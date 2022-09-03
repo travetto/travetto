@@ -132,7 +132,7 @@ export class ManagerTest {
     ConfigManager.bindTo(TestConfig, conf, 'model.mongo');
 
     // Default value from
-    assert(conf.anonHosts === ['a', 'b']);
+    assert.deepStrictEqual(conf.anonHosts, ['a', 'b']);
 
     process.env.MODEL_MONGO_ANONHOSTS = 'a,b,c,d';
     await this.#reinit();
@@ -140,7 +140,7 @@ export class ManagerTest {
     const newConf = ConfigManager.bindTo(TestConfig, new TestConfig(), 'model.mongo');
 
     // Default value from
-    assert(newConf.anonHosts === ['a', 'b', 'c', 'd']);
+    assert.deepStrictEqual(newConf.anonHosts, ['a', 'b', 'c', 'd']);
   }
 
   @Test()
@@ -183,9 +183,9 @@ panda.user: bob
     const all = ConfigManager.toJSON(true);
     console.log(all);
     assert(Util.isPlainObject(all.panda));
-    assert(all.panda === { user: '**********' });
+    assert.deepStrictEqual(all.panda, { user: '**********' });
     assert(Util.isPlainObject(all.config));
-    assert(all.config.s3 === { secretAccessKey: '**********' });
+    assert.deepStrictEqual(all.config.s3, { secretAccessKey: '**********' });
   }
 
   @Test()
@@ -231,8 +231,8 @@ panda.user: bob
     assert.ok(res.props);
     assert(res.props.person === 20);
     assert(res.props.age === true);
-    assert(res.props.child === { name: [1, 2, 3] });
+    assert.deepStrictEqual(res.props.child, { name: [1, 2, 3] });
     assert(res.props.superpower === 'green');
-    assert(res.props.color === ['2', '3', '4']);
+    assert.deepStrictEqual(res.props.color, ['2', '3', '4']);
   }
 }

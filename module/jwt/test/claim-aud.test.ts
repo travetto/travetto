@@ -81,7 +81,7 @@ class AudSignStringArraySuite {
     const verified = await JWTUtil.verify(this.#token, { alg: 'none' });
 
     assert.deepEqual(decoded, verified);
-    assert(decoded.aud === ['urn:foo', 'urn:bar']);
+    assert.deepStrictEqual(decoded.aud, ['urn:foo', 'urn:bar']);
   }
 
   @Test('should error on no match with a string "verify.audience" option')

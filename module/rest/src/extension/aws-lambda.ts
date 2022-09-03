@@ -1,4 +1,5 @@
-import * as lambda from 'aws-lambda';
+// @file-if aws-lambda
+import type * as lambda from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';

@@ -12,14 +12,14 @@ export class UtilTest {
       age: 20
     });
     assert(text.source === 'ctx._source.name = params.name;ctx._source.age = params.age');
-    assert(text.params === { name: 'bob', age: 20 });
+    assert.deepStrictEqual(text.params, { name: 'bob', age: 20 });
 
     const text2 = ElasticsearchSchemaUtil.generateUpdateScript({
       name: 'bob',
       age: undefined
     });
     assert(text2.source === 'ctx._source.name = params.name;ctx._source.remove("age")');
-    assert(text2.params === { name: 'bob' });
+    assert.deepStrictEqual(text2.params, { name: 'bob' });
 
     const text3 = ElasticsearchSchemaUtil.generateUpdateScript({
       child: {
@@ -28,7 +28,7 @@ export class UtilTest {
       }
     });
     assert(text3.source === 'ctx._source.child = ctx._source.child == null ? [:] : ctx._source.child;ctx._source.child.name = params.child_name;ctx._source.child.remove("age")');
-    assert(text3.params === { child_name: 'bob' });
+    assert.deepStrictEqual(text3.params, { child_name: 'bob' });
 
     const text4 = ElasticsearchSchemaUtil.generateUpdateScript({
       child: {
@@ -37,7 +37,7 @@ export class UtilTest {
       }
     });
     assert(text4.source === 'ctx._source.child = ctx._source.child == null ? [:] : ctx._source.child;ctx._source.child.name = params.child_name;ctx._source.child.remove("age")');
-    assert(text4.params === { child_name: 'bob\n' });
+    assert.deepStrictEqual(text4.params, { child_name: 'bob\n' });
 
     // const text5 = ElasticsearchSchemaUtil.generateUpdateScript({
     //   child: {

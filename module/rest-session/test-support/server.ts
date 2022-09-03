@@ -52,18 +52,18 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
     let res = await this.request<Aged>('get', '/test/session');
     let cookie = res.headers['set-cookie'];
-    assert(res.body === { age: 1 });
+    assert.deepStrictEqual(res.body, { age: 1 });
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     cookie = res.headers['set-cookie'] ?? cookie;
-    assert(res.body === { age: 2 });
+    assert.deepStrictEqual(res.body, { age: 2 });
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     cookie = res.headers['set-cookie'] ?? cookie;
-    assert(res.body === { age: 3 });
+    assert.deepStrictEqual(res.body, { age: 3 });
     res = await this.request('get', '/test/session');
-    assert(res.body === { age: 1 });
+    assert.deepStrictEqual(res.body, { age: 1 });
     cookie = res.headers['set-cookie'] ?? cookie;
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
-    assert(res.body === { age: 2 });
+    assert.deepStrictEqual(res.body, { age: 2 });
   }
 
   @Test()
@@ -104,25 +104,25 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
 
     let res = await this.request('get', '/test/session');
     let header = res.headers[key];
-    assert(res.body === { age: 1 });
+    assert.deepStrictEqual(res.body, { age: 1 });
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
 
-    assert(res.body === { age: 2 });
+    assert.deepStrictEqual(res.body, { age: 2 });
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
 
-    assert(res.body === { age: 3 });
+    assert.deepStrictEqual(res.body, { age: 3 });
 
     res = await this.request('get', '/test/session');
     header = res.headers[key] ?? header;
 
-    assert(res.body === { age: 1 });
+    assert.deepStrictEqual(res.body, { age: 1 });
     header = res.headers[key];
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
 
-    assert(res.body === { age: 2 });
+    assert.deepStrictEqual(res.body, { age: 2 });
   }
 
   @Test()

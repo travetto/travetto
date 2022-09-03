@@ -14,28 +14,24 @@ export class SourceUtilTest {
   @Test()
   resolveEnvToken() {
     process.env.NAME = '0';
-    // @ts-expect-error
-    assert(SourceUtil.resolveToken('-$NAME') === {
+    assert.deepStrictEqual(SourceUtil.resolveToken('-$NAME'), {
       minus: true,
       key: 'NAME',
       valid: true
     });
-    // @ts-expect-error
-    assert(SourceUtil.resolveToken('$NAME') === {
+    assert.deepStrictEqual(SourceUtil.resolveToken('$NAME'), {
       minus: false,
       key: 'NAME',
       valid: false
     });
 
     process.env.NAME = '1';
-    // @ts-expect-error
-    assert(SourceUtil.resolveToken('-$NAME') === {
+    assert.deepStrictEqual(SourceUtil.resolveToken('-$NAME'), {
       minus: true,
       key: 'NAME',
       valid: false
     });
-    // @ts-expect-error
-    assert(SourceUtil.resolveToken('$NAME') === {
+    assert.deepStrictEqual(SourceUtil.resolveToken('$NAME'), {
       minus: false,
       key: 'NAME',
       valid: true
@@ -45,32 +41,28 @@ export class SourceUtilTest {
   @Test()
   resolveModToken() {
     const { err: __err1, ...rest } = SourceUtil.resolveToken('-fsa');
-    // @ts-expect-error
-    assert(rest === {
+    assert.deepStrictEqual(rest, {
       minus: true,
       key: 'fsa',
       valid: true
     });
 
     const { err: __err2, ...rest2 } = SourceUtil.resolveToken('fsa');
-    // @ts-expect-error
-    assert(rest2 === {
+    assert.deepStrictEqual(rest2, {
       minus: false,
       key: 'fsa',
       valid: false
     });
 
     const { err: __err3, ...rest3 } = SourceUtil.resolveToken('-fs');
-    // @ts-expect-error
-    assert(rest3 === {
+    assert.deepStrictEqual(rest3, {
       minus: true,
       key: 'fs',
       valid: false
     });
 
     const { err: __err4, ...rest4 } = SourceUtil.resolveToken('fs');
-    // @ts-expect-error
-    assert(rest4 === {
+    assert.deepStrictEqual(rest4, {
       minus: false,
       key: 'fs',
       valid: true

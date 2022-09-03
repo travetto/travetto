@@ -13,7 +13,7 @@ export class QueryStringTest {
 
   @Test('Tokenizer')
   async tokenize() {
-    assert(QueryLanguageTokenizer.tokenize('A(B,C,D)') === [
+    assert.deepStrictEqual(QueryLanguageTokenizer.tokenize('A(B,C,D)'), [
       { type: 'identifier', value: 'A' },
       { type: 'grouping', value: 'start' },
       { type: 'identifier', value: 'B' },
@@ -23,12 +23,12 @@ export class QueryStringTest {
       { type: 'identifier', value: 'D' },
       { type: 'grouping', value: 'end' }
     ]);
-    assert(QueryLanguageTokenizer.tokenize('A.b.c  ==  D') === [
+    assert.deepStrictEqual(QueryLanguageTokenizer.tokenize('A.b.c  ==  D'), [
       { type: 'identifier', value: 'A.b.c' },
       { type: 'operator', value: '==' },
       { type: 'identifier', value: 'D' },
     ]);
-    assert(QueryLanguageTokenizer.tokenize(`"${'A.b.c'}"   =='  D'`) === [
+    assert.deepStrictEqual(QueryLanguageTokenizer.tokenize(`"${'A.b.c'}"   =='  D'`), [
       { type: 'literal', value: 'A.b.c' },
       { type: 'operator', value: '==' },
       { type: 'literal', value: '  D' }
@@ -42,7 +42,7 @@ export class QueryStringTest {
       QueryLanguageTokenizer.tokenize('"hello"');
     });
 
-    assert(QueryLanguageTokenizer.tokenize('A ~ /b.c.d/') === [
+    assert.deepStrictEqual(QueryLanguageTokenizer.tokenize('A ~ /b.c.d/'), [
       { type: 'identifier', value: 'A' },
       { type: 'operator', value: '~' },
       { type: 'literal', value: /b.c.d/ }
@@ -156,7 +156,7 @@ export class QueryStringTest {
   async parseComplex() {
     const res = QueryLanguageParser.parseToQuery<UserType>(
       "user.role in ['admin', 'root'] && (user.address.state == 'VA' || user.address.city == 'Springfield')");
-    assert(res === {
+    assert.deepStrictEqual(res, {
       $and: [
         { user: { role: { $in: ['admin', 'root'] } } },
         {
@@ -172,12 +172,12 @@ export class QueryStringTest {
   @Test('Parse Regex')
   async parseRegex() {
     const res = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>('user.role ~ /^admin/');
-    assert(res === { user: { role: { $regex: /^admin/ } } });
+    assert.deepStrictEqual(res, { user: { role: { $regex: /^admin/ } } });
     assert(res.user!.role!.$regex instanceof RegExp);
     assert(res.user!.role!.$regex.toString() === '/^admin/');
 
     const res2 = QueryLanguageParser.parseToQuery<UserType<{ $regex: RegExp }>>("user.role ~ 'admin'");
-    assert(res2 === { user: { role: { $regex: /^admin/ } } });
+    assert.deepStrictEqual(res2, { user: { role: { $regex: /^admin/ } } });
     assert(res2.user!.role!.$regex instanceof RegExp);
     assert(res2.user!.role!.$regex.toString() === '/^admin/');
   }
@@ -199,6 +199,6 @@ export class QueryStringTest {
   @Test('Relative date ranges')
   async parseRelativeDateRanges() {
     const res = QueryLanguageParser.parseToQuery<{ createdAt: { $gt: string }, deleteAt: { $gt: string } }>('createdAt > -7d AND deleteAt > 0d');
-    assert(res === { $and: [{ createdAt: { $gt: '-7d' } }, { deleteAt: { $gt: '0d' } }] });
+    assert.deepStrictEqual(res, { $and: [{ createdAt: { $gt: '-7d' } }, { deleteAt: { $gt: '0d' } }] });
   }
 }

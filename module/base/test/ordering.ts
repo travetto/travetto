@@ -35,12 +35,12 @@ class OrderingUtilTest {
 
     const order = OrderingUtil.compute(items);
     const ordered = order.map(x => x.key);
-    assert(ordered === ['first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
+    assert.deepStrictEqual(ordered, ['first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
 
     items.unshift({ key: 'tenth', before: ['second'] });
 
     const order2 = OrderingUtil.compute(items);
     const ordered2 = order2.map(x => x.key);
-    assert(ordered2 === ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
+    assert.deepStrictEqual(ordered2, ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
   }
 }

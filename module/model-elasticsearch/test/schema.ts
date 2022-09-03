@@ -60,7 +60,7 @@ class SchemaSuite {
   @Test('verifySchema')
   async verifySchema() {
     const schema = ElasticsearchSchemaUtil.generateSourceSchema(Person);
-    assert(schema === {
+    assert.deepStrictEqual(schema, {
       properties: {
         id: { type: 'keyword' },
         type: { type: 'keyword' },
@@ -82,7 +82,7 @@ class SchemaSuite {
     });
 
     const schema2 = ElasticsearchSchemaUtil.generateSourceSchema(SimpleNested);
-    assert(schema2 === {
+    assert.deepStrictEqual(schema2, {
       properties: {
         id: { type: 'keyword' },
         addresses: {

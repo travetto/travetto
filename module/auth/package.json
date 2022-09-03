@@ -16,8 +16,7 @@
   },
   "files": [
     "index.ts",
-    "src",
-    "test-support"
+    "src"
   ],
   "main": "index.ts",
   "repository": {

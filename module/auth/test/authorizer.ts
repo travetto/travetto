@@ -52,6 +52,6 @@ export class PrincipalTest {
     });
 
     assert(p.issuer === 'none');
-    assert(p.permissions === ['1', '2', '3']);
+    assert.deepStrictEqual(p.permissions, ['1', '2', '3']);
   }
 }

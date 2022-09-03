@@ -1,3 +1,4 @@
+// @file-if aws-lambda
 import type * as lambda from 'aws-lambda';
 import type { AwsLambdaHandler } from './aws-lambda';
 

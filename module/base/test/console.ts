@@ -15,6 +15,6 @@ export class ConsoleManagerTest {
     });
     ᚕlg('info', {}, 'a', 'b', 'c');
     assert(logs.length === 1);
-    assert(logs[0].args === ['a', 'b', 'c']);
+    assert.deepStrictEqual(logs[0].args, ['a', 'b', 'c']);
   }
 }

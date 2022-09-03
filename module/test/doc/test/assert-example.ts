@@ -7,7 +7,6 @@ class SimpleTest {
 
   @Test()
   async test() {
-    // @ts-expect-error
-    assert({ size: 20, address: { state: 'VA' } } === {});
+    assert.deepStrictEqual({ size: 20, address: { state: 'VA' } }, {});
   }
 }

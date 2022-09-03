@@ -98,13 +98,13 @@ export abstract class RestServerSuite extends BaseRestSuite {
   @Test()
   async getJSON() {
     const { body: ret } = await this.request('get', '/test/json');
-    assert(ret === { json: true });
+    assert.deepStrictEqual(ret, { json: true });
   }
 
   @Test()
   async getParam() {
     const { body: ret } = await this.request('post', '/test/param/bob');
-    assert(ret === { param: 'bob' });
+    assert.deepStrictEqual(ret, { param: 'bob' });
   }
 
   @Test()
@@ -114,7 +114,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
         age: '20'
       }
     });
-    assert(ret === { query: 20 });
+    assert.deepStrictEqual(ret, { query: 20 });
 
     await assert.rejects(() => this.request('put', '/test/query', {
       query: {
@@ -130,7 +130,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
         age: 20
       }
     });
-    assert(ret === { body: 20 });
+    assert.deepStrictEqual(ret, { body: 20 });
   }
 
   @Test()
@@ -143,13 +143,13 @@ export abstract class RestServerSuite extends BaseRestSuite {
     console.log('Headers', { headers });
     const cookie = Array.isArray(headers['set-cookie']) ? headers['set-cookie'][0] : headers['set-cookie'];
     assert(/flavor.*oreo/.test(cookie ?? ''));
-    assert(ret === { cookie: 'yummy' });
+    assert.deepStrictEqual(ret, { cookie: 'yummy' });
   }
 
   @Test()
   async testRegex() {
     const { body: ret } = await this.request('patch', '/test/regexp/super-poodle-party');
-    assert(ret === { path: 'poodle' });
+    assert.deepStrictEqual(ret, { path: 'poodle' });
   }
 
   @Test()
@@ -178,7 +178,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
   @Test()
   async testFullUrl() {
     const { body: ret } = await this.request('get', '/test/fullUrl');
-    assert(ret === { url: '/test/fullUrl', path: '/test/fullUrl' });
+    assert.deepStrictEqual(ret, { url: '/test/fullUrl', path: '/test/fullUrl' });
   }
 
   @Test()
@@ -188,7 +188,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
         age: ['1', '2', '3']
       }
     });
-    assert(ret === { header: '1' });
+    assert.deepStrictEqual(ret, { header: '1' });
   }
 
   @Test()
@@ -199,7 +199,7 @@ export abstract class RestServerSuite extends BaseRestSuite {
       },
       body: `[${' '.repeat(18)}]`
     });
-    assert(ret === { size: 20 });
+    assert.deepStrictEqual(ret, { size: 20 });
   }
 
 }

@@ -106,6 +106,6 @@ export abstract class ModelQueryPolymorphismSuite extends BaseModelSuite<ModelQu
 
     assert((await svc.facet(Worker, 'name')).length === 4);
     const docFacet = await svc.facet(Doctor, 'specialty');
-    assert(docFacet === [{ count: 2, key: 'eyes' }]);
+    assert.deepStrictEqual(docFacet, [{ count: 2, key: 'eyes' }]);
   }
 }

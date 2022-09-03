@@ -5,6 +5,7 @@ import { Util } from '@travetto/base';
 
 import type { Request, ServerHandle } from '../../src/types';
 import type { AwsLambdaRestApplication } from '../../src/extension/aws-lambda';
+
 import { RestServerSupport, MakeRequestConfig, MakeRequestResponse, headerToShape as valuesToShape } from './base';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {

@@ -164,8 +164,8 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       simples: [{ name: 'd' }]
     }));
 
-    assert(o2.names === ['a', 'd']);
-    assert(o2.simples === [SimpleItem.from({ name: 'd' })]);
+    assert.deepStrictEqual(o2.names, ['a', 'd']);
+    assert.deepStrictEqual(o2.simples, [SimpleItem.from({ name: 'd' })]);
   }
 
   @Test('Verify partial update with field removal and lists')

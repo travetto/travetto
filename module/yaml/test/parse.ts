@@ -18,7 +18,7 @@ export class ParserTest {
   c
 
   d`);
-    assert(output === ['a\nb\nc\n\nd']);
+    assert.deepStrictEqual(output, ['a\nb\nc\n\nd']);
   }
 
   @Test()
@@ -32,7 +32,7 @@ export class ParserTest {
  *bold*
  `);
 
-    assert(output === ['# Hello World\n## Sub\n### Sub Sub\n\n*bold*']);
+    assert.deepStrictEqual(output, ['# Hello World\n## Sub\n### Sub Sub\n\n*bold*']);
   }
 
   @Test()
@@ -46,7 +46,7 @@ export class ParserTest {
 
   d`);
 
-    assert(output === ['a b c\n\nd']);
+    assert.deepStrictEqual(output, ['a b c\n\nd']);
   }
 
   @Test()
@@ -76,7 +76,7 @@ c: 30 # Random comment
 e: {"a": 20, "c": 30}
 age: 20
 `);
-    assert(output === {
+    assert.deepStrictEqual(output, {
       a: 10,
       b: 20,
       c: 30,
@@ -112,7 +112,7 @@ age: 20
   - d: 6
     `);
 
-    assert(output === [[1, 2], [{ a: 4 }, { c: 5 }, { d: 6 }]]);
+    assert.deepStrictEqual(output, [[1, 2], [{ a: 4 }, { c: 5 }, { d: 6 }]]);
   }
 
   @Test()
@@ -122,7 +122,7 @@ age: 20
   mail:
      transport: null
   `);
-    assert(output === { mail: { transport: null } });
+    assert.deepStrictEqual(output, { mail: { transport: null } });
   }
 
   @Test()
@@ -131,25 +131,25 @@ age: 20
 ---
   mail: 'hello'
   `);
-    assert(output === { mail: 'hello' });
+    assert.deepStrictEqual(output, { mail: 'hello' });
 
     const output2 = YamlUtil.parse(`
 ---
   mail: ['hello']
   `);
-    assert(output2 === { mail: ['hello'] });
+    assert.deepStrictEqual(output2, { mail: ['hello'] });
 
     const output3 = YamlUtil.parse(`
 ---
   mail: { 'hello' : 'goodbye' }
           `);
-    assert(output3 === { mail: { hello: 'goodbye' } });
+    assert.deepStrictEqual(output3, { mail: { hello: 'goodbye' } });
 
     const output4 = YamlUtil.parse(`
 ---
   mail: { hello : 'goodbye' }
           `);
-    assert(output4 === { mail: { hello: 'goodbye' } });
+    assert.deepStrictEqual(output4, { mail: { hello: 'goodbye' } });
   }
 
   @Test()
@@ -160,20 +160,20 @@ age: 20
     name: 'hello'
     age-num: 20
   `);
-    assert(output === { 'mail-settings': { name: 'hello', 'age-num': 20 } });
+    assert.deepStrictEqual(output, { 'mail-settings': { name: 'hello', 'age-num': 20 } });
   }
 
   @Test()
   emptyFile() {
     const output = YamlUtil.parse(`#
 # `);
-    assert(output === {});
+    assert.deepStrictEqual(output, {});
   }
 
   @Test()
   blankFile() {
     const output = YamlUtil.parse('');
-    assert(output === {});
+    assert.deepStrictEqual(output, {});
   }
 
   @Test()
@@ -186,7 +186,7 @@ name: bob
 #
 #
 #`);
-    assert(output === { name: 'bob' });
+    assert.deepStrictEqual(output, { name: 'bob' });
   }
 
   @Test()
@@ -199,7 +199,7 @@ parent:
   - 3
 `);
 
-    assert(output === { parent: { values: [1, 2, 3] } });
+    assert.deepStrictEqual(output, { parent: { values: [1, 2, 3] } });
   }
 
   @Test()
@@ -210,7 +210,7 @@ config:
     - panda.user
 panda.user: bob`) as SimpleObject;
     assert(Util.isPlainObject(output.config));
-    assert(output.config.redacted === ['panda.user']);
+    assert.deepStrictEqual(output.config.redacted, ['panda.user']);
   }
 
   @Test()
@@ -221,6 +221,6 @@ add:
   - .trv_cache: cache
   - src`) as SimpleObject;
     assert(Array.isArray(output.add));
-    assert(output.add === ['package.json', { '.trv_cache': 'cache' }, 'src']);
+    assert.deepStrictEqual(output.add, ['package.json', { '.trv_cache': 'cache' }, 'src']);
   }
 }
