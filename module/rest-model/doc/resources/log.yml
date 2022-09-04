@@ -1,0 +1,5 @@
+rest.logRoutes:
+- '/controller1'
+- '!/controller1:*'
+- '/controller2:/path'
+- '!/controller3:/path/*'
