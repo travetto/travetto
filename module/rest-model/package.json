@@ -1,0 +1,35 @@
+{
+  "name": "@travetto/rest-model",
+  "displayName": "RESTful Model Routes",
+  "version": "2.2.6",
+  "description": "RESTful support for generating APIs from Model classes.",
+  "keywords": [
+    "rest",
+    "model",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-model"
+  },
+  "dependencies": {
+    "@travetto/rest": "^2.2.6",
+    "@travetto/schema": "^2.2.4",
+    "@travetto/model": "^2.2.4"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

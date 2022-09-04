@@ -1,4 +1,3 @@
-// @with-module @travetto/model
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport } from '@travetto/model';
 import { Path, Controller, Body, Get, Request, Delete, Post, Put } from '@travetto/rest';
