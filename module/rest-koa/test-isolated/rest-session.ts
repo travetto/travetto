@@ -1,5 +1,4 @@
 // @with-module @travetto/rest-session
-// @with-module @vendia/serverless-express
 
 import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
@@ -16,8 +15,3 @@ class Config {
 
 @Suite()
 export class KoaRestSessionTest extends RestSessionServerSuite { }
-
-@Suite()
-export class KoaLambdaRestSessionTest extends RestSessionServerSuite {
-  type = 'lambda';
-}

@@ -1,5 +1,4 @@
 import { readFileSync } from 'fs';
-import { EnvUtil } from '../env';
 
 type SourceHandler = (name: string, contents: string) => string;
 
@@ -55,28 +54,6 @@ export class SourceUtil {
       "Object.defineProperty(exports, 'ᚕtrvError', { value: true })",
       `module.exports = new Proxy({}, { ${Object.entries(map).map(([k, v]) => f([k, v!])).join(',')}});`
     ].join('\n');
-  }
-
-  /**
-   * Process token
-   * @param token The token to process
-   */
-  static resolveToken(token: string): { key: string, valid: boolean, err?: Error } {
-    const [, env, key] = token.match(/([$])?(.*)/)!;
-    if (env) {
-      return { key, valid: (EnvUtil.isSet(key) && !EnvUtil.isFalse(key)) };
-    } else {
-      try {
-        require.resolve(key);
-        return { key, valid: true };
-      } catch (err: unknown) {
-        if (err instanceof Error) {
-          return { key, valid: false, err };
-        } else {
-          throw err;
-        }
-      }
-    }
   }
 
   /**
