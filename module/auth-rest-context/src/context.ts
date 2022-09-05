@@ -1,11 +1,8 @@
-// @file-if @travetto/context
 import { Inject, Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
-import { AsyncContextInterceptor } from '@travetto/rest/src/extension/context';
 import { Principal } from '@travetto/auth';
-import { Request, Response, RestInterceptor } from '@travetto/rest';
-
-import { AuthInterceptor } from '../interceptor';
+import { Request, Response, RestInterceptor, AsyncContextInterceptor } from '@travetto/rest';
+import { AuthInterceptor } from '@travetto/auth-rest';
 
 const PrincipalⲐ = Symbol.for('@trv:auth/principal');
 
