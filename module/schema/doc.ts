@@ -116,33 +116,6 @@ When the validator is executed, it has access to the entire object, and you can 
 
 ${d.Snippet('Validation Error Structure', 'src/validate/types.ts', /interface ValidationError/, /^\}/)}
 
-${d.Section('Extension - Generation')}
-In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward.  The generation utility is built upon ${lib.Faker}, mapping data types, and various field names into specific ${lib.Faker} generation routines.
-
-By default all types are mapped as-is:
-
-${d.List(
-  d`${d.Input('string')}`,
-  d`${d.Input('number')}`,
-  d`${d.Input('Date')}`,
-  d`${d.Input('boolean')}`,
-  d`Enumerations as ${d.Input('string')} or ${d.Input('number')} types.`,
-  d`Provided regular expressions: ${d.List(
-    'email',
-    'url',
-    'telephone',
-    'postalCode',
-  )}`,
-  d`Sub-schemas as registered via ${Schema} decorators.`
-)}
-
-In addition to the general types, the code relies upon name matching to provide additional refinement:
-
-${d.Snippet('Supported Mappings', 'src/extension/faker.ts', /#namesToType/, /\};/)}
-
-An example of this would be:
-
-${d.Code('More complex Schema, used with Faker', 'doc/faker.ts')}
 
 ${d.Section('Custom Types')}
 When working with the schema, the basic types are easily understood, but some of ${lib.Typescript}'s more complex constructs are too complex to automate cleanly.

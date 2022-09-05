@@ -1,4 +1,5 @@
-import { Schema, SchemaFakerUtil } from '@travetto/schema';
+import { SchemaFaker } from '@travetto/schema-faker';
+import { Schema } from '@travetto/schema';
 
 @Schema()
 class Address {
@@ -20,6 +21,6 @@ class User {
 }
 
 export function generate(): User {
-  const user = SchemaFakerUtil.generate(User);
+  const user = SchemaFaker.generate(User);
   return user;
 }
