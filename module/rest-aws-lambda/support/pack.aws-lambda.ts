@@ -4,7 +4,7 @@ import { PathUtil } from '@travetto/boot';
 import type { AllConfigPartial } from '@travetto/pack';
 
 export const config: AllConfigPartial = {
-  name: 'rest/aws-lambda',
+  name: 'rest-aws-lambda/main',
   assemble: {
     active: true,
     keepSource: false,

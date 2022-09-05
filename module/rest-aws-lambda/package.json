@@ -1,0 +1,40 @@
+{
+  "name": "@travetto/rest-aws-lambda",
+  "displayName": "RESTful AWS Lambda",
+  "version": "2.2.6",
+  "description": "RESTful APIs entry point support for AWS Lambdas.",
+  "keywords": [
+    "rest",
+    "aws-lambda",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "index.ts",
+    "src",
+    "support",
+    "test-support"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-aws-lambda"
+  },
+  "dependencies": {
+    "@travetto/rest": "^2.2.6",
+    "@types/aws-lambda": "^8.10.102"
+  },
+  "devDependencies": {
+    "node-fetch": "^2.6.7",
+    "@types/node-fetch": "^2.6.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
