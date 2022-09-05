@@ -153,13 +153,13 @@ export class GenerateSuite {
       content: {
         'application/json': {
           schema: {
-            $ref: '#/components/schemas/who_28_31'
+            $ref: '#/components/schemas/who_29_31'
           }
         }
       },
       description: '__type'
     });
-    assert.deepStrictEqual(config.components.schemas['who_28_31'], {
+    assert.deepStrictEqual(config.components.schemas['who_29_31'], {
       description: '__type',
       example: undefined,
       properties: {

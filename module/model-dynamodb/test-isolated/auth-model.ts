@@ -1,7 +1,7 @@
-// @with-module @travetto/auth
+// @with-module @travetto/auth-model
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth/test-support/model';
+import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/test-support/model';
 
 import { DynamoDBModelConfig, DynamoDBModelService } from '..';
 

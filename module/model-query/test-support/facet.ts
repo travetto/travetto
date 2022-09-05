@@ -3,10 +3,16 @@ import * as assert from 'assert';
 import { ModelCrudSupport } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/test-support/base';
 import { Suite, Test } from '@travetto/test';
-import { SchemaFakerUtil } from '@travetto/schema';
 
 import { Person } from './types';
 import { ModelQueryFacetSupport } from '../src/service/facet';
+
+const pick = <T>(arr: T[]): T => arr[Math.trunc(Math.random() * arr.length)]!;
+
+const GENDERS = ['m', 'f'] as ['m', 'f'];
+const FNAME = ['Bob', 'Tom', 'Sarah', 'Leo', 'Alice', 'Jennifer', 'Tommy', 'George', 'Paula', 'Sam'];
+const LNAME = ['Smith', 'Sampson', 'Thompson', 'Oscar', 'Washington', 'Jefferson', 'Samuels'];
+const AGES = new Array(100).fill(0).map((x, i) => i + 10);
 
 @Suite()
 export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFacetSupport & ModelCrudSupport> {
@@ -15,7 +21,14 @@ export abstract class ModelQueryFacetSuite extends BaseModelSuite<ModelQueryFace
   async testFacet() {
     const people = ' '.repeat(50)
       .split('')
-      .map(() => SchemaFakerUtil.generate(Person));
+      .map(() => Person.from({
+        age: pick(AGES),
+        gender: pick(GENDERS),
+        name: `${pick(FNAME)} ${pick(LNAME)}`,
+        address: {
+          street1: `${pick(AGES)} ${pick(LNAME)} Road`
+        }
+      }));
 
     const svc = await this.service;
     const saved = await this.saveAll(Person, people);

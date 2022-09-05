@@ -1,17 +1,17 @@
-// @with-module @travetto/auth
+// @with-module @travetto/auth-model
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth/test-support/model';
-import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
+import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/test-support/model';
 import { AsyncContext } from '@travetto/context';
+import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 
-import { MySQLDialect } from '../src/dialect';
+import { PostgreSQLDialect } from '../src/dialect';
 
 class Config {
   @InjectableFactory({ primary: true })
   static getDialect(ctx: AsyncContext, config: SQLModelConfig) {
-    return new MySQLDialect(ctx, config);
+    return new PostgreSQLDialect(ctx, config);
   }
   @InjectableFactory(TestModelSvcⲐ)
   static modelProvider(svc: SQLModelService) {
@@ -21,7 +21,7 @@ class Config {
 
 @WithSuiteContext()
 @Suite()
-export class MySQLAuthModelServiceSuite extends AuthModelServiceSuite {
+export class PostgreSQLAuthModelServiceSuite extends AuthModelServiceSuite {
   serviceClass = SQLModelService;
   configClass = SQLModelConfig;
 }
