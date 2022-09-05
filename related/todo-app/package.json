@@ -26,6 +26,7 @@
     "@travetto/model-mongo": "^2.2.2",
     "@travetto/rest-express": "^2.2.2",
     "@travetto/auth-rest": "^2.2.2",
+    "@travetto/auth-rest-session": "^2.2.2",
     "@travetto/rest-session": "^2.2.2",
     "@travetto/openapi": "^2.2.2",
     "vue": "^2.7.10"

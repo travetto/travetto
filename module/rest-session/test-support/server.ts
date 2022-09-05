@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import * as assert from 'assert';
 
 import { Controller, Get, Body, Post, Put, Request } from '@travetto/rest';

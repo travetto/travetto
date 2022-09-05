@@ -1,10 +1,8 @@
-// @file-if @travetto/auth-rest
-import { Inject, Injectable } from '@travetto/di';
+import { Injectable, Inject } from '@travetto/di';
 import { Request, Response } from '@travetto/rest';
 import { Principal } from '@travetto/auth';
 import { PrincipalEncoder } from '@travetto/auth-rest';
-
-import { SessionService } from '../service';
+import { SessionService } from '@travetto/rest-session';
 
 /**
  * Integration with the auth module, using the session as a backing

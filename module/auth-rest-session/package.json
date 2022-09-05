@@ -1,11 +1,12 @@
 {
-  "name": "@travetto/rest-session",
-  "displayName": "REST Session",
+  "name": "@travetto/auth-rest-session",
+  "displayName": "Rest Auth Session",
   "version": "2.2.7",
-  "description": "Session provider for the travetto rest module.",
+  "description": "Rest authentication session integration support for the travetto framework",
   "keywords": [
-    "rest",
+    "authentication",
     "session",
+    "rest",
     "travetto",
     "typescript"
   ],
@@ -17,19 +18,21 @@
   },
   "files": [
     "index.ts",
-    "src",
-    "test-support"
+    "src"
   ],
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/rest-session"
+    "directory": "module/auth-rest-session"
   },
   "dependencies": {
-    "@travetto/config": "^2.2.4",
-    "@travetto/model": "^2.2.4",
+    "@travetto/auth-rest": "^2.2.7",
+    "@travetto/auth": "^2.2.4",
+    "@travetto/di": "^2.2.4",
+    "@travetto/rest-session": "^2.2.7",
     "@travetto/rest": "^2.2.6"
   },
+  "private": false,
   "publishConfig": {
     "access": "public"
   }
