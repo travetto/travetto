@@ -58,7 +58,7 @@ ${d.Execute('Docker Usage', 'trv', ['pack:docker', '--help'])}
 ${d.SubSection('Modes')}
 Various modules may provide customizations to the default ${d.Path('pack.config.ts')} to allow for easy integration with the packing process.  A simple example of this is via the ${mod.Rest} module, for how to publish lambda packages.
 
-${d.Code('Rest, pack.lambda.ts', '@travetto/rest/support/pack.aws-lambda.ts')}
+${d.Code('Rest, pack.lambda.ts', '@travetto/rest-aws-lambda/support/pack.aws-lambda.ts')}
 
 ${d.Terminal('Invoking Pack with Mode', 'npx trv pack <mode>')}
 

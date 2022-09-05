@@ -109,13 +109,13 @@ The module provides a command for the <a class="module-link" routerLink="/docs/c
       <figcaption class="terminal">OpenAPI usage
       
       </figcaption>
-      <pre><code class="language-bash">$ trv openapi:spec --help
+      <pre><code class="language-bash">$ trv openapi:spec <span class="token parameter variable">--help</span>
 
 Usage:  openapi:spec <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>  Output files <span class="token punctuation">(</span>default: <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
-  -h, --help             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>  Output files <span class="token punctuation">(</span>default: <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
 The command will run your application, in non-server mode, to collect all the routes and model information, to produce the <code class="item path">openapi.yml</code>.  Once produced, the code will store the output in the specified location.
@@ -130,18 +130,18 @@ The module provides a command for the <a class="module-link" routerLink="/docs/c
       <figcaption class="terminal">OpenAPI usage
       
       </figcaption>
-      <pre><code class="language-bash">$ trv openapi:client --help
+      <pre><code class="language-bash">$ trv openapi:client <span class="token parameter variable">--help</span>
 
 Usage:  openapi:client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>format-or-preset<span class="token punctuation">]</span>
 
 Options:
   -x, --extended-help                                  Show Extended Help
   -a, --additional-properties <span class="token operator">&lt;</span>additional-properties<span class="token operator">></span>  Additional Properties <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -i, --input <span class="token operator">&lt;</span>input<span class="token operator">></span>                                  Input <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"@trv:openapi/openapi.yml"</span><span class="token punctuation">)</span>
-  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>                                Output folder <span class="token punctuation">(</span>default: <span class="token string">"@trv:openapi/api-client"</span><span class="token punctuation">)</span>
+  -i, <span class="token parameter variable">--input</span> <span class="token operator">&lt;</span>input<span class="token operator">></span>                                  Input <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"@trv:openapi/openapi.yml"</span><span class="token punctuation">)</span>
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>                                Output folder <span class="token punctuation">(</span>default: <span class="token string">"@trv:openapi/api-client"</span><span class="token punctuation">)</span>
   -d, --docker-image <span class="token operator">&lt;</span>docker-image<span class="token operator">></span>                    Docker Image to use <span class="token punctuation">(</span>default: <span class="token string">"arcsine/openapi-generator:latest"</span><span class="token punctuation">)</span>
-  -w, --watch                                          Watch <span class="token keyword">for</span> <span class="token function">file</span> changes
-  -h, --help                                           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -w, <span class="token parameter variable">--watch</span>                                          Watch <span class="token keyword">for</span> <span class="token function">file</span> changes
+  -h, <span class="token parameter variable">--help</span>                                           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Presets
 ----------------------------------

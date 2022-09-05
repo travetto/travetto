@@ -1,8 +1,10 @@
+// @with-module @travetto/model-mysql
+
 import { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 
 import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
-import { MySQLDialect } from '@travetto/model-sql/src/dialect/mysql/dialect';
+import { MySQLDialect } from '@travetto/model-mysql';
 
 export class Init {
   @InjectableFactory({ primary: true })

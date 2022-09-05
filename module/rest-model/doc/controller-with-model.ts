@@ -1,6 +1,7 @@
 import { Inject } from '@travetto/di';
 import { ModelCrudSupport } from '@travetto/model';
-import { Controller, ModelRoutes } from '@travetto/rest';
+import { Controller } from '@travetto/rest';
+import { ModelRoutes } from '@travetto/rest-model';
 
 import { User } from './user';
 

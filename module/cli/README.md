@@ -89,5 +89,5 @@ And actually using it:
 ```bash
 $ trv echo -u bOb rOb DRoP
 
-[ 'BOB', 'ROB', 'DROP' ]
+[ 'bOb', 'rOb', 'DRoP' ]
 ```

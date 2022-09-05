@@ -157,8 +157,8 @@ Sample documentation for fictional module.  This module fictitiously relies upon
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
 Options:
-  -V, --version                output the version number
-  -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -V, <span class="token parameter variable">--version</span>                output the version number
+  -h, <span class="token parameter variable">--help</span>                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Commands:
   build <span class="token punctuation">[</span>options<span class="token punctuation">]</span>

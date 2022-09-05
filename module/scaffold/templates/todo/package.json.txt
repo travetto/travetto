@@ -12,9 +12,10 @@
     "@travetto/pack": "^{{{frameworkVersion}}}"
   },
   "devDependencies": {
-    "eslint": "^7.22.0",
-    "@typescript-eslint/eslint-plugin": "^4.17.0",
-    "@typescript-eslint/parser": "^4.17.0"
+    "@types/eslint": "^8.4.6",
+    "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "@typescript-eslint/parser": "^5.36.1",
+    "eslint": "^8.23.0",
   },
   "description": "A Travetto-based project",
   "keywords": [

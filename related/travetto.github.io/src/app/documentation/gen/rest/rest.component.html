@@ -278,10 +278,10 @@ By default, the framework provides a default <a target="_blank" class="source-li
 Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -e, --env <span class="token operator">&lt;</span>env<span class="token operator">></span>            Application environment
-  -p, --profile <span class="token operator">&lt;</span>profile<span class="token operator">></span>    Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -r, --resource <span class="token operator">&lt;</span>resource<span class="token operator">></span>  Additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -h, --help                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>env<span class="token operator">></span>            Application environment
+  -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>profile<span class="token operator">></span>    Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -r, <span class="token parameter variable">--resource</span> <span class="token operator">&lt;</span>resource<span class="token operator">></span>  Additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Applications:
 
@@ -322,10 +322,10 @@ And using the pattern established in the <a class="module-link" routerLink="/doc
 Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -e, --env <span class="token operator">&lt;</span>env<span class="token operator">></span>            Application environment
-  -p, --profile <span class="token operator">&lt;</span>profile<span class="token operator">></span>    Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -r, --resource <span class="token operator">&lt;</span>resource<span class="token operator">></span>  Additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -h, --help                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>env<span class="token operator">></span>            Application environment
+  -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>profile<span class="token operator">></span>    Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -r, <span class="token parameter variable">--resource</span> <span class="token operator">&lt;</span>resource<span class="token operator">></span>  Additional resource locations <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Applications:
 
@@ -458,7 +458,8 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
 <span class="token punctuation">-</span> <span class="token string">'!/controller1:*'</span>
 <span class="token punctuation">-</span> <span class="token string">'/controller2:/path'</span>
 <span class="token punctuation">-</span> <span class="token string">'!/controller3:/path/*'</span></code></pre>     
-      </figure></li></ol>
+      </figure></li>
+ <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/context.ts#L18">AsyncContextInterceptor</a> - This interceptor is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.</li></ol>
 
 <h3 id="custom-interceptors">Custom Interceptors</h3>
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a> by extending the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L11">RestInterceptor</a> class.  The interceptors are tied to the defined <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107">TravettoResponse</a> objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
@@ -549,153 +550,3 @@ SSL support can be enabled by setting <code class="item input">rest.ssl.active: 
 
 <h2 id="full-config">Full Config</h2>
 The entire <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/config.ts#L14">RestConfig</a> which will show the full set of valid configuration parameters for the rest module.
-
-<h2 id="serverless">Serverless</h2>
-<h3 id="aws-lambda">AWS Lambda</h3>
-
-The module provides support basic support with AWS lambdas. When using one of the specific rest modules (e.g. <a class="module-link" routerLink="/docs/rest-express" title="Express provider for the travetto rest module.">Express REST Source</a>), you can install the appropriate lambda-related dependencies installed (e.g. <a target="_blank" class="external-link" href="https://github.com/awslabs/aws-serverless-express/blob/master/README.md">aws-serverless-express</a>) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers. 
-
-<h2 id="packaging-lambdas">Packaging Lambdas</h2>
-
-      <figure class="terminal">
-      <figcaption class="terminal">Invoking a Package Build
-      
-      </figcaption>
-      <pre><code class="language-bash">$ trv pack rest/lambda -h
-
-Missing Package
---------------------
-To use pack please run:
-
-<span class="token function">npm</span> i --save-dev @travetto/pack</code></pre>     
-      </figure>
-
-<h2 id="extension-model">Extension - Model</h2>
-
-To facilitate common RESTful patterns, the module exposes  <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/extension/model.ts#L18">ModelRoutes</a>.
-
-      <figure class="code">
-      <figcaption class="code">ModelRoutes example
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/controller-with-model.ts">Source</a></cite>
-      </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelCrudSupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> ModelRoutes <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
-
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">)</span>
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">ModelRoutes</span></span><span class="token punctuation">(</span>User<span class="token punctuation">)</span>
-<span class="token keyword">class</span> <span class="token class-name">UserController</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  source<span class="token operator">:</span> ModelCrudSupport<span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
-      </figure>
-
-is a shorthand that is equal to:
-
-      <figure class="code">
-      <figcaption class="code">Comparable UserController, built manually
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/controller-without-model.ts">Source</a></cite>
-      </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelCrudSupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Path<span class="token punctuation">,</span> Controller<span class="token punctuation">,</span> Body<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> Request<span class="token punctuation">,</span> Delete<span class="token punctuation">,</span> Post<span class="token punctuation">,</span> Put <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
-
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">)</span>
-<span class="token keyword">class</span> <span class="token class-name">UserController</span> <span class="token punctuation">{{'{'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  service<span class="token operator">:</span> ModelCrudSupport<span class="token punctuation">;</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getAllUser</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">list</span><span class="token punctuation">(</span>User<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">':id'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getUser</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Path</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> id<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Delete</span></span><span class="token punctuation">(</span><span class="token string">':id'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">deleteUser</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Path</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">delete</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> id<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Post</span></span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">saveUser</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Body</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> user<span class="token operator">:</span> User<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> user<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Put</span></span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">updateUser</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Body</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> user<span class="token operator">:</span> User<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> user<span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
-      </figure>
-
-<h2 id="extension-model-query">Extension - Model Query</h2>
-
-Additionally, <a class="module-link" routerLink="/docs/model-query" title="Datastore abstraction for advanced query support.">Data Model Querying</a> support can also be added support in the form of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/extension/model-query.ts#L40">ModelQueryRoutes</a>. This provides listing by query as well as an endpoint to facilitate suggestion behaviors.
-
-      <figure class="code">
-      <figcaption class="code">ModelQueryRoutes example
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/controller-with-model-query.ts">Source</a></cite>
-      </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQuerySupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> ModelQueryRoutes <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
-
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">)</span>
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">ModelQueryRoutes</span></span><span class="token punctuation">(</span>User<span class="token punctuation">)</span>
-<span class="token keyword">class</span> <span class="token class-name">UserQueryController</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  source<span class="token operator">:</span> ModelQuerySupport<span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
-      </figure>
-
-is a shorthand that is equal to:
-
-      <figure class="code">
-      <figcaption class="code">Comparable UserController, built manually
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/controller-without-model-query.ts">Source</a></cite>
-      </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQuerySupport<span class="token punctuation">,</span> SortClause<span class="token punctuation">,</span> ValidStringFields <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> isQuerySuggestSupported <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query/src/internal/service/common'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestModelQuery<span class="token punctuation">,</span> RestModelSuggestQuery <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest/src/extension/model-query'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> User <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./user'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">const</span> convert <span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">(</span>k<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token operator">=></span> k <span class="token operator">&amp;&amp;</span> <span class="token keyword">typeof</span> k <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">&amp;&amp;</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^[\{{'{'}}\[]</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>k<span class="token punctuation">)</span> <span class="token keyword">as</span> <span class="token constant">T</span> <span class="token operator">:</span> k<span class="token punctuation">;</span>
-
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Controller</span></span><span class="token punctuation">(</span><span class="token string">'/user'</span><span class="token punctuation">)</span>
-<span class="token keyword">class</span> <span class="token class-name">UserQueryController</span> <span class="token punctuation">{{'{'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
-  service<span class="token operator">:</span> ModelQuerySupport<span class="token punctuation">;</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">''</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">getAllUser</span><span class="token punctuation">(</span>query<span class="token operator">:</span> RestModelQuery<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">query</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
-      limit<span class="token operator">:</span> query<span class="token punctuation">.</span>limit<span class="token punctuation">,</span>
-      offset<span class="token operator">:</span> query<span class="token punctuation">.</span>offset<span class="token punctuation">,</span>
-      sort<span class="token operator">:</span> <span class="token function">convert</span><span class="token punctuation">(</span>query<span class="token punctuation">.</span>sort<span class="token punctuation">)</span> <span class="token keyword">as</span> SortClause<span class="token operator">&lt;</span>User<span class="token operator">></span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-      where<span class="token operator">:</span> <span class="token function">convert</span><span class="token punctuation">(</span>query<span class="token punctuation">.</span>where<span class="token punctuation">)</span>
-    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/suggest/:field'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">suggest</span><span class="token punctuation">(</span>field<span class="token operator">:</span> ValidStringFields<span class="token operator">&lt;</span>User<span class="token operator">></span><span class="token punctuation">,</span> suggest<span class="token operator">:</span> RestModelSuggestQuery<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">isQuerySuggestSupported</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">suggest</span><span class="token punctuation">(</span>User<span class="token punctuation">,</span> field<span class="token punctuation">,</span> suggest<span class="token punctuation">.</span>q<span class="token punctuation">,</span> suggest<span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>     
-      </figure>

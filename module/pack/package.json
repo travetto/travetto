@@ -38,7 +38,8 @@
     }
   },
   "docDependencies": {
-    "@travetto/rest": true
+    "@travetto/rest": true,
+    "@travetto/rest-aws-lambda": true
   },
   "publishConfig": {
     "access": "public"

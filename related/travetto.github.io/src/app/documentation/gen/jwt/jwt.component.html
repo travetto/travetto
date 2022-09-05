@@ -128,7 +128,3 @@ The API exposes:
   <span class="token keyword">static</span> <span class="token keyword">async</span> <span class="token generic-function"><span class="token function">verify</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span></span><span class="token punctuation">(</span>jwt<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> options<span class="token operator">:</span> VerifyOptions <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Payload <span class="token operator">&amp;</span> <span class="token constant">T</span><span class="token operator">></span> <span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
-
-<h2 id="extension-auth-rest">Extension - Auth Rest</h2>
-
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/jwt/src/extension/auth-rest.ts#L31">JWTPrincipalEncoder</a> is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.  This token does not own a session, but allows for encoding the auth state into JWT constructs.

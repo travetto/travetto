@@ -42,6 +42,19 @@ import { ModelDynamodbComponent } from './gen/model-dynamodb/model-dynamodb.comp
 import { ModelFirestoreComponent } from './gen/model-firestore/model-firestore.component';
 import { ModelRedisComponent } from './gen/model-redis/model-redis.component';
 import { ModelS3Component } from './gen/model-s3/model-s3.component';
+import { EmailNodemailerComponent } from './gen/email-nodemailer/email-nodemailer.component';
+import { ModelMysqlComponent } from './gen/model-mysql/model-mysql.component';
+import { ModelPostgresComponent } from './gen/model-postgres/model-postgres.component';
+import { ModelSqliteComponent } from './gen/model-sqlite/model-sqlite.component';
+import { AuthRestSessionComponent } from './gen/auth-rest-session/auth-rest-session.component';
+import { AuthPassportComponent } from './gen/auth-passport/auth-passport.component';
+import { RestAwsLambdaComponent } from './gen/rest-aws-lambda/rest-aws-lambda.component';
+import { RestExpressLambdaComponent } from './gen/rest-express-lambda/rest-express-lambda.component';
+import { RestKoaLambdaComponent } from './gen/rest-koa-lambda/rest-koa-lambda.component';
+import { RestFastifyLambdaComponent } from './gen/rest-fastify-lambda/rest-fastify-lambda.component';
+import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.component';
+import { AuthRestContextComponent } from './gen/auth-rest-context/auth-rest-context.component';
+import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component';
 
 export const PAGES = [
   {
@@ -63,7 +76,10 @@ export const PAGES = [
       { path: 'model-mongo', title: 'Mongo', component: ModelMongoComponent },
       { path: 'model-redis', title: 'Redis', component: ModelRedisComponent },
       { path: 'model-s3', title: 'S3', component: ModelS3Component },
-      { path: 'model-sql', title: 'SQL', component: ModelSqlComponent }
+      { path: 'model-sql', title: 'SQL', component: ModelSqlComponent },
+      { path: 'model-mysql', title: 'SQL', component: ModelMysqlComponent },
+      { path: 'model-postgresql', title: 'SQL', component: ModelPostgresComponent },
+      { path: 'model-sqlite', title: 'SQL', component: ModelSqliteComponent },
     ]
   },
   {
@@ -71,6 +87,10 @@ export const PAGES = [
       { path: 'rest-express', title: 'Express', component: RestExpressComponent },
       { path: 'rest-koa', title: 'Koa', component: RestKoaComponent },
       { path: 'rest-fastify', title: 'Fastify', component: RestFastifyComponent },
+      { path: 'rest-aws-lambda', title: 'AWS Lambda', component: RestAwsLambdaComponent },
+      { path: 'rest-express-lambda', title: 'Express Lambda', component: RestExpressLambdaComponent },
+      { path: 'rest-koa-lambda', title: 'Koa Lambda', component: RestKoaLambdaComponent },
+      { path: 'rest-fastify-lambda', title: 'Fastify Lambda', component: RestFastifyLambdaComponent },
       { path: 'rest-session', title: 'Session', component: RestSessionComponent },
       { path: 'openapi', title: 'OpenAPI', component: OpenapiComponent }
     ]
@@ -83,12 +103,17 @@ export const PAGES = [
   {
     path: 'auth', title: 'Auth', component: AuthComponent, subs: [
       { path: 'auth-rest', title: 'Rest', component: AuthRestComponent },
+      { path: 'auth-passport', title: 'Passport', component: AuthPassportComponent },
+      { path: 'auth-rest-session', title: 'Rest Session', component: AuthRestSessionComponent },
+      { path: 'auth-rest-context', title: 'Rest Context', component: AuthRestContextComponent },
+      { path: 'auth-rest-jwt', title: 'Rest JWT', component: AuthRestJwtComponent },
       { path: 'jwt', title: 'JWT', component: JwtComponent }
     ]
   },
   {
     path: 'email', title: 'Email', component: EmailComponent, subs: [
-      { path: 'email-template', title: 'Template', component: EmailTemplateComponent }
+      { path: 'email-template', title: 'Template', component: EmailTemplateComponent },
+      { path: 'email-nodemailer', title: 'Nodemailer', component: EmailNodemailerComponent }
     ]
   },
   {
@@ -96,6 +121,7 @@ export const PAGES = [
       { path: 'di', title: 'Dependency Injection  ', component: DiComponent },
       { path: 'config', title: 'Config ', component: ConfigComponent },
       { path: 'schema', title: 'Schema', component: SchemaComponent },
+      { path: 'schema-faker', title: 'Schema Faker', component: SchemaFakerComponent },
       { path: 'test', title: 'Test', component: TestComponent },
     ]
   },

@@ -77,13 +77,13 @@ The module provides <a class="module-link" routerLink="/docs/cli" title="CLI inf
       <figcaption class="terminal">Running template compilation
       
       </figcaption>
-      <pre><code class="language-bash">$ trv email:compile -h
+      <pre><code class="language-bash">$ trv email:compile <span class="token parameter variable">-h</span>
 
 Usage:  email:compile <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -w, --watch  Compile <span class="token keyword">in</span> <span class="token function">watch</span> mode
-  -h, --help   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -w, <span class="token parameter variable">--watch</span>  Compile <span class="token keyword">in</span> <span class="token function">watch</span> mode
+  -h, <span class="token parameter variable">--help</span>   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
 Will convert all <code class="item path">.email.html</code> files into the appropriate <code class="item path">.compiled.html</code>, <code class="item path">.compiled.text</code> and <code class="item path">.compiled.subject</code> files.  These will be used during the running of the application.  By default these files are added to the <code class="item path">.gitignore</code> as they are generally not intended to be saved but to be generated during the build process.

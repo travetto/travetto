@@ -18,18 +18,18 @@
       <figcaption class="terminal">Pack usage
       
       </figcaption>
-      <pre><code class="language-bash">$ trv pack --help
+      <pre><code class="language-bash">$ trv pack <span class="token parameter variable">--help</span>
 
 Usage:  pack <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory
-  -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory
+  -h, <span class="token parameter variable">--help</span>                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
-  * rest/aws-lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.aws-lambda.ts<span class="token punctuation">]</span>
-  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span></code></pre>     
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
+  * rest-aws-lambda/main <span class="token punctuation">[</span>@travetto/rest-aws-lambda/support/pack.aws-lambda.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. The pack operation is actually a wrapper around multiple sub-operations that are run in series to produce the desired final structure for deployment.  The currently support operations are:
@@ -92,20 +92,20 @@ Assemble is the operation that stages the project's code for deployment.  The as
       <figcaption class="terminal">Assemble Usage
       
       </figcaption>
-      <pre><code class="language-bash">$ trv pack:assemble --help
+      <pre><code class="language-bash">$ trv pack:assemble <span class="token parameter variable">--help</span>
 
 Usage:  pack:assemble <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory
+  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory
   -k, --keep-source            Should <span class="token builtin class-name">source</span> be preserved
-  -r, --readonly               Build a <span class="token builtin class-name">readonly</span> deployable
-  -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -r, <span class="token parameter variable">--readonly</span>               Build a <span class="token builtin class-name">readonly</span> deployable
+  -h, <span class="token parameter variable">--help</span>                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
-  * rest/aws-lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.aws-lambda.ts<span class="token punctuation">]</span>
-  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span></code></pre>     
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
+  * rest-aws-lambda/main <span class="token punctuation">[</span>@travetto/rest-aws-lambda/support/pack.aws-lambda.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 <h3 id="cli-pack-zip">CLI - pack:zip</h3>
@@ -114,7 +114,7 @@ Zip is an optional step, that can run post assembly.  The only configuration it 
 
       <figure class="code">
       <figcaption class="code">Zip Default Config
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L57">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L58">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">zip<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   active<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
@@ -126,19 +126,19 @@ Zip is an optional step, that can run post assembly.  The only configuration it 
       <figcaption class="terminal">Zip Usage
       
       </figcaption>
-      <pre><code class="language-bash">$ trv pack:zip --help
+      <pre><code class="language-bash">$ trv pack:zip <span class="token parameter variable">--help</span>
 
 Usage:  pack:zip <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory
-  -o, --output <span class="token operator">&lt;</span>output<span class="token operator">></span>        Output File
-  -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>        Output File
+  -h, <span class="token parameter variable">--help</span>                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
-  * rest/aws-lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.aws-lambda.ts<span class="token punctuation">]</span>
-  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span></code></pre>     
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
+  * rest-aws-lambda/main <span class="token punctuation">[</span>@travetto/rest-aws-lambda/support/pack.aws-lambda.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 <h3 id="cli-pack-docker">CLI - pack:docker</h3>
@@ -147,7 +147,7 @@ Docker support is an optional step, that can run post assembly.  This allows for
 
       <figure class="code">
       <figcaption class="code">Docker Default Config
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L61">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/pack.config.ts#L62">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">docker<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   active<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
@@ -159,24 +159,24 @@ Docker support is an optional step, that can run post assembly.  This allows for
       <figcaption class="terminal">Docker Usage
       
       </figcaption>
-      <pre><code class="language-bash">$ trv pack:docker --help
+      <pre><code class="language-bash">$ trv pack:docker <span class="token parameter variable">--help</span>
 
 Usage:  pack:docker <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>mode<span class="token punctuation">]</span>
 
 Options:
-  -w, --workspace <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory
-  -i, --image <span class="token operator">&lt;</span>image<span class="token operator">></span>          Docker Image to extend
-  -n, --name <span class="token operator">&lt;</span>name<span class="token operator">></span>            Image Name
-  -t, --tag <span class="token operator">&lt;</span>tag<span class="token operator">></span>              Image Tag <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -p, --port <span class="token operator">&lt;</span>port<span class="token operator">></span>            Image Port <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -x, --push                   Push Tags
-  -r, --registry <span class="token operator">&lt;</span>registry<span class="token operator">></span>    Registry
-  -h, --help                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>  Working directory
+  -i, <span class="token parameter variable">--image</span> <span class="token operator">&lt;</span>image<span class="token operator">></span>          Docker Image to extend
+  -n, <span class="token parameter variable">--name</span> <span class="token operator">&lt;</span>name<span class="token operator">></span>            Image Name
+  -t, <span class="token parameter variable">--tag</span> <span class="token operator">&lt;</span>tag<span class="token operator">></span>              Image Tag <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -p, <span class="token parameter variable">--port</span> <span class="token operator">&lt;</span>port<span class="token operator">></span>            Image Port <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -x, <span class="token parameter variable">--push</span>                   Push Tags
+  -r, <span class="token parameter variable">--registry</span> <span class="token operator">&lt;</span>registry<span class="token operator">></span>    Registry
+  -h, <span class="token parameter variable">--help</span>                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Pack Modes:
   * default <span class="token punctuation">[</span>support/pack.config.ts<span class="token punctuation">]</span>
-  * rest/aws-lambda <span class="token punctuation">[</span>@travetto/rest/support/pack.aws-lambda.ts<span class="token punctuation">]</span>
-  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span></code></pre>     
+  * rest/docker <span class="token punctuation">[</span>@travetto/rest/support/pack.docker.ts<span class="token punctuation">]</span>
+  * rest-aws-lambda/main <span class="token punctuation">[</span>@travetto/rest-aws-lambda/support/pack.aws-lambda.ts<span class="token punctuation">]</span></code></pre>     
       </figure>
 
 <h3 id="modes">Modes</h3>
@@ -184,7 +184,7 @@ Various modules may provide customizations to the default <code class="item path
 
       <figure class="code">
       <figcaption class="code">Rest, pack.lambda.ts
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/support/pack.aws-lambda.ts">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest-aws-lambda/support/pack.aws-lambda.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fs <span class="token keyword">from</span> <span class="token string">'fs/promises'</span><span class="token punctuation">;</span>
 
@@ -192,7 +192,7 @@ Various modules may provide customizations to the default <code class="item path
 <span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> AllConfigPartial <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/pack'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> config<span class="token operator">:</span> AllConfigPartial <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
-  name<span class="token operator">:</span> <span class="token string">'rest/aws-lambda'</span><span class="token punctuation">,</span>
+  name<span class="token operator">:</span> <span class="token string">'rest-aws-lambda/main'</span><span class="token punctuation">,</span>
   assemble<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     active<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
     keepSource<span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
@@ -271,7 +271,7 @@ allow their key parameters to be overridden via environment variables.
 
       <figure class="code">
       <figcaption class="code">Docker Overrides
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/bin/operation/docker.ts#L37">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/bin/operation/docker.ts#L43">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">overrides<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   image<span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">PACK_DOCKER_IMAGE</span> <span class="token operator">||</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>

@@ -34,7 +34,7 @@ $ <span class="token builtin class-name">cd</span> todo-project
 
 $ <span class="token function">git</span> init <span class="token builtin class-name">.</span>
 
-$ <span class="token function">npm</span> init -f
+$ <span class="token function">npm</span> init <span class="token parameter variable">-f</span>
 $ <span class="token function">npm</span> i @travetto/<span class="token punctuation">{{'{'}}</span>log,test,rest-express,model-mongo<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
@@ -333,7 +333,7 @@ First we must start the application:
       <pre><code class="language-bash"><span class="token number">2022</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@trv:app/registry:57<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@trv:rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
 <span class="token number">2022</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@trv:app/registry:63<span class="token punctuation">]</span> Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
-    framework: <span class="token string">'2.2.3'</span>,
+    framework: <span class="token string">'2.2.4'</span>,
     name: <span class="token string">'@travetto/todo-app'</span>,
     description: <span class="token string">''</span>,
     version: <span class="token string">'0.0.0'</span>,
@@ -360,6 +360,7 @@ First we must start the application:
       <span class="token string">'@travetto/app'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:app'</span>,
       <span class="token string">'@travetto/auth'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:auth'</span>,
       <span class="token string">'@travetto/auth-rest'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:auth-rest'</span>,
+      <span class="token string">'@travetto/auth-rest-session'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:auth-rest-session'</span>,
       <span class="token string">'@travetto/base'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:base'</span>,
       <span class="token string">'@travetto/boot'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:boot'</span>,
       <span class="token string">'@travetto/cli'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:cli'</span>,
@@ -406,6 +407,7 @@ First we must start the application:
       sameSite: <span class="token string">'lax'</span>,
       keys: <span class="token punctuation">[</span> <span class="token string">'default-insecure'</span> <span class="token punctuation">]</span>
     <span class="token punctuation">{{'}'}}</span>,
+    context: <span class="token punctuation">{{'{'}}</span> disabled: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
     session: <span class="token punctuation">{{'{'}}</span>
       autoCommit: true,
       maxAge: <span class="token number">1800000</span>,
@@ -414,8 +416,7 @@ First we must start the application:
       sign: true,
       keyName: <span class="token string">'trv_sid'</span>,
       transport: <span class="token string">'cookie'</span>
-    <span class="token punctuation">{{'}'}}</span>,
-    context: <span class="token punctuation">{{'{'}}</span> disabled: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   model: <span class="token punctuation">{{'{'}}</span>
     mongo: <span class="token punctuation">{{'{'}}</span>
