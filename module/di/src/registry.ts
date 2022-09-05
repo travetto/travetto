@@ -120,13 +120,12 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       try {
         return await this.getInstance(x.target, x.qualifier, x.resolution);
       } catch (err) {
-        if (!err || !(err instanceof Error)) {
-          throw err;
-        }
         if (x.optional && err instanceof InjectionError && err.category === 'notfound') {
           return undefined;
         } else {
-          err.message = `${err.message} via=${managed.class.ᚕid}`;
+          if (err && err instanceof Error) {
+            err.message = `${err.message} via=${managed.class.ᚕid}`;
+          }
           throw err;
         }
       }
