@@ -1,11 +1,10 @@
-// @file-if passport
 import * as passport from 'passport';
 
 import { Authenticator, Principal } from '@travetto/auth';
 import { Request, Response } from '@travetto/rest';
+import { LoginContextⲐ } from '@travetto/auth-rest/src/internal/types';
 
 import { PassportAuthOptions, PassportUtil } from './util';
-import { LoginContextⲐ } from '../../internal/types';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 
@@ -54,7 +53,8 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, { r
       throw err;
     } else {
       // Remove profile fields from passport
-      const du: U & { _json?: unknown, _raw?: unknown, source?: unknown } = user;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const du = user as (U & { _json?: unknown, _raw?: unknown, source?: unknown });
       delete du._json;
       delete du._raw;
       delete du.source;

@@ -4,7 +4,6 @@ import { Context } from '@travetto/rest';
 
 import { AuthService } from './src/service';
 import { Authenticate, Unauthenticated, Authenticated } from './src/decorator';
-import { PassportAuthenticator } from './src/extension/passport/authenticator';
 
 const Principal = d.SnippetLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
 const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
@@ -64,21 +63,4 @@ ${Authenticate} provides middleware that will authenticate the user as defined b
 ${d.Code('Using provider with routes', 'doc/route.ts')}
 
 ${Authenticated} and ${Unauthenticated} will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the ${Principal} is accessible via ${Context} directly, without wiring in a request object, but is also accessible on the request object as ${Request}.auth.
-
-${d.Section('Passport - Extension')}
-
-Within the node ecosystem, the most prevalent auth framework is ${lib.Passport}.  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for ${lib.Passport} baked in. Registering and configuring a ${lib.Passport} strategy is fairly straightforward.
-
-${d.Code('Sample Facebook/passport config', 'doc/passport/conf.ts')}
-
-As you can see, ${PassportAuthenticator} will take care of the majority of the work, and all that is required is:
-${d.List(
-  'Provide the name of the strategy (should be unique)',
-  d`Provide the strategy instance. ${d.Note('you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework')}`,
-  'The conversion functions which defines the mapping between external and local identities.'
-)}
-
-After that, the provider is no different than any other, and can be used accordingly.  Additionally, because ${lib.Passport} runs first, in it's entirety, you can use the provider as you normally would any ${lib.Passport} middleware.
-
-${d.Code('Sample routes using Facebook/passport provider', 'doc/passport/simple.ts')}
 `;
