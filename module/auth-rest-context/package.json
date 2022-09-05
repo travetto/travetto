@@ -1,13 +1,13 @@
 {
-  "name": "@travetto/auth-rest",
-  "displayName": "Rest Auth",
+  "name": "@travetto/auth-rest-context",
+  "displayName": "Rest Auth Context",
   "version": "2.2.7",
-  "description": "Rest authentication integration support for the travetto framework",
+  "description": "Rest authentication context integration support for the travetto framework",
   "keywords": [
     "authentication",
     "rest",
+    "context",
     "travetto",
-    "decorators",
     "typescript"
   ],
   "homepage": "https://travetto.io",
@@ -18,23 +18,19 @@
   },
   "files": [
     "index.ts",
-    "src",
-    "test-support"
+    "src"
   ],
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/auth-rest"
+    "directory": "module/auth-rest-context"
   },
   "dependencies": {
+    "@travetto/context": "^2.2.6",
+    "@travetto/auth-rest": "^2.2.7",
+    "@travetto/di": "^2.2.4",
     "@travetto/auth": "^2.2.4",
-    "@travetto/config": "^2.2.4",
     "@travetto/rest": "^2.2.6"
-  },
-  "docDependencies": {
-    "@types/passport-facebook": "^2.1.11",
-    "passport-facebook": "^3.0.0",
-    "@travetto/app": true
   },
   "private": false,
   "publishConfig": {
