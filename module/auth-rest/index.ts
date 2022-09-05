@@ -4,13 +4,3 @@ export * from './src/decorator';
 export * from './src/service';
 export * from './src/encoder';
 export * from './src/types';
-
-// Named export needed for proxying
-export * from './src/extension/context/interceptor';
-
-// Named export needed for proxying
-export { PassportAuthenticator } from './src/extension/passport/authenticator';
-export { PassportInterceptor } from './src/extension/passport/interceptor';
-
-// Named export needed for proxying
-export { AuthContextInterceptor } from './src/extension/context/interceptor';

@@ -1,0 +1,47 @@
+{
+  "name": "@travetto/auth-passport",
+  "displayName": "Rest Auth Passport",
+  "version": "2.2.7",
+  "description": "Rest authentication integration support for the travetto framework",
+  "keywords": [
+    "authentication",
+    "rest",
+    "passport",
+    "travetto",
+    "decorators",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "index.ts",
+    "src",
+    "test-support"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/auth-passport"
+  },
+  "dependencies": {
+    "@travetto/auth": "^2.2.4",
+    "@travetto/auth-rest": "^2.2.4",
+    "@travetto/config": "^2.2.4",
+    "@travetto/rest": "^2.2.6",
+    "@types/passport": "^1.0.10",
+    "passport": "^0.6.0"
+  },
+  "docDependencies": {
+    "@types/passport-facebook": "^2.1.11",
+    "passport-facebook": "^3.0.0",
+    "@travetto/app": true
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}

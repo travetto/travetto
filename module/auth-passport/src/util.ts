@@ -1,10 +1,9 @@
-// @file-if passport
 import * as passport from 'passport';
 
 import { Util } from '@travetto/base';
 import { Request } from '@travetto/rest';
 
-import { LoginContext } from '../../types';
+import { LoginContext } from '@travetto/auth-rest';
 
 export interface PassportAuthOptions {
   state?: ((req: Request) => Record<string, unknown>) | Record<string, unknown>;

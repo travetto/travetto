@@ -1,10 +1,8 @@
-// @file-if passport
 import * as passport from 'passport';
 
 import { RestInterceptor, Request, Response } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
-
-import { AuthInterceptor } from '../../interceptor';
+import { AuthInterceptor } from '@travetto/auth-rest';
 
 type Handler = (req: Request, res: Response, next: Function) => unknown;
 
