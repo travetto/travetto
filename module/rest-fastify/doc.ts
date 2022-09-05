@@ -14,7 +14,4 @@ ${d.Section('Default Middleware')}
 When working with an ${lib.Fastify} applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
 
 ${d.Snippet('Configured Middleware', 'src/server.ts', /const app\s*=/, /addContentTypeParser/)}
-
-${d.Section('Extension - AWS Lambda')}
-The ${lib.Fastify} module supports integration with ${lib.AwsLambdaFastify} when installed.  This produces an instance of ${RestApplication} that is able to integrate with AWS appropriately. 
 `;

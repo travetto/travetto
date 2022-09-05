@@ -13,5 +13,5 @@ ${d.Code('Customizing the Express App', 'doc/customize.ts')}
 ${d.Section('Default Middleware')}
 When working with an ${lib.Express} applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
 
-${d.Snippet('Configured Middleware', 'src/server.ts', /const app\s*=/, /bodyParser.raw/)}
+${d.Snippet('Configured Middleware', 'src/server.ts', /const app\s*=/, /compress/)}
 `;

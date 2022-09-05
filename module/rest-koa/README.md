@@ -43,8 +43,6 @@ When working with an [koa](https://koajs.com/) applications, the module provides
 
 **Code: Configured Middleware**
 ```typescript
-
+const app = new koa();
+    app.use(kCompress());
 ```
-
-## Extension - AWS Lambda
-The [koa](https://koajs.com/) module supports integration with [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L23) that is able to integrate with AWS appropriately.

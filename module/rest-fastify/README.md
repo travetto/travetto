@@ -48,6 +48,3 @@ const app = fastify(fastConf);
     app.removeAllContentTypeParsers();
     app.addContentTypeParser(/.*/, (req, body, done) => done(null, body));
 ```
-
-## Extension - AWS Lambda
-The [fastify](https://www.fastify.io/) module supports integration with [@fastify/aws-lambda](https://github.com/fastify/aws-lambda-fastify/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L23) that is able to integrate with AWS appropriately.

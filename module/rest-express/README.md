@@ -41,5 +41,8 @@ When working with an [express](https://expressjs.com) applications, the module p
 
 **Code: Configured Middleware**
 ```typescript
-
+const app = express();
+    app.set('query parser', 'simple');
+    app.disable('x-powered-by');
+    app.use(compression());
 ```
