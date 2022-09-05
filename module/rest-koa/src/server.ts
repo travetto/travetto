@@ -39,7 +39,7 @@ export class KoaRestServer implements RestServer<koa> {
   @Inject()
   config: RestConfig;
 
-  init(): koa {
+  async init(): Promise<koa> {
     const app = new koa();
     app.use(kCompress());
 

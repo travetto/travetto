@@ -1,12 +1,12 @@
-// @file-if @vendia/serverless-express
 import * as serverless from '@vendia/serverless-express';
-import type * as lambda from 'aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
-import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ, RestAwsConfig } from '@travetto/rest/src/extension/aws-lambda';
-import { ServerHandle } from '@travetto/rest/src/types';
-
-import { KoaRestServer } from '../server';
+import {
+  AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ,
+  RestAwsConfig, LambdaContext, LambdaAPIGatewayProxyEvent
+} from '@travetto/rest-aws-lambda';
+import type { ServerHandle } from '@travetto/rest';
+import { KoaRestServer } from '@travetto/rest-koa';
 
 type AwsLambdaHandle = AwsLambdaHandler['handle'];
 
@@ -24,12 +24,12 @@ export class AwsLambdaKoaRestServer extends KoaRestServer implements AwsLambdaRe
   /**
    * Handler method for the proxy
    */
-  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): ReturnType<AwsLambdaHandle> {
+  handle(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): ReturnType<AwsLambdaHandle> {
     return this.#handler(event, context);
   }
 
-  override init(): this['raw'] {
-    const ret = super.init();
+  override async init(): Promise<this['raw']> {
+    const ret = await super.init();
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     this.#handler = serverless.configure({ app: ret.callback(), ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandle;
     return ret;
