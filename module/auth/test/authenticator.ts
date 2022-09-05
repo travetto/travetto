@@ -2,7 +2,8 @@ import * as assert from 'assert';
 
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
-import { Authenticator } from '@travetto/auth';
+
+import { Authenticator } from '../src/types/authenticator';
 
 type User = { username: string, password: string };
 
