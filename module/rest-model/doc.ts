@@ -1,6 +1,3 @@
-// To ensure module loading
-import '@travetto/model';
-
 import { d, mod } from '@travetto/doc';
 
 import { ModelRoutes } from './src/model';

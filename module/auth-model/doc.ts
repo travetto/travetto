@@ -1,7 +1,7 @@
 import { d, mod } from '@travetto/doc';
 import { Links } from '@travetto/model/support/doc-support';
 
-const RegisteredPrincipal = d.Snippet('Registered Principal', 'src/extension/model.ts', /interface RegisteredPrincipal/, /^[}]/);
+const RegisteredPrincipal = d.Snippet('Registered Principal', 'src/model.ts', /interface RegisteredPrincipal/, /^[}]/);
 
 export const text = d`
 ${d.Header()}
@@ -20,7 +20,9 @@ ${d.List(
   d`${mod.ModelMongo} @travetto/model-mongo`,
   d`${mod.ModelRedis} @travetto/model-redis`,
   d`${mod.ModelS3} @travetto/model-s3`,
-  d`${mod.ModelSql} @travetto/model-sql`,
+  d`${mod.ModelMysql} @travetto/model-mysql`,
+  d`${mod.ModelPostgres} @travetto/model-postgres`,
+  d`${mod.ModelSQLite} @travetto/model-sqlite`,
 )}
 
 The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a ${RegisteredPrincipal.link}

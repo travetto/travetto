@@ -52,6 +52,22 @@ import { ModelRedisComponent } from './gen/model-redis/model-redis.component';
 import { ModelS3Component } from './gen/model-s3/model-s3.component';
 import { ModelFirestoreComponent } from './gen/model-firestore/model-firestore.component';
 import { ModelQueryComponent } from './gen/model-query/model-query.component';
+import { AuthModelComponent } from './gen/auth-model/auth-model.component';
+import { AuthRestSessionComponent } from './gen/auth-rest-session/auth-rest-session.component';
+import { AuthPassportComponent } from './gen/auth-passport/auth-passport.component';
+import { ModelMysqlComponent } from './gen/model-mysql/model-mysql.component';
+import { ModelPostgresComponent } from './gen/model-postgres/model-postgres.component';
+import { ModelSqliteComponent } from './gen/model-sqlite/model-sqlite.component';
+import { RestModelComponent } from './gen/rest-model/rest-model.component';
+import { RestModelQueryComponent } from './gen/rest-model-query/rest-model-query.component';
+import { RestExpressLambdaComponent } from './gen/rest-express-lambda/rest-express-lambda.component';
+import { RestFastifyLambdaComponent } from './gen/rest-fastify-lambda/rest-fastify-lambda.component';
+import { RestKoaLambdaComponent } from './gen/rest-koa-lambda/rest-koa-lambda.component';
+import { RestAwsLambdaComponent } from './gen/rest-aws-lambda/rest-aws-lambda.component';
+import { EmailNodemailerComponent } from './gen/email-nodemailer/email-nodemailer.component';
+import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.component';
+import { AuthRestContextComponent } from './gen/auth-rest-context/auth-rest-context.component';
+import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component';
 
 @NgModule({
   imports: [
@@ -116,7 +132,23 @@ import { ModelQueryComponent } from './gen/model-query/model-query.component';
     ModelRedisComponent,
     ModelS3Component,
     ModelFirestoreComponent,
-    ModelQueryComponent
+    ModelQueryComponent,
+    AuthModelComponent,
+    AuthRestSessionComponent,
+    AuthPassportComponent,
+    ModelMysqlComponent,
+    ModelPostgresComponent,
+    ModelSqliteComponent,
+    RestModelComponent,
+    RestModelQueryComponent,
+    RestExpressLambdaComponent,
+    RestFastifyLambdaComponent,
+    RestKoaLambdaComponent,
+    RestAwsLambdaComponent,
+    EmailNodemailerComponent,
+    AuthRestJwtComponent,
+    AuthRestContextComponent,
+    SchemaFakerComponent
   ]
 })
 export class DocumentationModule { }

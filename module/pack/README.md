@@ -22,8 +22,8 @@ Options:
 
 Available Pack Modes:
   * default [support/pack.config.ts]
-  * rest/aws-lambda [@travetto/rest/support/pack.aws-lambda.ts]
   * rest/docker [@travetto/rest/support/pack.docker.ts]
+  * rest-aws-lambda/main [@travetto/rest-aws-lambda/support/pack.aws-lambda.ts]
 ```
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. The pack operation is actually a wrapper around multiple sub-operations that are run in series to produce the desired final structure for deployment.  The currently support operations are:
@@ -96,8 +96,8 @@ Options:
 
 Available Pack Modes:
   * default [support/pack.config.ts]
-  * rest/aws-lambda [@travetto/rest/support/pack.aws-lambda.ts]
   * rest/docker [@travetto/rest/support/pack.docker.ts]
+  * rest-aws-lambda/main [@travetto/rest-aws-lambda/support/pack.aws-lambda.ts]
 ```
 
 ### CLI - pack:zip
@@ -125,8 +125,8 @@ Options:
 
 Available Pack Modes:
   * default [support/pack.config.ts]
-  * rest/aws-lambda [@travetto/rest/support/pack.aws-lambda.ts]
   * rest/docker [@travetto/rest/support/pack.docker.ts]
+  * rest-aws-lambda/main [@travetto/rest-aws-lambda/support/pack.aws-lambda.ts]
 ```
 
 ### CLI - pack:docker
@@ -159,8 +159,8 @@ Options:
 
 Available Pack Modes:
   * default [support/pack.config.ts]
-  * rest/aws-lambda [@travetto/rest/support/pack.aws-lambda.ts]
   * rest/docker [@travetto/rest/support/pack.docker.ts]
+  * rest-aws-lambda/main [@travetto/rest-aws-lambda/support/pack.aws-lambda.ts]
 ```
 
 ### Modes
@@ -174,7 +174,7 @@ import { PathUtil } from '@travetto/boot';
 import type { AllConfigPartial } from '@travetto/pack';
 
 export const config: AllConfigPartial = {
-  name: 'rest/aws-lambda',
+  name: 'rest-aws-lambda/main',
   assemble: {
     active: true,
     keepSource: false,

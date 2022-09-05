@@ -22,13 +22,13 @@ As is the custom, modules are able to register their own cli extensions as scrip
       <figcaption class="terminal">General Usage
       
       </figcaption>
-      <pre><code class="language-bash">$ trv --help
+      <pre><code class="language-bash">$ trv <span class="token parameter variable">--help</span>
 
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
 Options:
-  -V, --version                          output the version number
-  -h, --help                             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -V, <span class="token parameter variable">--version</span>                          output the version number
+  -h, <span class="token parameter variable">--help</span>                             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Commands:
   build <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
@@ -84,13 +84,13 @@ With the corresponding output:
       <figcaption class="terminal">Echo Command Help
       
       </figcaption>
-      <pre><code class="language-bash">$ trv <span class="token builtin class-name">echo</span> --help
+      <pre><code class="language-bash">$ trv <span class="token builtin class-name">echo</span> <span class="token parameter variable">--help</span>
 
 Usage:  <span class="token builtin class-name">echo</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -u, --uppercase  Upper <span class="token keyword">case</span> <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
-  -h, --help       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -u, <span class="token parameter variable">--uppercase</span>  Upper <span class="token keyword">case</span> <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
 And actually using it:
@@ -99,7 +99,7 @@ And actually using it:
       <figcaption class="terminal">Echo Command Run
       
       </figcaption>
-      <pre><code class="language-bash">$ trv <span class="token builtin class-name">echo</span> -u bOb rOb DRoP
+      <pre><code class="language-bash">$ trv <span class="token builtin class-name">echo</span> <span class="token parameter variable">-u</span> bOb rOb DRoP
 
-<span class="token punctuation">[</span> <span class="token string">'BOB'</span>, <span class="token string">'ROB'</span>, <span class="token string">'DROP'</span> <span class="token punctuation">]</span></code></pre>     
+<span class="token punctuation">[</span> <span class="token string">'bOb'</span>, <span class="token string">'rOb'</span>, <span class="token string">'DRoP'</span> <span class="token punctuation">]</span></code></pre>     
       </figure>

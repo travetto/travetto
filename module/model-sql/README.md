@@ -10,109 +10,29 @@ npm install @travetto/model-sql
 
 **Install: Specific SQL Client: mysql**
 ```bash
-npm install mysql
+npm install @travetto/model-mysql
 ```
 
 or 
 
-**Install: Specific SQL Client: postgres**
+**Install: Specific SQL Client: mysql**
 ```bash
-npm install pg
+npm install @travetto/model-postgres
 ```
 
-This module provides a [SQL](https://en.wikipedia.org/wiki/SQL)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L38) will also modify the database schema in real time to minimize impact to development.
+or 
 
-The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of
-a [SQL](https://en.wikipedia.org/wiki/SQL) database.  Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values.
+**Install: Specific SQL Client: mysql**
+```bash
+npm install @travetto/model-sqlite
+```
 
 The current SQL client support stands at:
    
    *  [MySQL](https://www.mysql.com/) - 5.6 and 5.7
    *  [Postgres](https://postgresql.org) - 11+
+   *  [SQLite](https://www.sqlite.org/) - (bettersqlite 7.6+)
    *  `SQL Server` - Currently unsupported
    *  `Oracle` - Currently unsupported
 
 **Note**: Wider client support will roll out as usage increases.
-
-Supported features:
-   
-   *  [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-   *  [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L23)
-   *  [Query Crud](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/crud.ts#L11)
-   *  [Facet](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/facet.ts#L12)
-   *  [Query](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/query.ts#L10)
-   *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/suggest.ts#L12)
-
-    Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
-    or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
-
-    
-**Code: Wiring up a custom Model Source**
-```typescript
-import { AsyncContext } from '@travetto/context';
-import { InjectableFactory } from '@travetto/di';
-
-import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
-import { MySQLDialect } from '@travetto/model-sql/src/dialect/mysql/dialect';
-
-export class Init {
-  @InjectableFactory({ primary: true })
-  static getModelService(ctx: AsyncContext, conf: SQLModelConfig) {
-    return new SQLModelService(ctx, conf, new MySQLDialect(ctx, conf));
-  }
-}
-```
-
-  where the [SQLModelConfig](https://github.com/travetto/travetto/tree/main/module/model-sql/src/config.ts#L7) is defined by:
-
-  
-**Code: Structure of SQLModelConfig**
-```typescript
-import { Config } from '@travetto/config';
-
-/**
- * SQL Model Config
- */
-@Config('model.sql')
-export class SQLModelConfig {
-  /**
-   * Host to connect to
-   */
-  host = '127.0.0.1';
-  /**
-   * Default port
-   */
-  port = 0;
-  /**
-   * Username
-   */
-  user = '';
-  /**
-   * Password
-   */
-  password = '';
-  /**
-   * Table prefix
-   */
-  namespace = '';
-  /**
-   * Database name
-   */
-  database = 'app';
-  /**
-   * Auto schema creation
-   */
-  autoCreate?: boolean;
-  /**
-   * Db version
-   */
-  version = '';
-  /**
-   * Raw client options
-   */
-  options = {};
-}
-```
-
-  Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L9) annotation, and so these values can be overridden using the 
-  standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Environment-aware config management using yaml files")resolution paths.

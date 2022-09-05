@@ -13,6 +13,7 @@ import { LoggingInterceptor } from './src/interceptor/logging';
 import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies';
 import { RestConfig } from './src/application/config';
+import { AsyncContextInterceptor } from './src/interceptor/context';
 
 const Request = d.SnippetLink('TravettoRequest', 'src/types.d.ts', /interface TravettoRequest/);
 const Response = d.SnippetLink('TravettoResponse', 'src/types.d.ts', /interface TravettoResponse/);
@@ -170,6 +171,7 @@ ${d.Ordered(
   d`${GetCacheInterceptor} - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting ${d.Input('rest.disableGetCache: true')} in your config.`,
   d`${LoggingInterceptor} - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so\n
   ${d.Code('Control Logging', 'doc/resources/log.yml')}`,
+  d`${AsyncContextInterceptor} - This interceptor is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.`,
 )}
 
 ${d.SubSection('Custom Interceptors')}

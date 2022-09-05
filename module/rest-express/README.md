@@ -43,6 +43,3 @@ When working with an [express](https://expressjs.com) applications, the module p
 ```typescript
 
 ```
-
-## Extension - AWS Lambda
-The [express](https://expressjs.com) module supports integration with [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L23) that is able to integrate with AWS appropriately.

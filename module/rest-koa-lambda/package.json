@@ -27,24 +27,9 @@
   },
   "dependencies": {
     "@travetto/rest": "^2.2.6",
-    "@types/koa": "^2.13.5",
-    "@types/koa-compress": "^4.0.3",
-    "@types/koa-router": "^7.4.4",
-    "koa": "^2.13.4",
-    "koa-compress": "^5.1.0",
-    "koa-router": "^10.1.1"
-  },
-  "peerDependencies": {
-    "@types/aws-lambda": "^8.10.102",
+    "@travetto/rest-koa": "^2.2.6",
+    "@travetto/rest-aws-lambda": "^2.2.6",
     "@vendia/serverless-express": "^4.10.1"
-  },
-  "peerDependenciesMeta": {
-    "@types/aws-lambda": {
-      "optional": true
-    },
-    "@vendia/serverless-express": {
-      "optional": true
-    }
   },
   "publishConfig": {
     "access": "public"

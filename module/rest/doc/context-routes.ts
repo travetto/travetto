@@ -1,10 +1,11 @@
-// @with-module @travetto/rest
 import { Inject } from '@travetto/di';
 
 import { Controller, Post, Body } from '@travetto/rest';
 import { AsyncContext } from '@travetto/context';
 
-import { Preferences } from './model';
+type Preferences = {
+  language: string;
+};
 
 class PreferenceService {
   private context: AsyncContext;

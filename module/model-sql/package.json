@@ -37,6 +37,9 @@
   "devDependencies": {
     "@travetto/app": "^2.2.5"
   },
+  "docDependencies": {
+    "@travetto/model-mysql": 1
+  },
   "publishConfig": {
     "access": "public"
   }

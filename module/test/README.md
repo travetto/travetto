@@ -65,8 +65,7 @@ class SimpleTest {
 
   @Test()
   async test() {
-    // @ts-expect-error
-    assert({ size: 20, address: { state: 'VA' } } === {});
+    assert.deepStrictEqual({ size: 20, address: { state: 'VA' } }, {});
   }
 }
 ```
@@ -83,13 +82,13 @@ const ᚕ_decorator_1 = require("@travetto/registry/src/decorator");
 const assert = require("assert");
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static ᚕinit = ᚕ_decorator_1.Register.initMeta(SimpleTest, ᚕsrc(__filename), 442873266, { test: { hash: 1426090177 } }, false, false);
+    static ᚕinit = ᚕ_decorator_1.Register.initMeta(SimpleTest, ᚕsrc(__filename), 1887908328, { test: { hash: 102834457 } }, false, false);
     async test() {
-        ᚕ_check_1.AssertCheck.check({ file: ᚕsrc(__filename), line: 11, text: "{ size: 20, address: { state: 'VA' } } === {}", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
+        ᚕ_check_1.AssertCheck.check({ file: ᚕsrc(__filename), line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }
 };
 tslib_1.__decorate([
-    (0, test_1.Test)({ lines: { start: 8, end: 12, codeStart: 11 } })
+    (0, test_1.Test)({ lines: { start: 8, end: 11, codeStart: 10 } })
 ], SimpleTest.prototype, "test", null);
 SimpleTest = tslib_1.__decorate([
     ᚕ_decorator_1.Register(),
