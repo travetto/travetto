@@ -42,7 +42,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
   @Inject()
   config: RestConfig;
 
-  init(): express.Application {
+  async init(): Promise<express.Application> {
     const app = express();
     app.set('query parser', 'simple');
     app.disable('x-powered-by');

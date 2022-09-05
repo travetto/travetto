@@ -1,12 +1,13 @@
-// @file-if @vendia/serverless-express
-import * as serverless from '@vendia/serverless-express';
-import type * as lambda from 'aws-lambda';
+import * as  serverless from '@vendia/serverless-express';
 
 import { Inject, Injectable } from '@travetto/di';
-import { ServerHandle } from '@travetto/rest/src/types';
-import { AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ, RestAwsConfig } from '@travetto/rest/src/extension/aws-lambda';
+import { ServerHandle } from '@travetto/rest';
+import {
+  AwsLambdaHandler, AwsLambdaRestServer, AwsLambdaⲐ,
+  RestAwsConfig, LambdaContext, LambdaAPIGatewayProxyEvent
+} from '@travetto/rest-aws-lambda';
 
-import { ExpressRestServer } from '../server';
+import { ExpressRestServer } from '@travetto/rest-express';
 
 type AwsLambdaHandle = AwsLambdaHandler['handle'];
 
@@ -24,12 +25,12 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
   /**
    * Handler method for the proxy
    */
-  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): ReturnType<AwsLambdaHandle> {
+  handle(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): ReturnType<AwsLambdaHandle> {
     return this.#handler(event, context);
   }
 
-  override init(): this['raw'] {
-    const ret = super.init();
+  override async init(): Promise<this['raw']> {
+    const ret = await super.init();
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     this.#handler = serverless.configure({ app: ret, ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandle;
     return ret;

@@ -14,7 +14,4 @@ ${d.Section('Default Middleware')}
 When working with an ${lib.Express} applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
 
 ${d.Snippet('Configured Middleware', 'src/server.ts', /const app\s*=/, /bodyParser.raw/)}
-
-${d.Section('Extension - AWS Lambda')}
-The ${lib.Express} module supports integration with ${lib.ServerlessExpress} when installed.  This produces an instance of ${RestApplication} that is able to integrate with AWS appropriately.
 `;
