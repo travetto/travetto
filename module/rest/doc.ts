@@ -1,13 +1,7 @@
-// To ensure module loading
-import '@travetto/model';
-import '@travetto/model-query';
-
 import { d, lib, mod } from '@travetto/doc';
 import { Application } from '@travetto/app';
 import { Field, Schema } from '@travetto/schema';
 
-import { ModelRoutes } from './src/extension/model';
-import { ModelQueryRoutes } from './src/extension/model-query';
 import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
@@ -219,26 +213,4 @@ The module provides support basic support with AWS lambdas. When using one of th
 ${d.Section('Packaging Lambdas')}
 
 ${d.Execute('Invoking a Package Build', 'trv', ['pack', 'rest/lambda', '-h'])}
-
-${d.Section('Extension - Model')}
-
-To facilitate common RESTful patterns, the module exposes  ${mod.Model} support in the form of ${ModelRoutes}.
-
-${d.Code('ModelRoutes example', 'doc/controller-with-model.ts')}
-
-is a shorthand that is equal to:
-
-${d.Code('Comparable UserController, built manually', 'doc/controller-without-model.ts')}
-
-
-${d.Section('Extension - Model Query')}
-
-Additionally, ${mod.ModelQuery} support can also be added support in the form of ${ModelQueryRoutes}. This provides listing by query as well as an endpoint to facilitate suggestion behaviors.
-
-${d.Code('ModelQueryRoutes example', 'doc/controller-with-model-query.ts')}
-
-is a shorthand that is equal to:
-
-${d.Code('Comparable UserController, built manually', 'doc/controller-without-model-query.ts')}
-
 `;

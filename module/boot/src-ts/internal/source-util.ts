@@ -80,48 +80,12 @@ export class SourceUtil {
   }
 
   /**
-   * Resolve macros for keeping/removing text
-   * @param name The name of the file to resolve macros for
-   * @param contents The file contents
-   */
-  static resolveMacros(contents: string): { errors: string[], contents: string } {
-    const errors: string[] = [];
-
-    // Handle line queries
-    contents = contents.replace(/^.*[/][/]\s*@file-if\s+(.*?)\s*$/mg, (all, token: string) => {
-      if (errors.length) {
-        return ''; // Short circuit
-      }
-      const { valid, key } = this.resolveToken(token);
-      if (valid) {
-        return all;
-      } else {
-        errors.push(`Dependency ${key} should be installed`);
-        return '';
-      }
-    });
-
-    return { errors, contents };
-  }
-
-
-  /**
    * Pre-processes a typescript source file
    * @param filename The file to preprocess
    * @param contents The file contents to process
    */
   static preProcess(filename: string, contents?: string): string {
     let fileContents = contents ?? readFileSync(filename, 'utf-8');
-
-    // Resolve macro
-    const { contents: text, errors } = this.resolveMacros(fileContents);
-
-    if (errors.length) {
-      const [err] = errors;
-      fileContents = this.getErrorModule(err, `Skipping: ${err}`, { ᚕtrv: true, filename });
-    } else {
-      fileContents = text;
-    }
 
     for (const handler of this.#handlers) {
       fileContents = handler(filename, fileContents);

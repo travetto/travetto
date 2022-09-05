@@ -29,14 +29,6 @@
   "dependencies": {
     "@travetto/di": "^2.2.4"
   },
-  "peerDependencies": {
-    "@travetto/rest": "^2.2.6"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/rest": {
-      "optional": true
-    }
-  },
   "publishConfig": {
     "access": "public"
   }

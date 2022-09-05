@@ -1,4 +1,3 @@
-// @file-if @travetto/model-query
 import { AppError, Class } from '@travetto/base';
 import { ModelType, ModelRegistry } from '@travetto/model';
 import { Field, Schema } from '@travetto/schema';
