@@ -1,7 +1,7 @@
 {
   "name": "@travetto/auth-model",
   "displayName": "Authentication Model",
-  "version": "2.2.4",
+  "version": "3.0.0-rc.0",
   "description": "Authentication model support for the travetto framework",
   "keywords": [
     "authentication",
@@ -26,8 +26,8 @@
     "directory": "module/auth-model"
   },
   "dependencies": {
-    "@travetto/auth": "^2.2.4",
-    "@travetto/model": "^2.2.4"
+    "@travetto/auth": "^3.0.0-rc.0",
+    "@travetto/model": "^3.0.0-rc.0"
   },
   "private": false,
   "publishConfig": {

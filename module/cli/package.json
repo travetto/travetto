@@ -1,7 +1,7 @@
 {
   "name": "@travetto/cli",
   "displayName": "Command Line Interface",
-  "version": "2.2.4",
+  "version": "3.0.0-rc.0",
   "description": "CLI infrastructure for travetto framework",
   "keywords": [
     "cli",
@@ -27,7 +27,7 @@
     "directory": "module/cli"
   },
   "dependencies": {
-    "@travetto/base": "^2.2.4",
+    "@travetto/base": "^3.0.0-rc.0",
     "commander": "^9.4.0"
   },
   "docDependencies": {

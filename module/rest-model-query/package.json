@@ -1,7 +1,7 @@
 {
   "name": "@travetto/rest-model-query",
   "displayName": "RESTful Model Query Routes",
-  "version": "2.2.6",
+  "version": "3.0.0-rc.0",
   "description": "RESTful support for generating query APIs from Model classes.",
   "keywords": [
     "rest",
@@ -25,10 +25,10 @@
     "directory": "module/rest-model-query"
   },
   "dependencies": {
-    "@travetto/rest": "^2.2.6",
-    "@travetto/model": "^2.2.4",
-    "@travetto/model-query": "^2.2.4",
-    "@travetto/schema": "^2.2.4"
+    "@travetto/rest": "^3.0.0-rc.0",
+    "@travetto/model": "^3.0.0-rc.0",
+    "@travetto/model-query": "^3.0.0-rc.0",
+    "@travetto/schema": "^3.0.0-rc.0"
   },
   "publishConfig": {
     "access": "public"

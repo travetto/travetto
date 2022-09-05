@@ -1,7 +1,7 @@
 {
   "name": "@travetto/auth-rest",
   "displayName": "Rest Auth",
-  "version": "2.2.7",
+  "version": "3.0.0-rc.0",
   "description": "Rest authentication integration support for the travetto framework",
   "keywords": [
     "authentication",
@@ -27,9 +27,9 @@
     "directory": "module/auth-rest"
   },
   "dependencies": {
-    "@travetto/auth": "^2.2.4",
-    "@travetto/config": "^2.2.4",
-    "@travetto/rest": "^2.2.6"
+    "@travetto/auth": "^3.0.0-rc.0",
+    "@travetto/config": "^3.0.0-rc.0",
+    "@travetto/rest": "^3.0.0-rc.0"
   },
   "docDependencies": {
     "@types/passport-facebook": "^2.1.11",
