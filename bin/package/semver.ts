@@ -24,12 +24,13 @@ export class Semver {
         delete ver.prerelease;
         break;
       }
-      case 'prerelease': {
-        const computed = prefix ?? ver.prerelease?.[0] ?? 'alpha';
-        ver.prerelease = [computed, ((computed === ver.prerelease?.[0] ? ver.prerelease?.[1] : undefined) ?? -1) + 1];
-        break;
-      }
     }
+
+    if (level === 'prerelease' || prefix) {
+      const computed = prefix ?? ver.prerelease?.[0] ?? 'alpha';
+      ver.prerelease = [computed, ((computed === ver.prerelease?.[0] ? ver.prerelease?.[1] : undefined) ?? -1) + 1];
+    }
+
     return ver;
   }
 
