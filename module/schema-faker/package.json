@@ -1,12 +1,11 @@
 {
-  "name": "@travetto/schema",
-  "displayName": "Schema",
+  "name": "@travetto/schema-faker",
+  "displayName": "Schema Faker",
   "version": "2.2.4",
-  "description": "Data type registry for runtime validation, reflection and binding. ",
+  "description": "Data generation for schema-registered objects.",
   "keywords": [
+    "faker",
     "schema",
-    "ast-transformations",
-    "validation",
     "typescript",
     "travetto",
     "decorators"
@@ -19,17 +18,17 @@
   },
   "files": [
     "index.ts",
-    "src",
-    "support"
+    "src"
   ],
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/schema"
+    "directory": "module/schema-faker"
   },
   "dependencies": {
-    "@travetto/registry": "^2.2.4",
-    "@travetto/transformer": "^2.2.4"
+    "@travetto/schema": "^2.2.4",
+    "@types/faker": "^5.5.9",
+    "faker": "^5.5.3"
   },
   "publishConfig": {
     "access": "public"

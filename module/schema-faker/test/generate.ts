@@ -2,10 +2,9 @@ import * as assert from 'assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
+import { Precision, Max, Min, Schema } from '@travetto/schema';
 
-import { Schema } from '../';
-import { SchemaFakerUtil } from '../src/extension/faker';
-import { Precision, Max, Min } from '../src/decorator/field';
+import { SchemaFaker } from '../src/faker';
 
 @Schema()
 class Tag {
@@ -56,7 +55,7 @@ class DataGenerationSuite {
 
   @Test()
   verifyValueGen() {
-    const user = SchemaFakerUtil.generate(User);
+    const user = SchemaFaker.generate(User);
 
     assert.ok(user);
 
@@ -69,7 +68,7 @@ class DataGenerationSuite {
 
   @Test()
   verifyNumberGen() {
-    const user = SchemaFakerUtil.generate(UserScore);
+    const user = SchemaFaker.generate(UserScore);
     assert(user.score >= -10);
     assert(user.score <= 100);
     assert(`${user.score}`.split('.')[1].length < 3);
