@@ -16,6 +16,7 @@ export * from './src/response/error';
 export * from './src/interceptor/body-parse';
 export * from './src/interceptor/cors';
 export * from './src/interceptor/cookies';
+export * from './src/interceptor/context';
 export * from './src/interceptor/get-cache';
 export * from './src/interceptor/types';
 export * from './src/interceptor/logging';
