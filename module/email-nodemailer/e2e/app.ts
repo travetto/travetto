@@ -1,7 +1,8 @@
 import { Application } from '@travetto/app';
 import { InjectableFactory } from '@travetto/di';
+import { MailService, MailTransport } from '@travetto/email';
 
-import { MailService, NodemailerTransport, MailTransport } from '..';
+import { NodemailerTransport } from '..';
 
 class EmailConfig {
   @InjectableFactory()

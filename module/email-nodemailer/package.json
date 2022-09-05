@@ -1,10 +1,11 @@
 {
-  "name": "@travetto/email",
+  "name": "@travetto/email-nodemailer",
   "displayName": "Email",
   "version": "2.2.7",
   "description": "Email transmission module.",
   "keywords": [
     "email",
+    "nodemailer",
     "travetto",
     "typescript"
   ],
@@ -21,15 +22,17 @@
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/email"
+    "directory": "module/email-nodemailer"
   },
   "dependencies": {
-    "@travetto/config": "^2.2.4",
-    "@travetto/di": "^2.2.4",
-    "@types/mustache": "^4.2.1",
-    "mustache": "^4.2.0"
+    "@travetto/email": "^2.2.7",
+    "@types/nodemailer": "^6.4.5",
+    "nodemailer": "^6.7.8"
   },
   "publishConfig": {
     "access": "public"
+  },
+  "docDependencies": {
+    "@aws-sdk/client-ses": "^3.160.0"
   }
 }
