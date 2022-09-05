@@ -1,0 +1,52 @@
+{
+  "name": "@travetto/rest-koa-lambda",
+  "displayName": "Koa REST AWS Lambda Source",
+  "version": "2.2.7",
+  "description": "Koa provider for the travetto rest module.",
+  "keywords": [
+    "rest",
+    "aws-lambda",
+    "koa",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-koa-lambda"
+  },
+  "dependencies": {
+    "@travetto/rest": "^2.2.6",
+    "@types/koa": "^2.13.5",
+    "@types/koa-compress": "^4.0.3",
+    "@types/koa-router": "^7.4.4",
+    "koa": "^2.13.4",
+    "koa-compress": "^5.1.0",
+    "koa-router": "^10.1.1"
+  },
+  "peerDependencies": {
+    "@types/aws-lambda": "^8.10.102",
+    "@vendia/serverless-express": "^4.10.1"
+  },
+  "peerDependenciesMeta": {
+    "@types/aws-lambda": {
+      "optional": true
+    },
+    "@vendia/serverless-express": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

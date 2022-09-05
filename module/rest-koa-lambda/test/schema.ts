@@ -1,10 +1,8 @@
 import { SchemaRestServerSuite } from '@travetto/rest/test-support/schema';
+import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/test-support/server';
 import { Suite } from '@travetto/test';
 
 @Suite()
-export class KoaSchemaTest extends SchemaRestServerSuite { }
-
-@Suite()
 export class KoaLambdaSchemaTest extends SchemaRestServerSuite {
-  type = 'lambda';
+  type = AwsLambdaRestServerSupport;
 }
