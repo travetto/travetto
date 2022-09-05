@@ -1,6 +1,6 @@
 import { AppError } from '@travetto/base';
 import { Injectable, Inject } from '@travetto/di';
-import { ModelAuthService } from '@travetto/auth';
+import { ModelAuthService } from '@travetto/auth-model';
 
 import { User } from './model';
 

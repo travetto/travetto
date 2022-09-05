@@ -1,10 +1,11 @@
 {
-  "name": "@travetto/auth",
-  "displayName": "Authentication",
+  "name": "@travetto/auth-model",
+  "displayName": "Authentication Model",
   "version": "2.2.4",
-  "description": "Authentication scaffolding for the travetto framework",
+  "description": "Authentication model support for the travetto framework",
   "keywords": [
     "authentication",
+    "model",
     "travetto",
     "typescript"
   ],
@@ -16,15 +17,17 @@
   },
   "files": [
     "index.ts",
-    "src"
+    "src",
+    "test-support"
   ],
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/auth"
+    "directory": "module/auth-model"
   },
   "dependencies": {
-    "@travetto/base": "^2.2.4"
+    "@travetto/auth": "^2.2.4",
+    "@travetto/model": "^2.2.4"
   },
   "private": false,
   "publishConfig": {

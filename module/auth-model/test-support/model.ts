@@ -1,4 +1,3 @@
-// @file-if @travetto/model
 import * as assert from 'assert';
 
 import { AppError, Class } from '@travetto/base';
@@ -8,7 +7,7 @@ import { ModelCrudSupport, Model } from '@travetto/model';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 import { ModelSuite } from '@travetto/model/test-support/suite';
 
-import { ModelAuthService, RegisteredPrincipal } from '..';
+import { ModelAuthService, RegisteredPrincipal } from '../src/model';
 
 export const TestModelSvcⲐ = Symbol.for('@trv:auth/test-model-svc');
 
