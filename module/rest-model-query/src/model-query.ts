@@ -2,14 +2,14 @@
 import { AppError, Class } from '@travetto/base';
 import { ModelType, ModelRegistry } from '@travetto/model';
 import { Field, Schema } from '@travetto/schema';
+import { ControllerRegistry } from '@travetto/rest';
+import { querySchemaParamConfig } from '@travetto/rest/src/internal/param';
 import {
   ModelQueryFacetSupport, ModelQuerySupport, ModelQuerySuggestSupport,
   SortClause, ValidStringFields
 } from '@travetto/model-query';
 import { isQuerySuggestSupported, isQuerySupported } from '@travetto/model-query/src/internal/service/common';
 
-import { ControllerRegistry } from '../registry/controller';
-import { querySchemaParamConfig } from '../internal/param';
 
 type Svc = { source: Partial<ModelQuerySupport & ModelQuerySuggestSupport & ModelQueryFacetSupport> };
 

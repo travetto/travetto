@@ -23,8 +23,3 @@ export * from './src/interceptor/serialize';
 export * from './src/types';
 export * from './src/util/param';
 export * from './src/util/route';
-
-// Named export needed for proxying
-export { ModelRoutes } from './src/extension/model';
-// Named export needed for proxying
-export { ModelQueryRoutes } from './src/extension/model-query';
