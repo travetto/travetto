@@ -1,4 +1,3 @@
-// @file-if @travetto/auth-rest
 import { Principal } from '@travetto/auth';
 import { PrincipalEncoder } from '@travetto/auth-rest';
 import { AppError, Util } from '@travetto/base';
@@ -6,9 +5,7 @@ import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { Response, Request } from '@travetto/rest';
-
-import { JWTUtil } from '../util';
-import { Payload } from '../types';
+import { JWTUtil, Payload } from '@travetto/jwt';
 
 @Config('rest.jwt')
 export class RestJWTConfig {

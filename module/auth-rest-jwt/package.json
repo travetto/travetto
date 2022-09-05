@@ -1,0 +1,46 @@
+{
+  "name": "@travetto/auth-rest-jwt",
+  "displayName": "Rest Auth JWT",
+  "version": "2.2.7",
+  "description": "Rest authentication JWT integration support for the travetto framework",
+  "keywords": [
+    "authentication",
+    "jwt",
+    "rest",
+    "travetto",
+    "decorators",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "index.ts",
+    "src"
+  ],
+  "main": "index.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/auth-rest-jwt"
+  },
+  "dependencies": {
+    "@travetto/auth-rest": "^2.2.7",
+    "@travetto/auth": "^2.2.4",
+    "@travetto/config": "^2.2.4",
+    "@travetto/di": "^2.2.4",
+    "@travetto/rest": "^2.2.6",
+    "@travetto/jwt": "^2.2.4"
+  },
+  "docDependencies": {
+    "@types/passport-facebook": "^2.1.11",
+    "passport-facebook": "^3.0.0",
+    "@travetto/app": true
+  },
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  }
+}
