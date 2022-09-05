@@ -1,13 +1,11 @@
-// @file-if aws-lambda
-import type * as lambda from 'aws-lambda';
-
 import { Inject, Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { RestServer, RestApplication } from '@travetto/rest';
 
-import { RestApplication } from '../application/rest';
-import { RestServer } from '../application/server';
+import { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types';
 
-export const AwsLambdaⲐ = Symbol.for('@trv:rest/aws-lambda');
+export const AwsLambdaⲐ = Symbol.for('@trv:rest-aws-lambda/entry');
+
 
 /**
  * Main contract for lambda based applications
@@ -16,7 +14,7 @@ export interface AwsLambdaHandler {
   /**
    * Handles lambda proxy event
    */
-  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult>;
+  handle(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): Promise<LambdaAPIGatewayProxyResult>;
 }
 
 export class AwsLambdaRestServerTarget { }
@@ -50,7 +48,7 @@ export class AwsLambdaRestApplication extends RestApplication implements AwsLamb
     this.#lambdaServer = lambdaServer;
   }
 
-  handle(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
+  handle(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): Promise<LambdaAPIGatewayProxyResult> {
     return this.#lambdaServer.handle(event, context);
   }
 }

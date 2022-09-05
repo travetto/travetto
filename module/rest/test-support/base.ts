@@ -1,14 +1,13 @@
 import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, Util } from '@travetto/base';
+import { AppError, ConcreteClass, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
 
 import { MethodOrAll, Request, ServerHandle } from '../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
-import { AwsLambdaRestServerSupport } from './server-support/aws-lambda';
 import { CoreRestServerSupport } from './server-support/core';
 
 type Multipart = { name: string, type?: string, buffer: Buffer, filename?: string, size?: number };
@@ -23,16 +22,14 @@ export abstract class BaseRestSuite {
   #handle?: ServerHandle;
   #support: RestServerSupport;
 
-  type: string | RestServerSupport = 'core';
+  type: ConcreteClass<RestServerSupport>;
 
   @BeforeAll()
   async initServer(): Promise<void> {
-    if (this.type === 'core') {
+    if (!this.type || this.type === CoreRestServerSupport) {
       this.#support = new CoreRestServerSupport((SystemUtil.naiveHash(this.constructor.ᚕid) % 60000) + 1000);
-    } else if (this.type === 'lambda') {
-      this.#support = new AwsLambdaRestServerSupport();
-    } else if (typeof this.type !== 'string') {
-      this.#support = this.type;
+    } else {
+      this.#support = new this.type();
     }
     await RootRegistry.init();
     this.#handle = await this.#support.init();

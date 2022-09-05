@@ -1,9 +1,8 @@
-// @file-if aws-lambda
-import type * as lambda from 'aws-lambda';
-import type { AwsLambdaHandler } from './aws-lambda';
+import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types';
+import type { AwsLambdaHandler } from './server';
 
 async function buildApp(): Promise<{
-  handle(event: lambda.APIGatewayEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult>;
+  handle(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): Promise<LambdaAPIGatewayProxyResult>;
 }> {
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init');
@@ -11,7 +10,7 @@ async function buildApp(): Promise<{
   const { DependencyRegistry } = await import('@travetto/di');
   await DependencyRegistry.init();
 
-  const { AwsLambdaRestApplication } = await import('./aws-lambda');
+  const { AwsLambdaRestApplication } = await import('./server');
 
   const app = await DependencyRegistry.getInstance(AwsLambdaRestApplication);
   await app.run();
@@ -19,7 +18,7 @@ async function buildApp(): Promise<{
 }
 
 let inst: AwsLambdaHandler;
-export async function handler(event: lambda.APIGatewayProxyEvent, context: lambda.Context): Promise<lambda.APIGatewayProxyResult> {
+export async function handler(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): Promise<LambdaAPIGatewayProxyResult> {
   context.callbackWaitsForEmptyEventLoop = false;
   return (inst ??= await buildApp()).handle(event, context);
 }

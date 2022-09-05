@@ -2,11 +2,14 @@ import * as lambda from 'aws-lambda';
 
 import { DependencyRegistry } from '@travetto/di';
 import { Util } from '@travetto/base';
+import type { Request, ServerHandle } from '@travetto/rest';
+import {
+  RestServerSupport, MakeRequestConfig, MakeRequestResponse,
+  headerToShape as valuesToShape
+} from '@travetto/rest/test-support/server-support/base';
 
-import type { Request, ServerHandle } from '../../src/types';
-import type { AwsLambdaRestApplication } from '../../src/extension/aws-lambda';
+import type { AwsLambdaRestApplication } from '../src/server';
 
-import { RestServerSupport, MakeRequestConfig, MakeRequestResponse, headerToShape as valuesToShape } from './base';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
   resource: '/{proxy+}',
@@ -60,14 +63,14 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
   #lambda: AwsLambdaRestApplication;
 
   async init(): Promise<ServerHandle> {
-    const rest = await import('../..');
+    const rest = await import('@travetto/rest');
 
     Object.assign(
       await DependencyRegistry.getInstance(rest.RestCookieConfig),
       { active: true, secure: false, signed: false }
     );
 
-    const { AwsLambdaRestApplication: App } = await import('../../src/extension/aws-lambda');
+    const { AwsLambdaRestApplication: App } = await import('../src/server');
     this.#lambda = await DependencyRegistry.getInstance(App);
     return await this.#lambda.run();
   }
