@@ -1,5 +1,5 @@
 import { Model } from '@travetto/model';
-import { RegisteredPrincipal } from '@travetto/auth';
+import { RegisteredPrincipal } from '@travetto/auth-model';
 
 @Model()
 export class User implements RegisteredPrincipal {

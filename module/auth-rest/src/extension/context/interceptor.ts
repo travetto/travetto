@@ -1,6 +1,7 @@
 // @file-if @travetto/context
 import { Inject, Injectable } from '@travetto/di';
-import { AsyncContext, AsyncContextInterceptor } from '@travetto/context';
+import { AsyncContext } from '@travetto/context';
+import { AsyncContextInterceptor } from '@travetto/rest/src/extension/context';
 import { Principal } from '@travetto/auth';
 import { Request, Response, RestInterceptor } from '@travetto/rest';
 

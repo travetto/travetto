@@ -1,5 +1,3 @@
-// @with-module @travetto/model
-// @with-module @travetto/di
 import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
 import { Suite } from '@travetto/test';
