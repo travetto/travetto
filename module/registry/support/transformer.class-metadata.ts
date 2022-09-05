@@ -81,7 +81,6 @@ export class RegisterTransformer {
       DecoratorUtil.spliceDecorators(
         node, undefined, [state.createDecorator(REGISTER_MOD, 'Register')], 0
       ),
-      node.modifiers,
       node.name,
       node.typeParameters,
       node.heritageClauses,

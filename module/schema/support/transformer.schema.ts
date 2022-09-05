@@ -39,16 +39,16 @@ export class SchemaTransformer {
    */
   @AfterClass('Schema')
   static finalizeSchema(state: AutoState & TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    const decls = [...(node.decorators ?? [])];
+    const modifiers = (node.modifiers ?? []).slice(0);
 
     const comments = DocUtil.describeDocs(node);
 
     if (!state.findDecorator(this, node, 'Schema', SCHEMA_MOD)) {
-      decls.unshift(state.createDecorator(SCHEMA_MOD, 'Schema'));
+      modifiers.unshift(state.createDecorator(SCHEMA_MOD, 'Schema'));
     }
 
     if (comments.description) {
-      decls.push(state.createDecorator(COMMON_MOD, 'Describe', state.fromLiteral({
+      modifiers.push(state.createDecorator(COMMON_MOD, 'Describe', state.fromLiteral({
         title: comments.description
       })));
     }
@@ -58,8 +58,7 @@ export class SchemaTransformer {
 
     return state.factory.updateClassDeclaration(
       node,
-      decls,
-      node.modifiers,
+      modifiers,
       node.name,
       node.typeParameters,
       node.heritageClauses,

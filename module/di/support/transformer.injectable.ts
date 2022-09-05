@@ -74,7 +74,6 @@ export class InjectableTransformer {
         })),
         state.createDecorator(INJECTABLE_MOD, 'InjectArgs', injectArgs)
       ]),
-      node.modifiers,
       node.name,
       node.typeParameters,
       node.heritageClauses,
@@ -95,7 +94,6 @@ export class InjectableTransformer {
       DecoratorUtil.spliceDecorators(node, decl, [
         state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)),
       ], 0),
-      node.modifiers,
       node.name,
       node.questionToken,
       node.type,
@@ -116,7 +114,6 @@ export class InjectableTransformer {
       DecoratorUtil.spliceDecorators(node, decl, [
         state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)),
       ], 0),
-      node.modifiers,
       node.name,
       node.parameters,
       node.body
@@ -160,7 +157,6 @@ export class InjectableTransformer {
       DecoratorUtil.spliceDecorators(node, dec, [
         state.createDecorator(INJECTABLE_MOD, 'InjectableFactory', ...args)
       ]),
-      node.modifiers,
       node.asteriskToken,
       node.name,
       node.questionToken,

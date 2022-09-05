@@ -140,34 +140,34 @@ export class SchemaTransformUtil {
       params.push(state.factory.createObjectLiteralExpression(attrs));
     }
 
-    const newDecs = [
-      ...(node.decorators ?? []).filter(x => x !== existing),
+    const newModifiers = [
+      ...(node.modifiers ?? []).filter(x => x !== existing),
       state.createDecorator(FIELD_MOD, 'Field', ...params)
     ];
 
     if (ts.isPropertyDeclaration(node)) {
       const comments = DocUtil.describeDocs(node);
       if (comments.description) {
-        newDecs.push(state.createDecorator(COMMON_MOD, 'Describe', state.fromLiteral({
+        newModifiers.push(state.createDecorator(COMMON_MOD, 'Describe', state.fromLiteral({
           description: comments.description
         })));
       }
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return state.factory.updatePropertyDeclaration(node as Exclude<typeof node, T>,
-        newDecs, node.modifiers, node.name, node.questionToken, node.type, node.initializer) as T;
+        newModifiers, node.name, node.questionToken, node.type, node.initializer) as T;
     } else if (ts.isParameter(node)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return state.factory.updateParameterDeclaration(node as Exclude<typeof node, T>,
-        newDecs, node.modifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer) as T;
+        newModifiers, node.dotDotDotToken, node.name, node.questionToken, node.type, node.initializer) as T;
     } else if (ts.isGetAccessorDeclaration(node)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return state.factory.updateGetAccessorDeclaration(node as Exclude<typeof node, T>,
-        newDecs, node.modifiers, node.name, node.parameters, node.type, node.body) as T;
+        newModifiers, node.name, node.parameters, node.type, node.body) as T;
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return state.factory.updateSetAccessorDeclaration(node as Exclude<typeof node, T>,
-        newDecs, node.modifiers, node.name, node.parameters, node.body) as T;
+        newModifiers, node.name, node.parameters, node.body) as T;
     }
   }
 

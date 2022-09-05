@@ -24,11 +24,14 @@ export class DecoratorUtil {
   /**
    * Replace or add a decorator to a list of decorators
    */
-  static spliceDecorators(node: ts.Node, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1): ts.Decorator[] {
-    if (idx < 0 && target) {
-      idx = node.decorators?.indexOf(target) ?? -1;
+  static spliceDecorators(node: ts.Node, target: ts.Decorator | undefined, replacements: ts.Decorator[], idx = -1): ts.ModifierLike[] {
+    if (!ts.canHaveDecorators(node)) {
+      return [];
     }
-    const out = (node.decorators ?? []).filter(x => x !== target);
+    if (idx < 0 && target) {
+      idx = node.modifiers?.indexOf(target) ?? -1;
+    }
+    const out = (node.modifiers ?? []).filter(x => x !== target);
     if (idx < 0) {
       out.push(...replacements);
     } else {

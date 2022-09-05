@@ -59,7 +59,6 @@ export class ApplicationTransformer {
     const members = node.members.map(x => ts.isMethodDeclaration(x) && x === runMethod ?
       state.factory.updateMethodDeclaration(
         x,
-        x.decorators,
         x.modifiers,
         x.asteriskToken,
         x.name,
@@ -72,7 +71,6 @@ export class ApplicationTransformer {
 
     return state.factory.updateClassDeclaration(node,
       DecoratorUtil.spliceDecorators(node, dec, [newDec]),
-      node.modifiers,
       node.name,
       node.typeParameters,
       node.heritageClauses,

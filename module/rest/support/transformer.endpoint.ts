@@ -76,12 +76,12 @@ export class RestTransformer {
       node = SchemaTransformUtil.computeField(state, node, config);
     }
 
-    const decs = (node.decorators ?? []).filter(x => x !== pDec);
+    const modifiers = (node.modifiers ?? []).filter(x => x !== pDec);
 
     if (!pDec) { // Handle default, missing
-      decs.push(state.createDecorator(PARAM_DEC_FILE, detectedParamType ?? 'Context', conf));
+      modifiers.push(state.createDecorator(PARAM_DEC_FILE, detectedParamType ?? 'Context', conf));
     } else if (ts.isCallExpression(pDec.expression)) { // if it does exist, update
-      decs.push(state.factory.createDecorator(
+      modifiers.push(state.factory.createDecorator(
         state.factory.createCallExpression(
           pDec.expression.expression,
           [],
@@ -92,8 +92,7 @@ export class RestTransformer {
 
     return state.factory.updateParameterDeclaration(
       node,
-      decs,
-      node.modifiers,
+      modifiers,
       node.dotDotDotToken,
       node.name,
       node.questionToken,
@@ -108,8 +107,8 @@ export class RestTransformer {
   @OnMethod('Endpoint')
   static handleEndpoint(state: TransformerState, node: ts.MethodDeclaration, dec?: DecoratorMeta): ts.MethodDeclaration {
 
-    const decls = node.decorators ?? [];
-    const newDecls = [];
+    const modifiers = (node.modifiers ?? []).slice(0);
+    const newDecls: ts.ModifierLike[] = [];
 
     const comments = DocUtil.describeDocs(node);
 
@@ -146,8 +145,7 @@ export class RestTransformer {
     if (newDecls.length || nParams !== node.parameters) {
       return state.factory.updateMethodDeclaration(
         node,
-        [...decls, ...newDecls],
-        node.modifiers,
+        [...modifiers, ...newDecls],
         node.asteriskToken,
         node.name,
         node.questionToken,
@@ -175,12 +173,11 @@ export class RestTransformer {
       return state.factory.updateClassDeclaration(
         node,
         [
-          ...(node.decorators || []),
+          ...(node.modifiers ?? []),
           state.createDecorator(COMMON_DEC_FILE, 'Describe', state.fromLiteral({
             title: comments.description
           }))
         ],
-        node.modifiers,
         node.name,
         node.typeParameters,
         node.heritageClauses,

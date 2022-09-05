@@ -164,9 +164,9 @@ export class TransformerState implements State {
    * Get list of all #decorators for a node
    */
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
-    return (node.decorators ?? [])
+    return ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? [])
       .map(dec => this.getDecoratorMeta(dec))
-      .filter(x => !!x.ident);
+      .filter(x => !!x.ident) : [];
   }
 
   /**

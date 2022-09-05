@@ -38,7 +38,6 @@ export class CacheTransformer {
       // Return new method calling evict or cache depending on decorator.
       return state.factory.updateMethodDeclaration(
         node,
-        node.decorators,
         node.modifiers,
         node.asteriskToken,
         node.name,

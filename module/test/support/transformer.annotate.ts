@@ -48,7 +48,6 @@ export class AnnotationTransformer {
       const newDec = this.buildAnnotation(state, node, dec, dec.expression);
       return state.factory.updateClassDeclaration(node,
         DecoratorUtil.spliceDecorators(node, dec, [newDec]),
-        node.modifiers,
         node.name,
         node.typeParameters,
         node.heritageClauses,
@@ -66,7 +65,6 @@ export class AnnotationTransformer {
       const newDec = this.buildAnnotation(state, node, dec, dec.expression);
       return state.factory.updateMethodDeclaration(node,
         DecoratorUtil.spliceDecorators(node, dec, [newDec]),
-        node.modifiers,
         node.asteriskToken,
         node.name,
         node.questionToken,
