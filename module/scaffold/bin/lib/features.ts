@@ -15,8 +15,11 @@ export const FEATURES: Feature[] = [
     npm: '@travetto/rest',
     choices: [
       { title: 'Express.js', npm: '@travetto/rest-express' },
+      { title: 'Express.js Lambda', npm: '@travetto/rest-express-lambda' },
       { title: 'KOA', npm: '@travetto/rest-koa' },
+      { title: 'KOA Lambda', npm: '@travetto/rest-koa-lambda' },
       { title: 'Fastify', npm: '@travetto/rest-fastify' },
+      { title: 'Fastify Lambda', npm: '@travetto/rest-fastify-lambda' },
     ],
     addons: [
       { title: 'OpenAPI', npm: '@travetto/openapi' },
@@ -28,7 +31,10 @@ export const FEATURES: Feature[] = [
   {
     title: 'Rest Authentication',
     npm: '@travetto/auth-rest',
-    addons: [{ title: 'Rest Session', npm: '@travetto/rest-session' }]
+    addons: [
+      { title: 'Rest Session', npm: '@travetto/rest-session', addons: [{ npm: '@travetto/auth-rest-session' }] },
+      { title: 'Context', npm: '@travetto/auth-rest-session' }
+    ]
   },
   {
     title: 'Data Modelling',
@@ -36,8 +42,9 @@ export const FEATURES: Feature[] = [
     choices: [
       { title: 'Elasticsearch', npm: '@travetto/model-elasticsearch' },
       { title: 'MongoDB', npm: '@travetto/model-mongo' },
-      { title: 'MySQL', npm: '@travetto/model-sql', addons: [{ npm: 'mysql' }] },
-      { title: 'PostgreSQL', npm: '@travetto/model-sql', addons: [{ npm: 'pg' }] }
+      { title: 'MySQL', npm: '@travetto/model-mysql' },
+      { title: 'PostgreSQL', npm: '@travetto/model-postgres' },
+      { title: 'SQLite', npm: '@travetto/model-sqlite' }
     ],
     default: 'MongoDB'
   },
