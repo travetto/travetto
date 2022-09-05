@@ -5,7 +5,7 @@ import { AsyncContextInterceptor } from '@travetto/rest/src/extension/context';
 import { Principal } from '@travetto/auth';
 import { Request, Response, RestInterceptor } from '@travetto/rest';
 
-import { AuthInterceptor } from '../../interceptor';
+import { AuthInterceptor } from '../interceptor';
 
 const PrincipalⲐ = Symbol.for('@trv:auth/principal');
 
