@@ -18,7 +18,7 @@ export class SendUtil {
   static async getMailService(): Promise<MailService> {
     if (!this.#svc) {
       const { MailService: M } = await import('@travetto/email');
-      const { NodemailerTransport } = await import('@travetto/email/src/extension/nodemailer');
+      const { NodemailerTransport } = await import('@travetto/email-nodemailer');
       const { MailTransportTarget } = await import('@travetto/email/src/internal/types');
       const { DependencyRegistry } = await import('@travetto/di');
 
