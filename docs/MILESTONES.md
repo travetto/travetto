@@ -140,7 +140,7 @@ Release 0.7.x: 2019-07-15 -- BETA --
 * Proper GEO distance/within queries for Mongo and Elasticsearch
    * SQL support is pending
 * Swagger/Client Generation Fixes for ALL endpoints as well as endpoints with path parameters
-   * Switched over to openapitools as swagger-codegen-cli was out of date
+   * Switched over to openapi tools as swagger-codegen-cli was out of date
 * Rewrote all code transformers to follow specific pattern/framework
    * Code visiting is now in a single pass
    * Focuses on methods/fields/classes as specific type of visitation
@@ -177,7 +177,7 @@ Release 1.0.0: 2020-07-04 -- Launch
 * The docker portion of Exec has been moved to the Command module
 * The program execution part of Exec has been integrated into the boot module
 * The Worker module has been simplified, and is only one worker input source now, (though others can be added)
-* The Test  module now boasts a watachable test server, that will listen for changes in test files and automatically re-run them.  This is what is used to power the new plugin implementation.
+* The Test  module now boasts a watchable test server, that will listen for changes in test files and automatically re-run them.  This is what is used to power the new plugin implementation.
 * All ENV variables have been renamed from X to TRV_X  except for DEBUG, TRACE, and NODE_ENV
 * The app module no longer supports isolated sub-apps, everything is always connected.
 * The compiler  now knows about interfaces
@@ -218,7 +218,7 @@ Release 2.0.0: 2021-02-01 -- Model Rewrite
 #### Schema Overhaul
 
 Schema has taken a role as the gatekeeper of all inbound data into the application. Now `application`, `config` and `rest` utilize the schema 
-transformations and validations for entrypoints.  This enables consistent use of schema type information, validators, in all of these modules. 
+transformations and validations for entry points.  This enables consistent use of schema type information, validators, in all of these modules. 
 This also means the error messaging is consistent and behaves  the same way across all of these modules.  
 
 #### Model Overhaul
@@ -228,7 +228,7 @@ This also means the error messaging is consistent and behaves  the same way acro
 * S3, Firebase, Redis, Dynamo were all added as standard model providers
 * All model implementations now have extension testing for the services that they are compatible with
 * `asset-mongo`, and `asset-s3` are gone, and relies on a `model` provider that has streaming
-* `cache/src/extension/{redis,dynamdb}` are gone and are also now model provided
+* `cache/src/extension/{redis,dynamodb}` are gone and are also now model provided
 * `model` is gone and has been replaced by `model-core` and `model-query`.
 * `model-core` is a series of interfaces/contracts, and some minor utility functions. All ownership has been pushed to the various providers.
 * Method names have been standardized as `verbNoun` e.g. `getStream` or `deleteExpired`
@@ -273,7 +273,7 @@ This also means the error messaging is consistent and behaves  the same way acro
 * Converted all available files to `.ts`, only build scripts remain in `.js`
 
 #### Dependency Injection Enhancements
-* Using more interfaces where possible (and less reliance on abstract clasess)
+* Using more interfaces where possible (and less reliance on abstract classes)
    * This allows for better control at the cost of potentially duplicated functionality
 * Support for injecting/registering by interfaces
 * Better default behavior on multiple providers, with local code breaking ties.
@@ -286,18 +286,18 @@ This also means the error messaging is consistent and behaves  the same way acro
 * Alt folders have been removed, and can be emulated by specifying `TRV_SRC_LOCAL` values as needed.
 
 #### Compiler Ownership
-* Reworked @travetto/boot compiler to create clear responsiblity for managing the compiler/transpiler relationsip with node runtime.
+* Reworked @travetto/boot compiler to create clear responsibility for managing the compiler/transpiler relationship with node runtime.
 * Modified @travetto/compiler to no longer register extension directly, but extend functionality defined in boot 
 
 #### Entrypoint Standardization
-* Allow for use of `main` functions to allow for direct invocation of any file, primaryily used for plugins and cli activities
+* Allow for use of `main` functions to allow for direct invocation of any file, primarily used for plugins and cli activities
 * Removed all `plugin-*.js` files as in lieu of exposing a `main` function in the target files.
 * Removed almost all `*.js` files in the test folders, in lieu of exposing `main` functions. Tests no longer auto execute on import.
 
 #### Generator Simplification
 * Moved away from using yeoman due to dependency bloat, and went with a simple `@travetto/cli` based solution. Can be invoked with `npx @travetto/scaffold`
 
-#### Local Dev Overhual
+#### Local Dev Overhaul
 * Now relies on environment variables (`direnv` makes it easier) for augmenting what would have been embedded in the framework.
 * Using tsconfig paths in lieu of symlinks, general development performance, and refactoring are substantially improved.
 * Removed dependency on symlinks
@@ -317,3 +317,51 @@ This also means the error messaging is consistent and behaves  the same way acro
 ### Lerna Removal
 * Removed usage of lerna within framework, handling mono repo tasks manually
 * Reduced hoisted node_module size by 40%
+
+------------------------------------------------------
+Release 2.2.0: 2022-07-25 -- Alignment
+------------------------------------------------------
+As the framework has been moving forward, there has been a drive and goal to align with the growing standards in the TS/JS community. The last version (2.1.0) and the current release, have been about removing technical debt, and aligning with the changing landscape. In this release, the fundamental shift has been towards: 
+
+* Removing exceptions to Typescript strict mode, and relying on strict mode as the standard 
+* Explicit typing of every method, which has had the side effect of changing some return types slightly. 
+* Stricter linting rules to help enforce better practices (e.g. treating type casts as an anti-pattern) 
+* Swapping out use of NodeJS.ReadableStream for stream.Readable. 
+* Various dependency updates 
+## Rest Body Parsing
+Centralized rest body parsing to common, controlled code to help create a consistent experience.  Each framework is still responsible for compressing as the nuances of sending seem to be highly specific to each framework.
+
+## Future Work
+* ESM Support - Many dependencies are starting to move to ESM and this is starting to cause problems.  As soon as the loader proposal for ESM is finalized, this will be the next major release item.
+* TC39 Decorators - The new decorator proposal hit Stage 3, and so this will point to a rewrite of all decorators within the framework, w/o any API changes.  This will have a dependency on Typescript moving in the right direction, but this looks to be a priority for TS4.9.  
+* Heap Snap-shotting - A mechanism for bootstrapping startup overhead.  This would provide a boost to testing startup time, and allow for simplification of "unloading" code, that is primarily used for testing. 
+
+------------------------------------------------------
+Release 3.0.0: 2022-09-01 -- Future facing
+------------------------------------------------------
+
+## Major/Breaking Changes
+### The /extension/ pattern is removed
+All "extension" points have been moved to their own modules, removing support for @file-if and @line-if directives.  These patterns were convenient, but led to more complexity around determining what was in use and what wasn't.  Now package.json is definitive, and it is clear what files/dependencies are needed or not.
+### New Modules (or old but new)
+* Auth-model - Holds model for auth persistence with the model framework
+* Auth-rest-jwt - Support for auth-rest and jwt tokens
+* Auth-rest-session - Support for auth-rest and session integration
+* Auth-rest-context - Support for exposing the auth user into the request context support
+* Auth-passport - Clear support for passport, and handles pulling the correct dependencies
+* Email-nodemailer - Clear support for nodemailer, and handles pulling the correct dependencies
+* Rest-aws-lambda - Extracted all aws lambda code and dependencies, and can be pulled in as needed
+* Rest-express-lambda - rest-express + rest-aws-lambda + necessary deps
+* Rest-koa-lambda - rest-koa + rest-aws-lambda + necessary deps
+* Rest-fastify-lambda - rest-fastify + rest-aws-lambda + necessary deps
+* Schema-faker - Clear support for faker, and handles pulling the correct dependencies
+
+### Rest Interceptors
+Standardizing rest interceptor patterns for enabling/disabling and ability to provide route specific overrides.
+
+### Rest + Context
+The Rest framework now treats context as a given, and can be disabled as needed.
+
+### Typescript 4.8
+The shift to 4.8 brought some unexpected changes that required rewriting how decorators are managed within the framework.  This also bit the eslint team.  Additionally "refinement" on comparing literal objects is now an error which broke some testing patterns.  There had always been a fallback, so no change was needed, but is pointing to providing a clearer pattern of how to use.
+
