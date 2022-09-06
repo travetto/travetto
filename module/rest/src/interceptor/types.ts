@@ -3,14 +3,6 @@ import { Class } from '@travetto/base';
 import { RouteConfig, Request, Response } from '../types';
 import { ControllerConfig } from '../registry/types';
 
-export interface DisabledConfig {
-  disabled?: boolean;
-}
-
-export interface PathAwareConfig {
-  paths?: string[];
-}
-
 export type RouteApplies = (route: RouteConfig, controller?: ControllerConfig) => boolean;
 
 /**

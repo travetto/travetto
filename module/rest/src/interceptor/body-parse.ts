@@ -8,9 +8,9 @@ import { NodeEntityⲐ } from '../internal/symbol';
 import { InterceptorUtil } from '../util/interceptor';
 import { RouteConfig, Request, Response } from '../types';
 
-import { DisabledConfig, PathAwareConfig, RestInterceptor } from './types';
+import { RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
-import { ConfiguredInterceptor } from './decorator';
+import { ManagedConfig, ManagedInterceptor } from './decorator';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
@@ -20,15 +20,7 @@ type ParserType = 'json' | 'text' | 'form';
  * Rest body parse configuration
  */
 @Config('rest.bodyParse')
-export class RestBodyParseConfig implements DisabledConfig, PathAwareConfig {
-  /**
-   * Supported paths
-   */
-  paths: string[] = [];
-  /**
-   * Is interceptor disabled
-   */
-  disabled = false;
+export class RestBodyParseConfig extends ManagedConfig {
   /**
    * Max body size limit
    */
@@ -47,7 +39,7 @@ export class RestBodyParseConfig implements DisabledConfig, PathAwareConfig {
  * Parses the body input content
  */
 @Injectable()
-@ConfiguredInterceptor()
+@ManagedInterceptor()
 export class BodyParseInterceptor implements RestInterceptor {
 
   before = [LoggingInterceptor];

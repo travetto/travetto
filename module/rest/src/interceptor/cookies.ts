@@ -7,24 +7,16 @@ import { Config } from '@travetto/config';
 import { Request, Response } from '../types';
 import { RestConfig } from '../application/config';
 
-import { RestInterceptor, DisabledConfig, PathAwareConfig } from './types';
+import { RestInterceptor } from './types';
 import { CorsInterceptor } from './cors';
 import { GetCacheInterceptor } from './get-cache';
-import { ConfiguredInterceptor } from './decorator';
+import { ManagedConfig, ManagedInterceptor } from './decorator';
 
 /**
  * Rest cookie configuration
  */
 @Config('rest.cookie')
-export class RestCookieConfig implements DisabledConfig, PathAwareConfig {
-  /**
-   * Is interceptor disabled
-   */
-  disabled = false;
-  /**
-   * Path specific overrides
-   */
-  paths: string[] = [];
+export class RestCookieConfig extends ManagedConfig {
   /**
    * Are they signed
    */
@@ -55,7 +47,7 @@ export class RestCookieConfig implements DisabledConfig, PathAwareConfig {
  * Loads cookies from the request, verifies, exposes, and then signs and sets
  */
 @Injectable()
-@ConfiguredInterceptor()
+@ManagedInterceptor()
 export class CookiesInterceptor implements RestInterceptor {
 
   after = [CorsInterceptor];
