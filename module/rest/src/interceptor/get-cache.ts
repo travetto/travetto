@@ -3,27 +3,18 @@ import { Config } from '@travetto/config';
 
 import { RouteConfig, Request, Response } from '../types';
 
-import { RestInterceptor, DisabledConfig, PathAwareConfig } from './types';
+import { RestInterceptor } from './types';
 import { CorsInterceptor } from './cors';
-import { ConfiguredInterceptor } from './decorator';
+import { ManagedConfig, ManagedInterceptor } from './decorator';
 
 @Config('rest.getCache')
-class RestGetCacheConfig implements DisabledConfig, PathAwareConfig {
-  /**
-   * Is interceptor disabled
-   */
-  disabled = false;
-  /**
-   * Path specific overrides
-   */
-  paths: string[] = [];
-}
+export class RestGetCacheConfig extends ManagedConfig { }
 
 /**
  * Determines if we should cache all get requests
  */
 @Injectable()
-@ConfiguredInterceptor()
+@ManagedInterceptor()
 export class GetCacheInterceptor implements RestInterceptor {
 
   after = [CorsInterceptor];

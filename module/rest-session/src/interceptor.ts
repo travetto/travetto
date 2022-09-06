@@ -1,8 +1,12 @@
 import { Class } from '@travetto/base';
+import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
-import { Request, Response, CookiesInterceptor, RestInterceptor } from '@travetto/rest';
+import { Request, Response, CookiesInterceptor, RestInterceptor, ManagedConfig, ManagedInterceptor } from '@travetto/rest';
 
 import { SessionService } from './service';
+
+@Config('rest.session')
+export class RestSessionConfig extends ManagedConfig { }
 
 /**
  * Loads session, and provides ability to create session as needed.
@@ -13,6 +17,7 @@ import { SessionService } from './service';
  * NOTE: This is asymmetric with the writing process due to rest-auth's behavior.
  */
 @Injectable()
+@ManagedInterceptor()
 export class SessionReadInterceptor implements RestInterceptor {
 
   after: Class<RestInterceptor>[] = [
@@ -21,6 +26,9 @@ export class SessionReadInterceptor implements RestInterceptor {
 
   @Inject()
   service: SessionService;
+
+  @Inject()
+  config: RestSessionConfig;
 
   async postConstruct(): Promise<void> {
     try {
@@ -44,6 +52,7 @@ export class SessionReadInterceptor implements RestInterceptor {
  *
  */
 @Injectable()
+@ManagedInterceptor()
 export class SessionWriteInterceptor implements RestInterceptor {
 
   after = [CookiesInterceptor];
@@ -51,6 +60,9 @@ export class SessionWriteInterceptor implements RestInterceptor {
 
   @Inject()
   service: SessionService;
+
+  @Inject()
+  config: RestSessionConfig;
 
   async postConstruct(): Promise<void> {
     try {

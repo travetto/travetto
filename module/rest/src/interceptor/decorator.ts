@@ -1,15 +1,29 @@
 import { Class } from '@travetto/base';
+import { Schema } from '@travetto/schema';
 
 import { InterceptorUtil } from '../util/interceptor';
-import { DisabledConfig, PathAwareConfig, RouteApplies } from './types';
+import { RouteApplies } from './types';
 
 type InterceptorType = {
   applies?: RouteApplies;
   postConstruct?(): void | Promise<void>;
-  config: DisabledConfig & PathAwareConfig;
+  config: ManagedConfig;
 };
 
-export function ConfiguredInterceptor() {
+@Schema()
+export abstract class ManagedConfig {
+  /**
+   * Is interceptor disabled
+   */
+  disabled = false;
+
+  /**
+   * Path specific overrides
+   */
+  paths: string[] = [];
+}
+
+export function ManagedInterceptor() {
   return <T extends InterceptorType>(tgt: Class<T>): void => {
     const pc = tgt.prototype.postConstruct;
     const ap = tgt.prototype.applies;

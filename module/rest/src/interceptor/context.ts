@@ -4,27 +4,18 @@ import { AsyncContext } from '@travetto/context';
 
 import { Request, Response } from '../types';
 
-import { RestInterceptor, DisabledConfig, PathAwareConfig } from './types';
+import { RestInterceptor } from './types';
 import { GetCacheInterceptor } from './get-cache';
-import { ConfiguredInterceptor } from './decorator';
+import { ManagedConfig, ManagedInterceptor } from './decorator';
 
 @Config('rest.context')
-class RestAsyncContextConfig implements DisabledConfig, PathAwareConfig {
-  /**
-   * Is interceptor disabled
-   */
-  disabled = false;
-  /**
-   * Path specific overrides
-   */
-  paths: string[] = [];
-}
+class RestAsyncContextConfig extends ManagedConfig { }
 
 /**
  * Enables access to contextual data when running in a rest application
  */
 @Injectable()
-@ConfiguredInterceptor()
+@ManagedInterceptor()
 export class AsyncContextInterceptor implements RestInterceptor {
 
   after = [GetCacheInterceptor];

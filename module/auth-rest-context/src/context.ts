@@ -1,10 +1,14 @@
 import { Inject, Injectable } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 import { Principal } from '@travetto/auth';
-import { Request, Response, RestInterceptor, AsyncContextInterceptor } from '@travetto/rest';
+import { Request, Response, RestInterceptor, AsyncContextInterceptor, ManagedConfig, ManagedInterceptor } from '@travetto/rest';
 import { AuthInterceptor } from '@travetto/auth-rest';
+import { Config } from '@travetto/config';
 
 const PrincipalⲐ = Symbol.for('@trv:auth/principal');
+
+@Config('rest.authContext')
+export class RestAuthContextConfig extends ManagedConfig { }
 
 /**
  * Provides global context to accessing principal
@@ -33,10 +37,14 @@ export class AuthContextService {
  * user principal through async calls.
  */
 @Injectable()
+@ManagedInterceptor()
 export class AuthContextInterceptor implements RestInterceptor {
 
   after = [AsyncContextInterceptor];
   before = [AuthInterceptor];
+
+  @Inject()
+  config: RestAuthContextConfig;
 
   @Inject()
   svc: AuthContextService;

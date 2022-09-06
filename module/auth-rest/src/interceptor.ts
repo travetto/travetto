@@ -1,8 +1,12 @@
-import { RestInterceptor, Request, Response } from '@travetto/rest';
+import { RestInterceptor, Request, Response, ManagedInterceptor, ManagedConfig } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Principal } from '@travetto/auth';
+import { Config } from '@travetto/config';
 
 import { PrincipalEncoder } from './encoder';
+
+@Config('rest.auth')
+export class RestAuthConfig extends ManagedConfig { }
 
 /**
  * Authentication interceptor
@@ -11,10 +15,14 @@ import { PrincipalEncoder } from './encoder';
  * - Connects the principal to the request
  */
 @Injectable()
+@ManagedInterceptor()
 export class AuthInterceptor implements RestInterceptor {
 
   @Inject()
   encoder: PrincipalEncoder;
+
+  @Inject()
+  config: RestAuthConfig;
 
   async intercept(req: Request, res: Response, next: () => Promise<unknown>): Promise<unknown> {
     let og: Principal | undefined;

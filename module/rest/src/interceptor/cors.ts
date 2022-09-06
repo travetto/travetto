@@ -3,23 +3,15 @@ import { Injectable, Inject } from '@travetto/di';
 
 import { Request, Response } from '../types';
 
-import { RestInterceptor, DisabledConfig, PathAwareConfig } from './types';
+import { RestInterceptor } from './types';
 import { SerializeInterceptor } from './serialize';
-import { ConfiguredInterceptor } from './decorator';
+import { ManagedConfig, ManagedInterceptor } from './decorator';
 
 /**
  * Rest cors support
  */
 @Config('rest.cors')
-export class RestCorsConfig implements DisabledConfig, PathAwareConfig {
-  /**
-   * Is interceptor disabled
-   */
-  disabled: boolean = true;
-  /**
-   * Path overrides
-   */
-  paths: string[] = [];
+export class RestCorsConfig extends ManagedConfig {
   /**
    * Allowed origins
    */
@@ -42,7 +34,7 @@ export class RestCorsConfig implements DisabledConfig, PathAwareConfig {
  * Interceptor that will provide cors support across all requests
  */
 @Injectable()
-@ConfiguredInterceptor()
+@ManagedInterceptor()
 export class CorsInterceptor implements RestInterceptor {
 
   @Inject()

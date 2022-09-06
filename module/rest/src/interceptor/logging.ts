@@ -3,29 +3,20 @@ import { Config } from '@travetto/config';
 
 import { Request, Response } from '../types';
 
-import { DisabledConfig, PathAwareConfig, RestInterceptor } from './types';
-import { ConfiguredInterceptor } from './decorator';
+import { RestInterceptor } from './types';
+import { ManagedConfig, ManagedInterceptor } from './decorator';
 
 /**
  * Rest logging configuration
  */
 @Config('rest.logRoutes')
-export class RestLogRoutesConfig implements DisabledConfig, PathAwareConfig {
-  /**
-   * Is interceptor disabled
-   */
-  disabled = false;
-  /**
-   * Path specific overrides
-   */
-  paths: string[] = [];
-}
+export class RestLogRoutesConfig extends ManagedConfig { }
 
 /**
  * Logging interceptor, to show activity for all requests
  */
 @Injectable()
-@ConfiguredInterceptor()
+@ManagedInterceptor()
 export class LoggingInterceptor implements RestInterceptor {
 
   @Inject()
