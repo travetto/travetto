@@ -1,5 +1,5 @@
-import { ControllerConfig } from '../registry/types';
-import { Request, RouteConfig } from '../types';
+import { RouteApplies } from '../interceptor/types';
+import { Request } from '../types';
 
 type ContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 const ParsedType = Symbol.for('@trv:rest/content-type');
@@ -33,11 +33,11 @@ export class InterceptorUtil {
   /**
    * Matches a given route against a list of route checks
    */
-  static matchRoute(rules: RouteRule[], route: RouteConfig, controller: Partial<ControllerConfig>): boolean {
+  static matchRoute(rules: RouteRule[], route: Parameters<RouteApplies>[0], controller: Parameters<RouteApplies>[1]): boolean {
     if (rules.length) {
       for (const { base, sub, positive } of rules) {
         let match = false;
-        if (base === (controller.basePath ?? '').replace(/^\/+/, '') || base === '*') {
+        if (base === (controller?.basePath ?? '').replace(/^\/+/, '') || base === '*') {
           if (!sub || sub === '*') {
             match = true;
           } else if (typeof route.path === 'string') {
@@ -56,7 +56,7 @@ export class InterceptorUtil {
    * Create a predicate function that will check a given route/controller setup against an allow/deny list.
    *   It is intended to be used during controller setup to determine an interceptors inclusion in the exposed endpoint.
    */
-  static buildRouteChecker(allowDeny: string[]): (route: RouteConfig, controller: Partial<ControllerConfig>) => boolean {
+  static buildRouteChecker(allowDeny: string[]): RouteApplies {
     return this.matchRoute.bind(this, this.getRules(allowDeny));
   }
 

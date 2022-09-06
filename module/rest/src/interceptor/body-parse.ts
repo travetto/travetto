@@ -4,13 +4,13 @@ import * as rawBody from 'raw-body';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { RouteConfig, Request, Response } from '../types';
-import { RestInterceptor } from './types';
-import { LoggingInterceptor } from './logging';
-
 import { NodeEntityⲐ } from '../internal/symbol';
-import { ControllerConfig } from '../registry/types';
 import { InterceptorUtil } from '../util/interceptor';
+import { RouteConfig, Request, Response } from '../types';
+
+import { DisabledConfig, PathAwareConfig, RestInterceptor } from './types';
+import { LoggingInterceptor } from './logging';
+import { ConfiguredInterceptor } from './decorator';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
@@ -20,29 +20,40 @@ type ParserType = 'json' | 'text' | 'form';
  * Rest body parse configuration
  */
 @Config('rest.bodyParse')
-export class RestBodyParseConfig {
-  limit: string = '100kb';
-  routeLimits: Record<string, string> = {};
-  parsingTypes: Record<string, ParserType> = {};
+export class RestBodyParseConfig implements DisabledConfig, PathAwareConfig {
+  /**
+   * Supported paths
+   */
   paths: string[] = [];
+  /**
+   * Is interceptor disabled
+   */
+  disabled = false;
+  /**
+   * Max body size limit
+   */
+  limit: string = '100kb';
+  /**
+   * Limits per route
+   */
+  routeLimits: Record<string, string> = {};
+  /**
+   * How to interpret different content types
+   */
+  parsingTypes: Record<string, ParserType> = {};
 }
 
 /**
  * Parses the body input content
  */
 @Injectable()
+@ConfiguredInterceptor()
 export class BodyParseInterceptor implements RestInterceptor {
 
   before = [LoggingInterceptor];
 
   @Inject()
   config: RestBodyParseConfig;
-
-  check: (route: RouteConfig, controller: ControllerConfig) => boolean;
-
-  postConstruct(): void {
-    this.check = InterceptorUtil.buildRouteChecker(this.config.paths);
-  }
 
   async read(req: Request): Promise<{ text: string, raw: Buffer }> {
     const cfg = InterceptorUtil.getContentType(req);
@@ -77,8 +88,8 @@ export class BodyParseInterceptor implements RestInterceptor {
     }
   }
 
-  applies(route: RouteConfig, controller: ControllerConfig): boolean {
-    return (route.method === 'all' || METHODS_WITH_BODIES.has(route.method)) && this.check(route, controller);
+  applies(route: RouteConfig): boolean {
+    return route.method === 'all' || METHODS_WITH_BODIES.has(route.method);
   }
 
   async intercept(req: Request, res: Response): Promise<unknown> {
