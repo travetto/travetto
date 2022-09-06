@@ -1,7 +1,7 @@
 {
   "name": "@travetto/log",
   "displayName": "Logging",
-  "version": "3.0.0-rc.0",
+  "version": "3.0.0-rc.1",
   "description": "Logging framework that integrates at the console.log level.",
   "keywords": [
     "typescript",
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.0",
-    "@travetto/transformer": "^3.0.0-rc.0"
+    "@travetto/transformer": "^3.0.0-rc.1"
   },
   "publishConfig": {
     "access": "public"

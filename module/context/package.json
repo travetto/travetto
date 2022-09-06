@@ -1,7 +1,7 @@
 {
   "name": "@travetto/context",
   "displayName": "Async Context",
-  "version": "3.0.0-rc.0",
+  "version": "3.0.0-rc.1",
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "keywords": [
     "async-hooks",
@@ -27,7 +27,7 @@
     "directory": "module/context"
   },
   "dependencies": {
-    "@travetto/di": "^3.0.0-rc.0"
+    "@travetto/di": "^3.0.0-rc.1"
   },
   "publishConfig": {
     "access": "public"

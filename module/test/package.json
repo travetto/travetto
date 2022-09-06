@@ -1,7 +1,7 @@
 {
   "name": "@travetto/test",
   "displayName": "Testing",
-  "version": "3.0.0-rc.0",
+  "version": "3.0.0-rc.1",
   "description": "Declarative test framework",
   "keywords": [
     "unit-testing",
@@ -30,8 +30,8 @@
   },
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.0",
-    "@travetto/transformer": "^3.0.0-rc.0",
-    "@travetto/registry": "^3.0.0-rc.0",
+    "@travetto/transformer": "^3.0.0-rc.1",
+    "@travetto/registry": "^3.0.0-rc.1",
     "@travetto/watch": "^3.0.0-rc.0",
     "@travetto/worker": "^3.0.0-rc.0",
     "@travetto/yaml": "^3.0.0-rc.0"

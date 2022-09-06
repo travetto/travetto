@@ -1,7 +1,7 @@
 {
   "name": "@travetto/schema",
   "displayName": "Schema",
-  "version": "3.0.0-rc.0",
+  "version": "3.0.0-rc.1",
   "description": "Data type registry for runtime validation, reflection and binding. ",
   "keywords": [
     "schema",
@@ -28,8 +28,8 @@
     "directory": "module/schema"
   },
   "dependencies": {
-    "@travetto/registry": "^3.0.0-rc.0",
-    "@travetto/transformer": "^3.0.0-rc.0"
+    "@travetto/registry": "^3.0.0-rc.1",
+    "@travetto/transformer": "^3.0.0-rc.1"
   },
   "publishConfig": {
     "access": "public"
