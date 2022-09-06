@@ -71,12 +71,16 @@ export class OpenApiService {
    * Persist to local file
    */
   async persist(): Promise<void> {
-    console.debug('Generating OpenAPI Spec', { output: this.apiSpecConfig.output });
+    try {
+      console.debug('Generating OpenAPI Spec', { output: this.apiSpecConfig.output });
 
-    const output = this.apiSpecConfig.output.endsWith('.json') ?
-      JSON.stringify(this.spec, undefined, 2) :
-      YamlUtil.serialize(this.spec);
+      const output = this.apiSpecConfig.output.endsWith('.json') ?
+        JSON.stringify(this.spec, undefined, 2) :
+        YamlUtil.serialize(this.spec);
 
-    await fs.writeFile(this.apiSpecConfig.output, output);
+      await fs.writeFile(this.apiSpecConfig.output, output);
+    } catch (err) {
+      console.error('Unable to persist openapi spec', err);
+    }
   }
 }
