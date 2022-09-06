@@ -40,6 +40,7 @@ export class VisitorFactory<S extends State = State> {
   #transformers = new Map<TransformerType, TransformerSet<S>>();
   #logTarget: string;
   #getState: (context: ts.TransformationContext, src: ts.SourceFile) => S;
+  #logger: Console | undefined;
 
   constructor(
     getState: (context: ts.TransformationContext, src: ts.SourceFile) => S,
@@ -78,17 +79,21 @@ export class VisitorFactory<S extends State = State> {
     }
   }
 
+  get logger(): Console {
+    this.#logger ??= new console.Console({
+      stdout: createWriteStream(AppCache.toEntryName(this.#logTarget), { flags: 'a' }),
+      inspectOptions: { depth: 4 },
+    });
+    return this.#logger;
+  }
+
   /**
    * Produce a visitor for a given a file
    */
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
-        const c = new console.Console({
-          stdout: createWriteStream(AppCache.toEntryName(this.#logTarget), { flags: 'a' }),
-          inspectOptions: { depth: 4 },
-        });
-
+        const c = this.logger;
         ConsoleManager.set({
           onLog: (level, ctx, args) => c[level](level, ctx, ...LogUtil.collapseNodes(args))
         });
@@ -120,7 +125,7 @@ export class VisitorFactory<S extends State = State> {
         if (!(err instanceof Error)) {
           throw err;
         }
-        console.error('Failed transforming', { error: err, file: file.fileName });
+        console.error('Failed transforming', { error: `${err.message}\n${err.stack}`, file: file.fileName });
         const out = new Error(`Failed transforming: ${file.fileName}: ${err.message}`);
         out.stack = err.stack;
         throw out;
