@@ -3,6 +3,16 @@ import { Class } from '@travetto/base';
 import { RouteConfig, Request, Response } from '../types';
 import { ControllerConfig } from '../registry/types';
 
+export interface DisabledConfig {
+  disabled?: boolean;
+}
+
+export interface PathAwareConfig {
+  paths?: string[];
+}
+
+export type RouteApplies = (route: RouteConfig, controller?: ControllerConfig) => boolean;
+
 /**
  * Basic interceptor structure
  *
@@ -24,7 +34,7 @@ export interface RestInterceptor {
    * @param route The route to check
    * @param controller The controller the route belongs to
    */
-  applies?(route: RouteConfig, controller: Partial<ControllerConfig>): boolean;
+  applies?: RouteApplies;
 
   /**
    * Actually handle the request, response when applicable

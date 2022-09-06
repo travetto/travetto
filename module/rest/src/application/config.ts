@@ -21,10 +21,6 @@ export class RestConfig {
    */
   port = 3000;
   /**
-   * Disable cache on all gets, unless overridden
-   */
-  disableGetCache = true;
-  /**
    * Should we trust the proxy requests implicitly
    */
   trustProxy = false;

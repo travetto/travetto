@@ -1,19 +1,22 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { Request, Response, RouteConfig } from '../types';
-import { ControllerConfig } from '../registry/types';
-import { InterceptorUtil } from '../util/interceptor';
+import { Request, Response } from '../types';
 
-import { RestInterceptor } from './types';
+import { DisabledConfig, PathAwareConfig, RestInterceptor } from './types';
+import { ConfiguredInterceptor } from './decorator';
 
 /**
  * Rest logging configuration
  */
 @Config('rest.logRoutes')
-export class RestLogRoutesConfig {
+export class RestLogRoutesConfig implements DisabledConfig, PathAwareConfig {
   /**
-   * List of routes to enforce
+   * Is interceptor disabled
+   */
+  disabled = false;
+  /**
+   * Path specific overrides
    */
   paths: string[] = [];
 }
@@ -22,21 +25,11 @@ export class RestLogRoutesConfig {
  * Logging interceptor, to show activity for all requests
  */
 @Injectable()
+@ConfiguredInterceptor()
 export class LoggingInterceptor implements RestInterceptor {
 
   @Inject()
-  logConfig: RestLogRoutesConfig;
-
-
-  check: (route: RouteConfig, controller: Partial<ControllerConfig>) => boolean;
-
-  postConstruct(): void {
-    this.check = InterceptorUtil.buildRouteChecker(this.logConfig.paths);
-  }
-
-  applies(route: RouteConfig, controller: Partial<ControllerConfig>): boolean {
-    return this.check(route, controller);
-  }
+  config: RestLogRoutesConfig;
 
   async intercept(req: Request, res: Response, next: () => Promise<void | unknown>): Promise<unknown> {
     const start = Date.now();

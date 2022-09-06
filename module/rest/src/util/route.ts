@@ -38,7 +38,7 @@ export class RouteUtil {
   static createRouteHandler(
     interceptors: RestInterceptor[],
     route: RouteConfig | EndpointConfig,
-    router: Partial<ControllerConfig> = {}): Filter {
+    router?: ControllerConfig): Filter {
 
     const handlerBound = async (req: Request, res: Response): Promise<unknown> => {
       if ('class' in route) {
@@ -50,13 +50,13 @@ export class RouteUtil {
     };
 
     const filters: Filter[] = [
-      ...(router.filters ?? []).map(x => x.bind(router.instance)),
+      ...(router?.filters ?? []).map(x => x.bind(router?.instance)),
       ...('filters' in route ? route.filters : []).map(x => x.bind(route.instance)),
       ...(route.params.filter(x => x.resolve).map(x => x.resolve!))
     ];
 
     const headers = {
-      ...(router.headers ?? {}),
+      ...(router?.headers ?? {}),
       ...('headers' in route ? route.headers : {})
     };
 

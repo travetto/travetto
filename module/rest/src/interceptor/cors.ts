@@ -1,19 +1,25 @@
 import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
 
-import { Request, Response, RouteConfig } from '../types';
-import { RestInterceptor } from './types';
+import { Request, Response } from '../types';
+
+import { RestInterceptor, DisabledConfig, PathAwareConfig } from './types';
 import { SerializeInterceptor } from './serialize';
+import { ConfiguredInterceptor } from './decorator';
 
 /**
  * Rest cors support
  */
 @Config('rest.cors')
-export class RestCorsConfig {
+export class RestCorsConfig implements DisabledConfig, PathAwareConfig {
   /**
-   * Is cors active
+   * Is interceptor disabled
    */
-  active: boolean = false;
+  disabled: boolean = true;
+  /**
+   * Path overrides
+   */
+  paths: string[] = [];
   /**
    * Allowed origins
    */
@@ -36,10 +42,11 @@ export class RestCorsConfig {
  * Interceptor that will provide cors support across all requests
  */
 @Injectable()
+@ConfiguredInterceptor()
 export class CorsInterceptor implements RestInterceptor {
 
   @Inject()
-  corsConfig: RestCorsConfig;
+  config: RestCorsConfig;
 
   origins: Set<string>;
   methods: string;
@@ -49,14 +56,10 @@ export class CorsInterceptor implements RestInterceptor {
   after = [SerializeInterceptor];
 
   postConstruct(): void {
-    this.origins = new Set(this.corsConfig.origins ?? []);
-    this.methods = (this.corsConfig.methods ?? ['PUT', 'POST', 'GET', 'DELETE', 'PATCH', 'HEAD', 'TRACE']).join(',');
-    this.headers = (this.corsConfig.headers ?? []).join(',');
-    this.credentials = !!this.corsConfig.credentials;
-  }
-
-  applies(route: RouteConfig): boolean {
-    return this.corsConfig && this.corsConfig.active;
+    this.origins = new Set(this.config.origins ?? []);
+    this.methods = (this.config.methods ?? ['PUT', 'POST', 'GET', 'DELETE', 'PATCH', 'HEAD', 'TRACE']).join(',');
+    this.headers = (this.config.headers ?? []).join(',');
+    this.credentials = !!this.config.credentials;
   }
 
   intercept(req: Request, res: Response): void {

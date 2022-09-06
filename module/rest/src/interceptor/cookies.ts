@@ -4,21 +4,27 @@ import { ServerResponse, IncomingMessage } from 'http';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { RouteConfig, Request, Response } from '../types';
+import { Request, Response } from '../types';
 import { RestConfig } from '../application/config';
-import { RestInterceptor } from './types';
+
+import { RestInterceptor, DisabledConfig, PathAwareConfig } from './types';
 import { CorsInterceptor } from './cors';
 import { GetCacheInterceptor } from './get-cache';
+import { ConfiguredInterceptor } from './decorator';
 
 /**
  * Rest cookie configuration
  */
 @Config('rest.cookie')
-export class RestCookieConfig {
+export class RestCookieConfig implements DisabledConfig, PathAwareConfig {
   /**
-   * Are cookies supported
+   * Is interceptor disabled
    */
-  active = true;
+  disabled = false;
+  /**
+   * Path specific overrides
+   */
+  paths: string[] = [];
   /**
    * Are they signed
    */
@@ -49,26 +55,27 @@ export class RestCookieConfig {
  * Loads cookies from the request, verifies, exposes, and then signs and sets
  */
 @Injectable()
+@ConfiguredInterceptor()
 export class CookiesInterceptor implements RestInterceptor {
 
   after = [CorsInterceptor];
   before = [GetCacheInterceptor];
 
   @Inject()
-  cookieConfig: RestCookieConfig;
+  config: RestCookieConfig;
 
   @Inject()
   restConfig: RestConfig;
 
   postConstruct(): void {
-    const self = this.cookieConfig;
+    const self = this.config;
 
-    if (this.cookieConfig.secure === undefined) {
-      this.cookieConfig.secure = this.restConfig.ssl.active;
+    if (this.config.secure === undefined) {
+      this.config.secure = this.restConfig.ssl.active;
     }
 
-    if (this.cookieConfig.domain === undefined) {
-      this.cookieConfig.domain = this.restConfig.hostname;
+    if (this.config.domain === undefined) {
+      this.config.domain = this.restConfig.hostname;
     }
 
     // Patch all cookies to default to the cookie values
@@ -86,10 +93,6 @@ export class CookiesInterceptor implements RestInterceptor {
     };
   }
 
-  applies(route: RouteConfig): boolean {
-    return this.cookieConfig.active;
-  }
-
   intercept(req: Request, res: Response): void {
     // Enforce this is set
     req.cookies = res.cookies = new cookies(
@@ -97,7 +100,7 @@ export class CookiesInterceptor implements RestInterceptor {
       req as unknown as IncomingMessage,
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       res as unknown as ServerResponse,
-      this.cookieConfig
+      this.config
     );
   }
 }
