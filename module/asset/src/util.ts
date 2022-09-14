@@ -20,11 +20,13 @@ export class AssetUtil {
     const hasher = crypto.createHash('sha256').setEncoding('hex');
     const str = createReadStream(pth);
     const hashStream = str.pipe(hasher);
-
-    await new Promise<void>((res, rej) => {
-      hashStream.on('finish', e => e ? rej(e) : res());
-    });
-    return hasher.read().toString();
+    try {
+      return await new Promise<string>((res, rej) => {
+        hashStream.on('finish', e => e ? rej(e) : res(hasher.read().toString()));
+      });
+    } finally {
+      try { str.close(); } catch { }
+    }
   }
 
   /**
@@ -32,9 +34,13 @@ export class AssetUtil {
    */
   static async readChunk(filePath: string, bytes: number): Promise<Buffer> {
     const fd = await fs.open(filePath, 'r');
-    const buffer = Buffer.alloc(bytes);
-    await fd.read(buffer, 0, bytes, 0);
-    return buffer;
+    try {
+      const buffer = Buffer.alloc(bytes);
+      await fd.read(buffer, 0, bytes, 0);
+      return buffer;
+    } finally {
+      try { fd.close(); } catch { }
+    }
   }
 
   /**
@@ -67,7 +73,7 @@ export class AssetUtil {
    * Read content type from location on disk
    */
   static async resolveFileType(pth: string): Promise<string> {
-    let contentType: string = path.extname(pth);
+    let contentType = path.extname(pth);
     const detected = await this.detectFileType(pth);
 
     if (detected) {
@@ -91,7 +97,7 @@ export class AssetUtil {
       size,
       filename: remote,
       contentType,
-      stream: createReadStream(file),
+      stream: () => createReadStream(file),
       hash
     };
   }
