@@ -1,33 +1,28 @@
 import { Config } from '@travetto/config';
+import { ManagedInterceptorConfig } from '@travetto/rest';
 import { Ignore } from '@travetto/schema';
 
 /**
  * Config for assets within @travetto/rest
  */
 @Config('rest.asset')
-export class RestAssetConfig {
+export class RestAssetConfig extends ManagedInterceptorConfig {
   /**
    * Max file size in bytes
    */
   maxSize = 10 * 1024 * 1024;
   /**
-   * Comma separated list of types to allow
+   * List of types to allow/exclude
    */
-  allowedTypes: string = '';
+  types: string[] = [];
   /**
-   * Comma separated list of types to exclude
+   * Delete files after use
    */
-  excludedTypes: string = '';
+  deleteFiles: boolean = true;
 
   @Ignore()
-  allowedTypesList: string[];
-  @Ignore()
-  excludedTypesList: string[];
+  files?: Record<string, Partial<RestAssetConfig>>;
 
-  postConstruct(): void {
-    this.allowedTypesList = (typeof this.allowedTypes === 'string' ?
-      this.allowedTypes.trim().split(/\s*,\s*/).filter(x => !!x) : this.allowedTypes) ?? [];
-    this.excludedTypesList = (typeof this.excludedTypes === 'string' ?
-      this.excludedTypes.trim().split(/\s*,\s*/).filter(x => !!x) : this.excludedTypes) ?? [];
-  }
+  @Ignore()
+  matcher: (contentType: string) => boolean;
 }

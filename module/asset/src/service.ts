@@ -68,7 +68,7 @@ export class AssetService {
       }
     }
 
-    await this.#store.upsertStream(location, stream, asset);
+    await this.#store.upsertStream(location, stream(), asset);
     return location;
   }
 
@@ -82,6 +82,6 @@ export class AssetService {
   async get(location: string): Promise<Asset> {
     const stream = await this.#store.getStream(location);
     const info = await this.describe(location);
-    return { stream, ...info };
+    return { stream: () => stream, ...info };
   }
 }

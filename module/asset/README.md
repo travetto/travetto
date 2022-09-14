@@ -113,7 +113,7 @@ import { StreamMeta } from '@travetto/model';
  * @concrete ./internal/types:AssetImpl
  */
 export interface Asset extends StreamMeta {
-  stream: Readable;
+  stream(): Readable;
 }
 ```
 

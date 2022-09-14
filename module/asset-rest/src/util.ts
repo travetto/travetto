@@ -1,121 +1,87 @@
 import * as path from 'path';
+import { createWriteStream } from 'fs';
 import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as stream from 'stream';
-import * as busboy from 'busboy';
 
 import { Renderable, Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
-import { AppError } from '@travetto/base';
 import { PathUtil, StreamUtil } from '@travetto/boot';
-import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
+import { AppError } from '@travetto/base';
 
-import { RestAssetConfig } from './config';
+export type WithCleanup<T> = [T, () => Promise<unknown | void> | void | unknown];
 
-type AssetMap = Record<string, Asset>;
+const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 
 /**
  * General support for handling file uploads/downloads
  */
 export class AssetRestUtil {
 
-  /**
-   * Create a mime type validator
-   */
-  static mimeValidator(allowedTypes: string[] = [], excludedTypes: string[] = []): <T extends { contentType: string }>(asset: T) => T {
+  static async #createTempFileWithCleanup(filename: string): Promise<WithCleanup<string>> {
+    const uniqueDir = PathUtil.resolveUnix(os.tmpdir(), `upload_${Math.trunc(Date.now() / (1000 * 60))}_${Math.trunc(Math.random() * 100000000).toString(36)}`);
+    await fs.mkdir(uniqueDir, { recursive: true });
+    const uniqueLocal = PathUtil.resolveUnix(uniqueDir, path.basename(filename));
 
-    const cached = Object.fromEntries(
-      [...allowedTypes, ...excludedTypes].map(mime =>
-        [mime, (mime.endsWith('/*') || !mime.includes('/')) ? new RegExp(`^${mime.replace(/[\/][*]$/, '')}\/.*`) : new RegExp(`^${mime}$`)]
-      )
-    );
-
-    return <T extends { contentType: string }>(asset: T) => {
-      const matchPositive = !!allowedTypes.find(t => cached[t].test(asset.contentType));
-      const matchNegative = !!excludedTypes.find(t => cached[t].test(asset.contentType));
-
-      if (
-        (excludedTypes.length && matchNegative) ||
-        (allowedTypes.length && !matchPositive)) {
-        throw new AppError(`Content type not allowed: ${asset.contentType}`, 'data');
-      }
-      return asset;
+    const cleanup = async (): Promise<void> => {
+      try { await fs.unlink(uniqueLocal); } catch { }
+      try { await fs.rmdir(uniqueDir); } catch { }
     };
+
+    return [uniqueLocal, cleanup];
+  }
+
+  static async #streamToFileWithMaxSize(inputStream: stream.Readable, outputFile: string, maxSize?: number): Promise<void> {
+    if (!maxSize || maxSize < 0) {
+      return StreamUtil.writeToFile(inputStream, outputFile);
+    }
+
+    let read = 0;
+    await new Promise((res, rej) => {
+      inputStream
+        .pipe(new stream.Transform({
+          transform(chunk, encoding, callback): void {
+            read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : 0;
+            if (read >= maxSize) {
+              callback(new AppError('File size exceeded', 'data'));
+            } else {
+              callback(null, chunk);
+            }
+          },
+        }))
+        .on('error', rej)
+        .pipe(createWriteStream(outputFile, { autoClose: true }))
+        .on('finish', res)
+        .on('error', rej);
+    });
   }
 
   /**
-   * Stream file to disk, and verify types in the process.  Produce an asset as the output
+   * Write data to file, enforcing max size if needed
+   * @param data
+   * @param filename
+   * @param maxSize
    */
-  static async toLocalAsset(data: stream.Readable | Buffer, filename: string): Promise<Asset> {
-    const uniqueDir = PathUtil.resolveUnix(os.tmpdir(), `rnd.${Math.random()}.${Date.now()}`);
-    await fs.mkdir(uniqueDir, { recursive: true }); // TODO: Unique dir for each file? Use random file, and override metadata
-    const uniqueLocal = PathUtil.resolveUnix(uniqueDir, path.basename(filename));
+  static async writeToAsset(data: stream.Readable | Buffer, filename: string, maxSize?: number): Promise<WithCleanup<Asset>> {
+    const [uniqueLocal, cleanup] = await this.#createTempFileWithCleanup(filename);
 
-    await StreamUtil.writeToFile(data, uniqueLocal);
+    try {
+      await this.#streamToFileWithMaxSize(await StreamUtil.toStream(data), uniqueLocal, maxSize);
+    } catch (err) {
+      await cleanup();
+      throw err;
+    }
+
     const asset = await AssetUtil.fileToAsset(uniqueLocal);
-    return asset;
+    return [asset, cleanup];
   }
 
   /**
    * Parse filename from the request headers
    */
   static getFileName(req: Request): string {
-    const filenameExtract = /filename[*]?=["]?([^";]*)["]?/;
-    const matches = (req.header('content-disposition') ?? '').match(filenameExtract);
-    if (matches && matches.length) {
-      return matches[1];
-    } else {
-      const [, type] = req.header('content-type')?.split('/') ?? [];
-      return `file-upload.${type}`;
-    }
-  }
-
-  /**
-   * Actually process upload
-   */
-  static upload(req: Request, config: Partial<RestAssetConfig>): Promise<AssetMap> {
-    const validator = this.mimeValidator(config.allowedTypesList, config.excludedTypesList);
-
-    if (!/multipart|urlencoded/i.test(req.header('content-type') ?? '')) {
-      const filename = this.getFileName(req);
-      return this.toLocalAsset(req.body ?? req[NodeEntityⲐ], filename)
-        .then(validator)
-        .then(file => ({ file }));
-    } else {
-      return new Promise<AssetMap>((resolve, reject) => {
-        const mapping: AssetMap = {};
-        const uploads: Promise<Asset>[] = [];
-        const uploader = busboy({
-          headers: req.headers,
-          limits: {
-            fileSize: config.maxSize
-          }
-        });
-
-        uploader.on('file', async (fieldName, readable, { filename, encoding, mimeType }) => {
-          console.debug('Uploading file', { fieldName, filename, encoding, mimeType });
-          uploads.push(
-            this.toLocalAsset(readable, filename)
-              .then(validator)
-              .then(res => mapping[fieldName] = res)
-          );
-        });
-
-        uploader.on('finish', async () => {
-          console.debug('Finishing Upload');
-
-          try {
-            await Promise.all(uploads);
-            console.debug('Finished Upload');
-            resolve(mapping);
-          } catch (err) {
-            reject(err);
-          }
-        });
-
-        req.pipe(uploader);
-      });
-    }
+    const [, match] = (req.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
+    return match ?? `file-upload.${req.getContentType()?.subtype ?? 'unknown'}`;
   }
 
   /**
@@ -127,7 +93,7 @@ export class AssetRestUtil {
         res.status(200);
         res.setHeader('Content-Type', asset.contentType);
         res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
-        return asset.stream!;
+        return asset.stream!();
       }
     };
   }
