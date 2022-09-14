@@ -39,14 +39,15 @@ export class SchemaTransformUtil {
                 })
               )
             ],
-            [], id, [], [],
-            Object.entries(type.fieldTypes).map(([k, v]) =>
-              this.computeField(state, state.factory.createPropertyDeclaration(
-                [], [], k,
-                v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
-                undefined, undefined
-              ), { type: v, root })
-            )
+            id, [], [],
+            Object.entries(type.fieldTypes)
+              .map(([k, v]) =>
+                this.computeField(state, state.factory.createPropertyDeclaration(
+                  [], k,
+                  v.undefinable || v.nullable ? state.factory.createToken(ts.SyntaxKind.QuestionToken) : undefined,
+                  undefined, undefined
+                ), { type: v, root })
+              )
           );
           cls.getText = (): string => '';
           state.addStatement(cls, root || node);
