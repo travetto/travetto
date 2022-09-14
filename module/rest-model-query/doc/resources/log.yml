@@ -1,4 +1,4 @@
-rest.logRoutes:
+rest.log:
 - '/controller1'
 - '!/controller1:*'
 - '/controller2:/path'
