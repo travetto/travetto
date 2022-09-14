@@ -1,8 +1,8 @@
 import * as passport from 'passport';
 
-import { RestInterceptor, Request, Response, ManagedInterceptor, ManagedConfig } from '@travetto/rest';
+import { RestInterceptor, Request, Response, ManagedInterceptorConfig, FilterContext } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
-import { AuthInterceptor } from '@travetto/auth-rest';
+import { AuthReadWriteInterceptor } from '@travetto/auth-rest';
 import { Config } from '@travetto/config';
 
 type Handler = (req: Request, res: Response, next: Function) => unknown;
@@ -10,24 +10,24 @@ type Handler = (req: Request, res: Response, next: Function) => unknown;
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const authenticator = (passport as unknown as passport.Authenticator<Handler>);
 
-@Config('rest.passport')
-export class PassportConfig extends ManagedConfig { }
+@Config('rest.auth.passport')
+export class RestPassportConfig extends ManagedInterceptorConfig { }
 
 /**
  * Passport rest interceptor
  */
 @Injectable()
-@ManagedInterceptor()
-export class PassportInterceptor implements RestInterceptor {
+export class AuthPassportInterceptor implements RestInterceptor {
 
   #init = authenticator.initialize();
 
-  after = [AuthInterceptor];
+  after = [AuthReadWriteInterceptor];
 
   @Inject()
-  config: PassportConfig;
+  config: RestPassportConfig;
 
-  async intercept(req: Request, res: Response): Promise<void> {
+  // TODO: Limit to necessary paths
+  async intercept({ req, res }: FilterContext): Promise<void> {
     await new Promise<void>((resolve) => this.#init(req, res, resolve));
   }
 }

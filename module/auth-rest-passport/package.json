@@ -1,5 +1,5 @@
 {
-  "name": "@travetto/auth-passport",
+  "name": "@travetto/auth-rest-passport",
   "displayName": "Rest Auth Passport",
   "version": "3.0.0-rc.2",
   "description": "Rest authentication integration support for the travetto framework",
@@ -25,7 +25,7 @@
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/auth-passport"
+    "directory": "module/auth-rest-passport"
   },
   "dependencies": {
     "@travetto/auth": "^3.0.0-rc.0",
