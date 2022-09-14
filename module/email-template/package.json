@@ -1,7 +1,7 @@
 {
   "name": "@travetto/email-template",
   "displayName": "Email Templating",
-  "version": "3.0.0-rc.2",
+  "version": "3.0.0-rc.3",
   "description": "Email templating module",
   "keywords": [
     "email",
@@ -29,10 +29,10 @@
     "directory": "module/email-template"
   },
   "dependencies": {
-    "@travetto/config": "^3.0.0-rc.2",
-    "@travetto/di": "^3.0.0-rc.2",
-    "@travetto/email": "^3.0.0-rc.2",
-    "@travetto/image": "^3.0.0-rc.0",
+    "@travetto/config": "^3.0.0-rc.3",
+    "@travetto/di": "^3.0.0-rc.3",
+    "@travetto/email": "^3.0.0-rc.3",
+    "@travetto/image": "^3.0.0-rc.1",
     "@types/inline-css": "^3.0.1",
     "@types/sass": "^1.43.1",
     "@types/parse5": "^6.0.3",
@@ -43,7 +43,7 @@
   },
   "peerDependencies": {
     "parse5": "^7.0.0",
-    "@travetto/cli": "^3.0.0-rc.0"
+    "@travetto/cli": "^3.0.0-rc.1"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
