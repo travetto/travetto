@@ -203,6 +203,7 @@ Simple functions for providing a minimal facsimile to [lodash](https://lodash.co
       *  `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
       *  `strict`, will error out if the types do not match
    *  `uuid(len: number)` generates a simple uuid for use within the application.
+   *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
 
 ## CLI - build 
 
