@@ -63,7 +63,8 @@ As referenced above, a [Principal Structure](https://github.com/travetto/travett
 ```typescript
 export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
   /**
-   * Verify the payload, verifying the payload is correctly identified.
+   * Verify the payload, ensuring the payload is correctly identified.
+   *
    * @returns Valid principal if authenticated
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails
@@ -105,7 +106,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
    *  To have access to the principal
 
 ## Common Utilities
-The [AuthUtil](https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L24) provides the following functionality:
+The [AuthUtil](https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L11) provides the following functionality:
 
 **Code: Auth util structure**
 ```typescript
@@ -113,42 +114,16 @@ import * as crypto from 'crypto';
 import * as util from 'util';
 import { AppError, Util } from '@travetto/base';
 const pbkdf2 = util.promisify(crypto.pbkdf2);
-type PermSet = Set<string> | ReadonlySet<string>;
-type PermissionChecker = {
-  all: (perms: PermSet) => boolean;
-  any: (perms: PermSet) => boolean;
-};
-type PermissionCheckerSet = {
-  includes: (perms: PermSet) => boolean;
-  excludes: (perms: PermSet) => boolean;
-  check: (value: PermSet) => boolean;
-};
 /**
  * Standard auth utilities
  */
 export class AuthUtil {
   /**
-   * Build a permission checker against the provided permissions
+   * Build matcher for role permissions in allow/deny fashion
    *
-   * @param perms Set of permissions to check
-   * @param defaultIfEmpty If no perms passed, default to empty
+   * @param roles Roles to build matcher for
    */
-  /**
-   * Build a permission checker off of an include, and exclude set
-   *
-   * @param include Which permissions to include
-   * @param exclude Which permissions to exclude
-   * @param matchAll Whether not all permissions should be matched
-   */
-  static permissionChecker(include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any'): PermissionCheckerSet ;
-  /**
-   * Build a permission checker off of an include, and exclude set
-   *
-   * @param include Which permissions to include
-   * @param exclude Which permissions to exclude
-   * @param matchAll Whether not all permissions should be matched
-   */
-  static checkPermissions(permissions: Iterable<string>, include: Iterable<string>, exclude: Iterable<string>, mode: 'all' | 'any' = 'any'): void ;
+  static roleMatcher(roles: string[]): (perms: Set<string>) => boolean ;
   /**
    * Generate a hash for a given value
    *
@@ -170,13 +145,18 @@ export class AuthUtil {
 }
 ```
 
-`permissionSetChecker` is probably the only functionality that needs to be explained.The function operates in a `DENY` / `ALLOW` mode.  This means that a permission check will succeed only if:
+`roleMatcher` is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Application phase management, environment config and common utilities for travetto applications.")'s Util class.  
+
+An example of role checks could be:
 
    
-   *  The user is logged in     
-      *  If `matchAll` is false:    
-         *  The user does not have any permissions in the exclusion list
-         *  The include list is empty, or the user has at least one permission in the include list.
-      *  Else    
-         *  The user does not have all permissions in the exclusion list
-         *  The include list is empty, or the user has all permissions in the include list.
+   *  Admin
+   *  !Editor
+   *  Owner+Author
+
+The code would check the list in order, which would result in the following logic:
+   
+   *  If the user is an admin, always allow
+   *  If the user has the editor role, deny
+   *  If the user is both an owner and an author allow
+   *  By default, deny due to the presence of positive checks

@@ -7,7 +7,8 @@ import { Principal } from './principal';
  */
 export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
   /**
-   * Verify the payload, verifying the payload is correctly identified.
+   * Verify the payload, ensuring the payload is correctly identified.
+   *
    * @returns Valid principal if authenticated
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails

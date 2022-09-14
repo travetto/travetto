@@ -1,5 +1,5 @@
 import { AppError, Class } from '@travetto/base';
-import { Request, Response } from '@travetto/rest';
+import { FilterContext, Request } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { Principal, Authorizer, Authenticator } from '@travetto/auth';
 import { AuthenticatorTarget } from '@travetto/auth/src/internal/types';
@@ -27,11 +27,10 @@ export class AuthService {
 
   /**
    * Login user via the request. Supports multi-step login.
-   * @param req The travetto request
-   * @param res The travetto response
+   * @param ctx The travetto context
    * @param authenticators List of valid identity sources
    */
-  async login(req: Request, res: Response, authenticators: symbol[]): Promise<Principal | undefined> {
+  async login({ req, res }: FilterContext, authenticators: symbol[]): Promise<Principal | undefined> {
     let lastError: Error | undefined;
 
     /**

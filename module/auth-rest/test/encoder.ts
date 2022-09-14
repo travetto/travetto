@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable } from '@travetto/di';
-import { Request, Response } from '@travetto/rest';
+import { FilterContext, Request, Response } from '@travetto/rest';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
 import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 import { Principal } from '@travetto/auth/src/types/principal';
@@ -28,7 +28,7 @@ export class StatelessPrincipalEncoder implements PrincipalEncoder {
     this.accessor = new ValueAccessor(this.config.keyName, this.config.transport);
   }
 
-  async encode(req: Request, res: Response, principal?: Principal): Promise<void> {
+  async encode({ res }: FilterContext, principal?: Principal): Promise<void> {
     if (principal) {
       const text = Buffer.from(JSON.stringify(principal)).toString('base64');
       this.accessor.writeValue(res, text, { expires: principal?.expiresAt });
@@ -38,7 +38,7 @@ export class StatelessPrincipalEncoder implements PrincipalEncoder {
     return;
   }
 
-  async decode(req: Request): Promise<Principal | undefined> {
+  async decode({ req }: FilterContext): Promise<Principal | undefined> {
     const text = this.accessor.readValue(req);
     if (text) {
       const parsed = JSON.parse(Buffer.from(text, 'base64').toString('utf8'));
@@ -68,16 +68,22 @@ export class EncoderTest {
 
     const headers: Record<string, string> = {};
 
-    await this.instance.encode({} as Request, {
-      setHeader(key: string, value: string) {
-        headers[key] = value;
+    await this.instance.encode(
+      {
+        req: {} as Request,
+        res: {
+          setHeader(key: string, value: string) {
+            headers[key] = value;
+          }
+        } as Response
+      },
+      {
+        id: 'true',
+        details: {
+          data: 'hello'
+        }
       }
-    } as Response, {
-      id: 'true',
-      details: {
-        data: 'hello'
-      }
-    });
+    );
 
     assert(headers[this.config.keyName] !== undefined);
   }
@@ -88,11 +94,15 @@ export class EncoderTest {
 
     const headers: Record<string, string> = {};
 
-    await this.instance.encode({} as Request, {
-      setHeader(key: string, value: string) {
-        headers[key] = value;
-      }
-    } as Response, undefined);
+    await this.instance.encode({
+      req: {} as Request,
+      res: {
+        setHeader(key: string, value: string) {
+          headers[key] = value;
+
+        }
+      } as Response
+    }, undefined);
 
     assert(headers[this.config.keyName] === undefined);
   }

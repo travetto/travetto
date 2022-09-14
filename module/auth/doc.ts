@@ -60,18 +60,21 @@ The ${AuthUtil} provides the following functionality:
 
 ${d.Code('Auth util structure', AuthUtil.ᚕfile, true)}
 
-${d.Method('permissionSetChecker')} is probably the only functionality that needs to be explained.The function operates in a ${d.Input('DENY')} / ${d.Input('ALLOW')} mode.  This means that a permission check will succeed only if:
+${d.Method('roleMatcher')} is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from ${mod.Base}'s Util class.  
+
+An example of role checks could be:
 
 ${d.List(
-  d`The user is logged in  ${d.List(
-    d`If ${d.Input('matchAll')} is false: ${d.List(
-      'The user does not have any permissions in the exclusion list',
-      'The include list is empty, or the user has at least one permission in the include list.'
-    )}`,
-    d`Else ${d.List(
-      'The user does not have all permissions in the exclusion list',
-      'The include list is empty, or the user has all permissions in the include list.'
-    )}`
-  )}`
+  'Admin',
+  '!Editor',
+  'Owner+Author'
+)}
+
+The code would check the list in order, which would result in the following logic:
+${d.List(
+  'If the user is an admin, always allow',
+  'If the user has the editor role, deny',
+  'If the user is both an owner and an author allow',
+  'By default, deny due to the presence of positive checks'
 )} 
 `;

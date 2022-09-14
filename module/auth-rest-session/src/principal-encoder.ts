@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@travetto/di';
-import { Request, Response } from '@travetto/rest';
+import { FilterContext } from '@travetto/rest';
 import { Principal } from '@travetto/auth';
 import { PrincipalEncoder } from '@travetto/auth-rest';
 import { SessionService } from '@travetto/rest-session';
@@ -15,7 +15,7 @@ export class SessionPrincipalEncoder implements PrincipalEncoder {
   @Inject()
   service: SessionService;
 
-  encode(req: Request, res: Response, p: Principal): void {
+  encode({ req }: FilterContext, p: Principal): void {
     if (p) {
       p.expiresAt = req.session.expiresAt; // Let principal live as long as the session
       req.session.setValue(this.#key, p);
@@ -24,7 +24,7 @@ export class SessionPrincipalEncoder implements PrincipalEncoder {
     }
   }
 
-  async decode(req: Request): Promise<Principal | undefined> {
+  async decode({ req }: FilterContext): Promise<Principal | undefined> {
     await this.service.readRequest(req); // Preload session if not already loaded
     return req.session.getValue<Principal>(this.#key);
   }
