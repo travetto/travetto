@@ -67,7 +67,7 @@ export class AsyncContext {
   /**
    * Run an async function and ensure the context is available during execution
    */
-  async run<T = unknown>(fn: () => Promise<T>, init: Ctx = {}): Promise<T> {
+  async run<T = unknown>(fn: () => Promise<T> | T, init: Ctx = {}): Promise<T> {
     if (this.alStorage.getStore()) {
       init = { ...this.#store(), ...init };
     }
