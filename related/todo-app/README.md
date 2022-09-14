@@ -320,7 +320,7 @@ First we must start the application:
 2022-03-14T04:00:00.618Z info  [@trv:app/registry:57] Running application { name: 'rest', filename: '@trv:rest/src/application/rest.ts' }
 2022-03-14T04:00:00.837Z info  [@trv:app/registry:63] Manifest {
   info: {
-    framework: '2.2.4',
+    framework: '3.0.0',
     name: '@travetto/todo-app',
     description: '',
     version: '0.0.0',
@@ -379,22 +379,17 @@ First we must start the application:
   rest: {
     serve: true,
     port: 12555,
-    disableGetCache: true,
     trustProxy: false,
     hostname: 'localhost',
     defaultMessage: true,
     ssl: { active: false },
-    logRoutes: { paths: [ '!*' ] },
-    bodyParse: { limit: '100kb', routeLimits: {}, parsingTypes: {}, paths: [] },
-    cors: { active: true },
-    cookie: {
-      active: true,
-      signed: true,
-      httpOnly: true,
-      sameSite: 'lax',
-      keys: [ 'default-insecure' ]
-    },
-    context: { disabled: false },
+    log: {},
+    bodyParse: { limit: '100kb', parsingTypes: {} },
+    accepts: { types: [] },
+    cors: {},
+    getCache: {},
+    cookie: { signed: true, httpOnly: true, sameSite: 'lax', keys: [ 'default-insecure' ] },
+    context: {},
     session: {
       autoCommit: true,
       maxAge: 1800000,
@@ -403,7 +398,8 @@ First we must start the application:
       sign: true,
       keyName: 'trv_sid',
       transport: 'cookie'
-    }
+    },
+    auth: { readWrite: {}, verify: { roles: [] }, login: {} }
   },
   model: {
     mongo: {
@@ -418,7 +414,7 @@ First we must start the application:
     }
   }
 }
-2022-03-14T04:00:02.450Z info  [@trv:rest/application/rest:191] Listening { port: 12555 }
+2022-03-14T04:00:02.450Z info  [@trv:rest/application/rest:192] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:

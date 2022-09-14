@@ -69,7 +69,8 @@ As referenced above, a <a target="_blank" class="source-link" href="https://gith
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token punctuation">,</span> <span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
-   * Verify the payload, verifying the payload is correctly identified.
+   * Verify the payload, ensuring the payload is correctly identified.
+   *
    * @returns Valid principal if authenticated
    * @returns undefined if authentication is valid, but incomplete (multi-step)
    * @throws AppError if authentication fails
@@ -111,7 +112,7 @@ Overall, the structure is simple, but drives home the primary use cases of the f
  <li>To have access to the principal</li></ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L24">AuthUtil</a> provides the following functionality:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts#L11">AuthUtil</a> provides the following functionality:
 
       <figure class="code">
       <figcaption class="code">Auth util structure
@@ -121,42 +122,16 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> util <span class="token keyword">from</span> <span class="token string">'util'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError<span class="token punctuation">,</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> pbkdf2 <span class="token operator">=</span> util<span class="token punctuation">.</span><span class="token function">promisify</span><span class="token punctuation">(</span>crypto<span class="token punctuation">.</span>pbkdf2<span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token keyword">type</span> <span class="token class-name">PermSet</span> <span class="token operator">=</span> Set<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span> <span class="token operator">|</span> ReadonlySet<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
-<span class="token keyword">type</span> <span class="token class-name">PermissionChecker</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token function-variable function">all</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token function-variable function">any</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-<span class="token keyword">type</span> <span class="token class-name">PermissionCheckerSet</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token function-variable function">includes</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token function-variable function">excludes</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token function-variable function">check</span><span class="token operator">:</span> <span class="token punctuation">(</span>value<span class="token operator">:</span> PermSet<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 <span class="token comment">/**
  * Standard auth utilities
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthUtil</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
-   * Build a permission checker against the provided permissions
+   * Build matcher for role permissions in allow/deny fashion
    *
-   * @param perms Set of permissions to check
-   * @param defaultIfEmpty If no perms passed, default to empty
+   * @param roles Roles to build matcher for
    */</span>
-  <span class="token comment">/**
-   * Build a permission checker off of an include, and exclude set
-   *
-   * @param include Which permissions to include
-   * @param exclude Which permissions to exclude
-   * @param matchAll Whether not all permissions should be matched
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">permissionChecker</span><span class="token punctuation">(</span>include<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> exclude<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> mode<span class="token operator">:</span> <span class="token string">'all'</span> <span class="token operator">|</span> <span class="token string">'any'</span> <span class="token operator">=</span> <span class="token string">'any'</span><span class="token punctuation">)</span><span class="token operator">:</span> PermissionCheckerSet <span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Build a permission checker off of an include, and exclude set
-   *
-   * @param include Which permissions to include
-   * @param exclude Which permissions to exclude
-   * @param matchAll Whether not all permissions should be matched
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">checkPermissions</span><span class="token punctuation">(</span>permissions<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> include<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> exclude<span class="token operator">:</span> Iterable<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">,</span> mode<span class="token operator">:</span> <span class="token string">'all'</span> <span class="token operator">|</span> <span class="token string">'any'</span> <span class="token operator">=</span> <span class="token string">'any'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">roleMatcher</span><span class="token punctuation">(</span>roles<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> Set<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span> <span class="token punctuation">;</span>
   <span class="token comment">/**
    * Generate a hash for a given value
    *
@@ -178,9 +153,16 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<code class="item method">permissionSetChecker</code> is probably the only functionality that needs to be explained.The function operates in a <code class="item input">DENY</code> / <code class="item input">ALLOW</code> mode.  This means that a permission check will succeed only if:
+<code class="item method">roleMatcher</code> is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from <a class="module-link" routerLink="/docs/base" title="Application phase management, environment config and common utilities for travetto applications.">Base</a>'s Util class.  
 
-<ul> <li>The user is logged in  <ul> <li>If <code class="item input">matchAll</code> is false: <ul> <li>The user does not have any permissions in the exclusion list</li>
- <li>The include list is empty, or the user has at least one permission in the include list.</li></ul></li>
- <li>Else <ul> <li>The user does not have all permissions in the exclusion list</li>
- <li>The include list is empty, or the user has all permissions in the include list.</li></ul></li></ul></li></ul>
+An example of role checks could be:
+
+<ul> <li>Admin</li>
+ <li>!Editor</li>
+ <li>Owner+Author</li></ul>
+
+The code would check the list in order, which would result in the following logic:
+<ul> <li>If the user is an admin, always allow</li>
+ <li>If the user has the editor role, deny</li>
+ <li>If the user is both an owner and an author allow</li>
+ <li>By default, deny due to the presence of positive checks</li></ul>

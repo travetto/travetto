@@ -211,7 +211,8 @@ Simple functions for providing a minimal facsimile to <a target="_blank" class="
  <li><code class="item method">deepAssign(a, b, mode ?)</code> which allows for deep assignment of <code class="item input">b</code> onto <code class="item input">a</code>, the <code class="item input">mode</code> determines how aggressive the assignment is, and how flexible it is.  <code class="item input">mode</code> can have any of the following values: <ul> <li><code class="item input">loose</code>, which is the default is the most lenient. It will not error out, and overwrites will always happen</li>
  <li><code class="item input">coerce</code>, will attempt to force values from <code class="item input">b</code> to fit the types of <code class="item input">a</code>, and if it can't it will error out</li>
  <li><code class="item input">strict</code>, will error out if the types do not match</li></ul></li>
- <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li></ul>
+ <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
+ <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li></ul>
 
 <h2 id="cli-build">CLI - build</h2> 
 
