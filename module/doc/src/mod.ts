@@ -9,7 +9,7 @@ const MAPPING = {
   AuthRestContext: '@travetto/auth-rest-context',
   AuthRestJwt: '@travetto/auth-rest-jwt',
   AuthRestSession: '@travetto/auth-rest-session',
-  AuthPassport: '@travetto/auth-passport',
+  AuthRestPassport: '@travetto/auth-rest-passport',
   Base: '@travetto/base',
   Boot: '@travetto/boot',
   Cache: '@travetto/cache',

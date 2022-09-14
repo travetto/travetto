@@ -297,9 +297,7 @@ export class MongoModelService implements
     });
 
     await new Promise<unknown>((resolve, reject) => {
-      input.pipe(writeStream);
-      input.on('error', reject);
-      writeStream.once('finish', resolve);
+      input.pipe(writeStream).on('finish', resolve).on('error', reject);
     });
   }
 
