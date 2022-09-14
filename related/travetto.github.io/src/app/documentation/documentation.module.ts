@@ -54,7 +54,7 @@ import { ModelFirestoreComponent } from './gen/model-firestore/model-firestore.c
 import { ModelQueryComponent } from './gen/model-query/model-query.component';
 import { AuthModelComponent } from './gen/auth-model/auth-model.component';
 import { AuthRestSessionComponent } from './gen/auth-rest-session/auth-rest-session.component';
-import { AuthPassportComponent } from './gen/auth-passport/auth-passport.component';
+import { AuthRestPassportComponent } from './gen/auth-rest-passport/auth-rest-passport.component';
 import { ModelMysqlComponent } from './gen/model-mysql/model-mysql.component';
 import { ModelPostgresComponent } from './gen/model-postgres/model-postgres.component';
 import { ModelSqliteComponent } from './gen/model-sqlite/model-sqlite.component';
@@ -135,7 +135,7 @@ import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component'
     ModelQueryComponent,
     AuthModelComponent,
     AuthRestSessionComponent,
-    AuthPassportComponent,
+    AuthRestPassportComponent,
     ModelMysqlComponent,
     ModelPostgresComponent,
     ModelSqliteComponent,

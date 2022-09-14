@@ -47,7 +47,7 @@ import { ModelMysqlComponent } from './gen/model-mysql/model-mysql.component';
 import { ModelPostgresComponent } from './gen/model-postgres/model-postgres.component';
 import { ModelSqliteComponent } from './gen/model-sqlite/model-sqlite.component';
 import { AuthRestSessionComponent } from './gen/auth-rest-session/auth-rest-session.component';
-import { AuthPassportComponent } from './gen/auth-passport/auth-passport.component';
+import { AuthRestPassportComponent } from './gen/auth-rest-passport/auth-rest-passport.component';
 import { RestAwsLambdaComponent } from './gen/rest-aws-lambda/rest-aws-lambda.component';
 import { RestExpressLambdaComponent } from './gen/rest-express-lambda/rest-express-lambda.component';
 import { RestKoaLambdaComponent } from './gen/rest-koa-lambda/rest-koa-lambda.component';
@@ -103,7 +103,7 @@ export const PAGES = [
   {
     path: 'auth', title: 'Auth', component: AuthComponent, subs: [
       { path: 'auth-rest', title: 'Rest', component: AuthRestComponent },
-      { path: 'auth-passport', title: 'Passport', component: AuthPassportComponent },
+      { path: 'auth-rest-passport', title: 'Rest Passport', component: AuthRestPassportComponent },
       { path: 'auth-rest-session', title: 'Rest Session', component: AuthRestSessionComponent },
       { path: 'auth-rest-context', title: 'Rest Context', component: AuthRestContextComponent },
       { path: 'auth-rest-jwt', title: 'Rest JWT', component: AuthRestJwtComponent },
