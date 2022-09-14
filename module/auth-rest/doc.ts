@@ -38,7 +38,7 @@ Every external framework integration relies upon the ${Authenticator} contract. 
 
 ${d.Code('Structure for the Identity Source', Authenticator)}
 
-The only required method to be defined is the ${d.Method('authenticate')} method.  This takes in a ${Request} and ${Response}, and is responsible for:
+The only required method to be defined is the ${d.Method('authenticate')} method.  This takes in a pre-principal payload and a filter context with a ${Request} and ${Response}, and is responsible for:
 
 ${d.List(
   d`Returning an ${Principal} if authentication was successful`,
@@ -58,7 +58,7 @@ The symbol ${d.Input('FB_AUTH')} is what will be used to reference providers at 
 ${d.Section('Route Declaration')}
 Like the ${AuthService}, there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
 
-${Authenticate} provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
+${Authenticate} integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
 ${d.Code('Using provider with routes', 'doc/route.ts')}
 

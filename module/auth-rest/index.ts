@@ -1,5 +1,5 @@
 /// <reference path="./src/typings.d.ts" />
-export * from './src/interceptor';
+export * from './src/interceptors/readWrite';
 export * from './src/decorator';
 export * from './src/service';
 export * from './src/encoder';

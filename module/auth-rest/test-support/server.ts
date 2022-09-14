@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Controller, Get, Post, Redirect, Request, Response } from '@travetto/rest';
+import { Controller, FilterContext, Get, Post, Redirect, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/test-support/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable, InjectableFactory } from '@travetto/di';
@@ -15,13 +15,13 @@ const TestAuthⲐ = Symbol.for('TEST_AUTH');
 
 @Injectable({ primary: true })
 class AuthorizationEncoder implements PrincipalEncoder {
-  async encode(req: Request, res: Response, p: Principal | undefined) {
+  async encode({ res }: FilterContext, p: Principal | undefined) {
     if (p) {
       const value = JSON.stringify(p);
       res.setHeader('Authorization', Buffer.from(value).toString('base64'));
     }
   }
-  async decode(req: Request) {
+  async decode({ req }: FilterContext) {
     try {
       if (req.headers.authorization) {
         const p = JSON.parse(Buffer.from(req.headers.authorization as string, 'base64').toString('utf8'));

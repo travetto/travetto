@@ -1,5 +1,5 @@
 import { Principal } from '@travetto/auth';
-import { Request, Response } from '@travetto/rest';
+import { FilterContext } from '@travetto/rest';
 
 /**
  * Encoder for auth context for request/response
@@ -8,14 +8,13 @@ import { Request, Response } from '@travetto/rest';
 export interface PrincipalEncoder {
   /**
    * Write principal
-   * @param req The travetto request
-   * @param res The travetto response
+   * @param ctx The travetto filter context
    * @param p The auth principal
    */
-  encode(req: Request, res: Response, p: Principal | undefined): Promise<void> | void;
+  encode(ctx: FilterContext, p: Principal | undefined): Promise<void> | void;
   /**
    * Read principal from request
-   * @param req The travetto request
+   * @param ctx The travetto filter context
    */
-  decode(req: Request): Promise<Principal | undefined> | Principal | undefined;
+  decode(ctx: FilterContext): Promise<Principal | undefined> | Principal | undefined;
 }

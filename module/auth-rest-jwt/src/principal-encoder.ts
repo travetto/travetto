@@ -4,10 +4,10 @@ import { AppError, Util } from '@travetto/base';
 import { EnvUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
-import { Response, Request } from '@travetto/rest';
+import { FilterContext } from '@travetto/rest';
 import { JWTUtil, Payload } from '@travetto/jwt';
 
-@Config('rest.jwt')
+@Config('rest.auth.jwt')
 export class RestJWTConfig {
   header = 'Authorization';
   signingKey = 'dummy';
@@ -60,7 +60,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   /**
    * Write context
    */
-  async encode(req: Request, res: Response, p: Principal | undefined): Promise<void> {
+  async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
     if (p) {
       res.setHeader(this.config.header, `${this.config.headerPrefix}${await this.getToken(p)}`);
     }
@@ -69,7 +69,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   /**
    * Read JWT from request
    */
-  async decode(req: Request): Promise<Principal | undefined> {
+  async decode({ req }: FilterContext): Promise<Principal | undefined> {
     const token = (req.headerFirst(this.config.header))?.replace(this.config.headerPrefix, '');
     if (token) {
       return this.verifyToken(token);

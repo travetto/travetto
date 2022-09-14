@@ -1,12 +1,12 @@
-import { RestInterceptor, Request, Response, ManagedInterceptor, ManagedConfig } from '@travetto/rest';
+import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, FilterNext } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Principal } from '@travetto/auth';
 import { Config } from '@travetto/config';
 
-import { PrincipalEncoder } from './encoder';
+import { PrincipalEncoder } from '../encoder';
 
-@Config('rest.auth')
-export class RestAuthConfig extends ManagedConfig { }
+@Config('rest.auth.readWrite')
+export class RestAuthConfig extends ManagedInterceptorConfig { }
 
 /**
  * Authentication interceptor
@@ -15,8 +15,7 @@ export class RestAuthConfig extends ManagedConfig { }
  * - Connects the principal to the request
  */
 @Injectable()
-@ManagedInterceptor()
-export class AuthInterceptor implements RestInterceptor {
+export class AuthReadWriteInterceptor implements RestInterceptor {
 
   @Inject()
   encoder: PrincipalEncoder;
@@ -24,14 +23,15 @@ export class AuthInterceptor implements RestInterceptor {
   @Inject()
   config: RestAuthConfig;
 
-  async intercept(req: Request, res: Response, next: () => Promise<unknown>): Promise<unknown> {
+  async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
+    const { req } = ctx;
     let og: Principal | undefined;
     try {
-      og = req.auth = await this.encoder.decode(req);
+      og = req.auth = await this.encoder.decode(ctx);
       return await next();
     } finally {
       if (og !== req.auth || (req.auth && og && og.expiresAt !== req.auth.expiresAt)) { // If it changed
-        await this.encoder.encode(req, res, req.auth);
+        await this.encoder.encode(ctx, req.auth);
       }
       req.auth = undefined;
     }

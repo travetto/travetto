@@ -47,7 +47,7 @@ Every external framework integration relies upon the [Authenticator](https://git
 [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8)
 ```
 
-The only required method to be defined is the `authenticate` method.  This takes in a [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107), and is responsible for:
+The only required method to be defined is the `authenticate` method.  This takes in a pre-principal payload and a filter context with a [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L115), and is responsible for:
 
    
    *  Returning an [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) if authentication was successful
@@ -103,7 +103,7 @@ The symbol `FB_AUTH` is what will be used to reference providers at runtime.  Th
 ## Route Declaration
 Like the [AuthService](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/service.ts#L11), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use.
 
-[Authenticate](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L13) provides middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
+[@Authenticate](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L12) integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
 **Code: Using provider with routes**
 ```typescript
@@ -138,4 +138,4 @@ export class SampleAuth {
 }
 ```
 
-[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L27) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L43) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is accessible via [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39) directly, without wiring in a request object, but is also accessible on the request object as [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12).auth.
+[@Authenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L23) and [@Unauthenticated](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L34) will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the [Principal](https://github.com/travetto/travetto/tree/main/module/auth/src/types/principal.ts#L8) is accessible via [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39) directly, without wiring in a request object, but is also accessible on the request object as [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12).auth.

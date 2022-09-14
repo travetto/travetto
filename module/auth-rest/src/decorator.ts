@@ -1,38 +1,29 @@
-import { ControllerRegistry, FilterDecorator } from '@travetto/rest';
-import { AppError } from '@travetto/base';
-import { AuthUtil } from '@travetto/auth';
-import { DependencyRegistry } from '@travetto/di';
+import { ControllerRegistry, EndpointDecorator } from '@travetto/rest';
 
-import { AuthService } from './service';
+import { AuthVerifyInterceptor } from './interceptors/authenticate';
+import { AuthLoginInterceptor } from './interceptors/login';
 
 /**
  * Authenticate an endpoint with a list of available identity sources
  * @param source The symbol to target the specific authenticator
  * @param sources Additional providers to support
+ * @augments `@trv:auth/Authenticate`
  */
-export function Authenticate(source: symbol, ...sources: symbol[]): FilterDecorator {
-  const computed = [source, ...sources];
-  return ControllerRegistry.createFilterDecorator(async (req, res) => {
-    const svc = await DependencyRegistry.getInstance(AuthService);
-    return svc.login(req, res, computed);
+export function Authenticate(source: symbol, ...sources: symbol[]): EndpointDecorator {
+  return ControllerRegistry.createInterceptorConfigDecorator(AuthLoginInterceptor, {
+    providers: [source, ...sources]
   });
 }
 
 /**
  * Ensure the controller/route is authenticated, give a set of permissions
- * @param include Set of required permissions
- * @param exclude Set of invalid permissions
+ * @param roles Set of required/disallowed permissions
  * @augments `@trv:auth/Authenticated`
  */
-export function Authenticated(include: string[] = [], exclude: string[] = []): FilterDecorator {
-  const { check } = AuthUtil.permissionChecker(include, exclude);
-
-  return ControllerRegistry.createFilterDecorator((req, res) => {
-    if (!req.auth) {
-      throw new AppError('User is unauthenticated', 'authentication');
-    } else if (!check(new Set(req.auth.permissions ?? []))) {
-      throw new AppError('Access denied', 'permissions');
-    }
+export function Authenticated(roles: string[] = []): EndpointDecorator {
+  return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
+    state: 'authenticated',
+    roles,
   });
 }
 
@@ -40,10 +31,8 @@ export function Authenticated(include: string[] = [], exclude: string[] = []): F
  * Require the controller/route to be unauthenticated
  * @augments `@trv:auth/Unauthenticated`
  */
-export function Unauthenticated(): FilterDecorator {
-  return ControllerRegistry.createFilterDecorator(req => {
-    if (req.auth) {
-      throw new AppError('User is authenticated', 'authentication');
-    }
+export function Unauthenticated(): EndpointDecorator {
+  return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
+    state: 'unauthenticated'
   });
 }
