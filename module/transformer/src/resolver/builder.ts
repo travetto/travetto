@@ -183,7 +183,10 @@ export const TypeBuilder: {
         const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
         if (DeclarationUtil.isPublic(dec)) { // If public
           const memberType = checker.getType(dec);
-          if (!memberType.getCallSignatures().length) { // if not a function
+          if (
+            !member.getName().includes('@') && // if not a symbol
+            !memberType.getCallSignatures().length // if not a function
+          ) {
             fieldNodes[member.getName()] = memberType;
           }
         }
