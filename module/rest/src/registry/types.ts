@@ -1,10 +1,11 @@
 import { Class } from '@travetto/base';
+import { RestInterceptor } from '../interceptor/types';
 import { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
 
 /**
- * Filter decorator for composition of routing logic
+ * Endpoint decorator for composition of routing logic
  */
-export type FilterDecorator = (
+export type EndpointDecorator = (
   (<T extends Class>(target: T) => void) &
   (<U>(target: U, prop: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) => void)
 );
@@ -48,6 +49,10 @@ interface CoreConfig {
    * List of filters to run on request
    */
   filters: Filter[];
+  /**
+   * Set of interceptor configs
+   */
+  interceptors?: [Class<RestInterceptor>, { disabled?: boolean } & Record<string, unknown>][];
   /**
    * List of headers to add to the response
    */

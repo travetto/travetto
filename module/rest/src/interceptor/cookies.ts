@@ -4,19 +4,18 @@ import { ServerResponse, IncomingMessage } from 'http';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { Request, Response } from '../types';
+import { FilterContext, Request, Response } from '../types';
 import { RestConfig } from '../application/config';
 
-import { RestInterceptor } from './types';
+import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { CorsInterceptor } from './cors';
 import { GetCacheInterceptor } from './get-cache';
-import { ManagedConfig, ManagedInterceptor } from './decorator';
 
 /**
  * Rest cookie configuration
  */
 @Config('rest.cookie')
-export class RestCookieConfig extends ManagedConfig {
+export class RestCookieConfig extends ManagedInterceptorConfig {
   /**
    * Are they signed
    */
@@ -43,12 +42,34 @@ export class RestCookieConfig extends ManagedConfig {
   domain?: string;
 }
 
+class CustomCookies extends cookies {
+  #opts: RestCookieConfig;
+
+  constructor(req: Request, res: Response, opts: RestCookieConfig) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    super(req as unknown as IncomingMessage, res as unknown as ServerResponse, opts);
+    this.#opts = opts;
+  }
+
+  // Patch all cookies to default to the cookie values
+  set(key: string, value?: string, opts: cookies.SetOption = {}): this {
+    return super.set(key, value, { ...this.#opts, ...opts });
+  }
+
+  get(key: string, opts: Partial<cookies.GetOption> & { secure?: boolean } = {}): string | undefined {
+    if (key.endsWith('.sig')) {
+      opts.secure = false;
+      opts.signed = false;
+    }
+    return super.get(key, { ...this.#opts, ...opts });
+  }
+}
+
 /**
  * Loads cookies from the request, verifies, exposes, and then signs and sets
  */
 @Injectable()
-@ManagedInterceptor()
-export class CookiesInterceptor implements RestInterceptor {
+export class CookiesInterceptor implements RestInterceptor<RestCookieConfig> {
 
   after = [CorsInterceptor];
   before = [GetCacheInterceptor];
@@ -59,40 +80,14 @@ export class CookiesInterceptor implements RestInterceptor {
   @Inject()
   restConfig: RestConfig;
 
-  postConstruct(): void {
-    const self = this.config;
-
-    if (this.config.secure === undefined) {
-      this.config.secure = this.restConfig.ssl.active;
-    }
-
-    if (this.config.domain === undefined) {
-      this.config.domain = this.restConfig.hostname;
-    }
-
-    // Patch all cookies to default to the cookie values
-    const set = cookies.prototype.set;
-    const get = cookies.prototype.get;
-    cookies.prototype.set = function (key: string, value?: string, opts: cookies.SetOption = {}): cookies.Cookie {
-      return set.call(this, key, value, { ...self, ...opts });
-    };
-    cookies.prototype.get = function (key: string, opts: Partial<cookies.GetOption> & { secure?: boolean } = {}): string | undefined {
-      if (key.endsWith('.sig')) {
-        opts.secure = false;
-        opts.signed = false;
-      }
-      return get.call(this, key, { ...self, ...opts });
-    };
+  finalizeConfig(config: RestCookieConfig): RestCookieConfig {
+    config.secure ??= this.restConfig.ssl.active;
+    config.domain ??= this.restConfig.hostname;
+    return config;
   }
 
-  intercept(req: Request, res: Response): void {
+  intercept({ req, res, config }: FilterContext<RestCookieConfig>): void {
     // Enforce this is set
-    req.cookies = res.cookies = new cookies(
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      req as unknown as IncomingMessage,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      res as unknown as ServerResponse,
-      this.config
-    );
+    req.cookies = res.cookies = new CustomCookies(req, res, config);
   }
 }

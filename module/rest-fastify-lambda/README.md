@@ -8,4 +8,4 @@
 npm install @travetto/rest-fastify-lambda
 ```
 
-This module provides support for [Fastify REST Source](https://github.com/travetto/travetto/tree/main/module/rest-fastify#readme "Fastify provider for the travetto rest module.") + [RESTful AWS Lambda](https://github.com/travetto/travetto/tree/main/module/rest-aws-lambda#readme "RESTful APIs entry point support for AWS Lambdas.").  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L23) that is able to integrate with AWS appropriately.
+This module provides support for [Fastify REST Source](https://github.com/travetto/travetto/tree/main/module/rest-fastify#readme "Fastify provider for the travetto rest module.") + [RESTful AWS Lambda](https://github.com/travetto/travetto/tree/main/module/rest-aws-lambda#readme "RESTful APIs entry point support for AWS Lambdas.").  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L24) that is able to integrate with AWS appropriately.

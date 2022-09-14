@@ -1,10 +1,11 @@
-import { Class, ClassInstance, AppError, TimeSpan, Util } from '@travetto/base';
+import { Class, ClassInstance, TimeSpan, Util } from '@travetto/base';
 
-import { HeaderMap, Request, RouteHandler } from '../types';
+import { HeaderMap, RouteHandler } from '../types';
 import { ControllerRegistry } from '../registry/controller';
-import { EndpointConfig, ControllerConfig, DescribableConfig, FilterDecorator } from '../registry/types';
+import { EndpointConfig, ControllerConfig, DescribableConfig, EndpointDecorator } from '../registry/types';
+import { AcceptsInterceptor } from '../interceptor/accepts';
 
-function register(config: Partial<EndpointConfig | ControllerConfig>): FilterDecorator {
+function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointDecorator {
   return function <T>(target: T | Class<T>, property?: string, descriptor?: TypedPropertyDescriptor<RouteHandler>) {
     if (descriptor) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -20,18 +21,18 @@ function register(config: Partial<EndpointConfig | ControllerConfig>): FilterDec
  * Decorator used to add description metadata to a class or method
  * @param desc The describe config
  */
-export function Describe(desc: DescribableConfig): FilterDecorator { return register(desc); }
+export function Describe(desc: DescribableConfig): EndpointDecorator { return register(desc); }
 
 /**
  * Set response headers on success
  * @param headers The response headers to set
  */
-export function SetHeaders(headers: HeaderMap): FilterDecorator { return register({ headers }); }
+export function SetHeaders(headers: HeaderMap): EndpointDecorator { return register({ headers }); }
 
 /**
  * Specifies content type for response
  */
-export function Produces(mime: string): FilterDecorator { return register({ headers: { 'content-type': mime } }); }
+export function Produces(mime: string): EndpointDecorator { return register({ headers: { 'content-type': mime } }); }
 
 
 type HeaderSet = ReturnType<typeof SetHeaders>;
@@ -56,16 +57,14 @@ export const DisableCacheControl = (): HeaderSet => CacheControl('0s');
 
 /**
  * Define an endpoint to support specific input types
- * @param contentTypes The list of mime types to support
+ * @param types The list of mime types to allow/deny
  */
-export function Accepts(contentTypes: string[]): FilterDecorator {
-  const types = new Set(contentTypes);
-  const handler = async function (req: Request): Promise<void> {
-    const contentType = req.header('content-type');
-    if (!contentType || !types.has(contentType)) {
-      throw new AppError(`Content type ${contentType} not one of ${contentTypes}`, 'data');
-    }
-  };
-
-  return ControllerRegistry.createFilterDecorator(handler);
+export function Accepts(types: string[]): EndpointDecorator {
+  return ControllerRegistry.createInterceptorConfigDecorator(AcceptsInterceptor, { types });
 }
+
+/**
+ * Allows for configuring interceptor-level support at an endpoint or controller level
+ */
+export const ConfigureInterceptor =
+  ControllerRegistry.createInterceptorConfigDecorator.bind(ControllerRegistry);

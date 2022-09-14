@@ -3,7 +3,7 @@ import * as express from 'express';
 import * as compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
-import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig } from '@travetto/rest';
+import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor } from '@travetto/rest';
 import { GlobalRoute } from '@travetto/rest/src/internal/types';
 import { NodeEntityⲐ, TravettoEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { ServerHandle } from '@travetto/rest/src/types';
@@ -69,8 +69,8 @@ export class ExpressRestServer implements RestServer<express.Application> {
     const router: express.Router & { key?: string | symbol } = express.Router({ mergeParams: true });
 
     for (const route of routes) {
-      router[route.method](route.path!, (req, res) => {
-        route.handlerFinalized!(
+      router[route.method](route.path!, async (req, res) => {
+        await route.handlerFinalized!(
           req[TravettoEntityⲐ] ??= ExpressServerUtil.getRequest(req),
           res[TravettoEntityⲐ] ??= ExpressServerUtil.getResponse(res)
         );
@@ -85,7 +85,10 @@ export class ExpressRestServer implements RestServer<express.Application> {
           method: 'options',
           path: '*',
           handler: (__req: Request) => '',
-          params: [{ extract: (__, r: unknown) => r, location: 'context' }]
+          params: [{ extract: (__, r: unknown) => r, location: 'context' }],
+          interceptors: [
+            [LoggingInterceptor, { disabled: true }]
+          ]
         }
       );
 

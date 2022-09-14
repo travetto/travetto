@@ -1,9 +1,21 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Class, ClassInstance } from '@travetto/base';
 import { MetadataRegistry } from '@travetto/registry';
+import { Primitive } from '@travetto/base/src/internal/global-types';
 
-import { EndpointConfig, ControllerConfig, FilterDecorator } from './types';
+import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types';
 import { Filter, RouteHandler, ParamConfig } from '../types';
+import { RestInterceptor } from '../interceptor/types';
+
+
+type ValidFieldNames<T> = {
+  [K in keyof T]:
+  (T[K] extends (Primitive | undefined) ? K :
+    (T[K] extends (Function | undefined) ? never :
+      K))
+}[keyof T];
+
+type RetainFields<T> = Pick<T, ValidFieldNames<T>>;
 
 /**
  * Controller registry
@@ -19,6 +31,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       class: cls,
       filters: [],
       headers: {},
+      interceptors: [],
       basePath: '',
       endpoints: [],
     };
@@ -36,6 +49,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       priority: controllerConf.endpoints!.length, // Lowest is first
       headers: {},
       params: [],
+      interceptors: [],
       handlerName: handler.name,
       handler
     };
@@ -93,10 +107,34 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   /**
+   * Register the endpoint interceptor config
+   * @param cls Controller class
+   * @param handler Route handler
+   * @param param The param config
+   * @param index The parameter index
+   */
+  registerEndpointInterceptorConfig<T extends RestInterceptor<any>>(target: Class, handler: RouteHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
+    const endpointConfig = this.getOrCreateEndpointConfig(target, handler);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    (endpointConfig.interceptors ??= []).push([interceptorCls as Class<T>, { disabled: false, ...config }]);
+  }
+
+  /**
+   * Register the controller interceptor config
+   * @param cls Controller class
+   * @param param The param config
+   * @param index The parameter index
+   */
+  registerControllerInterceptorConfig<T extends RestInterceptor>(target: Class, interceptorCls: Class<T>, config: Partial<T['config']>): void {
+    const controllerConfig = this.getOrCreatePending(target);
+    (controllerConfig.interceptors ??= []).push([interceptorCls, { disabled: false, ...config }]);
+  }
+
+  /**
    * Create a filter decorator
    * @param fn The filter to call
    */
-  createFilterDecorator(fn: Filter): FilterDecorator {
+  createFilterDecorator(fn: Filter): EndpointDecorator {
     return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>): void => {
       if (prop) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -104,6 +142,27 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       } else {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         this.registerControllerFilter(target as Class, fn);
+      }
+    };
+  }
+
+  /**
+   * Register a controller/endpoint with specific config for an interceptor
+   * @param cls The interceptor to register data for
+   * @param cfg The partial config override
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  createInterceptorConfigDecorator<T extends RestInterceptor<any>>(
+    cls: Class<T>,
+    cfg: Partial<Omit<RetainFields<T['config']>, 'paths'>>
+  ): EndpointDecorator {
+    return (target: unknown, prop?: symbol | string, descriptor?: TypedPropertyDescriptor<RouteHandler>): void => {
+      if (prop && descriptor) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        this.registerEndpointInterceptorConfig((target as unknown as ClassInstance).constructor, descriptor!.value!, cls, cfg as Partial<T['config']>);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        this.registerControllerInterceptorConfig((target as unknown as Class), cls, cfg as Partial<T['config']>);
       }
     };
   }
@@ -118,6 +177,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     const headers = Object.fromEntries(Object.entries(src.headers ?? {}).map(([k, v]) => [k.toLowerCase(), v]));
     dest.headers = { ...(dest.headers ?? {}), ...headers };
     dest.filters = [...(dest.filters ?? []), ...(src.filters ?? [])];
+    dest.interceptors = [...(dest.interceptors ?? []), ...(src.interceptors ?? [])];
     dest.title = src.title || dest.title;
     dest.description = src.description || dest.description;
   }

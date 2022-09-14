@@ -7,7 +7,7 @@ import { Injectable } from '@travetto/di';
 import { RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
 
-import { Response, Request } from '../types';
+import { Response, FilterContext, FilterNext } from '../types';
 import { Renderable } from '../response/renderable';
 import { HeadersAddedⲐ, NodeEntityⲐ, SendStreamⲐ } from '../internal/symbol';
 
@@ -41,7 +41,7 @@ export class SerializeInterceptor implements RestInterceptor {
    * @param res Outbound response
    * @param output The value to output
    */
-  static async sendOutput(req: Request, res: Response, output: unknown): Promise<void> {
+  static async sendOutput({ req, res }: FilterContext, output: unknown): Promise<void> {
     if (res.headersSent) {
       return;
     } else if (res[HeadersAddedⲐ]) {
@@ -81,15 +81,16 @@ export class SerializeInterceptor implements RestInterceptor {
 
   after = [LoggingInterceptor];
 
-  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>): Promise<void> {
+  async intercept(ctx: FilterContext, next: FilterNext): Promise<void> {
     try {
       const output = await next();
-      await SerializeInterceptor.sendOutput(req, res, output);
+      await SerializeInterceptor.sendOutput(ctx, output);
     } catch (err) {
+      console.warn(err);
       if (isUnknownError(err)) {  // Ensure we always throw "Errors"
         err = new AppError(err.message || 'Unexpected error', 'general', err);
       }
-      await SerializeInterceptor.sendOutput(req, res, err);
+      await SerializeInterceptor.sendOutput(ctx, err);
     }
   }
 }

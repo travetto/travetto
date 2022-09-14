@@ -8,7 +8,7 @@
 npm install @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) class.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L115) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding. ") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) class.
 
 ## Routes: Controller
 
@@ -89,7 +89,7 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
    *  [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L63) - Request body (in it's entirety), with support for validation
    *   - Allows for mapping the query parameters to a full object
    *  [@Header](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L57) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107), etc.)
+   *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L115), etc.)
 
 Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L26) can be configured to indicate:
    
@@ -251,7 +251,7 @@ Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module
 
 ## Running an App
 
-By default, the framework provides a default [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) at [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L23) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support.") module to execute.  
+By default, the framework provides a default [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) at [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L24) that will follow default behaviors, and spin up the REST server.  You will need to install the [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support.") module to execute.  
 
 **Install: Installing app support**
 ```bash
@@ -325,11 +325,11 @@ Available Applications:
 
 ## Interceptors
 
-[RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L11)s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
+[RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L30)s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
 **Code: A Trivial Interceptor**
 ```typescript
-import { RestInterceptor, SerializeInterceptor, Request, Response } from '@travetto/rest';
+import { RestInterceptor, SerializeInterceptor, FilterContext } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
@@ -337,7 +337,7 @@ export class HelloWorldInterceptor implements RestInterceptor {
 
   after = [SerializeInterceptor];
 
-  intercept(req: Request, res: Response) {
+  intercept(ctx: FilterContext) {
     console.log('Hello world!');
   }
 }
@@ -347,28 +347,28 @@ export class HelloWorldInterceptor implements RestInterceptor {
 
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
    
-   1. [BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/body-parse.ts#L34) - This handles the inbound request, and converting the body payload into an appropriate format.  Additionally it exposes the original request as the raw property on the request.
+   1. [BodyParseInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/body-parse.ts#L36) - This handles the inbound request, and converting the body payload into an appropriate format.  Additionally it exposes the original request as the raw property on the request.
      
    **Code: Cors Config**
    ```typescript
-   export class RestBodyParseConfig {
+   export class RestBodyParseConfig extends ManagedInterceptorConfig {
+     /**
+      * Max body size limit
+      */
      limit: string = '100kb';
-     routeLimits: Record<string, string> = {};
+     /**
+      * How to interpret different content types
+      */
      parsingTypes: Record<string, ParserType> = {};
-     paths: string[] = [];
    }
    ```
    
    1. [SerializeInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L25) - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
-   1. [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cors.ts#L39) - This interceptor allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, `rest.cors.active: true`
+   1. [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cors.ts#L45) - This interceptor allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, `rest.cors.active: true`
      
    **Code: Cors Config**
    ```typescript
-   export class RestCorsConfig {
-     /**
-      * Is cors active
-      */
-     active: boolean = false;
+   export class RestCorsConfig extends ManagedInterceptorConfig {
      /**
       * Allowed origins
       */
@@ -385,18 +385,22 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
       * Support credentials?
       */
      credentials?: boolean;
+   
+     @Ignore()
+     resolved: {
+       origins: Set<string>;
+       methods: string;
+       headers: string;
+       credentials: boolean;
+     };
    }
    ```
    
-   1. [CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L52) - This interceptor is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
+   1. [CookiesInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cookies.ts#L72) - This interceptor is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
      
    **Code: Cookies Config**
    ```typescript
-   export class RestCookieConfig {
-     /**
-      * Are cookies supported
-      */
-     active = true;
+   export class RestCookieConfig extends ManagedInterceptorConfig {
      /**
       * Are they signed
       */
@@ -424,27 +428,27 @@ Out of the box, the rest framework comes with a few interceptors, and more are c
    }
    ```
    
-   1. [GetCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/get-cache.ts#L12) - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting `rest.disableGetCache: true` in your config.
-   1. [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L25) - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
+   1. [GetCacheInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/get-cache.ts#L16) - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting `rest.disableGetCache: true` in your config.
+   1. [LoggingInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/logging.ts#L17) - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so
    
      
    **Code: Control Logging**
    ```yaml
-   rest.logRoutes:
+   rest.log:
    - '/controller1'
    - '!/controller1:*'
    - '/controller2:/path'
    - '!/controller3:/path/*'
    ```
    
-   1. [AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/context.ts#L18) - This interceptor is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
+   1. [AsyncContextInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/context.ts#L17) - This interceptor is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.
 
 ### Custom Interceptors
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by extending the [RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L11) class.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") by implementing the [RestInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/types.ts#L30) interface.  The interceptors are tied to the defined [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L115) objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 **Code: Defining a new Interceptor**
 ```typescript
-import { Request, Response, RestInterceptor } from '@travetto/rest';
+import { FilterContext, RestInterceptor } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
 class Appender {
@@ -456,7 +460,7 @@ export class LoggingInterceptor implements RestInterceptor {
 
   constructor(private appender: Appender) { }
 
-  async intercept(req: Request, res: Response) {
+  async intercept({ req }: FilterContext) {
     // Write request to database
     this.appender.write(req.method, req.path, req.query);
   }
@@ -467,12 +471,12 @@ A `next` parameter is also available to allow for controlling the flow of the re
 
 **Code: Defining a fully controlled Interceptor**
 ```typescript
-import { RestInterceptor, Request, Response } from '@travetto/rest';
+import { RestInterceptor, FilterContext, FilterNext } from '@travetto/rest';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
 export class LoggingInterceptor implements RestInterceptor {
-  async intercept(req: Request, res: Response, next: () => Promise<unknown>) {
+  async intercept(ctx: FilterContext, next: FilterNext) {
     const start = Date.now();
     try {
       await next();
@@ -485,8 +489,54 @@ export class LoggingInterceptor implements RestInterceptor {
 
 Currently [Asset Rest Support](https://github.com/travetto/travetto/tree/main/module/asset-rest#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the travetto framework").
 
+### Configuring Interceptors
+All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:
+   
+   *  Enable/disable of individual interceptors via configuration 
+   **Code: Sample interceptor disabling configuration**
+   ```yaml
+   rest:
+     cors:
+       disabled: true
+   ```
+   
+   *  Path-based control for various routes within the application 
+   **Code: Sample interceptor path managed configuration**
+   ```yaml
+   rest:
+     cors:
+       paths: 
+         - '!/public/user'
+         - '/public/*'
+   ```
+   
+   *  Route-enabled control via decorators 
+   **Code: Sample controller with route-level allow/deny**
+   ```typescript
+   import { Controller, Get, Query, ConfigureInterceptor, CorsInterceptor } from '@travetto/rest';
+   
+   @Controller('/allowDeny')
+   @ConfigureInterceptor(CorsInterceptor, { disabled: true })
+   export class AlowDenyController {
+   
+     @Get('/override')
+     @ConfigureInterceptor(CorsInterceptor, { disabled: false })
+     cookies(@Query() value: string) {
+   
+     }
+   }
+   ```
+   
+
+The resolution logic is as follows:
+   
+   *  Determine if interceptor is disabled, this takes precedence.`
+   *  Check the route against the path allow/deny list.  If matched (positive or negative), this wins.
+   *  Finally check to see if the interceptor has custom applies logic.  If it does, match against the configuration for the route
+   *  By default, if nothing else matched, assume the interceptor is valid
+
 ## Cookie Support
-[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12)/[TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L107) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
+[express](https://expressjs.com)/[koa](https://koajs.com/)/[fastify](https://www.fastify.io/) all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using [cookies](https://www.npmjs.com/package/cookies).  This functionality is exposed onto the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L12)/[TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/types.d.ts#L115) object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
 **Code: Sample Cookie Usage**
 ```typescript
