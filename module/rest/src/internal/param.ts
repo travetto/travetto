@@ -13,7 +13,7 @@ export function querySchemaParamConfig(config: Partial<ParamConfig> & { view?: s
   return {
     ...config,
     location: 'query',
-    resolve: (req): void => {
+    resolve: ({ req }): void => {
       const val = BindUtil.expandPaths(req.query);
       req[QuerySchemaⲐ] ??= {};
       req[QuerySchemaⲐ][config.name!] = config.key ? val[config.key] : val;

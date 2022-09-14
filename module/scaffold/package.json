@@ -41,6 +41,7 @@
     "@types/mustache": "^4.2.1"
   },
   "docDependencies": {
+    "@travetto/auth-rest-context": true,
     "@travetto/auth-rest": true,
     "@travetto/model": true,
     "@travetto/model-query": true

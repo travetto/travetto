@@ -97,8 +97,6 @@ ${lib.JSDoc} comments can also be used to describe parameters using ${d.Input('@
 
 ${d.Code('Full-fledged Controller with Routes', 'doc/simple-full.ts')}
 
-
-
 ${d.SubSection('Body and QuerySchema')}
 
 The module provides high level access for ${mod.Schema} support, via decorators, for validating and typing request bodies.
@@ -175,7 +173,7 @@ ${d.Ordered(
 )}
 
 ${d.SubSection('Custom Interceptors')}
-Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the ${mod.Di} by extending the ${RestInterceptor} class.  The interceptors are tied to the defined ${Request} and ${Response} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
+Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the ${mod.Di} by implementing the ${RestInterceptor} interface.  The interceptors are tied to the defined ${Request} and ${Response} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
 ${d.Code('Defining a new Interceptor', 'doc/interceptor-logging.ts')}
 
@@ -184,6 +182,22 @@ A ${d.Input('next')} parameter is also available to allow for controlling the fl
 ${d.Code('Defining a fully controlled Interceptor', 'doc/interceptor-controlled.ts')}
 
 Currently ${mod.AssetRest} is implemented in this fashion, as well as ${mod.AuthRest}.
+
+${d.SubSection('Configuring Interceptors')}
+All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:
+${d.List(
+  d`Enable/disable of individual interceptors via configuration ${d.Code('Sample interceptor disabling configuration', 'doc/resources/disable.yml')}`,
+  d`Path-based control for various routes within the application ${d.Code('Sample interceptor path managed configuration', 'doc/resources/route-allow-deny.yml')}`,
+  d`Route-enabled control via decorators ${d.Code('Sample controller with route-level allow/deny', 'doc/controller-route-deny.ts')}`
+)}
+
+The resolution logic is as follows:
+${d.List(
+  'Determine if interceptor is disabled, this takes precedence.`',
+  'Check the route against the path allow/deny list.  If matched (positive or negative), this wins.',
+  'Finally check to see if the interceptor has custom applies logic.  If it does, match against the configuration for the route',
+  'By default, if nothing else matched, assume the interceptor is valid'
+)}
 
 ${d.Section('Cookie Support')}
 ${lib.Express}/${lib.Koa}/${lib.Fastify} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using ${lib.Cookies}.  This functionality is exposed onto the ${Request}/${Response} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.

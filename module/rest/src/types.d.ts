@@ -2,8 +2,8 @@ import { SetOption, GetOption } from 'cookies';
 import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'http';
 import { Readable, Writable } from 'stream';
 
-import { HeaderMap } from './types';
-import { HeadersAddedⲐ, NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from './internal/symbol';
+import { ContentType, HeaderMap } from './types';
+import { HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from './internal/symbol';
 
 declare global {
   /**
@@ -26,6 +26,10 @@ declare global {
      * The raw http Incoming Message object
      */
     [NodeEntityⲐ]: IncomingMessage;
+    /**
+     * Interceptor-related configs, providing request-awareness of route-level configurations
+     */
+    [InterceptorConfigsⲐ]?: Record<string, Record<string, unknown>>;
     /**
      * The http method
      */
@@ -93,6 +97,10 @@ declare global {
      * @param key 
      */
     headerFirst<K extends keyof TravettoRequestHeaders>(key: K): string | undefined;
+    /**
+     * Get the structured content type of the request
+     */
+    getContentType(): ContentType | undefined;
     /**
      * Listen for request events
      */

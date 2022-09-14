@@ -8,4 +8,4 @@
 npm install @travetto/rest-koa-lambda
 ```
 
-The [koa](https://koajs.com/) module supports integration with [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L23) that is able to integrate with AWS appropriately.
+The [koa](https://koajs.com/) module supports integration with [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md) when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L24) that is able to integrate with AWS appropriately.

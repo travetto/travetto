@@ -14,6 +14,7 @@ import { ControllerRegistry } from '../registry/controller';
 import { GlobalRoute, RestInterceptorTarget } from '../internal/types';
 import { RestServer } from './server';
 
+
 /**
  * The rest application
  */
@@ -166,7 +167,7 @@ export class RestApplication<T = unknown>  {
       }],
       instance: {},
       handler: this.globalHandler,
-      method: 'all', path: '*'
+      method: 'all', path: '*',
     };
     route.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, route);
     await this.server.registerRoutes(GlobalRoute, '/', [route]);

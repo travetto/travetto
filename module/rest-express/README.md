@@ -8,7 +8,7 @@
 npm install @travetto/rest-express
 ```
 
-The module is an [express](https://expressjs.com) provider for the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L23) for automatic injection in the default Rest server.
+The module is an [express](https://expressjs.com) provider for the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L24) for automatic injection in the default Rest server.
 
 ## Customizing Rest App
 
@@ -21,8 +21,8 @@ declare let rateLimit: (config: { windowMs: number, max: number }) => ((req: Exp
 
 @Injectable({ primary: true })
 class CustomRestServer extends ExpressRestServer {
-  override init() {
-    const app = super.init();
+  override async init() {
+    const app = await super.init();
     const limiter = rateLimit({
       windowMs: 15 * 60 * 1000, // 15 minutes
       max: 100 // limit each IP to 100 requests per windowMs

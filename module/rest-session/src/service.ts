@@ -6,15 +6,18 @@ import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/m
 import { Text } from '@travetto/schema';
 import { Request, Response } from '@travetto/rest';
 
-import { Session } from './session';
+import { Session, SessionData } from './session';
 import { SessionConfig } from './config';
 
+/**
+ * Session model service identifier
+ */
 export const SessionModelⲐ = Symbol.for('@trv:rest-session/model');
 
 /**
  * Symbol for accessing the raw session
  */
-const SessionⲐ = Symbol.for('@trv:rest-session/data');
+export const SessionⲐ = Symbol.for('@trv:rest-session/data');
 
 /**
  * Declare the session on the request
@@ -147,8 +150,8 @@ export class SessionService {
   /**
    * Store to response
    */
-  async writeResponse(req: Request, res: Response): Promise<void> {
-    const value = await this.#store(req[SessionⲐ]);
+  async writeResponse(res: Response, raw: Session<SessionData>): Promise<void> {
+    const value = await this.#store(raw);
 
     if (value === undefined) {
       return;

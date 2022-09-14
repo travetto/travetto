@@ -1,28 +1,25 @@
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
-import { Request, Response } from '../types';
-
-import { RestInterceptor } from './types';
-import { ManagedConfig, ManagedInterceptor } from './decorator';
+import { ManagedInterceptorConfig, RestInterceptor } from './types';
+import { FilterContext, FilterNext } from '../types';
 
 /**
  * Rest logging configuration
  */
-@Config('rest.logRoutes')
-export class RestLogRoutesConfig extends ManagedConfig { }
+@Config('rest.log')
+export class RestLogRoutesConfig extends ManagedInterceptorConfig { }
 
 /**
  * Logging interceptor, to show activity for all requests
  */
 @Injectable()
-@ManagedInterceptor()
 export class LoggingInterceptor implements RestInterceptor {
 
   @Inject()
   config: RestLogRoutesConfig;
 
-  async intercept(req: Request, res: Response, next: () => Promise<void | unknown>): Promise<unknown> {
+  async intercept({ req, res }: FilterContext, next: FilterNext): Promise<unknown> {
     const start = Date.now();
 
     try {

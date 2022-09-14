@@ -17,7 +17,7 @@ export class Simple {
     return { name: `/simple/names => ${user.first.toLowerCase()}` };
   }
 
-  @CacheControl(1, 'd')
+  @CacheControl('1d')
   @Get('/nameAngry')
   async doItAngry() {
     const user = await this.#service.fetch();

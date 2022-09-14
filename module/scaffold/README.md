@@ -84,6 +84,7 @@ import { NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
+import { AuthContextService } from '@travetto/auth-rest-context';
 
 import { Todo } from '../model/todo';
 
