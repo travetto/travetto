@@ -12,7 +12,7 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest-express</code></pre>     
       </figure>
 
-The module is an <a target="_blank" class="external-link" href="https://expressjs.com">express</a> provider for the <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L23">RestApplication</a> for automatic injection in the default Rest server.
+The module is an <a target="_blank" class="external-link" href="https://expressjs.com">express</a> provider for the <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module.  This module provides an implementation of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L24">RestApplication</a> for automatic injection in the default Rest server.
 
 <h2 id="customizing-rest-app">Customizing Rest App</h2>
 
@@ -27,8 +27,8 @@ The module is an <a target="_blank" class="external-link" href="https://expressj
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> primary<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">CustomRestServer</span> <span class="token keyword">extends</span> <span class="token class-name">ExpressRestServer</span> <span class="token punctuation">{{'{'}}</span>
-  override <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  override <span class="token keyword">async</span> <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">const</span> limiter <span class="token operator">=</span> <span class="token function">rateLimit</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
       windowMs<span class="token operator">:</span> <span class="token number">15</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">,</span> <span class="token comment">// 15 minutes</span>
       max<span class="token operator">:</span> <span class="token number">100</span> <span class="token comment">// limit each IP to 100 requests per windowMs</span>

@@ -18,7 +18,7 @@ A simple tool for scaffolding a reference project.  To get started, you need to 
       <figcaption class="install">Setting up the necessary config
       
       </figcaption>
-      <pre><code class="language-bash">$ <span class="token function">git</span> config --global.username <span class="token operator">&lt;</span>Username<span class="token operator">></span> <span class="token comment">#Set your git username</span></code></pre>     
+      <pre><code class="language-bash">$ <span class="token function">git</span> config <span class="token parameter variable">--global.username</span> <span class="token operator">&lt;</span>Username<span class="token operator">></span> <span class="token comment">#Set your git username</span></code></pre>     
       </figure>
 
 Once installed you can invoke the scaffolding by running
@@ -94,6 +94,7 @@ In the case both <code class="item input">rest</code> and <code class="item inpu
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ModelQuery<span class="token punctuation">,</span> ModelQueryCrudSupport <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/model-query'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AuthContextService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth-rest-context'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Todo <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../model/todo'</span><span class="token punctuation">;</span>
 
