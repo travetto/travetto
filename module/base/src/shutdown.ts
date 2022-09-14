@@ -1,3 +1,5 @@
+import { setTimeout } from 'timers/promises';
+
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { Util } from './util';
@@ -181,7 +183,7 @@ class $ShutdownManager {
   listenForUnhandled(): Promise<never> & { cancel: () => void } {
     const uncaught = Util.resolvablePromise<never>();
     const uncaughtWithCancel: typeof uncaught & { cancel?: () => void } = uncaught;
-    const cancel = this.onUnhandled(err => { uncaught.reject(err); return true; }, 0);
+    const cancel = this.onUnhandled(err => { setTimeout(1).then(() => uncaught.reject(err)); return true; }, 0);
     uncaughtWithCancel.cancel = (): void => {
       cancel(); // Remove the handler
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

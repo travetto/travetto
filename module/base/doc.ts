@@ -118,7 +118,8 @@ ${d.List(
     d`${d.Input('coerce')}, will attempt to force values from ${d.Input('b')} to fit the types of ${d.Input('a')}, and if it can't it will error out`,
     d`${d.Input('strict')}, will error out if the types do not match`,
   )}`,
-  d`${d.Method('uuid(len: number)')} generates a simple uuid for use within the application.`
+  d`${d.Method('uuid(len: number)')} generates a simple uuid for use within the application.`,
+  d`${d.Method('allowDenyMatcher(rules[])')} builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.`
 )}
 
 ${d.Section('CLI - build')} 
