@@ -1,7 +1,7 @@
 {
   "name": "@travetto/auth-rest-jwt",
   "displayName": "Rest Auth JWT",
-  "version": "3.0.0-rc.3",
+  "version": "3.0.0-rc.4",
   "description": "Rest authentication JWT integration support for the travetto framework",
   "keywords": [
     "authentication",
@@ -27,12 +27,12 @@
     "directory": "module/auth-rest-jwt"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^3.0.0-rc.3",
-    "@travetto/auth": "^3.0.0-rc.1",
-    "@travetto/config": "^3.0.0-rc.3",
-    "@travetto/di": "^3.0.0-rc.3",
-    "@travetto/rest": "^3.0.0-rc.3",
-    "@travetto/jwt": "^3.0.0-rc.1"
+    "@travetto/auth-rest": "^3.0.0-rc.4",
+    "@travetto/auth": "^3.0.0-rc.2",
+    "@travetto/config": "^3.0.0-rc.4",
+    "@travetto/di": "^3.0.0-rc.4",
+    "@travetto/rest": "^3.0.0-rc.4",
+    "@travetto/jwt": "^3.0.0-rc.2"
   },
   "docDependencies": {
     "@types/passport-facebook": "^2.1.11",
