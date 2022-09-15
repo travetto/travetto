@@ -57,8 +57,12 @@ class $ResourceManager {
    * @param searchPath Path to look through
    * @param full Is the path fully qualified or should it be relative to the cwd
    */
-  addPath(searchPath: string): void {
-    this.#paths.push(PathUtil.resolveUnix(searchPath));
+  addPath(searchPath: string, index = -1): void {
+    if (index < 0) {
+      this.#paths.push(PathUtil.resolveUnix(searchPath));
+    } else {
+      this.#paths.splice(index, 0, PathUtil.resolveUnix(searchPath));
+    }
   }
 
   /**
