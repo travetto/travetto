@@ -39,6 +39,7 @@ export class AuthService {
     for (const auth of authenticators) {
       try {
         const idp = this.#authenticators.get(auth)!;
+        await idp.initialize?.({ req, res });
         const principal = await idp.authenticate(req.body, { req, res });
         if (!principal) { // Multi-step login process
           return;

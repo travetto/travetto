@@ -5,7 +5,7 @@ import { Config } from '@travetto/config';
 import { AuthUtil } from '@travetto/auth';
 import { Ignore } from '@travetto/schema';
 
-import { AuthReadWriteInterceptor } from './readWrite';
+import { AuthReadWriteInterceptor } from './read-write';
 
 @Config('rest.auth.verify')
 export class RestAuthVerifyConfig extends ManagedInterceptorConfig {

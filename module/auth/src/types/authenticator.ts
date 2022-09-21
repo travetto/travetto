@@ -7,6 +7,12 @@ import { Principal } from './principal';
  */
 export interface Authenticator<T = unknown, P extends Principal = Principal, C = unknown> {
   /**
+   * Allows for the authenticator to be initialized if needed
+   * @param ctx
+   */
+  initialize?(ctx: C): Promise<void>;
+
+  /**
    * Verify the payload, ensuring the payload is correctly identified.
    *
    * @returns Valid principal if authenticated

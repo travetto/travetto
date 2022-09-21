@@ -1,18 +1,27 @@
 import * as passport from 'passport';
 
 import { Authenticator, Principal } from '@travetto/auth';
-import { Request, Response } from '@travetto/rest';
+import { FilterContext, Request, Response } from '@travetto/rest';
 import { LoginContextⲐ } from '@travetto/auth-rest/src/internal/types';
 
 import { PassportAuthOptions, PassportUtil } from './util';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
 
+
+type Handler = (req: Request, res: Response, next: Function) => unknown;
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+const authenticator = (passport as unknown as passport.Authenticator<Handler>);
+
 /**
  * Authenticator via passport
  */
-export class PassportAuthenticator<U> implements Authenticator<U, Principal, { req: Request, res: Response }> {
+export class PassportAuthenticator<U> implements Authenticator<U, Principal, FilterContext> {
 
+  #passportInit = authenticator.initialize();
+
+  #init?: Promise<void>;
   #strategyName: string;
   #strategy: passport.Strategy;
   #toPrincipal: (user: U) => SimplePrincipal;
@@ -66,11 +75,18 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, { r
   }
 
   /**
-   * Authenticate a request given passport config
-   * @param req The travetto request
-   * @param res The travetto response
+   * Setup passport for initialization
+   * @param ctx The travetto filter context
    */
-  authenticate(user: U, { req, res }: { req: Request, res: Response }): Promise<Principal | undefined> {
+  initialize({ req, res }: FilterContext): Promise<void> {
+    return this.#init ??= new Promise<void>(resolve => this.#passportInit(req, res, resolve));
+  }
+
+  /**
+   * Authenticate a request given passport config
+   * @param ctx The travetto filter context
+   */
+  authenticate(user: U, { req, res }: FilterContext): Promise<Principal | undefined> {
     return new Promise<Principal | undefined>((resolve, reject) => {
 
       // Get the login context
