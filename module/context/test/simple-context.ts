@@ -63,7 +63,7 @@ class VerifyContext {
         }
         await Util.wait(20);
         await this.context.run(async () => {
-          contexts.push(JSON.parse(JSON.stringify(this.context.get())));
+          contexts.push(structuredClone(this.context.get()));
         }, { color: 'green' });
       }, { age: 20, name: 'bob' });
     }));

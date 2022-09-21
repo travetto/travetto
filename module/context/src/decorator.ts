@@ -12,8 +12,7 @@ export function WithAsyncContext<T extends { context: AsyncContext }>(data?: Rec
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const og = descriptor.value! as (this: T, ...args: unknown[]) => Promise<V>;
     descriptor.value = function (this: T, ...args: unknown[]): Promise<V> {
-      return (this.context.run(og.bind(this, ...args),
-        data ? JSON.parse(JSON.stringify(data)) : {}));
+      return this.context.run(og.bind(this, ...args), structuredClone(data ?? {}));
     };
 
     Object.defineProperty(descriptor.value, 'name', { value: og.name });

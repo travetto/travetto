@@ -14,7 +14,7 @@ export function WithSuiteContext(data: Record<string, unknown> = {}) {
   return (target: Class): void => {
     function wrapped(ctx: AsyncContext, og: Function) {
       return function (this: unknown) {
-        return ctx.run(og.bind(this), JSON.parse(JSON.stringify(data)));
+        return ctx.run(og.bind(this), structuredClone(data));
       };
     }
 

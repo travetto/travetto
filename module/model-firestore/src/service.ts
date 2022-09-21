@@ -13,7 +13,7 @@ import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 
 import { FirestoreModelConfig } from './config';
 
-const clone = <T>(inp: T): T => JSON.parse(JSON.stringify(inp));
+const clone = structuredClone;
 
 const toSimpleObj = <T>(inp: T, missingValue: unknown = null): PartialWithFieldValue<DocumentData> =>
   JSON.parse(JSON.stringify(inp, (_, v) => v ?? null), (_, v) => v ?? missingValue);

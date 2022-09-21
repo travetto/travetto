@@ -77,7 +77,7 @@ class $ConfigManager {
    * @param secure Determines if secrets should be redacted, defaults to true in prod, false otherwise
    */
   toJSON(secure: boolean = EnvUtil.isProd()): Record<string, unknown> {
-    const copy = JSON.parse(JSON.stringify(this.#active));
+    const copy = structuredClone(this.#active);
     return secure ?
       ConfigUtil.sanitizeValuesByKey(copy, [
         ...this.#redactedKeys,
