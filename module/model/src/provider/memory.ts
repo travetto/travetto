@@ -119,9 +119,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     }
   }
 
-  async #write<T extends ModelType>(cls: Class<T>, item: T, action: 'remove'): Promise<void>;
-  async #write<T extends ModelType>(cls: Class<T>, item: T, action: 'write'): Promise<T>;
-  async #write<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'remove'): Promise<T | void> {
+  async #persist<T extends ModelType>(cls: Class<T>, item: T, action: 'remove'): Promise<void>;
+  async #persist<T extends ModelType>(cls: Class<T>, item: T, action: 'write'): Promise<T>;
+  async #persist<T extends ModelType>(cls: Class<T>, item: T, action: 'write' | 'remove'): Promise<T | void> {
     const store = this.#getStore(cls);
     await this.#removeIndices(cls, item.id);
     if (action === 'write') {
@@ -208,13 +208,13 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       await ModelCrudUtil.load(cls, store.get(item.id)!, 'exists');
     }
     const prepped = await ModelCrudUtil.preStore(cls, item, this);
-    return await this.#write(cls, prepped, 'write');
+    return await this.#persist(cls, prepped, 'write');
   }
 
   async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> {
     const id = item.id;
     const clean = await ModelCrudUtil.naivePartialUpdate(cls, item, view, () => this.get(cls, id));
-    return await this.#write(cls, clean, 'write');
+    return await this.#persist(cls, clean, 'write');
   }
 
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
@@ -224,7 +224,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     }
     await ModelCrudUtil.load(cls, store.get(id)!);
     const where: ModelType = { id };
-    await this.#write(cls, where, 'remove');
+    await this.#persist(cls, where, 'remove');
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
