@@ -1,8 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
-import { color } from '@travetto/cli/src/color';
+import { color, ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
 
 import { CommonConfig, PackOperation } from '../lib/types';
 import { PackUtil } from '../lib/util';

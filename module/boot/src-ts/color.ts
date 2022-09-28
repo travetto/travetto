@@ -4,6 +4,11 @@ type Prim = string | number | boolean | Date;
 
 type TemplateType<T> = (values: TemplateStringsArray, ...keys: (Partial<Record<keyof T, Prim>> | string)[]) => string;
 
+type ColorSetInput<T> = Record<keyof T, (text: Prim) => string>;
+
+type Color = keyof (typeof ColorUtil)['COLORS'];
+type Style = keyof (typeof ColorUtil)['STYLES'];
+
 /**
  * Utilities for dealing with coloring console text
  */
@@ -69,7 +74,7 @@ export class ColorUtil {
    * @param styles Text styles to apply
    * @param value The value to color
    */
-  static color(textColor: keyof typeof ColorUtil.COLORS, styles: (keyof typeof ColorUtil.STYLES)[], value: Prim): string {
+  static color(textColor: Color, styles: Style[], value: Prim): string {
     if (value === undefined || value === null) {
       return '';
     }
@@ -87,7 +92,7 @@ export class ColorUtil {
    * @param textColor Text color
    * @param styles Text styles to apply
    */
-  static makeColorer(textColor: keyof typeof ColorUtil.COLORS, ...styles: (keyof typeof ColorUtil.STYLES)[]): (text: Prim) => string {
+  static makeColorer(textColor: Color, ...styles: Style[]): (text: Prim) => string {
     return this.color.bind(this, textColor, styles);
   }
 
@@ -96,7 +101,7 @@ export class ColorUtil {
    *
    * @param palette The list of supported keys for the string template
    */
-  static makeTemplate<T extends Record<string, (text: Prim) => ReturnType<(typeof ColorUtil)['color']>>>(palette: T): TemplateType<T> {
+  static makeTemplate<T>(palette: ColorSetInput<T>): TemplateType<T> {
     /**
      * @example
      * ```
@@ -109,6 +114,7 @@ export class ColorUtil {
       } else {
         const out = keys.map((el, i) => {
           if (typeof el !== 'string') {
+            // @ts-expect-error
             const subKeys: (keyof T)[] = Object.keys(el);
             if (subKeys.length !== 1) {
               throw new Error('Invalid template variable, one and only one key should be specified');
@@ -125,4 +131,33 @@ export class ColorUtil {
       }
     };
   }
+
+  static buildColorSet<T extends Record<string, [Color, ...Style[]]>>(input: T): { set: ColorSetInput<T>, template: TemplateType<T> } {
+    // Common color support
+    // @ts-expect-error
+    const set: ColorSetInput<T> = Object.fromEntries(
+      Object.entries(input)
+        .map(([k, [col, ...styles]]) => [k, this.makeColorer(col, ...styles)] as const)
+    );
+
+    const template = ColorUtil.makeTemplate(set);
+
+    return { template, set };
+  }
 }
+
+// Common color support
+export const { set: colorSet, template: color } = ColorUtil.buildColorSet({
+  input: ['yellow'],
+  output: ['magenta'],
+  path: ['cyan'],
+  success: ['green', 'bold'],
+  failure: ['red', 'bold'],
+  param: ['green'],
+  type: ['cyan'],
+  description: ['white', 'faint', 'bold'],
+  title: ['white', 'bold'],
+  identifier: ['blue', 'bold'],
+  subtitle: ['white'],
+  subsubtitle: ['white', 'faint']
+});

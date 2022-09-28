@@ -4,9 +4,8 @@ import * as path from 'path';
 // TODO: Get proper typings
 const glob = require('picomatch');
 
-import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
+import { color, FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
-import { color } from '@travetto/cli/src/color';
 
 import { CommonConfig, PackOperation } from './types';
 

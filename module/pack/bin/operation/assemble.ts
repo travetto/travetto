@@ -1,5 +1,4 @@
-import { FsUtil, PathUtil } from '@travetto/boot';
-import { color } from '@travetto/cli/src/color';
+import { color, FsUtil, PathUtil } from '@travetto/boot';
 import { CliUtil } from '@travetto/cli/src/util';
 
 import { PackUtil } from '../lib/util';

@@ -1,3 +1,5 @@
+import './internal/setup';
+
 export * from './cache';
 export * from './exec';
 export * from './color';

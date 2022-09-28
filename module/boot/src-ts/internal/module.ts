@@ -1,5 +1,4 @@
 import type * as tsi from 'typescript';
-import * as sourceMapSupport from 'source-map-support';
 
 import { TranspileUtil } from './transpile-util';
 import { ModuleUtil, Module } from './module-util';
@@ -12,23 +11,10 @@ import { PathUtil } from '../path';
 
 type UnloadHandler = (file: string, unlink?: boolean) => void;
 
-declare const global: {
-  ᚕsrc: (f: string) => string;
-};
-
-declare global {
-  interface Object {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    __proto__: unknown;
-  }
-}
-
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
 export class ModuleManager {
-  static #objectProto = Object.prototype.__proto__;
-
   static #moduleResolveFilename = Module._resolveFilename.bind(Module);
   static #moduleLoad = Module._load.bind(Module);
   static #resolveFilename?: (filename: string) => string;
@@ -148,16 +134,8 @@ export class ModuleManager {
 
     this.setTranspiler(f => this.simpleTranspile(f));
 
-    // Registering unix conversion to use for filenames
-    global.ᚕsrc = PathUtil.toUnixTs;
     ModuleUtil.init();
     AppCache.init(true);
-
-    // Register source maps for cached files
-    sourceMapSupport.install({
-      emptyCacheBetweenOperations: EnvUtil.isDynamic(),
-      retrieveFile: p => AppCache.readOptionalEntry(PathUtil.toUnixTs(p))!
-    });
 
     // Supports bootstrapping with framework resolution
     if (this.#resolveFilename) {
@@ -165,9 +143,6 @@ export class ModuleManager {
     }
     Module._load = (req, p): unknown => this.#onModuleLoad(req, p);
     require.extensions[SourceUtil.EXT] = this.compile.bind(this);
-
-    // Remove to prevent __proto__ pollution in JSON
-    Object.defineProperty(Object.prototype, '__proto__', { configurable: false, enumerable: false, get: () => this.#objectProto });
 
     this.#initialized = true;
   }
@@ -218,7 +193,6 @@ export class ModuleManager {
       Module._resolveFilename = this.#moduleResolveFilename;
     }
     ModuleUtil.reset();
-    SourceUtil.reset();
 
     // Unload all
     for (const { file } of SourceIndex.find({ includeIndex: true })) {
