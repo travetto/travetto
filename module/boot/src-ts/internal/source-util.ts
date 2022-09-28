@@ -2,35 +2,40 @@ import { readFileSync } from 'fs';
 
 type SourceHandler = (name: string, contents: string) => string;
 
-declare global {
-  // eslint-disable-next-line no-var
-  var ts: unknown;
-}
+const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error)[(])|\n/g;
 
-// Inject into global space as 'ts'
-global.ts = new Proxy({}, {
-  // Load on demand, and replace on first use
-  get: (t, prop, r): unknown => (global.ts = require('typescript'))[prop]
-});
 
 /**
  * Source Utilities
  */
 export class SourceUtil {
 
-  static #handlers: SourceHandler[] = [];
-
-  static readonly EXT = '.ts';
-
-  static init(): void {
+  static #handlers: SourceHandler[] = [
     // Tag output to indicate it was successfully processed by the framework
-    this.addPreProcessor((__, contents) =>
-      `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`);
+    (__, contents): string =>
+      `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`,
 
     // Drop typescript import, and use global. Great speedup;
-    this.addPreProcessor((_, contents) =>
-      contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript';/mg, x => `// ${x}`));
-  }
+    (_, contents): string =>
+      contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript';/mg, x => `// ${x}`),
+
+    // Insert filename, line into all log statements for all components
+    (_, contents): string => {
+      let line = 1;
+      contents = contents.replace(CONSOLE_RE, (a, cmd, lvl) => {
+        if (a === '\n') {
+          line += 1;
+          return a;
+        } else {
+          lvl = lvl === 'log' ? 'info' : lvl;
+          return `ᚕlog('${lvl}', { file: ᚕsrc(__filename), line: ${line} },`; // Make ConsoleManager target for all console invokes
+        }
+      });
+      return contents;
+    }
+  ];
+
+  static readonly EXT = '.ts';
 
   /**
    * Build error module source
@@ -69,20 +74,5 @@ export class SourceUtil {
     }
 
     return fileContents;
-  }
-
-  /**
-   * Add support for source preprocessor
-   * @param fn The preprocessor to add
-   */
-  static addPreProcessor(fn: SourceHandler): void {
-    this.#handlers.unshift(fn);
-  }
-
-  /**
-   * Clear out on cleanup
-   */
-  static reset(): void {
-    this.#handlers = [];
   }
 }

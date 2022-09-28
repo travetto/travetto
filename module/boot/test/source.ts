@@ -13,10 +13,11 @@ export class SourceUtilTest {
 
   @Test()
   preProcess() {
-    SourceUtil.addPreProcessor((__, contents) =>
-      contents.replace(/HELLO/g, x => 'HELLO; let __$$__ = 2'));
-    const results = SourceUtil.preProcess('a', 'a\nb\nc\nHELLO');
-    assert(results.includes('__$$__ = 2'));
-    assert(results.includes('a\nb\nc\nHELLO'));
+    const results = SourceUtil.preProcess('a', `import * as ts from 'typescript';
+console.log('Hello');
+`);
+    assert(results.startsWith('// import'));
+    assert(results.includes("log('info', {"));
+    assert(results.endsWith("Object.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });"));
   }
 }

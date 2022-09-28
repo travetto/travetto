@@ -104,7 +104,6 @@ export class ModuleUtil {
    * Initialize module support
    */
   static init(): void {
-    SourceUtil.init();
   }
 
   /**

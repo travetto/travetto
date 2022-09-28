@@ -1,4 +1,4 @@
-import { color } from '@travetto/cli/src/color';
+import { color } from '@travetto/boot';
 
 import { CommonConfig, PackOperation } from '../lib/types';
 import { PackUtil } from '../lib/util';

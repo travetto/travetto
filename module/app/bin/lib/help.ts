@@ -1,5 +1,4 @@
-import { PathUtil } from '@travetto/boot';
-import { color } from '@travetto/cli/src/color';
+import { PathUtil, color } from '@travetto/boot';
 
 import { ApplicationConfig } from '../../src/types';
 

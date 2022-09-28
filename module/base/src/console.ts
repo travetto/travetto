@@ -1,5 +1,3 @@
-import { SourceUtil } from '@travetto/boot/src/internal/source-util';
-
 import { AppManifest } from './manifest';
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
@@ -13,8 +11,6 @@ interface ConsoleListener {
 function setGlobal<K extends string | symbol>(ctx: Partial<Record<K, unknown>>, key: K, val: unknown): void {
   ctx[key] = val;
 }
-
-const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error)[(])|\n/g;
 
 function wrap(target: Console): ConsoleListener {
   return {
@@ -50,8 +46,10 @@ class $ConsoleManager {
   /**
    * Unique key to use as a logger function
    */
-  constructor(public readonly key: string) {
-    setGlobal(globalThis, this.key, this.invoke.bind(this));
+  constructor(public readonly key?: string) {
+    if (this.key) {
+      setGlobal(globalThis, this.key, this.invoke.bind(this));
+    }
 
     this.#exclude = new Set();
 
@@ -60,25 +58,6 @@ class $ConsoleManager {
     }
 
     this.set(console); // Init to console
-    SourceUtil.addPreProcessor(this.#instrument.bind(this)); // Register console manager
-  }
-
-  /**
-   * Modify typescript file to point to the Console Manager
-   */
-  #instrument(filename: string, fileContents: string): string {
-    // Insert filename into all log statements for all components
-    let line = 1;
-    fileContents = fileContents.replace(CONSOLE_RE, (a, cmd, lvl) => {
-      if (a === '\n') {
-        line += 1;
-        return a;
-      } else {
-        lvl = lvl === 'log' ? 'info' : lvl;
-        return `${this.key}('${lvl}', { file: ᚕsrc(__filename), line: ${line} },`; // Make ConsoleManager target for all console invokes
-      }
-    });
-    return fileContents;
   }
 
   /**
@@ -128,4 +107,4 @@ class $ConsoleManager {
   }
 }
 
-export const ConsoleManager = new $ConsoleManager('ᚕlg');
+export const ConsoleManager = new $ConsoleManager('ᚕlog');
