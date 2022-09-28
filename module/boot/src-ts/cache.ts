@@ -1,7 +1,8 @@
 import {
   Stats, mkdirSync, constants, accessSync, readdirSync,
-  readFileSync, writeFileSync, unlinkSync, statSync
+  readFileSync, writeFileSync, unlinkSync, statSync, rmdirSync
 } from 'fs';
+import * as path from 'path';
 
 import { EnvUtil } from './env';
 import { FsUtil } from './fs';
@@ -30,17 +31,34 @@ export class FileCache {
   /**
    * Purge all expired data
    */
-  #purgeExpired(): void {
-    for (const f of readdirSync(this.cacheDir)) {
-      const full = this.fromEntryName(f);
-      try {
-        this.removeExpiredEntry(full);
-      } catch (err) {
-        // Only care if it's source, otherwise might be dynamically cached data without backing file
-        if (full.endsWith('.ts')) {
-          // Cannot remove file, source is missing
-          console.warn('Cannot read', { error: err });
+  #purgeExpired(dir = this.cacheDir): void {
+    const entries = readdirSync(dir);
+    for (const entry of entries) {
+      const entryPath = PathUtil.joinUnix(dir, entry);
+      const stat = statSync(entryPath);
+      if (stat.isDirectory() || stat.isSymbolicLink()) {
+        this.#purgeExpired(entryPath);
+      } else {
+        if (entryPath.endsWith('.ts')) {
+          continue;
         }
+        const full = this.fromEntryName(entryPath);
+        try {
+          this.removeExpiredEntry(full);
+        } catch (err) {
+          // Only care if it's source, otherwise might be dynamically cached data without backing file
+          if (full.endsWith('.ts')) {
+            // Cannot remove file, source is missing
+            console.warn('Cannot read', { error: err });
+          }
+        }
+      }
+    }
+    if (entries.length === 0 && dir !== this.cacheDir) {
+      try {
+        rmdirSync(dir);
+      } catch {
+        // Nothing
       }
     }
   }
@@ -70,7 +88,12 @@ export class FileCache {
    * @param contents Contents to write
    */
   writeEntry(local: string, contents: string): void {
-    writeFileSync(this.toEntryName(local), contents, 'utf8');
+    const entryPath = this.toEntryName(local);
+    mkdirSync(path.dirname(entryPath), { recursive: true });
+    writeFileSync(entryPath, contents, 'utf8');
+    if (entryPath.endsWith('.js')) {
+      writeFileSync(entryPath.replace(/[.]js$/, '.ts'), '', 'utf8'); // Placeholder
+    }
     this.statEntry(local);
   }
 
@@ -99,7 +122,11 @@ export class FileCache {
     if (this.hasEntry(local)) {
       try {
         if (force || FileCache.isOlder(this.statEntry(local), statSync(local))) {
-          unlinkSync(this.toEntryName(local));
+          const localName = this.toEntryName(local);
+          unlinkSync(localName);
+          if (localName.endsWith('.js')) {
+            unlinkSync(localName.replace(/[.]js$/, '.ts'));
+          }
         }
       } catch (err) {
         if (!(err instanceof Error) || !err.message.includes('ENOENT')) {
@@ -164,9 +191,9 @@ export class FileCache {
     return PathUtil.resolveUnix(PathUtil.resolveFrameworkPath(PathUtil.toUnix(entry)
       .replace(this.cacheDir, '')
       .replace(/^\//, '')
-      .replace(/~/g, '/')
-      .replace(/^[.]/, 'node_modules/@travetto/')
-      .replace(/\/\/+/g, '/')));
+      .replace(/\/\/+/g, '/')
+      .replace(/[.]js$/, '.ts')
+    ));
   }
 
   /**
@@ -176,9 +203,9 @@ export class FileCache {
   toEntryName(local: string): string {
     local = PathUtil.toUnix(local).replace(PathUtil.cwd, '');
     return PathUtil.joinUnix(this.cacheDir, PathUtil.normalizeFrameworkPath(local)
-      .replace(/.*@travetto\//, '.')
+      .replace(/.*@travetto/, 'node_modules/@travetto')
       .replace(/^\//, '')
-      .replace(/\/+/g, '~')
+      .replace(/[.]ts$/, '.js')
     );
   }
 
