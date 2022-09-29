@@ -1,14 +1,14 @@
 import { OptionConfig } from '@travetto/cli/src/command';
 
-import { BaseOptions, BasePackCommand } from './pack-base';
-import { Assemble, AssembleConfig } from './operation/assemble';
+import { BaseOptions, BasePackCommand } from './cli-pack-base';
+import { Assemble, AssembleConfig } from '../support/bin/assemble';
 
 type Options = BaseOptions & {
   keepSource: OptionConfig<boolean>;
   readonly: OptionConfig<boolean>;
 };
 
-export class PackAssembleCommand extends BasePackCommand<Options, AssembleConfig> {
+export class PackAssembleCommand extends BasePackCommand<Options, AssembleConfig, 'assemble'> {
   operation = Assemble;
 
   getOptions(): Options {

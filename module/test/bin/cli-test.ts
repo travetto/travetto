@@ -99,7 +99,7 @@ export class TestCommand extends CliCommand<Options> {
   }
 
   async action(regexes: string[]): Promise<void> {
-    const { runTests } = await import('./lib/run');
+    const { runTests } = await import('../support/bin/run');
 
     const [first] = regexes;
 

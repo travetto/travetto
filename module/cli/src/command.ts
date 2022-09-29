@@ -1,9 +1,10 @@
 import { appendFile } from 'fs/promises';
 import * as commander from 'commander';
 
+import { CliUtil } from '@travetto/boot';
+
 import { CompletionConfig } from './types';
 import { HelpUtil } from './help';
-import { CliUtil } from './util';
 
 type Completion = Record<string, string[]>;
 
@@ -148,7 +149,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
    * Pre-compile on every cli execution
    */
   async build(): Promise<void> {
-    await (await import('@travetto/base/bin/lib/'))
+    await (await import('@travetto/base/support/bin/'))
       .BuildUtil.build();
   }
 

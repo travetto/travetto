@@ -2,9 +2,9 @@ import * as rl from 'readline';
 import * as timers from 'timers/promises';
 
 import { CliCommand } from '@travetto/cli/src/command';
-import { color } from '@travetto/cli/src/color';
+import { color } from '@travetto/boot';
 
-import { ServiceUtil } from './lib/service';
+import { ServiceUtil } from '../support/bin/service';
 
 /**
  * `npx trv service`

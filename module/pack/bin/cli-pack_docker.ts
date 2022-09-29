@@ -1,7 +1,7 @@
 import { OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
 
-import { BaseOptions, BasePackCommand } from './pack-base';
-import { Docker, DockerConfig } from './operation/docker';
+import { BaseOptions, BasePackCommand } from './cli-pack-base';
+import { Docker, DockerConfig } from '../support/bin/docker';
 
 type Options = BaseOptions & {
   image: OptionConfig<string>;
@@ -12,7 +12,7 @@ type Options = BaseOptions & {
   registry: OptionConfig<string>;
 };
 
-export class PackDockerCommand extends BasePackCommand<Options, DockerConfig> {
+export class PackDockerCommand extends BasePackCommand<Options, DockerConfig, 'docker'> {
   operation = Docker;
 
   getOptions(): Options {

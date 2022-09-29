@@ -1,19 +1,19 @@
 import { ColorUtil } from '@travetto/boot';
 
-export const COLOR_ENHANCER = {
-  assertDescription: ColorUtil.makeColorer('white'),
-  testDescription: ColorUtil.makeColorer('white', 'faint', 'bold'),
-  success: ColorUtil.makeColorer('green', 'faint', 'bold'),
-  failure: ColorUtil.makeColorer('red', 'faint', 'bold'),
-  assertNumber: ColorUtil.makeColorer('blue', 'bold'),
-  testNumber: ColorUtil.makeColorer('blue', 'bold'),
-  assertFile: ColorUtil.makeColorer('cyan'),
-  assertLine: ColorUtil.makeColorer('yellow'),
-  objectInspect: ColorUtil.makeColorer('magenta'),
-  suiteName: ColorUtil.makeColorer('yellow', 'faint', 'bold'),
-  testName: ColorUtil.makeColorer('cyan', 'bold'),
-  total: ColorUtil.makeColorer('white', 'bold')
-};
+export const { set: COLOR_ENHANCER } = ColorUtil.buildColorSet({
+  assertDescription: ['white'],
+  testDescription: ['white', 'faint', 'bold'],
+  success: ['green', 'faint', 'bold'],
+  failure: ['red', 'faint', 'bold'],
+  assertNumber: ['blue', 'bold'],
+  testNumber: ['blue', 'bold'],
+  assertFile: ['cyan'],
+  assertLine: ['yellow'],
+  objectInspect: ['magenta'],
+  suiteName: ['yellow', 'faint', 'bold'],
+  testName: ['cyan', 'bold'],
+  total: ['white', 'bold']
+});
 
 export type TestResultsEnhancer = typeof COLOR_ENHANCER;
 

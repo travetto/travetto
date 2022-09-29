@@ -1,7 +1,7 @@
 import { OptionConfig } from '@travetto/cli/src/command';
 
-import { BaseOptions, BasePackCommand } from './pack-base';
-import { Zip, ZipConfig } from './operation/zip';
+import { BaseOptions, BasePackCommand } from './cli-pack-base';
+import { Zip, ZipConfig } from '../support/bin/zip';
 
 type Options = BaseOptions & {
   output: OptionConfig<string>;

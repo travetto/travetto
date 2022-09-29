@@ -3,7 +3,7 @@ import { ExecUtil } from '@travetto/boot';
 
 import { ApplicationConfig } from '../src/types';
 
-import { AppListUtil } from './lib/list';
+import { AppListUtil } from '../support/bin/list';
 
 /**
  * Entry point when run directly

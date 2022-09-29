@@ -145,19 +145,3 @@ export class ColorUtil {
     return { template, set };
   }
 }
-
-// Common color support
-export const { set: colorSet, template: color } = ColorUtil.buildColorSet({
-  input: ['yellow'],
-  output: ['magenta'],
-  path: ['cyan'],
-  success: ['green', 'bold'],
-  failure: ['red', 'bold'],
-  param: ['green'],
-  type: ['cyan'],
-  description: ['white', 'faint', 'bold'],
-  title: ['white', 'bold'],
-  identifier: ['blue', 'bold'],
-  subtitle: ['white'],
-  subsubtitle: ['white', 'faint']
-});

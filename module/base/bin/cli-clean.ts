@@ -1,8 +1,7 @@
 import * as fs from 'fs/promises';
 
-import { color } from '@travetto/cli/src/color';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
-import { FileCache, PathUtil } from '@travetto/boot';
+import { color, FileCache, PathUtil } from '@travetto/boot';
 
 type Options = {
   quiet: OptionConfig<boolean>;

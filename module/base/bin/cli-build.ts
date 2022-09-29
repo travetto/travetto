@@ -1,7 +1,7 @@
-import { color } from '@travetto/cli/src/color';
+import { color } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 
-import { BuildUtil } from './lib';
+import { BuildUtil } from '../support/bin';
 
 type Options = {
   output: OptionConfig<string>;

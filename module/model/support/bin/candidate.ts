@@ -1,5 +1,4 @@
-import { CliUtil } from '@travetto/cli/src/util';
-import { ExecUtil } from '@travetto/boot';
+import { CliUtil, ExecUtil } from '@travetto/boot';
 
 import type { Class } from '@travetto/base';
 import type { InjectableConfig } from '@travetto/di';

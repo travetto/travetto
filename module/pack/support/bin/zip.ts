@@ -3,8 +3,8 @@ import * as fs from 'fs/promises';
 
 import { color, ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
 
-import { CommonConfig, PackOperation } from '../lib/types';
-import { PackUtil } from '../lib/util';
+import { CommonConfig, PackOperation } from './lib/types';
+import { PackUtil } from './lib/util';
 
 export interface ZipConfig extends CommonConfig {
   output: string;
