@@ -1,6 +1,6 @@
 import * as commander from 'commander';
 
-import { color } from './color';
+import { color } from '@travetto/boot/src/cli';
 /**
  * Utilities for formatting help
  */

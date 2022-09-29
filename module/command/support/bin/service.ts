@@ -1,5 +1,5 @@
 import { SourceIndex } from '@travetto/boot/src/internal/source';
-import { colorSet } from '@travetto/boot/src/color';
+import { colorSet } from '@travetto/boot/src/cli';
 
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';

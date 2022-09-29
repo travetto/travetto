@@ -1,7 +1,6 @@
 import { statSync } from 'fs';
 
-import { CliUtil } from '@travetto/cli/src/util';
-import { AppCache, FileCache, ExecUtil, EnvUtil } from '@travetto/boot';
+import { AppCache, CliUtil, FileCache, ExecUtil, EnvUtil } from '@travetto/boot';
 import { SimpleEntry, SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**

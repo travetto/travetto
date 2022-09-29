@@ -1,7 +1,7 @@
 import { color } from '@travetto/cli/src/color';
 
-import { BaseModelCommand } from './lib/base-command';
-import { ModelInstallUtil } from './lib/install';
+import { BaseModelCommand } from './cli-base-command';
+import { ModelInstallUtil } from '../support/bin/install';
 
 /**
  * CLI Entry point for installing models

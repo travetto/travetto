@@ -1,10 +1,9 @@
 import { promises as fs } from 'fs';
 
-import { color, ExecUtil, Package, PathUtil } from '@travetto/boot';
-import { CliUtil } from '@travetto/cli/src/util';
+import { color, CliUtil, ExecUtil, Package, PathUtil } from '@travetto/boot';
 
-import { CommonConfig, PackOperation } from '../lib/types';
-import { PackUtil } from '../lib/util';
+import { CommonConfig, PackOperation } from './lib/types';
+import { PackUtil } from './lib/util';
 
 export interface DockerConfig extends CommonConfig {
   image: string;

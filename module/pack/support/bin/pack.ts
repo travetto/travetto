@@ -1,7 +1,7 @@
-import { color } from '@travetto/boot';
+import { color } from '@travetto/boot/src/cli';
 
-import { CommonConfig, PackOperation } from '../lib/types';
-import { PackUtil } from '../lib/util';
+import { CommonConfig, PackOperation } from './lib/types';
+import { PackUtil } from './lib/util';
 import { Assemble, AssembleConfig } from './assemble';
 import { Docker, DockerConfig } from './docker';
 import { Zip, ZipConfig } from './zip';

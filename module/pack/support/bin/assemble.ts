@@ -1,9 +1,8 @@
-import { color, FsUtil, PathUtil } from '@travetto/boot';
-import { CliUtil } from '@travetto/cli/src/util';
+import { color, CliUtil, FsUtil, PathUtil } from '@travetto/boot';
 
-import { PackUtil } from '../lib/util';
-import { CommonConfig, PackOperation } from '../lib/types';
-import { AssembleUtil } from '../lib/assemble';
+import { PackUtil } from './lib/util';
+import { CommonConfig, PackOperation } from './lib/types';
+import { AssembleUtil } from './lib/assemble';
 
 export interface AssembleConfig extends CommonConfig {
   keepSource: boolean;

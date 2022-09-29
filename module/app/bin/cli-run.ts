@@ -1,13 +1,12 @@
 import * as fs from 'fs/promises';
 
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
-import { color } from '@travetto/cli/src/color';
 import { EnvInit } from '@travetto/base/bin/init';
-import { EnvUtil, PathUtil } from '@travetto/boot';
+import { color, EnvUtil, PathUtil } from '@travetto/boot';
 
-import { AppListUtil } from './lib/list';
-import { AppRunUtil } from './lib/run';
-import { HelpUtil } from './lib/help';
+import { AppListUtil } from '../support/bin/list';
+import { AppRunUtil } from '../support/bin/run';
+import { HelpUtil } from '../support/bin/help';
 
 function hasChildren(e: Error): e is Error & { errors: Error[] } {
   return !!e && ('errors' in e);

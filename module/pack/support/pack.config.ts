@@ -1,4 +1,4 @@
-import { AllConfigPartial } from '../bin/operation/pack';
+import { AllConfigPartial } from './bin/pack';
 
 const mod = (f: string): string => `node_modules/${f}`;
 

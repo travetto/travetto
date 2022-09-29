@@ -1,6 +1,7 @@
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
-import { color } from './color';
+import { color } from '@travetto/boot/src/cli';
+
 import { CliCommand } from './command';
 
 const COMMAND_PACKAGE = [

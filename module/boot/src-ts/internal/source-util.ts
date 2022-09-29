@@ -28,7 +28,7 @@ export class SourceUtil {
           return a;
         } else {
           lvl = lvl === 'log' ? 'info' : lvl;
-          return `ᚕlog('${lvl}', { file: ᚕsrc(__filename), line: ${line} },`; // Make ConsoleManager target for all console invokes
+          return `ᚕlog('${lvl}', { file: ᚕsrc(__filename), line: ${line} },`;
         }
       });
       return contents;
