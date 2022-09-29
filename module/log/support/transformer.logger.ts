@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
 
-import { ConsoleManager, AppManifest } from '@travetto/base';
 import {
   TransformerId, TransformerState, OnCall, CoreUtil, LiteralUtil,
   OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction
@@ -67,31 +66,24 @@ export class LoggerTransformer {
 
   @OnCall()
   static onDebugCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
-    if (!ts.isIdentifier(node.expression) || node.expression.text !== ConsoleManager.key) {
+    if (!ts.isIdentifier(node.expression) || node.expression.text !== 'ᚕlog') {
       return node;
     }
+
     const arg = CoreUtil.getArgument(node);
-    if (arg) {
-      // Okay since we create the object ourselves in ConsoleManager
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      if (!ts.isStringLiteral(arg)) {
-        return node;
-      }
-      const level = LiteralUtil.toLiteral(arg, false);
-      if (AppManifest.prod && level === 'debug') {
-        return state.createIdentifier('undefined'); // Lose debug logging if in prod
-      } else {
-        return state.factory.updateCallExpression(node, node.expression, node.typeArguments, [
-          state.factory.createStringLiteral(level),
-          LiteralUtil.fromLiteral(state.factory, {
-            file: state.getFilenameAsSrc(),
-            line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
-            scope: state.scope?.map(x => x.name).join(':'),
-          }),
-          ...node.arguments.slice(2) // Drop log level, and previous context from base/console support
-        ]);
-      }
+    if (!arg || !ts.isStringLiteral(arg)) {
+      return node;
     }
-    return node;
+
+    const level = LiteralUtil.toLiteral(arg, false);
+    return state.factory.updateCallExpression(node, node.expression, node.typeArguments, [
+      state.factory.createStringLiteral(level),
+      LiteralUtil.fromLiteral(state.factory, {
+        file: state.getFilenameAsSrc(),
+        line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
+        scope: state.scope?.map(x => x.name).join(':'),
+      }),
+      ...node.arguments.slice(2) // Drop log level, and previous context from boot support
+    ]);
   }
 }
