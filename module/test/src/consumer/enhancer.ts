@@ -1,6 +1,6 @@
 import { ColorUtil } from '@travetto/boot';
 
-export const { set: COLOR_ENHANCER } = ColorUtil.buildColorSet({
+export const { palette: COLOR_ENHANCER } = ColorUtil.buildColorTemplate({
   assertDescription: ['white'],
   testDescription: ['white', 'faint', 'bold'],
   success: ['green', 'faint', 'bold'],

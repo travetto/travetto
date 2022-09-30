@@ -34,14 +34,15 @@ export class FileCache {
   #purgeExpired(dir = this.cacheDir): void {
     const entries = readdirSync(dir);
     for (const entry of entries) {
+      if (entry.endsWith('.ts')) {
+        continue;
+      }
+
       const entryPath = PathUtil.joinUnix(dir, entry);
       const stat = statSync(entryPath);
       if (stat.isDirectory() || stat.isSymbolicLink()) {
         this.#purgeExpired(entryPath);
       } else {
-        if (entryPath.endsWith('.ts')) {
-          continue;
-        }
         const full = this.fromEntryName(entryPath);
         try {
           this.removeExpiredEntry(full);

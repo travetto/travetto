@@ -1,10 +1,11 @@
 import { SourceIndex } from '@travetto/boot/src/internal/source';
-import { colorSet } from '@travetto/boot/src/cli';
+import { CliUtil } from '@travetto/boot/src/cli';
 
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
 
-type StreamingStatus = AsyncIterable<Partial<Record<keyof typeof colorSet, string | number>>>;
+export type StreamingResult = Partial<Record<keyof typeof CliUtil['colorPalette'], string | number>>;
+export type StreamingStatus = AsyncIterable<StreamingResult>;
 
 export type Service = {
   name: string;

@@ -3,8 +3,8 @@ import * as enquirer from 'enquirer';
 import { PathUtil, EnvUtil } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 
-import { Context } from './lib/context';
-import { Feature, FEATURES } from './lib/features';
+import { Context } from '../support/bin/context';
+import { Feature, FEATURES } from '../support/bin/features';
 
 type Options = {
   template: OptionConfig<string>;

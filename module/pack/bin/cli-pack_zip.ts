@@ -7,7 +7,7 @@ type Options = BaseOptions & {
   output: OptionConfig<string>;
 };
 
-export class PackZipCommand extends BasePackCommand<Options, ZipConfig> {
+export class PackZipCommand extends BasePackCommand<Options, ZipConfig, 'zip'> {
   operation = Zip;
 
   getOptions(): Options {

@@ -34,7 +34,7 @@ export class EmailTemplateFeature extends BaseFeature {
   ) {
     super(module, command);
 
-    this.#server = new ProcessServer(Workspace.binPath(this.module, 'editor'));
+    this.#server = new ProcessServer(Workspace.mainPath(this.module, 'editor'));
 
     this.#server.on('start', () => {
       this.#server.onMessage('changed', (type, msg) => this.#emitter.emit('render', msg));

@@ -1,4 +1,4 @@
-import { color } from '@travetto/boot';
+import { CliUtil } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 
 import { BuildUtil } from '../support/bin/util';
@@ -37,10 +37,10 @@ export class BaseBuildCommand extends CliCommand<Options> {
       await BuildUtil.build(process.env);
 
       if (!this.cmd.quiet) {
-        console!.log(color`${{ success: 'Successfully' }} wrote to ${{ path }}`);
+        console!.log(CliUtil.color`${{ success: 'Successfully' }} wrote to ${{ path }}`);
       }
     } catch (err) {
-      console.error(color`${{ failure: 'Failed' }} to compile to ${{ path }}`, err);
+      console.error(CliUtil.color`${{ failure: 'Failed' }} to compile to ${{ path }}`, err);
       process.exit(1);
     }
   }

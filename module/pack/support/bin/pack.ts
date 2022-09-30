@@ -1,4 +1,4 @@
-import { color } from '@travetto/boot/src/cli';
+import { CliUtil } from '@travetto/boot/src/cli';
 
 import { CommonConfig, PackOperation } from './lib/types';
 import { PackUtil } from './lib/util';
@@ -64,6 +64,6 @@ export const Pack: PackOperation<AllConfig, ''> = {
       await PackUtil.runOperation(op, cfg[step], 2);
     }
     process.stdout.write('\n');
-    yield color`${{ success: 'Successfully' }} packed project`;
+    yield CliUtil.color`${{ success: 'Successfully' }} packed project`;
   }
 };

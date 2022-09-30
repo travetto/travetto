@@ -1,4 +1,4 @@
-import { color, CliUtil, FsUtil, PathUtil } from '@travetto/boot';
+import { CliUtil, FsUtil, PathUtil } from '@travetto/boot';
 
 import { PackUtil } from './lib/util';
 import { CommonConfig, PackOperation } from './lib/types';
@@ -68,6 +68,6 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
       yield 'Emptying .ts Files'; await AssembleUtil.purgeSource([`${ws}/node_modules/@travetto`, `${ws}/src`]);
     }
 
-    yield color`${{ success: 'Successfully' }} assembled project at ${{ path: workspace }}`;
+    yield CliUtil.color`${{ success: 'Successfully' }} assembled project at ${{ path: workspace }}`;
   }
 };
