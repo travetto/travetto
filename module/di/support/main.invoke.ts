@@ -1,4 +1,4 @@
-import { EnvInit } from '@travetto/base/bin/init';
+import { EnvInit } from '@travetto/base/support/bin/init';
 
 export async function invoke(...[mod, cls, method, qualifier]: (string | undefined)[]): Promise<unknown> {
   EnvInit.init();

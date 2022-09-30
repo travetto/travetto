@@ -4,7 +4,7 @@ type Prim = string | number | boolean | Date;
 
 type TemplateType<T> = (values: TemplateStringsArray, ...keys: (Partial<Record<keyof T, Prim>> | string)[]) => string;
 
-type ColorSetInput<T> = Record<keyof T, (text: Prim) => string>;
+type ColorPalette<T> = Record<keyof T, (text: Prim) => string>;
 
 type Color = keyof (typeof ColorUtil)['COLORS'];
 type Style = keyof (typeof ColorUtil)['STYLES'];
@@ -101,7 +101,7 @@ export class ColorUtil {
    *
    * @param palette The list of supported keys for the string template
    */
-  static makeTemplate<T>(palette: ColorSetInput<T>): TemplateType<T> {
+  static makeTemplate<T>(palette: ColorPalette<T>): TemplateType<T> {
     /**
      * @example
      * ```
@@ -132,16 +132,20 @@ export class ColorUtil {
     };
   }
 
-  static buildColorSet<T extends Record<string, [Color, ...Style[]]>>(input: T): { set: ColorSetInput<T>, template: TemplateType<T> } {
+  /**
+   * Builds a color template function, along with the corresponding palette
+   * @param input List of terms and their styles
+   */
+  static buildColorTemplate<T extends Record<string, [Color, ...Style[]]>>(input: T): { palette: ColorPalette<T>, template: TemplateType<T> } {
     // Common color support
     // @ts-expect-error
-    const set: ColorSetInput<T> = Object.fromEntries(
+    const palette: ColorPalette<T> = Object.fromEntries(
       Object.entries(input)
         .map(([k, [col, ...styles]]) => [k, this.makeColorer(col, ...styles)] as const)
     );
 
-    const template = ColorUtil.makeTemplate(set);
+    const template = ColorUtil.makeTemplate(palette);
 
-    return { template, set };
+    return { template, palette };
   }
 }

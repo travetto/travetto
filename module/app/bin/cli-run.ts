@@ -1,8 +1,8 @@
 import * as fs from 'fs/promises';
 
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
-import { EnvInit } from '@travetto/base/bin/init';
-import { color, EnvUtil, PathUtil } from '@travetto/boot';
+import { EnvInit } from '@travetto/base/support/bin/init';
+import { Cli, EnvUtil, PathUtil } from '@travetto/boot';
 
 import { AppListUtil } from '../support/bin/list';
 import { AppRunUtil } from '../support/bin/run';
@@ -31,7 +31,7 @@ export class AppRunCommand extends CliCommand<Options> {
   async help(): Promise<string> {
     return [
       '',
-      color`${{ title: 'Available Applications:' }}`,
+      Cli.color`${{ title: 'Available Applications:' }}`,
       '',
       HelpUtil.generateAppHelpList(await AppListUtil.getList()),
       ''
@@ -83,9 +83,9 @@ export class AppRunCommand extends CliCommand<Options> {
             throw err;
           }
           const { StacktraceUtil } = await import('@travetto/base');
-          console.error(color`${{ failure: 'Failed to run' }} ${{ title: selected.name }}, ${err.message.replace(/via=.*$/, '')}`);
+          console.error(Cli.color`${{ failure: 'Failed to run' }} ${{ title: selected.name }}, ${err.message.replace(/via=.*$/, '')}`);
           if (hasChildren(err)) {
-            console.error(err.errors.map((x: { message: string }) => color`● ${{ output: x.message }}`).join('\n'));
+            console.error(err.errors.map((x: { message: string }) => Cli.color`● ${{ output: x.message }}`).join('\n'));
           } else {
             const stack = StacktraceUtil.simplifyStack(err);
             if (!stack.includes(err.message)) {

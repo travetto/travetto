@@ -1,7 +1,6 @@
-import { PathUtil } from '@travetto/boot';
-import { EnvInit } from '@travetto/base/bin/init';
+import { color, PathUtil } from '@travetto/boot';
+import { EnvInit } from '@travetto/base/support/bin/init';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
-import { color } from '@travetto/cli/src/color';
 
 type Options = {
   watch: OptionConfig<boolean>;
@@ -27,7 +26,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
 
-    const { TemplateUtil } = await import('./lib/util');
+    const { TemplateUtil } = await import('../support/bin/util');
 
     const all = await TemplateUtil.compileAllToDisk();
     console!.log(color`Successfully compiled ${{ param: `${all.length}` }} templates`);

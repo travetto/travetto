@@ -3,8 +3,7 @@ import * as fs from 'fs/promises';
 import { readFileSync } from 'fs';
 
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
-import { AppCache, ExecUtil, PathUtil } from '@travetto/boot';
-import { color } from '@travetto/cli/src/color';
+import { AppCache, CliUtil, ExecUtil, PathUtil } from '@travetto/boot';
 
 const presets: Record<string, [string, object] | [string]> = JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', 'resources', 'presets.json'), 'utf8'));
 
@@ -61,15 +60,15 @@ export class OpenApiClientCommand extends CliCommand<Options> {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, [cmd, v]]) => [`@trv:${k}`.padEnd(presetLen + 5), [cmd, this.presetMap(v)]] as const);
 
-    const presetText = color`
+    const presetText = CliUtil.color`
 ${{ subtitle: 'Available Presets' }}
 ----------------------------------
-${presetEntries.map(([k, [cmd, param]]) => color`* ${{ input: k }} -- ${{ identifier: cmd }} ${{ param }}`).join('\n')}`;
+${presetEntries.map(([k, [cmd, param]]) => CliUtil.color`* ${{ input: k }} -- ${{ identifier: cmd }} ${{ param }}`).join('\n')}`;
 
-    const formatText = color`
+    const formatText = CliUtil.color`
 ${{ subtitle: 'Available Formats' }}
 ----------------------------------
-${this.getListOfFormats().map(x => color`* ${{ input: x }}`).join('\n')} `;
+${this.getListOfFormats().map(x => CliUtil.color`* ${{ input: x }}`).join('\n')} `;
 
     return this.cmd.extendedHelp ? `${presetText}\n${formatText}` : presetText;
   }

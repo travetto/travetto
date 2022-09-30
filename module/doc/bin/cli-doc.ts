@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
-import { EnvInit } from '@travetto/base/bin/init';
+import { EnvInit } from '@travetto/base/support/bin/init';
 import { PathUtil } from '@travetto/boot';
 
 type Options = {

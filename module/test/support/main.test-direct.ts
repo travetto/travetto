@@ -1,5 +1,5 @@
-import { EnvInit } from '@travetto/base/bin/init';
-import { runTests } from '../support/bin/run';
+import { EnvInit } from '@travetto/base/support/bin/init';
+import { runTests } from './bin/run';
 
 // Direct entry point
 export function main(...args: string[]): Promise<void> {

@@ -1,6 +1,6 @@
 import { color } from '@travetto/boot/src/cli';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
-import { EnvInit } from '@travetto/base/bin/init';
+import { EnvInit } from '@travetto/base/support/bin/init';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
 import { ModelCandidateUtil } from '../support/bin/candidate';

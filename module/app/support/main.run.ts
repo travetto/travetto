@@ -1,4 +1,4 @@
-import { AppRunUtil } from '../support/bin/run';
+import { AppRunUtil } from './bin/run';
 
 /**
  * Direct invocation of applications
