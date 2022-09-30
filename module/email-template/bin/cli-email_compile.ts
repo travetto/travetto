@@ -26,7 +26,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
 
-    const { TemplateUtil } = await import('../support/bin/util');
+    const { TemplateUtil } = await import('../src/util');
 
     const all = await TemplateUtil.compileAllToDisk();
     console!.log(CliUtil.color`Successfully compiled ${{ param: `${all.length}` }} templates`);

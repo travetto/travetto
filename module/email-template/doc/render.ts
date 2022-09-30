@@ -1,5 +1,5 @@
 import { ResourceManager } from '@travetto/base';
-import { TemplateUtil } from '@travetto/email-template/support/bin/util';
+import { TemplateUtil } from '@travetto/email-template/support/src/util';
 
 export async function main() {
 

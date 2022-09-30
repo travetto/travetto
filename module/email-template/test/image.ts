@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { PathUtil } from '@travetto/boot';
 import { Test, Suite } from '@travetto/test';
 
-import { ImageUtil } from '../support/bin/image';
+import { ImageUtil } from '../src/image';
 
 @Suite()
 class ImageUtilTest {
