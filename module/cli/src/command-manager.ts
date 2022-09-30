@@ -1,6 +1,6 @@
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
-import { color } from '@travetto/boot/src/cli';
+import { CliUtil } from '@travetto/boot/src/cli';
 
 import { CliCommand } from './command';
 
@@ -41,7 +41,7 @@ export class CliCommandManager {
       const cfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
       if (cfg) {
         const [, pkg, prod] = cfg;
-        console.error(color`
+        console.error(CliUtil.color`
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
 ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
         process.exit(1);
@@ -70,7 +70,9 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
     return Promise.all(
       [...this.getCommandMapping().keys()]
         .sort((a, b) => a.localeCompare(b))
-        .map(k => this.loadCommand(k, op))
+        .map(k => this.loadCommand(k, op).catch(() => undefined))
+    ).then((values) =>
+      values.filter((cmd): cmd is CliCommand => !!cmd)
     );
   }
 }

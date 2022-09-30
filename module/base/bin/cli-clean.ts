@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
-import { color, FileCache, PathUtil } from '@travetto/boot';
+import { CliUtil, FileCache, PathUtil } from '@travetto/boot';
 
 type Options = {
   quiet: OptionConfig<boolean>;
@@ -29,10 +29,10 @@ export class BaseCleanCommand extends CliCommand<Options> {
         try {
           cache.clear(true);
           if (!this.cmd.quiet) {
-            console!.log(color`${{ success: 'Successfully' }} deleted temp dir ${{ path: cache.cacheDir }}`);
+            console!.log(CliUtil.color`${{ success: 'Successfully' }} deleted temp dir ${{ path: cache.cacheDir }}`);
           }
         } catch {
-          console!.error(color`${{ failure: 'Failed' }} to delete temp dir ${{ path: cache.cacheDir }}`);
+          console!.error(CliUtil.color`${{ failure: 'Failed' }} to delete temp dir ${{ path: cache.cacheDir }}`);
         }
       }
     }

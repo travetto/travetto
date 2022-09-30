@@ -149,7 +149,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
    * Pre-compile on every cli execution
    */
   async build(): Promise<void> {
-    await (await import('@travetto/base/support/bin/'))
+    await (await import('@travetto/base/support/bin/util'))
       .BuildUtil.build();
   }
 

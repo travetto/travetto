@@ -1,7 +1,7 @@
 import * as os from 'os';
 
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
-import { color, PathUtil, Package, FsUtil } from '@travetto/boot';
+import { CliUtil, PathUtil, Package, FsUtil } from '@travetto/boot';
 
 import { PackUtil } from '../support/bin/lib/util';
 import { CommonConfig, PackOperation } from '../support/bin/lib/types';
@@ -76,9 +76,9 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
 
     const out: string[] = [];
     if (lines.length) {
-      out.push('', color`${{ title: 'Available Pack Modes:' }}`);
+      out.push('', CliUtil.color`${{ title: 'Available Pack Modes:' }}`);
       for (const { name, file } of lines) {
-        out.push(color`  * ${{ input: `${name}` }} [${{ path: file }}]`);
+        out.push(CliUtil.color`  * ${{ input: `${name}` }} [${{ path: file }}]`);
       }
       out.push('');
     }

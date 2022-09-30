@@ -1,6 +1,6 @@
 import * as commander from 'commander';
 
-import { color } from '@travetto/boot/src/cli';
+import { CliUtil } from '@travetto/boot/src/cli';
 /**
  * Utilities for formatting help
  */
@@ -40,20 +40,20 @@ export class HelpUtil {
       const line: string[] = [];
       line.push(
         spacing,
-        color`${{ param: simpleParam }}`,
+        CliUtil.color`${{ param: simpleParam }}`,
         pSep,
-        color`${{ param: fullParam }}`,
+        CliUtil.color`${{ param: fullParam }}`,
         subSp,
-        color`${{ type: subVal }}`,
+        CliUtil.color`${{ type: subVal }}`,
         descSp,
-        color`${{ description: descVal }}`
+        CliUtil.color`${{ description: descVal }}`
           .replace(/(\(default:\s+)(.*?)(\))/g,
-            (__, l, input, r) => color`${l}${{ input }}${{ description: r }}`)
+            (__, l, input, r) => CliUtil.color`${l}${{ input }}${{ description: r }}`)
       );
 
       return line.filter(x => !!x).join('');
     })
-      .replace(/Options:/, title => color`${{ title }}`);
+      .replace(/Options:/, title => CliUtil.color`${{ title }}`);
   }
 
   /**
@@ -61,16 +61,16 @@ export class HelpUtil {
    */
   static colorizeCommands(commands: string): string {
     return commands
-      .replace(/\s([^\[\]]\S+)/g, param => color`${{ param }}`)
-      .replace(/(\s*[^\x1b]\[[^\]]+\])/g, input => color`${{ input }}`) // eslint-disable-line no-control-regex
-      .replace(/Commands:/, title => color`${{ title }}`);
+      .replace(/\s([^\[\]]\S+)/g, param => CliUtil.color`${{ param }}`)
+      .replace(/(\s*[^\x1b]\[[^\]]+\])/g, input => CliUtil.color`${{ input }}`) // eslint-disable-line no-control-regex
+      .replace(/Commands:/, title => CliUtil.color`${{ title }}`);
   }
 
   /**
    * Colorize usage
    */
   static colorizeUsage(usage: string): string {
-    return usage.replace(/Usage:/, title => color`${{ title }}`);
+    return usage.replace(/Usage:/, title => CliUtil.color`${{ title }}`);
   }
 
   /**
@@ -102,7 +102,7 @@ export class HelpUtil {
    */
   static showHelp(command: commander.Command, message?: string, extra?: string): never {
     if (message) {
-      console!.error(color`${{ failure: message }}\n`);
+      console!.error(CliUtil.color`${{ failure: message }}\n`);
     }
     console![message ? 'error' : 'log'](
       HelpUtil.getHelpText(command.helpInformation(), extra)

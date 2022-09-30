@@ -4,6 +4,11 @@ import { Writable } from 'stream';
 
 import { ColorUtil } from './color';
 
+type Table = {
+  init(...header: string[]): Promise<void>;
+  update(row: number, output: string): Promise<void>;
+  finish(): Promise<void>;
+};
 
 // Common color support
 const { palette: colorPalette, template: color } = ColorUtil.buildColorTemplate({
@@ -123,6 +128,61 @@ export class CliUtil {
       throw capturedError;
     } else {
       return value!;
+    }
+  }
+
+  /**
+   * Provides an updatable table where you define the row/col count at the beginning, and
+   *  then are able to update rows on demand.
+   */
+  static table(rows: number): Table {
+
+    let cursorRow = 0;
+    const responses: string[] = [];
+
+    async function init(...header: string[]): Promise<void> {
+      for (const line of header) {
+        console.log(line);
+      }
+      console.log('\n'.repeat(rows));
+      cursorRow = rows + 1;
+    }
+
+    const counts = new Array(rows).fill(0);
+
+    if (process.stdout.isTTY) {
+      return {
+        async init(...header): Promise<void> {
+          process.stdout.write('\x1B[?25l\n');
+          await init(...header);
+        },
+        async update(row, output): Promise<void> {
+          if (counts[row] > 0) {
+            await timers.setTimeout(500);
+          }
+          counts[row] += 1;
+          readline.moveCursor(process.stdout, 0, row - cursorRow);
+          readline.clearLine(process.stdout, 1);
+          cursorRow = row + 1;
+          console.log(output);
+        },
+        async finish(): Promise<void> {
+          readline.moveCursor(process.stdout, 0, rows - cursorRow);
+          process.stdout.write('\x1B[?25h\n');
+        }
+      };
+    } else {
+      return {
+        init,
+        async update(row, output): Promise<void> {
+          responses[row] = output;
+        },
+        async finish(): Promise<void> {
+          for (const response of responses) {
+            console.log(response);
+          }
+        }
+      };
     }
   }
 }

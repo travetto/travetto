@@ -111,10 +111,17 @@ export class Workspace {
   }
 
   /**
+   * Get a bin path for a module
+   */
+  static mainPath(module: string, script: string): string {
+    return `@travetto/${module}/support/main.${script}`;
+  }
+
+  /**
    * Build workspace code
    */
   static async buildCode(): Promise<ExecutionResult | string> {
-    const { result } = await this.runMain(this.binPath('base', 'build'));
+    const { result } = await this.runMain(this.mainPath('base', 'build'));
 
     try {
       return await Promise.race([result, this.sleep(500).then(() => { throw new Error(); })]);

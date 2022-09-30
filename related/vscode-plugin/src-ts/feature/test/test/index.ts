@@ -26,7 +26,7 @@ class TestRunnerFeature extends BaseFeature {
     command?: string
   ) {
     super(module, command);
-    this.#server = new ProcessServer(Workspace.binPath(this.module, 'test-watch'), ['exec'], {
+    this.#server = new ProcessServer(Workspace.mainPath(this.module, 'test-watch'), ['exec'], {
       env: { TRV_CACHE: this.#cacheDir, }
     });
 

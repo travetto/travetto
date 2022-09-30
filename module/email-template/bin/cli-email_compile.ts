@@ -1,4 +1,4 @@
-import { color, PathUtil } from '@travetto/boot';
+import { CliUtil, PathUtil } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/support/bin/init';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 
@@ -29,7 +29,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
     const { TemplateUtil } = await import('../support/bin/util');
 
     const all = await TemplateUtil.compileAllToDisk();
-    console!.log(color`Successfully compiled ${{ param: `${all.length}` }} templates`);
+    console!.log(CliUtil.color`Successfully compiled ${{ param: `${all.length}` }} templates`);
 
     if (this.cmd.watch) {
       try { require.resolve('@travetto/watch'); }

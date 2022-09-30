@@ -4,7 +4,7 @@ import * as path from 'path';
 // TODO: Get proper typings
 const glob = require('picomatch');
 
-import { color, FsUtil, PathUtil, ScanFs } from '@travetto/boot';
+import { CliUtil, FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
 import { CommonConfig, PackOperation } from './types';
@@ -123,16 +123,16 @@ export class PackUtil {
   static async runOperation<T extends CommonConfig>(op: PackOperation<T, string>, cfg: T, indent = 0): Promise<void> {
     const spacer = ' '.repeat(indent);
     const ctx = await op.context(cfg);
-    const title = color`${{ title: op.title }} ${ctx}`;
+    const title = CliUtil.color`${{ title: op.title }} ${ctx}`;
     const width = Math.max(title.replace(/\x1b\[\d+m/g, '').length, 50); // eslint-disable-line
 
     let i = 0;
     function stdout(msg?: string): void {
       if (i++ > 0) {
-        process.stdout.write(color`${spacer}${{ param: 'done' }}\n`);
+        process.stdout.write(CliUtil.color`${spacer}${{ param: 'done' }}\n`);
       }
       if (msg) {
-        process.stdout.write(color`${spacer}${{ output: '᳁' }} ${{ path: msg.padEnd(width - 15) }} ... `);
+        process.stdout.write(CliUtil.color`${spacer}${{ output: '᳁' }} ${{ path: msg.padEnd(width - 15) }} ... `);
       }
     }
 

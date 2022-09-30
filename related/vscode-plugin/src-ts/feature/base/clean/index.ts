@@ -11,7 +11,7 @@ import { BaseFeature } from '../../base';
 export class CleanFeature extends BaseFeature {
 
   async clean(): Promise<void> {
-    await Workspace.runMain(Workspace.binPath(this.module, 'clean'), []).result;
+    await Workspace.runMain(Workspace.mainPath(this.module, 'clean'), []).result;
     vscode.window.showInformationMessage('Successfully deleted');
   }
 
