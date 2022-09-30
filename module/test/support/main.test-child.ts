@@ -1,7 +1,7 @@
 import { createWriteStream } from 'fs';
 
 import { AppCache } from '@travetto/boot';
-import { EnvInit } from '@travetto/base/bin/init';
+import { EnvInit } from '@travetto/base/support/bin/init';
 
 export async function customLogs(): Promise<void> {
   const { ConsoleManager } = await import('@travetto/base');

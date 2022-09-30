@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 
 import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
-import { EnvInit } from '@travetto/base/bin/init';
+import { EnvInit } from '@travetto/base/support/bin/init';
 
 import type { RunState } from '../src/execute/types';
 

@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Test, Suite } from '@travetto/test';
 
 // Must force import
-import { MarkdownUtil } from '../bin/lib/markdown';
+import { MarkdownUtil } from '../support/bin/markdown';
 
 @Suite('Markdown')
 class MarkdownTest {

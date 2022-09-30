@@ -1,16 +1,16 @@
-import { EnvInit } from '@travetto/base/bin/init';
+import { EnvInit } from '@travetto/base/support/bin/init';
 import { ExecUtil } from '@travetto/boot';
 
 import { ApplicationConfig } from '../src/types';
 
-import { AppListUtil } from '../support/bin/list';
+import { AppListUtil } from './bin/list';
 
 /**
  * Entry point when run directly
  */
-export function main(): Promise<ApplicationConfig[]> {
+export async function main(): Promise<ApplicationConfig[]> {
   EnvInit.init();
-  return AppListUtil.buildList()
+  return AppListUtil.getList()
     .then(l => l ?? [])
     .then(ExecUtil.mainResponse, ExecUtil.mainResponse);
 }

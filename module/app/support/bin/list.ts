@@ -60,10 +60,10 @@ export class AppListUtil {
   static async buildList(): Promise<ApplicationConfig[]> {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Collecting', () =>
-        ExecUtil.workerMain<ApplicationConfig[]>(require.resolve('../../bin/list-build')).message
+        ExecUtil.workerMain<ApplicationConfig[]>(require.resolve('../main.list-build')).message
       );
     } else {
-      await (await import('@travetto/base/bin/build')).main();
+      await (await import('@travetto/base/support/main.build')).main();
 
       const { AppScanUtil } = await import('../../src/scan');
       const list = await AppScanUtil.scanList();

@@ -41,7 +41,7 @@ export class BuildUtil {
 
     // Compile rest of code
     return CliUtil.waiting(`Building... ${output}`,
-      ExecUtil.workerMain(require.resolve('../../bin/build'), [], { // target self
+      ExecUtil.workerMain(require.resolve('../main.build'), [], { // target self
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
           ...(env ?? {})

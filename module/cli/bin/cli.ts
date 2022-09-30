@@ -21,7 +21,7 @@ and invoke it locally using
   }
 
   // Compile CLI for usage
-  ModuleManager.transpileAll(SourceIndex.find({ folder: 'bin' }));
+  ModuleManager.transpileAll(SourceIndex.find({ filter: x => /[\/\\](bin|support)[\/\\]/.test(x) }));
 
   const { ExecutionManager } = await import('@travetto/cli/src/execute');
   return ExecutionManager.run(process.argv); // Run cli

@@ -4,12 +4,32 @@ import { Writable } from 'stream';
 
 import { ColorUtil } from './color';
 
+
+// Common color support
+const { palette: colorPalette, template: color } = ColorUtil.buildColorTemplate({
+  input: ['yellow'],
+  output: ['magenta'],
+  path: ['cyan'],
+  success: ['green', 'bold'],
+  failure: ['red', 'bold'],
+  param: ['green'],
+  type: ['cyan'],
+  description: ['white', 'faint', 'bold'],
+  title: ['white', 'bold'],
+  identifier: ['blue', 'bold'],
+  subtitle: ['white'],
+  subsubtitle: ['white', 'faint']
+});
+
 /**
  * Common CLI Utilities
  */
 export class CliUtil {
 
   static #waitState = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
+
+  static color = color;
+  static colorPalette = colorPalette;
 
   static isBoolean(x: string): boolean {
     return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
@@ -106,19 +126,3 @@ export class CliUtil {
     }
   }
 }
-
-// Common color support
-export const { set: colorSet, template: color } = ColorUtil.buildColorSet({
-  input: ['yellow'],
-  output: ['magenta'],
-  path: ['cyan'],
-  success: ['green', 'bold'],
-  failure: ['red', 'bold'],
-  param: ['green'],
-  type: ['cyan'],
-  description: ['white', 'faint', 'bold'],
-  title: ['white', 'bold'],
-  identifier: ['blue', 'bold'],
-  subtitle: ['white'],
-  subsubtitle: ['white', 'faint']
-});

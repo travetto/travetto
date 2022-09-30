@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs';
 
-import { color, CliUtil, ExecUtil, Package, PathUtil } from '@travetto/boot';
+import { CliUtil, ExecUtil, Package, PathUtil } from '@travetto/boot';
 
 import { CommonConfig, PackOperation } from './lib/types';
 import { PackUtil } from './lib/util';
@@ -89,6 +89,6 @@ export const Docker: PackOperation<DockerConfig, 'docker'> = {
       await ExecUtil.spawn('docker', ['image', 'push', ...tags]).result;
     }
 
-    yield color`${{ success: 'Successfully' }} containerized project`;
+    yield CliUtil.color`${{ success: 'Successfully' }} containerized project`;
   }
 };
