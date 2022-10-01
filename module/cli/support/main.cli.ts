@@ -1,7 +1,6 @@
-import { PathUtil } from '@travetto/boot/src/path';
+import { PathUtil, EnvUtil, Host } from '@travetto/boot';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
-import { EnvUtil } from '@travetto/boot';
 
 /**
  * Entry point
@@ -20,8 +19,10 @@ and invoke it locally using
     process.exit(1);
   }
 
-  // Compile CLI for usage
-  ModuleManager.transpileAll(SourceIndex.find({ filter: x => /[\/\\](bin|support)[\/\\]/.test(x) }));
+  if (!EnvUtil.isCompiled()) {
+    // Compile CLI for usage
+    ModuleManager.transpileAll(SourceIndex.find({ folder: Host.PATH.support }));
+  }
 
   const { ExecutionManager } = await import('@travetto/cli/src/execute');
   return ExecutionManager.run(process.argv); // Run cli

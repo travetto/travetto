@@ -1,8 +1,8 @@
 import { CliUtil, FsUtil, PathUtil } from '@travetto/boot';
 
-import { PackUtil } from './lib/util';
-import { CommonConfig, PackOperation } from './lib/types';
-import { AssembleUtil } from './lib/assemble';
+import { PackUtil } from '../util';
+import { CommonConfig, PackOperation } from '../types';
+import { AssembleUtil } from './util';
 
 export interface AssembleConfig extends CommonConfig {
   keepSource: boolean;
@@ -59,7 +59,7 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
     yield 'Writing Env.js'; await PackUtil.writeEnvJs(ws, {
       ...env,
       TRV_CACHE: `\${__dirname}/${cacheDir}`,
-      ...(readonly ? { TRV_READONLY: '1' } : {})
+      ...(readonly ? { TRV_COMPILED: '1' } : {})
     });
 
     if (!keepSource) {

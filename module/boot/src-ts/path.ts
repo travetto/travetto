@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { Host } from './host';
 
 /**
  * Standard utils for interacting with the paths
@@ -27,10 +28,11 @@ export class PathUtil {
   }
 
   /**
-   * Convert a given path to a source path
+   * Convert an input file to a unix source file
+   * @param file .ts or .js file to convert
    */
-  static toUnixTs(file: string): string {
-    return file.replace(/[\\\/]+/g, '/').replace(/[.]js$/, '.ts');
+  static toUnixSource(file: string): string {
+    return file.replace(/[\\\/]+/g, '/').replace(Host.EXT.outputRe, Host.EXT.input);
   }
 
   /**
@@ -87,7 +89,7 @@ export class PathUtil {
       out = out.replace(PathUtil.cwd, localRoot);
     }
     if (removeExt) {
-      out = out.replace(/[.][jt]s$/, '');
+      out = out.replace(Host.EXT.inputOutputRe, '');
     }
     return out;
   }

@@ -82,19 +82,20 @@ export class RestConfig {
     key: string;
     cert: string;
   } | undefined> {
-    if (this.ssl.active) {
-      if (!this.ssl.keys) {
-        if (EnvUtil.isProd()) {
-          throw new AppError('Cannot use test keys in production', 'permissions');
-        }
-        return RestServerUtil.generateSslKeyPair();
-      } else {
-        if (this.ssl.keys.key.length < 100) {
-          this.ssl.keys.key = await ResourceManager.read(this.ssl.keys.key, 'utf8');
-          this.ssl.keys.cert = await ResourceManager.read(this.ssl.keys.cert, 'utf8');
-        }
-        return this.ssl.keys;
+    if (!this.ssl.active) {
+      return;
+    }
+    if (!this.ssl.keys) {
+      if (EnvUtil.isProd()) {
+        throw new AppError('Cannot use test keys in production', 'permissions');
       }
+      return RestServerUtil.generateSslKeyPair();
+    } else {
+      if (this.ssl.keys.key.length < 100) {
+        this.ssl.keys.key = await ResourceManager.read(this.ssl.keys.key, 'utf8');
+        this.ssl.keys.cert = await ResourceManager.read(this.ssl.keys.cert, 'utf8');
+      }
+      return this.ssl.keys;
     }
   }
 }

@@ -1,7 +1,7 @@
 /**
  * Initializes the logger to take over from base
  */
-export const init = {
+export const step = {
   key: '@trv:log/init',
   after: ['@trv:base/init'],
   before: ['@trv:config/init'],

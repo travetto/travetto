@@ -1,4 +1,4 @@
-import { AppCache, EnvUtil, Package, PathUtil } from '@travetto/boot';
+import { AppCache, EnvUtil, Host, Package, PathUtil } from '@travetto/boot';
 import { SourceConfig } from '@travetto/boot/src/internal/source';
 
 import { version as framework } from '../package.json';
@@ -120,16 +120,16 @@ class $AppManifest {
         status,
         value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
       },
-      resources: ['resources', ...EnvUtil.getList('TRV_RESOURCES')],
+      resources: [Host.PATH.resources, ...EnvUtil.getList('TRV_RESOURCES')],
       shutdownWait: Util.getEnvTime('TRV_SHUTDOWN_WAIT', '2s')
     };
 
     this.#profileSet = new Set(this.env.profiles);
 
     this.source = {
-      common: ['src', ...EnvUtil.getList('TRV_SRC_COMMON')],
+      common: [Host.PATH.src, ...EnvUtil.getList('TRV_SRC_COMMON')],
       local: [...EnvUtil.getList('TRV_SRC_LOCAL')],
-      excludeModules: new Set(['@travetto/cli', '@travetto/doc', '@travetto/boot'])
+      excludeModules: new Set(['@travetto/doc', '@travetto/boot'])
     };
   }
 
@@ -146,7 +146,7 @@ class $AppManifest {
           cache: AppCache.cacheDir.replace(`${PathUtil.cwd}/`, ''),
           node: process.version,
           dynamic: EnvUtil.isDynamic(),
-          readonly: EnvUtil.isReadonly()
+          isCompiled: EnvUtil.isCompiled()
         },
         source: {
           ...this.source,

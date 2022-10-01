@@ -2,8 +2,7 @@ import * as ts from 'typescript';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
-import { PathUtil, AppCache } from '@travetto/boot';
-import { SourceUtil } from '@travetto/boot/src/internal/source-util';
+import { Host, PathUtil, AppCache } from '@travetto/boot';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
@@ -48,13 +47,13 @@ export class SourceHost implements ts.CompilerHost {
    * Read file from disk, using the transpile pre-processor on .ts files
    */
   readFile(filename: string): string {
-    filename = PathUtil.toUnixTs(filename);
+    filename = PathUtil.toUnixSource(filename);
     let content = ts.sys.readFile(filename);
     if (content === undefined) {
       throw new Error(`Unable to read file ${filename}`);
     }
-    if (filename.endsWith(SourceUtil.EXT) && !filename.endsWith('.d.ts')) {
-      content = SourceUtil.preProcess(filename, content);
+    if (Host.EXT.inputMatcher(filename)) {
+      content = TranspileUtil.preProcess(filename, content);
     }
     return content;
   }
@@ -63,7 +62,7 @@ export class SourceHost implements ts.CompilerHost {
    * Write file to disk, and set value in cache as well
    */
   writeFile(filename: string, content: string): void {
-    filename = PathUtil.toUnixTs(filename);
+    filename = PathUtil.toUnixSource(filename);
     this.#trackFile(filename, content);
     AppCache.writeEntry(filename, content);
   }
@@ -72,7 +71,7 @@ export class SourceHost implements ts.CompilerHost {
    * Fetch file
    */
   fetchFile(filename: string): void {
-    filename = PathUtil.toUnixTs(filename);
+    filename = PathUtil.toUnixSource(filename);
     const cached = AppCache.readEntry(filename);
     this.#trackFile(filename, cached);
   }
@@ -96,7 +95,7 @@ export class SourceHost implements ts.CompilerHost {
    * See if a file exists
    */
   fileExists(filename: string): boolean {
-    filename = PathUtil.toUnixTs(filename);
+    filename = PathUtil.toUnixSource(filename);
     return this.contents.has(filename) || ts.sys.fileExists(filename);
   }
 

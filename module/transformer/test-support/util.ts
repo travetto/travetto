@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { readFileSync } from 'fs';
 
-import { FsUtil, ScanFs } from '@travetto/boot';
+import { FsUtil, Host, ScanFs } from '@travetto/boot';
 import { Util } from '@travetto/base';
 
 import { VisitorFactory, TransformerState, getAllTransformers } from '..';
@@ -19,7 +19,7 @@ export class TransformerTestUtil {
 
     const prog = ts.createProgram({
       options: ts.convertCompilerOptionsFromJson(tsconfigObj, '').options,
-      rootNames: (await ScanFs.scanDir({ testFile: f => f.startsWith('src/') && f.endsWith('.ts') }, folder))
+      rootNames: (await ScanFs.scanDir({ testFile: f => f.startsWith(Host.PATH.srcWithSep) && f.endsWith(Host.EXT.input) }, folder))
         .filter(x => x.stats?.isFile())
         .filter(x => !file || x.file.endsWith(file))
         .map(x => x.file),

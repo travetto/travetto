@@ -4,6 +4,7 @@ import {
 } from 'fs';
 import * as path from 'path';
 
+import { Host } from './host';
 import { EnvUtil } from './env';
 import { FsUtil } from './fs';
 import { PathUtil } from './path';
@@ -34,10 +35,6 @@ export class FileCache {
   #purgeExpired(dir = this.cacheDir): void {
     const entries = readdirSync(dir);
     for (const entry of entries) {
-      if (entry.endsWith('.ts')) {
-        continue;
-      }
-
       const entryPath = PathUtil.joinUnix(dir, entry);
       const stat = statSync(entryPath);
       if (stat.isDirectory() || stat.isSymbolicLink()) {
@@ -46,13 +43,7 @@ export class FileCache {
         const full = this.fromEntryName(entryPath);
         try {
           this.removeExpiredEntry(full);
-        } catch (err) {
-          // Only care if it's source, otherwise might be dynamically cached data without backing file
-          if (full.endsWith('.ts')) {
-            // Cannot remove file, source is missing
-            console.warn('Cannot read', { error: err });
-          }
-        }
+        } catch (err) { }
       }
     }
     if (entries.length === 0 && dir !== this.cacheDir) {
@@ -68,18 +59,16 @@ export class FileCache {
    * Initialize the cache behavior
    */
   init(purgeExpired = false): void {
-    if (!EnvUtil.isReadonly()) {
-      mkdirSync(this.cacheDir, { recursive: true });
+    mkdirSync(this.cacheDir, { recursive: true });
 
-      try {
-        // Ensure we have access before trying to delete
-        accessSync(this.cacheDir, constants.W_OK);
-      } catch {
-        throw new Error(`Unable to write to cache directory: ${this.cacheDir}`);
-      }
-      if (purgeExpired) {
-        this.#purgeExpired();
-      }
+    try {
+      // Ensure we have access before trying to delete
+      accessSync(this.cacheDir, constants.W_OK);
+    } catch {
+      throw new Error(`Unable to write to cache directory: ${this.cacheDir}`);
+    }
+    if (purgeExpired) {
+      this.#purgeExpired();
     }
   }
 
@@ -92,9 +81,6 @@ export class FileCache {
     const entryPath = this.toEntryName(local);
     mkdirSync(path.dirname(entryPath), { recursive: true });
     writeFileSync(entryPath, contents, 'utf8');
-    if (entryPath.endsWith('.js')) {
-      writeFileSync(entryPath.replace(/[.]js$/, '.ts'), '', 'utf8'); // Placeholder
-    }
     this.statEntry(local);
   }
 
@@ -125,9 +111,6 @@ export class FileCache {
         if (force || FileCache.isOlder(this.statEntry(local), statSync(local))) {
           const localName = this.toEntryName(local);
           unlinkSync(localName);
-          if (localName.endsWith('.js')) {
-            unlinkSync(localName.replace(/[.]js$/, '.ts'));
-          }
         }
       } catch (err) {
         if (!(err instanceof Error) || !err.message.includes('ENOENT')) {
@@ -193,7 +176,7 @@ export class FileCache {
       .replace(this.cacheDir, '')
       .replace(/^\//, '')
       .replace(/\/\/+/g, '/')
-      .replace(/[.]js$/, '.ts')
+      .replace(Host.EXT.outputRe, Host.EXT.input)
     ));
   }
 
@@ -206,7 +189,7 @@ export class FileCache {
     return PathUtil.joinUnix(this.cacheDir, PathUtil.normalizeFrameworkPath(local)
       .replace(/.*@travetto/, 'node_modules/@travetto')
       .replace(/^\//, '')
-      .replace(/[.]ts$/, '.js')
+      .replace(Host.EXT.inputRe, Host.EXT.output)
     );
   }
 

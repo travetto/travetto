@@ -1,6 +1,6 @@
 import '@arcsine/nodesh';
 
-import { ExecUtil, FsUtil } from '@travetto/boot';
+import { ExecUtil, FsUtil, Host } from '@travetto/boot';
 import type { TestEvent } from '@travetto/test';
 
 import { Git } from './package/git';
@@ -17,7 +17,7 @@ async function run(isolated = false): Promise<boolean> {
   const consumer = new RunnableTestConsumer(emitter);
 
   return (process.env.TRV_ALL === '1' ? Packages.yieldPublicPackages() : Git.yieldChangedPackages())
-    .$filter(async p => !isolated || !!(await FsUtil.exists(`${p._.folder}/test-isolated`)))
+    .$filter(async p => !isolated || !!(await FsUtil.exists(`${p._.folder}/${Host.PATH.testIsolated}`)))
     .$parallel(async p => {
       const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '3'])];
       const { process: proc, result } = ExecUtil.spawn('trv', args, { cwd: p._.folder, stdio: [0, 'pipe', 2, 'ipc'] });

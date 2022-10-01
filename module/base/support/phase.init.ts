@@ -5,7 +5,7 @@ import { StacktraceUtil } from '../src/stacktrace';
  * Registers stack trace handler for non-prod
  * And prepare shutdown manager
  */
-export const init = {
+export const step = {
   key: '@trv:base/init',
   action: (): void => {
     StacktraceUtil.init();

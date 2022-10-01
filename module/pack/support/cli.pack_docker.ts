@@ -1,7 +1,7 @@
 import { OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
 
-import { BaseOptions, BasePackCommand } from './cli-pack-base';
-import { Docker, DockerConfig } from '../support/bin/docker';
+import { BaseOptions, BasePackCommand } from './cli.pack-base';
+import { Docker, DockerConfig } from './bin/docker';
 
 type Options = BaseOptions & {
   image: OptionConfig<string>;

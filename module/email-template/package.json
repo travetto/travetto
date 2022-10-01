@@ -18,10 +18,10 @@
     "name": "Travetto Framework"
   },
   "files": [
+    "src",
     "support",
     "resources",
-    "!resources/email/demo/",
-    "bin"
+    "!resources/email/demo/"
   ],
   "main": "support/application.email.ts",
   "repository": {

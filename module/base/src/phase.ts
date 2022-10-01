@@ -1,11 +1,17 @@
+import { EnvUtil, Host } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 
 import { OrderingUtil } from './internal/ordering';
 
-interface Initializer {
+interface PhaseStep {
   action: Function;
+  active?: () => (Promise<boolean> | boolean) | boolean;
   key: string;
+}
+
+interface PhaseFile {
+  step: PhaseStep;
 }
 
 type Scope = 'init' | 'reset' | 'test';
@@ -35,7 +41,7 @@ export class PhaseManager {
     return new PhaseManager(scope).load(upto).then(m => m.run(skip));
   }
 
-  #initializers: Initializer[] = [];
+  #steps: PhaseStep[] = [];
 
   #filter: RegExp;
 
@@ -44,7 +50,7 @@ export class PhaseManager {
    * @param scope The scope to run against
    */
   constructor(public scope: Scope) {
-    this.#filter = new RegExp(`phase[.]${this.scope}(.*?)[.]ts`);
+    this.#filter = new RegExp(`phase[.]${this.scope}(.*?)[.]`);
   }
 
   /**
@@ -54,21 +60,37 @@ export class PhaseManager {
    */
   async load(upto?: string, after?: string): Promise<this> {
 
-    const found = ModuleManager.transpileAll(SourceIndex.find({ folder: 'support' }));
+    const found = SourceIndex.find({ folder: Host.PATH.support });
+
+    if (!EnvUtil.isCompiled()) {
+      ModuleManager.transpileAll(found);
+    }
 
     // Load all support files
-    const initFiles = await Promise.all(found
+    const files = await Promise.all(found
       .filter(x => this.#filter.test(x.module))
       .map(x => import(x.file)));
-    this.#initializers = OrderingUtil.compute(initFiles.map(x => x.init));
+
+    // Filter, and validate active
+    const modules = (await Promise.all(files
+      .filter((x): x is PhaseFile => !!x)
+      .map(x => x.step)
+      .map(async x => x.active === undefined ? x : (
+        typeof x.active === 'boolean' ?
+          (x.active ? x : undefined) :
+          Promise.resolve(x.active()).then(res => res ? x : undefined)
+      ))
+    )).filter((x): x is PhaseStep => !!x);
+
+    this.#steps = OrderingUtil.compute(modules);
 
     if (upto) {
-      let end = this.#initializers.length - 1;
+      let end = this.#steps.length - 1;
       let start = 0;
 
-      const endIndex = this.#initializers.findIndex(x => x.key === upto);
+      const endIndex = this.#steps.findIndex(x => x.key === upto);
       if (after) {
-        const startIndex = this.#initializers.findIndex(x => x.key === after);
+        const startIndex = this.#steps.findIndex(x => x.key === after);
         if (startIndex >= 0) {
           start = startIndex + 1;
         }
@@ -76,10 +98,10 @@ export class PhaseManager {
       if (endIndex >= 0) {
         end = endIndex;
       }
-      this.#initializers = this.#initializers.slice(start, end + 1);
+      this.#steps = this.#steps.slice(start, end + 1);
     }
 
-    console.debug('Preparing phase', { scope: this.scope, initializers: this.#initializers.map(x => x.key) });
+    console.debug('Preparing phase', { scope: this.scope, initializers: this.#steps.map(x => x.key) });
 
     return this;
   }
@@ -88,13 +110,13 @@ export class PhaseManager {
    * Run the phase
    */
   async run(skip: string[] = []): Promise<void> {
-    for (const i of this.#initializers) {
-      if (skip.includes(i.key)) {
+    for (const step of this.#steps) {
+      if (skip.includes(step.key)) {
         continue;
       }
       const start = Date.now();
-      await i.action();
-      console.debug('Phase', { scope: this.scope, key: i.key, duration: Date.now() - start });
+      await step.action();
+      console.debug('Phase', { scope: this.scope, key: step.key, duration: Date.now() - start });
     }
   }
 }

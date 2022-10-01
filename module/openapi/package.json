@@ -19,7 +19,6 @@
   "files": [
     "index.ts",
     "src",
-    "bin",
     "resources"
   ],
   "main": "index.ts",

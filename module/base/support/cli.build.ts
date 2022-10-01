@@ -1,7 +1,7 @@
 import { CliUtil } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 
-import { BuildUtil } from '../support/bin/util';
+import { BuildUtil } from './bin/util';
 
 type Options = {
   output: OptionConfig<string>;

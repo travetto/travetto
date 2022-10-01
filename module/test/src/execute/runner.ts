@@ -1,4 +1,4 @@
-import { PathUtil } from '@travetto/boot';
+import { Host, PathUtil } from '@travetto/boot';
 import { PhaseManager, Util } from '@travetto/base';
 import { WorkPool, IterableWorkSet } from '@travetto/worker';
 
@@ -31,7 +31,7 @@ export class Runner {
   async runFiles(): Promise<boolean> {
     const consumer = RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
-    const files = (await RunnerUtil.getTestFiles(this.patterns, this.#state.isolated ? 'test-isolated' : 'test'));
+    const files = (await RunnerUtil.getTestFiles(this.patterns, this.#state.isolated ? Host.PATH.testIsolated : Host.PATH.test));
 
     console.debug('Running', { files });
 

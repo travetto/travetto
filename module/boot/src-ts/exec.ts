@@ -2,6 +2,7 @@ import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { Readable } from 'stream';
 import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
 
+import { Host } from './host';
 import { PathUtil } from './path';
 import { StreamUtil } from './stream';
 
@@ -202,7 +203,7 @@ export class ExecUtil {
   static forkMain(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     // Always register for the fork
     const opts = this.getOpts(options);
-    file = file.replace(/[.]js$/, '.ts');
+    file = file.replace(Host.EXT.inputOutputRe, Host.EXT.running);
     const spawnArgs = [require.resolve('@travetto/boot/bin/main'), file, ...args];
     const p = spawn(process.argv0, spawnArgs, opts);
     const result = this.enhanceProcess(p, options, spawnArgs.join(' '));
@@ -274,7 +275,7 @@ export class ExecUtil {
    * @param options The worker options
    */
   static workerMain<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
-    file = file.replace(/[.]js$/, '.ts');
+    file = file.replace(Host.EXT.inputOutputRe, Host.EXT.running);
     return this.worker<T>(require.resolve('@travetto/boot/bin/main'), [file, ...args], options);
   }
 

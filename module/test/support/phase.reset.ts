@@ -1,7 +1,7 @@
 /**
  * Handle test reset
  */
-export const init = {
+export const step = {
   key: '@trv:test/rest',
   before: ['@trv:registry/reset'],
   action: async (): Promise<void> => {

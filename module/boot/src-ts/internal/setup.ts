@@ -23,7 +23,7 @@ const objectProto = Object.prototype.__proto__;
 Object.defineProperty(Object.prototype, '__proto__', { configurable: false, enumerable: false, get: () => objectProto });
 
 // Registering unix conversion to use for filenames
-global.ᚕsrc = PathUtil.toUnixTs;
+global.ᚕsrc = PathUtil.toUnixSource;
 
 // Global default log interceptor
 global.ᚕlog = (level: string, ...args: unknown[]): string => (console as unknown as any)[level](...args);
@@ -37,5 +37,5 @@ global.ts = new Proxy({}, {
 // Register source maps for cached files
 sourceMapSupport.install({
   emptyCacheBetweenOperations: EnvUtil.isDynamic(),
-  retrieveFile: p => AppCache.readOptionalEntry(PathUtil.toUnixTs(p))!
+  retrieveFile: p => AppCache.readOptionalEntry(PathUtil.toUnixSource(p))!
 });

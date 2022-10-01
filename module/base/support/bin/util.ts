@@ -1,6 +1,6 @@
 import { statSync } from 'fs';
 
-import { AppCache, CliUtil, FileCache, ExecUtil, EnvUtil } from '@travetto/boot';
+import { AppCache, CliUtil, FileCache, EnvUtil, ExecUtil } from '@travetto/boot';
 import { SimpleEntry, SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**
@@ -12,7 +12,7 @@ export class BuildUtil {
    * Trigger a compile
    */
   static async build(env?: Record<string, string | undefined>): Promise<number | undefined> {
-    if (EnvUtil.isReadonly()) {
+    if (EnvUtil.isCompiled()) {
       return; // Do not run the compiler
     }
 

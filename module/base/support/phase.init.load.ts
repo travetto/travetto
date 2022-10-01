@@ -1,7 +1,7 @@
 /**
  * Responsible for loading all available modules
  */
-export const init = {
+export const step = {
   key: '@trv:base/load',
   after: ['@trv:base/transpile'],
   action: async (): Promise<void> => {

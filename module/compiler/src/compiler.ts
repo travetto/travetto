@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import * as sourceMapSupport from 'source-map-support';
 import * as ts from 'typescript';
 
-import { PathUtil, EnvUtil, AppCache } from '@travetto/boot';
+import { PathUtil, AppCache } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 import { Dynamic } from '@travetto/base/src/internal/dynamic';
@@ -105,17 +105,15 @@ class $Compiler {
     const start = Date.now();
     this.active = true;
 
-    if (!EnvUtil.isReadonly()) {
-      await this.#transformerManager.init();
-      // Enhance transpilation, with custom transformations
-      ModuleManager.setTranspiler(tsf => this.#transpile(tsf));
-    }
+    await this.#transformerManager.init();
+    // Enhance transpilation, with custom transformations
+    ModuleManager.setTranspiler(tsf => this.#transpile(tsf));
 
     ModuleManager.onUnload((f, unlink) => this.#host.unload(f, unlink)); // Remove source
 
     // Update source map support to read from transpiler cache
     sourceMapSupport.install({
-      retrieveFile: p => this.#host.contents.get(PathUtil.toUnixTs(p))!
+      retrieveFile: p => this.#host.contents.get(PathUtil.toUnixSource(p))!
     });
 
     console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
@@ -125,11 +123,14 @@ class $Compiler {
    * Reset the compiler
    */
   reset(): void {
-    if (!EnvUtil.isReadonly()) {
-      this.#transformerManager.reset();
-      this.#host.reset();
-      this.#program = undefined;
+    if (!this.active) {
+      return;
     }
+
+    this.#transformerManager.reset();
+    this.#host.reset();
+    this.#program = undefined;
+
     ModuleManager.clearUnloadHandlers();
     SourceIndex.reset();
     this.active = false;

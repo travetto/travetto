@@ -121,17 +121,17 @@ export class EnvUtil {
   }
 
   /**
-   * Can use compile
+   * Are we in production mode
    */
   static isProd(): boolean {
     return /^prod(uction)?$/i.test(EnvUtil.get('TRV_ENV', ''));
   }
 
   /**
-   * Can use compile
+   * Is the source already compiled
    */
-  static isReadonly(): boolean {
-    return this.isProd() ? !this.isFalse('TRV_READONLY') : this.isTrue('TRV_READONLY');
+  static isCompiled(): boolean {
+    return this.isProd() ? !this.isFalse('TRV_COMPILED') : this.isTrue('TRV_COMPILED');
   }
 
   /**

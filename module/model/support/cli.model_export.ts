@@ -1,5 +1,5 @@
-import { BaseModelCommand } from './cli-base-command';
-import { ModelExportUtil } from '../support/bin/export';
+import { BaseModelCommand } from './cli.base-command';
+import { ModelExportUtil } from './bin/export';
 
 /**
  * CLI Entry point for exporting model schemas
