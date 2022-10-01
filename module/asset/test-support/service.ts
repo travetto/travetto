@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { PathUtil } from '@travetto/boot';
+import { Host, PathUtil } from '@travetto/boot';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { Class, ResourceManager } from '@travetto/base';
 import { Inject } from '@travetto/di';
@@ -23,7 +23,7 @@ export abstract class AssetServiceSuite {
 
   @BeforeAll()
   async setup() {
-    ResourceManager.addPath(PathUtil.resolveUnix(__dirname, 'resources'));
+    ResourceManager.addPath(PathUtil.resolveUnix(__dirname, Host.PATH.resources));
   }
 
   @Test()

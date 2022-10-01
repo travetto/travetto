@@ -15,7 +15,7 @@ type DevConfig = {
 class DevRegister {
 
   static #trvMod = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
-  static #defaultMods = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc']);
+  static #defaultMods = new Set(['@travetto/test', '@travetto/doc']);
 
   /**
    * Resolve filename for dev mode

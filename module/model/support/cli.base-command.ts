@@ -3,7 +3,7 @@ import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 import { EnvInit } from '@travetto/base/support/bin/init';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
-import { ModelCandidateUtil } from '../support/bin/candidate';
+import { ModelCandidateUtil } from './bin/candidate';
 
 type Options = {
   env: OptionConfig<string>;

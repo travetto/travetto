@@ -1,6 +1,7 @@
 import { createReadStream } from 'fs';
 import * as readline from 'readline';
 
+import { Host } from '@travetto/boot';
 import { ShutdownManager, Util } from '@travetto/base';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
@@ -36,7 +37,7 @@ export class RunnerUtil {
   /**
    * Find all valid test files given the globs
    */
-  static async getTestFiles(globs: RegExp[], root = 'test'): Promise<string[]> {
+  static async getTestFiles(globs: RegExp[], root = Host.PATH.test): Promise<string[]> {
     const files = SourceIndex.find({ folder: root, paths: ['.'] })
       .filter(f => globs.some(g => g.test(f.module)));
 

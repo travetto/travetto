@@ -1,7 +1,7 @@
 import { OptionConfig } from '@travetto/cli/src/command';
 
-import { BaseOptions, BasePackCommand } from './cli-pack-base';
-import { Assemble, AssembleConfig } from '../support/bin/assemble';
+import { BaseOptions, BasePackCommand } from './cli.pack-base';
+import { Assemble, AssembleConfig } from './bin/assemble/operation';
 
 type Options = BaseOptions & {
   keepSource: OptionConfig<boolean>;

@@ -1,6 +1,6 @@
 import { AppManifest, Class, ShutdownManager } from '@travetto/base';
 import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
-import { FsUtil, PathUtil } from '@travetto/boot';
+import { Host, FsUtil, PathUtil } from '@travetto/boot';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 
@@ -11,7 +11,7 @@ import { Compiler } from '../src/compiler';
 /**
  * Wraps the compiler supporting real-time changes to files
  */
-export function init($Compiler: Class<typeof Compiler>): typeof $Compiler {
+export function setup($Compiler: Class<typeof Compiler>): typeof $Compiler {
   /**
    * Extending the $Compiler class to add some functionality
    */
@@ -30,7 +30,7 @@ export function init($Compiler: Class<typeof Compiler>): typeof $Compiler {
 
       // Proxy all file loads
       ModuleUtil.addHandler((name, mod) => {
-        if (name.includes(PathUtil.cwd) && !name.includes('node_modules') && /src\//.test(name)) {
+        if (name.includes(PathUtil.cwd) && !name.includes('node_modules') && Host.PATH.srcWithSepRe.test(name)) {
           if (!this.#modules.has(name)) {
             this.#modules.set(name, new RetargettingProxy(mod));
           } else {
@@ -51,7 +51,7 @@ export function init($Compiler: Class<typeof Compiler>): typeof $Compiler {
           .filter(x => FsUtil.existsSync(x)),
         {
           ignoreInitial: true,
-          validFile: x => x.endsWith('.ts') && !x.endsWith('.d.ts')
+          validFile: Host.EXT.inputMatcher
         }
       ).on('all', ({ event, entry }) => {
         switch (event) {

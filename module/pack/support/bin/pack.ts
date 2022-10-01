@@ -1,8 +1,8 @@
 import { CliUtil } from '@travetto/boot/src/cli';
 
-import { CommonConfig, PackOperation } from './lib/types';
-import { PackUtil } from './lib/util';
-import { Assemble, AssembleConfig } from './assemble';
+import { CommonConfig, PackOperation } from './types';
+import { PackUtil } from './util';
+import { Assemble, AssembleConfig } from './assemble/operation';
 import { Docker, DockerConfig } from './docker';
 import { Zip, ZipConfig } from './zip';
 

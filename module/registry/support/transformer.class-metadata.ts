@@ -66,7 +66,7 @@ export class RegisterTransformer {
       [],
       [
         state.createIdentifier(name),
-        state.getFilenameAsSrc(),
+        state.factory.createIdentifier('__filename'),
         state.fromLiteral(state[cls]!),
         state.extendObjectLiteral(state[methods] || {}),
         state.fromLiteral(CoreUtil.isAbstract(node)),

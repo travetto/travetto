@@ -1,6 +1,7 @@
 export * from './cache';
 export * from './exec';
 export * from './cli';
+export * from './host';
 export * from './color';
 export * from './stream';
 export * from './env';

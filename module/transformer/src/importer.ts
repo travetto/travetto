@@ -9,6 +9,8 @@ import { ImportUtil } from './util/import';
 import { CoreUtil } from './util/core';
 import { Import } from './types/shared';
 
+const D_OR_D_TS_EXT_RE = /[.]d([.]ts)?$/;
+
 /**
  * Manages imports within a ts.SourceFile
  */
@@ -42,7 +44,7 @@ export class ImportManager {
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {
-      file = require.resolve(file.replace(/.*@types\/node\//, '').replace(/[.]d([.]ts)?$/, ''));
+      file = require.resolve(file.replace(/.*@types\/node\//, '').replace(D_OR_D_TS_EXT_RE, ''));
     }
 
     // Handle relative imports
@@ -57,7 +59,7 @@ export class ImportManager {
       }
     }
 
-    if (!/[.]d([.]ts)?$/.test(file) && !this.#newImports.has(file)) {
+    if (!D_OR_D_TS_EXT_RE.test(file) && !this.#newImports.has(file)) {
       const id = this.getId(file);
 
       if (this.#imports.has(id)) { // Already imported, be cool
@@ -101,7 +103,7 @@ export class ImportManager {
     try {
       const importStmts = [...this.#newImports.values()].map(({ path, ident }) => {
         const importStmt = this.factory.createImportDeclaration(
-          undefined, undefined,
+          undefined,
           this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(ident)),
           this.factory.createStringLiteral(path)
         );

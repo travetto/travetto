@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import { FsUtil, PathUtil } from '@travetto/boot';
+import { FsUtil, Host, PathUtil } from '@travetto/boot';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
 
 type Options = {
@@ -26,7 +26,7 @@ export class PackDockerExportCommand extends CliCommand<Options> {
   }
 
   async action(...args: unknown[]): Promise<void> {
-    const files = ['src', 'bin', 'support', 'resources', 'package.json', 'package-lock.json', ...this.cmd.add]
+    const files = [Host.PATH.src, Host.PATH.bin, Host.PATH.support, Host.PATH.resources, 'package.json', 'package-lock.json', ...this.cmd.add]
       .filter(x => FsUtil.existsSync(PathUtil.resolveUnix(x)));
 
     const content = `

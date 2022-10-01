@@ -3,7 +3,7 @@ import * as timers from 'timers/promises';
 import * as fs from 'fs/promises';
 
 import { Util } from '@travetto/base';
-import { ExecUtil, PathUtil } from '@travetto/boot';
+import { ExecUtil, Host, PathUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
@@ -290,7 +290,7 @@ export class TestExecutor {
         TRV_MODULES: modules.join(','),
         TRV_RESOURCES: process.env.TRV_RESOURCES,
         TRV_PROFILES: process.env.TRV_PROFILES,
-        TRV_SRC_LOCAL: '^test-isolated',
+        TRV_SRC_LOCAL: `^${Host.PATH.testIsolated}`,
         TRV_SRC_COMMON: process.env.TRV_SRC_COMMON,
         TRV_TEST_FORMAT: 'exec',
         TRV_CACHE: `.trv_cache_${SystemUtil.naiveHash(file)}`

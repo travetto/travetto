@@ -2,7 +2,8 @@ import * as Mod from 'module';
 
 import { EnvUtil } from '../env';
 import { PathUtil } from '../path';
-import { SourceUtil } from './source-util';
+import { Host } from '../host';
+import { TranspileUtil } from './transpile-util';
 
 type ModuleHandler<T = unknown> = (name: string, o: T) => T;
 
@@ -52,7 +53,7 @@ export class ModuleUtil {
 
     if (EnvUtil.isDynamic() && !filename.startsWith('test/')) {
       console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
-      return SourceUtil.getErrorModule(err.message);
+      return TranspileUtil.getErrorModule(err.message);
     }
 
     throw err;
@@ -76,7 +77,7 @@ export class ModuleUtil {
       if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
         try {
           const p = Module._resolveFilename!(request, parent);
-          if (p && p.endsWith(SourceUtil.EXT)) {
+          if (p && p.endsWith(Host.EXT.input)) {
             throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
           }
         } catch {
@@ -98,12 +99,6 @@ export class ModuleUtil {
       }
     }
     return mod;
-  }
-
-  /**
-   * Initialize module support
-   */
-  static init(): void {
   }
 
   /**
@@ -135,7 +130,7 @@ export class ModuleUtil {
     if (mod.startsWith('@travetto')) {
       const [, ns2, ...rest] = mod.split(/\/+/);
       ns = `@trv:${ns2}`;
-      if (rest[0] === 'src') {
+      if (rest[0] === Host.PATH.src) {
         rest.shift();
       }
       mod = rest.join('/');

@@ -5,7 +5,7 @@ The common environment variables throughout the code base:
 * `TRV_PROFILES`= ['application'] - Additional profiles to run app under
 * `TRV_RESOURCES` = ['resources'] - The folders to use for resource lookup
 * `TRV_DYNAMIC` = 0|1             - Whether or not to run the program in dynamic mode, allowing for real-time updates
-* `TRV_READONLY` = 0|1            - Should compilation be supported, forced to false in PROD.  Defaults to 1
+* `TRV_COMPILED` = 0|1            - Has the code already been compiled?
 * `TRV_CACHE` = cwd               - The output directory for compilation, defaults to `.trv_cache` of the cwd
 * `TRV_SHUTDOWN_WAIT` = 2s        - The max time to wait for shutdown to finish after initial SIGINT, default `2s`
 

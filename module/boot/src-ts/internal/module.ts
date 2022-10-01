@@ -1,13 +1,11 @@
-import type * as tsi from 'typescript';
+import { AppCache } from '../cache';
+import { PathUtil } from '../path';
+import { EnvUtil } from '../env';
 
 import { TranspileUtil } from './transpile-util';
 import { ModuleUtil, Module } from './module-util';
-import { SourceUtil } from './source-util';
-
-import { EnvUtil } from '../env';
 import { SimpleEntry, SourceIndex } from './source';
-import { AppCache } from '../cache';
-import { PathUtil } from '../path';
+import { Host } from '../host';
 
 type UnloadHandler = (file: string, unlink?: boolean) => void;
 
@@ -71,29 +69,26 @@ export class ModuleManager {
    * Set transpiler triggered on require
    */
   static setTranspiler(fn: (file: string) => string): void {
-    if (EnvUtil.isReadonly()) {
-      fn = (tsf: string): string => AppCache.readEntry(tsf);
-    }
     // @ts-expect-error
     this.transpile = fn;
   }
 
   /**
-   * Compile and Transpile .ts file to javascript
+   * Compile and transpile a source file
    * @param m node module
-   * @param tsf filename
+   * @param sourceFile filename
    */
-  static compile(m: NodeJS.Module, tsf: string): unknown {
-    let content = this.transpile(tsf);
-    const jsf = tsf.replace(/[.]ts$/, '.js');
+  static compile(m: NodeJS.Module, sourceFile: string): unknown {
+    let content = this.transpile(sourceFile);
+    const outputFile = sourceFile.replace(Host.EXT.inputRe, Host.EXT.output);
     try {
-      return m._compile(content, jsf);
+      return m._compile(content, outputFile);
     } catch (err: unknown) {
       if (!(err instanceof Error)) {
         throw err;
       }
-      content = ModuleUtil.handlePhaseError('compile', tsf, err);
-      return m._compile(content, jsf);
+      content = ModuleUtil.handlePhaseError('compile', sourceFile, err);
+      return m._compile(content, outputFile);
     }
   }
 
@@ -103,21 +98,7 @@ export class ModuleManager {
    * @param force Force transpilation, even if cached
    */
   static simpleTranspile(tsf: string, force = false): string {
-    return AppCache.getOrSet(tsf, () => {
-      try {
-        const diags: tsi.Diagnostic[] = [];
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const ts = require('typescript') as typeof tsi;
-        const ret = ts.transpile(SourceUtil.preProcess(tsf), TranspileUtil.compilerOptions, tsf, diags);
-        TranspileUtil.checkTranspileErrors(tsf, diags);
-        return ret;
-      } catch (err: unknown) {
-        if (!(err instanceof Error)) {
-          throw err;
-        }
-        return TranspileUtil.transpileError(tsf, err);
-      }
-    }, force);
+    return AppCache.getOrSet(tsf, () => TranspileUtil.simpleTranspile(tsf), force);
   }
 
   /**
@@ -128,13 +109,8 @@ export class ModuleManager {
       return;
     }
 
-    if (EnvUtil.isReadonly()) {
-      console.debug(new Date().toISOString(), 'Running read-only mode, transpilation is disabled');
-    }
-
     this.setTranspiler(f => this.simpleTranspile(f));
 
-    ModuleUtil.init();
     AppCache.init(true);
 
     // Supports bootstrapping with framework resolution
@@ -142,26 +118,22 @@ export class ModuleManager {
       Module._resolveFilename = (req, p): string => this.#moduleResolveFilename(this.#resolveFilename!(req), p);
     }
     Module._load = (req, p): unknown => this.#onModuleLoad(req, p);
-    require.extensions[SourceUtil.EXT] = this.compile.bind(this);
+    require.extensions[Host.EXT.input] = this.compile.bind(this);
 
     this.#initialized = true;
   }
 
   /**
    * Transpile all found
-   * @param found
+   * @param entries
    */
-  static transpileAll(found: SimpleEntry[]): SimpleEntry[] {
-    if (!EnvUtil.isReadonly()) {
-      // Ensure we transpile all support files
-      for (const el of found) {
-        if (!AppCache.hasEntry(el.file)) {
-          this.transpile(el.file);
-        }
+  static transpileAll(entries: SimpleEntry[]): void {
+    // Ensure we transpile all files
+    for (const { file } of entries) {
+      if (!AppCache.hasEntry(file)) {
+        this.transpile(file);
       }
     }
-
-    return found;
   }
 
   /**
@@ -182,11 +154,11 @@ export class ModuleManager {
    * Turn off compile support
    */
   static reset(): void {
-    if (!this.#initialized) {
+    if (!this.#initialized || EnvUtil.isCompiled()) {
       return;
     }
 
-    delete require.extensions[SourceUtil.EXT];
+    delete require.extensions[Host.EXT.input];
     this.#initialized = false;
     Module._load = this.#moduleLoad;
     if (this.#resolveFilename) {

@@ -1,4 +1,6 @@
 import { Class } from '@travetto/base';
+
+import { PathUtil } from '@travetto/boot';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 /**
@@ -16,10 +18,12 @@ class $PendingRegister {
    * @param `ᚕmethods` Methods and their hashes
    * @param `ᚕabstract` Is the class abstract
    */
-  initMeta(cls: Class, ᚕfile: string, ᚕhash: number, ᚕmethods: Record<string, { hash: number }>, ᚕabstract: boolean, ᚕsynthetic: boolean): boolean {
+  initMeta(cls: Class, file: string, ᚕhash: number, ᚕmethods: Record<string, { hash: number }>, ᚕabstract: boolean, ᚕsynthetic: boolean): boolean {
+    const ᚕfile = PathUtil.toUnixSource(file);
     const meta = {
       ᚕid: ModuleUtil.getId(ᚕfile, cls.name),
       ᚕfile,
+      ᚕfileRaw: file,
       ᚕhash,
       ᚕmethods,
       ᚕabstract,

@@ -7,7 +7,7 @@ import type { ClassTarget, InjectableConfig } from '../src/types';
 /**
  * Wraps the Dependency Registry to support proxying instances
  */
-export function init($DependencyRegistry: Class<typeof DependencyRegistry>): typeof $DependencyRegistry {
+export function setup($DependencyRegistry: Class<typeof DependencyRegistry>): typeof $DependencyRegistry {
 
   /**
    * Extending the $DependencyRegistry class to add some functionality for watching

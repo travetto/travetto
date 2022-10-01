@@ -1,7 +1,7 @@
 import * as os from 'os';
 import { readFileSync } from 'fs';
 
-import { FsUtil, PathUtil, ScanFs } from '@travetto/boot';
+import { FsUtil, Host, PathUtil, ScanFs } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 import { EnvInit } from '@travetto/base/support/bin/init';
 
@@ -49,10 +49,10 @@ export class TestCommand extends CliCommand<Options> {
       debug: '0',
       set: { TRV_LOG_TIME: '0' },
       append: {
-        TRV_RESOURCES: 'test/resources',
+        TRV_RESOURCES: `${Host.PATH.test}/${Host.PATH.resources}`,
         TRV_PROFILES: 'test',
-        TRV_SRC_LOCAL: '^test',
-        TRV_SRC_COMMON: '^test-support'
+        TRV_SRC_LOCAL: `^${Host.PATH.test}`,
+        TRV_SRC_COMMON: `^${Host.PATH.testSupport}`
       }
     });
   }
@@ -84,7 +84,7 @@ export class TestCommand extends CliCommand<Options> {
     const isFile = await this.isFile(first);
 
     if (!first) {
-      state.args = state.isolated ? ['test-isolated/.*'] : ['test/.*'];
+      state.args = state.isolated ? [`${Host.PATH.testIsolated}/.*`] : [`${Host.PATH.test}/.*`];
       state.concurrency = (state.isolated ? 1 : undefined) ?? state.concurrency;
     } else if (isFile) { // If is a single file
       if (first.startsWith('test-')) {
@@ -99,7 +99,7 @@ export class TestCommand extends CliCommand<Options> {
   }
 
   async action(regexes: string[]): Promise<void> {
-    const { runTests } = await import('../support/bin/run');
+    const { runTests } = await import('./bin/run');
 
     const [first] = regexes;
 

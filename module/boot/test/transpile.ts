@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { SourceUtil } from '../src/internal/source-util';
+import { TranspileUtil } from '../src/internal/transpile-util';
 
 @Suite()
-export class SourceUtilTest {
+export class TranspileUtilTest {
 
   @Test()
   getErrorModule() {
@@ -13,7 +13,7 @@ export class SourceUtilTest {
 
   @Test()
   preProcess() {
-    const results = SourceUtil.preProcess('a', `import * as ts from 'typescript';
+    const results = TranspileUtil.preProcess('a', `import * as ts from 'typescript';
 console.log('Hello');
 `);
     assert(results.startsWith('// import'));

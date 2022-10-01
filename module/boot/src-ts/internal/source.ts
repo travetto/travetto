@@ -2,6 +2,8 @@ import { PathUtil } from '../path';
 import { ScanEntry, ScanFs } from '../scan';
 import { EnvUtil } from '../env';
 
+import { Host } from '../host';
+
 export type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean, paths?: string[] };
@@ -105,8 +107,8 @@ export class SourceIndex {
       const idx = new Map<string, IndexRecord>();
       idx.set('.', { base: PathUtil.cwd, files: new Map() });
 
-      for (const el of this.#scanFramework(x => x.endsWith('.ts') && !x.endsWith('.d.ts'))) {
-        const res = this.#compute(el);
+      for (const entry of this.#scanFramework(Host.EXT.runningMatcher)) {
+        const res = this.#compute(entry);
 
         if (!res) {
           continue;
@@ -115,18 +117,18 @@ export class SourceIndex {
         const { mod, sub } = res;
 
         if (!idx.has(mod)) {
-          idx.set(mod, { base: el.file, files: new Map() });
+          idx.set(mod, { base: entry.file, files: new Map() });
         }
 
-        if (ScanFs.isDir(el)) {
+        if (ScanFs.isDir(entry)) {
           // Do nothing
-        } else if (sub === 'index.ts') {
-          idx.get(mod)!.index = el;
+        } else if (sub === Host.EXT.runningIndex) {
+          idx.get(mod)!.index = { file: entry.file, module: entry.module };
         } else {
           if (!idx.get(mod)!.files.has(sub)) {
             idx.get(mod)!.files.set(sub, []);
           }
-          idx.get(mod)!.files.get(sub)!.push({ file: el.file, module: el.module });
+          idx.get(mod)!.files.get(sub)!.push({ file: entry.file, module: entry.module });
         }
       }
       this.#cache = idx;
@@ -158,7 +160,7 @@ export class SourceIndex {
     const { filter: f, folder, paths = this.getPaths() } = config;
     const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
 
-    if (folder === 'src') {
+    if (folder === Host.PATH.src) {
       config.includeIndex = config.includeIndex ?? true;
     }
     const all: SimpleEntry[][] = [];
@@ -198,9 +200,7 @@ export class SourceIndex {
     const all: SimpleEntry[][] = [];
     const getAll = (src: string[], cmd: (c: FindConfig) => SimpleEntry[]): void => {
       for (const folder of src.filter(x => mode === 'all' || !x.startsWith('^'))) {
-        all.push(cmd({ folder: folder.replace('^', '') })
-          .filter(x => mode === 'all' || !x.module.includes('.opt'))
-        );
+        all.push(cmd({ folder: folder.replace('^', '') }));
       }
     };
     getAll(config.common, c => this.find({

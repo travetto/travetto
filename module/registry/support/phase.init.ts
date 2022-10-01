@@ -1,7 +1,7 @@
 /**
  * Initialize the registry after all files have been loaded
  */
-export const init = {
+export const step = {
   key: '@trv:registry/init',
   after: ['@trv:base/load'],
   action: async (): Promise<unknown> => {

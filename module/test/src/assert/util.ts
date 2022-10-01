@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { PathUtil } from '@travetto/boot';
+import { Host, PathUtil } from '@travetto/boot';
 import { Class, ClassInstance, Util } from '@travetto/base';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
@@ -45,12 +45,12 @@ export class AssertUtil {
       .replace(/[\\]/g, '/')
       .split('\n')
       // Exclude node_modules, target self
-      .filter(x => x.includes(PathUtil.cwd) && (!x.includes('node_modules') || x.includes('/test-support/')));
+      .filter(x => x.includes(PathUtil.cwd) && (!x.includes('node_modules') || x.includes(`/${Host.PATH.testSupport}/`)));
 
     let best = lines.filter(x => x.includes(filename))[0];
 
     if (!best) {
-      [best] = lines.filter(x => x.includes(`${PathUtil.cwd}/test`));
+      [best] = lines.filter(x => x.includes(`${PathUtil.cwd}/${Host.PATH.test}`));
     }
 
     if (!best) {

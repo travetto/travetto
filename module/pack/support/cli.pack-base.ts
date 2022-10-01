@@ -3,8 +3,8 @@ import * as os from 'os';
 import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
 import { CliUtil, PathUtil, Package, FsUtil } from '@travetto/boot';
 
-import { PackUtil } from '../support/bin/lib/util';
-import { CommonConfig, PackOperation } from '../support/bin/lib/types';
+import { PackUtil } from './bin/util';
+import { CommonConfig, PackOperation } from './bin/types';
 
 const packName = `pack_${Package.name}`
   .toLowerCase()

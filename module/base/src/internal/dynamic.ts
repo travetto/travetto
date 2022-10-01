@@ -9,7 +9,7 @@ export function Dynamic(key: string): ClassDecorator {
   return ((target: Class<unknown>) => {
     if (EnvUtil.isDynamic()) {
       // Decorate
-      const ret = require(key).init(target);
+      const ret = require(key).setup(target);
       Object.defineProperty(ret, 'name', { value: target.name });
       return ret;
     }

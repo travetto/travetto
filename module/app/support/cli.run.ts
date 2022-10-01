@@ -4,9 +4,9 @@ import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/co
 import { EnvInit } from '@travetto/base/support/bin/init';
 import { CliUtil, EnvUtil, PathUtil } from '@travetto/boot';
 
-import { AppListUtil } from '../support/bin/list';
-import { AppRunUtil } from '../support/bin/run';
-import { HelpUtil } from '../support/bin/help';
+import { AppListUtil } from './bin/list';
+import { AppRunUtil } from './bin/run';
+import { HelpUtil } from './bin/help';
 
 function hasChildren(e: Error): e is Error & { errors: Error[] } {
   return !!e && ('errors' in e);

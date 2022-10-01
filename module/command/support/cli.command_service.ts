@@ -1,7 +1,7 @@
 import { CliCommand } from '@travetto/cli/src/command';
 import { CliUtil } from '@travetto/boot';
 
-import { ServiceUtil } from '../support/bin/service';
+import { ServiceUtil } from './bin/service';
 
 /**
  * `npx trv service`

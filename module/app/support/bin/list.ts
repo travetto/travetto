@@ -86,12 +86,12 @@ export class AppListUtil {
     let items: ApplicationConfig[] | undefined;
     if (!(items = await this.#readList())) { // no list
       items = await this.buildList();
-      if (items && !EnvUtil.isReadonly()) {
+      if (items) {
         this.#storeList(items);
       }
     }
 
-    if (items && !EnvUtil.isReadonly()) {
+    if (items) {
       try {
         await this.#verifyList(items);
       } catch (err) {

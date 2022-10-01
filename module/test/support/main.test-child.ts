@@ -1,6 +1,6 @@
 import { createWriteStream } from 'fs';
 
-import { AppCache } from '@travetto/boot';
+import { AppCache, Host } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/support/bin/init';
 
 export async function customLogs(): Promise<void> {
@@ -21,10 +21,10 @@ export async function main(): Promise<void> {
     debug: '0',
     set: { TRV_LOG_TIME: '0' },
     append: {
-      TRV_RESOURCES: 'test/resources',
+      TRV_RESOURCES: `${Host.PATH.test}/${Host.PATH.resources}`,
       TRV_PROFILES: 'test',
-      TRV_SRC_LOCAL: '^test',
-      TRV_SRC_COMMON: '^test-support'
+      TRV_SRC_LOCAL: `^${Host.PATH.test}`,
+      TRV_SRC_COMMON: `^${Host.PATH.testSupport}`
     }
   });
 
