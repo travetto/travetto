@@ -19,7 +19,7 @@ class LoggerTest {
   async shouldLog() {
     const events: LogEvent[] = [];
     Logger.listen('test', e => events.push(e));
-    (function (ᚕlg) {
+    (function (ᚕlog) {
       console.log('Hello', { args: [1, 2, 3] });
     })((level: string, ctx: LogEvent, message: string, context: Record<string, unknown>) => Logger.onLog(level as 'debug', ctx, [message, context]));
     assert(events.length === 1);

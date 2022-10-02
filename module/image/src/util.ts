@@ -1,4 +1,5 @@
 import * as fs from 'fs/promises';
+import * as path from 'path';
 import { Readable } from 'stream';
 
 import { CommandService } from '@travetto/command';
@@ -100,6 +101,7 @@ export class ImageUtil {
 
     const pth = await ResourceManager.find(rel);
     const out = AppCache.toEntryName(pth);
+    await fs.mkdir(path.dirname(out), { recursive: true });
 
     if (!(await FsUtil.exists(out))) {
       let stream: Buffer | Readable = await ResourceManager.readStream(rel);

@@ -10,10 +10,10 @@ export class SourceUtilSuite {
   async getId() {
     PathUtil.setDevPath('@@@@');
     const modId = SourceUtil.getSourceId(__filename);
-    assert(modId === './test/module-util');
+    assert(modId === './test/source-util');
 
-    const modId2 = SourceUtil.getSourceId(`${__dirname}/node_modules/@travetto/base/src/module-util.js`);
-    assert(modId2 === '@trv:base/module-util');
+    const modId2 = SourceUtil.getSourceId(`${__dirname}/node_modules/@travetto/base/src/source-util.js`);
+    assert(modId2 === '@trv:base/source-util');
 
     const modId3 = SourceUtil.getSourceId(`${__dirname}/../test/simple.js`);
     assert(modId3 === './test/simple');

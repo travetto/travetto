@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { PathUtil } from '@travetto/boot';
+import { Host, PathUtil } from '@travetto/boot';
 
 export class ImageUtil {
 
@@ -27,9 +27,10 @@ export class ImageUtil {
 
     const imageSources = new Set<string>();
     const resolver = (x: string): string => {
-      const resolved = PathUtil.resolveUnix(root, x).replace(/^.*\/resources\//, '/');
-      imageSources.add(resolved);
-      return resolved;
+      const og = PathUtil.resolveUnix(root, x);
+      const [, resolved] = og.split(`/${Host.PATH.resources}/`);
+      imageSources.add(resolved ?? og);
+      return resolved ?? og;
     };
 
     html = html
