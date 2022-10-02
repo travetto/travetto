@@ -131,7 +131,7 @@ class $Compiler {
     this.#host.reset();
     this.#program = undefined;
 
-    ModuleManager.clearUnloadHandlers();
+    ModuleManager.clearHandlers();
     SourceIndex.reset();
     this.active = false;
   }

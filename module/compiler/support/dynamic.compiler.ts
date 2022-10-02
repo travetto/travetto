@@ -1,7 +1,6 @@
 import { AppManifest, Class, ShutdownManager } from '@travetto/base';
 import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 import { Host, FsUtil, PathUtil } from '@travetto/boot';
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 
 import { FilePresenceManager } from '@travetto/watch';
@@ -29,7 +28,7 @@ export function setup($Compiler: Class<typeof Compiler>): typeof $Compiler {
       }, 0);
 
       // Proxy all file loads
-      ModuleUtil.addHandler((name, mod) => {
+      ModuleManager.onLoad((name, mod) => {
         if (name.includes(PathUtil.cwd) && !name.includes('node_modules') && Host.PATH.srcWithSepRe.test(name)) {
           if (!this.#modules.has(name)) {
             this.#modules.set(name, new RetargettingProxy(mod));
