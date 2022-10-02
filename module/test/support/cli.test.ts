@@ -2,7 +2,7 @@ import * as os from 'os';
 import { readFileSync } from 'fs';
 
 import { FsUtil, Host, PathUtil, ScanFs } from '@travetto/boot';
-import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
+import { CliCommand, OptionConfig } from '@travetto/cli';
 import { EnvInit } from '@travetto/base/support/bin/init';
 
 import type { RunState } from '../src/execute/types';

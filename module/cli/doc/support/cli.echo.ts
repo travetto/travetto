@@ -1,5 +1,5 @@
 import '@travetto/base';
-import { CliCommand } from '@travetto/cli/src/command';
+import { CliCommand } from '@travetto/cli';
 
 /**
  * `npx trv echo`

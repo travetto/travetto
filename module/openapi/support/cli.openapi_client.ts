@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { readFileSync } from 'fs';
 
-import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
+import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 import { AppCache, CliUtil, ExecUtil, Host, PathUtil } from '@travetto/boot';
 
 const presets: Record<string, [string, object] | [string]> = JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', Host.PATH.resources, 'presets.json'), 'utf8'));

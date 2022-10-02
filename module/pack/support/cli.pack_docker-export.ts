@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 
 import { FsUtil, Host, PathUtil } from '@travetto/boot';
-import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
+import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 type Options = {
   app: OptionConfig<string>;

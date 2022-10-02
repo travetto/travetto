@@ -15,10 +15,11 @@
     "name": "Travetto Framework"
   },
   "files": [
+    "index.ts",
     "src",
     "bin"
   ],
-  "main": "bin/trv.js",
+  "main": "index.ts",
   "bin": {
     "trv": "bin/trv.js"
   },

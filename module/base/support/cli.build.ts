@@ -1,5 +1,5 @@
 import { CliUtil } from '@travetto/boot';
-import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
+import { CliCommand, OptionConfig } from '@travetto/cli';
 
 import { BuildUtil } from './bin/util';
 

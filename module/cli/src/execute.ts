@@ -1,7 +1,6 @@
 import { program as commander } from 'commander';
 
-import { CliUtil } from './util';
-import { CompletionConfig } from './types';
+import { AutocompleteUtil, CompletionConfig } from './autocomplete';
 import { CliCommandManager } from './command-manager';
 import { HelpUtil } from './help';
 import { version } from '../package.json';
@@ -17,7 +16,7 @@ export class ExecutionManager {
   static async runCompletion(args: string[]): Promise<void> {
     const cfg: CompletionConfig = { all: [], task: {} };
     await CliCommandManager.loadAllCommands(x => x.setupCompletion(cfg));
-    const res = await CliUtil.getCompletion(cfg, args.slice(3));
+    const res = await AutocompleteUtil.getCompletion(cfg, args.slice(3));
     console.log(res.join(' '));
     return;
   }

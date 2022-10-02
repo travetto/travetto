@@ -1,4 +1,4 @@
-import { OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
+import { OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { BaseOptions, BasePackCommand } from './cli.pack-base';
 import { Docker, DockerConfig } from './bin/docker';

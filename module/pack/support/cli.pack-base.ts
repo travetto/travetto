@@ -1,6 +1,6 @@
 import * as os from 'os';
 
-import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
+import { CliCommand, OptionConfig } from '@travetto/cli';
 import { CliUtil, PathUtil, Package, FsUtil } from '@travetto/boot';
 
 import { PackUtil } from './bin/util';

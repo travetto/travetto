@@ -1,4 +1,4 @@
-import { CliCommand } from '@travetto/cli/src/command';
+import { CliCommand } from '@travetto/cli';
 import { CliUtil } from '@travetto/boot';
 
 import { ServiceUtil } from './bin/service';
