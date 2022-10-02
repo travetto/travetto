@@ -1,4 +1,4 @@
-import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
+import { CliCommand, OptionConfig } from '@travetto/cli';
 import { ExecUtil } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/support/bin/init';
 

@@ -1,6 +1,6 @@
-import { CliUtil, Host, PathUtil } from '@travetto/boot';
 import { EnvInit } from '@travetto/base/support/bin/init';
-import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
+import { CliUtil, Host, PathUtil } from '@travetto/boot';
+import { CliCommand, OptionConfig } from '@travetto/cli';
 
 type Options = {
   watch: OptionConfig<boolean>;

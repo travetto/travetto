@@ -3,7 +3,7 @@ import * as commander from 'commander';
 
 import { CliUtil } from '@travetto/boot';
 
-import { CompletionConfig } from './types';
+import { CompletionConfig } from './autocomplete';
 import { HelpUtil } from './help';
 
 type Completion = Record<string, string[]>;

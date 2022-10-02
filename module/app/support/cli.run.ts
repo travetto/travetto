@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli/src/command';
+import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 import { EnvInit } from '@travetto/base/support/bin/init';
 import { CliUtil, EnvUtil, PathUtil } from '@travetto/boot';
 

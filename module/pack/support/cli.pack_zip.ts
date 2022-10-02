@@ -1,4 +1,4 @@
-import { OptionConfig } from '@travetto/cli/src/command';
+import { OptionConfig } from '@travetto/cli';
 
 import { BaseOptions, BasePackCommand } from './cli.pack-base';
 import { Zip, ZipConfig } from './bin/zip';

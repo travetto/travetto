@@ -49,6 +49,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
   override async init(): Promise<void> {
     this.#pool = pool.createPool({
       create: () => this.#withRetries(async () => {
+        // TODO: This should be configurable, and not in the cache folder
         const db = Db(AppCache.toEntryName('sqlite_db'),
           this.#config.options
         );

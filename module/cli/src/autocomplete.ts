@@ -1,9 +1,22 @@
-import { CompletionConfig } from './types';
+export interface CompletionConfig {
+  /**
+   * All top level commands
+   */
+  all: string[];
+  /**
+   * Flags for sub tasks
+   */
+  task: {
+    [key: string]: {
+      [key: string]: string[];
+    };
+  };
+}
 
 /**
- * Common CLI Utilities
+ * Common Autocomplete Utilities
  */
-export class CliUtil {
+export class AutocompleteUtil {
 
   /**
    * Get code completion values

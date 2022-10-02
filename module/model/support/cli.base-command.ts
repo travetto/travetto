@@ -1,5 +1,5 @@
-import { CliUtil } from '@travetto/boot/src/cli';
-import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
+import { CliUtil } from '@travetto/boot';
+import { CliCommand, OptionConfig } from '@travetto/cli';
 import { EnvInit } from '@travetto/base/support/bin/init';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 

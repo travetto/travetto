@@ -1,7 +1,7 @@
 import * as enquirer from 'enquirer';
 
 import { PathUtil, EnvUtil } from '@travetto/boot';
-import { CliCommand, OptionConfig } from '@travetto/cli/src/command';
+import { CliCommand, OptionConfig } from '@travetto/cli';
 
 import { Context } from './bin/context';
 import { Feature, FEATURES } from './bin/features';
