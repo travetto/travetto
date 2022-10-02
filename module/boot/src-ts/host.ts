@@ -9,7 +9,7 @@ const dtsRe = /[.]d[.]ts$/;
 const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.endsWith(dtsExt));
 const jsMatcher = ((file: string): boolean => file.endsWith(jsExt));
 
-const runningExt = EnvUtil.isCompiled() ? jsExt : tsExt;
+const sourceExt = EnvUtil.isCompiled() ? jsExt : tsExt;
 
 export class Host {
   static EXT = {
@@ -26,9 +26,9 @@ export class Host {
 
     inputOutputRe: tjsRe,
 
-    running: runningExt,
-    runningMatcher: EnvUtil.isCompiled() ? jsMatcher : tsMatcher,
-    runningIndex: `index${runningExt}`
+    source: sourceExt,
+    sourceMatcher: EnvUtil.isCompiled() ? jsMatcher : tsMatcher,
+    sourceIndex: `index${sourceExt}`
   };
 
   static PATH = {

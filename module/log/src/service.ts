@@ -1,6 +1,6 @@
 import { EnvUtil } from '@travetto/boot';
 import { ConsoleManager, LogLevel, AppManifest, Util } from '@travetto/base';
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
+import { SourceUtil } from '@travetto/boot/src/internal/source-util';
 
 import { Appender, Formatter, LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
@@ -129,7 +129,7 @@ class $Logger {
       message = '';
     }
 
-    const category = ModuleUtil.getId(file);
+    const category = SourceUtil.getSourceId(file);
 
     if ((level in this.#exclude) || (category && level in this.#filters && !this.#filters[level]!(category))) {
       return;

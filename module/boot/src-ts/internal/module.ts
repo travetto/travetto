@@ -3,23 +3,67 @@ import { PathUtil } from '../path';
 import { EnvUtil } from '../env';
 
 import { TranspileUtil } from './transpile-util';
-import { ModuleUtil, Module } from './module-util';
+import { Module } from './module-typed';
 import { SimpleEntry, SourceIndex } from './source';
 import { Host } from '../host';
 
 type UnloadHandler = (file: string, unlink?: boolean) => void;
+type LoadHandler<T = unknown> = (name: string, o: T) => T;
+
 
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
 export class ModuleManager {
+  private static transpile: (filename: string) => string;
+
   static #moduleResolveFilename = Module._resolveFilename.bind(Module);
   static #moduleLoad = Module._load.bind(Module);
   static #resolveFilename?: (filename: string) => string;
   static #initialized = false;
   static #unloadHandlers: UnloadHandler[] = [];
+  static #loadHandlers: LoadHandler[] = [];
 
-  static readonly transpile: (filename: string) => string;
+  /**
+   * Check for module cycles
+   */
+  static #checkForCycles(mod: unknown, request: string, parent: NodeJS.Module): void {
+    if (parent && !parent.loaded) { // Standard ts compiler output
+      const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
+      if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
+        try {
+          const p = Module._resolveFilename!(request, parent);
+          if (p && p.endsWith(Host.EXT.input)) {
+            throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
+          }
+        } catch {
+          // Ignore if we can't resolve
+        }
+      }
+    }
+  }
+
+  /**
+   * Process error response
+   * @param phase The load/compile phase to care about
+   * @param tsf The typescript filename
+   * @param err The error produced
+   * @param filename The relative filename
+   */
+  static #handlePhaseError(phase: 'load' | 'compile', tsf: string, err: Error, filename = tsf.replace(PathUtil.cwd, '.')): string {
+    if (phase === 'compile' &&
+      (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
+    ) {
+      err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
+    }
+
+    if (EnvUtil.isDynamic() && !filename.startsWith('test/')) {
+      console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
+      return TranspileUtil.getErrorModule(err.message);
+    }
+
+    throw err;
+  }
 
   /**
    * When a module load is requested
@@ -30,15 +74,23 @@ export class ModuleManager {
     let mod: unknown;
     try {
       mod = this.#moduleLoad.apply(null, [request, parent]);
-      ModuleUtil.checkForCycles(mod, request, parent);
+      this.#checkForCycles(mod, request, parent);
     } catch (err: unknown) {
       if (!(err instanceof Error)) {
         throw err;
       }
       const name = Module._resolveFilename!(request, parent);
-      mod = Module._compile!(ModuleUtil.handlePhaseError('load', name, err), name);
+      mod = Module._compile!(this.#handlePhaseError('load', name, err), name);
     }
-    return ModuleUtil.handleModule(mod, request, parent);
+
+    if (this.#loadHandlers.length) {
+      const name = Module._resolveFilename!(request, parent);
+      for (const handler of this.#loadHandlers) {
+        mod = handler(name, mod);
+      }
+    }
+
+    return mod;
   }
 
   /**
@@ -58,10 +110,20 @@ export class ModuleManager {
   }
 
   /**
+   * Add module post processor (post-load)
+   *
+   * @param handler The code to run on post module load
+   */
+  static onLoad(handler: LoadHandler): void {
+    this.#loadHandlers.push(handler);
+  }
+
+  /**
    * Clear all unload handlers
    * @private
    */
-  static clearUnloadHandlers(): void {
+  static clearHandlers(): void {
+    this.#loadHandlers = [];
     this.#unloadHandlers = [];
   }
 
@@ -69,7 +131,6 @@ export class ModuleManager {
    * Set transpiler triggered on require
    */
   static setTranspiler(fn: (file: string) => string): void {
-    // @ts-expect-error
     this.transpile = fn;
   }
 
@@ -87,7 +148,7 @@ export class ModuleManager {
       if (!(err instanceof Error)) {
         throw err;
       }
-      content = ModuleUtil.handlePhaseError('compile', sourceFile, err);
+      content = this.#handlePhaseError('compile', sourceFile, err);
       return m._compile(content, outputFile);
     }
   }
@@ -164,7 +225,6 @@ export class ModuleManager {
     if (this.#resolveFilename) {
       Module._resolveFilename = this.#moduleResolveFilename;
     }
-    ModuleUtil.reset();
 
     // Unload all
     for (const { file } of SourceIndex.find({ includeIndex: true })) {
