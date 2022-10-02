@@ -24,6 +24,6 @@ and invoke it locally using
     ModuleManager.transpileAll(SourceIndex.find({ folder: Host.PATH.support }));
   }
 
-  const { ExecutionManager } = await import('@travetto/cli/src/execute');
+  const { ExecutionManager } = await import('@travetto/cli');
   return ExecutionManager.run(process.argv); // Run cli
 }
