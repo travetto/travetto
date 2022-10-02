@@ -3,9 +3,10 @@ import { readFileSync } from 'fs';
 
 import { FsUtil, Host, PathUtil, ScanFs } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import { EnvInit } from '@travetto/base/support/bin/init';
 
 import type { RunState } from '../src/execute/types';
+
+import { envInit } from './bin/env';
 
 const modes = ['single', 'standard'] as const;
 
@@ -45,16 +46,7 @@ export class TestCommand extends CliCommand<Options> {
   }
 
   envInit(): void {
-    EnvInit.init({
-      debug: '0',
-      set: { TRV_LOG_TIME: '0' },
-      append: {
-        TRV_RESOURCES: `${Host.PATH.test}/${Host.PATH.resources}`,
-        TRV_PROFILES: 'test',
-        TRV_SRC_LOCAL: `^${Host.PATH.test}`,
-        TRV_SRC_COMMON: `^${Host.PATH.testSupport}`
-      }
-    });
+    envInit();
   }
 
   getArgs(): string {
