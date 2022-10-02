@@ -68,6 +68,16 @@ export class FsUtil {
   }
 
   /**
+   * Determine if the current stat is older than the presented value
+   * @param current
+   * @param next
+   * @returns
+   */
+  static isOlder(current: fss.Stats, next: fss.Stats): boolean {
+    return current.ctimeMs < next.ctimeMs || current.mtimeMs < next.mtimeMs;
+  }
+
+  /**
    * Remove directory, determine if errors should be ignored
    * @param pth The folder to delete
    * @param ignore Should errors be ignored

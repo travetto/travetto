@@ -6,6 +6,7 @@ import { PathUtil } from '../module/boot/src/path';
 import { ModuleManager } from '../module/boot/src/internal/module';
 import { TranspileUtil } from '../module/boot/src/internal/transpile-util';
 import { SystemUtil } from '../module/boot/src/internal/system';
+import { ModuleCompileCache } from '../module/boot/src/internal/module-cache';
 
 type DevConfig = {
   entries: Record<string, string>;
@@ -15,7 +16,7 @@ type DevConfig = {
 class DevRegister {
 
   static #trvMod = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
-  static #defaultMods = new Set(['@travetto/test', '@travetto/cli','@travetto/doc']);
+  static #defaultMods = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc']);
 
   /**
    * Resolve filename for dev mode
@@ -75,7 +76,7 @@ class DevRegister {
   }
 
   static getContent(envMods: string): string {
-    return AppCache.getOrSet(`isolated-modules.${SystemUtil.naiveHash(envMods)}.json`,
+    return AppCache.getOrSet('isolated-modules.json',
       () => JSON.stringify(this.readDeps(this.getMods(envMods)), null, 2)
     );
   }
@@ -83,11 +84,14 @@ class DevRegister {
   static run(): void {
     const envMods = process.env.TRV_MODULES || '';
     if (envMods && !process.env.TRV_CACHE) { // Is specifying modules, build out
+      const uniqueId = SystemUtil.naiveHash(process.env.TRV_MODULES || '');
       // @ts-expect-error
-      AppCache.cacheDir = `.trv_cache_${SystemUtil.naiveHash(process.env.TRV_MODULES)}`;
+      AppCache.cacheDir = `.app_cache/${uniqueId}`;
+      // @ts-expect-error
+      ModuleCompileCache.cacheDir = `.trv_cache_${uniqueId}`;
     }
 
-    AppCache.init(true);
+    ModuleCompileCache.init(true);
     const { entries }: DevConfig = JSON.parse(this.getContent(envMods));
     process.env.TRV_MODULES = `${envMods.replace(this.#trvMod, '')},${Object.entries(entries).map(([k, v]) => `${k}=${v ?? ''}`).join(',')}`
       .replace(/,=/g, '');

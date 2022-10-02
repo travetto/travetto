@@ -30,8 +30,8 @@ export class BaseBuildCommand extends CliCommand<Options> {
       process.env.TRV_CACHE = this.cmd.output;
     }
 
-    const { AppCache } = await import('@travetto/boot');
-    const path = this.cmd.output ?? AppCache.cacheDir;
+    const { ModuleCompileCache } = await import('@travetto/boot/src/internal/module-cache');
+    const path = this.cmd.output ?? ModuleCompileCache.cacheDir;
 
     try {
       await BuildUtil.build(process.env);

@@ -1,15 +1,14 @@
-import { AppCache } from '../cache';
 import { PathUtil } from '../path';
 import { EnvUtil } from '../env';
 
 import { TranspileUtil } from './transpile-util';
 import { Module } from './module-typed';
+import { ModuleCompileCache } from './module-cache';
 import { SimpleEntry, SourceIndex } from './source';
 import { Host } from '../host';
 
 type UnloadHandler = (file: string, unlink?: boolean) => void;
 type LoadHandler<T = unknown> = (name: string, o: T) => T;
-
 
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
@@ -159,7 +158,7 @@ export class ModuleManager {
    * @param force Force transpilation, even if cached
    */
   static simpleTranspile(tsf: string, force = false): string {
-    return AppCache.getOrSet(tsf, () => TranspileUtil.simpleTranspile(tsf), force);
+    return ModuleCompileCache.getOrSet(tsf, () => TranspileUtil.simpleTranspile(tsf), force);
   }
 
   /**
@@ -172,7 +171,7 @@ export class ModuleManager {
 
     this.setTranspiler(f => this.simpleTranspile(f));
 
-    AppCache.init(true);
+    ModuleCompileCache.init(true);
 
     // Supports bootstrapping with framework resolution
     if (this.#resolveFilename) {
@@ -191,7 +190,7 @@ export class ModuleManager {
   static transpileAll(entries: SimpleEntry[]): void {
     // Ensure we transpile all files
     for (const { file } of entries) {
-      if (!AppCache.hasEntry(file)) {
+      if (!ModuleCompileCache.hasEntry(file)) {
         this.transpile(file);
       }
     }

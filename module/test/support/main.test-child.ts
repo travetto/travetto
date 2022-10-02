@@ -1,5 +1,3 @@
-import { createWriteStream } from 'fs';
-
 import { AppCache } from '@travetto/boot';
 
 import { envInit } from './bin/env';
@@ -7,8 +5,11 @@ import { envInit } from './bin/env';
 export async function customLogs(): Promise<void> {
   const { ConsoleManager } = await import('@travetto/base');
 
+  const handle = await AppCache.openEntryHandle(`test-worker.${process.pid}.log`, 'a');
+  const stdout = handle.createWriteStream();
+
   const c = new console.Console({
-    stdout: createWriteStream(AppCache.toEntryName(`test-worker.${process.pid}.log`), { flags: 'a' }),
+    stdout,
     inspectOptions: { depth: 4 },
   });
 

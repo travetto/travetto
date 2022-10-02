@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import { createWriteStream } from 'fs';
 
 import { ConsoleManager } from '@travetto/base/src/console';
-import { AppCache } from '@travetto/boot';
+import { AppCache, PathUtil } from '@travetto/boot';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { LogUtil } from './util/log';
@@ -81,7 +81,7 @@ export class VisitorFactory<S extends State = State> {
 
   get logger(): Console {
     this.#logger ??= new console.Console({
-      stdout: createWriteStream(AppCache.toEntryName(this.#logTarget), { flags: 'a' }),
+      stdout: createWriteStream(PathUtil.joinUnix(AppCache.cacheDir, this.#logTarget), { flags: 'a' }),
       inspectOptions: { depth: 4 },
     });
     return this.#logger;

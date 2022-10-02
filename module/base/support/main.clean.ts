@@ -1,8 +1,8 @@
-import { AppCache } from '@travetto/boot/src/cache';
+import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
 
 /**
  * Clean cache
  */
 export async function main(): Promise<void> {
-  AppCache.clear();
+  ModuleCompileCache.clear();
 }

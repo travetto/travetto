@@ -4,6 +4,7 @@
 # Common
 node_modules/
 .trv*
+.app_cache
 npm-debug.log
 .DS_STORE
 Thumbs.db

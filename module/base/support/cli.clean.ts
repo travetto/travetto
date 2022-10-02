@@ -1,7 +1,8 @@
 import * as fs from 'fs/promises';
 
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import { CliUtil, FileCache, PathUtil } from '@travetto/boot';
+import { CliUtil, PathUtil } from '@travetto/boot';
+import { ModuleFileCache } from '@travetto/boot/src/internal/module-cache';
 
 type Options = {
   quiet: OptionConfig<boolean>;
@@ -25,14 +26,14 @@ export class BaseCleanCommand extends CliCommand<Options> {
   async action(): Promise<void> {
     for (const el of await fs.readdir(PathUtil.cwd)) {
       if (el.startsWith('.trv') && (await fs.stat(el)).isDirectory()) {
-        const cache = new FileCache(el);
+        const cache = new ModuleFileCache(el);
         try {
           cache.clear(true);
           if (!this.cmd.quiet) {
-            console!.log(CliUtil.color`${{ success: 'Successfully' }} deleted temp dir ${{ path: cache.cacheDir }}`);
+            console!.log(CliUtil.color`${{ success: 'Successfully' }} deleted temp dir ${{ path: cache.shortCacheDir }}`);
           }
         } catch {
-          console!.error(CliUtil.color`${{ failure: 'Failed' }} to delete temp dir ${{ path: cache.cacheDir }}`);
+          console!.error(CliUtil.color`${{ failure: 'Failed' }} to delete temp dir ${{ path: cache.shortCacheDir }}`);
         }
       }
     }

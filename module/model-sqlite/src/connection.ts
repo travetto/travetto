@@ -50,9 +50,11 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
     this.#pool = pool.createPool({
       create: () => this.#withRetries(async () => {
         // TODO: This should be configurable, and not in the cache folder
-        const db = Db(AppCache.toEntryName('sqlite_db'),
-          this.#config.options
-        );
+        const handle = await AppCache.openEntryHandle('sqlite_db');
+        const buffer = await handle.readFile();
+        await handle.close();
+
+        const db = new Db(buffer, this.#config.options);
         await db.pragma('foreign_keys = ON');
         await db.pragma('journal_mode = WAL');
         db.function('regexp', (a, b) => new RegExp(a).test(b) ? 1 : 0);

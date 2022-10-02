@@ -1,0 +1,31 @@
+import { ExpiryFileCache } from '../cache';
+import { PathUtil } from '../path';
+import { EnvUtil } from '../env';
+
+import { Host } from '../host';
+
+export class ModuleFileCache extends ExpiryFileCache {
+  protected fromEntryName(val: string): string {
+    return PathUtil.resolveUnix(PathUtil.resolveFrameworkPath(PathUtil.toUnix(val)
+      .replace(this.cacheDir, '')
+      .replace(/^\//, '')
+      .replace(/\/\/+/g, '/')
+      .replace(Host.EXT.outputRe, Host.EXT.input)
+    ));
+  }
+
+  protected toEntryName(val: string): string {
+    val = PathUtil.toUnix(val).replace(PathUtil.cwd, '');
+    return PathUtil.joinUnix(this.cacheDir, PathUtil.normalizeFrameworkPath(val)
+      .replace(/.*@travetto/, 'node_modules/@travetto')
+      .replace(/^\//, '')
+      .replace(Host.EXT.inputRe, Host.EXT.output)
+    );
+  }
+
+  toEnv(): Record<string, string> {
+    return { TRV_CACHE: this.cacheDir };
+  }
+}
+
+export const ModuleCompileCache = new ModuleFileCache(EnvUtil.get('TRV_CACHE', '.trv_cache'));

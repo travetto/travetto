@@ -2,9 +2,9 @@ import {
   Stats, mkdirSync, constants, accessSync, readdirSync,
   readFileSync, writeFileSync, unlinkSync, statSync, rmdirSync
 } from 'fs';
+import * as fsp from 'fs/promises';
 import * as path from 'path';
 
-import { Host } from './host';
 import { EnvUtil } from './env';
 import { FsUtil } from './fs';
 import { PathUtil } from './path';
@@ -13,10 +13,6 @@ import { PathUtil } from './path';
  * Standard file cache, with output file name normalization and truncation
  */
 export class FileCache {
-
-  static isOlder(cacheStat: Stats, fullStat: Stats): boolean {
-    return cacheStat.ctimeMs < fullStat.ctimeMs || cacheStat.mtimeMs < fullStat.mtimeMs;
-  }
 
   #cache = new Map<string, Stats>();
 
@@ -30,35 +26,33 @@ export class FileCache {
   }
 
   /**
-   * Purge all expired data
+   * Map entry file name to the original source
+   * @param entry The entry path
    */
-  #purgeExpired(dir = this.cacheDir): void {
-    const entries = readdirSync(dir);
-    for (const entry of entries) {
-      const entryPath = PathUtil.joinUnix(dir, entry);
-      const stat = statSync(entryPath);
-      if (stat.isDirectory() || stat.isSymbolicLink()) {
-        this.#purgeExpired(entryPath);
-      } else {
-        const full = this.fromEntryName(entryPath);
-        try {
-          this.removeExpiredEntry(full);
-        } catch (err) { }
-      }
-    }
-    if (entries.length === 0 && dir !== this.cacheDir) {
-      try {
-        rmdirSync(dir);
-      } catch {
-        // Nothing
-      }
-    }
+  protected fromEntryName(entry: string): string {
+    return PathUtil.toUnix(entry)
+      .replace(this.cacheDir, '')
+      .replace(/^\//, '')
+      .replace(/\/\/+/g, '/');
+  }
+
+  /**
+   * Map the original file name to the cache file space
+   * @param local Local path
+   */
+  protected toEntryName(local: string): string {
+    local = PathUtil.toUnix(local).replace(PathUtil.cwd, '');
+    return PathUtil.joinUnix(this.cacheDir, local.replace(/^\//, ''));
+  }
+
+  get shortCacheDir(): string {
+    return this.cacheDir.replace(`${PathUtil.cwd}/`, '');
   }
 
   /**
    * Initialize the cache behavior
    */
-  init(purgeExpired = false): void {
+  init(): void {
     mkdirSync(this.cacheDir, { recursive: true });
 
     try {
@@ -66,9 +60,6 @@ export class FileCache {
       accessSync(this.cacheDir, constants.W_OK);
     } catch {
       throw new Error(`Unable to write to cache directory: ${this.cacheDir}`);
-    }
-    if (purgeExpired) {
-      this.#purgeExpired();
     }
   }
 
@@ -101,32 +92,14 @@ export class FileCache {
   }
 
   /**
-   * Delete expired entries
-   * @param full The local location
-   * @param force Should deletion be force
-   */
-  removeExpiredEntry(local: string, force = false): void {
-    if (this.hasEntry(local)) {
-      try {
-        if (force || FileCache.isOlder(this.statEntry(local), statSync(local))) {
-          const localName = this.toEntryName(local);
-          unlinkSync(localName);
-        }
-      } catch (err) {
-        if (!(err instanceof Error) || !err.message.includes('ENOENT')) {
-          throw err;
-        }
-      }
-      this.removeEntry(local);
-    }
-  }
-
-  /**
    * Delete entry
    * @param local The location to delete
    */
-  removeEntry(local: string): void {
+  removeEntry(local: string, unlink = false): void {
     this.#cache.delete(local);
+    if (unlink) {
+      unlinkSync(this.toEntryName(local));
+    }
   }
 
   /**
@@ -168,29 +141,13 @@ export class FileCache {
   }
 
   /**
-   * Map entry file name to the original source
-   * @param entry The entry path
+   * Ensure a cache entry is prepared for writing
+   * @param local
    */
-  fromEntryName(entry: string): string {
-    return PathUtil.resolveUnix(PathUtil.resolveFrameworkPath(PathUtil.toUnix(entry)
-      .replace(this.cacheDir, '')
-      .replace(/^\//, '')
-      .replace(/\/\/+/g, '/')
-      .replace(Host.EXT.outputRe, Host.EXT.input)
-    ));
-  }
-
-  /**
-   * Map the original file name to the cache file space
-   * @param local Local path
-   */
-  toEntryName(local: string): string {
-    local = PathUtil.toUnix(local).replace(PathUtil.cwd, '');
-    return PathUtil.joinUnix(this.cacheDir, PathUtil.normalizeFrameworkPath(local)
-      .replace(/.*@travetto/, 'node_modules/@travetto')
-      .replace(/^\//, '')
-      .replace(Host.EXT.inputRe, Host.EXT.output)
-    );
+  openEntryHandle(local: string, flags?: string | number, mode?: number): Promise<fsp.FileHandle> {
+    const target = this.toEntryName(local);
+    mkdirSync(path.dirname(target), { recursive: true });
+    return fsp.open(target, flags, mode);
   }
 
   /**
@@ -211,4 +168,63 @@ export class FileCache {
   }
 }
 
-export const AppCache = new FileCache(EnvUtil.get('TRV_CACHE', '.trv_cache'));
+export class ExpiryFileCache extends FileCache {
+  /**
+   * Purge all expired data
+   */
+  #purgeExpired(dir = this.cacheDir): void {
+    const entries = readdirSync(dir);
+    for (const entry of entries) {
+      const entryPath = PathUtil.joinUnix(dir, entry);
+      const stat = statSync(entryPath);
+      if (stat.isDirectory() || stat.isSymbolicLink()) {
+        this.#purgeExpired(entryPath);
+      } else {
+        const full = this.fromEntryName(entryPath);
+        try {
+          this.removeExpiredEntry(full);
+        } catch (err) { }
+      }
+    }
+    if (entries.length === 0 && dir !== this.cacheDir) {
+      try {
+        rmdirSync(dir);
+      } catch {
+        // Nothing
+      }
+    }
+  }
+
+  /**
+   * Initialize the cache behavior
+   */
+  init(purgeExpired = false): void {
+    super.init();
+    if (purgeExpired) {
+      this.#purgeExpired();
+    }
+  }
+
+  /**
+   * Delete expired entries
+   * @param full The local location
+   * @param force Should deletion be force
+   */
+  removeExpiredEntry(local: string, force = false): void {
+    if (this.hasEntry(local)) {
+      try {
+        if (force || FsUtil.isOlder(this.statEntry(local), statSync(local))) {
+          const localName = this.toEntryName(local);
+          unlinkSync(localName);
+        }
+      } catch (err) {
+        if (!(err instanceof Error) || !err.message.includes('ENOENT')) {
+          throw err;
+        }
+      }
+      this.removeEntry(local);
+    }
+  }
+}
+
+export const AppCache = new FileCache(EnvUtil.get('TRV_APP_CACHE', '.app_cache'));

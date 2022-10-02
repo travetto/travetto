@@ -1,4 +1,5 @@
-import { AppCache, EnvUtil, Host, Package, PathUtil } from '@travetto/boot';
+import { AppCache, EnvUtil, Host, Package } from '@travetto/boot';
+import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
 import { SourceConfig } from '@travetto/boot/src/internal/source';
 
 import { version as framework } from '../package.json';
@@ -143,7 +144,8 @@ class $AppManifest {
         info: this.info,
         env: {
           ...this.env,
-          cache: AppCache.cacheDir.replace(`${PathUtil.cwd}/`, ''),
+          cache: ModuleCompileCache.shortCacheDir,
+          appCache: AppCache.shortCacheDir,
           node: process.version,
           dynamic: EnvUtil.isDynamic(),
           isCompiled: EnvUtil.isCompiled()

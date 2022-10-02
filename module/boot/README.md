@@ -94,16 +94,6 @@ export declare class FileCache {
      */
     clear(quiet?: boolean): void;
     /**
-     * Map entry file name to the original source
-     * @param entry The entry path
-     */
-    fromEntryName(entry: string): string;
-    /**
-     * Map the original file name to the cache file space
-     * @param local Local path
-     */
-    toEntryName(local: string): string;
-    /**
      * Get or set a value (from the create function) if not in the cache
      * @param local The local location
      * @param create The method to execute if the entry is not found
