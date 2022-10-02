@@ -75,7 +75,7 @@ export class FsUtilTest {
 
     const results = ExecUtil.execSync(`ls -lsa ${target}`).split(/\n/g);
 
-    assert(results.length > 20);
+    assert(results.length > 19);
 
     FsUtil.unlinkRecursiveSync(base);
     assert(!FsUtil.existsSync(base));

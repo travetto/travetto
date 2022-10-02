@@ -4,7 +4,7 @@ import { Suite, Test } from '@travetto/test';
 import { SourceIndex } from '../src/internal/source';
 
 @Suite()
-class ScanTests {
+class SourceTests {
   @Test()
   testFind() {
     const files = SourceIndex.find({});

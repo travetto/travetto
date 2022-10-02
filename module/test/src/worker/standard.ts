@@ -14,7 +14,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
    * Spawn a child
    */
   return () => WorkUtil.spawnedWorker(
-    () => ExecUtil.forkMain('@travetto/test/bin/main.test-child', [], {
+    () => ExecUtil.forkMain('@travetto/test/support/main.test-child', [], {
       env: { TRV_CACHE: AppCache.cacheDir }
     }),
     /**
