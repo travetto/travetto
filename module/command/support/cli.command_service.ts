@@ -36,6 +36,7 @@ export class CliServiceCommand extends CliCommand<{}> {
     const table = CliUtil.table(all.length);
 
     await table.init(
+      '',
       CliUtil.color`   ${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
       '-'.repeat(maxName + maxVersion + 20)
     );

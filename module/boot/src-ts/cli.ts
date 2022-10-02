@@ -36,6 +36,14 @@ export class CliUtil {
   static color = color;
   static colorPalette = colorPalette;
 
+  static #disableCursor(): void {
+    process.stdout.write('\x1B[?25l');
+  }
+
+  static #enableCursor(): void {
+    process.stdout.write('\x1B[?25h');
+  }
+
   static isBoolean(x: string): boolean {
     return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
   }
@@ -103,6 +111,8 @@ export class CliUtil {
       return work; // Dip early
     }
 
+    this.#disableCursor();
+
     let i = -1;
     let done = false;
     let value: T | undefined;
@@ -124,6 +134,9 @@ export class CliUtil {
     if (i >= 0) {
       await writeLine(completion ? `${message} ${completion}\n` : '', true);
     }
+
+    this.#enableCursor();
+
     if (capturedError) {
       throw capturedError;
     } else {
@@ -153,7 +166,7 @@ export class CliUtil {
     if (process.stdout.isTTY) {
       return {
         async init(...header): Promise<void> {
-          process.stdout.write('\x1B[?25l\n');
+          CliUtil.#disableCursor();
           await init(...header);
         },
         async update(row, output): Promise<void> {
@@ -168,7 +181,7 @@ export class CliUtil {
         },
         async finish(): Promise<void> {
           readline.moveCursor(process.stdout, 0, rows - cursorRow);
-          process.stdout.write('\x1B[?25h\n');
+          CliUtil.#enableCursor();
         }
       };
     } else {
