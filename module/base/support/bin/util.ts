@@ -1,6 +1,7 @@
 import { statSync } from 'fs';
 
-import { AppCache, CliUtil, FileCache, EnvUtil, ExecUtil } from '@travetto/boot';
+import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
+import { CliUtil, EnvUtil, ExecUtil, FsUtil } from '@travetto/boot';
 import { SimpleEntry, SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**
@@ -17,7 +18,7 @@ export class BuildUtil {
     }
 
     const output = env?.TRV_CACHE ?? '';
-    AppCache.init();
+    ModuleCompileCache.init();
 
     const { AppManifest } = await import('@travetto/base/src/manifest');
 
@@ -25,7 +26,7 @@ export class BuildUtil {
     let missing: SimpleEntry | undefined;
     for (const entry of SourceIndex.findByFolders(AppManifest.source)) {
       try {
-        if (FileCache.isOlder(AppCache.statEntry(entry.file), statSync(entry.file))) {
+        if (FsUtil.isOlder(ModuleCompileCache.statEntry(entry.file), statSync(entry.file))) {
           expired = entry;
           break;
         }

@@ -1,5 +1,5 @@
 import { d, lib, mod } from '@travetto/doc';
-import { AppCache } from '@travetto/boot';
+import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
 
 import { Suite } from './src/decorator/suite';
 import { Test } from './src/decorator/test';
@@ -34,7 +34,7 @@ ${d.Code('Example assertion for deep comparison', 'doc/test/assert-example.ts')}
 
 would translate to:
 
-${d.Code('Transpiled test Code', AppCache.readEntry('doc/test/assert-example.ts'), false, 'doc/javascript')}
+${d.Code('Transpiled test Code', ModuleCompileCache.readEntry('doc/test/assert-example.ts'), false, 'doc/javascript')}
 
 This would ultimately produce the error like:
 

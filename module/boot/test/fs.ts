@@ -1,10 +1,10 @@
 import * as assert from 'assert';
-import { mkdirSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import * as fs from 'fs/promises';
 import * as os from 'os';
 
 import { Test, Suite } from '@travetto/test';
-import { AppCache, ExecUtil, FsUtil, PathUtil } from '../src';
+import { ExecUtil, FileCache, FsUtil, PathUtil } from '../src';
 
 @Suite()
 export class FsUtilTest {
@@ -63,21 +63,31 @@ export class FsUtilTest {
    */
   @Test()
   async copyRecursive() {
-    const base = PathUtil.resolveUnix(os.tmpdir(), `${Date.now()}`, `${Math.random()}`);
-    const target = AppCache.cacheDir;
+    const rndFolder = `${Date.now()}_${Math.trunc(Math.random() * 10000)}`;
+    const base = PathUtil.resolveUnix(os.tmpdir(), rndFolder);
+    const cache = new FileCache(`.trv_${Date.now()}_${Math.trunc(Math.random() * 1000)}`);
+    cache.init();
+
+    const target = cache.cacheDir;
 
     // Default
     assert(!FsUtil.existsSync(base));
     mkdirSync(base, { recursive: true });
     assert(FsUtil.existsSync(base));
 
+    for (const idx in [1, 2, 3, 4]) {
+      await fs.writeFile(PathUtil.resolveUnix(base, `copy-recursive-${idx}.txt`), 'blah', 'utf8');
+    }
+
     await FsUtil.copyRecursive(base, target);
 
-    const results = ExecUtil.execSync(`ls -lsa ${target}`).split(/\n/g);
+    const results = ExecUtil.execSync(`ls -lsa ${target}/${rndFolder}/copy-recursive*`).split(/\n/g);
 
-    assert(results.length > 19);
+    assert(results.length === 4);
 
     FsUtil.unlinkRecursiveSync(base);
     assert(!FsUtil.existsSync(base));
+
+    cache.clear();
   }
 }

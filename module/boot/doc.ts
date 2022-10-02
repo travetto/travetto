@@ -33,7 +33,7 @@ ${d.List(
 )}
 
 ${d.Section('Cache Support')}
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  ${AppCacheLink} is the cache that is used specific to the framework, and is an instance of ${FileCacheLink}.  ${FileCacheLink} is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  ${AppCacheLink} is the cache that is available for runtime storage, and is an instance of ${FileCacheLink}.  ${FileCacheLink} is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 

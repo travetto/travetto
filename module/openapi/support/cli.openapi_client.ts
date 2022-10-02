@@ -5,7 +5,8 @@ import { readFileSync } from 'fs';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 import { AppCache, CliUtil, ExecUtil, Host, PathUtil } from '@travetto/boot';
 
-const presets: Record<string, [string, object] | [string]> = JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', Host.PATH.resources, 'presets.json'), 'utf8'));
+const presets: Record<string, [string, object] | [string]> =
+  JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', Host.PATH.resources, 'presets.json'), 'utf8'));
 
 type Options = {
   extendedHelp: OptionConfig<boolean>;

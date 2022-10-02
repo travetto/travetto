@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as rl from 'readline';
 import { ExtensionContext } from 'vscode';
 
-import { FsUtil, AppCache } from '@travetto/boot';
+import { FsUtil, AppCache, PathUtil } from '@travetto/boot';
 
 import { TargetEvent } from './types';
 
@@ -71,7 +71,7 @@ export class IpcSupport {
   }
 
   activate(ctx: ExtensionContext): void {
-    this.#file = AppCache.toEntryName(`trv_ipc_vscode_${process.ppid}.ndjson`);
+    this.#file = PathUtil.joinUnix(AppCache.cacheDir, `trv_ipc_vscode_${process.ppid}.ndjson`);
     AppCache.init();
     this.#ensureFile();
 

@@ -1,4 +1,3 @@
-import { EnvUtil } from './env';
 const jsExt = '.js';
 const jsRe = /[.]js$/;
 const tsExt = '.ts';
@@ -9,7 +8,10 @@ const dtsRe = /[.]d[.]ts$/;
 const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.endsWith(dtsExt));
 const jsMatcher = ((file: string): boolean => file.endsWith(jsExt));
 
-const sourceExt = EnvUtil.isCompiled() ? jsExt : tsExt;
+const isCompiled = /^1$/.test(`${process.env.TRV_COMPILED}`);
+
+const sourceExt = isCompiled ? jsExt : tsExt;
+const sourceMatcher = isCompiled ? jsMatcher : tsMatcher;
 
 export class Host {
   static EXT = {
@@ -27,7 +29,7 @@ export class Host {
     inputOutputRe: tjsRe,
 
     source: sourceExt,
-    sourceMatcher: EnvUtil.isCompiled() ? jsMatcher : tsMatcher,
+    sourceMatcher,
     sourceIndex: `index${sourceExt}`
   };
 

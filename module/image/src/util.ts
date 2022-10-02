@@ -1,9 +1,7 @@
-import * as fs from 'fs/promises';
-import * as path from 'path';
 import { Readable } from 'stream';
 
 import { CommandService } from '@travetto/command';
-import { ExecUtil, StreamUtil, AppCache, FsUtil } from '@travetto/boot';
+import { ExecUtil, StreamUtil, AppCache } from '@travetto/boot';
 
 /**
  * Image output options
@@ -100,19 +98,21 @@ export class ImageUtil {
     const { ResourceManager } = await import('@travetto/base');
 
     const pth = await ResourceManager.find(rel);
-    const out = AppCache.toEntryName(pth);
-    await fs.mkdir(path.dirname(out), { recursive: true });
+    const handle = await AppCache.openEntryHandle(pth);
+    const exists = await handle.stat().then(() => true, () => false);
 
-    if (!(await FsUtil.exists(out))) {
+    if (!exists) {
       let stream: Buffer | Readable = await ResourceManager.readStream(rel);
       if (/[.]png$/.test(pth)) {
         stream = await this.optimize('png', stream);
       } else if (/[.]jpe?g$/i.test(pth)) {
         stream = await this.optimize('jpeg', stream);
       }
-      await StreamUtil.writeToFile(stream, out);
+      await StreamUtil.pipe(stream, handle.createWriteStream());
     }
 
-    return fs.readFile(out);
+    const buffer = await handle.readFile();
+    await handle.close();
+    return buffer;
   }
 }

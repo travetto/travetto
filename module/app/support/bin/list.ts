@@ -1,12 +1,10 @@
 import * as fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
-import { EnvUtil } from '@travetto/boot/src/env';
 import { FsUtil } from '@travetto/boot/src/fs';
 import { AppCache } from '@travetto/boot/src/cache';
 import { ExecUtil } from '@travetto/boot/src/exec';
 import { CliUtil } from '@travetto/boot/src/cli';
-import { SystemUtil } from '@travetto/boot/src/internal/system';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -15,7 +13,7 @@ import type { ApplicationConfig } from '../../src/types';
  */
 export class AppListUtil {
 
-  static #cacheConfig = `app-cache-${SystemUtil.naiveHash(EnvUtil.get('TRV_SRC_LOCAL', ''))}.json`;
+  static #cacheConfig = 'app-cache.json';
 
   /**
    * Read list
@@ -49,7 +47,7 @@ export class AppListUtil {
       }
       return items;
     } catch (err) {
-      AppCache.removeExpiredEntry(this.#cacheConfig, true);
+      AppCache.removeEntry(this.#cacheConfig, true);
       throw err;
     }
   }

@@ -2,8 +2,9 @@ import { EventEmitter } from 'events';
 import * as sourceMapSupport from 'source-map-support';
 import * as ts from 'typescript';
 
-import { PathUtil, AppCache } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
 import { ModuleManager } from '@travetto/boot/src/internal/module';
 import { Dynamic } from '@travetto/base/src/internal/dynamic';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
@@ -56,7 +57,7 @@ class $Compiler {
    * Perform actual transpilation
    */
   #transpile(filename: string, force = false): string {
-    if (force || !AppCache.hasEntry(filename)) {
+    if (force || !ModuleCompileCache.hasEntry(filename)) {
       console.debug('Emitting', { filename: filename.replace(PathUtil.cwd, '.') });
 
       try {
