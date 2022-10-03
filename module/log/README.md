@@ -61,14 +61,14 @@ export function work() {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.work = void 0;
 function work() {
-    ᚕlg("debug", { file: ᚕsrc(__filename), line: 2, scope: "work" }, 'Start Work');
+    ᚕlog("debug", { file: ᚕsrc(__filename), line: 2, scope: "work" }, 'Start Work');
     try {
         1 / 0;
     }
     catch (err) {
-        ᚕlg("error", { file: ᚕsrc(__filename), line: 7, scope: "work" }, 'Divide by zero', { error: err });
+        ᚕlog("error", { file: ᚕsrc(__filename), line: 7, scope: "work" }, 'Divide by zero', { error: err });
     }
-    ᚕlg("debug", { file: ᚕsrc(__filename), line: 9, scope: "work" }, 'End Work');
+    ᚕlog("debug", { file: ᚕsrc(__filename), line: 9, scope: "work" }, 'End Work');
 }
 exports.work = work;
 Object.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });
@@ -86,7 +86,7 @@ function work() {
         1 / 0;
     }
     catch (err) {
-        ᚕlg("error", { file: ᚕsrc(__filename), line: 5, scope: "work" }, 'Divide by Zero', { error: err });
+        ᚕlog("error", { file: ᚕsrc(__filename), line: 5, scope: "work" }, 'Divide by Zero', { error: err });
     }
 }
 exports.work = work;

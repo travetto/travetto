@@ -10,7 +10,7 @@ npm install @travetto/cli
 
 The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution.
 
-As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with `cli-`.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.
+As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with `cli.`.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.
 
 ## General
 
@@ -43,7 +43,7 @@ Extending the `cli` is fairly straightforward.  It is built upon [commander](htt
 **Code: Echo Command**
 ```typescript
 import '@travetto/base';
-import { CliCommand } from '@travetto/cli/src/command';
+import { CliCommand } from '@travetto/cli';
 
 /**
  * `npx trv echo`

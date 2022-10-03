@@ -2,7 +2,7 @@ import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 import type { MailService } from '@travetto/email/src/service';
 
-import { TemplateUtil } from './util';
+import { CompileUtil } from '../../src/util';
 import { ConfigUtil } from './config';
 
 /**
@@ -63,7 +63,7 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
         throw new Error('Node mailer support is missing');
       }
 
-      const key = file.replace(TemplateUtil.TPL_EXT, '').replace(/^.*?\/resources\//, '/');
+      const key = file.replace(CompileUtil.TPL_EXT, '').replace(/^.*?\/resources\//, '/');
       const info = await svc.sendCompiled<SMTPTransport.SentMessageInfo>(key, { to, context, from });
       console.log('Sent email', { to });
 

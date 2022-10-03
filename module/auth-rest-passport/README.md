@@ -60,7 +60,7 @@ export class AppConfig {
 }
 ```
 
-As you can see, [PassportAuthenticator](https://github.com/travetto/travetto/tree/main/module/auth-rest-passport/src/authenticator.ts#L14) will take care of the majority of the work, and all that is required is:
+As you can see, [PassportAuthenticator](https://github.com/travetto/travetto/tree/main/module/auth-rest-passport/src/authenticator.ts#L20) will take care of the majority of the work, and all that is required is:
    
    *  Provide the name of the strategy (should be unique)
    *  Provide the strategy instance. **Note**: you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework

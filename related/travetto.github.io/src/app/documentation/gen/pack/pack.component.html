@@ -44,7 +44,7 @@ Assemble is the operation that stages the project's code for deployment.  The as
 
 <ol> <li>Cleaning Workspace - Cleans workspace to start with an empty workspace</li>
  <li>Copying Dependencies - Computes the prod dependencies and copies them into the new workspace</li>
- <li>Copying App Content - Copies over application content (src/resources/support/bin)</li>
+ <li>Copying App Content - Copies over application content (src/, resources/, support/, bin/)</li>
  <li>Excluding Pre-Compile Files - Any files that should be excluded pre-compilation, are removed</li>
  <li>Compiling - Compiles the code in the new workspace, isolating it from your local development</li>
  <li>Excluding Post-Compile Files - Removes any files that should be excluded, post compilation</li>
@@ -261,7 +261,7 @@ allow their key parameters to be overridden via environment variables.
 
       <figure class="code">
       <figcaption class="code">Assemble Overrides
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/bin/operation/assemble.ts#L28">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/bin/assemble/operation.ts#L26">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">overrides<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   keepSource<span class="token operator">:</span> CliUtil<span class="token punctuation">.</span><span class="token function">toBool</span><span class="token punctuation">(</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">PACK_ASSEMBLE_KEEP_SOURCE</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
@@ -271,7 +271,7 @@ allow their key parameters to be overridden via environment variables.
 
       <figure class="code">
       <figcaption class="code">Docker Overrides
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/bin/operation/docker.ts#L43">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/bin/docker.ts#L41">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">overrides<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   image<span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">PACK_DOCKER_IMAGE</span> <span class="token operator">||</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
@@ -286,7 +286,7 @@ allow their key parameters to be overridden via environment variables.
 
       <figure class="code">
       <figcaption class="code">Zip Overrides
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/bin/operation/zip.ts#L20">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/pack/support/bin/zip.ts#L19">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript">overrides<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
   output<span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">PACK_ZIP_OUTPUT</span> <span class="token operator">||</span> <span class="token keyword">undefined</span>

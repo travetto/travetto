@@ -348,14 +348,15 @@ First we must start the application:
     resources: <span class="token punctuation">[</span> <span class="token string">'resources'</span>, <span class="token string">'doc/resources'</span> <span class="token punctuation">]</span>,
     shutdownWait: <span class="token number">2000</span>,
     cache: <span class="token string">'.trv_cache'</span>,
+    appCache: <span class="token string">'.app_cache'</span>,
     node: <span class="token string">'v17.9.1'</span>,
     dynamic: false,
-    readonly: <span class="token boolean">false</span>
+    isCompiled: <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span>,
   source: <span class="token punctuation">{{'{'}}</span>
     common: <span class="token punctuation">[</span> <span class="token string">'src'</span> <span class="token punctuation">]</span>,
     local: <span class="token punctuation">[</span> <span class="token string">'doc'</span> <span class="token punctuation">]</span>,
-    excludeModules: Set<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token string">'@travetto/cli'</span>, <span class="token string">'@travetto/doc'</span>, <span class="token string">'@travetto/boot'</span> <span class="token punctuation">{{'}'}}</span>,
+    excludeModules: Set<span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token string">'@travetto/doc'</span>, <span class="token string">'@travetto/boot'</span> <span class="token punctuation">{{'}'}}</span>,
     dynamicModules: <span class="token punctuation">{{'{'}}</span>
       <span class="token string">'@travetto/app'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:app'</span>,
       <span class="token string">'@travetto/auth'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:auth'</span>,
@@ -394,25 +395,57 @@ First we must start the application:
     port: <span class="token number">12555</span>,
     trustProxy: false,
     hostname: <span class="token string">'localhost'</span>,
+    bindAddress: undefined,
+    baseUrl: undefined,
     defaultMessage: true,
     ssl: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
-    log: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    bodyParse: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-    accepts: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-    cors: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    getCache: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    cookie: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span>, keys: <span class="token punctuation">[</span> <span class="token string">'default-insecure'</span> <span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
-    context: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+    log: <span class="token punctuation">{{'{'}}</span> disabled: undefined, paths: undefined <span class="token punctuation">{{'}'}}</span>,
+    bodyParse: <span class="token punctuation">{{'{'}}</span> disabled: undefined, paths: undefined, limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+    accepts: <span class="token punctuation">{{'{'}}</span> disabled: undefined, paths: undefined, types: <span class="token punctuation">[</span><span class="token punctuation">]</span>, matcher: undefined <span class="token punctuation">{{'}'}}</span>,
+    cors: <span class="token punctuation">{{'{'}}</span>
+      disabled: undefined,
+      paths: undefined,
+      origins: undefined,
+      methods: undefined,
+      headers: undefined,
+      credentials: undefined,
+      resolved: undefined
+    <span class="token punctuation">{{'}'}}</span>,
+    getCache: <span class="token punctuation">{{'{'}}</span> disabled: undefined, paths: undefined <span class="token punctuation">{{'}'}}</span>,
+    cookie: <span class="token punctuation">{{'{'}}</span>
+      disabled: undefined,
+      paths: undefined,
+      signed: true,
+      httpOnly: true,
+      sameSite: <span class="token string">'lax'</span>,
+      keys: <span class="token punctuation">[</span> <span class="token string">'default-insecure'</span> <span class="token punctuation">]</span>,
+      secure: undefined,
+      domain: undefined
+    <span class="token punctuation">{{'}'}}</span>,
+    context: <span class="token punctuation">{{'{'}}</span> disabled: undefined, paths: undefined <span class="token punctuation">{{'}'}}</span>,
     session: <span class="token punctuation">{{'{'}}</span>
+      disabled: undefined,
+      paths: undefined,
       autoCommit: true,
       maxAge: <span class="token number">1800000</span>,
       renew: true,
       rolling: false,
       sign: true,
+      secret: undefined,
       keyName: <span class="token string">'trv_sid'</span>,
       transport: <span class="token string">'cookie'</span>
     <span class="token punctuation">{{'}'}}</span>,
-    auth: <span class="token punctuation">{{'{'}}</span> readWrite: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>, verify: <span class="token punctuation">{{'{'}}</span> roles: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>, login: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
+    auth: <span class="token punctuation">{{'{'}}</span>
+      readWrite: <span class="token punctuation">{{'{'}}</span> disabled: undefined, paths: undefined <span class="token punctuation">{{'}'}}</span>,
+      verify: <span class="token punctuation">{{'{'}}</span>
+        disabled: undefined,
+        paths: undefined,
+        state: undefined,
+        roles: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
+        matcher: undefined
+      <span class="token punctuation">{{'}'}}</span>,
+      login: <span class="token punctuation">{{'{'}}</span> disabled: undefined, paths: undefined, providers: undefined <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   model: <span class="token punctuation">{{'{'}}</span>
     mongo: <span class="token punctuation">{{'{'}}</span>
@@ -423,7 +456,9 @@ First we must start the application:
       port: <span class="token number">27017</span>,
       connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       srvRecord: false,
-      options: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
+      options: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      autoCreate: undefined,
+      cullRate: undefined
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>

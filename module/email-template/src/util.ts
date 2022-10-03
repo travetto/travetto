@@ -1,7 +1,6 @@
 import { dirname } from 'path';
 import { promises as fs } from 'fs';
 
-import { FsUtil } from '@travetto/boot';
 import type { MailTemplateEngine } from '@travetto/email';
 
 import { Inky } from './inky';
@@ -9,20 +8,20 @@ import { MarkdownUtil } from './markdown';
 import { StyleUtil } from './style';
 import { ImageUtil } from './image';
 
-const PARTS = ['html', 'subject', 'text'] as const;
-type Parts = (typeof PARTS)[number];
+export const COMPILE_PARTS = ['html', 'subject', 'text'] as const;
+export type CompileParts = (typeof COMPILE_PARTS)[number];
 
 type Compilation = { html: string, text: string, subject?: string };
 
 /**
  * Utilities for templating
  */
-export class TemplateUtil {
+export class CompileUtil {
 
   static TPL_EXT = /[.]email[.]html$/;
 
-  static getOutputs(file: string): [Parts, string][] {
-    return PARTS.map((k): [part: Parts, file: string] => [k, file.replace(this.TPL_EXT, `.compiled.${k}`)]);
+  static getOutputs(file: string): [CompileParts, string][] {
+    return COMPILE_PARTS.map((k): [part: CompileParts, file: string] => [k, file.replace(this.TPL_EXT, `.compiled.${k}`)]);
   }
 
   /**
@@ -98,80 +97,5 @@ export class TemplateUtil {
     const text = await MarkdownUtil.htmlToMarkdown(tpl);
 
     return { html, text, subject };
-  }
-
-  /**
-   * Resolve template
-   */
-  static async resolveTemplate(file: string, format: Parts, context: Record<string, unknown>): Promise<string> {
-
-    const files = this.getOutputs(file);
-    const missing = await Promise.all(files.map(x => FsUtil.exists(x[1])));
-
-    if (missing.some(x => x === undefined)) {
-      await this.compileToDisk(file);
-    }
-
-    const compiled = Object.fromEntries(await Promise.all(files.map(([k, f]) => fs.readFile(f, 'utf8').then(c => [k, c]))));
-
-    // Let the engine template
-    const { MailTemplateEngineTarget } = await import('@travetto/email/src/internal/types');
-    const { DependencyRegistry } = await import('@travetto/di');
-
-    const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
-    return engine.template(compiled[format], context);
-  }
-
-  /**
-   * Render
-   * @param file
-   */
-  static async resolveCompiledTemplate(file: string, context: Record<string, unknown>): Promise<Record<Parts, string>> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const resolved = Object.fromEntries(
-      await Promise.all(
-        PARTS.map(k =>
-          this.resolveTemplate(file, k, context)
-            .then(c => [k, c] as const)
-        )
-      )
-    ) as Record<Parts, string>;
-    return resolved;
-  }
-
-  /**
-   * Watch compilation
-   */
-  static async watchCompile(cb?: (file: string) => void): Promise<void> {
-    const { ResourceManager, Util } = await import('@travetto/base');
-    const { FilePresenceManager } = await import('@travetto/watch');
-
-    new FilePresenceManager(ResourceManager.getRelativePaths().map(x => `${x}/email`), {
-      ignoreInitial: true,
-      validFile: x =>
-        !/[.]compiled[.]/.test(x) && (
-          /[.](html|scss|css|png|jpe?g|gif|ya?ml)$/.test(x)
-        )
-    }).on('changed', async ({ file }) => {
-      try {
-        console.log('Contents changed', { file });
-        if (this.TPL_EXT.test(file)) {
-          await this.compileToDisk(file);
-          if (cb) {
-            cb(file);
-          }
-        } else {
-          await this.compileAllToDisk();
-          if (cb) {
-            for (const el of await this.findAllTemplates()) {
-              cb(el.path);
-            }
-          }
-        }
-      } catch (err) {
-        console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
-      }
-    });
-    await Util.wait('1d');
   }
 }

@@ -169,14 +169,15 @@ Manifest {
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
+    appCache: '.app_cache',
     node: 'v17.9.1',
     dynamic: false,
-    readonly: false
+    isCompiled: false
   },
   source: {
     common: [ 'src' ],
     local: [ 'doc' ],
-    excludeModules: Set(3) { '@travetto/cli', '@travetto/doc', '@travetto/boot' },
+    excludeModules: Set(2) { '@travetto/doc', '@travetto/boot' },
     dynamicModules: {
       '@travetto/base': '@trv:base',
       '@travetto/boot': '@trv:boot',

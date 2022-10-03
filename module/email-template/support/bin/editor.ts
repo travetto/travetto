@@ -1,6 +1,8 @@
-import { SendUtil } from './send';
 import { TemplateUtil } from './util';
+import { SendUtil } from './send';
 import { ConfigUtil } from './config';
+
+import { CompileUtil } from '../../src/util';
 
 type InboundMessage =
   { type: 'configure' } |
@@ -21,7 +23,7 @@ export class EditorUtil {
   static LAST_FILE = '';
 
   static async renderFile(file: string): Promise<void> {
-    file = TemplateUtil.TPL_EXT.test(file) ? file : this.LAST_FILE;
+    file = CompileUtil.TPL_EXT.test(file) ? file : this.LAST_FILE;
     if (file) {
       try {
         const content = await TemplateUtil.resolveCompiledTemplate(
@@ -62,7 +64,7 @@ export class EditorUtil {
         case 'configure': return this.response({ type: 'configured', file: await ConfigUtil.ensureConfig() });
         case 'redraw': {
           try {
-            await TemplateUtil.compileToDisk(msg.file);
+            await CompileUtil.compileToDisk(msg.file);
           } catch (err) {
             if (err && err instanceof Error) {
               this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });

@@ -1,9 +1,9 @@
 import { ResourceManager } from '@travetto/base';
-import { TemplateUtil } from '@travetto/email-template/support/src/util';
+import { CompileUtil } from '@travetto/email-template';
 
 export async function main() {
 
-  const res = await TemplateUtil.compileToDisk(
+  const res = await CompileUtil.compileToDisk(
     await ResourceManager.findAbsolute('/email/welcome.email.html')
   );
 

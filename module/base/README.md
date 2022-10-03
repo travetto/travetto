@@ -96,7 +96,7 @@ An example would be something like `phase.init.ts` in the [Configuration](https:
 /**
  * Initializes the config source
  */
-export const init = {
+export const step = {
   key: '@trv:config/init',
   before: ['@trv:registry/init'],
   async action(): Promise<void> {
