@@ -4,10 +4,10 @@ import * as ts from 'typescript';
 
 import { PathUtil } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
-import { TranspileManager } from '@travetto/boot/src/internal/transpile';
+import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 import { Dynamic } from '@travetto/base/src/internal/dynamic';
+import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 
 import { SourceHost } from './host';
@@ -111,11 +111,11 @@ class $Compiler {
     // Enhance transpilation, with custom transformations
     TranspileManager.setTranspiler(tsf => this.#transpile(tsf));
 
-    TranspileManager.onUnload((f, unlink) => this.#host.unload(f, unlink)); // Remove source
+    DynamicLoader.onUnload((f, unlink) => this.#host.unload(f, unlink)); // Remove source
 
     // Update source map support to read from transpiler cache
     sourceMapSupport.install({
-      retrieveFile: p => this.#host.contents.get(ModuleUtil.toUnixSource(p))!
+      retrieveFile: p => this.#host.contents.get(TranspileUtil.toUnixSource(p))!
     });
 
     console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
@@ -133,7 +133,7 @@ class $Compiler {
     this.#host.reset();
     this.#program = undefined;
 
-    TranspileManager.clearHandlers();
+    DynamicLoader.clearHandlers();
     ModuleIndex.reset();
     this.active = false;
   }
@@ -159,7 +159,7 @@ class $Compiler {
    */
   added(filename: string): void {
     if (filename in require.cache) { // if already loaded
-      TranspileManager.unload(filename);
+      DynamicLoader.unload(filename);
     }
     // Load Synchronously
     require(filename);
@@ -170,7 +170,7 @@ class $Compiler {
    * Handle when a file is removed during watch
    */
   removed(filename: string): void {
-    TranspileManager.unload(filename, true);
+    DynamicLoader.unload(filename, true);
     this.notify('removed', filename);
   }
 
@@ -179,7 +179,7 @@ class $Compiler {
    */
   changed(filename: string): void {
     if (this.#host.hashChanged(filename)) {
-      TranspileManager.unload(filename);
+      DynamicLoader.unload(filename);
       // Load Synchronously
       require(filename);
       this.notify('changed', filename);

@@ -1,8 +1,8 @@
 import { PathUtil } from '../path';
 import { ScanEntry, ScanFs } from '../scan';
-import { EnvUtil } from '../env';
 
 import { Host } from '../host';
+import { ModuleUtil } from './module-util';
 
 export type ModuleIndexEntry = Pick<ScanEntry, 'module' | 'file'>;
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
@@ -37,11 +37,13 @@ class $ModuleIndex {
   #cache = new Map<string, IndexRecord>();
   #fileMatcher: (file: string) => boolean;
   #fileIndex: string;
+  #fileExt: string;
 
   constructor(
-    public readonly fileExt: string,
+    fileExt: string,
     matcher: (file: string) => boolean
   ) {
+    this.#fileExt = fileExt;
     this.#fileMatcher = matcher;
     this.#fileIndex = `index${fileExt}`;
   }
@@ -86,7 +88,7 @@ class $ModuleIndex {
         base: PathUtil.cwd,
         map: entry => entry
       },
-      ...Object.entries(EnvUtil.getDynamicModules()).map(([dep, pth]) => {
+      ...Object.entries(ModuleUtil.getDynamicModules()).map(([dep, pth]) => {
         const scan: FrameworkScan = {
           testDir: x => !x.includes('node_modules'),
           base: pth,
@@ -222,7 +224,4 @@ class $ModuleIndex {
   }
 }
 
-export const ModuleIndex = new $ModuleIndex(
-  EnvUtil.isCompiled() ? Host.EXT.output : Host.EXT.input,
-  EnvUtil.isCompiled() ? Host.EXT.outputMatcher : Host.EXT.inputMatcher
-);
+export const ModuleIndex = new $ModuleIndex(Host.EXT.moduleExt, Host.EXT.moduleMatcher);

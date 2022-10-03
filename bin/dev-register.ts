@@ -3,7 +3,7 @@ import { EnvUtil } from '../module/boot/src/env';
 import { readPackage } from '../module/boot/src/internal/package';
 import { Package } from '../module/boot/src/main-package';
 import { PathUtil } from '../module/boot/src/path';
-import { TranspileManager } from '../module/boot/src/internal/transpile';
+import { DynamicLoader } from '../module/boot/src/internal/dynamic-loader';
 import { TranspileUtil } from '../module/boot/src/internal/transpile-util';
 import { SystemUtil } from '../module/boot/src/internal/system';
 import { TranspileCache } from '../module/boot/src/internal/transpile-cache';
@@ -25,7 +25,7 @@ class DevRegister {
   static resolveFilename(p: string): string {
     if (p.includes('@travetto')) {
       const [, key, sub] = p.match(/^.*(@travetto\/[^/]+)(\/?.*)?$/) ?? [];
-      const match = EnvUtil.getDynamicModules()[key!];
+      const match = ModuleUtil.getDynamicModules()[key!];
       if (match) {
         p = `${match}${sub ?? ''}`;
       } else {
@@ -105,9 +105,9 @@ class DevRegister {
     });
 
     // Override filename resolution
-    TranspileManager.setFilenameResolver((p: string) => this.resolveFilename(p));
+    DynamicLoader.setFilenameResolver((p: string) => this.resolveFilename(p));
 
-    TranspileManager.init();
+    DynamicLoader.init();
   }
 }
 

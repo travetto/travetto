@@ -1,5 +1,9 @@
+import { WorkerOptions } from 'worker_threads';
+
 import { PathUtil } from '../path';
 import { Host } from '../host';
+import { EnvUtil } from '../env';
+import { CatchableResult, ExecUtil, ExecutionState, WorkerResult } from '../exec';
 
 /**
  * Utilities for dealing with source files
@@ -8,6 +12,7 @@ export class ModuleUtil {
 
   static #idCache = new Map<string, string>();
   static #devPath = process.env.TRV_DEV;
+  static #dynamicModules: Record<string, string>;
 
   /**
    * Set Dev path
@@ -62,14 +67,6 @@ export class ModuleUtil {
   }
 
   /**
-   * Convert an input file to a unix source file
-   * @param file .ts or .js file to convert
-   */
-  static toUnixSource(file: string): string {
-    return file.replace(/[\\\/]+/g, '/').replace(Host.EXT.outputRe, Host.EXT.input);
-  }
-
-  /**
    * Compute internal id from file name and optionally, class name
    */
   static computeId(filename: string, clsName?: string): string {
@@ -105,5 +102,54 @@ export class ModuleUtil {
     const name = `${ns}/${mod}`;
     this.#idCache.set(filename, name);
     return name;
+  }
+
+  /**
+   * Get dynamic modules
+   */
+  static getDynamicModules(): Record<string, string> {
+    if (this.#dynamicModules === undefined) {
+      this.#dynamicModules = Object.fromEntries(
+        EnvUtil.getEntries('TRV_MODULES')
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => [k, v || this.resolveFrameworkPath(PathUtil.resolveUnix('node_modules', k))])
+      );
+    }
+    return this.#dynamicModules;
+  }
+
+  /**
+   * Run a file with a main entry point relative to the current node executable.  Mimics how node's
+   * fork operation is just spawn with the command set to `process.argv0`
+   * @param cmd The file to run
+   * @param args The command line arguments to pass
+   * @param options The enhancement options
+   */
+  static forkMain(file: string, args: string[] = [], options: { env?: Record<string, string | undefined> } = {}): ExecutionState<CatchableResult> {
+    return ExecUtil.fork(
+      require.resolve('@travetto/boot/bin/main'),
+      [
+        file.replace(Host.EXT.inputOutputRe, Host.EXT.moduleExt),
+        ...args
+      ],
+      options
+    );
+  }
+
+  /**
+   * Run a file with a main entry point as a worker thread
+   * @param file The file to run, if starts with @, will be resolved as a module
+   * @param args The arguments to pass in
+   * @param options The worker options
+   */
+  static workerMain<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
+    return ExecUtil.worker<T>(
+      require.resolve('@travetto/boot/bin/main'),
+      [
+        file.replace(Host.EXT.inputOutputRe, Host.EXT.moduleExt),
+        ...args
+      ],
+      options
+    );
   }
 }

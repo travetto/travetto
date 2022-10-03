@@ -8,6 +8,8 @@ const dtsRe = /[.]d[.]ts$/;
 const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.endsWith(dtsExt));
 const jsMatcher = ((file: string): boolean => file.endsWith(jsExt));
 
+const compiled = process.env.TRV_COMPILED === '1';
+
 export class Host {
   static EXT = {
     output: jsExt,
@@ -22,6 +24,9 @@ export class Host {
     inputMatcher: tsMatcher,
 
     inputOutputRe: tjsRe,
+
+    moduleExt: compiled ? jsExt : tsExt,
+    moduleMatcher: compiled ? jsMatcher : tsMatcher
   };
 
   static PATH = {

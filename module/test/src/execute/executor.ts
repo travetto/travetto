@@ -3,7 +3,7 @@ import * as timers from 'timers/promises';
 import * as fs from 'fs/promises';
 
 import { Util } from '@travetto/base';
-import { ExecUtil, Host, PathUtil } from '@travetto/boot';
+import { Host, PathUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
@@ -285,7 +285,7 @@ export class TestExecutor {
       .matchAll(/\/\/\s*@with-module\s+(\S+)/g)]
       .map(x => x[1]);
 
-    const proc = ExecUtil.forkMain(require.resolve('../../support/main.test-direct'), [file, ...args], {
+    const proc = ModuleUtil.forkMain(require.resolve('../../support/main.test-direct'), [file, ...args], {
       env: {
         TRV_MODULES: modules.join(','),
         TRV_RESOURCES: process.env.TRV_RESOURCES,

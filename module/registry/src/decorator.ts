@@ -1,5 +1,6 @@
 import { Class } from '@travetto/base';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
+import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 
 /**
  * Register a class as pending
@@ -17,7 +18,7 @@ class $PendingRegister {
    * @param `ᚕabstract` Is the class abstract
    */
   initMeta(cls: Class, file: string, ᚕhash: number, ᚕmethods: Record<string, { hash: number }>, ᚕabstract: boolean, ᚕsynthetic: boolean): boolean {
-    const ᚕfile = ModuleUtil.toUnixSource(file);
+    const ᚕfile = TranspileUtil.toUnixSource(file);
     const meta = {
       ᚕid: ModuleUtil.computeId(ᚕfile, cls.name),
       ᚕfile,

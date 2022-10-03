@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { FsUtil, PathUtil, ExecUtil, ExecutionOptions, ExecutionResult } from '@travetto/boot';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
-type ForkResult = ReturnType<(typeof ExecUtil)['forkMain']>;
+type ForkResult = ReturnType<(typeof ModuleUtil)['forkMain']>;
 
 /**
  * Standard set of workspace utilities

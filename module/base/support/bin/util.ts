@@ -1,8 +1,9 @@
 import { statSync } from 'fs';
 
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
-import { CliUtil, EnvUtil, ExecUtil, FsUtil } from '@travetto/boot';
+import { CliUtil, EnvUtil, FsUtil } from '@travetto/boot';
 import { ModuleIndexEntry, ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 /**
  * Utilities for running compilation
@@ -42,7 +43,7 @@ export class BuildUtil {
 
     // Compile rest of code
     return CliUtil.waiting(`Building... ${output}`,
-      ExecUtil.workerMain(require.resolve('../main.build'), [], { // target self
+      ModuleUtil.workerMain(require.resolve('../main.build'), [], { // target self
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
           ...(env ?? {})
