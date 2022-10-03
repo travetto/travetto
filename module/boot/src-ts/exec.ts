@@ -2,8 +2,6 @@ import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { Readable } from 'stream';
 import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
 
-import { Host } from './host';
-import { ModuleIndex } from './internal/module';
 import { PathUtil } from './path';
 import { StreamUtil } from './stream';
 
@@ -37,13 +35,19 @@ export interface ExecutionResult {
   killed?: boolean;
 }
 
-interface WorkerResult<T> {
+/**
+ * Result of a worker delegation
+ */
+export interface WorkerResult<T> {
   worker: Worker;
   message: Promise<T>;
   result: Promise<number>;
 }
 
-type CatchableResult = Promise<ExecutionResult> & { catchAsResult?(): Promise<ExecutionResult> };
+/**
+ * A result that supports catching as part of the promise resolution
+ */
+export type CatchableResult = Promise<ExecutionResult> & { catchAsResult?(): Promise<ExecutionResult> };
 
 type ErrorWithMeta = Error & { meta?: ExecutionResult };
 
@@ -189,26 +193,11 @@ export class ExecUtil {
    */
   static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     // Always register for the fork
-    const proc = spawn(process.argv0, [file, ...args], this.getOpts(options));
-    const result = this.enhanceProcess(proc, options, `${file} ${args.join(' ')}`);
-    return { process: proc, result };
-  }
-
-  /**
-   * Run a file with a main entry point relative to the current node executable.  Mimics how node's
-   * fork operation is just spawn with the command set to `process.argv0`
-   * @param cmd The file to run
-   * @param args The command line arguments to pass
-   * @param options The enhancement options
-   */
-  static forkMain(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
-    // Always register for the fork
     const opts = this.getOpts(options);
-    file = file.replace(Host.EXT.inputOutputRe, ModuleIndex.fileExt);
-    const spawnArgs = [require.resolve('@travetto/boot/bin/main'), file, ...args];
-    const p = spawn(process.argv0, spawnArgs, opts);
-    const result = this.enhanceProcess(p, options, spawnArgs.join(' '));
-    return { process: p, result };
+    const spawnArgs = [file, ...args];
+    const proc = spawn(process.argv0, spawnArgs, opts);
+    const result = this.enhanceProcess(proc, options, spawnArgs.join(' '));
+    return { process: proc, result };
   }
 
   /**
@@ -267,17 +256,6 @@ export class ExecUtil {
     });
 
     return { worker, message, result };
-  }
-
-  /**
-   * Run a file with a main entry point as a worker thread
-   * @param file The file to run, if starts with @, will be resolved as a module
-   * @param args The arguments to pass in
-   * @param options The worker options
-   */
-  static workerMain<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
-    file = file.replace(Host.EXT.inputOutputRe, ModuleIndex.fileExt);
-    return this.worker<T>(require.resolve('@travetto/boot/bin/main'), [file, ...args], options);
   }
 
   /**

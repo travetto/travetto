@@ -1,5 +1,5 @@
 import { Host } from '@travetto/boot';
-import { TranspileManager } from '@travetto/boot/src/internal/transpile';
+import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager } from '@travetto/base';
@@ -88,7 +88,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       includeIndex: true
     })) {
       if (!(file.includes(Host.PATH.supportWithSep) && /\/(transformer|phase)[.]/.test(file))) {
-        const worked = TranspileManager.unload(file);
+        const worked = DynamicLoader.unload(file);
         if (worked) {
           console.debug('Unloading', { pid: process.pid, file });
         }

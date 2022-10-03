@@ -1,4 +1,4 @@
-import { EnvUtil, Host } from '@travetto/boot';
+import { Host } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 
@@ -62,9 +62,7 @@ export class PhaseManager {
 
     const found = ModuleIndex.find({ folder: Host.PATH.support });
 
-    if (!EnvUtil.isCompiled()) {
-      TranspileManager.transpileAll(found);
-    }
+    TranspileManager.transpileAll(found);
 
     // Load all support files
     const files = await Promise.all(found

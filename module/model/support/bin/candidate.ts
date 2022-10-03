@@ -1,4 +1,5 @@
-import { CliUtil, ExecUtil } from '@travetto/boot';
+import { CliUtil } from '@travetto/boot';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import type { Class } from '@travetto/base';
 import type { InjectableConfig } from '@travetto/di';
@@ -68,7 +69,7 @@ export class ModelCandidateUtil {
    */
   static async getCandidates(op: keyof ModelStorageSupport): Promise<CandidateNames> {
     return CliUtil.waiting('Resolving', () =>
-      ExecUtil.workerMain<CandidateNames>(require.resolve('../candidate'), [op]).message
+      ModuleUtil.workerMain<CandidateNames>(require.resolve('../candidate'), [op]).message
     );
   }
 

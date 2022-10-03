@@ -1,7 +1,7 @@
 import { AppManifest, Class, ShutdownManager } from '@travetto/base';
 import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 import { Host, FsUtil, PathUtil } from '@travetto/boot';
-import { TranspileManager } from '@travetto/boot/src/internal/transpile';
+import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 
 import { FilePresenceManager } from '@travetto/watch';
 
@@ -28,7 +28,7 @@ export function setup($Compiler: Class<typeof Compiler>): typeof $Compiler {
       }, 0);
 
       // Proxy all file loads
-      TranspileManager.onLoad((name, mod) => {
+      DynamicLoader.onLoad((name, mod) => {
         if (name.includes(PathUtil.cwd) && !name.includes('node_modules') && Host.PATH.srcWithSepRe.test(name)) {
           if (!this.#modules.has(name)) {
             this.#modules.set(name, new RetargettingProxy(mod));
@@ -42,7 +42,7 @@ export function setup($Compiler: Class<typeof Compiler>): typeof $Compiler {
       });
 
       // Clear target on unload
-      TranspileManager.onUnload(f => this.#modules.get(f)?.setTarget(null));
+      DynamicLoader.onUnload(f => this.#modules.get(f)?.setTarget(null));
 
       new FilePresenceManager(
         [...AppManifest.source.local, ...AppManifest.source.common]

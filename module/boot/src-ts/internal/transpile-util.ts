@@ -152,7 +152,7 @@ export class TranspileUtil {
    * @param isModule Is the error a module that should have been loaded
    * @param base The base set of properties to support
    */
-  static getErrorModule(message: string, isModule?: string | boolean, base?: Record<string, string | boolean>): string {
+  static getErrorModuleSource(message: string, isModule?: string | boolean, base?: Record<string, string | boolean>): string {
     const f = ([k, v]: string[]): string => `${k}: (t,k) => ${v}`;
     const e = '{ throw new Error(msg); }';
     const map: { [P in keyof ProxyHandler<object>]?: string } = {
@@ -253,7 +253,7 @@ export class TranspileUtil {
   static transpileError(tsf: string, err: Error): string {
     if (EnvUtil.isDynamic() && !tsf.startsWith(Host.PATH.test)) {
       console.trace(`Unable to transpile ${tsf}: stubbing out with error proxy.`, err.message);
-      return this.getErrorModule(err.message);
+      return this.getErrorModuleSource(err.message);
     } else {
       throw err;
     }
@@ -278,5 +278,35 @@ export class TranspileUtil {
       }
       return this.transpileError(tsf, err);
     }
+  }
+
+  /**
+   * Convert an input file to a unix source file
+   * @param file .ts or .js file to convert
+   */
+  static toUnixSource(file: string): string {
+    return file.replace(/[\\\/]+/g, '/').replace(Host.EXT.outputRe, Host.EXT.input);
+  }
+
+  /**
+   * Process error response
+   * @param phase The load/compile phase to care about
+   * @param tsf The typescript filename
+   * @param err The error produced
+   * @param filename The relative filename
+   */
+  static handlePhaseError(phase: 'load' | 'compile', tsf: string, err: Error, filename = tsf.replace(PathUtil.cwd, '.')): string {
+    if (phase === 'compile' &&
+      (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
+    ) {
+      err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
+    }
+
+    if (EnvUtil.isDynamic() && !filename.startsWith('test/')) {
+      console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
+      return this.getErrorModuleSource(err.message);
+    }
+
+    throw err;
   }
 }

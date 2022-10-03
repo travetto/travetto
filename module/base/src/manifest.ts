@@ -1,6 +1,7 @@
 import { AppCache, EnvUtil, Host, Package } from '@travetto/boot';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { ModuleSearchConfig } from '@travetto/boot/src/internal/module';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { version as framework } from '../package.json';
 import { TimeSpan, Util } from './util';
@@ -152,7 +153,7 @@ class $AppManifest {
         },
         source: {
           ...this.source,
-          dynamicModules: EnvUtil.getDynamicModules(),
+          dynamicModules: ModuleUtil.getDynamicModules(),
         }
       };
     return out;

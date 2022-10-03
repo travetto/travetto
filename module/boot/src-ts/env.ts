@@ -1,12 +1,7 @@
-import { ModuleUtil } from './internal/module-util';
-import { PathUtil } from './path';
-
 /**
  * Basic utils for reading environment variables
  */
 export class EnvUtil {
-
-  static #dynamicModules: Record<string, string>;
 
   /**
    * Get all relevant environment values
@@ -140,19 +135,5 @@ export class EnvUtil {
    */
   static isDynamic(): boolean {
     return !this.isCompiled() && this.isTrue('TRV_DYNAMIC');
-  }
-
-  /**
-   * Get dynamic modules
-   */
-  static getDynamicModules(): Record<string, string> {
-    if (this.#dynamicModules === undefined) {
-      this.#dynamicModules = Object.fromEntries(
-        this.getEntries('TRV_MODULES')
-          .sort(([a], [b]) => a.localeCompare(b))
-          .map(([k, v]) => [k, v || ModuleUtil.resolveFrameworkPath(PathUtil.resolveUnix('node_modules', k))])
-      );
-    }
-    return this.#dynamicModules;
   }
 }

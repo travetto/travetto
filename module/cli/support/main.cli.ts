@@ -19,10 +19,8 @@ and invoke it locally using
     process.exit(1);
   }
 
-  if (!EnvUtil.isCompiled()) {
-    // Compile CLI for usage
-    TranspileManager.transpileAll(ModuleIndex.find({ folder: Host.PATH.support }));
-  }
+  // Pre-transpile CLI for usage
+  TranspileManager.transpileAll(ModuleIndex.find({ folder: Host.PATH.support }));
 
   const { ExecutionManager } = await import('@travetto/cli');
   return ExecutionManager.run(process.argv); // Run cli
