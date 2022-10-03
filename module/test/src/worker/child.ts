@@ -1,4 +1,4 @@
-import { ModuleManager } from '@travetto/boot/src/internal/module';
+import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager } from '@travetto/base';
@@ -87,7 +87,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       includeIndex: true
     })) {
       if (!/support\/(transformer|phase)[.]/.test(file)) {
-        const worked = ModuleManager.unload(file);
+        const worked = TranspileManager.unload(file);
         if (worked) {
           console.debug('Unloading', { pid: process.pid, file });
         }

@@ -11,5 +11,5 @@ try { require(`${process.cwd()}/.env`); } catch { } // read env
 require('@travetto/boot/src/internal/setup');
 
 if (!require('@travetto/boot/src/env').EnvUtil.isCompiled()) {
-  require('@travetto/boot/src/internal/module').ModuleManager.init(); // init
+  require('@travetto/boot/src/internal/transpile').TranspileManager.init(); // init
 }

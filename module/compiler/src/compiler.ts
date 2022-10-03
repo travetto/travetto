@@ -5,7 +5,7 @@ import * as ts from 'typescript';
 import { PathUtil } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
-import { ModuleManager } from '@travetto/boot/src/internal/module';
+import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { Dynamic } from '@travetto/base/src/internal/dynamic';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 
@@ -108,9 +108,9 @@ class $Compiler {
 
     await this.#transformerManager.init();
     // Enhance transpilation, with custom transformations
-    ModuleManager.setTranspiler(tsf => this.#transpile(tsf));
+    TranspileManager.setTranspiler(tsf => this.#transpile(tsf));
 
-    ModuleManager.onUnload((f, unlink) => this.#host.unload(f, unlink)); // Remove source
+    TranspileManager.onUnload((f, unlink) => this.#host.unload(f, unlink)); // Remove source
 
     // Update source map support to read from transpiler cache
     sourceMapSupport.install({
@@ -132,7 +132,7 @@ class $Compiler {
     this.#host.reset();
     this.#program = undefined;
 
-    ModuleManager.clearHandlers();
+    TranspileManager.clearHandlers();
     SourceIndex.reset();
     this.active = false;
   }
@@ -158,7 +158,7 @@ class $Compiler {
    */
   added(filename: string): void {
     if (filename in require.cache) { // if already loaded
-      ModuleManager.unload(filename);
+      TranspileManager.unload(filename);
     }
     // Load Synchronously
     require(filename);
@@ -169,7 +169,7 @@ class $Compiler {
    * Handle when a file is removed during watch
    */
   removed(filename: string): void {
-    ModuleManager.unload(filename, true);
+    TranspileManager.unload(filename, true);
     this.notify('removed', filename);
   }
 
@@ -178,7 +178,7 @@ class $Compiler {
    */
   changed(filename: string): void {
     if (this.#host.hashChanged(filename)) {
-      ModuleManager.unload(filename);
+      TranspileManager.unload(filename);
       // Load Synchronously
       require(filename);
       this.notify('changed', filename);

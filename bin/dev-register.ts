@@ -3,7 +3,7 @@ import { EnvUtil } from '../module/boot/src/env';
 import { readPackage } from '../module/boot/src/internal/package';
 import { Package } from '../module/boot/src/main-package';
 import { PathUtil } from '../module/boot/src/path';
-import { ModuleManager } from '../module/boot/src/internal/module';
+import { TranspileManager } from '../module/boot/src/internal/transpile';
 import { TranspileUtil } from '../module/boot/src/internal/transpile-util';
 import { SystemUtil } from '../module/boot/src/internal/system';
 import { ModuleCompileCache } from '../module/boot/src/internal/module-cache';
@@ -104,9 +104,9 @@ class DevRegister {
     });
 
     // Override filename resolution
-    ModuleManager.setFilenameResolver((p: string) => this.resolveFilename(p));
+    TranspileManager.setFilenameResolver((p: string) => this.resolveFilename(p));
 
-    ModuleManager.init();
+    TranspileManager.init();
   }
 }
 
