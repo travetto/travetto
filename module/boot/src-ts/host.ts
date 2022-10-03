@@ -10,8 +10,8 @@ const jsMatcher = ((file: string): boolean => file.endsWith(jsExt));
 
 const isCompiled = /^1$/.test(`${process.env.TRV_COMPILED}`);
 
-const sourceExt = isCompiled ? jsExt : tsExt;
-const sourceMatcher = isCompiled ? jsMatcher : tsMatcher;
+const moduleExt = isCompiled ? jsExt : tsExt;
+const moduleMatcher = isCompiled ? jsMatcher : tsMatcher;
 
 export class Host {
   static EXT = {
@@ -28,9 +28,12 @@ export class Host {
 
     inputOutputRe: tjsRe,
 
-    source: sourceExt,
-    sourceMatcher,
-    sourceIndex: `index${sourceExt}`
+    module: moduleExt,
+    moduleMatcher,
+  };
+
+  static FILE = {
+    moduleIndex: `index${moduleExt}`
   };
 
   static PATH = {
