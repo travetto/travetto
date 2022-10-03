@@ -1,5 +1,5 @@
 import { EnvUtil, Host } from '@travetto/boot';
-import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 
 import { OrderingUtil } from './internal/ordering';
@@ -60,7 +60,7 @@ export class PhaseManager {
    */
   async load(upto?: string, after?: string): Promise<this> {
 
-    const found = SourceIndex.find({ folder: Host.PATH.support });
+    const found = ModuleIndex.find({ folder: Host.PATH.support });
 
     if (!EnvUtil.isCompiled()) {
       TranspileManager.transpileAll(found);

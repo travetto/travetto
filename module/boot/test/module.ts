@@ -1,13 +1,13 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { SourceIndex } from '../src/internal/source';
+import { ModuleIndex } from '../src/internal/module';
 
 @Suite()
-class SourceTests {
+class ModuleIndexTests {
   @Test()
   testFind() {
-    const files = SourceIndex.find({});
+    const files = ModuleIndex.find({});
     assert(files.some(x => x.file.endsWith('test/source.ts')));
   }
 }

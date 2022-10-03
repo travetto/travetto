@@ -3,7 +3,7 @@ import * as readline from 'readline';
 
 import { Host } from '@travetto/boot';
 import { ShutdownManager, Util } from '@travetto/base';
-import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleIndex } from '@travetto/boot/src/internal/module';
 
 /**
  * Simple Test Utilities
@@ -38,7 +38,7 @@ export class RunnerUtil {
    * Find all valid test files given the globs
    */
   static async getTestFiles(globs: RegExp[], root = Host.PATH.test): Promise<string[]> {
-    const files = SourceIndex.find({ folder: root, paths: ['.'] })
+    const files = ModuleIndex.find({ folder: root, paths: ['.'] })
       .filter(f => globs.some(g => g.test(f.module)));
 
     const validFiles = files

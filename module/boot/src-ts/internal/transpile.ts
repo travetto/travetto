@@ -4,7 +4,7 @@ import { EnvUtil } from '../env';
 import { TranspileUtil } from './transpile-util';
 import { Module } from './types';
 import { TranspileCache } from './transpile-cache';
-import { SimpleEntry, SourceIndex } from './source';
+import { ModuleIndexEntry, ModuleIndex } from './module';
 import { Host } from '../host';
 
 type UnloadHandler = (file: string, unlink?: boolean) => void;
@@ -187,7 +187,7 @@ export class TranspileManager {
    * Transpile all found
    * @param entries
    */
-  static transpileAll(entries: SimpleEntry[]): void {
+  static transpileAll(entries: ModuleIndexEntry[]): void {
     // Ensure we transpile all files
     for (const { file } of entries) {
       if (!TranspileCache.hasEntry(file)) {
@@ -226,7 +226,7 @@ export class TranspileManager {
     }
 
     // Unload all
-    for (const { file } of SourceIndex.find({ includeIndex: true })) {
+    for (const { file } of ModuleIndex.find({ includeIndex: true })) {
       this.unload(file);
     }
   }

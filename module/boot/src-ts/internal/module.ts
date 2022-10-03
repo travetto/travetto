@@ -4,15 +4,15 @@ import { EnvUtil } from '../env';
 
 import { Host } from '../host';
 
-export type SimpleEntry = Pick<ScanEntry, 'module' | 'file'>;
+export type ModuleIndexEntry = Pick<ScanEntry, 'module' | 'file'>;
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean, paths?: string[] };
 type FrameworkScan = { testDir: (x: string) => boolean, base: string, map: (e: ScanEntry) => ScanEntry };
 
 /**
- * Configuration for searching for source files
+ * Configuration for searching for module
  */
-export interface SourceConfig {
+export interface ModuleSearchConfig {
   /**
    * Common folders, including all modules to search for source files in
    */
@@ -27,12 +27,12 @@ export interface SourceConfig {
   excludeModules: Set<string>;
 }
 
-type IndexRecord = { index?: SimpleEntry, base: string, files: Map<string, SimpleEntry[]> };
+type IndexRecord = { index?: ModuleIndexEntry, base: string, files: Map<string, ModuleIndexEntry[]> };
 
 /**
  * Source code index
  */
-export class SourceIndex {
+export class ModuleIndex {
 
   static #cache = new Map<string, IndexRecord>();
 
@@ -163,7 +163,7 @@ export class SourceIndex {
     if (folder === Host.PATH.src) {
       config.includeIndex = config.includeIndex ?? true;
     }
-    const all: SimpleEntry[][] = [];
+    const all: ModuleIndexEntry[][] = [];
     const idx = this.#index;
     for (const key of paths) {
       if (idx.has(key)) {
@@ -196,9 +196,9 @@ export class SourceIndex {
    * Find all source files registered
    * @param mode Should all sources files be returned, including optional.
    */
-  static findByFolders(config: SourceConfig, mode: 'all' | 'required' = 'all'): ScanEntry[] {
-    const all: SimpleEntry[][] = [];
-    const getAll = (src: string[], cmd: (c: FindConfig) => SimpleEntry[]): void => {
+  static findByFolders(config: ModuleSearchConfig, mode: 'all' | 'required' = 'all'): ScanEntry[] {
+    const all: ModuleIndexEntry[][] = [];
+    const getAll = (src: string[], cmd: (c: FindConfig) => ModuleIndexEntry[]): void => {
       for (const folder of src.filter(x => mode === 'all' || !x.startsWith('^'))) {
         all.push(cmd({ folder: folder.replace('^', '') }));
       }

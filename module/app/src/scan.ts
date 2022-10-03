@@ -1,4 +1,4 @@
-import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { AppManifest } from '@travetto/base/src/manifest';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { SchemaRegistry } from '@travetto/schema';
@@ -25,7 +25,7 @@ export class AppScanUtil {
   static async scanList(): Promise<ApplicationConfig[]> {
 
     await Promise.all(
-      SourceIndex.findByFolders(AppManifest.source)
+      ModuleIndex.findByFolders(AppManifest.source)
         .filter(x => TranspileCache.readEntry(x.file).includes('@Application'))
         .map(x => import(x.file)) // Only load files that are candidates
     );

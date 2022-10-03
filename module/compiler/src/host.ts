@@ -6,7 +6,7 @@ import { Host, PathUtil } from '@travetto/boot';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
-import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { AppManifest } from '@travetto/base';
 
 /**
@@ -39,7 +39,7 @@ export class SourceHost implements ts.CompilerHost {
   getRootFiles(): Set<string> {
     if (!this.#rootFiles.size) {
       // Only needed for compilation
-      this.#rootFiles = new Set(SourceIndex.findByFolders(AppManifest.source, 'required').map(x => x.file));
+      this.#rootFiles = new Set(ModuleIndex.findByFolders(AppManifest.source, 'required').map(x => x.file));
     }
     return this.#rootFiles;
   }

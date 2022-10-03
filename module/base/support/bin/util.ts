@@ -2,7 +2,7 @@ import { statSync } from 'fs';
 
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { CliUtil, EnvUtil, ExecUtil, FsUtil } from '@travetto/boot';
-import { SimpleEntry, SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleIndexEntry, ModuleIndex } from '@travetto/boot/src/internal/module';
 
 /**
  * Utilities for running compilation
@@ -22,9 +22,9 @@ export class BuildUtil {
 
     const { AppManifest } = await import('@travetto/base/src/manifest');
 
-    let expired: SimpleEntry | undefined;
-    let missing: SimpleEntry | undefined;
-    for (const entry of SourceIndex.findByFolders(AppManifest.source)) {
+    let expired: ModuleIndexEntry | undefined;
+    let missing: ModuleIndexEntry | undefined;
+    for (const entry of ModuleIndex.findByFolders(AppManifest.source)) {
       try {
         if (FsUtil.isOlder(TranspileCache.statEntry(entry.file), statSync(entry.file))) {
           expired = entry;
