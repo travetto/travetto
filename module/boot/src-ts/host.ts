@@ -8,11 +8,6 @@ const dtsRe = /[.]d[.]ts$/;
 const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.endsWith(dtsExt));
 const jsMatcher = ((file: string): boolean => file.endsWith(jsExt));
 
-const isCompiled = /^1$/.test(`${process.env.TRV_COMPILED}`);
-
-const moduleExt = isCompiled ? jsExt : tsExt;
-const moduleMatcher = isCompiled ? jsMatcher : tsMatcher;
-
 export class Host {
   static EXT = {
     output: jsExt,
@@ -27,13 +22,6 @@ export class Host {
     inputMatcher: tsMatcher,
 
     inputOutputRe: tjsRe,
-
-    module: moduleExt,
-    moduleMatcher,
-  };
-
-  static FILE = {
-    moduleIndex: `index${moduleExt}`
   };
 
   static PATH = {
@@ -41,9 +29,11 @@ export class Host {
     srcWithSep: 'src/',
     srcWithSepRe: /src\//,
     support: 'support',
+    supportWithSep: 'support/',
     resources: 'resources',
     testSupport: 'test-support',
     testIsolated: 'test-isolated',
+    testAnyWithSepRe: /test(-(support|isolated))?\//,
     bin: 'bin',
     test: 'test'
   };

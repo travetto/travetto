@@ -57,7 +57,6 @@ export class FsUtilTest {
     assert(!FsUtil.existsSync(base));
   }
 
-
   /**
    * Remove directory, determine if errors should be ignored, synchronously
    */

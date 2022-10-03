@@ -30,17 +30,27 @@ export interface ModuleSearchConfig {
 type IndexRecord = { index?: ModuleIndexEntry, base: string, files: Map<string, ModuleIndexEntry[]> };
 
 /**
- * Source code index
+ * Module index, files to be loaded at runtime
  */
-export class ModuleIndex {
+class $ModuleIndex {
 
-  static #cache = new Map<string, IndexRecord>();
+  #cache = new Map<string, IndexRecord>();
+  #fileMatcher: (file: string) => boolean;
+  #fileIndex: string;
+
+  constructor(
+    public readonly fileExt: string,
+    matcher: (file: string) => boolean
+  ) {
+    this.#fileMatcher = matcher;
+    this.#fileIndex = `index${fileExt}`;
+  }
 
   /**
    * Compute index for a scan entry
    * @param entry
    */
-  static #compute(entry: ScanEntry): { mod: string, sub: string } | undefined {
+  #compute(entry: ScanEntry): { mod: string, sub: string } | undefined {
     const file = entry.module;
     if (file.includes('node_modules')) {
       const mod = file.match(/^.*node_modules\/((?:@[^/]+\/)?[^/]+)/)?.[1];
@@ -63,7 +73,7 @@ export class ModuleIndex {
    * Scan the framework for folder/files only the framework should care about
    * @param testFile The test to determine if a file is desired
    */
-  static #scanFramework(test: ScanTest): ScanEntry[] {
+  #scanFramework(test: ScanTest): ScanEntry[] {
     const testFile = 'test' in test ? test.test.bind(test) : test;
 
     // Folders to check
@@ -102,12 +112,12 @@ export class ModuleIndex {
   /**
    * Get index of all source files
    */
-  static get #index(): Map<string, IndexRecord> {
+  get #index(): Map<string, IndexRecord> {
     if (this.#cache.size === 0) {
       const idx = new Map<string, IndexRecord>();
       idx.set('.', { base: PathUtil.cwd, files: new Map() });
 
-      for (const entry of this.#scanFramework(Host.EXT.moduleMatcher)) {
+      for (const entry of this.#scanFramework(this.#fileMatcher)) {
         const res = this.#compute(entry);
 
         if (!res) {
@@ -122,7 +132,7 @@ export class ModuleIndex {
 
         if (ScanFs.isDir(entry)) {
           // Do nothing
-        } else if (sub === Host.FILE.moduleIndex) {
+        } else if (sub === this.#fileIndex) {
           idx.get(mod)!.index = { file: entry.file, module: entry.module };
         } else {
           if (!idx.get(mod)!.files.has(sub)) {
@@ -139,14 +149,14 @@ export class ModuleIndex {
   /**
    * Clears the app scanning cache
    */
-  static reset(): void {
+  reset(): void {
     this.#cache.clear();
   }
 
   /**
    * Get paths from index
    */
-  static getPaths(): string[] {
+  getPaths(): string[] {
     return [...this.#index.keys()];
   }
 
@@ -156,7 +166,7 @@ export class ModuleIndex {
    * @param folder The sub-folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
-  static find(config: FindConfig): ScanEntry[] {
+  find(config: FindConfig): ScanEntry[] {
     const { filter: f, folder, paths = this.getPaths() } = config;
     const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
 
@@ -196,7 +206,7 @@ export class ModuleIndex {
    * Find all source files registered
    * @param mode Should all sources files be returned, including optional.
    */
-  static findByFolders(config: ModuleSearchConfig, mode: 'all' | 'required' = 'all'): ScanEntry[] {
+  findByFolders(config: ModuleSearchConfig, mode: 'all' | 'required' = 'all'): ScanEntry[] {
     const all: ModuleIndexEntry[][] = [];
     const getAll = (src: string[], cmd: (c: FindConfig) => ModuleIndexEntry[]): void => {
       for (const folder of src.filter(x => mode === 'all' || !x.startsWith('^'))) {
@@ -211,3 +221,8 @@ export class ModuleIndex {
     return all.flat();
   }
 }
+
+export const ModuleIndex = new $ModuleIndex(
+  EnvUtil.isCompiled() ? Host.EXT.output : Host.EXT.input,
+  EnvUtil.isCompiled() ? Host.EXT.outputMatcher : Host.EXT.inputMatcher
+);
