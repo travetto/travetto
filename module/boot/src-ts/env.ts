@@ -1,3 +1,4 @@
+import { ModuleUtil } from './internal/module-util';
 import { PathUtil } from './path';
 
 /**
@@ -138,7 +139,7 @@ export class EnvUtil {
    * Is the app in dynamic mode?
    */
   static isDynamic(): boolean {
-    return !this.isProd() && this.isTrue('TRV_DYNAMIC');
+    return !this.isCompiled() && this.isTrue('TRV_DYNAMIC');
   }
 
   /**
@@ -149,7 +150,7 @@ export class EnvUtil {
       this.#dynamicModules = Object.fromEntries(
         this.getEntries('TRV_MODULES')
           .sort(([a], [b]) => a.localeCompare(b))
-          .map(([k, v]) => [k, v || PathUtil.resolveFrameworkPath(PathUtil.resolveUnix('node_modules', k))])
+          .map(([k, v]) => [k, v || ModuleUtil.resolveFrameworkPath(PathUtil.resolveUnix('node_modules', k))])
       );
     }
     return this.#dynamicModules;

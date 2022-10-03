@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
+
 import { FsUtil, PathUtil, ExecUtil, ExecutionOptions, ExecutionResult } from '@travetto/boot';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 type ForkResult = ReturnType<(typeof ExecUtil)['forkMain']>;
 
@@ -68,7 +70,7 @@ export class Workspace {
    * Resolve workspace path
    */
   static resolve(...p: string[]): string {
-    return PathUtil.resolveUnix(PathUtil.resolveFrameworkPath(PathUtil.resolveUnix(this.path, ...p)));
+    return PathUtil.resolveUnix(ModuleUtil.resolveFrameworkPath(PathUtil.resolveUnix(this.path, ...p)));
   }
 
   /**

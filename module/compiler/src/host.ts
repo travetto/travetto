@@ -4,6 +4,7 @@ import * as path from 'path';
 
 import { Host, PathUtil } from '@travetto/boot';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
@@ -48,7 +49,7 @@ export class SourceHost implements ts.CompilerHost {
    * Read file from disk, using the transpile pre-processor on .ts files
    */
   readFile(filename: string): string {
-    filename = PathUtil.toUnixSource(filename);
+    filename = ModuleUtil.toUnixSource(filename);
     let content = ts.sys.readFile(filename);
     if (content === undefined) {
       throw new Error(`Unable to read file ${filename}`);
@@ -63,7 +64,7 @@ export class SourceHost implements ts.CompilerHost {
    * Write file to disk, and set value in cache as well
    */
   writeFile(filename: string, content: string): void {
-    filename = PathUtil.toUnixSource(filename);
+    filename = ModuleUtil.toUnixSource(filename);
     this.#trackFile(filename, content);
     TranspileCache.writeEntry(filename, content);
   }
@@ -72,7 +73,7 @@ export class SourceHost implements ts.CompilerHost {
    * Fetch file
    */
   fetchFile(filename: string): void {
-    filename = PathUtil.toUnixSource(filename);
+    filename = ModuleUtil.toUnixSource(filename);
     const cached = TranspileCache.readEntry(filename);
     this.#trackFile(filename, cached);
   }
@@ -96,7 +97,7 @@ export class SourceHost implements ts.CompilerHost {
    * See if a file exists
    */
   fileExists(filename: string): boolean {
-    filename = PathUtil.toUnixSource(filename);
+    filename = ModuleUtil.toUnixSource(filename);
     return this.contents.has(filename) || ts.sys.fileExists(filename);
   }
 

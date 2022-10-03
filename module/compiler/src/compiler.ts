@@ -4,6 +4,7 @@ import * as ts from 'typescript';
 
 import { PathUtil } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { Dynamic } from '@travetto/base/src/internal/dynamic';
@@ -114,7 +115,7 @@ class $Compiler {
 
     // Update source map support to read from transpiler cache
     sourceMapSupport.install({
-      retrieveFile: p => this.#host.contents.get(PathUtil.toUnixSource(p))!
+      retrieveFile: p => this.#host.contents.get(ModuleUtil.toUnixSource(p))!
     });
 
     console.debug('Initialized', { duration: (Date.now() - start) / 1000 });

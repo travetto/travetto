@@ -1,6 +1,7 @@
 import * as path from 'path';
 
 import { PathUtil, FsUtil, Package, EnvUtil } from '@travetto/boot';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { AllType, AllTypeMap, node as n } from '../nodes';
 import { DocNode, RenderContextShape } from '../types';
@@ -63,7 +64,7 @@ export class RenderContext implements RenderContextShape {
 
   link(text: string, line?: number | { [key: string]: unknown, line?: number }): string {
     const num = typeof line === 'number' ? line : line?.line;
-    text = PathUtil.normalizeFrameworkPath(text);
+    text = ModuleUtil.normalizeFrameworkPath(text);
     return `${text.replace(PathUtil.cwd, this.gitBaseUrl)
       .replace(/.*@travetto\//, `${this.travettoGitBaseUrl}/module/`)}${num ? `#L${num}` : ''}`;
   }

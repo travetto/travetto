@@ -1,5 +1,6 @@
 import { PathUtil, Package, FsUtil } from '@travetto/boot';
 import { readPackage } from '@travetto/boot/src/internal/package';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { FileUtil, } from './util/file';
 import { DocRunUtil, RunConfig } from './util/run';
@@ -173,7 +174,7 @@ export const node = {
    * @param folder
    */
   Mod(folder: string) {
-    folder = PathUtil.resolveFrameworkPath(PathUtil.resolveUnix('node_modules', folder));
+    folder = ModuleUtil.resolveFrameworkPath(PathUtil.resolveUnix('node_modules', folder));
 
     const { description, displayName } = readPackage(folder);
     return $n('mod', { title: $c(displayName!), link: $c(folder), description: $c(description!) });
