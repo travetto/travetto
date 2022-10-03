@@ -71,7 +71,7 @@ export class IpcSupport {
   }
 
   activate(ctx: ExtensionContext): void {
-    this.#file = PathUtil.joinUnix(AppCache.cacheDir, `trv_ipc_vscode_${process.ppid}.ndjson`);
+    this.#file = PathUtil.joinUnix(AppCache.outputDir, `trv_ipc_vscode_${process.ppid}.ndjson`);
     AppCache.init();
     this.#ensureFile();
 

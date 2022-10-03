@@ -19,10 +19,10 @@ export class FileCache {
   /**
    * Directory to cache into
    */
-  readonly cacheDir: string;
+  readonly outputDir: string;
 
-  constructor(cacheDir: string) {
-    this.cacheDir = PathUtil.resolveUnix(cacheDir);
+  constructor(outputDir: string) {
+    this.outputDir = PathUtil.resolveUnix(outputDir);
   }
 
   /**
@@ -31,7 +31,7 @@ export class FileCache {
    */
   protected fromEntryName(entry: string): string {
     return PathUtil.toUnix(entry)
-      .replace(this.cacheDir, '')
+      .replace(this.outputDir, '')
       .replace(/^\//, '')
       .replace(/\/\/+/g, '/');
   }
@@ -42,24 +42,24 @@ export class FileCache {
    */
   protected toEntryName(local: string): string {
     local = PathUtil.toUnix(local).replace(PathUtil.cwd, '');
-    return PathUtil.joinUnix(this.cacheDir, local.replace(/^\//, ''));
+    return PathUtil.joinUnix(this.outputDir, local.replace(/^\//, ''));
   }
 
   get shortCacheDir(): string {
-    return this.cacheDir.replace(`${PathUtil.cwd}/`, '');
+    return this.outputDir.replace(`${PathUtil.cwd}/`, '');
   }
 
   /**
    * Initialize the cache behavior
    */
   init(): void {
-    mkdirSync(this.cacheDir, { recursive: true });
+    mkdirSync(this.outputDir, { recursive: true });
 
     try {
       // Ensure we have access before trying to delete
-      accessSync(this.cacheDir, constants.W_OK);
+      accessSync(this.outputDir, constants.W_OK);
     } catch {
-      throw new Error(`Unable to write to cache directory: ${this.cacheDir}`);
+      throw new Error(`Unable to write to cache directory: ${this.outputDir}`);
     }
   }
 
@@ -127,11 +127,11 @@ export class FileCache {
    * @param quiet Should the clear produce output
    */
   clear(quiet = false): void {
-    if (this.cacheDir) {
+    if (this.outputDir) {
       try {
-        FsUtil.unlinkRecursiveSync(this.cacheDir);
+        FsUtil.unlinkRecursiveSync(this.outputDir);
         if (!quiet) {
-          console.debug('Deleted', { cacheDir: this.cacheDir });
+          console.debug('Deleted', { cacheDir: this.outputDir });
         }
         this.#cache.clear(); // Clear it out
       } catch {
@@ -172,7 +172,7 @@ export class ExpiryFileCache extends FileCache {
   /**
    * Purge all expired data
    */
-  #purgeExpired(dir = this.cacheDir): void {
+  #purgeExpired(dir = this.outputDir): void {
     const entries = readdirSync(dir);
     for (const entry of entries) {
       const entryPath = PathUtil.joinUnix(dir, entry);
@@ -186,7 +186,7 @@ export class ExpiryFileCache extends FileCache {
         } catch (err) { }
       }
     }
-    if (entries.length === 0 && dir !== this.cacheDir) {
+    if (entries.length === 0 && dir !== this.outputDir) {
       try {
         rmdirSync(dir);
       } catch {

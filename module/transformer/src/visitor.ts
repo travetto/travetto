@@ -81,7 +81,7 @@ export class VisitorFactory<S extends State = State> {
 
   get logger(): Console {
     this.#logger ??= new console.Console({
-      stdout: createWriteStream(PathUtil.joinUnix(AppCache.cacheDir, this.#logTarget), { flags: 'a' }),
+      stdout: createWriteStream(PathUtil.joinUnix(AppCache.outputDir, this.#logTarget), { flags: 'a' }),
       inspectOptions: { depth: 4 },
     });
     return this.#logger;

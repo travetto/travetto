@@ -67,7 +67,7 @@ export class FsUtilTest {
     const cache = new FileCache(`.trv_${Date.now()}_${Math.trunc(Math.random() * 1000)}`);
     cache.init();
 
-    const target = cache.cacheDir;
+    const target = cache.outputDir;
 
     // Default
     assert(!FsUtil.existsSync(base));
