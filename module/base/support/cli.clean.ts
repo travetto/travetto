@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 
 import { CliCommand, OptionConfig } from '@travetto/cli';
 import { CliUtil, PathUtil } from '@travetto/boot';
-import { ModuleFileCache } from '@travetto/boot/src/internal/module-cache';
+import { $TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 
 type Options = {
   quiet: OptionConfig<boolean>;
@@ -26,7 +26,7 @@ export class BaseCleanCommand extends CliCommand<Options> {
   async action(): Promise<void> {
     for (const el of await fs.readdir(PathUtil.cwd)) {
       if (el.startsWith('.trv') && (await fs.stat(el)).isDirectory()) {
-        const cache = new ModuleFileCache(el);
+        const cache = new $TranspileCache(el);
         try {
           cache.clear(true);
           if (!this.cmd.quiet) {

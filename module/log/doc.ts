@@ -1,5 +1,5 @@
 import { d, lib, mod } from '@travetto/doc';
-import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
+import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 
 const ConsoleManager = d.Ref('ConsoleManager', '@travetto/base/src/console.ts');
 
@@ -41,11 +41,11 @@ A sample of the instrumentation would be:
 
 ${d.Code('Sample logging at various levels', 'doc/transpile.ts')}
 
-${d.Code('Sample After Transpilation', ModuleCompileCache.readEntry('doc/transpile.ts'), false, 'javascript')}
+${d.Code('Sample After Transpilation', TranspileCache.readEntry('doc/transpile.ts'), false, 'javascript')}
 
 And when in ${d.Input('prod')} mode transforms into:
 
-${d.Code('Sample After Transpilation, in Prod', ModuleCompileCache.readEntry('doc/transpile-prod.ts'), false, 'javascript')}
+${d.Code('Sample After Transpilation, in Prod', TranspileCache.readEntry('doc/transpile-prod.ts'), false, 'javascript')}
 
 ${d.Section('Logging to External Systems')}
 By default the logging functionality logs messages directly to the console, relying on the ${d.Method('util.inspect')} method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as ${lib.JSON}, which is easily consumable by services like ${lib.Elasticsearch} or ${lib.AwsCloudwatch} if running as a lambda or in a docker container.  

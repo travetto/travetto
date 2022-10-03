@@ -6,7 +6,7 @@ import { PathUtil } from '../module/boot/src/path';
 import { TranspileManager } from '../module/boot/src/internal/transpile';
 import { TranspileUtil } from '../module/boot/src/internal/transpile-util';
 import { SystemUtil } from '../module/boot/src/internal/system';
-import { ModuleCompileCache } from '../module/boot/src/internal/module-cache';
+import { TranspileCache } from '../module/boot/src/internal/transpile-cache';
 
 type DevConfig = {
   entries: Record<string, string>;
@@ -88,10 +88,10 @@ class DevRegister {
       // @ts-expect-error
       AppCache.cacheDir = `.app_cache/${uniqueId}`;
       // @ts-expect-error
-      ModuleCompileCache.cacheDir = `.trv_cache_${uniqueId}`;
+      TranspileCache.cacheDir = `.trv_cache_${uniqueId}`;
     }
 
-    ModuleCompileCache.init(true);
+    TranspileCache.init(true);
     const { entries }: DevConfig = JSON.parse(this.getContent(envMods));
     process.env.TRV_MODULES = `${envMods.replace(this.#trvMod, '')},${Object.entries(entries).map(([k, v]) => `${k}=${v ?? ''}`).join(',')}`
       .replace(/,=/g, '');
