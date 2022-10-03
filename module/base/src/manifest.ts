@@ -1,6 +1,6 @@
 import { AppCache, EnvUtil, Host, Package } from '@travetto/boot';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
-import { SourceConfig } from '@travetto/boot/src/internal/source';
+import { ModuleSearchConfig } from '@travetto/boot/src/internal/module';
 
 import { version as framework } from '../package.json';
 import { TimeSpan, Util } from './util';
@@ -90,7 +90,7 @@ class $AppManifest {
   readonly env: EnvConfig;
 
   /** Paths */
-  readonly source: SourceConfig;
+  readonly source: ModuleSearchConfig;
 
   constructor(pkg: Record<string, unknown> = {}) {
     const def = {

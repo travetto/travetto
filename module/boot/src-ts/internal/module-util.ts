@@ -4,7 +4,7 @@ import { Host } from '../host';
 /**
  * Utilities for dealing with source files
  */
-export class SourceUtil {
+export class ModuleUtil {
   static #idCache = new Map<string, string>();
 
   /**
@@ -18,11 +18,11 @@ export class SourceUtil {
   /**
    * Compute internal id from file name and optionally, class name
    */
-  static getSourceId(filename: string, clsName?: string): string {
+  static computeId(filename: string, clsName?: string): string {
     filename = PathUtil.resolveUnix(filename);
 
     if (clsName) {
-      return `${this.getSourceId(filename)}￮${clsName}`;
+      return `${this.computeId(filename)}￮${clsName}`;
     }
 
     if (this.#idCache.has(filename)) {

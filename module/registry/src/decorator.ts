@@ -1,7 +1,7 @@
 import { Class } from '@travetto/base';
 
 import { PathUtil } from '@travetto/boot';
-import { SourceUtil } from '@travetto/boot/src/internal/source-util';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 /**
  * Register a class as pending
@@ -21,7 +21,7 @@ class $PendingRegister {
   initMeta(cls: Class, file: string, ᚕhash: number, ᚕmethods: Record<string, { hash: number }>, ᚕabstract: boolean, ᚕsynthetic: boolean): boolean {
     const ᚕfile = PathUtil.toUnixSource(file);
     const meta = {
-      ᚕid: SourceUtil.getSourceId(ᚕfile, cls.name),
+      ᚕid: ModuleUtil.computeId(ᚕfile, cls.name),
       ᚕfile,
       ᚕfileRaw: file,
       ᚕhash,

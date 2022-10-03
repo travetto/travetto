@@ -1,4 +1,4 @@
-import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { Host } from '@travetto/boot/src/host';
 import { CliUtil } from '@travetto/boot/src/cli';
 
@@ -156,7 +156,7 @@ export class ServiceUtil {
    */
   static async findAll(): Promise<Service[]> {
     return (await Promise.all(
-      SourceIndex
+      ModuleIndex
         .find({ folder: Host.PATH.support, filter: x => /\/service[.]/.test(x) })
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         .map(async x => (await import(x.file)).service as Service)

@@ -6,7 +6,7 @@ import { Util } from '@travetto/base';
 import { ExecUtil, Host, PathUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
-import { SourceUtil } from '@travetto/boot/src/internal/source-util';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult } from '../model/test';
@@ -69,7 +69,7 @@ export class TestExecutor {
    */
   static failFile(consumer: TestConsumer, file: string, err: Error): void {
     const name = path.basename(file);
-    const classId = SourceUtil.getSourceId(file, name);
+    const classId = ModuleUtil.computeId(file, name);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const suite = { class: { name }, classId, duration: 0, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
     err.message = err.message.replace(PathUtil.cwd, '.');

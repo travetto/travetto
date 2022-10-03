@@ -3,7 +3,7 @@ import * as sourceMapSupport from 'source-map-support';
 import * as ts from 'typescript';
 
 import { PathUtil } from '@travetto/boot';
-import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { Dynamic } from '@travetto/base/src/internal/dynamic';
@@ -133,7 +133,7 @@ class $Compiler {
     this.#program = undefined;
 
     TranspileManager.clearHandlers();
-    SourceIndex.reset();
+    ModuleIndex.reset();
     this.active = false;
   }
 

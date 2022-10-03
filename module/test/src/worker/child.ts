@@ -1,5 +1,5 @@
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
-import { SourceIndex } from '@travetto/boot/src/internal/source';
+import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
@@ -82,8 +82,8 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     await PhaseManager.run('reset');
     await ShutdownManager.executeAsync(-1);
 
-    for (const { file } of SourceIndex.find({
-      paths: SourceIndex.getPaths().filter(x => !FIXED_MODULES.has(x)),
+    for (const { file } of ModuleIndex.find({
+      paths: ModuleIndex.getPaths().filter(x => !FIXED_MODULES.has(x)),
       includeIndex: true
     })) {
       if (!/support\/(transformer|phase)[.]/.test(file)) {
