@@ -107,7 +107,7 @@ export class ModuleIndex {
       const idx = new Map<string, IndexRecord>();
       idx.set('.', { base: PathUtil.cwd, files: new Map() });
 
-      for (const entry of this.#scanFramework(Host.EXT.sourceMatcher)) {
+      for (const entry of this.#scanFramework(Host.EXT.moduleMatcher)) {
         const res = this.#compute(entry);
 
         if (!res) {
@@ -122,7 +122,7 @@ export class ModuleIndex {
 
         if (ScanFs.isDir(entry)) {
           // Do nothing
-        } else if (sub === Host.EXT.sourceIndex) {
+        } else if (sub === Host.FILE.moduleIndex) {
           idx.get(mod)!.index = { file: entry.file, module: entry.module };
         } else {
           if (!idx.get(mod)!.files.has(sub)) {
