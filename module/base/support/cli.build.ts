@@ -31,7 +31,7 @@ export class BaseBuildCommand extends CliCommand<Options> {
     }
 
     const { TranspileCache } = await import('@travetto/boot/src/internal/transpile-cache');
-    const path = this.cmd.output ?? TranspileCache.cacheDir;
+    const path = this.cmd.output ?? TranspileCache.outputDir;
 
     try {
       await BuildUtil.build(process.env);

@@ -7,7 +7,7 @@ import { Host } from '../host';
 export class $TranspileCache extends ExpiryFileCache {
   protected fromEntryName(val: string): string {
     return PathUtil.resolveUnix(PathUtil.resolveFrameworkPath(PathUtil.toUnix(val)
-      .replace(this.cacheDir, '')
+      .replace(this.outputDir, '')
       .replace(/^\//, '')
       .replace(/\/\/+/g, '/')
       .replace(Host.EXT.outputRe, Host.EXT.input)
@@ -16,7 +16,7 @@ export class $TranspileCache extends ExpiryFileCache {
 
   protected toEntryName(val: string): string {
     val = PathUtil.toUnix(val).replace(PathUtil.cwd, '');
-    return PathUtil.joinUnix(this.cacheDir, PathUtil.normalizeFrameworkPath(val)
+    return PathUtil.joinUnix(this.outputDir, PathUtil.normalizeFrameworkPath(val)
       .replace(/.*@travetto/, 'node_modules/@travetto')
       .replace(/^\//, '')
       .replace(Host.EXT.inputRe, Host.EXT.output)
@@ -24,7 +24,7 @@ export class $TranspileCache extends ExpiryFileCache {
   }
 
   toEnv(): Record<string, string> {
-    return { TRV_CACHE: this.cacheDir };
+    return { TRV_CACHE: this.outputDir };
   }
 }
 

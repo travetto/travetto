@@ -86,9 +86,9 @@ class DevRegister {
     if (envMods && !process.env.TRV_CACHE) { // Is specifying modules, build out
       const uniqueId = SystemUtil.naiveHash(process.env.TRV_MODULES || '');
       // @ts-expect-error
-      AppCache.cacheDir = `.app_cache/${uniqueId}`;
+      AppCache.outputDir = `.app_cache/${uniqueId}`;
       // @ts-expect-error
-      TranspileCache.cacheDir = `.trv_cache_${uniqueId}`;
+      TranspileCache.outputDir = `.trv_cache_${uniqueId}`;
     }
 
     TranspileCache.init(true);
