@@ -2,6 +2,7 @@ import * as path from 'path';
 import { promises as fs } from 'fs';
 
 import { ExecUtil, Host, PathUtil, ScanFs, FsUtil } from '@travetto/boot';
+import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { DependenciesUtil, DepType } from './dependencies';
 import { PackUtil } from '../util';
@@ -93,7 +94,7 @@ export class AssembleUtil {
   static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'peer']): Promise<void> {
 
     for (const el of await DependenciesUtil.resolveDependencies({ types })) {
-      const sub = PathUtil.normalizeFrameworkPath(el.file, 'node_modules/')
+      const sub = ModuleUtil.normalizeFrameworkPath(el.file, 'node_modules/')
         .replace(/.*?node_modules/, 'node_modules');
 
       const tgt = PathUtil.resolveUnix(workspace, sub);

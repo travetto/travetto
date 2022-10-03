@@ -7,6 +7,7 @@ import { TranspileManager } from '../module/boot/src/internal/transpile';
 import { TranspileUtil } from '../module/boot/src/internal/transpile-util';
 import { SystemUtil } from '../module/boot/src/internal/system';
 import { TranspileCache } from '../module/boot/src/internal/transpile-cache';
+import { ModuleUtil } from '../module/boot/src/internal/module-util';
 
 type DevConfig = {
   entries: Record<string, string>;
@@ -54,7 +55,7 @@ class DevRegister {
     while (keys.length) {
       const top = keys.shift()!;
       final.set(top, null);
-      const deps = readPackage(PathUtil.resolveFrameworkPath(top)).dependencies ?? {};
+      const deps = readPackage(ModuleUtil.resolveFrameworkPath(top)).dependencies ?? {};
 
       for (const sub of Object.keys(deps)) {
         if (sub.startsWith('@travetto') && !final.has(sub)) {
@@ -100,7 +101,7 @@ class DevRegister {
     const key = '@travetto/*';
     TranspileUtil.setExtraOptions({
       rootDir: process.env.TRV_DEV_ROOT!,
-      paths: { [key]: [PathUtil.resolveFrameworkPath(key)] }
+      paths: { [key]: [ModuleUtil.resolveFrameworkPath(key)] }
     });
 
     // Override filename resolution
