@@ -23,7 +23,7 @@ Assemble is the operation that stages the project's code for deployment.  The as
 ${d.Ordered(
   'Cleaning Workspace - Cleans workspace to start with an empty workspace',
   'Copying Dependencies - Computes the prod dependencies and copies them into the new workspace',
-  'Copying App Content - Copies over application content (src/resources/support/bin)',
+  'Copying App Content - Copies over application content (src/, resources/, support/, bin/)',
   'Excluding Pre-Compile Files - Any files that should be excluded pre-compilation, are removed',
   'Compiling - Compiles the code in the new workspace, isolating it from your local development',
   'Excluding Post-Compile Files - Removes any files that should be excluded, post compilation',
@@ -79,7 +79,7 @@ ${d.SubSection('Environment Override')}
 When working with sub operations, passing command-line flags is challenging.  To support a more natural usage, the sub operations 
 allow their key parameters to be overridden via environment variables.
 
-${d.Snippet('Assemble Overrides', './bin/operation/assemble.ts', /^  overrides:/, /^  [}]/)}
-${d.Snippet('Docker Overrides', './bin/operation/docker.ts', /^  overrides:/, /^  [}]/)}
-${d.Snippet('Zip Overrides', './bin/operation/zip.ts', /^  overrides:/, /^  [}]/)}
+${d.Snippet('Assemble Overrides', './support/bin/assemble/operation.ts', /^  overrides:/, /^  [}]/)}
+${d.Snippet('Docker Overrides', './support/bin/docker.ts', /^  overrides:/, /^  [}]/)}
+${d.Snippet('Zip Overrides', './support/bin/zip.ts', /^  overrides:/, /^  [}]/)}
 `;

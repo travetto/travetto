@@ -82,7 +82,7 @@ const ᚕ_decorator_1 = require("@travetto/registry/src/decorator");
 const assert = require("assert");
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static ᚕinit = ᚕ_decorator_1.Register.initMeta(SimpleTest, ᚕsrc(__filename), 1887908328, { test: { hash: 102834457 } }, false, false);
+    static ᚕinit = ᚕ_decorator_1.Register.initMeta(SimpleTest, __filename, 1887908328, { test: { hash: 102834457 } }, false, false);
     async test() {
         ᚕ_check_1.AssertCheck.check({ file: ᚕsrc(__filename), line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }

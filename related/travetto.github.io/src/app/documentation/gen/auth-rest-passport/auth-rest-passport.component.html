@@ -66,7 +66,7 @@ Within the node ecosystem, the most prevalent auth framework is <a target="_blan
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-As you can see, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-passport/src/authenticator.ts#L14">PassportAuthenticator</a> will take care of the majority of the work, and all that is required is:
+As you can see, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-passport/src/authenticator.ts#L20">PassportAuthenticator</a> will take care of the majority of the work, and all that is required is:
 <ul> <li>Provide the name of the strategy (should be unique)</li>
  <li>Provide the strategy instance. <p class="note"><strong>Note</strong> you will need to provide the callback for the strategy to ensure you pass the external principal back into the framework</p></li>
  <li>The conversion functions which defines the mapping between external and local identities.</li></ul>

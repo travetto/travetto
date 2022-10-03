@@ -183,14 +183,15 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     resources: <span class="token punctuation">[</span> <span class="token string">'resources'</span>, <span class="token string">'doc/resources'</span> <span class="token punctuation">]</span>,
     shutdownWait: <span class="token number">2000</span>,
     cache: <span class="token string">'.trv_cache'</span>,
+    appCache: <span class="token string">'.app_cache'</span>,
     node: <span class="token string">'v17.9.1'</span>,
     dynamic: false,
-    readonly: <span class="token boolean">false</span>
+    isCompiled: <span class="token boolean">false</span>
   <span class="token punctuation">{{'}'}}</span>,
   source: <span class="token punctuation">{{'{'}}</span>
     common: <span class="token punctuation">[</span> <span class="token string">'src'</span> <span class="token punctuation">]</span>,
     local: <span class="token punctuation">[</span> <span class="token string">'doc'</span> <span class="token punctuation">]</span>,
-    excludeModules: Set<span class="token punctuation">(</span><span class="token number">3</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token string">'@travetto/cli'</span>, <span class="token string">'@travetto/doc'</span>, <span class="token string">'@travetto/boot'</span> <span class="token punctuation">{{'}'}}</span>,
+    excludeModules: Set<span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token string">'@travetto/doc'</span>, <span class="token string">'@travetto/boot'</span> <span class="token punctuation">{{'}'}}</span>,
     dynamicModules: <span class="token punctuation">{{'{'}}</span>
       <span class="token string">'@travetto/base'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:base'</span>,
       <span class="token string">'@travetto/boot'</span><span class="token builtin class-name">:</span> <span class="token string">'@trv:boot'</span>,

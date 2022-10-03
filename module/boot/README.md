@@ -28,29 +28,41 @@ The functionality we support for testing and retrieving environment information:
    *  `getList(key: string): string[];` - Retrieve an environmental value as a list
 
 ## Cache Support
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts) is the cache that is used specific to the framework, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L13).  [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L13) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  [AppCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts) is the cache that is available for runtime storage, and is an instance of [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L15).  [FileCache](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L15) is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 
 **Code: File Cache Structure**
 ```typescript
 /// <reference types="node" />
+/// <reference types="node" />
 import { Stats } from 'fs';
+import * as fsp from 'fs/promises';
 /**
  * Standard file cache, with output file name normalization and truncation
  */
 export declare class FileCache {
     #private;
-    static isOlder(cacheStat: Stats, fullStat: Stats): boolean;
     /**
      * Directory to cache into
      */
-    readonly cacheDir: string;
-    constructor(cacheDir: string);
+    readonly outputDir: string;
+    constructor(outputDir: string);
+    /**
+     * Map entry file name to the original source
+     * @param entry The entry path
+     */
+    protected fromEntryName(entry: string): string;
+    /**
+     * Map the original file name to the cache file space
+     * @param local Local path
+     */
+    protected toEntryName(local: string): string;
+    get shortCacheDir(): string;
     /**
      * Initialize the cache behavior
      */
-    init(purgeExpired?: boolean): void;
+    init(): void;
     /**
      * Write contents to disk
      * @param local Local location
@@ -68,16 +80,10 @@ export declare class FileCache {
      */
     readOptionalEntry(local: string): string | undefined;
     /**
-     * Delete expired entries
-     * @param full The local location
-     * @param force Should deletion be force
-     */
-    removeExpiredEntry(local: string, force?: boolean): void;
-    /**
      * Delete entry
      * @param local The location to delete
      */
-    removeEntry(local: string): void;
+    removeEntry(local: string, unlink?: boolean): void;
     /**
      * Checks to see if a file has been loaded or if it's available on disk
      * @param local The location to verify
@@ -94,12 +100,30 @@ export declare class FileCache {
      */
     clear(quiet?: boolean): void;
     /**
+     * Ensure a cache entry is prepared for writing
+     * @param local
+     */
+    openEntryHandle(local: string, flags?: string | number, mode?: number): Promise<fsp.FileHandle>;
+    /**
      * Get or set a value (from the create function) if not in the cache
      * @param local The local location
      * @param create The method to execute if the entry is not found
      * @param force Should create be executed always
      */
     getOrSet(local: string, create: () => string, force?: boolean): string;
+}
+export declare class ExpiryFileCache extends FileCache {
+    #private;
+    /**
+     * Initialize the cache behavior
+     */
+    init(purgeExpired?: boolean): void;
+    /**
+     * Delete expired entries
+     * @param full The local location
+     * @param force Should deletion be force
+     */
+    removeExpiredEntry(local: string, force?: boolean): void;
 }
 export declare const AppCache: FileCache;
 ```
@@ -121,7 +145,7 @@ The bootstrap process will also requires an index of all source files, which all
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/exec.ts#L81) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/main/module/boot/src-ts/exec.ts#L83) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

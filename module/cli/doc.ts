@@ -17,7 +17,7 @@ ${d.Section('Extending')}
 
 Extending the ${d.Input('cli')} is fairly straightforward.  It is built upon ${lib.Commander}, with a model that is extensible:
 
-${d.Code('Echo Command', 'doc/bin/cli-echo.ts')}
+${d.Code('Echo Command', 'doc/support/cli.echo.ts')}
 
 With the corresponding output:
 

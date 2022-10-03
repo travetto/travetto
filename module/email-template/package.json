@@ -18,12 +18,13 @@
     "name": "Travetto Framework"
   },
   "files": [
+    "index.ts",
     "src",
     "support",
     "resources",
     "!resources/email/demo/"
   ],
-  "main": "support/application.email.ts",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/email-template"

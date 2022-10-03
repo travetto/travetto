@@ -30,7 +30,7 @@ The functionality we support for testing and retrieving environment information:
  <li><code class="item method">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li></ul>
 
 <h2 id="cache-support">Cache Support</h2>
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts">AppCache</a> is the cache that is used specific to the framework, and is an instance of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L13">FileCache</a>.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L13">FileCache</a> is the generic structure for supporting a file cache that invalidates on modification/creation changes.
+The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts">AppCache</a> is the cache that is available for runtime storage, and is an instance of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L15">FileCache</a>.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/cache.ts#L15">FileCache</a> is the generic structure for supporting a file cache that invalidates on modification/creation changes.
 
 The class organization looks like:
 
@@ -39,22 +39,34 @@ The class organization looks like:
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/boot/src/cache.d.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token comment">/// &lt;reference types="node" /></span>
+<span class="token comment">/// &lt;reference types="node" /></span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Stats <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token operator">*</span> <span class="token keyword">as</span> fsp <span class="token keyword">from</span> <span class="token string">'fs/promises'</span><span class="token punctuation">;</span>
 <span class="token comment">/**
  * Standard file cache, with output file name normalization and truncation
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">declare</span> <span class="token keyword">class</span> <span class="token class-name">FileCache</span> <span class="token punctuation">{{'{'}}</span>
     #<span class="token keyword">private</span><span class="token punctuation">;</span>
-    <span class="token keyword">static</span> <span class="token function">isOlder</span><span class="token punctuation">(</span>cacheStat<span class="token operator">:</span> Stats<span class="token punctuation">,</span> fullStat<span class="token operator">:</span> Stats<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
     <span class="token comment">/**
      * Directory to cache into
      */</span>
-    <span class="token keyword">readonly</span> cacheDir<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-    <span class="token function">constructor</span><span class="token punctuation">(</span>cacheDir<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">readonly</span> outputDir<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    <span class="token function">constructor</span><span class="token punctuation">(</span>outputDir<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Map entry file name to the original source
+     * @param entry The entry path
+     */</span>
+    <span class="token keyword">protected</span> <span class="token function">fromEntryName</span><span class="token punctuation">(</span>entry<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Map the original file name to the cache file space
+     * @param local Local path
+     */</span>
+    <span class="token keyword">protected</span> <span class="token function">toEntryName</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    <span class="token keyword">get</span> <span class="token function">shortCacheDir</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
     <span class="token comment">/**
      * Initialize the cache behavior
      */</span>
-    <span class="token function">init</span><span class="token punctuation">(</span>purgeExpired<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
     <span class="token comment">/**
      * Write contents to disk
      * @param local Local location
@@ -72,16 +84,10 @@ The class organization looks like:
      */</span>
     <span class="token function">readOptionalEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
     <span class="token comment">/**
-     * Delete expired entries
-     * @param full The local location
-     * @param force Should deletion be force
-     */</span>
-    <span class="token function">removeExpiredEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-    <span class="token comment">/**
      * Delete entry
      * @param local The location to delete
      */</span>
-    <span class="token function">removeEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token function">removeEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> unlink<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
     <span class="token comment">/**
      * Checks to see if a file has been loaded or if it's available on disk
      * @param local The location to verify
@@ -98,15 +104,10 @@ The class organization looks like:
      */</span>
     <span class="token function">clear</span><span class="token punctuation">(</span>quiet<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
     <span class="token comment">/**
-     * Map entry file name to the original source
-     * @param entry The entry path
+     * Ensure a cache entry is prepared for writing
+     * @param local
      */</span>
-    <span class="token function">fromEntryName</span><span class="token punctuation">(</span>entry<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-    <span class="token comment">/**
-     * Map the original file name to the cache file space
-     * @param local Local path
-     */</span>
-    <span class="token function">toEntryName</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+    <span class="token function">openEntryHandle</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> flags<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">,</span> mode<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>fsp<span class="token punctuation">.</span>FileHandle<span class="token operator">></span><span class="token punctuation">;</span>
     <span class="token comment">/**
      * Get or set a value (from the create function) if not in the cache
      * @param local The local location
@@ -114,6 +115,19 @@ The class organization looks like:
      * @param force Should create be executed always
      */</span>
     <span class="token function">getOrSet</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token function-variable function">create</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">declare</span> <span class="token keyword">class</span> <span class="token class-name">ExpiryFileCache</span> <span class="token keyword">extends</span> <span class="token class-name">FileCache</span> <span class="token punctuation">{{'{'}}</span>
+    #<span class="token keyword">private</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Initialize the cache behavior
+     */</span>
+    <span class="token function">init</span><span class="token punctuation">(</span>purgeExpired<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+    <span class="token comment">/**
+     * Delete expired entries
+     * @param full The local location
+     * @param force Should deletion be force
+     */</span>
+    <span class="token function">removeExpiredEntry</span><span class="token punctuation">(</span>local<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> force<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 <span class="token keyword">export</span> <span class="token keyword">declare</span> <span class="token keyword">const</span> AppCache<span class="token operator">:</span> FileCache<span class="token punctuation">;</span></code></pre>     
       </figure>
@@ -135,7 +149,7 @@ The bootstrap process will also requires an index of all source files, which all
 This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
 
 <h2 id="process-execution">Process Execution</h2>
-Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/exec.ts#L81">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
+Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src-ts/exec.ts#L83">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

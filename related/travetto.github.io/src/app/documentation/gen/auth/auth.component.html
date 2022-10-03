@@ -69,6 +69,12 @@ As referenced above, a <a target="_blank" class="source-link" href="https://gith
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Authenticator<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">,</span> <span class="token constant">P</span> <span class="token keyword">extends</span> Principal <span class="token operator">=</span> Principal<span class="token punctuation">,</span> <span class="token constant">C</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
+   * Allows for the authenticator to be initialized if needed
+   * @param ctx
+   */</span>
+  initialize<span class="token operator">?</span><span class="token punctuation">(</span>ctx<span class="token operator">:</span> <span class="token constant">C</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
    * Verify the payload, ensuring the payload is correctly identified.
    *
    * @returns Valid principal if authenticated

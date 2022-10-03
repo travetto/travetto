@@ -8,5 +8,5 @@ export async function main(): Promise<void> {
   EnvInit.init({
     append: { TRV_RESOURCES: PathUtil.resolveUnix(__dirname, '..', Host.PATH.resources) }
   });
-  (await import('../src/editor')).EditorUtil.init();
+  (await import('./bin/editor')).EditorUtil.init();
 }
