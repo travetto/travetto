@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 
 import { Host, PathUtil } from '@travetto/boot';
-import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
+import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
@@ -65,7 +65,7 @@ export class SourceHost implements ts.CompilerHost {
   writeFile(filename: string, content: string): void {
     filename = PathUtil.toUnixSource(filename);
     this.#trackFile(filename, content);
-    ModuleCompileCache.writeEntry(filename, content);
+    TranspileCache.writeEntry(filename, content);
   }
 
   /**
@@ -73,7 +73,7 @@ export class SourceHost implements ts.CompilerHost {
    */
   fetchFile(filename: string): void {
     filename = PathUtil.toUnixSource(filename);
-    const cached = ModuleCompileCache.readEntry(filename);
+    const cached = TranspileCache.readEntry(filename);
     this.#trackFile(filename, cached);
   }
 
@@ -119,7 +119,7 @@ export class SourceHost implements ts.CompilerHost {
    */
   unload(filename: string, unlink = true): void {
     if (this.contents.has(filename)) {
-      ModuleCompileCache.removeExpiredEntry(filename, unlink);
+      TranspileCache.removeExpiredEntry(filename, unlink);
 
       if (unlink && this.#hashes.has(filename)) {
         this.#hashes.delete(filename);

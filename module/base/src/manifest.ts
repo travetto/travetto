@@ -1,5 +1,5 @@
 import { AppCache, EnvUtil, Host, Package } from '@travetto/boot';
-import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
+import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { SourceConfig } from '@travetto/boot/src/internal/source';
 
 import { version as framework } from '../package.json';
@@ -144,7 +144,7 @@ class $AppManifest {
         info: this.info,
         env: {
           ...this.env,
-          cache: ModuleCompileCache.shortCacheDir,
+          cache: TranspileCache.shortCacheDir,
           appCache: AppCache.shortCacheDir,
           node: process.version,
           dynamic: EnvUtil.isDynamic(),

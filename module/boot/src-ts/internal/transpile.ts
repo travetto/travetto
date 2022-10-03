@@ -3,7 +3,7 @@ import { EnvUtil } from '../env';
 
 import { TranspileUtil } from './transpile-util';
 import { Module } from './types';
-import { ModuleCompileCache } from './module-cache';
+import { TranspileCache } from './transpile-cache';
 import { SimpleEntry, SourceIndex } from './source';
 import { Host } from '../host';
 
@@ -158,7 +158,7 @@ export class TranspileManager {
    * @param force Force transpilation, even if cached
    */
   static simpleTranspile(tsf: string, force = false): string {
-    return ModuleCompileCache.getOrSet(tsf, () => TranspileUtil.simpleTranspile(tsf), force);
+    return TranspileCache.getOrSet(tsf, () => TranspileUtil.simpleTranspile(tsf), force);
   }
 
   /**
@@ -171,7 +171,7 @@ export class TranspileManager {
 
     this.setTranspiler(f => this.simpleTranspile(f));
 
-    ModuleCompileCache.init(true);
+    TranspileCache.init(true);
 
     // Supports bootstrapping with framework resolution
     if (this.#resolveFilename) {
@@ -190,7 +190,7 @@ export class TranspileManager {
   static transpileAll(entries: SimpleEntry[]): void {
     // Ensure we transpile all files
     for (const { file } of entries) {
-      if (!ModuleCompileCache.hasEntry(file)) {
+      if (!TranspileCache.hasEntry(file)) {
         this.transpile(file);
       }
     }

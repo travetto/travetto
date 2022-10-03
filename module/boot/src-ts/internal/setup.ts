@@ -2,7 +2,7 @@ import * as sourceMapSupport from 'source-map-support';
 
 import { EnvUtil } from '../env';
 import { PathUtil } from '../path';
-import { ModuleCompileCache } from './module-cache';
+import { TranspileCache } from './transpile-cache';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -37,5 +37,5 @@ global.ts = new Proxy({}, {
 // Register source maps for cached files
 sourceMapSupport.install({
   emptyCacheBetweenOperations: EnvUtil.isDynamic(),
-  retrieveFile: p => ModuleCompileCache.readOptionalEntry(PathUtil.toUnixSource(p))!
+  retrieveFile: p => TranspileCache.readOptionalEntry(PathUtil.toUnixSource(p))!
 });

@@ -4,7 +4,7 @@ import { EnvUtil } from '../env';
 
 import { Host } from '../host';
 
-export class ModuleFileCache extends ExpiryFileCache {
+export class $TranspileCache extends ExpiryFileCache {
   protected fromEntryName(val: string): string {
     return PathUtil.resolveUnix(PathUtil.resolveFrameworkPath(PathUtil.toUnix(val)
       .replace(this.cacheDir, '')
@@ -28,4 +28,4 @@ export class ModuleFileCache extends ExpiryFileCache {
   }
 }
 
-export const ModuleCompileCache = new ModuleFileCache(EnvUtil.get('TRV_CACHE', '.trv_cache'));
+export const TranspileCache = new $TranspileCache(EnvUtil.get('TRV_CACHE', '.trv_cache'));

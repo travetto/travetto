@@ -1,5 +1,5 @@
 import { ErrorUtil } from '@travetto/base/src/internal/error';
-import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
+import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { ParentCommChannel, Worker, WorkUtil } from '@travetto/worker';
 import { ExecUtil } from '@travetto/boot';
 
@@ -16,7 +16,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
    */
   return () => WorkUtil.spawnedWorker(
     () => ExecUtil.forkMain('@travetto/test/support/main.test-child', [], {
-      env: ModuleCompileCache.toEnv()
+      env: TranspileCache.toEnv()
     }),
     /**
      * Child initialization

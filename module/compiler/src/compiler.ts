@@ -4,7 +4,7 @@ import * as ts from 'typescript';
 
 import { PathUtil } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
-import { ModuleCompileCache } from '@travetto/boot/src/internal/module-cache';
+import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { Dynamic } from '@travetto/base/src/internal/dynamic';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
@@ -57,7 +57,7 @@ class $Compiler {
    * Perform actual transpilation
    */
   #transpile(filename: string, force = false): string {
-    if (force || !ModuleCompileCache.hasEntry(filename)) {
+    if (force || !TranspileCache.hasEntry(filename)) {
       console.debug('Emitting', { filename: filename.replace(PathUtil.cwd, '.') });
 
       try {

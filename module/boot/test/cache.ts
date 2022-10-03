@@ -3,16 +3,16 @@ import * as assert from 'assert';
 import { Test, Suite, AfterEach, BeforeAll } from '@travetto/test';
 
 import { PathUtil } from '../src';
-import { ModuleFileCache } from '../src/internal/module-cache';
+import { $TranspileCache } from '../src/internal/transpile-cache';
 
 @Suite()
 export class CacheSuite {
 
-  cache: ModuleFileCache;
+  cache: $TranspileCache;
 
   @BeforeAll()
   before() {
-    this.cache = new ModuleFileCache('.test');
+    this.cache = new $TranspileCache('.test');
   }
 
   @AfterEach()
