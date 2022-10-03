@@ -2,7 +2,7 @@ import { PathUtil } from '../path';
 import { EnvUtil } from '../env';
 
 import { TranspileUtil } from './transpile-util';
-import { Module } from './module-typed';
+import { Module } from './types';
 import { ModuleCompileCache } from './module-cache';
 import { SimpleEntry, SourceIndex } from './source';
 import { Host } from '../host';
@@ -13,7 +13,7 @@ type LoadHandler<T = unknown> = (name: string, o: T) => T;
 /**
  * Utilities for registering the bootstrap process. Hooks into module loading/compiling
  */
-export class ModuleManager {
+export class TranspileManager {
   private static transpile: (filename: string) => string;
 
   static #moduleResolveFilename = Module._resolveFilename.bind(Module);

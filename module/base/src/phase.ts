@@ -1,6 +1,6 @@
 import { EnvUtil, Host } from '@travetto/boot';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
-import { ModuleManager } from '@travetto/boot/src/internal/module';
+import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 
 import { OrderingUtil } from './internal/ordering';
 
@@ -63,7 +63,7 @@ export class PhaseManager {
     const found = SourceIndex.find({ folder: Host.PATH.support });
 
     if (!EnvUtil.isCompiled()) {
-      ModuleManager.transpileAll(found);
+      TranspileManager.transpileAll(found);
     }
 
     // Load all support files

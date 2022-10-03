@@ -1,5 +1,5 @@
 import { PathUtil, EnvUtil, Host } from '@travetto/boot';
-import { ModuleManager } from '@travetto/boot/src/internal/module';
+import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { SourceIndex } from '@travetto/boot/src/internal/source';
 
 /**
@@ -21,7 +21,7 @@ and invoke it locally using
 
   if (!EnvUtil.isCompiled()) {
     // Compile CLI for usage
-    ModuleManager.transpileAll(SourceIndex.find({ folder: Host.PATH.support }));
+    TranspileManager.transpileAll(SourceIndex.find({ folder: Host.PATH.support }));
   }
 
   const { ExecutionManager } = await import('@travetto/cli');
