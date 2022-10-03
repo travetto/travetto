@@ -1,3 +1,4 @@
+import { Host } from '@travetto/boot';
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
@@ -86,7 +87,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       paths: ModuleIndex.getPaths().filter(x => !FIXED_MODULES.has(x)),
       includeIndex: true
     })) {
-      if (!/support\/(transformer|phase)[.]/.test(file)) {
+      if (!(file.includes(Host.PATH.supportWithSep) && /\/(transformer|phase)[.]/.test(file))) {
         const worked = TranspileManager.unload(file);
         if (worked) {
           console.debug('Unloading', { pid: process.pid, file });

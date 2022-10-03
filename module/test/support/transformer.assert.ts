@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { PathUtil } from '@travetto/boot';
+import { Host, PathUtil } from '@travetto/boot';
 import { TransformerState, OnCall, DeclarationUtil, CoreUtil, TransformerId } from '@travetto/transformer';
 
 /**
@@ -279,7 +279,7 @@ export class AssertTransformer {
     if (state[IsTestⲐ] === undefined) {
       const name = PathUtil.toUnix(state.source.fileName);
       // Only apply to test files, allowing for inheriting from module test files as well
-      state[IsTestⲐ] = /\/test(-(support|isolated))?\//.test(name) && !name.includes('/test/src/');
+      state[IsTestⲐ] = Host.PATH.testAnyWithSepRe.test(name) && !name.includes('/test/src/');
     }
 
     // Only check in test mode
