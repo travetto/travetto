@@ -335,14 +335,15 @@ First we must start the application:
     resources: [ 'resources', 'doc/resources' ],
     shutdownWait: 2000,
     cache: '.trv_cache',
+    appCache: '.app_cache',
     node: 'v17.9.1',
     dynamic: false,
-    readonly: false
+    isCompiled: false
   },
   source: {
     common: [ 'src' ],
     local: [ 'doc' ],
-    excludeModules: Set(3) { '@travetto/cli', '@travetto/doc', '@travetto/boot' },
+    excludeModules: Set(2) { '@travetto/doc', '@travetto/boot' },
     dynamicModules: {
       '@travetto/app': '@trv:app',
       '@travetto/auth': '@trv:auth',
@@ -381,25 +382,57 @@ First we must start the application:
     port: 12555,
     trustProxy: false,
     hostname: 'localhost',
+    bindAddress: undefined,
+    baseUrl: undefined,
     defaultMessage: true,
     ssl: { active: false },
-    log: {},
-    bodyParse: { limit: '100kb', parsingTypes: {} },
-    accepts: { types: [] },
-    cors: {},
-    getCache: {},
-    cookie: { signed: true, httpOnly: true, sameSite: 'lax', keys: [ 'default-insecure' ] },
-    context: {},
+    log: { disabled: undefined, paths: undefined },
+    bodyParse: { disabled: undefined, paths: undefined, limit: '100kb', parsingTypes: {} },
+    accepts: { disabled: undefined, paths: undefined, types: [], matcher: undefined },
+    cors: {
+      disabled: undefined,
+      paths: undefined,
+      origins: undefined,
+      methods: undefined,
+      headers: undefined,
+      credentials: undefined,
+      resolved: undefined
+    },
+    getCache: { disabled: undefined, paths: undefined },
+    cookie: {
+      disabled: undefined,
+      paths: undefined,
+      signed: true,
+      httpOnly: true,
+      sameSite: 'lax',
+      keys: [ 'default-insecure' ],
+      secure: undefined,
+      domain: undefined
+    },
+    context: { disabled: undefined, paths: undefined },
     session: {
+      disabled: undefined,
+      paths: undefined,
       autoCommit: true,
       maxAge: 1800000,
       renew: true,
       rolling: false,
       sign: true,
+      secret: undefined,
       keyName: 'trv_sid',
       transport: 'cookie'
     },
-    auth: { readWrite: {}, verify: { roles: [] }, login: {} }
+    auth: {
+      readWrite: { disabled: undefined, paths: undefined },
+      verify: {
+        disabled: undefined,
+        paths: undefined,
+        state: undefined,
+        roles: [],
+        matcher: undefined
+      },
+      login: { disabled: undefined, paths: undefined, providers: undefined }
+    }
   },
   model: {
     mongo: {
@@ -410,7 +443,9 @@ First we must start the application:
       port: 27017,
       connectionOptions: {},
       srvRecord: false,
-      options: {}
+      options: {},
+      autoCreate: undefined,
+      cullRate: undefined
     }
   }
 }

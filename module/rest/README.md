@@ -312,11 +312,6 @@ Options:
 
 Available Applications:
 
-   ● custom 
-     ------------------------
-     usage: custom 
-     file:  doc/custom-app.ts
-
    ● rest Default rest application entrypoint
      ----------------------------------------
      usage: rest 
