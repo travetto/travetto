@@ -16,6 +16,10 @@ The module provides support basic support with AWS lambdas. When using one of th
 ```bash
 $ trv pack rest/lambda -h
 
+{
+  file: '@trv:cli/src/command-manager.ts',
+  line: 44
+} 
 Missing Package
 --------------------
 To use pack please run:
