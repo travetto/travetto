@@ -1,9 +1,6 @@
-import { WorkerOptions } from 'worker_threads';
-
 import { PathUtil } from '../path';
 import { Host } from '../host';
 import { EnvUtil } from '../env';
-import { CatchableResult, ExecUtil, ExecutionState, WorkerResult } from '../exec';
 
 /**
  * Utilities for dealing with source files
@@ -116,40 +113,5 @@ export class ModuleUtil {
       );
     }
     return this.#dynamicModules;
-  }
-
-  /**
-   * Run a file with a main entry point relative to the current node executable.  Mimics how node's
-   * fork operation is just spawn with the command set to `process.argv0`
-   * @param cmd The file to run
-   * @param args The command line arguments to pass
-   * @param options The enhancement options
-   */
-  static forkMain(file: string, args: string[] = [], options: { env?: Record<string, string | undefined> } = {}): ExecutionState<CatchableResult> {
-    return ExecUtil.fork(
-      require.resolve('@travetto/boot/bin/main'),
-      [
-        file.replace(Host.EXT.inputOutputRe, Host.EXT.moduleExt),
-        ...args
-      ],
-      options
-    );
-  }
-
-  /**
-   * Run a file with a main entry point as a worker thread
-   * @param file The file to run, if starts with @, will be resolved as a module
-   * @param args The arguments to pass in
-   * @param options The worker options
-   */
-  static workerMain<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
-    return ExecUtil.worker<T>(
-      require.resolve('@travetto/boot/bin/main'),
-      [
-        file.replace(Host.EXT.inputOutputRe, Host.EXT.moduleExt),
-        ...args
-      ],
-      options
-    );
   }
 }

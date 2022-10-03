@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
 import { FsUtil, AppCache, CliUtil } from '@travetto/boot';
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
+import { ModuleExec } from '@travetto/boot/src/internal/module-exec';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -56,7 +56,7 @@ export class AppListUtil {
   static async buildList(): Promise<ApplicationConfig[]> {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Collecting', () =>
-        ModuleUtil.workerMain<ApplicationConfig[]>(require.resolve('../main.list-build')).message
+        ModuleExec.workerMain<ApplicationConfig[]>(require.resolve('../main.list-build')).message
       );
     } else {
       await (await import('@travetto/base/support/main.build')).main();
