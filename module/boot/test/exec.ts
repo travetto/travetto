@@ -7,7 +7,6 @@ import { ResourceManager } from '@travetto/base';
 
 import { ExecUtil, StreamUtil } from '../src';
 import { Host } from '../src/host';
-import { ModuleIndex } from '../src/internal/module';
 
 @Suite()
 export class ExecUtilTest {
@@ -18,7 +17,7 @@ export class ExecUtilTest {
       cwd: __dirname
     });
     const result = await proc.result;
-    assert(result.stdout.includes(path.basename(__filename.replace(Host.EXT.outputRe, ModuleIndex.fileExt))));
+    assert(result.stdout.includes(path.basename(__filename.replace(Host.EXT.outputRe, Host.EXT.moduleExt))));
     assert(result.code === 0);
     assert(result.valid);
   }
@@ -42,20 +41,6 @@ export class ExecUtilTest {
   }
 
   @Test()
-  async forkMain() {
-    const proc = ExecUtil.forkMain(await ResourceManager.findAbsolute('test.ts'));
-    const result = await proc.result;
-    assert(result.stdout === 'Hello World\n');
-  }
-
-  @Test()
-  async worker() {
-    const { message } = ExecUtil.workerMain(await ResourceManager.findAbsolute('worker.ts'));
-    const result = await message;
-    assert.deepStrictEqual(result, { a: 1, b: 2, c: new Set([1, 2, 3]) });
-  }
-
-  @Test()
   async execSync() {
     const output = ExecUtil.execSync(`${process.argv0} ${await ResourceManager.findAbsolute('test.js')}`);
     assert(output === 'Hello World');
@@ -63,10 +48,10 @@ export class ExecUtilTest {
 
   @Test()
   async pipe() {
-    const echo = await ResourceManager.findAbsolute('echo.ts');
-    const proc = ExecUtil.forkMain(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const returnedStream = await ExecUtil.pipe(proc, createReadStream(__filename.replace(Host.EXT.outputRe, ModuleIndex.fileExt)));
+    const echo = await ResourceManager.findAbsolute('echo.js');
+    const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
+    const returnedStream = await ExecUtil.pipe(proc, createReadStream(__filename.replace(Host.EXT.outputRe, Host.EXT.moduleExt)));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
-    assert(result.includes('ExecUtil.forkMain(echo'));
+    assert(result.includes('ExecUtil.fork(echo'));
   }
 }
