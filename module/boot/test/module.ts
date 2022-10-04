@@ -8,6 +8,6 @@ class ModuleIndexTests {
   @Test()
   testFind() {
     const files = ModuleIndex.find({});
-    assert(files.some(x => x.file.endsWith('test/source.ts')));
+    assert(files.some(x => x.file.endsWith('test/module.ts')));
   }
 }

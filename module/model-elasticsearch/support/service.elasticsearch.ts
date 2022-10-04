@@ -1,4 +1,4 @@
-import type { Service } from '@travetto/command/bin/lib/service';
+import type { Service } from '@travetto/command/support/bin/service';
 
 const { version } = require(require.resolve('@elastic/elasticsearch').replace('index.js', 'package.json'));
 

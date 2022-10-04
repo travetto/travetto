@@ -1,7 +1,7 @@
 import { mkdirSync } from 'fs';
 import * as os from 'os';
 
-import type { Service } from '@travetto/command/bin/lib/service';
+import type { Service } from '@travetto/command/support/bin/service';
 
 const temp = `${os.tmpdir()}/local-stack`;
 try {
