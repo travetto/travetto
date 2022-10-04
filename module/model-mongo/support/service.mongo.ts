@@ -1,5 +1,5 @@
 import { EnvUtil } from '@travetto/boot';
-import type { Service } from '@travetto/command/bin/lib/service';
+import type { Service } from '@travetto/command/support/bin/service';
 
 const version = EnvUtil.get('TRV_SERVICE_MONGO', '4.4');
 
