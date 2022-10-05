@@ -1,4 +1,4 @@
-import { StacktraceUtil } from '../stacktrace';
+import { StacktraceManager } from '../stacktrace';
 
 declare global {
   interface Error { toJSON(sub?: unknown): unknown }
@@ -33,7 +33,7 @@ addFn(Set.prototype, 'toJSON', function (this: Set<unknown>) {
 
 // Add .toJSON to the default Error as well
 addFn(Error.prototype, 'toJSON', function (this: Error, extra?: Record<string, unknown>) {
-  const stack = StacktraceUtil.simplifyStack(this);
+  const stack = StacktraceManager.simplifyStack(this);
   return {
     message: this.message,
     ...extra,

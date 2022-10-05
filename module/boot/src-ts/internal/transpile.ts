@@ -1,22 +1,72 @@
-import { TranspileUtil } from './transpile-util';
+import * as sourceMapSupport from 'source-map-support';
+
+import { TranspileUtil, TypescriptCompilerOptions } from './transpile-util';
 import { TranspileCache } from './transpile-cache';
 import { ModuleIndexEntry } from './module';
 import { Host } from '../host';
 import { EnvUtil } from '../env';
+import { PathUtil } from '../path';
+import { FsUtil } from '../fs';
 
 /**
  * Transpilation manager
  */
-export class TranspileManager {
-  private static transpile: (filename: string) => string;
+class $TranspileManager {
+  private transpile: (filename: string) => string;
 
-  static #initialized = false;
+  #initialized = false;
+  #options: Record<string, unknown>; // Untyped so that the typescript typings do not make it into the API
+  #optionsExtra?: TypescriptCompilerOptions;
+
+  /**
+   * Set extra transpiler options
+   * @privates
+   */
+  setExtraOptions(opts: TypescriptCompilerOptions): void {
+    this.#optionsExtra = { ...this.#optionsExtra ?? {}, ...opts };
+  }
+
+  /**
+   * Get loaded compiler options
+   */
+  get compilerOptions(): TypescriptCompilerOptions {
+    if (!this.#options) {
+      const opts = this.#optionsExtra ?? {};
+      const rootDir = opts.rootDir ?? PathUtil.cwd;
+      const projTsconfig = PathUtil.resolveUnix('tsconfig.json');
+      const baseTsconfig = PathUtil.resolveUnix(__dirname, '..', '..', 'tsconfig.trv.json');
+      // Fallback to base tsconfig if not found in local folder
+      const config = FsUtil.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;
+
+      this.#options = {
+        ...TranspileUtil.readTsConfigOptions(config),
+        rootDir,
+        outDir: rootDir,
+        sourceRoot: rootDir,
+        ...opts
+      };
+    }
+    return this.#options;
+  }
+
 
   /**
    * Set transpiler triggered on require
    */
-  static setTranspiler(fn: (file: string) => string): void {
+  setTranspiler(fn: (file: string) => string): void {
     this.transpile = fn;
+  }
+
+  /**
+   * Set file reading logic
+   * @param fn
+   */
+  setSourceMapSource(fn: (file: string) => string | undefined): void {
+    // Register source maps for cached files
+    sourceMapSupport.install({
+      emptyCacheBetweenOperations: EnvUtil.isDynamic(),
+      retrieveFile: p => fn(TranspileUtil.toUnixSource(p))!
+    });
   }
 
   /**
@@ -24,7 +74,7 @@ export class TranspileManager {
    * @param m node module
    * @param sourceFile filename
    */
-  static compile(m: NodeJS.Module, sourceFile: string): unknown {
+  compile(m: NodeJS.Module, sourceFile: string): unknown {
     let content = this.transpile(sourceFile);
     const outputFile = sourceFile.replace(Host.EXT.inputRe, Host.EXT.output);
     try {
@@ -43,20 +93,21 @@ export class TranspileManager {
    * @param tsf The typescript file to transpile
    * @param force Force transpilation, even if cached
    */
-  static simpleTranspile(tsf: string, force = false): string {
-    return TranspileCache.getOrSet(tsf, () => TranspileUtil.simpleTranspile(tsf), force);
+  simpleTranspile(tsf: string, force = false): string {
+    return TranspileCache.getOrSet(tsf, () => TranspileUtil.simpleTranspile(tsf, this.compilerOptions), force);
   }
 
   /**
    * Enable transpilation hooks
    */
-  static init(): void {
+  init(): void {
     if (this.#initialized || EnvUtil.isCompiled()) {
       return;
     }
 
     require.extensions[Host.EXT.input] = (...args): unknown => this.compile(...args);
     this.setTranspiler(f => this.simpleTranspile(f));
+    this.setSourceMapSource(f => TranspileCache.readOptionalEntry(f));
     TranspileCache.init(true);
 
     this.#initialized = true;
@@ -65,7 +116,7 @@ export class TranspileManager {
   /**
    * Resets transpilation hooks
    */
-  static reset(): void {
+  reset(): void {
     if (!this.#initialized) {
       return;
     }
@@ -78,7 +129,7 @@ export class TranspileManager {
    * Transpile all found
    * @param entries
    */
-  static transpileAll(entries: ModuleIndexEntry[]): void {
+  transpileAll(entries: ModuleIndexEntry[]): void {
     if (EnvUtil.isCompiled()) {
       return; // Do nothing
     }
@@ -91,3 +142,5 @@ export class TranspileManager {
     }
   }
 }
+
+export const TranspileManager = new $TranspileManager();

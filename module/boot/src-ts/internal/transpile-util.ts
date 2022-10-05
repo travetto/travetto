@@ -2,7 +2,6 @@ import type * as tsi from 'typescript';
 import { readFileSync } from 'fs';
 
 import { EnvUtil } from '../env';
-import { FsUtil } from '../fs';
 import { PathUtil } from '../path';
 import { Host } from '../host';
 
@@ -18,7 +17,12 @@ type Diag = {
   };
 };
 
-type CompilerOptions = {
+declare global {
+  // eslint-disable-next-line no-var
+  var ts: unknown;
+}
+
+export type TypescriptCompilerOptions = {
   allowJs?: boolean;
   allowSyntheticDefaultImports?: boolean;
   allowUmdGlobalAccess?: boolean;
@@ -102,48 +106,48 @@ const TS_TARGET = ({
   16: 'ESNext'
 } as const)[NODE_VERSION] ?? 'ESNext'; // Default if not found
 
-type SourceHandler = (name: string, contents: string) => string;
+type SourceHandler = (text: string) => string;
 
 const CONSOLE_RE = /(\bconsole[.](debug|info|warn|log|error)[(])|\n/g;
+
+const SOURCE_HANDLERS: SourceHandler[] = [
+  // Tag source as processed by framework
+  (text): string => `${text}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`,
+  // Suppress typescript imports, and use a global proxy for performance
+  (text): string => text.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript';/mg, x => `// ${x}`),
+  // Modify console.log statements to include file and line
+  (text): string => {
+    let line = 1;
+    text = text.replace(CONSOLE_RE, (a, cmd, lvl) => {
+      if (a === '\n') {
+        line += 1;
+        return a;
+      } else {
+        lvl = lvl === 'log' ? 'info' : lvl;
+        return `ᚕlog('${lvl}', { file: __filename, line: ${line} },`;
+      }
+    });
+    return text;
+  }
+];
 
 /**
  * Standard transpilation support
  */
 export class TranspileUtil {
-  static #options: Record<string, unknown>; // Untyped so that the typescript typings do not make it into the API
 
-  static #optionsExtra?: CompilerOptions;
-
-  static #handlers: SourceHandler[] = [
-    // Tag output to indicate it was successfully processed by the framework
-    (__, contents): string =>
-      `${contents}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`,
-
-    // Drop typescript import, and use global. Great speedup;
-    (_, contents): string =>
-      contents.replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript';/mg, x => `// ${x}`),
-
-    // Insert filename, line into all log statements for all components
-    (_, contents): string => {
-      let line = 1;
-      contents = contents.replace(CONSOLE_RE, (a, cmd, lvl) => {
-        if (a === '\n') {
-          line += 1;
-          return a;
-        } else {
-          lvl = lvl === 'log' ? 'info' : lvl;
-          return `ᚕlog('${lvl}', { file: ᚕsrc(__filename), line: ${line} },`;
-        }
-      });
-      return contents;
-    }
-  ];
-
-  static #readTsConfigOptions(path: string): CompilerOptions {
+  /**
+   * Read the given tsconfig.json values for the project
+   * @param path
+   * @returns
+   */
+  static readTsConfigOptions(path: string): TypescriptCompilerOptions {
     const ts = requireTs();
-    return ts.parseJsonSourceFileConfigFileContent(
+    const { options } = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(path, ts.sys.readFile), ts.sys, PathUtil.cwd
-    ).options;
+    );
+    options.target = ts.ScriptTarget[TS_TARGET];
+    return options;
   }
 
   /**
@@ -176,50 +180,21 @@ export class TranspileUtil {
    * @param contents The file contents to process
    */
   static preProcess(filename: string, contents?: string): string {
+    // Inject into global space as 'ts', only when applying logic
+    if (!('ts' in global)) {
+      global.ts = new Proxy({}, {
+        // Load on demand, and replace on first use
+        get: (t, prop, r): unknown => (global.ts = require('typescript'))[prop]
+      });
+    }
+
     let fileContents = contents ?? readFileSync(filename, 'utf-8');
 
-    for (const handler of this.#handlers) {
-      fileContents = handler(filename, fileContents);
+    for (const handler of SOURCE_HANDLERS) {
+      fileContents = handler(fileContents);
     }
 
     return fileContents;
-  }
-
-  /**
-   * Set extra transpiler options
-   * @privates
-   */
-  static setExtraOptions(opts: CompilerOptions): void {
-    this.#optionsExtra = { ...this.#optionsExtra ?? {}, ...opts };
-  }
-
-  /**
-   * Get loaded compiler options
-   */
-  static get compilerOptions(): CompilerOptions {
-    let o: CompilerOptions = {};
-    if (this.#optionsExtra) {
-      o = this.#optionsExtra;
-    }
-    if (!this.#options) {
-      const opts = o ?? {};
-      const rootDir = opts.rootDir ?? PathUtil.cwd;
-      const ts = requireTs();
-      const projTsconfig = PathUtil.resolveUnix('tsconfig.json');
-      const baseTsconfig = PathUtil.resolveUnix(__dirname, '..', '..', 'tsconfig.trv.json');
-      // Fallback to base tsconfig if not found in local folder
-      const config = FsUtil.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;
-
-      this.#options = {
-        ...this.#readTsConfigOptions(config),
-        target: ts.ScriptTarget[TS_TARGET],
-        rootDir,
-        outDir: rootDir,
-        sourceRoot: rootDir,
-        ...(o ?? {})
-      };
-    }
-    return this.#options;
   }
 
   /**
@@ -250,7 +225,7 @@ export class TranspileUtil {
   /**
    * Handle transpilation errors
    */
-  static transpileError(tsf: string, err: Error): string {
+  static handleTranspileError(tsf: string, err: Error): string {
     if (EnvUtil.isDynamic() && !tsf.startsWith(Host.PATH.test)) {
       console.trace(`Unable to transpile ${tsf}: stubbing out with error proxy.`, err.message);
       return this.getErrorModuleSource(err.message);
@@ -264,19 +239,19 @@ export class TranspileUtil {
    * @param tsf file to transpile
    * @returns
    */
-  static simpleTranspile(tsf: string): string {
+  static simpleTranspile(tsf: string, options: TypescriptCompilerOptions): string {
     try {
       const diags: tsi.Diagnostic[] = [];
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const ts = require('typescript') as typeof tsi;
-      const ret = ts.transpile(this.preProcess(tsf), this.compilerOptions, tsf, diags);
+      const ts = requireTs();
+      const ret = ts.transpile(this.preProcess(tsf), options, tsf, diags);
       this.checkTranspileErrors(tsf, diags);
       return ret;
     } catch (err: unknown) {
       if (!(err instanceof Error)) {
         throw err;
       }
-      return this.transpileError(tsf, err);
+      return this.handleTranspileError(tsf, err);
     }
   }
 

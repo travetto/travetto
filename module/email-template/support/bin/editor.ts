@@ -1,6 +1,6 @@
 import { TemplateUtil } from './util';
 import { SendUtil } from './send';
-import { ConfigUtil } from './config';
+import { EditorConfig } from './config';
 
 import { CompileUtil } from '../../src/util';
 
@@ -19,15 +19,15 @@ type OutboundMessage =
 /**
  * Utils for interacting with editors
  */
-export class EditorUtil {
-  static LAST_FILE = '';
+class $EditorState {
+  #lastFile = '';
 
-  static async renderFile(file: string): Promise<void> {
-    file = CompileUtil.TPL_EXT.test(file) ? file : this.LAST_FILE;
+  async renderFile(file: string): Promise<void> {
+    file = CompileUtil.TPL_EXT.test(file) ? file : this.#lastFile;
     if (file) {
       try {
         const content = await TemplateUtil.resolveCompiledTemplate(
-          file, await ConfigUtil.getContext()
+          file, await EditorConfig.getContext()
         );
         this.response({
           type: 'changed',
@@ -44,53 +44,62 @@ export class EditorUtil {
     }
   }
 
-  static response(response: OutboundMessage): void {
+  response(response: OutboundMessage): void {
     if (process.send) {
       process.send(response);
+    }
+  }
+
+  async #onConfigure(msg: InboundMessage & { type: 'configure' }): Promise<void> {
+    this.response({ type: 'configured', file: await EditorConfig.ensureConfig() });
+  }
+
+  async #onRedraw(msg: InboundMessage & { type: 'redraw' }): Promise<void> {
+    try {
+      await CompileUtil.compileToDisk(msg.file);
+    } catch (err) {
+      if (err && err instanceof Error) {
+        this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
+      } else {
+        console.error(err);
+      }
+    }
+    await this.renderFile(msg.file);
+  }
+
+  async #onSend(msg: InboundMessage & { type: 'send' }): Promise<void> {
+    const cfg = await EditorConfig.get();
+    const to = msg.to || cfg.to;
+    const from = msg.from || cfg.from;
+    try {
+      await SendUtil.sendEmail(msg.file, from, to, await EditorConfig.getContext());
+      this.response({ type: 'sent', to, file: msg.file });
+    } catch (err) {
+      if (err && err instanceof Error) {
+        this.response({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
+      } else {
+        console.error(err);
+      }
     }
   }
 
   /**
    * Initialize context, and listeners
    */
-  static async init(): Promise<void> {
+  async init(): Promise<void> {
     const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
 
     TemplateUtil.watchCompile(f => this.renderFile(f));
 
-    process.on('message', async (msg: InboundMessage) => {
+    process.on('message', (msg: InboundMessage) => {
       switch (msg.type) {
-        case 'configure': return this.response({ type: 'configured', file: await ConfigUtil.ensureConfig() });
-        case 'redraw': {
-          try {
-            await CompileUtil.compileToDisk(msg.file);
-          } catch (err) {
-            if (err && err instanceof Error) {
-              this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
-            } else {
-              console.error(err);
-            }
-          }
-          return this.renderFile(msg.file);
-        }
-        case 'send': {
-          const cfg = await ConfigUtil.get();
-          const to = msg.to || cfg.to;
-          const from = msg.from || cfg.from;
-          try {
-            await SendUtil.sendEmail(msg.file, from, to, await ConfigUtil.getContext());
-            this.response({ type: 'sent', to, file: msg.file });
-          } catch (err) {
-            if (err && err instanceof Error) {
-              this.response({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
-            } else {
-              console.error(err);
-            }
-          }
-          break;
-        }
+        case 'configure': this.#onConfigure(msg); break;
+        case 'redraw': this.#onRedraw(msg); break;
+        case 'send': this.#onSend(msg); break;
       }
     });
   }
 }
+
+export const EditorState = new $EditorState();

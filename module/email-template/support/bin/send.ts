@@ -3,7 +3,7 @@ import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
 import type { MailService } from '@travetto/email/src/service';
 
 import { CompileUtil } from '../../src/util';
-import { ConfigUtil } from './config';
+import { EditorConfig } from './config';
 
 /**
  * Util for sending emails
@@ -22,7 +22,7 @@ export class SendUtil {
       const { MailTransportTarget } = await import('@travetto/email/src/internal/types');
       const { DependencyRegistry } = await import('@travetto/di');
 
-      const senderConfig = await ConfigUtil.getSenderConfig();
+      const senderConfig = await EditorConfig.getSenderConfig();
 
       if (senderConfig) {
         const cls = class { };
@@ -39,7 +39,7 @@ export class SendUtil {
 Please configure your email setup and/or credentials for testing. In the file \`email/dev.yml\`, you can specify \`sender\` configuration.
 Email sending will not work until the above is fixed. A sample configuration would look like:     
 
-${ConfigUtil.getDefaultConfig()}`.trim();
+${EditorConfig.getDefaultConfig()}`.trim();
         console.error(errorMessage);
         throw new Error(errorMessage);
       }
@@ -67,7 +67,7 @@ ${ConfigUtil.getDefaultConfig()}`.trim();
       const info = await svc.sendCompiled<SMTPTransport.SentMessageInfo>(key, { to, context, from });
       console.log('Sent email', { to });
 
-      const senderConfig = await ConfigUtil.getSenderConfig();
+      const senderConfig = await EditorConfig.getSenderConfig();
       return senderConfig.host?.includes('ethereal') ? {
         url: (await import('nodemailer')).getTestMessageUrl(info)
       } : {};

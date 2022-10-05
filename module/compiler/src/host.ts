@@ -6,6 +6,7 @@ import { Host, PathUtil } from '@travetto/boot';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
+import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { AppManifest } from '@travetto/base';
 
@@ -30,7 +31,7 @@ export class SourceHost implements ts.CompilerHost {
   getNewLine: () => string = () => ts.sys.newLine;
   useCaseSensitiveFileNames: () => boolean = () => ts.sys.useCaseSensitiveFileNames;
   getDefaultLibLocation(): string {
-    return path.dirname(ts.getDefaultLibFilePath(TranspileUtil.compilerOptions));
+    return path.dirname(ts.getDefaultLibFilePath(TranspileManager.compilerOptions));
   }
 
   /**
@@ -86,7 +87,7 @@ export class SourceHost implements ts.CompilerHost {
       const content = this.readFile(filename)!;
       this.#sources.set(filename, ts.createSourceFile(filename, content ?? '',
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        (TranspileUtil.compilerOptions as ts.CompilerOptions).target!
+        (TranspileManager.compilerOptions as ts.CompilerOptions).target!
       ));
     }
     return this.#sources.get(filename)!;
