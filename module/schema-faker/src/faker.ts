@@ -21,7 +21,7 @@ export class SchemaFaker {
    * Mapping of field types to faker utils
    */
   static #namesToType = {
-    string: new Map([
+    string: new Map<RegExp, () => string>([
       [/^(image|img).*url$/, faker.image.imageUrl],
       [/^url$/, faker.internet.url],
       [/^email(addr(ress)?)?$/, faker.internet.email],

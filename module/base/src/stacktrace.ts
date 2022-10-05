@@ -4,16 +4,15 @@ import { AppManifest } from './manifest';
 /**
  * General tools for manipulating stack traces.
  */
-export class StacktraceUtil {
+export class $StacktraceManager {
 
-  static #filters: string[] = [];
-
-  static #filterRegex: RegExp = /./g;
+  #filters: string[] = [];
+  #filterRegex: RegExp = /./g;
 
   /**
    * Initialize
    */
-  static init(): void {
+  init(): void {
     this.addStackFilters(
       '@travetto/(?:watch|context)',
       'src/stacktrace',
@@ -36,7 +35,7 @@ export class StacktraceUtil {
    * Add a filter to hide certain stack frames
    * @param names List files to exclude from the stack traces
    */
-  static addStackFilters(...names: string[]): void {
+  addStackFilters(...names: string[]): void {
     if (this.#filters) {
       this.#filters.push(...names);
       this.#filterRegex = new RegExp(`(${this.#filters.join('|')})`);
@@ -46,7 +45,7 @@ export class StacktraceUtil {
   /**
    * Unset all filters
    */
-  static clearStackFilters(): void {
+  clearStackFilters(): void {
     this.#filters = [];
     this.#filterRegex = /##/;
   }
@@ -56,7 +55,7 @@ export class StacktraceUtil {
    * @param err The error to filter
    * @param filter Should the stack be filtered
    */
-  static simplifyStack(err: Error | string, filter = true): string {
+  simplifyStack(err: Error | string, filter = true): string {
     let lastLocation: string = '';
     const body = (typeof err === 'string' ? err : err.stack!).replace(/\\/g, '/').split('\n')
       .filter(x => !filter || !this.#filters.length || !this.#filterRegex.test(x)) // Exclude framework boilerplate
@@ -85,3 +84,5 @@ export class StacktraceUtil {
     }
   }
 }
+
+export const StacktraceManager = new $StacktraceManager();

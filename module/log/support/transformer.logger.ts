@@ -79,7 +79,7 @@ export class LoggerTransformer {
     return state.factory.updateCallExpression(node, node.expression, node.typeArguments, [
       state.factory.createStringLiteral(level),
       LiteralUtil.fromLiteral(state.factory, {
-        file: state.getFilenameAsSrc(),
+        file: state.getFilename(),
         line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
         scope: state.scope?.map(x => x.name).join(':'),
       }),

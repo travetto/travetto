@@ -12,18 +12,18 @@ type LoadHandler<T = unknown> = (name: string, o: T) => T;
 /**
  * Dynamic module loader. Hooks into module loading/compiling, and transpiles on demand
  */
-export class DynamicLoader {
-  static #moduleResolveFilename = Module._resolveFilename.bind(Module);
-  static #moduleLoad = Module._load.bind(Module);
-  static #resolveFilename?: (filename: string) => string;
-  static #initialized = false;
-  static #unloadHandlers: UnloadHandler[] = [];
-  static #loadHandlers: LoadHandler[] = [];
+export class $DynamicLoader {
+  #moduleResolveFilename = Module._resolveFilename.bind(Module);
+  #moduleLoad = Module._load.bind(Module);
+  #resolveFilename?: (filename: string) => string;
+  #initialized = false;
+  #unloadHandlers: UnloadHandler[] = [];
+  #loadHandlers: LoadHandler[] = [];
 
   /**
    * Check for module cycles
    */
-  static #checkForCycles(mod: unknown, request: string, parent: NodeJS.Module): void {
+  #checkForCycles(mod: unknown, request: string, parent: NodeJS.Module): void {
     if (parent && !parent.loaded) { // Standard ts compiler output
       const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
       if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
@@ -44,7 +44,7 @@ export class DynamicLoader {
    * @param request path to file
    * @param parent parent Module
    */
-  static #onModuleLoad(request: string, parent: NodeJS.Module): unknown {
+  #onModuleLoad(request: string, parent: NodeJS.Module): unknown {
     let mod: unknown;
     try {
       mod = this.#moduleLoad.apply(null, [request, parent]);
@@ -71,7 +71,7 @@ export class DynamicLoader {
    * Set filename resolver
    * @private
    */
-  static setFilenameResolver(fn: (filename: string) => string): void {
+  setFilenameResolver(fn: (filename: string) => string): void {
     this.#resolveFilename = fn;
   }
 
@@ -79,7 +79,7 @@ export class DynamicLoader {
    * Listen for when files are unloaded
    * @param handler
    */
-  static onUnload(handler: UnloadHandler): void {
+  onUnload(handler: UnloadHandler): void {
     this.#unloadHandlers.push(handler);
   }
 
@@ -88,7 +88,7 @@ export class DynamicLoader {
    *
    * @param handler The code to run on post module load
    */
-  static onLoad(handler: LoadHandler): void {
+  onLoad(handler: LoadHandler): void {
     this.#loadHandlers.push(handler);
   }
 
@@ -96,7 +96,7 @@ export class DynamicLoader {
    * Clear all unload handlers
    * @private
    */
-  static clearHandlers(): void {
+  clearHandlers(): void {
     this.#loadHandlers = [];
     this.#unloadHandlers = [];
   }
@@ -104,7 +104,7 @@ export class DynamicLoader {
   /**
    * Enable compile support
    */
-  static init(): void {
+  init(): void {
     if (this.#initialized) {
       return;
     }
@@ -123,7 +123,7 @@ export class DynamicLoader {
   /**
    * Remove file from require.cache, and possible the file system
    */
-  static unload(filename: string, unlink = false): true | undefined {
+  unload(filename: string, unlink = false): true | undefined {
     const native = PathUtil.toNative(filename);
     for (const el of this.#unloadHandlers) {
       el(filename, unlink);
@@ -137,7 +137,7 @@ export class DynamicLoader {
   /**
    * Turn off compile support
    */
-  static reset(): void {
+  reset(): void {
     if (!this.#initialized) {
       return;
     }
@@ -156,3 +156,5 @@ export class DynamicLoader {
     }
   }
 }
+
+export const DynamicLoader = new $DynamicLoader();

@@ -3,14 +3,14 @@ import { ExecUtil } from '@travetto/boot';
 
 import { ApplicationConfig } from '../src/types';
 
-import { AppListUtil } from './bin/list';
+import { AppListLoader } from './bin/list';
 
 /**
  * Entry point when run directly
  */
 export async function main(): Promise<ApplicationConfig[]> {
   EnvInit.init();
-  return AppListUtil.getList()
+  return AppListLoader.getList()
     .then(l => l ?? [])
     .then(ExecUtil.mainResponse, ExecUtil.mainResponse);
 }

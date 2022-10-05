@@ -10,6 +10,17 @@ class $PendingRegister {
   ordered: [string, Class[]][] = [];
 
   /**
+   * Initialize the meta data for a function
+   * @param function Function
+   * @param `ᚕfile` Filename
+   */
+  initFunctionMeta(fn: Function, file: string): boolean {
+    fn.ᚕfile = TranspileUtil.toUnixSource(file);
+    fn.ᚕfileRaw = file;
+    return true;
+  }
+
+  /**
    * Initialize the meta data for the cls
    * @param cls Class
    * @param `ᚕfile` Filename
@@ -76,3 +87,4 @@ export function Register() {
 }
 
 Register.initMeta = PendingRegister.initMeta;
+Register.initFunctionMeta = PendingRegister.initFunctionMeta;

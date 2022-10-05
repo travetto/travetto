@@ -9,14 +9,18 @@ import type { ApplicationConfig } from '../../src/types';
 /**
  * Utilities to fetch list of applications
  */
-export class AppListUtil {
+export class $AppListLoader {
 
-  static #cacheConfig = 'app-cache.json';
+  #cacheConfig: string;
+
+  constructor(cacheConfig: string) {
+    this.#cacheConfig = cacheConfig;
+  }
 
   /**
    * Read list
    */
-  static async #readList(): Promise<ApplicationConfig[] | undefined> {
+  async #readList(): Promise<ApplicationConfig[] | undefined> {
     if (AppCache.hasEntry(this.#cacheConfig)) {
       return JSON.parse(AppCache.readEntry(this.#cacheConfig));
     }
@@ -26,7 +30,7 @@ export class AppListUtil {
    * Store list of cached items
    * @param items
    */
-  static #storeList(items: ApplicationConfig[]): void {
+  #storeList(items: ApplicationConfig[]): void {
     const toStore = items.map(x => ({ ...x, target: undefined }));
     AppCache.writeEntry(this.#cacheConfig, JSON.stringify(toStore));
   }
@@ -34,7 +38,7 @@ export class AppListUtil {
   /**
    * Request list of applications
    */
-  static async #verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
+  async #verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
     try {
       for (const el of items) {
         const elStat = (await fs.lstat(el.filename).catch(() => { delete el.generatedTime; }));
@@ -53,7 +57,7 @@ export class AppListUtil {
   /**
    * Compile code, and look for `@Application` annotations
    */
-  static async buildList(): Promise<ApplicationConfig[]> {
+  async buildList(): Promise<ApplicationConfig[]> {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Collecting', () =>
         ModuleExec.workerMain<ApplicationConfig[]>(require.resolve('../main.list-build')).message
@@ -71,14 +75,14 @@ export class AppListUtil {
    * Find application by given name
    * @param name
    */
-  static async findByName(name: string): Promise<ApplicationConfig | undefined> {
+  async findByName(name: string): Promise<ApplicationConfig | undefined> {
     return (await this.getList())?.find(x => x.name === name);
   }
 
   /**
    * Request list of applications
    */
-  static async getList(): Promise<ApplicationConfig[] | undefined> {
+  async getList(): Promise<ApplicationConfig[] | undefined> {
     let items: ApplicationConfig[] | undefined;
     if (!(items = await this.#readList())) { // no list
       items = await this.buildList();
@@ -101,3 +105,5 @@ export class AppListUtil {
     return items;
   }
 }
+
+export const AppListLoader = new $AppListLoader('app-cache.json');

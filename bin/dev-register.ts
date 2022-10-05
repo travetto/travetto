@@ -4,7 +4,7 @@ import { readPackage } from '../module/boot/src/internal/package';
 import { Package } from '../module/boot/src/main-package';
 import { PathUtil } from '../module/boot/src/path';
 import { DynamicLoader } from '../module/boot/src/internal/dynamic-loader';
-import { TranspileUtil } from '../module/boot/src/internal/transpile-util';
+import { TranspileManager } from '../module/boot/src/internal/transpile';
 import { SystemUtil } from '../module/boot/src/internal/system';
 import { TranspileCache } from '../module/boot/src/internal/transpile-cache';
 import { ModuleUtil } from '../module/boot/src/internal/module-util';
@@ -16,13 +16,13 @@ type DevConfig = {
 
 class DevRegister {
 
-  static #trvMod = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
-  static #defaultMods = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc']);
+  #trvMod = /(@travetto\/[^= ,]+)(\s*=[^,]+)?(,)?/g;
+  #defaultMods = new Set(['@travetto/test', '@travetto/cli', '@travetto/doc']);
 
   /**
    * Resolve filename for dev mode
    */
-  static resolveFilename(p: string): string {
+  resolveFilename(p: string): string {
     if (p.includes('@travetto')) {
       const [, key, sub] = p.match(/^.*(@travetto\/[^/]+)(\/?.*)?$/) ?? [];
       const match = ModuleUtil.getDynamicModules()[key!];
@@ -38,7 +38,7 @@ class DevRegister {
   }
 
   /** Gather all dependencies of the module */
-  static readDeps(givenMods: Iterable<string>): DevConfig {
+  readDeps(givenMods: Iterable<string>): DevConfig {
     const keys = [
       ...givenMods, // Givens
       ...Object.keys(Package.dependencies || {}),
@@ -70,19 +70,19 @@ class DevRegister {
     };
   }
 
-  static getMods(envMods: string): Set<string> {
+  getMods(envMods: string): Set<string> {
     const mods = new Set(this.#defaultMods);
     envMods.replace(this.#trvMod, (_, m) => mods.add(m) && '');
     return mods;
   }
 
-  static getContent(envMods: string): string {
+  getContent(envMods: string): string {
     return AppCache.getOrSet('isolated-modules.json',
       () => JSON.stringify(this.readDeps(this.getMods(envMods)), null, 2)
     );
   }
 
-  static run(): void {
+  run(): void {
     const envMods = process.env.TRV_MODULES || '';
     if (envMods && !process.env.TRV_CACHE) { // Is specifying modules, build out
       const uniqueId = SystemUtil.naiveHash(process.env.TRV_MODULES || '');
@@ -99,7 +99,7 @@ class DevRegister {
 
     // Override compiler options
     const key = '@travetto/*';
-    TranspileUtil.setExtraOptions({
+    TranspileManager.setExtraOptions({
       rootDir: process.env.TRV_DEV_ROOT!,
       paths: { [key]: [ModuleUtil.resolveFrameworkPath(key)] }
     });
@@ -111,4 +111,4 @@ class DevRegister {
   }
 }
 
-DevRegister.run();
+new DevRegister().run();

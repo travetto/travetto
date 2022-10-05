@@ -1,5 +1,4 @@
 import { EventEmitter } from 'events';
-import * as sourceMapSupport from 'source-map-support';
 import * as ts from 'typescript';
 
 import { PathUtil } from '@travetto/boot';
@@ -45,7 +44,7 @@ class $Compiler {
       }
       this.#program = ts.createProgram({
         rootNames: [...rootFiles],
-        options: TranspileUtil.compilerOptions,
+        options: TranspileManager.compilerOptions,
         host: this.#host,
         oldProgram: this.#program
       });
@@ -77,7 +76,7 @@ class $Compiler {
         if (!(err instanceof Error)) {
           throw err;
         }
-        const errContent = TranspileUtil.transpileError(filename, err);
+        const errContent = TranspileUtil.handleTranspileError(filename, err);
         this.#host.contents.set(filename, errContent);
       }
       // Save writing for typescript program (`writeFile`)
@@ -110,13 +109,8 @@ class $Compiler {
     await this.#transformerManager.init();
     // Enhance transpilation, with custom transformations
     TranspileManager.setTranspiler(tsf => this.#transpile(tsf));
-
+    TranspileManager.setSourceMapSource(tsf => this.#host.contents.get(tsf)!);
     DynamicLoader.onUnload((f, unlink) => this.#host.unload(f, unlink)); // Remove source
-
-    // Update source map support to read from transpiler cache
-    sourceMapSupport.install({
-      retrieveFile: p => this.#host.contents.get(TranspileUtil.toUnixSource(p))!
-    });
 
     console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
   }

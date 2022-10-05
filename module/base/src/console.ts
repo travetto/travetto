@@ -1,3 +1,4 @@
+import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 import { AppManifest } from './manifest';
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
@@ -79,6 +80,9 @@ class $ConsoleManager {
     if (this.#exclude.has(level)) {
       return; // Do nothing
     }
+
+    // Ensure __filename is translated
+    ctx.file = TranspileUtil.toUnixSource(ctx.file);
 
     return this.#appender.onLog(level, ctx, args);
   }

@@ -66,7 +66,7 @@ export class RegisterTransformer {
       [],
       [
         state.createIdentifier(name),
-        state.factory.createIdentifier('__filename'),
+        state.getFilename(),
         state.fromLiteral(state[cls]!),
         state.extendObjectLiteral(state[methods] || {}),
         state.fromLiteral(CoreUtil.isAbstract(node)),
@@ -102,13 +102,17 @@ export class RegisterTransformer {
 
     if (node.name && /^[A-Z]/.test(node.name.escapedText.toString())) {
       // If we have a class like function
+      const ident = state.importDecorator(REGISTER_MOD, 'Register')!;
+      const meta = state.factory.createCallExpression(
+        state.createAccess(ident, 'initFunctionMeta'),
+        [],
+        [
+          state.createIdentifier(node.name),
+          state.getFilename()
+        ]
+      );
       state.addStatement(
-        state.factory.createExpressionStatement(
-          state.factory.createAssignment(
-            state.createAccess(node.name, 'ᚕfile'),
-            state.getFilenameAsSrc()
-          )
-        )
+        state.factory.createExpressionStatement(meta)
       );
     }
     return node;

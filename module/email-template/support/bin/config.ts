@@ -21,36 +21,39 @@ interface ConfigType {
 /**
  * Configuration utils
  */
-export class ConfigUtil {
+export class $EditorConfig {
 
-  static #configFile = PathUtil.resolveUnix('resources/email/dev.yml');
-  static #defaultConfig = fs.readFile(PathUtil.resolveUnix(__dirname, 'default-dev.yml'), 'utf8');
+  #configFile = PathUtil.resolveUnix('resources/email/dev.yml');
+  #defaultConfig = fs.readFile(PathUtil.resolveUnix(__dirname, 'default-dev.yml'), 'utf8');
 
   /**
    *
    */
-  static async get(): Promise<ConfigType> {
-    return fs.readFile(this.#configFile, 'utf8')
-      .then((f: string) => YamlUtil.parse<ConfigType>(f))
+  async get(): Promise<ConfigType> {
+    try {
+      const content = await fs.readFile(this.#configFile, 'utf8');
+      return YamlUtil.parse<ConfigType>(content);
+    } catch {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      .catch(() => ({} as ConfigType));
+      return {} as ConfigType;
+    }
   }
 
-  static async getContext(): Promise<Exclude<ConfigType['context'], undefined>> {
+  async getContext(): Promise<Exclude<ConfigType['context'], undefined>> {
     const conf = await this.get();
     return conf.context ?? {};
   }
 
-  static async getSenderConfig(): Promise<Exclude<ConfigType['sender'], undefined>> {
+  async getSenderConfig(): Promise<Exclude<ConfigType['sender'], undefined>> {
     const conf = await this.get();
     return conf.sender ?? {};
   }
 
-  static getDefaultConfig(): Promise<string> {
+  getDefaultConfig(): Promise<string> {
     return this.#defaultConfig;
   }
 
-  static async ensureConfig(): Promise<string> {
+  async ensureConfig(): Promise<string> {
     const file = this.#configFile;
     if (!(await FsUtil.exists(file))) {
       await fs.mkdir(path.dirname(file), { recursive: true });
@@ -59,3 +62,5 @@ export class ConfigUtil {
     return file;
   }
 }
+
+export const EditorConfig = new $EditorConfig();

@@ -4,7 +4,7 @@ import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 import { EnvInit } from '@travetto/base/support/bin/init';
 import { CliUtil, EnvUtil, PathUtil } from '@travetto/boot';
 
-import { AppListUtil } from './bin/list';
+import { AppListLoader } from './bin/list';
 import { AppRunUtil } from './bin/run';
 import { HelpUtil } from './bin/help';
 
@@ -33,7 +33,7 @@ export class AppRunCommand extends CliCommand<Options> {
       '',
       CliUtil.color`${{ title: 'Available Applications:' }}`,
       '',
-      HelpUtil.generateAppHelpList(await AppListUtil.getList()),
+      HelpUtil.generateAppHelpList(await AppListLoader.getList()),
       ''
     ].join('\n');
   }
@@ -67,7 +67,7 @@ export class AppRunCommand extends CliCommand<Options> {
   async action(app: string, args: string[]): Promise<void> {
     try {
       // Find app
-      const selected = await AppListUtil.findByName(app);
+      const selected = await AppListLoader.findByName(app);
 
       // If app not found
       if (!selected) {
@@ -82,7 +82,7 @@ export class AppRunCommand extends CliCommand<Options> {
           if (!err || !(err instanceof Error)) {
             throw err;
           }
-          const { StacktraceUtil } = await import('@travetto/base');
+          const { StacktraceUtil: StacktraceManager } = await import('@travetto/base');
           console.error(CliUtil.color`${{ failure: 'Failed to run' }} ${{ title: selected.name }}, ${err.message.replace(/via=.*$/, '')}`);
           if (hasChildren(err)) {
             console.error(err.errors.map((x: { message: string }) => CliUtil.color`● ${{ output: x.message }}`).join('\n'));
@@ -100,7 +100,7 @@ export class AppRunCommand extends CliCommand<Options> {
       if (!outerErr || !(outerErr instanceof Error)) {
         throw outerErr;
       }
-      await this.showHelp(outerErr, `\nUsage: ${HelpUtil.getAppUsage((await AppListUtil.findByName(app))!)}`);
+      await this.showHelp(outerErr, `\nUsage: ${HelpUtil.getAppUsage((await AppListLoader.findByName(app))!)}`);
     }
   }
 
@@ -116,7 +116,7 @@ export class AppRunCommand extends CliCommand<Options> {
    * Tab completion support
    */
   override async complete(): Promise<Record<string, string[]>> {
-    const apps = await AppListUtil.getList() || [];
+    const apps = await AppListLoader.getList() || [];
 
     const profiles = (await fs.readdir(PathUtil.cwd))
       .filter(x => /[.]ya?ml/.test(x))

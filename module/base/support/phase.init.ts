@@ -1,5 +1,5 @@
 import { ShutdownManager } from '../src/shutdown';
-import { StacktraceUtil } from '../src/stacktrace';
+import { StacktraceManager } from '../src/stacktrace';
 
 /**
  * Registers stack trace handler for non-prod
@@ -8,7 +8,7 @@ import { StacktraceUtil } from '../src/stacktrace';
 export const step = {
   key: '@trv:base/init',
   action: (): void => {
-    StacktraceUtil.init();
+    StacktraceManager.init();
     ShutdownManager.register();
   }
 };

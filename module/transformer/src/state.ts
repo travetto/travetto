@@ -211,12 +211,10 @@ export class TransformerState implements State {
   }
 
   /**
-   * Get Filename as ᚕsrc
+   * Get Filename as source file
    */
-  getFilenameAsSrc(): ts.CallExpression {
-    const ident = this.factory.createIdentifier('ᚕsrc');
-    ident.getSourceFile = (): ts.SourceFile => this.source;
-    return this.factory.createCallExpression(ident, [], [this.createIdentifier('__filename')]);
+  getFilename(): ts.Identifier {
+    return this.createIdentifier('__filename');
   }
 
   /**

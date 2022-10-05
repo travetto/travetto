@@ -2,6 +2,7 @@ import * as assert from 'assert';
 
 import { PathUtil } from '@travetto/boot';
 import { Util, AppError, ClassInstance, Class } from '@travetto/base';
+import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
 import { AssertCapture, CaptureAssert } from './capture';
@@ -30,6 +31,8 @@ export class AssertCheck {
    * @param args The arguments passed in
    */
   static check(assertion: CaptureAssert, positive: boolean, ...args: unknown[]): void {
+    assertion.file = TranspileUtil.toUnixSource(assertion.file);
+
     let fn = assertion.operator;
     assertion.operator = ASSERT_FN_OPERATOR[fn];
 
@@ -225,6 +228,8 @@ export class AssertCheck {
   ): void {
     let missed: Error | undefined;
 
+    assertion.file = TranspileUtil.toUnixSource(assertion.file);
+
     try {
       action();
       if (!positive) {
@@ -256,6 +261,8 @@ export class AssertCheck {
     message?: string
   ): Promise<void> {
     let missed: Error | undefined;
+
+    assertion.file = TranspileUtil.toUnixSource(assertion.file);
 
     try {
       if ('then' in action) {
