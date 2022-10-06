@@ -72,7 +72,7 @@ class $ParamExtractor {
    * @param req The request
    * @param res The response
    */
-  extractParams(route: EndpointConfig, req: Request, res: Response): unknown[] {
+  extract(route: EndpointConfig, req: Request, res: Response): unknown[] {
     const cls = route.class;
     const method = route.handlerName;
     const routed = route.params.map(c => (c.extract ?? this.defaultExtractors[c.location])(c, req, res));

@@ -11,7 +11,7 @@ export class ConsoleManagerTest {
     ConsoleManager.set({
       onLog: (level, ctx, args) => logs.push({ level, ctx, args })
     });
-    ᚕlog('info', {}, 'a', 'b', 'c');
+    ᚕlog('info', { file: '', line: 0 }, 'a', 'b', 'c');
     assert(logs.length === 1);
     assert.deepStrictEqual(logs[0].args, ['a', 'b', 'c']);
   }
