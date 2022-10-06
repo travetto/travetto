@@ -8,7 +8,7 @@ import { StacktraceManager } from '../src/stacktrace';
 export const step = {
   key: '@trv:base/init',
   action: (): void => {
-    StacktraceManager.init();
+    StacktraceManager.register();
     ShutdownManager.register();
   }
 };

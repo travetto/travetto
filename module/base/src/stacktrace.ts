@@ -1,5 +1,4 @@
-import { PathUtil } from '@travetto/boot';
-import { AppManifest } from './manifest';
+import { EnvUtil, PathUtil } from '@travetto/boot';
 
 /**
  * General tools for manipulating stack traces.
@@ -9,14 +8,10 @@ export class $StacktraceManager {
   #filters: string[] = [];
   #filterRegex: RegExp = /./g;
 
-  /**
-   * Initialize
-   */
-  init(): void {
-    this.addStackFilters(
+  constructor() {
+    const names = [
       '@travetto/(?:watch|context)',
       'src/stacktrace',
-      '(?:boot|base|[.])/bin/(?:main|register)[.]js',
       'internal',
       '(?:Array.*?<anonymous>)',
       'async_hooks',
@@ -24,30 +19,26 @@ export class $StacktraceManager {
       'typescript',
       'tslib',
       'source-map-support[.]js'
-    );
-
-    if (!AppManifest.prod) {
-      Error.stackTraceLimit = 50;
-    }
+    ];
+    this.#filters.push(...names);
+    this.#filterRegex = new RegExp(`(${this.#filters.join('|')})`);
   }
 
   /**
-   * Add a filter to hide certain stack frames
-   * @param names List files to exclude from the stack traces
+   * Connect into Error toJSON and set stacktrace limit
    */
-  addStackFilters(...names: string[]): void {
-    if (this.#filters) {
-      this.#filters.push(...names);
-      this.#filterRegex = new RegExp(`(${this.#filters.join('|')})`);
-    }
-  }
-
-  /**
-   * Unset all filters
-   */
-  clearStackFilters(): void {
-    this.#filters = [];
-    this.#filterRegex = /##/;
+  register(): void {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const mgr = this;
+    Error.prototype.toJSON = function (this: Error, extra?: Record<string, unknown>): unknown {
+      const stack = mgr.simplifyStack(this);
+      return {
+        message: this.message,
+        ...extra,
+        stack: stack.substring(stack.indexOf('\n') + 1)
+      };
+    };
+    Error.stackTraceLimit = EnvUtil.isProd() ? 20 : 50;
   }
 
   /**
