@@ -1,5 +1,4 @@
-import { Primitive as Prim } from '@travetto/base/src/internal/types';
-import { TimeSpan } from '@travetto/base/src/util';
+import { TimeSpan, Primitive } from '@travetto/base';
 
 /**
  * Point as [number,number] with validation and binding support
@@ -8,13 +7,13 @@ import { TimeSpan } from '@travetto/base/src/util';
  */
 export type Point = [number, number];
 
-export type Primitive = Prim | Point;
-export type PrimitiveArray = Primitive[];
+export type QueryPrimitive = Primitive | Point;
+export type QueryPrimitiveArray = QueryPrimitive[];
 export type DistanceUnit = 'mi' | 'm' | 'km' | 'ft' | 'rad';
 
 export type ValidFieldNames<T> = {
   [K in keyof T]:
-  (T[K] extends (Primitive | undefined) ? K :
+  (T[K] extends (QueryPrimitive | undefined) ? K :
     (T[K] extends (Function | undefined) ? never :
       K))
 }[keyof T];

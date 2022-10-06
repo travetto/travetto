@@ -114,8 +114,7 @@ export class ColorUtil {
       } else {
         const out = keys.map((el, i) => {
           if (typeof el !== 'string') {
-            // @ts-expect-error
-            const subKeys: (keyof T)[] = Object.keys(el);
+            const subKeys = Object.keys(el);
             if (subKeys.length !== 1) {
               throw new Error('Invalid template variable, one and only one key should be specified');
             }
@@ -140,7 +139,7 @@ export class ColorUtil {
     // Common color support
     // @ts-expect-error
     const palette: ColorPalette<T> = Object.fromEntries(
-      Object.entries(input)
+      Object.entries<[Color, ...Style[]]>(input)
         .map(([k, [col, ...styles]]) => [k, this.makeColorer(col, ...styles)] as const)
     );
 

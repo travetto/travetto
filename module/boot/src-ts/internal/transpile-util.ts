@@ -17,11 +17,6 @@ type Diag = {
   };
 };
 
-declare global {
-  // eslint-disable-next-line no-var
-  var ts: unknown;
-}
-
 export type TypescriptCompilerOptions = {
   allowJs?: boolean;
   allowSyntheticDefaultImports?: boolean;
@@ -180,14 +175,6 @@ export class TranspileUtil {
    * @param contents The file contents to process
    */
   static preProcess(filename: string, contents?: string): string {
-    // Inject into global space as 'ts', only when applying logic
-    if (!('ts' in global)) {
-      global.ts = new Proxy({}, {
-        // Load on demand, and replace on first use
-        get: (t, prop, r): unknown => (global.ts = require('typescript'))[prop]
-      });
-    }
-
     let fileContents = contents ?? readFileSync(filename, 'utf-8');
 
     for (const handler of SOURCE_HANDLERS) {

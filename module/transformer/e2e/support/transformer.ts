@@ -20,7 +20,6 @@ export class MakeUpper {
 
     return state.factory.updateMethodDeclaration(
       node,
-      [],
       node.modifiers,
       node.asteriskToken,
       node.name,

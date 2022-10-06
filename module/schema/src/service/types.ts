@@ -1,5 +1,4 @@
-import { Class } from '@travetto/base';
-import { Primitive } from '@travetto/base/src/internal/types';
+import { Primitive, Class } from '@travetto/base';
 
 import { AllViewⲐ } from '../internal/types';
 import { ValidatorFn } from '../validate/types';

@@ -13,7 +13,6 @@ export class MakeUpper {
     }
     return state.factory.updatePropertyDeclaration(
       node,
-      [],
       node.modifiers,
       node.name.getText().toUpperCase(),
       undefined,
@@ -29,7 +28,6 @@ export class MakeUpper {
     }
     return state.factory.updateClassDeclaration(
       node,
-      [],
       node.modifiers,
       state.createIdentifier(node.name!.getText().toUpperCase()),
       node.typeParameters,
@@ -45,7 +43,6 @@ export class MakeUpper {
     }
     return state.factory.updateMethodDeclaration(
       node,
-      [],
       node.modifiers,
       undefined,
       state.createIdentifier(node.name.getText().toUpperCase()),

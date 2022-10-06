@@ -1,4 +1,5 @@
 import { Class } from '@travetto/base';
+
 import { RestInterceptor } from '../interceptor/types';
 import { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
 
