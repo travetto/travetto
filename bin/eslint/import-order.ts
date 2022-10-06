@@ -1,5 +1,5 @@
 import type * as eslint from 'eslint';
-import { BaseExpression, Expression } from 'estree';
+import { BaseExpression, Expression, ImportDeclaration } from 'estree';
 
 const groupTypeMap = {
   node: ['node', 'travetto', 'local'],
@@ -18,6 +18,15 @@ declare module 'estree' {
   }
 }
 
+function getImportNamespace(dec: ImportDeclaration): string | undefined {
+  const specs = dec.specifiers;
+  if (!specs || specs.length !== 1) {
+    return;
+  }
+  const first = specs[0];
+  return first.type === 'ImportNamespaceSpecifier' ? first.local.name : undefined;
+}
+
 
 export const ImportOrder = {
   create(context: eslint.Rule.RuleContext): { Program: (ast: eslint.AST.Program) => void } {
@@ -34,10 +43,10 @@ export const ImportOrder = {
 
       for (const node of body) {
 
-        let from;
+        let from: string | undefined;
 
         if (node.type === 'ImportDeclaration') {
-          from = node.source?.value;
+          from = node.source?.value as string;
         } else if (node.type === 'VariableDeclaration' && node.kind === 'const') {
           const [decl] = node.declarations;
           let call: Expression | undefined;
@@ -48,12 +57,18 @@ export const ImportOrder = {
             call = decl.init.expression;
           }
           if (call?.type === 'CallExpression' && call.callee.type === 'Identifier' && call.callee.name === 'require' && call.arguments[0].type === 'Literal') {
-            from = call.arguments[0].value;
+            from = call.arguments[0].value as string;
           }
         }
 
         if (!from) {
           continue;
+        }
+
+        if (from === 'typescript') {
+          if (node.type !== 'ImportDeclaration' || getImportNamespace(node) !== 'ts') {
+            context.report({ message: 'All typescript usages must be namespace imports with an alias of \'ts\'', node });
+          }
         }
 
         if (from.endsWith('@travetto/boot/src')) {

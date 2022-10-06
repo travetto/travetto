@@ -30,13 +30,11 @@ export class $StacktraceManager {
   register(): void {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const mgr = this;
-    Error.prototype.toJSON = function (this: Error, extra?: Record<string, unknown>): unknown {
+
+    // TODO: Revisit
+    Error.prototype.resolveStack = function (this: Error): string {
       const stack = mgr.simplifyStack(this);
-      return {
-        message: this.message,
-        ...extra,
-        stack: stack.substring(stack.indexOf('\n') + 1)
-      };
+      return stack.substring(stack.indexOf('\n') + 1);
     };
     Error.stackTraceLimit = EnvUtil.isProd() ? 20 : 50;
   }

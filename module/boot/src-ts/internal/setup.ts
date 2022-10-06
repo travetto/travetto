@@ -1,7 +1,10 @@
 import * as sourceMapSupport from 'source-map-support';
 
 declare global {
-  interface Error { toJSON?(sub?: unknown): unknown }
+  interface Error {
+    toJSON(sub?: unknown): unknown;
+    resolveStack?(text?: string): string;
+  }
   interface Map<K, V> { toJSON(): unknown }
   interface Set<T> { toJSON(): unknown }
   interface ObjectConstructor {
@@ -55,7 +58,7 @@ addFn(Error.prototype, 'toJSON', function (this: Error, extra?: Record<string, u
   return {
     message: this.message,
     ...extra,
-    stack: this.stack
+    stack: this.resolveStack?.() ?? this.stack
   };
 });
 
