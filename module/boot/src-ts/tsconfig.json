@@ -2,6 +2,7 @@
   "extends": "../tsconfig.trv.json",
   "compilerOptions": {
     "declaration": true,
+    "skipLibCheck": true,
     "removeComments": false,
     "outDir": "../src"
   }

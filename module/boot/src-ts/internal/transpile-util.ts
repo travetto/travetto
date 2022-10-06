@@ -1,4 +1,4 @@
-import type * as tsi from 'typescript';
+import type * as ts from 'typescript';
 import { readFileSync } from 'fs';
 
 import { EnvUtil } from '../env';
@@ -6,7 +6,7 @@ import { PathUtil } from '../path';
 import { Host } from '../host';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const requireTs = (): typeof tsi => require('typescript') as typeof tsi;
+const requireTs = (): typeof ts => require('typescript') as typeof ts;
 
 type Diag = {
   start?: number;
@@ -137,11 +137,11 @@ export class TranspileUtil {
    * @returns
    */
   static readTsConfigOptions(path: string): TypescriptCompilerOptions {
-    const ts = requireTs();
-    const { options } = ts.parseJsonSourceFileConfigFileContent(
-      ts.readJsonConfigFile(path, ts.sys.readFile), ts.sys, PathUtil.cwd
+    const tsl = requireTs();
+    const { options } = tsl.parseJsonSourceFileConfigFileContent(
+      tsl.readJsonConfigFile(path, tsl.sys.readFile), tsl.sys, PathUtil.cwd
     );
-    options.target = ts.ScriptTarget[TS_TARGET];
+    options.target = tsl.ScriptTarget[TS_TARGET];
     return options;
   }
 
@@ -192,8 +192,7 @@ export class TranspileUtil {
   static checkTranspileErrors<T extends Diag>(filename: string, diagnostics: readonly T[]): void {
     if (diagnostics && diagnostics.length) {
       const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-        const ts = requireTs();
-        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        const message = requireTs().flattenDiagnosticMessageText(diag.messageText, '\n');
         if (diag.file) {
           const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
           return ` @ ${diag.file.fileName.replace(PathUtil.cwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
@@ -228,10 +227,9 @@ export class TranspileUtil {
    */
   static simpleTranspile(tsf: string, options: TypescriptCompilerOptions): string {
     try {
-      const diags: tsi.Diagnostic[] = [];
+      const diags: ts.Diagnostic[] = [];
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const ts = requireTs();
-      const ret = ts.transpile(this.preProcess(tsf), options, tsf, diags);
+      const ret = requireTs().transpile(this.preProcess(tsf), options, tsf, diags);
       this.checkTranspileErrors(tsf, diags);
       return ret;
     } catch (err: unknown) {

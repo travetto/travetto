@@ -4,10 +4,6 @@ import { ValidationResultError } from '@travetto/schema';
 import { ModelCrudSupport } from './crud';
 import { ModelType, OptionalId } from '../types/model';
 
-declare global {
-  interface Error { toJSON(sub?: unknown): unknown }
-}
-
 /**
  * Bulk operation. Each operation has a single action and payload
  */

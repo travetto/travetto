@@ -1,4 +1,4 @@
-/// <reference path="./src/types.d.ts" />
+/// <reference path="./src/typings.d.ts" />
 
 export * from './src/application/rest';
 export * from './src/application/server';
@@ -12,7 +12,6 @@ export * from './src/registry/controller';
 export * from './src/registry/types';
 export * from './src/response/redirect';
 export * from './src/response/renderable';
-export * from './src/response/error';
 export * from './src/interceptor/body-parse';
 export * from './src/interceptor/cors';
 export * from './src/interceptor/cookies';

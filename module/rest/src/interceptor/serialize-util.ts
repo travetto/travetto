@@ -4,19 +4,18 @@ import { AppError, Util } from '@travetto/base';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { StreamUtil } from '@travetto/boot';
 
-import { HeadersAddedⲐ, SendStreamⲐ, NodeEntityⲐ } from '../internal/symbol';
+import { SendStreamⲐ, NodeEntityⲐ, HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
-import { FilterContext, Response } from '../types';
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const isRenderable = (o: unknown): o is Renderable => !!o && !Util.isPrimitive(o) && 'render' in (o as object);
-// eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const isStream = (o: unknown): o is Readable => !!o && 'pipe' in (o as object) && 'on' in (o as object);
+import { Request, Response } from '../types';
 
 /**
  * Utilities for serializing output
  */
 export class SerializeUtil {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  static isRenderable = (o: unknown): o is Renderable => !!o && !Util.isPrimitive(o) && 'render' in (o as object);
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  static isStream = (o: unknown): o is Readable => !!o && 'pipe' in (o as object) && 'on' in (o as object);
 
   /**
    * Determine the error status for a given error, with special provisions for AppError
@@ -39,50 +38,85 @@ export class SerializeUtil {
   }
 
   /**
-   * Send output to the response
-   * @param output The value to output
+   * Set outbound headers
    */
-  static async sendOutput({ req, res }: FilterContext, output: unknown): Promise<void> {
-    if (res.headersSent) {
-      return;
-    } else if (res[HeadersAddedⲐ]) {
-      for (const [k, v] of Object.entries(res[HeadersAddedⲐ]!)) {
+  static setHeaders(res: Response, headers?: Record<string, string | (() => string)>): void {
+    if (headers) {
+      for (const [k, v] of Object.entries(headers)) {
         res.setHeader(k, typeof v === 'string' ? v : v());
       }
     }
+  }
+
+  /**
+   * Standard json
+   */
+  static serializeJSON(req: Request, res: Response, output: unknown): void {
+    const payload = Util.hasToJSON(output) ? output.toJSON() : output;
+    this.setContentTypeIfUndefined(res, 'application/json');
+    res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
+  }
+
+  /**
+   * Serialize text
+   */
+  static serializeText(res: Response, output: string): void {
+    this.setContentTypeIfUndefined(res, 'text/plain');
+    res.send(output);
+  }
+
+  /**
+   * Serialize buffer
+   */
+  static serializeBuffer(res: Response, output: Buffer): void {
+    this.setContentTypeIfUndefined(res, 'application/octet-stream');
+    res.send(output);
+  }
+
+  /**
+   * Serialize stream
+   */
+  static async serializeStream(res: Response, output: Readable): Promise<void> {
+    this.setContentTypeIfUndefined(res, 'application/octet-stream');
+    return (res[SendStreamⲐ] ? res[SendStreamⲐ](output) : StreamUtil.pipe(output, res[NodeEntityⲐ]));
+  }
+
+  static serializeEmpty(req: Request, res: Response): void {
+    res.status(req.method === 'POST' || req.method === 'PUT' ? 201 : 204);
+    res.send('');
+  }
+
+  /**
+   * Serialize Error
+   * @param res
+   * @param error
+   */
+  static serializeError(res: Response, error: Error): void {
+    const status = this.getErrorStatus(error);
+    res.status(status);
+    res.statusError = error;
+    res.setHeader('Content-Type', 'application/json');
+    res.send(JSON.stringify(error.toJSON({ status })));
+  }
+
+  /**
+   * Determine serialization type based on output
+   */
+  static serializeStandard(req: Request, res: Response, output: unknown): void | Promise<void> {
+    this.setHeaders(res, res[HeadersAddedⲐ]);
 
     if (!output) {
-      res.status(req.method === 'POST' || req.method === 'PUT' ? 201 : 204);
-      res.send('');
-      return;
-    }
-
-    if (isRenderable(output)) {
-      output = await output.render(res);
-      if (output === undefined) { // If render didn't return a result, consider us done
-        return;
-      }
-    }
-
-    if (typeof output === 'string') {
-      this.setContentTypeIfUndefined(res, 'text/plain');
-      res.send(output);
+      return this.serializeEmpty(req, res);
+    } else if (typeof output === 'string') {
+      return this.serializeText(res, output);
     } else if (Buffer.isBuffer(output)) {
-      this.setContentTypeIfUndefined(res, 'application/octet-stream');
-      res.send(output);
-    } else if (isStream(output)) {
-      this.setContentTypeIfUndefined(res, 'application/octet-stream');
-      await (res[SendStreamⲐ] ? res[SendStreamⲐ](output) : StreamUtil.pipe(output, res[NodeEntityⲐ]));
+      return this.serializeBuffer(res, output);
+    } else if (this.isStream(output)) {
+      return this.serializeStream(res, output);
     } else if (output instanceof Error) {
-      const status = this.getErrorStatus(output);
-      res.status(status);
-      res.statusError = output;
-      res.setHeader('Content-Type', 'application/json');
-      res.send(JSON.stringify(output.toJSON({ status })));
+      return this.serializeError(res, output);
     } else {
-      const payload = Util.hasToJSON(output) ? output.toJSON() : output;
-      this.setContentTypeIfUndefined(res, 'application/json');
-      res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
+      return this.serializeJSON(req, res, output);
     }
   }
 }
