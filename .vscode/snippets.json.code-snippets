@@ -1,0 +1,22 @@
+{
+	"Star": {
+		"scope": "javascript,typescript",
+		"prefix": [
+			"star"
+		],
+		"body": [
+			"ᚕ"
+		],
+		"description": "A star"
+	},
+	"StarTs": {
+		"scope": "typescript",
+		"prefix": [
+			"ts"
+		],
+		"body": [
+			"ᚕts"
+		],
+		"description": "TS with star"
+	}
+}

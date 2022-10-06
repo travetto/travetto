@@ -1,7 +1,7 @@
 import * as sourceMapSupport from 'source-map-support';
 
 declare global {
-  interface Error { toJSON(sub?: unknown): unknown }
+  interface Error { toJSON?(sub?: unknown): unknown }
   interface Map<K, V> { toJSON(): unknown }
   interface Set<T> { toJSON(): unknown }
   interface ObjectConstructor {
@@ -15,6 +15,9 @@ declare global {
   }
 
   function ᚕlog(level: 'error' | 'info' | 'warn' | 'debug' | 'log', ctx: { file: string, line: number }, ...args: unknown[]): void;
+
+  // eslint-disable-next-line no-var
+  var ts: unknown;
 }
 
 const objectProto = Object.prototype.__proto__;
@@ -54,6 +57,11 @@ addFn(Error.prototype, 'toJSON', function (this: Error, extra?: Record<string, u
     ...extra,
     stack: this.stack
   };
+});
+
+global.ts = new Proxy({}, {
+  // Load on demand, and replace on first use
+  get: (t, prop, r): unknown => (global.ts = require('typescript'))[prop]
 });
 
 // Increase stack limit

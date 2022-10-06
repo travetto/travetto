@@ -7,8 +7,10 @@ export class PointImpl {
   }
   static bindSchema(input: unknown): [number, number] | undefined {
     if (Array.isArray(input) && input.length === 2) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return input.map(x => Util.coerceType(x, Number, false)) as [number, number];
+      return [
+        Util.coerceType(input[0], Number, false),
+        Util.coerceType(input[1], Number, false)
+      ];
     }
   }
 }

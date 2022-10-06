@@ -130,6 +130,10 @@ declare global {
      */
     statusCode: number;
     /**
+     * The error that caused the current status
+     */
+    statusError?: Error;
+    /**
      * Set the status code
      * @param code The code to set
      */

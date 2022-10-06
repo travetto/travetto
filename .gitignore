@@ -10,9 +10,9 @@ npm-debug.log
 Thumbs.db
 
 # VSCode
-.vscode/
 *.vsix
 out/
+related/*/.vscode
 
 # OpenAPI
 api-client/

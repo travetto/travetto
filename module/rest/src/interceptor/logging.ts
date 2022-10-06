@@ -41,6 +41,9 @@ export class LoggingInterceptor implements RestInterceptor {
       } else if (res.statusCode < 500) {
         console.warn('Request', reqLog);
       } else {
+        if (res.statusError) {
+          console.error(res.statusError.message, { error: res.statusError });
+        }
         console.error('Request', reqLog);
       }
     }
