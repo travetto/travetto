@@ -1,5 +1,5 @@
 import { PrincipalTarget } from '@travetto/auth/src/internal/types';
-import { ContextProvider, ParamUtil } from '@travetto/rest';
+import { ContextProvider, ParamExtractor } from '@travetto/rest';
 
 export const LoginContextⲐ = Symbol.for('@trv:auth-rest/login');
 
@@ -13,4 +13,4 @@ export class PrincipalEncoderTarget { }
 
 
 // Register context providers
-ParamUtil.registerContext(PrincipalTarget, (_, r) => r.auth);
+ParamExtractor.registerContext(PrincipalTarget, (_, r) => r.auth);

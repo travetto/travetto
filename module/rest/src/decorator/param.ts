@@ -2,7 +2,7 @@ import { ClassInstance } from '@travetto/base';
 
 import { ParamConfig } from '../types';
 import { ControllerRegistry } from '../registry/controller';
-import { ParamUtil } from '../util/param';
+import { ParamExtractor } from '../util/param';
 import { querySchemaParamConfig } from '../internal/param';
 
 type ParamDecorator = (target: ClassInstance, propertyKey: string | symbol, idx: number) => void;
@@ -74,4 +74,4 @@ export function QuerySchema(config: Partial<ParamConfig> & { view?: string, key?
 /**
  * Create context provider as a decorator, to allow for adding additional context parameter values
  */
-export const ContextProvider = ParamUtil.provider.bind(ParamUtil);
+export const ContextProvider = ParamExtractor.provider.bind(ParamExtractor);

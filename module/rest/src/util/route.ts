@@ -5,7 +5,7 @@ import { EndpointConfig, ControllerConfig } from '../registry/types';
 import { LightweightConfig, ManagedInterceptorConfig, RestInterceptor, RouteApplies } from '../interceptor/types';
 import { HeadersAddedⲐ, InterceptorConfigsⲐ } from '../internal/symbol';
 
-import { ParamUtil } from './param';
+import { ParamExtractor } from './param';
 import { RouteCheckUtil } from './route-check';
 
 const RouteChecker = Symbol.for('@trv:rest/route-checker');
@@ -153,7 +153,7 @@ export class RouteUtil {
 
     const handlerBound: Filter = async ({ req, res }: FilterContext): Promise<unknown> => {
       if ('class' in route) {
-        const params = ParamUtil.extractParams(route, req, res);
+        const params = ParamExtractor.extract(route, req, res);
         return route.handler.apply(route.instance, params);
       } else {
         return route.handler.call(route.instance, req, res);
