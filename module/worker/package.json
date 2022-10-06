@@ -28,7 +28,7 @@
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.2",
     "@types/generic-pool": "^3.1.11",
-    "generic-pool": "^3.8.2"
+    "generic-pool": "^3.9.0"
   },
   "publishConfig": {
     "access": "public"

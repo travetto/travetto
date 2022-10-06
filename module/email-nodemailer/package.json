@@ -26,13 +26,13 @@
   },
   "dependencies": {
     "@travetto/email": "^3.0.0-rc.4",
-    "@types/nodemailer": "^6.4.5",
-    "nodemailer": "^6.7.8"
+    "@types/nodemailer": "^6.4.6",
+    "nodemailer": "^6.8.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "docDependencies": {
-    "@aws-sdk/client-ses": "^3.160.0"
+    "@aws-sdk/client-ses": "^3.185.0"
   }
 }

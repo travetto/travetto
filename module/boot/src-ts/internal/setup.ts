@@ -6,7 +6,7 @@ declare global {
     __proto__: unknown;
   }
 
-  function ᚕlog(level: 'error' | 'info' | 'warn' | 'debug' | 'log', ...args: unknown[]): void;
+  function ᚕlog(level: 'error' | 'info' | 'warn' | 'debug' | 'log', ctx: { file: string, line: number }, ...args: unknown[]): void;
 }
 
 const objectProto = Object.prototype.__proto__;
@@ -16,7 +16,7 @@ Object.defineProperty(Object.prototype, '__proto__', { configurable: false, enum
 
 // Global default log interceptor
 // eslint-disable-next-line no-console
-global.ᚕlog = (level, ...args): void => console[level](...args);
+global.ᚕlog = (level, ctx, ...args): void => console[level](...args);
 
 // Register source maps
 sourceMapSupport.install();
