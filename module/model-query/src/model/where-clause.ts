@@ -1,4 +1,4 @@
-import { Primitive as Prim } from '@travetto/base/src/internal/global-types';
+import { Primitive as Prim } from '@travetto/base/src/internal/types';
 import { TimeSpan } from '@travetto/base/src/util';
 
 /**

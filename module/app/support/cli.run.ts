@@ -82,12 +82,12 @@ export class AppRunCommand extends CliCommand<Options> {
           if (!err || !(err instanceof Error)) {
             throw err;
           }
-          const { StacktraceUtil: StacktraceManager } = await import('@travetto/base');
+          const { StacktraceManager } = await import('@travetto/base');
           console.error(CliUtil.color`${{ failure: 'Failed to run' }} ${{ title: selected.name }}, ${err.message.replace(/via=.*$/, '')}`);
           if (hasChildren(err)) {
             console.error(err.errors.map((x: { message: string }) => CliUtil.color`● ${{ output: x.message }}`).join('\n'));
           } else {
-            const stack = StacktraceUtil.simplifyStack(err);
+            const stack = StacktraceManager.simplifyStack(err);
             if (!stack.includes(err.message)) {
               console.error(err.message);
             }
