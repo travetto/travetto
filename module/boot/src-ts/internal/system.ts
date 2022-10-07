@@ -1,3 +1,5 @@
+import * as cp from 'child_process';
+
 /**
  * Shared util
  */
@@ -14,5 +16,16 @@ export class SystemUtil {
     }
 
     return Math.abs(hash);
+  }
+
+  /**
+   * OS aware file opening
+   */
+  static nativeOpen(pth: string): void {
+    const op = process.platform === 'darwin' ? ['open', pth] :
+      process.platform === 'win32' ? ['cmd', '/c', 'start', pth] :
+        ['xdg-open', pth];
+
+    cp.spawnSync(op.join(' '));
   }
 }
