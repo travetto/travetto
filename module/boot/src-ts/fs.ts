@@ -17,18 +17,6 @@ const checkPath = (pth: string): void => {
 export class FsUtil {
 
   /**
-   * Command to remove a folder
-   * @param pth The folder to delete
-   */
-  static #unlinkCommand(pth: string): [string, string[]] {
-    if (process.platform === 'win32') {
-      return ['rmdir', ['/Q', '/S', PathUtil.toNative(pth)]];
-    } else {
-      return ['rm', ['-r', pth]];
-    }
-  }
-
-  /**
    * Command to copy a folder
    * @param pth The folder to copy
    */
@@ -74,7 +62,7 @@ export class FsUtil {
    * @returns
    */
   static isOlder(current: fss.Stats, next: fss.Stats): boolean {
-    return current.ctimeMs < next.ctimeMs || current.mtimeMs < next.mtimeMs;
+    return this.maxTime(current) < this.maxTime(next);
   }
 
   /**
@@ -84,13 +72,7 @@ export class FsUtil {
    */
   static unlinkRecursiveSync(pth: string): void {
     checkPath(pth);
-    if ('rmSync' in fss) {
-      fss.rmSync(pth, { recursive: true, force: true });
-    } else {
-      try {
-        ExecUtil.execSync(...this.#unlinkCommand(pth));
-      } catch { }
-    }
+    fss.rmSync(pth, { recursive: true, force: true });
   }
 
   /**
@@ -100,13 +82,7 @@ export class FsUtil {
    */
   static async unlinkRecursive(pth: string): Promise<void> {
     checkPath(pth);
-    if ('rm' in fs) {
-      await fs.rm(pth, { recursive: true, force: true });
-    } else {
-      try {
-        await ExecUtil.spawn(...this.#unlinkCommand(pth)).result;
-      } catch { }
-    }
+    await fs.rm(pth, { recursive: true, force: true });
   }
 
   /**
@@ -123,16 +99,5 @@ export class FsUtil {
         throw err;
       }
     }
-  }
-
-  /**
-   * OS aware file opening
-   */
-  static nativeOpen(pth: string): void {
-    const op = process.platform === 'darwin' ? ['open', pth] :
-      process.platform === 'win32' ? ['cmd', '/c', 'start', pth] :
-        ['xdg-open', pth];
-
-    ExecUtil.spawn(op[0], op.slice(1));
   }
 }

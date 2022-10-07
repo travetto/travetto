@@ -1,8 +1,9 @@
 import * as os from 'os';
 import { readFileSync } from 'fs';
 
-import { FsUtil, Host, PathUtil, ScanFs } from '@travetto/boot';
+import { FsUtil, Host } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli';
+import { ModuleIndex } from '@travetto/boot/src/internal/module';
 
 import type { RunState } from '../src/execute/types';
 
@@ -26,10 +27,11 @@ export class TestCommand extends CliCommand<Options> {
 
   getTypes(): string[] {
     if (!this._types) {
-      this._types = ScanFs.scanDirSync({},
-        PathUtil.resolveUnix(__dirname, '..', 'src/consumer/types/')
-      )
-        .filter(x => x.stats?.isFile())
+      this._types = ModuleIndex
+        .find({
+          folder: Host.PATH.src,
+          filter: /consumer\/types\/.*/
+        })
         .map(x => readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1])
         .filter((x?: string): x is string => !!x);
     }

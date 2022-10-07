@@ -6,7 +6,7 @@ import { PathUtil } from '../path';
 import { Host } from '../host';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-const requireTs = (): typeof ts => require('typescript') as typeof ts;
+const requireTs = (): typeof ts => global.ts as typeof ts;
 
 type Diag = {
   start?: number;
