@@ -22,4 +22,4 @@ for TS in ./bin/trv*.ts; do
   chmod +x $SH
 done
 
-npx tsc --outDir $BIN --importHelpers -m commonjs -t ES2020 --lib es2020 $ROOT/bin/dev-register.ts 2> /dev/null
+npx tsc --outDir $BIN --skipLibCheck --importHelpers -m commonjs -t ES2020 --lib es2020 $ROOT/bin/dev-register.ts 2> /dev/null
