@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
 
-import { Host, PathUtil } from '@travetto/boot';
-import { TransformerState, OnCall, DeclarationUtil, CoreUtil, TransformerId } from '@travetto/transformer';
+import { TransformerState, OnCall, DeclarationUtil, CoreUtil, TransformerId, OnMethod, AfterMethod } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -270,18 +269,23 @@ export class AssertTransformer {
     }
   }
 
+  @OnMethod('AssertCheck')
+  static onAssertCheck(state: TransformerState & AssertState, node: ts.MethodDeclaration): ts.MethodDeclaration {
+    state[IsTestⲐ] = true;
+    return node;
+  }
+
+  @AfterMethod('AssertCheck')
+  static afterAssertCheck(state: TransformerState & AssertState, node: ts.MethodDeclaration): ts.MethodDeclaration {
+    state[IsTestⲐ] = false;
+    return node;
+  }
+
   /**
    * Listen for all call expression
    */
   @OnCall()
   static onAssertCall(state: TransformerState & AssertState, node: ts.CallExpression): ts.CallExpression {
-    // If not in test mode, see if file is valid
-    if (state[IsTestⲐ] === undefined) {
-      const name = PathUtil.toUnix(state.source.fileName);
-      // Only apply to test files, allowing for inheriting from module test files as well
-      state[IsTestⲐ] = Host.PATH.testAnyWithSepRe.test(name) && !name.includes('/test/src/');
-    }
-
     // Only check in test mode
     if (!state[IsTestⲐ]) {
       return node;
