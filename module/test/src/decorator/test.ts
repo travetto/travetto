@@ -4,9 +4,17 @@ import { SuiteRegistry } from '../registry/suite';
 import { TestConfig } from '../model/test';
 
 /**
+ * The `@AssertCheck` indicates that a function's assert calls should be transformed
+ */
+export function AssertCheck(): MethodDecorator {
+  return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => descriptor;
+}
+
+/**
  * The `@Test` decorator register a test to be run as part of the enclosing suite.
  * @param description The test description
  * @augments `@trv:test/Test`
+ * @augments `@trv:test/AssertCheck`
  */
 export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;

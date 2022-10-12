@@ -38,7 +38,6 @@ export class Host {
     resources: 'resources',
     testSupport: 'test-support',
     testIsolated: 'test-isolated',
-    testAnyWithSepRe: /test(-(support|isolated))?\//,
     bin: 'bin',
     test: 'test'
   };
