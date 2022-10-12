@@ -2,9 +2,9 @@ import * as ts from 'typescript';
 import { readFileSync } from 'fs';
 import * as path from 'path';
 
-import { Host, PathUtil } from '@travetto/boot';
+import { SystemUtil } from '@travetto/transformer';
+
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
-import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
@@ -26,7 +26,7 @@ export class SourceHost implements ts.CompilerHost {
   }
 
   getCanonicalFileName: (file: string) => string = (f: string) => f;
-  getCurrentDirectory: () => string = () => PathUtil.cwd;
+  getCurrentDirectory: () => string = () => SystemUtil.cwd;
   getDefaultLibFileName: (opts: ts.CompilerOptions) => string = (opts: ts.CompilerOptions) => ts.getDefaultLibFileName(opts);
   getNewLine: () => string = () => ts.sys.newLine;
   useCaseSensitiveFileNames: () => boolean = () => ts.sys.useCaseSensitiveFileNames;
@@ -54,7 +54,7 @@ export class SourceHost implements ts.CompilerHost {
     if (content === undefined) {
       throw new Error(`Unable to read file ${filename}`);
     }
-    if (Host.EXT.inputMatcher(filename)) {
+    if (SystemUtil.EXT.inputMatcher(filename)) {
       content = TranspileUtil.preProcess(filename, content);
     }
     return content;
