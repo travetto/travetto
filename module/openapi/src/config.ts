@@ -1,5 +1,3 @@
-import * as path from 'path';
-import * as fs from 'fs/promises';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { Config } from '@travetto/config';
@@ -65,7 +63,6 @@ export class ApiSpecConfig {
       if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder
         this.output = PathUtil.resolveUnix(this.output, 'openapi.yml');
       }
-      await fs.mkdir(path.dirname(this.output), { recursive: true });
     }
   }
 }

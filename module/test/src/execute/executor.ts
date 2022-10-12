@@ -282,6 +282,7 @@ export class TestExecutor {
    */
   static async executeIsolated(consumer: TestConsumer, file: string, ...args: string[]): Promise<void> {
     // Read modules for extensions
+    // TODO: Should read from abstraction layer
     const modules = [...(await fs.readFile(file, 'utf8'))
       .matchAll(/\/\/\s*@with-module\s+(\S+)/g)]
       .map(x => x[1]);

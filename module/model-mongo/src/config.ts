@@ -1,5 +1,5 @@
 import * as mongo from 'mongodb';
-import { promises as fs } from 'fs';
+import * as fs from 'fs/promises';
 
 import { TimeSpan, ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
@@ -60,6 +60,7 @@ export class MongoModelConfig {
    * Load a resource
    */
   async fetch(val: string): Promise<string> {
+    // TODO: Use file abstraction
     return ResourceManager.read(val)
       .then(res => typeof res === 'string' ? res : res.toString('utf8'))
       .catch(() => fs.readFile(val)
