@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
 
-import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { ExternalType, AnyType } from './resolver/types';
@@ -10,7 +9,7 @@ import { ImportManager } from './importer';
 import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
 import { DeclarationUtil } from './util/declaration';
-import { CoreUtil, LiteralUtil } from './util';
+import { CoreUtil, LiteralUtil, SystemUtil } from './util';
 import { Import } from './types/shared';
 
 function hasOriginal(n: unknown): n is { original: ts.Node } {
@@ -284,7 +283,7 @@ export class TransformerState implements State {
       const tgt = DeclarationUtil.getPrimaryDeclarationNode(type.original!);
       unique = `${ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line}_${tgt.getEnd() - tgt.getStart()}`;
       if (tgt.getSourceFile().fileName !== this.source.fileName) { // if in same file
-        unique = `${CoreUtil.naiveHash(tgt.getSourceFile().fileName)}_${unique}`;
+        unique = `${SystemUtil.naiveHash(tgt.getSourceFile().fileName)}_${unique}`;
       }
     } catch {
       // Determine type unique ident

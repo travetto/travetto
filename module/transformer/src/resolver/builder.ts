@@ -2,10 +2,10 @@
 import * as ts from 'typescript';
 import { dirname } from 'path';
 
-import { Host, PathUtil } from '@travetto/boot';
+import { Host } from '@travetto/boot';
 
 import { Type, AnyType, UnionType, Checker } from './types';
-import { DocUtil, CoreUtil, DeclarationUtil, LiteralUtil } from '../util';
+import { DocUtil, CoreUtil, DeclarationUtil, LiteralUtil, SystemUtil } from '../util';
 import { CoerceUtil } from './coerce';
 
 /**
@@ -218,10 +218,10 @@ export const TypeBuilder: {
         if (source === '.') {
           source = sourceFile;
         } else if (source.startsWith('.')) {
-          source = PathUtil.resolveUnix(dirname(sourceFile), source);
+          source = SystemUtil.resolveUnix(dirname(sourceFile), source);
         }
 
-        return { key: 'external', name, source: ext === 'node' ? source : PathUtil.resolveUnix(sourceFile, source) };
+        return { key: 'external', name, source: ext === 'node' ? source : SystemUtil.resolveUnix(sourceFile, source) };
       }
     }
   }

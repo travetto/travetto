@@ -1,11 +1,11 @@
 import * as ts from 'typescript';
 import { basename, dirname, relative } from 'path';
 
-import { PathUtil } from '@travetto/boot';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { AnyType, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';
+import { SystemUtil } from './util/system';
 import { CoreUtil } from './util/core';
 import { Import } from './types/shared';
 
@@ -51,8 +51,8 @@ export class ImportManager {
     if (file.startsWith('.') && base &&
       !base.startsWith('@travetto') && !base.includes('node_modules')
     ) { // Relative path
-      const fileDir = dirname(PathUtil.resolveUnix(file));
-      const baseDir = dirname(PathUtil.resolveUnix(base));
+      const fileDir = dirname(SystemUtil.resolveUnix(file));
+      const baseDir = dirname(SystemUtil.resolveUnix(base));
       file = `${relative(baseDir, fileDir) || '.'}/${basename(file)}`;
       if (/^[A-Za-z]/.test(file)) {
         file = `./${file}`;
@@ -118,7 +118,7 @@ export class ImportManager {
       if (!(err instanceof Error)) {
         throw err;
       }
-      const out = new Error(`${err.message} in ${file.fileName.replace(PathUtil.cwd, '.')}`);
+      const out = new Error(`${err.message} in ${file.fileName.replace(SystemUtil.cwd, '.')}`);
       out.stack = err.stack;
       throw out;
     }

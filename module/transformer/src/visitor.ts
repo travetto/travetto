@@ -1,11 +1,12 @@
 import * as ts from 'typescript';
 import { createWriteStream } from 'fs';
 
-import { AppCache, PathUtil, ConsoleManager } from '@travetto/boot';
+import { AppCache, ConsoleManager } from '@travetto/boot';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { LogUtil } from './util/log';
 import { CoreUtil } from './util/core';
+import { SystemUtil } from './util/system';
 
 /**
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
@@ -80,7 +81,7 @@ export class VisitorFactory<S extends State = State> {
 
   get logger(): Console {
     this.#logger ??= new console.Console({
-      stdout: createWriteStream(PathUtil.joinUnix(AppCache.outputDir, this.#logTarget), { flags: 'a' }),
+      stdout: createWriteStream(SystemUtil.resolveUnix(AppCache.outputDir, this.#logTarget), { flags: 'a' }),
       inspectOptions: { depth: 4 },
     });
     return this.#logger;
