@@ -1,5 +1,4 @@
-import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
-import { AppManifest } from './manifest';
+import { TranspileUtil } from './internal/transpile-util';
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
 
@@ -54,7 +53,8 @@ class $ConsoleManager {
 
     this.#exclude = new Set();
 
-    if (AppManifest.env.debug.status === false) {
+    // eslint-disable-next-line no-constant-condition
+    if (false /* TODO: define w/o app manifest */) {
       this.#exclude.add('debug');
     }
 

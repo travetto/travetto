@@ -1,5 +1,5 @@
-import { EnvUtil } from '@travetto/boot';
-import { ConsoleManager, LogLevel, AppManifest, Util } from '@travetto/base';
+import { ConsoleManager, LogLevel, EnvUtil } from '@travetto/boot';
+import { AppManifest, Util } from '@travetto/base';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { Appender, Formatter, LogEvent, LogLevels } from './types';

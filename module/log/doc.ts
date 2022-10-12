@@ -1,7 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 
-const ConsoleManager = d.Ref('ConsoleManager', '@travetto/base/src/console.ts');
+const ConsoleManager = d.Ref('ConsoleManager', '@travetto/boot/src-ts/console.ts');
 
 export const text = d`
 ${d.Header()}
