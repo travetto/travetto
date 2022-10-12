@@ -1,6 +1,5 @@
 import * as ts from 'typescript';
 
-import { SystemUtil } from '@travetto/boot/src/internal/system';
 import {
   TransformerState, OnMethod, OnClass, AfterClass,
   DecoratorUtil, TransformerId, AfterFunction, CoreUtil
@@ -30,7 +29,7 @@ export class RegisterTransformer {
    */
   @OnClass()
   static preprocessClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    state[cls] = SystemUtil.naiveHash(node.getText());
+    state[cls] = CoreUtil.naiveHash(node.getText());
     return node;
   }
 
@@ -40,7 +39,7 @@ export class RegisterTransformer {
   @OnMethod()
   static processMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
-      const hash = SystemUtil.naiveHash(node.getText());
+      const hash = CoreUtil.naiveHash(node.getText());
       const conf = { hash };
       state[methods] ??= {};
       state[methods]![node.name.escapedText.toString()] = conf;

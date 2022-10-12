@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, ConcreteClass, Util } from '@travetto/base';
+import { AppError, ConcreteClass } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 import { AfterAll, BeforeAll } from '@travetto/test';
 import { SystemUtil } from '@travetto/boot/src/internal/system';
@@ -52,7 +52,7 @@ export abstract class BaseRestSuite {
   }
 
   getMultipartRequest(chunks: Multipart[]): FullRequest {
-    const boundary = `-------------------------multipart-${Util.uuid()}`;
+    const boundary = `-------------------------multipart-${SystemUtil.uuid()}`;
 
     const nl = '\r\n';
 

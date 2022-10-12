@@ -9,11 +9,12 @@ import {
   ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError, Util } from '@travetto/base';
+import { Class, AppError } from '@travetto/base';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { S3ModelConfig } from './config';
 
@@ -147,7 +148,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   uuid(): string {
-    return Util.uuid(32);
+    return ModelUtil.uuid(32);
   }
 
   async postConstruct(): Promise<void> {
@@ -176,7 +177,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     try {
       const result = await this.client.getObject(this.#q(cls, id));
       if (result.Body) {
-        const body = (await StreamUtil.streamToBuffer(result.Body)).toString('utf8');
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const body = (await StreamUtil.streamToBuffer(result.Body as Readable)).toString('utf8');
         const output = await ModelCrudUtil.load(cls, body);
         if (output) {
           const { expiresAt } = ModelRegistry.get(cls);

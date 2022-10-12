@@ -1,12 +1,12 @@
 import * as lambda from 'aws-lambda';
 
 import { DependencyRegistry } from '@travetto/di';
-import { Util } from '@travetto/base';
 import type { Request, ServerHandle } from '@travetto/rest';
 import {
   RestServerSupport, MakeRequestConfig, MakeRequestResponse,
   headerToShape as valuesToShape
 } from '@travetto/rest/test-support/server-support/base';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
 
 import type { AwsLambdaRestApplication } from '../src/server';
 
@@ -18,10 +18,10 @@ const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParam
 };
 
 const baseLambdaContext = {
-  accountId: Util.uuid(),
-  resourceId: Util.uuid(),
-  requestId: Util.uuid(),
-  apiId: Util.uuid(),
+  accountId: SystemUtil.uuid(),
+  resourceId: SystemUtil.uuid(),
+  requestId: SystemUtil.uuid(),
+  apiId: SystemUtil.uuid(),
   requestTimeEpoch: 1428582896000,
   resourcePath: '/{proxy+}',
   protocol: 'HTTP/1.1',

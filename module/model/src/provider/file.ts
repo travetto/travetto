@@ -5,7 +5,7 @@ import * as path from 'path';
 import { Readable } from 'stream';
 
 import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
-import { Class, Util, TimeSpan } from '@travetto/base';
+import { Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
@@ -21,6 +21,7 @@ import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
 import { StreamModel, STREAMS } from '../internal/service/stream';
+import { ModelUtil } from '../internal/util';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -37,7 +38,7 @@ export class FileModelConfig {
 
   async postConstruct(): Promise<void> {
     if (!this.folder) {
-      this.folder = PathUtil.resolveUnix(os.tmpdir(), Util.uuid().substring(0, 10));
+      this.folder = PathUtil.resolveUnix(os.tmpdir(), ModelUtil.uuid().substring(0, 10));
     }
   }
 }
@@ -107,7 +108,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   uuid(): string {
-    return Util.uuid(32);
+    return ModelUtil.uuid(32);
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

@@ -1,6 +1,6 @@
 import * as dynamodb from '@aws-sdk/client-dynamodb';
 
-import { Class, ShutdownManager, Util } from '@travetto/base';
+import { Class, ShutdownManager } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -13,6 +13,7 @@ import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { DynamoDBModelConfig } from './config';
 
@@ -269,7 +270,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
 
   // Crud
   uuid(): string {
-    return Util.uuid();
+    return ModelUtil.uuid();
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

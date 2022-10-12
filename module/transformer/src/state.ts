@@ -2,7 +2,6 @@ import * as ts from 'typescript';
 
 import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
-import { Util } from '@travetto/base';
 
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';
@@ -289,7 +288,7 @@ export class TransformerState implements State {
       }
     } catch {
       // Determine type unique ident
-      unique = Util.uuid(type.name ? 5 : 10);
+      unique = SystemUtil.uuid(type.name ? 5 : 10);
     }
     // Otherwise read name with uuid
     let name = type.name && !type.name.startsWith('_') ? type.name : '';

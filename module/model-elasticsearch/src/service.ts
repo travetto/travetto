@@ -6,7 +6,7 @@ import {
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
   OptionalId
 } from '@travetto/model';
-import { Class, Util, ShutdownManager, AppError } from '@travetto/base';
+import { Class, ShutdownManager, AppError } from '@travetto/base';
 import { SchemaChange, DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -23,6 +23,7 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
+import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsBulkError } from './internal/types';
@@ -111,7 +112,7 @@ export class ElasticsearchModelService implements
   truncateModel(cls: Class): Promise<void> { return this.deleteByQuery(cls, {}).then(() => { }); }
 
   uuid(): string {
-    return Util.uuid();
+    return ModelUtil.uuid();
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

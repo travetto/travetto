@@ -1,4 +1,6 @@
-import { Util, ShutdownManager, TimeSpan } from '@travetto/base';
+import { ShutdownManager, TimeSpan } from '@travetto/base';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
+
 import { Timeout } from './timeout';
 
 function canCancel(o: unknown): o is { cancel(): unknown } {
@@ -32,7 +34,7 @@ export class Barrier {
     if (!('then' in p)) {
       p = p();
     }
-    const k = Util.uuid();
+    const k = SystemUtil.uuid();
     p = p
       .finally(() => this.#barriers.delete(k))
       .catch(err => { this.cleanup(); throw err; });

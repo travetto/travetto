@@ -11,4 +11,10 @@ export class SystemSuite {
     const hashForSpace = SystemUtil.naiveHash(' ');
     assert(!allHashes.includes(hashForSpace));
   }
+
+  @Test()
+  verifyUUID() {
+    assert(SystemUtil.uuid(32).length === 32);
+    assert(/^[0-9a-f]{32}$/.test(SystemUtil.uuid(32)));
+  }
 }

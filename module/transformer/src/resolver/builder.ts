@@ -3,10 +3,10 @@ import * as ts from 'typescript';
 import { dirname } from 'path';
 
 import { Host, PathUtil } from '@travetto/boot';
-import { Util } from '@travetto/base';
 
 import { Type, AnyType, UnionType, Checker } from './types';
 import { DocUtil, CoreUtil, DeclarationUtil, LiteralUtil } from '../util';
+import { CoerceUtil } from './coerce';
 
 /**
  * List of global types that can be parameterized
@@ -118,7 +118,7 @@ export const TypeBuilder: {
       if (name in GLOBAL_SIMPLE) {
         const cons = GLOBAL_SIMPLE[name];
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const ret = LiteralUtil.isLiteralType(type) ? Util.coerceType(type.value, cons as typeof String, false) :
+        const ret = LiteralUtil.isLiteralType(type) ? CoerceUtil.coerce(type.value, cons as typeof String, false) :
           undefined;
 
         return {

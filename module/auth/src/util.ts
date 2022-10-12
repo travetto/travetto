@@ -2,6 +2,7 @@ import * as crypto from 'crypto';
 import * as util from 'util';
 
 import { AppError, Util } from '@travetto/base';
+import { SystemUtil } from '@travetto/boot/src/internal/system';
 
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 
@@ -57,7 +58,7 @@ export class AuthUtil {
       throw new AppError('Password is required', 'data');
     }
 
-    salt = typeof salt === 'number' ? Util.uuid(salt) : salt;
+    salt = typeof salt === 'number' ? SystemUtil.uuid(salt) : salt;
     const hash = await this.generateHash(password, salt);
 
     return { salt, hash };
