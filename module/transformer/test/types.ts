@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
 import { TransformerTestUtil } from '../test-support/util';
-import { SystemUtil } from '../src/util';
+import { SystemUtil } from '../src/util/system';
 
 @Suite()
 export class TypesTransformSuite {

@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import { AnyType, Checker } from './types';
 import { TypeCategorize, TypeBuilder } from './builder';
 import { VisitCache } from './cache';
-import { DocUtil } from '../util';
+import { DocUtil } from '../util/doc';
 
 /**
  * Type resolver

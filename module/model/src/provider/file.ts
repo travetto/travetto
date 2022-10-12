@@ -232,10 +232,10 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   }
 
   async deleteStorage(): Promise<void> {
-    await FsUtil.unlinkRecursive(PathUtil.resolveUnix(this.config.folder, this.config.namespace));
+    await fs.rm(PathUtil.resolveUnix(this.config.folder, this.config.namespace), { recursive: true, force: true });
   }
 
   async truncateModel(cls: Class<ModelType>): Promise<void> {
-    await FsUtil.unlinkRecursive(await this.#resolveName(cls === StreamModel ? STREAMS : cls));
+    await fs.rm(await this.#resolveName(cls === StreamModel ? STREAMS : cls), { recursive: true, force: true });
   }
 }

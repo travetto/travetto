@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs/promises';
 
 import { FsUtil } from '@travetto/boot';
 
@@ -47,7 +48,7 @@ class TestRunnerFeature extends BaseFeature {
   /** Clean up */
   async clean(recopy = false): Promise<void> {
     this.#consumer.dispose();
-    await FsUtil.unlinkRecursive(this.#cacheDir);
+    await fs.rm(this.#cacheDir, { recursive: true, force: true });
     if (recopy) {
       await FsUtil.copyRecursive(`${Workspace.path}/.trv_cache`, this.#cacheDir, true);
     }

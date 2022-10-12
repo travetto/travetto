@@ -1,6 +1,6 @@
 import {
   Stats, mkdirSync, constants, accessSync, readdirSync,
-  readFileSync, writeFileSync, unlinkSync, statSync, rmdirSync
+  readFileSync, writeFileSync, unlinkSync, statSync, rmdirSync, rmSync
 } from 'fs';
 import * as fsp from 'fs/promises';
 import * as path from 'path';
@@ -129,7 +129,7 @@ export class FileCache {
   clear(quiet = false): void {
     if (this.outputDir) {
       try {
-        FsUtil.unlinkRecursiveSync(this.outputDir);
+        rmSync(this.outputDir, { recursive: true, force: true });
         if (!quiet) {
           console.debug('Deleted', { cacheDir: this.outputDir });
         }

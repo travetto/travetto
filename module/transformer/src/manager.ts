@@ -1,12 +1,12 @@
 import * as ts from 'typescript';
 
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
-import { Host } from '@travetto/boot';
 
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
 import { TransformerState } from './state';
 import { getAllTransformers } from './register';
+import { SystemUtil } from './util/system';
 
 type TransformerList = { before: ts.TransformerFactory<ts.SourceFile>[] };
 
@@ -27,7 +27,7 @@ export class TransformerManager {
     }
 
     // Modules
-    const found = ModuleIndex.find({ folder: Host.PATH.support, filter: /\/transformer.*[.]ts/ });
+    const found = ModuleIndex.find({ folder: SystemUtil.PATH.support, filter: /\/transformer.*[.]ts/ });
 
     for (const entry of found) { // Exclude based on blacklist
       this.#transformers.push(...getAllTransformers(await import(entry.file)));

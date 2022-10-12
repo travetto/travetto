@@ -6,11 +6,14 @@ import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';
 import { TypeResolver } from './resolver/service';
 import { ImportManager } from './importer';
+import { Import } from './types/shared';
+
 import { DocUtil } from './util/doc';
 import { DecoratorUtil } from './util/decorator';
 import { DeclarationUtil } from './util/declaration';
-import { CoreUtil, LiteralUtil, SystemUtil } from './util';
-import { Import } from './types/shared';
+import { CoreUtil } from './util/core';
+import { LiteralUtil } from './util/literal';
+import { SystemUtil } from './util/system';
 
 function hasOriginal(n: unknown): n is { original: ts.Node } {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
