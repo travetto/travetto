@@ -1,3 +1,4 @@
+import { EnvUtil } from './env';
 import { TranspileUtil } from './internal/transpile-util';
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
@@ -53,8 +54,7 @@ class $ConsoleManager {
 
     this.#exclude = new Set();
 
-    // eslint-disable-next-line no-constant-condition
-    if (false /* TODO: define w/o app manifest */) {
+    if (!EnvUtil.isTrue('TRV_DEBUG')) {
       this.#exclude.add('debug');
     }
 

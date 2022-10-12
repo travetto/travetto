@@ -284,7 +284,7 @@ export class TransformerState implements State {
       const tgt = DeclarationUtil.getPrimaryDeclarationNode(type.original!);
       unique = `${ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line}_${tgt.getEnd() - tgt.getStart()}`;
       if (tgt.getSourceFile().fileName !== this.source.fileName) { // if in same file
-        unique = `${SystemUtil.naiveHash(tgt.getSourceFile().fileName)}_${unique}`;
+        unique = `${CoreUtil.naiveHash(tgt.getSourceFile().fileName)}_${unique}`;
       }
     } catch {
       // Determine type unique ident

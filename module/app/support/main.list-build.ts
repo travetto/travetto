@@ -1,5 +1,5 @@
 import { EnvInit } from '@travetto/base/support/bin/init';
-import { ExecUtil } from '@travetto/boot';
+import { ModuleExec } from '@travetto/boot/src/internal/module-exec';
 
 import { ApplicationConfig } from '../src/types';
 
@@ -12,5 +12,5 @@ export function main(): Promise<ApplicationConfig[]> {
   EnvInit.init();
   return AppListLoader.buildList()
     .then(l => l ?? [])
-    .then(ExecUtil.mainResponse, ExecUtil.mainResponse);
+    .then(ModuleExec.mainResponse, ModuleExec.mainResponse);
 }
