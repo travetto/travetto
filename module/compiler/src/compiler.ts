@@ -1,14 +1,13 @@
 import { EventEmitter } from 'events';
 import * as ts from 'typescript';
 
-import { PathUtil } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 import { Dynamic } from '@travetto/base/src/internal/dynamic';
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
-import { TransformerManager } from '@travetto/transformer';
+import { SystemUtil, TransformerManager } from '@travetto/transformer';
 
 import { SourceHost } from './host';
 
@@ -58,7 +57,7 @@ class $Compiler {
    */
   #transpile(filename: string, force = false): string {
     if (force || !TranspileCache.hasEntry(filename)) {
-      console.debug('Emitting', { filename: filename.replace(PathUtil.cwd, '.') });
+      console.debug('Emitting', { filename: filename.replace(SystemUtil.cwd, '.') });
 
       try {
         const prog = this.#getProgram(filename);
@@ -136,7 +135,7 @@ class $Compiler {
    * Notify of an add/remove/change event
    */
   notify(type: EventType, filename: string): void {
-    console.debug('File Event', { type, filename: filename.replace(PathUtil.cwd, '.') });
+    console.debug('File Event', { type, filename: filename.replace(SystemUtil.cwd, '.') });
     this.#emitter.emit(type, filename);
   }
 

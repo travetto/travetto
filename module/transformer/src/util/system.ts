@@ -3,6 +3,7 @@ import * as crypto from 'crypto';
 
 const tsExt = '.ts';
 const dtsExt = '.d.ts';
+const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.endsWith(dtsExt));
 
 export class SystemUtil {
   static readonly cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
@@ -10,6 +11,7 @@ export class SystemUtil {
   static EXT = {
     outputTypes: dtsExt,
     input: tsExt,
+    inputMatcher: tsMatcher,
   };
 
   static PATH = {
