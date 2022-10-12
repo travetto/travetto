@@ -1,5 +1,6 @@
 import * as util from 'util';
-import { ConsoleManager, LogLevel } from '@travetto/base';
+
+import { ConsoleManager, LogLevel } from '@travetto/boot';
 
 /**
  * Console capturer.  Hooks into the Console manager, and collects the

@@ -1,4 +1,4 @@
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil, ConsoleManager } from '@travetto/boot';
 import { ApplicationConfig } from '../../src/types';
 
 /**
@@ -12,7 +12,7 @@ export class AppRunUtil {
    */
   static async run(app: ApplicationConfig | string, ...sub: string[]): Promise<void> {
 
-    const { PhaseManager, ConsoleManager } = await import('@travetto/base');
+    const { PhaseManager } = await import('@travetto/base');
 
     if (!EnvUtil.isTrue('TRV_DEBUG')) {
       ConsoleManager.exclude('debug', true);

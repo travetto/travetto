@@ -1,4 +1,5 @@
 import * as sourceMapSupport from 'source-map-support';
+import type { LogLevel } from '../console';
 
 declare global {
   interface Error {
@@ -17,7 +18,7 @@ declare global {
     __proto__: unknown;
   }
 
-  function ᚕlog(level: 'error' | 'info' | 'warn' | 'debug' | 'log', ctx: { file: string, line: number }, ...args: unknown[]): void;
+  function ᚕlog(level: LogLevel | 'log', ctx: { file: string, line: number }, ...args: unknown[]): void;
 
   // eslint-disable-next-line no-var
   var ts: unknown;
