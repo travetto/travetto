@@ -2,10 +2,13 @@
 import * as ts from 'typescript';
 import { dirname } from 'path';
 
-import { Host } from '@travetto/boot';
+import { DocUtil } from '../util/doc';
+import { CoreUtil } from '../util/core';
+import { DeclarationUtil } from '../util/declaration';
+import { LiteralUtil } from '../util/literal';
+import { SystemUtil } from '../util/system';
 
 import { Type, AnyType, UnionType, Checker } from './types';
-import { DocUtil, CoreUtil, DeclarationUtil, LiteralUtil, SystemUtil } from '../util';
 import { CoerceUtil } from './coerce';
 
 /**
@@ -64,7 +67,7 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
     const source = DeclarationUtil.getPrimaryDeclarationNode(resolvedType).getSourceFile();
     if (source?.fileName.includes('@types/node/globals') || source?.fileName.includes('typescript/lib')) {
       return { category: 'literal', type };
-    } else if (!source?.fileName.includes('@travetto') && source?.fileName.endsWith(Host.EXT.outputTypes)) {
+    } else if (!source?.fileName.includes('@travetto') && source?.fileName.endsWith(SystemUtil.EXT.outputTypes)) {
       return { category: 'unknown', type };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };

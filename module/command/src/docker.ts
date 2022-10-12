@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
+import { rmSync } from 'fs';
 
-import { PathUtil, EnvUtil, ExecUtil, ExecutionState, FsUtil, ExecutionResult } from '@travetto/boot';
+import { PathUtil, EnvUtil, ExecUtil, ExecutionState, ExecutionResult } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
 
 /**
@@ -438,7 +439,7 @@ export class DockerContainer {
 
     await Promise.all(
       [...this.#tempVolumes.keys()]
-        .map(x => FsUtil.unlinkRecursive(x))
+        .map(x => fs.rm(x, { recursive: true, force: true }))
     );
   }
 
@@ -449,7 +450,7 @@ export class DockerContainer {
     console.debug('Cleaning', { image: this.#image, container: this.#container });
 
     for (const [vol,] of this.#tempVolumes) {
-      FsUtil.unlinkRecursiveSync(vol);
+      rmSync(vol, { recursive: true, force: true });
     }
   }
 

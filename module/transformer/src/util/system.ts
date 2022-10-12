@@ -1,8 +1,23 @@
 import * as path from 'path';
 import * as crypto from 'crypto';
 
+const tsExt = '.ts';
+const dtsExt = '.d.ts';
+
 export class SystemUtil {
   static readonly cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
+
+  static EXT = {
+    outputTypes: dtsExt,
+    input: tsExt,
+  };
+
+  static PATH = {
+    src: 'src',
+    srcWithSep: 'src/',
+    support: 'support',
+    supportWithSep: 'support/',
+  };
 
   /**
    * Generate a random UUID

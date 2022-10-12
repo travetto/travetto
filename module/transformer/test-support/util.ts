@@ -1,10 +1,11 @@
 import * as ts from 'typescript';
+import * as fs from 'fs/promises';
 import * as timer from 'timers/promises';
 import { readFileSync } from 'fs';
 
-import { FsUtil, Host, ScanFs } from '@travetto/boot';
+import { ScanFs } from '@travetto/boot';
 
-import { VisitorFactory, TransformerState, getAllTransformers } from '..';
+import { VisitorFactory, TransformerState, getAllTransformers, SystemUtil } from '..';
 
 /**
  * Utils for testing transformers
@@ -19,14 +20,14 @@ export class TransformerTestUtil {
 
     const prog = ts.createProgram({
       options: ts.convertCompilerOptionsFromJson(tsconfigObj, '').options,
-      rootNames: (await ScanFs.scanDir({ testFile: f => f.startsWith(Host.PATH.srcWithSep) && f.endsWith(Host.EXT.input) }, folder))
+      rootNames: (await ScanFs.scanDir({ testFile: f => f.startsWith(SystemUtil.PATH.srcWithSep) && f.endsWith(SystemUtil.EXT.input) }, folder))
         .filter(x => x.stats?.isFile())
         .filter(x => !file || x.file.endsWith(file))
         .map(x => x.file),
     });
     const log = `${folder}/.trv_compiler.log`;
 
-    await FsUtil.unlinkRecursive(log);
+    await fs.rm(log, { recursive: true, force: true });
 
     const transformers =
       (await ScanFs.scanDir({ testFile: f => f.startsWith('support/transformer') }, folder))
@@ -50,7 +51,7 @@ export class TransformerTestUtil {
       console.info(readFileSync(log, 'utf8'));
     } catch { }
 
-    await FsUtil.unlinkRecursive(log);
+    await fs.rm(log, { recursive: true, force: true });
 
     return out;
   }

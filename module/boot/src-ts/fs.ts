@@ -1,15 +1,8 @@
 import * as fss from 'fs';
+import * as fs from 'fs/promises';
 import * as cp from 'child_process';
 
 import { PathUtil } from './path';
-
-const fs = fss.promises;
-
-const checkPath = (pth: string): void => {
-  if (!pth || pth === '/') {
-    throw new Error('Path has not been defined');
-  }
-};
 
 /**
  * Standard utils for interacting with the file system
@@ -63,26 +56,6 @@ export class FsUtil {
    */
   static isOlder(current: fss.Stats, next: fss.Stats): boolean {
     return this.maxTime(current) < this.maxTime(next);
-  }
-
-  /**
-   * Remove directory, determine if errors should be ignored
-   * @param pth The folder to delete
-   * @param ignore Should errors be ignored
-   */
-  static unlinkRecursiveSync(pth: string): void {
-    checkPath(pth);
-    fss.rmSync(pth, { recursive: true, force: true });
-  }
-
-  /**
-   * Remove directory, determine if errors should be ignored
-   * @param pth The folder to delete
-   * @param ignore Should errors be ignored
-   */
-  static async unlinkRecursive(pth: string): Promise<void> {
-    checkPath(pth);
-    await fs.rm(pth, { recursive: true, force: true });
   }
 
   /**

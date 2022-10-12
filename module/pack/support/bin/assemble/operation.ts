@@ -1,4 +1,6 @@
-import { CliUtil, FsUtil, PathUtil } from '@travetto/boot';
+import * as fs from 'fs/promises';
+
+import { CliUtil, PathUtil } from '@travetto/boot';
 
 import { PackUtil } from '../util';
 import { CommonConfig, PackOperation } from '../types';
@@ -48,7 +50,7 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
     const fullCacheDir = PathUtil.resolveUnix(workspace!, cacheDir);
     const ws = PathUtil.resolveUnix(workspace!);
 
-    yield 'Cleaning Workspace'; await FsUtil.unlinkRecursive(ws).then(() => { });
+    yield 'Cleaning Workspace'; await fs.rm(ws, { recursive: true, force: true }).then(() => { });
     yield 'Copying Dependencies'; await AssembleUtil.copyDependencies(ws);
     yield 'Copying App Content'; await AssembleUtil.copyModule(PathUtil.cwd, ws);
     yield 'Excluding Pre-Compile Files'; await AssembleUtil.excludeFiles(ws, excludeCompile);

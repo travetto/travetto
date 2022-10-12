@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { mkdirSync, writeFileSync } from 'fs';
+import { mkdirSync } from 'fs';
 import * as fs from 'fs/promises';
 import * as os from 'os';
 
@@ -19,14 +19,6 @@ export class FsUtilTest {
   }
 
   /**
-   * Command to remove a folder
-   */
-  @Test()
-  async unlink() {
-    assert.doesNotThrow(() => FsUtil.unlinkRecursiveSync('/woahwoah'));
-  }
-
-  /**
    * Make directory and all intermediate ones as well
    */
   @Test()
@@ -39,7 +31,7 @@ export class FsUtilTest {
     await fs.mkdir(special, { recursive: true });
     assert(await FsUtil.exists(special));
 
-    await FsUtil.unlinkRecursive(base);
+    await fs.rm(base, { recursive: true, force: false });
     assert(!(await FsUtil.exists(special)));
   }
 
@@ -53,7 +45,7 @@ export class FsUtilTest {
     mkdirSync(special, { recursive: true });
     assert(FsUtil.existsSync(special));
 
-    FsUtil.unlinkRecursiveSync(base);
+    await fs.rm(base, { recursive: true, force: false });
     assert(!FsUtil.existsSync(base));
   }
 
@@ -84,7 +76,7 @@ export class FsUtilTest {
 
     assert(results.length === 4);
 
-    FsUtil.unlinkRecursiveSync(base);
+    await fs.rm(base, { recursive: true, force: false });
     assert(!FsUtil.existsSync(base));
 
     cache.clear();
