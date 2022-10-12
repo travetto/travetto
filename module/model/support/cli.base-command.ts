@@ -26,7 +26,8 @@ export abstract class BaseModelCommand extends CliCommand<Options> {
 
   override async build(): Promise<void> {
     await super.build();
-    const { ConsoleManager, PhaseManager } = await import('@travetto/base');
+    const { ConsoleManager } = await import('@travetto/boot');
+    const { PhaseManager } = await import('@travetto/base');
     ConsoleManager.exclude('debug');
     // Init
     await PhaseManager.run('init');
