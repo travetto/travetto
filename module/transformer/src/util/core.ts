@@ -5,20 +5,6 @@ import * as ts from 'typescript';
  */
 export class CoreUtil {
   /**
-   * Naive hashing
-   */
-  static naiveHash(text: string): number {
-    let hash = 5381;
-
-    for (let i = 0; i < text.length; i++) {
-      // eslint-disable-next-line no-bitwise
-      hash = (hash * 33) ^ text.charCodeAt(i);
-    }
-
-    return Math.abs(hash);
-  }
-
-  /**
    * See if inbound node has an original property
    */
   static hasOriginal(o: ts.Node): o is (ts.Node & { original: ts.Node }) {

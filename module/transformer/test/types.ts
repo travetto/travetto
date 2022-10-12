@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { PathUtil } from '@travetto/boot';
 
 import { TransformerTestUtil } from '../test-support/util';
+import { SystemUtil } from '../src/util';
 
 @Suite()
 export class TypesTransformSuite {
@@ -11,7 +11,7 @@ export class TypesTransformSuite {
   @Test({ timeout: 10000 })
   async transformQuestion() {
     const output = await TransformerTestUtil.compile(
-      PathUtil.resolveUnix(__dirname, '../doc'),
+      SystemUtil.resolveUnix(__dirname, '../doc'),
       'upper.ts'
     );
     assert(output.includes('this.AGE'));
