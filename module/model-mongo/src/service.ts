@@ -14,7 +14,7 @@ import {
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
-import { ShutdownManager, Util, Class, AppError } from '@travetto/base';
+import { ShutdownManager, Class, AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { DeepPartial, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -29,6 +29,7 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
+import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
@@ -90,7 +91,7 @@ export class MongoModelService implements
    * Build a mongo identifier
    */
   uuid(): string {
-    return Util.uuid();
+    return ModelUtil.uuid();
   }
 
   // Storage

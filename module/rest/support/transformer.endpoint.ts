@@ -1,10 +1,9 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, TransformerId, DecoratorMeta, LiteralUtil
+  TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, TransformerId, DecoratorMeta, LiteralUtil, AnyType
 } from '@travetto/transformer';
 import { SchemaTransformUtil } from '@travetto/schema/support/transform-util';
-import { AnyType } from '@travetto/transformer/src/resolver/types';
 
 const PARAM_DEC_FILE = '@travetto/rest/src/decorator/param';
 const COMMON_DEC_FILE = '@travetto/rest/src/decorator/common';

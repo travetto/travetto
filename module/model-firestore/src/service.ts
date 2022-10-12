@@ -1,6 +1,6 @@
 import { DocumentData, FieldValue, Firestore, PartialWithFieldValue, Query, UpdateData } from '@google-cloud/firestore';
 
-import { ShutdownManager, Util, Class } from '@travetto/base';
+import { ShutdownManager, Class } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -10,6 +10,7 @@ import {
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
+import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { FirestoreModelConfig } from './config';
 
@@ -57,7 +58,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   // Crud
   uuid(): string {
-    return Util.uuid();
+    return ModelUtil.uuid();
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

@@ -25,7 +25,7 @@
     "directory": "module/transformer"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.2"
+    "@travetto/boot": "^3.0.0-rc.2"
   },
   "publishConfig": {
     "access": "public"

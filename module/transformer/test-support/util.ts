@@ -1,8 +1,8 @@
 import * as ts from 'typescript';
+import * as timer from 'timers/promises';
 import { readFileSync } from 'fs';
 
 import { FsUtil, Host, ScanFs } from '@travetto/boot';
-import { Util } from '@travetto/base';
 
 import { VisitorFactory, TransformerState, getAllTransformers } from '..';
 
@@ -45,7 +45,7 @@ export class TransformerTestUtil {
       );
     });
 
-    await Util.wait('1s'); // Wait for file buffer to sync
+    await timer.setTimeout(1000); // Wait for file buffer to sync
     try {
       console.info(readFileSync(log, 'utf8'));
     } catch { }

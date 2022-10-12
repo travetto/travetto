@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 
 import { StreamUtil } from '@travetto/boot';
-import { Util, Class, TimeSpan } from '@travetto/base';
+import { Class, TimeSpan } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -21,6 +21,7 @@ import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
 import { StreamModel, STREAMS } from '../internal/service/stream';
 import { IndexConfig } from '../registry/types';
+import { ModelUtil } from '../internal/util';
 
 const STREAM_META = `${STREAMS}_meta`;
 
@@ -169,7 +170,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   // CRUD Support
   uuid(): string {
-    return Util.uuid(32);
+    return ModelUtil.uuid(32);
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

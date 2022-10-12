@@ -1,5 +1,3 @@
-import { Util } from '@travetto/base';
-
 const exclude = new Set([
   'parent', 'checker', 'end', 'pos', 'id', 'source', 'sourceFile', 'getSourceFile',
   'statements', 'stringIndexInfo', 'numberIndexInfo', 'instantiations', 'thisType',
@@ -22,7 +20,7 @@ export class LogUtil {
    * Clean up `ts.Node` contents for logging
    */
   static collapseNode(x: unknown, cache: Set<unknown> = new Set()): unknown {
-    if (!x || Util.isPrimitive(x)) {
+    if (!x || !(typeof x === 'object' || typeof x === 'function')) {
       return x;
     }
 
@@ -39,7 +37,7 @@ export class LogUtil {
       const ox = x as object;
       const out: Record<string, unknown> = {};
       for (const key of Object.keys(ox)) {
-        if (Util.isFunction(ox[key]) || exclude.has(key) || ox[key] === undefined) {
+        if (Object.getPrototypeOf(ox[key]) === Function.prototype || exclude.has(key) || ox[key] === undefined) {
           continue;
         }
         try {
