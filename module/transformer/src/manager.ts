@@ -3,12 +3,12 @@ import * as ts from 'typescript';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { Host } from '@travetto/boot';
 
-import {
-  NodeTransformer, VisitorFactory, TransformerState, getAllTransformers
-} from '@travetto/transformer'; // Narrow import to minimize scope
+import { NodeTransformer } from './types/visitor';
+import { VisitorFactory } from './visitor';
+import { TransformerState } from './state';
+import { getAllTransformers } from './register';
 
 type TransformerList = { before: ts.TransformerFactory<ts.SourceFile>[] };
-
 
 /**
  * Manages the typescript transformers

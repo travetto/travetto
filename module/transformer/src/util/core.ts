@@ -51,7 +51,6 @@ export class CoreUtil {
    */
   static createStaticField(factory: ts.NodeFactory, name: string, val: ts.Expression): ts.PropertyDeclaration {
     return factory.createPropertyDeclaration(
-      undefined,
       [factory.createToken(ts.SyntaxKind.StaticKeyword)],
       name, undefined, undefined, val
     );

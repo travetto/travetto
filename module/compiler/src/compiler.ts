@@ -8,9 +8,9 @@ import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 import { Dynamic } from '@travetto/base/src/internal/dynamic';
 import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 import { TranspileUtil } from '@travetto/boot/src/internal/transpile-util';
+import { TransformerManager } from '@travetto/transformer';
 
 import { SourceHost } from './host';
-import { TransformerManager } from './transformer';
 
 type FileListener = (name: string) => void;
 type EventType = 'added' | 'removed' | 'changed';
