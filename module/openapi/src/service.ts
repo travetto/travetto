@@ -1,4 +1,5 @@
-import { promises as fs } from 'fs';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 import { OpenAPIObject } from 'openapi3-ts';
 
 import { Injectable, Inject } from '@travetto/di';
@@ -78,6 +79,8 @@ export class OpenApiService {
         JSON.stringify(this.spec, undefined, 2) :
         YamlUtil.serialize(this.spec);
 
+      // TODO: Should use file abstraction
+      await fs.mkdir(path.dirname(this.apiSpecConfig.output), { recursive: true });
       await fs.writeFile(this.apiSpecConfig.output, output);
     } catch (err) {
       console.error('Unable to persist openapi spec', err);

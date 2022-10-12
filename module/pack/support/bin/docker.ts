@@ -1,4 +1,4 @@
-import { promises as fs } from 'fs';
+import * as fs from 'fs/promises';
 
 import { CliUtil, ExecUtil, Package, PathUtil } from '@travetto/boot';
 

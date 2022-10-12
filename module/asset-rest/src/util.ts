@@ -19,6 +19,7 @@ const FILENAME_EXTRACT = /filename[*]?=["]?([^";]*)["]?/;
 export class AssetRestUtil {
 
   static async #createTempFileWithCleanup(filename: string): Promise<WithCleanup<string>> {
+    // TODO: Should use file abstraction
     const uniqueDir = PathUtil.resolveUnix(os.tmpdir(), `upload_${Math.trunc(Date.now() / (1000 * 60))}_${Math.trunc(Math.random() * 100000000).toString(36)}`);
     await fs.mkdir(uniqueDir, { recursive: true });
     const uniqueLocal = PathUtil.resolveUnix(uniqueDir, path.basename(filename));

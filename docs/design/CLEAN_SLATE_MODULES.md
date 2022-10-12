@@ -2,12 +2,8 @@
 
 ## Phase 1
 Framework will now be broken into two parts:
-* Compiler 
-  - Boot
-    - No longer responsible for transpilation
-    - Existing "source mods" will become a support.transformer.*
-    - Will most likely still be responsible for module loading/indexing
-
+* Compiler
+  - The goal is to wrap `tsc` as much as possible, and remove as much custom logic where possible.
   - Transform (will still read transformers from module folders)
     - Will need to pre-compile support.transformer.* code
   - Compiler 
@@ -24,7 +20,10 @@ Framework will now be broken into two parts:
 
 * Run-time
   - All the other modules
-  - Includes Boot as well
+  - Boot
+    - No longer responsible for transpilation
+    - Existing "source mods" will become a support.transformer.*
+    - Will most likely still be responsible for module loading indexing
   - Includes Watch as well
     * Will watch .trv_cache/<full path> as the source for changes to care about
 
