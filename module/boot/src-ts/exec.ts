@@ -1,6 +1,6 @@
 import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { Readable } from 'stream';
-import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
+import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 
 import { PathUtil } from './path';
 import { StreamUtil } from './stream';
@@ -301,13 +301,5 @@ export class ExecUtil {
     } else {
       proc.kill('SIGTERM');
     }
-  }
-
-  /**
-   * Return plugin data depending on how it has been called
-   */
-  static mainResponse<T = unknown>(obj: T): T {
-    parentPort ? parentPort.postMessage(obj) : console.log(JSON.stringify(obj));
-    return obj;
   }
 }

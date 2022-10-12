@@ -1,4 +1,4 @@
-import { WorkerOptions } from 'worker_threads';
+import { parentPort, WorkerOptions } from 'worker_threads';
 
 import { CatchableResult, ExecUtil, ExecutionState, WorkerResult } from '../exec';
 import { Host } from '../host';
@@ -41,5 +41,13 @@ export class ModuleExec {
       ],
       options
     );
+  }
+
+  /**
+   * Return plugin data depending on how it has been called
+   */
+  static mainResponse<T = unknown>(obj: T): T {
+    parentPort ? parentPort.postMessage(obj) : console.log(JSON.stringify(obj));
+    return obj;
   }
 }

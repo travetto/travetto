@@ -1,6 +1,6 @@
 import * as fss from 'fs';
+import * as cp from 'child_process';
 
-import { ExecUtil } from './exec';
 import { PathUtil } from './path';
 
 const fs = fss.promises;
@@ -93,7 +93,13 @@ export class FsUtil {
    */
   static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
     try {
-      await ExecUtil.execSync(...this.#copyCommand(src, dest));
+      await new Promise<void>((res, rej) => {
+        const [cmd, args] = this.#copyCommand(src, dest);
+        const proc = cp.spawn([cmd, ...args].join(' '), {});
+        proc
+          .on('error', err => rej(err))
+          .on('exit', (code: number) => code > 0 ? rej(new Error('Failed to copy')) : res());
+      });
     } catch (err) {
       if (!ignore) {
         throw err;
