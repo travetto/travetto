@@ -6,9 +6,8 @@ export const step = {
   after: ['@trv:base/transpile'],
   action: async (): Promise<void> => {
     const { ModuleIndex } = await import('@travetto/boot/src/internal/module');
-    const { AppManifest } = await import('@travetto/base');
 
-    for (const { file } of ModuleIndex.findByFolders(AppManifest.source, 'required')) {
+    for (const { file } of ModuleIndex.find({ folder: 'src' })) {
       // Use require vs import on purpose
       require(file); // Scan all files as compiler source root
     }

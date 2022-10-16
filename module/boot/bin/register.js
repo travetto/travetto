@@ -9,7 +9,3 @@ global[s] = __filename;
 try { require(`${process.cwd()}/.env`); } catch { } // read env
 (process.env.TRV_REQUIRES || '').replace(/[^ ,:]+/g, f => require(f));
 require('@travetto/boot/src/internal/setup');
-
-if (!require('@travetto/boot/src/env').EnvUtil.isCompiled()) {
-  require('@travetto/boot/src/internal/transpile').TranspileManager.init(); // init
-}

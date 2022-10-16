@@ -12,14 +12,12 @@ Module Structure
 ## Test
 * test/
   * resources/
-* test-isolated/ (For testing isolated code)
 
 ## Library (node_modules/@travetto/{x})
 * bin/  - CLI Support
 * bin/lib - CLI Support Libraries
 * support/ - Phase support as well as AST transformer support
 * index.ts - Root index for loading
-* test-support/ - Shared libraries for testing
 
 App Running
 -----------------------------

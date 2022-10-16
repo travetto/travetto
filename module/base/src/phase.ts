@@ -1,6 +1,5 @@
 import { Host } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
-import { TranspileManager } from '@travetto/boot/src/internal/transpile';
 
 import { OrderingUtil } from './internal/ordering';
 
@@ -60,14 +59,10 @@ export class PhaseManager {
    */
   async load(upto?: string, after?: string): Promise<this> {
 
-    const found = ModuleIndex.find({ folder: Host.PATH.support });
-
-    TranspileManager.transpileAll(found);
+    const found = ModuleIndex.find({ folder: Host.PATH.support, filter: this.#filter });
 
     // Load all support files
-    const files = await Promise.all(found
-      .filter(x => this.#filter.test(x.module))
-      .map(x => import(x.file)));
+    const files = await Promise.all(found.map(x => import(x.module)));
 
     // Filter, and validate active
     const modules = (await Promise.all(files

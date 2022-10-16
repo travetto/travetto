@@ -36,8 +36,6 @@ export class Host {
     support: 'support',
     supportWithSep: 'support/',
     resources: 'resources',
-    testSupport: 'test-support',
-    testIsolated: 'test-isolated',
     bin: 'bin',
     test: 'test'
   };

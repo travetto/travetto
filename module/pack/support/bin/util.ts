@@ -50,7 +50,7 @@ export class PackUtil {
   static async modeList(): Promise<Partial<CommonConfig>[]> {
     if (!this.#modes) {
       this.#modes = await Promise.all(
-        ModuleIndex.find({ folder: Host.PATH.support, filter: f => /\/pack[.].*[.]ts/.test(f) })
+        ModuleIndex.find({ folder: Host.PATH.support, filter: f => /\/pack[.].*[.]/.test(f) })
           .map(async (x) => {
             const req: Partial<CommonConfig> = (await import(x.file)).config;
             req.file = x.module.replace(/^node_modules\//, '');

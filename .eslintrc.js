@@ -19,7 +19,7 @@ module.exports = {
   overrides: [
     ...overrides,
     {
-      files: 'module/*/{test,doc,e2e,test-support,test-isolated}/**/*.{ts,js}',
+      files: 'module/*/{test,doc,e2e}/**/*.{ts,js}',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0
