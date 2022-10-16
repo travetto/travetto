@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Test, Suite, AfterEach, BeforeAll } from '@travetto/test';
 
-import { PathUtil } from '../src';
+import { PathUtil } from '..';
 import { $TranspileCache } from '../src/internal/transpile-cache';
 import { ModuleUtil } from '../src/internal/module-util';
 

@@ -1,12 +1,7 @@
 import * as ts from 'typescript';
-import { createWriteStream } from 'fs';
-
-import { AppCache, ConsoleManager } from '@travetto/boot';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
-import { LogUtil } from './util/log';
 import { CoreUtil } from './util/core';
-import { SystemUtil } from './util/system';
 
 /**
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
@@ -38,16 +33,12 @@ export class VisitorFactory<S extends State = State> {
   }
 
   #transformers = new Map<TransformerType, TransformerSet<S>>();
-  #logTarget: string;
   #getState: (context: ts.TransformationContext, src: ts.SourceFile) => S;
-  #logger: Console | undefined;
 
   constructor(
     getState: (context: ts.TransformationContext, src: ts.SourceFile) => S,
-    transformers: NodeTransformer<S, TransformerType, ts.Node>[],
-    logTarget = 'compiler.log'
+    transformers: NodeTransformer<S, TransformerType, ts.Node>[]
   ) {
-    this.#logTarget = logTarget;
     this.#getState = getState;
     this.#init(transformers);
   }
@@ -79,25 +70,12 @@ export class VisitorFactory<S extends State = State> {
     }
   }
 
-  get logger(): Console {
-    this.#logger ??= new console.Console({
-      stdout: createWriteStream(SystemUtil.resolveUnix(AppCache.outputDir, this.#logTarget), { flags: 'a' }),
-      inspectOptions: { depth: 4 },
-    });
-    return this.#logger;
-  }
-
   /**
    * Produce a visitor for a given a file
    */
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
-        const c = this.logger;
-        ConsoleManager.set({
-          onLog: (level, ctx, args) => c[level](level, ctx, ...LogUtil.collapseNodes(args))
-        });
-
         console.debug('Processing', { file: file.fileName, pid: process.pid });
         const state = this.#getState(context, file);
         let ret = this.visit(state, context, file);
@@ -129,8 +107,6 @@ export class VisitorFactory<S extends State = State> {
         const out = new Error(`Failed transforming: ${file.fileName}: ${err.message}`);
         out.stack = err.stack;
         throw out;
-      } finally {
-        ConsoleManager.clear(); // Reset logging
       }
     };
   }

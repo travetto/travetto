@@ -1,7 +1,5 @@
 import * as ts from 'typescript';
 
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
-
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';
 import { TypeResolver } from './resolver/service';
@@ -42,7 +40,7 @@ export class TransformerState implements State {
   constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker) {
     this.#imports = new ImportManager(source, factory);
     this.#resolver = new TypeResolver(checker);
-    this.module = ModuleUtil.normalizePath(this.source.fileName);
+    this.module = SystemUtil.normalizePath(this.source.fileName);
   }
 
   /**
@@ -152,7 +150,7 @@ export class TransformerState implements State {
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
-      module: decl ? ModuleUtil.normalizePath(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
+      module: decl ? SystemUtil.normalizePath(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
       targets: DocUtil.readAugments(this.#resolver.getType(ident)),
       name: ident ?
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

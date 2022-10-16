@@ -1,5 +1,5 @@
 import { d, lib } from '@travetto/doc';
-import { FileCache, ExecUtil, StreamUtil } from './src';
+import { FileCache, ExecUtil, StreamUtil } from '.';
 
 const AppCacheLink = d.Ref('AppCache', 'src-ts/cache.ts');
 const FileCacheLink = d.Ref(FileCache.name, 'src-ts/cache.ts');

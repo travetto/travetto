@@ -16,7 +16,9 @@
   },
   "files": [
     "index.ts",
+    "bin",
     "src",
+    "support",
     "test-support"
   ],
   "main": "index.ts",

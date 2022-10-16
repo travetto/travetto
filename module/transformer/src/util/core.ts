@@ -4,6 +4,7 @@ import * as ts from 'typescript';
  * Core utilities util
  */
 export class CoreUtil {
+
   /**
    * See if inbound node has an original property
    */

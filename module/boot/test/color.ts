@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite, BeforeEach } from '@travetto/test';
-import { ColorUtil } from '../src';
+import { ColorUtil } from '..';
 
 @Suite()
 export class ColorUtilTest {

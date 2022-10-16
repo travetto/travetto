@@ -1,8 +1,6 @@
 import * as ts from 'typescript';
 import { basename, dirname, relative } from 'path';
 
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
-
 import { AnyType, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';
 import { SystemUtil } from './util/system';
@@ -40,7 +38,7 @@ export class ImportManager {
    * Import a file if needed, and record it's identifier
    */
   importFile(file: string, base?: string): Import {
-    file = ModuleUtil.normalizePath(file);
+    file = SystemUtil.normalizePath(file);
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {

@@ -5,7 +5,7 @@ import * as os from 'os';
 import { ResourceManager } from '@travetto/base';
 import { Test, Suite } from '@travetto/test';
 
-import { StreamUtil, ExecUtil } from '../src';
+import { StreamUtil, ExecUtil } from '..';
 
 @Suite()
 export class StreamUtilTest {

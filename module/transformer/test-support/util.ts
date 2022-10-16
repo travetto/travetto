@@ -1,9 +1,5 @@
 import * as ts from 'typescript';
-import * as fs from 'fs/promises';
 import * as timer from 'timers/promises';
-import { readFileSync } from 'fs';
-
-import { ScanFs } from '@travetto/boot';
 
 import { VisitorFactory, TransformerState, getAllTransformers, SystemUtil } from '..';
 
@@ -15,6 +11,7 @@ export class TransformerTestUtil {
    * Compile a single file from a folder
    */
   static async compile(folder: string, file?: string): Promise<string> {
+    const { ScanFs } = await import('@travetto/boot');
 
     const tsconfigObj = await import('@travetto/boot/tsconfig.trv.json');
 
@@ -25,9 +22,6 @@ export class TransformerTestUtil {
         .filter(x => !file || x.file.endsWith(file))
         .map(x => x.file),
     });
-    const log = `${folder}/.trv_compiler.log`;
-
-    await fs.rm(log, { recursive: true, force: true });
 
     const transformers =
       (await ScanFs.scanDir({ testFile: f => f.startsWith('support/transformer') }, folder))
@@ -36,8 +30,7 @@ export class TransformerTestUtil {
 
     const visitor = new VisitorFactory(
       (ctx, src) => new TransformerState(src, ctx.factory, prog.getTypeChecker()),
-      (await Promise.all(transformers)).flat(),
-      log
+      (await Promise.all(transformers)).flat()
     );
 
     const out = await new Promise<string>(res => {
@@ -47,11 +40,6 @@ export class TransformerTestUtil {
     });
 
     await timer.setTimeout(1000); // Wait for file buffer to sync
-    try {
-      console.info(readFileSync(log, 'utf8'));
-    } catch { }
-
-    await fs.rm(log, { recursive: true, force: true });
 
     return out;
   }

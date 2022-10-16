@@ -1,12 +1,9 @@
 import * as ts from 'typescript';
 
-import { ModuleIndex } from '@travetto/boot/src/internal/module';
-
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
 import { TransformerState } from './state';
 import { getAllTransformers } from './register';
-import { SystemUtil } from './util/system';
 
 type TransformerList = { before: ts.TransformerFactory<ts.SourceFile>[] };
 
@@ -21,15 +18,12 @@ export class TransformerManager {
   /**
    * Read all transformers from disk under the pattern support/transformer.*
    */
-  async init(): Promise<void> {
+  async init(entries: { file: string }[]): Promise<void> {
     if (this.#cached) {
       return;
     }
 
-    // Modules
-    const found = ModuleIndex.find({ folder: SystemUtil.PATH.support, filter: /\/transformer.*[.]ts/ });
-
-    for (const entry of found) { // Exclude based on blacklist
+    for (const entry of entries) { // Exclude based on blacklist
       this.#transformers.push(...getAllTransformers(await import(entry.file)));
     }
 
