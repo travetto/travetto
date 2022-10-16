@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "esnext",
+    "moduleResolution": "node",
+    "lib": [
+      "es2022"
+    ],
+    "strict": true,
+    "strictPropertyInitialization": false,
+    "experimentalDecorators": true,
+    "noEmitOnError": false,
+    "noErrorTruncation": true,
+    "resolveJsonModule": true,
+    "sourceMap": false,
+    "inlineSourceMap": true,
+    "removeComments": true,
+    "importHelpers": true,
+    "outDir": "build/"
+  }
+}

@@ -4,7 +4,7 @@ import * as fs from 'fs/promises';
 import * as os from 'os';
 
 import { Test, Suite } from '@travetto/test';
-import { ExecUtil, FileCache, FsUtil, PathUtil } from '../src';
+import { ExecUtil, FileCache, FsUtil, PathUtil } from '..';
 
 @Suite()
 export class FsUtilTest {

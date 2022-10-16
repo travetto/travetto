@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { PathUtil } from '../src';
+import { PathUtil } from '..';
 
 @Suite()
 export class PathTest {

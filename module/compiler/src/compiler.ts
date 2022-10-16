@@ -105,7 +105,9 @@ class $Compiler {
     const start = Date.now();
     this.active = true;
 
-    await this.#transformerManager.init();
+    await this.#transformerManager.init(
+      ModuleIndex.find({ folder: SystemUtil.PATH.support, filter: /\/transformer.*[.]ts/ })
+    );
     // Enhance transpilation, with custom transformations
     TranspileManager.setTranspiler(tsf => this.#transpile(tsf));
     TranspileManager.setSourceMapSource(tsf => this.#host.contents.get(tsf)!);

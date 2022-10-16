@@ -52,7 +52,7 @@ export class RegisterTransformer {
    */
   @AfterClass()
   static registerClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (state.module === REGISTER_MOD) {  // Cannot process self
+    if (state.module === REGISTER_MOD || state.module.startsWith('@travetto/boot')) {  // Cannot process self
       return node;
     }
 

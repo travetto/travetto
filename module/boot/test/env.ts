@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite, AfterEach, BeforeEach } from '@travetto/test';
-import { EnvUtil } from '../src';
+import { EnvUtil } from '..';
 
 @Suite()
 export class EnvUtilTest {

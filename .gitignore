@@ -35,7 +35,6 @@ module/*/LICENSE
 related/*/LICENSE
 module/*/*.tgz
 
-module/boot/src/
 module/scaffold/**/eslintrc.json
 related/travetto.github.io/src/assets/images/vscode-plugin
 related/travetto.github.io/.angular
