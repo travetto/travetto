@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 
 import { Class } from '@travetto/base';
-import { Compiler } from '@travetto/compiler';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 import { PendingRegister } from '../decorator';
@@ -17,9 +16,9 @@ export class ClassSource implements ChangeSource<Class> {
   #emitter = new EventEmitter();
 
   constructor() {
-    Compiler
-      .on('added', () => { this.processFiles(); this.#flush(); })
-      .on('changed', () => this.processFiles());
+    // Compiler
+    //   .on('added', () => { this.processFiles(); this.#flush(); })
+    //   .on('changed', () => this.processFiles());
   }
 
   /**

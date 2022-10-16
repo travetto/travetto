@@ -47,4 +47,13 @@ export class ModuleUtil {
     this.#idCache.set(filename, name);
     return name;
   }
+
+
+  /**
+   * Convert an output file to a unix source file
+   * @param file .ts or .js file to convert
+   */
+  static toUnixSource(file: string): string {
+    return file.replace(/[\\\/]+/g, '/').replace(/[.]js$/, '.ts');
+  }
 }

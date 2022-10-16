@@ -3,11 +3,11 @@ import * as assert from 'assert';
 import { StreamUtil } from '@travetto/boot';
 import { Suite, Test } from '@travetto/test';
 
-import { ModelBasicSuite } from '@travetto/model/test-support/basic';
-import { ModelCrudSuite } from '@travetto/model/test-support/crud';
-import { ModelStreamSuite } from '@travetto/model/test-support/stream';
-import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
-import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud';
+import { ModelStreamSuite } from '@travetto/model/support/test/stream';
+import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
+import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
 import { S3ModelConfig } from '../src/config';
 import { S3ModelService } from '../src/service';

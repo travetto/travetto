@@ -2,12 +2,12 @@ import { Suite } from '@travetto/test';
 import { InjectableFactory } from '@travetto/di';
 import { AsyncContext } from '@travetto/context';
 
-import { ModelCrudSuite } from '@travetto/model/test-support/crud';
-import { ModelBulkSuite } from '@travetto/model/test-support/bulk';
-import { ModelBasicSuite } from '@travetto/model/test-support/basic';
-import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
-import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
-import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud';
+import { ModelBulkSuite } from '@travetto/model/support/test/bulk';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic';
+import { WithSuiteContext } from '@travetto/context/support/test.context';
+import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
+import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 
 import { SqliteDialect } from '../src/dialect';

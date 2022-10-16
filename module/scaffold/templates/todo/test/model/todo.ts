@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { ModelCrudSupport } from '@travetto/model';
-import { BaseModelSuite } from '@travetto/model/test-support/base';
+import { BaseModelSuite } from '@travetto/model/support/test/base';
 
 import { Todo } from '../../src/model/todo';
 

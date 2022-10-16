@@ -3,7 +3,7 @@ import * as asyncHooks from 'async_hooks';
 
 import { Inject } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
-import { InjectableSuite } from '@travetto/di/test-support/suite';
+import { InjectableSuite } from '@travetto/di/support/test.suite';
 import { Util } from '@travetto/base';
 
 import { AsyncContext, WithAsyncContext } from '../';

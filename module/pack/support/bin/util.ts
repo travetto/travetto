@@ -4,7 +4,7 @@ import * as path from 'path';
 // TODO: Get proper typings
 const glob = require('picomatch');
 
-import { CliUtil, FsUtil, Host, PathUtil, ScanFs } from '@travetto/boot';
+import { CliUtil, FsUtil, PathUtil, ScanFs } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 
 import { CommonConfig, PackOperation } from './types';
@@ -50,7 +50,7 @@ export class PackUtil {
   static async modeList(): Promise<Partial<CommonConfig>[]> {
     if (!this.#modes) {
       this.#modes = await Promise.all(
-        ModuleIndex.find({ folder: Host.PATH.support, filter: f => /\/pack[.].*[.]/.test(f) })
+        ModuleIndex.findSupport({ filter: f => /\/pack[.].*[.]/.test(f) })
           .map(async (x) => {
             const req: Partial<CommonConfig> = (await import(x.file)).config;
             req.file = x.module.replace(/^node_modules\//, '');

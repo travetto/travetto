@@ -1,5 +1,4 @@
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
-import { Host } from '@travetto/boot/src/host';
 import { CliUtil } from '@travetto/boot/src/cli';
 
 import { CliCommand } from './command';
@@ -25,8 +24,8 @@ export class CliCommandManager {
    */
   static getCommandMapping(): Map<string, string> {
     const all = new Map<string, string>();
-    for (const { file } of ModuleIndex.find({ folder: Host.PATH.support, filter: /\/cli[.]/ })) {
-      all.set(file.split(`/${Host.PATH.support}/`)[1].replace(/^cli[.](.*?)[.][^.]+$/, (_, f) => f), file);
+    for (const { file } of ModuleIndex.findSupport({ filter: /\/cli[.]/ })) {
+      all.set(file.replace(/^.*\/cli[.](.*?)[.][^.]+$/, (_, f) => f), file);
     }
     return all;
   }

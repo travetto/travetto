@@ -21,7 +21,7 @@ export class BuildUtil {
 
     let expired: ModuleIndexEntry | undefined;
     let missing: ModuleIndexEntry | undefined;
-    for (const entry of ModuleIndex.find({ folder: 'src' })) {
+    for (const entry of ModuleIndex.findSrc({})) {
       try {
         if (FsUtil.isOlder(statSync(entry.source), statSync(entry.file))) {
           expired = entry;

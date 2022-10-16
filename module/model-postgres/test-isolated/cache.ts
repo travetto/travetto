@@ -2,10 +2,10 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
 import { CacheModelⲐ } from '@travetto/cache';
-import { CacheServiceSuite } from '@travetto/cache/test-support/service';
+import { CacheServiceSuite } from '@travetto/cache/support/service';
 import { AsyncContext } from '@travetto/context';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
-import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
+import { WithSuiteContext } from '@travetto/context/support/test.context';
 import { SQLModelService, SQLModelConfig } from '@travetto/model-sql';
 
 import { PostgreSQLDialect } from '../src/dialect';

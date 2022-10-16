@@ -37,7 +37,7 @@ export class RunnerUtil {
    * Find all valid test files given the globs
    */
   static async getTestFiles(globs: RegExp[]): Promise<string[]> {
-    const files = ModuleIndex.find({ folder: 'test' })
+    const files = ModuleIndex.findTest({})
       .filter(f => globs.some(g => g.test(f.module)));
 
     const validFiles = files

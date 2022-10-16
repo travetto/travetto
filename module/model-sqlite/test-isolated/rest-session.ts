@@ -2,10 +2,10 @@
 // @with-module @travetto/rest-express
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { RestSessionServerSuite } from '@travetto/rest-session/test-support/server';
+import { RestSessionServerSuite } from '@travetto/rest-session/support/test.server';
 import { SessionModelⲐ } from '@travetto/rest-session';
 import { AsyncContext } from '@travetto/context';
-import { ModelSuite } from '@travetto/model/test-support/suite';
+import { ModelSuite } from '@travetto/model/support/test/suite';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 

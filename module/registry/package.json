@@ -28,7 +28,6 @@
     "directory": "module/registry"
   },
   "dependencies": {
-    "@travetto/compiler": "^3.0.0-rc.4",
     "@travetto/transformer": "^3.0.0-rc.4"
   },
   "docDependencies": {

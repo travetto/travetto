@@ -1,9 +1,9 @@
 import { Suite } from '@travetto/test';
 
-import { ModelBasicSuite } from '@travetto/model/test-support/basic';
-import { ModelCrudSuite } from '@travetto/model/test-support/crud';
-import { ModelIndexedSuite } from '@travetto/model/test-support/indexed';
-import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud';
+import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
+import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
 import { FirestoreModelConfig, FirestoreModelService } from '..';
 

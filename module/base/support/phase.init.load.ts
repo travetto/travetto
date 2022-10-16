@@ -7,7 +7,7 @@ export const step = {
   action: async (): Promise<void> => {
     const { ModuleIndex } = await import('@travetto/boot/src/internal/module');
 
-    for (const { file } of ModuleIndex.find({ folder: 'src' })) {
+    for (const { file } of ModuleIndex.findSrc({})) {
       // Use require vs import on purpose
       require(file); // Scan all files as compiler source root
     }

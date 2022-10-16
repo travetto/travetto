@@ -157,7 +157,7 @@ import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 import { InjectableSuite } from '@travetto/di/test-support/suite';
-import { ModelSuite } from '@travetto/model/test-support/suite';
+import { ModelSuite } from '@travetto/model/support/test/suite';
 
 import { TodoService } from '../src/service';
 import { Todo } from '../src/model';

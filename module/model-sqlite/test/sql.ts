@@ -3,7 +3,7 @@ import { InjectableFactory } from '@travetto/di';
 import { SQLModelConfig } from '@travetto/model-sql/src/config';
 import { Suite } from '@travetto/test';
 import { SQLModelService } from '@travetto/model-sql';
-import { BaseSQLTest } from '@travetto/model-sql/test-support/query';
+import { BaseSQLTest } from '@travetto/model-sql/support/query';
 
 import { SqliteDialect } from '../src/dialect';
 

@@ -1,7 +1,5 @@
 import { PathUtil } from '../path';
 
-import { Host } from '../host';
-
 export type ModuleIndexEntry = { source: string, module: string, file: string };
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean };
@@ -44,12 +42,11 @@ class $ModuleIndex {
    */
   reset(): void {
     // @ts-expect-error
-    delete this.#modules;
+    this.#modules = undefined;
   }
 
   /**
    * Find files from the index
-   * @param paths The paths to check
    * @param folder The sub-folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
@@ -57,18 +54,18 @@ class $ModuleIndex {
     const { filter: f, folder } = config;
     const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
 
-    if (folder === Host.PATH.src) {
+    if (folder === 'src') {
       config.includeIndex = config.includeIndex ?? true;
     }
     const idx = this.#index;
     if (folder) {
       return idx.flatMap(
-        m => [...m.files[folder], ...(config.includeIndex ? m.files.index : [])]
+        m => [...m.files[folder] ?? [], ...(config.includeIndex ? m.files.index : [])]
           .filter(([f, ext]) => ext === 'ts')
           .map(([f]) => ({
             source: `${m.source}/${f}`.replace(/[.]js$/, '.ts'),
-            file: f,
-            module: `${m.output}/${f}`.replace(/^.*node_modules\//, '')
+            file: PathUtil.joinUnix(PathUtil.cwd, `${m.output}/${f}`.replace(/[.]ts$/, '.js')),
+            module: `${m.output || '.'}/${f}`.replace(/^.*node_modules\//, '').replace(/[.]ts$/, '.js')
           }))
           .filter(({ file }) => filter?.(file) ?? true)
       );
@@ -79,12 +76,36 @@ class $ModuleIndex {
           .filter(([f, ext]) => ext === 'ts')
           .map(([f]) => ({
             source: `${m.source}/${f}`.replace(/[.]js$/, '.ts'),
-            file: f,
-            module: `${m.output}/${f}`.replace(/^.*node_modules\//, '')
+            file: PathUtil.joinUnix(PathUtil.cwd, `${m.output}/${f}`.replace(/[.]ts$/, '.js')),
+            module: `${m.output || '.'}/${f}`.replace(/^.*node_modules\//, '').replace(/[.]ts$/, '.js')
           }))
           .filter(({ file }) => filter?.(file) ?? true)
       )
     }
+  }
+
+  /**
+   * Find files from the index
+   * @param filter The filter to determine if this is a valid support file
+   */
+  findSupport(config: Omit<FindConfig, 'folder'>): ModuleIndexEntry[] {
+    return this.find({ ...config, folder: 'support' });
+  }
+
+  /**
+   * Find files from the index
+   * @param filter The filter to determine if this is a valid support file
+   */
+  findSrc(config: Omit<FindConfig, 'folder'>): ModuleIndexEntry[] {
+    return this.find({ ...config, folder: 'src' });
+  }
+
+  /**
+   * Find files from the index
+   * @param filter The filter to determine if this is a valid support file
+   */
+  findTest(config: Omit<FindConfig, 'folder'>): ModuleIndexEntry[] {
+    return this.find({ ...config, folder: 'test' });
   }
 }
 

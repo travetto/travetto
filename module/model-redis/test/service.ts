@@ -1,9 +1,9 @@
 import { Suite } from '@travetto/test';
-import { ModelBasicSuite } from '@travetto/model/test-support/basic';
-import { ModelCrudSuite } from '@travetto/model/test-support/crud';
-import { ModelExpirySuite } from '@travetto/model/test-support/expiry';
-import { ModelIndexedSuite } from '@travetto/model/test-support/indexed';
-import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic';
+import { ModelCrudSuite } from '@travetto/model/support/test/crud';
+import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
+import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
+import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
 import { RedisModelConfig, RedisModelService } from '..';
 

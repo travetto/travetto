@@ -1,4 +1,4 @@
-import { AppCache, EnvUtil, Host, Package } from '@travetto/boot';
+import { AppCache, EnvUtil, Package } from '@travetto/boot';
 
 import { version as framework } from '../package.json';
 import { TimeSpan, Util } from './util';
@@ -116,7 +116,7 @@ class $AppManifest {
         status,
         value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
       },
-      resources: [Host.PATH.resources, ...EnvUtil.getList('TRV_RESOURCES')],
+      resources: ['resources', ...EnvUtil.getList('TRV_RESOURCES')],
       shutdownWait: Util.getEnvTime('TRV_SHUTDOWN_WAIT', '2s')
     };
 
