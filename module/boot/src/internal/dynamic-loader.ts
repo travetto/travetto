@@ -1,6 +1,5 @@
 import { PathUtil } from '../path';
 
-import { TranspileManager } from './transpile';
 import { TranspileUtil } from './transpile-util';
 import { Module } from './types';
 import { ModuleIndex } from './module';
@@ -10,12 +9,10 @@ type UnloadHandler = (file: string, unlink?: boolean) => void;
 type LoadHandler<T = unknown> = (name: string, o: T) => T;
 
 /**
- * Dynamic module loader. Hooks into module loading/compiling, and transpiles on demand
+ * Dynamic module loader. Hooks into module loading
  */
 export class $DynamicLoader {
-  #moduleResolveFilename = Module._resolveFilename.bind(Module);
   #moduleLoad = Module._load.bind(Module);
-  #resolveFilename?: (filename: string) => string;
   #initialized = false;
   #unloadHandlers: UnloadHandler[] = [];
   #loadHandlers: LoadHandler[] = [];
@@ -68,14 +65,6 @@ export class $DynamicLoader {
   }
 
   /**
-   * Set filename resolver
-   * @private
-   */
-  setFilenameResolver(fn: (filename: string) => string): void {
-    this.#resolveFilename = fn;
-  }
-
-  /**
    * Listen for when files are unloaded
    * @param handler
    */
@@ -109,12 +98,6 @@ export class $DynamicLoader {
       return;
     }
 
-    TranspileManager.init();
-
-    // Supports bootstrapping with framework resolution
-    if (this.#resolveFilename) {
-      Module._resolveFilename = (req, p): string => this.#moduleResolveFilename(this.#resolveFilename!(req), p);
-    }
     Module._load = (req, p): unknown => this.#onModuleLoad(req, p);
 
     this.#initialized = true;
@@ -143,15 +126,11 @@ export class $DynamicLoader {
     }
 
     this.#initialized = false;
-    TranspileManager.reset();
 
     Module._load = this.#moduleLoad;
-    if (this.#resolveFilename) {
-      Module._resolveFilename = this.#moduleResolveFilename;
-    }
 
     // Unload all
-    for (const { file } of ModuleIndex.find({ includeIndex: true })) {
+    for (const { file } of ModuleIndex.find({ folder: 'src', includeIndex: true })) {
       this.unload(file);
     }
   }

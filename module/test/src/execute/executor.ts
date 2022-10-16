@@ -1,13 +1,10 @@
 import * as path from 'path';
 import * as timers from 'timers/promises';
-import * as fs from 'fs/promises';
 
 import { Util } from '@travetto/base';
-import { Host, PathUtil } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
-import { SystemUtil } from '@travetto/boot/src/internal/system';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
-import { ModuleExec } from '@travetto/boot/src/internal/module-exec';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult } from '../model/test';
@@ -19,7 +16,6 @@ import { ConsoleCapture } from './console';
 import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
-import { TestEvent } from '../model/event';
 
 const TEST_TIMEOUT = Util.getEnvTime('TRV_TEST_TIMEOUT', '5s');
 
@@ -275,30 +271,5 @@ export class TestExecutor {
     } else { // Running the suite
       await this.executeSuite(consumer, params.suite);
     }
-  }
-
-  /**
-   * Execute isolated
-   */
-  static async executeIsolated(consumer: TestConsumer, file: string, ...args: string[]): Promise<void> {
-    // Read modules for extensions
-    // TODO: Should read from abstraction layer
-    const modules = [...(await fs.readFile(file, 'utf8'))
-      .matchAll(/\/\/\s*@with-module\s+(\S+)/g)]
-      .map(x => x[1]);
-
-    const proc = ModuleExec.forkMain(require.resolve('../../support/main.test-direct'), [file, ...args], {
-      env: {
-        TRV_MODULES: modules.join(','),
-        TRV_RESOURCES: process.env.TRV_RESOURCES,
-        TRV_PROFILES: process.env.TRV_PROFILES,
-        TRV_SRC_LOCAL: `^${Host.PATH.testIsolated}`,
-        TRV_SRC_COMMON: process.env.TRV_SRC_COMMON,
-        TRV_TEST_FORMAT: 'exec',
-        TRV_CACHE: `.trv_cache_${SystemUtil.naiveHash(file)}`
-      }
-    });
-    proc.process.on('message', (e: TestEvent) => consumer.onEvent(e));
-    await proc.result;
   }
 }

@@ -21,10 +21,6 @@ export interface RunState {
    */
   concurrency: number;
   /**
-   * Run in isolated mode?
-   */
-  isolated?: boolean;
-  /**
    * Input arguments
    */
   args: string[];

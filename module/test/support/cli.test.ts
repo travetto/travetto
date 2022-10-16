@@ -1,7 +1,7 @@
 import * as os from 'os';
 import { readFileSync } from 'fs';
 
-import { FsUtil, Host } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 
@@ -14,7 +14,6 @@ const modes = ['single', 'standard'] as const;
 type Options = {
   format: OptionConfig<string>;
   concurrency: OptionConfig<number>;
-  isolated: OptionConfig<boolean>;
   mode: OptionConfig<'single' | 'standard'>;
 };
 
@@ -29,7 +28,7 @@ export class TestCommand extends CliCommand<Options> {
     if (!this._types) {
       this._types = ModuleIndex
         .find({
-          folder: Host.PATH.src,
+          folder: 'src',
           filter: /consumer\/types\/.*/
         })
         .map(x => readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1])
@@ -42,7 +41,6 @@ export class TestCommand extends CliCommand<Options> {
     return {
       format: this.choiceOption({ desc: 'Output format for test results', def: 'tap', choices: this.getTypes() }),
       concurrency: this.intOption({ desc: 'Number of tests to run concurrently', lower: 1, upper: 32, def: Math.min(4, os.cpus().length - 1) }),
-      isolated: this.boolOption({ desc: 'Isolated mode' }),
       mode: this.choiceOption({ desc: 'Test run mode', def: 'standard', choices: [...modes] })
     };
   }
@@ -78,16 +76,12 @@ export class TestCommand extends CliCommand<Options> {
     const isFile = await this.isFile(first);
 
     if (!first) {
-      state.args = state.isolated ? [`${Host.PATH.testIsolated}/.*`] : [`${Host.PATH.test}/.*`];
-      state.concurrency = (state.isolated ? 1 : undefined) ?? state.concurrency;
+      state.args = ['test/.*'];
     } else if (isFile) { // If is a single file
-      if (first.startsWith('test-')) {
-        state.isolated = true;
-      }
-      if (/test(\-[^-]+)?\//.test(first)) {
+      if (/test\//.test(first)) {
         await this.onSingle(state, first);
       } else {
-        await this.showHelp('Only files in the test/ and test-*/ folders are permitted to be run');
+        await this.showHelp('Only files in the test/ folder are permitted to be run');
       }
     }
   }
@@ -101,7 +95,6 @@ export class TestCommand extends CliCommand<Options> {
       args: regexes,
       mode: this.cmd.mode,
       concurrency: +this.cmd.concurrency,
-      isolated: this.cmd.isolated,
       format: this.cmd.format
     };
 

@@ -1,7 +1,4 @@
 import { AppCache, EnvUtil, Host, Package } from '@travetto/boot';
-import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
-import { ModuleSearchConfig } from '@travetto/boot/src/internal/module';
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { version as framework } from '../package.json';
 import { TimeSpan, Util } from './util';
@@ -90,9 +87,6 @@ class $AppManifest {
   /** Env */
   readonly env: EnvConfig;
 
-  /** Paths */
-  readonly source: ModuleSearchConfig;
-
   constructor(pkg: Record<string, unknown> = {}) {
     const def = {
       framework,
@@ -127,12 +121,6 @@ class $AppManifest {
     };
 
     this.#profileSet = new Set(this.env.profiles);
-
-    this.source = {
-      common: [Host.PATH.src, ...EnvUtil.getList('TRV_SRC_COMMON')],
-      local: [...EnvUtil.getList('TRV_SRC_LOCAL')],
-      excludeModules: new Set(['@travetto/doc', '@travetto/boot'])
-    };
   }
 
   /**
@@ -145,15 +133,10 @@ class $AppManifest {
         info: this.info,
         env: {
           ...this.env,
-          cache: TranspileCache.shortCacheDir,
           appCache: AppCache.shortCacheDir,
           node: process.version,
           dynamic: EnvUtil.isDynamic(),
           isCompiled: EnvUtil.isCompiled()
-        },
-        source: {
-          ...this.source,
-          dynamicModules: ModuleUtil.getDynamicModules(),
         }
       };
     return out;

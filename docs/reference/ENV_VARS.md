@@ -5,9 +5,7 @@ The common environment variables throughout the code base:
 * `TRV_PROFILES`= ['application'] - Additional profiles to run app under
 * `TRV_RESOURCES` = ['resources'] - The folders to use for resource lookup
 * `TRV_DYNAMIC` = 0|1             - Whether or not to run the program in dynamic mode, allowing for real-time updates
-* `TRV_COMPILED` = 0|1            - Has the code already been compiled?
 * `TRV_CACHE` = string            - The output directory for compilation, defaults to `.trv_cache` of the cwd
-* `TRV_APP_CACHE` = string        - The app cache directory, shared across various iterations, defaults to `.app_cache`
 * `TRV_SHUTDOWN_WAIT` = 2s        - The max time to wait for shutdown to finish after initial SIGINT, default `2s`
 
 ## Logging 
@@ -32,9 +30,6 @@ The common environment variables throughout the code base:
 ## Framework
 * `TRV_DEV` = `./module`          - The folder for local travetto modules
 * `TRV_DEV_ROOT` = `./`           - The source folder for local travetto checkout
-* `TRV_MODULES` = []              - The list of additional npm modules to treat as framework modules
-* `TRV_SRC_COMMON` = ['src']      - The common folders to search across all modules in, for source files.  Auto loaded at runtime.
-* `TRV_SRC_LOCAL` = []            - The folder local only to the application that is searched for source files.  Useful for loading in optional sub-applications.
 * `TRV_DOC_BRANCH` = `master`     - The branch to target the documentation against.
 * `TRV_NODE_VERSION` = DEFAULT    - The node version to compile for, translates into a specific typescript target for compability. Will default to the version of node running.
 * `TRV_CONSOLE_WIDTH`             - An override for controlling output-width for cli-based operations.

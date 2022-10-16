@@ -1,6 +1,5 @@
 import { statSync } from 'fs';
 
-import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
 import { CliUtil, EnvUtil, FsUtil } from '@travetto/boot';
 import { ModuleIndexEntry, ModuleIndex } from '@travetto/boot/src/internal/module';
 import { ModuleExec } from '@travetto/boot/src/internal/module-exec';
@@ -19,15 +18,12 @@ export class BuildUtil {
     }
 
     const output = env?.TRV_CACHE ?? '';
-    TranspileCache.init();
-
-    const { AppManifest } = await import('@travetto/base/src/manifest');
 
     let expired: ModuleIndexEntry | undefined;
     let missing: ModuleIndexEntry | undefined;
-    for (const entry of ModuleIndex.findByFolders(AppManifest.source)) {
+    for (const entry of ModuleIndex.find({ folder: 'src' })) {
       try {
-        if (FsUtil.isOlder(TranspileCache.statEntry(entry.file), statSync(entry.file))) {
+        if (FsUtil.isOlder(statSync(entry.source), statSync(entry.file))) {
           expired = entry;
           break;
         }

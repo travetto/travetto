@@ -9,8 +9,6 @@ export function envInit(localOptional = true, dynamic: boolean = false): void {
     append: {
       TRV_RESOURCES: `${Host.PATH.test}/${Host.PATH.resources}`,
       TRV_PROFILES: 'test',
-      TRV_SRC_LOCAL: `${localOptional ? '^' : ''}${Host.PATH.test}`,
-      TRV_SRC_COMMON: `^${Host.PATH.testSupport}`
     }
   });
 }

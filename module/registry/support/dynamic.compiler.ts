@@ -5,7 +5,7 @@ import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 
 import { FilePresenceManager } from '@travetto/watch';
 
-import { Compiler } from '../src/compiler';
+import { Compiler } from '../../compiler/src/compiler';
 
 /**
  * Wraps the compiler supporting real-time changes to files

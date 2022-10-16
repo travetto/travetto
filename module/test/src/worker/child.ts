@@ -84,6 +84,8 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     await ShutdownManager.executeAsync(-1);
 
     for (const { file } of ModuleIndex.find({
+      // TODO: Fix paths
+      // @ts-expect-error
       paths: ModuleIndex.getPaths().filter(x => !FIXED_MODULES.has(x)),
       includeIndex: true
     })) {
