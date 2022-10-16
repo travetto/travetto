@@ -5,8 +5,6 @@ import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 
 import { FilePresenceManager } from '@travetto/watch';
 
-import { Compiler } from '../../compiler/src/compiler';
-
 /**
  * Wraps the compiler supporting real-time changes to files
  */
@@ -29,7 +27,7 @@ export function setup($Compiler: Class<typeof Compiler>): typeof $Compiler {
 
       // Proxy all file loads
       DynamicLoader.onLoad((name, mod) => {
-        if (name.includes(PathUtil.cwd) && !name.includes('node_modules') && Host.PATH.srcWithSepRe.test(name)) {
+        if (name.includes(PathUtil.cwd) && !name.includes('node_modules') && /src\//.test(name)) {
           if (!this.#modules.has(name)) {
             this.#modules.set(name, new RetargettingProxy(mod));
           } else {

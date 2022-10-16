@@ -28,7 +28,7 @@ dev.yml
 email-dev-context.json
 
 # Assets
-**/test-support/resources/logo
+**/support/test-resources/logo
 
 # Folder Specific
 module/*/LICENSE

@@ -7,7 +7,7 @@ import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 import { DependenciesUtil, DepType } from './dependencies';
 import { PackUtil } from '../util';
 
-const MODULE_DIRS = [Host.PATH.src, Host.PATH.bin, Host.PATH.support, Host.PATH.resources, 'index.ts', 'package.json', 'tsconfig.trv.json'];
+const MODULE_DIRS = ['src', 'bin', 'support', 'resources', 'index.ts', 'package.json', 'tsconfig.trv.json'];
 
 /**
  * Utils for assembling

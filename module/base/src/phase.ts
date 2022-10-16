@@ -1,4 +1,3 @@
-import { Host } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 
 import { OrderingUtil } from './internal/ordering';
@@ -59,7 +58,7 @@ export class PhaseManager {
    */
   async load(upto?: string, after?: string): Promise<this> {
 
-    const found = ModuleIndex.find({ folder: Host.PATH.support, filter: this.#filter });
+    const found = ModuleIndex.findSupport({ filter: this.#filter });
 
     // Load all support files
     const files = await Promise.all(found.map(x => import(x.module)));

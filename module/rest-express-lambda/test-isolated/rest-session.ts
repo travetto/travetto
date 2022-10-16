@@ -2,8 +2,8 @@
 import { InjectableFactory } from '@travetto/di';
 import { MemoryModelConfig, MemoryModelService } from '@travetto/model';
 import { SessionModelⲐ } from '@travetto/rest-session';
-import { RestSessionServerSuite } from '@travetto/rest-session/test-support/server';
-import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/test-support/server';
+import { RestSessionServerSuite } from '@travetto/rest-session/support/test.server';
+import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/server';
 import { Suite } from '@travetto/test';
 
 class Config {

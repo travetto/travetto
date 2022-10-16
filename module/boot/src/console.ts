@@ -1,5 +1,5 @@
 import { EnvUtil } from './env';
-import { TranspileUtil } from './internal/transpile-util';
+import { ModuleUtil } from './internal/module-util';
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
 
@@ -82,7 +82,7 @@ class $ConsoleManager {
     }
 
     // Ensure __filename is translated
-    ctx.file = TranspileUtil.toUnixSource(ctx.file);
+    ctx.file = ModuleUtil.toUnixSource(ctx.file);
 
     return this.#appender.onLog(level, ctx, args);
   }

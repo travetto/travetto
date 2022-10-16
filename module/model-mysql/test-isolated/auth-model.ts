@@ -1,8 +1,8 @@
 // @with-module @travetto/auth-model
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/test-support/model';
-import { WithSuiteContext } from '@travetto/context/test-support/suite-context';
+import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/support/test/model';
+import { WithSuiteContext } from '@travetto/context/support/test.context';
 import { AsyncContext } from '@travetto/context';
 import { SQLModelConfig, SQLModelService } from '@travetto/model-sql';
 

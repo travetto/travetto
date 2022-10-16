@@ -3,9 +3,9 @@
 
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { RestSessionServerSuite } from '@travetto/rest-session/test-support/server';
+import { RestSessionServerSuite } from '@travetto/rest-session/support/test.server';
 import { SessionModelⲐ } from '@travetto/rest-session';
-import { ModelSuite } from '@travetto/model/test-support/suite';
+import { ModelSuite } from '@travetto/model/support/test/suite';
 
 import { DynamoDBModelService } from '../src/service';
 import { DynamoDBModelConfig } from '../src/config';

@@ -1,5 +1,5 @@
 import { EnvInit } from '@travetto/base/support/bin/init';
-import { CliUtil, Host, PathUtil } from '@travetto/boot';
+import { CliUtil, PathUtil } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli';
 
 type Options = {
@@ -14,7 +14,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
 
   envInit(): void {
     EnvInit.init({
-      append: { TRV_RESOURCES: PathUtil.resolveUnix(__dirname, '..', Host.PATH.resources) }
+      append: { TRV_RESOURCES: PathUtil.resolveUnix(__dirname, '..', 'resources') }
     });
   }
 

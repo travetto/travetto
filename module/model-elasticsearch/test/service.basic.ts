@@ -1,6 +1,6 @@
 import { Suite } from '@travetto/test';
 
-import { ModelBasicSuite } from '@travetto/model/test-support/basic';
+import { ModelBasicSuite } from '@travetto/model/support/test/basic';
 
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 

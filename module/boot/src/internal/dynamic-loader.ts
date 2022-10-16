@@ -1,9 +1,9 @@
 import { PathUtil } from '../path';
 
-import { TranspileUtil } from './transpile-util';
 import { Module } from './types';
 import { ModuleIndex } from './module';
 import { Host } from '../host';
+import { EnvUtil } from '../env';
 
 type UnloadHandler = (file: string, unlink?: boolean) => void;
 type LoadHandler<T = unknown> = (name: string, o: T) => T;
@@ -12,6 +12,53 @@ type LoadHandler<T = unknown> = (name: string, o: T) => T;
  * Dynamic module loader. Hooks into module loading
  */
 export class $DynamicLoader {
+
+  /**
+   * Build error module source
+   * @param message Error message to show
+   * @param isModule Is the error a module that should have been loaded
+   * @param base The base set of properties to support
+   */
+  static getErrorModuleSource(message: string, isModule?: string | boolean, base?: Record<string, string | boolean>): string {
+    const f = ([k, v]: string[]): string => `${k}: (t,k) => ${v}`;
+    const e = '{ throw new Error(msg); }';
+    const map: { [P in keyof ProxyHandler<object>]?: string } = {
+      getOwnPropertyDescriptor: base ? '({})' : e,
+      get: base ? `{ const v = values[keys.indexOf(k)]; if (!v) ${e} else return v; }` : e,
+      has: base ? 'keys.includes(k)' : e
+    };
+    return [
+      (typeof isModule === 'string') ? `console.debug(\`${isModule}\`);` : '',
+      base ? `let keys = ['${Object.keys(base).join("','")}']` : '',
+      base ? `let values = ['${Object.values(base).join("','")}']` : '',
+      `let msg = \`${message}\`;`,
+      "Object.defineProperty(exports, 'ᚕtrvError', { value: true })",
+      `module.exports = new Proxy({}, { ${Object.entries(map).map(([k, v]) => f([k, v!])).join(',')}});`
+    ].join('\n');
+  }
+
+  /**
+   * Process error response
+   * @param phase The load/compile phase to care about
+   * @param tsf The typescript filename
+   * @param err The error produced
+   * @param filename The relative filename
+   */
+  static handlePhaseError(phase: 'load' | 'compile', tsf: string, err: Error, filename = tsf.replace(PathUtil.cwd, '.')): string {
+    if (phase === 'compile' &&
+      (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
+    ) {
+      err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
+    }
+
+    if (EnvUtil.isDynamic() && !filename.startsWith('test/')) {
+      console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
+      return this.getErrorModuleSource(err.message);
+    }
+
+    throw err;
+  }
+
   #moduleLoad = Module._load.bind(Module);
   #initialized = false;
   #unloadHandlers: UnloadHandler[] = [];
@@ -51,7 +98,7 @@ export class $DynamicLoader {
         throw err;
       }
       const name = Module._resolveFilename!(request, parent);
-      mod = Module._compile!(TranspileUtil.handlePhaseError('load', name, err), name);
+      mod = Module._compile!($DynamicLoader.handlePhaseError('load', name, err), name);
     }
 
     if (this.#loadHandlers.length) {
@@ -130,7 +177,7 @@ export class $DynamicLoader {
     Module._load = this.#moduleLoad;
 
     // Unload all
-    for (const { file } of ModuleIndex.find({ folder: 'src', includeIndex: true })) {
+    for (const { file } of ModuleIndex.findSrc({})) {
       this.unload(file);
     }
   }

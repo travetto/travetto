@@ -15,7 +15,6 @@ const MAPPING = {
   Cache: '@travetto/cache',
   Cli: '@travetto/cli',
   Command: '@travetto/command',
-  Compiler: '@travetto/compiler',
   Config: '@travetto/config',
   Context: '@travetto/context',
   Di: '@travetto/di',

@@ -19,7 +19,7 @@ export class ModuleExec {
     return ExecUtil.fork(
       require.resolve('@travetto/boot/bin/main'),
       [
-        file.replace(Host.EXT.inputOutputRe, Host.EXT.moduleExt),
+        file.replace(Host.EXT.input, Host.EXT.output),
         ...args
       ],
       options
@@ -36,7 +36,7 @@ export class ModuleExec {
     return ExecUtil.worker<T>(
       require.resolve('@travetto/boot/bin/main'),
       [
-        file.replace(Host.EXT.inputOutputRe, Host.EXT.moduleExt),
+        file.replace(Host.EXT.input, Host.EXT.output),
         ...args
       ],
       options

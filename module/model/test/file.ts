@@ -1,10 +1,10 @@
 import { Suite } from '@travetto/test';
 
 import { FileModelConfig, FileModelService } from '../src/provider/file';
-import { ModelCrudSuite } from '../test-support/crud';
-import { ModelExpirySuite } from '../test-support/expiry';
-import { ModelStreamSuite } from '../test-support/stream';
-import { ModelBasicSuite } from '../test-support/basic';
+import { ModelCrudSuite } from '../support/test/crud';
+import { ModelExpirySuite } from '../support/test/expiry';
+import { ModelStreamSuite } from '../support/test/stream';
+import { ModelBasicSuite } from '../support/test/basic';
 
 @Suite()
 export class FileBasicSuite extends ModelBasicSuite {

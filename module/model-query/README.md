@@ -241,11 +241,11 @@ To enforce that these contracts are honored, the module provides shared test sui
 ```typescript
 import { Suite } from '@travetto/test';
 
-import { ModelQuerySuite } from '@travetto/model-query/test-support/query';
-import { ModelQueryCrudSuite } from '@travetto/model-query/test-support/crud';
-import { ModelQueryFacetSuite } from '@travetto/model-query/test-support/facet';
-import { ModelQueryPolymorphismSuite } from '@travetto/model-query/test-support/polymorphism';
-import { ModelQuerySuggestSuite } from '@travetto/model-query/test-support/suggest';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query';
+import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
+import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';
+import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism';
+import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest';
 
 import { MongoModelConfig, MongoModelService } from '..';
 

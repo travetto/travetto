@@ -1,6 +1,6 @@
 import { Suite } from '@travetto/test';
 
-import { ModelPolymorphismSuite } from '@travetto/model/test-support/polymorphism';
+import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 

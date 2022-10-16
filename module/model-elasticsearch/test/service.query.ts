@@ -1,9 +1,9 @@
 import { Suite } from '@travetto/test';
 
-import { ModelQuerySuite } from '@travetto/model-query/test-support/query';
-import { ModelQueryCrudSuite } from '@travetto/model-query/test-support/crud';
-import { ModelQueryFacetSuite } from '@travetto/model-query/test-support/facet';
-import { ModelQuerySuggestSuite } from '@travetto/model-query/test-support/suggest';
+import { ModelQuerySuite } from '@travetto/model-query/support/test/query';
+import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
+import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';
+import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest';
 
 import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
 

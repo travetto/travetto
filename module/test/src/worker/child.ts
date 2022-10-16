@@ -89,7 +89,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       paths: ModuleIndex.getPaths().filter(x => !FIXED_MODULES.has(x)),
       includeIndex: true
     })) {
-      if (!(file.includes(Host.PATH.supportWithSep) && /\/(transformer|phase)[.]/.test(file))) {
+      if (!/support\/(transformer|phase)[.]/.test(file)) {
         const worked = DynamicLoader.unload(file);
         if (worked) {
           console.debug('Unloading', { pid: process.pid, file });

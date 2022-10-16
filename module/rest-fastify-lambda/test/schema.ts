@@ -1,5 +1,5 @@
-import { SchemaRestServerSuite } from '@travetto/rest/test-support/schema';
-import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/test-support/server';
+import { SchemaRestServerSuite } from '@travetto/rest/support/test/schema';
+import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/server';
 import { Suite } from '@travetto/test';
 
 @Suite()

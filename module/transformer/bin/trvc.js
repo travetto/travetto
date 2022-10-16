@@ -12,7 +12,7 @@ const output = `${root}/.trv_compiler`
 const modules = buildManifestModules();
 const transformingModules = modules
   .filter(x => x.name === '@travetto/transformer' ||
-    (x.files.support?.find(([name, type]) => type === 'ts' && name.startsWith('support/transform'))))
+    (x.files.support?.find(([name, type]) => type === 'ts' && name.startsWith('support/transform'))));
 
 
 const NODE_VERSION = process.env.TRV_NODE_VERSION ?? process.version
@@ -42,7 +42,7 @@ function buildTsconfig() {
       skipLibCheck: true,
       target: TS_TARGET,
     },
-    "files": [
+    files: [
       ...[...transformer.files.src, ...transformer.files.support, ...transformer.files.index]
         .map(x => `${staging}/${transformer.output}/${x[0]}`),
       ...transformingModules.flatMap(x =>
@@ -75,7 +75,7 @@ function setupEnv() {
   fs.writeFileSync(`${staging}/tsconfig.json`, JSON.stringify(buildTsconfig(), null, 2));
   cp.spawnSync(require.resolve('typescript').replace(/\/lib.*$/, '/bin/tsc'), { cwd: staging });
   fs.writeFileSync(`${output}/manifest.json`, JSON.stringify(modules));
-  fs.writeFileSync(`${output}/compile.js`, `require('@travetto/transformer/support/compiler').Compiler.run('${output}');`)
+  fs.writeFileSync(`${output}/index.js`, `require('@travetto/transformer/support/main.compiler').Compiler.run('${output}');`);
 }
 
 setupEnv();
