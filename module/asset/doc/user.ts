@@ -1,4 +1,3 @@
-// @with-module @travetto/model
 import { Model } from '@travetto/model';
 
 @Model()
