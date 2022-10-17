@@ -1,0 +1,11 @@
+{
+  "name": "model-sqlite_cache",
+  "dependencies": {
+    "@travetto/model-sqlite": "1",
+    "@travetto/cache": "1"
+  },
+  "devDependencie": {
+    "@travetto/test": "1",
+    "@travetto/cli": "1"
+  }
+}

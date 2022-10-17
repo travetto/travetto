@@ -1,0 +1,11 @@
+{
+  "name": "rest-fastify-lambda_rest-session",
+  "dependencies": {
+    "@travetto/rest-fastify-lambda": "1",
+    "@travetto/rest-session": "1"
+  },
+  "devDependencie": {
+    "@travetto/test": "1",
+    "@travetto/cli": "1"
+  }
+}
