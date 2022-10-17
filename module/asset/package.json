@@ -40,12 +40,16 @@
       "optional": true
     }
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@travetto/model-mongo": true,
-    "@travetto/model-s3": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/model-mongo": [
+      "doc"
+    ],
+    "@travetto/model-s3": [
+      "doc"
+    ]
   },
   "private": false,
   "publishConfig": {

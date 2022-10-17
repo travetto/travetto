@@ -29,8 +29,10 @@
     "fastify": "^3.29.2",
     "@fastify/compress": "^5.0.0"
   },
-  "testDependencies": {
-    "@travetto/test": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
   },
   "publishConfig": {
     "access": "public"

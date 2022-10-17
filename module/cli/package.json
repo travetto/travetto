@@ -32,11 +32,13 @@
     "@travetto/base": "^3.0.0-rc.2",
     "commander": "^9.4.1"
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@travetto/app": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/app": [
+      "doc"
+    ]
   },
   "publishConfig": {
     "access": "public"

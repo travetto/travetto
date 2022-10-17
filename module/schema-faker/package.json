@@ -30,8 +30,10 @@
     "@types/faker": "^5.5.9",
     "faker": "^5.5.3"
   },
-  "testDependencies": {
-    "@travetto/test": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
   },
   "publishConfig": {
     "access": "public"

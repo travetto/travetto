@@ -27,8 +27,10 @@
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.2"
   },
-  "testDependencies": {
-    "@travetto/test": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
   },
   "publishConfig": {
     "access": "public"

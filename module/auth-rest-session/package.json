@@ -32,8 +32,10 @@
     "@travetto/rest-session": "^3.0.0-rc.4",
     "@travetto/rest": "^3.0.0-rc.4"
   },
-  "testDependencies": {
-    "@travetto/test": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
   },
   "private": false,
   "publishConfig": {

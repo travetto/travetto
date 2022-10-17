@@ -28,7 +28,7 @@ export type PackageType = {
   peerDependencies?: Record<string, string>;
   peerDependenciesMeta?: Record<string, { optional?: boolean }>;
   optionalDependencies?: Record<string, string>;
-  docDependencies?: Record<string, string | true>;
+  trvDependencies?: Record<string, ('doc' | 'test' | 'all')[]>;
   private?: boolean;
   publishConfig?: { access?: 'restricted' | 'public' };
 };

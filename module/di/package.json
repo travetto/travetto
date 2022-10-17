@@ -31,14 +31,22 @@
     "@travetto/transformer": "^3.0.0-rc.4",
     "@travetto/registry": "^3.0.0-rc.4"
   },
-  "testDependencies": {
-    "@travetto/test": "^3.0.0-rc.4",
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/schema": "^3.0.0-rc.4"
-  },
-  "docDependencies": {
-    "@travetto/model-mongo": true,
-    "@travetto/rest": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/config": [
+      "test"
+    ],
+    "@travetto/schema": [
+      "test"
+    ],
+    "@travetto/model-mongo": [
+      "doc"
+    ],
+    "@travetto/rest": [
+      "doc"
+    ]
   },
   "publishConfig": {
     "access": "public"

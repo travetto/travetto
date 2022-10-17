@@ -28,11 +28,13 @@
     "@types/jws": "^3.2.4",
     "jws": "^4.0.0"
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@travetto/auth-rest": 1
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/auth-rest": [
+      "doc"
+    ]
   },
   "publishConfig": {
     "access": "public"

@@ -31,8 +31,10 @@
     "@travetto/registry": "^3.0.0-rc.4",
     "@travetto/transformer": "^3.0.0-rc.4"
   },
-  "testDependencies": {
-    "@travetto/test": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
   },
   "publishConfig": {
     "access": "public"
