@@ -33,6 +33,17 @@
     "node-fetch": "^2.6.7",
     "@types/node-fetch": "^2.6.2"
   },
+  "peerDependencies": {
+    "@travetto/test": "^3.0.0-rc.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "publishConfig": {
     "access": "public"
   }

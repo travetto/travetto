@@ -36,6 +36,9 @@
       "optional": true
     }
   },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "docDependencies": {
     "@travetto/model-elasticsearch": true
   },

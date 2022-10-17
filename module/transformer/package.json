@@ -28,6 +28,17 @@
   "dependencies": {
     "@travetto/boot": "^3.0.0-rc.2"
   },
+  "peerDependencies": {
+    "@travetto/test": "^3.0.0-rc.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "publishConfig": {
     "access": "public"
   }

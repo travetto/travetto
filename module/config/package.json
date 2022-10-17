@@ -32,8 +32,16 @@
     "@travetto/transformer": "^3.0.0-rc.4",
     "@travetto/yaml": "^3.0.0-rc.2"
   },
-  "devDependencies": {
+  "peerDependencies": {
     "@travetto/di": "^3.0.0-rc.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/di": {
+      "optional": true
+    }
+  },
+  "testDependencies": {
+    "@travetto/test": true
   },
   "publishConfig": {
     "access": "public"

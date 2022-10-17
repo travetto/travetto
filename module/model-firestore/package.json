@@ -30,6 +30,17 @@
     "@travetto/model": "^3.0.0-rc.4",
     "@google-cloud/firestore": "^5.0.2"
   },
+  "peerDependencies": {
+    "@travetto/command": "^3.0.0-rc.2"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/command": {
+      "optional": true
+    }
+  },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "private": false,
   "publishConfig": {
     "access": "public"

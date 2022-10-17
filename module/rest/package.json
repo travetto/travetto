@@ -47,11 +47,15 @@
   },
   "peerDependencies": {
     "@travetto/cli": "^3.0.0-rc.2",
+    "@travetto/test": "^3.0.0-rc.4",
     "node-forge": "^1.3.1",
     "@types/node-forge": "^1.3.0"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
+      "optional": true
+    },
+    "@travetto/test": {
       "optional": true
     },
     "node-forge": {
@@ -60,6 +64,9 @@
     "@types/node-forge": {
       "optional": true
     }
+  },
+  "testDependencies": {
+    "@travetto/test": true
   },
   "publishConfig": {
     "access": "public"

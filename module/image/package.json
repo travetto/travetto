@@ -26,6 +26,9 @@
   "dependencies": {
     "@travetto/command": "^3.0.0-rc.2"
   },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "publishConfig": {
     "access": "public"
   }

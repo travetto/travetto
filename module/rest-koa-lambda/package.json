@@ -31,6 +31,9 @@
     "@travetto/rest-aws-lambda": "^3.0.0-rc.4",
     "@vendia/serverless-express": "^4.10.1"
   },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "publishConfig": {
     "access": "public"
   }

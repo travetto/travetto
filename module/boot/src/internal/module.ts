@@ -4,19 +4,15 @@ export type ModuleIndexEntry = { source: string, module: string, file: string };
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean };
 
-type ModuleFile = [string, 'ts' | 'js' | 'json' | 'unknown' | 'typing'];
-type Module = {
+type ModuleFileType = 'ts' | 'js' | 'json' | 'unknown' | 'typing';
+type ModuleFile = ModuleIndexEntry & { type: ModuleFileType };
+type Module<Sub = ModuleFile> = {
   name: string;
   source: string;
   output: string;
   module: boolean;
   files: {
-    index: ModuleFile[];
-    src: ModuleFile[];
-    test: ModuleFile[];
-    resources: ModuleFile[];
-    bin: ModuleFile[];
-    [key: string]: ModuleFile[];
+    [key: string]: Sub[];
   }
 }
 
@@ -32,7 +28,30 @@ class $ModuleIndex {
    */
   get #index(): Module[] {
     if (this.#modules === undefined) {
-      this.#modules = require(PathUtil.resolveUnix('manifest.json'));
+      this.#modules = (require(PathUtil.resolveUnix('manifest.json')) as Module<[string, ModuleFileType]>[]).map(
+        m => {
+          const mapping: Record<string, ModuleFile[]> = {};
+          for (const folder of Object.keys(m.files)) {
+            mapping[folder] = m.files[folder].map(([f, type]) => {
+              const source = PathUtil.joinUnix(m.source, f);
+              const fullFile = PathUtil.joinUnix(PathUtil.cwd, m.output, f).replace(/[.]ts$/, '.js');
+              const module = (m.output.startsWith('node_modules') ?
+                `${m.output.split('node_modules/')[1]}/${f}` :
+                `./${f}`).replace(/[.]ts$/, '.js');
+              return {
+                type,
+                source,
+                file: fullFile,
+                module
+              };
+            });
+          }
+          return {
+            ...m,
+            files: mapping
+          };
+        }
+      );
     }
     return this.#modules;
   }
@@ -54,34 +73,14 @@ class $ModuleIndex {
     const { filter: f, folder } = config;
     const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
 
-    if (folder === 'src') {
-      config.includeIndex = config.includeIndex ?? true;
-    }
     const idx = this.#index;
-    if (folder) {
-      return idx.flatMap(
-        m => [...m.files[folder] ?? [], ...(config.includeIndex ? m.files.index : [])]
-          .filter(([f, ext]) => ext === 'ts')
-          .map(([f]) => ({
-            source: `${m.source}/${f}`.replace(/[.]js$/, '.ts'),
-            file: PathUtil.joinUnix(PathUtil.cwd, `${m.output}/${f}`.replace(/[.]ts$/, '.js')),
-            module: `${m.output || '.'}/${f}`.replace(/^.*node_modules\//, '').replace(/[.]ts$/, '.js')
-          }))
-          .filter(({ file }) => filter?.(file) ?? true)
-      );
-    } else {
-      return idx.flatMap(
-        m => [...Object.values(m.files)]
-          .flat()
-          .filter(([f, ext]) => ext === 'ts')
-          .map(([f]) => ({
-            source: `${m.source}/${f}`.replace(/[.]js$/, '.ts'),
-            file: PathUtil.joinUnix(PathUtil.cwd, `${m.output}/${f}`.replace(/[.]ts$/, '.js')),
-            module: `${m.output || '.'}/${f}`.replace(/^.*node_modules\//, '').replace(/[.]ts$/, '.js')
-          }))
-          .filter(({ file }) => filter?.(file) ?? true)
-      )
-    }
+    const searchSpace = folder ?
+      idx.flatMap(m => [...m.files[folder] ?? [], ...(config.includeIndex ? m.files.index : [])]) :
+      idx.flatMap(m => [...Object.values(m.files)].flat());
+
+    return searchSpace
+      .filter(({ type }) => type === 'ts')
+      .filter(({ file }) => filter?.(file) ?? true)
   }
 
   /**
@@ -97,7 +96,7 @@ class $ModuleIndex {
    * @param filter The filter to determine if this is a valid support file
    */
   findSrc(config: Omit<FindConfig, 'folder'>): ModuleIndexEntry[] {
-    return this.find({ ...config, folder: 'src' });
+    return this.find({ ...config, folder: 'src', includeIndex: true });
   }
 
   /**

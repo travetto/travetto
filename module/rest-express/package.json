@@ -31,6 +31,9 @@
     "compression": "^1.7.4",
     "express": "^4.18.1"
   },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "publishConfig": {
     "access": "public"
   }
