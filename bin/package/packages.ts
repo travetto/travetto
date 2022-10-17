@@ -9,7 +9,7 @@ import { PackageType, readPackage } from '@travetto/boot/src/internal/package';
 export const DEP_GROUPS = [
   'dependencies', 'devDependencies',
   'peerDependencies', 'optionalDependencies',
-  'docDependencies'
+  // 'trvDependencies'
 ] as const;
 
 export type DepGroup = (typeof DEP_GROUPS[number]);
@@ -62,7 +62,7 @@ export class Packages {
     files, main, bin, scripts, keywords,
     dependencies, devDependencies, peerDependencies,
     optionalDependencies, peerDependenciesMeta,
-    docDependencies,
+    trvDependencies,
     engines, private: priv, repository, author,
     publishConfig, ...rest
   }: Pkg): Pkg {
@@ -91,7 +91,7 @@ export class Packages {
       peerDependencies,
       peerDependenciesMeta,
       optionalDependencies,
-      docDependencies,
+      trvDependencies,
       engines,
       private: !!priv,
       publishConfig: {
