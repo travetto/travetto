@@ -1,0 +1,19 @@
+{
+  "name": "model_cache",
+  "dependencies": {
+    "@travetto/model-dynamodb": "1",
+    "@travetto/model-firestore": "1",
+    "@travetto/model-elasticsearch": "1",
+    "@travetto/model-mongo": "1",
+    "@travetto/model-mysql": "1",
+    "@travetto/model-postgresql": "1",
+    "@travetto/model-redis": "1",
+    "@travetto/model-s3": "1",
+    "@travetto/model-sqlite": "1",
+    "@travetto/cache": "1"
+  },
+  "devDependencie": {
+    "@travetto/test": "1",
+    "@travetto/cli": "1"
+  }
+}
