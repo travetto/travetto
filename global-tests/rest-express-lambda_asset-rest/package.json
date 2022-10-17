@@ -1,0 +1,11 @@
+{
+  "name": "rest-express-lambda_asset-rest",
+  "dependencies": {
+    "@travetto/rest-express-lambda": "1",
+    "@travetto/asset-rest": "1"
+  },
+  "devDependencie": {
+    "@travetto/test": "1",
+    "@travetto/cli": "1"
+  }
+}

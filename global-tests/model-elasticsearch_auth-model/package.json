@@ -1,0 +1,11 @@
+{
+  "name": "model-elasticsearch_auth-model",
+  "dependencies": {
+    "@travetto/model-elasticsearch": "1",
+    "@travetto/auth-model": "1"
+  },
+  "devDependencie": {
+    "@travetto/test": "1",
+    "@travetto/cli": "1"
+  }
+}

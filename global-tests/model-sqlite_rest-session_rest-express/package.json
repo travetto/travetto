@@ -1,0 +1,12 @@
+{
+  "name": "model-sqlite_rest-session_rest-express",
+  "dependencies": {
+    "@travetto/model-sqlite": "1",
+    "@travetto/rest-session": "1",
+    "@travetto/rest-express": "1"
+  },
+  "devDependencie": {
+    "@travetto/test": "1",
+    "@travetto/cli": "1"
+  }
+}

@@ -1,4 +1,4 @@
-import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/server';
+import { AwsLambdaRestServerSupport } from '@travetto/rest-aws-lambda/support/test.server';
 import { SchemaRestServerSuite } from '@travetto/rest/support/test/schema';
 import { Suite } from '@travetto/test';
 

@@ -1,0 +1,11 @@
+{
+  "name": "rest-koa-lambda_auth-rest",
+  "dependencies": {
+    "@travetto/rest-koa-lambda": "1",
+    "@travetto/auth-rest": "1"
+  },
+  "devDependencie": {
+    "@travetto/test": "1",
+    "@travetto/cli": "1"
+  }
+}
