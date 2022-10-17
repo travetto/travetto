@@ -1,4 +1,3 @@
-// @with-module @travetto/schema
 import { Schema } from '@travetto/schema';
 import { Controller, Get, QuerySchema } from '@travetto/rest';
 

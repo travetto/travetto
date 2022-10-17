@@ -46,8 +46,7 @@ export class FileUtil {
 
     let text: string | undefined;
     if (language) {
-      text = readFileSync(resolved, 'utf8')
-        .replace(/^\/\/\s*@with-module.*/, '');
+      text = readFileSync(resolved, 'utf8');
 
       text = text.split(/\n/)
         .map(x => {

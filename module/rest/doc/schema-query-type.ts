@@ -1,4 +1,3 @@
-// @with-module @travetto/schema
 import { Controller, Get, QuerySchema } from '@travetto/rest';
 
 type Paging = {
