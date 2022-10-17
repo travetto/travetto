@@ -27,7 +27,7 @@ export class AppScanUtil {
     await Promise.all(
       ModuleIndex.find({ folder: 'src' })
         .filter(x => fs.readFileSync(x.file).includes('@Application'))
-        .map(x => import(x.module)) // Only load files that are candidates
+        .map(x => import(x.file)) // Only load files that are candidates
     );
 
     // Get applications

@@ -75,7 +75,8 @@ export class EncoderTest {
           setHeader(key: string, value: string) {
             headers[key] = value;
           }
-        } as Response
+        } as Response,
+        config: {}
       },
       {
         id: 'true',
@@ -101,7 +102,8 @@ export class EncoderTest {
           headers[key] = value;
 
         }
-      } as Response
+      } as Response,
+      config: {}
     }, undefined);
 
     assert(headers[this.config.keyName] === undefined);

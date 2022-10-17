@@ -29,12 +29,19 @@
     "prismjs": "^1.29.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.2"
+    "@travetto/cli": "^3.0.0-rc.2",
+    "@travetto/test": "^3.0.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
       "optional": true
+    },
+    "@travetto/test": {
+      "optional": true
     }
+  },
+  "testDependencies": {
+    "@travetto/test": true
   },
   "private": false,
   "publishConfig": {

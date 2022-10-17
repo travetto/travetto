@@ -29,6 +29,9 @@
     "@types/mustache": "^4.2.1",
     "mustache": "^4.2.0"
   },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "publishConfig": {
     "access": "public"
   }

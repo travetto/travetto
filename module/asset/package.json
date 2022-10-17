@@ -32,6 +32,17 @@
     "file-type": "^16.5.4",
     "mime": "^3.0.0"
   },
+  "peerDependencies": {
+    "@travetto/test": "^3.0.0-rc.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "docDependencies": {
     "@travetto/model-mongo": true,
     "@travetto/model-s3": true

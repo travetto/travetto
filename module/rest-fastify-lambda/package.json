@@ -31,6 +31,9 @@
     "@travetto/rest-fastify": "^3.0.0-rc.4",
     "@fastify/aws-lambda": "^3.1.3"
   },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "publishConfig": {
     "access": "public"
   }

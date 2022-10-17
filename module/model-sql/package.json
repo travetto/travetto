@@ -36,6 +36,21 @@
   "devDependencies": {
     "@travetto/app": "^3.0.0-rc.4"
   },
+  "peerDependencies": {
+    "@travetto/test": "^3.0.0-rc.4",
+    "@travetto/command": "^3.0.0-rc.2"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/command": {
+      "optional": true
+    },
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "docDependencies": {
     "@travetto/model-mysql": 1
   },

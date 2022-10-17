@@ -29,6 +29,9 @@
     "@types/nodemailer": "^6.4.6",
     "nodemailer": "^6.8.0"
   },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "publishConfig": {
     "access": "public"
   },

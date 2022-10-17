@@ -30,6 +30,9 @@
     "@types/generic-pool": "^3.1.11",
     "generic-pool": "^3.9.0"
   },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "publishConfig": {
     "access": "public"
   }

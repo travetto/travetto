@@ -41,8 +41,8 @@
       "optional": true
     }
   },
-  "docDependencies": {
-    "@travetto/log": true
+  "testDependencies": {
+    "@travetto/test": true
   },
   "private": false,
   "publishConfig": {

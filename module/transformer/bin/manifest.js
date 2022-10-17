@@ -5,14 +5,20 @@ const fs = require('fs');
 const root = process.cwd().replace(/[\\]/g, '/');
 
 function collectPackages(folder, seen = new Set()) {
-  const { name, dependencies = {}, travettoModule = false } = JSON.parse(fs.readFileSync(`${folder}/package.json`, 'utf8'));
+  const { name, dependencies = {}, devDependencies = {}, peerDependencies = {}, travettoModule = false } = JSON.parse(fs.readFileSync(`${folder}/package.json`, 'utf8'));
   if (seen.has(name)) {
     return [];
   }
   const isModule = name.startsWith('@travetto') || travettoModule;
   const out = [{ name, folder, isModule }];
   seen.add(name);
-  for (const el of Object.keys(dependencies)) {
+  const searchSpace = [
+    ...Object.keys(dependencies),
+    ...[...Object.keys(devDependencies)].filter(x => x.startsWith('@travetto/')),
+    ...[...Object.keys(peerDependencies)].filter(x => x.startsWith('@travetto/')),
+  ].sort();
+
+  for (const el of searchSpace) {
     try {
       const next = require.resolve(el).replace(/[\\]/g, '/')
         .replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
@@ -72,8 +78,10 @@ function describeModule({ name, folder }) {
       // Group by top folder
       const rel = p.replace(`${folder}/`, '');
       if (!rel.includes('/')) { // If a file
-        if (rel.endsWith('index.ts')) {
+        if (rel === 'index.ts') {
           acc.index = [transformFile(rel)];
+        } else if (rel === 'doc.ts') {
+          acc.docIndex = [transformFile(rel)];
         } else {
           (acc['rootFiles'] ??= []).push(transformFile(rel));
         }
@@ -105,7 +113,7 @@ function buildManifestModules() {
       name: '@travetto/cli',
       folder: `${process.env.TRV_DEV}/cli`,
       isModule: true,
-    })
+    });
   }
   return modules.map(x => describeModule(x));
 }

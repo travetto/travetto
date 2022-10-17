@@ -31,6 +31,17 @@
     "@travetto/config": "^3.0.0-rc.4",
     "@travetto/rest": "^3.0.0-rc.4"
   },
+  "peerDependencies": {
+    "@travetto/test": "^3.0.0-rc.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/test": {
+      "optional": true
+    }
+  },
+  "testDependencies": {
+    "@travetto/test": true
+  },
   "docDependencies": {
     "@types/passport-facebook": "^2.1.11",
     "passport-facebook": "^3.0.0",
