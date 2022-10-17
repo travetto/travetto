@@ -1,13 +1,13 @@
 import '@arcsine/nodesh';
 
-import { ExecUtil, FsUtil } from '@travetto/boot';
+import { ExecUtil } from '@travetto/boot';
 import type { TestEvent } from '@travetto/test';
 
 import { Git } from './package/git';
 import { Packages } from './package/packages';
 
-async function run(isolated = false): Promise<boolean> {
-  console.error(`Starting tests [isolated=${isolated}]`);
+async function run(): Promise<boolean> {
+  console.error('Starting tests');
   const { TestConsumerRegistry } = await import('@travetto/test/src/consumer/registry');
   await TestConsumerRegistry.manualInit();
 
@@ -17,9 +17,8 @@ async function run(isolated = false): Promise<boolean> {
   const consumer = new RunnableTestConsumer(emitter);
 
   return (process.env.TRV_ALL === '1' ? Packages.yieldPublicPackages() : Git.yieldChangedPackages())
-    .$filter(async p => !isolated || !!(await FsUtil.exists(`${p._.folder}/test-isolated`)))
     .$parallel(async p => {
-      const args = ['test', '-f', 'exec', ...(isolated ? ['-i'] : ['-c', '3'])];
+      const args = ['test', '-f', 'exec', '-c', '3'];
       const { process: proc, result } = ExecUtil.spawn('trv', args, { cwd: p._.folder, stdio: [0, 'pipe', 2, 'ipc'] });
 
       proc.on('message', (ev: TestEvent) => consumer.onEvent(ev));
@@ -28,7 +27,7 @@ async function run(isolated = false): Promise<boolean> {
         proc.kill('SIGTERM');
       });
       await result;
-    }, { concurrent: isolated ? 1 : 4 }).then(x => consumer.summarizeAsBoolean());
+    }, { concurrent: 4 }).then(x => consumer.summarizeAsBoolean());
 }
 
-run(/^true|1|yes|on$/.test(process.argv[2]));
+run();
