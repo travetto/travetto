@@ -38,11 +38,13 @@
       "optional": true
     }
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@travetto/config": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/config": [
+      "doc"
+    ]
   },
   "private": false,
   "publishConfig": {

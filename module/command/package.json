@@ -36,11 +36,13 @@
       "optional": true
     }
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@travetto/model-elasticsearch": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/model-elasticsearch": [
+      "doc"
+    ]
   },
   "publishConfig": {
     "access": "public"

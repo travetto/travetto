@@ -41,8 +41,10 @@
     "@types/node": "^18.8.2",
     "@types/vscode": "^1.71.0"
   },
-  "docDependencies": {
-    "@travetto/app": true
+  "trvDependencies": {
+    "@travetto/app": [
+      "doc"
+    ]
   },
   "engines": {
     "vscode": "^1.69.0"

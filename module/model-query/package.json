@@ -40,13 +40,19 @@
       "optional": true
     }
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@travetto/model-mongo": true,
-    "@travetto/model-elasticsearch": true,
-    "@travetto/model-sql": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/model-mongo": [
+      "doc"
+    ],
+    "@travetto/model-elasticsearch": [
+      "doc"
+    ],
+    "@travetto/model-sql": [
+      "doc"
+    ]
   },
   "publishConfig": {
     "access": "public"

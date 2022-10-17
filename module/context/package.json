@@ -38,9 +38,13 @@
       "optional": true
     }
   },
-  "testDependencies": {
-    "@travetto/test": true,
-    "@travetto/di": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/di": [
+      "test"
+    ]
   },
   "publishConfig": {
     "access": "public"

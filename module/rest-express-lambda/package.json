@@ -31,8 +31,10 @@
     "@travetto/rest-express": "^3.0.0-rc.4",
     "@vendia/serverless-express": "^4.10.1"
   },
-  "testDependencies": {
-    "@travetto/test": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
   },
   "publishConfig": {
     "access": "public"

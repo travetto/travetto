@@ -39,8 +39,10 @@
     "tslib": "^2.4.0",
     "typescript": "^4.8.4"
   },
-  "testDependencies": {
-    "@travetto/test": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
   },
   "engines": {
     "node": ">=12.17.0"

@@ -38,16 +38,28 @@
       "optional": true
     }
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@travetto/model-dynamodb": true,
-    "@travetto/model-mongo": true,
-    "@travetto/model-elasticsearch": true,
-    "@travetto/model-redis": true,
-    "@travetto/model-sql": true,
-    "@travetto/model-s3": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/model-dynamodb": [
+      "doc"
+    ],
+    "@travetto/model-mongo": [
+      "doc"
+    ],
+    "@travetto/model-elasticsearch": [
+      "doc"
+    ],
+    "@travetto/model-redis": [
+      "doc"
+    ],
+    "@travetto/model-sql": [
+      "doc"
+    ],
+    "@travetto/model-s3": [
+      "doc"
+    ]
   },
   "publishConfig": {
     "access": "public"

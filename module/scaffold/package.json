@@ -41,11 +41,19 @@
   "devDependencies": {
     "@types/mustache": "^4.2.1"
   },
-  "docDependencies": {
-    "@travetto/auth-rest-context": true,
-    "@travetto/auth-rest": true,
-    "@travetto/model": true,
-    "@travetto/model-query": true
+  "trvDependencies": {
+    "@travetto/auth-rest-context": [
+      "doc"
+    ],
+    "@travetto/auth-rest": [
+      "doc"
+    ],
+    "@travetto/model": [
+      "doc"
+    ],
+    "@travetto/model-query": [
+      "doc"
+    ]
   },
   "publishConfig": {
     "access": "public"

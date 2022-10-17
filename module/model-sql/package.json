@@ -48,11 +48,13 @@
       "optional": true
     }
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@travetto/model-mysql": 1
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/model-mysql": [
+      "doc"
+    ]
   },
   "publishConfig": {
     "access": "public"

@@ -30,11 +30,13 @@
   "dependencies": {
     "@travetto/transformer": "^3.0.0-rc.4"
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@travetto/di": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ],
+    "@travetto/di": [
+      "doc"
+    ]
   },
   "publishConfig": {
     "access": "public"

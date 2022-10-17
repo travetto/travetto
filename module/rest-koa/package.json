@@ -33,8 +33,10 @@
     "koa-compress": "^5.1.0",
     "koa-router": "^10.1.1"
   },
-  "testDependencies": {
-    "@travetto/test": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
   },
   "publishConfig": {
     "access": "public"

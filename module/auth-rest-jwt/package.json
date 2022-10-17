@@ -34,13 +34,10 @@
     "@travetto/rest": "^3.0.0-rc.4",
     "@travetto/jwt": "^3.0.0-rc.2"
   },
-  "testDependencies": {
-    "@travetto/test": true
-  },
-  "docDependencies": {
-    "@types/passport-facebook": "^2.1.11",
-    "passport-facebook": "^3.0.0",
-    "@travetto/app": true
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
   },
   "private": false,
   "publishConfig": {
