@@ -2,15 +2,16 @@ import * as ts from 'typescript';
 
 import {
   TransformerState, OnMethod, OnClass, AfterClass,
-  DecoratorUtil, TransformerId, AfterFunction, CoreUtil, SystemUtil
+  TransformerId, AfterFunction, CoreUtil, SystemUtil
 } from '@travetto/transformer';
 
-const REGISTER_MOD = '@travetto/registry/src/decorator';
+const UTIL_MOD = '@travetto/boot/src/internal/class-metadata';
+const UTIL_CLS = 'ClassMetadataUtil';
 
-const methods = Symbol.for('@trv:registry/methods');
-const cls = Symbol.for('@trv:registry/class');
+const methods = Symbol.for('@trv:boot/methods');
+const cls = Symbol.for('@trv:boot/class');
 
-interface RegisterInfo {
+interface MetadataInfo {
   [methods]?: {
     [key: string]: { hash: number };
   };
@@ -18,17 +19,17 @@ interface RegisterInfo {
 }
 
 /**
- * Registration of all classes to support the registry
+ * Providing metadata for classes
  */
 export class RegisterTransformer {
 
-  static [TransformerId] = '@trv:registry';
+  static [TransformerId] = '@trv:boot';
 
   /**
    * Hash each class
    */
   @OnClass()
-  static preprocessClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
+  static onClass(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
     state[cls] = SystemUtil.naiveHash(node.getText());
     return node;
   }
@@ -37,7 +38,7 @@ export class RegisterTransformer {
    * Hash each method
    */
   @OnMethod()
-  static processMethod(state: TransformerState & RegisterInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
+  static onMethod(state: TransformerState & MetadataInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
     if (ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
       const hash = SystemUtil.naiveHash(node.getText());
       const conf = { hash };
@@ -51,12 +52,8 @@ export class RegisterTransformer {
    * After visiting each class, register all the collected metadata
    */
   @AfterClass()
-  static registerClass(state: TransformerState & RegisterInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (state.module === REGISTER_MOD || state.module.startsWith('@travetto/boot')) {  // Cannot process self
-      return node;
-    }
-
-    const ident = state.importDecorator(REGISTER_MOD, 'Register')!;
+  static afterClass(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
+    const ident = state.importDecorator(UTIL_MOD, UTIL_CLS)!;
 
     const name = node.name?.escapedText.toString() ?? '';
 
@@ -77,9 +74,7 @@ export class RegisterTransformer {
 
     return state.factory.updateClassDeclaration(
       node,
-      DecoratorUtil.spliceDecorators(
-        node, undefined, [state.createDecorator(REGISTER_MOD, 'Register')], 0
-      ),
+      node.modifiers,
       node.name,
       node.typeParameters,
       node.heritageClauses,
@@ -94,14 +89,14 @@ export class RegisterTransformer {
    * Give proper functions a file name
    */
   @AfterFunction()
-  static registerFunction(state: TransformerState & RegisterInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
+  static onFunction(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     if (!ts.isFunctionDeclaration(node)) {
       return node;
     }
 
     if (node.name && /^[A-Z]/.test(node.name.escapedText.toString())) {
       // If we have a class like function
-      const ident = state.importDecorator(REGISTER_MOD, 'Register')!;
+      const ident = state.importDecorator(UTIL_MOD, UTIL_CLS)!;
       const meta = state.factory.createCallExpression(
         state.createAccess(ident, 'initFunctionMeta'),
         [],

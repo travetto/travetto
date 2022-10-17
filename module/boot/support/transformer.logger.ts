@@ -1,12 +1,20 @@
 import * as ts from 'typescript';
 
 import {
-  TransformerId, TransformerState, OnCall, CoreUtil, LiteralUtil,
+  TransformerId, TransformerState, OnCall, LiteralUtil,
   OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction
 } from '@travetto/transformer';
 
 type CustomState = TransformerState & {
   scope: { type: 'method' | 'class' | 'function', name: string }[];
+};
+
+const VALID_LEVELS: Record<string, string> = {
+  log: 'info',
+  info: 'info',
+  debug: 'debug',
+  warn: 'warn',
+  error: 'error'
 };
 
 /**
@@ -15,7 +23,7 @@ type CustomState = TransformerState & {
  */
 export class LoggerTransformer {
 
-  static [TransformerId] = '@trv:log';
+  static [TransformerId] = '@trv:boot';
 
   static initState(state: CustomState): void {
     state.scope = state.scope ?? [];
@@ -38,7 +46,7 @@ export class LoggerTransformer {
   static onMethod(state: CustomState, node: ts.MethodDeclaration): typeof node {
     this.initState(state);
     let name = 'unknown';
-    if (ts.isIdentifier(node.name)) {
+    if (ts.isIdentifier(node.name) || ts.isPrivateIdentifier(node.name)) {
       name = node.name?.text ?? name;
     }
     state.scope.push({ type: 'method', name });
@@ -65,25 +73,38 @@ export class LoggerTransformer {
   }
 
   @OnCall()
-  static onDebugCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
-    if (!ts.isIdentifier(node.expression) || node.expression.text !== 'ᚕlog') {
+  static onLogCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
+    if (!ts.isPropertyAccessExpression(node.expression)) {
       return node;
     }
 
-    const arg = CoreUtil.getArgument(node);
-    if (!arg || !ts.isStringLiteral(arg)) {
+    const chain = node.expression;
+    const name = chain.name;
+    const prop = chain.expression;
+
+    if (!ts.isIdentifier(prop) || prop.escapedText !== 'console' || !ts.isIdentifier(name)) {
       return node;
     }
 
-    const level = LiteralUtil.toLiteral(arg, false);
-    return state.factory.updateCallExpression(node, node.expression, node.typeArguments, [
-      state.factory.createStringLiteral(level),
-      LiteralUtil.fromLiteral(state.factory, {
-        file: state.getFilename(),
-        line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
-        scope: state.scope?.map(x => x.name).join(':'),
-      }),
-      ...node.arguments.slice(2) // Drop log level, and previous context from boot support
-    ]);
+    const level = name.escapedText!;
+
+    if (VALID_LEVELS[level]) {
+      return state.factory.updateCallExpression(
+        node,
+        state.factory.createIdentifier('ᚕlog'),
+        node.typeArguments,
+        [
+          state.factory.createStringLiteral(VALID_LEVELS[level]),
+          LiteralUtil.fromLiteral(state.factory, {
+            file: state.getFilename(),
+            line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
+            scope: state.scope?.map(x => x.name).join(':'),
+          }),
+          ...node.arguments.slice(2) // Drop log level, and previous context from boot support
+        ]
+      );
+    } else {
+      return node;
+    }
   }
 }

@@ -102,7 +102,7 @@ export class Compiler {
         .map(([f]) => `${bootLocation}/${x.output}/${f.replace('.ts', '.js')}`)
     );
 
-    this.#sourceToOutput = (file: string) => {
+    this.#sourceToOutput = (file: string): string => {
       for (const m of this.#modules) {
         if (file.startsWith(m.source)) {
           return file.replace(m.source, m.output);
@@ -112,6 +112,12 @@ export class Compiler {
     };
 
     this.#transformerTsconfig = `${this.#modules.find(m => m.name === '@travetto/transformer')!.source}/tsconfig.trv.json`;
+  }
+
+  #transformSourceText(text: string): string {
+    return `${text}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`
+      .replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript';/mg, x => `// ${x}`)
+      .replace(/^const ts = require[(]['"]typescript["'][)]/mg, x => `// ${x}`);
   }
 
   /**
@@ -139,6 +145,7 @@ export class Compiler {
    * Build typescript program
    */
   #getProgram(): ts.Program {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const tsv = require('typescript') as typeof ts;
     const rootFiles = new Set(this.#sourceFiles);
 
@@ -205,7 +212,7 @@ export class Compiler {
           const output = this.#sourceToOutput(targetFile);
           const finalTarget = targetFile.startsWith(SystemUtil.cwd) ? `${SystemUtil.cwd}/${output}` : `${OUT_DIR}/${output}`;
           fs.mkdirSync(path.dirname(finalTarget), { recursive: true });
-          fs.writeFileSync(finalTarget, text, 'utf8');
+          fs.writeFileSync(finalTarget, this.#transformSourceText(text), 'utf8');
         },
         undefined,
         false,
