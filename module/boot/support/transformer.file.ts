@@ -35,17 +35,26 @@ export class FileTransformer {
       }
     }
 
-    if (/support[\\\/]main[.]/.test(node.fileName)) {
+    // Create main entry point
+    if (/(support|bin)[\\\/]main[.]/.test(node.fileName)) {
       before.push(
         state.factory.createImportDeclaration(
           [],
           undefined,
-          state.factory.createStringLiteral('@travetto/boot/src/internal/setup')
+          state.factory.createStringLiteral('@travetto/boot/support/init')
         )
       );
 
       after.push(toStmt(
-        state.factory.createCallExpression(state.createIdentifier('main'), [], [])
+        state.factory.createCallExpression(state.createIdentifier('main'), [], [
+          state.factory.createSpreadElement(
+            state.factory.createCallExpression(
+              state.createAccess('process', 'argv', 'slice'),
+              [],
+              [state.fromLiteral(2)] // Eat node command, and filename
+            )
+          )
+        ])
       ));
     }
 

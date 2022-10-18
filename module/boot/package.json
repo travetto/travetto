@@ -18,7 +18,6 @@
   "files": [
     "src",
     "support",
-    "bin",
     "tsconfig.trv.json"
   ],
   "main": "index.ts",

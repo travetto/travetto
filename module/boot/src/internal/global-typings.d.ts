@@ -21,4 +21,7 @@ declare global {
 
   // eslint-disable-next-line no-var
   var ts: unknown;
+
+  // Global flag
+  var ᚕtrv: string | undefined;
 }
