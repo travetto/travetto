@@ -24,6 +24,24 @@ function storeHandler(cls: TransformerWithHandlers, fn: Function, phase: Transfo
 }
 
 /**
+ * Wraps entire file before transforming
+ */
+export function OnFile(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.SourceFile) => R>
+  ): void => storeHandler(inst, d.value!, 'before', 'file', target);
+}
+
+/**
+ * Wraps entire file after transforming
+ */
+export function AfterFile(...target: string[]) {
+  return <S extends State = State, R extends ts.Node = ts.Node>(
+    inst: Transformer, __: unknown, d: TypedPropertyDescriptor<(state: S, node: ts.SourceFile) => R>
+  ): void => storeHandler(inst, d.value!, 'before', 'file', target);
+}
+
+/**
  * Listens for a `ts.CallExpression`, on descent
  */
 export function OnCall(...target: string[]) {

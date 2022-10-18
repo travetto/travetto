@@ -113,12 +113,6 @@ export class Compiler {
     this.#transformerTsconfig = `${this.#modules.find(m => m.name === '@travetto/transformer')!.source}/tsconfig.trv.json`;
   }
 
-  #transformSourceText(text: string): string {
-    return `${text}\nObject.defineProperty(exports, 'ᚕtrv', { configurable: true, value: true });`
-      .replace(/^import\s+[*]\s+as\s+ts\s+from\s+'typescript';/mg, x => `// ${x}`)
-      .replace(/^const ts = require[(]['"]typescript["'][)]/mg, x => `// ${x}`);
-  }
-
   /**
    * Get loaded compiler options
    */
@@ -211,7 +205,7 @@ export class Compiler {
           const output = this.#sourceToOutput(targetFile);
           const finalTarget = targetFile.startsWith(SystemUtil.cwd) ? `${SystemUtil.cwd}/${output}` : `${OUT_DIR}/${output}`;
           fs.mkdirSync(path.dirname(finalTarget), { recursive: true });
-          fs.writeFileSync(finalTarget, this.#transformSourceText(text), 'utf8');
+          fs.writeFileSync(finalTarget, text, 'utf8');
         },
         undefined,
         false,

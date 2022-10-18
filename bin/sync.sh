@@ -9,7 +9,6 @@ cp -r $ROOT/module/boot node_modules/@travetto/
 
 echo 'process.env.TRV_COMPILED = 1;
 process.env.TRV_DEV="";
-process.env.TRV_DEV_ROOT="";
 process.env.TRV_REQUIRES="";
 ' > .env.js
 

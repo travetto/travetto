@@ -105,9 +105,9 @@ export class RegisterTransformer {
           state.getFilename()
         ]
       );
-      state.addStatement(
+      state.addStatements([
         state.factory.createExpressionStatement(meta)
-      );
+      ]);
     }
     return node;
   }

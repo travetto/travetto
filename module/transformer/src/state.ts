@@ -180,25 +180,30 @@ export class TransformerState implements State {
    * @param stmt
    * @param before
    */
-  addStatement(stmt: ts.Statement, before?: ts.Node): void {
+  addStatements(added: ts.Statement[], before?: ts.Node | number): void {
     const stmts = this.source.statements.slice(0);
-    let idx = stmts.length;
-    let n = before;
-    if (hasOriginal(n)) {
-      n = n.original;
-    }
-    while (n && !ts.isSourceFile(n.parent)) {
-      n = n.parent;
-    }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const nStmt: ts.Statement = n as ts.Statement;
-    if (n && ts.isSourceFile(n.parent) && stmts.indexOf(nStmt) >= 0) {
-      idx = stmts.indexOf(nStmt) - 1;
+    let idx = stmts.length + 1000;
+
+    if (before && typeof before !== 'number') {
+      let n = before;
+      if (hasOriginal(n)) {
+        n = n.original;
+      }
+      while (n && !ts.isSourceFile(n.parent) && n !== n.parent) {
+        n = n.parent;
+      }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const nStmt: ts.Statement = n as ts.Statement;
+      if (n && ts.isSourceFile(n.parent) && stmts.indexOf(nStmt) >= 0) {
+        idx = stmts.indexOf(nStmt) - 1;
+      }
+    } else if (before !== undefined) {
+      idx = before;
     }
     if (!this.added.has(idx)) {
       this.added.set(idx, []);
     }
-    this.added.get(idx)!.push(stmt);
+    this.added.get(idx)!.push(...added);
   }
 
   /**
