@@ -1,8 +1,7 @@
 import { statSync } from 'fs';
 
-import { CliUtil, EnvUtil, FsUtil } from '@travetto/boot';
+import { CliUtil, EnvUtil, ExecUtil, FsUtil } from '@travetto/boot';
 import { ModuleIndexEntry, ModuleIndex } from '@travetto/boot/src/internal/module';
-import { ModuleExec } from '@travetto/boot/src/internal/module-exec';
 
 /**
  * Utilities for running compilation
@@ -39,7 +38,7 @@ export class BuildUtil {
 
     // Compile rest of code
     return CliUtil.waiting(`Building... ${output}`,
-      ModuleExec.workerMain(require.resolve('../main.build'), [], { // target self
+      ExecUtil.worker('@travetto/base/support/main.build', [], { // target self
         env: {
           ...(output ? { TRV_CACHE: output } : {}),
           ...(env ?? {})
