@@ -1,4 +1,3 @@
-import { Host } from '@travetto/boot';
 import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
@@ -90,7 +89,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       includeIndex: true
     })) {
       if (!/support\/(transformer|phase)[.]/.test(file)) {
-        const worked = DynamicLoader.unload(file);
+        const worked = await DynamicLoader.unload(file);
         if (worked) {
           console.debug('Unloading', { pid: process.pid, file });
         }

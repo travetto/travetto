@@ -153,7 +153,7 @@ export class $DynamicLoader {
   /**
    * Remove file from require.cache, and possible the file system
    */
-  unload(filename: string, unlink = false): true | undefined {
+  async unload(filename: string, unlink = false): Promise<true | undefined> {
     const native = PathUtil.toNative(filename);
     for (const el of this.#unloadHandlers) {
       el(filename, unlink);
@@ -162,6 +162,22 @@ export class $DynamicLoader {
       delete require.cache[native]; // Remove require cached element
       return true;
     }
+  }
+
+  /** 
+   * Load a file
+   */
+  async load(filename: string) {
+    require(filename);
+  }
+
+  /**
+   * Reload a file
+   * @param filename 
+   */
+  async reload(filename: string) {
+    await this.unload(filename);
+    await this.load(filename);
   }
 
   /**

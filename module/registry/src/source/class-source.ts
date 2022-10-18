@@ -1,6 +1,7 @@
 import { EventEmitter } from 'events';
 
 import { Class } from '@travetto/base';
+import { Dynamic } from '@travetto/base/src/internal/dynamic';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 import { PendingRegister } from '../decorator';
@@ -10,16 +11,11 @@ import { PendingRegister } from '../decorator';
  * compiler as a way to listen to changes via the compiler
  * watching.
  */
+@Dynamic('@travetto/registry/support/dynamic.class-source')
 export class ClassSource implements ChangeSource<Class> {
 
   #classes = new Map<string, Map<string, Class>>();
   #emitter = new EventEmitter();
-
-  constructor() {
-    // Compiler
-    //   .on('added', () => { this.processFiles(); this.#flush(); })
-    //   .on('changed', () => this.processFiles());
-  }
 
   /**
    * Flush classes
@@ -75,10 +71,13 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Flush all pending classes
    */
-  processFiles(): void {
+  processFiles(flush = false): void {
     console.debug('Pending changes', { changes: PendingRegister.ordered.map(([, x]) => x.map(y => y.ᚕid)) });
     for (const [file, classes] of PendingRegister.flush()) {
       this.#handleFileChanges(file, classes);
+    }
+    if (flush) {
+      this.#flush();
     }
   }
 
