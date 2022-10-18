@@ -50,7 +50,7 @@ export class SchemaTransformUtil {
               )
           );
           cls.getText = (): string => '';
-          state.addStatement(cls, root || node);
+          state.addStatements([cls], root || node);
         }
         return id;
       }

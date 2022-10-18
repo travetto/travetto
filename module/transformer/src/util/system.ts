@@ -8,6 +8,8 @@ const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.ends
 
 export class SystemUtil {
   static readonly cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
+
+  // TODO: This needs to go away and use manifest.json
   static #devPath: string = process.env.TRV_DEV ?? '';
 
   static EXT = {

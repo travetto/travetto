@@ -29,6 +29,8 @@ export class VisitorFactory<S extends State = State> {
       return 'getter';
     } else if (ts.isSetAccessor(node)) {
       return 'setter';
+    } else if (ts.isSourceFile(node)) {
+      return 'file';
     }
   }
 
