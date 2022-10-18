@@ -7,10 +7,7 @@ popd > /dev/null
 rm -rf node_modules/@travetto/boot
 cp -r $ROOT/module/boot node_modules/@travetto/
 
-echo 'process.env.TRV_COMPILED = 1;
-process.env.TRV_DEV="";
-process.env.TRV_REQUIRES="";
-' > .env.js
+echo 'process.env.TRV_DEV="";' > .env.js
 
 function copy_module() {  
   MOD=$1

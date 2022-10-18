@@ -1,4 +1,14 @@
+/// <reference path="../src/internal/global-typings.d.ts" />
+
 import * as sourceMapSupport from 'source-map-support';
+
+if (global.ᚕtrv) {
+  console.error(`@travetto/boot was already loaded at ${global.ᚕtrv} but now is trying to be loaded in ${__filename}`);
+  console.error('This means you have two versions of the framework installed, which is not supported');
+  process.exit(1);
+}
+
+global.ᚕtrv = __filename;
 
 const objectProto = Object.prototype.__proto__;
 
@@ -46,3 +56,6 @@ global.ts = new Proxy({}, {
 
 // Increase stack limit
 Error.stackTraceLimit = 50;
+
+// import/setup
+try { require(`${process.cwd()}/.env`); } catch { } // read env
