@@ -88,7 +88,6 @@ export class Compiler {
         ...x.files.src ?? [],
         ...x.files.support ?? [],
         ...x.files.test ?? [],
-        ...x.files.e2e ?? [],
       ]
         .filter(([, type]) => type === 'ts')
         .map(([f]) => `${x.source}/${f}`)
