@@ -15,9 +15,9 @@ export class WatchUtil {
    */
   static async watchFile(file: string, cb: (ev: unknown) => void, unload = false): Promise<void> {
     new Watcher(__dirname, { interval: 250, exclude: { testDir: () => false, testFile: f => f === file } })
-      .on('all', e => {
+      .on('all', async e => {
         if (unload) {
-          DynamicLoader.unload(PathUtil.resolveUnix(file));
+          await DynamicLoader.unload(PathUtil.resolveUnix(file));
         }
         cb(e);
       });

@@ -8,8 +8,7 @@ export const step = {
     const { ModuleIndex } = await import('@travetto/boot/src/internal/module');
 
     for (const { file } of ModuleIndex.findSrc({})) {
-      // Use require vs import on purpose
-      require(file); // Scan all files as compiler source root
+      await import(file);
     }
   }
 };
