@@ -1,7 +1,7 @@
 import { d, mod } from '@travetto/doc';
 import { Injectable } from '@travetto/di';
 import { FileModelService, MemoryModelService } from '@travetto/model';
-import { Links } from '@travetto/model/support/doc-support';
+import { Links } from '@travetto/model/support/doc.support';
 
 import { AssetService } from '.';
 
