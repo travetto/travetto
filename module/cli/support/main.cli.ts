@@ -1,3 +1,4 @@
+import '@travetto/boot/support/init'; // Special b/c trv is run before proper compilation
 import { PathUtil, EnvUtil } from '@travetto/boot';
 
 /**

@@ -1,9 +1,8 @@
 import { $AsyncIterable } from '@arcsine/nodesh/dist/types';
 
-import { PathUtil } from '@travetto/boot';
-
 import { Modules } from './modules';
 import { Packages, Pkg } from './packages';
+import { Util } from './util';
 
 export class Git {
 
@@ -26,7 +25,7 @@ export class Git {
       .$tokens(patt)
       .$sort()
       .$unique()
-      .$map(f => PathUtil.resolveUnix(f));
+      .$map(f => Util.resolveUnix(f));
   }
 
   static async * yieldChangedPackages(hash?: string, transitive = process.env.TRV_FLAT !== '1'): $AsyncIterable<Pkg> {

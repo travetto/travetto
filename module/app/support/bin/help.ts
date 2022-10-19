@@ -1,6 +1,6 @@
 import { CliUtil, PathUtil } from '@travetto/boot';
 
-import { ApplicationConfig } from '../../src/types';
+import type { ApplicationConfig } from '../../src/types';
 
 export class HelpUtil {
 

@@ -1,10 +1,11 @@
 import '@arcsine/nodesh';
+import * as cp from 'child_process';
 
-import { ExecUtil } from '@travetto/boot';
 import type { TestEvent } from '@travetto/test';
 
 import { Git } from './package/git';
 import { Packages } from './package/packages';
+import { Util } from './package/util';
 
 async function run(): Promise<boolean> {
   console.error('Starting tests');
@@ -19,7 +20,8 @@ async function run(): Promise<boolean> {
   return (process.env.TRV_ALL === '1' ? Packages.yieldPublicPackages() : Git.yieldChangedPackages())
     .$parallel(async p => {
       const args = ['test', '-f', 'exec', '-c', '3'];
-      const { process: proc, result } = ExecUtil.spawn('trv', args, { cwd: p._.folder, stdio: [0, 'pipe', 2, 'ipc'] });
+      const proc = cp.spawn('trv', args, { cwd: p._.folder, stdio: [0, 'pipe', 2, 'ipc'], shell: false });
+      const result = Util.enhanceProcess(proc, 'trv test');
 
       proc.on('message', (ev: TestEvent) => consumer.onEvent(ev));
       proc.on('error', e => {

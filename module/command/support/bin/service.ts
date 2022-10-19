@@ -1,9 +1,6 @@
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
 import { CliUtil } from '@travetto/boot/src/cli';
 
-import { CommandUtil } from '../../src/util';
-import { DockerContainer } from '../../src/docker';
-
 export type StreamingResult = Partial<Record<keyof typeof CliUtil['colorPalette'], string | number>>;
 export type StreamingStatus = AsyncIterable<StreamingResult>;
 
@@ -30,6 +27,8 @@ export class ServiceUtil {
    * Determine if service is running
    */
   static async * isRunning(svc: Service, mode: 'running' | 'startup', timeout = 100): StreamingStatus {
+    const { CommandUtil } = await import('../../src/util');
+
     const port = svc.ports ? +Object.keys(svc.ports)[0] : (svc.port ?? 0);
     if (port > 0) {
       const checkPort = CommandUtil.waitForPort(port, timeout).then(x => true, x => false);
@@ -58,6 +57,8 @@ export class ServiceUtil {
    * Get container id from docker
    */
   static async getContainerId(svc: Service): Promise<string> {
+    const { CommandUtil } = await import('../../src/util');
+
     return CommandUtil.findContainerByLabel(`trv-${svc.name}`);
   }
 
@@ -65,6 +66,8 @@ export class ServiceUtil {
    * Stop a service
    */
   static async * stop(svc: Service): StreamingStatus {
+    const { CommandUtil } = await import('../../src/util');
+
     const running = yield* this.isRunning(svc, 'running');
     if (running) {
       const pid = await this.getContainerId(svc);
@@ -84,6 +87,8 @@ export class ServiceUtil {
    * Start a service
    */
   static async * start(svc: Service): StreamingStatus {
+    const { DockerContainer } = await import('../../src/docker');
+
     const preRun = yield* this.isRunning(svc, 'running');
     if (!preRun) {
       yield { subtitle: 'Starting' };
@@ -155,8 +160,7 @@ export class ServiceUtil {
    */
   static async findAll(): Promise<Service[]> {
     return (await Promise.all(
-      ModuleIndex
-        .find({ folder: 'support', filter: x => /\/service[.]/.test(x) })
+      ModuleIndex.findSupport({ filter: x => /\/service[.]/.test(x) })
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         .map(async x => (await import(x.file)).service as Service)
     ))

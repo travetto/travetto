@@ -1,4 +1,5 @@
 import { PathUtil } from '../path';
+import { EnvUtil } from '../env';
 
 export type ModuleIndexEntry = { source: string, module: string, file: string };
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
@@ -13,8 +14,8 @@ type Module<Sub = ModuleFile> = {
   module: boolean;
   files: {
     [key: string]: Sub[];
-  }
-}
+  };
+};
 
 /**
  * Module index, files to be loaded at runtime
@@ -23,18 +24,27 @@ class $ModuleIndex {
 
   #modules: Module[];
 
+  #resolve(...parts: string[]): string {
+    return PathUtil.resolveUnix(EnvUtil.get('TRV_CACHE', PathUtil.cwd), ...parts);
+  }
+
+  #loadManifest(): Module<[string, ModuleFileType]>[] {
+    const modules: Module<[string, ModuleFileType]>[] = require(this.#resolve('manifest.json'));
+    return modules;
+  }
+
   /**
    * Get index of all source files
    */
   get #index(): Module[] {
     if (this.#modules === undefined) {
-      this.#modules = (require(PathUtil.resolveUnix('manifest.json')) as Module<[string, ModuleFileType]>[]).map(
+      this.#modules = this.#loadManifest().map(
         m => {
           const mapping: Record<string, ModuleFile[]> = {};
           for (const folder of Object.keys(m.files)) {
             mapping[folder] = m.files[folder].map(([f, type]) => {
               const source = PathUtil.joinUnix(m.source, f);
-              const fullFile = PathUtil.joinUnix(PathUtil.cwd, m.output, f).replace(/[.]ts$/, '.js');
+              const fullFile = this.#resolve(m.output, f).replace(/[.]ts$/, '.js');
               const module = (m.output.startsWith('node_modules') ?
                 `${m.output.split('node_modules/')[1]}/${f}` :
                 `./${f}`).replace(/[.]ts$/, '.js');
@@ -80,7 +90,7 @@ class $ModuleIndex {
 
     return searchSpace
       .filter(({ type }) => type === 'ts')
-      .filter(({ file }) => filter?.(file) ?? true)
+      .filter(({ file }) => filter?.(file) ?? true);
   }
 
   /**

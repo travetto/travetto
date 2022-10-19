@@ -1,3 +1,5 @@
+import * as fs from 'fs/promises';
+
 import type * as sqlite3 from 'better-sqlite3';
 import Db = require('better-sqlite3');
 import * as pool from 'generic-pool';
@@ -5,8 +7,8 @@ import * as pool from 'generic-pool';
 import { ShutdownManager, Util } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
-import { AppCache } from '@travetto/boot';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
+import { PathUtil } from '@travetto/boot';
 
 /**
  * Connection support for Sqlite
@@ -15,12 +17,12 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
 
   isolatedTransactions = false;
 
-  #config: SQLModelConfig;
+  #config: SQLModelConfig<sqlite3.Options & { file?: string }>;
   #pool: pool.Pool<sqlite3.Database>;
 
   constructor(
     context: AsyncContext,
-    config: SQLModelConfig
+    config: SQLModelConfig<sqlite3.Options & { file?: string }>
   ) {
     super(context);
     this.#config = config;
@@ -49,8 +51,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
   override async init(): Promise<void> {
     this.#pool = pool.createPool({
       create: () => this.#withRetries(async () => {
-        // TODO: This should be configurable, and not in the cache folder
-        const handle = await AppCache.openEntryHandle('sqlite_db');
+        const handle = await fs.open(PathUtil.resolveUnix(this.#config.options.file ?? '.trv-sqlite_db'));
         const buffer = await handle.readFile();
         await handle.close();
 

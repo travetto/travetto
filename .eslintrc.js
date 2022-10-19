@@ -3,23 +3,33 @@ const Module = require('module');
 const og = Module._resolveFilename.bind(Module);
 // Hack Node module system to recognize our plugin.
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-Module._resolveFilename = (r, ...args) => /plugin-travetto/.test(r) ? require.resolve('./bin/eslint') : og(r, ...args);
+Module._resolveFilename = (r, ...args) => /plugin-travetto/.test(r) ? require.resolve('./.bin/eslint') : og(r, ...args);
 
 const { ignorePatterns, plugins, rules, overrides, extends: ext, ...rest } = require('./bin/eslint/rules.json');
 module.exports = {
   ...rest,
   ignorePatterns: [
     ...ignorePatterns,
-    'module/boot/src',
     'module/scaffold/templates',
-    'bin/eslint/*.js'
   ],
   extends: [...ext, 'plugin:travetto/all'],
   plugins: [...plugins, 'unused-imports'],
   overrides: [
     ...overrides,
     {
-      files: '{module,global-tests}/*/{test,doc,e2e,support/test}/**/*.{ts,js}',
+      files: 'module/{transformer,watch}/**',
+      rules: {
+        'no-restricted-imports': 0
+      }
+    },
+    {
+      files: '{module,sample,global-test}/*/support/transform*',
+      rules: {
+        'no-restricted-imports': 0
+      }
+    },
+    {
+      files: '{module,global-test}/*/{test,doc,support/test}/**/*.{ts,js}',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0

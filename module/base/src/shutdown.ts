@@ -1,7 +1,6 @@
 import { setTimeout } from 'timers/promises';
 
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
-import { Host } from '@travetto/boot';
 
 import { Util } from './util';
 import { AppManifest } from './manifest';
@@ -147,7 +146,7 @@ class $ShutdownManager {
       name = nameOrCloseable;
       handler = handler!;
     }
-    if (Host.EXT.inputOutputRe.test(name)) {
+    if (/[.][tj]s$/.test(name)) {
       name = ModuleUtil.computeId(name);
     }
     this.#listeners.push({ name, handler, final });

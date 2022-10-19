@@ -1,12 +1,10 @@
 import { d, lib } from '@travetto/doc';
-import { FileCache, ExecUtil, StreamUtil } from '.';
+import { ExecUtil, StreamUtil } from '.';
 
-const AppCacheLink = d.Ref('AppCache', 'src-ts/cache.ts');
-const FileCacheLink = d.Ref(FileCache.name, 'src-ts/cache.ts');
-const FsUtilLink = d.Ref('FsUtil', 'src-ts/fs.ts');
-const ScanFsLink = d.Ref('ScanFs', 'src-ts/scan.ts');
-const ExecUtilLink = d.Ref(ExecUtil.name, 'src-ts/exec.ts');
-const StreamUtilLink = d.Ref(StreamUtil.name, 'src-ts/stream.ts');
+const FsUtilLink = d.Ref('FsUtil', 'src/fs.ts');
+const ScanFsLink = d.Ref('ScanFs', 'src/scan.ts');
+const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
+const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
 
 export const text = d`
 ${d.Header()}
@@ -14,9 +12,8 @@ ${d.Header()}
 Boot is basic environment  awareness coupled with typescript bootstrapping for ${lib.Travetto} apps and libraries.  It has support for the following key areas:
 ${d.List(
   'Environmental Information',
-  'Cache Support',
+  'Module Indexing',
   'File Operations',
-  'Typescript Bootstrapping',
   'Process Execution',
   'Stream Support'
 )}
@@ -32,28 +29,14 @@ ${d.List(
   d`${d.Method('getList(key: string): string[];')} - Retrieve an environmental value as a list`,
 )}
 
-${d.Section('Cache Support')}
-The framework uses a file cache to support it's compilation activities for performance.  This cache is also leveraged by other modules to support storing of complex calculations.  ${AppCacheLink} is the cache that is available for runtime storage, and is an instance of ${FileCacheLink}.  ${FileCacheLink} is the generic structure for supporting a file cache that invalidates on modification/creation changes.
-
-The class organization looks like:
-
-${d.Code('File Cache Structure', 'src/cache.d.ts')}
-
-Everything is based on absolute paths being passed in, and translated into cache specific files.
-
 ${d.Section('File Operations')}
 ${FsUtilLink} provides some high level functionality (like recursive directory delete).
 
 ${d.SubSection('File System Scanning')}
 ${ScanFsLink} provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
-${d.Section('Typescript Bootstrapping')}
-
-${d.SubSection('Source Indexing')}
-The bootstrap process will also requires an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatic discovery that is used within the framework (and transpiling).
-
-${d.SubSection('Registration')}
-This functionality allows the program to opt in the typescript compiler.  This allows for run-time compilation of typescript files.
+${d.SubSection('Module Indexing')}
+The bootstrap process will also produce an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatic discovery that is used within the framework (and transpiling).
 
 ${d.Section('Process Execution')}
 Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.

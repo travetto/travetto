@@ -8,7 +8,7 @@ export class MakeUpper {
 
   @OnProperty()
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
-    if (!state.source.fileName.includes('doc/src')) {
+    if (!state.file.includes('doc/src')) {
       return node;
     }
     return state.factory.updatePropertyDeclaration(
@@ -23,7 +23,7 @@ export class MakeUpper {
 
   @OnClass()
   static handleClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (!state.source.fileName.includes('doc/src')) {
+    if (!state.file.includes('doc/src')) {
       return node;
     }
     return state.factory.updateClassDeclaration(
@@ -38,7 +38,7 @@ export class MakeUpper {
 
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (!state.source.fileName.includes('doc/src')) {
+    if (!state.file.includes('doc/src')) {
       return node;
     }
     return state.factory.updateMethodDeclaration(

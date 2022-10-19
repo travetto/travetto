@@ -2,7 +2,6 @@ import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 import type { MailService } from '@travetto/email/src/service';
 
-import { CompileUtil } from '../../src/util';
 import { EditorConfig } from './config';
 
 /**
@@ -56,6 +55,8 @@ ${EditorConfig.getDefaultConfig()}`.trim();
     url?: string | false;
   }> {
     try {
+      const { CompileUtil } = await import('../../src/util');
+
       console.log('Sending email', { to });
       // Let the engine template
       const svc = await this.getMailService();

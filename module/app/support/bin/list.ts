@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
-import { FsUtil, AppCache, CliUtil } from '@travetto/boot';
+import { FsUtil, CliUtil, PathUtil } from '@travetto/boot';
 import { ModuleExec } from '@travetto/boot/src/internal/module-exec';
 
 import type { ApplicationConfig } from '../../src/types';
@@ -21,8 +21,8 @@ export class $AppListLoader {
    * Read list
    */
   async #readList(): Promise<ApplicationConfig[] | undefined> {
-    if (AppCache.hasEntry(this.#cacheConfig)) {
-      return JSON.parse(AppCache.readEntry(this.#cacheConfig));
+    if (await FsUtil.exists(this.#cacheConfig)) {
+      return JSON.parse(await fs.readFile(this.#cacheConfig, 'utf8'));
     }
   }
 
@@ -30,9 +30,9 @@ export class $AppListLoader {
    * Store list of cached items
    * @param items
    */
-  #storeList(items: ApplicationConfig[]): void {
+  async #storeList(items: ApplicationConfig[]): Promise<void> {
     const toStore = items.map(x => ({ ...x, target: undefined }));
-    AppCache.writeEntry(this.#cacheConfig, JSON.stringify(toStore));
+    await fs.writeFile(this.#cacheConfig, JSON.stringify(toStore));
   }
 
   /**
@@ -49,7 +49,7 @@ export class $AppListLoader {
       }
       return items;
     } catch (err) {
-      AppCache.removeEntry(this.#cacheConfig, true);
+      await fs.unlink(this.#cacheConfig);
       throw err;
     }
   }
@@ -63,7 +63,7 @@ export class $AppListLoader {
         ModuleExec.workerMain<ApplicationConfig[]>(require.resolve('../main.list-build')).message
       );
     } else {
-      await (await import('@travetto/base/support/main.build')).main();
+      await (await import('@travetto/boot/support/main.build')).main();
 
       const { AppScanUtil } = await import('../../src/scan');
       const list = await AppScanUtil.scanList();
@@ -87,7 +87,7 @@ export class $AppListLoader {
     if (!(items = await this.#readList())) { // no list
       items = await this.buildList();
       if (items) {
-        this.#storeList(items);
+        await this.#storeList(items);
       }
     }
 
@@ -106,4 +106,6 @@ export class $AppListLoader {
   }
 }
 
-export const AppListLoader = new $AppListLoader('app-cache.json');
+export const AppListLoader = new $AppListLoader(
+  PathUtil.resolveUnix('.trv-app-cache.json')
+);

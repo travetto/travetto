@@ -5,6 +5,8 @@ import {
   TransformerId, AfterFunction, CoreUtil, SystemUtil
 } from '@travetto/transformer';
 
+const MOD = '@travetto/boot';
+
 const UTIL_MOD = '@travetto/boot/src/internal/class-metadata';
 const UTIL_CLS = 'ClassMetadataUtil';
 
@@ -30,6 +32,9 @@ export class RegisterTransformer {
    */
   @OnClass()
   static onClass(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
+    if (state.module.startsWith(MOD)) {
+      return node; // Exclude self
+    }
     state[cls] = SystemUtil.naiveHash(node.getText());
     return node;
   }
@@ -53,6 +58,10 @@ export class RegisterTransformer {
    */
   @AfterClass()
   static afterClass(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
+    if (!state[cls]) {
+      return node;
+    }
+
     const ident = state.importDecorator(UTIL_MOD, UTIL_CLS)!;
 
     const name = node.name?.escapedText.toString() ?? '';
@@ -71,6 +80,7 @@ export class RegisterTransformer {
     );
 
     state[methods] = {};
+    delete state[cls];
 
     return state.factory.updateClassDeclaration(
       node,
@@ -90,7 +100,7 @@ export class RegisterTransformer {
    */
   @AfterFunction()
   static onFunction(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
-    if (!ts.isFunctionDeclaration(node)) {
+    if (state.module.startsWith(MOD) || !ts.isFunctionDeclaration(node)) {
       return node;
     }
 

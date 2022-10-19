@@ -14,6 +14,7 @@ Base is the foundation of all ${lib.Travetto} applications.  It is intended to b
 
 ${d.List(
   'Application Manifest',
+  'Application Caching',
   'File Operations',
   'Resource Management',
   'Lifecycle Support',

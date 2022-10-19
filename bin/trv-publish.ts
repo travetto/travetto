@@ -1,10 +1,10 @@
 import * as fs from 'fs/promises';
+import * as cp from 'child_process';
 
 import '@arcsine/nodesh';
 
-import { ExecUtil } from '@travetto/boot';
-
 import { Packages } from './package/packages';
+import { Util } from './package/util';
 
 Packages.yieldPublicPackages()
   .$filter(p => p.name.startsWith('@travetto'))
@@ -22,6 +22,7 @@ Packages.yieldPublicPackages()
     if (!/^[~^]/.test(tag) && !/-(rc|latest|alpha|beta|next)[.]\d+$/.test(pkg.version)) {
       args.push('--tag', 'latest');
     }
-    return ExecUtil.spawn('npm', args, { cwd: pkg!._.folder, stdio: [0, 1, 2] }).result;
+    const proc = cp.spawn('npm', args, { shell: false, cwd: pkg!._.folder, stdio: [0, 1, 2] });
+    return Util.enhanceProcess(proc, 'npm publish');
   })
   .$stdout;

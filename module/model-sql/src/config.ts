@@ -4,7 +4,7 @@ import { Config } from '@travetto/config';
  * SQL Model Config
  */
 @Config('model.sql')
-export class SQLModelConfig {
+export class SQLModelConfig<T extends {} = {}> {
   /**
    * Host to connect to
    */
@@ -40,5 +40,6 @@ export class SQLModelConfig {
   /**
    * Raw client options
    */
-  options = {};
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  options: T = {} as T;
 }

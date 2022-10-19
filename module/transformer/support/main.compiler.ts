@@ -1,9 +1,12 @@
-import type * as ts from 'typescript';
+#!/usr/bin/env node
+import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs';
 
 import { TransformerManager } from '../src/manager';
-import { SystemUtil } from '../src/util/system';
+
+const CWD = process.cwd();
+
 
 const NODE_VERSION = (process.env.TRV_NODE_VERSION ?? process.version)
   .replace(/^.*?(\d+).*?$/, (_, v) => v);
@@ -22,53 +25,7 @@ type Module = {
   files: Record<string, [string, 'ts' | 'js'][] | undefined>;
 };
 
-const OUT_DIR = `${SystemUtil.cwd}/.trv_out`;
-
 export class Compiler {
-  static run(bootLocation: string): Promise<void> {
-    return new Compiler(bootLocation).run();
-  }
-
-  /**
-   * Read the given tsconfig.json values for the project
-   * @param path
-   * @returns
-   */
-  static readTsConfigOptions(file: string): ts.CompilerOptions {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const tsv = require('typescript') as typeof ts;
-    const { options } = tsv.parseJsonSourceFileConfigFileContent(
-      tsv.readJsonConfigFile(file, tsv.sys.readFile), tsv.sys, SystemUtil.cwd
-    );
-    options.target = tsv.ScriptTarget[TS_TARGET];
-    return options;
-  }
-
-  /**
-   * Check transpilation errors
-   * @param filename The name of the file
-   * @param diagnostics The diagnostic errors
-   */
-  static checkTranspileErrors<T extends ts.Diagnostic>(filename: string, diagnostics: readonly T[]): void {
-    if (diagnostics && diagnostics.length) {
-      const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const message = (require('typescript') as typeof ts).flattenDiagnosticMessageText(diag.messageText, '\n');
-        if (diag.file) {
-          const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
-          return ` @ ${diag.file.fileName.replace(SystemUtil.cwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
-        } else {
-          return ` ${message}`;
-        }
-      });
-
-      if (diagnostics.length > 5) {
-        errors.push(`${diagnostics.length - 5} more ...`);
-      }
-      throw new Error(`Transpiling ${filename.replace(SystemUtil.cwd, '.')} failed: \n${errors.join('\n')}`);
-    }
-  }
-
 
   #program: ts.Program | undefined;
   #transformerManager = new TransformerManager();
@@ -77,11 +34,17 @@ export class Compiler {
   #transformerTsconfig: string;
   #sourceToOutput: (file: string) => string;
   #modules: Module[];
+  #outDir: string;
+  #bootLocation: string;
 
   constructor(
-    bootLocation: string
+    outDir: string,
+    bootLocation?: string,
   ) {
-    this.#modules = JSON.parse(fs.readFileSync(`${bootLocation}/manifest.json`, 'utf8'));
+    this.#outDir = path.resolve(outDir).replaceAll('\\', '/');
+    this.#bootLocation = path.resolve(CWD, bootLocation ?? __filename.split('node_modules')[0]).replaceAll('\\', '/');
+
+    this.#modules = JSON.parse(fs.readFileSync(`${this.#bootLocation}/manifest.json`, 'utf8'));
     this.#sourceFiles = this.#modules.flatMap(
       x => [
         ...x.files.index ?? [],
@@ -94,11 +57,9 @@ export class Compiler {
     );
 
     this.#transformers = this.#modules.flatMap(
-      x => [
-        ...x.files.support ?? []
-      ]
+      x => (x.files.support ?? [])
         .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
-        .map(([f]) => `${bootLocation}/${x.output}/${f.replace('.ts', '.js')}`)
+        .map(([f]) => `${this.#bootLocation}/${x.output}/${f.replace(/[.][tj]s$/, '')}`)
     );
 
     this.#sourceToOutput = (file: string): string => {
@@ -114,20 +75,60 @@ export class Compiler {
   }
 
   /**
+   * Read the given tsconfig.json values for the project
+   * @param path
+   * @returns
+   */
+  readTsConfigOptions(file: string): ts.CompilerOptions {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const { options } = ts.parseJsonSourceFileConfigFileContent(
+      ts.readJsonConfigFile(file, ts.sys.readFile), ts.sys, CWD
+    );
+    options.target = ts.ScriptTarget[TS_TARGET];
+    return options;
+  }
+
+  /**
+   * Check transpilation errors
+   * @param filename The name of the file
+   * @param diagnostics The diagnostic errors
+   */
+  checkTranspileErrors(filename: string, diagnostics: readonly ts.Diagnostic[]): void {
+    if (diagnostics && diagnostics.length) {
+      const errors: string[] = diagnostics.slice(0, 5).map(diag => {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        if (diag.file) {
+          const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
+          return ` @ ${diag.file.fileName.replace(CWD, '.')}(${line + 1}, ${character + 1}): ${message}`;
+        } else {
+          return ` ${message}`;
+        }
+      });
+
+      if (diagnostics.length > 5) {
+        errors.push(`${diagnostics.length - 5} more ...`);
+      }
+      throw new Error(`Transpiling ${filename.replace(CWD, '.')} failed: \n${errors.join('\n')}`);
+    }
+  }
+
+
+  /**
    * Get loaded compiler options
    */
   #getCompilerOptions(): ts.CompilerOptions {
     const opts: Partial<ts.CompilerOptions> = {};
-    const rootDir = opts.rootDir ?? SystemUtil.cwd;
-    const projTsconfig = path.resolve(SystemUtil.cwd, 'tsconfig.json');
+    const rootDir = opts.rootDir ?? CWD;
+    const projTsconfig = path.resolve('tsconfig.json');
     // Fallback to base tsconfig if not found in local folder
     const config = fs.existsSync(projTsconfig) ? projTsconfig : this.#transformerTsconfig;
     console.log('Loading config', config);
 
     return {
-      ...Compiler.readTsConfigOptions(config),
+      ...this.readTsConfigOptions(config),
       rootDir,
-      outDir: OUT_DIR,
+      outDir: this.#outDir,
       sourceRoot: rootDir,
       ...opts
     };
@@ -139,12 +140,11 @@ export class Compiler {
    */
   #getProgram(): ts.Program {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const tsv = require('typescript') as typeof ts;
     const rootFiles = new Set(this.#sourceFiles);
 
     if (!this.#program) {
       console.debug('Loading program', { size: rootFiles.size });
-      this.#program = tsv.createProgram({
+      this.#program = ts.createProgram({
         rootNames: [...rootFiles],
         options: this.#getCompilerOptions(),
         oldProgram: this.#program,
@@ -174,8 +174,8 @@ export class Compiler {
 
     for (const module of this.#modules) {
       if (module.files.rootFiles?.find(([f]) => f === 'package.json')) {
-        fs.mkdirSync(`${OUT_DIR}/${module.output}`, { recursive: true });
-        fs.writeFileSync(`${OUT_DIR}/${module.output}/package.json`,
+        fs.mkdirSync(`${this.#outDir}/${module.output}`, { recursive: true });
+        fs.writeFileSync(`${this.#outDir}/${module.output}/package.json`,
           fs.readFileSync(`${module.source}/package.json`, 'utf8')
             .replaceAll('"index.ts"', '"index.js"')
           , 'utf8');
@@ -184,7 +184,7 @@ export class Compiler {
       for (const files of Object.values(module.files)) {
         for (const [jsFile, ext] of files!) {
           if (ext === 'js') {
-            const outJsFile = `${OUT_DIR}/${module.output}/${jsFile}`;
+            const outJsFile = `${this.#outDir}/${module.output}/${jsFile}`;
             console.log('Copying', outJsFile);
             fs.mkdirSync(path.dirname(outJsFile), { recursive: true });
             fs.copyFileSync(`${module.source}/${jsFile}`, outJsFile);
@@ -194,16 +194,16 @@ export class Compiler {
     }
 
     // Write manifest
-    fs.writeFileSync(`${OUT_DIR}/manifest.json`, JSON.stringify(this.#modules));
+    fs.writeFileSync(`${this.#outDir}/manifest.json`, JSON.stringify(this.#modules));
 
     // Compile with transformers
     const prog = this.getProgram();
     for (const file of this.#sourceFiles) {
-      prog.emit(
+      const result = prog.emit(
         prog.getSourceFile(file),
-        (targetFile: string, text, bom, onError) => {
+        (targetFile, text) => {
           const output = this.#sourceToOutput(targetFile);
-          const finalTarget = targetFile.startsWith(SystemUtil.cwd) ? `${SystemUtil.cwd}/${output}` : `${OUT_DIR}/${output}`;
+          const finalTarget = targetFile.startsWith(CWD) ? `${CWD}/${output}` : `${this.#outDir}/${output}`;
           fs.mkdirSync(path.dirname(finalTarget), { recursive: true });
           fs.writeFileSync(finalTarget, text, 'utf8');
         },
@@ -211,6 +211,15 @@ export class Compiler {
         false,
         this.#transformerManager.getTransformers()
       );
+      this.checkTranspileErrors(file, result.diagnostics);
     }
   }
+}
+
+async function main(outDir = '.trv_out'): Promise<void> {
+  return new Compiler(outDir).run();
+}
+
+if (require.main === module) {
+  main(...process.argv.slice(2));
 }

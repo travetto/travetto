@@ -54,6 +54,6 @@ export class ModuleUtil {
    * @param file .ts or .js file to convert
    */
   static toUnixSource(file: string): string {
-    return file.replace(/[\\\/]+/g, '/').replace(/[.]js$/, '.ts');
+    return file.replaceAll('\\', '/').replace(/[.]js$/, '.ts');
   }
 }

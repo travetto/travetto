@@ -1,11 +1,13 @@
-import { AppCache } from '@travetto/boot';
+import * as fs from 'fs/promises';
+
+import { PathUtil } from '@travetto/boot';
 
 import { envInit } from './bin/env';
 
 export async function customLogs(): Promise<void> {
   const { ConsoleManager } = await import('@travetto/boot');
 
-  const handle = await AppCache.openEntryHandle(`test-worker.${process.pid}.log`, 'a');
+  const handle = await fs.open(PathUtil.resolveUnix(`.trv-test-worker.${process.pid}.log`), 'a');
   const stdout = handle.createWriteStream();
 
   const c = new console.Console({

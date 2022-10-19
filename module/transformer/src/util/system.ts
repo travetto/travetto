@@ -3,14 +3,11 @@ import * as crypto from 'crypto';
 
 const tsExt = '.ts';
 const dtsExt = '.d.ts';
-const tjsRe = /[.][tj]s$/;
 const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.endsWith(dtsExt));
 
-export class SystemUtil {
-  static readonly cwd = process.cwd().replace(/[\/\\]+/g, '/').replace(/\/$/, '');
+const CWD = process.cwd().replaceAll('\\', '/');
 
-  // TODO: This needs to go away and use manifest.json
-  static #devPath: string = process.env.TRV_DEV ?? '';
+export class SystemUtil {
 
   static EXT = {
     outputTypes: dtsExt,
@@ -53,53 +50,23 @@ export class SystemUtil {
   }
 
   /**
-   * Convert file to a unix format
-   * @param pth The path to convert
-   */
-  static toUnix(pth: string): string {
-    return pth.replace(/[\\\/]+/g, '/');
-  }
-
-  /**
    * Resolve path to use / for directory separator
    * @param paths The paths to resolve
    */
   static resolveUnix(...paths: string[]): string {
-    return this.toUnix(path.resolve(this.cwd, ...paths));
-  }
-
-  /**
-   * Normalize file path to act as if not in dev mode
-   * @private
-   * @param file
-   * @returns
-   */
-  static normalizeFrameworkPath(file: string, prefix = ''): string {
-    return this.#devPath ? file.replace(this.#devPath, `${prefix}@travetto`) : file;
-  }
-
-
-  /**
-   * Simplifies path name to remove node_modules construct
-   * @param file
-   */
-  static simplifyPath(file: string, localRoot?: string, removeExt = false): string {
-    let out = file.replace(/^.*node_modules\//, '');
-    if (localRoot !== undefined) {
-      out = out.replace(this.cwd, localRoot);
-    }
-    if (removeExt) {
-      out = out.replace(tjsRe, '');
-    }
-    return out;
+    return path.resolve(CWD, ...paths).replaceAll('\\', '/');
   }
 
   /**
    * Convert a file name, to a proper module reference for importing, and comparing
    * @param file
    */
-  static normalizePath(file: string): string {
-    return this.simplifyPath(this.normalizeFrameworkPath(file), '.', true);
+  static moduleReference(file: string): string {
+    file = file.replaceAll('\\', '/');
+    if (file.includes('node_modules')) { // it is a module
+      return file.replace(/^.*node_modules\//, '');
+    } else {
+      return file.replace(CWD, '.');
+    }
   }
-
 }

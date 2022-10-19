@@ -1,13 +1,10 @@
-import { Class } from '../types';
+import type { Class } from '../types';
 import { ModuleUtil } from './module-util';
 
 /**
  * Register a class as pending
  */
 export class ClassMetadataUtil {
-  map = new Map<string, Class[]>();
-  ordered: [string, Class[]][] = [];
-
   /**
    * Initialize the meta data for a function
    * @param function Function

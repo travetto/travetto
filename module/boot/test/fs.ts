@@ -4,7 +4,7 @@ import * as fs from 'fs/promises';
 import * as os from 'os';
 
 import { Test, Suite } from '@travetto/test';
-import { ExecUtil, FileCache, FsUtil, PathUtil } from '..';
+import { ExecUtil, FsUtil, PathUtil } from '..';
 
 @Suite()
 export class FsUtilTest {
@@ -56,10 +56,9 @@ export class FsUtilTest {
   async copyRecursive() {
     const rndFolder = `${Date.now()}_${Math.trunc(Math.random() * 10000)}`;
     const base = PathUtil.resolveUnix(os.tmpdir(), rndFolder);
-    const cache = new FileCache(`.trv_${Date.now()}_${Math.trunc(Math.random() * 1000)}`);
-    cache.init();
+    const cache = await fs.mkdtemp(PathUtil.joinUnix(os.tmpdir(), `${Date.now()}_${Math.trunc(Math.random() * 1000)}`));
 
-    const target = cache.outputDir;
+    const target = cache;
 
     // Default
     assert(!FsUtil.existsSync(base));
@@ -79,6 +78,6 @@ export class FsUtilTest {
     await fs.rm(base, { recursive: true, force: false });
     assert(!FsUtil.existsSync(base));
 
-    cache.clear();
+    await fs.rm(cache, { recursive: true, force: true });
   }
 }

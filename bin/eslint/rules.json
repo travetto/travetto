@@ -67,8 +67,8 @@
     "no-restricted-imports": [
       "error",
       {
-        "patterns": [
-          "@travetto/boot/src-ts/**/*"
+        "paths": [
+          "typescript"
         ]
       }
     ],

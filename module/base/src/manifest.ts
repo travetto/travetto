@@ -1,7 +1,8 @@
-import { AppCache, EnvUtil, Package } from '@travetto/boot';
+import { EnvUtil, Package } from '@travetto/boot';
+
+import { TimeSpan, Util } from './util';
 
 import { version as framework } from '../package.json';
-import { TimeSpan, Util } from './util';
 
 /**
  * Application info
@@ -133,7 +134,6 @@ class $AppManifest {
         info: this.info,
         env: {
           ...this.env,
-          appCache: AppCache.shortCacheDir,
           node: process.version,
           dynamic: EnvUtil.isDynamic(),
           isCompiled: EnvUtil.isCompiled()
