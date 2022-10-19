@@ -4,14 +4,14 @@ import { spawnSync } from 'child_process';
 
 import '@arcsine/nodesh';
 
-import { PathUtil } from '@travetto/boot';
 import { Packages } from './package/packages';
+import { Util } from './package/util';
 
 const page = (f: string): string =>
-  PathUtil.resolveUnix('related/travetto.github.io/src', f);
+  Util.resolveUnix('related/travetto.github.io/src', f);
 
 let [, , target] = process.argv;
-const root = path.resolve(__dirname, '..');
+const root = Util.resolveUnix(__dirname, '..');
 
 if (target && target.startsWith(root)) {
   target = target.replace(root, '').split('/').pop()!;
@@ -33,7 +33,7 @@ const htmlPage = (mod: string): string =>
   })[mod] ?? `app/documentation/gen/${mod}/${mod}.component.html`);
 
 const markdownPage = (mod: string): string =>
-  ({ overview: PathUtil.resolveUnix('README.md') })[mod] ?? './README.md';
+  ({ overview: Util.resolveUnix('README.md') })[mod] ?? './README.md';
 
 [
   !target || target === 'todo-app' ?

@@ -5,7 +5,6 @@
   "description": "Bootstrapping and common utilities for travetto applications.",
   "keywords": [
     "bootstrapping",
-    "caching",
     "travetto",
     "typescript"
   ],
@@ -25,18 +24,10 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/boot"
   },
-  "scripts": {
-    "build": "tsc -p src-ts",
-    "build:watch": "tsc -w -p src-ts",
-    "compress": "trv-compress-js '{module/boot/src/*,module/boot/src/internal/*}'",
-    "prepack": "npm run build && npm run compress"
-  },
   "dependencies": {
-    "@types/node": "^18.8.2",
+    "@travetto/transformer": "^3.0.0-rc.2",
     "@types/source-map-support": "^0.5.6",
-    "source-map-support": "^0.5.21",
-    "tslib": "^2.4.0",
-    "typescript": "^4.8.4"
+    "source-map-support": "^0.5.21"
   },
   "trvDependencies": {
     "@travetto/test": [

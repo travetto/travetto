@@ -1,0 +1,12 @@
+{
+  "extends": "../module/transformer/tsconfig.trv.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "outDir": "../.bin"
+  },
+  "include": [
+    "*.ts",
+    "eslint/*.ts",
+    "package/*.ts"
+  ]
+}

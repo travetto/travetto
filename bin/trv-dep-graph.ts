@@ -1,8 +1,9 @@
 import '@arcsine/nodesh';
-import { PathUtil } from '@travetto/boot';
-import { Modules } from './package/modules';
 
-const prep = (v: string): string => v.replace(PathUtil.cwd, '').replace(/\/(module|related)\//, '');
+import { Modules } from './package/modules';
+import { Util } from './package/util';
+
+const prep = (v: string): string => v.replace(Util.cwd, '').replace(/\/(module|related)\//, '');
 
 ['digraph g {'].$concat(
   ''.$map(() => Modules.graphByFolder)

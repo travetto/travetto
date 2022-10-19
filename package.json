@@ -10,10 +10,7 @@
   "license": "MIT",
   "scripts": {
     "prestart": "npm ci --legacy-peer-deps",
-    "start": "npm run boot",
-    "poststart": "./bin/setup.sh",
-    "boot": "npx tsc -p module/boot/src-ts/tsconfig.json",
-    "boot:watch": "npm run boot -- -w",
+    "start": "./bin/setup.sh",
     "test": "trv-test",
     "lint": "npx eslint --ext .js --ext .ts ."
   },

@@ -1,9 +1,9 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { readFileSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
-import { AppCache, CliUtil, ExecUtil, PathUtil } from '@travetto/boot';
+import { CliUtil, ExecUtil, PathUtil, FsUtil } from '@travetto/boot';
 
 const presets: Record<string, [string, object] | [string]> =
   JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', 'resources', 'presets.json'), 'utf8'));
@@ -27,7 +27,8 @@ export class OpenApiClientCommand extends CliCommand<Options> {
   }
 
   getListOfFormats(): string[] {
-    const json = AppCache.getOrSet('openapi-formats.json', () => {
+    const formatCache = PathUtil.resolveUnix('.trv-openapi-formats.json');
+    if (!FsUtil.existsSync(formatCache)) {
       const stdout = ExecUtil.execSync('docker', ['run', '--rm', this.cmd.dockerImage, 'list']);
       const lines = stdout
         .split('DOCUMENTATION')[0]
@@ -35,11 +36,10 @@ export class OpenApiClientCommand extends CliCommand<Options> {
         .split(/\n/g)
         .filter(x => /^\s+-/.test(x) && !/\((beta|experimental)\)/.test(x))
         .map(x => x.replace(/^\s+-\s+/, '').trim());
-      return JSON.stringify([
-        ...lines.sort(),
-      ]);
-    });
-    const list: string[] = JSON.parse(json);
+
+      writeFileSync(formatCache, JSON.stringify([...lines.sort(),]));
+    }
+    const list: string[] = JSON.parse(readFileSync(formatCache, 'utf8'));
     return list;
   }
 

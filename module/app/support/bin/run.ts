@@ -1,5 +1,5 @@
 import { EnvUtil, ConsoleManager } from '@travetto/boot';
-import { ApplicationConfig } from '../../src/types';
+import type { ApplicationConfig } from '../../src/types';
 
 /**
  * Supporting app execution

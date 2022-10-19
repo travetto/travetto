@@ -19,9 +19,9 @@ declare global {
 
   function ᚕlog(level: LogLevel | 'log', ctx: { file: string, line: number }, ...args: unknown[]): void;
 
-  // eslint-disable-next-line no-var
-  var ts: unknown;
-
   // Global flag
   var ᚕtrv: string | undefined;
+
+  // Main handler
+  var ᚕmain: <T>(target: (...args: unknown[]) => T, args?: string[], respond?: boolean) => Promise<T>;
 }

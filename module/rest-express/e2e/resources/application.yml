@@ -1,7 +1,0 @@
-rest.cookie:
-  domain: fun.com
-  sameSite: strict
-rest.log:
-  paths:
-    - '!/'
-    - '!/simple:/name/*'

@@ -23,7 +23,7 @@ export class ImageUtil {
    * Inline image sources
    */
   static async inlineImageSource(html: string, root: string): Promise<string> {
-    const { ImageUtil: ImgUtil } = await import('@travetto/image');
+    const { ImageConverter: ImgUtil } = await import('@travetto/image');
 
     const imageSources = new Set<string>();
     const resolver = (x: string): string => {

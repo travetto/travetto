@@ -1,5 +1,7 @@
 import '@arcsine/nodesh';
-import { ExecUtil } from '@travetto/boot';
+import * as cp from 'child_process';
+
+import { Util } from './package/util';
 import { Packages } from './package/packages';
 
 Packages.yieldPublicPackages()
@@ -7,9 +9,11 @@ Packages.yieldPublicPackages()
   .$map(f => f.replace(/^.*module\/([^/]+).*$/, (a, m) => `@travetto/${m}`))
   .$collect()
   .$forEach(modules => {
-    ExecUtil.spawn('trv', ['command:service', ...process.argv.slice(2)], {
+    const proc = cp.spawn('trv', ['command:service', ...process.argv.slice(2)], {
       env: { TRV_MODULES: modules.join(',') },
       stdio: 'inherit',
-      cwd: 'module/command'
+      cwd: 'module/command',
+      shell: false
     });
+    Util.enhanceProcess(proc, 'trv command:service');
   });

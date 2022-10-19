@@ -2,7 +2,6 @@ import * as ts from 'typescript';
 import { resolve as pathResolve } from 'path';
 
 import { Import } from '../types/shared';
-import { SystemUtil } from './system';
 
 /**
  * Import utilities
@@ -25,7 +24,7 @@ export class ImportUtil {
    */
   static collectImports(src: ts.SourceFile): Map<string, Import> {
     const pth = require.resolve(src.fileName);
-    const base = SystemUtil.toUnix(pth);
+    const base = pth.replaceAll('\\', '/');
 
     const imports = new Map<string, Import>();
 

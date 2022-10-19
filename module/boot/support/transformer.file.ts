@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerId, AfterFile, TransformerState, LiteralUtil } from '@travetto/transformer';
+import { TransformerId, AfterFile, TransformerState } from '@travetto/transformer';
 
 /**
  *  General file cleanup, including:
@@ -18,46 +18,35 @@ export class FileTransformer {
     const after: ts.Statement[] = [];
     const toStmt = (x: ts.Expression): ts.Statement => state.factory.createExpressionStatement(x);
 
-    for (let i = 0; i < node.statements.length; i++) {
-      const el = node.statements[i];
-      if (
-        ts.isImportDeclaration(el) &&
-        LiteralUtil.toLiteral(el.moduleSpecifier) === 'typescript'
-      ) {
-        const imp = el.importClause;
-        if (imp) {
-          const name = imp.namedBindings;
-          if (name && ts.isNamespaceImport(name) && name.name.getText() === 'ts') {
-            // @ts-expect-error
-            node.statements[i] = undefined;
-          }
-        }
+    // Create main entry point
+    if (/[/]main[.]/.test(state.module)) {
+      const mainFn = node.statements
+        .filter((x): x is ts.FunctionDeclaration => x && ts.isFunctionDeclaration(x))
+        .find(x => x.name?.getText() === 'main');
+
+      if (mainFn) {
+        before.push(
+          state.factory.createImportDeclaration(
+            [],
+            undefined,
+            state.factory.createStringLiteral('@travetto/boot/support/init')
+          )
+        );
+
+        after.push(toStmt(
+          state.factory.createBinaryExpression(
+            state.factory.createBinaryExpression(
+              state.createAccess('require', 'main'),
+              ts.SyntaxKind.EqualsEqualsEqualsToken,
+              state.createIdentifier('module')
+            ),
+            ts.SyntaxKind.AmpersandAmpersandToken,
+            state.factory.createCallExpression(state.createIdentifier('ᚕmain'), [], [mainFn.name!])
+          )));
       }
     }
 
-    // Create main entry point
-    if (/(support|bin)[\\\/]main[.]/.test(node.fileName)) {
-      before.push(
-        state.factory.createImportDeclaration(
-          [],
-          undefined,
-          state.factory.createStringLiteral('@travetto/boot/support/init')
-        )
-      );
-
-      after.push(toStmt(
-        state.factory.createCallExpression(state.createIdentifier('main'), [], [
-          state.factory.createSpreadElement(
-            state.factory.createCallExpression(
-              state.createAccess('process', 'argv', 'slice'),
-              [],
-              [state.fromLiteral(2)] // Eat node command, and filename
-            )
-          )
-        ])
-      ));
-    }
-
+    // Tag for cycle detection
     after.push(toStmt(
       state.factory.createCallExpression(
         state.createAccess('Object', 'defineProperty'),

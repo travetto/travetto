@@ -2,22 +2,27 @@ Module Structure
 -----------------
 ## App Config
 * (root)
+  * doc/
   * src/
   * resources/
+  * support/
+  * test/
+    * resources/
+  * doc.ts
+  * index.ts - Root index for loading
 
-* alt/(sub-app)
-  * src/  
-  * resources/
-  
 ## Test
 * test/
   * resources/
 
 ## Library (node_modules/@travetto/{x})
-* bin/  - CLI Support
-* bin/lib - CLI Support Libraries
-* support/ - Phase support as well as AST transformer support
-* index.ts - Root index for loading
+* bin/ - Pure JS files for execution
+* support/ -
+  - bin/ support for main/cli operations
+  - phase.* Phase support 
+  - transform.* AST transformer support
+  - main.* Main entry points
+  - cli.* CLI entry points
 
 App Running
 -----------------------------
@@ -26,11 +31,9 @@ App Running
 * (libraries)/support - Loading all transformers
 * (root)/index - Main app logic
 * (root)/src - Main app logic
-* <alt>/(sub-app)/src - Sub app logic
 
 ## Config
 * (root)/resources/*.yml
-* <alt>/(sub-app)/resources/*.yml
 
 Test Running
 -----------------------------
@@ -38,6 +41,7 @@ Test Running
 * (libraries)/src - Load all library source
 * (libraries)/support - Loading all transformers
 * (root)/src - Main app logic
+* (root)/support - Loading all transformers
 
 ## Manual loading
 * (root)/test - for individual execution

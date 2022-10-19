@@ -1,6 +1,88 @@
 # Clean Slate Design for Module System
 
-## Phase 1
+## Compilation Flow
+Once: (Needs to be rebuilt whenever transformers change, e.g. installing new modules)
+   (
+      `@travetto/transformer/**/*`,
+      `**/support/transform*`
+   ) ==> `.trv_compiler_staging` 
+
+   `.trv_compiler_staging` => |npx tsc| ==> `.trv_compiler`
+
+Repeated:
+   (  
+      `project source`,
+      `module sources`
+   )
+   => |node `.trv_compiler`| ==> `.trv_out`
+
+Repeated:
+   (
+      `.trv_out`,
+      `resources/`
+   ) => |node `trv.js`| ==> Execution
+
+## Details
+Will provide a new multiphase compiler that:
+* Step 1 - Generates a project manifest
+   - Finds all transpilable modules
+      - `@travetto/*`
+      - Modules that have `"travettoModule: true"` in their `package.json`
+   - Contains all the files for modules
+      - Non node_module modules are treated as watchable source
+      - Supported paths
+        * `bin/`
+        * `doc/`
+        * `resources/`
+        * `src/` 
+        * `support/`
+        * `test/`
+          * `test/resources/`
+        * `doc.ts`
+        * `index.ts`
+        * `package.json`
+* Step 2 - Bootstrap compiler
+  - Pull in `@travetto/transformer` code
+  - Find all transformers from all loaded modules
+  - Prepare a workspace (e.g. `.trv_compiler_staging`)
+  - Symlink/copy necessary files
+  - Prepare a valid tsconfig.json for this workspace
+  - Run tsc, and output to `TRV_COMPILER=.trv_compiler`
+     * Will produce all necessary .js files
+     * Will copy over package.json files (and replace `"index.ts"` with `"index.js"`)
+
+* Step 3 - Run compiler
+  - This can be executed via `node .trv_compiler`
+  - Modify the `cli/bin/trv.js` to:
+     * Invoke compiler on changed files (writes to `TRV_CACHE=.trv_out`)
+     * Execute from within the `TRV_CACHE`
+
+## Architectural Changes
+* `framework dev`
+   * TRV_DEV is gone (well, its there, but now a boolean flag)
+   * TRV_DEV_ROOT is gone
+   * dev-register.js is gone   
+* `@travetto/compiler` is no more
+* `@travetto/transformer` is now independent of the rest of the framework (the new bootstrap)
+* `@travetto/boot` 
+   - is now independent of transpilation, and depends on `@travetto/transformer`
+   - Relies on the manifest produced in `Step 1`, which removes need for scanning at startup (and works better for module packing)
+   - Transpile cache is no longer used/needed
+   - AppCache/FileCache are gone
+* `@travetto/registry`, in watch mode, will now watch `TRV_CACHE` for changes, independent of the transpilation process
+* `@travetto/test`, test-support has been removed
+* `bin/*` No longer depends on `@travetto/boot`
+
+
+## Pending Items
+- get trv.js working properly with new compiler output
+- `trv-test` needs to be moved into `@travetto/test`
+- fixup tests
+
+
+## Deprecated
+
+### Phase 1
 Framework will now be broken into two parts:
 * Compiler
   - The goal is to wrap `tsc` as much as possible, and remove as much custom logic where possible.
@@ -28,7 +110,7 @@ Framework will now be broken into two parts:
     * Will watch .trv_cache/<full path> as the source for changes to care about
 
 
-## Phase 2
+### Phase 2
 Run-time behavior is rewritten
   - Resource 
    * loading
@@ -37,8 +119,6 @@ Run-time behavior is rewritten
   - Module 
    * loading
    * scanning
-   * Multiple search paths?
-
 
 
 

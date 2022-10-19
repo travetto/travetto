@@ -146,7 +146,7 @@ export const TypeBuilder: {
       const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
       const name = CoreUtil.getSymbol(type)?.getName();
       return {
-        key: 'external', name, source: source.fileName,
+        key: 'external', name, source: source.fileName.replaceAll('\\', '/'),
         tsTypeArguments: checker.getAllTypeArguments(type)
       };
     }

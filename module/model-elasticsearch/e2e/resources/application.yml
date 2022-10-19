@@ -1,3 +1,0 @@
-elasticsearch.model:
-  schema: "sample-e2e"
-  apiVersion: 6.8

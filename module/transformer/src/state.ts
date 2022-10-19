@@ -36,11 +36,13 @@ export class TransformerState implements State {
 
   added = new Map<number, ts.Statement[]>();
   module: string;
+  file: string;
 
   constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker) {
     this.#imports = new ImportManager(source, factory);
     this.#resolver = new TypeResolver(checker);
-    this.module = SystemUtil.normalizePath(this.source.fileName);
+    this.file = this.source.fileName.replaceAll('\\', '/');
+    this.module = SystemUtil.moduleReference(this.file);
   }
 
   /**
@@ -150,7 +152,7 @@ export class TransformerState implements State {
       dec,
       ident,
       file: decl?.getSourceFile().fileName,
-      module: decl ? SystemUtil.normalizePath(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
+      module: decl ? SystemUtil.moduleReference(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
       targets: DocUtil.readAugments(this.#resolver.getType(ident)),
       name: ident ?
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

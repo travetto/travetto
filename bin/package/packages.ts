@@ -1,10 +1,10 @@
 import '@arcsine/nodesh';
 import { $AsyncIterable } from '@arcsine/nodesh/dist/types';
 
+import * as cp from 'child_process';
 import { createWriteStream } from 'fs';
 
-import { ExecUtil, PathUtil } from '@travetto/boot';
-import { PackageType, readPackage } from '@travetto/boot/src/internal/package';
+import { PackageType, Util } from './util';
 
 export const DEP_GROUPS = [
   'dependencies', 'devDependencies',
@@ -33,18 +33,18 @@ export class Packages {
   }
 
   static #readPackage(folder: string): Pkg {
-    const file = PathUtil.resolveUnix(folder, 'package.json');
-    const folderRelative = folder.replace(`${PathUtil.cwd}/`, '');
+    const file = Util.resolveUnix(folder, 'package.json');
+    const folderRelative = folder.replace(`${Util.cwd}/`, '');
     return {
       _: {
-        ...readPackage(folder), // Save original copy
+        ...Util.readPackage(folder), // Save original copy
         file,
         folder,
         mod: folderRelative.split('/').pop()!,
         folderPadded: folderRelative.padEnd(30),
         folderRelative
       },
-      ...readPackage(folder)
+      ...Util.readPackage(folder)
     };
   }
 
@@ -102,10 +102,13 @@ export class Packages {
   }
 
   static findPublishedVersion(folder: string, dep: string, version: string): Promise<string | undefined> {
-    return ExecUtil.spawn('npm',
-      ['show', `${dep}@${version}`, 'version', '--json'],
-      { cwd: folder, stdio: 'pipe' }
-    ).result
+    const result = Util.enhanceProcess(
+      cp.spawn('npm', ['show', `${dep}@${version}`, 'version', '--json'], {
+        cwd: folder, stdio: 'pipe', shell: false
+      }),
+      'npm show'
+    );
+    return result
       .catchAsResult!()
       .then(res => {
         if (!res.valid && !res.stderr.includes('E404')) {
@@ -154,12 +157,12 @@ export class Packages {
   }
 
   static async * getTopLevelPackage(): $AsyncIterable<Pkg> {
-    yield this.#readPackage(PathUtil.cwd);
+    yield this.#readPackage(process.cwd());
   }
 
   static async getByFolder(folder: string): Promise<Pkg> {
     await this.#init();
-    return this.#byFolder[PathUtil.resolveUnix(folder)];
+    return this.#byFolder[Util.resolveUnix(folder)];
   }
 
   static async * yieldByFolder(folder: string): $AsyncIterable<Pkg> {

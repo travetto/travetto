@@ -3,13 +3,14 @@ import * as fs from 'fs/promises';
 import { FsUtil } from '@travetto/boot';
 import type { MailTemplateEngine } from '@travetto/email';
 
-import { CompileParts, CompileUtil, COMPILE_PARTS } from '../../src/util';
+import type { CompileParts } from '../../src/util';
 
 export class TemplateUtil {
   /**
    * Resolve template
    */
   static async resolveTemplate(file: string, format: CompileParts, context: Record<string, unknown>): Promise<string> {
+    const { CompileUtil } = await import('../../src/util');
 
     const files = CompileUtil.getOutputs(file);
     const missing = await Promise.all(files.map(x => FsUtil.exists(x[1])));
@@ -33,6 +34,8 @@ export class TemplateUtil {
    * @param file
    */
   static async resolveCompiledTemplate(file: string, context: Record<string, unknown>): Promise<Record<CompileParts, string>> {
+    const { CompileUtil, COMPILE_PARTS } = await import('../../src/util');
+
     const entries = await Promise.all(
       COMPILE_PARTS.map(k =>
         this.resolveTemplate(file, k, context)
@@ -49,6 +52,7 @@ export class TemplateUtil {
   static async watchCompile(cb?: (file: string) => void): Promise<void> {
     const { ResourceManager, Util } = await import('@travetto/base');
     const { FilePresenceManager } = await import('@travetto/watch');
+    const { CompileUtil } = await import('../../src/util');
 
     new FilePresenceManager(ResourceManager.getRelativePaths().map(x => `${x}/email`), {
       ignoreInitial: true,
