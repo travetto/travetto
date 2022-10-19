@@ -4,7 +4,7 @@ import { FileModelService } from './src/provider/file';
 import { MemoryModelService } from './src/provider/memory';
 import { Model } from './src/registry/decorator';
 
-import { Links } from './support/doc-support';
+import { Links } from './support/doc.support';
 
 const ModelTypeSnippet = d.Snippet('ModelType', './src/types/model.ts', /export interface/, /^}/);
 

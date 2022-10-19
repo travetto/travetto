@@ -1,5 +1,5 @@
 import { d, mod } from '@travetto/doc';
-import { Links } from '@travetto/model/support/doc-support';
+import { Links } from '@travetto/model/support/doc.support';
 
 const RegisteredPrincipal = d.Snippet('Registered Principal', 'src/model.ts', /interface RegisteredPrincipal/, /^[}]/);
 

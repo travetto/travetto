@@ -7,7 +7,7 @@ import { RedisModelService } from '@travetto/model-redis';
 import { SQLModelService } from '@travetto/model-sql';
 import { S3ModelService } from '@travetto/model-s3';
 
-import { Links } from '@travetto/model/support/doc-support';
+import { Links } from '@travetto/model/support/doc.support';
 
 import { Cache, EvictCache } from './src/decorator';
 import { CacheModelⲐ, CacheService } from './src/service';

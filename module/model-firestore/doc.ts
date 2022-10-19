@@ -1,5 +1,5 @@
 import { d, lib, mod } from '@travetto/doc';
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
 import { FirestoreModelConfig } from './src/config';
 import { FirestoreModelService } from './src/service';

@@ -1,5 +1,5 @@
 import { d, lib, mod } from '@travetto/doc';
-import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc-support';
+import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
 import { RedisModelConfig } from './src/config';
 import { RedisModelService } from './src/service';
