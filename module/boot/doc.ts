@@ -2,7 +2,6 @@ import { d, lib } from '@travetto/doc';
 import { ExecUtil, StreamUtil } from '.';
 
 const FsUtilLink = d.Ref('FsUtil', 'src/fs.ts');
-const ScanFsLink = d.Ref('ScanFs', 'src/scan.ts');
 const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
 const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
 
@@ -31,9 +30,6 @@ ${d.List(
 
 ${d.Section('File Operations')}
 ${FsUtilLink} provides some high level functionality (like recursive directory delete).
-
-${d.SubSection('File System Scanning')}
-${ScanFsLink} provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 ${d.SubSection('Module Indexing')}
 The bootstrap process will also produce an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatic discovery that is used within the framework (and transpiling).

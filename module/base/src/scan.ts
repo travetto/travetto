@@ -1,8 +1,7 @@
 import { lstatSync, readdirSync, realpathSync, Stats } from 'fs';
 import * as fs from 'fs/promises';
 
-import { FsUtil } from './fs';
-import { PathUtil } from './path';
+import { FsUtil, PathUtil } from '@travetto/boot';
 
 export interface ScanEntry {
   /**
@@ -81,7 +80,7 @@ export class ScanFs {
    * @param handler Handler to search with
    * @param base The starting point
    */
-  static async scanDir(handler: ScanHandler, base: string): Promise<ScanEntry[]> {
+  static async scanDir(handler: ScanHandler, base: string = PathUtil.cwd): Promise<ScanEntry[]> {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [];
@@ -131,7 +130,7 @@ export class ScanFs {
    * @param handler Handler to search with
    * @param base The starting point
    */
-  static scanDirSync(handler: ScanHandler, base: string): ScanEntry[] {
+  static scanDirSync(handler: ScanHandler, base: string = PathUtil.cwd): ScanEntry[] {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [];

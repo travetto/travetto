@@ -163,18 +163,18 @@ export class $DynamicLoader {
     }
   }
 
-  /** 
+  /**
    * Load a file
    */
-  async load(filename: string) {
+  async load(filename: string): Promise<void> {
     require(filename);
   }
 
   /**
    * Reload a file
-   * @param filename 
+   * @param filename
    */
-  async reload(filename: string) {
+  async reload(filename: string): Promise<void> {
     await this.unload(filename);
     await this.load(filename);
   }

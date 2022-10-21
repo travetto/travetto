@@ -1,8 +1,9 @@
 import * as fs from 'fs/promises';
-import { PathUtil, ScanFs } from '@travetto/boot';
+
+import { ScanFs } from '@travetto/base';
 
 export async function processServiceConfigs(svc: string) {
-  const svcConfigs = await ScanFs.scanDir({ testFile: f => new RegExp(`${svc}.*[.]config$/`).test(f) }, PathUtil.cwd);
+  const svcConfigs = await ScanFs.scanDir({ testFile: f => new RegExp(`${svc}.*[.]config$/`).test(f) });
   for (const conf of svcConfigs) {
     // Do work
 

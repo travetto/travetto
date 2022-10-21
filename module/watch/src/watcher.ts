@@ -1,7 +1,9 @@
 import { lstatSync, readdir, statSync, } from 'fs';
 import * as ts from 'typescript';
 
-import { ScanEntry, ScanFs, PathUtil, ScanHandler } from '@travetto/boot';
+import { PathUtil } from '@travetto/boot';
+import { ScanEntry, ScanFs, ScanHandler } from '@travetto/base';
+
 import { WatchEmitter } from './emitter';
 
 /**
