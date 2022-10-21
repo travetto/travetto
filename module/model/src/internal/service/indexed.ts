@@ -118,7 +118,7 @@ export class ModelIndexedUtil {
     opts?: ComputeConfig & { sep?: string }
   ): { type: string, key: string, sort?: number | Date } {
     const { fields, sorted } = this.computeIndexParts(cls, idx, item, { ...(opts ?? {}), includeSortInFields: false });
-    const key = fields.map(({ value }) => value).map(x => `${x}`).join(opts?.sep ?? 'ᚕ');
+    const key = fields.map(({ value }) => value).map(x => `${x}`).join(opts?.sep ?? 'Ⲑ');
     const cfg = typeof idx === 'string' ? ModelRegistry.getIndex(cls, idx) : idx;
     return !sorted ? { type: cfg.type, key } : { type: cfg.type, key, sort: sorted.value };
   }

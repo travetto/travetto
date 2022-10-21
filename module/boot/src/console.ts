@@ -8,10 +8,6 @@ interface ConsoleListener {
   onLog<T extends LineContext>(context: LogLevel, ctx: T, args: unknown[]): void;
 }
 
-function setGlobal<K extends string | symbol>(ctx: Partial<Record<K, unknown>>, key: K, val: unknown): void {
-  ctx[key] = val;
-}
-
 function wrap(target: Console): ConsoleListener {
   return {
     onLog(level: LogLevel, ctx: LineContext, args: unknown[]): void {
@@ -46,11 +42,7 @@ class $ConsoleManager {
   /**
    * Unique key to use as a logger function
    */
-  constructor(public readonly key?: string) {
-    if (this.key) {
-      setGlobal(globalThis, this.key, this.invoke.bind(this));
-    }
-
+  constructor() {
     this.#exclude = new Set();
 
     if (!EnvUtil.isTrue('TRV_DEBUG')) {
@@ -106,4 +98,6 @@ class $ConsoleManager {
   }
 }
 
-export const ConsoleManager = new $ConsoleManager('ᚕlog');
+export const ConsoleManager = new $ConsoleManager();
+
+ᚕ.log = ConsoleManager.invoke.bind(ConsoleManager);

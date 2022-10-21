@@ -76,6 +76,7 @@ Will provide a new multiphase compiler that:
 
 ## Pending Items
 - get trv.js working properly with new compiler output
+- Modify `trv` to compile before running, and then run
 - `trv-test` needs to be moved into `@travetto/test`
 - fixup tests
 - Rework pack to use manifest

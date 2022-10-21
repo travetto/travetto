@@ -91,7 +91,7 @@ export class LoggerTransformer {
     if (VALID_LEVELS[level]) {
       return state.factory.updateCallExpression(
         node,
-        state.factory.createIdentifier('ᚕlog'),
+        state.createAccess('ᚕ', 'log'),
         node.typeArguments,
         [
           state.factory.createStringLiteral(VALID_LEVELS[level]),

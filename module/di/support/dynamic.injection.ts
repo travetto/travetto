@@ -64,7 +64,7 @@ export function setup($DependencyRegistry: Class<typeof DependencyRegistry>): ty
       const classId = cls.ᚕid;
 
       if (
-        !cls.ᚕabstract &&
+        !cls.ᚕmeta?.abstract &&
         this.#proxies.has(classId) &&
         this.#proxies.get(classId)!.has(config.qualifier)
       ) {

@@ -1,5 +1,5 @@
-/// <reference path="./src/internal/global-typings.d.ts" />
-/// <reference path="./src/internal/global-function.d.ts" />
+/// <reference path="./src/global-typings.d.ts" />
+/// <reference path="./src/global-function.d.ts" />
 
 export * from './src/exec';
 export * from './src/cli';
