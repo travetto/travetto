@@ -14,6 +14,9 @@ export class FileTransformer {
 
   @OnFile()
   static onFile(state: TransformerState, node: ts.SourceFile): typeof node {
+    if (state.module.includes('boot/support/init')) {
+      return node;
+    }
     const toAdd = state.factory.createVariableStatement(
       [],
       state.factory.createVariableDeclarationList([
@@ -22,7 +25,9 @@ export class FileTransformer {
           undefined,
           undefined,
           state.factory.createCallExpression(
-            state.createAccess('ᚕ', 'src'), [], [state.createIdentifier('__filename')]
+            state.createAccess('ᚕtrv', 'source'),
+            [],
+            [state.createIdentifier('__filename')]
           )
         )
       ])
@@ -75,7 +80,7 @@ export class FileTransformer {
               state.createIdentifier('module')
             ),
             ts.SyntaxKind.AmpersandAmpersandToken,
-            state.factory.createCallExpression(state.createAccess('ᚕ', 'main'), [], [mainFn.name!])
+            state.factory.createCallExpression(state.createAccess('ᚕtrv', 'main'), [], [mainFn.name!])
           )));
       }
     }
@@ -87,8 +92,8 @@ export class FileTransformer {
         [],
         [
           state.createIdentifier('exports'),
-          state.fromLiteral('Ⲑtrv'),
-          state.fromLiteral({ configurable: true, value: true })
+          state.fromLiteral('@trv'),
+          state.fromLiteral({ configurable: false, value: true })
         ]
       )
     ));

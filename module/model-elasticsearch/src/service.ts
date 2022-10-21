@@ -99,7 +99,7 @@ export class ElasticsearchModelService implements
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     await ModelStorageUtil.registerModelChangeListener(this.manager, this.constructor as Class);
-    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.close());
+    ShutdownManager.onShutdown(this.constructor.Ⲑid, () => this.client.close());
     ModelExpiryUtil.registerCull(this);
   }
 

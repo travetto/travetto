@@ -7,9 +7,9 @@ import { BaseModelSuite } from './base';
 import {
   ModelIndexedSupport, Index, ModelCrudSupport, Model,
   NotFoundError, SubTypeNotSupportedError
-} from '..';
-import { isIndexedSupported } from '../src/internal/service/common';
-import { ExistsError } from '../src/error/exists';
+} from '../..';
+import { isIndexedSupported } from '../../src/internal/service/common';
+import { ExistsError } from '../../src/error/exists';
 
 @Model({ baseType: true })
 export class Worker {

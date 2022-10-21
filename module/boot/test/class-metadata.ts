@@ -7,16 +7,16 @@ import { ClassMetadataUtil } from '../src/internal/class-metadata';
 export class ClassMetadataUtilTest {
   @Test()
   async getId() {
-    const modId = ClassMetadataUtil.computeId(__filename);
+    const modId = ClassMetadataUtil.computeId(__source.file);
     assert(modId === './test/module-util');
 
-    const modId2 = ClassMetadataUtil.computeId(`${__dirname}/node_modules/@travetto/base/src/module-util.js`);
+    const modId2 = ClassMetadataUtil.computeId(`${__source.folder}/node_modules/@travetto/base/src/module-util.js`);
     assert(modId2 === '@trv:base/module-util');
 
-    const modId3 = ClassMetadataUtil.computeId(`${__dirname}/../test/simple.js`);
+    const modId3 = ClassMetadataUtil.computeId(`${__source.folder}/../test/simple.js`);
     assert(modId3 === './test/simple');
 
-    const modId4 = ClassMetadataUtil.computeId(`${__dirname}/node_modules/lodash/test`);
+    const modId4 = ClassMetadataUtil.computeId(`${__source.folder}/node_modules/lodash/test`);
     assert(modId4 === '@npm/lodash/test');
   }
 }

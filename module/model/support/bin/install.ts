@@ -8,7 +8,7 @@ export class ModelInstallUtil {
       throw new Error(`${provider} does not support model installation`);
     }
     for (const m of models) {
-      console.log('Installing', { name: m.ᚕid });
+      console.log('Installing', { name: m.Ⲑid });
       await provider.createModel(m);
     }
     (await import('@travetto/base')).ShutdownManager.execute(-1); // Release database

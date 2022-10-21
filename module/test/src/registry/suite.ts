@@ -13,14 +13,14 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * Find all valid tests (ignoring abstract)
    */
   getValidClasses(): Class[] {
-    return this.getClasses().filter(c => !c.ᚕmeta?.abstract);
+    return this.getClasses().filter(c => !c.Ⲑmeta?.abstract);
   }
 
   createPending(cls: Class): Partial<SuiteConfig> {
     return {
       class: cls,
-      classId: cls.ᚕid,
-      file: cls.ᚕfile,
+      classId: cls.Ⲑid,
+      file: cls.Ⲑfile,
       tests: [],
       beforeAll: [],
       beforeEach: [],
@@ -32,7 +32,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   override createPendingField(cls: Class, fn: Function): Partial<TestConfig> {
     return {
       class: cls,
-      file: cls.ᚕfile,
+      file: cls.Ⲑfile,
       methodName: fn.name
     };
   }
@@ -52,7 +52,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   onInstallFinalize<T>(cls: Class<T>): SuiteConfig {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const config = this.getOrCreatePending(cls) as SuiteConfig;
-    const tests = [...this.pendingFields.get(cls.ᚕid)!.values()];
+    const tests = [...this.pendingFields.get(cls.Ⲑid)!.values()];
 
     const parent = this.getParentClass(cls);
 
@@ -88,7 +88,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
-      const suites = this.getValidClasses().filter(f => f.ᚕfile === file).map(x => this.get(x)).filter(x => !x.skip);
+      const suites = this.getValidClasses().filter(f => f.Ⲑfile === file).map(x => this.get(x)).filter(x => !x.skip);
       const suite = suites.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
 
       if (suite) {
@@ -110,7 +110,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
-          .filter(x => !x.class.ᚕmeta?.abstract);  // Do not run abstract suites
+          .filter(x => !x.class.Ⲑmeta?.abstract);  // Do not run abstract suites
         return { suites };
       }
     }

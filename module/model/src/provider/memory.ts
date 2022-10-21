@@ -35,7 +35,7 @@ export class MemoryModelConfig {
 }
 
 function indexName<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T> | string, suffix?: string): string {
-  return [cls.ᚕid, typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
+  return [cls.Ⲑid, typeof idx === 'string' ? idx : idx.name, suffix].filter(x => !!x).join(':');
 }
 
 function getFirstId(data: Map<string, unknown> | Set<string>, value?: string | number): string | undefined {
@@ -160,7 +160,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
       for (const idx of ModelRegistry.get(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
-            console.error('Unique indices are not supported for', { cls: el.ᚕid, idx: idx.name });
+            console.error('Unique indices are not supported for', { cls: el.Ⲑid, idx: idx.name });
             break;
           }
         }

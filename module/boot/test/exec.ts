@@ -13,10 +13,10 @@ export class ExecUtilTest {
   @Test()
   async spawn() {
     const proc = ExecUtil.spawn('ls', ['-lsa'], {
-      cwd: __dirname
+      cwd: __source.folder
     });
     const result = await proc.result;
-    assert(result.stdout.includes(path.basename(__filename)));
+    assert(result.stdout.includes(path.basename(__source.file)));
     assert(result.code === 0);
     assert(result.valid);
   }
@@ -24,7 +24,7 @@ export class ExecUtilTest {
   @Test()
   async spawnBad() {
     const proc = ExecUtil.spawn('ls', ['xxxx'], {
-      cwd: __dirname
+      cwd: __source.folder
     });
     const result = await proc.result.catchAsResult!();
     assert(result.stderr.includes('xxxx'));
@@ -49,7 +49,7 @@ export class ExecUtilTest {
   async pipe() {
     const echo = await ResourceManager.findAbsolute('echo.js');
     const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const returnedStream = await ExecUtil.pipe(proc, createReadStream(__filename));
+    const returnedStream = await ExecUtil.pipe(proc, createReadStream(__source.file));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('ExecUtil.fork(echo'));
   }

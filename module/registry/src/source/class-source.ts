@@ -27,7 +27,7 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.#classes.set(file, new Map());
       for (const cls of classes) {
-        this.#classes.get(cls.ᚕfile)!.set(cls.ᚕid, cls);
+        this.#classes.get(cls.Ⲑfile)!.set(cls.Ⲑid, cls);
         this.emit({ type: 'added', curr: cls });
       }
     }
@@ -37,7 +37,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Listen for a single file, and process all the classes within
    */
   async #handleFileChanges(file: string, classes: Class[] = []): Promise<void> {
-    const next = new Map<string, Class>(classes.map(cls => [cls.ᚕid, cls] as const));
+    const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
 
     let prev = new Map<string, Class>();
     if (this.#classes.has(file)) {
@@ -61,7 +61,7 @@ export class ClassSource implements ChangeSource<Class> {
         this.#classes.get(file)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           this.emit({ type: 'added', curr: next.get(k)! });
-        } else if (prev.get(k)!.ᚕmeta?.hash !== next.get(k)!.ᚕmeta?.hash) {
+        } else if (prev.get(k)!.Ⲑmeta?.hash !== next.get(k)!.Ⲑmeta?.hash) {
           this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
         }
       }
@@ -72,7 +72,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Flush all pending classes
    */
   processFiles(flush = false): void {
-    console.debug('Pending changes', { changes: PendingRegister.ordered.map(([, x]) => x.map(y => y.ᚕid)) });
+    console.debug('Pending changes', { changes: PendingRegister.ordered.map(([, x]) => x.map(y => y.Ⲑid)) });
     for (const [file, classes] of PendingRegister.flush()) {
       this.#handleFileChanges(file, classes);
     }
@@ -85,7 +85,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Emit a change event
    */
   emit(e: ChangeEvent<Class>): void {
-    console.debug('Emitting change', { type: e.type, curr: e.curr?.ᚕid, prev: e.prev?.ᚕid });
+    console.debug('Emitting change', { type: e.type, curr: e.curr?.Ⲑid, prev: e.prev?.Ⲑid });
     this.#emitter.emit('change', e);
   }
 

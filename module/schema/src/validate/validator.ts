@@ -236,7 +236,7 @@ export class SchemaValidator {
    */
   static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if (!Util.isPlainObject(o) && !(o instanceof cls || cls.ᚕid === (o as ClassInstance<T>).constructor.ᚕid)) {
+    if (!Util.isPlainObject(o) && !(o instanceof cls || cls.Ⲑid === (o as ClassInstance<T>).constructor.Ⲑid)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       throw new TypeMismatchError(cls.name, (o as ClassInstance).constructor.name);
     }

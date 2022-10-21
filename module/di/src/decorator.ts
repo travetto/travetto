@@ -79,7 +79,7 @@ export function InjectableFactory(first?: Partial<InjectableFactoryConfig> | sym
       ...config,
       dependencies: config.dependencies?.map(x => Array.isArray(x) ? collapseConfig(...x) : collapseConfig(x)),
       fn: descriptor.value!,
-      id: `${target.ᚕid}#${property.toString()}`
+      id: `${target.Ⲑid}#${property.toString()}`
     });
   };
 }

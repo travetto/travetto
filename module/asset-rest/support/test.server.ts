@@ -62,7 +62,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @BeforeAll()
   async setup() {
     const src = await import('@travetto/asset/support/test.service');
-    ResourceManager.addPath(PathUtil.resolveUnix(src.AssetServiceSuite.ᚕfile, '..', 'resources'));
+    ResourceManager.addPath(PathUtil.resolveUnix(src.AssetServiceSuite.Ⲑfile, '..', 'resources'));
   }
 
   @Test()

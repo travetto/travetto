@@ -49,7 +49,7 @@ class $ApplicationRegistry {
     const config = this.#applications.get(name);
     if (!config) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      throw new InjectionError('Application not found', { ᚕid: name } as Class);
+      throw new InjectionError('Application not found', { Ⲑid: name } as Class);
     }
 
     const cleaned = this.prepareParams(name, args);

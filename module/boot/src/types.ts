@@ -2,7 +2,7 @@
 export type Class<T = any> = abstract new (...args: any[]) => T;
 export type ConcreteClass<T = any> = new (...args: any[]) => T;
 export type ClassInstance<T = any> = T & {
-  constructor: ConcreteClass<T> & { ᚕid: string };
+  constructor: ConcreteClass<T> & { Ⲑid: string };
 };
 
 export type Primitive = number | boolean | string | Date | Error;

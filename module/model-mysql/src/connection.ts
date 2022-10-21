@@ -34,7 +34,7 @@ export class MySQLConnection extends Connection<mysql.PoolConnection> {
     });
 
     // Close mysql
-    ShutdownManager.onShutdown(this.constructor.ᚕid, () => new Promise(r => this.#pool.end(r)));
+    ShutdownManager.onShutdown(this.constructor.Ⲑid, () => new Promise(r => this.#pool.end(r)));
   }
 
   /**

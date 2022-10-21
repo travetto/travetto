@@ -1,8 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { ScanFs } from '@travetto/boot';
-import { Util } from '@travetto/base';
+import { ScanFs, Util } from '@travetto/base';
 
 import { Watcher } from '../src/watcher';
 
@@ -12,7 +11,7 @@ export class WatchTest {
   @Test()
   async runWatcher() {
     const found: [string, string][] = [];
-    const w = new Watcher(__dirname);
+    const w = new Watcher(__source.originalFolder);
     w
       .on('all', ({ event, entry }) => {
         console.log('Received event', { type: event, file: entry.file });
@@ -23,7 +22,7 @@ export class WatchTest {
 
     w.close();
 
-    const expected = (await ScanFs.scanDir({}, __dirname)).filter(x => ScanFs.isNotDir(x));
+    const expected = (await ScanFs.scanDir({}, __source.originalFolder)).filter(x => ScanFs.isNotDir(x));
     assert(found.filter(x => x[0] === 'added').length === expected.length);
     assert(found.filter(x => expected.find(y => y.file === x[1])).length === expected.length);
   }

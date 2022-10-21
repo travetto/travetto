@@ -31,7 +31,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
   return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
     SuiteRegistry.registerField(inst.constructor, descriptor.value, {
       ...extra,
-      file: inst.constructor.ᚕfile,
+      file: inst.constructor.Ⲑfile,
       description: descriptionString
     });
     return descriptor;

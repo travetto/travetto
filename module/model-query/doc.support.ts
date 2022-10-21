@@ -10,9 +10,9 @@ export const Links = {
   Query: d.SnippetLink('Query', '@travetto/model-query/src/service/query', /export interface/),
 };
 
-export const ModelQueryTypes = (file: string | { ᚕfile: string }): AllTypeMap['SnippetLink'][] => {
+export const ModelQueryTypes = (file: string | { Ⲑfile: string }): AllTypeMap['SnippetLink'][] => {
   if (typeof file !== 'string') {
-    file = file.ᚕfile;
+    file = file.Ⲑfile;
   }
   const contents = readFileSync(file, 'utf8');
   const found: AllTypeMap['SnippetLink'][] = [];

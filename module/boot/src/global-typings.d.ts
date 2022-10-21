@@ -17,17 +17,20 @@ declare global {
     __proto__: unknown;
   }
 
-  var ᚕ: {
+  // Parallel to __filename, but cleansed
+  var __source: {
+    file: string;
+    folder: string;
+  };
+
+  var ᚕtrv: {
     // Global file loaded
     self: string | undefined;
     // Log replacement
     log(level: LogLevel | 'log', ctx: { file: string, line: number }, ...args: unknown[]): void;
-    // Simple wrapper for creating source
-    src(file: string): string;
+    // To initialize __source
+    source(file: string): typeof __source;
     // Main handler
     main<T>(target: (...args: unknown[]) => T, args?: string[], respond?: boolean): Promise<T>;
   };
-
-  // Parallel to __filename, but cleansed
-  var __source: string;
 }

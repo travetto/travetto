@@ -51,12 +51,12 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [], autoCreate: true, baseType: cls.ᚕmeta?.abstract };
+    return { class: cls, indices: [], autoCreate: true, baseType: cls.Ⲑmeta?.abstract };
   }
 
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const config = this.pending.get(cls.ᚕid)! as ModelOptions<ModelType>;
+    const config = this.pending.get(cls.Ⲑid)! as ModelOptions<ModelType>;
 
     const schema = SchemaRegistry.get(cls);
     const view = schema.views[AllViewⲐ].schema;
@@ -145,11 +145,11 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
       if (candidates.length > 1) {
         if (config.store) {
           throw new AppError('Duplicate models with same store name', 'general', {
-            classes: candidates.map(x => x.ᚕid)
+            classes: candidates.map(x => x.Ⲑid)
           });
         } else {
           throw new AppError('Duplicate models with same class name, but no store name provided', 'general', {
-            classes: candidates.map(x => x.ᚕid)
+            classes: candidates.map(x => x.Ⲑid)
           });
         }
       }

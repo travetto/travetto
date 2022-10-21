@@ -1,6 +1,6 @@
 import { AllType, node } from './nodes';
 
-export function doc(values: TemplateStringsArray, ...keys: (AllType | { ᚕfile: string, name: string } | string)[]): AllType {
+export function doc(values: TemplateStringsArray, ...keys: (AllType | { Ⲑfile: string, name: string } | string)[]): AllType {
   const out: AllType[] = [];
 
   keys.forEach((el, i) =>
@@ -8,7 +8,7 @@ export function doc(values: TemplateStringsArray, ...keys: (AllType | { ᚕfile:
       node.Text(values[i] ?? ''),
       typeof el === 'string' ?
         node.Text(el) :
-        'ᚕfile' in el ? node.Ref(el.name.replace(/[$]/, ''), el.ᚕfile) : el
+        'Ⲑfile' in el ? node.Ref(el.name.replace(/[$]/, ''), el.Ⲑfile) : el
     )
   );
 

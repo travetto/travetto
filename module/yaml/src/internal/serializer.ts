@@ -82,7 +82,7 @@ export class Serializer {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         out = this.serialize(o.toJSON() as object, cfg, indentLevel);
       } else if (o instanceof Function) {
-        out = this.serialize(o.ᚕid ?? o.name, cfg, indentLevel);
+        out = this.serialize(o.Ⲑid ?? o.name, cfg, indentLevel);
       } else {
         throw new Error(`Types are not supported: ${typeof o}`);
       }

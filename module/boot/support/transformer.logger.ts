@@ -91,16 +91,16 @@ export class LoggerTransformer {
     if (VALID_LEVELS[level]) {
       return state.factory.updateCallExpression(
         node,
-        state.createAccess('ᚕ', 'log'),
+        state.createAccess('ᚕtrv', 'log'),
         node.typeArguments,
         [
           state.factory.createStringLiteral(VALID_LEVELS[level]),
           LiteralUtil.fromLiteral(state.factory, {
-            file: state.createIdentifier('__source'),
+            file: state.createAccess('__source', 'file'),
             line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
             scope: state.scope?.map(x => x.name).join(':'),
           }),
-          ...node.arguments.slice(2) // Drop log level, and previous context from boot support
+          ...node.arguments.slice(0)
         ]
       );
     } else {

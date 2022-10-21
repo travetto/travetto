@@ -29,7 +29,7 @@ export class AssertUtil {
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const subV = val as (Class | ClassInstance);
-      if (subV.ᚕid || !subV.constructor || (!subV.constructor.ᚕid && Util.isFunction(subV))) { // If a function, show name
+      if (subV.Ⲑid || !subV.constructor || (!subV.constructor.Ⲑid && Util.isFunction(subV))) { // If a function, show name
         return subV.name;
       } else { // Else inspect
         return util.inspect(val, false, 1).replace(/\n/g, ' ');

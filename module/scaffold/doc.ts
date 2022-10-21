@@ -56,14 +56,14 @@ ${d.List(
 
 A default model is constructed, a ${Todo} class:
 
-${d.Code('Todo Model', Todo.ᚕfile)}
+${d.Code('Todo Model', Todo.Ⲑfile)}
 
 Basic tests are also included for the ${d.Input('model')} to verify that database interaction and functionality is working properly.
 
 ${d.Section('Rest + Model')}
 In the case both ${d.Input('rest')} and ${d.Input('model')} features are enabled, the code will produce a controller that exposes the ${Todo} model via restful patterns.
 
-${d.Code('Todo controller', TodoController.ᚕfile)}
+${d.Code('Todo controller', TodoController.Ⲑfile)}
 
 ${d.Section('Running')}
 

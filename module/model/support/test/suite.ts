@@ -4,9 +4,9 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry } from '@travetto/test';
 
-import { isStorageSupported, isStreamSupported } from '../src/internal/service/common';
-import { StreamModel } from '../src/internal/service/stream';
-import { ModelRegistry } from '../src/registry/model';
+import { isStorageSupported, isStreamSupported } from '../../src/internal/service/common';
+import { StreamModel } from '../../src/internal/service/stream';
+import { ModelRegistry } from '../../src/registry/model';
 
 const Loaded = Symbol();
 
@@ -16,7 +16,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       target,
       async function (this: T & { [Loaded]?: boolean }) {
         // Track self
-        ResourceManager.addPath(PathUtil.resolveUnix(__dirname, 'resources'));
+        ResourceManager.addPath(PathUtil.resolveUnix(__source.originalFolder, 'resources'));
 
         await RootRegistry.init();
 

@@ -6,7 +6,7 @@ import { ChangeEvent } from '@travetto/registry';
 import { FieldConfig, ClassConfig } from './types';
 import { AllViewⲐ } from '../internal/types';
 
-const id = (c: Class | string): string => typeof c === 'string' ? c : c.ᚕid;
+const id = (c: Class | string): string => typeof c === 'string' ? c : c.Ⲑid;
 
 interface FieldMapping {
   path: FieldConfig[];
@@ -139,7 +139,7 @@ class $SchemaChangeListener {
     }
 
     // Handle class references changing, but keeping same id
-    const compareTypes = (a: Class, b: Class): boolean => 'ᚕid' in a ? a.ᚕid === b.ᚕid : a === b;
+    const compareTypes = (a: Class, b: Class): boolean => 'Ⲑid' in a ? a.Ⲑid === b.Ⲑid : a === b;
 
     for (const c of currFields) {
       if (prevFields.has(c)) {

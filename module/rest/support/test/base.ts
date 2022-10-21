@@ -27,7 +27,7 @@ export abstract class BaseRestSuite {
   @BeforeAll()
   async initServer(): Promise<void> {
     if (!this.type || this.type === CoreRestServerSupport) {
-      this.#support = new CoreRestServerSupport((SystemUtil.naiveHash(this.constructor.ᚕid) % 60000) + 1000);
+      this.#support = new CoreRestServerSupport((SystemUtil.naiveHash(this.constructor.Ⲑid) % 60000) + 1000);
     } else {
       this.#support = new this.type();
     }

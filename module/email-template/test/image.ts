@@ -18,7 +18,7 @@ class ImageUtilTest {
 <div style="background: url('/red.gif')"></div>
 `;
 
-    const output = await ImageUtil.inlineImageSource(text, PathUtil.resolveUnix(__dirname, '..'));
+    const output = await ImageUtil.inlineImageSource(text, PathUtil.resolveUnix(__source.originalFolder, '..'));
 
     assert(!output.includes('red.gif'));
     assert(!output.includes('blue.gif'));

@@ -39,7 +39,7 @@ ${d.Section('Supporting Metadata')}
 For the registries to work properly, metadata needs to be collected about files and classes to uniquely identify them, especially across file reloads for the live flow.  To achieve this, every ${d.Input('class')} is decorated with additional fields.  The data that is added is:
 
 ${d.List(
-  d`${d.Input('ᚕfile')} denotes the fully qualified path name of the class`,
-  d`${d.Input('ᚕid')} represents a computed id that is tied to the file/class combination`
+  d`${d.Input('Ⲑfile')} denotes the fully qualified path name of the class`,
+  d`${d.Input('Ⲑid')} represents a computed id that is tied to the file/class combination`
 )};
 `;

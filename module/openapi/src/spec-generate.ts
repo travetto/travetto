@@ -69,7 +69,7 @@ export class SpecGenerator {
     const viewConf = SchemaRegistry.has(field.type) && SchemaRegistry.getViewSchema(field.type, field.view);
     const schemaConf = viewConf && viewConf.schema;
     if (!schemaConf) {
-      throw new Error(`Unknown class, not registered as a schema: ${field.type.ᚕid}`);
+      throw new Error(`Unknown class, not registered as a schema: ${field.type.Ⲑid}`);
     }
     const params: ParameterObject[] = [];
     for (const sub of Object.values(schemaConf)) {
@@ -379,7 +379,7 @@ export class SpecGenerator {
 
     if (!config.skipRoutes) {
       for (const cls of ControllerRegistry.getClasses()) {
-        if (cls.ᚕid !== OpenApiController.ᚕid) {
+        if (cls.Ⲑid !== OpenApiController.Ⲑid) {
           this.processController(cls);
         }
       }
