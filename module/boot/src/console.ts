@@ -1,5 +1,4 @@
 import { EnvUtil } from './env';
-import { ModuleUtil } from './internal/module-util';
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
 
@@ -80,10 +79,6 @@ class $ConsoleManager {
     if (this.#exclude.has(level)) {
       return; // Do nothing
     }
-
-    // Ensure __filename is translated
-    ctx.file = ModuleUtil.toUnixSource(ctx.file);
-
     return this.#appender.onLog(level, ctx, args);
   }
 

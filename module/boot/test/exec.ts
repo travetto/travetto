@@ -6,7 +6,6 @@ import { Test, Suite } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 
 import { ExecUtil, StreamUtil } from '..';
-import { Host } from '../src/host';
 
 @Suite()
 export class ExecUtilTest {
@@ -17,7 +16,7 @@ export class ExecUtilTest {
       cwd: __dirname
     });
     const result = await proc.result;
-    assert(result.stdout.includes(path.basename(__filename.replace(Host.EXT.outputRe, '.js'))));
+    assert(result.stdout.includes(path.basename(__filename)));
     assert(result.code === 0);
     assert(result.valid);
   }
@@ -50,7 +49,7 @@ export class ExecUtilTest {
   async pipe() {
     const echo = await ResourceManager.findAbsolute('echo.js');
     const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const returnedStream = await ExecUtil.pipe(proc, createReadStream(__filename.replace(Host.EXT.outputRe, '.js')));
+    const returnedStream = await ExecUtil.pipe(proc, createReadStream(__filename));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('ExecUtil.fork(echo'));
   }

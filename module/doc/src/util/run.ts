@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
 
-import { Host, PathUtil, ExecUtil, EnvUtil, ExecutionOptions, ExecutionState } from '@travetto/boot';
+import { PathUtil, ExecUtil, EnvUtil, ExecutionOptions, ExecutionState } from '@travetto/boot';
 
 export type RunConfig = {
   filter?: (line: string) => boolean;
@@ -46,7 +46,7 @@ export class DocRunUtil {
 
   static runState(cmd: string, args: string[], config: RunConfig = {}): RunState {
     args = [...args];
-    if (cmd.endsWith(Host.EXT.input)) {
+    if (cmd.endsWith('.ts')) {
       const mod = config.module ?? 'base';
       args.unshift(require.resolve(`@travetto/${mod}/bin/main`), cmd);
       cmd = process.argv0;

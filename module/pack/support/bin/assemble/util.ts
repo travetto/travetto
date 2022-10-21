@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { ExecUtil, Host, PathUtil, ScanFs, FsUtil } from '@travetto/boot';
+import { ExecUtil, PathUtil, ScanFs, FsUtil } from '@travetto/boot';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { DependenciesUtil, DepType } from './dependencies';
@@ -19,7 +19,7 @@ export class AssembleUtil {
    */
   static async cleanCache(cache: string): Promise<void> {
     for (const el of await fs.readdir(cache)) {
-      if (el.endsWith(Host.EXT.input) || el.endsWith(Host.EXT.output)) {
+      if (el.endsWith('.ts') || el.endsWith('.js')) {
         const content = (await fs.readFile(`${cache}/${el}`, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
         await fs.writeFile(`${cache}/${el}`, content);
       }
@@ -31,12 +31,12 @@ export class AssembleUtil {
    */
   static async cleanBoot(ws: string): Promise<void> {
     for (const el of await ScanFs.scanDir({
-      testFile: f => f.endsWith(Host.EXT.output) || f.endsWith(Host.EXT.outputTypes),
+      testFile: f => f.endsWith('.js') || f.endsWith('.d.ts'),
       testDir: x => true
     }, `${ws}/node_modules/@travetto/boot`)) {
-      if (el.file.endsWith(Host.EXT.outputTypes)) {
+      if (el.file.endsWith('.d.ts')) {
         await fs.writeFile(el.file, '');
-      } else if (el.file.endsWith(Host.EXT.output)) {
+      } else if (el.file.endsWith('.js')) {
         const content = (await fs.readFile(el.file, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
         await fs.writeFile(el.file, content);
       }
@@ -48,7 +48,7 @@ export class AssembleUtil {
    */
   static async purgeSource(folders: string[]): Promise<void> {
     for (const sub of folders) {
-      for (const f of await ScanFs.scanDir({ testFile: x => x.endsWith(Host.EXT.input), testDir: x => true }, sub)) {
+      for (const f of await ScanFs.scanDir({ testFile: x => x.endsWith('.ts'), testDir: x => true }, sub)) {
         if (f.stats?.isFile() && !f.module.startsWith('cli/')) {
           await fs.writeFile(f.file, '');
         }

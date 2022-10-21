@@ -96,7 +96,7 @@ export class LoggerTransformer {
         [
           state.factory.createStringLiteral(VALID_LEVELS[level]),
           LiteralUtil.fromLiteral(state.factory, {
-            file: state.getFilename(),
+            file: state.createIdentifier('__source'),
             line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
             scope: state.scope?.map(x => x.name).join(':'),
           }),

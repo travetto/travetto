@@ -1,4 +1,4 @@
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
+import { PathUtil } from '@travetto/boot';
 import { Class, AppManifest, ShutdownManager, ConcreteClass } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
@@ -56,7 +56,7 @@ class $ApplicationRegistry {
 
     console.log('Running application', {
       name: config.name,
-      filename: ModuleUtil.simplifyPath(config.filename, '.')
+      filename: config.filename.replace(PathUtil.cwd, '.').replace(/.*node_modules/, '')
     });
 
     // Show manifest

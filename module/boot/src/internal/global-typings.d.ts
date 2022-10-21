@@ -17,11 +17,18 @@ declare global {
     __proto__: unknown;
   }
 
+  // Log replacement
   function ᚕlog(level: LogLevel | 'log', ctx: { file: string, line: number }, ...args: unknown[]): void;
+
+  // Simple wrapper for creating source
+  function ᚕsrc(file: string): string;
 
   // Global flag
   var ᚕtrv: string | undefined;
 
   // Main handler
   var ᚕmain: <T>(target: (...args: unknown[]) => T, args?: string[], respond?: boolean) => Promise<T>;
+
+  // Parallel to __filename, but cleansed
+  var __source: string;
 }

@@ -1,6 +1,4 @@
-import { ModuleExec } from '@travetto/boot/src/internal/module-exec';
-
-export async function main(): Promise<void> {
+export async function main(): Promise<unknown> {
   const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init');
 
@@ -8,5 +6,5 @@ export async function main(): Promise<void> {
   const { OpenApiService } = await import('../src/service');
 
   const instance = await DependencyRegistry.getInstance(OpenApiService);
-  ModuleExec.mainResponse(await instance.spec);
+  return instance.spec;
 }

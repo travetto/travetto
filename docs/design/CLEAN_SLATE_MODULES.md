@@ -9,7 +9,7 @@ Once: (Needs to be rebuilt whenever transformers change, e.g. installing new mod
 
    `.trv_compiler_staging` => |npx tsc| ==> `.trv_compiler`
 
-Repeated:
+Repeated (Watchable):
    (  
       `project source`,
       `module sources`
@@ -18,7 +18,7 @@ Repeated:
 
 Repeated:
    (
-      `.trv_out`,
+      `.trv_out` <=== Watches for live-reload,
       `resources/`
    ) => |node `trv.js`| ==> Execution
 
@@ -78,7 +78,7 @@ Will provide a new multiphase compiler that:
 - get trv.js working properly with new compiler output
 - `trv-test` needs to be moved into `@travetto/test`
 - fixup tests
-
+- Rework pack to use manifest
 
 ## Deprecated
 
