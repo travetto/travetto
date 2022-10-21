@@ -128,17 +128,12 @@
         "xpack",
         "XPOST",
         "Xunit",
-        "ᚕ",
-        "ᚕabstract",
         "ᚕfile",
-        "ᚕhash",
-        "ᚕinit",
         "ᚕlog",
-        "ᚕmethods",
+        "ᚕmeta",
         "ᚕsrc",
-        "ᚕsyn",
-        "ᚕsynthetic",
-        "ᚕtrv"
+        "Ⲑtrv",
+        "ⲐtrvError"
     ],
     "ignoreWords": [],
     "import": []

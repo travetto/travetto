@@ -31,7 +31,7 @@ export class ImportManager {
   getId(file: string): string {
     if (!this.#ids.has(file)) {
       const key = basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
-      this.#ids.set(file, `ᚕ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
+      this.#ids.set(file, `Ⲑ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
     }
     return this.#ids.get(file)!;
   }

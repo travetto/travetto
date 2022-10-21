@@ -61,7 +61,7 @@ export class ClassSource implements ChangeSource<Class> {
         this.#classes.get(file)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           this.emit({ type: 'added', curr: next.get(k)! });
-        } else if (prev.get(k)!.ᚕhash !== next.get(k)!.ᚕhash) {
+        } else if (prev.get(k)!.ᚕmeta?.hash !== next.get(k)!.ᚕmeta?.hash) {
           this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
         }
       }

@@ -5,8 +5,12 @@
 declare interface Function {
   ᚕid: string;
   ᚕfile: string;
-  ᚕhash: number;
-  ᚕmethods: Record<string, { hash: number }>;
-  ᚕsynthetic: boolean;
-  ᚕabstract: boolean;
+  ᚕmeta?: {
+    id: string;
+    file: string;
+    hash: number;
+    methods: Record<string, { hash: number }>;
+    synthetic: boolean;
+    abstract: boolean;
+  }
 }

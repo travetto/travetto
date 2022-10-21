@@ -13,7 +13,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * Find all valid tests (ignoring abstract)
    */
   getValidClasses(): Class[] {
-    return this.getClasses().filter(c => !c.ᚕabstract);
+    return this.getClasses().filter(c => !c.ᚕmeta?.abstract);
   }
 
   createPending(cls: Class): Partial<SuiteConfig> {
@@ -110,7 +110,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
-          .filter(x => !x.class.ᚕabstract);  // Do not run abstract suites
+          .filter(x => !x.class.ᚕmeta?.abstract);  // Do not run abstract suites
         return { suites };
       }
     }

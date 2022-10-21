@@ -51,7 +51,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [], autoCreate: true, baseType: cls.ᚕabstract };
+    return { class: cls, indices: [], autoCreate: true, baseType: cls.ᚕmeta?.abstract };
   }
 
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {

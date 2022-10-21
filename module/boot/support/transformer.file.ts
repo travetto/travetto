@@ -22,7 +22,7 @@ export class FileTransformer {
           undefined,
           undefined,
           state.factory.createCallExpression(
-            state.createIdentifier('ᚕsrc'), [], [state.createIdentifier('__filename')]
+            state.createAccess('ᚕ', 'src'), [], [state.createIdentifier('__filename')]
           )
         )
       ])
@@ -75,7 +75,7 @@ export class FileTransformer {
               state.createIdentifier('module')
             ),
             ts.SyntaxKind.AmpersandAmpersandToken,
-            state.factory.createCallExpression(state.createIdentifier('ᚕmain'), [], [mainFn.name!])
+            state.factory.createCallExpression(state.createAccess('ᚕ', 'main'), [], [mainFn.name!])
           )));
       }
     }
@@ -87,7 +87,7 @@ export class FileTransformer {
         [],
         [
           state.createIdentifier('exports'),
-          state.fromLiteral('ᚕtrv'),
+          state.fromLiteral('Ⲑtrv'),
           state.fromLiteral({ configurable: true, value: true })
         ]
       )

@@ -40,7 +40,7 @@ export class SpecGenerator {
    * @param cls
    */
   #getTypeId(cls: Class): string {
-    return cls.name?.replace('ᚕsyn', '');
+    return cls.name?.replace('Ⲑsyn', '');
   }
 
   /**

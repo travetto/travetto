@@ -1,7 +1,7 @@
-/// <reference path="../src/internal/global-typings.d.ts" />
+/// <reference path="../src/global-typings.d.ts" />
 
-if (global.ᚕtrv) {
-  console.error(`@travetto/boot was already loaded at ${global.ᚕtrv} but now is trying to be loaded in ${__source}`);
+if (global.ᚕ) {
+  console.error(`@travetto/boot was already loaded at ${global.ᚕ.self} but now is trying to be loaded in ${__source}`);
   console.error('This means you have two versions of the framework installed, which is not supported');
   process.exit(1);
 }
@@ -37,38 +37,37 @@ addFn(Error.prototype, 'toJSON', function (this: Error, extra?: Record<string, u
   };
 });
 
-// Mark framework load location
-global.ᚕtrv = __source;
+global.ᚕ = {
+  // Mark framework load location
+  self: __source,
+  // Global default log interceptor
+  // eslint-disable-next-line no-console
+  log: (level, ctx, ...args): void => console[level](...args),
+  src: (file: string): string => file.replaceAll('\\', '/').replace(/[.]js$/, '.ts'),
+  // Declare main function invoker
+  async main(target, args = process.argv.slice(2), respond = true): Promise<ReturnType<typeof target>> {
+    const sourceMapSupport = await import('source-map-support');
 
-// Global default log interceptor
-// eslint-disable-next-line no-console
-global.ᚕlog = (level, ctx, ...args): void => console[level](...args);
+    // Increase stack limit
+    Error.stackTraceLimit = 50;
 
-global.ᚕsrc = (file: string): string => file.replaceAll('\\', '/').replace(/[.]js$/, '.ts');
+    // Register source maps
+    sourceMapSupport.install();
 
-// Declare main function invoker
-global.ᚕmain = async (target, args = process.argv.slice(2), respond = true): Promise<ReturnType<typeof target>> => {
-  const sourceMapSupport = await import('source-map-support');
+    const send = respond ? async function send(res: unknown): Promise<void> {
+      const { parentPort } = await import('worker_threads');
+      parentPort ? parentPort.postMessage(res) : console.log(JSON.stringify(res));
+    } : (): void => { };
 
-  // Increase stack limit
-  Error.stackTraceLimit = 50;
-
-  // Register source maps
-  sourceMapSupport.install();
-
-  const send = respond ? async function send(res: unknown): Promise<void> {
-    const { parentPort } = await import('worker_threads');
-    parentPort ? parentPort.postMessage(res) : console.log(JSON.stringify(res));
-  } : (): void => { };
-
-  const path = await import('path');
-  try { await import(path.resolve('.env')); } catch { } // Read env
-  try {
-    const res = await target(...args);
-    await send(res);
-    return res;
-  } catch (err) {
-    await send(err);
-    throw err;
+    const path = await import('path');
+    try { await import(path.resolve('.env')); } catch { } // Read env
+    try {
+      const res = await target(...args);
+      await send(res);
+      return res;
+    } catch (err) {
+      await send(err);
+      throw err;
+    }
   }
 };

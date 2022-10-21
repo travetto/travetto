@@ -31,7 +31,7 @@ export class $DynamicLoader {
       base ? `let keys = ['${Object.keys(base).join("','")}']` : '',
       base ? `let values = ['${Object.values(base).join("','")}']` : '',
       `let msg = \`${message}\`;`,
-      "Object.defineProperty(exports, 'ᚕtrvError', { value: true })",
+      "Object.defineProperty(exports, 'ⲐtrvError', { value: true })",
       `module.exports = new Proxy({}, { ${Object.entries(map).map(([k, v]) => f([k, v!])).join(',')}});`
     ].join('\n');
   }
@@ -69,7 +69,7 @@ export class $DynamicLoader {
   #checkForCycles(mod: unknown, request: string, parent: NodeJS.Module): void {
     if (parent && !parent.loaded) { // Standard ts compiler output
       const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
-      if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
+      if (!mod || !('Ⲑtrv' in desc) || 'ⲐtrvError' in desc) {
         try {
           const p = Module._resolveFilename!(request, parent);
           if (p && !p.includes('node_modules')) {
