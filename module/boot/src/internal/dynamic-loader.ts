@@ -2,7 +2,6 @@ import { PathUtil } from '../path';
 
 import { Module } from './types';
 import { ModuleIndex } from './module';
-import { Host } from '../host';
 import { EnvUtil } from '../env';
 
 type UnloadHandler = (file: string, unlink?: boolean) => void;
@@ -73,7 +72,7 @@ export class $DynamicLoader {
       if (!mod || !('ᚕtrv' in desc) || 'ᚕtrvError' in desc) {
         try {
           const p = Module._resolveFilename!(request, parent);
-          if (p && p.endsWith(Host.EXT.input)) {
+          if (p && !p.includes('node_modules')) {
             throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
           }
         } catch {

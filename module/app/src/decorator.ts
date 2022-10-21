@@ -1,7 +1,7 @@
 import { lstatSync } from 'fs';
 
 import { Class } from '@travetto/base';
-import { EnvUtil, FsUtil } from '@travetto/boot';
+import { FsUtil } from '@travetto/boot';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ApplicationConfig, AppClass } from './types';
@@ -26,7 +26,7 @@ export function Application(name: string, config?: AppDecorator) {
       filename: target.ᚕfile,
       targetId: target.ᚕid,
       name: name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-').replace(/([a-z])([A-Z])/g, (_, l, u) => `${l}-${u.toLowerCase()}`),
-      generatedTime: FsUtil.maxTime(lstatSync(EnvUtil.isCompiled() ? target.ᚕfileRaw : target.ᚕfile))
+      generatedTime: FsUtil.maxTime(lstatSync(target.ᚕfile.replace(/[.]ts$/, '.js')))
     };
     SchemaRegistry.register(target);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

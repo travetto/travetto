@@ -1,8 +1,7 @@
 import * as fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
-import { FsUtil, CliUtil, PathUtil } from '@travetto/boot';
-import { ModuleExec } from '@travetto/boot/src/internal/module-exec';
+import { FsUtil, CliUtil, PathUtil, ExecUtil } from '@travetto/boot';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -60,7 +59,7 @@ export class $AppListLoader {
   async buildList(): Promise<ApplicationConfig[]> {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Collecting', () =>
-        ModuleExec.workerMain<ApplicationConfig[]>(require.resolve('../main.list-build')).message
+        ExecUtil.worker<ApplicationConfig[]>(require.resolve('../main.list-build')).message
       );
     } else {
       await (await import('@travetto/boot/support/main.build')).main();

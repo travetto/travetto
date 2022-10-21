@@ -217,13 +217,6 @@ export class TransformerState implements State {
   }
 
   /**
-   * Get Filename as source file
-   */
-  getFilename(): ts.Identifier {
-    return this.createIdentifier('__filename');
-  }
-
-  /**
    * From literal
    */
   fromLiteral<T extends ts.Expression>(val: T): T;

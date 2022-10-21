@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { TransformerId, AfterFile, TransformerState } from '@travetto/transformer';
+import { TransformerId, AfterFile, TransformerState, OnFile } from '@travetto/transformer';
 
 /**
  *  General file cleanup, including:
@@ -11,6 +11,40 @@ import { TransformerId, AfterFile, TransformerState } from '@travetto/transforme
 export class FileTransformer {
 
   static [TransformerId] = '@trv:boot';
+
+  @OnFile()
+  static onFile(state: TransformerState, node: ts.SourceFile): typeof node {
+    const toAdd = state.factory.createVariableStatement(
+      [],
+      state.factory.createVariableDeclarationList([
+        state.factory.createVariableDeclaration(
+          '__source',
+          undefined,
+          undefined,
+          state.factory.createCallExpression(
+            state.createIdentifier('ᚕsrc'), [], [state.createIdentifier('__filename')]
+          )
+        )
+      ])
+    );
+    let start = node.statements.findIndex(x => ts.isImportDeclaration(x));
+    while (start < node.statements.length - 1 && ts.isImportDeclaration(node.statements[start + 1])) {
+      start += 1;
+    }
+
+    // Declare __source
+    return state.factory.updateSourceFile(
+      node,
+      start > 0 ? [
+        ...node.statements.slice(0, start),
+        toAdd,
+        ...node.statements.slice(start)
+      ] : [
+        toAdd,
+        ...node.statements
+      ]
+    );
+  }
 
   @AfterFile()
   static afterFile(state: TransformerState, node: ts.SourceFile): typeof node {

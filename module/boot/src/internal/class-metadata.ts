@@ -1,18 +1,60 @@
+import { PathUtil } from '../path';
 import type { Class } from '../types';
-import { ModuleUtil } from './module-util';
 
 /**
  * Register a class as pending
  */
 export class ClassMetadataUtil {
+  static #idCache = new Map<string, string>();
+
+  /**
+   * Compute internal id from file name and optionally, class name
+   */
+  static computeId(filename: string, clsName?: string): string {
+    filename = PathUtil.resolveUnix(filename);
+
+    if (clsName) {
+      return `${this.computeId(filename)}￮${clsName}`;
+    }
+
+    if (this.#idCache.has(filename)) {
+      return this.#idCache.get(filename)!;
+    }
+
+    let mod = filename
+      .replace(/^.*node_modules\//, '')
+      .replace(PathUtil.cwd, '.')
+      .replace(/[.]js$/, '');
+
+    let ns: string;
+
+    if (mod.startsWith('@travetto')) {
+      const [, ns2, ...rest] = mod.split(/\/+/);
+      ns = `@trv:${ns2}`;
+      if (rest[0] === 'src') {
+        rest.shift();
+      }
+      mod = rest.join('/');
+    } else if (!mod.startsWith('.')) {
+      ns = '@npm';
+    } else {
+      const [ns1, ...rest] = mod.split(/\/+/);
+      ns = ns1;
+      mod = rest.join('/');
+    }
+
+    const name = `${ns}/${mod}`;
+    this.#idCache.set(filename, name);
+    return name;
+  }
+
   /**
    * Initialize the meta data for a function
    * @param function Function
    * @param `ᚕfile` Filename
    */
-  static initFunctionMeta(fn: Function, file: string): boolean {
-    fn.ᚕfile = ModuleUtil.toUnixSource(file);
-    fn.ᚕfileRaw = file;
+  static initFunctionMeta(fn: Function, ᚕfile: string): boolean {
+    fn.ᚕfile = ᚕfile;
     return true;
   }
 
@@ -24,12 +66,10 @@ export class ClassMetadataUtil {
    * @param `ᚕmethods` Methods and their hashes
    * @param `ᚕabstract` Is the class abstract
    */
-  static initMeta(cls: Class, file: string, ᚕhash: number, ᚕmethods: Record<string, { hash: number }>, ᚕabstract: boolean, ᚕsynthetic: boolean): boolean {
-    const ᚕfile = ModuleUtil.toUnixSource(file);
+  static initMeta(cls: Class, ᚕfile: string, ᚕhash?: number, ᚕmethods?: Record<string, { hash: number }>, ᚕabstract?: boolean, ᚕsynthetic?: boolean): boolean {
     const meta = {
-      ᚕid: ModuleUtil.computeId(ᚕfile, cls.name),
+      ᚕid: this.computeId(ᚕfile, cls.name),
       ᚕfile,
-      ᚕfileRaw: file,
       ᚕhash,
       ᚕmethods,
       ᚕabstract,
