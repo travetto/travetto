@@ -50,7 +50,7 @@ export class ClassMetadataUtil {
 
   static #writeMeta(fn: Function, cfg: Record<string, unknown>): boolean {
     for (const [key, value] of Object.entries(cfg)) {
-      Object.defineProperty(fn, `ᚕ${key}`, {
+      Object.defineProperty(fn, `Ⲑ${key}`, {
         value,
         enumerable: false,
         configurable: false,
@@ -65,7 +65,7 @@ export class ClassMetadataUtil {
    * @param function Function
    * @param `file` Filename
    */
-  static initFunctionMeta(fn: Function, file: string): boolean {
+  static initFunctionMeta(fn: Function, { file }: typeof __source): boolean {
     return this.#writeMeta(fn, { file });
   }
 
@@ -77,7 +77,7 @@ export class ClassMetadataUtil {
    * @param `methods` Methods and their hashes
    * @param `abstract` Is the class abstract
    */
-  static initMeta(cls: Class, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean): boolean {
+  static initMeta(cls: Class, { file }: typeof __source, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean): boolean {
     const id = this.computeId(file);
     const meta = { id, file, hash, methods, abstract, synthetic };
     return this.#writeMeta(cls, { file, id, meta });

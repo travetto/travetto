@@ -79,7 +79,7 @@ export class MongoModelService implements
       writeConcern: { w: 1 }
     });
     await ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.close());
+    ShutdownManager.onShutdown(this.constructor.Ⲑid, () => this.client.close());
     ModelExpiryUtil.registerCull(this);
   }
 
@@ -112,7 +112,7 @@ export class MongoModelService implements
         out.push(...this.getGeoIndices(field.type, [...path, field], root));
       } else if (field.type === PointImpl) {
         const name = [...path, field].map(x => x.name).join('.');
-        console.debug('Preparing geo-index', { cls: root.ᚕid, name });
+        console.debug('Preparing geo-index', { cls: root.Ⲑid, name });
         out.push({ [name]: '2d' });
       }
     }

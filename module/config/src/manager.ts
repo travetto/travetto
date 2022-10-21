@@ -95,7 +95,7 @@ class $ConfigManager {
    */
   bindTo<T>(cls: Class<T>, item: T, namespace: string): T {
     if (!SchemaRegistry.has(cls)) {
-      throw new AppError(`${cls.ᚕid} is not a valid schema class, config is not supported`);
+      throw new AppError(`${cls.Ⲑid} is not a valid schema class, config is not supported`);
     }
 
     const cfg = Util.deepAssign({}, this.#get(namespace));
@@ -110,8 +110,8 @@ class $ConfigManager {
       await SchemaValidator.validate(cls, out);
     } catch (err) {
       if (err instanceof ValidationResultError) {
-        err.message = `Failed to construct ${cls.ᚕid} as validation errors have occurred`;
-        err.payload = { class: cls.ᚕid, file: cls.ᚕfile, ...(err.payload ?? {}) };
+        err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
+        err.payload = { class: cls.Ⲑid, file: cls.Ⲑfile, ...(err.payload ?? {}) };
       }
       throw err;
     }

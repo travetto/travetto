@@ -23,10 +23,10 @@ export function Application(name: string, config?: AppDecorator) {
     const out: Partial<ApplicationConfig> = {
       ...config ?? {},
       target,
-      filename: target.ᚕfile,
-      targetId: target.ᚕid,
+      filename: target.Ⲑfile,
+      targetId: target.Ⲑid,
       name: name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-').replace(/([a-z])([A-Z])/g, (_, l, u) => `${l}-${u.toLowerCase()}`),
-      generatedTime: FsUtil.maxTime(lstatSync(target.ᚕfile.replace(/[.]ts$/, '.js')))
+      generatedTime: FsUtil.maxTime(lstatSync(target.Ⲑfile.replace(/[.]ts$/, '.js')))
     };
     SchemaRegistry.register(target);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

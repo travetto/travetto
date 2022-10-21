@@ -9,7 +9,7 @@ import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 
 import { BaseModelSuite } from './base';
-import { ModelStreamSupport } from '../src/service/stream';
+import { ModelStreamSupport } from '../../src/service/stream';
 
 @Suite()
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
@@ -38,7 +38,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
 
   @BeforeAll()
   async beforeAll(): Promise<void> {
-    ResourceManager.addPath(PathUtil.resolveUnix(__dirname, '..', 'resources'));
+    ResourceManager.addPath(PathUtil.resolveUnix(__source.originalFolder, '..', 'resources'));
   }
 
   @Test()

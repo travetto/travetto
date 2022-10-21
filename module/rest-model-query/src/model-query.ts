@@ -54,7 +54,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>): (target: C
           where: convert(full.where)
         });
       } else {
-        throw new AppError(`${this.source.constructor.ᚕid} does not support querying`);
+        throw new AppError(`${this.source.constructor.Ⲑid} does not support querying`);
       }
     }
 
@@ -78,7 +78,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>): (target: C
       if (isQuerySuggestSupported(this.source)) {
         return this.source.suggest<T>(getCls(), field, suggest.q, suggest);
       } else {
-        throw new AppError(`${this.source.constructor.ᚕid} does not support suggesting by query`);
+        throw new AppError(`${this.source.constructor.Ⲑid} does not support suggesting by query`);
       }
     }
 

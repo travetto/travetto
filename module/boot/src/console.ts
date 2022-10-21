@@ -100,4 +100,4 @@ class $ConsoleManager {
 
 export const ConsoleManager = new $ConsoleManager();
 
-ᚕ.log = ConsoleManager.invoke.bind(ConsoleManager);
+ᚕtrv.log = ConsoleManager.invoke.bind(ConsoleManager);

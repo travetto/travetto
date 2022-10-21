@@ -4,11 +4,11 @@ import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { Util } from '@travetto/base';
 
-import { Index, Model } from '../src/registry/decorator';
-import { ModelIndexedSupport } from '../src/service/indexed';
+import { Index, Model } from '../../src/registry/decorator';
+import { ModelIndexedSupport } from '../../src/service/indexed';
 import { BaseModelSuite } from './base';
-import { NotFoundError } from '../src/error/not-found';
-import { IndexNotSupported } from '../src/error/invalid-index';
+import { NotFoundError } from '../../src/error/not-found';
+import { IndexNotSupported } from '../../src/error/invalid-index';
 
 @Model('index_user')
 @Index({

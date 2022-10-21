@@ -160,12 +160,12 @@ ${d.Note('The example above defines the interceptor to run after another interce
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 ${d.Ordered(
   d`${BodyParseInterceptor} - This handles the inbound request, and converting the body payload into an appropriate format.  Additionally it exposes the original request as the raw property on the request.
-  ${d.Snippet('Cors Config', RestBodyParseConfig.ᚕfile, /class.*Config/, /^\}/)}`,
+  ${d.Snippet('Cors Config', RestBodyParseConfig.Ⲑfile, /class.*Config/, /^\}/)}`,
   d`${SerializeInterceptor} - This is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.`,
   d`${CorsInterceptor} - This interceptor allows cors functionality to be configured out of the box, by setting properties in your ${d.Path('application.yml')}, specifically, ${d.Input('rest.cors.active: true')}
-  ${d.Snippet('Cors Config', RestCorsConfig.ᚕfile, /class.*Config/, /^\}/)}`,
+  ${d.Snippet('Cors Config', RestCorsConfig.Ⲑfile, /class.*Config/, /^\}/)}`,
   d`${CookiesInterceptor} - This interceptor is responsible for processing inbound cookie headers and populating the appropriate data on the request, as well as sending the appropriate response data
-  ${d.Snippet('Cookies Config', RestCookieConfig.ᚕfile, /class.*Config/, /^\}/)}`,
+  ${d.Snippet('Cookies Config', RestCookieConfig.Ⲑfile, /class.*Config/, /^\}/)}`,
   d`${GetCacheInterceptor} - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting ${d.Input('rest.disableGetCache: true')} in your config.`,
   d`${LoggingInterceptor} - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so\n
   ${d.Code('Control Logging', 'doc/resources/log.yml')}`,

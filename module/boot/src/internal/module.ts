@@ -66,6 +66,10 @@ class $ModuleIndex {
     return this.#modules;
   }
 
+  get modules() {
+    return this.#modules;
+  }
+
   /**
    * Clears the app scanning cache
    */

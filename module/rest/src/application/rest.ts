@@ -97,7 +97,7 @@ export class RestApplication<T = unknown>  {
    * @param e The change event
    */
   async onControllerChange(e: ChangeEvent<Class>): Promise<void> {
-    console.debug('Registry event', { type: e.type, target: (e.curr ?? e.prev)?.ᚕid });
+    console.debug('Registry event', { type: e.type, target: (e.curr ?? e.prev)?.Ⲑid });
     if (e.prev && ControllerRegistry.hasExpired(e.prev)) {
       await this.unregisterController(e.prev);
     }
@@ -128,14 +128,14 @@ export class RestApplication<T = unknown>  {
       ep.handlerFinalized = RouteUtil.createRouteHandler(this.interceptors, ep, config);
     }
 
-    await this.server.registerRoutes(config.class.ᚕid, config.basePath, config.endpoints, this.interceptors);
+    await this.server.registerRoutes(config.class.Ⲑid, config.basePath, config.endpoints, this.interceptors);
 
     if (this.server.listening && this.server.updateGlobalOnChange) {
       await this.unregisterGlobal();
       await this.registerGlobal();
     }
 
-    console.debug('Registering Controller Instance', { id: config.class.ᚕid, path: config.basePath, endpointCount: config.endpoints.length });
+    console.debug('Registering Controller Instance', { id: config.class.Ⲑid, path: config.basePath, endpointCount: config.endpoints.length });
   }
 
   /**
@@ -148,7 +148,7 @@ export class RestApplication<T = unknown>  {
       return;
     }
 
-    await this.server.unregisterRoutes(c.ᚕid);
+    await this.server.unregisterRoutes(c.Ⲑid);
   }
 
   /**

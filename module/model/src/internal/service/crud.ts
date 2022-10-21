@@ -41,7 +41,7 @@ export class ModelCrudUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const result = ModelRegistry.getBaseModel(cls).from(input as object) as T;
 
-    if (!(result instanceof cls || result.constructor.ᚕid === cls.ᚕid)) {
+    if (!(result instanceof cls || result.constructor.Ⲑid === cls.Ⲑid)) {
       if (onTypeMismatch === 'notfound') {
         throw new NotFoundError(cls, result.id);
       } else {

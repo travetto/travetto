@@ -29,14 +29,14 @@ export function setup($DependencyRegistry: Class<typeof DependencyRegistry>): ty
       if (!this.#proxies.get(classId)!.has(qualifier)) {
         proxy = new RetargettingProxy<T>(instance);
         this.#proxies.get(classId)!.set(qualifier, proxy);
-        console.debug('Registering proxy', { id: target.ᚕid, qualifier: qualifier.toString() });
+        console.debug('Registering proxy', { id: target.Ⲑid, qualifier: qualifier.toString() });
       } else {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         proxy = this.#proxies.get(classId)!.get(qualifier) as RetargettingProxy<T>;
         proxy.setTarget(instance);
         console.debug('Updating target', {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          id: target.ᚕid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
+          id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
         });
       }
 
@@ -61,10 +61,10 @@ export function setup($DependencyRegistry: Class<typeof DependencyRegistry>): ty
     onInstallFinalize<T>(cls: Class<T>): InjectableConfig<T> {
       const config = super.onInstallFinalize(cls);
       // If already loaded, reload
-      const classId = cls.ᚕid;
+      const classId = cls.Ⲑid;
 
       if (
-        !cls.ᚕmeta?.abstract &&
+        !cls.Ⲑmeta?.abstract &&
         this.#proxies.has(classId) &&
         this.#proxies.get(classId)!.has(config.qualifier)
       ) {
@@ -77,7 +77,7 @@ export function setup($DependencyRegistry: Class<typeof DependencyRegistry>): ty
     }
 
     destroyInstance(cls: Class, qualifier: symbol): void {
-      const classId = cls.ᚕid;
+      const classId = cls.Ⲑid;
       const proxy = this.#proxies.get(classId)!.get(qualifier);
       super.destroyInstance(cls, qualifier);
       if (proxy) {

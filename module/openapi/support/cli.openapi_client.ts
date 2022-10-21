@@ -6,7 +6,7 @@ import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 import { CliUtil, ExecUtil, PathUtil, FsUtil } from '@travetto/boot';
 
 const presets: Record<string, [string, object] | [string]> =
-  JSON.parse(readFileSync(PathUtil.resolveUnix(__dirname, '..', 'resources', 'presets.json'), 'utf8'));
+  JSON.parse(readFileSync(PathUtil.resolveUnix(__source.originalFolder, '..', 'resources', 'presets.json'), 'utf8'));
 
 type Options = {
   extendedHelp: OptionConfig<boolean>;

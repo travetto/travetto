@@ -11,11 +11,11 @@ export class FsUtilTest {
 
   @Test()
   async exists() {
-    assert(FsUtil.existsSync(__dirname));
-    assert(!FsUtil.existsSync(`${__dirname}.gone`));
+    assert(FsUtil.existsSync(__source.folder));
+    assert(!FsUtil.existsSync(`${__source.folder}.gone`));
 
-    assert(await FsUtil.exists(__dirname));
-    assert(!(await FsUtil.exists(`${__dirname}.gone`)));
+    assert(await FsUtil.exists(__source.folder));
+    assert(!(await FsUtil.exists(`${__source.folder}.gone`)));
   }
 
   /**

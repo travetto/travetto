@@ -65,7 +65,7 @@ export abstract class Registry implements ChangeSource<Class> {
   async #runInit(): Promise<void> {
     try {
       this.#resolved = false;
-      console.debug('Initializing', { id: this.constructor.ᚕid, uid: this.#uid });
+      console.debug('Initializing', { id: this.constructor.Ⲑid, uid: this.#uid });
 
       // Handle top level when dealing with non-registry
       const waitFor = this.#parents.filter(x => !(x instanceof Registry));
@@ -80,7 +80,7 @@ export abstract class Registry implements ChangeSource<Class> {
 
       await Promise.all(this.#dependents.map(x => x.init()));
 
-      console.debug('Initialized', { id: this.constructor.ᚕid, uid: this.#uid });
+      console.debug('Initialized', { id: this.constructor.Ⲑid, uid: this.#uid });
     } finally {
       this.#resolved = true;
     }
@@ -110,7 +110,7 @@ export abstract class Registry implements ChangeSource<Class> {
    * Initialize, with a built-in latch to prevent concurrent initializations
    */
   async init(): Promise<unknown> {
-    console.debug('Trying to initialize', { id: this.constructor.ᚕid, uid: this.#uid, initialized: !!this.#initialized });
+    console.debug('Trying to initialize', { id: this.constructor.Ⲑid, uid: this.#uid, initialized: !!this.#initialized });
 
     if (!this.#initialized) {
       this.#initialized = this.#runInit();
@@ -156,7 +156,7 @@ export abstract class Registry implements ChangeSource<Class> {
    * Listen for events from the parent
    */
   onEvent(event: ChangeEvent<Class>): void {
-    console.debug('Received', { id: this.constructor.ᚕid, type: event.type, targetId: (event.curr ?? event.prev)!.ᚕid });
+    console.debug('Received', { id: this.constructor.Ⲑid, type: event.type, targetId: (event.curr ?? event.prev)!.Ⲑid });
 
     switch (event.type) {
       case 'removing':

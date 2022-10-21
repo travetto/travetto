@@ -13,9 +13,9 @@ export const Links = {
   Stream: d.SnippetLink('Streaming', '@travetto/model/src/service/stream', /export interface/),
 };
 
-export const ModelTypes = (file: string | { ᚕfile: string }): AllTypeMap['SnippetLink'][] => {
+export const ModelTypes = (file: string | { Ⲑfile: string }): AllTypeMap['SnippetLink'][] => {
   if (typeof file !== 'string') {
-    file = file.ᚕfile;
+    file = file.Ⲑfile;
   }
   const contents = readFileSync(file, 'utf8');
   const found: AllTypeMap['SnippetLink'][] = [];
@@ -30,7 +30,7 @@ export const ModelTypes = (file: string | { ᚕfile: string }): AllTypeMap['Snip
   return found;
 };
 
-export const ModelCustomConfig = (cfg: { name: string, ᚕfile: string }): AllType =>
+export const ModelCustomConfig = (cfg: { name: string, Ⲑfile: string }): AllType =>
   d`
     Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
     or config, you can override and register it with the ${mod.Di} module.
@@ -39,7 +39,7 @@ export const ModelCustomConfig = (cfg: { name: string, ᚕfile: string }): AllTy
 
   where the ${cfg} is defined by:
 
-  ${d.Code(`Structure of ${cfg.name}`, cfg.ᚕfile)}
+  ${d.Code(`Structure of ${cfg.name}`, cfg.Ⲑfile)}
 
   Additionally, you can see that the class is registered with the ${Config} annotation, and so these values can be overridden using the 
   standard ${mod.Config}resolution paths. 

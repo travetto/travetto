@@ -176,12 +176,12 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
     this.client = redis.createClient(this.config.client);
     await this.client.connect();
     await ModelStorageUtil.registerModelChangeListener(this);
-    ShutdownManager.onShutdown(this.constructor.ᚕid, () => this.client.disconnect());
+    ShutdownManager.onShutdown(this.constructor.Ⲑid, () => this.client.disconnect());
     for (const el of ModelRegistry.getClasses()) {
       for (const idx of ModelRegistry.get(el).indices ?? []) {
         switch (idx.type) {
           case 'unique': {
-            console.error('Unique indices are not supported in redis for', { cls: el.ᚕid, idx: idx.name });
+            console.error('Unique indices are not supported in redis for', { cls: el.Ⲑid, idx: idx.name });
             break;
           }
         }

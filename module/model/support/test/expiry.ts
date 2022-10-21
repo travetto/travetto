@@ -3,10 +3,10 @@ import * as assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 import { Util, TimeSpan, TimeUnit } from '@travetto/base';
 
-import { ExpiresAt, Model } from '../src/registry/decorator';
-import { ModelExpirySupport } from '../src/service/expiry';
-import { ModelExpiryUtil } from '../src/internal/service/expiry';
-import { NotFoundError } from '../src/error/not-found';
+import { ExpiresAt, Model } from '../../src/registry/decorator';
+import { ModelExpirySupport } from '../../src/service/expiry';
+import { ModelExpiryUtil } from '../../src/internal/service/expiry';
+import { NotFoundError } from '../../src/error/not-found';
 import { BaseModelSuite } from './base';
 
 @Model('expiry-user')

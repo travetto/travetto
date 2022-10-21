@@ -80,7 +80,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    */
   resolveSubType(cls: Class, type: Class | string): Class {
     if (this.#subTypes.has(cls)) {
-      const typeId = type && (typeof type === 'string' ? type : type.ᚕid);
+      const typeId = type && (typeof type === 'string' ? type : type.Ⲑid);
       if (type) {
         return this.#subTypes.get(cls)!.get(typeId) ?? cls;
       }
@@ -114,7 +114,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
         this.#subTypes.set(parent, new Map());
       }
       this.#subTypes.get(parent)!.set(type, cls);
-      this.#subTypes.get(parent)!.set(cls.ᚕid, cls);
+      this.#subTypes.get(parent)!.set(cls.Ⲑid, cls);
       parent = this.getParentClass(parent!)!;
       parentConfig = this.get(parent);
     }

@@ -41,7 +41,7 @@ export class TestWatcher {
         return;
       }
       if (!method) {
-        consumer.removeClass(cls.ᚕid);
+        consumer.removeClass(cls.Ⲑid);
         return;
       }
       const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
@@ -57,8 +57,8 @@ export class TestWatcher {
         process.send({
           type: 'removeTest',
           method: method?.name,
-          classId: cls?.ᚕid,
-          file: cls?.ᚕfile,
+          classId: cls?.Ⲑid,
+          file: cls?.Ⲑfile,
         });
       }
     });

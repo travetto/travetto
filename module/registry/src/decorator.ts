@@ -11,12 +11,12 @@ class $PendingRegister {
    * Register class as pending
    */
   add(cls: Class): void {
-    if (!this.map.has(cls.ᚕfile)) {
+    if (!this.map.has(cls.Ⲑfile)) {
       const sub: Class[] = [];
-      this.map.set(cls.ᚕfile, sub);
-      this.ordered.push([cls.ᚕfile, sub]);
+      this.map.set(cls.Ⲑfile, sub);
+      this.ordered.push([cls.Ⲑfile, sub]);
     }
-    this.map.get(cls.ᚕfile)!.push(cls);
+    this.map.get(cls.Ⲑfile)!.push(cls);
   }
 
   /**

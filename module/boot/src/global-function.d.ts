@@ -3,9 +3,9 @@
  * information for all registered classes
  */
 declare interface Function {
-  ᚕid: string;
-  ᚕfile: string;
-  ᚕmeta?: {
+  Ⲑid: string;
+  Ⲑfile: string;
+  Ⲑmeta?: {
     id: string;
     file: string;
     hash: number;

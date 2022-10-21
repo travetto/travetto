@@ -64,7 +64,7 @@ ${d.Code(d`Example Multiple Candidate Types`, 'doc/injectable-multiple-primary.t
 
 ${d.Section('Manual Invocation')}
 
-Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the ${d.Ref('DependencyRegistry', DependencyRegistry.constructor.ᚕfile)}. The registry allows for requesting a dependency by class reference:
+Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the ${d.Ref('DependencyRegistry', DependencyRegistry.constructor.Ⲑfile)}. The registry allows for requesting a dependency by class reference:
 
 ${d.Code(d`Example of Manual Lookup`, 'doc/injectable-manual.ts')}
 `;

@@ -30,7 +30,7 @@ export class RouteUtil {
    * Get the interceptor config for a given request and interceptor instance
    */
   static getInterceptorConfig<T extends RestInterceptor<U>, U extends ManagedInterceptorConfig>(req: Request, inst: T): U | undefined {
-    const cfg = req[InterceptorConfigsⲐ]?.[inst.constructor.ᚕid] ?? undefined;
+    const cfg = req[InterceptorConfigsⲐ]?.[inst.constructor.Ⲑid] ?? undefined;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return cfg as U;
   }

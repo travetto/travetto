@@ -4,7 +4,7 @@ import { Registry } from '../registry';
 import { ChangeEvent } from '../types';
 
 function id(cls: string | Class): string {
-  return cls && typeof cls !== 'string' ? cls.ᚕid : cls;
+  return cls && typeof cls !== 'string' ? cls.Ⲑid : cls;
 }
 
 /**
@@ -131,10 +131,10 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
   getOrCreatePendingField(cls: Class, field: F): Partial<M> {
     this.getOrCreatePending(cls);
 
-    if (!this.pendingFields.get(cls.ᚕid)!.has(field)) {
-      this.pendingFields.get(cls.ᚕid)!.set(field, this.createPendingField(cls, field));
+    if (!this.pendingFields.get(cls.Ⲑid)!.has(field)) {
+      this.pendingFields.get(cls.Ⲑid)!.set(field, this.createPendingField(cls, field));
     }
-    return this.pendingFields.get(cls.ᚕid)!.get(field)!;
+    return this.pendingFields.get(cls.Ⲑid)!.get(field)!;
   }
 
   /**
@@ -157,13 +157,13 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * On an install event, finalize
    */
   onInstall(cls: Class, e: ChangeEvent<Class>): void {
-    if (this.pending.has(cls.ᚕid) || this.pendingFields.has(cls.ᚕid)) {
-      console.debug('Installing', { service: this.constructor.name, id: cls.ᚕid });
+    if (this.pending.has(cls.Ⲑid) || this.pendingFields.has(cls.Ⲑid)) {
+      console.debug('Installing', { service: this.constructor.name, id: cls.Ⲑid });
       const result = this.onInstallFinalize(cls);
-      this.pendingFields.delete(cls.ᚕid);
-      this.pending.delete(cls.ᚕid);
+      this.pendingFields.delete(cls.Ⲑid);
+      this.pending.delete(cls.Ⲑid);
 
-      this.entries.set(cls.ᚕid, result);
+      this.entries.set(cls.Ⲑid, result);
       this.emit(e);
     }
   }
@@ -172,15 +172,15 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    * On an uninstall event, remove
    */
   onUninstall(cls: Class, e: ChangeEvent<Class>): void {
-    if (this.entries.has(cls.ᚕid)) {
-      console.debug('Uninstalling', { service: this.constructor.name, id: cls.ᚕid });
-      this.expired.set(cls.ᚕid, this.entries.get(cls.ᚕid)!);
-      this.entries.delete(cls.ᚕid);
+    if (this.entries.has(cls.Ⲑid)) {
+      console.debug('Uninstalling', { service: this.constructor.name, id: cls.Ⲑid });
+      this.expired.set(cls.Ⲑid, this.entries.get(cls.Ⲑid)!);
+      this.entries.delete(cls.Ⲑid);
       this.onUninstallFinalize(cls);
       if (e.type === 'removing') {
         this.emit(e);
       }
-      process.nextTick(() => this.expired.delete(cls.ᚕid));
+      process.nextTick(() => this.expired.delete(cls.Ⲑid));
     }
   }
 
