@@ -9,5 +9,4 @@ export * from './src/stream';
 export * from './src/env';
 export * from './src/fs';
 export * from './src/path';
-export * from './src/scan';
 export * from './src/main-package';

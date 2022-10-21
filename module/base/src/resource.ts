@@ -2,8 +2,9 @@ import * as fs from 'fs/promises';
 import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 
-import { PathUtil, ScanFs, ScanEntry, FsUtil } from '@travetto/boot';
+import { PathUtil, FsUtil } from '@travetto/boot';
 
+import { ScanFs, ScanEntry } from './scan';
 import { AppError } from './error';
 import { AppManifest } from './manifest';
 

@@ -4,6 +4,7 @@ import { AppError } from './src/error';
 import { Util } from './src/util';
 
 const UtilLink = d.Ref(Util.name, 'src/util.ts');
+const ScanFsLink = d.Ref('ScanFs', 'src/scan.ts');
 const AppErrorLink = d.Ref(AppError.name, 'src/error.ts');
 const ResourceManagerLink = d.Ref('ResourceManager', 'src/resource.ts');
 
@@ -16,6 +17,7 @@ ${d.List(
   'Application Manifest',
   'Application Caching',
   'File Operations',
+  'File System Scanning',
   'Resource Management',
   'Lifecycle Support',
   'Shutdown Management',
@@ -44,6 +46,9 @@ The framework does a fair amount of file system scanning to auto - load files. I
 A simple example of finding specific ${d.Path('.config')} files in your codebase:
 
 ${d.Code('Looking for all .config files with the prefix defined by svc', 'doc/find.ts')}
+
+${d.SubSection('File System Scanning')}
+${ScanFsLink} provides a breadth-first search through the file system with the ability to track and collect files via patterns.
 
 ${d.Section('Resource Management')}
 

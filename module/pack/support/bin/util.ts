@@ -4,8 +4,9 @@ import * as path from 'path';
 // TODO: Get proper typings
 const glob = require('picomatch');
 
-import { CliUtil, FsUtil, PathUtil, ScanFs } from '@travetto/boot';
+import { CliUtil, FsUtil, PathUtil } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ScanFs } from '@travetto/base';
 
 import { CommonConfig, PackOperation } from './types';
 
