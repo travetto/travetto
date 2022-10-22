@@ -3,55 +3,26 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as cp from 'child_process';
 
-import { buildManifestModules, ModuleShape } from './manifest';
-import {
-  CWD, COMPILER_OUTPUT, SOURCE_OUTPUT, TS_TARGET, TSC, STAGING_OUTPUT
-} from './config';
+import { buildManifest, writeManifest } from './manifest';
+import { CWD, COMPILER_OUTPUT, TS_TARGET, TSC, STAGING_OUTPUT } from './config';
+import { ModuleShape, ManifestShape } from './types';
 
 type CompileContext = {
-  modules: ModuleShape[];
+  manifest: ManifestShape;
   transforming: ModuleShape[];
   transformer: ModuleShape;
 };
 
-function writeManifest(modules: ModuleShape[]): void {
-  fs.mkdirSync(COMPILER_OUTPUT, { recursive: true });
-  fs.writeFileSync(`${COMPILER_OUTPUT}/manifest.json`, JSON.stringify(modules));
-}
-
-export function init(): void {
-  if (!fs.existsSync(COMPILER_OUTPUT)) {
-    cp.spawnSync(process.argv0, [__filename], { stdio: ['pipe', 'pipe', 2], env: process.env });
-  }
-
-  writeManifest(buildManifestModules());
-
-  // Compile
-  cp.spawnSync(process.argv0, [
-    `${COMPILER_OUTPUT}/node_modules/@travetto/transformer/support/main.compiler`,
-    SOURCE_OUTPUT,
-  ], { stdio: ['pipe', 'pipe', 2], env: process.env });
-
-
-  if (!process.env.TRV_CACHE) {
-    if (fs.existsSync(SOURCE_OUTPUT)) {
-      process.env.TRV_CACHE = SOURCE_OUTPUT;
-    } else if (fs.existsSync(COMPILER_OUTPUT)) {
-      process.env.TRV_CACHE = COMPILER_OUTPUT;
-    }
-  }
-}
-
 function getModuleContext(): CompileContext {
-  const modules = buildManifestModules();
+  const manifest = buildManifest();
 
-  const transforming = modules
+  const transforming = Object.values(manifest.modules)
     .filter(x => x.files.support?.find(([name, type]) => type === 'ts' && name.startsWith('support/transform')));
 
-  const transformer = modules.find(x => x.name === '@travetto/transformer')!;
+  const transformer = manifest.modules['@travetto/transformer'];
 
   return {
-    modules,
+    manifest,
     transforming,
     transformer
   };
@@ -113,7 +84,7 @@ export function precompile(context: CompileContext = getModuleContext()): void {
   fs.writeFileSync(`${STAGING_OUTPUT}/tsconfig.json`, JSON.stringify(buildTsconfig(context), null, 2));
   cp.spawnSync(TSC, { cwd: STAGING_OUTPUT, stdio: 'pipe' });
 
-  writeManifest(context.modules);
+  writeManifest(COMPILER_OUTPUT, context.manifest);
 }
 
 if (require.main === module) {

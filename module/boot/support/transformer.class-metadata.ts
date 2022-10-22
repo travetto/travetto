@@ -4,6 +4,7 @@ import {
   TransformerState, OnMethod, OnClass, AfterClass,
   TransformerId, AfterFunction, CoreUtil, SystemUtil
 } from '@travetto/transformer';
+import path = require('path');
 
 const MOD = '@travetto/boot';
 

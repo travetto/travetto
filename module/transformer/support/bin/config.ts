@@ -14,6 +14,6 @@ export const TS_TARGET = ({
   14: 'ES2020',
   15: 'ESNext',
   16: 'ESNext'
-})[NODE_VERSION] ?? 'ESNext'; // Default if not found
+} as const)[NODE_VERSION] ?? 'ESNext'; // Default if not found
 
 export const TSC = require.resolve('typescript').replace(/\/lib.*$/, '/bin/tsc');

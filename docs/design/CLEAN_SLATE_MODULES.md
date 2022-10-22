@@ -1,26 +1,86 @@
 # Clean Slate Design for Module System
 
 ## Compilation Flow
-Once: (Needs to be rebuilt whenever transformers change, e.g. installing new modules)
-   (
-      `@travetto/transformer/**/*`,
-      `**/support/transform*`
-   ) ==> `.trv_compiler_staging` 
+1. 
+  Phase: compiler-bootstrap
+  Desc: Run tsc on `source://transformer/support/bin/*.ts`
+  When: `source://transformer/support/bin/*.ts` changes or is missing a `.js` counterpart
+  Inputs:
+    - `source://@travetto/transformer/support/bin/**/*.ts`
+  Action: tsc
+  Output: 
+    - `source://@travetto/transformer/support/bin/**/*.js`
 
-   `.trv_compiler_staging` => |npx tsc| ==> `.trv_compiler`
+2.
+  Phase: manifest-generate
+  Desc: Generates project manifest
+  When: in development/build mode
+  Input: 
+    - `source://project`,
+    - `source://modules`
+  Action: node `@travetto/transformer/support/bin/manifest`
+  Output: 
+    - `memory://manifest`
 
-Repeated (Watchable):
-   (  
-      `project source`,
-      `module sources`
-   )
-   => |node `.trv_compiler`| ==> `.trv_out`
+3.
+  Phase: manifest-delta
+  Desc: Generates project delta for any changed files
+  When: `memory://manifest`
+  Input: 
+    - `memory://manifest`
+    - `compiler://manifest`
+  Action: node `source://@travetto/transformer/support/bin/manifest-delta`
+  Output: 
+    - `memory://manifest-delta`    
 
-Repeated:
-   (
-      `.trv_out` <=== Watches for live-reload,
-      `resources/`
-   ) => |node `trv.js`| ==> Execution
+4. 
+  Phase: compiler-stage
+  Desc: Stage code for compiler-build
+  When: `memory://manifest-delta` includes `source://**/support/transform*`, or `source://@travetto/transformer`
+  Input: 
+    - `memory://manifest`
+    - `source://@travetto/transformer/**/*`,
+    - `source://**/support/transform*`
+  Action: copy or symlink
+  Output: 
+    - `staging://**` 
+
+5. 
+  Phase: compiler-build
+  Desc: Run tsc on staged code
+  When: `memory://manifest-delta` includes `source://**/support/transform*`, or `source://@travetto/transformer`
+  Input: 
+    - `staging://manifest`
+    - `staging://**` 
+  Action: tsc
+  Output: 
+    - `compiler://manifest`
+    - `compiler://**`
+
+6. 
+  Phase: source-compile
+  Desc: Compile project sources
+  When: `memory://manifest-delta` includes any changes
+  Watchable: 
+    - `source://project`
+  Input: 
+    - `compiler://manifest`
+    - `source://project`,
+    - `source://modules`
+  Action: node `compiler://@travetto/transformer/support/main.compiler`
+  Output: 
+    - `output://manifest`
+    - `output://**`
+
+7. 
+  Phase: source-execute
+  Desc: Run compiled sources
+  Watchable: 
+    - `output://**`
+  Input:
+    - `output://manifest`
+    - `output://**`
+  Action: node
 
 ## Details
 Will provide a new multiphase compiler that:
