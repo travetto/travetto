@@ -66,7 +66,7 @@ export class Context {
   }
 
   source(file?: string): string {
-    return PathUtil.resolveUnix(__source.originalFolder, '..', '..', 'templates', this.#template, ...file ? [file] : []);
+    return PathUtil.resolveUnix(__source.folder, 'resources', 'templates', this.#template, ...file ? [file] : []);
   }
 
   destination(file?: string): string {

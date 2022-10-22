@@ -2,7 +2,6 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 
 import { FsUtil, Package, PathUtil } from '@travetto/boot';
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
@@ -29,7 +28,8 @@ export class FileUtil {
       file = require.resolve(file);
     }
     const resolved = PathUtil.resolveUnix(file);
-    return { resolved, cleaned: ModuleUtil.simplifyPath(resolved, Package.name) };
+    // TODO: Fix name
+    return { resolved, cleaned: [resolved, Package.name].join(' ') };
   }
 
   /**

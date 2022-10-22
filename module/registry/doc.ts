@@ -32,7 +32,7 @@ The registry is a ${MetadataReg} that similar to the ${SchemaReg} and the ${Depe
 ${d.SubSection('Live Flow')}
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries.
 
-As the ${mod.Compiler} notifies that a file has been changed and recompiled, the ${RootReg} will pick it up, and process it accordingly.
+As the ${mod.Watch} notifies that a file has been changed, the ${RootReg} will pick it up, and process it accordingly.
 
 ${d.Section('Supporting Metadata')}
 

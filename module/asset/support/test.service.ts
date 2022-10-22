@@ -23,7 +23,7 @@ export abstract class AssetServiceSuite {
 
   @BeforeAll()
   async setup() {
-    ResourceManager.addPath(PathUtil.resolveUnix(__source.originalFolder, 'resources'));
+    ResourceManager.addPath(PathUtil.resolveUnix(__source.folder, 'resources'));
   }
 
   @Test()
