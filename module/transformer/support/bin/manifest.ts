@@ -95,7 +95,7 @@ function describeModule({ name, folder }: Dependency): ModuleShape {
           (acc['rootFiles'] ??= []).push(transformFile(rel));
         }
       } else {
-        const sub = rel.match(/^((?:test\/resources)|[^/]+)/)![0];
+        const sub = rel.match(/^((?:(test|support)\/resources)|[^/]+)/)![0];
         (acc[sub] ??= []).push(transformFile(rel));
       }
       return acc;

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import * as ts from 'typescript';
 import * as path from 'path';
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 import { TransformerManager } from '../src/manager';
 
@@ -44,7 +45,7 @@ export class Compiler {
     this.#outDir = path.resolve(outDir).replaceAll('\\', '/');
     this.#bootLocation = path.resolve(CWD, bootLocation ?? __filename.split('node_modules')[0]).replaceAll('\\', '/');
 
-    this.#modules = JSON.parse(fs.readFileSync(`${this.#bootLocation}/manifest.json`, 'utf8'));
+    this.#modules = JSON.parse(readFileSync(`${this.#bootLocation}/manifest.json`, 'utf8'));
     this.#sourceFiles = this.#modules.flatMap(
       x => [
         ...x.files.index ?? [],
@@ -122,7 +123,7 @@ export class Compiler {
     const rootDir = opts.rootDir ?? CWD;
     const projTsconfig = path.resolve('tsconfig.json');
     // Fallback to base tsconfig if not found in local folder
-    const config = fs.existsSync(projTsconfig) ? projTsconfig : this.#transformerTsconfig;
+    const config = existsSync(projTsconfig) ? projTsconfig : this.#transformerTsconfig;
     console.log('Loading config', config);
 
     return {
@@ -174,27 +175,42 @@ export class Compiler {
 
     for (const module of this.#modules) {
       if (module.files.rootFiles?.find(([f]) => f === 'package.json')) {
-        fs.mkdirSync(`${this.#outDir}/${module.output}`, { recursive: true });
-        fs.writeFileSync(`${this.#outDir}/${module.output}/package.json`,
-          fs.readFileSync(`${module.source}/package.json`, 'utf8')
+        await fs.mkdir(`${this.#outDir}/${module.output}`, { recursive: true });
+        await fs.writeFile(`${this.#outDir}/${module.output}/package.json`,
+          (await fs.readFile(`${module.source}/package.json`, 'utf8'))
             .replaceAll('"index.ts"', '"index.js"')
           , 'utf8');
       }
+
       // Copy over all js files
       for (const files of Object.values(module.files)) {
         for (const [jsFile, ext] of files!) {
           if (ext === 'js') {
             const outJsFile = `${this.#outDir}/${module.output}/${jsFile}`;
             console.log('Copying', outJsFile);
-            fs.mkdirSync(path.dirname(outJsFile), { recursive: true });
-            fs.copyFileSync(`${module.source}/${jsFile}`, outJsFile);
+            await fs.mkdir(path.dirname(outJsFile), { recursive: true });
+            await fs.copyFile(`${module.source}/${jsFile}`, outJsFile);
           }
+        }
+      }
+
+      // Symlink resources
+      for (const key of ['resources', 'support/resources', 'test/resources']) {
+
+        if (await fs.stat(`${module.source}/${key}`).then(x => true, x => false)) {
+          await fs.mkdir(`${this.#outDir}/${module.output}/${key}`, { recursive: true });
+        }
+
+        if (module.files[key]) {
+          const output = `${this.#outDir}/${module.output}/${key}`;
+          await fs.mkdir(path.dirname(output));
+          await fs.symlink(`${module.source}/${key}`, output)
         }
       }
     }
 
     // Write manifest
-    fs.writeFileSync(`${this.#outDir}/manifest.json`, JSON.stringify(this.#modules));
+    await fs.writeFile(`${this.#outDir}/manifest.json`, JSON.stringify(this.#modules));
 
     // Compile with transformers
     const prog = this.getProgram();
@@ -204,8 +220,8 @@ export class Compiler {
         (targetFile, text) => {
           const output = this.#sourceToOutput(targetFile);
           const finalTarget = targetFile.startsWith(CWD) ? `${CWD}/${output}` : `${this.#outDir}/${output}`;
-          fs.mkdirSync(path.dirname(finalTarget), { recursive: true });
-          fs.writeFileSync(finalTarget, text, 'utf8');
+          mkdirSync(path.dirname(finalTarget), { recursive: true });
+          writeFileSync(finalTarget, text, 'utf8');
         },
         undefined,
         false,

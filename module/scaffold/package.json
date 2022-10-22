@@ -17,10 +17,7 @@
   },
   "files": [
     "bin",
-    "src",
-    "support",
-    "templates",
-    ".eslintrc.js"
+    "support"
   ],
   "repository": {
     "url": "https://github.com/travetto/travetto.git",

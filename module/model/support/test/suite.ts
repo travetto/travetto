@@ -16,7 +16,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       target,
       async function (this: T & { [Loaded]?: boolean }) {
         // Track self
-        ResourceManager.addPath(PathUtil.resolveUnix(__source.originalFolder, 'resources'));
+        ResourceManager.addPath(PathUtil.resolveUnix(__source.folder, '..', 'resources'));
 
         await RootRegistry.init();
 

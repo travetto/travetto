@@ -21,8 +21,7 @@
     "index.ts",
     "src",
     "support",
-    "resources",
-    "!resources/email/demo/"
+    "!resources"
   ],
   "main": "index.ts",
   "repository": {

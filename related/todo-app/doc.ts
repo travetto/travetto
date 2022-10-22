@@ -13,7 +13,7 @@ export const text = async () => {
   const startupBuffer: Buffer[] = [];
 
   const cmd = DocRunUtil.runBackground('trv', ['run', 'rest'], {
-    env: { REST_LOGROUTES_PATHS: '!*', REST_PORT: '12555' }
+    env: { REST_LOG_PATHS: '!*', REST_PORT: '12555' }
   });
 
   cmd.process.stdout?.on('data', v =>
@@ -30,7 +30,7 @@ export const text = async () => {
   const result = d`
 ${d.RawHeader('Getting Started: A Todo App')}
 
-The following tutorial wil walk you through setting up a ${lib.Travetto} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at ${d.Ref('Todo App', __source.originalFolder)}.  Additionally, you can use the ${mod.Scaffold}.
+The following tutorial wil walk you through setting up a ${lib.Travetto} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at ${d.Ref('Todo App', __source.folder)}.  Additionally, you can use the ${mod.Scaffold}.
 
 ${d.TableOfContents('Overview')}
 

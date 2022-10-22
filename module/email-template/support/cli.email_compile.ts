@@ -14,7 +14,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
 
   envInit(): void {
     EnvInit.init({
-      append: { TRV_RESOURCES: PathUtil.resolveUnix(__source.originalFolder, '..', 'resources') }
+      append: { TRV_RESOURCES: PathUtil.resolveUnix(__source.folder, 'resources') }
     });
   }
 

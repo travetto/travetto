@@ -12,7 +12,7 @@ export class UtilTest {
 
   @BeforeAll()
   async init() {
-    ResourceManager.addPath(PathUtil.resolveUnix(__source.originalFolder, '..', 'support', 'test-resources'));
+    ResourceManager.addPath(PathUtil.resolveUnix(__source.folder, '..', 'support', 'resources'));
   }
 
   @Test()
