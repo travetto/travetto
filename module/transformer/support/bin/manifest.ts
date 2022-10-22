@@ -1,15 +1,9 @@
 import * as fs from 'fs';
+import * as path from 'path';
 
-import { CWD } from './config';
+import type { ManifestShape, ModuleFile, ModuleShape } from './types';
 
-type ModuleFile = [string, 'd.ts' | 'ts' | 'js' | 'json' | 'unknown'];
-
-export type ModuleShape = {
-  name: string;
-  source: string;
-  output: string;
-  files: Record<string, ModuleFile[]>;
-};
+const CWD = process.cwd().replace(/[\\]/g, '/');
 
 type PackageType = {
   name: string;
@@ -20,6 +14,10 @@ type PackageType = {
 };
 
 type Dependency = { name: string, folder: string, isModule: boolean };
+
+function getNewest(stat: fs.Stats) {
+  return Math.max(stat.mtimeMs, stat.ctimeMs);
+}
 
 function collectPackages(folder: string, seen = new Set<string>()): Dependency[] {
   const { name, dependencies = {}, devDependencies = {}, peerDependencies = {}, travettoModule = false }: PackageType =
@@ -74,11 +72,12 @@ function scanFolder(folder: string, includeTopFolders = new Set<string>()): stri
 }
 
 function transformFile(file: string): ModuleFile {
-  return [file, file.endsWith('.d.ts') ? 'd.ts' : (
+  const type = file.endsWith('.d.ts') ? 'd.ts' : (
     file.endsWith('.ts') ? 'ts' : (
       (file.endsWith('.js') || file.endsWith('mjs') || file.endsWith('.cjs')) ? 'js' :
         (file.endsWith('.json') ? 'json' : 'unknown')
-    ))];
+    ));
+  return [file, type, getNewest(fs.statSync(file))];
 }
 
 function describeModule({ name, folder }: Dependency): ModuleShape {
@@ -114,7 +113,7 @@ function describeModule({ name, folder }: Dependency): ModuleShape {
   };
 }
 
-export function buildManifestModules(): ModuleShape[] {
+function buildManifestModules(): Record<string, ModuleShape> {
   const modules = collectPackages(CWD)
     .filter(x => x.isModule);
   if (process.env.TRV_DEV && !modules.find(x => x.name === '@travetto/cli')) {
@@ -124,5 +123,51 @@ export function buildManifestModules(): ModuleShape[] {
       isModule: true,
     });
   }
-  return modules.map(x => describeModule(x));
+  return Object.fromEntries(
+    modules.map(x => describeModule(x)).map(m => [m.name, m])
+  );
+}
+
+export function buildManifest(): ManifestShape {
+  return {
+    modules: buildManifestModules(),
+    generated: Date.now()
+  }
+}
+
+export function writeManifest(file: string, manifest: ManifestShape): void {
+  let folder = file;
+  if (file.endsWith('.json')) {
+    folder = path.dirname(file);
+  } else {
+    file = `${folder}/manifest.json`;
+  }
+  fs.mkdirSync(folder, { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(manifest));
+}
+
+export function readManifest(file: string): ManifestShape | undefined {
+  let folder = file;
+  if (file.endsWith('.json')) {
+    folder = path.dirname(file);
+  } else {
+    file = `${folder}/manifest.json`;
+  }
+  if (fs.existsSync(file)) {
+    return JSON.parse(
+      fs.readFileSync(file, 'utf8')
+    );
+  } else {
+    return undefined;
+  }
+}
+
+export function produceDelta(left: ManifestShape, right: ManifestShape) {
+  for (const [name, lmod] of Object.entries(left.modules)) {
+
+  }
+
+  for (const [name, rmod] of Object.entries(right.modules)) {
+
+  }
 }

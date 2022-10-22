@@ -2,29 +2,13 @@
 import * as ts from 'typescript';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 
 import { TransformerManager } from '../src/manager';
 
+import { TS_TARGET } from './bin/config';
+import { WorkspaceManager } from './bin/workspace';
+
 const CWD = process.cwd();
-
-
-const NODE_VERSION = (process.env.TRV_NODE_VERSION ?? process.version)
-  .replace(/^.*?(\d+).*?$/, (_, v) => v);
-const TS_TARGET = ({
-  12: 'ES2019',
-  13: 'ES2019',
-  14: 'ES2020',
-  15: 'ESNext',
-  16: 'ESNext'
-} as const)[NODE_VERSION] ?? 'ESNext'; // Default if not found
-
-type Module = {
-  name: string;
-  source: string;
-  output: string;
-  files: Record<string, [string, 'ts' | 'js'][] | undefined>;
-};
 
 export class Compiler {
 
@@ -33,20 +17,14 @@ export class Compiler {
   #sourceFiles: string[];
   #transformers: string[];
   #transformerTsconfig: string;
-  #sourceToOutput: (file: string) => string;
-  #modules: Module[];
-  #outDir: string;
-  #bootLocation: string;
+
+  #mgr: WorkspaceManager;
 
   constructor(
-    outDir: string,
-    bootLocation?: string,
+    mgr: WorkspaceManager
   ) {
-    this.#outDir = path.resolve(outDir).replaceAll('\\', '/');
-    this.#bootLocation = path.resolve(CWD, bootLocation ?? __filename.split('node_modules')[0]).replaceAll('\\', '/');
-
-    this.#modules = JSON.parse(readFileSync(`${this.#bootLocation}/manifest.json`, 'utf8'));
-    this.#sourceFiles = this.#modules.flatMap(
+    this.#mgr = mgr;
+    this.#sourceFiles = this.#mgr.modules.flatMap(
       x => [
         ...x.files.index ?? [],
         ...x.files.src ?? [],
@@ -57,22 +35,12 @@ export class Compiler {
         .map(([f]) => `${x.source}/${f}`)
     );
 
-    this.#transformers = this.#modules.flatMap(
+    this.#transformers = this.#mgr.modules.flatMap(
       x => (x.files.support ?? [])
         .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
-        .map(([f]) => `${this.#bootLocation}/${x.output}/${f.replace(/[.][tj]s$/, '')}`)
-    );
+        .map(([f]) => this.#mgr.resolveInBoot(x, f.replace(/[.][tj]s$/, ''))));
 
-    this.#sourceToOutput = (file: string): string => {
-      for (const m of this.#modules) {
-        if (file.startsWith(m.source)) {
-          return file.replace(m.source, m.output);
-        }
-      }
-      return file;
-    };
-
-    this.#transformerTsconfig = `${this.#modules.find(m => m.name === '@travetto/transformer')!.source}/tsconfig.trv.json`;
+    this.#transformerTsconfig = `${this.#mgr.modules.find(m => m.name === '@travetto/transformer')!.source}/tsconfig.trv.json`;
   }
 
   /**
@@ -80,7 +48,7 @@ export class Compiler {
    * @param path
    * @returns
    */
-  readTsConfigOptions(file: string): ts.CompilerOptions {
+  async readTsConfigOptions(file: string): Promise<ts.CompilerOptions> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const { options } = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(file, ts.sys.readFile), ts.sys, CWD
@@ -118,18 +86,18 @@ export class Compiler {
   /**
    * Get loaded compiler options
    */
-  #getCompilerOptions(): ts.CompilerOptions {
+  async #getCompilerOptions(): Promise<ts.CompilerOptions> {
     const opts: Partial<ts.CompilerOptions> = {};
     const rootDir = opts.rootDir ?? CWD;
     const projTsconfig = path.resolve('tsconfig.json');
     // Fallback to base tsconfig if not found in local folder
-    const config = existsSync(projTsconfig) ? projTsconfig : this.#transformerTsconfig;
+    const config = (await fs.stat(projTsconfig).then(x => true, x => false)) ? projTsconfig : this.#transformerTsconfig;
     console.log('Loading config', config);
 
     return {
-      ...this.readTsConfigOptions(config),
+      ...(await this.readTsConfigOptions(config)),
       rootDir,
-      outDir: this.#outDir,
+      outDir: this.#mgr.outDir,
       sourceRoot: rootDir,
       ...opts
     };
@@ -139,7 +107,7 @@ export class Compiler {
   /**
    * Build typescript program
    */
-  #getProgram(): ts.Program {
+  async getProgram(): Promise<ts.Program> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const rootFiles = new Set(this.#sourceFiles);
 
@@ -147,7 +115,7 @@ export class Compiler {
       console.debug('Loading program', { size: rootFiles.size });
       this.#program = ts.createProgram({
         rootNames: [...rootFiles],
-        options: this.#getCompilerOptions(),
+        options: await this.#getCompilerOptions(),
         oldProgram: this.#program,
       });
       this.#transformerManager.build(this.#program!.getTypeChecker());
@@ -156,73 +124,23 @@ export class Compiler {
   }
 
   /**
-   * Get program
-   * @private
-   */
-  getProgram(): ts.Program {
-    return this.#getProgram();
-  }
-
-  /**
    * Run the compiler
    */
   async run(): Promise<void> {
     const start = Date.now();
 
+    await this.#mgr.init();
+
     await this.#transformerManager.init(this.#transformers.map(f => ({ file: f })));
 
     console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
 
-    for (const module of this.#modules) {
-      if (module.files.rootFiles?.find(([f]) => f === 'package.json')) {
-        await fs.mkdir(`${this.#outDir}/${module.output}`, { recursive: true });
-        await fs.writeFile(`${this.#outDir}/${module.output}/package.json`,
-          (await fs.readFile(`${module.source}/package.json`, 'utf8'))
-            .replaceAll('"index.ts"', '"index.js"')
-          , 'utf8');
-      }
-
-      // Copy over all js files
-      for (const files of Object.values(module.files)) {
-        for (const [jsFile, ext] of files!) {
-          if (ext === 'js') {
-            const outJsFile = `${this.#outDir}/${module.output}/${jsFile}`;
-            console.log('Copying', outJsFile);
-            await fs.mkdir(path.dirname(outJsFile), { recursive: true });
-            await fs.copyFile(`${module.source}/${jsFile}`, outJsFile);
-          }
-        }
-      }
-
-      // Symlink resources
-      for (const key of ['resources', 'support/resources', 'test/resources']) {
-
-        if (await fs.stat(`${module.source}/${key}`).then(x => true, x => false)) {
-          await fs.mkdir(`${this.#outDir}/${module.output}/${key}`, { recursive: true });
-        }
-
-        if (module.files[key]) {
-          const output = `${this.#outDir}/${module.output}/${key}`;
-          await fs.mkdir(path.dirname(output));
-          await fs.symlink(`${module.source}/${key}`, output)
-        }
-      }
-    }
-
-    // Write manifest
-    await fs.writeFile(`${this.#outDir}/manifest.json`, JSON.stringify(this.#modules));
-
     // Compile with transformers
-    const prog = this.getProgram();
+    const prog = await this.getProgram();
     for (const file of this.#sourceFiles) {
       const result = prog.emit(
         prog.getSourceFile(file),
-        (targetFile, text) => {
-          const output = this.#sourceToOutput(targetFile);
-          const finalTarget = targetFile.startsWith(CWD) ? `${CWD}/${output}` : `${this.#outDir}/${output}`;
-          mkdirSync(path.dirname(finalTarget), { recursive: true });
-          writeFileSync(finalTarget, text, 'utf8');
-        },
+        (targetFile, text) => this.#mgr.writeSourceOutput(targetFile, text),
         undefined,
         false,
         this.#transformerManager.getTransformers()
@@ -233,7 +151,7 @@ export class Compiler {
 }
 
 async function main(outDir = '.trv_out'): Promise<void> {
-  return new Compiler(outDir).run();
+  return new Compiler(new WorkspaceManager(outDir)).run();
 }
 
 if (require.main === module) {

@@ -1,20 +1,23 @@
+import type { ManifestShape, ModuleFile, ModuleFileType, ModuleShape } from '@travetto/transformer/support/bin/types';
+
 import { PathUtil } from '../path';
 import { EnvUtil } from '../env';
 
-export type ModuleIndexEntry = { source: string, module: string, file: string };
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean };
 
-type ModuleFileType = 'ts' | 'js' | 'json' | 'unknown' | 'typing';
-type ModuleFile = ModuleIndexEntry & { type: ModuleFileType };
-type Module<Sub = ModuleFile> = {
+export type ModuleIndexEntry = {
+  source: string;
+  module: string;
+  file: string;
+  type: ModuleFileType;
+};
+
+type IndexedModule = {
   name: string;
   source: string;
   output: string;
-  module: boolean;
-  files: {
-    [key: string]: Sub[];
-  };
+  files: Record<string, ModuleIndexEntry[]>;
 };
 
 /**
@@ -22,48 +25,43 @@ type Module<Sub = ModuleFile> = {
  */
 class $ModuleIndex {
 
-  #modules: Module[];
+  #modules: IndexedModule[];
 
   #resolve(...parts: string[]): string {
     return PathUtil.resolveUnix(EnvUtil.get('TRV_CACHE', PathUtil.cwd), ...parts);
   }
 
-  #loadManifest(): Module<[string, ModuleFileType]>[] {
-    const modules: Module<[string, ModuleFileType]>[] = require(this.#resolve('manifest.json'));
+  #loadManifest(): ManifestShape {
+    const modules: ManifestShape = require(this.#resolve('manifest.json'));
     return modules;
+  }
+
+  #moduleFiles(m: ModuleShape, files: ModuleFile[]): ModuleIndexEntry[] {
+    return files.map(([f, type]) => {
+      const source = PathUtil.joinUnix(m.source, f);
+      const fullFile = this.#resolve(m.output, f).replace(/[.]ts$/, '.js');
+      const module = (m.output.startsWith('node_modules') ?
+        `${m.output.split('node_modules/')[1]}/${f}` :
+        `./${f}`).replace(/[.]ts$/, '.js');
+      return {
+        type,
+        source,
+        file: fullFile,
+        module
+      };
+    });
   }
 
   /**
    * Get index of all source files
    */
-  get #index(): Module[] {
-    if (this.#modules === undefined) {
-      this.#modules = this.#loadManifest().map(
-        m => {
-          const mapping: Record<string, ModuleFile[]> = {};
-          for (const folder of Object.keys(m.files)) {
-            mapping[folder] = m.files[folder].map(([f, type]) => {
-              const source = PathUtil.joinUnix(m.source, f);
-              const fullFile = this.#resolve(m.output, f).replace(/[.]ts$/, '.js');
-              const module = (m.output.startsWith('node_modules') ?
-                `${m.output.split('node_modules/')[1]}/${f}` :
-                `./${f}`).replace(/[.]ts$/, '.js');
-              return {
-                type,
-                source,
-                file: fullFile,
-                module
-              };
-            });
-          }
-          return {
-            ...m,
-            files: mapping
-          };
-        }
-      );
-    }
-    return this.#modules;
+  get #index(): IndexedModule[] {
+    return this.#modules ??= Object.values(this.#loadManifest().modules).map(m => ({
+      ...m,
+      files: Object.fromEntries(
+        Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files)])
+      )
+    }));
   }
 
   get modules() {
