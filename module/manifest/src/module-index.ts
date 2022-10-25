@@ -1,7 +1,6 @@
-import type { ManifestShape, ModuleFile, ModuleFileType, ModuleShape } from '@travetto/transformer/support/bin/types';
+import * as path from 'path';
+import type { ManifestShape, ModuleFile, ModuleFileType, ModuleShape } from './types';
 
-import { PathUtil } from '../path';
-import { EnvUtil } from '../env';
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean };
@@ -20,15 +19,22 @@ type IndexedModule = {
   files: Record<string, ModuleIndexEntry[]>;
 };
 
+const CWD = process.cwd().replace(/[\\]/g, '/');
+
 /**
  * Module index, files to be loaded at runtime
  */
 class $ModuleIndex {
 
   #modules: IndexedModule[];
+  #root: string;
+
+  constructor(root: string) {
+    this.#root = root;
+  }
 
   #resolve(...parts: string[]): string {
-    return PathUtil.resolveUnix(EnvUtil.get('TRV_CACHE', PathUtil.cwd), ...parts);
+    return path.resolve(this.#root, ...parts).replace(/[\\]/g, '/');
   }
 
   #loadManifest(): ManifestShape {
@@ -38,7 +44,7 @@ class $ModuleIndex {
 
   #moduleFiles(m: ModuleShape, files: ModuleFile[]): ModuleIndexEntry[] {
     return files.map(([f, type]) => {
-      const source = PathUtil.joinUnix(m.source, f);
+      const source = path.join(m.source, f);
       const fullFile = this.#resolve(m.output, f).replace(/[.]ts$/, '.js');
       const module = (m.output.startsWith('node_modules') ?
         `${m.output.split('node_modules/')[1]}/${f}` :
@@ -126,4 +132,6 @@ class $ModuleIndex {
   }
 }
 
-export const ModuleIndex = new $ModuleIndex();
+export const ModuleIndex = new $ModuleIndex(
+  (process.env.TRV_CACHE ?? process.cwd()).replace(/[\\]/g, '/')
+);

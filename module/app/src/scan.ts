@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ApplicationConfig } from './types';

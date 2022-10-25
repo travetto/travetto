@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { ModuleIndex } from '../src/internal/module';
+import { ModuleIndex } from '..';
 
 @Suite()
 class ModuleIndexTests {

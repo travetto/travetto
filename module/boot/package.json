@@ -25,6 +25,7 @@
     "directory": "module/boot"
   },
   "dependencies": {
+    "@travetto/manifest": "^3.0.0-rc.4",
     "@travetto/transformer": "^3.0.0-rc.2",
     "@types/source-map-support": "^0.5.6",
     "source-map-support": "^0.5.21"

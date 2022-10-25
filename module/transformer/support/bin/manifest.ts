@@ -162,12 +162,68 @@ export function readManifest(file: string): ManifestShape | undefined {
   }
 }
 
-export function produceDelta(left: ManifestShape, right: ManifestShape) {
-  for (const [name, lmod] of Object.entries(left.modules)) {
+type DeltaModuleFiles = Record<string, ModuleFile>;
 
+function flattenModuleFiles(m: ModuleShape): DeltaModuleFiles {
+  const out: DeltaModuleFiles = {};
+  for (const key of Object.keys(m.files)) {
+    for (const [name, type, date] of m.files[key]) {
+      if (type === 'ts' || type === 'd.ts') {
+        out[name] = [name, type, date];
+      }
+    }
+  }
+  return out;
+}
+
+type DeltaEvent = [string, 'added' | 'changed' | 'removed' | 'missing' | 'dirty'];
+
+function deltaModules(outputFolder: string, left: ModuleShape<DeltaModuleFiles>, right: ModuleShape<DeltaModuleFiles>): DeltaEvent[] {
+  let out: DeltaEvent[] = [];
+  for (const el of Object.keys(left.files)) {
+    if (!(el in right)) {
+      out.push([el, 'added']);
+    } else {
+      const [, , leftTs] = left.files[el];
+      const [, , rightTs] = right.files[el];
+      if (leftTs > rightTs) {
+        out.push([el, 'changed']);
+      } else {
+        try {
+          const stat = fs.statSync(`${outputFolder}/${left.output}/${el}`);
+          if (getNewest(stat) > leftTs) {
+            out.push([el, 'dirty']);
+          }
+        } catch {
+          out.push([el, 'missing']);
+        }
+      }
+    }
+  }
+  for (const el of Object.keys(right.files)) {
+    if (!(el in left)) {
+      out.push([el, 'removed']);
+    }
+  }
+  return out;
+}
+
+export function produceDelta(outputFolder: string, left: ManifestShape, right: ManifestShape): Record<string, DeltaEvent[]> {
+  const deltaLeft = Object.fromEntries(
+    Object.values(left.modules)
+      .map(m => [m.name, { ...m, files: flattenModuleFiles(m) }])
+  );
+
+  const deltaRight = Object.fromEntries(
+    Object.values(right.modules)
+      .map(m => [m.name, { ...m, files: flattenModuleFiles(m) }])
+  );
+
+  const out: Record<string, DeltaEvent[]> = {};
+
+  for (const [name, lmod] of Object.entries(deltaLeft)) {
+    out[name] = deltaModules(outputFolder, lmod, deltaRight[name])
   }
 
-  for (const [name, rmod] of Object.entries(right.modules)) {
-
-  }
+  return out;
 }
