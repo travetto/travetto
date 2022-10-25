@@ -5,7 +5,7 @@ export const step = {
   key: '@trv:base/load',
   after: ['@trv:base/transpile'],
   action: async (): Promise<void> => {
-    const { ModuleIndex } = await import('@travetto/boot/src/internal/module');
+    const { ModuleIndex } = await import('@travetto/manifest');
 
     for (const { file } of ModuleIndex.findSrc({})) {
       await import(file);

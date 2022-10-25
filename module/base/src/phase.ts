@@ -1,4 +1,4 @@
-import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleIndex } from '@travetto/manifest';
 
 import { OrderingUtil } from './internal/ordering';
 

@@ -1,4 +1,4 @@
-import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleIndex } from '@travetto/manifest';
 import { CliUtil } from '@travetto/boot/src/cli';
 
 import { CliCommand } from './command';

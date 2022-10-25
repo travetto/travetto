@@ -1,5 +1,5 @@
 import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
-import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleIndex } from '@travetto/manifest';
 import { ErrorUtil } from '@travetto/base/src/internal/error';
 import { PhaseManager, ShutdownManager } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';

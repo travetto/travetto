@@ -1,7 +1,7 @@
 import { statSync } from 'fs';
 
 import { CliUtil, ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
-import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleIndex } from '@travetto/manifest';
 
 /**
  * Utilities for running compilation

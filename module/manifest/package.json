@@ -1,11 +1,11 @@
 {
-  "name": "@travetto/transformer",
-  "displayName": "Transformation",
+  "name": "@travetto/manifest",
+  "displayName": "Manifest",
   "version": "3.0.0-rc.4",
-  "description": "Functionality for AST transformations, with transformer registration, and general utils",
+  "description": "Functionality for source manifesting",
   "keywords": [
+    "manifest",
     "typescript",
-    "ast-transformations",
     "travetto"
   ],
   "homepage": "https://travetto.io",
@@ -15,20 +15,14 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "index.ts",
     "bin",
-    "src",
-    "support"
+    "index.ts",
+    "src"
   ],
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/transformer"
-  },
-  "dependencies": {
-    "@travetto/manifest": "^3.0.0-rc.4",
-    "tslib": "^2.4.0",
-    "typescript": "^4.8.4"
   },
   "peerDependencies": {
     "@travetto/test": "^3.0.0-rc.4"

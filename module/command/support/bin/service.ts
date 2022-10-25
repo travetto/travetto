@@ -1,4 +1,4 @@
-import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleIndex } from '@travetto/manifest';
 import { CliUtil } from '@travetto/boot/src/cli';
 
 export type StreamingResult = Partial<Record<keyof typeof CliUtil['colorPalette'], string | number>>;

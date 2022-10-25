@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 
 import { FsUtil } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleIndex } from '@travetto/manifest';
 
 import type { RunState } from '../src/execute/types';
 

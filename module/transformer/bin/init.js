@@ -1,6 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 
+const delta = require('../../manifest/bin/manifest').delta();
+
 const FOLDER = path.resolve(__dirname, '..', 'support', 'bin');
 const FILES = ['./precompile.ts', './config.ts', './workspace.ts', './manifest.ts'];
 

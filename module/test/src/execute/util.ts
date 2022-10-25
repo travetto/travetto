@@ -2,7 +2,7 @@ import { createReadStream } from 'fs';
 import * as readline from 'readline';
 
 import { ShutdownManager, Util } from '@travetto/base';
-import { ModuleIndex } from '@travetto/boot/src/internal/module';
+import { ModuleIndex } from '@travetto/manifest';
 
 /**
  * Simple Test Utilities
