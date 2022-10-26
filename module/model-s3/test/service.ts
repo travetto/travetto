@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { StreamUtil } from '@travetto/boot';
+import { StreamUtil } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 
 import { ModelBasicSuite } from '@travetto/model/support/test/basic';

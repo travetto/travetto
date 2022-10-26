@@ -4,11 +4,10 @@ import {
   TransformerState, OnMethod, OnClass, AfterClass,
   TransformerId, AfterFunction, CoreUtil, SystemUtil
 } from '@travetto/transformer';
-import path = require('path');
 
 const MOD = '@travetto/boot';
 
-const UTIL_MOD = '@travetto/boot/src/internal/class-metadata';
+const UTIL_MOD = '@travetto/boot/src/class-metadata';
 const UTIL_CLS = 'ClassMetadataUtil';
 
 const methods = Symbol.for('@trv:boot/methods');

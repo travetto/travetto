@@ -1,4 +1,4 @@
-import type { LogLevel } from './console';
+import type { LogLevel } from './types';
 
 declare global {
   interface Error {

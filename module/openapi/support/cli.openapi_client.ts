@@ -1,9 +1,10 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import * as cp from 'child_process';
 
-import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
-import { CliUtil, ExecUtil } from '@travetto/boot';
+import { CliCommand, CliUtil, OptionConfig, ListOptionConfig } from '@travetto/cli';
+import { ExecUtil } from '@travetto/base';
 
 const presets: Record<string, [string, object] | [string]> =
   JSON.parse(readFileSync(path.resolve(__source.folder, 'resources', 'presets.json'), 'utf8').__posix);
@@ -29,7 +30,7 @@ export class OpenApiClientCommand extends CliCommand<Options> {
   getListOfFormats(): string[] {
     const formatCache = path.resolve('.trv-openapi-formats.json').__posix;
     if (!existsSync(formatCache)) {
-      const stdout = ExecUtil.execSync('docker', ['run', '--rm', this.cmd.dockerImage, 'list']);
+      const stdout = cp.execSync(`docker run --rm ${this.cmd.dockerImage} list`, { stdio: ['pipe', 'pipe'], encoding: 'utf8' }).trim();
       const lines = stdout
         .split('DOCUMENTATION')[0]
         .trim()

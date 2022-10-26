@@ -1,4 +1,4 @@
-import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
+import { RetargettingProxy } from '@travetto/boot';
 import { Class, ClassInstance } from '@travetto/base';
 
 import type { DependencyRegistry } from '../src/registry';

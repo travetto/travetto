@@ -1,7 +1,6 @@
 import { Principal } from '@travetto/auth';
 import { PrincipalEncoder } from '@travetto/auth-rest';
-import { AppError, Util } from '@travetto/base';
-import { EnvUtil } from '@travetto/boot';
+import { AppError, EnvUtil, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';
@@ -12,7 +11,7 @@ export class RestJWTConfig {
   header = 'Authorization';
   signingKey = 'dummy';
   headerPrefix = 'Bearer ';
-  defaultAge = Util.timeToMs('1y');
+  defaultAge = TimeUtil.timeToMs('1y');
 
   postConstruct(): void {
     if (EnvUtil.isProd() && this.signingKey === 'dummy') {

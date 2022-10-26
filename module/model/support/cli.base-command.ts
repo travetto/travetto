@@ -1,6 +1,7 @@
-import { CliUtil } from '@travetto/boot';
-import { CliCommand, OptionConfig } from '@travetto/cli';
-import { EnvInit } from '@travetto/base/support/bin/init';
+import { ConsoleManager, PhaseManager } from '@travetto/boot';
+
+import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
+import { EnvInit } from '@travetto/base/support/bin/env';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
 import { ModelCandidateUtil } from './bin/candidate';
@@ -26,8 +27,6 @@ export abstract class BaseModelCommand extends CliCommand<Options> {
 
   override async build(): Promise<void> {
     await super.build();
-    const { ConsoleManager } = await import('@travetto/boot');
-    const { PhaseManager } = await import('@travetto/base');
     ConsoleManager.exclude('debug');
     // Init
     await PhaseManager.run('init');

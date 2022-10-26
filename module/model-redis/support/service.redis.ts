@@ -1,4 +1,4 @@
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/base';
 import type { Service } from '@travetto/command/support/bin/service';
 
 const version = EnvUtil.get('TRV_SERVICE_REDIS', '5');

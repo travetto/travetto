@@ -1,7 +1,7 @@
 import { ChildProcess } from 'child_process';
 import { EventEmitter } from 'events';
 
-import { ExecUtil } from '@travetto/boot';
+import { ExecUtil } from '@travetto/base';
 
 /**
  * Channel that represents communication between parent/child

@@ -1,4 +1,4 @@
-import { ErrorUtil } from '@travetto/base/src/internal/error';
+import { ErrorUtil } from '@travetto/boot';
 import { TestEvent, } from '../model/event';
 
 export class ConsumerUtil {

@@ -1,6 +1,5 @@
-import { ResourceManager } from '@travetto/base';
+import { EnvUtil, ResourceManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
-import { EnvUtil } from '@travetto/boot';
 
 import { MessageOptions, SentMessage } from './types';
 import { MailTransport } from './transport';

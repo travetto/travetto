@@ -1,4 +1,4 @@
-import { EnvInit } from '@travetto/base/support/bin/init';
+import { EnvInit } from '@travetto/base/support/bin/env';
 
 import { ApplicationConfig } from '../src/types';
 

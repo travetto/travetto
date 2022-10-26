@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import * as fs from 'fs/promises';
 
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import { ModuleIndex } from '@travetto/manifest';
+import { ModuleIndex } from '@travetto/boot';
 
 import type { RunState } from '../src/execute/types';
 

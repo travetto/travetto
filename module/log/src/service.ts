@@ -1,6 +1,5 @@
-import { ConsoleManager, LogLevel, EnvUtil } from '@travetto/boot';
-import { AppManifest, Util } from '@travetto/base';
-import { ModuleIndex } from '@travetto/manifest';
+import { ModuleIndex, ConsoleManager, LogLevel } from '@travetto/boot';
+import { EnvUtil, AppManifest, Util } from '@travetto/base';
 
 import { Appender, Formatter, LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';

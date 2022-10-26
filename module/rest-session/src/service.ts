@@ -1,7 +1,6 @@
 import { Injectable, Inject } from '@travetto/di';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
-import { Util } from '@travetto/base';
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil, Util } from '@travetto/base';
 import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Request, Response } from '@travetto/rest';

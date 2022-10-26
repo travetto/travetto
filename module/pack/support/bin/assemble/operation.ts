@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import { CliUtil } from '@travetto/boot';
+import { CliUtil } from '@travetto/cli';
 
 import { PackUtil } from '../util';
 import { CommonConfig, PackOperation } from '../types';

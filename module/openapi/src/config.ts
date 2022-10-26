@@ -2,8 +2,7 @@ import * as path from 'path';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { Config } from '@travetto/config';
-import { EnvUtil } from '@travetto/boot';
-import { AppManifest } from '@travetto/base';
+import { EnvUtil, AppManifest } from '@travetto/base';
 
 /**
  * API Information, infers as much as possible from the package.json

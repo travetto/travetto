@@ -1,7 +1,6 @@
 import { Readable } from 'stream';
 
-import { StreamUtil } from '@travetto/boot';
-import { Class, TimeSpan } from '@travetto/base';
+import { StreamUtil, Class, TimeSpan } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';

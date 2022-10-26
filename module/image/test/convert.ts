@@ -2,8 +2,7 @@ import * as assert from 'assert';
 import * as fs from 'fs/promises';
 
 import { Test, Suite } from '@travetto/test';
-import { StreamUtil } from '@travetto/boot';
-import { ResourceManager } from '@travetto/base';
+import { StreamUtil, ResourceManager } from '@travetto/base';
 
 import { ImageConverter } from '../src/convert';
 

@@ -1,6 +1,6 @@
-import { ModuleIndex } from '@travetto/manifest';
-import { CliUtil } from '@travetto/boot/src/cli';
+import { ModuleIndex } from '@travetto/boot';
 
+import { CliUtil } from './util';
 import { CliCommand } from './command';
 
 const COMMAND_PACKAGE = [

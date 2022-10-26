@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Util, TimeSpan, TimeUnit } from '@travetto/base';
+import { TimeSpan, TimeUnit, TimeUtil } from '@travetto/base';
 
 import { ExpiresAt, Model } from '../../src/registry/decorator';
 import { ModelExpirySupport } from '../../src/service/expiry';
@@ -22,11 +22,11 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   delayFactor: number = 1;
 
   async wait(n: number | TimeSpan) {
-    await Util.wait(Util.timeToMs(n) * this.delayFactor);
+    await TimeUtil.wait(TimeUtil.timeToMs(n) * this.delayFactor);
   }
 
   timeFromNow(v: number | TimeSpan, unit?: TimeUnit) {
-    return new Date(Date.now() + Util.timeToMs(v, unit) * this.delayFactor);
+    return new Date(Date.now() + TimeUtil.timeToMs(v, unit) * this.delayFactor);
   }
 
   @Test()

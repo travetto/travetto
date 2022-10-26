@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-import { Util } from '@travetto/base';
+import { TimeUtil } from '@travetto/base';
 
 import { ApplicationRegistry } from '../src/registry';
 import { Application } from '../src/decorator';
@@ -25,7 +25,7 @@ class CloseableApp {
 
   async wait() {
     while (this.running) {
-      await Util.wait(50);
+      await TimeUtil.wait(50);
     }
   }
 
@@ -56,7 +56,7 @@ export class RegistryTest {
     const app = await DependencyRegistry.getInstance(CloseableApp);
     let done = false;
     const all = ApplicationRegistry.run('closeable', ['20']).then(() => done = true);
-    await Util.wait(50);
+    await TimeUtil.wait(50);
     assert(!done);
     assert(app.running === true);
     await app.close();

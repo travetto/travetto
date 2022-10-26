@@ -1,3 +1,3 @@
-export * from './src/module-index';
-export * from './src/types';
-export * from './src/util';
+export * from '../boot/src/module-index';
+export * from '../boot/src/types';
+export * from '../boot/src/manifest-util';

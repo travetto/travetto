@@ -1,4 +1,4 @@
-import { ExecUtil, ExecutionState } from '@travetto/boot';
+import { ExecUtil, ExecutionState } from '@travetto/base';
 import { Worker, WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
 
 class ImageProcessor implements Worker<string> {

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { existsSync } from 'fs';
 
-import { Package, EnvUtil } from '@travetto/boot';
+import { EnvUtil, PackageUtil } from '@travetto/base';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { AllType, AllTypeMap, node as n } from '../nodes';
@@ -21,7 +21,7 @@ export class RenderContext implements RenderContextShape {
   }
 
   get #repoUrl(): string {
-    return (Package.main.repository?.url ?? '').replace(/[.]git$/, '');
+    return (PackageUtil.main.repository?.url ?? '').replace(/[.]git$/, '');
   }
 
   get gitBaseUrl(): string {

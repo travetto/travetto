@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 import { DependencyRegistry } from '@travetto/di';
-import { Util } from '@travetto/base';
+import { TimeUtil } from '@travetto/base';
 
 import type { RestApplication } from '../../../src/application/rest';
 import type { Request } from '../../../src/types';
@@ -41,7 +41,7 @@ export class CoreRestServerSupport implements RestServerSupport {
         await fetch(this.url);
         break; // We good
       } catch {
-        await Util.wait(100);
+        await TimeUtil.wait(100);
       }
     }
 

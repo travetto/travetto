@@ -1,3 +1,6 @@
+import { PhaseManager } from '@travetto/boot';
+import { TimeUtil } from '@travetto/base';
+
 import type { RunState } from '../../src/execute/types';
 
 declare global {
@@ -14,7 +17,6 @@ declare global {
  * @param opts
  */
 export async function runTests(opts: RunState): Promise<void> {
-  const { PhaseManager, Util } = await import('@travetto/base');
   await PhaseManager.run('init', '*', ['@trv:registry/init']); // Delay registry
 
   const { RunnerUtil } = await import('../../src/execute/util');
@@ -23,7 +25,7 @@ export async function runTests(opts: RunState): Promise<void> {
   RunnerUtil.registerCleanup('runner');
 
   if (process.env.TRV_TEST_DELAY) {
-    await Util.wait(process.env.TRV_TEST_DELAY);
+    await TimeUtil.wait(process.env.TRV_TEST_DELAY);
   }
 
   try {

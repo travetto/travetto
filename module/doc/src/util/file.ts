@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import * as path from 'path';
 
-import { Package } from '@travetto/boot';
+import { PackageUtil } from '@travetto/base';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
@@ -29,7 +29,7 @@ export class FileUtil {
     }
     const resolved = path.resolve(file).__posix;
     // TODO: Fix name
-    return { resolved, cleaned: [resolved, Package.main.name].join(' ') };
+    return { resolved, cleaned: [resolved, PackageUtil.main.name].join(' ') };
   }
 
   /**

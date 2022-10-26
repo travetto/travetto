@@ -1,7 +1,8 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import { CliUtil, ExecUtil, Package } from '@travetto/boot';
+import { ExecUtil, PackageUtil } from '@travetto/base';
+import { CliUtil } from '@travetto/cli';
 
 import { CommonConfig, PackOperation } from './types';
 import { PackUtil } from './util';
@@ -34,7 +35,7 @@ export const Docker: PackOperation<DockerConfig, 'docker'> = {
     return `[image=${cfg.image}, port=${cfg.port}]`;
   },
   defaults: {
-    name: Package.main.name.replace('@', ''),
+    name: PackageUtil.main.name.replace('@', ''),
     builder: dockerFileBuilder,
     port: [],
     tag: ['latest']

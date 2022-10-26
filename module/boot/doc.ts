@@ -1,42 +1,21 @@
-import { d, lib } from '@travetto/doc';
-import { ExecUtil, StreamUtil } from '.';
-
-const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
-const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
+import { d, lib, mod } from '@travetto/doc';
 
 export const text = d`
 ${d.Header()}
 
 Boot is basic environment  awareness coupled with typescript bootstrapping for ${lib.Travetto} apps and libraries.  It has support for the following key areas:
 ${d.List(
-  'Environmental Information',
+  'Application Bootstrapping',
+  'Console Management',
+  'Manifest Generation',
   'Module Indexing',
-  'Process Execution',
-  'Stream Support'
-)}
-
-${d.Section('Environmental Information')}
-The functionality we support for testing and retrieving environment information:
-${d.List(
-  d`${d.Method('isTrue(key: string): boolean;')} - Test whether or not an environment flag is set and is true`,
-  d`${d.Method('isFalse(key: string): boolean;')} - Test whether or not an environment flag is set and is false`,
-  d`${d.Method('isSet(key:string): boolean;')} - Test whether or not an environment value is set (excludes: ${d.Input('null')}, ${d.Input("''")}, and ${d.Input('undefined')})`,
-  d`${d.Method('get(key: string, def?: string): string;')} - Retrieve an environmental value with a potential default`,
-  d`${d.Method('getInt(key: string, def?: number): number;')} - Retrieve an environmental value as a number`,
-  d`${d.Method('getList(key: string): string[];')} - Retrieve an environmental value as a list`,
+  'Lifecycle Support',
+  'Stacktrace Management',
 )}
 
 ${d.SubSection('Module Indexing')}
 The bootstrap process will also produce an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatic discovery that is used within the framework (and transpiling).
 
-${d.Section('Process Execution')}
-Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.
-
-A simple example would be:
-
-${d.Code('Running a directory listing via ls', 'doc/exec.ts')}
-
-As you can see, the call returns not only the child process information, but the ${d.Input('Promise')} to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
 
 ${d.List(
   d`${d.Input('timeout')} as the number of milliseconds the process can run before terminating and throwing an error`,
@@ -45,13 +24,34 @@ ${d.List(
   d`${d.Input('timeoutKill')} allows for registering functionality to execute when a process is force killed by timeout`
 )}
 
-${d.Section('Stream Support')}
-The ${StreamUtilLink} class provides basic stream utilities for use within the framework:
+${d.Section('Lifecycle Support')}
+
+During the lifecycle of an application, there is a need to handle different phases of execution. When executing a phase, the code will recursively find all ${d.Path('phase.<phase>.ts')} files under ${d.Path('node_modules/@travetto')}, and in the root of your project. The format of each phase handler is comprised of five main elements:
 
 ${d.List(
-  d`${d.Method('toBuffer(src: Readable | Buffer | string): Promise<Buffer>')} for converting a stream/buffer/filepath to a Buffer.`,
-  d`${d.Method('toReadable(src: Readable | Buffer | string):Promise<Readable>')} for converting a stream/buffer/filepath to a Readable`,
-  d`${d.Method('writeToFile(src: Readable, out: string):Promise<void>')} will stream a readable into a file path, and wait for completion.`,
-  d`${d.Method('waitForCompletion(src: Readable, finish:()=>Promise<any>)')} will ensure the stream remains open until the promise finish produces is satisfied.`,
+  d`The phase of execution, which is defined by the file name ${d.Path('phase.<phase>.ts')} ${d.List(
+    'The key of the handler to be referenced for dependency management.'
+  )}`,
+  'The list of dependent handlers that the current handler depends on, if any.',
+  'The list of handlers that should be dependent on the current handler, if any.',
+  'The actual functionality to execute'
 )}
+
+An example would be something like ${d.Path('phase.init.ts')} in the ${mod.Config} module.  
+
+${d.Code('Config phase init', '@travetto/config/support/phase.init.ts')}
+
+${d.Section('Stacktrace Management')}
+The built in stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  
+
+From a test scenario:
+
+${d.Code('Tracking asynchronous behavior', 'doc/stack-test.ts')}
+
+Will produce the following stack trace:
+
+${d.Execute('Stack trace from async errors', 'doc/stack-test.ts')}
+
+The needed functionality cannot be loaded until ${d.Method('init.action')} executes, and so must be required only at that time.
+
 `;

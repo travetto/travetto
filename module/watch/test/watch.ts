@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { ScanFs, Util } from '@travetto/base';
+import { ScanFs, TimeUtil } from '@travetto/base';
 
 import { Watcher } from '../src/watcher';
 
@@ -18,7 +18,7 @@ export class WatchTest {
         found.push([event, entry.file]);
       });
 
-    await Util.wait(100);
+    await TimeUtil.wait(100);
 
     w.close();
 

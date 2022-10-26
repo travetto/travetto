@@ -1,12 +1,16 @@
 import { d, mod, lib } from '@travetto/doc';
 
 import { AppError } from './src/error';
+import { StreamUtil } from './src/stream';
 import { Util } from './src/util';
+import { ExecUtil } from './src/exec';
 
 const UtilLink = d.Ref(Util.name, 'src/util.ts');
 const ScanFsLink = d.Ref('ScanFs', 'src/scan.ts');
 const AppErrorLink = d.Ref(AppError.name, 'src/error.ts');
 const ResourceManagerLink = d.Ref('ResourceManager', 'src/resource.ts');
+const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
+const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
 
 export const text = d`
 ${d.Header()}
@@ -14,16 +18,29 @@ ${d.Header()}
 Base is the foundation of all ${lib.Travetto} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
 ${d.List(
+  'Environment Support',
   'Application Manifest',
-  'Application Caching',
   'File Operations',
   'File System Scanning',
   'Resource Management',
-  'Lifecycle Support',
+  'Process Execution',
   'Shutdown Management',
   'Standard Error Support',
+  'Stream Support',
   'General Utilities'
 )}
+
+${d.Section('Environment Support')}
+The functionality we support for testing and retrieving environment information:
+${d.List(
+  d`${d.Method('isTrue(key: string): boolean;')} - Test whether or not an environment flag is set and is true`,
+  d`${d.Method('isFalse(key: string): boolean;')} - Test whether or not an environment flag is set and is false`,
+  d`${d.Method('isSet(key:string): boolean;')} - Test whether or not an environment value is set (excludes: ${d.Input('null')}, ${d.Input("''")}, and ${d.Input('undefined')})`,
+  d`${d.Method('get(key: string, def?: string): string;')} - Retrieve an environmental value with a potential default`,
+  d`${d.Method('getInt(key: string, def?: number): number;')} - Retrieve an environmental value as a number`,
+  d`${d.Method('getList(key: string): string[];')} - Retrieve an environmental value as a list`,
+)}
+
 
 ${d.Section('Application Manifest')}
 The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers 
@@ -56,22 +73,14 @@ Resource management, loading of files, and other assets at runtime is a common p
 
 ${d.Code('Finding Images', 'doc/image.ts')}
 
-${d.Section('Lifecycle Support')}
+${d.Section('Process Execution')}
+Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.
 
-During the lifecycle of an application, there is a need to handle different phases of execution. When executing a phase, the code will recursively find all ${d.Path('phase.<phase>.ts')} files under ${d.Path('node_modules/@travetto')}, and in the root of your project. The format of each phase handler is comprised of five main elements:
+A simple example would be:
 
-${d.List(
-  d`The phase of execution, which is defined by the file name ${d.Path('phase.<phase>.ts')} ${d.List(
-    'The key of the handler to be referenced for dependency management.'
-  )}`,
-  'The list of dependent handlers that the current handler depends on, if any.',
-  'The list of handlers that should be dependent on the current handler, if any.',
-  'The actual functionality to execute'
-)}
+${d.Code('Running a directory listing via ls', 'doc/exec.ts')}
 
-An example would be something like ${d.Path('phase.init.ts')} in the ${mod.Config} module.  
-
-${d.Code('Config phase init', '@travetto/config/support/phase.init.ts')}
+As you can see, the call returns not only the child process information, but the ${d.Input('Promise')} to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
 
 ${d.Section('Shutdown Management')}
 
@@ -97,18 +106,15 @@ ${d.List(
 )}
 
 
-${d.SubSection('Stacktrace')}
-The built in stack filtering will remove duplicate or unnecessary lines, as well as filter out framework specific steps that do not aid in debugging.  The final result should be a stack trace that is concise and clear.  
+${d.Section('Stream Support')}
+The ${StreamUtilLink} class provides basic stream utilities for use within the framework:
 
-From a test scenario:
-
-${d.Code('Tracking asynchronous behavior', 'doc/stack-test.ts')}
-
-Will produce the following stack trace:
-
-${d.Execute('Stack trace from async errors', 'doc/stack-test.ts')}
-
-The needed functionality cannot be loaded until ${d.Method('init.action')} executes, and so must be required only at that time.
+${d.List(
+  d`${d.Method('toBuffer(src: Readable | Buffer | string): Promise<Buffer>')} for converting a stream/buffer/filepath to a Buffer.`,
+  d`${d.Method('toReadable(src: Readable | Buffer | string):Promise<Readable>')} for converting a stream/buffer/filepath to a Readable`,
+  d`${d.Method('writeToFile(src: Readable, out: string):Promise<void>')} will stream a readable into a file path, and wait for completion.`,
+  d`${d.Method('waitForCompletion(src: Readable, finish:()=>Promise<any>)')} will ensure the stream remains open until the promise finish produces is satisfied.`,
+)}
 
 ${d.Section('General Utilities')}
 Simple functions for providing a minimal facsimile to ${lib.Lodash}, but without all the weight. Currently ${UtilLink} includes:

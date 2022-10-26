@@ -1,5 +1,4 @@
-import { EnvUtil } from '@travetto/boot';
-import { AppManifest, Class } from '@travetto/base';
+import { EnvUtil, AppManifest, Class } from '@travetto/base';
 import { SchemaChangeListener } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';

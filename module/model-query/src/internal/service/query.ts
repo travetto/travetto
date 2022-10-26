@@ -1,4 +1,4 @@
-import { Class, AppError, Util } from '@travetto/base';
+import { Class, AppError, TimeUtil } from '@travetto/base';
 import { ModelRegistry, NotFoundError } from '@travetto/model';
 import { ModelType } from '@travetto/model/src/types/model';
 import { SchemaRegistry } from '@travetto/schema';
@@ -21,7 +21,7 @@ export class ModelQueryUtil {
   static resolveComparator(val: unknown): unknown {
     if (typeof val === 'string') {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return Util.timeFromNow(val as '1m');
+      return TimeUtil.timeFromNow(val as '1m');
     } else {
       return val;
     }

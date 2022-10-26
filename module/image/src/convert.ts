@@ -4,7 +4,7 @@ import { mkdirSync } from 'fs';
 import { Readable } from 'stream';
 
 import { CommandService } from '@travetto/command';
-import { ExecUtil, StreamUtil, EnvUtil } from '@travetto/boot';
+import { EnvUtil, StreamUtil } from '@travetto/base';
 
 /**
  * Image output options
@@ -80,7 +80,7 @@ class $ImageConverter {
       '-', '-');
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return await ExecUtil.pipe(state, image as Buffer);
+    return await StreamUtil.execPipe(state, image as Buffer);
   }
 
   /**
@@ -102,7 +102,7 @@ class $ImageConverter {
       }
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return await ExecUtil.pipe(stream, image as Buffer);
+    return await StreamUtil.execPipe(stream, image as Buffer);
   }
 
   /**

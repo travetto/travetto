@@ -24,6 +24,7 @@
     "directory": "module/image"
   },
   "dependencies": {
+    "@travetto/base": "^3.0.0-rc.2",
     "@travetto/command": "^3.0.0-rc.2"
   },
   "trvDependencies": {

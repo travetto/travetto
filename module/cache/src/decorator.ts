@@ -1,5 +1,4 @@
-import { MethodDescriptor } from '@travetto/base/src/internal/types';
-import { TimeSpan, Util } from '@travetto/base';
+import { TimeSpan, TimeUtil } from '@travetto/base';
 
 import { CacheService } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';
@@ -18,7 +17,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
 ): MethodDecorator {
   if (cfg !== undefined) {
     if (typeof cfg === 'string' || typeof cfg === 'number') {
-      config.maxAge = Util.timeToMs(cfg);
+      config.maxAge = TimeUtil.timeToMs(cfg);
     } else {
       config = cfg;
     }

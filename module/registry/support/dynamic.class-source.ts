@@ -1,9 +1,8 @@
 import * as path from 'path';
 
 import { Class, ShutdownManager } from '@travetto/base';
-import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
-import { ModuleIndex } from '@travetto/manifest';
+import { RetargettingProxy, ModuleIndex } from '@travetto/boot';
 import { FilePresenceManager } from '@travetto/watch';
 
 import type { ClassSource } from '../src/source/class-source';

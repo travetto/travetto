@@ -1,4 +1,4 @@
-import { LogLevel } from '@travetto/base';
+import { LogLevel } from '@travetto/boot';
 
 /**
  * Log levels, numerically

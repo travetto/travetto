@@ -1,4 +1,4 @@
-import { CliUtil } from '@travetto/boot';
+import { CliUtil } from '@travetto/cli';
 
 import { BaseModelCommand } from './cli.base-command';
 import { ModelInstallUtil } from './bin/install';

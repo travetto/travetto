@@ -3,7 +3,7 @@ import * as timers from 'timers/promises';
 
 import { Util } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
-import { ModuleIndex } from '@travetto/manifest';
+import { ModuleIndex } from '@travetto/boot';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult } from '../model/test';

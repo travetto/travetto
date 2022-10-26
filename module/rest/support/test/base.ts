@@ -1,8 +1,7 @@
 import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, ConcreteClass, Util } from '@travetto/base';
-import { StreamUtil } from '@travetto/boot';
+import { StreamUtil, AppError, ConcreteClass, Util } from '@travetto/base';
 import { AfterAll, BeforeAll } from '@travetto/test';
 
 import { MethodOrAll, Request, ServerHandle } from '../../src/types';

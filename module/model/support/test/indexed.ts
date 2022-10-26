@@ -2,13 +2,14 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
-import { Util } from '@travetto/base';
+import { TimeUtil } from '@travetto/base';
 
 import { Index, Model } from '../../src/registry/decorator';
 import { ModelIndexedSupport } from '../../src/service/indexed';
-import { BaseModelSuite } from './base';
 import { NotFoundError } from '../../src/error/not-found';
 import { IndexNotSupported } from '../../src/error/invalid-index';
+
+import { BaseModelSuite } from './base';
 
 @Model('index_user')
 @Index({
@@ -152,9 +153,9 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
   async queryComplexDateList() {
     const service = await this.service;
 
-    await service.create(User4, User4.from({ child: { name: 'bob', age: 40 }, createdDate: Util.timeFromNow('3d'), color: 'blue' }));
-    await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, createdDate: Util.timeFromNow('2d'), color: 'red' }));
-    await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, createdDate: Util.timeFromNow('-1d'), color: 'green' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 40 }, createdDate: TimeUtil.timeFromNow('3d'), color: 'blue' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, createdDate: TimeUtil.timeFromNow('2d'), color: 'red' }));
+    await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, createdDate: TimeUtil.timeFromNow('-1d'), color: 'green' }));
 
     const arr = await this.toArray(service.listByIndex(User4, 'nameCreated', User4.from({ child: { name: 'bob' } })));
 

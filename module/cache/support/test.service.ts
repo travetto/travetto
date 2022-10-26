@@ -5,7 +5,7 @@ import { ModelExpirySupport } from '@travetto/model';
 import { Inject, Injectable } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test.suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
-import { Class, Util } from '@travetto/base';
+import { Class, TimeUtil } from '@travetto/base';
 
 import { Cache, EvictCache } from '../src/decorator';
 import { CacheModelⲐ, CacheService } from '../src/service';
@@ -26,37 +26,37 @@ class SampleService {
 
   @Cache('source')
   async basic(num: number) {
-    await Util.wait(100);
+    await TimeUtil.wait(100);
     return num * 2;
   }
 
   @Cache('source', '.5s')
   async agesQuickly(num: number) {
-    await Util.wait(100);
+    await TimeUtil.wait(100);
     return num * 3;
   }
 
   @Cache('source', 200, { extendOnAccess: true })
   async ageExtension(num: number) {
-    await Util.wait(100);
+    await TimeUtil.wait(100);
     return num * 3;
   }
 
   @Cache('source')
   async complexInput(config: object, size: number) {
-    await Util.wait(100);
+    await TimeUtil.wait(100);
     return { length: Object.keys(config).length, size };
   }
 
   @Cache('source', { key: config => config.a })
   async customKey(config: object, size: number) {
-    await Util.wait(100);
+    await TimeUtil.wait(100);
     return { length: Object.keys(config).length, size };
   }
 
   @Cache('source', { keySpace: 'user.id', reinstate: x => User.from(x as User) })
   async getUser(userId: string) {
-    await Util.wait(100);
+    await TimeUtil.wait(100);
 
     return {
       id: userId,
@@ -66,7 +66,7 @@ class SampleService {
 
   @EvictCache('source', { keySpace: 'user.id' })
   async deleteUser(userId: string) {
-    await Util.wait(100);
+    await TimeUtil.wait(100);
     return true;
   }
 }
@@ -110,7 +110,7 @@ export abstract class CacheServiceSuite {
     assert(diff > 75);
     assert(res === 30);
 
-    await Util.wait(510);
+    await TimeUtil.wait(510);
 
     start = Date.now();
     res = await service.agesQuickly(10);
@@ -130,7 +130,7 @@ export abstract class CacheServiceSuite {
     assert(res === 30);
 
     for (let i = 0; i < 2; i += 1) {
-      await Util.wait(55);
+      await TimeUtil.wait(55);
 
       start = Date.now();
       res = await service.ageExtension(10);
@@ -139,7 +139,7 @@ export abstract class CacheServiceSuite {
       assert(res === 30);
     }
 
-    await Util.wait(210);
+    await TimeUtil.wait(210);
     start = Date.now();
     res = await service.ageExtension(10);
     diff = Date.now() - start;

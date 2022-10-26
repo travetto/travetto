@@ -1,6 +1,5 @@
-import { AppError, Util, Class } from '@travetto/base';
+import { AppError, EnvUtil, Util, Class, TimeUtil } from '@travetto/base';
 import { ModelCrudSupport, ModelType, NotFoundError, OptionalId } from '@travetto/model';
-import { EnvUtil } from '@travetto/boot';
 import { AuthUtil, Principal, Authenticator, Authorizer } from '@travetto/auth';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
@@ -164,7 +163,7 @@ export class ModelAuthService<T extends ModelType> implements
     const salt = await Util.uuid();
 
     ident.resetToken = await AuthUtil.generateHash(Util.uuid(), salt, 25000, 32);
-    ident.resetExpires = Util.timeFromNow('1h');
+    ident.resetExpires = TimeUtil.timeFromNow('1h');
 
     Object.assign(user, this.fromPrincipal(ident));
 
