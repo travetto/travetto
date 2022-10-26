@@ -1,7 +1,8 @@
+import * as path from 'path';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
 import { Config } from '@travetto/config';
-import { PathUtil, EnvUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/boot';
 import { AppManifest } from '@travetto/base';
 
 /**
@@ -55,13 +56,13 @@ export class ApiSpecConfig {
   exposeAllSchemas: boolean = false;
 
   async postConstruct(): Promise<void> {
-    this.output = PathUtil.toUnix(this.output);
+    this.output = this.output.__posix;
     if (!this.output || this.output === '-') {
       this.persist = false;
     }
     if (this.persist) {
       if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder
-        this.output = PathUtil.resolveUnix(this.output, 'openapi.yml');
+        this.output = path.resolve(this.output, 'openapi.yml').__posix;
       }
     }
   }

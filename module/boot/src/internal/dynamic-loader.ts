@@ -1,9 +1,9 @@
 import * as Mod from 'module';
+import * as path from 'path';
 
-import { PathUtil } from '../path';
 import { EnvUtil } from '../env';
 
-import { ModuleIndex } from './module';
+import { ModuleIndex } from '@travetto/manifest';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export const Module: NodeModule = Mod as unknown as NodeModule;
@@ -64,7 +64,7 @@ export class $DynamicLoader {
    * @param err The error produced
    * @param filename The relative filename
    */
-  static handlePhaseError(phase: 'load' | 'compile', tsf: string, err: Error, filename = tsf.replace(PathUtil.cwd, '.')): string {
+  static handlePhaseError(phase: 'load' | 'compile', tsf: string, err: Error, filename = tsf.replace(process.cwd().__posix, '.')): string {
     if (phase === 'compile' &&
       (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
     ) {
@@ -174,7 +174,7 @@ export class $DynamicLoader {
    * Remove file from require.cache, and possible the file system
    */
   async unload(filename: string, unlink = false): Promise<true | undefined> {
-    const native = PathUtil.toNative(filename);
+    const native = filename.replace(/[\\\/]+/g, path.sep);
     for (const el of this.#unloadHandlers) {
       el(filename, unlink);
     }

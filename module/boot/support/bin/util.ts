@@ -1,6 +1,7 @@
 import { statSync } from 'fs';
+import * as path from 'path';
 
-import { CliUtil, ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
+import { CliUtil, ExecUtil } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/manifest';
 
 /**
@@ -11,7 +12,8 @@ export class BuildUtil {
   static async needsBuild(outputFolder: string): Promise<boolean> {
     for (const entry of ModuleIndex.findSrc({})) {
       try {
-        if (FsUtil.isOlder(statSync(entry.source), statSync(PathUtil.resolveUnix(outputFolder, entry.file)))) {
+        const [lStat, rStat] = [statSync(entry.source), statSync(path.resolve(outputFolder, entry.file).__posix)];
+        if (Math.max(rStat.mtimeMs, rStat.ctimeMs) < Math.max(lStat.mtimeMs, lStat.ctimeMs)) {
           return true;
         }
       } catch {

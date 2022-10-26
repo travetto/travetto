@@ -1,4 +1,4 @@
-import { FsUtil } from '@travetto/boot';
+import { existsSync } from 'fs';
 import { FileUtil } from './file';
 
 /**
@@ -12,7 +12,7 @@ export class ResolveUtil {
     const { resolved } = FileUtil.resolveFile(file);
     file = resolved;
 
-    if (!FsUtil.existsSync(file)) {
+    if (!existsSync(file)) {
       throw new Error(`${file} is not a valid location`);
     } else {
       const res = FileUtil.read(file);

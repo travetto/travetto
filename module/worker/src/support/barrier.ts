@@ -1,5 +1,4 @@
-import { ShutdownManager, TimeSpan } from '@travetto/base';
-import { SystemUtil } from '@travetto/boot/src/internal/system';
+import { ShutdownManager, TimeSpan, Util } from '@travetto/base';
 
 import { Timeout } from './timeout';
 
@@ -34,7 +33,7 @@ export class Barrier {
     if (!('then' in p)) {
       p = p();
     }
-    const k = SystemUtil.uuid();
+    const k = Util.uuid();
     p = p
       .finally(() => this.#barriers.delete(k))
       .catch(err => { this.cleanup(); throw err; });

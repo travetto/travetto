@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import * as mustache from 'mustache';
 
-import { EnvUtil, ExecUtil, ExecutionResult, FsUtil, PathUtil } from '@travetto/boot';
+import { EnvUtil, ExecUtil, ExecutionResult } from '@travetto/boot';
 import { version } from '@travetto/boot/package.json';
 
 import { Feature } from './features';
@@ -43,7 +43,7 @@ export class Context {
   constructor(name: string, template: string, targetDir: string) {
     this.name = name;
     this.#template = template;
-    this.#targetDir = PathUtil.resolveUnix(targetDir);
+    this.#targetDir = path.resolve(targetDir).__posix;
   }
 
   get modules(): Record<string, boolean> {
@@ -66,11 +66,11 @@ export class Context {
   }
 
   source(file?: string): string {
-    return PathUtil.resolveUnix(__source.folder, 'resources', 'templates', this.#template, ...file ? [file] : []);
+    return path.resolve(__source.folder, 'resources', 'templates', this.#template, ...file ? [file] : []).__posix;
   }
 
   destination(file?: string): string {
-    return PathUtil.resolveUnix(this.#targetDir, ...file ? [file] : []);
+    return path.resolve(this.#targetDir, ...file ? [file] : []).__posix;
   }
 
   get sourceListing(): Promise<Listing> {
@@ -86,7 +86,7 @@ export class Context {
   async initialize(): Promise<void> {
     let base = this.destination();
     while (base) {
-      if (await FsUtil.exists(`${base}/package.json`)) {
+      if (await fs.stat(`${base}/package.json`).catch(() => { })) {
         throw new Error(`Cannot create project inside of an existing node project ${base}`);
       }
       const next = path.dirname(base);

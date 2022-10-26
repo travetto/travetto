@@ -148,4 +148,17 @@ class UtilTests {
     assert(Util.isSimple(test));
     assert(Util.shallowClone(test) === test);
   }
+
+  @Test()
+  verifyUUID() {
+    assert(Util.uuid(32).length === 32);
+    assert(/^[0-9a-f]{32}$/.test(Util.uuid(32)));
+  }
+
+  @Test()
+  async testHash() {
+    const allHashes = ' '.repeat(1000).split('').map((x, i) => Util.naiveHash(' '.repeat(i + 2)));
+    const hashForSpace = Util.naiveHash(' ');
+    assert(!allHashes.includes(hashForSpace));
+  }
 }

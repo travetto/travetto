@@ -1,7 +1,6 @@
-import { lstatSync, readdirSync, realpathSync, Stats } from 'fs';
+import { existsSync, lstatSync, readdirSync, realpathSync, Stats } from 'fs';
 import * as fs from 'fs/promises';
-
-import { FsUtil, PathUtil } from '@travetto/boot';
+import * as path from 'path';
 
 export interface ScanEntry {
   /**
@@ -80,12 +79,12 @@ export class ScanFs {
    * @param handler Handler to search with
    * @param base The starting point
    */
-  static async scanDir(handler: ScanHandler, base: string = PathUtil.cwd): Promise<ScanEntry[]> {
+  static async scanDir(handler: ScanHandler, base: string = process.cwd().__posix): Promise<ScanEntry[]> {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [];
 
-    if (await FsUtil.exists(base)) {
+    if (await fs.stat(base).catch(() => { })) {
       dirs.push({ file: base, children: [], module: '' });
     }
 
@@ -96,7 +95,7 @@ export class ScanFs {
           continue inner;
         }
 
-        let full = PathUtil.resolveUnix(dir.file, file);
+        let full = path.resolve(dir.file, file).__posix;
         if (handler.resolvePath) {
           full = handler.resolvePath(full);
         }
@@ -130,12 +129,12 @@ export class ScanFs {
    * @param handler Handler to search with
    * @param base The starting point
    */
-  static scanDirSync(handler: ScanHandler, base: string = PathUtil.cwd): ScanEntry[] {
+  static scanDirSync(handler: ScanHandler, base: string = process.cwd().__posix): ScanEntry[] {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [];
 
-    if (FsUtil.existsSync(base)) {
+    if (existsSync(base)) {
       dirs.push({ file: base, children: [], module: '' });
     }
 
@@ -146,7 +145,7 @@ export class ScanFs {
           continue inner;
         }
 
-        let full = PathUtil.resolveUnix(dir.file, file);
+        let full = path.resolve(dir.file, file).__posix;
         if (handler.resolvePath) {
           full = handler.resolvePath(full);
         }

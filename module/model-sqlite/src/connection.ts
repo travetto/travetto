@@ -1,4 +1,5 @@
 import * as fs from 'fs/promises';
+import * as path from 'path';
 
 import type * as sqlite3 from 'better-sqlite3';
 import Db = require('better-sqlite3');
@@ -8,7 +9,6 @@ import { ShutdownManager, Util } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
-import { PathUtil } from '@travetto/boot';
 
 /**
  * Connection support for Sqlite
@@ -51,7 +51,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
   override async init(): Promise<void> {
     this.#pool = pool.createPool({
       create: () => this.#withRetries(async () => {
-        const handle = await fs.open(PathUtil.resolveUnix(this.#config.options.file ?? '.trv-sqlite_db'));
+        const handle = await fs.open(path.resolve(this.#config.options.file ?? '.trv-sqlite_db').__posix);
         const buffer = await handle.readFile();
         await handle.close();
 

@@ -3,7 +3,6 @@ import { ModelCrudSupport, ModelType, NotFoundError, OptionalId } from '@travett
 import { EnvUtil } from '@travetto/boot';
 import { AuthUtil, Principal, Authenticator, Authorizer } from '@travetto/auth';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
-import { SystemUtil } from '@travetto/boot/src/internal/system';
 
 /**
  * A set of registration data
@@ -162,9 +161,9 @@ export class ModelAuthService<T extends ModelType> implements
   async generateResetToken(userId: string): Promise<RegisteredPrincipal> {
     const user = await this.#retrieve(userId);
     const ident = this.toPrincipal(user);
-    const salt = await SystemUtil.uuid();
+    const salt = await Util.uuid();
 
-    ident.resetToken = await AuthUtil.generateHash(SystemUtil.uuid(), salt, 25000, 32);
+    ident.resetToken = await AuthUtil.generateHash(Util.uuid(), salt, 25000, 32);
     ident.resetExpires = Util.timeFromNow('1h');
 
     Object.assign(user, this.fromPrincipal(ident));

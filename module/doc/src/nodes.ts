@@ -1,5 +1,7 @@
-import { PathUtil, Package, FsUtil } from '@travetto/boot';
-import { readPackage } from '@travetto/boot/src/internal/package';
+import * as path from 'path';
+import { existsSync } from 'fs';
+
+import { Package } from '@travetto/boot';
 
 import { FileUtil, } from './util/file';
 import { DocRunUtil, RunConfig } from './util/run';
@@ -158,7 +160,7 @@ export const node = {
    */
   Execute: (title: Content, cmd: string, args: string[] = [], cfg: RunConfig = {}) => {
     if (cmd !== 'trv') {
-      cmd = FileUtil.resolveFile(cmd).resolved.replace(PathUtil.cwd, '.');
+      cmd = FileUtil.resolveFile(cmd).resolved.replace(process.cwd().__posix, '.');
     }
 
     const script = DocRunUtil.run(cmd, args, cfg);
@@ -173,9 +175,9 @@ export const node = {
    * @param folder
    */
   Mod(folder: string) {
-    folder = PathUtil.resolveUnix('node_modules', folder);
+    folder = path.resolve('node_modules', folder).__posix;
 
-    const { description, displayName } = readPackage(folder);
+    const { description, displayName } = Package.read(folder);
     return $n('mod', { title: $c(displayName!), link: $c(folder), description: $c(description!) });
   },
 
@@ -217,7 +219,7 @@ export const node = {
    * @param install
    * @param pkg
    */
-  Header: (install = true, pkg = Package) =>
+  Header: (install = true, pkg = Package.main) =>
     $n('header', { title: $c(pkg.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install }),
 
   /**
@@ -284,7 +286,7 @@ export const node = {
    * @param file
    */
   Image: (title: Content, file: string) => {
-    if (!/^https?:/.test(file) && !FsUtil.existsSync(file)) {
+    if (!/^https?:/.test(file) && !existsSync(file)) {
       throw new Error(`${file} is not a valid location`);
     }
     return $n('image', { title: $c(title), link: $c(file) });

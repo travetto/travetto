@@ -1,6 +1,9 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
+import * as fs from 'fs/promises';
+import * as cp from 'child_process';
 
-import { FsUtil, PathUtil, ExecUtil, ExecutionOptions, ExecutionResult } from '@travetto/boot';
+import { ExecUtil, ExecutionOptions, ExecutionResult } from '@travetto/boot';
 
 type ForkResult = ReturnType<(typeof ModuleUtil)['forkMain']>;
 
@@ -46,7 +49,6 @@ export class Workspace {
     this.context = context;
     // @ts-expect-error
     [this.folder] = vscode.workspace.workspaceFolders!;
-    Object.defineProperty(PathUtil, 'cwd', { value: Workspace.path });
   }
 
   /**
@@ -69,7 +71,7 @@ export class Workspace {
    * Resolve workspace path
    */
   static resolve(...p: string[]): string {
-    return PathUtil.resolveUnix(this.path, ...p);
+    return path.resolve(this.path, ...p);
   }
 
   /**
@@ -93,7 +95,7 @@ export class Workspace {
       cwd: Workspace.path,
       ...opts,
       env: {
-        NODE_PATH: PathUtil.resolveUnix('..', '..', '.bin'),
+        NODE_PATH: path.resolve('..', '..', '.bin').replaceAll('\\', '/'),
         ...(opts.env ?? {}),
       }
     });
@@ -141,7 +143,7 @@ export class Workspace {
    * @param module
    */
   static async isInstalled(module: string): Promise<boolean> {
-    return !!(await FsUtil.exists(this.resolveModule(module)));
+    return !!(await fs.stat(this.resolveModule(module)).catch(() => { }));
   }
 
   /**
@@ -222,5 +224,30 @@ export class Workspace {
       vscode.debug.removeBreakpoints([breakpoint]);
       remove.dispose();
     });
+  }
+
+  /**
+   * Remove directory, determine if errors should be ignored
+   * @param src The folder to copy
+   * @param dest The folder to copy to
+   * @param ignore Should errors be ignored
+   */
+  static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
+    try {
+      await new Promise<void>((res, rej) => {
+        const [cmd, args] = process.platform === 'win32' ?
+          ['xcopy', ['/y', '/h', '/s', src.replaceAll('/', path.sep), dest.replaceAll('/', path.sep)]] :
+          ['cp', ['-r', '-p', src, dest]];
+
+        const proc = cp.spawn([cmd, ...args].join(' '), {});
+        proc
+          .on('error', err => rej(err))
+          .on('exit', (code: number) => code > 0 ? rej(new Error('Failed to copy')) : res());
+      });
+    } catch (err) {
+      if (!ignore) {
+        throw err;
+      }
+    }
   }
 }

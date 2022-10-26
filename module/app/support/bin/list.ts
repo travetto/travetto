@@ -1,7 +1,8 @@
+import * as path from 'path';
 import * as fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
-import { FsUtil, CliUtil, PathUtil, ExecUtil } from '@travetto/boot';
+import { CliUtil, ExecUtil } from '@travetto/boot';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -20,7 +21,7 @@ export class $AppListLoader {
    * Read list
    */
   async #readList(): Promise<ApplicationConfig[] | undefined> {
-    if (await FsUtil.exists(this.#cacheConfig)) {
+    if (await fs.stat(this.#cacheConfig).catch(() => { })) {
       return JSON.parse(await fs.readFile(this.#cacheConfig, 'utf8'));
     }
   }
@@ -42,7 +43,7 @@ export class $AppListLoader {
       for (const el of items) {
         const elStat = (await fs.lstat(el.filename).catch(() => { delete el.generatedTime; }));
         // invalidate cache if changed
-        if (elStat && (!el.generatedTime || FsUtil.maxTime(elStat) > el.generatedTime)) {
+        if (elStat && (!el.generatedTime || Math.max(elStat.mtimeMs, elStat.ctimeMs) > el.generatedTime)) {
           throw new Error('Expired entry, data is stale');
         }
       }
@@ -106,5 +107,5 @@ export class $AppListLoader {
 }
 
 export const AppListLoader = new $AppListLoader(
-  PathUtil.resolveUnix('.trv-app-cache.json')
+  path.resolve('.trv-app-cache.json').__posix
 );

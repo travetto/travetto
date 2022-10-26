@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
 
-import { PathUtil, ExecUtil, EnvUtil, ExecutionOptions, ExecutionState } from '@travetto/boot';
+import { ExecUtil, EnvUtil, ExecutionOptions, ExecutionState } from '@travetto/boot';
 
 export type RunConfig = {
   filter?: (line: string) => boolean;
@@ -55,7 +55,7 @@ export class DocRunUtil {
       cmd,
       args,
       opts: {
-        cwd: config.cwd ?? PathUtil.cwd,
+        cwd: config.cwd ?? process.cwd().__posix,
         shell: '/bin/bash',
         env: {
           ...EnvUtil.getAll(),
@@ -75,7 +75,7 @@ export class DocRunUtil {
       // eslint-disable-next-line no-control-regex
       .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@trv:')
-      .replace(new RegExp(PathUtil.cwd, 'g'), '.')
+      .replace(new RegExp(process.cwd().__posix, 'g'), '.')
       .replace(/([.]trv_cache)[_A-Za-z0-9]+/g, (_, b) => b)
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
       .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))

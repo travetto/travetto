@@ -1,7 +1,7 @@
-import { readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import * as path from 'path';
 
-import { FsUtil, Package, PathUtil } from '@travetto/boot';
+import { Package } from '@travetto/boot';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
@@ -24,12 +24,12 @@ export class FileUtil {
    * @returns
    */
   static resolveFile(file: string): { resolved: string, cleaned: string } {
-    if (!FsUtil.existsSync(PathUtil.resolveUnix(file))) {
+    if (!existsSync(path.resolve(file).__posix)) {
       file = require.resolve(file);
     }
-    const resolved = PathUtil.resolveUnix(file);
+    const resolved = path.resolve(file).__posix;
     // TODO: Fix name
-    return { resolved, cleaned: [resolved, Package.name].join(' ') };
+    return { resolved, cleaned: [resolved, Package.main.name].join(' ') };
   }
 
   /**

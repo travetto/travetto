@@ -1,8 +1,7 @@
+import * as path from 'path';
 import * as fs from 'fs/promises';
-import { createReadStream } from 'fs';
+import { createReadStream, existsSync } from 'fs';
 import { Readable } from 'stream';
-
-import { PathUtil, FsUtil } from '@travetto/boot';
 
 import { ScanFs, ScanEntry } from './scan';
 import { AppError } from './error';
@@ -29,8 +28,8 @@ class $ResourceManager {
     this.#paths.push(...this.#rootPaths);
 
     this.#paths = this.#paths
-      .map(x => PathUtil.resolveUnix(x))
-      .filter(x => FsUtil.existsSync(x));
+      .map(x => path.resolve(x).__posix)
+      .filter(x => existsSync(x));
   }
 
   /**
@@ -60,9 +59,9 @@ class $ResourceManager {
    */
   addPath(searchPath: string, index = -1): void {
     if (index < 0) {
-      this.#paths.push(PathUtil.resolveUnix(searchPath));
+      this.#paths.push(path.resolve(searchPath).__posix);
     } else {
-      this.#paths.splice(index, 0, PathUtil.resolveUnix(searchPath));
+      this.#paths.splice(index, 0, path.resolve(searchPath).__posix);
     }
   }
 
@@ -77,7 +76,8 @@ class $ResourceManager {
    * List all paths as relative to the cwd
    */
   getRelativePaths(): string[] {
-    return this.#paths.slice(0).map(x => x.replace(`${PathUtil.cwd}/`, ''));
+    const cwdPrefix = `${process.cwd().__posix}/`;
+    return this.#paths.slice(0).map(x => x.replace(cwdPrefix, ''));
   }
 
   /**
@@ -100,8 +100,8 @@ class $ResourceManager {
       return this.#cache.get(pth)!;
     }
 
-    for (const f of this.#paths.map(x => PathUtil.joinUnix(x, pth))) {
-      if (await FsUtil.exists(f)) {
+    for (const f of this.#paths.map(x => path.join(x, pth).__posix)) {
+      if (await fs.stat(f).catch(() => { })) {
         this.#cache.set(pth, f);
         return f;
       }
@@ -147,7 +147,7 @@ class $ResourceManager {
 
     for (const root of this.#paths) {
       const results = await ScanFs.scanDir({ testFile: x => pattern.test(x) },
-        PathUtil.resolveUnix(root, base));
+        path.resolve(root, base).__posix);
 
       for (const r of results) {
         this.#scanEntry(base, found, out, r);

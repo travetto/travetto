@@ -6,7 +6,7 @@ import * as stream from 'stream';
 
 import { Renderable, Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
-import { PathUtil, StreamUtil } from '@travetto/boot';
+import { StreamUtil } from '@travetto/boot';
 import { AppError } from '@travetto/base';
 
 export type WithCleanup<T> = [T, () => Promise<unknown | void> | void | unknown];
@@ -20,9 +20,9 @@ export class AssetRestUtil {
 
   static async #createTempFileWithCleanup(filename: string): Promise<WithCleanup<string>> {
     // TODO: Should use file abstraction
-    const uniqueDir = PathUtil.resolveUnix(os.tmpdir(), `upload_${Math.trunc(Date.now() / (1000 * 60))}_${Math.trunc(Math.random() * 100000000).toString(36)}`);
+    const uniqueDir = path.resolve(os.tmpdir(), `upload_${Math.trunc(Date.now() / (1000 * 60))}_${Math.trunc(Math.random() * 100000000).toString(36)}`).__posix;
     await fs.mkdir(uniqueDir, { recursive: true });
-    const uniqueLocal = PathUtil.resolveUnix(uniqueDir, path.basename(filename));
+    const uniqueLocal = path.resolve(uniqueDir, path.basename(filename)).__posix;
 
     const cleanup = async (): Promise<void> => {
       try { await fs.unlink(uniqueLocal); } catch { }

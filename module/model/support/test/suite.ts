@@ -1,5 +1,6 @@
+import * as path from 'path';
+
 import { Class, ResourceManager } from '@travetto/base';
-import { PathUtil } from '@travetto/boot';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry } from '@travetto/test';
@@ -16,7 +17,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       target,
       async function (this: T & { [Loaded]?: boolean }) {
         // Track self
-        ResourceManager.addPath(PathUtil.resolveUnix(__source.folder, '..', 'resources'));
+        ResourceManager.addPath(path.resolve(__source.folder, '..', 'resources').__posix);
 
         await RootRegistry.init();
 

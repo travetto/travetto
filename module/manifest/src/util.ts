@@ -109,7 +109,14 @@ export class ManifestUtil {
       files.rootFiles = files.rootFiles.filter(([file, type]) => type !== 'ts');
     }
 
+    let id = name.replace('@travetto', '@trv').replace('/', ':');
+
+    if (folder.includes('node_modules') && !folder.includes('node_modules/@travetto')) {
+      id = `@npm:${id}`;
+    }
+
     return {
+      id,
       name,
       source: folder,
       output: folder === CWD ? '' : `node_modules/${name}`,

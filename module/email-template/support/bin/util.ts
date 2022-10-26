@@ -1,6 +1,5 @@
 import * as fs from 'fs/promises';
 
-import { FsUtil } from '@travetto/boot';
 import type { MailTemplateEngine } from '@travetto/email';
 
 import type { CompileParts } from '../../src/util';
@@ -13,7 +12,7 @@ export class TemplateUtil {
     const { CompileUtil } = await import('../../src/util');
 
     const files = CompileUtil.getOutputs(file);
-    const missing = await Promise.all(files.map(x => FsUtil.exists(x[1])));
+    const missing = await Promise.all(files.map(x => fs.stat(x[1]).catch(() => { })));
 
     if (missing.some(x => x === undefined)) {
       await CompileUtil.compileToDisk(file);

@@ -2,9 +2,8 @@ import * as path from 'path';
 import * as timers from 'timers/promises';
 
 import { Util } from '@travetto/base';
-import { PathUtil } from '@travetto/boot';
 import { Barrier, ExecutionError } from '@travetto/worker';
-import { ClassMetadataUtil } from '@travetto/boot/src/internal/class-metadata';
+import { ModuleIndex } from '@travetto/manifest';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult } from '../model/test';
@@ -66,10 +65,10 @@ export class TestExecutor {
    */
   static failFile(consumer: TestConsumer, file: string, err: Error): void {
     const name = path.basename(file);
-    const classId = ClassMetadataUtil.computeId(file, name);
+    const classId = ModuleIndex.computeId(file, name);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const suite = { class: { name }, classId, duration: 0, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
-    err.message = err.message.replace(PathUtil.cwd, '.');
+    err.message = err.message.replace(process.cwd().__posix, '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
     consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });
@@ -239,12 +238,12 @@ export class TestExecutor {
    */
   static async execute(consumer: TestConsumer, file: string, ...args: string[]): Promise<void> {
 
-    if (!file.startsWith(PathUtil.cwd)) {
-      file = PathUtil.joinUnix(PathUtil.cwd, file);
+    if (!file.startsWith(process.cwd().__posix)) {
+      file = path.join(process.cwd(), file).__posix;
     }
 
     try {
-      await import(PathUtil.toUnix(file)); // Path to module
+      await import(file.__posix); // Path to module
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;

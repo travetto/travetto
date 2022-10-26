@@ -1,10 +1,9 @@
 import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { AppError, ConcreteClass } from '@travetto/base';
+import { AppError, ConcreteClass, Util } from '@travetto/base';
 import { StreamUtil } from '@travetto/boot';
 import { AfterAll, BeforeAll } from '@travetto/test';
-import { SystemUtil } from '@travetto/boot/src/internal/system';
 
 import { MethodOrAll, Request, ServerHandle } from '../../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
@@ -27,7 +26,7 @@ export abstract class BaseRestSuite {
   @BeforeAll()
   async initServer(): Promise<void> {
     if (!this.type || this.type === CoreRestServerSupport) {
-      this.#support = new CoreRestServerSupport((SystemUtil.naiveHash(this.constructor.Ⲑid) % 60000) + 1000);
+      this.#support = new CoreRestServerSupport((Util.naiveHash(this.constructor.Ⲑid) % 60000) + 1000);
     } else {
       this.#support = new this.type();
     }
@@ -52,7 +51,7 @@ export abstract class BaseRestSuite {
   }
 
   getMultipartRequest(chunks: Multipart[]): FullRequest {
-    const boundary = `-------------------------multipart-${SystemUtil.uuid()}`;
+    const boundary = `-------------------------multipart-${Util.uuid()}`;
 
     const nl = '\r\n';
 

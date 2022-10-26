@@ -1,17 +1,7 @@
 # Clean Slate Design for Module System
 
 ## Compilation Flow
-1. 
-  Phase: compiler-bootstrap
-  Desc: Run tsc on `source://transformer/support/bin/*.ts`
-  When: `source://transformer/support/bin/*.ts` changes or is missing a `.js` counterpart
-  Inputs:
-    - `source://@travetto/transformer/support/bin/**/*.ts`
-  Action: tsc
-  Output: 
-    - `source://@travetto/transformer/support/bin/**/*.js`
-
-2.
+1.
   Phase: manifest-generate
   Desc: Generates project manifest
   When: in development/build mode
@@ -22,7 +12,7 @@
   Output: 
     - `memory://manifest`
 
-3.
+2.
   Phase: manifest-delta
   Desc: Generates project delta for any changed files
   When: `memory://manifest`
@@ -32,6 +22,17 @@
   Action: node `source://@travetto/transformer/support/bin/manifest-delta`
   Output: 
     - `memory://manifest-delta`    
+
+3. 
+  Phase: compiler-bootstrap
+  Desc: Run tsc on `source://transformer/support/bin/*.ts`
+  When: `memory://manifest-delta` includes `source://transformer/support/bin/*.ts` 
+  Inputs:
+  
+    - `source://@travetto/transformer/support/bin/**/*.ts`
+  Action: tsc
+  Output: 
+    - `source://@travetto/transformer/support/bin/**/*.js`
 
 4. 
   Phase: compiler-stage

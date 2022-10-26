@@ -1,52 +1,10 @@
-import { PathUtil } from '../path';
+import { ModuleIndex } from '@travetto/manifest';
 import type { Class } from '../types';
 
 /**
- * Register a class as pending
+ * Register class metadata
  */
 export class ClassMetadataUtil {
-  static #idCache = new Map<string, string>();
-
-  /**
-   * Compute internal id from file name and optionally, class name
-   */
-  static computeId(filename: string, clsName?: string): string {
-    filename = PathUtil.resolveUnix(filename);
-
-    if (clsName) {
-      return `${this.computeId(filename)}￮${clsName}`;
-    }
-
-    if (this.#idCache.has(filename)) {
-      return this.#idCache.get(filename)!;
-    }
-
-    let mod = filename
-      .replace(/^.*node_modules\//, '')
-      .replace(PathUtil.cwd, '.')
-      .replace(/[.]js$/, '');
-
-    let ns: string;
-
-    if (mod.startsWith('@travetto')) {
-      const [, ns2, ...rest] = mod.split(/\/+/);
-      ns = `@trv:${ns2}`;
-      if (rest[0] === 'src') {
-        rest.shift();
-      }
-      mod = rest.join('/');
-    } else if (!mod.startsWith('.')) {
-      ns = '@npm';
-    } else {
-      const [ns1, ...rest] = mod.split(/\/+/);
-      ns = ns1;
-      mod = rest.join('/');
-    }
-
-    const name = `${ns}/${mod}`;
-    this.#idCache.set(filename, name);
-    return name;
-  }
 
   static #writeMeta(fn: Function, cfg: Record<string, unknown>): boolean {
     for (const [key, value] of Object.entries(cfg)) {
@@ -78,7 +36,7 @@ export class ClassMetadataUtil {
    * @param `abstract` Is the class abstract
    */
   static initMeta(cls: Class, { file }: typeof __source, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean): boolean {
-    const id = this.computeId(file);
+    const id = ModuleIndex.computeId(file);
     const meta = { id, file, hash, methods, abstract, synthetic };
     return this.#writeMeta(cls, { file, id, meta });
   }

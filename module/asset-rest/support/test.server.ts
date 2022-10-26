@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { PathUtil, StreamUtil } from '@travetto/boot';
+import { StreamUtil } from '@travetto/boot';
 import { AssetUtil, Asset } from '@travetto/asset';
 import { ResourceManager } from '@travetto/base';
 import { Controller, Post, Request } from '@travetto/rest';
@@ -8,6 +8,7 @@ import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { Upload, UploadAll } from '../src/decorator';
+import path = require('path');
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -62,7 +63,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @BeforeAll()
   async setup() {
     const src = await import('@travetto/asset/support/test.service');
-    ResourceManager.addPath(PathUtil.resolveUnix(src.AssetServiceSuite.Ⲑfile, '..', 'resources'));
+    ResourceManager.addPath(path.resolve(src.AssetServiceSuite.Ⲑfile, '..', 'resources').__posix);
   }
 
   @Test()

@@ -3,9 +3,9 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as cp from 'child_process';
 
-import { buildManifest, writeManifest } from './manifest';
+import { ModuleShape, ManifestShape, ManifestUtil } from '@travetto/manifest';
+
 import { CWD, COMPILER_OUTPUT, TS_TARGET, TSC, STAGING_OUTPUT } from './config';
-import { ModuleShape, ManifestShape } from './types';
 
 type CompileContext = {
   manifest: ManifestShape;
@@ -14,7 +14,7 @@ type CompileContext = {
 };
 
 function getModuleContext(): CompileContext {
-  const manifest = buildManifest();
+  const manifest = ManifestUtil.buildManifest();
 
   const transforming = Object.values(manifest.modules)
     .filter(x => x.files.support?.find(([name, type]) => type === 'ts' && name.startsWith('support/transform')));
@@ -83,8 +83,6 @@ export function precompile(context: CompileContext = getModuleContext()): void {
   }
   fs.writeFileSync(`${STAGING_OUTPUT}/tsconfig.json`, JSON.stringify(buildTsconfig(context), null, 2));
   cp.spawnSync(TSC, { cwd: STAGING_OUTPUT, stdio: 'pipe' });
-
-  writeManifest(COMPILER_OUTPUT, context.manifest);
 }
 
 if (require.main === module) {
