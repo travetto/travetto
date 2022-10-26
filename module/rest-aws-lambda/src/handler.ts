@@ -1,10 +1,11 @@
+import { PhaseManager } from '@travetto/boot';
+
 import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types';
 import type { AwsLambdaHandler } from './server';
 
 async function buildApp(): Promise<{
   handle(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): Promise<LambdaAPIGatewayProxyResult>;
 }> {
-  const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init');
 
   const { DependencyRegistry } = await import('@travetto/di');

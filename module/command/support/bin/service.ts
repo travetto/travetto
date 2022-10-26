@@ -1,5 +1,5 @@
-import { ModuleIndex } from '@travetto/manifest';
-import { CliUtil } from '@travetto/boot/src/cli';
+import { ModuleIndex } from '@travetto/boot';
+import { CliUtil } from '@travetto/cli';
 
 export type StreamingResult = Partial<Record<keyof typeof CliUtil['colorPalette'], string | number>>;
 export type StreamingStatus = AsyncIterable<StreamingResult>;

@@ -1,9 +1,10 @@
 import { setTimeout } from 'timers/promises';
 
-import { ModuleIndex } from '@travetto/manifest';
+import { ModuleIndex } from '@travetto/boot';
 
 import { Util } from './util';
 import { AppManifest } from './manifest';
+import { TimeUtil } from './time';
 
 const ogExit = process.exit;
 
@@ -90,7 +91,7 @@ class $ShutdownManager {
       if (promises.length) {
         const finalRun = Promise.race([
           ...promises,
-          Util.wait(AppManifest.env.shutdownWait).then(() => { throw new Error('Timeout on shutdown'); })
+          TimeUtil.wait(AppManifest.env.shutdownWait).then(() => { throw new Error('Timeout on shutdown'); })
         ]);
         await finalRun;
       }

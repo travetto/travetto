@@ -1,7 +1,7 @@
 import { fromIni } from '@aws-sdk/credential-provider-ini';
 import * as S3 from '@aws-sdk/client-s3';
 
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field, Required } from '@travetto/schema';
 

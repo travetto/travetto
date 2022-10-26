@@ -1,6 +1,6 @@
 import { createReadStream } from 'fs';
 
-import { StreamUtil } from '@travetto/boot';
+import { StreamUtil } from '@travetto/base';
 import { ImageConverter } from '@travetto/image';
 
 export class ResizeService {

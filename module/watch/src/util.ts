@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { Util } from '@travetto/base';
+import { TimeUtil } from '@travetto/base';
 import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 
 import { Watcher } from './watcher';
@@ -22,6 +22,6 @@ export class WatchUtil {
         }
         cb(e);
       });
-    await Util.wait('1d');
+    await TimeUtil.wait('1d');
   }
 }

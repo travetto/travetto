@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { existsSync } from 'fs';
 
-import { Package } from '@travetto/boot';
+import { PackageUtil } from '@travetto/base';
 
 import { FileUtil, } from './util/file';
 import { DocRunUtil, RunConfig } from './util/run';
@@ -177,7 +177,7 @@ export const node = {
   Mod(folder: string) {
     folder = path.resolve('node_modules', folder).__posix;
 
-    const { description, displayName } = Package.read(folder);
+    const { description, displayName } = PackageUtil.readPackage(folder);
     return $n('mod', { title: $c(displayName!), link: $c(folder), description: $c(description!) });
   },
 
@@ -219,7 +219,7 @@ export const node = {
    * @param install
    * @param pkg
    */
-  Header: (install = true, pkg = Package.main) =>
+  Header: (install = true, pkg = PackageUtil.main) =>
     $n('header', { title: $c(pkg.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install }),
 
   /**

@@ -1,5 +1,11 @@
-import { ErrorCategory } from './internal/error';
-export { ErrorCategory } from './internal/error'; // Re-export
+export type ErrorCategory =
+  'general' |
+  'notfound' |
+  'data' |
+  'permissions' |
+  'authentication' |
+  'timeout' |
+  'unavailable';
 
 /**
  * Framework error class, with the aim of being extensible

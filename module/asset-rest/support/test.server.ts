@@ -1,8 +1,7 @@
 import * as assert from 'assert';
 
-import { StreamUtil } from '@travetto/boot';
 import { AssetUtil, Asset } from '@travetto/asset';
-import { ResourceManager } from '@travetto/base';
+import { StreamUtil, ResourceManager } from '@travetto/base';
 import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test } from '@travetto/test';

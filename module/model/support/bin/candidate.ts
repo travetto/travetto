@@ -1,6 +1,5 @@
-import { CliUtil, ExecUtil } from '@travetto/boot';
-
-import type { Class } from '@travetto/base';
+import { Class, ExecUtil } from '@travetto/base';
+import { CliUtil } from '@travetto/cli';
 import type { InjectableConfig } from '@travetto/di';
 
 import type { ModelStorageSupport } from '../../src/service/storage';

@@ -1,7 +1,6 @@
 import * as path from 'path';
 
-import { AppError, AppManifest, Class, ResourceManager, Util } from '@travetto/base';
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil, AppError, AppManifest, Class, ResourceManager, Util } from '@travetto/base';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ConfigUtil } from './internal/util';

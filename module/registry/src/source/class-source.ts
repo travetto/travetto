@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
 import { Class } from '@travetto/base';
-import { Dynamic } from '@travetto/base/src/internal/dynamic';
+import { Dynamic } from '@travetto/boot';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 import { PendingRegister } from '../decorator';

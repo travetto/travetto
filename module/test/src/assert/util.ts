@@ -41,8 +41,7 @@ export class AssertUtil {
    */
   static getPositionOfError(err: Error, filename: string): { file: string, line: number } {
     const cwd = process.cwd().__posix;
-    const lines = (err.stack ?? new Error().stack!)
-      .replace(/[\\]/g, '/')
+    const lines = (err.stack ?? new Error().stack!).__posix
       .split('\n')
       // Exclude node_modules, target self
       .filter(x => x.includes(cwd) && (!x.includes('node_modules') || x.includes('/support/')));

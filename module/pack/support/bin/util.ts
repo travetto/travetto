@@ -5,8 +5,8 @@ import * as cp from 'child_process';
 // TODO: Get proper typings
 const glob = require('picomatch');
 
-import { CliUtil } from '@travetto/boot';
-import { ModuleIndex } from '@travetto/manifest';
+import { CliUtil } from '@travetto/cli';
+import { ModuleIndex } from '@travetto/boot';
 import { ScanFs } from '@travetto/base';
 
 import { CommonConfig, PackOperation } from './types';

@@ -1,12 +1,23 @@
 import { Readable } from 'stream';
 
-import { AppError, Util } from '@travetto/base';
-import { ErrorUtil } from '@travetto/base/src/internal/error';
-import { StreamUtil } from '@travetto/boot';
+import { StreamUtil, ErrorCategory, AppError, Util } from '@travetto/base';
 
 import { SendStreamⲐ, NodeEntityⲐ, HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
 import { Request, Response } from '../types';
+
+/**
+ * Mapping from error category to standard http error codes
+ */
+const categoryToCode: Record<ErrorCategory, number> = {
+  general: 500,
+  notfound: 404,
+  data: 400,
+  permissions: 403,
+  authentication: 401,
+  timeout: 408,
+  unavailable: 503,
+};
 
 /**
  * Utilities for serializing output
@@ -23,7 +34,7 @@ export class SerializeUtil {
   static getErrorStatus(err: Error & { status?: number, statusCode?: number }): number {
     return err.status ??
       err.statusCode ??
-      (err instanceof AppError ? ErrorUtil.codeFromCategory(err.category) : 500);
+      (err instanceof AppError ? categoryToCode[err.category] : 500);
   }
 
   /**

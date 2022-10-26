@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
 
-import { ExecUtil, EnvUtil, ExecutionOptions, ExecutionState } from '@travetto/boot';
+import { EnvUtil, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 
 export type RunConfig = {
   filter?: (line: string) => boolean;

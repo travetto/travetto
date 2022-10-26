@@ -1,4 +1,4 @@
-import { CliUtil } from '@travetto/boot';
+import { CliUtil } from '@travetto/cli';
 
 import type { ApplicationConfig } from '../../src/types';
 

@@ -1,3 +1,5 @@
+import { PhaseManager } from '@travetto/boot';
+
 import { TemplateUtil } from './util';
 import { SendUtil } from './send';
 import { EditorConfig } from './config';
@@ -87,7 +89,6 @@ class $EditorState {
    * Initialize context, and listeners
    */
   async init(): Promise<void> {
-    const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
 
     TemplateUtil.watchCompile(f => this.renderFile(f));

@@ -1,9 +1,8 @@
 import * as Mod from 'module';
 import * as path from 'path';
 
-import { EnvUtil } from '../env';
-
-import { ModuleIndex } from '@travetto/manifest';
+import { EnvUtil } from '../../../base/src/env';
+import { ModuleIndex } from '../module-index';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export const Module: NodeModule = Mod as unknown as NodeModule;

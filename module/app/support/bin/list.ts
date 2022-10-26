@@ -2,7 +2,8 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
-import { CliUtil, ExecUtil } from '@travetto/boot';
+import { ExecUtil } from '@travetto/base';
+import { CliUtil } from '@travetto/cli';
 
 import type { ApplicationConfig } from '../../src/types';
 

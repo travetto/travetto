@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
-import { StreamUtil } from '@travetto/boot';
+import { StreamUtil } from '@travetto/base';
 
 import { Controller } from '../../src/decorator/controller';
 import { Get, Post, Put, Delete, Patch } from '../../src/decorator/endpoint';

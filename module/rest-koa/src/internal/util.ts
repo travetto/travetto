@@ -4,7 +4,7 @@ import * as koa from 'koa';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
 import { NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from '@travetto/rest/src/internal/symbol';
-import { StreamUtil } from '@travetto/boot';
+import { StreamUtil } from '@travetto/base';
 
 /**
  * Provides translation between koa request/response objects and the framework

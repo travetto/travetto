@@ -1,8 +1,7 @@
 import { appendFile } from 'fs/promises';
 import * as commander from 'commander';
 
-import { CliUtil } from '@travetto/boot';
-
+import { CliUtil } from './util';
 import { CompletionConfig } from './autocomplete';
 import { HelpUtil } from './help';
 

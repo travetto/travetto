@@ -3,13 +3,12 @@ import { Readable } from 'stream';
 import * as s3 from '@aws-sdk/client-s3';
 import type { MetadataBearer } from '@aws-sdk/types';
 
-import { StreamUtil } from '@travetto/boot';
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
   ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
-import { Class, AppError } from '@travetto/base';
+import { StreamUtil, Class, AppError } from '@travetto/base';
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';

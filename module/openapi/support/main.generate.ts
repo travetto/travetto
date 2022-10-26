@@ -1,5 +1,6 @@
+import { PhaseManager } from '@travetto/boot';
+
 export async function main(): Promise<unknown> {
-  const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init');
 
   const { DependencyRegistry } = await import('@travetto/di');

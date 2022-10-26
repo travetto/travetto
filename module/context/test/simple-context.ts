@@ -4,7 +4,7 @@ import * as asyncHooks from 'async_hooks';
 import { Inject } from '@travetto/di';
 import { Suite, Test } from '@travetto/test';
 import { InjectableSuite } from '@travetto/di/support/test.suite';
-import { Util } from '@travetto/base';
+import { TimeUtil } from '@travetto/base';
 
 import { AsyncContext, WithAsyncContext } from '../';
 
@@ -20,7 +20,7 @@ class VerifyContext {
   async loadContext() {
     assert(this.context !== null);
     this.context.set({ user: 'bob' });
-    await Util.wait(1);
+    await TimeUtil.wait(1);
     assert(this.context.get().user === 'bob');
   }
 
@@ -36,7 +36,7 @@ class VerifyContext {
       async () => {
         const start = asyncHooks.executionAsyncId();
         this.context.set({ name: `test-${i}` });
-        await Util.wait(1);
+        await TimeUtil.wait(1);
         const end = asyncHooks.executionAsyncId();
 
         if (this.context.get().name !== `test-${i}`) {
@@ -61,7 +61,7 @@ class VerifyContext {
         if (i === 1) {
           this.context.get().age = 30;
         }
-        await Util.wait(20);
+        await TimeUtil.wait(20);
         await this.context.run(async () => {
           contexts.push(structuredClone(this.context.get()));
         }, { color: 'green' });

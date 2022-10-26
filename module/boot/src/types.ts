@@ -1,8 +1,29 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export type Class<T = any> = abstract new (...args: any[]) => T;
-export type ConcreteClass<T = any> = new (...args: any[]) => T;
-export type ClassInstance<T = any> = T & {
-  constructor: ConcreteClass<T> & { Ⲑid: string };
+// Manifest types
+export type ManifestModuleFileType = 'd.ts' | 'ts' | 'js' | 'json' | 'unknown';
+
+export type ManifestModuleFile = [string, ManifestModuleFileType, number];
+
+export type ManifestModule<T = Record<string, ManifestModuleFile[]>> = {
+  id: string;
+  name: string;
+  source: string;
+  output: string;
+  files: T;
 };
 
-export type Primitive = number | boolean | string | Date | Error;
+export type Manifest = {
+  generated: number;
+  modules: Record<string, ManifestModule>;
+};
+
+export type ManifestDeltaEvent = [string, 'added' | 'changed' | 'removed' | 'missing' | 'dirty'];
+
+
+// Log types
+export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
+
+export type LineContext = { file: string, line: number };
+
+export interface ConsoleListener {
+  onLog<T extends LineContext>(context: LogLevel, ctx: T, args: unknown[]): void;
+}

@@ -1,6 +1,6 @@
-import { EnvUtil, Package } from '@travetto/boot';
-
-import { TimeSpan, Util } from './util';
+import { EnvUtil } from './env';
+import { TimeSpan, TimeUtil } from './time';
+import { PackageUtil } from './package';
 
 import { version as framework } from '../package.json';
 
@@ -71,6 +71,14 @@ interface EnvConfig {
    * List of folders for resources
    */
   resources: string[];
+  /**
+   * Is the application in dynamic mode?
+   */
+  dynamic?: boolean;
+  /**
+   * Node version
+   */
+  node: string;
 }
 
 /**
@@ -80,21 +88,26 @@ class $AppManifest {
   /**
    * App profiles with indexing
    */
-  readonly #profileSet: Set<string>;
+  #profileSet: Set<string>;
 
   /** Application info */
-  readonly info: AppInfo;
+  info: AppInfo;
 
   /** Env */
-  readonly env: EnvConfig;
+  env: EnvConfig;
 
   constructor(pkg: Record<string, unknown> = {}) {
+    this.init(pkg);
+  }
+
+  init(pkg: Record<string, unknown>): void {
     const def = {
       framework,
       name: 'untitled',
       description: 'A Travetto application',
       version: '0.0.0'
     };
+
     this.info = { ...def };
     try {
       const { version = def.version, name = def.name, license, author, description = def.description } = pkg;
@@ -118,7 +131,9 @@ class $AppManifest {
         value: (status ? EnvUtil.get('TRV_DEBUG') : '') || undefined
       },
       resources: ['resources', ...EnvUtil.getList('TRV_RESOURCES')],
-      shutdownWait: Util.getEnvTime('TRV_SHUTDOWN_WAIT', '2s')
+      shutdownWait: TimeUtil.getEnvTime('TRV_SHUTDOWN_WAIT', '2s'),
+      dynamic: EnvUtil.isDynamic(),
+      node: process.version,
     };
 
     this.#profileSet = new Set(this.env.profiles);
@@ -128,18 +143,9 @@ class $AppManifest {
    * Generate to JSON
    */
   toJSON(): Record<string, unknown> {
-    const out: Record<string, unknown> = this.env.prod ?
+    return this.env.prod ?
       { info: this.info } :
-      {
-        info: this.info,
-        env: {
-          ...this.env,
-          node: process.version,
-          dynamic: EnvUtil.isDynamic(),
-          isCompiled: EnvUtil.isCompiled()
-        }
-      };
-    return out;
+      { info: this.info, env: this.env, };
   }
 
   /**
@@ -157,4 +163,4 @@ class $AppManifest {
   }
 }
 
-export const AppManifest = new $AppManifest(Package.main);
+export const AppManifest = new $AppManifest(PackageUtil.main);

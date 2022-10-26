@@ -1,4 +1,4 @@
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 

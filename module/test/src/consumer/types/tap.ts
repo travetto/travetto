@@ -1,8 +1,8 @@
 import { Writable } from 'stream';
 
-import { ColorUtil } from '@travetto/boot';
+import { ColorUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
-import { ErrorUtil } from '@travetto/base/src/internal/error';
+import { ErrorUtil } from '@travetto/boot';
 
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';

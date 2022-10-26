@@ -1,4 +1,4 @@
-import { CliUtil } from '@travetto/boot/src/cli';
+import { CliUtil } from '@travetto/cli';
 
 import { CommonConfig, PackOperation } from './types';
 import { PackUtil } from './util';

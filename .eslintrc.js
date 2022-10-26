@@ -23,6 +23,12 @@ module.exports = {
       }
     },
     {
+      files: 'module/boot/support/main.compiler.ts',
+      rules: {
+        'no-restricted-imports': 0
+      }
+    },
+    {
       files: '{module,sample,global-test}/*/support/transform*',
       rules: {
         'no-restricted-imports': 0

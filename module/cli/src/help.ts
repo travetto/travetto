@@ -1,6 +1,7 @@
 import * as commander from 'commander';
 
-import { CliUtil } from '@travetto/boot/src/cli';
+import { CliUtil } from './util';
+
 /**
  * Utilities for formatting help
  */

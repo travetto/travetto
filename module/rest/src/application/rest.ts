@@ -1,10 +1,9 @@
-import { Class, AppManifest, AppError } from '@travetto/base';
-import { OrderingUtil } from '@travetto/base/src/internal/ordering';
+import { RetargettingProxy, OrderingUtil } from '@travetto/boot';
+
+import { EnvUtil, Class, AppManifest, AppError } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
-import { EnvUtil } from '@travetto/boot';
 import { Application } from '@travetto/app';
-import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 
 import { RouteConfig, Request, ServerHandle } from '../types';
 import { RestConfig } from './config';

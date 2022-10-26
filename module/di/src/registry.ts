@@ -1,6 +1,6 @@
 import { Class, ClassInstance, ConcreteClass } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { Dynamic } from '@travetto/base/src/internal/dynamic';
+import { Dynamic } from '@travetto/boot';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';

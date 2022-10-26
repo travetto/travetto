@@ -6,8 +6,7 @@ import * as stream from 'stream';
 
 import { Renderable, Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
-import { StreamUtil } from '@travetto/boot';
-import { AppError } from '@travetto/base';
+import { StreamUtil, AppError } from '@travetto/base';
 
 export type WithCleanup<T> = [T, () => Promise<unknown | void> | void | unknown];
 

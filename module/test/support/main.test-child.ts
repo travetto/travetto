@@ -1,6 +1,8 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
+import { PhaseManager } from '@travetto/boot';
+
 import { envInit } from './bin/env';
 
 export async function customLogs(): Promise<void> {
@@ -24,7 +26,6 @@ export async function main(): Promise<void> {
 
   await customLogs();
 
-  const { PhaseManager } = await import('@travetto/base');
   await PhaseManager.run('init', '@trv:base/load');
 
   const { TestChildWorker } = await import('../src/worker/child');

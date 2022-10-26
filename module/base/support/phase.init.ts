@@ -1,5 +1,5 @@
 import { ShutdownManager } from '../src/shutdown';
-import { StacktraceManager } from '../src/stacktrace';
+import { StacktraceManager } from '../../boot/src/stacktrace';
 
 /**
  * Registers stack trace handler for non-prod

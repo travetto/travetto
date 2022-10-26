@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Util } from '@travetto/base';
+import { TimeUtil } from '@travetto/base';
 
 import { Suite, Test, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../';
 
@@ -59,7 +59,7 @@ class Simple {
 
   @Test()
   async test1d() {
-    await Util.wait(100);
+    await TimeUtil.wait(100);
     assert(1 === a);
   }
 

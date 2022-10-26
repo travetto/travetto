@@ -1,12 +1,5 @@
-import { EnvUtil } from './env';
+import { ConsoleListener, LineContext, LogLevel } from './types';
 
-export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
-
-type LineContext = { file: string, line: number };
-
-interface ConsoleListener {
-  onLog<T extends LineContext>(context: LogLevel, ctx: T, args: unknown[]): void;
-}
 
 function wrap(target: Console): ConsoleListener {
   return {
@@ -45,7 +38,7 @@ class $ConsoleManager {
   constructor() {
     this.#exclude = new Set();
 
-    if (!EnvUtil.isTrue('TRV_DEBUG')) {
+    if (!/^(1|true|yes|on)/i.test(process.env.TRV_DEBUG ?? '')) {
       this.#exclude.add('debug');
     }
 

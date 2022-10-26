@@ -1,7 +1,7 @@
 import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
-import { EnvUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/base';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { CacheError } from './error';

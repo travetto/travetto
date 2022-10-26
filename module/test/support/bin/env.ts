@@ -1,4 +1,4 @@
-import { EnvInit } from '@travetto/base/support/bin/init';
+import { EnvInit } from '@travetto/base/support/bin/env';
 
 export function envInit(localOptional = true, dynamic: boolean = false): void {
   EnvInit.init({

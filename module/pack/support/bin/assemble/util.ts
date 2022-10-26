@@ -1,9 +1,8 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { ExecUtil } from '@travetto/boot';
+import { ExecUtil, ScanFs } from '@travetto/base';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
-import { ScanFs } from '@travetto/base';
 
 import { DependenciesUtil, DepType } from './dependencies';
 import { PackUtil } from '../util';

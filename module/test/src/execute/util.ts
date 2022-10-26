@@ -1,8 +1,8 @@
 import { createReadStream } from 'fs';
 import * as readline from 'readline';
 
-import { ShutdownManager, Util } from '@travetto/base';
-import { ModuleIndex } from '@travetto/manifest';
+import { ShutdownManager, TimeUtil } from '@travetto/base';
+import { ModuleIndex } from '@travetto/boot';
 
 /**
  * Simple Test Utilities
@@ -12,7 +12,7 @@ export class RunnerUtil {
    * Add 50 ms to the shutdown to allow for buffers to output properly
    */
   static registerCleanup(scope: string): void {
-    ShutdownManager.onShutdown(`test.${scope}.bufferOutput`, () => Util.wait(50));
+    ShutdownManager.onShutdown(`test.${scope}.bufferOutput`, () => TimeUtil.wait(50));
   }
 
   /**

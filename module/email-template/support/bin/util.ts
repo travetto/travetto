@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
 
+import { TimeUtil } from '@travetto/base';
 import type { MailTemplateEngine } from '@travetto/email';
 
 import type { CompileParts } from '../../src/util';
@@ -79,6 +80,6 @@ export class TemplateUtil {
         console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
       }
     });
-    await Util.wait('1d');
+    await TimeUtil.wait('1d');
   }
 }

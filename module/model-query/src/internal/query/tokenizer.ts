@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { TimeUtil } from '@travetto/base';
 import { Token, TokenizeState, TokenType } from './types';
 
 const OPEN_PARENS = 0x28, CLOSE_PARENS = 0x29, OPEN_BRACKET = 0x5b, CLOSE_BRACKET = 0x5d, COMMA = 0x2c;
@@ -61,7 +61,7 @@ export class QueryLanguageTokenizer {
         value = parseInt(text, 10);
       } else if (/^-?\d+[.]\d+$/.test(text)) {
         value = parseFloat(text);
-      } else if (Util.isTimeSpan(text)) {
+      } else if (TimeUtil.isTimeSpan(text)) {
         value = text;
       } else {
         state.mode = 'identifier';

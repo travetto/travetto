@@ -1,7 +1,8 @@
-import { EnvInit } from '@travetto/base/support/bin/init';
-import { CliUtil } from '@travetto/boot';
-import { CliCommand, OptionConfig } from '@travetto/cli';
-import path = require('path');
+import * as path from 'path';
+
+import { EnvInit } from '@travetto/base/support/bin/env';
+import { PhaseManager } from '@travetto/boot';
+import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
 
 type Options = {
   watch: OptionConfig<boolean>;
@@ -24,7 +25,6 @@ export class EmailCompileCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    const { PhaseManager } = await import('@travetto/base');
     await PhaseManager.run('init');
 
     const { CompileUtil } = await import('../src/util');

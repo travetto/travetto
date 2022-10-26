@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { ColorUtil, EnvUtil } from '@travetto/boot';
+import { ColorUtil, EnvUtil } from '@travetto/base';
 
 import { LogEvent, Formatter } from '../types';
 

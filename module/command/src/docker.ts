@@ -1,9 +1,9 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as cp from 'child_process';
 import { rmSync } from 'fs';
 
-import { EnvUtil, ExecUtil, ExecutionState, ExecutionResult } from '@travetto/boot';
-import { ShutdownManager } from '@travetto/base';
+import { EnvUtil, ExecUtil, ExecutionState, ExecutionResult, ShutdownManager } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container
@@ -83,6 +83,10 @@ export class DockerContainer {
       throw err;
     });
     return state;
+  }
+
+  #execSync(...args: string[]): string {
+    return cp.execSync(`${this.#dockerCmd} ${args.join(' ')}`, { stdio: ['pipe', 'pipe'], encoding: 'utf8' }).toString().trim();
   }
 
   /**
@@ -401,20 +405,20 @@ export class DockerContainer {
    */
   forceDestroy(): void { // Cannot be async as it's used on exit, that's why it's all sync
     try {
-      ExecUtil.execSync(`${this.#dockerCmd} kill ${this.#container}`);
+      this.#execSync('kill', this.#container);
     } catch { }
 
     console.debug('Removing', { image: this.#image, container: this.#container });
 
     try {
-      ExecUtil.execSync(`${this.#dockerCmd} rm -fv ${this.#container}`);
+      this.#execSync('rm', '-fv', this.#container);
     } catch { }
 
     this.cleanupSync();
 
-    const ids = ExecUtil.execSync(`${this.#dockerCmd} volume ls -qf dangling=true`);
+    const ids = this.#execSync('volume', 'ls', '-qf', 'dangling=true');
     if (ids) {
-      ExecUtil.execSync(`${this.#dockerCmd} volume rm ${ids.split('\n').join(' ')}`);
+      this.#execSync('volume', 'rm', ...ids.split('\n'));
     }
   }
 
