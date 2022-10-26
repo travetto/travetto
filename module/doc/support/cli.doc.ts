@@ -3,7 +3,6 @@ import * as fs from 'fs/promises';
 
 import { EnvInit } from '@travetto/base/support/bin/init';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
-import { PathUtil } from '@travetto/boot';
 
 type Options = {
   input: OptionConfig<string>;
@@ -52,7 +51,7 @@ export class DocCommand extends CliCommand<Options> {
 
     const { RenderUtil } = await import('../src/render/util');
 
-    const docFile = PathUtil.resolveUnix(this.cmd.input);
+    const docFile = path.resolve(this.cmd.input).__posix;
 
     // If specifying output
     if (this.cmd.output.length) {
@@ -60,7 +59,7 @@ export class DocCommand extends CliCommand<Options> {
         RenderUtil.purge(docFile);
         for (const out of this.cmd.output) {
           const fmt = path.extname(out) ?? this.cmd.format;
-          const finalName = await PathUtil.resolveUnix(out);
+          const finalName = path.resolve(out).__posix;
           const result = await RenderUtil.render(docFile, fmt);
           await fs.writeFile(finalName, result, 'utf8');
         }
@@ -73,7 +72,7 @@ export class DocCommand extends CliCommand<Options> {
         try {
           await write();
         } catch (err) {
-          console.error(PathUtil.cwd, err);
+          console.error(process.cwd().__posix, err);
           process.exit(1);
         }
       }

@@ -157,4 +157,4 @@ class $AppManifest {
   }
 }
 
-export const AppManifest = new $AppManifest(Package);
+export const AppManifest = new $AppManifest(Package.main);

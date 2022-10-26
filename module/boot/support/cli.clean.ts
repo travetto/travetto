@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import { CliUtil, PathUtil } from '@travetto/boot';
+import { CliUtil } from '@travetto/boot';
 
 type Options = {
   full: OptionConfig<boolean>;
@@ -28,15 +28,16 @@ export class BaseCleanCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    for (const el of await fs.readdir(PathUtil.cwd)) {
+    const cwd = process.cwd().__posix;
+    for (const el of await fs.readdir(cwd)) {
       if (el.startsWith('.trv') && (await fs.stat(el)).isDirectory() && (!el.startsWith('.trv_compiler') || this.cmd.full)) {
         try {
           await fs.rmdir(el, { recursive: true, force: true });
           if (!this.cmd.quiet) {
-            console!.log(CliUtil.color`${{ success: 'Successfully' }} deleted temp dir ${{ path: path.join(PathUtil.cwd, el) }}`);
+            console!.log(CliUtil.color`${{ success: 'Successfully' }} deleted temp dir ${{ path: path.join(cwd, el).__posix }}`);
           }
         } catch {
-          console!.error(CliUtil.color`${{ failure: 'Failed' }} to delete temp dir ${{ path: path.join(PathUtil.cwd, el) }}`);
+          console!.error(CliUtil.color`${{ failure: 'Failed' }} to delete temp dir ${{ path: path.join(cwd, el).__posix }}`);
         }
       }
     }

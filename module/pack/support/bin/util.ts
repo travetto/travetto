@@ -1,10 +1,11 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import * as cp from 'child_process';
 
 // TODO: Get proper typings
 const glob = require('picomatch');
 
-import { CliUtil, FsUtil, PathUtil } from '@travetto/boot';
+import { CliUtil } from '@travetto/boot';
 import { ModuleIndex } from '@travetto/manifest';
 import { ScanFs } from '@travetto/base';
 
@@ -78,7 +79,7 @@ export class PackUtil {
 
     return (f: string): boolean => {
       let exclude = undefined;
-      f = PathUtil.resolveUnix(base, f);
+      f = path.resolve(base, f).__posix;
       for (const [match, n] of all) {
         if ((n || exclude === undefined) && match(f)) {
           if (n) { // Fast exit if negating
@@ -95,14 +96,14 @@ export class PackUtil {
    * Update .env.js with new env data
    */
   static async writeEnvJs(workspace: string, env: Record<string, string | undefined>): Promise<void> {
-    const out = `${workspace}/.env.js`;
+    const out = path.resolve(workspace, '.env.js').__posix;
     let src = '';
-    if (!!(await FsUtil.exists(out))) {
+    if (!!(await fs.stat(out).catch(() => { }))) {
       src = await fs.readFile(out, 'utf8');
     }
     const lines = Object.entries(env).map(([k, v]) => v ? `process.env['${k}'] = \`${v.replace(/`/g, '\\`')}\`;` : '');
     const content = `${src}\n${lines.join('\n')}`;
-    await fs.writeFile(PathUtil.resolveUnix(workspace, '.env.js'), content, { encoding: 'utf8' });
+    await fs.writeFile(out, content, { encoding: 'utf8' });
   }
 
   /**
@@ -170,6 +171,31 @@ export class PackUtil {
     if (message !== undefined) {
       process.stdout.write(`${spacer}${'-'.repeat(width)}\n`);
       process.stdout.write(`${spacer}${message}\n`);
+    }
+  }
+
+  /**
+   * Remove directory, determine if errors should be ignored
+   * @param src The folder to copy
+   * @param dest The folder to copy to
+   * @param ignore Should errors be ignored
+   */
+  static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
+    try {
+      await new Promise<void>((res, rej) => {
+        const [cmd, args] = process.platform === 'win32' ?
+          ['xcopy', ['/y', '/h', '/s', src.replaceAll('/', path.sep), dest.replaceAll('/', path.sep)]] :
+          ['cp', ['-r', '-p', src, dest]];
+
+        const proc = cp.spawn([cmd, ...args].join(' '), {});
+        proc
+          .on('error', err => rej(err))
+          .on('exit', (code: number) => code > 0 ? rej(new Error('Failed to copy')) : res());
+      });
+    } catch (err) {
+      if (!ignore) {
+        throw err;
+      }
     }
   }
 }

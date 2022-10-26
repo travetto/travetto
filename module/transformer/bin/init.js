@@ -1,58 +1,27 @@
 const path = require('path');
 const fs = require('fs');
 
-const delta = require('../../manifest/bin/manifest').delta();
+const { relativeDelta, bootstrap } = require('../../manifest/bin/manifest');
 
 const FOLDER = path.resolve(__dirname, '..', 'support', 'bin');
 const FILES = ['./precompile.ts', './config.ts', './workspace.ts', './manifest.ts'];
 
-/**
- * @param {fs.Stats} stat 
- */
-const recent = stat => Math.max(stat.ctimeMs, stat.mtimeMs);
-
-function shouldBootstrapCompiler(folder, files) {
-  for (const f of files) {
-    const source = path.resolve(folder, f);
-    try {
-      const targetStat = fs.statSync(source.replace(/[.]ts$/, '.js'));
-      const sourceStat = fs.statSync(source);
-      if (recent(sourceStat) > recent(targetStat)) {
-        return true;
-      }
-    } catch {
-      return true;
-    }
-  }
-  return false;
+function shouldBootstrapCompiler(delta) {
+  return !!(delta['@travetto/transformer'] ?? []).find(x => x.startsWith('support/bin/'));
 }
-
-function shouldStageCompiler() {
-
-}
-
-
-function bootstrapCompiler(folder, files) {
-  const cmd = require.resolve('typescript').replace(/(node_modules\/typescript)\/.*$/, (_, s) => `${s}/bin/tsc`);
-  const args = [
-    '--outDir', folder,
-    '-t', 'es2021',
-    '-m', 'commonjs',
-    '--rootDir', folder,
-    '--strict',
-    '--skipLibCheck',
-    ...files
-  ];
-  require('child_process').spawnSync(cmd, args, { cwd: folder });
-}
-
 
 function init() {
-  if (shouldBootstrapCompiler(FOLDER, FILES)) {
-    bootstrapCompiler(FOLDER, FILES);
+  const CWD = process.cwd().replace(/[\\]/g, '/');
+  const COMPILER_OUTPUT = path.resolve(CWD, process.env.TRV_COMPILER ?? '.trv_compiler');
+  const delta = relativeDelta(COMPILER_OUTPUT);
+
+  if (shouldBootstrapCompiler(delta)) {
+    bootstrap(FOLDER, FILES);
   }
 
   const { COMPILER_OUTPUT, SOURCE_OUTPUT } = require('../support/bin/config');
+
+  // Look at delta to determine if we need to run pre-compile
 
   if (!fs.existsSync(COMPILER_OUTPUT)) {
     cp.spawnSync(process.argv0, [require.resolve('../support/bin/precompile')], { stdio: ['pipe', 'pipe', 2], env: process.env });
@@ -61,6 +30,8 @@ function init() {
   // Maybe?
   const { writeManifest, buildManifest } = require('../support/bin/manifest');
   writeManifest(COMPILER_OUTPUT, buildManifest());
+
+  // Look at delta to determine if we need to run compile
 
   // Compile
   cp.spawnSync(process.argv0, [

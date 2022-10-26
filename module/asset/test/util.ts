@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as assert from 'assert';
+import * as path from 'path';
 
-import { PathUtil } from '@travetto/boot';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 
@@ -12,7 +12,7 @@ export class UtilTest {
 
   @BeforeAll()
   async init() {
-    ResourceManager.addPath(PathUtil.resolveUnix(__source.folder, '..', 'support', 'resources'));
+    ResourceManager.addPath(path.resolve(__source.folder, '..', 'support', 'resources').__posix);
   }
 
   @Test()

@@ -1,12 +1,12 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
-import { CliUtil, ExecUtil, PathUtil, FsUtil } from '@travetto/boot';
+import { CliUtil, ExecUtil } from '@travetto/boot';
 
 const presets: Record<string, [string, object] | [string]> =
-  JSON.parse(readFileSync(PathUtil.resolveUnix(__source.folder, 'resources', 'presets.json'), 'utf8'));
+  JSON.parse(readFileSync(path.resolve(__source.folder, 'resources', 'presets.json'), 'utf8').__posix);
 
 type Options = {
   extendedHelp: OptionConfig<boolean>;
@@ -27,8 +27,8 @@ export class OpenApiClientCommand extends CliCommand<Options> {
   }
 
   getListOfFormats(): string[] {
-    const formatCache = PathUtil.resolveUnix('.trv-openapi-formats.json');
-    if (!FsUtil.existsSync(formatCache)) {
+    const formatCache = path.resolve('.trv-openapi-formats.json').__posix;
+    if (!existsSync(formatCache)) {
       const stdout = ExecUtil.execSync('docker', ['run', '--rm', this.cmd.dockerImage, 'list']);
       const lines = stdout
         .split('DOCUMENTATION')[0]
@@ -47,8 +47,8 @@ export class OpenApiClientCommand extends CliCommand<Options> {
     return {
       extendedHelp: this.boolOption({ name: 'extended-help', short: 'x', desc: 'Show Extended Help' }),
       props: this.listOption({ name: 'additional-properties', short: 'a', desc: 'Additional Properties' }),
-      input: this.option({ desc: 'Input file', def: './openapi.yml', combine: v => PathUtil.resolveUnix(v), completion: true }),
-      output: this.option({ desc: 'Output folder', def: './api-client', combine: v => PathUtil.resolveUnix(v), completion: true }),
+      input: this.option({ desc: 'Input file', def: './openapi.yml', combine: v => path.resolve(v).__posix, completion: true }),
+      output: this.option({ desc: 'Output folder', def: './api-client', combine: v => path.resolve(v).__posix, completion: true }),
       dockerImage: this.option({ desc: 'Docker Image to use', def: 'arcsine/openapi-generator:latest' }),
       watch: this.boolOption({ desc: 'Watch for file changes' })
     };

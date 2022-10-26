@@ -1,6 +1,5 @@
 import * as util from 'util';
 
-import { PathUtil } from '@travetto/boot';
 import { Class, ClassInstance, Util } from '@travetto/base';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
@@ -41,16 +40,17 @@ export class AssertUtil {
    * Determine file location for a given error and the stack trace
    */
   static getPositionOfError(err: Error, filename: string): { file: string, line: number } {
+    const cwd = process.cwd().__posix;
     const lines = (err.stack ?? new Error().stack!)
       .replace(/[\\]/g, '/')
       .split('\n')
       // Exclude node_modules, target self
-      .filter(x => x.includes(PathUtil.cwd) && (!x.includes('node_modules') || x.includes('/support/')));
+      .filter(x => x.includes(cwd) && (!x.includes('node_modules') || x.includes('/support/')));
 
     let best = lines.filter(x => x.includes(filename))[0];
 
     if (!best) {
-      [best] = lines.filter(x => x.includes(`${PathUtil.cwd}/test`));
+      [best] = lines.filter(x => x.includes(`${cwd}/test`));
     }
 
     if (!best) {
@@ -72,7 +72,7 @@ export class AssertUtil {
       line = -1;
     }
 
-    const outFileParts = file.split(PathUtil.cwd.replace(/^[A-Za-z]:/, ''));
+    const outFileParts = file.split(cwd.replace(/^[A-Za-z]:/, ''));
 
     const outFile = outFileParts.length > 1 ? outFileParts[1].replace(/^[\/]/, '') : filename;
 

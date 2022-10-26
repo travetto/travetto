@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { FsUtil, PathUtil } from '@travetto/boot';
+import { existsSync } from 'fs';
 
 export type ResolvedDep = { file: string, type: DepType, dep: string, version: string };
 export type DepType = 'prod' | 'dev' | 'opt' | 'peer';
@@ -37,11 +37,11 @@ export class DependenciesUtil {
     let folder: string;
     try {
       folder = require.resolve(`${dep}/package.json`, { paths });
-      folder = path.dirname(PathUtil.resolveUnix(root, folder));
+      folder = path.dirname(path.resolve(root, folder).__posix);
     } catch {
       folder = require.resolve(dep, { paths });
-      folder = path.dirname(PathUtil.resolveUnix(root, folder));
-      while (!FsUtil.existsSync(`${folder}/package.json`)) {
+      folder = path.dirname(path.resolve(root, folder).__posix);
+      while (!existsSync(`${folder}/package.json`)) {
         const next = path.dirname(folder);
         if (folder === next) {
           throw new Error(`Unable to resolve dependency: ${dep}`);
@@ -56,7 +56,7 @@ export class DependenciesUtil {
    * Get list of all production dependencies and their folders, for a given package
    */
   static async resolveDependencies({
-    root = PathUtil.cwd,
+    root = process.cwd().__posix,
     types = ['prod'],
     maxDepth = Number.MAX_SAFE_INTEGER
   }: DepResolveConfig): Promise<ResolvedDep[]> {

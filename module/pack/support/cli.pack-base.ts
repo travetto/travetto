@@ -1,12 +1,14 @@
 import * as os from 'os';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import { CliUtil, PathUtil, Package, FsUtil } from '@travetto/boot';
+import { CliUtil, Package } from '@travetto/boot';
 
 import { PackUtil } from './bin/util';
 import { CommonConfig, PackOperation } from './bin/types';
 
-const packName = `pack_${Package.name}`
+const packName = `pack_${Package.main.name}`
   .toLowerCase()
   .replace(/[^a-z]+/g, '_')
   .replace(/_+/g, '_');
@@ -55,7 +57,7 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
     const def = list.find(c => c.name === 'default');
 
     const configs = [
-      { workspace: PathUtil.resolveUnix(os.tmpdir(), packName) },
+      { workspace: path.resolve(os.tmpdir(), packName).__posix },
       def,
       cfg,
       this.cmdOptions,
@@ -91,7 +93,7 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
 
   async action(): Promise<void> {
     const resolved = await this.resolveConfigs();
-    if (await FsUtil.exists(PathUtil.resolveUnix(resolved.workspace, '.git'))) {
+    if (await fs.stat(path.resolve(resolved.workspace, '.git').__posix).catch(() => { })) {
       throw new Error('Refusing to use workspace with a .git directory');
     }
     return PackUtil.runOperation(this.operation, resolved);

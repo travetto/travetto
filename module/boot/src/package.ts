@@ -1,7 +1,7 @@
+import * as path from 'path';
 import { readFileSync } from 'fs';
-import { PathUtil } from '../path';
 
-export type PackageType = {
+export type PackageShape = {
   name: string;
   displayName?: string;
   version: string;
@@ -33,6 +33,31 @@ export type PackageType = {
   publishConfig?: { access?: 'restricted' | 'public' };
 };
 
-export const readPackage = (folder: string): PackageType =>
+const readPackage = (folder: string): PackageShape =>
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  JSON.parse(readFileSync(PathUtil.resolveUnix(folder, 'package.json'), 'utf8')) as PackageType;
+  JSON.parse(readFileSync(path.resolve(folder, 'package.json').__posix, 'utf8')) as PackageShape;
+
+let config: PackageShape | undefined;
+
+export const Package = {
+  get main(): PackageShape {
+    if (config !== undefined) {
+      return config;
+    }
+    try {
+      return config = readPackage(process.cwd().__posix);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.warn(`Unable to locate ${path.resolve('package.json').__posix}: ${err.message}`);
+      } else {
+        throw err;
+      }
+      return config = {
+        name: 'unknown',
+        main: 'unknown',
+        version: '0.0.0'
+      };
+    }
+  },
+  read: readPackage
+};

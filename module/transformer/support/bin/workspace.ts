@@ -1,8 +1,8 @@
-import { mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import { ModuleShape } from './config';
+import { ModuleShape, ManifestUtil } from '@travetto/manifest';
 
 const CWD = process.cwd();
 
@@ -16,7 +16,7 @@ export class WorkspaceManager {
   constructor(outDir: string, bootLocation?: string) {
     this.#outDir = path.resolve(outDir).replaceAll('\\', '/');
     this.#bootLocation = path.resolve(bootLocation ?? __filename.split('node_modules')[0]).replaceAll('\\', '/');
-    this.#modules = JSON.parse(readFileSync(`${this.#bootLocation}/manifest.json`, 'utf8'));
+    this.#modules = Object.values(ManifestUtil.readManifest(`${this.#bootLocation}/manifest.json`)!.modules);
 
     this.#sourceToOutput = (file: string): string => {
       for (const m of this.#modules) {

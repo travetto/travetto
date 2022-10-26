@@ -1,4 +1,4 @@
-import { EnvUtil, PathUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/boot';
 
 /**
  * General tools for manipulating stack traces.
@@ -49,7 +49,7 @@ export class $StacktraceManager {
     const body = (typeof err === 'string' ? err : err.stack!).replace(/\\/g, '/').split('\n')
       .filter(x => !filter || !this.#filters.length || !this.#filterRegex.test(x)) // Exclude framework boilerplate
       .reduce<string[]>((acc, line) => {
-        const [, location] = line.split(PathUtil.cwd);
+        const [, location] = line.split(process.cwd().__posix);
 
         if (location === lastLocation) {
           // Do nothing
@@ -62,7 +62,7 @@ export class $StacktraceManager {
         return acc;
       }, [])
       .map(x => x
-        .replace(`${PathUtil.cwd}/`, './')
+        .replace(`${process.cwd().__posix}/`, './')
         .replace(/^[\/]+/, '')
       );
 

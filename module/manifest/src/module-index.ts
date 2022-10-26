@@ -1,6 +1,6 @@
 import * as path from 'path';
+import * as fs from 'fs';
 import type { ManifestShape, ModuleFile, ModuleFileType, ModuleShape } from './types';
-
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean };
@@ -13,21 +13,22 @@ export type ModuleIndexEntry = {
 };
 
 type IndexedModule = {
+  id: string;
   name: string;
   source: string;
   output: string;
   files: Record<string, ModuleIndexEntry[]>;
 };
 
-const CWD = process.cwd().replace(/[\\]/g, '/');
-
 /**
  * Module index, files to be loaded at runtime
  */
 class $ModuleIndex {
 
+  #manifest: ManifestShape;
   #modules: IndexedModule[];
   #root: string;
+  #idCache = new Map<string, string>();
 
   constructor(root: string) {
     this.#root = root;
@@ -37,9 +38,9 @@ class $ModuleIndex {
     return path.resolve(this.#root, ...parts).replace(/[\\]/g, '/');
   }
 
-  #loadManifest(): ManifestShape {
-    const modules: ManifestShape = require(this.#resolve('manifest.json'));
-    return modules;
+  get manifest(): ManifestShape {
+    this.#manifest ??= JSON.parse(fs.readFileSync(this.#resolve('manifest.json'), 'utf8'));
+    return this.#manifest
   }
 
   #moduleFiles(m: ModuleShape, files: ModuleFile[]): ModuleIndexEntry[] {
@@ -62,7 +63,7 @@ class $ModuleIndex {
    * Get index of all source files
    */
   get #index(): IndexedModule[] {
-    return this.#modules ??= Object.values(this.#loadManifest().modules).map(m => ({
+    return this.#modules ??= Object.values(this.manifest.modules).map(m => ({
       ...m,
       files: Object.fromEntries(
         Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files)])
@@ -129,6 +130,37 @@ class $ModuleIndex {
    */
   findTest(config: Omit<FindConfig, 'folder'>): ModuleIndexEntry[] {
     return this.find({ ...config, folder: 'test' });
+  }
+
+
+  /**
+   * Compute internal id from file name and optionally, class name
+   */
+  computeId(filename: string, clsName?: string): string {
+    if (clsName) {
+      return `${this.computeId(filename)}￮${clsName}`;
+    }
+
+    filename = filename.__posix;
+
+    if (this.#idCache.has(filename)) {
+      return this.#idCache.get(filename)!;
+    }
+
+    const rel = filename.replace(`${process.cwd().__posix}/`, '');
+
+    const mod = rel.startsWith('node_modules') ?
+      this.#modules.find(x => rel.startsWith(`${x.output}/`)) :
+      this.#modules.find(x => x.output === '');
+
+    if (mod) {
+      const name = rel.replace(mod.output, mod.id).replace(/\/src\//, '/');
+      this.#idCache.set(filename, name);
+      return name;
+    } else {
+      this.#idCache.set(filename, filename);
+      return filename;
+    }
   }
 }
 

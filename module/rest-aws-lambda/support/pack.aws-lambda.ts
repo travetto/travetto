@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
+import * as path from 'path';
 
-import { PathUtil } from '@travetto/boot';
 import type { AllConfigPartial } from '@travetto/pack';
 
 export const config: AllConfigPartial = {
@@ -17,8 +17,8 @@ export const config: AllConfigPartial = {
     postProcess: [{
       ['Lambda Entrypoint']: cfg =>
         fs.copyFile(
-          PathUtil.resolveUnix(__source.folder, 'aws-lambda.handler.js'),
-          PathUtil.resolveUnix(cfg.workspace, 'index.js')
+          path.resolve(__source.folder, 'aws-lambda.handler.js').__posix,
+          path.resolve(cfg.workspace, 'index.js').__posix
         )
     }],
   },

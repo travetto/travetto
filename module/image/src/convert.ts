@@ -1,9 +1,10 @@
 import * as fs from 'fs/promises';
+import * as path from 'path';
 import { mkdirSync } from 'fs';
 import { Readable } from 'stream';
 
 import { CommandService } from '@travetto/command';
-import { ExecUtil, StreamUtil, PathUtil, EnvUtil } from '@travetto/boot';
+import { ExecUtil, StreamUtil, EnvUtil } from '@travetto/boot';
 
 /**
  * Image output options
@@ -58,12 +59,12 @@ class $ImageConverter {
   #root: string;
 
   constructor(root: string) {
-    this.#root = PathUtil.resolveUnix(root);
+    this.#root = path.resolve(root).__posix;
     mkdirSync(root, { recursive: true });
   }
 
-  async #openFile(path: string): Promise<fs.FileHandle> {
-    return fs.open(PathUtil.joinUnix(this.#root, path.replace(/[\\/]/g, '__')));
+  async #openFile(pth: string): Promise<fs.FileHandle> {
+    return fs.open(path.join(this.#root, pth.replace(/[\\/]/g, '__')).__posix);
   }
 
   /**

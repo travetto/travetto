@@ -1,6 +1,6 @@
 import { setTimeout } from 'timers/promises';
 
-import { ClassMetadataUtil } from '@travetto/boot/src/internal/class-metadata';
+import { ModuleIndex } from '@travetto/manifest';
 
 import { Util } from './util';
 import { AppManifest } from './manifest';
@@ -147,7 +147,7 @@ class $ShutdownManager {
       handler = handler!;
     }
     if (/[.][tj]s$/.test(name)) {
-      name = ClassMetadataUtil.computeId(name);
+      name = ModuleIndex.computeId(name);
     }
     this.#listeners.push({ name, handler, final });
   }

@@ -1,4 +1,4 @@
-import { SystemUtil } from '@travetto/boot/src/internal/system';
+import { Util } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
 
 const ContextActiveⲐ: unique symbol = Symbol.for('@trv:model/sql-active');
@@ -110,7 +110,7 @@ export abstract class Connection<C = unknown> {
   async runWithTransaction<R>(mode: TransactionType, op: () => R): Promise<R> {
     if (this.activeTx) {
       if (mode === 'isolated' || mode === 'force') {
-        const txId = mode === 'isolated' ? `tx${SystemUtil.uuid()}` : undefined;
+        const txId = mode === 'isolated' ? `tx${Util.uuid()}` : undefined;
         try {
           await this.startTx(this.active, txId);
           const res = await op();

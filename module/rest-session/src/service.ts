@@ -1,10 +1,10 @@
 import { Injectable, Inject } from '@travetto/di';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
+import { Util } from '@travetto/base';
 import { EnvUtil } from '@travetto/boot';
 import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Request, Response } from '@travetto/rest';
-import { SystemUtil } from '@travetto/boot/src/internal/system';
 
 import { Session, SessionData } from './session';
 import { SessionConfig } from './config';
@@ -132,7 +132,7 @@ export class SessionService {
       // @ts-expect-error
       req[SessionⲐ] = undefined;
     }
-    return req[SessionⲐ] ??= new Session({ action: 'create', data: {}, id: SystemUtil.uuid(), maxAge: this.config.maxAge });
+    return req[SessionⲐ] ??= new Session({ action: 'create', data: {}, id: Util.uuid(), maxAge: this.config.maxAge });
   }
 
   /**

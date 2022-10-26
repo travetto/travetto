@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 import * as fs from 'fs/promises';
 import { createReadStream } from 'fs';
+import * as path from 'path';
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
 
-import { PathUtil } from '@travetto/boot';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ResourceManager } from '@travetto/base';
 
@@ -38,7 +38,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
 
   @BeforeAll()
   async beforeAll(): Promise<void> {
-    ResourceManager.addPath(PathUtil.resolveUnix(__source.folder, '..', 'resources'));
+    ResourceManager.addPath(path.resolve(__source.folder, '..', 'resources').__posix);
   }
 
   @Test()

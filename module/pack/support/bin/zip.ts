@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { CliUtil, ExecUtil, FsUtil, PathUtil } from '@travetto/boot';
+import { CliUtil, ExecUtil } from '@travetto/boot';
 
 import { CommonConfig, PackOperation } from './types';
 import { PackUtil } from './util';
@@ -29,12 +29,12 @@ export const Zip: PackOperation<ZipConfig, 'zip'> = {
   * Zip workspace with flags
   */
   async * exec({ workspace, output }: ZipConfig) {
-    const ws = PathUtil.resolveUnix(workspace);
-    const zipFile = PathUtil.resolveUnix(output);
+    const ws = path.resolve(workspace).__posix;
+    const zipFile = path.resolve(output).__posix;
 
     yield 'Preparing Target';
     await fs.mkdir(path.dirname(zipFile), { recursive: true });
-    if (await FsUtil.exists(zipFile)) {
+    if (await fs.stat(zipFile).catch(() => { })) {
       await fs.unlink(zipFile); // Unlink
     }
 
@@ -45,6 +45,6 @@ export const Zip: PackOperation<ZipConfig, 'zip'> = {
       await ExecUtil.spawn('zip', ['-r', zipFile, '.'], { cwd: ws }).result;
     }
 
-    yield CliUtil.color`${{ success: 'Successfully' }} archived project to ${{ path: zipFile.replace(PathUtil.cwd, '.') }}`;
+    yield CliUtil.color`${{ success: 'Successfully' }} archived project to ${{ path: zipFile.replace(process.cwd().__posix, '.') }}`;
   }
 };

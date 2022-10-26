@@ -1,7 +1,6 @@
 import { d, lib } from '@travetto/doc';
 import { ExecUtil, StreamUtil } from '.';
 
-const FsUtilLink = d.Ref('FsUtil', 'src/fs.ts');
 const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
 const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
 
@@ -12,7 +11,6 @@ Boot is basic environment  awareness coupled with typescript bootstrapping for $
 ${d.List(
   'Environmental Information',
   'Module Indexing',
-  'File Operations',
   'Process Execution',
   'Stream Support'
 )}
@@ -27,9 +25,6 @@ ${d.List(
   d`${d.Method('getInt(key: string, def?: number): number;')} - Retrieve an environmental value as a number`,
   d`${d.Method('getList(key: string): string[];')} - Retrieve an environmental value as a list`,
 )}
-
-${d.Section('File Operations')}
-${FsUtilLink} provides some high level functionality (like recursive directory delete).
 
 ${d.SubSection('Module Indexing')}
 The bootstrap process will also produce an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatic discovery that is used within the framework (and transpiling).

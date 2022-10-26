@@ -2,8 +2,6 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { FsUtil } from '@travetto/boot';
-
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
@@ -50,7 +48,7 @@ class TestRunnerFeature extends BaseFeature {
     this.#consumer.dispose();
     await fs.rm(this.#cacheDir, { recursive: true, force: true });
     if (recopy) {
-      await FsUtil.copyRecursive(`${Workspace.path}/.trv_cache`, this.#cacheDir, true);
+      await Workspace.copyRecursive(`${Workspace.path}/.trv_cache`, this.#cacheDir, true);
     }
   }
 

@@ -2,7 +2,6 @@ import { ChildProcess, SpawnOptions, spawn, execSync } from 'child_process';
 import { Readable } from 'stream';
 import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 
-import { PathUtil } from './path';
 import { StreamUtil } from './stream';
 
 /**
@@ -92,7 +91,7 @@ export class ExecUtil {
   static getOpts(opts: ExecutionOptions): ExecutionOptions {
     return {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      cwd: PathUtil.cwd,
+      cwd: process.cwd().__posix,
       shell: false,
       ...opts,
       env: {

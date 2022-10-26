@@ -1,7 +1,7 @@
 import { lstatSync, readdir, statSync, } from 'fs';
 import * as ts from 'typescript';
+import * as path from 'path';
 
-import { PathUtil } from '@travetto/boot';
 import { ScanEntry, ScanFs, ScanHandler } from '@travetto/base';
 
 import { WatchEmitter } from './emitter';
@@ -36,7 +36,7 @@ export class Watcher extends WatchEmitter {
   constructor(folder: string, options: WatcherOptions = {}) {
     super(options.maxListeners);
     this.#options = { interval: 100, ...options };
-    this.#folder = PathUtil.resolveUnix(this.#options.cwd ?? PathUtil.cwd, folder);
+    this.#folder = path.resolve(this.#options.cwd ?? process.cwd(), folder).__posix;
 
     this.suppress = !!this.#options.ignoreInitial;
 
@@ -61,7 +61,7 @@ export class Watcher extends WatchEmitter {
       }
 
       // Convert to full paths
-      current = current.filter(x => !x.startsWith('.')).map(x => PathUtil.joinUnix(dir.file, x));
+      current = current.filter(x => !x.startsWith('.')).map(x => path.join(dir.file, x).__posix);
 
       // Get watched files for this dir
       const previous = (dir.children ?? []).slice(0);
@@ -105,8 +105,8 @@ export class Watcher extends WatchEmitter {
 
     try {
       console.debug('Watching Directory', { directory: entry.file });
-      // const watcher = fs.watch(PathUtil.resolveUnix(entry.file), { persistent: false }, () => this.processDirectoryChange(entry);
-      const watcher = ts.sys.watchDirectory!(PathUtil.resolveUnix(entry.file), () => this.#processDirectoryChange(entry), false);
+      // const watcher = fs.watch(path.resolve(entry.file).__posix, { persistent: false }, () => this.processDirectoryChange(entry);
+      const watcher = ts.sys.watchDirectory!(path.resolve(entry.file).__posix, () => this.#processDirectoryChange(entry), false);
 
       // watcher.on('error', this.handleError.bind(this));
       this.#directories.set(entry.file, watcher);

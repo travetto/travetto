@@ -4,7 +4,7 @@ import * as os from 'os';
 import * as path from 'path';
 import { Readable } from 'stream';
 
-import { FsUtil, PathUtil, StreamUtil } from '@travetto/boot';
+import { StreamUtil } from '@travetto/boot';
 import { Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -38,10 +38,12 @@ export class FileModelConfig {
 
   async postConstruct(): Promise<void> {
     if (!this.folder) {
-      this.folder = PathUtil.resolveUnix(os.tmpdir(), ModelUtil.uuid().substring(0, 10));
+      this.folder = path.resolve(os.tmpdir(), ModelUtil.uuid().substring(0, 10)).__posix;
     }
   }
 }
+
+const exists = (f: string) => fs.stat(f).catch(() => { });
 
 /**
  * Standard file support
@@ -51,9 +53,9 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   private static async * scanFolder(folder: string, suffix: string): AsyncGenerator<[id: string, field: string]> {
     for (const sub of await fs.readdir(folder)) {
-      for (const file of await fs.readdir(PathUtil.resolveUnix(folder, sub))) {
+      for (const file of await fs.readdir(path.resolve(folder, sub).__posix)) {
         if (file.endsWith(suffix)) {
-          yield [file.replace(suffix, ''), PathUtil.resolveUnix(folder, sub, file)];
+          yield [file.replace(suffix, ''), path.resolve(folder, sub, file).__posix];
         }
       }
     }
@@ -72,16 +74,16 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   async #resolveName<T extends ModelType>(cls: Class<T> | string, suffix?: Suffix, id?: string): Promise<string> {
     const name = typeof cls === 'string' ? cls : ModelRegistry.getStore(cls);
-    let resolved = PathUtil.resolveUnix(this.config.folder, this.config.namespace, name);
+    let resolved = path.resolve(this.config.folder, this.config.namespace, name).__posix;
     if (id) {
-      resolved = PathUtil.resolveUnix(resolved, id.replace(/^[/]/, '').substring(0, 3));
+      resolved = path.resolve(resolved, id.replace(/^[/]/, '').substring(0, 3)).__posix;
     }
     let dir = resolved;
     if (id) {
-      resolved = PathUtil.resolveUnix(resolved, `${id}${suffix}`);
+      resolved = path.resolve(resolved, `${id}${suffix}`);
       dir = path.dirname(resolved);
     }
-    if (!await FsUtil.exists(dir)) {
+    if (!await exists(dir)) {
       await fs.mkdir(dir, { recursive: true });
     }
     return resolved;
@@ -89,7 +91,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   async #find<T extends ModelType>(cls: Class<T> | string, suffix: Suffix, id?: string): Promise<string> {
     const file = await this.#resolveName(cls, suffix, id);
-    if (id && !(await FsUtil.exists(file))) {
+    if (id && !(await exists(file))) {
       throw new NotFoundError(cls, id);
     }
     return file;
@@ -116,7 +118,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
     const file = await this.#resolveName(cls, '.json', id);
 
-    if (await FsUtil.exists(file)) {
+    if (await exists(file)) {
       const content = await StreamUtil.streamToBuffer(createReadStream(file));
       return this.checkExpiry(cls, await ModelCrudUtil.load(cls, content));
     }
@@ -131,7 +133,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
     const file = await this.#resolveName(cls, '.json', item.id);
 
-    if (await FsUtil.exists(file)) {
+    if (await exists(file)) {
       throw new ExistsError(cls, item.id!);
     }
 
@@ -204,7 +206,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   async deleteStream(location: string): Promise<void> {
     const file = await this.#resolveName(STREAMS, BIN, location);
-    if (await FsUtil.exists(file)) {
+    if (await exists(file)) {
       await Promise.all([
         fs.unlink(file),
         fs.unlink(file.replace('.bin', META))
@@ -227,12 +229,12 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   // Storage management
   async createStorage(): Promise<void> {
-    const dir = PathUtil.resolveUnix(this.config.folder, this.config.namespace);
+    const dir = path.resolve(this.config.folder, this.config.namespace).__posix;
     await fs.mkdir(dir, { recursive: true });
   }
 
   async deleteStorage(): Promise<void> {
-    await fs.rm(PathUtil.resolveUnix(this.config.folder, this.config.namespace), { recursive: true, force: true });
+    await fs.rm(path.resolve(this.config.folder, this.config.namespace).__posix, { recursive: true, force: true });
   }
 
   async truncateModel(cls: Class<ModelType>): Promise<void> {

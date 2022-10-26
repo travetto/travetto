@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { FsUtil, PathUtil } from '@travetto/boot';
 import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {
@@ -23,8 +22,8 @@ interface ConfigType {
  */
 export class $EditorConfig {
 
-  #configFile = PathUtil.resolveUnix('resources/email/dev.yml');
-  #defaultConfig = fs.readFile(PathUtil.resolveUnix(__source.folder, 'default-dev.yml'), 'utf8');
+  #configFile = path.resolve('resources/email/dev.yml').__posix;
+  #defaultConfig = fs.readFile(path.resolve(__source.folder, 'default-dev.yml').__posix, 'utf8');
 
   /**
    *
@@ -55,7 +54,7 @@ export class $EditorConfig {
 
   async ensureConfig(): Promise<string> {
     const file = this.#configFile;
-    if (!(await FsUtil.exists(file))) {
+    if (!(await fs.stat(file).catch(() => { }))) {
       await fs.mkdir(path.dirname(file), { recursive: true });
       await fs.writeFile(file, await this.#defaultConfig, { encoding: 'utf8' });
     }

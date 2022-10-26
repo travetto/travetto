@@ -1,6 +1,6 @@
 import { ConsoleManager, LogLevel, EnvUtil } from '@travetto/boot';
 import { AppManifest, Util } from '@travetto/base';
-import { ClassMetadataUtil } from '@travetto/boot/src/internal/class-metadata';
+import { ModuleIndex } from '@travetto/manifest';
 
 import { Appender, Formatter, LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
@@ -129,7 +129,7 @@ class $Logger {
       message = '';
     }
 
-    const category = ClassMetadataUtil.computeId(file);
+    const category = ModuleIndex.computeId(file);
 
     if ((level in this.#exclude) || (category && level in this.#filters && !this.#filters[level]!(category))) {
       return;

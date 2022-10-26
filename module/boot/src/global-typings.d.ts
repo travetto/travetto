@@ -17,6 +17,11 @@ declare global {
     __proto__: unknown;
   }
 
+  // Posix compatible
+  interface String {
+    __posix: string;
+  }
+
   // Parallel to __filename, but cleansed
   var __source: {
     file: string;

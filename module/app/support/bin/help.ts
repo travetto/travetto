@@ -1,4 +1,4 @@
-import { CliUtil, PathUtil } from '@travetto/boot';
+import { CliUtil } from '@travetto/boot';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -36,6 +36,7 @@ export class HelpUtil {
     if (!configs || !configs.length) {
       return CliUtil.color`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
     }
+    const cwdPrefix = `${process.cwd().__posix}/`;
     for (const conf of configs) {
       const lines = [];
 
@@ -43,7 +44,7 @@ export class HelpUtil {
 
       lines.push(CliUtil.color`${{ identifier: conf.name }} ${{ subtitle: conf.description }}`);
       lines.push(CliUtil.color`${{ subsubtitle: 'usage' }}: ${usage}`);
-      lines.push(CliUtil.color`${{ subsubtitle: 'file' }}:  ${{ path: conf.filename.replace(`${PathUtil.cwd}/`, '') }}`);
+      lines.push(CliUtil.color`${{ subsubtitle: 'file' }}:  ${{ path: conf.filename.replace(cwdPrefix, '') }}`);
 
       // eslint-disable-next-line no-control-regex
       const len = lines.reduce((acc, v) => Math.max(acc, v.replace(/\x1b\[\d+m/g, '').length), 0);

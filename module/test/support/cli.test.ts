@@ -1,7 +1,7 @@
 import * as os from 'os';
 import { readFileSync } from 'fs';
+import * as fs from 'fs/promises';
 
-import { FsUtil } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli';
 import { ModuleIndex } from '@travetto/manifest';
 
@@ -55,7 +55,7 @@ export class TestCommand extends CliCommand<Options> {
 
   async isFile(file: string, errorIfNot?: string): Promise<true | undefined> {
     try {
-      const stat = await FsUtil.exists(file);
+      const stat = await fs.stat(file).catch(() => { });
       const res = stat?.isFile();
       if (res) {
         return true;

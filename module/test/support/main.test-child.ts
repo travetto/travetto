@@ -1,13 +1,12 @@
 import * as fs from 'fs/promises';
-
-import { PathUtil } from '@travetto/boot';
+import * as path from 'path';
 
 import { envInit } from './bin/env';
 
 export async function customLogs(): Promise<void> {
   const { ConsoleManager } = await import('@travetto/boot');
 
-  const handle = await fs.open(PathUtil.resolveUnix(`.trv-test-worker.${process.pid}.log`), 'a');
+  const handle = await fs.open(path.resolve(`.trv-test-worker.${process.pid}.log`).__posix, 'a');
   const stdout = handle.createWriteStream();
 
   const c = new console.Console({

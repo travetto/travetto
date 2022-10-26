@@ -44,7 +44,7 @@ function bootstrap(folder, files) {
   require('child_process').spawnSync(cmd, args, { cwd: folder });
 }
 
-function relativeDelta(outputFolder, inputManifest) {
+function relativeDelta(outputFolder, inputManifest = `${outputFolder}/manifest.json`) {
   if (shouldBootstrap(FOLDER, FILES)) {
     bootstrap(FOLDER, FILES);
   }

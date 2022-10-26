@@ -1,5 +1,6 @@
+import * as path from 'path';
+
 import { Util } from '@travetto/base';
-import { PathUtil } from '@travetto/boot';
 import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 
 import { Watcher } from './watcher';
@@ -17,7 +18,7 @@ export class WatchUtil {
     new Watcher(__source.folder, { interval: 250, exclude: { testDir: () => false, testFile: f => f === file } })
       .on('all', async e => {
         if (unload) {
-          await DynamicLoader.unload(PathUtil.resolveUnix(file));
+          await DynamicLoader.unload(path.resolve(file).__posix);
         }
         cb(e);
       });

@@ -49,6 +49,14 @@ Object.defineProperty(Error.prototype, 'toJSON', {
   }
 });
 
+// Add __posix to the String class
+Object.defineProperty(String.prototype, '__unix', {
+  ...propDef,
+  get() {
+    return this.replaceAll('\\', '/');
+  }
+})
+
 async function main(target: Function, args = process.argv.slice(2), respond = true): Promise<unknown> {
   const sourceMapSupport = await import('source-map-support');
 

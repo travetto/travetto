@@ -1,8 +1,7 @@
 import * as fs from 'fs';
 import * as rl from 'readline';
+import * as path from 'path';
 import { ExtensionContext } from 'vscode';
-
-import { FsUtil, AppCache, PathUtil } from '@travetto/boot';
 
 import { TargetEvent } from './types';
 
@@ -45,7 +44,7 @@ export class IpcSupport {
   }
 
   #ensureFile(): void {
-    if (FsUtil.existsSync(this.#file)) {
+    if (fs.existsSync(this.#file)) {
       fs.unlinkSync(this.#file);
     }
     fs.appendFileSync(this.#file, '');
@@ -71,8 +70,7 @@ export class IpcSupport {
   }
 
   activate(ctx: ExtensionContext): void {
-    this.#file = PathUtil.joinUnix(AppCache.outputDir, `trv_ipc_vscode_${process.ppid}.ndjson`);
-    AppCache.init();
+    this.#file = path.resolve(`.trv_ipc_vscode_${process.ppid}.ndjson`).__posix;
     this.#ensureFile();
 
     ctx.environmentVariableCollection.replace('TRV_CLI_JSON_IPC', this.#file);

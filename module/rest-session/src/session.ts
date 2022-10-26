@@ -1,4 +1,4 @@
-import { SystemUtil } from '@travetto/boot/src/internal/system';
+import { Util } from '@travetto/base';
 import { ContextProvider } from '@travetto/rest';
 
 /**
@@ -73,7 +73,7 @@ export class Session<T extends SessionData = SessionData>  {
     }
 
     // Hash the session as it stands
-    this.#hash = SystemUtil.naiveHash(JSON.stringify(this));
+    this.#hash = Util.naiveHash(JSON.stringify(this));
   }
 
   /**
@@ -97,7 +97,7 @@ export class Session<T extends SessionData = SessionData>  {
    * Determine if session has changed
    */
   isChanged(): boolean {
-    return this.isTimeChanged() || this.#hash !== SystemUtil.naiveHash(JSON.stringify(this));
+    return this.isTimeChanged() || this.#hash !== Util.naiveHash(JSON.stringify(this));
   }
 
   /**
