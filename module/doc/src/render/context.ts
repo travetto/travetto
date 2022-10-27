@@ -1,7 +1,8 @@
 import * as path from 'path';
 import { existsSync } from 'fs';
 
-import { EnvUtil, PackageUtil } from '@travetto/base';
+import { PackageUtil } from '@travetto/boot';
+import { EnvUtil } from '@travetto/base';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { AllType, AllTypeMap, node as n } from '../nodes';

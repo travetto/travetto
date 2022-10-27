@@ -23,21 +23,6 @@ export class $StacktraceManager {
   }
 
   /**
-   * Connect into Error toJSON and set stacktrace limit
-   */
-  register(): void {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const mgr = this;
-
-    // TODO: Revisit
-    Error.prototype.resolveStack = function (this: Error): string {
-      const stack = mgr.simplifyStack(this);
-      return stack.substring(stack.indexOf('\n') + 1);
-    };
-    Error.stackTraceLimit = 50;
-  }
-
-  /**
    * Clean up the stack output for an error
    * @param err The error to filter
    * @param filter Should the stack be filtered
@@ -73,3 +58,8 @@ export class $StacktraceManager {
 }
 
 export const StacktraceManager = new $StacktraceManager();
+
+ᚕtrv.resolveStack = function (err: Error): string {
+  const stack = StacktraceManager.simplifyStack(err);
+  return stack.substring(stack.indexOf('\n') + 1);
+};

@@ -1,4 +1,5 @@
-import { Class, AppManifest, ShutdownManager, ConcreteClass } from '@travetto/base';
+import { PackageUtil } from '@travetto/boot';
+import { Class, ShutdownManager, ConcreteClass, EnvUtil } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
 import { ConfigManager } from '@travetto/config';
@@ -59,7 +60,10 @@ class $ApplicationRegistry {
     });
 
     // Show manifest
-    console.log('Manifest', AppManifest.toJSON());
+    console.log('Manifest', {
+      info: PackageUtil.mainDigest(),
+      env: EnvUtil.digest(),
+    });
 
     // Get instance of app class
     const inst = DependencyRegistry.get(config.target!) ?

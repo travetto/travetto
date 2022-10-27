@@ -1,6 +1,6 @@
-import { RetargettingProxy, OrderingUtil } from '@travetto/boot';
+import { RetargettingProxy, OrderingUtil, PackageUtil } from '@travetto/boot';
 
-import { EnvUtil, Class, AppManifest, AppError } from '@travetto/base';
+import { EnvUtil, Class, AppError } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
 import { Application } from '@travetto/app';
@@ -36,7 +36,7 @@ export class RestApplication<T = unknown>  {
   /**
    * Provide the base information for the app
    */
-  info = AppManifest.toJSON();
+  info: Record<string, unknown>;
 
   constructor() {
     this.onControllerChange = this.onControllerChange.bind(this);
@@ -44,7 +44,11 @@ export class RestApplication<T = unknown>  {
   }
 
   async postConstruct(): Promise<void> {
-    this.info.restProvider = this.server.constructor.name;
+    this.info = {
+      info: PackageUtil.mainDigest(),
+      env: EnvUtil.digest(),
+      restProvider: this.server.constructor.name
+    };
 
     await this.server.init();
 

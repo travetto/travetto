@@ -1,4 +1,3 @@
-import { AppManifest } from '@travetto/base';
 import { LogEvent, Formatter, Appender } from './types';
 
 /**
@@ -32,10 +31,7 @@ export class LogUtil {
 
     // Auto wildcard for modules
     if (cleaned.startsWith('@app')) {
-      const [, sfx] = cleaned.match(/^@app(?::(.*)?)?$/)!;
-      const sub = [...AppManifest.source.common, ...AppManifest.source.local]
-        .map(f => ['.', f, sfx ?? ''].filter(x => !!x).join('/'));
-      filter.push(...sub);
+      filter.push('./src', './support', './test');
     } else {
       filter.push(cleaned);
     }

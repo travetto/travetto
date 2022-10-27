@@ -55,8 +55,8 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
     }));
   }
 
-  async getAsset(path: string) {
-    return AssetUtil.fileToAsset(await ResourceManager.findAbsolute(path));
+  async getAsset(pth: string) {
+    return AssetUtil.fileToAsset(await ResourceManager.findAbsolute(pth));
   }
 
   @BeforeAll()

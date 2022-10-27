@@ -1,7 +1,7 @@
 import * as Mod from 'module';
 import * as path from 'path';
 
-import { EnvUtil } from '../../../base/src/env';
+import { EnvUtil } from '@travetto/base';
 import { ModuleIndex } from '../module-index';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -51,7 +51,7 @@ export class $DynamicLoader {
       base ? `let keys = ['${Object.keys(base).join("','")}']` : '',
       base ? `let values = ['${Object.values(base).join("','")}']` : '',
       `let msg = \`${message}\`;`,
-      "Object.defineProperty(exports, '@trv', { value: true })",
+      "Object.defineProperty(exports, 'Ⲑtrv', { value: true })",
       `module.exports = new Proxy({}, { ${Object.entries(map).map(([k, v]) => f([k, v!])).join(',')}});`
     ].join('\n');
   }
@@ -70,7 +70,7 @@ export class $DynamicLoader {
       err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
     }
 
-    if (EnvUtil.isDynamic() && !filename.startsWith('test/')) {
+    if (/^(yes|on|1|true)$/i.test(process.env.TRV_DYNAMIC ?? '') && !filename.startsWith('test/')) {
       console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
       return this.getErrorModuleSource(err.message);
     }
@@ -89,7 +89,7 @@ export class $DynamicLoader {
   #checkForCycles(mod: unknown, request: string, parent: NodeJS.Module): void {
     if (parent && !parent.loaded) { // Standard ts compiler output
       const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
-      if (!mod || !('@trv' in desc)) {
+      if (!mod || !('Ⲑtrv' in desc)) {
         try {
           const p = Module._resolveFilename!(request, parent);
           if (p && !p.includes('node_modules')) {

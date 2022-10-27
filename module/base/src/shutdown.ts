@@ -1,9 +1,8 @@
 import { setTimeout } from 'timers/promises';
 
-import { ModuleIndex } from '@travetto/boot';
+import { ModuleIndex, PackageUtil } from '@travetto/boot';
 
 import { Util } from './util';
-import { AppManifest } from './manifest';
 import { TimeUtil } from './time';
 
 const ogExit = process.exit;
@@ -78,10 +77,12 @@ class $ShutdownManager {
       this.#shutdownCode = exitCode;
     }
 
+    const name = PackageUtil.main.name;
+
     try {
       // If the err is not an exit code
       if (exitErr && typeof exitErr !== 'number') {
-        console.warn('Error on shutdown', { package: AppManifest.info.name, error: exitErr });
+        console.warn('Error on shutdown', { package: name, error: exitErr });
       }
 
       // Get list of all pending listeners
@@ -89,15 +90,16 @@ class $ShutdownManager {
 
       // Run them all, with the ability for the shutdown to preempt
       if (promises.length) {
+        const waitTime = TimeUtil.getEnvTime('TRV_SHUTDOWN_WAIT', '2s');
         const finalRun = Promise.race([
           ...promises,
-          TimeUtil.wait(AppManifest.env.shutdownWait).then(() => { throw new Error('Timeout on shutdown'); })
+          TimeUtil.wait(waitTime).then(() => { throw new Error('Timeout on shutdown'); })
         ]);
         await finalRun;
       }
 
     } catch (err) {
-      console.warn('Error on shutdown', { package: AppManifest.info.name, error: err });
+      console.warn('Error on shutdown', { package: name, error: err });
     }
 
     if (this.#shutdownCode >= 0) {
