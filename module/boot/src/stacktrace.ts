@@ -29,10 +29,12 @@ export class $StacktraceManager {
    */
   simplifyStack(err: Error | string, filter = true): string {
     let lastLocation: string = '';
-    const body = (typeof err === 'string' ? err : err.stack!).replace(/\\/g, '/').split('\n')
+    const cwd = process.cwd().__posix;
+    const cwdPrefix = `${cwd}/`;
+    const body = (typeof err === 'string' ? err : err.stack!).__posix.split('\n')
       .filter(x => !filter || !this.#filters.length || !this.#filterRegex.test(x)) // Exclude framework boilerplate
       .reduce<string[]>((acc, line) => {
-        const [, location] = line.split(process.cwd().__posix);
+        const [, location] = line.split(cwd);
 
         if (location === lastLocation) {
           // Do nothing
@@ -45,7 +47,7 @@ export class $StacktraceManager {
         return acc;
       }, [])
       .map(x => x
-        .replace(`${process.cwd().__posix}/`, './')
+        .replace(cwdPrefix, './')
         .replace(/^[\/]+/, '')
       );
 
