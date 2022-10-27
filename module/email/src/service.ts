@@ -1,4 +1,4 @@
-import { EnvUtil, ResourceManager } from '@travetto/base';
+import { Env, ResourceManager } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { MessageOptions, SentMessage } from './types';
@@ -45,7 +45,7 @@ export class MailService {
    */
   async sendCompiled<S extends SentMessage = SentMessage>(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<S> {
     // Bypass cache if in dynamic mode
-    if (EnvUtil.isDynamic() || !this.#compiled.has(key)) {
+    if (Env.isDynamic() || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         ResourceManager.read(`${key}.compiled.html`, 'utf8'),
         ResourceManager.read(`${key}.compiled.text`, 'utf8').catch(() => ''),

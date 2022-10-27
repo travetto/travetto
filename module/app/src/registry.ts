@@ -1,5 +1,5 @@
 import { PackageUtil } from '@travetto/boot';
-import { Class, ShutdownManager, ConcreteClass, EnvUtil } from '@travetto/base';
+import { Class, ShutdownManager, ConcreteClass, Env } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
 import { ConfigManager } from '@travetto/config';
@@ -62,7 +62,7 @@ class $ApplicationRegistry {
     // Show manifest
     console.log('Manifest', {
       info: PackageUtil.mainDigest(),
-      env: EnvUtil.digest(),
+      env: Env.digest(),
     });
 
     // Get instance of app class

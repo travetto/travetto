@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 
 import { ScanFs, ScanEntry } from './scan';
 import { AppError } from './error';
-import { EnvUtil } from './env';
+import { Env } from './env';
 
 const cleanPath = (p: string): string => p.charAt(0) === '/' ? p.substring(1) : p;
 
@@ -30,7 +30,7 @@ class $ResourceManager {
   #paths: string[] = [];
 
   init(): void {
-    this.#paths.unshift('resources', ...EnvUtil.getResourcePaths());
+    this.#paths.unshift('resources', ...Env.getResourcePaths());
 
     this.#paths = this.#paths
       .map(x => path.resolve(x).__posix)

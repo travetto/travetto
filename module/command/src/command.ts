@@ -1,4 +1,4 @@
-import { EnvUtil, ExecUtil, ExecutionResult, ExecutionState } from '@travetto/base';
+import { Env, ExecUtil, ExecutionResult, ExecutionState } from '@travetto/base';
 
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
@@ -16,7 +16,7 @@ export class CommandService {
    * Check to see if docker is available
    */
   static async dockerAvailable(): Promise<boolean> {
-    if (this.#hasDocker === undefined && !EnvUtil.isFalse('TRV_DOCKER')) { // Check for docker existence
+    if (this.#hasDocker === undefined && !Env.isFalse('TRV_DOCKER')) { // Check for docker existence
       const { result: prom } = ExecUtil.spawn('docker', ['ps']);
       this.#hasDocker = (await prom).valid;
     }

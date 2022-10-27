@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 import { Class, ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';
 import type { InjectableConfig } from '@travetto/di';
@@ -67,7 +69,7 @@ export class ModelCandidateUtil {
    */
   static async getCandidates(op: keyof ModelStorageSupport): Promise<CandidateNames> {
     return CliUtil.waiting('Resolving', () =>
-      ExecUtil.worker<CandidateNames>(require.resolve('../candidate'), [op]).message
+      ExecUtil.worker<CandidateNames>(path.resolve(__source.folder, '..', 'candidate').__posix, [op]).message
     );
   }
 

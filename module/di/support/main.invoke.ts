@@ -1,8 +1,10 @@
-import { EnvInit } from '@travetto/base/support/bin/env';
+import { PhaseManager } from '@travetto/boot';
+import { Env } from '@travetto/base';
 
 export async function invoke(...[mod, cls, method, qualifier]: (string | undefined)[]): Promise<unknown> {
-  EnvInit.init();
-  await (await import('@travetto/base')).PhaseManager.run('init');
+  Env.define();
+  await PhaseManager.run('init');
+
   const inst = await (await import('../src/registry')).DependencyRegistry
     .getInstance(
       (await import(mod!))[cls!],

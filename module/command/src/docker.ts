@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as cp from 'child_process';
 import { rmSync } from 'fs';
 
-import { EnvUtil, ExecUtil, ExecutionState, ExecutionResult, ShutdownManager } from '@travetto/base';
+import { Env, ExecUtil, ExecutionState, ExecutionResult, ShutdownManager } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container
@@ -11,7 +11,7 @@ import { EnvUtil, ExecUtil, ExecutionState, ExecutionResult, ShutdownManager } f
 export class DockerContainer {
 
   static #getNamespace(image: string): string {
-    return EnvUtil.isTrue('TRV_DOCKER') ? image : EnvUtil.get('TRV_DOCKER', image);
+    return Env.isTrue('TRV_DOCKER') ? image : Env.get('TRV_DOCKER', image);
   }
 
   static #getContainerName(image: string, container?: string): string {

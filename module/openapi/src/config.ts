@@ -3,7 +3,7 @@ import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/mode
 
 import { PackageUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
-import { EnvUtil } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 
@@ -62,7 +62,7 @@ export class ApiSpecConfig {
   /**
    * Should file be generated at runtime
    */
-  persist: boolean = EnvUtil.isDynamic();
+  persist: boolean = Env.isDynamic();
   /**
    * Skip emitting all routes
    */

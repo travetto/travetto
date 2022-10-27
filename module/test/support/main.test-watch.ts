@@ -3,7 +3,7 @@ import { PhaseManager } from '@travetto/boot';
 import { envInit } from './bin/env';
 
 export async function main(format: string = 'tap'): Promise<void> {
-  envInit(false, true);
+  envInit(true);
 
   // Compile everything inline, don't delegate
   await PhaseManager.run('init', '@trv:base/load');

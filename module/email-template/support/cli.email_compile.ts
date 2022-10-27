@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { EnvInit } from '@travetto/base/support/bin/env';
+import { Env } from '@travetto/base';
 import { PhaseManager } from '@travetto/boot';
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
 
@@ -15,7 +15,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
   name = 'email:compile';
 
   envInit(): void {
-    EnvInit.init({
+    Env.define({
       append: { TRV_RESOURCES: path.resolve(__source.folder, 'resources').__posix }
     });
   }

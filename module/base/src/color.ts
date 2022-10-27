@@ -1,4 +1,4 @@
-import { EnvUtil } from './env';
+import { Env } from './env';
 
 type Prim = string | number | boolean | Date;
 
@@ -28,10 +28,10 @@ export class ColorUtil {
    */
   static get colorize(): boolean {
     if (this.#colorize === undefined) {
-      if (EnvUtil.isSet('TRV_COLOR')) {
-        this.#colorize = EnvUtil.isTrue('TRV_COLOR');
+      if (Env.isSet('TRV_COLOR')) {
+        this.#colorize = Env.isTrue('TRV_COLOR');
       } else {
-        this.#colorize = EnvUtil.isTrue('FORCE_COLOR') || (!EnvUtil.isTrue('NO_COLOR') && process.stdout.isTTY);
+        this.#colorize = Env.isTrue('FORCE_COLOR') || (!Env.isTrue('NO_COLOR') && process.stdout.isTTY);
       }
     }
     return this.#colorize;

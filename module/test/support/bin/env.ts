@@ -1,7 +1,7 @@
-import { EnvInit } from '@travetto/base/support/bin/env';
+import { Env } from '@travetto/base';
 
-export function envInit(localOptional = true, dynamic: boolean = false): void {
-  EnvInit.init({
+export function envInit(dynamic: boolean = false): void {
+  Env.define({
     ...(dynamic ? { dynamic } : {}),
     debug: '0',
     set: { TRV_LOG_TIME: '0' },

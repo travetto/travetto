@@ -2,7 +2,7 @@ import * as path from 'path';
 import { existsSync } from 'fs';
 
 import { PackageUtil } from '@travetto/boot';
-import { EnvUtil } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { AllType, AllTypeMap, node as n } from '../nodes';
@@ -26,7 +26,7 @@ export class RenderContext implements RenderContextShape {
   }
 
   get gitBaseUrl(): string {
-    return `${this.#repoUrl}/tree/${EnvUtil.get('TRV_DOC_BRANCH', 'main')}`;
+    return `${this.#repoUrl}/tree/${Env.get('TRV_DOC_BRANCH', 'main')}`;
   }
 
   get travettoGitBaseUrl(): string {

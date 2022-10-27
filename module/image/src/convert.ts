@@ -4,7 +4,7 @@ import { mkdirSync } from 'fs';
 import { Readable } from 'stream';
 
 import { CommandService } from '@travetto/command';
-import { EnvUtil, StreamUtil } from '@travetto/base';
+import { Env, StreamUtil } from '@travetto/base';
 
 /**
  * Image output options
@@ -132,5 +132,5 @@ class $ImageConverter {
 }
 
 export const ImageConverter = new $ImageConverter(
-  EnvUtil.get('TRV_IMAGE_CACHE', '.trv_images')
+  Env.get('TRV_IMAGE_CACHE', '.trv_images')
 );
