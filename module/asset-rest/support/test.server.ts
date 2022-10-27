@@ -1,13 +1,15 @@
 import * as assert from 'assert';
 
 import { AssetUtil, Asset } from '@travetto/asset';
-import { StreamUtil, ResourceManager } from '@travetto/base';
+import { StreamUtil } from '@travetto/base';
 import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
-import { BeforeAll, Suite, Test } from '@travetto/test';
+import { BeforeAll, Suite, Test, TestFile } from '@travetto/test';
 
 import { Upload, UploadAll } from '../src/decorator';
-import path = require('path');
+
+import { TEST_RESOURCES } from '@travetto/asset/support/test.service';
+
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -50,19 +52,18 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
 
   async getUploads(...files: FileUpload[]) {
     return Promise.all(files.map(async ({ name, type, resource: filename }) => {
-      const buffer = await StreamUtil.streamToBuffer(await ResourceManager.readStream(filename));
+      const buffer = await StreamUtil.streamToBuffer(await TestFile.readStream(filename));
       return { name, type, filename, buffer, size: buffer.length };
     }));
   }
 
   async getAsset(pth: string) {
-    return AssetUtil.fileToAsset(await ResourceManager.findAbsolute(pth));
+    return AssetUtil.fileToAsset(await TestFile.find(pth));
   }
 
   @BeforeAll()
   async setup() {
-    const src = await import('@travetto/asset/support/test.service');
-    ResourceManager.addPath(path.resolve(src.AssetServiceSuite.Ⲑfile, '..', 'resources').__posix);
+    TestFile.addPath(TEST_RESOURCES);
   }
 
   @Test()

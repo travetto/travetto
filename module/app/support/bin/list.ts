@@ -1,10 +1,11 @@
-import * as path from 'path';
 import * as fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
+import * as path from '@travetto/path';
 import { ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';
 
+import { AppScanUtil } from '../../src/scan';
 import type { ApplicationConfig } from '../../src/types';
 
 /**
@@ -61,12 +62,11 @@ export class $AppListLoader {
   async buildList(): Promise<ApplicationConfig[]> {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Collecting', () =>
-        ExecUtil.worker<ApplicationConfig[]>(path.resolve(__source.folder, '..', 'main.list-build').__posix).message
+        ExecUtil.worker<ApplicationConfig[]>(`${__source.folder}/../main.list-build`).message
       );
     } else {
       await (await import('@travetto/boot/support/main.build')).main();
 
-      const { AppScanUtil } = await import('../../src/scan');
       const list = await AppScanUtil.scanList();
       return list.map(({ target, ...rest }) => rest);
     }
@@ -108,5 +108,5 @@ export class $AppListLoader {
 }
 
 export const AppListLoader = new $AppListLoader(
-  path.resolve('.trv-app-cache.json').__posix
+  path.resolve('.trv-app-cache.json')
 );

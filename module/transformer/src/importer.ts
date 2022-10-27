@@ -1,5 +1,6 @@
 import * as ts from 'typescript';
-import { basename, dirname, relative } from 'path';
+
+import * as path from '@travetto/path';
 
 import { AnyType, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';
@@ -22,7 +23,7 @@ export class ImportManager {
 
   constructor(public source: ts.SourceFile, public factory: ts.NodeFactory) {
     this.#imports = ImportUtil.collectImports(source);
-    this.#file = source.fileName.replaceAll('\\', '/');
+    this.#file = path.toPosix(source.fileName);
   }
 
   /**
@@ -30,7 +31,7 @@ export class ImportManager {
    */
   getId(file: string): string {
     if (!this.#ids.has(file)) {
-      const key = basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
+      const key = path.basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
       this.#ids.set(file, `Ⲑ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
     }
     return this.#ids.get(file)!;
@@ -51,9 +52,9 @@ export class ImportManager {
     if (file.startsWith('.') && base &&
       !base.startsWith('@travetto') && !base.includes('node_modules')
     ) { // Relative path
-      const fileDir = dirname(SystemUtil.resolveUnix(file));
-      const baseDir = dirname(SystemUtil.resolveUnix(base));
-      file = `${relative(baseDir, fileDir) || '.'}/${basename(file)}`;
+      const fileDir = path.dirname(path.resolve(file));
+      const baseDir = path.dirname(path.resolve(base));
+      file = `${path.relative(baseDir, fileDir) || '.'}/${path.basename(file)}`;
       if (/^[A-Za-z]/.test(file)) {
         file = `./${file}`;
       }

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import * as ts from 'typescript';
-import * as path from 'path';
 import * as fs from 'fs/promises';
+
+import * as path from '@travetto/path';
 
 import { TransformerManager } from '@travetto/transformer';
 

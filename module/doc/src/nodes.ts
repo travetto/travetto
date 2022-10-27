@@ -1,6 +1,6 @@
-import * as path from 'path';
 import { existsSync } from 'fs';
 
+import * as path from '@travetto/path';
 import { PackageUtil } from '@travetto/boot';
 
 import { FileUtil, } from './util/file';
@@ -160,7 +160,7 @@ export const node = {
    */
   Execute: (title: Content, cmd: string, args: string[] = [], cfg: RunConfig = {}) => {
     if (cmd !== 'trv') {
-      cmd = FileUtil.resolveFile(cmd).resolved.replace(process.cwd().__posix, '.');
+      cmd = FileUtil.resolveFile(cmd).resolved.replace(path.cwd(), '.');
     }
 
     const script = DocRunUtil.run(cmd, args, cfg);
@@ -175,7 +175,7 @@ export const node = {
    * @param folder
    */
   Mod(folder: string) {
-    folder = path.resolve('node_modules', folder).__posix;
+    folder = path.resolve('node_modules', folder);
 
     const { description, displayName } = PackageUtil.readPackage(folder);
     return $n('mod', { title: $c(displayName!), link: $c(folder), description: $c(description!) });

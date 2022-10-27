@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { CliCommand, OptionConfig } from '@travetto/cli';
 import { Env, ExecUtil } from '@travetto/base';
 
@@ -25,7 +23,7 @@ export class OpenApiSpecCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    const result = await ExecUtil.worker(path.resolve(__source.folder, '..', 'support', 'main.generate').__posix).message;
+    const result = await ExecUtil.worker(`${__source.folder}/../support/main.generate`).message;
 
     if (this.cmd.output === '-' || !this.cmd.output) {
       console.log!(result);

@@ -1,8 +1,8 @@
-import * as path from 'path';
 import * as cp from 'child_process';
 import * as fs from 'fs/promises';
 import * as mustache from 'mustache';
 
+import * as path from '@travetto/path';
 import { Env, ExecUtil, ExecutionResult } from '@travetto/base';
 import { version } from '@travetto/boot/package.json';
 
@@ -44,7 +44,7 @@ export class Context {
   constructor(name: string, template: string, targetDir: string) {
     this.name = name;
     this.#template = template;
-    this.#targetDir = path.resolve(targetDir).__posix;
+    this.#targetDir = path.resolve(targetDir);
   }
 
   get modules(): Record<string, boolean> {
@@ -67,11 +67,11 @@ export class Context {
   }
 
   source(file?: string): string {
-    return path.resolve(__source.folder, 'resources', 'templates', this.#template, ...file ? [file] : []).__posix;
+    return path.resolve(__source.folder, 'resources', 'templates', this.#template, ...file ? [file] : []);
   }
 
   destination(file?: string): string {
-    return path.resolve(this.#targetDir, ...file ? [file] : []).__posix;
+    return path.resolve(this.#targetDir, ...file ? [file] : []);
   }
 
   get sourceListing(): Promise<Listing> {

@@ -1,0 +1,35 @@
+{
+  "name": "@travetto/path",
+  "displayName": "Path",
+  "version": "3.0.0-rc.2",
+  "description": "Native path replacement",
+  "keywords": [
+    "path",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "main": "index.js",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/path"
+  },
+  "dependencies": {},
+  "trvDependencies": {
+    "@travetto/test": [
+      "test"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

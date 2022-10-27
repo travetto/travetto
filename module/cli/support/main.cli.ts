@@ -1,11 +1,12 @@
 import { Env } from '@travetto/base';
+import { ExecutionManager } from '@travetto/cli';
+import * as path from '@travetto/path';
 
 /**
  * Entry point
  */
 export async function main(): Promise<void> {
-  const cwd = process.cwd().__posix;
-  if (!Env.isFalse('TRV_CLI_LOCAL') && !__source.folder.startsWith(cwd)) { // If the current file is not under the working directory
+  if (!Env.isFalse('TRV_CLI_LOCAL') && !__source.folder.startsWith(path.cwd())) { // If the current file is not under the working directory
     console.error(`
 The @travetto/cli is not intended to be installed globally.  Please install it within your local project
 
@@ -18,6 +19,5 @@ and invoke it locally using
     process.exit(1);
   }
 
-  const { ExecutionManager } = await import('@travetto/cli');
   return ExecutionManager.run(process.argv); // Run cli
 }

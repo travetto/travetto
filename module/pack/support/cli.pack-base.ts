@@ -1,7 +1,7 @@
 import * as os from 'os';
-import * as path from 'path';
 import * as fs from 'fs/promises';
 
+import * as path from '@travetto/path';
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
 import { PackageUtil } from '@travetto/boot';
 
@@ -57,7 +57,7 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
     const def = list.find(c => c.name === 'default');
 
     const configs = [
-      { workspace: path.resolve(os.tmpdir(), packName).__posix },
+      { workspace: path.resolve(os.tmpdir(), packName) },
       def,
       cfg,
       this.cmdOptions,
@@ -93,7 +93,7 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
 
   async action(): Promise<void> {
     const resolved = await this.resolveConfigs();
-    if (await fs.stat(path.resolve(resolved.workspace, '.git').__posix).catch(() => { })) {
+    if (await fs.stat(path.resolve(resolved.workspace, '.git')).catch(() => { })) {
       throw new Error('Refusing to use workspace with a .git directory');
     }
     return PackUtil.runOperation(this.operation, resolved);

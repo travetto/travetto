@@ -1,5 +1,6 @@
-import { ResourceManager } from '@travetto/base';
+import { ResourceManager } from '@travetto/resource';
 import { RootRegistry } from '@travetto/registry';
+import { ConfigManager } from '@travetto/config';
 
 import { DBConfig } from './dbconfig';
 
@@ -11,7 +12,6 @@ export async function main() {
 
   await RootRegistry.init();
 
-  const { ConfigManager } = await import('@travetto/config');
   await ConfigManager.reset();
   await ConfigManager.init();
   await ConfigManager.install(DBConfig, new DBConfig(), 'database');

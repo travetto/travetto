@@ -1,3 +1,4 @@
+import * as path from '@travetto/path';
 import { CliUtil } from '@travetto/cli';
 
 import type { ApplicationConfig } from '../../src/types';
@@ -36,7 +37,7 @@ export class HelpUtil {
     if (!configs || !configs.length) {
       return CliUtil.color`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
     }
-    const cwdPrefix = `${process.cwd().__posix}/`;
+    const cwdPrefix = `${path.cwd()}/`;
     for (const conf of configs) {
       const lines = [];
 

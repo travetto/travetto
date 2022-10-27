@@ -1,6 +1,7 @@
 /* eslint-disable no-bitwise */
 import * as ts from 'typescript';
-import { dirname } from 'path';
+
+import * as path from '@travetto/path';
 
 import { DocUtil } from '../util/doc';
 import { CoreUtil } from '../util/core';
@@ -221,10 +222,10 @@ export const TypeBuilder: {
         if (source === '.') {
           source = sourceFile;
         } else if (source.startsWith('.')) {
-          source = SystemUtil.resolveUnix(dirname(sourceFile), source);
+          source = path.resolve(path.dirname(sourceFile), source);
         }
 
-        return { key: 'external', name, source: ext === 'node' ? source : SystemUtil.resolveUnix(sourceFile, source) };
+        return { key: 'external', name, source: ext === 'node' ? source : path.resolve(sourceFile, source) };
       }
     }
   }

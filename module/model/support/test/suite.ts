@@ -1,9 +1,7 @@
-import * as path from 'path';
-
-import { Class, ResourceManager } from '@travetto/base';
+import { Class } from '@travetto/base';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
-import { SuiteRegistry } from '@travetto/test';
+import { SuiteRegistry, TestFile } from '@travetto/test';
 
 import { isStorageSupported, isStreamSupported } from '../../src/internal/service/common';
 import { StreamModel } from '../../src/internal/service/stream';
@@ -17,7 +15,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       target,
       async function (this: T & { [Loaded]?: boolean }) {
         // Track self
-        ResourceManager.addPath(path.resolve(__source.folder, '..', 'resources').__posix);
+        TestFile.addPath(`${__source.folder}/../resources`);
 
         await RootRegistry.init();
 

@@ -1,8 +1,10 @@
-import * as path from 'path';
-
+import * as path from '@travetto/path';
 import { Env } from '@travetto/base';
-import { PhaseManager } from '@travetto/boot';
+import { ModuleIndex, PhaseManager } from '@travetto/boot';
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
+
+import { CompileUtil } from '../src/util';
+import { TemplateUtil } from './bin/util';
 
 type Options = {
   watch: OptionConfig<boolean>;
@@ -16,7 +18,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
 
   envInit(): void {
     Env.define({
-      append: { TRV_RESOURCES: path.resolve(__source.folder, 'resources').__posix }
+      append: { TRV_RESOURCES: path.resolve(__source.folder, 'resources') }
     });
   }
 
@@ -27,20 +29,17 @@ export class EmailCompileCommand extends CliCommand<Options> {
   async action(): Promise<void> {
     await PhaseManager.run('init');
 
-    const { CompileUtil } = await import('../src/util');
-    const { TemplateUtil } = await import('./bin/util');
-
     const all = await CompileUtil.compileAllToDisk();
     console!.log(CliUtil.color`Successfully compiled ${{ param: `${all.length}` }} templates`);
 
     if (this.cmd.watch) {
-      try { require.resolve('@travetto/watch'); }
-      catch {
+      if (ModuleIndex.hasModule('@travetto/watch')) {
+        await TemplateUtil.watchCompile();
+        await new Promise(r => process.on('exit', r));
+      } else {
         console.error('@travetto/watch must be installed to watch');
         process.exit(1);
       }
-      await TemplateUtil.watchCompile();
-      await new Promise(r => process.on('exit', r));
     }
   }
 }

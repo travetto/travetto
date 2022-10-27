@@ -11,7 +11,7 @@ export class TransformerTestUtil {
    * Compile a single file from a folder
    */
   static async compile(folder: string, file?: string): Promise<string> {
-    const { ScanFs } = await import('@travetto/base');
+    const { ScanFs } = await import('@travetto/resource');
 
     const tsconfigObj = await import('@travetto/boot/tsconfig.trv.json');
 

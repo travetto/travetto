@@ -1,5 +1,4 @@
-import { Class, ResourceManager, Util } from '@travetto/base';
-import { YamlUtil } from '@travetto/yaml';
+import { Class, Util } from '@travetto/base';
 import { BindUtil, SchemaRegistry, ViewConfig } from '@travetto/schema';
 
 /**
@@ -77,15 +76,6 @@ export class ConfigUtil {
       }
     }
     return data;
-  }
-
-  /**
-   * Parse config file from YAML into JSON
-   */
-  static async getConfigFileAsData(file: string, ns: string = ''): Promise<Record<string, unknown>> {
-    const data = await ResourceManager.read(file, 'utf8');
-    const doc = YamlUtil.parse<Record<string, unknown>>(data);
-    return ns ? { [ns]: doc } : doc;
   }
 
   /**

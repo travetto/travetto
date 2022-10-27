@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
-import { Suite, Test } from '@travetto/test';
-import { ExecUtil, ResourceManager } from '@travetto/base';
+import { Suite, Test, TestFile } from '@travetto/test';
+import { ExecUtil } from '@travetto/base';
 
 import { WorkPool } from '../src/pool';
 import { IterableWorkSet } from '../src/input/iterable';
@@ -20,7 +20,7 @@ export class PoolExecTest {
       }
     });
 
-    const launcher = await ResourceManager.findAbsolute('simple.child.ts');
+    const launcher = await TestFile.find('simple.child.ts');
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<{ data: string }, string>(

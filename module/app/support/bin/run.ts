@@ -1,6 +1,7 @@
 import { PhaseManager, ConsoleManager } from '@travetto/boot';
 import { Env } from '@travetto/base';
 
+import { ApplicationRegistry } from '../../src/registry';
 import type { ApplicationConfig } from '../../src/types';
 
 /**
@@ -25,12 +26,10 @@ export class AppRunUtil {
       ConsoleManager.exclude('debug', false);
     }
 
-    // And run
-    const { ApplicationRegistry } = await import('../../src/registry');
-
     // Convert to full app
     app = typeof app === 'string' ? ApplicationRegistry.getByName(app)! : app;
 
+    // Run
     return await ApplicationRegistry.run(app.name, sub);
   }
 }

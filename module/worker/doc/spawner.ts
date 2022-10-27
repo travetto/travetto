@@ -4,7 +4,7 @@ import { WorkPool, WorkUtil, IterableWorkSet } from '@travetto/worker';
 export async function main(): Promise<void> {
   const pool = new WorkPool(() =>
     WorkUtil.spawnedWorker<{ data: string }, string>(
-      () => ExecUtil.fork(require.resolve('./spawned')),
+      () => ExecUtil.fork(`${__source.folder}/spawned`),
       ch => ch.once('ready'), // Wait for child to indicate it is ready
       async (channel, inp) => {
         const res = channel.once('response'); //  Register response listener

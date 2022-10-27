@@ -1,5 +1,6 @@
 import { spawnSync } from 'child_process';
 
+import * as path from '@travetto/path';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 
 export type RunConfig = {
@@ -55,7 +56,7 @@ export class DocRunUtil {
       cmd,
       args,
       opts: {
-        cwd: config.cwd ?? process.cwd().__posix,
+        cwd: path.toPosix(config.cwd ?? path.cwd()),
         shell: '/bin/bash',
         env: {
           ...Env.getAll(),
@@ -75,7 +76,7 @@ export class DocRunUtil {
       // eslint-disable-next-line no-control-regex
       .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@trv:')
-      .replace(new RegExp(process.cwd().__posix, 'g'), '.')
+      .replace(new RegExp(path.cwd(), 'g'), '.')
       .replace(/([.]trv_cache)[_A-Za-z0-9]+/g, (_, b) => b)
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
       .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))

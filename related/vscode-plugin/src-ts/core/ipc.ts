@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as rl from 'readline';
-import * as path from 'path';
 import { ExtensionContext } from 'vscode';
+
+import * as path from '@travetto/path';
 
 import { TargetEvent } from './types';
 
@@ -70,7 +71,7 @@ export class IpcSupport {
   }
 
   activate(ctx: ExtensionContext): void {
-    this.#file = path.resolve(`.trv_ipc_vscode_${process.ppid}.ndjson`).__posix;
+    this.#file = path.resolve(`.trv_ipc_vscode_${process.ppid}.ndjson`);
     this.#ensureFile();
 
     ctx.environmentVariableCollection.replace('TRV_CLI_JSON_IPC', this.#file);

@@ -1,13 +1,13 @@
 import * as fs from 'fs/promises';
-import * as path from 'path';
 import * as cp from 'child_process';
 
 // TODO: Get proper typings
 const glob = require('picomatch');
 
+import * as path from '@travetto/path';
 import { CliUtil } from '@travetto/cli';
 import { ModuleIndex } from '@travetto/boot';
-import { ScanFs } from '@travetto/base';
+import { ScanFs } from '@travetto/resource';
 
 import { CommonConfig, PackOperation } from './types';
 
@@ -79,7 +79,7 @@ export class PackUtil {
 
     return (f: string): boolean => {
       let exclude = undefined;
-      f = path.resolve(base, f).__posix;
+      f = path.resolve(base, f);
       for (const [match, n] of all) {
         if ((n || exclude === undefined) && match(f)) {
           if (n) { // Fast exit if negating
@@ -96,7 +96,7 @@ export class PackUtil {
    * Update .env.js with new env data
    */
   static async writeEnvJs(workspace: string, env: Record<string, string | undefined>): Promise<void> {
-    const out = path.resolve(workspace, '.env.js').__posix;
+    const out = path.resolve(workspace, '.env.js');
     let src = '';
     if (!!(await fs.stat(out).catch(() => { }))) {
       src = await fs.readFile(out, 'utf8');
@@ -110,7 +110,7 @@ export class PackUtil {
    * Delete all empty folders
    */
   static async removeEmptyFolders(root: string): Promise<void> {
-    for (const el of await ScanFs.scanDir({ testDir: x => true, testFile: x => false, withHidden: true }, root)) {
+    for (const el of await ScanFs.scanDir({ testDir: x => true, testFile: () => false, withHidden: true }, root)) {
       let dir = el.file;
       while ((await fs.readdir(dir)).length === 0) { // empty
         await fs.rmdir(dir);
@@ -184,7 +184,7 @@ export class PackUtil {
     try {
       await new Promise<void>((res, rej) => {
         const [cmd, args] = process.platform === 'win32' ?
-          ['xcopy', ['/y', '/h', '/s', src.replaceAll('/', path.sep), dest.replaceAll('/', path.sep)]] :
+          ['xcopy', ['/y', '/h', '/s', src.replaceAll('/', '\\'), dest.replaceAll('/', '\\')]] :
           ['cp', ['-r', '-p', src, dest]];
 
         const proc = cp.spawn([cmd, ...args].join(' '), {});

@@ -1,6 +1,7 @@
 import { mkdirSync, writeFileSync } from 'fs';
 import * as fs from 'fs/promises';
-import * as path from 'path';
+
+import * as path from '@travetto/path';
 
 import { ManifestModule, ManifestUtil } from '../..';
 
@@ -14,8 +15,8 @@ export class WorkspaceManager {
   #sourceToOutput: (file: string) => string;
 
   constructor(outDir: string, bootLocation?: string) {
-    this.#outDir = path.resolve(outDir).__posix;
-    this.#bootLocation = path.resolve(bootLocation ?? __filename.split('node_modules')[0]).__posix;
+    this.#outDir = path.resolve(outDir);
+    this.#bootLocation = path.resolve(bootLocation ?? __filename.split('node_modules')[0]);
     this.#modules = Object.values(ManifestUtil.readManifest(`${this.#bootLocation}/manifest.json`)!.modules);
 
     this.#sourceToOutput = (file: string): string => {

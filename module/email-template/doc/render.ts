@@ -1,4 +1,4 @@
-import { ResourceManager } from '@travetto/base';
+import { ResourceManager } from '@travetto/resource';
 import { CompileUtil } from '@travetto/email-template';
 
 export async function main() {

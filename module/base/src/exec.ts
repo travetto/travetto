@@ -2,6 +2,8 @@ import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import { Readable } from 'stream';
 import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 
+import * as path from '@travetto/path';
+
 /**
  * Result of an execution
  */
@@ -90,7 +92,7 @@ export class ExecUtil {
   static getOpts(opts: ExecutionOptions): ExecutionOptions {
     return {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
-      cwd: process.cwd().__posix,
+      cwd: path.cwd(),
       shell: false,
       ...opts,
       env: {
@@ -192,7 +194,7 @@ export class ExecUtil {
   static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     // Always register for the fork
     const opts = this.getOpts(options);
-    const spawnArgs = [file, ...args];
+    const spawnArgs = [path.resolve(file), ...args];
     const proc = spawn(process.argv0, spawnArgs, opts);
     const result = this.enhanceProcess(proc, options, spawnArgs.join(' '));
     return { process: proc, result };
@@ -205,7 +207,7 @@ export class ExecUtil {
    * @param options The worker options
    */
   static worker<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
-    const worker = new Worker(file, {
+    const worker = new Worker(path.resolve(file), {
       stderr: true,
       stdout: true,
       stdin: false,

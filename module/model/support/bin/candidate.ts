@@ -1,8 +1,8 @@
-import * as path from 'path';
-
 import { Class, ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';
-import type { InjectableConfig } from '@travetto/di';
+import { ModelRegistry } from '@travetto/model';
+import { InjectableConfig, DependencyRegistry } from '@travetto/di';
+import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/common';
 
 import type { ModelStorageSupport } from '../../src/service/storage';
 import type { ModelType } from '../../src/types/model';
@@ -20,7 +20,6 @@ export class ModelCandidateUtil {
   static async #getModels(models?: string[]): Promise<Class<ModelType>[]> {
     const names = new Set(models ?? []);
     const all = names.has('*');
-    const { ModelRegistry } = await import('@travetto/model');
     return ModelRegistry.getClasses()
       .map(x => ModelRegistry.getBaseModel(x))
       .filter(x => !models || all || names.has(ModelRegistry.getStore(x)));
@@ -30,7 +29,6 @@ export class ModelCandidateUtil {
    * Get model names
    */
   static async getModelNames(): Promise<string[]> {
-    const { ModelRegistry } = await import('@travetto/model');
     return (await this.#getModels()).map(x => ModelRegistry.getStore(x)).sort();
   }
 
@@ -38,8 +36,6 @@ export class ModelCandidateUtil {
    * Get all providers that are viable candidates
    */
   static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectableConfig[]> {
-    const { DependencyRegistry } = await import('@travetto/di');
-    const { ModelStorageSupportTarget } = await import('@travetto/model/src/internal/service/common');
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const types = DependencyRegistry.getCandidateTypes<ModelStorageSupport>(ModelStorageSupportTarget as unknown as Class<ModelStorageSupport>);
     return types.filter(x => !op || x.class.prototype[op]);
@@ -58,7 +54,6 @@ export class ModelCandidateUtil {
    * Get a single provider
    */
   static async getProvider(provider: string): Promise<ModelStorageSupport> {
-    const { DependencyRegistry } = await import('@travetto/di');
     const config = (await this.getProviders()).find(x => x.class.name === `${provider}ModelService`)!;
     return DependencyRegistry.getInstance<ModelStorageSupport>(config.class, config.qualifier);
   }
@@ -69,7 +64,7 @@ export class ModelCandidateUtil {
    */
   static async getCandidates(op: keyof ModelStorageSupport): Promise<CandidateNames> {
     return CliUtil.waiting('Resolving', () =>
-      ExecUtil.worker<CandidateNames>(path.resolve(__source.folder, '..', 'candidate').__posix, [op]).message
+      ExecUtil.worker<CandidateNames>(`${__source.folder}/../candidate`, [op]).message
     );
   }
 

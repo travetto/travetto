@@ -24,7 +24,8 @@
     "directory": "module/watch"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.2"
+    "@travetto/base": "^3.0.0-rc.2",
+    "@travetto/resource": "^3.0.0-rc.4"
   },
   "trvDependencies": {
     "@travetto/test": [

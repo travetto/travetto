@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 
+import * as path from '@travetto/path';
 import { Util, AppError, ClassInstance, Class } from '@travetto/base';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
@@ -285,7 +286,7 @@ export class AssertCheck {
     }
 
     AssertCapture.add({
-      file: test.file.replace(`${process.cwd().__posix}/`, ''),
+      file: test.file.replace(`${path.cwd()}/`, ''),
       line,
       operator: 'throws',
       error: err,

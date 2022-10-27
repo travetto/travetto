@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from '@travetto/path';
 import { d, lib } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 
@@ -33,7 +33,7 @@ ${d.Execute('Command Service', 'trv', ['command:service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${d.Terminal('All Services', DocRunUtil.run('trv-service', ['status'], { cwd: path.resolve(__source.folder, '..', '..').__posix }))}
+${d.Terminal('All Services', DocRunUtil.run('trv-service', ['status'], { cwd: path.resolve(__source.folder, '..', '..') }))}
 
 ${d.SubSection('Defining new Services')}
 

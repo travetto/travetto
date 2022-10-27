@@ -1,7 +1,8 @@
-import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { ExecUtil, ScanFs } from '@travetto/base';
+import * as path from '@travetto/path';
+import { ExecUtil } from '@travetto/base';
+import { ScanFs } from '@travetto/resource';
 import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { DependenciesUtil, DepType } from './dependencies';
@@ -61,8 +62,8 @@ export class AssembleUtil {
    */
   static async copyModule(root: string, target: string): Promise<void> {
     for (const f of MODULE_DIRS) {
-      const sourceFile = path.resolve(root, f).__posix;
-      const targetFile = path.resolve(target, f).__posix;
+      const sourceFile = path.resolve(root, f);
+      const targetFile = path.resolve(target, f);
       const found = await fs.stat(sourceFile).catch(() => { });
       if (found) {
         if (found.isFile()) {
@@ -97,7 +98,7 @@ export class AssembleUtil {
       const sub = ModuleUtil.normalizeFrameworkPath(el.file, 'node_modules/')
         .replace(/.*?node_modules/, 'node_modules');
 
-      const tgt = path.resolve(workspace, sub).__posix;
+      const tgt = path.resolve(workspace, sub);
       await fs.mkdir(path.dirname(tgt), { recursive: true });
 
       if (el.dep.startsWith('@travetto')) {
@@ -109,12 +110,12 @@ export class AssembleUtil {
       }
     }
     await PackUtil.copyRecursive(
-      path.resolve(path.dirname(require.resolve('@travetto/boot/bin/main.js'))).__posix,
-      path.resolve(workspace, 'node_modules/@travetto/boot/bin').__posix
+      path.resolve(path.dirname(require.resolve('@travetto/boot/bin/main.js'))),
+      path.resolve(workspace, 'node_modules/@travetto/boot/bin')
     );
     await PackUtil.copyRecursive(
-      path.resolve(path.dirname(require.resolve('@travetto/base/bin/main.js'))).__posix,
-      path.resolve(workspace, 'node_modules/@travetto/base/bin').__posix
+      path.resolve(path.dirname(require.resolve('@travetto/base/bin/main.js'))),
+      path.resolve(workspace, 'node_modules/@travetto/base/bin')
     );
   }
 
@@ -136,7 +137,7 @@ export class AssembleUtil {
   static async copyAddedContent(workspace: string, files: Record<string, string>[]): Promise<void> {
     for (const a of files) {
       let [src, dest] = Object.entries(a)[0];
-      [src, dest] = [path.resolve(src), path.resolve(workspace, dest).__posix];
+      [src, dest] = [path.resolve(src), path.resolve(workspace, dest)];
       const stat = await fs.stat(src).catch(() => { });
       if (stat) {
         if (stat.isFile()) {

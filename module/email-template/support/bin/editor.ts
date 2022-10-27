@@ -4,6 +4,8 @@ import { TemplateUtil } from './util';
 import { SendUtil } from './send';
 import { EditorConfig } from './config';
 
+import { CompileUtil } from '../../src/util';
+
 type InboundMessage =
   { type: 'configure' } |
   { type: 'redraw', file: string } |
@@ -23,7 +25,6 @@ class $EditorState {
   #lastFile = '';
 
   async renderFile(file: string): Promise<void> {
-    const { CompileUtil } = await import('../../src/util');
     file = CompileUtil.TPL_EXT.test(file) ? file : this.#lastFile;
     if (file) {
       try {
@@ -57,7 +58,6 @@ class $EditorState {
 
   async #onRedraw(msg: InboundMessage & { type: 'redraw' }): Promise<void> {
     try {
-      const { CompileUtil } = await import('../../src/util');
       await CompileUtil.compileToDisk(msg.file);
     } catch (err) {
       if (err && err instanceof Error) {

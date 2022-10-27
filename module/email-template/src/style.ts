@@ -1,5 +1,7 @@
 import * as util from 'util';
 
+import { ResourceManager } from '@travetto/resource';
+
 /**
  * Style Utils
  */
@@ -22,8 +24,6 @@ export class StyleUtil {
    * Get compiled styles
    */
   static async getStyles(): Promise<string> {
-    const { ResourceManager } = await import('@travetto/base');
-
     const file = await ResourceManager.find('email/main.scss');
     return await this.compileSass(file, [
       require

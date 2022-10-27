@@ -1,14 +1,13 @@
 import * as fs from 'fs/promises';
-import * as path from 'path';
 
-import { PhaseManager } from '@travetto/boot';
+import * as path from '@travetto/path';
+import { ConsoleManager, PhaseManager } from '@travetto/boot';
 
 import { envInit } from './bin/env';
+import { TestChildWorker } from '../src/worker/child';
 
 export async function customLogs(): Promise<void> {
-  const { ConsoleManager } = await import('@travetto/boot');
-
-  const handle = await fs.open(path.resolve(`.trv-test-worker.${process.pid}.log`).__posix, 'a');
+  const handle = await fs.open(path.resolve(`.trv-test-worker.${process.pid}.log`), 'a');
   const stdout = handle.createWriteStream();
 
   const c = new console.Console({
@@ -26,8 +25,7 @@ export async function main(): Promise<void> {
 
   await customLogs();
 
-  await PhaseManager.run('init', '@trv:base/load');
+  await PhaseManager.run('init', '@trv:boot/load');
 
-  const { TestChildWorker } = await import('../src/worker/child');
   return new TestChildWorker().activate();
 }

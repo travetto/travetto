@@ -1,11 +1,10 @@
-import * as path from 'path';
 import * as crypto from 'crypto';
+
+import * as path from '@travetto/path';
 
 const tsExt = '.ts';
 const dtsExt = '.d.ts';
 const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.endsWith(dtsExt));
-
-const CWD = process.cwd().replaceAll('\\', '/');
 
 export class SystemUtil {
 
@@ -50,23 +49,15 @@ export class SystemUtil {
   }
 
   /**
-   * Resolve path to use / for directory separator
-   * @param paths The paths to resolve
-   */
-  static resolveUnix(...paths: string[]): string {
-    return path.resolve(CWD, ...paths).replaceAll('\\', '/');
-  }
-
-  /**
    * Convert a file name, to a proper module reference for importing, and comparing
    * @param file
    */
   static moduleReference(file: string): string {
-    file = file.replaceAll('\\', '/');
+    file = path.toPosix(file);
     if (file.includes('node_modules')) { // it is a module
       return file.replace(/^.*node_modules\//, '');
     } else {
-      return file.replace(CWD, '.');
+      return file.replace(path.cwd(), '.');
     }
   }
 }

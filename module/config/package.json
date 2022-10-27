@@ -43,6 +43,9 @@
   "trvDependencies": {
     "@travetto/test": [
       "test"
+    ],
+    "@travetto/resource": [
+      "doc"
     ]
   },
   "publishConfig": {

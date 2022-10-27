@@ -1,3 +1,5 @@
+import * as fs from 'fs';
+
 import { Class } from '@travetto/base';
 
 import { TestConsumer } from '../types';
@@ -25,16 +27,15 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    * state
    */
   summarizeSuite(test: TestResult): SuiteResult {
-    try {
-      // TODO: Load asynchronously
-      require(test.file);
+    // Was only loading to verify existence (TODO: double-check)
+    if (fs.existsSync(test.file)) {
       this.#state[test.classId] = this.#state[test.classId] ?? {};
       this.#state[test.classId][test.methodName] = test.status;
       const SuiteCls = SuiteRegistry.getClasses().find(x =>
         x.Ⲑid === test.classId
       )!;
       return this.computeTotal(SuiteCls);
-    } catch {
+    } else {
       return this.removeClass(test.classId);
     }
   }

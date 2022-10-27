@@ -1,5 +1,6 @@
-import * as path from 'path';
 import { readFileSync } from 'fs';
+
+import * as path from '@travetto/path';
 
 import { version as framework } from '../package.json';
 
@@ -40,17 +41,17 @@ export class PackageUtil {
   static #config: Package | undefined;
 
   static readPackage(folder: string): Package {
-    const pkg: Package = JSON.parse(readFileSync(path.resolve(folder, 'package.json').__posix, 'utf8'));
+    const pkg: Package = JSON.parse(readFileSync(path.resolve(folder, 'package.json'), 'utf8'));
     return pkg;
   }
 
   static get main(): Package {
     if (!this.#config) {
       try {
-        this.#config = this.readPackage(process.cwd().__posix);
+        this.#config = this.readPackage(path.cwd());
       } catch (err: unknown) {
         if (err instanceof Error) {
-          console.warn(`Unable to locate ${path.resolve('package.json').__posix}: ${err.message}`);
+          console.warn(`Unable to locate ${path.resolve('package.json')}: ${err.message}`);
         } else {
           throw err;
         }

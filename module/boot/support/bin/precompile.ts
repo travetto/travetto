@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 import * as fs from 'fs';
-import * as path from 'path';
 import * as cp from 'child_process';
+
+import * as path from '@travetto/path';
+
+import '../init';
 
 import { ManifestUtil } from '../../src/manifest-util';
 import { ManifestModule, Manifest } from '../../src/types';
 
-import { CWD, COMPILER_OUTPUT, TS_TARGET, TSC, STAGING_OUTPUT } from './config';
+import { COMPILER_OUTPUT, TS_TARGET, TSC, STAGING_OUTPUT } from './config';
 
 type CompileContext = {
   manifest: Manifest;
@@ -30,7 +33,7 @@ function getModuleContext(): CompileContext {
 }
 
 function buildTsconfig(context: CompileContext): Record<string, unknown> {
-  const projTsconfig = path.resolve(CWD, 'tsconfig.json');
+  const projTsconfig = path.resolve('tsconfig.json');
   const baseTsconfig = path.resolve(context.transformer.source, 'tsconfig.trv.json');
   // Fallback to base tsconfig if not found in local folder
   const config = fs.existsSync(projTsconfig) ? projTsconfig : baseTsconfig;

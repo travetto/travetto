@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
-import * as path from 'path';
 
+import * as path from '@travetto/path';
 import { PackageUtil } from '@travetto/boot';
 import { ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';
@@ -72,11 +72,11 @@ export const Docker: PackOperation<DockerConfig, 'docker'> = {
   async* exec(cfg: DockerConfig) {
     const { builder, workspace, push, image, tag, name, registry } = cfg;
 
-    const ws = path.resolve(workspace).__posix;
+    const ws = path.resolve(workspace);
 
     yield 'Building Dockerfile';
 
-    await fs.writeFile(path.resolve(ws, 'Dockerfile').__posix, builder!(cfg), { encoding: 'utf8' });
+    await fs.writeFile(path.resolve(ws, 'Dockerfile'), builder!(cfg), { encoding: 'utf8' });
 
     yield 'Pulling Base Image';
     await ExecUtil.spawn('docker', ['pull', image]).result;

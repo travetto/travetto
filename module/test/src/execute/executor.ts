@@ -1,7 +1,7 @@
-import * as path from 'path';
 import * as timers from 'timers/promises';
 
-import { Util } from '@travetto/base';
+import * as path from '@travetto/path';
+import { TimeUtil, Util } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 import { ModuleIndex } from '@travetto/boot';
 
@@ -16,7 +16,7 @@ import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
 
-const TEST_TIMEOUT = Util.getEnvTime('TRV_TEST_TIMEOUT', '5s');
+const TEST_TIMEOUT = TimeUtil.getEnvTime('TRV_TEST_TIMEOUT', '5s');
 
 /**
  * Support execution of the tests
@@ -68,7 +68,7 @@ export class TestExecutor {
     const classId = ModuleIndex.computeId(file, name);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const suite = { class: { name }, classId, duration: 0, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
-    err.message = err.message.replace(process.cwd().__posix, '.');
+    err.message = err.message.replace(path.cwd(), '.');
     const res = AssertUtil.generateSuiteError(suite, 'require', err);
     consumer.onEvent({ type: 'suite', phase: 'before', suite });
     consumer.onEvent({ type: 'test', phase: 'before', test: res.testConfig });
@@ -238,12 +238,14 @@ export class TestExecutor {
    */
   static async execute(consumer: TestConsumer, file: string, ...args: string[]): Promise<void> {
 
-    if (!file.startsWith(process.cwd().__posix)) {
-      file = path.join(process.cwd(), file).__posix;
+    const cwd = path.cwd();
+
+    if (!file.startsWith(cwd)) {
+      file = path.join(cwd, file);
     }
 
     try {
-      await import(file.__posix); // Path to module
+      await import(path.toPosix(file)); // Path to module
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;

@@ -1,3 +1,4 @@
+import * as path from '@travetto/path';
 import { TimeUtil } from '@travetto/base';
 import { PhaseManager } from '@travetto/boot';
 import { WorkPool, IterableWorkSet } from '@travetto/worker';
@@ -21,7 +22,7 @@ export class Runner {
   }
 
   get patterns(): RegExp[] {
-    return this.#state.args.map(x => new RegExp(x.__posix));
+    return this.#state.args.map(x => new RegExp(path.toPosix(x)));
   }
 
   /**
