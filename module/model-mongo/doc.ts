@@ -5,7 +5,7 @@ import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.suppo
 import { MongoModelConfig } from './src/config';
 import { MongoModelService } from './src/service';
 
-const ResourceManager = d.SnippetLink('ResourceManager', '@travetto/base/src/resource.ts', /class [$]Resource/);
+const ResourceManager = d.SnippetLink('ResourceManager', '@travetto/resource/src/resource.ts', /class [$]Resource/);
 
 export const text = d`
 ${d.Header()}

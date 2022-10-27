@@ -26,9 +26,9 @@
     "directory": "module/transformer"
   },
   "dependencies": {
-    "@travetto/manifest": "^3.0.0-rc.4",
     "tslib": "^2.4.0",
-    "typescript": "^4.8.4"
+    "typescript": "^4.8.4",
+    "@travetto/path": "^3.0.0-rc.4"
   },
   "peerDependencies": {
     "@travetto/test": "^3.0.0-rc.4"

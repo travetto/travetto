@@ -1,5 +1,6 @@
 import { Writable } from 'stream';
 
+import * as path from '@travetto/path';
 import { ColorUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 import { ErrorUtil } from '@travetto/boot';
@@ -59,6 +60,8 @@ export class TapEmitter implements TestConsumer {
       }
       this.log(`# ${header}`);
 
+      const cwd = path.cwd();
+
       // Handle each assertion
       if (test.assertions.length) {
         let subCount = 0;
@@ -68,7 +71,7 @@ export class TapEmitter implements TestConsumer {
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(a.file.replace(process.cwd().__posix, '.'))}:${this.#enhancer.assertLine(a.line)}`
+            `${this.#enhancer.assertFile(a.file.replace(cwd, '.'))}:${this.#enhancer.assertLine(a.line)}`
           ].join(' ');
 
           if (a.error) {

@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 
-import { Suite, Test } from '@travetto/test';
-import { ResourceManager } from '@travetto/base';
+import { Suite, Test, TestFile } from '@travetto/test';
 
 import { DockerContainer } from '../src/docker';
 
@@ -18,7 +17,7 @@ export class DockerIOTest {
 
     const { process: proc, result: prom } = await container.exec(['gm', 'convert', '-resize', '100x50', '-', '-']);
 
-    (await ResourceManager.readStream('/download.jpeg')).pipe(proc.stdin!);
+    (await TestFile.readStream('/download.jpeg')).pipe(proc.stdin!);
 
     assert(true);
 

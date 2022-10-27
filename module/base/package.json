@@ -2,7 +2,7 @@
   "name": "@travetto/base",
   "displayName": "Base",
   "version": "3.0.0-rc.2",
-  "description": "Application phase management, environment config and common utilities for travetto applications.",
+  "description": "Environment config and common utilities for travetto applications.",
   "keywords": [
     "shutdown-helper",
     "console-manager",
@@ -29,20 +29,9 @@
   "dependencies": {
     "@travetto/boot": "^3.0.0-rc.0"
   },
-  "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.2"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/cli": {
-      "optional": true
-    }
-  },
   "trvDependencies": {
     "@travetto/test": [
       "test"
-    ],
-    "@travetto/config": [
-      "doc"
     ]
   },
   "private": false,

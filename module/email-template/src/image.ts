@@ -1,4 +1,9 @@
-import * as path from 'path';
+import { createReadStream } from 'fs';
+
+import * as path from '@travetto/path';
+import { ImageConverter as ImgUtil } from '@travetto/image';
+import { ResourceManager } from '@travetto/resource';
+import { StreamUtil } from '@travetto/base';
 
 export class ImageUtil {
 
@@ -22,11 +27,9 @@ export class ImageUtil {
    * Inline image sources
    */
   static async inlineImageSource(html: string, root: string): Promise<string> {
-    const { ImageConverter: ImgUtil } = await import('@travetto/image');
-
     const imageSources = new Set<string>();
     const resolver = (x: string): string => {
-      const og = path.resolve(root, x).__posix;
+      const og = path.resolve(root, x);
       const [, resolved] = og.split('/resources/');
       imageSources.add(resolved ?? og);
       return resolved ?? og;
@@ -36,12 +39,25 @@ export class ImageUtil {
       .replace(/(<img[^>]src=\s*["'])([^"]+)/g, (_, pre, src) => this.sourceHandler(resolver, ['@@', '@@'], _, pre, src))
       .replace(/(background(?:-image)?:\s*url[(])([^)]+)/g, (_, pre, src) => this.sourceHandler(resolver, ['\'@@', '@@\''], _, pre, src));
 
-    const pendingImages = [...imageSources].map(async src => {
-      const [, ext] = path.extname(src).split('.');
-      const data = (await ImgUtil.optimizeResource(src)).toString('base64');
+    const pendingImages = [...imageSources]
+      .map(src => {
+        const [, ext] = path.extname(src).split('.');
+        switch (ext) {
+          case 'jpg':
+          case 'jpeg': return ['jpeg', src] as const;
+          case 'png': return ['png', src] as const;
+          default: return undefined;
+        }
+      })
+      .filter((x): x is Exclude<typeof x, undefined> => !!x)
+      .map(async ([ext, src]) => {
+        const stream = createReadStream(await ResourceManager.find(src));
+        const outputStream = await ImgUtil.optimize(ext, stream);
+        const buffer = await StreamUtil.streamToBuffer(outputStream);
+        const data = buffer.toString('base64');
 
-      return [src, { data, ext, src }] as const;
-    });
+        return [src, { data, ext, src }] as const;
+      });
 
     const imageMap = new Map(await Promise.all(pendingImages));
 

@@ -1,9 +1,11 @@
-/// <reference path="../src/global-typings.d.ts" />
+import * as sourceMapSupport from 'source-map-support';
+import { parentPort } from 'worker_threads';
 
-import { dirname } from 'path';
+import * as path from '@travetto/path';
+
 import type { LogLevel } from '../src/types';
 
-const src = (file: string): string => file.replaceAll('\\', '/').replace(/[.]js$/, '.ts');
+const src = (file: string): string => path.toPosix(file).replace(/[.]js$/, '.ts');
 
 if (global.ᚕtrv) {
   console.error(`@travetto/boot was already loaded at ${global.ᚕtrv.self} but now is trying to be loaded in ${src(__filename)}`);
@@ -11,15 +13,13 @@ if (global.ᚕtrv) {
   process.exit(1);
 }
 
-const propDef = { writable: false };
-
 // Remove to prevent __proto__ pollution in JSON
 const objectProto = Object.prototype.__proto__;
-Object.defineProperty(Object.prototype, '__proto__', { ...propDef, value: objectProto });
+Object.defineProperty(Object.prototype, '__proto__', { writable: false, value: objectProto });
 
 // Enable maps to be serialized as json
 Object.defineProperty(Map.prototype, 'toJSON', {
-  ...propDef,
+  writable: false,
   value(this: Map<unknown, unknown>): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const [k, v] of this.entries()) {
@@ -31,7 +31,7 @@ Object.defineProperty(Map.prototype, 'toJSON', {
 
 // Enable sets to be serialized as JSON
 Object.defineProperty(Set.prototype, 'toJSON', {
-  ...propDef,
+  writable: false,
   value(this: Set<unknown>): unknown[] {
     return [...this.values()];
   }
@@ -39,7 +39,7 @@ Object.defineProperty(Set.prototype, 'toJSON', {
 
 // Add .toJSON to the default Error as well
 Object.defineProperty(Error.prototype, 'toJSON', {
-  ...propDef,
+  writable: false,
   value(this: Error, extra?: Record<string, unknown>): Record<string, unknown> {
     return {
       message: this.message,
@@ -49,17 +49,7 @@ Object.defineProperty(Error.prototype, 'toJSON', {
   }
 });
 
-// Add __posix to the String class
-Object.defineProperty(String.prototype, '__posix', {
-  ...propDef,
-  get() {
-    return this.replaceAll('\\', '/');
-  }
-});
-
 async function main(target: Function, args = process.argv.slice(2), respond = true): Promise<unknown> {
-  const sourceMapSupport = await import('source-map-support');
-
   // Increase stack limit
   Error.stackTraceLimit = 50;
 
@@ -67,11 +57,9 @@ async function main(target: Function, args = process.argv.slice(2), respond = tr
   sourceMapSupport.install();
 
   const send = respond ? async function send(res: unknown): Promise<void> {
-    const { parentPort } = await import('worker_threads');
     parentPort ? parentPort.postMessage(res) : console.log(JSON.stringify(res));
   } : (): void => { };
 
-  const path = await import('path');
   try { await import(path.resolve('.env')); } catch { } // Read env
   try {
     const res = await target(...args);
@@ -87,17 +75,14 @@ async function main(target: Function, args = process.argv.slice(2), respond = tr
 // eslint-disable-next-line no-console
 const log = (level: LogLevel, ctx: unknown, ...args: unknown[]): void => console[level](...args);
 
-const source = (file: string): typeof __source => ({ file: src(file), folder: dirname(src(file)) });
+const source = (file: string): typeof __source => ({ file: src(file), folder: path.dirname(src(file)) });
 
 const utils = Object.defineProperties({}, {
-  self: { ...propDef, value: src(__filename) },
-  source: { ...propDef, value: source },
-  main: { ...propDef, value: main },
+  self: { writable: false, value: src(__filename) },
+  source: { writable: false, value: source },
+  main: { writable: false, value: main },
   log: { writable: true, value: log },
   resolveStack: { writable: true, value: undefined }
 });
 
-Object.defineProperty(global, 'ᚕtrv', { ...propDef, value: utils });
-
-// Set stack trace limit
-Error.stackTraceLimit = 50;
+Object.defineProperty(global, 'ᚕtrv', { writable: false, value: utils });

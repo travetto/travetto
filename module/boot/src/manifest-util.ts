@@ -1,9 +1,10 @@
 import * as fs from 'fs';
-import * as path from 'path';
+
+import * as path from '@travetto/path';
 
 import type { Manifest, ManifestModuleFile, ManifestModule, ManifestDeltaEvent } from './types';
 
-const CWD = process.cwd().__posix;
+const CWD = path.cwd();
 
 type PackageType = {
   name: string;
@@ -40,7 +41,7 @@ export class ManifestUtil {
 
     for (const el of searchSpace) {
       try {
-        const next = require.resolve(el).__posix
+        const next = path.toPosix(require.resolve(el))
           .replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
         out.push(...this.#collectPackages(next, seen));
       } catch (e) {

@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
-import * as path from 'path';
 
+import * as path from '@travetto/path';
 import { CliUtil } from '@travetto/cli';
 
 import { PackUtil } from '../util';
@@ -48,12 +48,11 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
    * Assemble the project into a workspace directory, optimized for space and runtime
    */
   async * exec({ workspace, cacheDir, add, exclude, excludeCompile, env, keepSource, readonly }: AssembleConfig) {
-    const fullCacheDir = path.resolve(workspace!, cacheDir).__posix;
-    const ws = path.resolve(workspace!).__posix;
-
+    const fullCacheDir = path.resolve(workspace!, cacheDir);
+    const ws = path.resolve(workspace!);
     yield 'Cleaning Workspace'; await fs.rm(ws, { recursive: true, force: true }).then(() => { });
     yield 'Copying Dependencies'; await AssembleUtil.copyDependencies(ws);
-    yield 'Copying App Content'; await AssembleUtil.copyModule(process.cwd().__posix, ws);
+    yield 'Copying App Content'; await AssembleUtil.copyModule(path.cwd(), ws);
     yield 'Excluding Pre-Compile Files'; await AssembleUtil.excludeFiles(ws, excludeCompile);
     yield 'Building'; await AssembleUtil.buildWorkspace(ws, cacheDir);
     yield 'Excluding Post-Compile Files'; await AssembleUtil.excludeFiles(ws, exclude);

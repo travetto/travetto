@@ -1,6 +1,11 @@
 import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
 
-import type { MailService } from '@travetto/email/src/service';
+import { MailService } from '@travetto/email';
+import { NodemailerTransport } from '@travetto/email-nodemailer';
+import { MailTransportTarget } from '@travetto/email/src/internal/types';
+import { DependencyRegistry } from '@travetto/di';
+
+import { CompileUtil } from '../../src/util';
 
 import { EditorConfig } from './config';
 
@@ -16,11 +21,6 @@ export class SendUtil {
    */
   static async getMailService(): Promise<MailService> {
     if (!this.#svc) {
-      const { MailService: M } = await import('@travetto/email');
-      const { NodemailerTransport } = await import('@travetto/email-nodemailer');
-      const { MailTransportTarget } = await import('@travetto/email/src/internal/types');
-      const { DependencyRegistry } = await import('@travetto/di');
-
       const senderConfig = await EditorConfig.getSenderConfig();
 
       if (senderConfig) {
@@ -43,7 +43,7 @@ ${EditorConfig.getDefaultConfig()}`.trim();
         throw new Error(errorMessage);
       }
 
-      this.#svc = DependencyRegistry.getInstance(M);
+      this.#svc = DependencyRegistry.getInstance(MailService);
     }
     return this.#svc;
   }
@@ -55,8 +55,6 @@ ${EditorConfig.getDefaultConfig()}`.trim();
     url?: string | false;
   }> {
     try {
-      const { CompileUtil } = await import('../../src/util');
-
       console.log('Sending email', { to });
       // Let the engine template
       const svc = await this.getMailService();

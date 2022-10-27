@@ -3,9 +3,11 @@ import fetch from 'node-fetch';
 import { DependencyRegistry } from '@travetto/di';
 import { TimeUtil } from '@travetto/base';
 
-import type { RestApplication } from '../../../src/application/rest';
 import type { Request } from '../../../src/types';
+import { RestCookieConfig, RestConfig, RestApplication } from '../../..';
+
 import { RestServerSupport, MakeRequestConfig, headerToShape } from './base';
+
 
 /**
  * Support for invoking http requests against the server
@@ -20,18 +22,16 @@ export class CoreRestServerSupport implements RestServerSupport {
   }
 
   async init() {
-    const rest = await import('../../..');
-
     Object.assign(
-      await DependencyRegistry.getInstance(rest.RestCookieConfig),
+      await DependencyRegistry.getInstance(RestCookieConfig),
       { active: true, secure: false, signed: false }
     );
 
-    const config = await DependencyRegistry.getInstance(rest.RestConfig);
+    const config = await DependencyRegistry.getInstance(RestConfig);
     config.port = this.#port;
     config.ssl.active = false; // Update config object
 
-    this.#app = await DependencyRegistry.getInstance(rest.RestApplication);
+    this.#app = await DependencyRegistry.getInstance(RestApplication);
     const handle = await this.#app.run();
 
     const start = Date.now();

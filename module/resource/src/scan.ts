@@ -1,6 +1,7 @@
 import { existsSync, lstatSync, readdirSync, realpathSync, Stats } from 'fs';
 import * as fs from 'fs/promises';
-import * as path from 'path';
+
+import * as path from '@travetto/path';
 
 export interface ScanEntry {
   /**
@@ -79,7 +80,7 @@ export class ScanFs {
    * @param handler Handler to search with
    * @param base The starting point
    */
-  static async scanDir(handler: ScanHandler, base: string = process.cwd().__posix): Promise<ScanEntry[]> {
+  static async scanDir(handler: ScanHandler, base: string = path.cwd()): Promise<ScanEntry[]> {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [];
@@ -95,7 +96,7 @@ export class ScanFs {
           continue inner;
         }
 
-        let full = path.resolve(dir.file, file).__posix;
+        let full = path.resolve(dir.file, file);
         if (handler.resolvePath) {
           full = handler.resolvePath(full);
         }
@@ -129,7 +130,7 @@ export class ScanFs {
    * @param handler Handler to search with
    * @param base The starting point
    */
-  static scanDirSync(handler: ScanHandler, base: string = process.cwd().__posix): ScanEntry[] {
+  static scanDirSync(handler: ScanHandler, base: string = path.cwd()): ScanEntry[] {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [];
@@ -145,7 +146,7 @@ export class ScanFs {
           continue inner;
         }
 
-        let full = path.resolve(dir.file, file).__posix;
+        let full = path.resolve(dir.file, file);
         if (handler.resolvePath) {
           full = handler.resolvePath(full);
         }

@@ -1,5 +1,4 @@
-import * as path from 'path';
-
+import * as path from '@travetto/path';
 import { Class, ShutdownManager } from '@travetto/base';
 import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
 import { RetargettingProxy, ModuleIndex } from '@travetto/boot';

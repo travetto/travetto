@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import { existsSync } from 'fs';
-import * as path from 'path';
 
+import * as path from '@travetto/path';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 type Options = {
@@ -28,7 +28,7 @@ export class PackDockerExportCommand extends CliCommand<Options> {
 
   async action(...args: unknown[]): Promise<void> {
     const files = ['src', 'bin', 'support', 'resource', 'package.json', 'package-lock.json', ...this.cmd.add]
-      .filter(x => existsSync(path.resolve(x).__posix));
+      .filter(x => existsSync(path.resolve(x)));
 
     const content = `
 FROM ${this.cmd.image} as build

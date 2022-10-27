@@ -1,8 +1,8 @@
 import * as fs from 'fs/promises';
-import * as path from 'path';
 import * as cp from 'child_process';
 import { rmSync } from 'fs';
 
+import * as path from '@travetto/path';
 import { Env, ExecUtil, ExecutionState, ExecutionResult, ShutdownManager } from '@travetto/base';
 
 /**

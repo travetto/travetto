@@ -1,7 +1,8 @@
 import * as os from 'os';
 
 import { Config } from '@travetto/config';
-import { Env, AppError, ResourceManager } from '@travetto/base';
+import { Env, AppError } from '@travetto/base';
+import { ResourceManager } from '@travetto/resource';
 import { Required } from '@travetto/schema';
 
 import { RestServerUtil } from './util';

@@ -33,6 +33,7 @@
     "@travetto/di": "^3.0.0-rc.4",
     "@travetto/email": "^3.0.0-rc.4",
     "@travetto/image": "^3.0.0-rc.2",
+    "@travetto/resource": "^3.0.0-rc.4",
     "@types/inline-css": "^3.0.1",
     "@types/sass": "^1.43.1",
     "@types/parse5": "^6.0.3",

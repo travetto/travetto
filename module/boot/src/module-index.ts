@@ -1,5 +1,6 @@
-import * as path from 'path';
 import * as fs from 'fs';
+
+import * as path from '@travetto/path';
 
 import type { Manifest, ManifestModuleFile, ManifestModuleFileType, ManifestModule } from './types';
 
@@ -142,13 +143,13 @@ class $ModuleIndex {
       return `${this.computeId(filename)}￮${clsName}`;
     }
 
-    filename = filename.__posix;
+    filename = path.toPosix(filename);
 
     if (this.#idCache.has(filename)) {
       return this.#idCache.get(filename)!;
     }
 
-    const rel = filename.replace(`${process.cwd().__posix}/`, '');
+    const rel = filename.replace(`${this.#root}/`, '');
 
     const mod = rel.startsWith('node_modules') ?
       this.#modules.find(x => rel.startsWith(`${x.output}/`)) :
@@ -163,8 +164,16 @@ class $ModuleIndex {
       return filename;
     }
   }
+
+
+  /**
+   * Is module installed?
+   */
+  hasModule(name: string) {
+    return name in this.manifest.modules;
+  }
 }
 
 export const ModuleIndex = new $ModuleIndex(
-  (process.env.TRV_CACHE ?? process.cwd()).__posix
+  path.toPosix(process.env.TRV_CACHE ?? path.cwd())
 );

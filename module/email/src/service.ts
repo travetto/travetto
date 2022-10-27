@@ -1,4 +1,5 @@
-import { Env, ResourceManager } from '@travetto/base';
+import { Env } from '@travetto/base';
+import { ResourceManager } from '@travetto/resource';
 import { Injectable } from '@travetto/di';
 
 import { MessageOptions, SentMessage } from './types';

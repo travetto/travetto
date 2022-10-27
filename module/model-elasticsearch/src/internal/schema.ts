@@ -5,8 +5,9 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
 
-const { version: VERSION } = require(require.resolve('@elastic/elasticsearch').replace('index.js', 'package.json'));
+import { service } from '../../support/service.elasticsearch';
 
+const { version: VERSION } = service;
 
 type FieldType = {
   type?: string;

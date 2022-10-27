@@ -1,7 +1,8 @@
 import * as mongo from 'mongodb';
 import * as fs from 'fs/promises';
 
-import { TimeSpan, ResourceManager } from '@travetto/base';
+import { TimeSpan } from '@travetto/base';
+import { ResourceManager } from '@travetto/resource';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 

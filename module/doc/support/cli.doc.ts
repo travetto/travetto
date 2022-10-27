@@ -1,9 +1,11 @@
-import * as path from 'path';
 import * as fs from 'fs/promises';
 
-import { PhaseManager } from '@travetto/boot';
+import * as path from '@travetto/path';
+import { ModuleIndex, PhaseManager } from '@travetto/boot';
 import { Env } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
+
+import { RenderUtil } from '../src/render/util';
 
 type Options = {
   input: OptionConfig<string>;
@@ -49,9 +51,7 @@ export class DocCommand extends CliCommand<Options> {
     // Standard compile
     await PhaseManager.run('init');
 
-    const { RenderUtil } = await import('../src/render/util');
-
-    const docFile = path.resolve(this.cmd.input).__posix;
+    const docFile = path.resolve(this.cmd.input);
 
     // If specifying output
     if (this.cmd.output.length) {
@@ -59,20 +59,24 @@ export class DocCommand extends CliCommand<Options> {
         RenderUtil.purge(docFile);
         for (const out of this.cmd.output) {
           const fmt = path.extname(out) ?? this.cmd.format;
-          const finalName = path.resolve(out).__posix;
+          const finalName = path.resolve(out);
           const result = await RenderUtil.render(docFile, fmt);
           await fs.writeFile(finalName, result, 'utf8');
         }
       };
 
       if (this.cmd.watch) {
-        const { WatchUtil } = await import('@travetto/watch');
-        await WatchUtil.watchFile(docFile, write, true);
+        if (ModuleIndex.hasModule('@travetto/watch')) {
+          const { WatchUtil } = await import('@travetto/watch');
+          await WatchUtil.watchFile(docFile, write, true);
+        } else {
+          console.error('@travetto/watch must be installed to use watch functionality');
+        }
       } else {
         try {
           await write();
         } catch (err) {
-          console.error(process.cwd().__posix, err);
+          console.error(path.cwd(), err);
           process.exit(1);
         }
       }

@@ -1,8 +1,10 @@
 import * as fs from 'fs/promises';
-import * as path from 'path';
 import { mkdirSync } from 'fs';
 import { Readable } from 'stream';
 
+
+import * as path from '@travetto/path';
+import { ResourceManager } from '@travetto/resource';
 import { CommandService } from '@travetto/command';
 import { Env, StreamUtil } from '@travetto/base';
 
@@ -59,12 +61,12 @@ class $ImageConverter {
   #root: string;
 
   constructor(root: string) {
-    this.#root = path.resolve(root).__posix;
+    this.#root = path.resolve(root);
     mkdirSync(root, { recursive: true });
   }
 
   async #openFile(pth: string): Promise<fs.FileHandle> {
-    return fs.open(path.join(this.#root, pth.replace(/[\\/]/g, '__')).__posix);
+    return fs.open(path.join(this.#root, pth.replace(/[\\/]/g, '__')));
   }
 
   /**
@@ -109,8 +111,6 @@ class $ImageConverter {
    * Fetch image, compress and return as buffer
    */
   async optimizeResource(rel: string): Promise<Buffer> {
-    const { ResourceManager } = await import('@travetto/base');
-
     const pth = await ResourceManager.find(rel);
     const handle = await this.#openFile(pth);
     const exists = await handle.stat().then(() => true, () => false);

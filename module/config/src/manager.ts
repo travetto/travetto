@@ -1,7 +1,9 @@
-import * as path from 'path';
+import * as fs from 'fs/promises';
 
-import { Env, AppError, Class, ResourceManager, Util } from '@travetto/base';
+import * as path from '@travetto/path';
+import { Env, AppError, Class, Util } from '@travetto/base';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { YamlUtil } from '@travetto/yaml';
 
 import { ConfigUtil } from './internal/util';
 
@@ -35,8 +37,19 @@ class $ConfigManager {
 
     const profileIndex = Object.fromEntries(Object.entries(profiles).map(([k, v]) => [v, +k] as const));
 
-    const files = (await ResourceManager.findAll(/[.]ya?ml$/))
-      .map(file => ({ file, profile: path.basename(file).replace(/[.]ya?ml$/, '') }))
+    const allFiles: { file: string, profile: string }[] = [];
+
+    // Find all files
+    for (const folder of ['resources', ...Env.getResourcePaths()]) {
+      const toFind = path.resolve(folder);
+      for (const el of await fs.readdir(toFind)) {
+        if (!el.startsWith('.') && /[.]ya?ml$/.test(el)) {
+          allFiles.push({ file: path.resolve(toFind, el), profile: el.replace(/[.]ya?ml$/, '') });
+        }
+      }
+    }
+
+    const files = allFiles
       .filter(({ profile }) => profile in profileIndex)
       .sort((a, b) => profileIndex[a.profile] - profileIndex[b.profile]);
 
@@ -44,8 +57,9 @@ class $ConfigManager {
       console.debug('Found configurations for', { files: files.map(x => x.profile) });
     }
 
-    for (const f of files) {
-      const data = await ConfigUtil.getConfigFileAsData(f.file);
+    for (const { file } of files) {
+      const text = await fs.readFile(file, 'utf8');
+      const data = YamlUtil.parse<Record<string, unknown>>(text);
       Util.deepAssign(this.#storage, BindUtil.expandPaths(data), 'coerce');
     }
   }

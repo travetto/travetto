@@ -1,3 +1,5 @@
+import * as path from '@travetto/path';
+
 /**
  * General tools for manipulating stack traces.
  */
@@ -29,9 +31,10 @@ export class $StacktraceManager {
    */
   simplifyStack(err: Error | string, filter = true): string {
     let lastLocation: string = '';
-    const cwd = process.cwd().__posix;
+    const cwd = path.cwd();
     const cwdPrefix = `${cwd}/`;
-    const body = (typeof err === 'string' ? err : err.stack!).__posix.split('\n')
+    const body = path.toPosix(typeof err === 'string' ? err : err.stack!)
+      .split('\n')
       .filter(x => !filter || !this.#filters.length || !this.#filterRegex.test(x)) // Exclude framework boilerplate
       .reduce<string[]>((acc, line) => {
         const [, location] = line.split(cwd);

@@ -1,12 +1,10 @@
 import * as assert from 'assert';
 import * as fs from 'fs/promises';
 import { createReadStream } from 'fs';
-import * as path from 'path';
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
 
-import { BeforeAll, Suite, Test } from '@travetto/test';
-import { ResourceManager } from '@travetto/base';
+import { BeforeAll, Suite, Test, TestFile } from '@travetto/test';
 
 import { BaseModelSuite } from './base';
 import { ModelStreamSupport } from '../../src/service/stream';
@@ -26,7 +24,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
   }
 
   async getStream(resource: string): Promise<readonly [{ size: number, contentType: string, hash: string, filename: string }, Readable]> {
-    const file = await ResourceManager.findAbsolute(resource);
+    const file = await TestFile.find(resource);
     const stat = await fs.stat(file);
     const hash = await this.getHash(createReadStream(file));
 
@@ -38,7 +36,7 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
 
   @BeforeAll()
   async beforeAll(): Promise<void> {
-    ResourceManager.addPath(path.resolve(__source.folder, '..', 'resources').__posix);
+    TestFile.addPath(`${__source.folder}/../resources`);
   }
 
   @Test()

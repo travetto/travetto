@@ -1,10 +1,11 @@
 import { lstatSync, readdir, statSync, } from 'fs';
-import * as ts from 'typescript';
-import * as path from 'path';
 
-import { ScanEntry, ScanFs, ScanHandler } from '@travetto/base';
+import * as path from '@travetto/path';
+import { ScanEntry, ScanFs, ScanHandler } from '@travetto/resource';
 
 import { WatchEmitter } from './emitter';
+import { WatchHost } from './host';
+
 
 /**
  * Watch Options
@@ -36,7 +37,7 @@ export class Watcher extends WatchEmitter {
   constructor(folder: string, options: WatcherOptions = {}) {
     super(options.maxListeners);
     this.#options = { interval: 100, ...options };
-    this.#folder = path.resolve(this.#options.cwd ?? process.cwd(), folder).__posix;
+    this.#folder = path.resolve(this.#options.cwd ?? path.cwd(), folder);
 
     this.suppress = !!this.#options.ignoreInitial;
 
@@ -61,7 +62,7 @@ export class Watcher extends WatchEmitter {
       }
 
       // Convert to full paths
-      current = current.filter(x => !x.startsWith('.')).map(x => path.join(dir.file, x).__posix);
+      current = current.filter(x => !x.startsWith('.')).map(x => path.join(dir.file, x));
 
       // Get watched files for this dir
       const previous = (dir.children ?? []).slice(0);
@@ -105,8 +106,8 @@ export class Watcher extends WatchEmitter {
 
     try {
       console.debug('Watching Directory', { directory: entry.file });
-      // const watcher = fs.watch(path.resolve(entry.file).__posix, { persistent: false }, () => this.processDirectoryChange(entry);
-      const watcher = ts.sys.watchDirectory!(path.resolve(entry.file).__posix, () => this.#processDirectoryChange(entry), false);
+      // const watcher = fs.watch(path.resolve(entry.file), { persistent: false }, () => this.processDirectoryChange(entry);
+      const watcher = WatchHost.watchDirectory!(path.resolve(entry.file), () => this.#processDirectoryChange(entry), false);
 
       // watcher.on('error', this.handleError.bind(this));
       this.#directories.set(entry.file, watcher);
@@ -152,16 +153,16 @@ export class Watcher extends WatchEmitter {
       entry.stats = stats;
       try {
         switch (kind) {
-          case ts.FileWatcherEventKind.Created: this.emit('added', entry); break;
-          case ts.FileWatcherEventKind.Changed: this.emit('changed', entry); break;
-          case ts.FileWatcherEventKind.Deleted: this.emit('removed', entry); break;
+          case WatchHost.CreatedEvent: this.emit('added', entry); break;
+          case WatchHost.ChangedEvent: this.emit('changed', entry); break;
+          case WatchHost.DeletedEvent: this.emit('removed', entry); break;
         }
       } catch {
         console.warn('Error in watching', { file: entry.file });
       }
     };
 
-    this.#files.set(entry.file, ts.sys.watchFile!(entry.file, poller, opts.interval, opts));
+    this.#files.set(entry.file, WatchHost.watchFile!(entry.file, poller, opts.interval, opts));
     // this.#files.set(entry.file, { close: () => fs.unwatchFile(entry.file, poller) });
     // fs.watchFile(entry.file, opts, poller);
   }

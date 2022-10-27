@@ -1,13 +1,13 @@
-import * as path from 'path';
 import * as fs from 'fs/promises';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import * as cp from 'child_process';
 
+import * as path from '@travetto/path';
 import { CliCommand, CliUtil, OptionConfig, ListOptionConfig } from '@travetto/cli';
 import { ExecUtil } from '@travetto/base';
 
 const presets: Record<string, [string, object] | [string]> =
-  JSON.parse(readFileSync(path.resolve(__source.folder, 'resources', 'presets.json'), 'utf8').__posix);
+  JSON.parse(readFileSync(path.resolve(`${__source.folder}/resources/presets.json`), 'utf8'));
 
 type Options = {
   extendedHelp: OptionConfig<boolean>;
@@ -28,7 +28,7 @@ export class OpenApiClientCommand extends CliCommand<Options> {
   }
 
   getListOfFormats(): string[] {
-    const formatCache = path.resolve('.trv-openapi-formats.json').__posix;
+    const formatCache = path.resolve('.trv-openapi-formats.json');
     if (!existsSync(formatCache)) {
       const stdout = cp.execSync(`docker run --rm ${this.cmd.dockerImage} list`, { stdio: ['pipe', 'pipe'], encoding: 'utf8' }).trim();
       const lines = stdout
@@ -48,8 +48,8 @@ export class OpenApiClientCommand extends CliCommand<Options> {
     return {
       extendedHelp: this.boolOption({ name: 'extended-help', short: 'x', desc: 'Show Extended Help' }),
       props: this.listOption({ name: 'additional-properties', short: 'a', desc: 'Additional Properties' }),
-      input: this.option({ desc: 'Input file', def: './openapi.yml', combine: v => path.resolve(v).__posix, completion: true }),
-      output: this.option({ desc: 'Output folder', def: './api-client', combine: v => path.resolve(v).__posix, completion: true }),
+      input: this.option({ desc: 'Input file', def: './openapi.yml', combine: v => path.resolve(v), completion: true }),
+      output: this.option({ desc: 'Output folder', def: './api-client', combine: v => path.resolve(v), completion: true }),
       dockerImage: this.option({ desc: 'Docker Image to use', def: 'arcsine/openapi-generator:latest' }),
       watch: this.boolOption({ desc: 'Watch for file changes' })
     };

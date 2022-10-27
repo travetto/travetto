@@ -1,5 +1,5 @@
 import * as fs from 'fs/promises';
-import * as path from 'path';
+import * as path from '@travetto/path';
 
 type TimeEntry<T> = { key: string, data: T, time: number };
 
@@ -21,7 +21,7 @@ export class ActionStorage<T> {
    * Load configuration
    */
   get resolved(): string {
-    return path.resolve(this.root, `.trv.${this.scope}.json`).__posix;
+    return path.resolve(this.root, `.trv.${this.scope}.json`);
   }
 
   /**

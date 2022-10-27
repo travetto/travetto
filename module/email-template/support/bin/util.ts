@@ -1,17 +1,20 @@
 import * as fs from 'fs/promises';
 
-import { TimeUtil } from '@travetto/base';
+import { ResourceManager } from '@travetto/resource';
+import { FilePresenceManager } from '@travetto/watch';
 import type { MailTemplateEngine } from '@travetto/email';
+import { TimeUtil } from '@travetto/base';
+import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
+import { DependencyRegistry } from '@travetto/di';
 
-import type { CompileParts } from '../../src/util';
+
+import { CompileUtil, CompileParts, COMPILE_PARTS } from '../../src/util';
 
 export class TemplateUtil {
   /**
    * Resolve template
    */
   static async resolveTemplate(file: string, format: CompileParts, context: Record<string, unknown>): Promise<string> {
-    const { CompileUtil } = await import('../../src/util');
-
     const files = CompileUtil.getOutputs(file);
     const missing = await Promise.all(files.map(x => fs.stat(x[1]).catch(() => { })));
 
@@ -22,9 +25,6 @@ export class TemplateUtil {
     const compiled = Object.fromEntries(await Promise.all(files.map(([k, f]) => fs.readFile(f, 'utf8').then(c => [k, c]))));
 
     // Let the engine template
-    const { MailTemplateEngineTarget } = await import('@travetto/email/src/internal/types');
-    const { DependencyRegistry } = await import('@travetto/di');
-
     const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
     return engine.template(compiled[format], context);
   }
@@ -34,8 +34,6 @@ export class TemplateUtil {
    * @param file
    */
   static async resolveCompiledTemplate(file: string, context: Record<string, unknown>): Promise<Record<CompileParts, string>> {
-    const { CompileUtil, COMPILE_PARTS } = await import('../../src/util');
-
     const entries = await Promise.all(
       COMPILE_PARTS.map(k =>
         this.resolveTemplate(file, k, context)
@@ -50,10 +48,6 @@ export class TemplateUtil {
    * Watch compilation
    */
   static async watchCompile(cb?: (file: string) => void): Promise<void> {
-    const { ResourceManager, Util } = await import('@travetto/base');
-    const { FilePresenceManager } = await import('@travetto/watch');
-    const { CompileUtil } = await import('../../src/util');
-
     new FilePresenceManager(ResourceManager.getRelativePaths().map(x => `${x}/email`), {
       ignoreInitial: true,
       validFile: x =>

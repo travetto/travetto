@@ -3,6 +3,10 @@ import { ErrorUtil, PhaseManager, ModuleIndex } from '@travetto/boot';
 import { ShutdownManager } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
+import { RunnerUtil } from '../execute/util';
+
+import { Runner } from '../execute/runner';
+
 import { Events, RunEvent } from './types';
 
 const FIXED_MODULES = new Set([
@@ -40,7 +44,6 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    * Start the worker
    */
   async activate(): Promise<void> {
-    const { RunnerUtil } = await import('../execute/util');
     RunnerUtil.registerCleanup('worker');
 
     // Listen for inbound requests
@@ -109,8 +112,6 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
 
     // Run all remaining initializations as needed for tests
     await PhaseManager.run('init', '*', ['@trv:registry/init']);
-
-    const { Runner } = await import('../execute/runner');
 
     console.debug('Running', { file: event.file });
 

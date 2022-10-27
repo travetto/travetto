@@ -2,7 +2,7 @@
   "name": "@travetto/boot",
   "displayName": "Boot",
   "version": "3.0.0-rc.0",
-  "description": "Bootstrapping and common utilities for travetto applications.",
+  "description": "Bootstrapping and application phase management for travetto applications.",
   "keywords": [
     "bootstrapping",
     "travetto",
@@ -25,10 +25,18 @@
     "directory": "module/boot"
   },
   "dependencies": {
-    "@travetto/manifest": "^3.0.0-rc.4",
+    "@travetto/path": "^3.0.0-rc.4",
     "@travetto/transformer": "^3.0.0-rc.2",
     "@types/source-map-support": "^0.5.6",
     "source-map-support": "^0.5.21"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "^3.0.0-rc.2"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "trvDependencies": {
     "@travetto/test": [

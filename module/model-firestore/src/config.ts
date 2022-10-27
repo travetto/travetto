@@ -1,4 +1,4 @@
-import { ResourceManager } from '@travetto/base';
+import { ResourceManager } from '@travetto/resource';
 import { Config } from '@travetto/config';
 
 @Config('model.firestore')

@@ -1,6 +1,6 @@
 import * as enquirer from 'enquirer';
-import * as path from 'path';
 
+import * as path from '@travetto/path';
 import { Env } from '@travetto/base';
 import { CliCommand, OptionConfig } from '@travetto/cli';
 
@@ -98,7 +98,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
     }
 
     const ctx = new Context(
-      name, this.cmd.template, path.resolve(Env.get('INIT_CWD', process.cwd().__posix), this.cmd.dir ?? name).__posix
+      name, this.cmd.template, path.resolve(Env.get('INIT_CWD', path.cwd()), this.cmd.dir ?? name)
     );
 
     if (!this.cmd.force) {

@@ -6,9 +6,7 @@ import { Util } from './src/util';
 import { ExecUtil } from './src/exec';
 
 const UtilLink = d.Ref(Util.name, 'src/util.ts');
-const ScanFsLink = d.Ref('ScanFs', 'src/scan.ts');
 const AppErrorLink = d.Ref(AppError.name, 'src/error.ts');
-const ResourceManagerLink = d.Ref('ResourceManager', 'src/resource.ts');
 const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
 const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
 
@@ -19,9 +17,6 @@ Base is the foundation of all ${lib.Travetto} applications.  It is intended to b
 
 ${d.List(
   'Environment Support',
-  'File Operations',
-  'File System Scanning',
-  'Resource Management',
   'Process Execution',
   'Shutdown Management',
   'Standard Error Support',
@@ -39,22 +34,6 @@ ${d.List(
   d`${d.Method('getInt(key: string, def?: number): number;')} - Retrieve an environmental value as a number`,
   d`${d.Method('getList(key: string): string[];')} - Retrieve an environmental value as a list`,
 )}
-
-${d.Section('File Operations')}
-The framework does a fair amount of file system scanning to auto - load files. It also needs to have knowledge of what files are available. The framework provides a simple and performant functionality for recursively finding files. This functionality leverages regular expressions in lieu of glob pattern matching(this is to minimize overall code complexity).
-
-A simple example of finding specific ${d.Path('.config')} files in your codebase:
-
-${d.Code('Looking for all .config files with the prefix defined by svc', 'doc/find.ts')}
-
-${d.SubSection('File System Scanning')}
-${ScanFsLink} provides a breadth-first search through the file system with the ability to track and collect files via patterns.
-
-${d.Section('Resource Management')}
-
-Resource management, loading of files, and other assets at runtime is a common pattern that the ${ResourceManagerLink} encapsulates. It provides the ability to add additional search paths, as well as resolve resources by searching in all the registered paths.
-
-${d.Code('Finding Images', 'doc/image.ts')}
 
 ${d.Section('Process Execution')}
 Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.
@@ -116,16 +95,4 @@ ${d.List(
   d`${d.Method('uuid(len: number)')} generates a simple uuid for use within the application.`,
   d`${d.Method('allowDenyMatcher(rules[])')} builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.`
 )}
-
-${d.Section('CLI - build')} 
-
-${d.Execute('Build usage', 'trv', ['build', '--help'])}
-
-This command line operation pre-compiles all of the application source code.  You can target the output location as well, which is useful in conjunction with ${d.Field('process.env.TRV_CACHE')} for relocating the compiled files.
-
-${d.Section('CLI - clean')}
-
-The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
-
-${d.Execute('Clean operation', 'trv', ['clean', '--help'])}
 `;

@@ -1,6 +1,7 @@
 import type { Class } from '@travetto/base';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 import type { ModelType } from '@travetto/model/src/types/model';
+import { ShutdownManager } from '@travetto/base';
 
 export class ModelInstallUtil {
   static async run(provider: ModelStorageSupport, models: Class<ModelType>[]): Promise<void> {
@@ -11,6 +12,6 @@ export class ModelInstallUtil {
       console.log('Installing', { name: m.Ⲑid });
       await provider.createModel(m);
     }
-    (await import('@travetto/base')).ShutdownManager.execute(-1); // Release database
+    ShutdownManager.execute(-1); // Release database
   }
 }

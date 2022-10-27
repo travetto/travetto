@@ -1,7 +1,10 @@
-import { dirname } from 'path';
 import { promises as fs } from 'fs';
 
+import * as path from '@travetto/path';
+import { ResourceManager } from '@travetto/resource';
 import type { MailTemplateEngine } from '@travetto/email';
+import { DependencyRegistry } from '@travetto/di';
+import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
 
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
@@ -28,8 +31,6 @@ export class CompileUtil {
    * Grab list of all available templates
    */
   static async findAllTemplates(): Promise<{ path: string, key: string }[]> {
-    const { ResourceManager } = await import('@travetto/base');
-
     return Promise.all((await ResourceManager.findAll(this.TPL_EXT))
       .sort()
       .map(async path => ({
@@ -51,7 +52,7 @@ export class CompileUtil {
    */
   static async compileToDisk(file: string): Promise<Compilation> {
     const resolved = await fs.readFile(file, 'utf8');
-    const compiled = await this.compile(resolved, dirname(file));
+    const compiled = await this.compile(resolved, path.dirname(file));
 
     await Promise.all(this.getOutputs(file)
       .map(([k, f]) => {
@@ -69,10 +70,6 @@ export class CompileUtil {
    * Compile template
    */
   static async compile(tpl: string, root: string): Promise<Compilation> {
-    const { ResourceManager } = await import('@travetto/base');
-    const { DependencyRegistry } = await import('@travetto/di');
-    const { MailTemplateEngineTarget } = await import('@travetto/email/src/internal/types');
-
     const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
 
     // Wrap with body

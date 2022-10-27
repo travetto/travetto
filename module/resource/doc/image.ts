@@ -1,4 +1,4 @@
-import { ResourceManager } from '@travetto/base';
+import { ResourceManager } from '@travetto/resource';
 
 /**
  * Find a single image, first one wins by resource path order

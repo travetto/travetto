@@ -1,11 +1,12 @@
-import * as path from 'path';
 import * as fs from 'fs/promises';
 import { createReadStream, existsSync } from 'fs';
 import { Readable } from 'stream';
 
+import * as path from '@travetto/path';
+import { Env, AppError } from '@travetto/base';
+
+
 import { ScanFs, ScanEntry } from './scan';
-import { AppError } from './error';
-import { Env } from './env';
 
 const cleanPath = (p: string): string => p.charAt(0) === '/' ? p.substring(1) : p;
 
@@ -25,15 +26,18 @@ const dedupe = (): (x: string) => boolean => {
  * Standard resource management interface allowing for look up by resource name
  * across multiple resource paths
  */
-class $ResourceManager {
+export class $ResourceManager {
   #cache = new Map<string, string>();
   #paths: string[] = [];
 
   init(): void {
     this.#paths.unshift('resources', ...Env.getResourcePaths());
+    this.finalize();
+  }
 
+  finalize(): void {
     this.#paths = this.#paths
-      .map(x => path.resolve(x).__posix)
+      .map(x => path.resolve(x))
       .filter(dedupe())
       .filter(x => existsSync(x));
   }
@@ -67,9 +71,9 @@ class $ResourceManager {
     this.#cache.clear();
 
     if (index < 0) {
-      this.#paths.push(path.resolve(searchPath).__posix);
+      this.#paths.push(path.resolve(searchPath));
     } else {
-      this.#paths.splice(index, 0, path.resolve(searchPath).__posix);
+      this.#paths.splice(index, 0, path.resolve(searchPath));
     }
   }
 
@@ -84,7 +88,7 @@ class $ResourceManager {
    * List all paths as relative to the cwd
    */
   getRelativePaths(): string[] {
-    const cwdPrefix = `${process.cwd().__posix}/`;
+    const cwdPrefix = `${path.cwd()}/`;
     return this.#paths.slice(0).map(x => x.replace(cwdPrefix, ''));
   }
 
@@ -108,7 +112,7 @@ class $ResourceManager {
       return this.#cache.get(pth)!;
     }
 
-    for (const f of this.#paths.map(x => path.join(x, pth).__posix)) {
+    for (const f of this.#paths.map(x => path.join(x, pth))) {
       if (await fs.stat(f).catch(() => { })) {
         this.#cache.set(pth, f);
         return f;
@@ -155,7 +159,7 @@ class $ResourceManager {
 
     for (const root of this.#paths) {
       const results = await ScanFs.scanDir({ testFile: x => pattern.test(x) },
-        path.resolve(root, base).__posix);
+        path.resolve(root, base));
 
       for (const r of results) {
         this.#scanEntry(base, found, out, r);

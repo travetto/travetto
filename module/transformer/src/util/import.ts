@@ -1,5 +1,5 @@
 import * as ts from 'typescript';
-import { resolve as pathResolve } from 'path';
+import * as path from '@travetto/path';
 
 import { Import } from '../types/shared';
 
@@ -11,7 +11,7 @@ export class ImportUtil {
    * useful for handling failed imports, but still transpiling
    */
   static optionalResolve(file: string, base?: string): string {
-    file = base ? pathResolve(base, file) : file;
+    file = base ? path.resolve(base, file) : file;
     try {
       return require.resolve(file);
     } catch {

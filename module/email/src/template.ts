@@ -1,7 +1,7 @@
 import * as Mustache from 'mustache';
 
 import { Injectable } from '@travetto/di';
-import { ResourceManager } from '@travetto/base';
+import { ResourceManager } from '@travetto/resource';
 
 /**
  * Mail templating engine
