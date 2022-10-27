@@ -1,7 +1,6 @@
 import * as Mod from 'module';
 import * as path from 'path';
 
-import { EnvUtil } from '@travetto/base';
 import { ModuleIndex } from '../module-index';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

@@ -1,7 +1,42 @@
+interface InitConfig {
+  env?: string;
+  dynamic?: boolean;
+  debug?: string;
+  set?: Record<string, string>;
+  append?: Record<string, (string[] | string)>;
+}
+
 /**
  * Basic utils for reading environment variables
  */
-export class EnvUtil {
+export class Env {
+
+  /**
+  * Add item to environment variable list, not persistent
+  */
+  static #addToList(k: string, ...items: string[]): void {
+    process.env[k] = [...new Set(Env.getList(k, items))].join(',');
+  }
+
+  /**
+   * Initialize the app environment
+   * @private
+   */
+  static define({ env, dynamic, debug, set, append }: InitConfig = {}): void {
+    process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
+    const prod = this.isProd();
+    dynamic ??= this.isDynamic();
+
+    Object.assign(process.env, {
+      NODE_ENV: prod ? 'production' : 'development',
+      TRV_DYNAMIC: `${dynamic}`,
+      TRV_DEBUG: this.get('TRV_DEBUG', this.get('DEBUG', debug ?? (prod ? '0' : '')))
+    }, set ?? {});
+
+    for (const [key, values] of Object.entries(append ?? {})) {
+      this.#addToList(key, ...((typeof values === 'string' ? [values] : values) ?? []));
+    }
+  }
 
   /**
    * Get all relevant environment values

@@ -1,7 +1,7 @@
 import * as os from 'os';
 
 import { Config } from '@travetto/config';
-import { EnvUtil, AppError, ResourceManager } from '@travetto/base';
+import { Env, AppError, ResourceManager } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 import { RestServerUtil } from './util';
@@ -85,7 +85,7 @@ export class RestConfig {
       return;
     }
     if (!this.ssl.keys) {
-      if (EnvUtil.isProd()) {
+      if (Env.isProd()) {
         throw new AppError('Cannot use test keys in production', 'permissions');
       }
       return RestServerUtil.generateSslKeyPair();

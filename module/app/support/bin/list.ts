@@ -61,7 +61,7 @@ export class $AppListLoader {
   async buildList(): Promise<ApplicationConfig[]> {
     if (!parentPort) { // If top level, recurse
       return CliUtil.waiting('Collecting', () =>
-        ExecUtil.worker<ApplicationConfig[]>(require.resolve('../main.list-build')).message
+        ExecUtil.worker<ApplicationConfig[]>(path.resolve(__source.folder, '..', 'main.list-build').__posix).message
       );
     } else {
       await (await import('@travetto/boot/support/main.build')).main();

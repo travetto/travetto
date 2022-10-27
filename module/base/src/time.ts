@@ -1,6 +1,6 @@
 import * as timers from 'timers/promises';
 
-import { EnvUtil } from './env';
+import { Env } from './env';
 
 const MIN = 1000 * 60;
 const DAY = 24 * MIN * 60;
@@ -69,7 +69,7 @@ export class TimeUtil {
    * @param def backup value if not valid or found
    */
   static getEnvTime(key: string, def?: number | TimeSpan): number {
-    const val = EnvUtil.get(key);
+    const val = Env.get(key);
     let ms: number | undefined;
     if (val) {
       if (this.isTimeSpan(val)) {

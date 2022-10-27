@@ -1,8 +1,7 @@
 import * as fs from 'fs/promises';
 
 import { CliUtil, CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
-import { EnvInit } from '@travetto/base/support/bin/env';
-import { EnvUtil } from '@travetto/base';
+import { Env } from '@travetto/base';
 
 import { AppListLoader } from './bin/list';
 import { AppRunUtil } from './bin/run';
@@ -51,9 +50,9 @@ export class AppRunCommand extends CliCommand<Options> {
   }
 
   envInit(): void {
-    EnvInit.init({
+    Env.define({
       env: this.cmd.env,
-      dynamic: !EnvUtil.isFalse('TRV_DYNAMIC'),
+      dynamic: !Env.isFalse('TRV_DYNAMIC'),
       append: {
         TRV_PROFILES: this.cmd.profile,
         TRV_RESOURCES: this.cmd.resource
@@ -82,7 +81,7 @@ export class AppRunCommand extends CliCommand<Options> {
           if (!err || !(err instanceof Error)) {
             throw err;
           }
-          const { StacktraceManager } = await import('@travetto/base');
+          const { StacktraceManager } = await import('@travetto/boot');
           console.error(CliUtil.color`${{ failure: 'Failed to run' }} ${{ title: selected.name }}, ${err.message.replace(/via=.*$/, '')}`);
           if (hasChildren(err)) {
             console.error(err.errors.map((x: { message: string }) => CliUtil.color`● ${{ output: x.message }}`).join('\n'));

@@ -1,5 +1,5 @@
 import { ModuleIndex, ConsoleManager, LogLevel } from '@travetto/boot';
-import { EnvUtil, Util } from '@travetto/base';
+import { Env, Util } from '@travetto/base';
 
 import { Appender, Formatter, LogEvent, LogLevels } from './types';
 import { LineFormatter } from './formatter/line';
@@ -21,9 +21,9 @@ class $Logger {
    * Should we enrich the console by default
    */
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  readonly #logFormat: 'line' | 'json' = EnvUtil.get('TRV_LOG_FORMAT', 'line') as 'line';
+  readonly #logFormat: 'line' | 'json' = Env.get('TRV_LOG_FORMAT', 'line') as 'line';
 
-  readonly #logFile?: string = EnvUtil.get('TRV_LOG_FILE');
+  readonly #logFile?: string = Env.get('TRV_LOG_FILE');
 
   /**
    * Listeners for logging events
@@ -48,11 +48,11 @@ class $Logger {
    */
   init(): void {
     // Compute the debug state
-    const debugStatus = EnvUtil.isSet('TRV_DEBUG') ? !EnvUtil.isFalse('TRV_DEBUG') : !EnvUtil.isProd();
+    const debugStatus = Env.isSet('TRV_DEBUG') ? !Env.isFalse('TRV_DEBUG') : !Env.isProd();
 
     if (debugStatus !== false) {
       delete this.#exclude.debug;
-      const filter = LogUtil.buildFilter(EnvUtil.get('TRV_DEBUG', '@app'));
+      const filter = LogUtil.buildFilter(Env.get('TRV_DEBUG', '@app'));
       if (filter) {
         this.#filters.debug = filter;
       }

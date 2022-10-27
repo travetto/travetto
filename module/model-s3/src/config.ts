@@ -1,7 +1,7 @@
 import { fromIni } from '@aws-sdk/credential-provider-ini';
 import * as S3 from '@aws-sdk/client-s3';
 
-import { EnvUtil } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field, Required } from '@travetto/schema';
 
@@ -15,8 +15,8 @@ export class S3ModelConfig {
   bucket = ''; // S3 bucket
   endpoint = ''; // Endpoint url
 
-  accessKeyId: string = EnvUtil.get('AWS_ACCESS_KEY_ID', '');
-  secretAccessKey: string = EnvUtil.get('AWS_SECRET_ACCESS_KEY', '');
+  accessKeyId: string = Env.get('AWS_ACCESS_KEY_ID', '');
+  secretAccessKey: string = Env.get('AWS_SECRET_ACCESS_KEY', '');
 
   @Field(Object)
   @Required(false)
@@ -38,7 +38,7 @@ export class S3ModelConfig {
    */
   async postConstruct(): Promise<void> {
     if (!this.accessKeyId && !this.secretAccessKey) {
-      const creds = await fromIni({ profile: EnvUtil.get('AWS_PROFILE') })();
+      const creds = await fromIni({ profile: Env.get('AWS_PROFILE') })();
       this.accessKeyId = creds.accessKeyId;
       this.secretAccessKey = creds.secretAccessKey;
     }

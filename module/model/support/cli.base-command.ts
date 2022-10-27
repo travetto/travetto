@@ -1,7 +1,7 @@
 import { ConsoleManager, PhaseManager } from '@travetto/boot';
 
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
-import { EnvInit } from '@travetto/base/support/bin/env';
+import { Env } from '@travetto/base';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
 import { ModelCandidateUtil } from './bin/candidate';
@@ -22,7 +22,7 @@ export abstract class BaseModelCommand extends CliCommand<Options> {
   resolve = ModelCandidateUtil.resolve.bind(ModelCandidateUtil);
 
   envInit(): void {
-    EnvInit.init();
+    Env.define();
   }
 
   override async build(): Promise<void> {

@@ -1,6 +1,6 @@
 import { RetargettingProxy, OrderingUtil, PackageUtil } from '@travetto/boot';
 
-import { EnvUtil, Class, AppError } from '@travetto/base';
+import { Env, Class, AppError } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
 import { Application } from '@travetto/app';
@@ -46,7 +46,7 @@ export class RestApplication<T = unknown>  {
   async postConstruct(): Promise<void> {
     this.info = {
       info: PackageUtil.mainDigest(),
-      env: EnvUtil.digest(),
+      env: Env.digest(),
       restProvider: this.server.constructor.name
     };
 
@@ -114,7 +114,7 @@ export class RestApplication<T = unknown>  {
    * @param c The class to register
    */
   async registerController(c: Class): Promise<void> {
-    if (this.server.listening && !EnvUtil.isDynamic()) {
+    if (this.server.listening && !Env.isDynamic()) {
       console.warn('Reloading only supported in dynamic mode');
       return;
     }
@@ -122,7 +122,7 @@ export class RestApplication<T = unknown>  {
     const config = ControllerRegistry.get(c);
     config.instance = await DependencyRegistry.getInstance(config.class);
 
-    if (EnvUtil.isDynamic()) {
+    if (Env.isDynamic()) {
       config.instance = RetargettingProxy.unwrap(config.instance);
     }
 
@@ -146,7 +146,7 @@ export class RestApplication<T = unknown>  {
    * @param c The class to unregister
    */
   async unregisterController(c: Class): Promise<void> {
-    if (!EnvUtil.isDynamic()) {
+    if (!Env.isDynamic()) {
       console.warn('Unloading only supported in dynamic mode');
       return;
     }
@@ -158,7 +158,7 @@ export class RestApplication<T = unknown>  {
    * Register the global listener as a hardcoded path
    */
   async registerGlobal(): Promise<void> {
-    if (this.server.listening && !EnvUtil.isDynamic()) {
+    if (this.server.listening && !Env.isDynamic()) {
       console.warn('Reloading only supported in dynamic mode');
       return;
     }
@@ -180,7 +180,7 @@ export class RestApplication<T = unknown>  {
    * Remove the global listener
    */
   async unregisterGlobal(): Promise<void> {
-    if (!EnvUtil.isDynamic()) {
+    if (!Env.isDynamic()) {
       console.warn('Unloading only supported in dynamic mode');
       return;
     }

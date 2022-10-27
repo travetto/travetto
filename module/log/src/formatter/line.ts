@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { ColorUtil, EnvUtil } from '@travetto/base';
+import { ColorUtil, Env } from '@travetto/base';
 
 import { LogEvent, Formatter } from '../types';
 
@@ -34,10 +34,10 @@ export class LineFormatter implements Formatter {
   #opts: LineFormatterOpts;
 
   constructor(opts: LineFormatterOpts = {}) {
-    const notPlain = !EnvUtil.isTrue('TRV_LOG_PLAIN');
+    const notPlain = !Env.isTrue('TRV_LOG_PLAIN');
     this.#opts = {
       colorize: notPlain && ColorUtil.colorize,
-      timestamp: notPlain ? EnvUtil.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms') : undefined,
+      timestamp: notPlain ? Env.isValueOrFalse('TRV_LOG_TIME', ['s', 'ms'] as const, 'ms') : undefined,
       align: true, level: notPlain, location: notPlain,
       ...opts
     };

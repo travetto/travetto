@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 
 import { PhaseManager } from '@travetto/boot';
-import { EnvInit } from '@travetto/base/support/bin/env';
+import { Env } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 type Options = {
@@ -28,7 +28,7 @@ export class DocCommand extends CliCommand<Options> {
   }
 
   async envInit(): Promise<void> {
-    EnvInit.init({
+    Env.define({
       debug: '0',
       append: {
         TRV_SRC_LOCAL: 'doc',

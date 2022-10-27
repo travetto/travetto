@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 
 import { Test, Suite, AfterEach, BeforeEach } from '@travetto/test';
-import { EnvUtil } from '..';
+import { Env } from '..';
 
 @Suite()
-export class EnvUtilTest {
+export class EnvTest {
 
   #env?: NodeJS.ProcessEnv;
 
@@ -28,58 +28,58 @@ export class EnvUtilTest {
     process.env.NAME = 'BOB';
     process.env.nAmE = 'bOb';
 
-    assert(EnvUtil.get('name') === 'bob');
-    assert(EnvUtil.get('NAME') === 'BOB');
-    assert(EnvUtil.get('nAmE') === 'bOb');
-    assert(EnvUtil.get('NaMe') === 'BOB');
+    assert(Env.get('name') === 'bob');
+    assert(Env.get('NAME') === 'BOB');
+    assert(Env.get('nAmE') === 'bOb');
+    assert(Env.get('NaMe') === 'BOB');
 
-    assert(EnvUtil.get('nombre', 'roberto') === 'roberto');
+    assert(Env.get('nombre', 'roberto') === 'roberto');
   }
 
   @Test()
   verifyGetInt() {
     process.env.age = '20';
 
-    assert(EnvUtil.getInt('age', -1) === 20);
-    assert(EnvUtil.getInt('age2', -1) === -1);
+    assert(Env.getInt('age', -1) === 20);
+    assert(Env.getInt('age2', -1) === -1);
 
     process.env.age = '-a';
-    assert(isNaN(EnvUtil.getInt('age', -1)));
+    assert(isNaN(Env.getInt('age', -1)));
   }
 
   @Test()
   verifyGetList() {
     process.env.names = 'a,b,c,d,e';
 
-    assert.deepStrictEqual(EnvUtil.getList('names'), ['a', 'b', 'c', 'd', 'e']);
+    assert.deepStrictEqual(Env.getList('names'), ['a', 'b', 'c', 'd', 'e']);
 
     process.env.names = '  a , b ,  c ,,, d ,,e';
 
-    assert.deepStrictEqual(EnvUtil.getList('names'), ['a', 'b', 'c', 'd', 'e']);
+    assert.deepStrictEqual(Env.getList('names'), ['a', 'b', 'c', 'd', 'e']);
 
     process.env.names = '  a  b   c  d e';
 
-    assert.deepStrictEqual(EnvUtil.getList('names'), ['a', 'b', 'c', 'd', 'e']);
+    assert.deepStrictEqual(Env.getList('names'), ['a', 'b', 'c', 'd', 'e']);
   }
 
   @Test()
   verifyGetMap() {
     process.env.mapped = 'a=1,b=2,c=3,d=';
-    assert.deepStrictEqual(EnvUtil.getEntries('mapped'), [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
+    assert.deepStrictEqual(Env.getEntries('mapped'), [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
 
     process.env.mapped = 'a#1,b#2,c#3,d#';
-    assert.deepStrictEqual(EnvUtil.getEntries('mapped', '#'), [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
+    assert.deepStrictEqual(Env.getEntries('mapped', '#'), [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
   }
 
   @Test()
   verifyPresence() {
     process.env.found = 'y';
 
-    assert(EnvUtil.isSet('FOUND'));
+    assert(Env.isSet('FOUND'));
 
     delete process.env.found;
 
-    assert(!EnvUtil.isSet('FOUND'));
+    assert(!Env.isSet('FOUND'));
   }
 
   @Test()
@@ -87,49 +87,49 @@ export class EnvUtilTest {
     for (const val of ['yes', '1', 'TRUE', 'On']) {
       process.env.found = val;
 
-      assert(EnvUtil.isTrue('FOUND'));
-      assert(!EnvUtil.isFalse('found'));
+      assert(Env.isTrue('FOUND'));
+      assert(!Env.isFalse('found'));
     }
 
     for (const val of ['no', '0', 'FALSE', 'Off']) {
       process.env.found = val;
-      assert(!EnvUtil.isTrue('found'));
-      assert(EnvUtil.isFalse('FOUND'));
+      assert(!Env.isTrue('found'));
+      assert(Env.isFalse('FOUND'));
     }
 
     delete process.env.found;
-    assert(!EnvUtil.isTrue('FOUND'));
-    assert(!EnvUtil.isFalse('FOUND'));
+    assert(!Env.isTrue('FOUND'));
+    assert(!Env.isFalse('FOUND'));
   }
 
   @Test()
   verifyValueOrFalse() {
     delete process.env.color;
-    assert(EnvUtil.isValueOrFalse('color', ['red', 'green', 'blue'] as const, 'red') === 'red');
-    assert(EnvUtil.isValueOrFalse('color', ['red', 'green', 'blue'] as const) === false);
+    assert(Env.isValueOrFalse('color', ['red', 'green', 'blue'] as const, 'red') === 'red');
+    assert(Env.isValueOrFalse('color', ['red', 'green', 'blue'] as const) === false);
     process.env.color = '0';
-    assert(EnvUtil.isValueOrFalse('color', ['red', 'green', 'blue'] as const, 'red') === false);
+    assert(Env.isValueOrFalse('color', ['red', 'green', 'blue'] as const, 'red') === false);
     process.env.color = 'green';
-    assert(EnvUtil.isValueOrFalse('color', ['red', 'green', 'blue'] as const) === 'green');
+    assert(Env.isValueOrFalse('color', ['red', 'green', 'blue'] as const) === 'green');
     process.env.COLOR2 = 'blue';
-    assert(EnvUtil.isValueOrFalse('color2', ['red', 'green', 'blue'] as const) === 'blue');
+    assert(Env.isValueOrFalse('color2', ['red', 'green', 'blue'] as const) === 'blue');
     process.env.COLOR3 = 'gray';
-    assert(EnvUtil.isValueOrFalse('color3', ['red', 'green', 'blue'] as const) === false);
-    assert(EnvUtil.isValueOrFalse('color3', ['red', 'green', 'blue'] as const, 'green') === 'green');
+    assert(Env.isValueOrFalse('color3', ['red', 'green', 'blue'] as const) === false);
+    assert(Env.isValueOrFalse('color3', ['red', 'green', 'blue'] as const, 'green') === 'green');
   }
 
   @Test()
   verifyGetBoolean() {
-    assert(EnvUtil.getBoolean('bool') === undefined);
+    assert(Env.getBoolean('bool') === undefined);
     process.env.BOOL = '0';
-    assert(EnvUtil.getBoolean('bool') === false);
+    assert(Env.getBoolean('bool') === false);
     process.env.BOOL = 'off';
-    assert(EnvUtil.getBoolean('bool') === false);
+    assert(Env.getBoolean('bool') === false);
     process.env.BOOL = '';
-    assert(EnvUtil.getBoolean('bool') === undefined);
+    assert(Env.getBoolean('bool') === undefined);
     process.env.BOOL = '*';
-    assert(EnvUtil.getBoolean('bool') === true);
+    assert(Env.getBoolean('bool') === true);
     process.env.BOOL = '1';
-    assert(EnvUtil.getBoolean('bool') === true);
+    assert(Env.getBoolean('bool') === true);
   }
 }

@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { EnvUtil, AppError, Class, ResourceManager, Util } from '@travetto/base';
+import { Env, AppError, Class, ResourceManager, Util } from '@travetto/base';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ConfigUtil } from './internal/util';
@@ -31,7 +31,7 @@ class $ConfigManager {
    * Load all config files
    */
   async #load(): Promise<void> {
-    const profiles = ['application', ...EnvUtil.getProfiles(), EnvUtil.getName()];
+    const profiles = ['application', ...Env.getProfiles(), Env.getName()];
 
     const profileIndex = Object.fromEntries(Object.entries(profiles).map(([k, v]) => [v, +k] as const));
 
@@ -77,7 +77,7 @@ class $ConfigManager {
    * @param namespace If only a portion of the config should be exported
    * @param secure Determines if secrets should be redacted, defaults to true in prod, false otherwise
    */
-  toJSON(secure: boolean = EnvUtil.isProd()): Record<string, unknown> {
+  toJSON(secure: boolean = Env.isProd()): Record<string, unknown> {
     const copy = structuredClone(this.#active);
     return secure ?
       ConfigUtil.sanitizeValuesByKey(copy, [
