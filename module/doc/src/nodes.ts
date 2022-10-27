@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { existsSync } from 'fs';
 
-import { PackageUtil } from '@travetto/base';
+import { PackageUtil } from '@travetto/boot';
 
 import { FileUtil, } from './util/file';
 import { DocRunUtil, RunConfig } from './util/run';

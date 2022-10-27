@@ -19,7 +19,6 @@ Base is the foundation of all ${lib.Travetto} applications.  It is intended to b
 
 ${d.List(
   'Environment Support',
-  'Application Manifest',
   'File Operations',
   'File System Scanning',
   'Resource Management',
@@ -39,22 +38,6 @@ ${d.List(
   d`${d.Method('get(key: string, def?: string): string;')} - Retrieve an environmental value with a potential default`,
   d`${d.Method('getInt(key: string, def?: number): number;')} - Retrieve an environmental value as a number`,
   d`${d.Method('getList(key: string): string[];')} - Retrieve an environmental value as a list`,
-)}
-
-
-${d.Section('Application Manifest')}
-The framework provides basic environment information, e.g. in prod/test/dev.  This is useful for runtime decisions.  This is primarily used by the framework, but can prove useful to application developers 
-as well. The information that is available is:
-
-${d.List(
-  d`${d.Field('env.prod')}- Determines if app is in prod mode.  A ${d.Input('boolean')} flag that should indicate a production run.`,
-  d`${d.Field('env.name')} - The environment name.  Will usually be one of ${d.Input('dev')}, ${d.Input('test')}, or ${d.Input('prod')}.  Can be anything that is passed in.`,
-  d`${d.Field('env.profiles: Set<string>')} - Specific application profiles that have been activated.  This is useful for indicating different configuration or run states.`,
-  d`${d.Field('env.debug')} - Simple logging flag.  This ${d.Input('boolean')} flag will enable or disable logging at various levels. By default ${d.Input('debug')} is on in non-${d.Input('prod')}.`,
-  d`${d.Field('env.resources: string[]')} - Resource folders.  Search paths for resolving resource requests via ${ResourceManagerLink}`,
-  d`${d.Field('source.local: string[]')} - Local source folders for transpiling.  Does not extend to installed modules.`,
-  d`${d.Field('source.common: string[]')} - Common source folders for transpiling. Includes installed modules.`,
-  d`${d.Method('hasProfile(p: string): boolean;')} - Test whether or not a profile is active.`,
 )}
 
 ${d.Section('File Operations')}

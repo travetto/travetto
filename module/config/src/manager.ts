@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { EnvUtil, AppError, AppManifest, Class, ResourceManager, Util } from '@travetto/base';
+import { EnvUtil, AppError, Class, ResourceManager, Util } from '@travetto/base';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ConfigUtil } from './internal/util';
@@ -31,7 +31,9 @@ class $ConfigManager {
    * Load all config files
    */
   async #load(): Promise<void> {
-    const profileIndex = Object.fromEntries(Object.entries(AppManifest.env.profiles).map(([k, v]) => [v, +k] as const));
+    const profiles = ['application', ...EnvUtil.getProfiles(), EnvUtil.getName()];
+
+    const profileIndex = Object.fromEntries(Object.entries(profiles).map(([k, v]) => [v, +k] as const));
 
     const files = (await ResourceManager.findAll(/[.]ya?ml$/))
       .map(file => ({ file, profile: path.basename(file).replace(/[.]ya?ml$/, '') }))

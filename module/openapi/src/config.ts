@@ -1,20 +1,38 @@
 import * as path from 'path';
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
+import { PackageUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
-import { EnvUtil, AppManifest } from '@travetto/base';
+import { EnvUtil } from '@travetto/base';
+import { Required } from '@travetto/schema';
+
 
 /**
  * API Information, infers as much as possible from the package.json
  */
 @Config('api.info', { internal: true })
 export class ApiInfoConfig {
-  contact: ContactObject = AppManifest.info.author ?? {};
-  description?: string = AppManifest.info.description;
-  license: LicenseObject = { name: AppManifest.info.license! };
+  @Required(false)
+  contact: ContactObject;
+  @Required(false)
+  description?: string;
+  @Required(false)
+  license: LicenseObject;
+  @Required(false)
   termsOfService?: string;
-  title: string = AppManifest.info.name;
-  version: string = AppManifest.info.version ?? '0.0.0';
+  @Required(false)
+  title: string;
+  @Required(false)
+  version: string;
+
+  postConstruct(): void {
+    const info = PackageUtil.main;
+    this.contact ??= info.author ?? {};
+    this.description ??= info.description;
+    this.license ??= { name: info.license! };
+    this.title ??= info.name;
+    this.version ??= info.version;
+  }
 }
 
 /**

@@ -37,5 +37,7 @@ declare global {
     source(file: string): typeof __source;
     // Main handler
     main<T>(target: (...args: unknown[]) => T, args?: string[], respond?: boolean): Promise<T>;
+    // Resolve stack
+    resolveStack?: (err: Error) => string;
   };
 }

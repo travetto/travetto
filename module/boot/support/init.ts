@@ -44,7 +44,7 @@ Object.defineProperty(Error.prototype, 'toJSON', {
     return {
       message: this.message,
       ...extra,
-      stack: this.resolveStack?.() ?? this.stack
+      stack: ᚕtrv.resolveStack?.(this) ?? this.stack
     };
   }
 });
@@ -94,6 +94,10 @@ const utils = Object.defineProperties({}, {
   source: { ...propDef, value: source },
   main: { ...propDef, value: main },
   log: { writable: true, value: log },
+  resolveStack: { writable: true, value: undefined }
 });
 
 Object.defineProperty(global, 'ᚕtrv', { ...propDef, value: utils });
+
+// Set stack trace limit
+Error.stackTraceLimit = 50;

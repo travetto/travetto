@@ -12,3 +12,4 @@ export * from './src/proxy';
 export * from './src/dynamic';
 export * from './src/stacktrace';
 export * from './src/error';
+export * from './src/package';

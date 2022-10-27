@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs/promises';
 
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
-import { PackageUtil } from '@travetto/base';
+import { PackageUtil } from '@travetto/boot';
 
 import { PackUtil } from './bin/util';
 import { CommonConfig, PackOperation } from './bin/types';

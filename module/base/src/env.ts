@@ -116,11 +116,19 @@ export class EnvUtil {
     }
   }
 
+  static getName(): string {
+    const name = this.get('TRV_ENV', this.get('NODE_ENV', 'dev'))
+      .replace(/^production$/i, 'prod')
+      .replace(/^development$/i, 'dev')
+      .toLowerCase();
+    return name;
+  }
+
   /**
    * Are we in production mode
    */
   static isProd(): boolean {
-    return /^prod(uction)?$/i.test(this.get('TRV_ENV', ''));
+    return /^prod(uction)?$/i.test(this.getName());
   }
 
   /**
@@ -128,5 +136,33 @@ export class EnvUtil {
    */
   static isDynamic(): boolean {
     return this.isTrue('TRV_DYNAMIC');
+  }
+
+  /**
+   * Get environment provided resource paths
+   */
+  static getResourcePaths(): string[] {
+    return this.getList('TRV_RESOURCES');
+  }
+
+  /**
+   * Get environment provided profiles
+   */
+  static getProfiles(): string[] {
+    return this.getList('TRV_PROFILES');
+  }
+
+  /**
+   * Provides general digest on state of env
+   */
+  static digest(): Record<string, unknown> {
+    return {
+      name: this.getName(),
+      prod: this.isProd(),
+      dynamic: this.isDynamic(),
+      nodeVersion: process.version,
+      profiles: this.getProfiles(),
+      resources: this.getResourcePaths()
+    };
   }
 }

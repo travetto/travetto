@@ -11,20 +11,20 @@ export class FileModuleTagTransformer {
 
   @AfterFile()
   static afterFile(state: TransformerState, node: ts.SourceFile): typeof node {
-    const toStmt = (x: ts.Expression): ts.Statement => state.factory.createExpressionStatement(x);
-
     // Tag for cycle detection
-    state.addStatements([toStmt(
-      state.factory.createCallExpression(
-        state.createAccess('Object', 'defineProperty'),
-        [],
+    state.addStatements([
+      state.factory.createVariableStatement(
         [
-          state.createIdentifier('exports'),
-          state.fromLiteral('@trv'),
-          state.fromLiteral({ configurable: false, value: true })
-        ]
+          ts.factory.createModifier(ts.SyntaxKind.ExportKeyword),
+          ts.factory.createModifier(ts.SyntaxKind.ConstKeyword)
+        ],
+        state.factory.createVariableDeclarationList([
+          state.factory.createVariableDeclaration(
+            'Ⲑtrv', undefined, undefined, state.factory.createTrue()
+          )
+        ])
       )
-    )]);
+    ]);
 
     return node;
   }

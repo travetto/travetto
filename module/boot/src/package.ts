@@ -1,6 +1,8 @@
 import * as path from 'path';
 import { readFileSync } from 'fs';
 
+import { version as framework } from '../package.json';
+
 export type Package = {
   name: string;
   displayName?: string;
@@ -43,19 +45,30 @@ export class PackageUtil {
   }
 
   static get main(): Package {
-    try {
-      return this.#config ??= this.readPackage(process.cwd().__posix);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        console.warn(`Unable to locate ${path.resolve('package.json').__posix}: ${err.message}`);
-      } else {
-        throw err;
+    if (!this.#config) {
+      try {
+        this.#config = this.readPackage(process.cwd().__posix);
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          console.warn(`Unable to locate ${path.resolve('package.json').__posix}: ${err.message}`);
+        } else {
+          throw err;
+        }
+        this.#config = {
+          name: 'untitled',
+          version: '0.0.0',
+          main: 'unknown',
+        };
       }
-      return this.#config = {
-        name: 'unknown',
-        main: 'unknown',
-        version: '0.0.0'
-      };
+      this.#config.name ??= 'untitled';
+      this.#config.description ??= 'A Travetto application';
+      this.#config.version ??= '0.0.0';
     }
+    return this.#config;
+  }
+
+  static mainDigest(): Record<string, unknown> {
+    const { main, name, author, license, version } = this.main;
+    return { name, main, author, license, version, framework };
   }
 }

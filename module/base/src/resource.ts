@@ -5,9 +5,21 @@ import { Readable } from 'stream';
 
 import { ScanFs, ScanEntry } from './scan';
 import { AppError } from './error';
-import { AppManifest } from './manifest';
+import { EnvUtil } from './env';
 
 const cleanPath = (p: string): string => p.charAt(0) === '/' ? p.substring(1) : p;
+
+const dedupe = (): (x: string) => boolean => {
+  const seen = new Set();
+  return x => {
+    if (seen.has(x)) {
+      return false;
+    }
+    seen.add(x);
+    return true;
+  };
+};
+
 
 /**
  * Standard resource management interface allowing for look up by resource name
@@ -15,20 +27,14 @@ const cleanPath = (p: string): string => p.charAt(0) === '/' ? p.substring(1) : 
  */
 class $ResourceManager {
   #cache = new Map<string, string>();
-
   #paths: string[] = [];
-  #rootPaths: string[];
 
-  constructor(rootPaths: string[]) {
-    this.#rootPaths = rootPaths;
-    this.#init();
-  }
-
-  #init(): void {
-    this.#paths.push(...this.#rootPaths);
+  init(): void {
+    this.#paths.unshift('resources', ...EnvUtil.getResourcePaths());
 
     this.#paths = this.#paths
       .map(x => path.resolve(x).__posix)
+      .filter(dedupe())
       .filter(x => existsSync(x));
   }
 
@@ -157,4 +163,4 @@ class $ResourceManager {
   }
 }
 
-export const ResourceManager = new $ResourceManager(AppManifest.env.resources);
+export const ResourceManager = new $ResourceManager();

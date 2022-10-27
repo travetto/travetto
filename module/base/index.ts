@@ -1,6 +1,4 @@
-export * from './src/manifest';
 export * from './src/exec';
-export * from './src/package';
 export * from './src/error';
 export * from './src/shutdown';
 export * from './src/util';
