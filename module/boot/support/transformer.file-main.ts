@@ -10,9 +10,7 @@ export class FileMainTransformer {
   static [TransformerId] = '@trv:boot';
 
   @AfterFile()
-  static afterFile(state: TransformerState, node: ts.SourceFile): typeof node {
-    const before: ts.Statement[] = [];
-    const after: ts.Statement[] = [];
+  static registerMainMethod(state: TransformerState, node: ts.SourceFile): typeof node {
     const toStmt = (x: ts.Expression): ts.Statement => state.factory.createExpressionStatement(x);
 
     // If not a main file

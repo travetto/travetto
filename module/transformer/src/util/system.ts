@@ -1,7 +1,5 @@
 import * as crypto from 'crypto';
 
-import * as path from '@travetto/path';
-
 const tsExt = '.ts';
 const dtsExt = '.d.ts';
 const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.endsWith(dtsExt));
@@ -46,18 +44,5 @@ export class SystemUtil {
     }
 
     return Math.abs(hash);
-  }
-
-  /**
-   * Convert a file name, to a proper module reference for importing, and comparing
-   * @param file
-   */
-  static moduleReference(file: string): string {
-    file = path.toPosix(file);
-    if (file.includes('node_modules')) { // it is a module
-      return file.replace(/^.*node_modules\//, '');
-    } else {
-      return file.replace(path.cwd(), '.');
-    }
   }
 }

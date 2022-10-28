@@ -85,7 +85,7 @@ export class ScanFs {
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [];
 
-    if (await fs.stat(base).catch(() => { })) {
+    if (await fs.stat(base).catch(() => false)) {
       dirs.push({ file: base, children: [], module: '' });
     }
 

@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
-import * as path from '@travetto/path';
 
+import * as path from '../../support/path';
 import { Import } from '../types/shared';
 
 /**
@@ -11,7 +11,16 @@ export class ImportUtil {
    * useful for handling failed imports, but still transpiling
    */
   static optionalResolve(file: string, base?: string): string {
-    file = base ? path.resolve(base, file) : file;
+    if (base?.endsWith('.ts')) {
+      base = path.dirname(base);
+    }
+    if (base && file.startsWith('.')) {
+      const resolved = path.resolve(base, file);
+      return resolved;
+      // TODO: Replace with manifest reverse lookup
+    } else if (file.startsWith('@')) {
+      return path.resolve('node_modules', file);
+    }
     try {
       return require.resolve(file);
     } catch {
@@ -23,7 +32,8 @@ export class ImportUtil {
    * Collect all imports for a source file, as a hash map
    */
   static collectImports(src: ts.SourceFile): Map<string, Import> {
-    const pth = require.resolve(src.fileName);
+    // TODO: Replace with manifest reverse lookup
+    let pth = src.fileName;
     const base = pth.replaceAll('\\', '/');
 
     const imports = new Map<string, Import>();

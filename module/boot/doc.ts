@@ -54,12 +54,6 @@ ${d.Execute('Stack trace from async errors', 'doc/stack-test.ts')}
 
 The needed functionality cannot be loaded until ${d.Method('init.action')} executes, and so must be required only at that time.
 
-${d.Section('CLI - build')} 
-
-${d.Execute('Build usage', 'trv', ['build', '--help'])}
-
-This command line operation pre-compiles all of the application source code.  You can target the output location as well, which is useful in conjunction with ${d.Field('process.env.TRV_CACHE')} for relocating the compiled files.
-
 ${d.Section('CLI - clean')}
 
 The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.

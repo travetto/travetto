@@ -20,20 +20,21 @@
     "start": "npx travetto run"
   },
   "dependencies": {
-    "@travetto/log": "^2.2.2",
-    "@travetto/cli": "^2.2.2",
-    "@travetto/app": "^2.2.2",
-    "@travetto/model-mongo": "^2.2.2",
-    "@travetto/rest-express": "^2.2.2",
-    "@travetto/auth-rest": "^2.2.2",
-    "@travetto/auth-rest-session": "^2.2.2",
-    "@travetto/rest-session": "^2.2.2",
-    "@travetto/openapi": "^2.2.2",
+    "@travetto/log": "^3.0.0-rc.0",
+    "@travetto/cli": "^3.0.0-rc.0",
+    "@travetto/app": "^3.0.0-rc.0",
+    "@travetto/model-mongo": "^3.0.0-rc.0",
+    "@travetto/rest-express": "^3.0.0-rc.0",
+    "@travetto/auth-rest": "^3.0.0-rc.0",
+    "@travetto/auth-rest-session": "^3.0.0-rc.0",
+    "@travetto/rest-session": "^3.0.0-rc.0",
+    "@travetto/openapi": "^3.0.0-rc.0",
     "vue": "^2.7.10"
   },
   "devDependencies": {
-    "@travetto/pack": "^2.2.2",
-    "@travetto/test": "^2.2.2"
+    "@travetto/pack": "^3.0.0-rc.0",
+    "@travetto/command": "^3.0.0-rc.0",
+    "@travetto/test": "^3.0.0-rc.0"
   },
   "private": true,
   "publishConfig": {

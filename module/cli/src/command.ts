@@ -145,14 +145,6 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   }
 
   /**
-   * Pre-compile on every cli execution
-   */
-  async build(): Promise<void> {
-    await (await import('@travetto/base/support/bin/util'))
-      .BuildUtil.build();
-  }
-
-  /**
    * Expose configuration as constrained typed object
    */
   get cmd(): Shape<V> {
@@ -230,7 +222,6 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
    */
   async runAction(...args: unknown[]): Promise<void> {
     await this.envInit?.();
-    await this.build();
     if (process.env.TRV_CLI_JSON_IPC && this.jsonIpc) {
       const data = await this.jsonIpc(...args);
       if (data !== undefined) {

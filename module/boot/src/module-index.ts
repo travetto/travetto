@@ -73,10 +73,6 @@ class $ModuleIndex {
     }));
   }
 
-  get modules(): IndexedModule[] {
-    return this.#modules;
-  }
-
   /**
    * Clears the app scanning cache
    */
@@ -96,7 +92,7 @@ class $ModuleIndex {
 
     const idx = this.#index;
     const searchSpace = folder ?
-      idx.flatMap(m => [...m.files[folder] ?? [], ...(config.includeIndex ? m.files.index : [])]) :
+      idx.flatMap(m => [...m.files[folder] ?? [], ...(config.includeIndex ? (m.files.index ?? []) : [])]) :
       idx.flatMap(m => [...Object.values(m.files)].flat());
 
     return searchSpace
@@ -152,8 +148,8 @@ class $ModuleIndex {
     const rel = filename.replace(`${this.#root}/`, '');
 
     const mod = rel.startsWith('node_modules') ?
-      this.#modules.find(x => rel.startsWith(`${x.output}/`)) :
-      this.#modules.find(x => x.output === '');
+      this.#index.find(x => rel.startsWith(`${x.output}/`)) :
+      this.#index.find(x => x.output === '.');
 
     if (mod) {
       const name = rel.replace(mod.output, mod.id).replace(/\/src\//, '/');

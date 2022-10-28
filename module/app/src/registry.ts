@@ -8,7 +8,7 @@ import { ConfigManager } from '@travetto/config';
 import { AppClass, ApplicationConfig } from './types';
 
 /**
- * Registration point for all applications.  Generally invoked by using
+ * Registration point for all applications. Generally invoked by using
  * the `@Application` decorator, but can be used directly as well.
  */
 class $ApplicationRegistry {

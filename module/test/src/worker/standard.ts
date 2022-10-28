@@ -14,7 +14,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
    * Spawn a child
    */
   return () => WorkUtil.spawnedWorker(
-    () => ExecUtil.fork('@travetto/test/support/main.test-child'),
+    () => ExecUtil.fork('node_modules/@travetto/test/support/main.test-child'),
     /**
      * Child initialization
      */

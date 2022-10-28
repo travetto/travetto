@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import * as timer from 'timers/promises';
 
-import { VisitorFactory, TransformerState, getAllTransformers, SystemUtil } from '..';
+import { VisitorFactory, TransformerState, getAllTransformers, SystemUtil } from '../index';
 
 /**
  * Utils for testing transformers

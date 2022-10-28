@@ -27,7 +27,7 @@ export class InjectableTransformer {
     const callExpr = existing?.expression as ts.CallExpression;
     const args: ts.Expression[] = [...(callExpr?.arguments ?? [])];
 
-    let optional = undefined;
+    let optional: ts.Expression | undefined = undefined;
     if (optional === undefined && !!param.questionToken) {
       optional = state.fromLiteral(true);
     }

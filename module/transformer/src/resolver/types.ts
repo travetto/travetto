@@ -1,5 +1,7 @@
 import type * as ts from 'typescript';
 
+import { ManifestManager } from '../manifest';
+
 /**
  * Base type for a simplistic type structure
  */
@@ -156,4 +158,5 @@ export interface Checker {
   getPropertiesOfType(type: ts.Type): ts.Symbol[];
   getTypeAsString(type: ts.Type): string | undefined;
   getType(node: ts.Node): ts.Type;
+  getManifest(): ManifestManager;
 }

@@ -15,10 +15,9 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "index.js",
-    "index.d.ts"
+    "index.ts"
   ],
-  "main": "index.js",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/path"

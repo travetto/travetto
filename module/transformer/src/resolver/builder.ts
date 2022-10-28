@@ -1,7 +1,7 @@
 /* eslint-disable no-bitwise */
 import * as ts from 'typescript';
 
-import * as path from '@travetto/path';
+import * as path from '../../support/path';
 
 import { DocUtil } from '../util/doc';
 import { CoreUtil } from '../util/core';
@@ -11,6 +11,7 @@ import { SystemUtil } from '../util/system';
 
 import { Type, AnyType, UnionType, Checker } from './types';
 import { CoerceUtil } from './coerce';
+import { ManifestManager } from '../manifest';
 
 /**
  * List of global types that can be parameterized
@@ -39,7 +40,7 @@ type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape
 /**
  * Type categorizer, input for builder
  */
-export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { category: Category, type: ts.Type } {
+export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type, manifest: ManifestManager): { category: Category, type: ts.Type } {
   const flags = type.getFlags();
   const objectFlags = DeclarationUtil.getObjectFlags(type) ?? 0;
 
@@ -66,9 +67,10 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
     }
 
     const source = DeclarationUtil.getPrimaryDeclarationNode(resolvedType).getSourceFile();
-    if (source?.fileName.includes('@types/node/globals') || source?.fileName.includes('typescript/lib')) {
+    const sourceFile = source.fileName;
+    if (sourceFile?.includes('@types/node/globals') || sourceFile?.includes('typescript/lib')) {
       return { category: 'literal', type };
-    } else if (!source?.fileName.includes('@travetto') && source?.fileName.endsWith(SystemUtil.EXT.outputTypes)) {
+    } else if (sourceFile?.endsWith(SystemUtil.EXT.outputTypes) && !manifest.knownFile(sourceFile)) {
       return { category: 'unknown', type };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };
@@ -147,7 +149,9 @@ export const TypeBuilder: {
       const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
       const name = CoreUtil.getSymbol(type)?.getName();
       return {
-        key: 'external', name, source: source.fileName.replaceAll('\\', '/'),
+        key: 'external',
+        name,
+        source: source.fileName,
         tsTypeArguments: checker.getAllTypeArguments(type)
       };
     }
@@ -196,7 +200,9 @@ export const TypeBuilder: {
         }
       }
       return {
-        key: 'shape', name: name?.getName(),
+        key: 'shape',
+        name: name?.getName(),
+        // source: checker.getManifest().ensureOutputFile(source?.fileName),
         source: source?.fileName,
         tsFieldTypes: fieldNodes,
         tsTypeArguments: checker.getAllTypeArguments(type),
@@ -215,9 +221,12 @@ export const TypeBuilder: {
           source = '.';
         }
 
-        const sourceFile: string = DeclarationUtil.getDeclarations(type)
+        const rawSourceFile: string = DeclarationUtil.getDeclarations(type)
           ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
           ?.getSourceFile().fileName ?? '';
+
+        // Ensure we are looking at the output location 
+        const sourceFile = checker.getManifest().ensureOutputFile(rawSourceFile);
 
         if (source === '.') {
           source = sourceFile;

@@ -8,7 +8,7 @@ import { NotFoundError } from '@travetto/model';
 import { InjectableSuite } from '@travetto/di/support/test.suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 
-import { HashNamingStrategy, AssetService, AssetUtil } from '..';
+import { HashNamingStrategy, AssetService, AssetUtil } from '../index';
 
 @Suite()
 @ModelSuite()

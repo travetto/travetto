@@ -4,6 +4,7 @@ import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
 import { TransformerState } from './state';
 import { getAllTransformers } from './register';
+import { ManifestManager, ManifestModule } from './manifest';
 
 type TransformerList = { before: ts.TransformerFactory<ts.SourceFile>[] };
 
@@ -14,14 +15,17 @@ export class TransformerManager {
 
   #cached: TransformerList | undefined;
   #transformers: NodeTransformer<TransformerState>[] = [];
+  #manifest: ManifestManager;
 
   /**
    * Read all transformers from disk under the pattern support/transformer.*
    */
-  async init(entries: { file: string }[]): Promise<void> {
+  async init(entries: { file: string }[], modules: ManifestModule[]): Promise<void> {
     if (this.#cached) {
       return;
     }
+
+    this.#manifest = new ManifestManager(modules);
 
     for (const entry of entries) { // Exclude based on blacklist
       this.#transformers.push(...getAllTransformers(await import(entry.file)));
@@ -43,7 +47,7 @@ export class TransformerManager {
 
   build(checker: ts.TypeChecker): void {
     const visitor = new VisitorFactory(
-      (ctx, src) => new TransformerState(src, ctx.factory, checker),
+      (ctx, src) => new TransformerState(src, ctx.factory, checker, this.#manifest),
       this.#transformers
     );
 
