@@ -2,12 +2,14 @@ const path = require('path');
 const fs = require('fs');
 
 const FOLDER = path.resolve(__dirname, '..');
-const FILES = [
-  ...fs.readdirSync(`${FOLDER}/src`)
-    .filter(x => !x.startsWith('.'))
-    .map(x => `./src/${x}`),
-  './index.ts'
-];
+const FILES = ['src', 'support/bin', 'support/init.ts', 'index.ts']
+  .flatMap(sub =>
+    sub.endsWith('.ts') ?
+      [`./${sub}`] :
+      fs.readdirSync(`${FOLDER}/${sub}`)
+        .filter(x => !x.startsWith('.'))
+        .map(x => `./${sub}/${x}`)
+  );
 
 /**
  * @param {fs.Stats} stat
@@ -34,8 +36,10 @@ function bootstrap(folder, files) {
   const cmd = require.resolve('typescript').replace(/(node_modules\/typescript)\/.*$/, (_, s) => `${s}/bin/tsc`);
   const args = [
     '--outDir', folder,
-    '-t', 'es2021',
+    '-t', 'es2022',
+    '--lib', 'es2022',
     '-m', 'commonjs',
+    '--importHelpers',
     '--rootDir', folder,
     '--strict',
     '--skipLibCheck',
