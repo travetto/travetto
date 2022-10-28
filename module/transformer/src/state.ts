@@ -1,9 +1,11 @@
 import * as ts from 'typescript';
 
+import * as path from '../support/path';
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';
 import { TypeResolver } from './resolver/service';
 import { ImportManager } from './importer';
+import { ManifestManager } from './manifest';
 import { Import } from './types/shared';
 
 import { DocUtil } from './util/doc';
@@ -31,18 +33,19 @@ export class TransformerState implements State {
 
   #resolver: TypeResolver;
   #imports: ImportManager;
+  #manifest: ManifestManager;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
-
   added = new Map<number, ts.Statement[]>();
   module: string;
   file: string;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker) {
-    this.#imports = new ImportManager(source, factory);
-    this.#resolver = new TypeResolver(checker);
-    this.file = this.source.fileName.replaceAll('\\', '/');
-    this.module = SystemUtil.moduleReference(this.file);
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, manifest: ManifestManager) {
+    this.#manifest = manifest;
+    this.#imports = new ImportManager(source, factory, manifest);
+    this.#resolver = new TypeResolver(checker, manifest);
+    this.file = path.toPosix(this.source.fileName);
+    this.module = manifest.resolveModule(this.file);
   }
 
   /**
@@ -82,7 +85,7 @@ export class TransformerState implements State {
   resolveExternalType(node: ts.Node): ExternalType {
     const resolved = this.resolveType(node);
     if (resolved.key !== 'external') {
-      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${node.getSourceFile().fileName}`);
+      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${this.#manifest.toSource(node.getSourceFile().fileName)}`);
     }
     return resolved;
   }
@@ -124,7 +127,7 @@ export class TransformerState implements State {
    */
   importDecorator(pth: string, name: string): ts.PropertyAccessExpression | undefined {
     if (!this.#decorators.has(`${pth}:${name}`)) {
-      const ref = this.#imports.importFile(pth);
+      const ref = this.#imports.importFile(pth, this.file);
       const ident = this.factory.createIdentifier(name);
       this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.ident, ident));
     }
@@ -151,8 +154,9 @@ export class TransformerState implements State {
     return {
       dec,
       ident,
-      file: decl?.getSourceFile().fileName,
-      module: decl ? SystemUtil.moduleReference(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
+      // file: this.#manifest.ensureOutputFile(decl?.getSourceFile().fileName),
+      file: decl?.getSourceFile().fileName.replaceAll('\\', '/'),
+      module: decl ? this.#manifest.resolveModule(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
       targets: DocUtil.readAugments(this.#resolver.getType(ident)),
       name: ident ?
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

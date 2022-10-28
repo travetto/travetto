@@ -10,7 +10,7 @@ export class FileModuleTagTransformer {
   static [TransformerId] = '@trv:boot';
 
   @AfterFile()
-  static afterFile(state: TransformerState, node: ts.SourceFile): typeof node {
+  static tagFile(state: TransformerState, node: ts.SourceFile): typeof node {
     // Tag for cycle detection
     state.addStatements([
       state.factory.createVariableStatement(

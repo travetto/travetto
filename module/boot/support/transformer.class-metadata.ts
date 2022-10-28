@@ -31,7 +31,7 @@ export class RegisterTransformer {
    * Hash each class
    */
   @OnClass()
-  static onClass(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
+  static collectClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
     if (state.module.startsWith(MOD)) {
       return node; // Exclude self
     }
@@ -43,8 +43,8 @@ export class RegisterTransformer {
    * Hash each method
    */
   @OnMethod()
-  static onMethod(state: TransformerState & MetadataInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
+  static collectMethodMetadata(state: TransformerState & MetadataInfo, node: ts.MethodDeclaration): ts.MethodDeclaration {
+    if (state[cls] && ts.isIdentifier(node.name) && !CoreUtil.isAbstract(node) && ts.isClassDeclaration(node.parent)) {
       const hash = SystemUtil.naiveHash(node.getText());
       const conf = { hash };
       state[methods] ??= {};
@@ -57,7 +57,7 @@ export class RegisterTransformer {
    * After visiting each class, register all the collected metadata
    */
   @AfterClass()
-  static afterClass(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
+  static registerClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
     if (!state[cls]) {
       return node;
     }
@@ -99,7 +99,7 @@ export class RegisterTransformer {
    * Give proper functions a file name
    */
   @AfterFunction()
-  static onFunction(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
+  static registerFunctionMetadata(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     if (state.module.startsWith(MOD) || !ts.isFunctionDeclaration(node)) {
       return node;
     }

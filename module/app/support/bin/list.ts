@@ -65,8 +65,6 @@ export class $AppListLoader {
         ExecUtil.worker<ApplicationConfig[]>(`${__source.folder}/../main.list-build`).message
       );
     } else {
-      await (await import('@travetto/boot/support/main.build')).main();
-
       const list = await AppScanUtil.scanList();
       return list.map(({ target, ...rest }) => rest);
     }

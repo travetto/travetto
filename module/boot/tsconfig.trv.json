@@ -17,5 +17,5 @@
     "removeComments": true,
     "importHelpers": true,
     "outDir": "build/"
-  }
+  },
 }

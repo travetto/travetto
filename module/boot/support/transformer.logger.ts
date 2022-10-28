@@ -17,6 +17,8 @@ const VALID_LEVELS: Record<string, string> = {
   error: 'error'
 };
 
+const INIT_MOD = '@travetto/boot/support/init';
+
 /**
  * Allows for removal of debug log messages depending on whether app is running
  * in prod mode.
@@ -30,20 +32,20 @@ export class LoggerTransformer {
   }
 
   @OnClass()
-  static onClass(state: CustomState, node: ts.ClassDeclaration): typeof node {
+  static startClassForLog(state: CustomState, node: ts.ClassDeclaration): typeof node {
     this.initState(state);
     state.scope.push({ type: 'class', name: node.name?.text ?? 'unknown' });
     return node;
   }
 
   @AfterClass()
-  static afterClass(state: CustomState, node: ts.ClassDeclaration): typeof node {
+  static leaveClassForLog(state: CustomState, node: ts.ClassDeclaration): typeof node {
     state.scope.pop();
     return node;
   }
 
   @OnMethod()
-  static onMethod(state: CustomState, node: ts.MethodDeclaration): typeof node {
+  static startMethodForLog(state: CustomState, node: ts.MethodDeclaration): typeof node {
     this.initState(state);
     let name = 'unknown';
     if (ts.isIdentifier(node.name) || ts.isPrivateIdentifier(node.name)) {
@@ -54,27 +56,27 @@ export class LoggerTransformer {
   }
 
   @AfterMethod()
-  static afterMethod(state: CustomState, node: ts.MethodDeclaration): typeof node {
+  static leaveMethodForLog(state: CustomState, node: ts.MethodDeclaration): typeof node {
     state.scope.pop();
     return node;
   }
 
   @OnFunction()
-  static onFunction(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
+  static startFunctionForLog(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     this.initState(state);
     state.scope.push({ type: 'function', name: node.name?.text ?? 'unknown' });
     return node;
   }
 
   @AfterFunction()
-  static afterFunction(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
+  static leaveFunctionForLog(state: CustomState, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
     state.scope.pop();
     return node;
   }
 
   @OnCall()
   static onLogCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
-    if (!ts.isPropertyAccessExpression(node.expression)) {
+    if (!ts.isPropertyAccessExpression(node.expression) || state.module === INIT_MOD) {
       return node;
     }
 

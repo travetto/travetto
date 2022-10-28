@@ -1,12 +1,13 @@
 import * as ts from 'typescript';
 
-import * as path from '@travetto/path';
+import * as path from '../support/path';
 
 import { AnyType, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';
-import { SystemUtil } from './util/system';
 import { CoreUtil } from './util/core';
 import { Import } from './types/shared';
+
+import { ManifestManager } from './manifest';
 
 const D_OR_D_TS_EXT_RE = /[.]d([.]ts)?$/;
 
@@ -20,10 +21,12 @@ export class ImportManager {
   #idx: Record<string, number> = {};
   #ids = new Map<string, string>();
   #file: string;
+  #manifest: ManifestManager;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory) {
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, manifest: ManifestManager) {
     this.#imports = ImportUtil.collectImports(source);
     this.#file = path.toPosix(source.fileName);
+    this.#manifest = manifest;
   }
 
   /**
@@ -41,11 +44,16 @@ export class ImportManager {
    * Import a file if needed, and record it's identifier
    */
   importFile(file: string, base?: string): Import {
-    file = SystemUtil.moduleReference(file);
+    file = this.#manifest.resolveModule(file);
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {
       file = require.resolve(file.replace(/.*@types\/node\//, '').replace(D_OR_D_TS_EXT_RE, ''));
+    }
+
+    // Put file back to its original state
+    if (file.startsWith(`${this.#manifest.main.name}/`)) {
+      file = file.replace(this.#manifest.main.name, '.');
     }
 
     // Handle relative imports

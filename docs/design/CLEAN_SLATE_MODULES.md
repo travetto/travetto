@@ -1,87 +1,96 @@
 # Clean Slate Design for Module System
 
 ## Compilation Flow
-1.
-  Phase: manifest-generate
-  Desc: Generates project manifest
-  When: in development/build mode
-  Input: 
-    - `source://project`,
-    - `source://modules`
-  Action: node `@travetto/transformer/support/bin/manifest`
-  Output: 
-    - `memory://manifest`
+1. 
+  Phase: manifest-bootstrap
+  When: Corresponding `source://boot/**/*.js` are missing or out of date
+  Steps:
+    -
+      Desc: Run tsc on `source://boot/{index,src/**,support/bin/**}.ts`
+      Inputs:
+        - `source://boot/{index,src/**,support/bin/**}.ts`
+      Action: tsc
+      Output: 
+        - `source://boot/{index,src/**,support/bin/**}.js`
 
 2.
-  Phase: manifest-delta
-  Desc: Generates project delta for any changed files
-  When: `memory://manifest`
-  Input: 
-    - `memory://manifest`
-    - `compiler://manifest`
-  Action: node `source://@travetto/transformer/support/bin/manifest-delta`
-  Output: 
-    - `memory://manifest-delta`    
+  Phase: manifest-generate
+  When: in development/build mode
+  Steps:
+    -
+      Desc: Generates project manifest
+      Input: 
+        - `source://project`,
+        - `source://modules`
+      Action: `ManifestUtil::generate`
+      Output: 
+        - `memory://manifest`
+    - 
+      Desc: Generates manifest delta
+      Input:
+        - 'memory://manifest'
+        - 'output://manifest'
+      Action: `ManifestUtil::generateDelta`
+      Output:
+        - `memory://manifest-delta`    
 
 3. 
-  Phase: compiler-bootstrap
-  Desc: Run tsc on `source://transformer/support/bin/*.ts`
-  When: `memory://manifest-delta` includes `source://transformer/support/bin/*.ts` 
-  Inputs:
-  
-    - `source://@travetto/transformer/support/bin/**/*.ts`
-  Action: tsc
-  Output: 
-    - `source://@travetto/transformer/support/bin/**/*.js`
+  Phase: compiler-stage
+  When: `memory://manifest-delta` includes `source://**/support/transform*`, or `source://@travetto/transformer`
+  Steps:
+    - 
+      Desc: Stage code for compiler-build
+      Input: 
+        - `memory://manifest`
+        - `source://@travetto/path/**/*`
+        - `source://@travetto/transformer/**/*`,
+        - `source://**/support/transform*`
+      Action: copy or symlink
+      Output: 
+        - `staging://**` 
+    -
+      Desc: Run tsc on staged code
+      Input: 
+        - `memory://manifest`
+        - `staging://**` 
+      Action: tsc
+      Output: 
+        - `compiler://manifest`
+        - `compiler://**`
 
 4. 
-  Phase: compiler-stage
-  Desc: Stage code for compiler-build
-  When: `memory://manifest-delta` includes `source://**/support/transform*`, or `source://@travetto/transformer`
-  Input: 
-    - `memory://manifest`
-    - `source://@travetto/transformer/**/*`,
-    - `source://**/support/transform*`
-  Action: copy or symlink
-  Output: 
-    - `staging://**` 
+  Phase: source-compile
+  Steps:
+    -
+      When: `memory://manifest-delta` includes any changes
+      Desc: Compile project sources
+      Input: 
+        - `compiler://manifest`
+        - `source://project`,
+        - `source://modules`
+      Action: node `compiler://@travetto/transformer/support/main.compiler`
+      Output: 
+        - `output://manifest`
+        - `output://**`
+    - 
+      When: `watchable://true` and changes in `source://project`
+      Desc: Watch for changes
+      Action: Run Step 1
 
 5. 
-  Phase: compiler-build
-  Desc: Run tsc on staged code
-  When: `memory://manifest-delta` includes `source://**/support/transform*`, or `source://@travetto/transformer`
-  Input: 
-    - `staging://manifest`
-    - `staging://**` 
-  Action: tsc
-  Output: 
-    - `compiler://manifest`
-    - `compiler://**`
-
-6. 
-  Phase: source-compile
-  Desc: Compile project sources
-  When: `memory://manifest-delta` includes any changes
-  Watchable: 
-    - `source://project`
-  Input: 
-    - `compiler://manifest`
-    - `source://project`,
-    - `source://modules`
-  Action: node `compiler://@travetto/transformer/support/main.compiler`
-  Output: 
-    - `output://manifest`
-    - `output://**`
-
-7. 
   Phase: source-execute
-  Desc: Run compiled sources
-  Watchable: 
-    - `output://**`
-  Input:
-    - `output://manifest`
-    - `output://**`
-  Action: node
+  Steps:
+    -
+      Desc: Run compiled sources
+      Input:
+        - `output://manifest`
+        - `output://**`
+      Action: node
+    - 
+      When: `watchable://true` and changes in `output://**`
+      Desc: Watch for changes
+      Action: Specific logic for live-reload
+
 
 ## Details
 Will provide a new multiphase compiler that:

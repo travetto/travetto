@@ -13,11 +13,9 @@ type Options = {
  *
  * Allows for cleaning of the cache dire
  */
-export class BaseCleanCommand extends CliCommand<Options> {
+export class BootCleanCommand extends CliCommand<Options> {
 
   name = 'clean';
-
-  override async build(): Promise<void> { }
 
   getOptions(): Options {
     return {
@@ -31,7 +29,7 @@ export class BaseCleanCommand extends CliCommand<Options> {
     for (const el of await fs.readdir(cwd)) {
       if (el.startsWith('.trv') && (await fs.stat(el)).isDirectory() && (!el.startsWith('.trv_compiler') || this.cmd.full)) {
         try {
-          await fs.rmdir(el, { recursive: true, force: true });
+          await fs.rmdir(el, { recursive: true });
           if (!this.cmd.quiet) {
             console!.log(CliUtil.color`${{ success: 'Successfully' }} deleted temp dir ${{ path: path.join(cwd, el) }}`);
           }

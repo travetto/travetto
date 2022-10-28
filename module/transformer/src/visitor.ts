@@ -78,7 +78,7 @@ export class VisitorFactory<S extends State = State> {
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
       try {
-        console.debug('Processing', { file: file.fileName, pid: process.pid });
+        console!.debug('Processing', { file: file.fileName, pid: process.pid });
         const state = this.#getState(context, file);
         let ret = this.visit(state, context, file);
 
@@ -105,7 +105,7 @@ export class VisitorFactory<S extends State = State> {
         if (!(err instanceof Error)) {
           throw err;
         }
-        console.error('Failed transforming', { error: `${err.message}\n${err.stack}`, file: file.fileName });
+        console!.error('Failed transforming', { error: `${err.message}\n${err.stack}`, file: file.fileName });
         const out = new Error(`Failed transforming: ${file.fileName}: ${err.message}`);
         out.stack = err.stack;
         throw out;

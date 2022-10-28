@@ -74,6 +74,7 @@ export class TodoController {
    */
   @Delete('/:id')
   async remove(id: string) {
+    console.log('Hello');
     await this._svc.remove(id);
   }
 }

@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "esnext",
+    "moduleResolution": "node",
+    "lib": [
+      "es2022"
+    ],
+    "strict": true,
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "noEmitOnError": false,
+    "noErrorTruncation": true,
+    "importHelpers": true,
+    "rootDir": ".",
+    "outDir": "."
+  },
+  "files": [
+    "build.ts",
+    "compiler-simple.ts",
+    "compiler-setup.ts",
+    "compiler.ts",
+    "path.ts",
+    "manifest.ts",
+    "types.ts",
+    "workspace.ts"
+  ]
+}

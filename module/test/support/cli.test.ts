@@ -2,6 +2,7 @@ import * as os from 'os';
 import { readFileSync } from 'fs';
 import * as fs from 'fs/promises';
 
+import * as path from '@travetto/path';
 import { CliCommand, OptionConfig } from '@travetto/cli';
 import { ModuleIndex } from '@travetto/boot';
 
@@ -31,7 +32,7 @@ export class TestCommand extends CliCommand<Options> {
           folder: 'src',
           filter: /consumer\/types\/.*/
         })
-        .map(x => readFileSync(x.file, 'utf8').match(/@Consumable[(]'([^']+)/)?.[1])
+        .map(x => readFileSync(`${x.file}`, 'utf8').match(/Consumable.[(]'([^']+)/)?.[1])
         .filter((x?: string): x is string => !!x);
     }
     return this._types;
@@ -55,7 +56,7 @@ export class TestCommand extends CliCommand<Options> {
 
   async isFile(file: string, errorIfNot?: string): Promise<true | undefined> {
     try {
-      const stat = await fs.stat(file).catch(() => { });
+      const stat = await fs.stat(path.resolve(file)).catch(() => { });
       const res = stat?.isFile();
       if (res) {
         return true;
