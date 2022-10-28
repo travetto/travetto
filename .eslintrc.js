@@ -35,21 +35,27 @@ module.exports = {
       }
     },
     {
-      files: '{module,global-test}/*/{test,doc,support/test}/**/*.{ts,js}',
+      file: '**/*.js',
+      rules: {
+        '@typescript-eslint/consistent-type-assertions': 0,
+      }
+    },
+    {
+      files: '{module,global-test}/*/{test,doc,support/test}/**/*.ts',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0
       }
     },
     {
-      files: 'module/*/support/test.*.{ts,js}',
+      files: 'module/*/support/test.*.ts',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0
       }
     },
     {
-      files: 'related/{todo-app,travetto.github.io}/**/*.{ts,js}',
+      files: 'related/{todo-app,travetto.github.io}/**/*.ts',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0
