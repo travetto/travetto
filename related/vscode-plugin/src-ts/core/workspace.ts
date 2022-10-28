@@ -3,9 +3,10 @@ import * as fs from 'fs/promises';
 import * as cp from 'child_process';
 
 import * as path from '@travetto/path';
-import { ExecUtil, ExecutionOptions, ExecutionResult } from '@travetto/boot';
 
-type ForkResult = ReturnType<(typeof ModuleUtil)['forkMain']>;
+import { CatchableResult, ExecUtil, ExecutionOptions, ExecutionResult, ExecutionState } from './exec';
+
+type ForkResult = ExecutionState<CatchableResult>;
 
 /**
  * Standard set of workspace utilities
