@@ -1,2 +1,9 @@
 export var log: (...args: unknown[]) => void;
-export var spawn: (action: string, cmd: string, args: string[], cwd: string, failOnError?: boolean) => Promise<void>;
+type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string> };
+export var spawn: (action: string, cmd: string, cfg?: SpawnCfg) => Promise<void>;
+export var isFolderStale: (folder: string) => boolean;
+export type BuildConfig = {
+  outputFolder: string;
+  compilerFolder: string;
+  watch?: boolean;
+};

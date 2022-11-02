@@ -16,8 +16,12 @@ export class WorkspaceManager {
     return this.#outDir;
   }
 
+  async sourceExists(module: ManifestModule, file: string): Promise<boolean> {
+    return fs.stat(`${module.source}/${file}`).then(() => true, () => false);
+  }
+
   async symlinkFolder(module: ManifestModule, key: string): Promise<void> {
-    if (module.files[key] && await fs.stat(`${module.source}/${key}`).catch(() => false)) {
+    if (module.files[key] && await this.sourceExists(module, key)) {
       const output = `${this.#outDir}/${module.output}/${key}`;
       await fs.mkdir(path.dirname(output), { recursive: true });
 
@@ -29,10 +33,12 @@ export class WorkspaceManager {
   }
 
   async copyFile(module: ManifestModule, file: string): Promise<void> {
-    const outFile = `${this.#outDir}/${module.output}/${file}`;
-    console.debug('Copying', outFile);
-    await fs.mkdir(path.dirname(outFile), { recursive: true });
-    await fs.copyFile(`${module.source}/${file}`, outFile);
+    if (await this.sourceExists(module, file)) {
+      const outFile = `${this.#outDir}/${module.output}/${file}`;
+      console.debug('Copying', outFile);
+      await fs.mkdir(path.dirname(outFile), { recursive: true });
+      await fs.copyFile(`${module.source}/${file}`, outFile);
+    }
   }
 
   async writeFile(module: ManifestModule, file: string, contents: string): Promise<void> {
