@@ -20,15 +20,15 @@ export class TransformerManager {
   /**
    * Read all transformers from disk under the pattern support/transformer.*
    */
-  async init(entries: { file: string }[], modules: ManifestModule[]): Promise<void> {
+  async init(transformers: string[], modules: ManifestModule[]): Promise<void> {
     if (this.#cached) {
       return;
     }
 
     this.#manifest = new ManifestManager(modules);
 
-    for (const entry of entries) { // Exclude based on blacklist
-      this.#transformers.push(...getAllTransformers(await import(entry.file)));
+    for (const entry of transformers) { // Exclude based on blacklist
+      this.#transformers.push(...getAllTransformers(await import(entry)));
     }
 
     console.debug('Transformers', {

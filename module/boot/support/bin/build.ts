@@ -1,4 +1,4 @@
-import { log, spawn } from '../../bin/build-support';
+import { log, spawn, BuildConfig } from '../../bin/build-support';
 
 import { ManifestState } from './types';
 import { ManifestUtil } from './manifest';
@@ -45,7 +45,7 @@ async function compilerSetup(state: ManifestState, compilerFolder: string): Prom
       (manifestTemp ??= await ManifestUtil.writeState(state)),
       compilerFolder
     ]
-    await spawn('Setting up Compiler', process.argv0, args, process.cwd(), false); // Step 3.b
+    await spawn('Setting up Compiler', process.argv0, { args, cwd: process.cwd() }); // Step 3.b
   } else {
     log('[3] Skipping Compiler Setup');
   }
@@ -54,7 +54,7 @@ async function compilerSetup(state: ManifestState, compilerFolder: string): Prom
 /**
  *  Step 4
  */
-async function compileOutput(state: ManifestState, compilerFolder: string, outputFolder: string): Promise<void> {
+async function compileOutput(state: ManifestState, { compilerFolder, outputFolder, watch = false }: BuildConfig): Promise<void> {
   const changes = Object.values(state.delta).flat();
   if (changes.length === 0) {
     log('[4] Skipping Compilation');
@@ -67,11 +67,11 @@ async function compileOutput(state: ManifestState, compilerFolder: string, outpu
     (manifestTemp ??= await ManifestUtil.writeState(state)),
     outputFolder
   ]
-  await spawn('Compiling Output', process.argv0, args, compilerFolder, true);
+  await spawn('Compiling Output', process.argv0, { args, env: { TRV_WATCH: `${watch}` }, cwd: compilerFolder });
 }
 
-export async function build(outputFolder: string, compilerFolder: string): Promise<void> {
-  const state = await buildManifest(outputFolder); // Step 2
-  await compilerSetup(state, compilerFolder); // Step 3
-  await compileOutput(state, compilerFolder, outputFolder); // Step 4
+export async function build(cfg: BuildConfig): Promise<void> {
+  const state = await buildManifest(cfg.outputFolder); // Step 2
+  await compilerSetup(state, cfg.compilerFolder); // Step 3
+  await compileOutput(state, cfg); // Step 4
 }

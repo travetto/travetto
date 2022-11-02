@@ -9,7 +9,7 @@ import { Manifest } from './types';
 export class OutputCompiler extends Compiler {
 
   #transformerManager: TransformerManager;
-  #transformers: { file: string }[];
+  #transformers: string[];
   #bootLocation: string;
 
   constructor(manifest: Manifest, outputFolder: string) {
@@ -19,7 +19,7 @@ export class OutputCompiler extends Compiler {
       x => (x.files.support ?? [])
         .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
         .map(([f]) =>
-          ({ file: `${this.#bootLocation}/${x.output}/${f}`.replace(/[.][tj]s$/, '') })
+          (`${this.#bootLocation}/${x.output}/${f}`.replace(/[.][tj]s$/, ''))
         )
     );
   }

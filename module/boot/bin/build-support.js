@@ -1,11 +1,13 @@
+const fs = require('fs/promises');
+const path = require('path');
 const cp = require('child_process');
 const readline = require('readline');
 const timers = require('timers/promises');
 
-const spawn = async (action, cmd, args, cwd, failOnError = true) => {
+const spawn = async (action, cmd, { args = [], cwd = process.cwd(), failOnError = true, env = {} }) => {
   let stdout = process.env.DEBUG === 'build' ? 1 : 'pipe';
   let stderr = process.env.DEBUG === 'build' ? 2 : 'pipe';
-  const proc = cp.spawn(cmd, args, { cwd, stdio: ['pipe', stdout, stderr] });
+  const proc = cp.spawn(cmd, args, { cwd, stdio: ['pipe', stdout, stderr], env: { ...process.env, ...env } });
   let stderrOutput = [];
   let stdoutOutput = [];
 
@@ -89,8 +91,23 @@ async function waiting(message, worker) {
   }
 }
 
+const recent = file => fs.stat(file).then(stat => Math.max(stat.ctimeMs, stat.mtimeMs));
+
+async function isFolderStale(folder) {
+  const flags = await Promise.all(
+    (await fs.readdir(folder))
+      .filter(x => !x.startsWith('.'))
+      .map(x => path.resolve(folder, x))
+      .map(async f => Promise.all([recent(f), recent(f.replace(/[.]ts$/, '.js'))])
+        .then(([l, r]) => l > r)
+        .catch(() => true)
+      )
+  );
+  return flags.some(x => x === true);
+}
+
 let logTarget = process.env.DEBUG === 'build' ? console.debug.bind(console) : () => { };
 
 let log = (...args) => logTarget(...args);
 
-module.exports = { spawn, log };
+module.exports = { spawn, log, isFolderStale };
