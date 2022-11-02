@@ -8,9 +8,11 @@ type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean };
 
 export type ModuleIndexEntry = {
+  id: string;
   source: string;
   module: string;
   file: string;
+  fileTs: string;
   type: ManifestModuleFileType;
 };
 
@@ -30,10 +32,11 @@ class $ModuleIndex {
   #manifest: Manifest;
   #modules: IndexedModule[];
   #root: string;
-  #idCache = new Map<string, string>();
+  #outputToId = new Map<string, string>();
 
   constructor(root: string) {
     this.#root = root;
+    this.#index();
   }
 
   #resolve(...parts: string[]): string {
@@ -41,21 +44,25 @@ class $ModuleIndex {
   }
 
   get manifest(): Manifest {
-    this.#manifest ??= JSON.parse(fs.readFileSync(this.#resolve('manifest.json'), 'utf8'));
     return this.#manifest;
   }
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): ModuleIndexEntry[] {
     return files.map(([f, type]) => {
       const source = path.join(m.source, f);
-      const fullFile = this.#resolve(m.output, f).replace(/[.]ts$/, '.js');
+      const fullFile = this.#resolve(m.output, f);
       const module = (m.output.startsWith('node_modules') ?
         `${m.output.split('node_modules/')[1]}/${f}` :
         `./${f}`).replace(/[.]ts$/, '.js');
+
+      const id = m.output === '.' ? module : module.replace(m.name, m.id);
+
       return {
+        id: id.replace(/\/src\//, '/').replace(/[.][tj]s$/, ''),
         type,
         source,
-        file: fullFile,
+        fileTs: fullFile,
+        file: fullFile.replace(/[.]ts$/, '.js'),
         module
       };
     });
@@ -64,13 +71,22 @@ class $ModuleIndex {
   /**
    * Get index of all source files
    */
-  get #index(): IndexedModule[] {
-    return this.#modules ??= Object.values(this.manifest.modules).map(m => ({
+  #index(): void {
+    this.#manifest = JSON.parse(fs.readFileSync(this.#resolve('manifest.json'), 'utf8'));
+    this.#modules = Object.values(this.manifest.modules).map(m => ({
       ...m,
       files: Object.fromEntries(
         Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files)])
       )
     }));
+
+    for (const mod of this.#modules) {
+      for (const [name, files] of Object.entries(mod.files ?? {})) {
+        for (const { fileTs, id } of files) {
+          this.#outputToId.set(fileTs, id);
+        }
+      }
+    }
   }
 
   /**
@@ -90,7 +106,7 @@ class $ModuleIndex {
     const { filter: f, folder } = config;
     const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
 
-    const idx = this.#index;
+    const idx = this.#modules;
     const searchSpace = folder ?
       idx.flatMap(m => [...m.files[folder] ?? [], ...(config.includeIndex ? (m.files.index ?? []) : [])]) :
       idx.flatMap(m => [...Object.values(m.files)].flat());
@@ -130,37 +146,15 @@ class $ModuleIndex {
     return this.find({ ...config, folder: 'test' });
   }
 
-
   /**
-   * Compute internal id from file name and optionally, class name
+   * Get internal id from file name and optionally, class name
    */
-  computeId(filename: string, clsName?: string): string {
-    if (clsName) {
-      return `${this.computeId(filename)}￮${clsName}`;
-    }
-
+  getId(filename: string, clsName?: string): string {
     filename = path.toPosix(filename);
 
-    if (this.#idCache.has(filename)) {
-      return this.#idCache.get(filename)!;
-    }
-
-    const rel = filename.replace(`${this.#root}/`, '');
-
-    const mod = rel.startsWith('node_modules') ?
-      this.#index.find(x => rel.startsWith(`${x.output}/`)) :
-      this.#index.find(x => x.output === '.');
-
-    if (mod) {
-      const name = rel.replace(mod.output, mod.id).replace(/\/src\//, '/');
-      this.#idCache.set(filename, name);
-      return name;
-    } else {
-      this.#idCache.set(filename, filename);
-      return filename;
-    }
+    const id = this.#outputToId.get(filename) ?? filename;
+    return clsName ? `${id}￮${clsName}` : id;
   }
-
 
   /**
    * Is module installed?

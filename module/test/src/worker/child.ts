@@ -1,6 +1,4 @@
-import { DynamicLoader } from '@travetto/boot/src/internal/dynamic-loader';
-import { ErrorUtil, PhaseManager, ModuleIndex } from '@travetto/boot';
-import { ShutdownManager } from '@travetto/base';
+import { ErrorUtil, PhaseManager } from '@travetto/boot';
 import { ChildCommChannel } from '@travetto/worker';
 
 import { RunnerUtil } from '../execute/util';
@@ -9,23 +7,11 @@ import { Runner } from '../execute/runner';
 
 import { Events, RunEvent } from './types';
 
-const FIXED_MODULES = new Set([
-  //  'cache', 'openapi',
-  // 'registry'
-  'boot', 'base', 'cli',
-  'compiler', 'transformer',
-  'yaml', 'worker', 'command',
-  'log', 'jwt', 'image',
-  'test',
-].map(x => `@travetto/${x}`));
-
 /**
  * Child Worker for the Test Runner.  Receives events as commands
  * to run specific tests
  */
 export class TestChildWorker extends ChildCommChannel<RunEvent> {
-
-  #runs = 0;
 
   async #exec(op: () => Promise<unknown>, type: string): Promise<void> {
     try {
@@ -74,41 +60,10 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
   async onInitCommand(): Promise<void> { }
 
   /**
-   * Reset the state to prepare for the next run
-   */
-  async resetForRun(): Promise<void> {
-    // Clear require cache of all data loaded minus base framework pieces
-    console.debug('Resetting', { fileCount: Object.keys(require.cache).length });
-
-    // Reload registries, test and root
-    await PhaseManager.run('reset');
-    await ShutdownManager.executeAsync(-1);
-
-    for (const { file } of ModuleIndex.find({
-      // TODO: Fix paths
-      // @ts-expect-error
-      paths: ModuleIndex.getPaths().filter(x => !FIXED_MODULES.has(x)),
-      includeIndex: true
-    })) {
-      if (!/support\/(transformer|phase)[.]/.test(file)) {
-        const worked = await DynamicLoader.unload(file);
-        if (worked) {
-          console.debug('Unloading', { pid: process.pid, file });
-        }
-      }
-    }
-  }
-
-  /**
    * Run a specific test/suite
    */
   async onRunCommand(event: RunEvent): Promise<void> {
-    this.#runs += 1;
     console.debug('Run');
-
-    if (this.#runs > 1) {
-      await this.resetForRun();
-    }
 
     // Run all remaining initializations as needed for tests
     await PhaseManager.run('init', '*', ['@trv:registry/init']);

@@ -150,7 +150,7 @@ class $ShutdownManager {
       handler = handler!;
     }
     if (/[.][tj]s$/.test(name)) {
-      name = ModuleIndex.computeId(name);
+      name = ModuleIndex.getId(name);
     }
     this.#listeners.push({ name, handler, final });
   }

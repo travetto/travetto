@@ -1,4 +1,4 @@
-import { Class, ClassInstance, TimeSpan, Util } from '@travetto/base';
+import { Class, ClassInstance, TimeSpan, TimeUtil } from '@travetto/base';
 
 import { HeaderMap, RouteHandler } from '../types';
 import { ControllerRegistry } from '../registry/controller';
@@ -43,7 +43,7 @@ type HeaderSet = ReturnType<typeof SetHeaders>;
  * @param unit The unit of measurement
  */
 export function CacheControl(value: number | TimeSpan): HeaderSet {
-  const delta = Math.trunc(Util.timeToMs(value) / 1000);
+  const delta = Math.trunc(TimeUtil.timeToMs(value) / 1000);
   return SetHeaders({
     Expires: delta === 0 ? '-1' : (): string => new Date(delta * 1000 + Date.now()).toUTCString(),
     'Cache-Control': () => delta === 0 ? 'max-age=0,no-cache' : `max-age=${delta}`

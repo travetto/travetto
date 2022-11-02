@@ -131,7 +131,7 @@ class $Logger {
       message = '';
     }
 
-    const category = ModuleIndex.computeId(file);
+    const category = ModuleIndex.getId(file);
 
     if ((level in this.#exclude) || (category && level in this.#filters && !this.#filters[level]!(category))) {
       return;
