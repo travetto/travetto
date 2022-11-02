@@ -149,6 +149,7 @@ export class Compiler {
       const [prefix, sourceMapData] = sourceMapUrl.split(`base64,`)
       const data: { sourceRoot: string, sources: string[] } = JSON.parse(Buffer.from(sourceMapData, 'base64url').toString('utf8'));
       const [src] = data.sources;
+
       if (src.startsWith('node_modules')) {
         // @ts-expect-error
         const { groups: { mod, file } } = (src.startsWith('node_modules/@') ?
@@ -159,7 +160,12 @@ export class Compiler {
         data.sourceRoot = resolved.source;
         data.sources = [file];
         text = text.replace(sourceMapUrl, `${prefix}base64,${Buffer.from(JSON.stringify(data), 'utf8').toString('base64url')}`);
+      } else { // Normal file
+        const mod = this.#modules.find(x => x.output === '.')!;
+        data.sourceRoot = mod.source;
       }
+
+      text = text.replace(sourceMapUrl, `${prefix}base64,${Buffer.from(JSON.stringify(data), 'utf8').toString('base64url')}`);
     }
     return text;
   }

@@ -26,7 +26,7 @@ async function boot({
   compilerFolder = path.resolve('.trv_compiler'),
   outputFolder = path.resolve('.trv_out'),
   watch,
-  compile = process.env.TRV_COMPILE !== '0'
+  compile = process.env.TRV_COMPILED !== '1'
 } = {}) {
   if (compile) {
     await bootstrap(); // Step 1 

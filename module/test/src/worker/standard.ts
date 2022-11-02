@@ -43,6 +43,9 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
       // Wait for complete
       const { error } = await complete;
 
+      // Kill on complete
+      channel.destroy();
+
       // If we received an error, throw it
       if (error) {
         throw ErrorUtil.deserializeError(error);
