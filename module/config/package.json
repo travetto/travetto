@@ -1,6 +1,5 @@
 {
   "name": "@travetto/config",
-  "displayName": "Configuration",
   "version": "3.0.0-rc.4",
   "description": "Environment-aware config management using yaml files",
   "keywords": [
@@ -40,13 +39,13 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/resource": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Configuration",
+    "dependencies": {
+      "@travetto/resource": [
+        "doc"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

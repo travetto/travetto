@@ -1,6 +1,5 @@
 {
   "name": "@travetto/resource",
-  "displayName": "Resource",
   "version": "3.0.0-rc.2",
   "description": "Resource searching and loading support",
   "keywords": [
@@ -28,13 +27,13 @@
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.4"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/config": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Resource",
+    "dependencies": {
+      "@travetto/config": [
+        "doc"
+      ]
+    }
   },
   "private": false,
   "publishConfig": {

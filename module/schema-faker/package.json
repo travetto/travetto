@@ -1,6 +1,5 @@
 {
   "name": "@travetto/schema-faker",
-  "displayName": "Schema Faker",
   "version": "3.0.0-rc.4",
   "description": "Data generation for schema-registered objects.",
   "keywords": [
@@ -30,10 +29,8 @@
     "@types/faker": "^5.5.9",
     "faker": "^5.5.3"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Schema Faker"
   },
   "publishConfig": {
     "access": "public"

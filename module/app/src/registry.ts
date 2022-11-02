@@ -1,5 +1,4 @@
-import * as path from '@travetto/path';
-import { PackageUtil } from '@travetto/boot';
+import { ModuleIndex, PackageUtil } from '@travetto/boot';
 import { Class, ShutdownManager, ConcreteClass, Env } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
@@ -57,13 +56,16 @@ class $ApplicationRegistry {
 
     console.log('Running application', {
       name: config.name,
-      filename: config.filename.replace(path.cwd(), '.').replace(/.*node_modules/, '')
+      filename: ModuleIndex.getId(config.filename)
     });
 
     // Show manifest
     console.log('Manifest', {
       info: PackageUtil.mainDigest(),
-      env: Env.digest(),
+      env: {
+        ...Env.digest(),
+        resources: Env.getList('TRV_RESOURCES')
+      }
     });
 
     // Get instance of app class

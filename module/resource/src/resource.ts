@@ -31,7 +31,7 @@ export class $ResourceManager {
   #paths: string[] = [];
 
   init(): void {
-    this.#paths.unshift('resources', ...Env.getResourcePaths());
+    this.#paths.unshift('resources', ...Env.getList('TRV_RESOURCES'));
     this.finalize();
   }
 

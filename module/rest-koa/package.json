@@ -1,6 +1,5 @@
 {
   "name": "@travetto/rest-koa",
-  "displayName": "Koa REST Source",
   "version": "3.0.0-rc.4",
   "description": "Koa provider for the travetto rest module.",
   "keywords": [
@@ -33,10 +32,8 @@
     "koa-compress": "^5.1.0",
     "koa-router": "^10.1.1"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Koa REST Source"
   },
   "publishConfig": {
     "access": "public"

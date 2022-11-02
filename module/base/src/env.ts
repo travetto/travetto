@@ -163,7 +163,7 @@ export class Env {
    * Are we in production mode
    */
   static isProd(): boolean {
-    return /^prod(uction)?$/i.test(this.getName());
+    return this.getName() === 'prod';
   }
 
   /**
@@ -174,17 +174,10 @@ export class Env {
   }
 
   /**
-   * Get environment provided resource paths
-   */
-  static getResourcePaths(): string[] {
-    return this.getList('TRV_RESOURCES');
-  }
-
-  /**
-   * Get environment provided profiles
+   * The list of the profiles
    */
   static getProfiles(): string[] {
-    return this.getList('TRV_PROFILES');
+    return Env.getList('TRV_PROFILES');
   }
 
   /**
@@ -195,9 +188,8 @@ export class Env {
       name: this.getName(),
       prod: this.isProd(),
       dynamic: this.isDynamic(),
-      nodeVersion: process.version,
       profiles: this.getProfiles(),
-      resources: this.getResourcePaths()
+      nodeVersion: process.version
     };
   }
 }

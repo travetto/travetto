@@ -1,6 +1,5 @@
 {
   "name": "@travetto/rest-express",
-  "displayName": "Express REST Source",
   "version": "3.0.0-rc.4",
   "description": "Express provider for the travetto rest module.",
   "keywords": [
@@ -31,10 +30,8 @@
     "compression": "^1.7.4",
     "express": "^4.18.1"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Express REST Source"
   },
   "publishConfig": {
     "access": "public"

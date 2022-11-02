@@ -1,6 +1,5 @@
 {
   "name": "@travetto/cli",
-  "displayName": "Command Line Interface",
   "version": "3.0.0-rc.2",
   "description": "CLI infrastructure for travetto framework",
   "keywords": [
@@ -32,13 +31,13 @@
     "@travetto/base": "^3.0.0-rc.2",
     "commander": "^9.4.1"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/app": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Command Line Interface",
+    "dependencies": {
+      "@travetto/app": [
+        "doc"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

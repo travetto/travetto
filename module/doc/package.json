@@ -1,6 +1,5 @@
 {
   "name": "@travetto/doc",
-  "displayName": "Documentation",
   "version": "3.0.0-rc.2",
   "description": "Documentation support for the travetto framework",
   "keywords": [
@@ -40,10 +39,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Documentation"
   },
   "private": false,
   "publishConfig": {

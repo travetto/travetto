@@ -1,6 +1,5 @@
 {
   "name": "travetto-plugin",
-  "displayName": "Travetto Plugin",
   "version": "2.2.0",
   "description": "VS Code plugin for interacting with the Travetto framework ",
   "keywords": [
@@ -41,10 +40,13 @@
     "@types/node": "^18.8.2",
     "@types/vscode": "^1.71.0"
   },
-  "trvDependencies": {
-    "@travetto/app": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Travetto Plugin",
+    "dependencies": {
+      "@travetto/app": [
+        "doc"
+      ]
+    }
   },
   "engines": {
     "vscode": "^1.69.0"

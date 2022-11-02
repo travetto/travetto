@@ -1,6 +1,5 @@
 {
   "name": "@travetto/scaffold",
-  "displayName": "App Scaffold",
   "version": "3.0.0-rc.2",
   "description": "App Scaffold for the Travetto framework",
   "keywords": [
@@ -38,19 +37,22 @@
   "devDependencies": {
     "@types/mustache": "^4.2.1"
   },
-  "trvDependencies": {
-    "@travetto/auth-rest-context": [
-      "doc"
-    ],
-    "@travetto/auth-rest": [
-      "doc"
-    ],
-    "@travetto/model": [
-      "doc"
-    ],
-    "@travetto/model-query": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "App Scaffold",
+    "dependencies": {
+      "@travetto/auth-rest-context": [
+        "doc"
+      ],
+      "@travetto/auth-rest": [
+        "doc"
+      ],
+      "@travetto/model": [
+        "doc"
+      ],
+      "@travetto/model-query": [
+        "doc"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

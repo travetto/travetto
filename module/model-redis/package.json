@@ -1,6 +1,5 @@
 {
   "name": "@travetto/model-redis",
-  "displayName": "Redis Model Support",
   "version": "3.0.0-rc.4",
   "description": "Redis backing for the travetto model module.",
   "keywords": [
@@ -38,10 +37,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Redis Model Support"
   },
   "publishConfig": {
     "access": "public"

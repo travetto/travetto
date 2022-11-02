@@ -1,6 +1,5 @@
 {
   "name": "@travetto/asset-rest",
-  "displayName": "Asset Rest Support",
   "version": "3.0.0-rc.4",
   "description": "Provides integration between the travetto asset and rest module.",
   "keywords": [
@@ -40,13 +39,13 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/app": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Asset Rest Support",
+    "dependencies": {
+      "@travetto/app": [
+        "doc"
+      ]
+    }
   },
   "private": false,
   "publishConfig": {

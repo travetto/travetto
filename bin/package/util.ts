@@ -4,7 +4,6 @@ import * as path from 'path';
 
 export type PackageType = {
   name: string;
-  displayName?: string;
   version: string;
   description?: string;
   license?: string;
@@ -29,7 +28,12 @@ export type PackageType = {
   peerDependencies?: Record<string, string>;
   peerDependenciesMeta?: Record<string, { optional?: boolean }>;
   optionalDependencies?: Record<string, string>;
-  trvDependencies?: Record<string, ('doc' | 'test' | 'all')[]>;
+  travetto?: {
+    id?: string;
+    displayName?: string;
+    profile?: string;
+    dependencies?: Record<string, ('doc' | 'test' | 'all')[]>
+  },
   private?: boolean;
   publishConfig?: { access?: 'restricted' | 'public' };
 };

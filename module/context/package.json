@@ -1,6 +1,5 @@
 {
   "name": "@travetto/context",
-  "displayName": "Async Context",
   "version": "3.0.0-rc.4",
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "keywords": [
@@ -38,13 +37,13 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/di": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Async Context",
+    "dependencies": {
+      "@travetto/di": [
+        "test"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

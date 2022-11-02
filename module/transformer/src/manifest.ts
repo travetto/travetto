@@ -3,7 +3,6 @@ import * as path from '../support/path';
 export type ManifestModule = { source: string, output: string, name: string, files: Record<string, [string, string, number][]> };
 
 export class ManifestManager {
-  #modules: Record<string, ManifestModule>;
   #srcToMod: Record<string, string> = {};
   #outToMod: Record<string, string> = {};
   #srcToOut: Record<string, string> = {};
@@ -11,8 +10,6 @@ export class ManifestManager {
   #main: ManifestModule;
 
   constructor(modules: ManifestModule[]) {
-    this.#modules = Object.fromEntries(modules.map(m => [m.name, m]));
-
     for (const mod of modules) {
       if (mod.output === '.') {
         this.#main = mod;

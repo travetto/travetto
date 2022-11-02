@@ -1,6 +1,5 @@
 {
   "name": "@travetto/command",
-  "displayName": "Command",
   "version": "3.0.0-rc.2",
   "description": "Support for executing complex commands at runtime.",
   "keywords": [
@@ -36,13 +35,13 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/model-elasticsearch": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Command",
+    "dependencies": {
+      "@travetto/model-elasticsearch": [
+        "doc"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

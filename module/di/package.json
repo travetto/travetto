@@ -1,6 +1,5 @@
 {
   "name": "@travetto/di",
-  "displayName": "Dependency Injection",
   "version": "3.0.0-rc.4",
   "description": "Dependency registration/management and injection support.",
   "keywords": [
@@ -31,22 +30,22 @@
     "@travetto/transformer": "^3.0.0-rc.4",
     "@travetto/registry": "^3.0.0-rc.4"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/config": [
-      "test"
-    ],
-    "@travetto/schema": [
-      "test"
-    ],
-    "@travetto/model-mongo": [
-      "doc"
-    ],
-    "@travetto/rest": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Dependency Injection",
+    "dependencies": {
+      "@travetto/config": [
+        "test"
+      ],
+      "@travetto/schema": [
+        "test"
+      ],
+      "@travetto/model-mongo": [
+        "doc"
+      ],
+      "@travetto/rest": [
+        "doc"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

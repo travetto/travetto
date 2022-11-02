@@ -1,6 +1,5 @@
 {
   "name": "@travetto/asset",
-  "displayName": "Asset",
   "version": "3.0.0-rc.4",
   "description": "Modular library for storing and retrieving binary assets",
   "keywords": [
@@ -40,16 +39,16 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/model-mongo": [
-      "doc"
-    ],
-    "@travetto/model-s3": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Asset",
+    "dependencies": {
+      "@travetto/model-mongo": [
+        "doc"
+      ],
+      "@travetto/model-s3": [
+        "doc"
+      ]
+    }
   },
   "private": false,
   "publishConfig": {

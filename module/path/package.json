@@ -1,6 +1,5 @@
 {
   "name": "@travetto/path",
-  "displayName": "Path",
   "version": "3.0.0-rc.2",
   "description": "Native path replacement",
   "keywords": [
@@ -23,10 +22,8 @@
     "directory": "module/path"
   },
   "dependencies": {},
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Path"
   },
   "publishConfig": {
     "access": "public"

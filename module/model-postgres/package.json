@@ -1,6 +1,5 @@
 {
   "name": "@travetto/model-postgres",
-  "displayName": "PostgreSQL Model Service",
   "version": "3.0.0-rc.4",
   "description": "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "keywords": [
@@ -47,10 +46,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "PostgreSQL Model Service"
   },
   "publishConfig": {
     "access": "public"

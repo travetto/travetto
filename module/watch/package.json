@@ -1,6 +1,5 @@
 {
   "name": "@travetto/watch",
-  "displayName": "Watch",
   "version": "3.0.0-rc.2",
   "description": "Support for making files watchable during runtime",
   "keywords": [
@@ -27,10 +26,8 @@
     "@travetto/base": "^3.0.0-rc.2",
     "@travetto/resource": "^3.0.0-rc.4"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Watch"
   },
   "publishConfig": {
     "access": "public"

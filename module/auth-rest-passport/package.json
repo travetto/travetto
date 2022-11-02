@@ -1,6 +1,5 @@
 {
   "name": "@travetto/auth-rest-passport",
-  "displayName": "Rest Auth Passport",
   "version": "3.0.0-rc.4",
   "description": "Rest authentication integration support for the travetto framework",
   "keywords": [
@@ -34,13 +33,13 @@
     "@types/passport": "^1.0.11",
     "passport": "^0.6.0"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/app": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Rest Auth Passport",
+    "dependencies": {
+      "@travetto/app": [
+        "doc"
+      ]
+    }
   },
   "docDependencies": {
     "@types/passport-facebook": "^2.1.11",

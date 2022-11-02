@@ -1,6 +1,5 @@
 {
   "name": "@travetto/email-nodemailer",
-  "displayName": "Email",
   "version": "3.0.0-rc.4",
   "description": "Email transmission module.",
   "keywords": [
@@ -29,10 +28,8 @@
     "@types/nodemailer": "^6.4.6",
     "nodemailer": "^6.8.0"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Email Nodemailer Support"
   },
   "publishConfig": {
     "access": "public"
