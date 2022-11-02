@@ -1,6 +1,5 @@
 {
   "name": "@travetto/base",
-  "displayName": "Base",
   "version": "3.0.0-rc.2",
   "description": "Environment config and common utilities for travetto applications.",
   "keywords": [
@@ -29,10 +28,8 @@
   "dependencies": {
     "@travetto/boot": "^3.0.0-rc.0"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Base"
   },
   "private": false,
   "publishConfig": {

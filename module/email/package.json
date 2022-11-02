@@ -1,6 +1,5 @@
 {
   "name": "@travetto/email",
-  "displayName": "Email",
   "version": "3.0.0-rc.4",
   "description": "Email transmission module.",
   "keywords": [
@@ -30,10 +29,8 @@
     "@types/mustache": "^4.2.1",
     "mustache": "^4.2.0"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Email"
   },
   "publishConfig": {
     "access": "public"

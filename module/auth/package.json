@@ -1,6 +1,5 @@
 {
   "name": "@travetto/auth",
-  "displayName": "Authentication",
   "version": "3.0.0-rc.2",
   "description": "Authentication scaffolding for the travetto framework",
   "keywords": [
@@ -26,10 +25,8 @@
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.2"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Authentication"
   },
   "private": false,
   "publishConfig": {

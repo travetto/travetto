@@ -1,6 +1,5 @@
 {
   "name": "@travetto/rest-koa-lambda",
-  "displayName": "Koa REST AWS Lambda Source",
   "version": "3.0.0-rc.4",
   "description": "Koa provider for the travetto rest module.",
   "keywords": [
@@ -31,10 +30,8 @@
     "@travetto/rest-aws-lambda": "^3.0.0-rc.4",
     "@vendia/serverless-express": "^4.10.1"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Koa REST AWS Lambda Source"
   },
   "publishConfig": {
     "access": "public"

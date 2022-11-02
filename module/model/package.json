@@ -1,6 +1,5 @@
 {
   "name": "@travetto/model",
-  "displayName": "Data Modeling Support",
   "version": "3.0.0-rc.4",
   "description": "Datastore abstraction for core operations.",
   "keywords": [
@@ -44,10 +43,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Data Modeling Support"
   },
   "publishConfig": {
     "access": "public"

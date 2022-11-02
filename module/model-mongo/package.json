@@ -1,6 +1,5 @@
 {
   "name": "@travetto/model-mongo",
-  "displayName": "MongoDB Model Support",
   "version": "3.0.0-rc.4",
   "description": "Mongo backing for the travetto model module.",
   "keywords": [
@@ -40,10 +39,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "MongoDB Model Support"
   },
   "publishConfig": {
     "access": "public"

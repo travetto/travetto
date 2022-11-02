@@ -1,6 +1,5 @@
 {
   "name": "@travetto/worker",
-  "displayName": "Worker",
   "version": "3.0.0-rc.2",
   "description": "Process management utilities, with a focus on inter-process communication",
   "keywords": [
@@ -30,10 +29,8 @@
     "@types/generic-pool": "^3.1.11",
     "generic-pool": "^3.9.0"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Worker"
   },
   "publishConfig": {
     "access": "public"

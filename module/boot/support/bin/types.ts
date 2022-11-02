@@ -8,6 +8,7 @@ export type ManifestModule<T = Record<string, ManifestModuleFile[]>> = {
   name: string;
   source: string;
   output: string;
+  profile?: string;
   files: T;
 };
 

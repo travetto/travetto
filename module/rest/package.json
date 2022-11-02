@@ -1,6 +1,5 @@
 {
   "name": "@travetto/rest",
-  "displayName": "RESTful API",
   "version": "3.0.0-rc.4",
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
   "keywords": [
@@ -66,10 +65,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "RESTful API"
   },
   "publishConfig": {
     "access": "public"

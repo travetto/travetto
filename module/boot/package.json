@@ -1,6 +1,5 @@
 {
   "name": "@travetto/boot",
-  "displayName": "Boot",
   "version": "3.0.0-rc.0",
   "description": "Bootstrapping and application phase management for travetto applications.",
   "keywords": [
@@ -38,10 +37,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Boot"
   },
   "engines": {
     "node": ">=12.17.0"

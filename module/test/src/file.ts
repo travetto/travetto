@@ -38,7 +38,7 @@ class $TestFile {
     pth = cleanPath(pth);
 
     for (const f of this.paths.map(x => path.join(x, pth))) {
-      if (await fs.stat(f).catch(() => { })) {
+      if (await fs.stat(f).catch(() => false)) {
         return f;
       }
     }

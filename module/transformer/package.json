@@ -1,6 +1,5 @@
 {
   "name": "@travetto/transformer",
-  "displayName": "Transformation",
   "version": "3.0.0-rc.4",
   "description": "Functionality for AST transformations, with transformer registration, and general utils",
   "keywords": [
@@ -37,10 +36,9 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Transformation",
+    "profile": "compile"
   },
   "publishConfig": {
     "access": "public"

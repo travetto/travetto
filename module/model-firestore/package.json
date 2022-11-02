@@ -1,6 +1,5 @@
 {
   "name": "@travetto/model-firestore",
-  "displayName": "Firestore Model Support",
   "version": "3.0.0-rc.4",
   "description": "Firestore backing for the travetto model module.",
   "keywords": [
@@ -39,10 +38,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "Firestore Model Support"
   },
   "private": false,
   "publishConfig": {

@@ -1,6 +1,5 @@
 {
   "name": "@travetto/rest-model",
-  "displayName": "RESTful Model Routes",
   "version": "3.0.0-rc.4",
   "description": "RESTful support for generating APIs from Model classes.",
   "keywords": [
@@ -29,10 +28,8 @@
     "@travetto/schema": "^3.0.0-rc.4",
     "@travetto/model": "^3.0.0-rc.4"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "RESTful Model Routes"
   },
   "publishConfig": {
     "access": "public"

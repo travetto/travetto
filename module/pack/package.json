@@ -1,6 +1,5 @@
 {
   "name": "@travetto/pack",
-  "displayName": "Pack",
   "version": "3.0.0-rc.2",
   "description": "Code packing utilities",
   "keywords": [
@@ -37,13 +36,16 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/rest": [
-      "doc"
-    ],
-    "@travetto/rest-aws-lambda": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Pack",
+    "dependencies": {
+      "@travetto/rest": [
+        "doc"
+      ],
+      "@travetto/rest-aws-lambda": [
+        "doc"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

@@ -1,6 +1,5 @@
 {
   "name": "@travetto/rest-session",
-  "displayName": "REST Session",
   "version": "3.0.0-rc.4",
   "description": "Session provider for the travetto rest module.",
   "keywords": [
@@ -38,10 +37,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "REST Session"
   },
   "publishConfig": {
     "access": "public"

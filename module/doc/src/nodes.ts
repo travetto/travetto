@@ -177,8 +177,8 @@ export const node = {
   Mod(folder: string) {
     folder = path.resolve('node_modules', folder);
 
-    const { description, displayName } = PackageUtil.readPackage(folder);
-    return $n('mod', { title: $c(displayName!), link: $c(folder), description: $c(description!) });
+    const { description, travetto } = PackageUtil.readPackage(folder);
+    return $n('mod', { title: $c(travetto!.displayName!), link: $c(folder), description: $c(description!) });
   },
 
   /**
@@ -220,7 +220,7 @@ export const node = {
    * @param pkg
    */
   Header: (install = true, pkg = PackageUtil.main) =>
-    $n('header', { title: $c(pkg.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install }),
+    $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install }),
 
   /**
    * Comment

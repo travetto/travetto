@@ -1,6 +1,5 @@
 {
   "name": "@travetto/rest-aws-lambda",
-  "displayName": "RESTful AWS Lambda",
   "version": "3.0.0-rc.4",
   "description": "RESTful APIs entry point support for AWS Lambdas.",
   "keywords": [
@@ -41,10 +40,8 @@
       "optional": true
     }
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ]
+  "travetto": {
+    "displayName": "RESTful AWS Lambda"
   },
   "publishConfig": {
     "access": "public"

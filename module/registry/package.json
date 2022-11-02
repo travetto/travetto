@@ -1,6 +1,5 @@
 {
   "name": "@travetto/registry",
-  "displayName": "Registry",
   "version": "3.0.0-rc.4",
   "description": "Patterns and utilities for handling registration of metadata and functionality for run-time use",
   "keywords": [
@@ -30,13 +29,13 @@
   "dependencies": {
     "@travetto/transformer": "^3.0.0-rc.4"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/di": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "Registry",
+    "dependencies": {
+      "@travetto/di": [
+        "doc"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

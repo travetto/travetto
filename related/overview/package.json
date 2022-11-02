@@ -1,6 +1,5 @@
 {
   "name": "overview",
-  "displayName": "Overview Docs",
   "version": "2.2.2",
   "description": "Documentation overview",
   "keywords": [
@@ -21,6 +20,9 @@
   },
   "dependencies": {
     "@travetto/boot": "^2.2.2"
+  },
+  "travetto": {
+    "displayName": "Overview Docs"
   },
   "private": true
 }

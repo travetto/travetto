@@ -40,7 +40,7 @@ class $ConfigManager {
     const allFiles: { file: string, profile: string }[] = [];
 
     // Find all files
-    for (const folder of ['resources', ...Env.getResourcePaths()]) {
+    for (const folder of ['resources', ...Env.getList('TRV_RESOURCES')]) {
       const toFind = path.resolve(folder);
       for (const el of await fs.readdir(toFind)) {
         if (!el.startsWith('.') && /[.]ya?ml$/.test(el)) {

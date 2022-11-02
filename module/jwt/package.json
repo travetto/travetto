@@ -1,6 +1,5 @@
 {
   "name": "@travetto/jwt",
-  "displayName": "JWT",
   "version": "3.0.0-rc.2",
   "description": "JSON Web Token implementation",
   "keywords": [
@@ -28,13 +27,13 @@
     "@types/jws": "^3.2.4",
     "jws": "^4.0.0"
   },
-  "trvDependencies": {
-    "@travetto/test": [
-      "test"
-    ],
-    "@travetto/auth-rest": [
-      "doc"
-    ]
+  "travetto": {
+    "displayName": "JWT",
+    "dependencies": {
+      "@travetto/auth-rest": [
+        "doc"
+      ]
+    }
   },
   "publishConfig": {
     "access": "public"

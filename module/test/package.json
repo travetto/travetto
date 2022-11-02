@@ -1,6 +1,5 @@
 {
   "name": "@travetto/test",
-  "displayName": "Testing",
   "version": "3.0.0-rc.4",
   "description": "Declarative test framework",
   "keywords": [
@@ -42,6 +41,10 @@
     "@travetto/cli": {
       "optional": true
     }
+  },
+  "travetto": {
+    "displayName": "Testing",
+    "profile": "test"
   },
   "publishConfig": {
     "access": "public"

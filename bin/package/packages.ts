@@ -9,7 +9,6 @@ import { PackageType, Util } from './util';
 export const DEP_GROUPS = [
   'dependencies', 'devDependencies',
   'peerDependencies', 'optionalDependencies',
-  // 'trvDependencies'
 ] as const;
 
 export type DepGroup = (typeof DEP_GROUPS[number]);
@@ -58,17 +57,16 @@ export class Packages {
   }
 
   static standardize({
-    name, displayName, version, description,
+    name, version, description,
     files, main, bin, scripts, keywords,
     dependencies, devDependencies, peerDependencies,
     optionalDependencies, peerDependenciesMeta,
-    trvDependencies,
+    travetto,
     engines, private: priv, repository, author,
     publishConfig, ...rest
   }: Pkg): Pkg {
     return {
       name,
-      displayName,
       version,
       description,
       keywords: this.#combine(keywords!, 'travetto', 'typescript'),
@@ -91,7 +89,7 @@ export class Packages {
       peerDependencies,
       peerDependenciesMeta,
       optionalDependencies,
-      trvDependencies,
+      travetto,
       engines,
       private: !!priv,
       publishConfig: {
