@@ -1,0 +1,10 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/di": "file:..",
+    "@travetto/model-mongo": "file:../../model-mongo",
+    "@travetto/rest": "file:../../rest"
+  },
+  "private": true
+}
