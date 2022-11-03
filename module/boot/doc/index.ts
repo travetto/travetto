@@ -46,11 +46,11 @@ The built in stack filtering will remove duplicate or unnecessary lines, as well
 
 From a test scenario:
 
-${d.Code('Tracking asynchronous behavior', 'doc/stack-test.ts')}
+${d.Code('Tracking asynchronous behavior', 'src/stack-test.ts')}
 
 Will produce the following stack trace:
 
-${d.Execute('Stack trace from async errors', 'doc/stack-test.ts')}
+${d.Execute('Stack trace from async errors', 'src/stack-test.ts')}
 
 The needed functionality cannot be loaded until ${d.Method('init.action')} executes, and so must be required only at that time.
 

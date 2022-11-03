@@ -33,31 +33,6 @@
     "@types/passport": "^1.0.11",
     "passport": "^0.6.0"
   },
-  "peerDependencies": {
-    "@types/passport-facebook": "^2.1.11",
-    "passport-facebook": "^3.0.0",
-    "@travetto/app": "file:../app"
-  },
-  "peerDependenciesMeta": {
-    "@types/passport-facebook": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "passport-facebook": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/app": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    }
-  },
   "travetto": {
     "id": "@trv:auth-rest-passport",
     "displayName": "Rest Auth Passport"

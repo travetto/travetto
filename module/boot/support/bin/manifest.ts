@@ -73,6 +73,12 @@ export class ManifestUtil {
     const stack: [string, number][] = [[folder, 0]];
     while (stack.length) {
       const [top, depth] = stack.pop()!;
+
+      // Don't navigate into sub-folders with package.json's
+      if (top !== folder && await fs.stat(`${top}/package.json`).catch(() => false)) {
+        continue;
+      }
+
       for (const sub of await fs.readdir(top)) {
         const stat = await fs.stat(`${top}/${sub}`);
         if (stat.isFile()) {
@@ -107,8 +113,6 @@ export class ManifestUtil {
       if (!rel.includes('/')) { // If a file
         if (rel === 'index.ts') {
           files.index = [entry];
-        } else if (rel === 'doc.ts') {
-          files.docIndex = [entry];
         } else {
           (files['rootFiles'] ??= []).push(entry);
         }

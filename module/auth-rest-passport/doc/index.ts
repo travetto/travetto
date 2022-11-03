@@ -1,6 +1,5 @@
 import { d, lib, mod } from '@travetto/doc';
-
-import { PassportAuthenticator } from './src/authenticator';
+import { PassportAuthenticator } from '@travetto/auth-rest-passport';
 
 export const text = d`
 ${d.Header()}
@@ -9,7 +8,7 @@ This is a primary integration for the ${mod.AuthRest} module.  This is another l
 
 Within the node ecosystem, the most prevalent auth framework is ${lib.Passport}.  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for ${lib.Passport} baked in. Registering and configuring a ${lib.Passport} strategy is fairly straightforward.
 
-${d.Code('Sample Facebook/passport config', 'doc/conf.ts')}
+${d.Code('Sample Facebook/passport config', 'src/conf.ts')}
 
 As you can see, ${PassportAuthenticator} will take care of the majority of the work, and all that is required is:
 ${d.List(
@@ -20,5 +19,5 @@ ${d.List(
 
 After that, the provider is no different than any other, and can be used accordingly.  Additionally, because ${lib.Passport} runs first, in it's entirety, you can use the provider as you normally would any ${lib.Passport} middleware.
 
-${d.Code('Sample routes using Facebook/passport provider', 'doc/simple.ts')}
+${d.Code('Sample routes using Facebook/passport provider', 'src/simple.ts')}
 `;

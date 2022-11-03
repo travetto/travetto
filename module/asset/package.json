@@ -33,24 +33,10 @@
   },
   "peerDependencies": {
     "@travetto/test": "file:../test",
-    "@travetto/model-mongo": "file:../model-mongo",
-    "@travetto/model-s3": "file:../model-s3"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
       "optional": true
-    },
-    "@travetto/model-mongo": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model-s3": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
     }
   },
   "travetto": {

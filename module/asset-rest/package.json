@@ -32,18 +32,11 @@
     "busboy": "^1.6.0"
   },
   "peerDependencies": {
-    "@travetto/test": "file:../test",
-    "@travetto/app": "file:../app"
+    "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
       "optional": true
-    },
-    "@travetto/app": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
     }
   },
   "travetto": {

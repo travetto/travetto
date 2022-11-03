@@ -1,0 +1,9 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/asset-rest": "file:..",
+    "@travetto/app": "file:../../app"
+  },
+  "private": true
+}
