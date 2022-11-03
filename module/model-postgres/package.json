@@ -35,9 +35,6 @@
     "@types/pg": "^8.6.5",
     "pg": "^8.8.0"
   },
-  "devDependencies": {
-    "@travetto/app": "file:../app"
-  },
   "peerDependencies": {
     "@travetto/command": "file:../command"
   },

@@ -2,8 +2,8 @@ import { d, lib, mod } from '@travetto/doc';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
-import { MongoModelConfig } from './src/config';
-import { MongoModelService } from './src/service';
+import { MongoModelConfig } from '@travetto/model-mongo/src/config';
+import { MongoModelService } from '@travetto/model-mongo/src/service';
 
 const ResourceManager = d.SnippetLink('ResourceManager', '@travetto/resource/src/resource.ts', /class [$]Resource/);
 

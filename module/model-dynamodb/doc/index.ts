@@ -2,8 +2,8 @@ import { d, lib, mod } from '@travetto/doc';
 
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
-import { DynamoDBModelService } from './src/service';
-import { DynamoDBModelConfig } from './src/config';
+import { DynamoDBModelService } from '@travetto/model-dynamodb/src/service';
+import { DynamoDBModelConfig } from '@travetto/model-dynamodb/src/config';
 
 export const text = d`
 ${d.Header()}

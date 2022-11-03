@@ -32,32 +32,11 @@
     "@travetto/schema": "file:../schema"
   },
   "peerDependencies": {
-    "@travetto/test": "file:../test",
-    "@travetto/model-mongo": "file:../model-mongo",
-    "@travetto/model-elasticsearch": "file:../model-elasticsearch",
-    "@travetto/model-sql": "file:../model-sql"
+    "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
       "optional": true
-    },
-    "@travetto/model-mongo": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model-elasticsearch": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model-sql": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
     }
   },
   "travetto": {
