@@ -30,53 +30,11 @@
     "@travetto/model": "file:../model"
   },
   "peerDependencies": {
-    "@travetto/test": "file:../test",
-    "@travetto/model-dynamodb": "file:../model-dynamodb",
-    "@travetto/model-mongo": "file:../model-mongo",
-    "@travetto/model-elasticsearch": "file:../model-elasticsearch",
-    "@travetto/model-redis": "file:../model-redis",
-    "@travetto/model-sql": "file:../model-sql",
-    "@travetto/model-s3": "file:../model-s3"
+    "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
       "optional": true
-    },
-    "@travetto/model-dynamodb": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model-mongo": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model-elasticsearch": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model-redis": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model-sql": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model-s3": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
     }
   },
   "travetto": {
