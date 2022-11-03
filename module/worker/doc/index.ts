@@ -1,13 +1,11 @@
 import { d } from '@travetto/doc';
 
-import { WorkPool } from './src/pool';
-import { IterableWorkSet } from './src/input/iterable';
-import { ManualAsyncIterator } from './src/input/async-iterator';
-import { ChildCommChannel } from './src/comm/child';
-import { ParentCommChannel } from './src/comm/parent';
-import { WorkUtil } from './src/util';
+import {
+  WorkPool, IterableWorkSet, ManualAsyncIterator,
+  ChildCommChannel, ParentCommChannel, WorkUtil
+} from '@travetto/worker';
 
-const WorkSet = d.SnippetLink('WorkSet', 'src/input/types.ts', /interface WorkSet/);
+const WorkSet = d.SnippetLink('WorkSet', '@travetto/worker/src/input/types.ts', /interface WorkSet/);
 
 export const text = d`
 ${d.Header()}
@@ -21,7 +19,7 @@ The only provided ${WorkSet} is the ${IterableWorkSet} which supports all ${d.In
 
 Below is a pool that will convert images on demand, while queuing as needed.
 
-${d.Code('Image processing queue, with a fixed batch/pool size', 'doc/images.ts')}
+${d.Code('Image processing queue, with a fixed batch/pool size', 'src/images.ts')}
 
 Once a pool is constructed, it can be shutdown by calling the ${d.Method('.shutdown()')} method, and awaiting the result.
 
@@ -32,13 +30,13 @@ Within the ${d.Input('comm')} package, there is support for two primary communic
 ${d.SubSection('IPC as a Worker')}
 A common pattern is to want to model a sub process as a worker, to be a valid candidate in a ${WorkPool}.  The ${WorkUtil} class provides a utility to facilitate this desire.
 
-${d.Code('Spawned Worker', 'src/util.ts')}
+${d.Code('Spawned Worker', '@travetto/worker/src/util.ts')}
 
 When creating your work, via process spawning, you will need to provide the script (and any other features you would like in ${d.Input('SpawnConfig')}).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel (${ParentCommChannel}) and the input value.  A simple example could look like:
 
-${d.Code('Spawning Pool', 'doc/spawner.ts')}
+${d.Code('Spawning Pool', 'src/spawner.ts')}
 
-${d.Code('Spawned Worker', 'doc/spawned.ts')}
+${d.Code('Spawned Worker', 'src/spawned.ts')}
 
-${d.Execute('Output', 'doc/spawner.ts')}
+${d.Execute('Output', 'src/spawner.ts')}
 `;
