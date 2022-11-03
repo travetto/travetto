@@ -52,8 +52,7 @@ export class WorkspaceManager {
     await fs.writeFile(outFile, contents, 'utf8');
   }
 
-  async transformFile(module: ManifestModule, file: string, mapper: (val: string) => string): Promise<void> {
-    const text = await fs.readFile(`${module.source}/${file}`, 'utf8');
-    this.writeFile(module, file, mapper(text));
+  async readFile(module: ManifestModule, file: string): Promise<string> {
+    return fs.readFile(`${module.source}/${file}`, 'utf8');
   }
 }

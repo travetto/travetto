@@ -1,4 +1,5 @@
 import '@arcsine/nodesh';
+import * as path from 'path';
 
 import { DEP_GROUPS, Packages } from './package/packages';
 
@@ -9,7 +10,9 @@ Packages.getTopLevelPackage()
       .$map(pkg => ({ pkg, groups: DEP_GROUPS }))
       .$flatMap(({ pkg, groups }) => [...groups]
         .$flatMap(grp => Object.entries(pkg[grp] ?? []))
-        .$filter(([k]) => !k.startsWith('@travetto'))
+        .$map(([k, v]) => [k, v.startsWith('file:') ?
+          `file:${path.resolve(pkg._.folder, v.split('file:')[1]).replace(process.cwd(), '.').replaceAll('\\', '/')}` : v
+        ])
         .$collect()
         .$tap(all => {
           const hoisted = all.filter(([k, v]) => (top.devDependencies ?? {})[k] !== v);

@@ -30,7 +30,7 @@
     "@travetto/config": "file:../config",
     "@travetto/context": "file:../context",
     "@travetto/model": "file:../model",
-    "@travetto/model-query": "3.0.0-rc.4"
+    "@travetto/model-query": "file:../model-query"
   },
   "devDependencies": {
     "@travetto/app": "file:../app"

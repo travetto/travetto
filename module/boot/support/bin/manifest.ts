@@ -5,7 +5,7 @@ import * as path from './path';
 
 import type { Manifest, ManifestModuleFile, ManifestState, ManifestModule, ManifestDeltaEvent, ManifestDelta, Package } from './types';
 
-type Dependency = { id?: string, name: string, folder: string, isModule: boolean, profiles?: string[] };
+type Dependency = { id?: string, version: string, name: string, folder: string, isModule: boolean, profiles?: string[] };
 type DeltaModuleFiles = Record<string, ManifestModuleFile>;
 
 export class ManifestUtil {
@@ -15,29 +15,46 @@ export class ManifestUtil {
   }
 
   static async #collectPackages(folder: string, seen = new Set<string>()): Promise<Dependency[]> {
-    const { name, dependencies = {}, devDependencies = {}, peerDependencies = {}, travetto }: Package =
+    const { name, version, dependencies = {}, devDependencies = {}, peerDependencies = {}, peerDependenciesMeta = {}, travetto }: Package =
       JSON.parse(await fs.readFile(`${folder}/package.json`, 'utf8'));
 
     if (seen.has(name)) {
       return [];
     }
-    const out: Dependency[] = [{ id: travetto?.id, name, folder, isModule: !!travetto, profiles: travetto?.profiles }];
+
+    const isModule = !!travetto || folder === path.cwd();
+    const out: Dependency[] = [{ id: travetto?.id, name, version, folder, isModule, profiles: travetto?.profiles }];
     seen.add(name);
     const searchSpace = [
-      ...Object.keys(dependencies),
-      ...[...Object.keys(devDependencies)].filter(x => x.startsWith('@travetto/')),
-      ...[...Object.keys(peerDependencies)].filter(x => x.startsWith('@travetto/')),
-    ].sort();
+      ...Object.entries(dependencies).map(([k, v]) => [k, v, 'dep'] as const),
+      ...(isModule ? Object.entries(devDependencies).map(([k, v]) => [k, v, 'dev'] as const) : []),
+      ...Object.entries(peerDependencies).map(([k, v]) => [k, v, 'peer'] as const)
+        .filter(([x]) => {
+          try {
+            require.resolve(x);
+            return true;
+          } catch {
+            return false;
+          }
+        }),
+    ].sort(([a, b]) => a[0].localeCompare(b[0]));
 
-    for (const el of searchSpace) {
-      try {
-        const next = path.resolve(require.resolve(el))
-          .replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
-        out.push(...await this.#collectPackages(next, seen));
-      } catch (e) {
-        if (el.startsWith('file:')) {
-          out.push(...await this.#collectPackages(path.resolve(folder, el.replace('file:', '')), seen));
+    for (const [el, value, type] of searchSpace) {
+      if (type === 'peer') {
+        const profiles = peerDependenciesMeta?.[el].profiles;
+        if (profiles) {
+          // TODO: Filter by profiles
+          continue;
         }
+      }
+      if (value.startsWith('file:')) {
+        out.push(...await this.#collectPackages(path.resolve(folder, value.replace('file:', '')), seen));
+      } else {
+        try {
+          const next = path.resolve(require.resolve(el))
+            .replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
+          out.push(...await this.#collectPackages(next, seen));
+        } catch (e) { }
       }
     }
     return out;
@@ -74,7 +91,7 @@ export class ManifestUtil {
     return [relative, type, this.#getNewest(await fs.stat(full))];
   }
 
-  static async #describeModule(rootFolder: string, { id, name, folder, profiles }: Dependency): Promise<ManifestModule> {
+  static async #describeModule(rootFolder: string, { id, name, version, folder, profiles }: Dependency): Promise<ManifestModule> {
     const files: Record<string, ManifestModuleFile[]> = {};
     const folderSet = folder !== rootFolder ? new Set<string>(['src', 'bin', 'support']) : new Set<string>();
 
@@ -110,6 +127,7 @@ export class ManifestUtil {
       id,
       profiles,
       name,
+      version,
       source: folder,
       output: folder === rootFolder ? '.' : `node_modules/${name}`,
       files
@@ -122,11 +140,7 @@ export class ManifestUtil {
     if (!modules.find(x => x.name === '@travetto/cli')) {
       const folder = path.resolve(__dirname, '..', '..', '..', 'cli');
       if (await fs.stat(folder).catch(() => false)) {
-        modules.unshift({
-          name: '@travetto/cli',
-          folder,
-          isModule: true,
-        });
+        modules.unshift(...(await this.#collectPackages(folder)));
       }
     }
     const out: Record<string, ManifestModule> = {};

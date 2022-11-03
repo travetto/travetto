@@ -6,7 +6,7 @@ import { mkdirSync, writeFileSync } from 'fs';
 import { WorkspaceManager } from './workspace';
 
 import * as path from './path';
-import type { Manifest, ManifestDelta, ManifestModule, ManifestState } from './types';
+import type { Manifest, ManifestDelta, ManifestModule, ManifestState, Package } from './types';
 import { ManifestUtil } from './manifest';
 
 const nativeCwd = process.cwd();
@@ -204,8 +204,24 @@ export class Compiler {
   async #initPackages() {
     for (const module of this.#modules) {
       if (module.files.rootFiles?.find(([f]) => f === 'package.json')) {
-        await this.#mgr.transformFile(module, 'package.json', text =>
-          text.replace(/"index.ts"/g, '"index.js"'));
+        const text = (await this.#mgr.readFile(module, 'package.json'));
+        const pkg: Package = JSON.parse(text);
+        if (pkg.files) {
+          pkg.files = pkg.files.map(x => x.replace(/.ts$/, '.js'))
+        }
+        if (pkg.main) {
+          pkg.main = pkg.main.replace(/[.]ts$/, '.js');
+        }
+        for (const key of ["devDependencies", "dependencies", "peerDependencies"]) {
+          if (key in pkg) {
+            for (const dep of Object.keys(pkg[key])) {
+              if (dep in this.#manifest.modules) {
+                pkg[key][dep] = this.#manifest.modules[dep].version;
+              }
+            }
+          }
+        }
+        this.#mgr.writeFile(module, 'package.json', JSON.stringify(pkg));
       }
     }
   }

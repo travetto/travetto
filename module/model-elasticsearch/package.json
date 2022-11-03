@@ -30,7 +30,7 @@
     "@elastic/elasticsearch": "^7.17.0",
     "@travetto/config": "file:../config",
     "@travetto/model": "file:../model",
-    "@travetto/model-query": "3.0.0-rc.4"
+    "@travetto/model-query": "file:../model-query"
   },
   "devDependencies": {
     "@travetto/app": "file:../app"
