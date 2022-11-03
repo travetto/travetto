@@ -2,7 +2,7 @@ import * as path from '@travetto/path';
 import { d, lib } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 
-import { CommandService } from './src/command';
+import { CommandService } from '@travetto/command/src/command';
 
 export const text = d`
 ${d.Header()}
@@ -17,13 +17,13 @@ ${d.List(
   d`Spin up a container and run multiple executions against it.  In this format, the container, once started, will be scheduled to terminate on ${d.Class('Shutdown')} of the application.`
 )}
 
-${d.Code('Launching nginx and wait for connect', 'doc/docker.ts')}
+${d.Code('Launching nginx and wait for connect', 'src/docker.ts')}
 
 ${d.Section('Command Service')}
 
 While docker containers provide a high level of flexibility, performance can be an issue.  ${CommandService} is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
 
-${d.Code('Command Service example, using pngquant', 'doc/service.ts')}
+${d.Code('Command Service example, using pngquant', 'src/service.ts')}
 
 ${d.Section('CLI - command:service')}
 
