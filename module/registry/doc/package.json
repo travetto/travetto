@@ -1,0 +1,10 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/registry": "file:..",
+    "@travetto/di": "file:../../di",
+    "@travetto/schema": "file:../../schema"
+  },
+  "private": true
+}
