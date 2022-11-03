@@ -28,17 +28,6 @@
     "@types/nodemailer": "^6.4.6",
     "nodemailer": "^6.8.0"
   },
-  "peerDependencies": {
-    "@aws-sdk/client-ses": "^3.185.0"
-  },
-  "peerDependenciesMeta": {
-    "@aws-sdk/client-ses": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    }
-  },
   "travetto": {
     "id": "@trv:email-nodemailer",
     "displayName": "Email Nodemailer Support"

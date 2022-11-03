@@ -2,8 +2,7 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/email-nodemailer": "file:..",
-    "@aws-sdk/client-ses": "^3.185.0"
+    "@travetto/yaml": "file:.."
   },
   "private": true
 }
