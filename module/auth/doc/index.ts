@@ -1,10 +1,10 @@
 import { d, mod } from '@travetto/doc';
 
-import { AuthUtil } from './src/util';
+import { AuthUtil } from '@travetto/auth/src/util';
 
-const Principal = d.Snippet('Principal Structure', './src/types/principal.ts', /interface Principal/, /^}/);
-const Authorizer = d.Snippet('Authorizer', './src/types/authorizer.ts', /interface Authorizer/, /^}/);
-const Authenticator = d.Snippet('Authenticator', './src/types/authenticator.ts', /interface Authenticator/, /^}/);
+const Principal = d.Snippet('Principal Structure', '@travetto/auth/src/types/principal.ts', /interface Principal/, /^}/);
+const Authorizer = d.Snippet('Authorizer', '@travetto/auth/src/types/authorizer.ts', /interface Authorizer/, /^}/);
+const Authenticator = d.Snippet('Authenticator', '@travetto/auth/src/types/authenticator.ts', /interface Authenticator/, /^}/);
 
 export const text = d`
 ${d.Header()}

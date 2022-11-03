@@ -6,7 +6,7 @@
     "@travetto/model-elasticsearch": "file:../../module/model-elasticsearch",
     "@travetto/model-mongo": "file:../../module/model-mongo",
     "@travetto/model-mysql": "file:../../module/model-mysql",
-    "@travetto/model-postgresql": "file:../../module/model-postgresql",
+    "@travetto/model-postgres": "file:../../module/model-postgres",
     "@travetto/model-redis": "file:../../module/model-redis",
     "@travetto/model-s3": "file:../../module/model-s3",
     "@travetto/model-sqlite": "file:../../module/model-sqlite",

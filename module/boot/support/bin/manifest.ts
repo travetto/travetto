@@ -45,13 +45,6 @@ export class ManifestUtil {
     ].sort(([a, b]) => a[0].localeCompare(b[0]));
 
     for (const [el, value, type] of searchSpace) {
-      if (type === 'peer') {
-        const profiles = peerDependenciesMeta?.[el].profiles;
-        if (profiles) {
-          // TODO: Filter by profiles
-          continue;
-        }
-      }
       if (value.startsWith('file:')) {
         out.push(...await this.#collectPackages(path.resolve(folder, value.replace('file:', '')), seen));
       } else {
@@ -113,6 +106,8 @@ export class ManifestUtil {
       if (!rel.includes('/')) { // If a file
         if (rel === 'index.ts') {
           files.index = [entry];
+        } else if (rel === 'doc.ts') {
+          files.docIndex = [entry];
         } else {
           (files['rootFiles'] ??= []).push(entry);
         }

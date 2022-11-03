@@ -78,7 +78,7 @@ export const PAGES = [
       { path: 'model-s3', title: 'S3', component: ModelS3Component },
       { path: 'model-sql', title: 'SQL', component: ModelSqlComponent },
       { path: 'model-mysql', title: 'Mysql', component: ModelMysqlComponent },
-      { path: 'model-postgresql', title: 'Postgres', component: ModelPostgresComponent },
+      { path: 'model-postgres', title: 'Postgres', component: ModelPostgresComponent },
       { path: 'model-sqlite', title: 'Sqlite', component: ModelSqliteComponent },
     ]
   },

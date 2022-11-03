@@ -32,7 +32,7 @@
     "mime": "^3.0.0"
   },
   "peerDependencies": {
-    "@travetto/test": "file:../test",
+    "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

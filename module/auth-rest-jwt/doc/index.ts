@@ -1,6 +1,6 @@
 import { d } from '@travetto/doc';
 
-import { JWTPrincipalEncoder } from './src/principal-encoder';
+import { JWTPrincipalEncoder } from '@travetto/auth-rest-jwt/src/principal-encoder';
 
 export const text = d`
 ${d.Header()}
