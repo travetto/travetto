@@ -30,24 +30,6 @@
     "@travetto/transformer": "file:../transformer",
     "@travetto/registry": "file:../registry"
   },
-  "peerDependencies": {
-    "@travetto/model-mongo": "file:../model-mongo",
-    "@travetto/rest": "file:../rest"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/model-mongo": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/rest": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    }
-  },
   "travetto": {
     "id": "@trv:di",
     "displayName": "Dependency Injection"
