@@ -1,95 +1,113 @@
 import { RetargettingProxy } from '@travetto/boot';
 import { Class, ClassInstance } from '@travetto/base';
 
-import type { DependencyRegistry } from '../src/registry';
+import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
 import type { ClassTarget, InjectableConfig } from '../src/types';
 
 /**
  * Wraps the Dependency Registry to support proxying instances
  */
-export function setup($DependencyRegistry: Class<typeof DependencyRegistry>): typeof $DependencyRegistry {
+class $DynamicDependencyRegistry {
+  #proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
+  #registry: typeof DependencyRegistry;
+  #registryCreateInstance: <T>(target: ClassTarget<T>, qualifier: symbol) => Promise<T>;
+  #registryResolveTarget: <T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType) => Resolved<T>;
+  #registryOnInstallFinalize: <T>(target: Class<T>) => InjectableConfig<T>;
+  #registryDestroyInstance: <T>(target: Class<T>, qualifier: symbol) => void;
+  #registryOnReset: () => void;
 
   /**
-   * Extending the $DependencyRegistry class to add some functionality for watching
+   * Proxy the created instance
    */
-  const Cls = class extends $DependencyRegistry {
-    #proxies = new Map<string, Map<symbol | undefined, RetargettingProxy<unknown>>>();
+  proxyInstance<T>(target: ClassTarget<T>, qual: symbol | undefined, instance: T): T {
+    const { qualifier, id: classId } = this.#registryResolveTarget(target, qual);
+    let proxy: RetargettingProxy<T>;
 
-    /**
-     * Proxy the created instance
-     */
-    protected proxyInstance<T>(target: ClassTarget<T>, qual: symbol | undefined, instance: T): T {
-      const { qualifier, id: classId } = this.resolveTarget(target, qual);
-      let proxy: RetargettingProxy<T>;
+    if (!this.#proxies.has(classId)) {
+      this.#proxies.set(classId, new Map());
+    }
 
-      if (!this.#proxies.has(classId)) {
-        this.#proxies.set(classId, new Map());
-      }
-
-      if (!this.#proxies.get(classId)!.has(qualifier)) {
-        proxy = new RetargettingProxy<T>(instance);
-        this.#proxies.get(classId)!.set(qualifier, proxy);
-        console.debug('Registering proxy', { id: target.Ⲑid, qualifier: qualifier.toString() });
-      } else {
+    if (!this.#proxies.get(classId)!.has(qualifier)) {
+      proxy = new RetargettingProxy<T>(instance);
+      this.#proxies.get(classId)!.set(qualifier, proxy);
+      console.debug('Registering proxy', { id: target.Ⲑid, qualifier: qualifier.toString() });
+    } else {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      proxy = this.#proxies.get(classId)!.get(qualifier) as RetargettingProxy<T>;
+      proxy.setTarget(instance);
+      console.debug('Updating target', {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        proxy = this.#proxies.get(classId)!.get(qualifier) as RetargettingProxy<T>;
-        proxy.setTarget(instance);
-        console.debug('Updating target', {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
-        });
-      }
-
-      return proxy.get();
+        id: target.Ⲑid, qualifier: qualifier.toString(), instanceType: (instance as unknown as ClassInstance<T>).constructor.name as string
+      });
     }
 
-    /**
-     * Create instance and wrap in a proxy
-     */
-    protected async createInstance<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
-      const instance = await super.createInstance(target, qualifier);
-      const classId = this.resolveTarget(target, qualifier).id;
-      // Reset as proxy instance
-      const proxied = this.proxyInstance<T>(target, qualifier, instance);
-      this.instances.get(classId)!.set(qualifier, proxied);
-      return proxied;
+    return proxy.get();
+  }
+
+  /**
+   * Create instance and wrap in a proxy
+   */
+  async createInstance<T>(target: ClassTarget<T>, qualifier: symbol): Promise<T> {
+    const instance = await this.#registryCreateInstance(target, qualifier);
+    const classId = this.#registryResolveTarget(target, qualifier).id;
+    // Reset as proxy instance
+    const proxied = this.proxyInstance<T>(target, qualifier, instance);
+    this.#registry['instances'].get(classId)!.set(qualifier, proxied);
+    return proxied;
+  }
+
+  /**
+   * Reload proxy if in watch mode
+   */
+  onInstallFinalize<T>(cls: Class<T>): InjectableConfig<T> {
+    const config = this.#registryOnInstallFinalize(cls);
+    // If already loaded, reload
+    const classId = cls.Ⲑid;
+
+    if (
+      !cls.Ⲑmeta?.abstract &&
+      this.#proxies.has(classId) &&
+      this.#proxies.get(classId)!.has(config.qualifier)
+    ) {
+      console.debug('Reloading on next tick');
+      // Timing matters due to create instance being asynchronous
+      process.nextTick(() => this.createInstance(config.target, config.qualifier));
     }
 
-    /**
-     * Reload proxy if in watch mode
-     */
-    onInstallFinalize<T>(cls: Class<T>): InjectableConfig<T> {
-      const config = super.onInstallFinalize(cls);
-      // If already loaded, reload
-      const classId = cls.Ⲑid;
+    return config;
+  }
 
-      if (
-        !cls.Ⲑmeta?.abstract &&
-        this.#proxies.has(classId) &&
-        this.#proxies.get(classId)!.has(config.qualifier)
-      ) {
-        console.debug('Reloading on next tick');
-        // Timing matters due to create instance being asynchronous
-        process.nextTick(() => this.createInstance(config.target, config.qualifier));
-      }
-
-      return config;
+  destroyInstance(cls: Class, qualifier: symbol): void {
+    const classId = cls.Ⲑid;
+    const proxy = this.#proxies.get(classId)!.get(qualifier);
+    this.#registryDestroyInstance(cls, qualifier);
+    if (proxy) {
+      proxy.setTarget(null);
     }
+  }
 
-    destroyInstance(cls: Class, qualifier: symbol): void {
-      const classId = cls.Ⲑid;
-      const proxy = this.#proxies.get(classId)!.get(qualifier);
-      super.destroyInstance(cls, qualifier);
-      if (proxy) {
-        proxy.setTarget(null);
-      }
-    }
+  onReset(): void {
+    this.#registryOnReset();
+    this.#proxies.clear();
+  }
 
-    onReset(): void {
-      super.onReset();
-      this.#proxies.clear();
-    }
-  };
+  register(registry: typeof DependencyRegistry): void {
+    this.#registryCreateInstance = registry['createInstance'].bind(registry);
+    this.#registryResolveTarget = registry['resolveTarget'].bind(registry);
+    this.#registryOnInstallFinalize = registry['onInstallFinalize'].bind(registry);
+    this.#registryDestroyInstance = registry['destroyInstance'].bind(registry);
+    this.#registryOnReset = registry['onReset'].bind(registry);
 
-  return Cls;
+    this.#registry['createInstance'] = this.createInstance.bind(this);
+    this.#registry['destroyInstance'] = this.destroyInstance.bind(this);
+    this.#registry['onReset'] = this.onReset.bind(this);
+    this.#registry['onInstallFinalize'] = this.onInstallFinalize.bind(this);
+  }
+}
+
+export const DependencyRegistration = {
+  init(registry: typeof DependencyRegistry) {
+    const dynamic = new $DynamicDependencyRegistry();
+    dynamic.register(registry);
+  }
 }
