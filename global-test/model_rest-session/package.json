@@ -13,7 +13,7 @@
     "@travetto/rest-session": "file:../../module/rest-session",
     "@travetto/rest-express": "file:../../module/rest-express"
   },
-  "devDependencie": {
+  "devDependencies": {
     "@travetto/test": "file:../../module/test",
     "@travetto/cli": "file:../../module/cli"
   },
