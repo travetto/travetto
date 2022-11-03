@@ -1,5 +1,5 @@
 import { d, lib, mod } from '@travetto/doc';
-import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
+import { ModuleIndex } from '@travetto/boot';
 
 const ConsoleManager = d.Ref('ConsoleManager', '@travetto/boot/src-ts/console.ts');
 
@@ -39,13 +39,13 @@ All of the logging instrumentation occurs at transpilation time.  All ${d.Method
 
 A sample of the instrumentation would be:
 
-${d.Code('Sample logging at various levels', 'doc/transpile.ts')}
+${d.Code('Sample logging at various levels', 'src/transpile.ts')}
 
-${d.Code('Sample After Transpilation', TranspileCache.readEntry('doc/transpile.ts'), false, 'javascript')}
+${d.Code('Sample After Transpilation', ModuleIndex.find({ filter: f => f === 'src/transpile.ts' })[0].file, false, 'javascript')}
 
 And when in ${d.Input('prod')} mode transforms into:
 
-${d.Code('Sample After Transpilation, in Prod', TranspileCache.readEntry('doc/transpile-prod.ts'), false, 'javascript')}
+${d.Code('Sample After Transpilation, in Prod', ModuleIndex.find({ filter: f => f === 'src/transpile-prod.ts' })[0].file, false, 'javascript')}
 
 ${d.Section('Logging to External Systems')}
 By default the logging functionality logs messages directly to the console, relying on the ${d.Method('util.inspect')} method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as ${lib.JSON}, which is easily consumable by services like ${lib.Elasticsearch} or ${lib.AwsCloudwatch} if running as a lambda or in a docker container.  
@@ -56,11 +56,11 @@ ${d.Section('Sample Output')}
 
 The logging output, as indicated provides context for location of invocation. Given the file ${d.Path('test/simple.ts')}:
 
-${d.Code('Various log levels', 'doc/output.ts')}
+${d.Code('Various log levels', 'support/main.output.ts')}
 
 The corresponding output would be
 
-${d.Execute('Logging output', 'doc/output.ts', [], {
+${d.Execute('Logging output', 'support/main.output', [], {
   env: {
     TRV_DEBUG: '@trv:log',
     TRV_LOG_PLAIN: '0'
