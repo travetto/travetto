@@ -38,6 +38,7 @@
     }
   },
   "travetto": {
+    "id": "@trv:model-dynamodb",
     "displayName": "DynamoDB Model Support"
   },
   "publishConfig": {

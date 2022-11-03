@@ -29,6 +29,7 @@
     "@travetto/boot": "^3.0.0-rc.0"
   },
   "travetto": {
+    "id": "@trv:base",
     "displayName": "Base"
   },
   "private": false,

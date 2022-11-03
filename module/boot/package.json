@@ -38,6 +38,7 @@
     }
   },
   "travetto": {
+    "id": "@trv:boot",
     "displayName": "Boot"
   },
   "engines": {

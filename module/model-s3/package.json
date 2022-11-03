@@ -38,6 +38,7 @@
     }
   },
   "travetto": {
+    "id": "@trv:model-s3",
     "displayName": "S3 Model Support"
   },
   "publishConfig": {

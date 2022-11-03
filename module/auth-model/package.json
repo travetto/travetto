@@ -37,6 +37,7 @@
     }
   },
   "travetto": {
+    "id": "@trv:auth-model",
     "displayName": "Authentication Model"
   },
   "private": false,

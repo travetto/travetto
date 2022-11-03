@@ -32,23 +32,30 @@
     "mime": "^3.0.0"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.4"
+    "@travetto/test": "^3.0.0-rc.4",
+    "@travetto/model-mongo": "^3.0.0-rc.4",
+    "@travetto/model-s3": "^3.0.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
       "optional": true
-    }
-  },
-  "travetto": {
-    "displayName": "Asset",
-    "dependencies": {
-      "@travetto/model-mongo": [
+    },
+    "@travetto/model-mongo": {
+      "optional": true,
+      "profiles": [
         "doc"
-      ],
-      "@travetto/model-s3": [
+      ]
+    },
+    "@travetto/model-s3": {
+      "optional": true,
+      "profiles": [
         "doc"
       ]
     }
+  },
+  "travetto": {
+    "id": "@trv:asset",
+    "displayName": "Asset"
   },
   "private": false,
   "publishConfig": {

@@ -31,6 +31,7 @@
     "@fastify/aws-lambda": "^3.1.3"
   },
   "travetto": {
+    "id": "@trv:rest-fastify-lambda",
     "displayName": "Fastify REST AWS Lambda Source"
   },
   "publishConfig": {

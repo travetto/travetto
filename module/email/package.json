@@ -30,6 +30,7 @@
     "mustache": "^4.2.0"
   },
   "travetto": {
+    "id": "@trv:email",
     "displayName": "Email"
   },
   "publishConfig": {

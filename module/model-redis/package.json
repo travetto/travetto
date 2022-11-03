@@ -38,6 +38,7 @@
     }
   },
   "travetto": {
+    "id": "@trv:model-redis",
     "displayName": "Redis Model Support"
   },
   "publishConfig": {

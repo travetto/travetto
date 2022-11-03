@@ -43,8 +43,11 @@
     }
   },
   "travetto": {
+    "id": "@trv:test",
     "displayName": "Testing",
-    "profile": "test"
+    "profiles": [
+      "test"
+    ]
   },
   "publishConfig": {
     "access": "public"

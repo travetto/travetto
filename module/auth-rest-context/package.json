@@ -32,6 +32,7 @@
     "@travetto/rest": "^3.0.0-rc.4"
   },
   "travetto": {
+    "id": "@trv:auth-rest-context",
     "displayName": "Rest Auth Context"
   },
   "private": false,

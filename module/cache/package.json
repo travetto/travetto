@@ -30,35 +30,58 @@
     "@travetto/model": "^3.0.0-rc.4"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.4"
+    "@travetto/test": "^3.0.0-rc.4",
+    "@travetto/model-dynamodb": "^3.0.0-rc.4",
+    "@travetto/model-mongo": "^3.0.0-rc.4",
+    "@travetto/model-elasticsearch": "^3.0.0-rc.4",
+    "@travetto/model-redis": "^3.0.0-rc.4",
+    "@travetto/model-sql": "^3.0.0-rc.4",
+    "@travetto/model-s3": "^3.0.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
       "optional": true
-    }
-  },
-  "travetto": {
-    "displayName": "Caching",
-    "dependencies": {
-      "@travetto/model-dynamodb": [
+    },
+    "@travetto/model-dynamodb": {
+      "optional": true,
+      "profiles": [
         "doc"
-      ],
-      "@travetto/model-mongo": [
+      ]
+    },
+    "@travetto/model-mongo": {
+      "optional": true,
+      "profiles": [
         "doc"
-      ],
-      "@travetto/model-elasticsearch": [
+      ]
+    },
+    "@travetto/model-elasticsearch": {
+      "optional": true,
+      "profiles": [
         "doc"
-      ],
-      "@travetto/model-redis": [
+      ]
+    },
+    "@travetto/model-redis": {
+      "optional": true,
+      "profiles": [
         "doc"
-      ],
-      "@travetto/model-sql": [
+      ]
+    },
+    "@travetto/model-sql": {
+      "optional": true,
+      "profiles": [
         "doc"
-      ],
-      "@travetto/model-s3": [
+      ]
+    },
+    "@travetto/model-s3": {
+      "optional": true,
+      "profiles": [
         "doc"
       ]
     }
+  },
+  "travetto": {
+    "id": "@trv:cache",
+    "displayName": "Caching"
   },
   "publishConfig": {
     "access": "public"

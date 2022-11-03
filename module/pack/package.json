@@ -29,23 +29,30 @@
     "picomatch": "^2.3.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.2"
+    "@travetto/cli": "^3.0.0-rc.2",
+    "@travetto/rest": "^3.0.0-rc.4",
+    "@travetto/rest-aws-lambda": "^3.0.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
       "optional": true
-    }
-  },
-  "travetto": {
-    "displayName": "Pack",
-    "dependencies": {
-      "@travetto/rest": [
+    },
+    "@travetto/rest": {
+      "optional": true,
+      "profiles": [
         "doc"
-      ],
-      "@travetto/rest-aws-lambda": [
+      ]
+    },
+    "@travetto/rest-aws-lambda": {
+      "optional": true,
+      "profiles": [
         "doc"
       ]
     }
+  },
+  "travetto": {
+    "id": "@trv:pack",
+    "displayName": "Pack"
   },
   "publishConfig": {
     "access": "public"

@@ -29,6 +29,7 @@
     "@fastify/compress": "^5.0.0"
   },
   "travetto": {
+    "id": "@trv:rest-fastify",
     "displayName": "Fastify REST Source"
   },
   "publishConfig": {
