@@ -47,6 +47,7 @@
     "@travetto/config": "file:./module/config",
     "@travetto/context": "file:./module/context",
     "@travetto/di": "file:./module/di",
+    "@travetto/doc": "file:./module/doc",
     "@travetto/email": "file:./module/email",
     "@travetto/image": "file:./module/image",
     "@travetto/jwt": "file:./module/jwt",
