@@ -1,8 +1,8 @@
 import { d, mod } from '@travetto/doc';
 
-const RootReg = d.Ref('RootRegistry', 'src/service/root.ts');
-const SchemaReg = d.Ref('SchemaRegistry', '../schema/src/service/registry.ts');
-const MetadataReg = d.Ref('MetadataRegistry', 'src/service/metadata.ts');
+const RootReg = d.Ref('RootRegistry', '@travetto/registry/src/service/root.ts');
+const SchemaReg = d.Ref('SchemaRegistry', '@travetto/schema/src/service/registry.ts');
+const MetadataReg = d.Ref('MetadataRegistry', '@travetto/registry/src/service/metadata.ts');
 const DependencyReg = d.Ref('DependencyRegistry', '@travetto/di/src/registry.ts');
 
 export const text = d`
@@ -25,7 +25,7 @@ ${d.Ordered(
 
 This flow ensures all files are loaded and processed before application starts. A sample registry could like:
 
-${d.Code('Sample Registry', 'doc/registry.ts')}
+${d.Code('Sample Registry', 'src/registry.ts')}
 
 The registry is a ${MetadataReg} that similar to the ${SchemaReg} and the ${DependencyReg}.
 

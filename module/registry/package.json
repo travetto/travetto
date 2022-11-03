@@ -30,17 +30,6 @@
     "@travetto/base": "file:../base",
     "@travetto/transformer": "file:../transformer"
   },
-  "peerDependencies": {
-    "@travetto/di": "file:../di"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/di": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    }
-  },
   "travetto": {
     "id": "@trv:registry",
     "displayName": "Registry"
