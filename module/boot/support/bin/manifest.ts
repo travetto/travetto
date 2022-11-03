@@ -5,7 +5,7 @@ import * as path from './path';
 
 import type { Manifest, ManifestModuleFile, ManifestState, ManifestModule, ManifestDeltaEvent, ManifestDelta, Package } from './types';
 
-type Dependency = { id?: string, version: string, name: string, folder: string, isModule: boolean, profiles?: string[] };
+type Dependency = { id?: string, version: string, name: string, folder: string, profiles?: string[] };
 type DeltaModuleFiles = Record<string, ManifestModuleFile>;
 
 export class ManifestUtil {
@@ -22,12 +22,17 @@ export class ManifestUtil {
       return [];
     }
 
-    const isModule = !!travetto || folder === path.cwd();
-    const out: Dependency[] = [{ id: travetto?.id, name, version, folder, isModule, profiles: travetto?.profiles }];
     seen.add(name);
+
+    const isModule = !!travetto || folder === path.cwd();
+    if (!isModule) {
+      return [];
+    }
+
+    const out: Dependency[] = [{ id: travetto?.id, name, version, folder, profiles: travetto?.profiles }];
     const searchSpace = [
       ...Object.entries(dependencies).map(([k, v]) => [k, v, 'dep'] as const),
-      ...(isModule ? Object.entries(devDependencies).map(([k, v]) => [k, v, 'dev'] as const) : []),
+      ...Object.entries(devDependencies).map(([k, v]) => [k, v, 'dev'] as const),
       ...Object.entries(peerDependencies).map(([k, v]) => [k, v, 'peer'] as const)
         .filter(([x]) => {
           try {
@@ -135,9 +140,9 @@ export class ManifestUtil {
   }
 
   static async #buildManifestModules(rootFolder: string): Promise<Record<string, ManifestModule>> {
-    const modules = (await this.#collectPackages(rootFolder))
-      .filter(x => x.isModule);
-    if (!modules.find(x => x.name === '@travetto/cli')) {
+    const modules = (await this.#collectPackages(rootFolder));
+
+    if (!modules.some(x => x.name === '@travetto/cli')) {
       const folder = path.resolve(__dirname, '..', '..', '..', 'cli');
       if (await fs.stat(folder).catch(() => false)) {
         modules.unshift(...(await this.#collectPackages(folder)));
@@ -256,8 +261,8 @@ export class ManifestUtil {
     return cfg;
   }
 
-  static async writeState(state: ManifestState): Promise<string> {
-    const manifestTemp = path.resolve(os.tmpdir(), `manifest-state.${Date.now()}${Math.random()}.json`);
+  static async writeState(state: ManifestState, file?: string): Promise<string> {
+    const manifestTemp = file ?? path.resolve(os.tmpdir(), `manifest-state.${Date.now()}${Math.random()}.json`);
     await fs.writeFile(manifestTemp, JSON.stringify(state), 'utf8');
     return manifestTemp;
   }

@@ -1,13 +1,12 @@
-import { Class, ClassInstance, ConcreteClass } from '@travetto/base';
+import { Class, ClassInstance, ConcreteClass, Env } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
-import { Dynamic } from '@travetto/boot';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
 
 type TargetId = string;
 type ClassId = string;
-type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: string };
+export type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: string };
 
 export type ResolutionType = 'strict' | 'loose' | 'any';
 
@@ -26,7 +25,6 @@ function hasPreDestroy(o: unknown): o is { preDestroy: () => unknown } {
 /**
  * Dependency registry
  */
-@Dynamic('@travetto/di/support/dynamic.injection')
 class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   protected pendingFinalize: Class[] = [];
 
@@ -233,6 +231,14 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     this.instancePromises.get(classId)!.delete(qualifier);
     this.classToTarget.get(cls.Ⲑid)!.delete(qualifier);
     console.debug('On uninstall', { id: cls.Ⲑid, qualifier: qualifier.toString(), classId });
+  }
+
+  override async init(): Promise<void> {
+    await super.init();
+    if (Env.isDynamic()) {
+      const { DependencyRegistration } = await import('../support/dynamic.injection');
+      DependencyRegistration.init(this);
+    }
   }
 
   /**

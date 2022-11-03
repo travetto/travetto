@@ -1,7 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { Class } from '@travetto/base';
-import { Dynamic } from '@travetto/boot';
+import { Class, Env } from '@travetto/base';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 import { PendingRegister } from '../decorator';
@@ -11,7 +10,6 @@ import { PendingRegister } from '../decorator';
  * compiler as a way to listen to changes via the compiler
  * watching.
  */
-@Dynamic('@travetto/registry/support/dynamic.class-source')
 export class ClassSource implements ChangeSource<Class> {
 
   #classes = new Map<string, Map<string, Class>>();
@@ -100,6 +98,11 @@ export class ClassSource implements ChangeSource<Class> {
    * Initialize
    */
   async init(): Promise<void> {
+    if (Env.isDynamic()) {
+      const { DynamicClassSource } = await import('../../support/dynamic.class-source');
+      DynamicClassSource.init(this);
+    }
+
     this.#flush();
   }
 
