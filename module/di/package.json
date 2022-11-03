@@ -31,24 +31,10 @@
     "@travetto/registry": "file:../registry"
   },
   "peerDependencies": {
-    "@travetto/config": "file:../config",
-    "@travetto/schema": "file:../schema",
     "@travetto/model-mongo": "file:../model-mongo",
     "@travetto/rest": "file:../rest"
   },
   "peerDependenciesMeta": {
-    "@travetto/config": {
-      "optional": true,
-      "profiles": [
-        "test"
-      ]
-    },
-    "@travetto/schema": {
-      "optional": true,
-      "profiles": [
-        "test"
-      ]
-    },
     "@travetto/model-mongo": {
       "optional": true,
       "profiles": [

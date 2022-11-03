@@ -1,6 +1,3 @@
-import { Config } from '@travetto/config';
-import { Schema } from '@travetto/schema';
-
 import { Injectable, Inject } from '../src/decorator';
 import { Util } from './util';
 
@@ -9,18 +6,15 @@ export class Empty {
   age = 10;
 }
 
-@Schema()
-class Basic {
-  @Inject()
-  empty: Empty;
-}
 
-@Config('a')
-export class DbConfig<A, B> extends Basic {
+@Injectable()
+export class DbConfig {
   temp?: unknown;
 
+  @Inject()
+  empty: Empty;
+
   constructor() {
-    super();
     console.log('Creating dbconfigs');
   }
 
