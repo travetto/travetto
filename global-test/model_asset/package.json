@@ -5,7 +5,7 @@
     "@travetto/model-s3": "file:../../module/model-s3",
     "@travetto/asset": "file:../../module/asset"
   },
-  "devDependencie": {
+  "devDependencies": {
     "@travetto/test": "file:../../module/test",
     "@travetto/cli": "file:../../module/cli"
   },

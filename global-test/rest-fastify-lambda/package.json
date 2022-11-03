@@ -6,7 +6,7 @@
     "@travetto/auth-rest": "file:../../module/auth-rest",
     "@travetto/rest-session": "file:../../module/rest-session"
   },
-  "devDependencie": {
+  "devDependencies": {
     "@travetto/test": "file:../../module/test",
     "@travetto/cli": "file:../../module/cli"
   },

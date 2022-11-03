@@ -12,7 +12,7 @@
     "@travetto/model-sqlite": "file:../../module/model-sqlite",
     "@travetto/cache": "file:../../module/cache"
   },
-  "devDependencie": {
+  "devDependencies": {
     "@travetto/test": "file:../../module/test",
     "@travetto/cli": "file:../../module/cli"
   },
