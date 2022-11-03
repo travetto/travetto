@@ -28,18 +28,11 @@
     "@travetto/base": "file:../base"
   },
   "peerDependencies": {
-    "@travetto/cli": "file:../cli",
-    "@travetto/model-elasticsearch": "file:../model-elasticsearch"
+    "@travetto/cli": "file:../cli"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
       "optional": true
-    },
-    "@travetto/model-elasticsearch": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
     }
   },
   "travetto": {

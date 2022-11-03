@@ -1,0 +1,9 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/command": "file:..",
+    "@travetto/model-elasticsearch": "file:../../model-elasticsearch"
+  },
+  "private": true
+}
