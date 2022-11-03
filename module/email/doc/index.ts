@@ -1,7 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
 
-import { NullTransport } from './src/transport';
-import { MailConfig } from './src/config';
+import { NullTransport } from '@travetto/email/src/transport';
+import { MailConfig } from '@travetto/email/src/config';
 
 export const text = d`
 ${d.Header()}
@@ -10,7 +10,7 @@ A standard API for sending and rendering emails. The mail transport must be defi
 
 To expose the necessary email transport, the following pattern is commonly used:
 
-${d.Code('Declaring the null transport for development', 'doc/null.ts')}
+${d.Code('Declaring the null transport for development', 'src/null.ts')}
 
 Given the amorphous nature of transports, the ${d.Input('transport')} field in ${MailConfig} is open for any configuration that you may want there. Additionally, the templating engine is optional.  The code will only fail if you attempt to send a templated email without declaring the dependency first.
 
