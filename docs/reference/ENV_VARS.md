@@ -29,8 +29,6 @@ The common environment variables throughout the code base:
 * `TRV_DOCKER` = 0|ns             - Docker support, if non-zero, acts as the docker namespace.  If `0`, disables running if docker should even be considered when running a command service, defaults to `undefined`
 
 ## Framework
-* `TRV_DEV` = `./module`          - The folder for local travetto modules
-* `TRV_DEV_ROOT` = `./`           - The source folder for local travetto checkout
 * `TRV_DOC_BRANCH` = `master`     - The branch to target the documentation against.
 * `TRV_NODE_VERSION` = DEFAULT    - The node version to compile for, translates into a specific typescript target for compability. Will default to the version of node running.
 * `TRV_CONSOLE_WIDTH`             - An override for controlling output-width for cli-based operations.

@@ -29,8 +29,8 @@
     "trv-scaffold": "./bin/trv-scaffold.js"
   },
   "dependencies": {
-    "@travetto/boot": "^3.0.0-rc.0",
-    "@travetto/cli": "^3.0.0-rc.2",
+    "@travetto/boot": "file:../boot",
+    "@travetto/cli": "file:../cli",
     "mustache": "^4.2.0",
     "enquirer": "^2.3.6"
   },
@@ -38,10 +38,10 @@
     "@types/mustache": "^4.2.1"
   },
   "peerDependencies": {
-    "@travetto/auth-rest-context": "^3.0.0-rc4",
-    "@travetto/auth-rest": "^3.0.0-rc4",
-    "@travetto/model": "^3.0.0-rc4",
-    "@travetto/model-query": "^3.0.0-rc4"
+    "@travetto/auth-rest-context": "file:../auth-rest-context",
+    "@travetto/auth-rest": "file:../auth-rest",
+    "@travetto/model": "file:../model",
+    "@travetto/model-query": "file:../model-query"
   },
   "peerDependenciesMeta": {
     "@travetto/auth-rest-context": {

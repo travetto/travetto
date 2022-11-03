@@ -1,14 +1,14 @@
 {
   "name": "rest-fastify_asset-rest",
   "dependencies": {
-    "@travetto/rest-fastify": "^3.0.0-rc.4",
-    "@travetto/asset-rest": "^3.0.0-rc.4",
-    "@travetto/auth-rest": "^3.0.0-rc.4",
-    "@travetto/rest-session": "^3.0.0-rc.4"
+    "@travetto/rest-fastify": "file:../../module/rest-fastify",
+    "@travetto/asset-rest": "file:../../module/asset-rest",
+    "@travetto/auth-rest": "file:../../module/auth-rest",
+    "@travetto/rest-session": "file:../../module/rest-session"
   },
   "devDependencie": {
-    "@travetto/test": "^3.0.0-rc.4",
-    "@travetto/cli": "^3.0.0-rc.4"
+    "@travetto/test": "file:../../module/test",
+    "@travetto/cli": "file:../../module/cli"
   },
   "private": true
 }

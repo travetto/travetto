@@ -25,11 +25,11 @@
     "directory": "module/auth-rest-context"
   },
   "dependencies": {
-    "@travetto/context": "^3.0.0-rc.4",
-    "@travetto/auth-rest": "^3.0.0-rc.4",
-    "@travetto/di": "^3.0.0-rc.4",
-    "@travetto/auth": "^3.0.0-rc.2",
-    "@travetto/rest": "^3.0.0-rc.4"
+    "@travetto/context": "file:../context",
+    "@travetto/auth-rest": "file:../auth-rest",
+    "@travetto/di": "file:../di",
+    "@travetto/auth": "file:../auth",
+    "@travetto/rest": "file:../rest"
   },
   "travetto": {
     "id": "@trv:auth-rest-context",

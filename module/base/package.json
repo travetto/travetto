@@ -26,7 +26,7 @@
     "directory": "module/base"
   },
   "dependencies": {
-    "@travetto/boot": "^3.0.0-rc.0"
+    "@travetto/boot": "file:../boot"
   },
   "travetto": {
     "id": "@trv:base",

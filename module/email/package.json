@@ -23,9 +23,9 @@
     "directory": "module/email"
   },
   "dependencies": {
-    "@travetto/resource": "^3.0.0-rc.4",
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/di": "^3.0.0-rc.4",
+    "@travetto/resource": "file:../resource",
+    "@travetto/config": "file:../config",
+    "@travetto/di": "file:../di",
     "@types/mustache": "^4.2.1",
     "mustache": "^4.2.0"
   },

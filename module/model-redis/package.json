@@ -25,12 +25,12 @@
     "directory": "module/model-redis"
   },
   "dependencies": {
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/model": "^3.0.0-rc.4",
+    "@travetto/config": "file:../config",
+    "@travetto/model": "file:../model",
     "redis": "^4.3.1"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.0.0-rc.2"
+    "@travetto/command": "file:../command"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {

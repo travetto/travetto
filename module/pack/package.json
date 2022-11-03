@@ -24,14 +24,14 @@
     "directory": "module/pack"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.2",
+    "@travetto/base": "file:../base",
     "@types/picomatch": "^2.3.0",
     "picomatch": "^2.3.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.2",
-    "@travetto/rest": "^3.0.0-rc.4",
-    "@travetto/rest-aws-lambda": "^3.0.0-rc.4"
+    "@travetto/cli": "file:../cli",
+    "@travetto/rest": "file:../rest",
+    "@travetto/rest-aws-lambda": "file:../rest-aws-lambda"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

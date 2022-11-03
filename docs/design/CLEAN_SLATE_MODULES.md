@@ -129,7 +129,7 @@ Will provide a new multiphase compiler that:
 
 ## Architectural Changes
 * `framework dev`
-   * TRV_DEV is gone (well, its there, but now a boolean flag)
+   * TRV_DEV is gone
    * TRV_DEV_ROOT is gone
    * dev-register.js is gone   
 * `@travetto/compiler` is no more

@@ -26,13 +26,13 @@
     "directory": "module/auth-rest"
   },
   "dependencies": {
-    "@travetto/auth": "^3.0.0-rc.2",
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/rest": "^3.0.0-rc.4"
+    "@travetto/auth": "file:../auth",
+    "@travetto/config": "file:../config",
+    "@travetto/rest": "file:../rest"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.4",
-    "@travetto/app": "^3.0.0-rc.4"
+    "@travetto/test": "file:../test",
+    "@travetto/app": "file:../app"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

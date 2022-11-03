@@ -26,8 +26,8 @@
     "directory": "module/context"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.4",
-    "@travetto/di": "^3.0.0-rc.4"
+    "@travetto/test": "file:../test",
+    "@travetto/di": "file:../di"
   },
   "peerDependenciesMeta": {
     "@travetto/di": {
