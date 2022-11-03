@@ -31,17 +31,6 @@
     "@travetto/base": "file:../base",
     "commander": "^9.4.1"
   },
-  "peerDependencies": {
-    "@travetto/app": "file:../app"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/app": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    }
-  },
   "travetto": {
     "id": "@trv:cli",
     "displayName": "Command Line Interface"
