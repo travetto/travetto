@@ -1,0 +1,14 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/cache": "file:..",
+    "@travetto/model-dynamodb": "file:../../model-dynamodb",
+    "@travetto/model-mongo": "file:../../model-mongo",
+    "@travetto/model-elasticsearch": "file:../../model-elasticsearch",
+    "@travetto/model-redis": "file:../../model-redis",
+    "@travetto/model-sql": "file:../../model-sql",
+    "@travetto/model-s3": "file:../../model-s3"
+  },
+  "private": true
+}

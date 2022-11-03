@@ -9,8 +9,8 @@ import { S3ModelService } from '@travetto/model-s3';
 
 import { Links } from '@travetto/model/support/doc.support';
 
-import { Cache, EvictCache } from './src/decorator';
-import { CacheModelⲐ, CacheService } from './src/service';
+import { Cache, EvictCache } from '@travetto/cache/src/decorator';
+import { CacheModelⲐ, CacheService } from '@travetto/cache/src/service';
 
 export const text = d`
 ${d.Header()}
@@ -39,7 +39,7 @@ Additionally, to use the decorators you will need to have a ${CacheService} obje
 
 ${Cache} is a decorator that will cache all successful results, keyed by a computation based on the method arguments.  Given the desire for supporting remote caches (e.g. ${lib.Redis}, ${lib.Memcached}), only asynchronous methods are supported.
 
-${d.Code('Using decorators to cache expensive async call', 'doc/async.ts')}
+${d.Code('Using decorators to cache expensive async call', 'src/async.ts')}
 
 ${d.SubSection(d`${Cache}`)}
 
@@ -62,11 +62,11 @@ ${d.SubSection(d`${EvictCache}`)}
 
 Additionally, there is support for planned eviction via the ${EvictCache} decorator.  On successful execution of a method with this decorator, the matching keySpace/key value will be evicted from the cache.  This requires coordination between multiple methods, to use the same ${d.Input('keySpace')} and ${d.Input('key')} to compute the expected key.
 
-${d.Code('Using decorators to cache/evict user access', 'doc/evict.ts')}
+${d.Code('Using decorators to cache/evict user access', 'src/evict.ts')}
 
 ${d.Section('Extending the Cache Service')}
 
 By design, the ${CacheService} relies solely on the ${mod.Model} module.  Specifically on the ${Links.Expiry}.   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the ${CacheService}.  The ${CacheService} is expecting the model service to be registered using the ${CacheModelⲐ.description!}:
 
-${d.Code('Registering a Custom Model Source', 'doc/custom.ts')}
+${d.Code('Registering a Custom Model Source', 'src/custom.ts')}
 `;
