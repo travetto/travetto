@@ -2,24 +2,24 @@ import { d, lib, mod } from '@travetto/doc';
 import { Application } from '@travetto/app';
 import { Field, Schema } from '@travetto/schema';
 
-import { RestApplication } from './src/application/rest';
-import { Controller } from './src/decorator/controller';
-import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
-import { Path, Query, QuerySchema, Body, Context, Param, Header } from './src/decorator/param';
-import { BodyParseInterceptor, RestBodyParseConfig } from './src/interceptor/body-parse';
-import { CorsInterceptor, RestCorsConfig } from './src/interceptor/cors';
-import { GetCacheInterceptor } from './src/interceptor/get-cache';
-import { LoggingInterceptor } from './src/interceptor/logging';
-import { SerializeInterceptor } from './src/interceptor/serialize';
-import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies';
-import { RestConfig } from './src/application/config';
-import { AsyncContextInterceptor } from './src/interceptor/context';
+import { RestApplication } from '@travetto/rest/src/application/rest';
+import { Controller } from '@travetto/rest/src/decorator/controller';
+import { Get, Post, Put, Delete, Patch, Head, Options } from '@travetto/rest/src/decorator/endpoint';
+import { Path, Query, QuerySchema, Body, Context, Param, Header } from '@travetto/rest/src/decorator/param';
+import { BodyParseInterceptor, RestBodyParseConfig } from '@travetto/rest/src/interceptor/body-parse';
+import { CorsInterceptor, RestCorsConfig } from '@travetto/rest/src/interceptor/cors';
+import { GetCacheInterceptor } from '@travetto/rest/src/interceptor/get-cache';
+import { LoggingInterceptor } from '@travetto/rest/src/interceptor/logging';
+import { SerializeInterceptor } from '@travetto/rest/src/interceptor/serialize';
+import { CookiesInterceptor, RestCookieConfig } from '@travetto/rest/src/interceptor/cookies';
+import { RestConfig } from '@travetto/rest/src/application/config';
+import { AsyncContextInterceptor } from '@travetto/rest/src/interceptor/context';
 
-const Request = d.SnippetLink('TravettoRequest', 'src/types.d.ts', /interface TravettoRequest/);
-const Response = d.SnippetLink('TravettoResponse', 'src/types.d.ts', /interface TravettoResponse/);
+const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
+const Response = d.SnippetLink('TravettoResponse', '@travetto/rest/src/types.d.ts', /interface TravettoResponse/);
 const ResourceManager = d.Ref('ResourceManager', '@travetto/resource/src/resource.ts');
 
-const RestInterceptor = d.SnippetLink('RestInterceptor', 'src/interceptor/types.ts', /interface RestInterceptor/);
+const RestInterceptor = d.SnippetLink('RestInterceptor', '@travetto/rest/src/interceptor/types.ts', /interface RestInterceptor/);
 
 export const text = d`
 ${d.Header()}
@@ -39,7 +39,7 @@ Additionally, the module is predicated upon ${mod.Di}, and so all standard injec
 
 ${lib.JSDoc} comments can also be used to define the ${d.Input('title')} attribute.
 
-${d.Code('Basic Controller Registration', 'doc/simple-controller.ts')}
+${d.Code('Basic Controller Registration', 'src/simple-controller.ts')}
 
 ${d.Section('Routes: Endpoints')}
 
@@ -69,7 +69,7 @@ ${lib.JSDoc} comments can also be used to define the ${d.Input('title')} attribu
 
 Additionally, the return type of the method will also be used to describe the ${d.Input('responseType')} if not specified manually.
 
-${d.Code('Controller with Sample Route', 'doc/simple-route.ts')}
+${d.Code('Controller with Sample Route', 'src/simple-route.ts')}
 
 ${d.Note(d`In development mode the module supports hot reloading of ${d.Input('class')}es.  Routes can be added/modified/removed at runtime.`)}
 
@@ -95,7 +95,7 @@ ${d.List(
 
 ${lib.JSDoc} comments can also be used to describe parameters using ${d.Input('@param')} tags in the comment.
 
-${d.Code('Full-fledged Controller with Routes', 'doc/simple-full.ts')}
+${d.Code('Full-fledged Controller with Routes', 'src/simple-full.ts')}
 
 ${d.SubSection('Body and QuerySchema')}
 
@@ -103,15 +103,15 @@ The module provides high level access for ${mod.Schema} support, via decorators,
 
 ${Body} provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
-${d.Code(d`Using ${Body.name} for POST requests`, 'doc/schema-body.ts')}
+${d.Code(d`Using ${Body.name} for POST requests`, 'src/schema-body.ts')}
 
 ${QuerySchema} provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
-${d.Code(d`Using ${QuerySchema.name} for GET requests`, 'doc/schema-query.ts')}
+${d.Code(d`Using ${QuerySchema.name} for GET requests`, 'src/schema-query.ts')}
 
 Additionally, ${QuerySchema} and ${Body} can also be used with ${d.Input('interface')}s and ${d.Input('type')} literals in lieu of classes. This is best suited for simple types:
 
-${d.Code(d`Using ${QuerySchema.name} with a type literal`, 'doc/schema-query-type.ts')}
+${d.Code(d`Using ${QuerySchema.name} with a type literal`, 'src/schema-query-type.ts')}
 
 ${d.Section('Input/Output')}
 
@@ -138,12 +138,12 @@ By default, the framework provides a default ${Application} at ${RestApplication
 
 ${d.Install('Installing app support', '@travetto/app')}
 
-${d.Execute('Standard application', 'trv', ['run'], { env: { TRV_SRC_LOCAL: 'src' } })}
+${d.Execute('Standard application', 'trv', ['run'])}
 
 ${d.SubSection('Creating a Custom App')}
 To customize a REST server, you may need to construct an entry point using the ${Application} decorator. This could look like:
 
-${d.Code('Application entry point for Rest Applications', 'doc/custom-app.ts')}
+${d.Code('Application entry point for Rest Applications', 'src/custom-app.ts')}
 
 And using the pattern established in the ${mod.App} module, you would run your program using ${d.Command('npx trv run custom')}.
 
@@ -153,7 +153,7 @@ ${d.Section('Interceptors')}
 
 ${RestInterceptor}s  are a key part of the rest framework, to allow for conditional functions to be added, sometimes to every route, and other times to a select few. Express/Koa/Fastify are all built around the concept of middleware, and interceptors are a way of representing that.
 
-${d.Code('A Trivial Interceptor', 'doc/interceptor-hello-world.ts')}
+${d.Code('A Trivial Interceptor', 'src/interceptor-hello-world.ts')}
 
 ${d.Note('The example above defines the interceptor to run after another interceptor class. The framework will automatically sort the interceptors by the before/after requirements to ensure the appropriate order of execution.')}
 
@@ -168,27 +168,27 @@ ${d.Ordered(
   ${d.Snippet('Cookies Config', RestCookieConfig.Ⲑfile, /class.*Config/, /^\}/)}`,
   d`${GetCacheInterceptor} - This interceptor, by default, disables caching for all GET requests if the response does not include caching headers.  This can be disabled by setting ${d.Input('rest.disableGetCache: true')} in your config.`,
   d`${LoggingInterceptor} - This interceptor allows for logging of all requests, and their response codes.  You can deny/allow specific routes, by setting config like so\n
-  ${d.Code('Control Logging', 'doc/resources/log.yml')}`,
+  ${d.Code('Control Logging', 'resources/log.yml')}`,
   d`${AsyncContextInterceptor} - This interceptor is responsible for sharing context across the various layers that may be touched by a request. There is a negligible performance impact to the necessary booking keeping and so this interceptor can easily be disabled as needed.`,
 )}
 
 ${d.SubSection('Custom Interceptors')}
 Additionally it is sometimes necessary to register custom interceptors.  Interceptors can be registered with the ${mod.Di} by implementing the ${RestInterceptor} interface.  The interceptors are tied to the defined ${Request} and ${Response} objects of the framework, and not the underlying app framework.  This allows for Interceptors to be used across multiple frameworks as needed. A simple logging interceptor:
 
-${d.Code('Defining a new Interceptor', 'doc/interceptor-logging.ts')}
+${d.Code('Defining a new Interceptor', 'src/interceptor-logging.ts')}
 
 A ${d.Input('next')} parameter is also available to allow for controlling the flow of the request, either by stopping the flow of interceptors, or being able to determine when a request starts, and when it is ending.
 
-${d.Code('Defining a fully controlled Interceptor', 'doc/interceptor-controlled.ts')}
+${d.Code('Defining a fully controlled Interceptor', 'src/interceptor-controlled.ts')}
 
 Currently ${mod.AssetRest} is implemented in this fashion, as well as ${mod.AuthRest}.
 
 ${d.SubSection('Configuring Interceptors')}
 All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:
 ${d.List(
-  d`Enable/disable of individual interceptors via configuration ${d.Code('Sample interceptor disabling configuration', 'doc/resources/disable.yml')}`,
-  d`Path-based control for various routes within the application ${d.Code('Sample interceptor path managed configuration', 'doc/resources/route-allow-deny.yml')}`,
-  d`Route-enabled control via decorators ${d.Code('Sample controller with route-level allow/deny', 'doc/controller-route-deny.ts')}`
+  d`Enable/disable of individual interceptors via configuration ${d.Code('Sample interceptor disabling configuration', 'resources/disable.yml')}`,
+  d`Path-based control for various routes within the application ${d.Code('Sample interceptor path managed configuration', 'resources/route-allow-deny.yml')}`,
+  d`Route-enabled control via decorators ${d.Code('Sample controller with route-level allow/deny', 'src/controller-route-deny.ts')}`
 )}
 
 The resolution logic is as follows:
@@ -202,7 +202,7 @@ ${d.List(
 ${d.Section('Cookie Support')}
 ${lib.Express}/${lib.Koa}/${lib.Fastify} all have their own cookie implementations that are common for each framework but are somewhat incompatible.  To that end, cookies are supported for every platform, by using ${lib.Cookies}.  This functionality is exposed onto the ${Request}/${Response} object following the pattern set forth by Koa (this is the library Koa uses).  This choice also enables better security support as we are able to rely upon standard behavior when it comes to cookies, and signing.
 
-${d.Code('Sample Cookie Usage', 'doc/cookie-routes.ts')}
+${d.Code('Sample Cookie Usage', 'src/cookie-routes.ts')}
 
 ${d.Section('SSL Support')}
 
