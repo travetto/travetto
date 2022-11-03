@@ -3,20 +3,9 @@ import * as os from 'os';
 
 import * as path from './path';
 
-import type { Manifest, ManifestModuleFile, ManifestState, ManifestModule, ManifestDeltaEvent, ManifestDelta } from './types';
+import type { Manifest, ManifestModuleFile, ManifestState, ManifestModule, ManifestDeltaEvent, ManifestDelta, Package } from './types';
 
-type PackageType = {
-  name: string;
-  dependencies: Record<string, string>;
-  devDependencies: Record<string, string>;
-  peerDependencies: Record<string, string>;
-  travetto?: {
-    id?: string;
-    profile?: string;
-  };
-};
-
-type Dependency = { id?: string, name: string, folder: string, isModule: boolean, profile?: string };
+type Dependency = { id?: string, name: string, folder: string, isModule: boolean, profiles?: string[] };
 type DeltaModuleFiles = Record<string, ManifestModuleFile>;
 
 export class ManifestUtil {
@@ -26,13 +15,13 @@ export class ManifestUtil {
   }
 
   static async #collectPackages(folder: string, seen = new Set<string>()): Promise<Dependency[]> {
-    const { name, dependencies = {}, devDependencies = {}, peerDependencies = {}, travetto }: PackageType =
+    const { name, dependencies = {}, devDependencies = {}, peerDependencies = {}, travetto }: Package =
       JSON.parse(await fs.readFile(`${folder}/package.json`, 'utf8'));
 
     if (seen.has(name)) {
       return [];
     }
-    const out: Dependency[] = [{ id: travetto?.id, name, folder, isModule: !!travetto, profile: travetto?.profile }];
+    const out: Dependency[] = [{ id: travetto?.id, name, folder, isModule: !!travetto, profiles: travetto?.profiles }];
     seen.add(name);
     const searchSpace = [
       ...Object.keys(dependencies),
@@ -85,7 +74,7 @@ export class ManifestUtil {
     return [relative, type, this.#getNewest(await fs.stat(full))];
   }
 
-  static async #describeModule(rootFolder: string, { id, name, folder, profile }: Dependency): Promise<ManifestModule> {
+  static async #describeModule(rootFolder: string, { id, name, folder, profiles }: Dependency): Promise<ManifestModule> {
     const files: Record<string, ManifestModuleFile[]> = {};
     const folderSet = folder !== rootFolder ? new Set<string>(['src', 'bin', 'support']) : new Set<string>();
 
@@ -112,17 +101,14 @@ export class ManifestUtil {
       files.rootFiles = files.rootFiles.filter(([file, type]) => type !== 'ts');
     }
 
-    if (!id) {
-      id = name.replace('@travetto', '@trv').replace('/', ':');
-
-      if (folder.includes('node_modules') && !folder.includes('node_modules/@travetto')) {
-        id = `@npm:${id}`;
-      }
-    }
+    // Cleaning up names
+    id ??= folder.includes('node_modules') ?
+      `@npm:${name.replace('/', ':')}` :
+      name.replace('/', ':');
 
     return {
       id,
-      profile,
+      profiles,
       name,
       source: folder,
       output: folder === rootFolder ? '.' : `node_modules/${name}`,

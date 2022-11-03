@@ -37,7 +37,8 @@
   },
   "peerDependencies": {
     "@travetto/test": "^3.0.0-rc.4",
-    "@travetto/command": "^3.0.0-rc.2"
+    "@travetto/command": "^3.0.0-rc.2",
+    "@travetto/model-mysql": "^3.0.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {
@@ -45,15 +46,17 @@
     },
     "@travetto/test": {
       "optional": true
-    }
-  },
-  "travetto": {
-    "displayName": "SQL Model Service",
-    "dependencies": {
-      "@travetto/model-mysql": [
+    },
+    "@travetto/model-mysql": {
+      "optional": true,
+      "profiles": [
         "doc"
       ]
     }
+  },
+  "travetto": {
+    "id": "@trv:model-sql",
+    "displayName": "SQL Model Service"
   },
   "publishConfig": {
     "access": "public"

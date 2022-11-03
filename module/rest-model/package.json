@@ -29,6 +29,7 @@
     "@travetto/model": "^3.0.0-rc.4"
   },
   "travetto": {
+    "id": "@trv:rest-model",
     "displayName": "RESTful Model Routes"
   },
   "publishConfig": {

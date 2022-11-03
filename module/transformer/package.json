@@ -37,8 +37,11 @@
     }
   },
   "travetto": {
+    "id": "@trv:transformer",
     "displayName": "Transformation",
-    "profile": "compile"
+    "profiles": [
+      "compile"
+    ]
   },
   "publishConfig": {
     "access": "public"

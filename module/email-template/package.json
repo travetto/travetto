@@ -51,6 +51,7 @@
     }
   },
   "travetto": {
+    "id": "@trv:email-template",
     "displayName": "Email Templating"
   },
   "publishConfig": {

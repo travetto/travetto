@@ -66,6 +66,7 @@
     }
   },
   "travetto": {
+    "id": "@trv:rest",
     "displayName": "RESTful API"
   },
   "publishConfig": {

@@ -41,6 +41,7 @@
     }
   },
   "travetto": {
+    "id": "@trv:openapi",
     "displayName": "OpenAPI Specification"
   },
   "publishConfig": {

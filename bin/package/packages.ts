@@ -51,7 +51,7 @@ export class Packages {
     if (this.#cache) {
       return;
     }
-    this.#cache = await '{module,related}/*/package.json'.$dir()
+    this.#cache = await '{module,related,global-test,sample}/*/package.json'.$dir()
       .$map(p => this.#readPackage(p.replace('/package.json', '')));
     this.#byFolder = Object.fromEntries(this.#cache.map(p => ([p._.folder, p] as const)));
   }

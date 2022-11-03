@@ -8,7 +8,7 @@ export type ManifestModule<T = Record<string, ManifestModuleFile[]>> = {
   name: string;
   source: string;
   output: string;
-  profile?: string;
+  profiles?: string[];
   files: T;
 };
 
@@ -29,4 +29,39 @@ export type SourceMap = {
 export type ManifestState = {
   manifest: Manifest;
   delta: ManifestDelta;
+};
+
+export type Package = {
+  name: string;
+  version: string;
+  description?: string;
+  license?: string;
+  repository?: {
+    url: string;
+    directory?: string;
+  };
+  author?: {
+    email?: string;
+    name?: string;
+  };
+  main: string;
+  homepage?: string;
+  files?: string[];
+  bin?: Record<string, string>;
+  scripts?: Record<string, string>;
+  engines?: Record<string, string>;
+  keywords?: string[];
+
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+  peerDependencies?: Record<string, string>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean, profiles?: string[] }>;
+  optionalDependencies?: Record<string, string>;
+  travetto?: {
+    id?: string;
+    displayName?: string;
+    profiles?: string[];
+  },
+  private?: boolean;
+  publishConfig?: { access?: 'restricted' | 'public' };
 };

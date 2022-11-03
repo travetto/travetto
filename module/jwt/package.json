@@ -27,13 +27,20 @@
     "@types/jws": "^3.2.4",
     "jws": "^4.0.0"
   },
-  "travetto": {
-    "displayName": "JWT",
-    "dependencies": {
-      "@travetto/auth-rest": [
+  "peerDependencies": {
+    "@travetto/auth-rest": "^3.0.0-rc.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/auth-rest": {
+      "optional": true,
+      "profiles": [
         "doc"
       ]
     }
+  },
+  "travetto": {
+    "id": "@trv:jwt",
+    "displayName": "JWT"
   },
   "publishConfig": {
     "access": "public"

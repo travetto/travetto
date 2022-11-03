@@ -23,6 +23,7 @@
   },
   "dependencies": {},
   "travetto": {
+    "id": "@trv:path",
     "displayName": "Path"
   },
   "publishConfig": {

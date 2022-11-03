@@ -40,12 +40,8 @@
     }
   },
   "travetto": {
-    "displayName": "Configuration",
-    "dependencies": {
-      "@travetto/resource": [
-        "doc"
-      ]
-    }
+    "id": "@trv:config",
+    "displayName": "Configuration"
   },
   "publishConfig": {
     "access": "public"

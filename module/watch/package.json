@@ -27,7 +27,11 @@
     "@travetto/resource": "^3.0.0-rc.4"
   },
   "travetto": {
-    "displayName": "Watch"
+    "id": "@trv:watch",
+    "displayName": "Watch",
+    "profiles": [
+      "watch"
+    ]
   },
   "publishConfig": {
     "access": "public"

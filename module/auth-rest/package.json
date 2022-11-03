@@ -31,20 +31,23 @@
     "@travetto/rest": "^3.0.0-rc.4"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.4"
+    "@travetto/test": "^3.0.0-rc.4",
+    "@travetto/app": "^3.0.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
       "optional": true
-    }
-  },
-  "travetto": {
-    "displayName": "Rest Auth",
-    "dependencies": {
-      "@travetto/app": [
+    },
+    "@travetto/app": {
+      "optional": true,
+      "profiles": [
         "doc"
       ]
     }
+  },
+  "travetto": {
+    "id": "@trv:auth-rest",
+    "displayName": "Rest Auth"
   },
   "private": false,
   "publishConfig": {

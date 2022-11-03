@@ -26,13 +26,12 @@ export type PackageType = {
   dependencies?: Record<string, string>;
   devDependencies?: Record<string, string>;
   peerDependencies?: Record<string, string>;
-  peerDependenciesMeta?: Record<string, { optional?: boolean }>;
+  peerDependenciesMeta?: Record<string, { optional?: boolean, profiles?: string[] }>;
   optionalDependencies?: Record<string, string>;
   travetto?: {
     id?: string;
     displayName?: string;
-    profile?: string;
-    dependencies?: Record<string, ('doc' | 'test' | 'all')[]>
+    profiles?: string[];
   },
   private?: boolean;
   publishConfig?: { access?: 'restricted' | 'public' };

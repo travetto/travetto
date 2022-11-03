@@ -39,6 +39,7 @@
     }
   },
   "travetto": {
+    "id": "@trv:model-firestore",
     "displayName": "Firestore Model Support"
   },
   "private": false,

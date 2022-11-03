@@ -28,12 +28,8 @@
     "@travetto/base": "^3.0.0-rc.4"
   },
   "travetto": {
-    "displayName": "Resource",
-    "dependencies": {
-      "@travetto/config": [
-        "doc"
-      ]
-    }
+    "id": "@trv:resource",
+    "displayName": "Resource"
   },
   "private": false,
   "publishConfig": {

@@ -3,42 +3,9 @@ import { readFileSync } from 'fs';
 import * as path from '@travetto/path';
 
 import { version as framework } from '../package.json';
+import { Package } from '../support/bin/types';
+export { Package } from '../support/bin/types';
 
-export type Package = {
-  name: string;
-  version: string;
-  description?: string;
-  license?: string;
-  repository?: {
-    url: string;
-    directory?: string;
-  };
-  author?: {
-    email?: string;
-    name?: string;
-  };
-  main: string;
-  homepage?: string;
-  files?: string[];
-  bin?: Record<string, string>;
-  scripts?: Record<string, string>;
-  engines?: Record<string, string>;
-  keywords?: string[];
-
-  dependencies?: Record<string, string>;
-  devDependencies?: Record<string, string>;
-  peerDependencies?: Record<string, string>;
-  peerDependenciesMeta?: Record<string, { optional?: boolean }>;
-  optionalDependencies?: Record<string, string>;
-  travetto?: {
-    id?: string;
-    displayName?: string;
-    profile?: string;
-    dependencies?: Record<string, ('doc' | 'test' | 'all')[]>;
-  },
-  private?: boolean;
-  publishConfig?: { access?: 'restricted' | 'public' };
-};
 
 export class PackageUtil {
 

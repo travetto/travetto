@@ -40,13 +40,20 @@
     "@types/node": "^18.8.2",
     "@types/vscode": "^1.71.0"
   },
-  "travetto": {
-    "displayName": "Travetto Plugin",
-    "dependencies": {
-      "@travetto/app": [
+  "peerDependencies": {
+    "@travetto/app": "^3.0.0-rc.4"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/app": {
+      "optional": true,
+      "profiles": [
         "doc"
       ]
     }
+  },
+  "travetto": {
+    "id": "travetto-plugin",
+    "displayName": "Travetto Plugin"
   },
   "engines": {
     "vscode": "^1.69.0"

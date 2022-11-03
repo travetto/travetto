@@ -38,12 +38,8 @@
     }
   },
   "travetto": {
-    "displayName": "Async Context",
-    "dependencies": {
-      "@travetto/di": [
-        "test"
-      ]
-    }
+    "id": "@trv:context",
+    "displayName": "Async Context"
   },
   "publishConfig": {
     "access": "public"
