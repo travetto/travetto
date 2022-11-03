@@ -25,9 +25,9 @@
     "directory": "module/rest-koa-lambda"
   },
   "dependencies": {
-    "@travetto/rest": "^3.0.0-rc.4",
-    "@travetto/rest-koa": "^3.0.0-rc.4",
-    "@travetto/rest-aws-lambda": "^3.0.0-rc.4",
+    "@travetto/rest": "file:../rest",
+    "@travetto/rest-koa": "file:../rest-koa",
+    "@travetto/rest-aws-lambda": "file:../rest-aws-lambda",
     "@vendia/serverless-express": "^4.10.1"
   },
   "travetto": {

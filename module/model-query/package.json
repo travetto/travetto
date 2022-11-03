@@ -27,15 +27,15 @@
     "directory": "module/model-query"
   },
   "dependencies": {
-    "@travetto/di": "^3.0.0-rc.4",
-    "@travetto/model": "^3.0.0-rc.4",
-    "@travetto/schema": "^3.0.0-rc.4"
+    "@travetto/di": "file:../di",
+    "@travetto/model": "file:../model",
+    "@travetto/schema": "file:../schema"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.4",
-    "@travetto/model-mongo": "^3.0.0-rc.4",
-    "@travetto/model-elasticsearch": "^3.0.0-rc.4",
-    "@travetto/model-sql": "^3.0.0-rc.4"
+    "@travetto/test": "file:../test",
+    "@travetto/model-mongo": "file:../model-mongo",
+    "@travetto/model-elasticsearch": "file:../model-elasticsearch",
+    "@travetto/model-sql": "file:../model-sql"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

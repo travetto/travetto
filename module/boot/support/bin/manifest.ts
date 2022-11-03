@@ -35,8 +35,8 @@ export class ManifestUtil {
           .replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
         out.push(...await this.#collectPackages(next, seen));
       } catch (e) {
-        if (process.env.TRV_DEV && el.startsWith('@travetto')) {
-          out.push(...await this.#collectPackages(el.replace('@travetto', process.env.TRV_DEV), seen));
+        if (el.startsWith('file:')) {
+          out.push(...await this.#collectPackages(path.resolve(folder, el.replace('file:', '')), seen));
         }
       }
     }
@@ -119,12 +119,15 @@ export class ManifestUtil {
   static async #buildManifestModules(rootFolder: string): Promise<Record<string, ManifestModule>> {
     const modules = (await this.#collectPackages(rootFolder))
       .filter(x => x.isModule);
-    if (process.env.TRV_DEV && !modules.find(x => x.name === '@travetto/cli')) {
-      modules.unshift({
-        name: '@travetto/cli',
-        folder: `${process.env.TRV_DEV}/cli`,
-        isModule: true,
-      });
+    if (!modules.find(x => x.name === '@travetto/cli')) {
+      const folder = path.resolve(__dirname, '..', '..', '..', 'cli');
+      if (await fs.stat(folder).catch(() => false)) {
+        modules.unshift({
+          name: '@travetto/cli',
+          folder,
+          isModule: true,
+        });
+      }
     }
     const out: Record<string, ManifestModule> = {};
     for (const mod of modules) {

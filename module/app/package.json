@@ -26,15 +26,15 @@
     "directory": "module/app"
   },
   "dependencies": {
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/transformer": "^3.0.0-rc.4",
-    "@travetto/registry": "^3.0.0-rc.4",
-    "@travetto/schema": "^3.0.0-rc.4",
-    "@travetto/di": "^3.0.0-rc.4"
+    "@travetto/config": "file:../config",
+    "@travetto/transformer": "file:../transformer",
+    "@travetto/registry": "file:../registry",
+    "@travetto/schema": "file:../schema",
+    "@travetto/di": "file:../di"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.2",
-    "@travetto/test": "^3.0.0-rc.4"
+    "@travetto/cli": "file:../cli",
+    "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

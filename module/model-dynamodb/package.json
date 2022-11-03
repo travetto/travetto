@@ -26,11 +26,11 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.185.0",
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/model": "^3.0.0-rc.4"
+    "@travetto/config": "file:../config",
+    "@travetto/model": "file:../model"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.0.0-rc.2"
+    "@travetto/command": "file:../command"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {

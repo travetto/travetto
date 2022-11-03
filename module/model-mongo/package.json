@@ -25,14 +25,14 @@
     "directory": "module/model-mongo"
   },
   "dependencies": {
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/model": "^3.0.0-rc.4",
+    "@travetto/config": "file:../config",
+    "@travetto/model": "file:../model",
     "@travetto/model-query": "3.0.0-rc.4",
-    "@travetto/resource": "^3.0.0-rc.4",
+    "@travetto/resource": "file:../resource",
     "mongodb": "^4.10.0"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.0.0-rc.2"
+    "@travetto/command": "file:../command"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {

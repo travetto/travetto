@@ -19,7 +19,7 @@
     "directory": "related/overview"
   },
   "dependencies": {
-    "@travetto/boot": "^2.2.2"
+    "@travetto/boot": "file:../../module/boot"
   },
   "travetto": {
     "displayName": "Overview Docs"

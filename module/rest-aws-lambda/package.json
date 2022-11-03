@@ -25,7 +25,7 @@
     "directory": "module/rest-aws-lambda"
   },
   "dependencies": {
-    "@travetto/rest": "^3.0.0-rc.4",
+    "@travetto/rest": "file:../rest",
     "@types/aws-lambda": "^8.10.106"
   },
   "devDependencies": {
@@ -33,7 +33,7 @@
     "@types/node-fetch": "^2.6.2"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.4"
+    "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

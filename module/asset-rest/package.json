@@ -25,15 +25,15 @@
     "directory": "module/asset-rest"
   },
   "dependencies": {
-    "@travetto/asset": "^3.0.0-rc.4",
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/rest": "^3.0.0-rc.4",
+    "@travetto/asset": "file:../asset",
+    "@travetto/config": "file:../config",
+    "@travetto/rest": "file:../rest",
     "@types/busboy": "^1.5.0",
     "busboy": "^1.6.0"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.4",
-    "@travetto/app": "^3.0.0-rc.4"
+    "@travetto/test": "file:../test",
+    "@travetto/app": "file:../app"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

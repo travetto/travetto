@@ -26,12 +26,12 @@
     "directory": "module/auth-rest-jwt"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^3.0.0-rc.4",
-    "@travetto/auth": "^3.0.0-rc.2",
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/di": "^3.0.0-rc.4",
-    "@travetto/rest": "^3.0.0-rc.4",
-    "@travetto/jwt": "^3.0.0-rc.2"
+    "@travetto/auth-rest": "file:../auth-rest",
+    "@travetto/auth": "file:../auth",
+    "@travetto/config": "file:../config",
+    "@travetto/di": "file:../di",
+    "@travetto/rest": "file:../rest",
+    "@travetto/jwt": "file:../jwt"
   },
   "travetto": {
     "id": "@trv:auth-rest-jwt",

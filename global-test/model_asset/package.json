@@ -1,13 +1,13 @@
 {
   "name": "model-mongo_asset",
   "dependencies": {
-    "@travetto/model-mongo": "^3.0.0-rc.4",
-    "@travetto/model-s3": "^3.0.0-rc.4",
-    "@travetto/asset": "^3.0.0-rc.4"
+    "@travetto/model-mongo": "file:../../module/model-mongo",
+    "@travetto/model-s3": "file:../../module/model-s3",
+    "@travetto/asset": "file:../../module/asset"
   },
   "devDependencie": {
-    "@travetto/test": "^3.0.0-rc.4",
-    "@travetto/cli": "^3.0.0-rc.4"
+    "@travetto/test": "file:../../module/test",
+    "@travetto/cli": "file:../../module/cli"
   },
   "private": true
 }

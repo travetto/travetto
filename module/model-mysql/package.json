@@ -27,19 +27,19 @@
     "directory": "module/model-mysql"
   },
   "dependencies": {
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/context": "^3.0.0-rc.4",
-    "@travetto/model": "^3.0.0-rc.4",
+    "@travetto/config": "file:../config",
+    "@travetto/context": "file:../context",
+    "@travetto/model": "file:../model",
     "@travetto/model-query": "3.0.0-rc.4",
-    "@travetto/model-sql": "^3.0.0-rc.4",
+    "@travetto/model-sql": "file:../model-sql",
     "mysql": "^2.18.1",
     "@types/mysql": "^2.15.21"
   },
   "devDependencies": {
-    "@travetto/app": "^3.0.0-rc.4"
+    "@travetto/app": "file:../app"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.0.0-rc.2"
+    "@travetto/command": "file:../command"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {

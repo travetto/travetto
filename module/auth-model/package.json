@@ -25,11 +25,11 @@
     "directory": "module/auth-model"
   },
   "dependencies": {
-    "@travetto/auth": "^3.0.0-rc.2",
-    "@travetto/model": "^3.0.0-rc.4"
+    "@travetto/auth": "file:../auth",
+    "@travetto/model": "file:../model"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.4"
+    "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

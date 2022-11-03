@@ -24,10 +24,10 @@
     "directory": "module/rest-model-query"
   },
   "dependencies": {
-    "@travetto/rest": "^3.0.0-rc.4",
-    "@travetto/model": "^3.0.0-rc.4",
-    "@travetto/model-query": "^3.0.0-rc.4",
-    "@travetto/schema": "^3.0.0-rc.4"
+    "@travetto/rest": "file:../rest",
+    "@travetto/model": "file:../model",
+    "@travetto/model-query": "file:../model-query",
+    "@travetto/schema": "file:../schema"
   },
   "travetto": {
     "id": "@trv:rest-model-query",

@@ -25,9 +25,9 @@
     "directory": "module/rest-express-lambda"
   },
   "dependencies": {
-    "@travetto/rest-aws-lambda": "^3.0.0-rc.4",
-    "@travetto/rest": "^3.0.0-rc.4",
-    "@travetto/rest-express": "^3.0.0-rc.4",
+    "@travetto/rest-aws-lambda": "file:../rest-aws-lambda",
+    "@travetto/rest": "file:../rest",
+    "@travetto/rest-express": "file:../rest-express",
     "@vendia/serverless-express": "^4.10.1"
   },
   "travetto": {

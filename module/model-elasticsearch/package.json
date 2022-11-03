@@ -28,15 +28,15 @@
   },
   "dependencies": {
     "@elastic/elasticsearch": "^7.17.0",
-    "@travetto/config": "^3.0.0-rc.4",
-    "@travetto/model": "^3.0.0-rc.4",
+    "@travetto/config": "file:../config",
+    "@travetto/model": "file:../model",
     "@travetto/model-query": "3.0.0-rc.4"
   },
   "devDependencies": {
-    "@travetto/app": "^3.0.0-rc.4"
+    "@travetto/app": "file:../app"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.0.0-rc.2"
+    "@travetto/command": "file:../command"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {

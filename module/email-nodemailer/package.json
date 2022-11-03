@@ -24,7 +24,7 @@
     "directory": "module/email-nodemailer"
   },
   "dependencies": {
-    "@travetto/email": "^3.0.0-rc.4",
+    "@travetto/email": "file:../email",
     "@types/nodemailer": "^6.4.6",
     "nodemailer": "^6.8.0"
   },

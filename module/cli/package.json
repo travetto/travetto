@@ -28,11 +28,11 @@
     "directory": "module/cli"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.2",
+    "@travetto/base": "file:../base",
     "commander": "^9.4.1"
   },
   "peerDependencies": {
-    "@travetto/app": "^3.0.0-rc.4"
+    "@travetto/app": "file:../app"
   },
   "peerDependenciesMeta": {
     "@travetto/app": {
