@@ -1,0 +1,8 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/rest-fastify-lambda": "file:.."
+  },
+  "private": true
+}

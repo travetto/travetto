@@ -14,7 +14,7 @@
         - `source://boot/{index,src/**,support/bin/**}.js`
 
 2.
-  Phase: manifest-generate
+  Phase: manifest-state-generate
   When: in development/build mode
   Steps:
     -
@@ -35,27 +35,18 @@
         - `memory://manifest-delta`    
 
 3. 
-  Phase: compiler-stage
+  Phase: compiler-build
   When: `memory://manifest-delta` includes `source://**/support/transform*`, or `source://@travetto/transformer`
   Steps:
     - 
-      Desc: Stage code for compiler-build
+      Desc: Create compiler directory
       Input: 
         - `memory://manifest`
         - `source://@travetto/path/**/*`
         - `source://@travetto/transformer/**/*`,
         - `source://**/support/transform*`
-      Action: copy or symlink
-      Output: 
-        - `staging://**` 
-    -
-      Desc: Run tsc on staged code
-      Input: 
-        - `memory://manifest`
-        - `staging://**` 
       Action: tsc
       Output: 
-        - `compiler://manifest`
         - `compiler://**`
 
 4. 
@@ -145,11 +136,12 @@ Will provide a new multiphase compiler that:
 
 
 ## Pending Items
-- get trv.js working properly with new compiler output
-   - Only run compiler on file changes
-- Modify `trv` to compile before running, and then run
 - `trv-test` needs to be moved into `@travetto/test`
-- fixup tests
+- Rework vscode plugin:
+   * No longer depend on travetto
+   * Fix how we invoke operations
+- Rework docs to:
+   * Use new system
 - Rework pack to use manifest
 
 ## Deprecated
@@ -191,13 +183,6 @@ Run-time behavior is rewritten
   - Module 
    * loading
    * scanning
-
-
-
-
-
-
-
 
 
 

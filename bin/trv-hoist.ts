@@ -22,6 +22,10 @@ Packages.getTopLevelPackage()
         })
       )
       .$flatten()
+      .$concat(
+        await Packages.yieldPublicPackages()
+          .$map(p => [p.name, p._.folder.replace(`${process.cwd()}/`, 'file:')])
+      )
       .$sort(([a], [b]) => a.localeCompare(b))
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       .$reduce((acc: Record<string, string>, [a, b]) => { acc[a] = b as string; return acc; }, {})
