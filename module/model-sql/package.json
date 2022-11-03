@@ -37,8 +37,7 @@
   },
   "peerDependencies": {
     "@travetto/test": "file:../test",
-    "@travetto/command": "file:../command",
-    "@travetto/model-mysql": "file:../model-mysql"
+    "@travetto/command": "file:../command"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {
@@ -46,12 +45,6 @@
     },
     "@travetto/test": {
       "optional": true
-    },
-    "@travetto/model-mysql": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
     }
   },
   "travetto": {
