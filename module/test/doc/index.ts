@@ -1,8 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
-import { TranspileCache } from '@travetto/boot/src/internal/transpile-cache';
+import { ModuleIndex } from '@travetto/boot';
 
-import { Suite } from './src/decorator/suite';
-import { Test } from './src/decorator/test';
+import { Suite, Test } from '@travetto/test';
 
 export const text = d`
 ${d.Header()}
@@ -24,17 +23,17 @@ A test suite is a collection of individual tests.  All test suites are classes w
 
 A simple example would be:
 
-${d.Code('Example Test Suite', 'doc/example.ts')}
+${d.Code('Example Test Suite', 'test/example.ts')}
 
 
 ${d.Section('Assertions')}
 A common aspect of the tests themselves are the assertions that are made.  ${lib.Node} provides a built-in ${lib.Assert} library.  The framework uses AST transformations to modify the assertions to provide integration with the test module, and to provide a much higher level of detail in the failed assertions.  For example:
 
-${d.Code('Example assertion for deep comparison', 'doc/test/assert-example.ts')}
+${d.Code('Example assertion for deep comparison', 'test/assert-example.ts')}
 
 would translate to:
 
-${d.Code('Transpiled test Code', TranspileCache.readEntry('doc/test/assert-example.ts'), false, 'doc/javascript')}
+${d.Code('Transpiled test Code', ModuleIndex.find({ filter: f => f === 'test/assert-example.ts' })[0].file, false, 'src/javascript')}
 
 This would ultimately produce the error like:
 
@@ -65,10 +64,10 @@ In addition to the standard operations, there is support for throwing/rejecting 
 
 ${d.List(
   d`${d.Method('throws')}/${d.Method('doesNotThrow')} is for catching synchronous rejections
-  ${d.Code('Throws vs Does Not Throw', 'doc/throws.ts')}
+  ${d.Code('Throws vs Does Not Throw', 'test/throws.ts')}
   `,
   d`${d.Method('rejects')}/${d.Method('doesNotReject')} is for catching asynchronous rejections
-  ${d.Code('Rejects vs Does Not Reject', 'doc/rejects.ts')}
+  ${d.Code('Rejects vs Does Not Reject', 'test/rejects.ts')}
   `
 )}
 
@@ -79,7 +78,7 @@ ${d.List(
   'A function to allow for whatever custom verification of the error is needed',
 )}
 
-${d.Code('Example of different Error matching paradigms', 'doc/error-types.ts')}
+${d.Code('Example of different Error matching paradigms', 'test/error-types.ts')}
 
 ${d.Section('Running Tests')}
 
