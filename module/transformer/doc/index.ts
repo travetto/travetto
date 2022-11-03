@@ -13,7 +13,7 @@ ${d.Section('Custom Transformer')}
 
 Below is an example of a transformer that upper cases all ${d.Input('class')}, ${d.Input('method')} and ${d.Input('param')} declarations.  This will break any code that depends upon it as we are redefining all the identifiers at compile time.  
 
-${d.Code('Sample Transformer - Upper case all declarations', 'doc/support/transformer.ts')}
+${d.Code('Sample Transformer - Upper case all declarations', 'support/transformer.upper.ts')}
 
 ${d.Note('This should be a strong indicator that it is very easy to break code in unexpected ways.')}
 `;
