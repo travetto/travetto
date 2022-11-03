@@ -1,0 +1,8 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/resource": "file:.."
+  },
+  "private": true
+}
