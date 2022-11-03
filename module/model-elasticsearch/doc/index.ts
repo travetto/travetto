@@ -2,8 +2,8 @@ import { d, lib, mod } from '@travetto/doc';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
-import { ElasticsearchModelConfig } from './src/config';
-import { ElasticsearchModelService } from './src/service';
+import { ElasticsearchModelConfig } from '@travetto/model-elasticsearch/src/config';
+import { ElasticsearchModelService } from '@travetto/model-elasticsearch/src/service';
 
 export const text = d`
 ${d.Header()}

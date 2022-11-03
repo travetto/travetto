@@ -1,8 +1,8 @@
 import { d, lib, mod } from '@travetto/doc';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
 
-import { FirestoreModelConfig } from './src/config';
-import { FirestoreModelService } from './src/service';
+import { FirestoreModelConfig } from '@travetto/model-firestore/src/config';
+import { FirestoreModelService } from '@travetto/model-firestore/src/service';
 
 export const text = d`
 ${d.Header()}

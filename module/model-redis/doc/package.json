@@ -1,0 +1,8 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/model-redis": "file:.."
+  },
+  "private": true
+}

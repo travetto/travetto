@@ -1,0 +1,11 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/model-query": "file:..",
+    "@travetto/model-mongo": "file:../../model-mongo",
+    "@travetto/model-elasticsearch": "file:../../model-elasticsearch",
+    "@travetto/model-sql": "file:../../model-sql"
+  },
+  "private": true
+}
