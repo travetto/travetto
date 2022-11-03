@@ -2,11 +2,10 @@ import { d, mod } from '@travetto/doc';
 import { Injectable } from '@travetto/di';
 import { FileModelService, MemoryModelService } from '@travetto/model';
 import { Links } from '@travetto/model/support/doc.support';
+import { AssetService } from '@travetto/asset';
 
-import { AssetService } from '.';
-
-const Asset = d.SnippetLink('Asset', 'src/types.ts', /interface Asset/);
-const AssetNamingStrategySnippet = d.Snippet('AssetNamingStrategy', 'src/naming.ts', /interface AssetNamingStrategy/, /^[}]/);
+const Asset = d.SnippetLink('Asset', '@travetto/asset/src/types.ts', /interface Asset/);
+const AssetNamingStrategySnippet = d.Snippet('AssetNamingStrategy', '@travetto/asset/src/naming.ts', /interface AssetNamingStrategy/, /^[}]/);
 
 export const text = d`
 ${d.Header()}
@@ -24,11 +23,11 @@ ${d.List(
 
 If you are using more than one ${Links.Stream} service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
 
-${d.Code('Configuration Methods', 'doc/asset-config.ts')}
+${d.Code('Configuration Methods', 'src/asset-config.ts')}
 
 Reading of and writing assets uses the ${AssetService}.  Below you can see an example dealing with a user's profile image.
 
-${d.Code('User Profile Images', 'doc/user-profile.ts')}
+${d.Code('User Profile Images', 'src/user-profile.ts')}
 
 ${d.Section('Naming Strategies')}
 
@@ -44,9 +43,9 @@ ${d.Section('Advanced Usage')}
 
 In addition to reading and writing, you can also retrieve information on the saved asset, including basic information, and additional meta data.  The structure of the ${Asset} looks like:
 
-${d.Code('Asset Structure', 'src/types.ts')}
+${d.Code('Asset Structure', '@travetto/asset/src/types.ts')}
 
 To get the asset information, you would call:
 
-${d.Code('Fetching Asset Info', 'doc/user-profile-meta.ts')}
+${d.Code('Fetching Asset Info', 'src/user-profile-meta.ts')}
 `;

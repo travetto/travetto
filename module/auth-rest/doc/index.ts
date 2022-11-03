@@ -1,9 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
 import { InjectableFactory } from '@travetto/di';
 import { Context } from '@travetto/rest';
-
-import { AuthService } from './src/service';
-import { Authenticate, Unauthenticated, Authenticated } from './src/decorator';
+import { AuthService, Authenticate, Unauthenticated, Authenticated } from '@travetto/auth-rest';
 
 const Principal = d.SnippetLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
 const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
@@ -27,7 +25,7 @@ ${d.Section('Security information management')}
 When working with framework's authentication, the user information is exposed via the ${Request} 
 object.  The auth functionality is exposed on the request as the property ${d.Input('auth')}.
 
-${d.Snippet('Structure of auth property on the request', './src/typings.d.ts', /interface TravettoRequest/, /^\s+[}]/)}
+${d.Snippet('Structure of auth property on the request', '@travetto/auth-rest/src/typings.d.ts', /interface TravettoRequest/, /^\s+[}]/)}
 
 This allows for any filters/middleware to access this information without deeper knowledge of the framework itself.  Also, for performance benefits, the auth context can be stored in the user session as a means to minimize future lookups. If storing the entire principal in the session, it is best to keep the principal as small as possible.
 
@@ -47,11 +45,11 @@ ${d.List(
 )}
 A sample auth provider would look like:
 
-${d.Code('Sample Identity Source', 'doc/source.ts')}
+${d.Code('Sample Identity Source', 'src/source.ts')}
 
 The provider must be registered with a custom symbol to be used within the framework.  At startup, all registered ${Authenticator}'s are collected and stored for reference at runtime, via symbol. For example:
 
-${d.Code('Potential Facebook provider', 'doc/facebook.ts')}
+${d.Code('Potential Facebook provider', 'src/facebook.ts')}
 
 The symbol ${d.Input('FB_AUTH')} is what will be used to reference providers at runtime.  This was chosen, over ${d.Input('class')} references due to the fact that most providers will not be defined via a new class, but via an ${InjectableFactory} method.
 
@@ -60,7 +58,7 @@ Like the ${AuthService}, there are common auth patterns that most users will imp
 
 ${Authenticate} integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 
-${d.Code('Using provider with routes', 'doc/route.ts')}
+${d.Code('Using provider with routes', 'src/route.ts')}
 
 ${Authenticated} and ${Unauthenticated} will simply enforce whether or not a user is logged in and throw the appropriate error messages as needed. Additionally, the ${Principal} is accessible via ${Context} directly, without wiring in a request object, but is also accessible on the request object as ${Request}.auth.
 `;

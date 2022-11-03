@@ -31,18 +31,11 @@
     "@travetto/rest": "file:../rest"
   },
   "peerDependencies": {
-    "@travetto/test": "file:../test",
-    "@travetto/app": "file:../app"
+    "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
       "optional": true
-    },
-    "@travetto/app": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
     }
   },
   "travetto": {

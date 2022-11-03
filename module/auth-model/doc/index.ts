@@ -1,7 +1,7 @@
 import { d, mod } from '@travetto/doc';
 import { Links } from '@travetto/model/support/doc.support';
 
-const RegisteredPrincipal = d.Snippet('Registered Principal', 'src/model.ts', /interface RegisteredPrincipal/, /^[}]/);
+const RegisteredPrincipal = d.Snippet('Registered Principal', '@travetto/auth-model/src/model.ts', /interface RegisteredPrincipal/, /^[}]/);
 
 export const text = d`
 ${d.Header()}
@@ -31,13 +31,13 @@ A registered principal extends the base concept of an principal, by adding in ad
 
 ${RegisteredPrincipal}
 
-${d.Code('A valid user model', 'doc/model.ts')}
+${d.Code('A valid user model', 'src/model.ts')}
 
 ${d.Section('Configuration')}
 
 Additionally, there exists a common practice of mapping various external security principals into a local contract. These external identities, as provided from countless authentication schemes, need to be homogenized for use.  This has been handled in other frameworks by using external configuration, and creating a mapping between the two set of fields.  Within this module, the mappings are defined as functions in which you can translate to the model from an identity or to an identity from a model.
 
-${d.Code('Principal Source configuration', 'doc/config.ts')}
+${d.Code('Principal Source configuration', 'src/config.ts')}
 
-${d.Code('Sample usage', 'doc/usage.ts')}
+${d.Code('Sample usage', 'src/usage.ts')}
 `;

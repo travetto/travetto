@@ -8,7 +8,6 @@ export * from './src/module-index';
 export * from './src/types';
 export * from './src/ordering';
 export * from './src/proxy';
-export * from './src/dynamic';
 export * from './src/stacktrace';
 export * from './src/error';
 export * from './src/package';

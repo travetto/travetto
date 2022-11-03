@@ -1,0 +1,11 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/auth-rest-passport": "file:..",
+    "@types/passport-facebook": "^2.1.11",
+    "passport-facebook": "^3.0.0",
+    "@travetto/app": "file:../../app"
+  },
+  "private": true
+}
