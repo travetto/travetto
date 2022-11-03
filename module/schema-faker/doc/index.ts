@@ -25,9 +25,9 @@ ${d.List(
 
 In addition to the general types, the code relies upon name matching to provide additional refinement:
 
-${d.Snippet('Supported Mappings', 'src/faker.ts', /#namesToType/, /\};/)}
+${d.Snippet('Supported Mappings', '@travetto/schema/src/faker.ts', /#namesToType/, /\};/)}
 
 An example of this would be:
 
-${d.Code('More complex Schema, used with Faker', 'doc/faker.ts')}
+${d.Code('More complex Schema, used with Faker', 'src/faker.ts')}
 `;
