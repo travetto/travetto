@@ -2,10 +2,5 @@
   "extends": "./module/boot/tsconfig.trv.json",
   "compilerOptions": {
     "rootDir": ".",
-    "paths": {
-      "@travetto/*": [
-        "./module/*"
-      ]
-    }
   }
 }

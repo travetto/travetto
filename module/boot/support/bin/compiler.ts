@@ -1,5 +1,4 @@
 import * as ts from 'typescript';
-// @ts-expect-error
 import { TransformerManager } from '@travetto/transformer';
 
 import * as path from './path';

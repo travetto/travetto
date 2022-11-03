@@ -29,8 +29,8 @@
     "@travetto/config": "file:../config",
     "@travetto/context": "file:../context",
     "@travetto/model": "file:../model",
-    "@travetto/model-query": "3.0.0-rc.4",
-    "@travetto/model-sql": "3.0.0-rc.4",
+    "@travetto/model-query": "file:../model-query",
+    "@travetto/model-sql": "file:../model-sql",
     "better-sqlite3": "^7.6.2",
     "@types/better-sqlite3": "^7.6.0"
   },
