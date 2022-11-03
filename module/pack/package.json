@@ -29,25 +29,11 @@
     "picomatch": "^2.3.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "file:../cli",
-    "@travetto/rest": "file:../rest",
-    "@travetto/rest-aws-lambda": "file:../rest-aws-lambda"
+    "@travetto/cli": "file:../cli"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
       "optional": true
-    },
-    "@travetto/rest": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/rest-aws-lambda": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
     }
   },
   "travetto": {

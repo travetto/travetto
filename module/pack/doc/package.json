@@ -1,0 +1,10 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/pack": "file:..",
+    "@travetto/rest": "file:../../rest",
+    "@travetto/rest-aws-lambda": "file:../../rest-aws-lambda"
+  },
+  "private": true
+}

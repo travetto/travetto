@@ -72,14 +72,14 @@ ${d.List(
 
 These two configurations will be loaded and layered, with the selected config taking precedence.
 
-${d.Code('Example pack.config.ts', 'doc/support/pack.config.ts')}
+${d.Code('Example pack.config.ts', 'support/pack.config.ts')}
 
 ${d.SubSection('Environment Override')}
 
 When working with sub operations, passing command-line flags is challenging.  To support a more natural usage, the sub operations 
 allow their key parameters to be overridden via environment variables.
 
-${d.Snippet('Assemble Overrides', './support/bin/assemble/operation.ts', /^  overrides:/, /^  [}]/)}
-${d.Snippet('Docker Overrides', './support/bin/docker.ts', /^  overrides:/, /^  [}]/)}
-${d.Snippet('Zip Overrides', './support/bin/zip.ts', /^  overrides:/, /^  [}]/)}
+${d.Snippet('Assemble Overrides', '@travetto/pack/support/bin/assemble/operation.ts', /^  overrides:/, /^  [}]/)}
+${d.Snippet('Docker Overrides', '@travetto/pack/support/bin/docker.ts', /^  overrides:/, /^  [}]/)}
+${d.Snippet('Zip Overrides', '@travetto/pack/support/bin/zip.ts', /^  overrides:/, /^  [}]/)}
 `;
