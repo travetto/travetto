@@ -1,0 +1,12 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/scaffold": "file:..",
+    "@travetto/auth-rest-context": "file:../../auth-rest-context",
+    "@travetto/auth-rest": "file:../../auth-rest",
+    "@travetto/model": "file:../../model",
+    "@travetto/model-query": "file:../../model-query"
+  },
+  "private": true
+}

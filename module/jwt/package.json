@@ -27,17 +27,6 @@
     "@types/jws": "^3.2.4",
     "jws": "^4.0.0"
   },
-  "peerDependencies": {
-    "@travetto/auth-rest": "file:../auth-rest"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/auth-rest": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    }
-  },
   "travetto": {
     "id": "@trv:jwt",
     "displayName": "JWT"

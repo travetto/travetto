@@ -37,38 +37,6 @@
   "devDependencies": {
     "@types/mustache": "^4.2.1"
   },
-  "peerDependencies": {
-    "@travetto/auth-rest-context": "file:../auth-rest-context",
-    "@travetto/auth-rest": "file:../auth-rest",
-    "@travetto/model": "file:../model",
-    "@travetto/model-query": "file:../model-query"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/auth-rest-context": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/auth-rest": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    },
-    "@travetto/model-query": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    }
-  },
   "travetto": {
     "id": "@trv:scaffold",
     "displayName": "App Scaffold"
