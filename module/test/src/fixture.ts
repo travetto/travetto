@@ -4,15 +4,15 @@ import { Readable } from 'stream';
 
 import * as path from '@travetto/path';
 import { AppError } from '@travetto/base';
+import { ModuleIndex } from '@travetto/boot';
 
 const cleanPath = (p: string): string => p.charAt(0) === '/' ? p.substring(1) : p;
 
-class $TestFile {
+class $TestFixtures {
   paths: string[] = [];
 
   constructor() {
-    this.addPath('test/resources');
-    this.addPath('support/resources');
+    this.addPath('test/fixtures');
   }
 
   /**
@@ -20,7 +20,7 @@ class $TestFile {
    * @param searchPath Path to look through
    */
   addPath(searchPath: string, index = -1): void {
-    const resolved = path.resolve(searchPath);
+    let resolved = path.resolve(searchPath);
     if (existsSync(resolved)) {
       if (index < 0) {
         this.paths.push(resolved);
@@ -28,6 +28,16 @@ class $TestFile {
         this.paths.splice(index, 0, resolved);
       }
     }
+  }
+
+  /**
+   * Add a new search path by module
+   * @param modulePath Path in import form, to look through
+   */
+  addModulePath(modulePath: string, index = -1): void {
+    try {
+      return this.addPath(ModuleIndex.resolveImport(modulePath), index);
+    } catch { }
   }
 
   /**
@@ -73,4 +83,4 @@ class $TestFile {
   }
 }
 
-export const TestFile = new $TestFile();
+export const TestFixtures = new $TestFixtures();

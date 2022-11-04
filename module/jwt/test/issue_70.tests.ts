@@ -1,4 +1,4 @@
-import { Suite, Test, TestFile } from '@travetto/test';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { JWTUtil } from '..';
 
@@ -7,8 +7,8 @@ class Issue70 {
 
   @Test('should work')
   async test() {
-    const certPub = await TestFile.read('/rsa-public.pem');
-    const certPriv = await TestFile.read('/rsa-private.pem');
+    const certPub = await TestFixtures.read('/rsa-public.pem');
+    const certPriv = await TestFixtures.read('/rsa-private.pem');
 
     const token = await JWTUtil.create({ foo: 'bar' }, { key: certPriv, alg: 'RS256' });
 

@@ -42,9 +42,11 @@ class $ConfigManager {
     // Find all files
     for (const folder of ['resources', ...Env.getList('TRV_RESOURCES')]) {
       const toFind = path.resolve(folder);
-      for (const el of await fs.readdir(toFind)) {
-        if (!el.startsWith('.') && /[.]ya?ml$/.test(el)) {
-          allFiles.push({ file: path.resolve(toFind, el), profile: el.replace(/[.]ya?ml$/, '') });
+      if (await fs.stat(toFind).catch(() => false)) {
+        for (const el of await fs.readdir(toFind)) {
+          if (!el.startsWith('.') && /[.]ya?ml$/.test(el)) {
+            allFiles.push({ file: path.resolve(toFind, el), profile: el.replace(/[.]ya?ml$/, '') });
+          }
         }
       }
     }

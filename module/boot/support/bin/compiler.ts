@@ -1,7 +1,6 @@
 import * as ts from 'typescript';
 import { TransformerManager } from '@travetto/transformer';
 
-import * as path from './path';
 import { Compiler, main } from './compiler-simple';
 import { Manifest } from './types';
 
@@ -13,7 +12,7 @@ export class OutputCompiler extends Compiler {
 
   constructor(manifest: Manifest, outputFolder: string) {
     super(manifest, outputFolder);
-    this.#bootLocation = path.resolve(__filename.split('node_modules')[0]);
+    this.#bootLocation = manifest.buildLocation;
     this.#transformers = this.modules.flatMap(
       x => (x.files.support ?? [])
         .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
@@ -48,12 +47,12 @@ export class OutputCompiler extends Compiler {
 
       // Symlink resources
       await this.workspace.symlinkFolder(module, 'resources');
-      await this.workspace.symlinkFolder(module, 'support/resources');
+      await this.workspace.symlinkFolder(module, 'support/fixtures');
     }
 
-    const main = this.modules.find(x => x.output === '.');
+    const main = this.modules.find(x => x.root);
     if (main) {
-      await this.workspace.symlinkFolder(main, 'test/resources');
+      await this.workspace.symlinkFolder(main, 'test/fixtures');
     }
 
     // Write manifest

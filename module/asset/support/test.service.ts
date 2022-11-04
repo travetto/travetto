@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import * as path from '@travetto/path';
-import { Test, Suite, BeforeAll, TestFile } from '@travetto/test';
+import { Test, Suite, BeforeAll, TestFixtures } from '@travetto/test';
 import { Class } from '@travetto/base';
 import { Inject } from '@travetto/di';
 import { NotFoundError } from '@travetto/model';
@@ -23,13 +23,13 @@ export abstract class AssetServiceSuite {
 
   @BeforeAll()
   async setup() {
-    TestFile.addPath(`${__source.folder}/resources`);
+    TestFixtures.addModulePath('@travetto/asset/support/fixtures');
   }
 
   @Test()
   async writeBasic() {
     const service = this.assetService;
-    const pth = await TestFile.find('/asset.yml');
+    const pth = await TestFixtures.find('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
 
     const out = await service.upsert(file);
@@ -40,7 +40,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeHashed() {
     const service = this.assetService;
-    const pth = await TestFile.find('/asset.yml');
+    const pth = await TestFixtures.find('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const outHashed = await service.upsert(file, false, new HashNamingStrategy());
     const hash = await AssetUtil.hashFile(pth);
@@ -50,7 +50,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeAndGet() {
     const service = this.assetService;
-    const pth = await TestFile.find('/asset.yml');
+    const pth = await TestFixtures.find('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     await service.upsert(file);
 
@@ -65,7 +65,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeAndDelete() {
     const service = this.assetService;
-    const pth = await TestFile.find('/asset.yml');
+    const pth = await TestFixtures.find('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const loc = await service.upsert(file);
 
@@ -80,5 +80,3 @@ export abstract class AssetServiceSuite {
     }, NotFoundError);
   }
 }
-
-export const TEST_RESOURCES = path.resolve(__source.folder, '..', 'resources');

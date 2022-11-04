@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { Suite, Test, TestFile } from '@travetto/test';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 import { ExecUtil } from '@travetto/base';
 
 import { WorkPool } from '../src/pool';
@@ -20,7 +20,7 @@ export class PoolExecTest {
       }
     });
 
-    const launcher = await TestFile.find('simple.child.ts');
+    const launcher = await TestFixtures.find('simple.child.ts');
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<{ data: string }, string>(
