@@ -22,7 +22,7 @@ export class DocCommand extends CliCommand<Options> {
 
   getOptions(): Options {
     return {
-      input: this.option({ desc: 'Input File', def: 'doc.ts' }),
+      input: this.option({ desc: 'Input File', def: 'index.ts' }),
       output: this.listOption({ desc: 'Output files' }),
       format: this.option({ desc: 'Format', def: 'md' }),
       watch: this.boolOption({ desc: 'Watch' })
@@ -32,10 +32,6 @@ export class DocCommand extends CliCommand<Options> {
   async envInit(): Promise<void> {
     Env.define({
       debug: '0',
-      append: {
-        TRV_SRC_LOCAL: 'doc',
-        TRV_RESOURCES: 'doc/resources'
-      },
       set: {
         TRV_CONSOLE_WIDTH: '140',
         TRV_CLI_JSON_IPC: '',

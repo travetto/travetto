@@ -6,6 +6,7 @@ export type ManifestModuleFile = [string, ManifestModuleFileType, number];
 export type ManifestModule<T = Record<string, ManifestModuleFile[]>> = {
   id: string;
   name: string;
+  root?: boolean;
   version: string,
   source: string;
   output: string;
@@ -15,6 +16,7 @@ export type ManifestModule<T = Record<string, ManifestModuleFile[]>> = {
 
 export type Manifest = {
   generated: number;
+  buildLocation: string;
   modules: Record<string, ManifestModule>;
 };
 

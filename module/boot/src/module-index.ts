@@ -55,7 +55,7 @@ class $ModuleIndex {
         `${m.output.split('node_modules/')[1]}/${f}` :
         `./${f}`).replace(/[.]ts$/, '.js');
 
-      const id = m.output === '.' ? module : module.replace(m.name, m.id);
+      const id = m.root ? module : module.replace(m.name, m.id);
 
       return {
         id: id.replace(/\/src\//, '/').replace(/[.][tj]s$/, ''),

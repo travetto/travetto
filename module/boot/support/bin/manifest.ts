@@ -3,7 +3,10 @@ import * as os from 'os';
 
 import * as path from './path';
 
-import type { Manifest, ManifestModuleFile, ManifestState, ManifestModule, ManifestDeltaEvent, ManifestDelta, Package } from './types';
+import type {
+  Manifest, ManifestModuleFile, ManifestState, ManifestModule,
+  ManifestDeltaEvent, ManifestDelta, Package
+} from './types';
 
 const resolveImport = (library: string) => require.resolve(library);
 
@@ -17,7 +20,7 @@ export class ManifestUtil {
   }
 
   static async #collectPackages(folder: string, seen = new Set<string>()): Promise<Dependency[]> {
-    const { name, version, dependencies = {}, devDependencies = {}, peerDependencies = {}, peerDependenciesMeta = {}, travetto }: Package =
+    const { name, version, dependencies = {}, devDependencies = {}, peerDependencies = {}, travetto }: Package =
       JSON.parse(await fs.readFile(`${folder}/package.json`, 'utf8'));
 
     if (seen.has(name)) {
@@ -127,13 +130,16 @@ export class ManifestUtil {
       `@npm:${name.replace('/', ':')}` :
       name.replace('/', ':');
 
+    const root = folder === rootFolder;
+
     return {
       id,
       profiles,
       name,
       version,
+      root,
       source: folder,
-      output: folder === rootFolder ? '.' : `node_modules/${name}`,
+      output: root ? '.' : `node_modules/${name}`,
       files
     };
   }
@@ -201,11 +207,15 @@ export class ManifestUtil {
     return out;
   }
 
-  static async buildManifest(rootFolder: string): Promise<Manifest> {
+  static #wrapModules(modules: Record<string, ManifestModule>): Manifest {
     return {
-      modules: await this.#buildManifestModules(rootFolder),
-      generated: Date.now()
+      modules, generated: Date.now(),
+      buildLocation: __filename.replace(/[\\]/g, '/').replace(/^(.*?\/[.]trv_[a-z_]+).*/, (_, p) => p)
     };
+  }
+
+  static async buildManifest(rootFolder: string): Promise<Manifest> {
+    return this.#wrapModules(await this.#buildManifestModules(rootFolder));
   }
 
   static async readManifest(folder: string): Promise<Manifest> {
@@ -215,7 +225,7 @@ export class ManifestUtil {
         await fs.readFile(file, 'utf8')
       );
     } else {
-      return { modules: {}, generated: Date.now() };
+      return this.#wrapModules({});
     }
   }
 

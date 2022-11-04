@@ -1,4 +1,4 @@
-import { Suite, Test, ShouldThrow, TestFile } from '@travetto/test';
+import { Suite, Test, ShouldThrow, TestFixtures } from '@travetto/test';
 
 import { JWTUtil } from '..';
 
@@ -10,14 +10,14 @@ class BadAlgoSuite {
   @Test('signing with pub key as symmetric')
   @ShouldThrow('invalid algorithm')
   async testSymmetric() {
-    const pub = await TestFile.read('/pub.pem', 'utf8');
+    const pub = await TestFixtures.read('/pub.pem', 'utf8');
     await JWTUtil.verify(TOKEN, { key: pub });
   }
 
   @Test('signing with pub key as HS256 and whitelisting only RS256')
   @ShouldThrow('invalid algorithm')
   async testAsymmetric() {
-    const pub = await TestFile.read('/pub.pem', 'utf8');
+    const pub = await TestFixtures.read('/pub.pem', 'utf8');
 
     await JWTUtil.verify(TOKEN, { key: pub, alg: 'RS256' });
   }

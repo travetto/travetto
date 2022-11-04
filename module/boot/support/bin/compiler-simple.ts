@@ -159,7 +159,7 @@ export class Compiler {
         data.sources = [file];
         text = text.replace(sourceMapUrl, `${prefix}base64,${Buffer.from(JSON.stringify(data), 'utf8').toString('base64url')}`);
       } else { // Normal file
-        const mod = this.#modules.find(x => x.output === '.')!;
+        const mod = this.#modules.find(x => x.root)!;
         data.sourceRoot = mod.source;
       }
 
@@ -246,7 +246,7 @@ export class Compiler {
       for (const [modName, subs] of Object.entries(delta)) {
         const mod = this.#manifest.modules[modName];
         for (const [file] of subs) {
-          files.push(path.resolve(`${mod.output}/${file}`));
+          files.push(path.resolve(mod.output, file));
         }
       }
     }

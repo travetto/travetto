@@ -4,12 +4,9 @@ import { AssetUtil, Asset } from '@travetto/asset';
 import { StreamUtil } from '@travetto/base';
 import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
-import { BeforeAll, Suite, Test, TestFile } from '@travetto/test';
+import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 
 import { Upload, UploadAll } from '../src/decorator';
-
-import { TEST_RESOURCES } from '@travetto/asset/support/test.service';
-
 
 type FileUpload = { name: string, resource: string, type: string };
 
@@ -52,18 +49,18 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
 
   async getUploads(...files: FileUpload[]) {
     return Promise.all(files.map(async ({ name, type, resource: filename }) => {
-      const buffer = await StreamUtil.streamToBuffer(await TestFile.readStream(filename));
+      const buffer = await StreamUtil.streamToBuffer(await TestFixtures.readStream(filename));
       return { name, type, filename, buffer, size: buffer.length };
     }));
   }
 
   async getAsset(pth: string) {
-    return AssetUtil.fileToAsset(await TestFile.find(pth));
+    return AssetUtil.fileToAsset(await TestFixtures.find(pth));
   }
 
   @BeforeAll()
   async setup() {
-    TestFile.addPath(TEST_RESOURCES);
+    TestFixtures.addModulePath('@travetto/asset/support/fixtures');
   }
 
   @Test()
