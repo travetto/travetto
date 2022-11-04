@@ -2,6 +2,7 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
+    "@travetto/doc": "file:../../doc",
     "@travetto/cache": "file:..",
     "@travetto/model-dynamodb": "file:../../model-dynamodb",
     "@travetto/model-mongo": "file:../../model-mongo",

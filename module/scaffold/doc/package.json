@@ -2,6 +2,7 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
+    "@travetto/doc": "file:../../doc",
     "@travetto/scaffold": "file:..",
     "@travetto/auth-rest-context": "file:../../auth-rest-context",
     "@travetto/auth-rest": "file:../../auth-rest",
