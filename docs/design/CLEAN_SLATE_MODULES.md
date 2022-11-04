@@ -145,6 +145,8 @@ Will provide a new multiphase compiler that:
 - Rework pack:
    * Use manifest for staging files
    * Integrate with bundler (webpack, vite, etc?)
+- Rework top-level command to start/stop all services
+   * Cannot rely on module marfing
 
 ## Deprecated
 
