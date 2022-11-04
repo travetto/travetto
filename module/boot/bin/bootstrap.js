@@ -3,7 +3,7 @@
 // @ts-check
 const path = require('path');
 
-const { log, spawn, isFolderStale } = require('./build-support');
+const { log, spawn, isFolderStale, resolveImport } = require('./build-support');
 
 /**
  *  Step 1
@@ -12,7 +12,7 @@ async function bootstrap() {
   const folder = path.resolve(__dirname, '../support/bin');
   if (await isFolderStale(folder)) {
     log('[1] Bootstrap Rebuilding.');
-    const TSC = require.resolve('typescript').replace(/(node_modules\/typescript)\/.*$/, (_, s) => `${s}/bin/tsc`);
+    const TSC = `${resolveImport('typescript', true)}/bin/tsc`;
     await spawn('Compiling Bootstrap', TSC, { cwd: folder });
   } else {
     log('[1] Bootstrap Rebuild Skipped.');

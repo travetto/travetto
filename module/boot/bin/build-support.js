@@ -106,8 +106,17 @@ async function isFolderStale(folder) {
   return flags.some(x => x === true);
 }
 
+const resolveImport = (library, toRoot = false) => {
+  let res = require.resolve(library)
+  if (toRoot) {
+    res = `${res.split(`/node_modules/${library}`)[0]}/node_modules/${library}`;
+  }
+  return res;
+};
+
+
 let logTarget = process.env.DEBUG === 'build' ? console.debug.bind(console) : () => { };
 
 let log = (...args) => logTarget(...args);
 
-module.exports = { spawn, log, isFolderStale };
+module.exports = { spawn, log, isFolderStale, resolveImport };

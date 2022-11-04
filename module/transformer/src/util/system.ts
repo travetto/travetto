@@ -45,4 +45,11 @@ export class SystemUtil {
 
     return Math.abs(hash);
   }
+
+  /**
+   * Resolve import
+   */
+  static resolveImport(module: string): string {
+    return require.resolve(module);
+  }
 }

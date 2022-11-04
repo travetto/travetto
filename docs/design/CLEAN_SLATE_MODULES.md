@@ -142,7 +142,9 @@ Will provide a new multiphase compiler that:
    * Fix how we invoke operations
 - Rework docs to:
    * Use new system
-- Rework pack to use manifest
+- Rework pack:
+   * Use manifest for staging files
+   * Integrate with bundler (webpack, vite, etc?)
 
 ## Deprecated
 

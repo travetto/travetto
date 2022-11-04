@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 import * as fs from 'fs/promises';
 
+import * as path from '../../../util/path';
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
@@ -73,7 +73,7 @@ class TestRunnerFeature extends BaseFeature {
     await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig(
       'Debug Travetto',
       Workspace.binPath(this.module, 'test-direct'),
-      [file.replace(`${Workspace.path}${path.sep}`, ''), `${line}`],
+      [file.replace(`${Workspace.path}${path.nativeSep}`, ''), `${line}`],
       { TRV_TEST_DELAY: '2s' }
     ));
   }

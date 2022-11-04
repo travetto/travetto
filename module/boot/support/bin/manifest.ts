@@ -5,6 +5,8 @@ import * as path from './path';
 
 import type { Manifest, ManifestModuleFile, ManifestState, ManifestModule, ManifestDeltaEvent, ManifestDelta, Package } from './types';
 
+const resolveImport = (library: string) => require.resolve(library);
+
 type Dependency = { id?: string, version: string, name: string, folder: string, profiles?: string[] };
 type DeltaModuleFiles = Record<string, ManifestModuleFile>;
 
@@ -36,7 +38,7 @@ export class ManifestUtil {
       ...Object.entries(peerDependencies).map(([k, v]) => [k, v, 'peer'] as const)
         .filter(([x]) => {
           try {
-            require.resolve(x);
+            resolveImport(x);
             return true;
           } catch {
             return false;
@@ -49,7 +51,7 @@ export class ManifestUtil {
         out.push(...await this.#collectPackages(path.resolve(folder, value.replace('file:', '')), seen));
       } else {
         try {
-          const next = path.resolve(require.resolve(el))
+          const next = path.resolve(resolveImport(el))
             .replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
           out.push(...await this.#collectPackages(next, seen));
         } catch (e) { }
@@ -106,8 +108,6 @@ export class ManifestUtil {
       if (!rel.includes('/')) { // If a file
         if (rel === 'index.ts') {
           files.index = [entry];
-        } else if (rel === 'doc.ts') {
-          files.docIndex = [entry];
         } else {
           (files['rootFiles'] ??= []).push(entry);
         }
@@ -153,40 +153,6 @@ export class ManifestUtil {
       out[cfg.name] = cfg;
     }
     return out;
-  }
-
-  static async buildManifest(rootFolder: string): Promise<Manifest> {
-    return {
-      modules: await this.#buildManifestModules(rootFolder),
-      generated: Date.now()
-    };
-  }
-
-  static async writeManifest(file: string, manifest: Manifest): Promise<void> {
-    let folder = file;
-    if (file.endsWith('.json')) {
-      folder = path.dirname(file);
-    } else {
-      file = `${folder}/manifest.json`;
-    }
-    await fs.mkdir(folder, { recursive: true });
-    await fs.writeFile(file, JSON.stringify(manifest));
-  }
-
-  static async readManifest(file: string): Promise<Manifest | undefined>;
-  static async readManifest(file: string, createStub: true): Promise<Manifest>;
-  static async readManifest(file: string, createStub = false): Promise<Manifest | undefined> {
-    let folder = file;
-    if (!file.endsWith('.json')) {
-      file = `${folder}/manifest.json`;
-    }
-    if (await fs.stat(file).catch(() => false)) {
-      return JSON.parse(
-        await fs.readFile(file, 'utf8')
-      );
-    } else {
-      return createStub ? { modules: {}, generated: Date.now() } : undefined;
-    }
   }
 
   static #flattenModuleFiles(m: ManifestModule): DeltaModuleFiles {
@@ -235,6 +201,24 @@ export class ManifestUtil {
     return out;
   }
 
+  static async buildManifest(rootFolder: string): Promise<Manifest> {
+    return {
+      modules: await this.#buildManifestModules(rootFolder),
+      generated: Date.now()
+    };
+  }
+
+  static async readManifest(folder: string): Promise<Manifest> {
+    const file = path.resolve(folder, 'manifest.json');
+    if (await fs.stat(file).catch(() => false)) {
+      return JSON.parse(
+        await fs.readFile(file, 'utf8')
+      );
+    } else {
+      return { modules: {}, generated: Date.now() };
+    }
+  }
+
   static async produceDelta(outputFolder: string, left: Manifest, right: Manifest): Promise<ManifestDelta> {
     const deltaLeft = Object.fromEntries(
       Object.values(left.modules)
@@ -268,7 +252,8 @@ export class ManifestUtil {
 
   static async produceState(rootFolder: string, outputFolder: string): Promise<ManifestState> {
     const manifest = await this.buildManifest(rootFolder);
-    const delta = await this.produceDelta(outputFolder, manifest, await ManifestUtil.readManifest(outputFolder, true));
+    const oldManifest = await this.readManifest(outputFolder);
+    const delta = await this.produceDelta(outputFolder, manifest, oldManifest);
     return { manifest, delta };
   }
 }

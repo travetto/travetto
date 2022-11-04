@@ -33,23 +33,11 @@
     "watch": "npx tsc -watch -p ./"
   },
   "dependencies": {
-    "@travetto/path": "file:../../module/path",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
     "@types/node": "^18.8.2",
     "@types/vscode": "^1.71.0"
-  },
-  "peerDependencies": {
-    "@travetto/app": "file:../../module/app"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/app": {
-      "optional": true,
-      "profiles": [
-        "doc"
-      ]
-    }
   },
   "travetto": {
     "id": "travetto-plugin",

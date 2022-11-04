@@ -1,7 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
 import { ModuleIndex } from '@travetto/boot';
 
-const ConsoleManager = d.Ref('ConsoleManager', '@travetto/boot/src-ts/console.ts');
+const ConsoleManager = d.Ref('ConsoleManager', '@travetto/boot/src/console.ts');
 
 export const text = d`
 ${d.Header()}
@@ -35,7 +35,7 @@ ${d.Note(d`In production mode, all ${d.Method('console.debug')} invocations are 
 
 ${d.Section('How Logging is Instrumented')}
 
-All of the logging instrumentation occurs at transpilation time.  All ${d.Method('console.*')} methods are replaced with a call to a globally defined variable that delegates to the ${ConsoleManager}.  This module, hooks into the ${ConsoleManager} and receives all logging events from all files compiled by the ${mod.Compiler} module.
+All of the logging instrumentation occurs at transpilation time.  All ${d.Method('console.*')} methods are replaced with a call to a globally defined variable that delegates to the ${ConsoleManager}.  This module, hooks into the ${ConsoleManager} and receives all logging events from all files compiled by the ${lib.Travetto}.
 
 A sample of the instrumentation would be:
 
@@ -60,7 +60,7 @@ ${d.Code('Various log levels', 'support/main.output.ts')}
 
 The corresponding output would be
 
-${d.Execute('Logging output', 'support/main.output', [], {
+${d.Execute('Logging output', 'support/main.output.ts', [], {
   env: {
     TRV_DEBUG: '@trv:log',
     TRV_LOG_PLAIN: '0'

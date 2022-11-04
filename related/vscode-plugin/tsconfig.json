@@ -10,7 +10,7 @@
     }
   },
   "exclude": [
-    "doc.ts",
+    "doc/doc.ts",
     "node_modules",
     ".vscode-test"
   ],

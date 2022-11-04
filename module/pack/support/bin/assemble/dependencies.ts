@@ -1,6 +1,7 @@
 import { existsSync } from 'fs';
 
 import * as path from '@travetto/path';
+import { PackageUtil } from '@travetto/boot';
 
 export type ResolvedDep = { file: string, type: DepType, dep: string, version: string };
 export type DepType = 'prod' | 'dev' | 'opt' | 'peer';
@@ -13,14 +14,6 @@ const DEP_MAPPING = {
   opt: 'optionalDependencies',
   peer: 'peerDependencies',
 } as const;
-
-type PackageShape = {
-  name: string;
-} & {
-  [key: string]: {
-    [key: string]: string;
-  };
-};
 
 /**
  * Utilities for processing the package.json dependencies
@@ -68,8 +61,7 @@ export class DependenciesUtil {
       if (depth > maxDepth) { // Ignore if greater than valid max depth
         continue;
       }
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const p = await import(`${top}/package.json`) as PackageShape;
+      const p = PackageUtil.readPackage(`${top}/package.json`);
       const deps: (readonly [name: string, type: DepType, version: string])[] = [];
       for (const type of types) {
         if (

@@ -2,6 +2,7 @@ import * as ts from 'typescript';
 
 import * as path from '../../support/path';
 import { Import } from '../types/shared';
+import { SystemUtil } from './system';
 
 /**
  * Import utilities
@@ -22,7 +23,7 @@ export class ImportUtil {
       return path.resolve('node_modules', file);
     }
     try {
-      return require.resolve(file);
+      return SystemUtil.resolveImport(file);
     } catch {
       return file;
     }

@@ -2,7 +2,7 @@ import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import { Readable } from 'stream';
 import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 
-import * as path from '@travetto/path';
+import * as path from './path';
 
 /**
  * Result of an execution
@@ -181,22 +181,6 @@ export class ExecUtil {
   static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
     const proc = spawn(cmd, args, this.getOpts(options));
     const result = this.enhanceProcess(proc, options, `${cmd} ${args.join(' ')}`);
-    return { process: proc, result };
-  }
-
-  /**
-   * Run a command relative to the current node executable.  Mimics how node's
-   * fork operation is just spawn with the command set to `process.argv0`
-   * @param cmd The file to run
-   * @param args The command line arguments to pass
-   * @param options The enhancement options
-   */
-  static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
-    // Always register for the fork
-    const opts = this.getOpts(options);
-    const spawnArgs = [path.resolve(file), ...args];
-    const proc = spawn(process.argv0, spawnArgs, opts);
-    const result = this.enhanceProcess(proc, options, spawnArgs.join(' '));
     return { process: proc, result };
   }
 

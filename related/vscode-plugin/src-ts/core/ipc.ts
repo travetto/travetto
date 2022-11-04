@@ -2,8 +2,7 @@ import * as fs from 'fs';
 import * as rl from 'readline';
 import { ExtensionContext } from 'vscode';
 
-import * as path from '@travetto/path';
-
+import * as path from '../util/path';
 import { TargetEvent } from './types';
 
 export class IpcSupport {
