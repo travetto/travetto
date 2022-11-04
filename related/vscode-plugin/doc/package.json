@@ -1,0 +1,9 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "vscode-plugin": "file:..",
+    "@travetto/app": "file:../../../module/app"
+  },
+  "private": true
+}

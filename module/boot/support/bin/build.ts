@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { log, spawn, BuildConfig } from '../../bin/build-support';
 
 import { ManifestState } from './types';
@@ -41,7 +42,7 @@ async function compilerSetup(state: ManifestState, compilerFolder: string): Prom
   if (shouldRebuildCompiler(state)) {
     log('[3] Setting up Compiler');
     const args = [
-      require.resolve('./compiler-setup'),
+      path.resolve(__dirname, './compiler-setup'),
       (manifestTemp ??= await ManifestUtil.writeState(state)),
       compilerFolder
     ]

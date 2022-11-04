@@ -57,7 +57,7 @@ export class OutputCompiler extends Compiler {
     }
 
     // Write manifest
-    await this.workspace.writeRawFile('manifest.json', JSON.stringify(this.manifest));
+    await this.workspace.writeRawFile('manifest.json', JSON.stringify(this.manifest, null, 2));
   }
 }
 

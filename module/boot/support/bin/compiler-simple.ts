@@ -51,8 +51,6 @@ export class Compiler {
       x => [
         ...x.files.index ?? [],
         ...x.files.src ?? [],
-        ...x.files.docIndex ?? [],
-        ...x.files.doc ?? [],
         ...x.files.support ?? [],
         ...x.files.test ?? [],
       ]
@@ -212,11 +210,11 @@ export class Compiler {
         if (pkg.main) {
           pkg.main = pkg.main.replace(/[.]ts$/, '.js');
         }
-        for (const key of ["devDependencies", "dependencies", "peerDependencies"]) {
+        for (const key of ["devDependencies", "dependencies", "peerDependencies"] as const) {
           if (key in pkg) {
-            for (const dep of Object.keys(pkg[key])) {
+            for (const dep of Object.keys(pkg[key] ?? {})) {
               if (dep in this.#manifest.modules) {
-                pkg[key][dep] = this.#manifest.modules[dep].version;
+                pkg[key]![dep] = this.#manifest.modules[dep].version;
               }
             }
           }

@@ -2,9 +2,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs/promises';
 import * as cp from 'child_process';
 
-import * as path from '@travetto/path';
-
-import { CatchableResult, ExecUtil, ExecutionOptions, ExecutionResult, ExecutionState } from './exec';
+import * as path from '../util/path';
+import { CatchableResult, ExecUtil, ExecutionOptions, ExecutionResult, ExecutionState } from '../util/exec';
 
 type ForkResult = ExecutionState<CatchableResult>;
 
@@ -237,7 +236,7 @@ export class Workspace {
     try {
       await new Promise<void>((res, rej) => {
         const [cmd, args] = process.platform === 'win32' ?
-          ['xcopy', ['/y', '/h', '/s', src.replaceAll('/', path.sep), dest.replaceAll('/', path.sep)]] :
+          ['xcopy', ['/y', '/h', '/s', src.replaceAll('/', path.nativeSep), dest.replaceAll('/', path.nativeSep)]] :
           ['cp', ['-r', '-p', src, dest]];
 
         const proc = cp.spawn([cmd, ...args].join(' '), {});

@@ -8,6 +8,7 @@ import { CoreUtil } from './util/core';
 import { Import } from './types/shared';
 
 import { ManifestManager } from './manifest';
+import { SystemUtil } from './util/system';
 
 const D_OR_D_TS_EXT_RE = /[.]d([.]ts)?$/;
 
@@ -48,7 +49,7 @@ export class ImportManager {
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {
-      file = require.resolve(file.replace(/.*@types\/node\//, '').replace(D_OR_D_TS_EXT_RE, ''));
+      file = SystemUtil.resolveImport(file.replace(/.*@types\/node\//, '').replace(D_OR_D_TS_EXT_RE, ''));
     }
 
     // Put file back to its original state

@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
-import * as path from '@travetto/path';
+
+import * as path from '../util/path';
 
 type TimeEntry<T> = { key: string, data: T, time: number };
 

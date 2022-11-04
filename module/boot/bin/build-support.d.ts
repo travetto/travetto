@@ -2,6 +2,7 @@ export var log: (...args: unknown[]) => void;
 type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string> };
 export var spawn: (action: string, cmd: string, cfg?: SpawnCfg) => Promise<void>;
 export var isFolderStale: (folder: string) => boolean;
+export var resolveImport: (library: string, toRoot?: boolean) => string;
 export type BuildConfig = {
   outputFolder: string;
   compilerFolder: string;

@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 
 import * as path from '@travetto/path';
-import { PackageUtil } from '@travetto/boot';
+import { ModuleIndex, PackageUtil } from '@travetto/boot';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
@@ -25,7 +25,7 @@ export class FileUtil {
    */
   static resolveFile(file: string): { resolved: string, cleaned: string } {
     if (!existsSync(path.resolve(file))) {
-      file = require.resolve(file);
+      file = ModuleIndex.resolveImport(file);
     }
     const resolved = path.resolve(file);
     // TODO: Fix name

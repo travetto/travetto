@@ -162,6 +162,14 @@ class $ModuleIndex {
   hasModule(name: string) {
     return name in this.manifest.modules;
   }
+
+  /**
+   * Resolve import
+   */
+  resolveImport(name: string): string {
+    // TODO: Write own logic?
+    return require.resolve(name);
+  }
 }
 
 export const ModuleIndex = new $ModuleIndex(

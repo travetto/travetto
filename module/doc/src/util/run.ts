@@ -47,11 +47,6 @@ export class DocRunUtil {
 
   static runState(cmd: string, args: string[], config: RunConfig = {}): RunState {
     args = [...args];
-    if (cmd.endsWith('.ts')) {
-      const mod = config.module ?? 'base';
-      args.unshift(require.resolve(`@travetto/${mod}/bin/main`), cmd);
-      cmd = process.argv0;
-    }
     return {
       cmd,
       args,

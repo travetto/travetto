@@ -114,8 +114,6 @@ The services are defined as plain javascript files within the framework and can 
 ```typescript
 import type { Service } from '@travetto/command/bin/lib/service';
 
-const { version } = require(require.resolve('@elastic/elasticsearch').replace('index.js', 'package.json'));
-
 const port = 9200;
 
 export const service: Service = {

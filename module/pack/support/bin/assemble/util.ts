@@ -3,7 +3,6 @@ import * as fs from 'fs/promises';
 import * as path from '@travetto/path';
 import { ExecUtil } from '@travetto/base';
 import { ScanFs } from '@travetto/resource';
-import { ModuleUtil } from '@travetto/boot/src/internal/module-util';
 
 import { DependenciesUtil, DepType } from './dependencies';
 import { PackUtil } from '../util';
@@ -109,14 +108,6 @@ export class AssembleUtil {
         }
       }
     }
-    await PackUtil.copyRecursive(
-      path.resolve(path.dirname(require.resolve('@travetto/boot/bin/main.js'))),
-      path.resolve(workspace, 'node_modules/@travetto/boot/bin')
-    );
-    await PackUtil.copyRecursive(
-      path.resolve(path.dirname(require.resolve('@travetto/base/bin/main.js'))),
-      path.resolve(workspace, 'node_modules/@travetto/base/bin')
-    );
   }
 
   /**
