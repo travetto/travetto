@@ -14,7 +14,7 @@ export class ExecUtilTest {
       cwd: __source.folder
     });
     const result = await proc.result;
-    assert(result.stdout.includes(path.basename(__source.file)));
+    assert(result.stdout.includes(path.basename(__source.file.replace(/[.]ts$/, '.js'))));
     assert(result.code === 0);
     assert(result.valid);
   }

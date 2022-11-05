@@ -1,8 +1,9 @@
 import { Compiler, main } from './compiler-simple';
+import { ManifestUtil } from './manifest';
 import { Manifest, ManifestDelta, ManifestState } from './types';
 
 function restrictManifest(state: ManifestState): ManifestState {
-  const outManifest: Manifest = { generated: Date.now(), modules: {} };
+  const outManifest: Manifest = ManifestUtil.wrapModules({});
   const outDelta: ManifestDelta = {};
   const trans = state.manifest.modules['@travetto/transformer'];
   const boot = state.manifest.modules['@travetto/boot'];
@@ -39,13 +40,15 @@ function restrictManifest(state: ManifestState): ManifestState {
         allFiles.add(file);
       }
     }
-    const changed = state.delta[name].filter(([file]) => allFiles.has(file));;
+    const changed = state.delta[name].filter(([file]) => allFiles.has(file));
     if (changed.length) {
       outDelta[name] = changed;
     }
   }
 
-  return { manifest: outManifest, delta: outDelta }
+  outManifest.buildLocation = state.manifest.buildLocation;
+
+  return { manifest: outManifest, delta: outDelta };
 }
 
 if (require.main === module) {

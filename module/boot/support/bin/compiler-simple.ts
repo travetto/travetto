@@ -159,7 +159,7 @@ export class Compiler {
         data.sources = [file];
         text = text.replace(sourceMapUrl, `${prefix}base64,${Buffer.from(JSON.stringify(data), 'utf8').toString('base64url')}`);
       } else { // Normal file
-        const mod = this.#modules.find(x => x.root)!;
+        const mod = this.#modules.find(x => x.main)!;
         data.sourceRoot = mod.source;
       }
 

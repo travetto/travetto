@@ -9,9 +9,11 @@ let manifestTemp: string;
 /**
  *  Step 2
  */
-async function buildManifest(outputFolder: string): Promise<ManifestState> {
+async function buildManifest(cfg: BuildConfig): Promise<ManifestState> {
   log('[2] Generating Manifest state');
-  return await ManifestUtil.produceState(process.cwd(), outputFolder);
+  const state = await ManifestUtil.produceState(process.cwd(), cfg.outputFolder);
+  state.manifest.buildLocation = cfg.compilerFolder;
+  return state;
 }
 
 function shouldRebuildCompiler({ delta }: ManifestState): boolean {
@@ -72,7 +74,7 @@ async function compileOutput(state: ManifestState, { compilerFolder, outputFolde
 }
 
 export async function build(cfg: BuildConfig): Promise<void> {
-  const state = await buildManifest(cfg.outputFolder); // Step 2
+  const state = await buildManifest(cfg); // Step 2
   await compilerSetup(state, cfg.compilerFolder); // Step 3
   await compileOutput(state, cfg); // Step 4
 }

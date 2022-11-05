@@ -35,14 +35,10 @@ async function boot({
     });
   }
 
-  process.chdir(outputFolder);
+  process.env.TRV_MANIFEST_ROOT = outputFolder;
   process.env.NODE_PATH = [`${outputFolder}/node_modules`, process.env.NODE_PATH].join(path.delimiter);
   // @ts-expect-error
-  require("module").Module._initPaths();
+  require('module').Module._initPaths();
 }
 
 module.exports = { boot };
-
-if (require.main === module) {
-  boot();
-}

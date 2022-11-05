@@ -1,6 +1,13 @@
 import * as path from '../support/path';
 
-export type ManifestModule = { source: string, output: string, root?: boolean, name: string, files: Record<string, [string, string, number][]> };
+export type ManifestModule = {
+  source: string;
+  output: string;
+  main?: boolean;
+  local?: boolean;
+  name: string;
+  files: Record<string, [string, string, number][]>;
+};
 
 export class ManifestManager {
   #srcToMod: Record<string, string> = {};
@@ -11,7 +18,7 @@ export class ManifestManager {
 
   constructor(modules: ManifestModule[]) {
     for (const mod of modules) {
-      if (mod.root) {
+      if (mod.main) {
         this.#main = mod;
       }
       for (const files of Object.values(mod.files)) {

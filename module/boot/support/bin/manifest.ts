@@ -101,8 +101,11 @@ export class ManifestUtil {
   }
 
   static async #describeModule(rootFolder: string, { id, name, version, folder, profiles }: Dependency): Promise<ManifestModule> {
+    const local = folder.includes('node_modules');
+    const main = folder === rootFolder;
+
     const files: Record<string, ManifestModuleFile[]> = {};
-    const folderSet = folder !== rootFolder ? new Set<string>(['src', 'bin', 'support']) : new Set<string>();
+    const folderSet = !main ? new Set<string>(['src', 'bin', 'support']) : new Set<string>();
 
     for (const file of await this.#scanFolder(folder, folderSet)) {
       // Group by top folder
@@ -114,32 +117,33 @@ export class ManifestUtil {
         } else {
           (files['rootFiles'] ??= []).push(entry);
         }
+      } else if (/(test|support)\/fixtures/.test(rel)) {
+        entry[1] = 'fixture';
+        const sub = rel.replace(/.*((?:test|support)\/fixtures)\/.*/, (_, p) => p);
+        (files[sub] ??= []).push(entry);
       } else {
-        const sub = rel.match(/^((?:(test|support)\/resources)|[^/]+)/)![0];
+        const [sub] = rel.split('/');
         (files[sub] ??= []).push(entry);
       }
     }
 
     // Refine non-main module
-    if (folder !== rootFolder) {
+    if (!main) {
       files.rootFiles = files.rootFiles.filter(([file, type]) => type !== 'ts');
     }
 
     // Cleaning up names
-    id ??= folder.includes('node_modules') ?
-      `@npm:${name.replace('/', ':')}` :
-      name.replace('/', ':');
-
-    const root = folder === rootFolder;
+    id ??= (!local ? `@npm:${name}` : name).replace('/', ':');
 
     return {
       id,
       profiles,
       name,
       version,
-      root,
+      main,
+      local: local,
       source: folder,
-      output: root ? '.' : `node_modules/${name}`,
+      output: `node_modules/${name}`,
       files
     };
   }
@@ -147,12 +151,14 @@ export class ManifestUtil {
   static async #buildManifestModules(rootFolder: string): Promise<Record<string, ManifestModule>> {
     const modules = (await this.#collectPackages(rootFolder));
 
+    // TODO: Revisit logic
     if (!modules.some(x => x.name === '@travetto/cli')) {
       const folder = path.resolve(__dirname, '..', '..', '..', 'cli');
       if (await fs.stat(folder).catch(() => false)) {
         modules.unshift(...(await this.#collectPackages(folder)));
       }
     }
+
     const out: Record<string, ManifestModule> = {};
     for (const mod of modules) {
       const cfg = await this.#describeModule(rootFolder, mod);
@@ -207,15 +213,15 @@ export class ManifestUtil {
     return out;
   }
 
-  static #wrapModules(modules: Record<string, ManifestModule>): Manifest {
+  static wrapModules(modules: Record<string, ManifestModule>): Manifest {
     return {
       modules, generated: Date.now(),
-      buildLocation: __filename.replace(/[\\]/g, '/').replace(/^(.*?\/[.]trv_[a-z_]+).*/, (_, p) => p)
+      buildLocation: '__tbd__'
     };
   }
 
   static async buildManifest(rootFolder: string): Promise<Manifest> {
-    return this.#wrapModules(await this.#buildManifestModules(rootFolder));
+    return this.wrapModules(await this.#buildManifestModules(rootFolder));
   }
 
   static async readManifest(folder: string): Promise<Manifest> {
@@ -225,7 +231,7 @@ export class ManifestUtil {
         await fs.readFile(file, 'utf8')
       );
     } else {
-      return this.#wrapModules({});
+      return this.wrapModules({});
     }
   }
 
