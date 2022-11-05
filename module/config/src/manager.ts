@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 
 import * as path from '@travetto/path';
+import { ModuleIndex } from '@travetto/boot';
 import { Env, AppError, Class, Util } from '@travetto/base';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { YamlUtil } from '@travetto/yaml';
@@ -128,7 +129,7 @@ class $ConfigManager {
     } catch (err) {
       if (err instanceof ValidationResultError) {
         err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
-        err.payload = { class: cls.Ⲑid, file: cls.Ⲑfile, ...(err.payload ?? {}) };
+        err.payload = { class: cls.Ⲑid, file: cls.Ⲑsource, ...(err.payload ?? {}) };
       }
       throw err;
     }

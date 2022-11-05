@@ -11,10 +11,10 @@ export class ExecUtilTest {
   @Test()
   async spawn() {
     const proc = ExecUtil.spawn('ls', ['-lsa'], {
-      cwd: __source.folder
+      cwd: path.dirname(__output)
     });
     const result = await proc.result;
-    assert(result.stdout.includes(path.basename(__source.file.replace(/[.]ts$/, '.js'))));
+    assert(result.stdout.includes(path.basename(__output)));
     assert(result.code === 0);
     assert(result.valid);
   }
@@ -22,7 +22,7 @@ export class ExecUtilTest {
   @Test()
   async spawnBad() {
     const proc = ExecUtil.spawn('ls', ['xxxx'], {
-      cwd: __source.folder
+      cwd: path.dirname(__output)
     });
     const result = await proc.result.catchAsResult!();
     assert(result.stderr.includes('xxxx'));

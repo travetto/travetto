@@ -54,7 +54,7 @@ export class PackUtil {
       this.#modes = await Promise.all(
         ModuleIndex.findSupport({ filter: f => /\/pack[.].*[.]/.test(f) })
           .map(async (x) => {
-            const req: Partial<CommonConfig> = (await import(x.file)).config;
+            const req: Partial<CommonConfig> = (await import(x.output)).config;
             req.file = x.module.replace(/^node_modules\//, '');
             return req;
           })

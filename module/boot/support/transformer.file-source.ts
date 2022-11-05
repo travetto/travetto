@@ -6,7 +6,7 @@ const INIT_MOD = '@travetto/boot/support/init';
 const PATH_MOD = '@travetto/path';
 
 /**
- *  Supporting `__source` as a file property
+ *  Supporting `__output` as a file property
  */
 export class FileSourceTransformer {
 
@@ -23,11 +23,11 @@ export class FileSourceTransformer {
         [],
         state.factory.createVariableDeclarationList([
           state.factory.createVariableDeclaration(
-            '__source',
+            '__output',
             undefined,
             undefined,
             state.factory.createCallExpression(
-              state.createAccess('ᚕtrv', 'source'),
+              state.createAccess('ᚕtrv', 'output'),
               [],
               [state.createIdentifier('__filename')]
             )

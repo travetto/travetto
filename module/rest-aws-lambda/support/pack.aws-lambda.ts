@@ -17,7 +17,7 @@ export const config: AllConfigPartial = {
     postProcess: [{
       ['Lambda Entrypoint']: cfg =>
         fs.copyFile(
-          path.resolve(__source.folder, 'aws-lambda.handler.js'),
+          path.resolve(path.dirname(__output), 'aws-lambda.handler.js'),
           path.resolve(cfg.workspace, 'index.js')
         )
     }],

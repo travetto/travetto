@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 
+import * as path from '@travetto/path';
 import { Suite, Test } from '@travetto/test';
 import { ModuleIndex } from '../src/module-index';
 
@@ -8,18 +9,18 @@ class ModuleIndexTests {
   @Test()
   testFind() {
     const files = ModuleIndex.find({});
-    assert(files.some(x => x.file.endsWith('test/module.ts')));
+    assert(files.some(x => x.output.endsWith('test/module.js')));
   }
 
   @Test()
   async getId() {
-    const modId = ModuleIndex.getId(__source.file);
-    assert(modId === './test/module-util');
+    const modId = ModuleIndex.getId(__output);
+    assert(modId === '@travetto/boot/test/module');
 
-    const modId2 = ModuleIndex.getId(`${__source.folder}/node_modules/@travetto/boot/src/module-index.js`);
-    assert(modId2 === '@trv:boot/module-util');
+    const modId2 = ModuleIndex.getId(path.resolve(path.dirname(__output), '..', '..', 'test', 'src', 'assert', 'util.ts'));
+    assert(modId2 === '@trv:test/assert/util');
 
-    const modId3 = ModuleIndex.getId(`${__source.folder}/../test/simple.js`);
-    assert(modId3 === './test/simple');
+    const modId3 = ModuleIndex.getId(path.resolve(path.dirname(__output), 'fixtures', 'simple.ts'));
+    assert(modId3 === '@travetto/boot/test/fixtures/simple');
   }
 }

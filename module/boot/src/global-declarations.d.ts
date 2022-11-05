@@ -4,10 +4,9 @@
  */
 declare interface Function {
   Ⲑid: string;
-  Ⲑfile: string;
+  Ⲑsource: string;
   Ⲑmeta?: {
     id: string;
-    file: string;
     hash: number;
     methods: Record<string, { hash: number }>;
     synthetic: boolean;

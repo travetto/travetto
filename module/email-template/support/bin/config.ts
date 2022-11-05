@@ -23,7 +23,7 @@ interface ConfigType {
 export class $EditorConfig {
 
   #configFile = path.resolve('resources/email/dev.yml');
-  #defaultConfig = fs.readFile(path.resolve(__source.folder, 'default-dev.yml'), 'utf8');
+  #defaultConfig = fs.readFile(path.resolve(path.dirname(__output), 'default-dev.yml'), 'utf8');
 
   /**
    *

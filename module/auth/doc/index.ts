@@ -58,7 +58,7 @@ ${d.List(
 ${d.Section('Common Utilities')}
 The ${AuthUtil} provides the following functionality:
 
-${d.Code('Auth util structure', AuthUtil.Ⲑfile, true)}
+${d.Code('Auth util structure', AuthUtil, true)}
 
 ${d.Method('roleMatcher')} is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from ${mod.Base}'s Util class.  
 

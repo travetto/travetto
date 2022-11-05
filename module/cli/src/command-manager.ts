@@ -24,9 +24,8 @@ export class CliCommandManager {
    */
   static getCommandMapping(): Map<string, string> {
     const all = new Map<string, string>();
-    for (const { file } of ModuleIndex.findSupport({ filter: /\/cli[.]/ })) {
-      console.log('Finding file', file);
-      all.set(file.replace(/^.*\/cli[.](.*?)[.][^.]+$/, (_, f) => f), file);
+    for (const { output } of ModuleIndex.findSupport({ filter: /\/cli[.]/ })) {
+      all.set(output.replace(/^.*\/cli[.](.*?)[.][^.]+$/, (_, f) => f), output);
     }
     return all;
   }
@@ -36,8 +35,8 @@ export class CliCommandManager {
    */
   static async loadCommand(cmd: string, op?: (p: CliCommand) => unknown): Promise<CliCommand> {
     const command = cmd.replace(/:/g, '_');
-    const f = this.getCommandMapping().get(command)!;
-    if (!f) {
+    const found = this.getCommandMapping().get(command)!;
+    if (!found) {
       const cfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
       if (cfg) {
         const [, pkg, prod] = cfg;
@@ -48,7 +47,7 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
       }
       throw new Error(`Unknown command: ${cmd}`);
     }
-    const values = Object.values<{ new(...args: unknown[]): unknown }>(await import(f));
+    const values = Object.values<{ new(...args: unknown[]): unknown }>(await import(found));
     for (const v of values) {
       try {
         const inst = new v();

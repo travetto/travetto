@@ -75,7 +75,7 @@ export class StreamUtilTest {
   async pipe() {
     const echo = await TestFixtures.find('echo.js');
     const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const returnedStream = await StreamUtil.execPipe(proc, createReadStream(__source.file.replace(/[.]ts$/, '.js')));
+    const returnedStream = await StreamUtil.execPipe(proc, createReadStream(__output));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('ExecUtil.fork(echo'));
   }

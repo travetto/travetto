@@ -58,7 +58,7 @@ export class TestWatcher {
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
-          file: cls?.Ⲑfile,
+          file: cls?.Ⲑsource,
         });
       }
     });

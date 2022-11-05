@@ -42,7 +42,7 @@ class $DynamicClassSource {
 
     const folders = ModuleIndex.findOwnSrc()
       .reduce((acc, v) => {
-        let d = path.dirname(v.file);
+        let d = path.dirname(v.output);
         do {
           acc.add(d);
           d = path.dirname(d);

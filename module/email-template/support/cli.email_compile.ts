@@ -18,7 +18,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
 
   envInit(): void {
     Env.define({
-      append: { TRV_RESOURCES: path.resolve(__source.folder, 'resources') }
+      append: { TRV_RESOURCES: path.resolve(path.dirname(__output), 'resources') }
     });
   }
 

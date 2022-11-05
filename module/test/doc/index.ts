@@ -33,7 +33,7 @@ ${d.Code('Example assertion for deep comparison', 'test/assert-example.ts')}
 
 would translate to:
 
-${d.Code('Transpiled test Code', ModuleIndex.find({ filter: f => f === 'test/assert-example.ts' })[0].file, false, 'src/javascript')}
+${d.Code('Transpiled test Code', ModuleIndex.find({ filter: f => f === 'test/assert-example.ts' })[0].output, false, 'src/javascript')}
 
 This would ultimately produce the error like:
 

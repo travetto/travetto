@@ -19,11 +19,11 @@ export type AppDecorator = { description?: string };
  */
 export function Application(name: string, config?: AppDecorator) {
   return <T extends Class<AppClass>>(target: T): void => {
-    const stat = lstatSync(target.Ⲑfile.replace(/[.]ts$/, '.js'));
+    const stat = lstatSync(target.Ⲑsource);
     const out: Partial<ApplicationConfig> = {
       ...config ?? {},
       target,
-      filename: target.Ⲑfile,
+      filename: target.Ⲑsource,
       targetId: target.Ⲑid,
       name: name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-').replace(/([a-z])([A-Z])/g, (_, l, u) => `${l}-${u.toLowerCase()}`),
       generatedTime: Math.max(stat.mtimeMs, stat.ctimeMs)

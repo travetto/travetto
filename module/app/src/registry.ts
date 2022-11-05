@@ -1,4 +1,4 @@
-import { ModuleIndex, PackageUtil } from '@travetto/boot';
+import { PackageUtil } from '@travetto/boot';
 import { Class, ShutdownManager, ConcreteClass, Env } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
@@ -56,16 +56,13 @@ class $ApplicationRegistry {
 
     console.log('Running application', {
       name: config.name,
-      filename: ModuleIndex.getId(config.filename)
+      filename: config.filename
     });
 
     // Show manifest
     console.log('Manifest', {
       info: PackageUtil.mainDigest(),
-      env: {
-        ...Env.digest(),
-        resources: Env.getList('TRV_RESOURCES')
-      }
+      env: Env.digest()
     });
 
     // Get instance of app class

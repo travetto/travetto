@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import * as path from '@travetto/path';
+import { ModuleIndex } from '@travetto/boot';
 import { Util, AppError, ClassInstance, Class } from '@travetto/base';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
@@ -30,6 +30,8 @@ export class AssertCheck {
    * @param args The arguments passed in
    */
   static check(assertion: CaptureAssert, positive: boolean, ...args: unknown[]): void {
+    assertion.file = ModuleIndex.getSourceFile(assertion.file);
+
     let fn = assertion.operator;
     assertion.operator = ASSERT_FN_OPERATOR[fn];
 
@@ -225,6 +227,8 @@ export class AssertCheck {
   ): void {
     let missed: Error | undefined;
 
+    assertion.file = ModuleIndex.getSourceFile(assertion.file);
+
     try {
       action();
       if (!positive) {
@@ -286,7 +290,7 @@ export class AssertCheck {
     }
 
     AssertCapture.add({
-      file: test.file.replace(`${path.cwd()}/`, ''),
+      file: test.file,
       line,
       operator: 'throws',
       error: err,

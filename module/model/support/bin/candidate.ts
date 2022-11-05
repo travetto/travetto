@@ -6,6 +6,7 @@ import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/
 
 import type { ModelStorageSupport } from '../../src/service/storage';
 import type { ModelType } from '../../src/types/model';
+import { ModuleIndex } from '@travetto/boot';
 
 type CandidateNames = { providers: string[], models: string[] };
 
@@ -64,7 +65,7 @@ export class ModelCandidateUtil {
    */
   static async getCandidates(op: keyof ModelStorageSupport): Promise<CandidateNames> {
     return CliUtil.waiting('Resolving', () =>
-      ExecUtil.worker<CandidateNames>(`${__source.folder}/../candidate`, [op]).message
+      ExecUtil.worker<CandidateNames>(ModuleIndex.resolveImport('@travetto/model/support/main.candidate'), [op]).message
     );
   }
 

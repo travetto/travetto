@@ -1,3 +1,4 @@
+import { ModuleIndex } from '@travetto/boot';
 import { EventEmitter } from 'events';
 import { Assertion, TestConfig } from '../model/test';
 

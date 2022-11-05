@@ -18,18 +18,15 @@ declare global {
   }
 
   // Parallel to __filename, but cleansed
-  var __source: {
-    file: string;
-    folder: string;
-  };
+  var __output: string;
 
   var ᚕtrv: {
     // Global file loaded
     self: string | undefined;
     // Log replacement
     log(level: LogLevel | 'log', ctx: { file: string, line: number }, ...args: unknown[]): void;
-    // To initialize __source
-    source(file: string): typeof __source;
+    // To initialize __output
+    output(file: string): string;
     // Main handler
     main<T>(target: (...args: unknown[]) => T, args?: string[], respond?: boolean): Promise<T>;
     // Resolve stack

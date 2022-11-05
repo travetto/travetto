@@ -6,8 +6,8 @@ import { ModuleIndex } from '../src/module-index';
 export const step = {
   key: '@trv:boot/load',
   async action(): Promise<void> {
-    for (const { file } of ModuleIndex.findSrc({})) {
-      await import(file);
+    for (const { output } of ModuleIndex.findSrc({})) {
+      await import(output);
     }
   }
 };
