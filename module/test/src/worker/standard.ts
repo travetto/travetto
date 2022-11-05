@@ -1,5 +1,5 @@
 import { ExecUtil } from '@travetto/base';
-import { ErrorUtil } from '@travetto/boot';
+import { ErrorUtil, ModuleIndex } from '@travetto/boot';
 import { ParentCommChannel, Worker, WorkUtil } from '@travetto/worker';
 
 import { Events, RunEvent } from './types';
@@ -14,7 +14,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
    * Spawn a child
    */
   return () => WorkUtil.spawnedWorker(
-    () => ExecUtil.fork('node_modules/@travetto/test/support/main.test-child'),
+    () => ExecUtil.fork(ModuleIndex.resolveImport('@travetto/test/support/main.test-child')),
     /**
      * Child initialization
      */

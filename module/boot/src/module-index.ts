@@ -51,11 +51,9 @@ class $ModuleIndex {
     return files.map(([f, type]) => {
       const source = path.join(m.source, f);
       const fullFile = this.#resolve(m.output, f);
-      const module = (m.output.startsWith('node_modules') ?
-        `${m.output.split('node_modules/')[1]}/${f}` :
-        `./${f}`).replace(/[.]ts$/, '.js');
+      const module = `${m.name}/${f}`.replace(/[.]ts$/, '.js');
 
-      const id = m.root ? module : module.replace(m.name, m.id);
+      const id = m.main ? module : module.replace(m.name, m.id);
 
       return {
         id: id.replace(/\/src\//, '/').replace(/[.][tj]s$/, ''),
@@ -173,5 +171,5 @@ class $ModuleIndex {
 }
 
 export const ModuleIndex = new $ModuleIndex(
-  path.toPosix(process.env.TRV_CACHE ?? path.cwd())
+  path.toPosix(process.env.TRV_MANIFEST_ROOT ?? path.cwd())
 );

@@ -1,12 +1,13 @@
 // Manifest types
-export type ManifestModuleFileType = 'd.ts' | 'ts' | 'js' | 'json' | 'unknown';
+export type ManifestModuleFileType = 'd.ts' | 'ts' | 'js' | 'json' | 'unknown' | 'fixture';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number];
 
 export type ManifestModule<T = Record<string, ManifestModuleFile[]>> = {
   id: string;
   name: string;
-  root?: boolean;
+  main?: boolean;
+  local?: boolean;
   version: string,
   source: string;
   output: string;

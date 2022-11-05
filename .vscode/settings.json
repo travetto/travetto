@@ -3,4 +3,7 @@
   "cSpell.words": [
     "direnv"
   ],
+  "files.exclude": {
+    "**/.trv_compiler/**": true
+  },
 }

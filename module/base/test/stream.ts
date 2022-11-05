@@ -2,10 +2,9 @@ import * as assert from 'assert';
 import { createReadStream } from 'fs';
 import * as os from 'os';
 
-import { Test, Suite } from '@travetto/test';
+import { Test, Suite, TestFixtures } from '@travetto/test';
 import { ExecUtil } from '@travetto/base';
 
-import { ResourceManager } from '../src/resource';
 import { StreamUtil } from '../src/stream';
 
 
@@ -25,7 +24,7 @@ export class StreamUtilTest {
 
   @Test()
   async streamToBuffer() {
-    const stream = createReadStream(await ResourceManager.findAbsolute('test.js'));
+    const stream = createReadStream(await TestFixtures.find('test.js'));
     const text = (await StreamUtil.streamToBuffer(stream)).toString('utf8');
     assert(text.length > 1);
     assert(text.includes('Hello World'));
@@ -44,7 +43,7 @@ export class StreamUtilTest {
 
     assert((await StreamUtil.toBuffer(unit8)).toString('utf8') === 'abcde');
 
-    const stream = createReadStream(await ResourceManager.findAbsolute('test.js'));
+    const stream = createReadStream(await TestFixtures.find('test.js'));
     assert((await StreamUtil.toBuffer(stream)).length > 10);
   }
 
@@ -66,7 +65,7 @@ export class StreamUtilTest {
 
   @Test()
   async waitForCompletion() {
-    const state = ExecUtil.fork(await ResourceManager.findAbsolute('long.js'), ['100000'], { stdio: 'pipe' });
+    const state = ExecUtil.fork(await TestFixtures.find('long.js'), ['100000'], { stdio: 'pipe' });
     const stream = await StreamUtil.waitForCompletion(state.process.stdout!, () => state.result);
     const output = (await StreamUtil.toBuffer(stream)).toString('utf8').split(/\n/g);
     assert(output.length >= 100000);
@@ -74,9 +73,9 @@ export class StreamUtilTest {
 
   @Test()
   async pipe() {
-    const echo = await ResourceManager.findAbsolute('echo.js');
+    const echo = await TestFixtures.find('echo.js');
     const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const returnedStream = await StreamUtil.execPipe(proc, createReadStream(__source.file));
+    const returnedStream = await StreamUtil.execPipe(proc, createReadStream(__source.file.replace(/[.]ts$/, '.js')));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('ExecUtil.fork(echo'));
   }

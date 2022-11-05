@@ -8,16 +8,14 @@ export class OutputCompiler extends Compiler {
 
   #transformerManager: TransformerManager;
   #transformers: string[];
-  #bootLocation: string;
 
   constructor(manifest: Manifest, outputFolder: string) {
     super(manifest, outputFolder);
-    this.#bootLocation = manifest.buildLocation;
     this.#transformers = this.modules.flatMap(
       x => (x.files.support ?? [])
         .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
         .map(([f]) =>
-          (`${this.#bootLocation}/${x.output}/${f}`.replace(/[.][tj]s$/, ''))
+          (`${manifest.buildLocation}/${x.output}/${f}`.replace(/[.][tj]s$/, ''))
         )
     );
   }
@@ -50,7 +48,7 @@ export class OutputCompiler extends Compiler {
       await this.workspace.symlinkFolder(module, 'support/fixtures');
     }
 
-    const main = this.modules.find(x => x.root);
+    const main = this.modules.find(x => x.main);
     if (main) {
       await this.workspace.symlinkFolder(main, 'test/fixtures');
     }
