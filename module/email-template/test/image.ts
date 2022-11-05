@@ -1,7 +1,6 @@
 import * as assert from 'assert';
 
-import * as path from '@travetto/path';
-import { Test, Suite } from '@travetto/test';
+import { Test, Suite, TestFixtures } from '@travetto/test';
 
 import { ImageUtil } from '../src/image';
 
@@ -18,7 +17,7 @@ class ImageUtilTest {
 <div style="background: url('/red.gif')"></div>
 `;
 
-    const output = await ImageUtil.inlineImageSource(text, path.resolve(__source.folder, '..'));
+    const output = await ImageUtil.inlineImageSource(text, rel => TestFixtures.findSync(rel));
 
     assert(!output.includes('red.gif'));
     assert(!output.includes('blue.gif'));

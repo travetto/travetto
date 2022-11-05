@@ -75,11 +75,11 @@ async function main(target: Function, args = process.argv.slice(2), respond = tr
 // eslint-disable-next-line no-console
 const log = (level: LogLevel, ctx: unknown, ...args: unknown[]): void => console[level](...args);
 
-const source = (file: string): typeof __source => ({ file: src(file), folder: path.dirname(src(file)) });
+const output = (file: string): string => path.toPosix(file);
 
 const utils = Object.defineProperties({}, {
   self: { writable: false, value: src(__filename) },
-  source: { writable: false, value: source },
+  output: { writable: false, value: output },
   main: { writable: false, value: main },
   log: { writable: true, value: log },
   resolveStack: { writable: true, value: undefined }

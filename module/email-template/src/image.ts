@@ -26,10 +26,10 @@ export class ImageUtil {
   /**
    * Inline image sources
    */
-  static async inlineImageSource(html: string, root: string): Promise<string> {
+  static async inlineImageSource(html: string, srcResolver: (key: string) => string): Promise<string> {
     const imageSources = new Set<string>();
     const resolver = (x: string): string => {
-      const og = path.resolve(root, x);
+      const og = srcResolver(x);
       const [, resolved] = og.split('/resources/');
       imageSources.add(resolved ?? og);
       return resolved ?? og;

@@ -65,24 +65,24 @@ export class TapEmitter implements TestConsumer {
       // Handle each assertion
       if (test.assertions.length) {
         let subCount = 0;
-        for (const a of test.assertions) {
-          const text = a.message ? `${a.text} (${this.#enhancer.failure(a.message)})` : a.text;
+        for (const asrt of test.assertions) {
+          const text = asrt.message ? `${asrt.text} (${this.#enhancer.failure(asrt.message)})` : asrt.text;
           let subMessage = [
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(a.file.replace(cwd, '.'))}:${this.#enhancer.assertLine(a.line)}`
+            `${this.#enhancer.assertFile(asrt.file.replace(cwd, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
           ].join(' ');
 
-          if (a.error) {
+          if (asrt.error) {
             subMessage = `${this.#enhancer.failure('not ok')} ${subMessage}`;
           } else {
             subMessage = `${this.#enhancer.success('ok')} ${subMessage}`;
           }
           this.log(`    ${subMessage}`);
 
-          if (a.message && a.message.length > 100) {
-            this.logMeta({ message: a.message.replace(/\\n/g, '\n') });
+          if (asrt.message && asrt.message.length > 100) {
+            this.logMeta({ message: asrt.message.replace(/\\n/g, '\n') });
           }
         }
         this.log(`    ${this.#enhancer.assertNumber(1)}..${this.#enhancer.assertNumber(subCount)}`);

@@ -238,14 +238,12 @@ export class TestExecutor {
    */
   static async execute(consumer: TestConsumer, file: string, ...args: string[]): Promise<void> {
 
-    const cwd = path.cwd();
+    file = path.resolve(file);
 
-    if (!file.startsWith(cwd)) {
-      file = path.join(cwd, file);
-    }
+    const module = ModuleIndex.getModuleFromSource(file) ?? file;
 
     try {
-      await import(path.toPosix(file)); // Path to module
+      await import(module);
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;

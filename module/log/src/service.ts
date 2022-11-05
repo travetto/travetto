@@ -1,4 +1,4 @@
-import { ModuleIndex, ConsoleManager, LogLevel } from '@travetto/boot';
+import { ConsoleManager, LogLevel, LineContext as BaseLineContext } from '@travetto/boot';
 import { Env, Util } from '@travetto/base';
 
 import { Appender, Formatter, LogEvent, LogLevels } from './types';
@@ -10,7 +10,7 @@ import { LogUtil } from './util';
 
 const DefaultLoggerⲐ = Symbol.for('@trv:log/default');
 
-type LineContext = { file: string, line: number, scope?: string };
+type LineContext = BaseLineContext & { scope?: string };
 
 /**
  * Logger service
@@ -118,7 +118,7 @@ class $Logger {
   /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
-  onLog(level: LogLevel, { file, line, scope }: LineContext, [message, context, ...args]: [string, Record<string, unknown>, ...unknown[]]): void {
+  onLog(level: LogLevel, { file, category, line, scope }: LineContext, [message, context, ...args]: [string, Record<string, unknown>, ...unknown[]]): void {
     level = (level in LogLevels) ? level : 'info';
 
     if (!Util.isPlainObject(context)) {
@@ -130,8 +130,6 @@ class $Logger {
       args.unshift(message);
       message = '';
     }
-
-    const category = ModuleIndex.getId(file);
 
     if ((level in this.#exclude) || (category && level in this.#filters && !this.#filters[level]!(category))) {
       return;

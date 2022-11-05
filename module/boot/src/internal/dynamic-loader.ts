@@ -214,8 +214,8 @@ export class $DynamicLoader {
     Module._load = this.#moduleLoad;
 
     // Unload all
-    for (const { file } of ModuleIndex.findSrc({})) {
-      this.unload(file);
+    for (const { output } of ModuleIndex.findSrc({})) {
+      this.unload(output);
     }
   }
 }

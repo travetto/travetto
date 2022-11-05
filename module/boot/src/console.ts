@@ -1,3 +1,4 @@
+import { ModuleIndex } from './module-index';
 import { ConsoleListener, LineContext, LogLevel } from './types';
 
 
@@ -64,6 +65,11 @@ class $ConsoleManager {
     if (this.#exclude.has(level)) {
       return; // Do nothing
     }
+
+    // Resolve input to source file
+    ctx.file = ModuleIndex.getSourceFile(ctx.file);
+    ctx.category = ModuleIndex.getId(ctx.file);
+
     return this.#appender.onLog(level, ctx, args);
   }
 

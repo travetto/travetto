@@ -6,9 +6,6 @@ import * as path from '@travetto/path';
 import { CliCommand, CliUtil, OptionConfig, ListOptionConfig } from '@travetto/cli';
 import { ExecUtil } from '@travetto/base';
 
-const presets: Record<string, [string, object] | [string]> =
-  JSON.parse(readFileSync(path.resolve(`${__source.folder}/resources/presets.json`), 'utf8'));
-
 type Options = {
   extendedHelp: OptionConfig<boolean>;
   props: ListOptionConfig<string>;
@@ -21,7 +18,17 @@ type Options = {
  * CLI for generating the cli client
  */
 export class OpenApiClientCommand extends CliCommand<Options> {
+  #presets: Record<string, [string, object] | [string]>;
   name = 'openapi:client';
+
+  async getPresets(): Promise<Record<string, [string, object] | [string]>> {
+    if (!this.#presets) {
+      // TODO: Needs to be better
+      const file = path.resolve(path.dirname(__output), 'resources/presets.json');
+      this.#presets = JSON.parse(await fs.readFile(file, 'utf8'));
+    }
+    return this.#presets;
+  }
 
   presetMap(prop?: object): string {
     return !prop || Object.keys(prop).length === 0 ? '' : Object.entries(prop).map(([k, v]) => `${k}=${v}`).join(',');
@@ -55,7 +62,8 @@ export class OpenApiClientCommand extends CliCommand<Options> {
     };
   }
 
-  help(): string {
+  async help(): Promise<string> {
+    const presets = await this.getPresets();
     const presetLen = Math.max(...Object.keys(presets).map(x => x.length));
     const presetEntries = Object
       .entries(presets)
@@ -91,7 +99,7 @@ ${this.getListOfFormats().map(x => CliUtil.color`* ${{ input: x }}`).join('\n')}
 
     if (format.startsWith('@trv:')) {
       const key = format.split('@trv:')[1];
-      const [fmt, props] = presets[key];
+      const [fmt, props] = (await this.getPresets())[key];
       format = fmt;
       propMap = { ...props, ...propMap };
     }

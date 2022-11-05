@@ -22,7 +22,7 @@ export class ClassMetadataUtil {
    * @param function Function
    * @param `file` Filename
    */
-  static initFunctionMeta(fn: Function, { file }: typeof __source): boolean {
+  static initFunctionMeta(fn: Function, file: string): boolean {
     return this.#writeMeta(fn, { file });
   }
 
@@ -34,9 +34,10 @@ export class ClassMetadataUtil {
    * @param `methods` Methods and their hashes
    * @param `abstract` Is the class abstract
    */
-  static initMeta(cls: Function, { file }: typeof __source, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean): boolean {
+  static initMeta(cls: Function, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean): boolean {
     const id = ModuleIndex.getId(file, cls.name);
-    const meta = { id, file, hash, methods, abstract, synthetic };
-    return this.#writeMeta(cls, { file, id, meta });
+    const source = ModuleIndex.getSourceFile(file);
+    const meta = { id, hash, methods, abstract, synthetic };
+    return this.#writeMeta(cls, { id, source, meta });
   }
 }

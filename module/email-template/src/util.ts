@@ -88,7 +88,7 @@ export class CompileUtil {
     html = await StyleUtil.applyStyling(html);
 
     // Inline Images
-    html = await ImageUtil.inlineImageSource(html, root);
+    html = await ImageUtil.inlineImageSource(html, rel => path.resolve(root, rel));
 
     // Generate text version
     const text = await MarkdownUtil.htmlToMarkdown(tpl);

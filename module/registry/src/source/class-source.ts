@@ -25,7 +25,7 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.#classes.set(file, new Map());
       for (const cls of classes) {
-        this.#classes.get(cls.Ⲑfile)!.set(cls.Ⲑid, cls);
+        this.#classes.get(cls.Ⲑsource)!.set(cls.Ⲑid, cls);
         this.emit({ type: 'added', curr: cls });
       }
     }

@@ -8,7 +8,7 @@ import { EditorState } from './bin/editor';
  */
 export async function main(): Promise<void> {
   Env.define({
-    append: { TRV_RESOURCES: path.resolve(__source.folder, 'resources') }
+    append: { TRV_RESOURCES: path.resolve(path.dirname(__output), 'resources') }
   });
 
   EditorState.init();

@@ -67,7 +67,7 @@ export class Context {
   }
 
   source(file?: string): string {
-    return path.resolve(__source.folder, 'resources', 'templates', this.#template, ...file ? [file] : []);
+    return path.resolve('resources', 'templates', this.#template, ...file ? [file] : []);
   }
 
   destination(file?: string): string {

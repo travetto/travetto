@@ -52,21 +52,6 @@ export class ImportManager {
       file = SystemUtil.resolveImport(file.replace(/.*@types\/node\//, '').replace(D_OR_D_TS_EXT_RE, ''));
     }
 
-    // Put file back to its original state
-    if (file.startsWith(`${this.#manifest.main.name}/`)) {
-      file = file.replace(this.#manifest.main.name, '.');
-    }
-
-    // Handle relative imports
-    if (file.startsWith('.') && base && !base.includes('node_modules')) { // Relative path
-      const fileDir = path.dirname(path.resolve(file));
-      const baseDir = path.dirname(path.resolve(base));
-      file = `${path.relative(baseDir, fileDir) || '.'}/${path.basename(file)}`;
-      if (/^[A-Za-z]/.test(file)) {
-        file = `./${file}`;
-      }
-    }
-
     if (!D_OR_D_TS_EXT_RE.test(file) && !this.#newImports.has(file)) {
       const id = this.getId(file);
 

@@ -32,7 +32,7 @@ export class TestCommand extends CliCommand<Options> {
           folder: 'src',
           filter: /consumer\/types\/.*/
         })
-        .map(x => readFileSync(`${x.file}`, 'utf8').match(/Consumable.[(]'([^']+)/)?.[1])
+        .map(x => readFileSync(`${x.output}`, 'utf8').match(/Consumable.[(]'([^']+)/)?.[1])
         .filter((x?: string): x is string => !!x);
     }
     return this._types;

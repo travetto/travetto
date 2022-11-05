@@ -186,7 +186,10 @@ export const node = {
    * @param title
    * @param file
    */
-  Ref: (title: Content, file: string) => {
+  Ref: (title: Content, file: string | Function) => {
+    if (typeof file === 'function') {
+      file = file.Ⲑsource;
+    }
     const res = ResolveUtil.resolveRef(title, file);
     return $n('ref', { title: $c(res.title), link: $c(res.file), line: res.line });
   },
@@ -198,7 +201,10 @@ export const node = {
    * @param outline
    * @param language
    */
-  Code: (title: Content, content: Content, outline = false, language = 'typescript') => {
+  Code: (title: Content, content: Content | Function, outline = false, language = 'typescript') => {
+    if (typeof content === 'function') {
+      content = content.Ⲑsource;
+    }
     const res = ResolveUtil.resolveCode(content, language, outline);
     return $n('code', { title: $c(title), content: $c(res.content), language: res.language, file: $c(res.file) });
   },
@@ -237,7 +243,10 @@ export const node = {
    * @param endPattern
    * @param outline
    */
-  Snippet: (title: Content, file: string, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) => {
+  Snippet: (title: Content, file: string | Function, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) => {
+    if (typeof file !== 'string') {
+      file = file.Ⲑsource
+    }
     const res = ResolveUtil.resolveSnippet(file, startPattern, endPattern, outline);
     return $n('code', {
       title: $c(title), content: $c(res.text), line: res.line, file: $c(res.file), language: res.language,

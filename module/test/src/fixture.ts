@@ -35,9 +35,26 @@ class $TestFixtures {
    * @param modulePath Path in import form, to look through
    */
   addModulePath(modulePath: string, index = -1): void {
-    try {
-      return this.addPath(ModuleIndex.resolveImport(modulePath), index);
-    } catch { }
+    // try {
+    // console.error('HELLO', ModuleIndex.resolveImport(modulePath));
+    return this.addPath(ModuleIndex.resolveImport(modulePath), index);
+    // } catch { }
+  }
+
+  /**
+   * Find a given resource and return it's location
+   * @param pth The relative path of a resource to find
+   */
+  findSync(pth: string): string {
+    pth = cleanPath(pth);
+
+    for (const f of this.paths.map(x => path.join(x, pth))) {
+      if (existsSync(f)) {
+        return f;
+      }
+    }
+
+    throw new AppError(`Cannot find resource: ${pth}, searched=${this.paths.join(',')}`, 'notfound');
   }
 
   /**
@@ -53,7 +70,7 @@ class $TestFixtures {
       }
     }
 
-    throw new AppError(`Cannot find resource: ${pth}, searched: ${this.paths}`, 'notfound');
+    throw new AppError(`Cannot find resource: ${pth}, searched=${this.paths.join(',')}`, 'notfound');
   }
 
   /**

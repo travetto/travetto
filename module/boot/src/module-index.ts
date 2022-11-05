@@ -9,10 +9,9 @@ export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: bo
 
 export type ModuleIndexEntry = {
   id: string;
-  source: string;
   module: string;
-  file: string;
-  fileTs: string;
+  source: string;
+  output: string;
   type: ManifestModuleFileType;
 };
 
@@ -32,7 +31,8 @@ class $ModuleIndex {
   #manifest: Manifest;
   #modules: IndexedModule[];
   #root: string;
-  #outputToId = new Map<string, string>();
+  #outputToEntry = new Map<string, ModuleIndexEntry>();
+  #sourceToEntry = new Map<string, ModuleIndexEntry>();
 
   constructor(root: string) {
     this.#root = root;
@@ -50,19 +50,12 @@ class $ModuleIndex {
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): ModuleIndexEntry[] {
     return files.map(([f, type]) => {
       const source = path.join(m.source, f);
-      const fullFile = this.#resolve(m.output, f);
-      const module = `${m.name}/${f}`.replace(/[.]ts$/, '.js');
+      const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
+      const output = this.#resolve(m.output, js);
+      const module = `${m.name}/${js}`;
+      const id = (m.main ? module : module.replace(m.name, m.id)).replace(/\/src\//, '/');
 
-      const id = m.main ? module : module.replace(m.name, m.id);
-
-      return {
-        id: id.replace(/\/src\//, '/').replace(/[.][tj]s$/, ''),
-        type,
-        source,
-        fileTs: fullFile,
-        file: fullFile.replace(/[.]ts$/, '.js'),
-        module
-      };
+      return { id, type, source, output, module };
     });
   }
 
@@ -80,11 +73,16 @@ class $ModuleIndex {
 
     for (const mod of this.#modules) {
       for (const [name, files] of Object.entries(mod.files ?? {})) {
-        for (const { fileTs, id } of files) {
-          this.#outputToId.set(fileTs, id);
+        for (const entry of files) {
+          this.#outputToEntry.set(entry.output, entry);
+          this.#sourceToEntry.set(entry.source, entry);
         }
       }
     }
+  }
+
+  #getEntry(file: string): ModuleIndexEntry | undefined {
+    return this.#outputToEntry.get(file);
   }
 
   /**
@@ -111,7 +109,7 @@ class $ModuleIndex {
 
     return searchSpace
       .filter(({ type }) => type === 'ts')
-      .filter(({ file }) => filter?.(file) ?? true);
+      .filter(({ source }) => filter?.(source) ?? true);
   }
 
   /**
@@ -149,8 +147,7 @@ class $ModuleIndex {
    */
   getId(filename: string, clsName?: string): string {
     filename = path.toPosix(filename);
-
-    const id = this.#outputToId.get(filename) ?? filename;
+    const id = this.#getEntry(filename)?.id ?? filename;
     return clsName ? `${id}￮${clsName}` : id;
   }
 
@@ -167,6 +164,22 @@ class $ModuleIndex {
   resolveImport(name: string): string {
     // TODO: Write own logic?
     return require.resolve(name);
+  }
+
+  /**
+   * Get source file from output location
+   * @param outputFile 
+   */
+  getSourceFile(outputFile: string): string {
+    return this.#outputToEntry.get(outputFile)?.source ?? outputFile;
+  }
+
+  /**
+   * Get node module from source file
+   * @param source 
+   */
+  getModuleFromSource(source: string): string | undefined {
+    return this.#sourceToEntry.get(source)?.module;
   }
 }
 

@@ -41,11 +41,11 @@ A sample of the instrumentation would be:
 
 ${d.Code('Sample logging at various levels', 'src/transpile.ts')}
 
-${d.Code('Sample After Transpilation', ModuleIndex.find({ filter: f => f === 'src/transpile.ts' })[0].file, false, 'javascript')}
+${d.Code('Sample After Transpilation', ModuleIndex.find({ filter: f => f === 'src/transpile.ts' })[0].output, false, 'javascript')}
 
 And when in ${d.Input('prod')} mode transforms into:
 
-${d.Code('Sample After Transpilation, in Prod', ModuleIndex.find({ filter: f => f === 'src/transpile-prod.ts' })[0].file, false, 'javascript')}
+${d.Code('Sample After Transpilation, in Prod', ModuleIndex.find({ filter: f => f === 'src/transpile-prod.ts' })[0].output, false, 'javascript')}
 
 ${d.Section('Logging to External Systems')}
 By default the logging functionality logs messages directly to the console, relying on the ${d.Method('util.inspect')} method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as ${lib.JSON}, which is easily consumable by services like ${lib.Elasticsearch} or ${lib.AwsCloudwatch} if running as a lambda or in a docker container.  
