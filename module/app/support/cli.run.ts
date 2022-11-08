@@ -1,9 +1,6 @@
-import * as fs from 'fs/promises';
-
-import * as path from '@travetto/path';
 import { StacktraceManager } from '@travetto/boot';
 import { CliUtil, CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
-import { Env } from '@travetto/base';
+import { Env, FileResourceProvider } from '@travetto/base';
 
 import { AppListLoader } from './bin/list';
 import { AppRunUtil } from './bin/run';
@@ -118,8 +115,8 @@ export class AppRunCommand extends CliCommand<Options> {
   override async complete(): Promise<Record<string, string[]>> {
     const apps = await AppListLoader.getList() || [];
 
-    const profiles = (await fs.readdir(path.cwd()))
-      .filter(x => /[.]ya?ml/.test(x))
+    const profiles = (await new FileResourceProvider()
+      .query(x => /[.]ya?ml/.test(x) && !x.includes('/')))
       .map(x => x.replace(/[.]ya?ml/, ''));
 
     return {

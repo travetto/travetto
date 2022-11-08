@@ -1,4 +1,4 @@
-import { Class, ResourceManager } from '@travetto/base';
+import { Class, Resources } from '@travetto/base';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry, TestFixtures } from '@travetto/test';
@@ -15,7 +15,7 @@ export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean
       target,
       async function (this: T & { [Loaded]?: boolean }) {
         // Track self
-        ResourceManager.getProvider(TestFixtures).addModule('@travetto/model');
+        Resources.getProvider(TestFixtures).addModule('@travetto/model');
 
         await RootRegistry.init();
 

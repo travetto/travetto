@@ -1,4 +1,4 @@
-import { ResourceManager } from '@travetto/base';
+import { Resources } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { ConfigManager } from '@travetto/config';
 
@@ -6,7 +6,7 @@ import { DBConfig } from './dbconfig';
 
 export async function main() {
   Object.assign(process.env, Object.fromEntries(
-    (await ResourceManager.read('file:/env.properties'))
+    (await Resources.read('file:/env.properties'))
       .split(/\n/g)
       .map(x => x.split(/\s*=\s*/))));
 

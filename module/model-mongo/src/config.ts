@@ -1,6 +1,6 @@
 import * as mongo from 'mongodb';
 
-import { ResourceManager, TimeSpan } from '@travetto/base';
+import { Resources, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -59,7 +59,7 @@ export class MongoModelConfig {
    * Load a resource
    */
   async fetch(val: string): Promise<string> {
-    return ResourceManager.read(val).catch(() => val);
+    return Resources.read(val).catch(() => val);
   }
 
   /**

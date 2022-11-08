@@ -45,6 +45,32 @@ export class FileProvider {
     file = await this.#getPath(file);
     return createReadStream(file, binary ? undefined : 'utf8');
   }
+
+  async query(filter: (file: string) => boolean): Promise<string[]> {
+    const search = [...this.#paths.map(x => [x, x] as [string, string])];
+    const seen = new Set();
+    const out: string[] = [];
+    while (search.length) {
+      const [folder, root] = search.shift()!;
+      for (const sub of await fs.readdir(folder)) {
+        if (sub.startsWith('.')) {
+          continue;
+        }
+        const resolved = path.resolve(folder, sub);
+        const stats = await fs.stat(resolved);
+        if (stats.isDirectory()) {
+          search.push([resolved, root])
+        } else {
+          const rel = resolved.replace(`${root}/`, '');
+          if (!seen.has(rel) && filter(rel)) {
+            out.push(rel);
+            seen.add(rel);
+          }
+        }
+      }
+    }
+    return out;
+  }
 }
 
 @ResourceProvider('file')

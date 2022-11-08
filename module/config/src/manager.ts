@@ -1,8 +1,4 @@
-import * as fs from 'fs/promises';
-
-import * as path from '@travetto/path';
-import { ModuleIndex } from '@travetto/boot';
-import { Env, AppError, Class, Util } from '@travetto/base';
+import { Env, AppError, Class, Util, FileResourceProvider } from '@travetto/base';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { YamlUtil } from '@travetto/yaml';
 
@@ -38,21 +34,10 @@ class $ConfigManager {
 
     const profileIndex = Object.fromEntries(Object.entries(profiles).map(([k, v]) => [v, +k] as const));
 
-    const allFiles: { file: string, profile: string }[] = [];
+    const provider = new FileResourceProvider();
 
-    // Find all files
-    for (const folder of ['resources', ...Env.getList('TRV_RESOURCES')]) {
-      const toFind = path.resolve(folder);
-      if (await fs.stat(toFind).catch(() => false)) {
-        for (const el of await fs.readdir(toFind)) {
-          if (!el.startsWith('.') && /[.]ya?ml$/.test(el)) {
-            allFiles.push({ file: path.resolve(toFind, el), profile: el.replace(/[.]ya?ml$/, '') });
-          }
-        }
-      }
-    }
-
-    const files = allFiles
+    const files = (await provider.query(f => !f.includes('/') && /[.]ya?ml$/.test(f)))
+      .map(file => ({ file, profile: file.replace(/[.]ya?ml$/, '') }))
       .filter(({ profile }) => profile in profileIndex)
       .sort((a, b) => profileIndex[a.profile] - profileIndex[b.profile]);
 
@@ -61,7 +46,7 @@ class $ConfigManager {
     }
 
     for (const { file } of files) {
-      const text = await fs.readFile(file, 'utf8');
+      const text = await provider.read(file);
       const data = YamlUtil.parse<Record<string, unknown>>(text);
       Util.deepAssign(this.#storage, BindUtil.expandPaths(data), 'coerce');
     }

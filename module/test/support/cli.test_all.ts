@@ -1,33 +1,13 @@
 import * as os from 'os';
-import * as fs from 'fs/promises';
 
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import * as path from '@travetto/path';
+import { ModuleIndex } from '@travetto/boot';
 
 type Options = {
   format: OptionConfig<string>;
   concurrency: OptionConfig<number>;
   mode: OptionConfig<'scan' | 'raw'>
 };
-
-async function findAllModules(seed: string[]): Promise<string[]> {
-  const stack: string[] = [...seed.map(x => path.resolve(x))];
-  const modules: string[] = [];
-  while (stack.length) {
-    const top = stack.shift()!;
-    for (const el of await fs.readdir(top)) {
-      if (el === 'node_modules' || el.startsWith('.')) {
-        continue;
-      } else if ((await fs.stat(`${top}/${el}`)).isDirectory()) {
-        stack.push(`${top}/${el}`);
-      } else if (el === 'package.json' && (await fs.stat(`${top}/test`).catch(() => { }))?.isDirectory()) {
-        modules.push(top);
-      }
-    }
-  }
-  return modules;
-}
-
 
 /**
  * Launch test framework and execute tests
@@ -49,7 +29,10 @@ export class TestAllCommand extends CliCommand<Options> {
 
   async action(folders: string[]): Promise<void> {
     if (this.cmd.mode === 'scan') {
-      folders = await findAllModules(folders ?? [process.cwd()]);
+      folders = Object
+        .values(ModuleIndex.manifest.modules)
+        .filter(x => x.local && 'test' in x.files)
+        .map(x => x.source);
     }
 
     console.error('Starting tests', folders);

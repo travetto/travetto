@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 
 import * as path from '@travetto/path';
-import { Test, Suite, TestFixtures } from '@travetto/test';
+import { Test, Suite } from '@travetto/test';
 
-import { ExecUtil } from '..';
+import { ExecUtil, Resources } from '..';
 
 @Suite()
 export class ExecUtilTest {
@@ -32,7 +32,7 @@ export class ExecUtilTest {
 
   @Test()
   async fork() {
-    const proc = ExecUtil.fork(await TestFixtures.find('test.js'));
+    const proc = ExecUtil.fork((await Resources.describe('test:test.js')).path);
     const result = await proc.result;
     assert(result.stdout === 'Hello World\n');
   }

@@ -77,7 +77,7 @@ class $ResourceManager implements ResourceProvider {
    * Read a resource as a stream, mimicking fs.readStream
    * @param pth The path to read
    */
-  readStream(pth: string, binary?: boolean): Promise<Readable> {
+  readStream(pth: string, binary: boolean = true): Promise<Readable> {
     const [provider, rel] = this.#resolvePath(pth);
     return provider.readStream(rel, binary);
   }
@@ -99,11 +99,11 @@ class $ResourceManager implements ResourceProvider {
   }
 }
 
-export const ResourceManager = new $ResourceManager();
+export const Resources = new $ResourceManager();
 
 
 export function ResourceProvider(scheme: string) {
   return <T extends ResourceProvider>(target: ConcreteClass<T>): void => {
-    ResourceManager.register(scheme, target);
+    Resources.register(scheme, target);
   };
 }

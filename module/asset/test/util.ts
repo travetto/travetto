@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as assert from 'assert';
 
-import { ResourceManager } from '@travetto/base';
+import { Resources } from '@travetto/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 
 import { AssetUtil } from '../src/util';
@@ -11,7 +11,7 @@ export class UtilTest {
 
   @BeforeAll()
   async init() {
-    ResourceManager.getProvider(TestFixtures).addModule('@travetto/asset');
+    Resources.getProvider(TestFixtures).addModule('@travetto/asset');
   }
 
   @Test()
@@ -20,14 +20,14 @@ export class UtilTest {
 
   @Test()
   async readChunk() {
-    const { path: yml } = await ResourceManager.describe('test:/asset.yml');
+    const { path: yml } = await Resources.describe('test:/asset.yml');
     const chunk = await AssetUtil.readChunk(yml, 10);
     assert(chunk.length === 10);
   }
 
   @Test()
   async detectFileType() {
-    const { path: png } = await ResourceManager.describe('test:/logo.png');
+    const { path: png } = await Resources.describe('test:/logo.png');
     const fileType = (await AssetUtil.detectFileType(png))!;
     assert(fileType.ext === 'png');
     assert(fileType.mime === 'image/png');
@@ -35,19 +35,19 @@ export class UtilTest {
 
   @Test()
   async resolveFileType() {
-    const { path: file } = await ResourceManager.describe('test:/logo.png');
+    const { path: file } = await Resources.describe('test:/logo.png');
     await fs.copyFile(file, file.replace(/[.]png$/, ''));
-    const { path: png } = await ResourceManager.describe('test:/logo');
+    const { path: png } = await Resources.describe('test:/logo');
     const result = await AssetUtil.resolveFileType(png);
     assert(result === 'image/png');
   }
 
   @Test()
   async fileToAsset() {
-    const { path: file } = await ResourceManager.describe('test:/logo.png');
+    const { path: file } = await Resources.describe('test:/logo.png');
     await fs.copyFile(file, file.replace(/[.]png$/, ''));
 
-    const { path: png } = await ResourceManager.describe('test:/logo');
+    const { path: png } = await Resources.describe('test:/logo');
     const asset = await AssetUtil.fileToAsset(png);
     assert(asset.contentType === 'image/png');
     assert(asset.filename === png);

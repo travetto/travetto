@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
 import { AssetUtil, Asset } from '@travetto/asset';
-import { ResourceManager, StreamUtil } from '@travetto/base';
+import { Resources, StreamUtil } from '@travetto/base';
 import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
@@ -49,18 +49,18 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
 
   async getUploads(...files: FileUpload[]) {
     return Promise.all(files.map(async ({ name, type, resource: filename }) => {
-      const buffer = await StreamUtil.streamToBuffer(await ResourceManager.readStream(`test:${filename}`));
+      const buffer = await StreamUtil.streamToBuffer(await Resources.readStream(`test:${filename}`));
       return { name, type, filename, buffer, size: buffer.length };
     }));
   }
 
   async getAsset(pth: string) {
-    return AssetUtil.fileToAsset(await (await ResourceManager.describe(`test:${pth}`)).path);
+    return AssetUtil.fileToAsset(await (await Resources.describe(`test:${pth}`)).path);
   }
 
   @BeforeAll()
   async init() {
-    ResourceManager.getProvider(TestFixtures).addModule('@travetto/asset');
+    Resources.getProvider(TestFixtures).addModule('@travetto/asset');
   }
 
   @Test()
