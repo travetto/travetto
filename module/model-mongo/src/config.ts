@@ -1,8 +1,6 @@
 import * as mongo from 'mongodb';
-import * as fs from 'fs/promises';
 
-import { TimeSpan } from '@travetto/base';
-import { ResourceManager } from '@travetto/resource';
+import { ResourceManager, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -61,13 +59,7 @@ export class MongoModelConfig {
    * Load a resource
    */
   async fetch(val: string): Promise<string> {
-    // TODO: Use file abstraction
-    return ResourceManager.read(val)
-      .then(res => typeof res === 'string' ? res : res.toString('utf8'))
-      .catch(() => fs.readFile(val)
-        .then(res => typeof res === 'string' ? res : res.toString('utf8'))
-      )
-      .catch(() => val);
+    return ResourceManager.read(val).catch(() => val);
   }
 
   /**

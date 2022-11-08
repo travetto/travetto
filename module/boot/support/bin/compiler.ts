@@ -42,17 +42,7 @@ export class OutputCompiler extends Compiler {
           }
         }
       }
-
-      // Symlink resources
-      await this.workspace.symlinkFolder(module, 'resources');
-      await this.workspace.symlinkFolder(module, 'support/fixtures');
     }
-
-    const main = this.modules.find(x => x.main);
-    if (main) {
-      await this.workspace.symlinkFolder(main, 'test/fixtures');
-    }
-
     // Write manifest
     await this.workspace.writeRawFile('manifest.json', JSON.stringify(this.manifest, null, 2));
   }

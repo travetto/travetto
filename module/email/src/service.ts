@@ -48,9 +48,9 @@ export class MailService {
     // Bypass cache if in dynamic mode
     if (Env.isDynamic() || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
-        ResourceManager.read(`${key}.compiled.html`, 'utf8'),
-        ResourceManager.read(`${key}.compiled.text`, 'utf8').catch(() => ''),
-        ResourceManager.read(`${key}.compiled.subject`, 'utf8')
+        ResourceManager.read(`${key}.compiled.html`),
+        ResourceManager.read(`${key}.compiled.text`).catch(() => ''),
+        ResourceManager.read(`${key}.compiled.subject`)
       ]);
 
       this.#compiled.set(key, { html, text, subject });

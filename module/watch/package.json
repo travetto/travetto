@@ -23,8 +23,7 @@
     "directory": "module/watch"
   },
   "dependencies": {
-    "@travetto/base": "file:../base",
-    "@travetto/resource": "file:../resource"
+    "@travetto/base": "file:../base"
   },
   "travetto": {
     "id": "@trv:watch",

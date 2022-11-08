@@ -1,12 +1,15 @@
+import { ResourceManager } from '../src/resource';
 import { ShutdownManager } from '../src/shutdown';
 
 /**
- * Registers stack trace handler for non-prod
+ * Registers resource managers
  * And prepare shutdown manager
  */
 export const step = {
   key: '@trv:base/init',
-  action: (): void => {
+  after: ['@trv:boot/load'],
+  action: async (): Promise<void> => {
+    await ResourceManager.init();
     ShutdownManager.register();
   }
 };

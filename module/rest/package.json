@@ -26,11 +26,11 @@
     "directory": "module/rest"
   },
   "dependencies": {
+    "@travetto/base": "file:../base",
     "@travetto/config": "file:../config",
     "@travetto/context": "file:../context",
     "@travetto/app": "file:../app",
     "@travetto/di": "file:../di",
-    "@travetto/resource": "file:../resource",
     "@travetto/schema": "file:../schema",
     "@travetto/registry": "file:../registry",
     "@travetto/transformer": "file:../transformer",

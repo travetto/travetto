@@ -71,7 +71,6 @@
     "@travetto/pack": "file:module/pack",
     "@travetto/path": "file:module/path",
     "@travetto/registry": "file:module/registry",
-    "@travetto/resource": "file:module/resource",
     "@travetto/rest": "file:module/rest",
     "@travetto/rest-aws-lambda": "file:module/rest-aws-lambda",
     "@travetto/rest-express": "file:module/rest-express",

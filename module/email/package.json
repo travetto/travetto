@@ -23,7 +23,7 @@
     "directory": "module/email"
   },
   "dependencies": {
-    "@travetto/resource": "file:../resource",
+    "@travetto/base": "file:../base",
     "@travetto/config": "file:../config",
     "@travetto/di": "file:../di",
     "@types/mustache": "^4.2.1",

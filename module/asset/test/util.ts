@@ -1,6 +1,7 @@
 import * as fs from 'fs/promises';
 import * as assert from 'assert';
 
+import { ResourceManager } from '@travetto/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 
 import { AssetUtil } from '../src/util';
@@ -10,7 +11,7 @@ export class UtilTest {
 
   @BeforeAll()
   async init() {
-    TestFixtures.addModulePath('@travetto/asset/support/fixtures');
+    ResourceManager.getProvider(TestFixtures).addModule('@travetto/asset');
   }
 
   @Test()
@@ -19,14 +20,14 @@ export class UtilTest {
 
   @Test()
   async readChunk() {
-    const yml = await TestFixtures.find('asset.yml');
+    const { path: yml } = await ResourceManager.describe('test:/asset.yml');
     const chunk = await AssetUtil.readChunk(yml, 10);
     assert(chunk.length === 10);
   }
 
   @Test()
   async detectFileType() {
-    const png = await TestFixtures.find('logo.png');
+    const { path: png } = await ResourceManager.describe('test:/logo.png');
     const fileType = (await AssetUtil.detectFileType(png))!;
     assert(fileType.ext === 'png');
     assert(fileType.mime === 'image/png');
@@ -34,19 +35,19 @@ export class UtilTest {
 
   @Test()
   async resolveFileType() {
-    const file = await TestFixtures.find('logo.png');
+    const { path: file } = await ResourceManager.describe('test:/logo.png');
     await fs.copyFile(file, file.replace(/[.]png$/, ''));
-    const png = await TestFixtures.find('logo');
+    const { path: png } = await ResourceManager.describe('test:/logo');
     const result = await AssetUtil.resolveFileType(png);
     assert(result === 'image/png');
   }
 
   @Test()
   async fileToAsset() {
-    const file = await TestFixtures.find('logo.png');
+    const { path: file } = await ResourceManager.describe('test:/logo.png');
     await fs.copyFile(file, file.replace(/[.]png$/, ''));
 
-    const png = await TestFixtures.find('logo');
+    const { path: png } = await ResourceManager.describe('test:/logo');
     const asset = await AssetUtil.fileToAsset(png);
     assert(asset.contentType === 'image/png');
     assert(asset.filename === png);

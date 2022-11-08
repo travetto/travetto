@@ -17,7 +17,7 @@ import { AsyncContextInterceptor } from '@travetto/rest/src/interceptor/context'
 
 const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
 const Response = d.SnippetLink('TravettoResponse', '@travetto/rest/src/types.d.ts', /interface TravettoResponse/);
-const ResourceManager = d.Ref('ResourceManager', '@travetto/resource/src/resource.ts');
+const ResourceManager = d.Ref('ResourceManager', '@travetto/base/src/resource.ts');
 
 const RestInterceptor = d.SnippetLink('RestInterceptor', '@travetto/rest/src/interceptor/types.ts', /interface RestInterceptor/);
 

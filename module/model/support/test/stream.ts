@@ -1,10 +1,10 @@
 import * as assert from 'assert';
 import * as fs from 'fs/promises';
-import { createReadStream } from 'fs';
 import * as crypto from 'crypto';
 import { Readable } from 'stream';
 
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
+import { ResourceManager } from '@travetto/base';
 
 import { BaseModelSuite } from './base';
 import { ModelStreamSupport } from '../../src/service/stream';
@@ -24,19 +24,18 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
   }
 
   async getStream(resource: string): Promise<readonly [{ size: number, contentType: string, hash: string, filename: string }, Readable]> {
-    const file = await TestFixtures.find(resource);
-    const stat = await fs.stat(file);
-    const hash = await this.getHash(createReadStream(file));
+    const { size } = await ResourceManager.describe(`test:${resource}`);
+    const hash = await this.getHash(await ResourceManager.readStream(`test:${resource}`));
 
     return [
-      { size: stat.size, contentType: '', hash, filename: resource },
-      createReadStream(file)
+      { size, contentType: '', hash, filename: resource },
+      await ResourceManager.readStream(`test:${resource}`)
     ] as const;
   }
 
   @BeforeAll()
-  async beforeAll(): Promise<void> {
-    TestFixtures.addModulePath('@travetto/model/support/fixtures');
+  async init() {
+    ResourceManager.getProvider(TestFixtures).addModule('@travetto/model');
   }
 
   @Test()
