@@ -1,8 +1,8 @@
 import * as assert from 'assert';
 import * as fs from 'fs/promises';
 
-import { Test, Suite, TestFixtures } from '@travetto/test';
-import { StreamUtil } from '@travetto/base';
+import { Test, Suite } from '@travetto/test';
+import { Resources, StreamUtil } from '@travetto/base';
 
 import { ImageConverter } from '../src/convert';
 
@@ -12,7 +12,7 @@ class ImageConverterTest {
   @Test('resize test')
   async resizeImage() {
 
-    const imgBuffer = await TestFixtures.read('apple.jpg');
+    const imgBuffer = await Resources.read('test:apple.jpg', true);
 
     assert(imgBuffer.length > 0);
 
@@ -25,8 +25,8 @@ class ImageConverterTest {
 
   @Test('compress png')
   async compressPng() {
-    const imgStream = await TestFixtures.readStream('google.png');
-    const imgBuffer = await TestFixtures.read('google.png');
+    const imgStream = await Resources.readStream('test:google.png');
+    const imgBuffer = await Resources.read('test:google.png', true);
 
     const out = await ImageConverter.optimize('png', imgStream);
 
@@ -39,8 +39,8 @@ class ImageConverterTest {
 
   @Test('compress jpeg')
   async compressJpeg() {
-    const imgStream = await TestFixtures.readStream('lincoln.jpg');
-    const imgBuffer = await TestFixtures.read('lincoln.jpg');
+    const imgStream = await Resources.readStream('test:lincoln.jpg');
+    const imgBuffer = await Resources.read('test:lincoln.jpg', true);
 
     const out = await ImageConverter.optimize('jpeg', imgStream);
 
@@ -53,7 +53,7 @@ class ImageConverterTest {
 
   @Test('resizeToFile')
   async resizeToFile() {
-    const imgStream = await TestFixtures.readStream('lincoln.jpg');
+    const imgStream = await Resources.readStream('lincoln.jpg');
     const out = await ImageConverter.resize(imgStream, {
       w: 50,
       h: 50,

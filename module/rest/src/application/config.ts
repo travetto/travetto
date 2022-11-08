@@ -1,7 +1,7 @@
 import * as os from 'os';
 
 import { Config } from '@travetto/config';
-import { ResourceManager, Env, AppError } from '@travetto/base';
+import { Resources, Env, AppError } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 import { RestServerUtil } from './util';
@@ -91,8 +91,8 @@ export class RestConfig {
       return RestServerUtil.generateSslKeyPair();
     } else {
       if (this.ssl.keys.key.length < 100) {
-        this.ssl.keys.key = await ResourceManager.read(this.ssl.keys.key);
-        this.ssl.keys.cert = await ResourceManager.read(this.ssl.keys.cert);
+        this.ssl.keys.key = await Resources.read(this.ssl.keys.key);
+        this.ssl.keys.cert = await Resources.read(this.ssl.keys.cert);
       }
       return this.ssl.keys;
     }

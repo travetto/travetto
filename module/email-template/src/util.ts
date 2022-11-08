@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 
 import * as path from '@travetto/path';
-import { ResourceManager } from '@travetto/resource';
+import { FileResourceProvider, Resources } from '@travetto/base';
 import type { MailTemplateEngine } from '@travetto/email';
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
@@ -31,10 +31,11 @@ export class CompileUtil {
    * Grab list of all available templates
    */
   static async findAllTemplates(): Promise<{ path: string, key: string }[]> {
-    return Promise.all((await ResourceManager.findAll(this.TPL_EXT))
+    const provider = Resources.getProvider(FileResourceProvider);
+    return Promise.all((await provider.query(f => this.TPL_EXT.test(f)))
       .sort()
       .map(async pth => ({
-        path: await ResourceManager.describe(pth),
+        path: (await provider.describe(pth)).path,
         key: pth.replace(this.TPL_EXT, '')
       })));
   }
@@ -71,9 +72,10 @@ export class CompileUtil {
    */
   static async compile(tpl: string, root: string): Promise<Compilation> {
     const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
+    const provider = Resources.getProvider(FileResourceProvider);
 
     // Wrap with body
-    tpl = (await ResourceManager.read('file:/email/wrapper.html')).replace('<!-- BODY -->', tpl);
+    tpl = (await provider.read('email/wrapper.html')).replace('<!-- BODY -->', tpl);
 
     // Resolve mustache partials
     tpl = await engine.resolveNested(tpl);

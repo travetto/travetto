@@ -1,43 +1,36 @@
-import { createReadStream } from 'fs';
-
 import * as path from '@travetto/path';
 import { ImageConverter as ImgUtil } from '@travetto/image';
-import { ResourceManager } from '@travetto/resource';
-import { StreamUtil } from '@travetto/base';
+import { Resources, StreamUtil } from '@travetto/base';
+
+type Resolver = (src: string) => (string | Promise<string>);
 
 export class ImageUtil {
-
-  static sourceHandler(
-    resolver: (href: string) => string,
-    [lTok, rTok]: [string, string],
-    all: string,
-    prefix: string,
-    src: string
-  ): string {
-    if (/^['"](.*)['"]$/.test(src)) {
-      src = src.substring(1, src.length - 1); // Trim
-    }
-    if (!src.startsWith('http')) {
-      return `${prefix}${lTok}${resolver(src)}${rTok}`;
-    }
-    return all;
-  }
 
   /**
    * Inline image sources
    */
-  static async inlineImageSource(html: string, srcResolver: (key: string) => string): Promise<string> {
+  static async inlineImageSource(html: string, srcResolver: Resolver): Promise<string> {
     const imageSources = new Set<string>();
-    const resolver = (x: string): string => {
-      const og = srcResolver(x);
+    const resolver = async (x: string): Promise<string> => {
+      const og = await srcResolver(x);
       const [, resolved] = og.split('/resources/');
       imageSources.add(resolved ?? og);
       return resolved ?? og;
     };
 
-    html = html
-      .replace(/(<img[^>]src=\s*["'])([^"]+)/g, (_, pre, src) => this.sourceHandler(resolver, ['@@', '@@'], _, pre, src))
-      .replace(/(background(?:-image)?:\s*url[(])([^)]+)/g, (_, pre, src) => this.sourceHandler(resolver, ['\'@@', '@@\''], _, pre, src));
+    for (const [pattern, combine] of [
+      [/(?<pre><img[^>]src=\s*["'])(?<src>[^"]+)/g, (x: string) => `@@${x}@@`],
+      [/(?<pre>background(?:-image)?:\s*url[(])(?<src>[^)]+)/g, (x: string) => `'@@${x}@@'`]
+    ] as const) {
+      for (let { [0]: all, groups: { pre, src } = { pre: '', src: '' } } of html.matchAll(pattern)) {
+        if (/^['"](.*)['"]$/.test(src)) {
+          src = src.substring(1, src.length - 1); // Trim
+        }
+        if (!src.startsWith('http')) {
+          html.replace(all, `${pre}${combine(await resolver(src))}`);
+        }
+      }
+    }
 
     const pendingImages = [...imageSources]
       .map(src => {
@@ -51,7 +44,7 @@ export class ImageUtil {
       })
       .filter((x): x is Exclude<typeof x, undefined> => !!x)
       .map(async ([ext, src]) => {
-        const stream = createReadStream(await ResourceManager.find(src));
+        const stream = await Resources.readStream(src);
         const outputStream = await ImgUtil.optimize(ext, stream);
         const buffer = await StreamUtil.streamToBuffer(outputStream);
         const data = buffer.toString('base64');

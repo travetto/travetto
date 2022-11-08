@@ -5,7 +5,7 @@ import { Readable } from 'stream';
 
 import * as path from '@travetto/path';
 import { CommandService } from '@travetto/command';
-import { ResourceManager, Env, StreamUtil } from '@travetto/base';
+import { Resources, Env, StreamUtil } from '@travetto/base';
 
 /**
  * Image output options
@@ -110,7 +110,7 @@ class $ImageConverter {
    * Fetch image, compress and return as buffer
    */
   async optimizeResource(rel: string): Promise<Buffer> {
-    const { path: pth } = await ResourceManager.describe(rel);
+    const { path: pth } = await Resources.describe(rel);
     const cachedOutput = path.resolve(this.#root, rel);
     await fs.mkdir(path.dirname(cachedOutput));
 
@@ -118,7 +118,7 @@ class $ImageConverter {
     const exists = !!(await handle.stat().catch(() => false));
 
     if (!exists) {
-      let stream: Buffer | Readable = await ResourceManager.readStream(rel);
+      let stream: Buffer | Readable = await Resources.readStream(rel);
       if (/[.]png$/.test(pth)) {
         stream = await this.optimize('png', stream);
       } else if (/[.]jpe?g$/i.test(pth)) {

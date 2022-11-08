@@ -1,4 +1,4 @@
-import { ResourceManager } from '../src/resource';
+import { Resources } from '../src/resource';
 import { ShutdownManager } from '../src/shutdown';
 
 /**
@@ -9,7 +9,7 @@ export const step = {
   key: '@trv:base/init',
   after: ['@trv:boot/load'],
   action: async (): Promise<void> => {
-    await ResourceManager.init();
+    await Resources.init();
     ShutdownManager.register();
   }
 };

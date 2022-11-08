@@ -3,7 +3,7 @@ import { createReadStream } from 'fs';
 import * as os from 'os';
 
 import { Test, Suite } from '@travetto/test';
-import { ExecUtil, ResourceManager } from '@travetto/base';
+import { ExecUtil, Resources } from '@travetto/base';
 
 import { StreamUtil } from '../src/stream';
 
@@ -24,7 +24,7 @@ export class StreamUtilTest {
 
   @Test()
   async streamToBuffer() {
-    const stream = await ResourceManager.readStream('test:/test.js');
+    const stream = await Resources.readStream('test:/test.js');
     const text = (await StreamUtil.streamToBuffer(stream)).toString('utf8');
     assert(text.length > 1);
     assert(text.includes('Hello World'));
@@ -43,7 +43,7 @@ export class StreamUtilTest {
 
     assert((await StreamUtil.toBuffer(unit8)).toString('utf8') === 'abcde');
 
-    const stream = await ResourceManager.readStream('test:/test.js');
+    const stream = await Resources.readStream('test:/test.js');
     assert((await StreamUtil.toBuffer(stream)).length > 10);
   }
 
@@ -65,7 +65,7 @@ export class StreamUtilTest {
 
   @Test()
   async waitForCompletion() {
-    const { path } = await ResourceManager.describe('test:/long.js');
+    const { path } = await Resources.describe('test:/long.js');
     const state = ExecUtil.fork(path, ['100000'], { stdio: 'pipe' });
     const stream = await StreamUtil.waitForCompletion(state.process.stdout!, () => state.result);
     const output = (await StreamUtil.toBuffer(stream)).toString('utf8').split(/\n/g);
@@ -74,7 +74,7 @@ export class StreamUtilTest {
 
   @Test()
   async pipe() {
-    const { path: echo } = await ResourceManager.describe('test:/echo.js');
+    const { path: echo } = await Resources.describe('test:/echo.js');
     const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
     const returnedStream = await StreamUtil.execPipe(proc, createReadStream(__output));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
