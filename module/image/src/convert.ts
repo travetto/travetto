@@ -4,9 +4,8 @@ import { Readable } from 'stream';
 
 
 import * as path from '@travetto/path';
-import { ResourceManager } from '@travetto/resource';
 import { CommandService } from '@travetto/command';
-import { Env, StreamUtil } from '@travetto/base';
+import { ResourceManager, Env, StreamUtil } from '@travetto/base';
 
 /**
  * Image output options
@@ -111,9 +110,12 @@ class $ImageConverter {
    * Fetch image, compress and return as buffer
    */
   async optimizeResource(rel: string): Promise<Buffer> {
-    const pth = await ResourceManager.find(rel);
-    const handle = await this.#openFile(pth);
-    const exists = await handle.stat().then(() => true, () => false);
+    const { path: pth } = await ResourceManager.describe(rel);
+    const cachedOutput = path.resolve(this.#root, rel);
+    await fs.mkdir(path.dirname(cachedOutput));
+
+    const handle = await this.#openFile(cachedOutput);
+    const exists = !!(await handle.stat().catch(() => false));
 
     if (!exists) {
       let stream: Buffer | Readable = await ResourceManager.readStream(rel);

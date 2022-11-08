@@ -1,4 +1,4 @@
-import { ResourceManager } from '@travetto/resource';
+import { ResourceManager } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('model.firestore')
@@ -21,7 +21,7 @@ export class FirestoreModelConfig {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
     if (this.credentialsFile && !this.credentials) {
-      this.credentials = JSON.parse(await ResourceManager.read(this.credentialsFile, 'utf8'));
+      this.credentials = await ResourceManager.readJSON(this.credentialsFile);
     }
   }
 }

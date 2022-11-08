@@ -25,9 +25,9 @@
     "directory": "module/model-firestore"
   },
   "dependencies": {
+    "@travetto/base": "file:../base",
     "@travetto/config": "file:../config",
     "@travetto/model": "file:../model",
-    "@travetto/resource": "file:../resource",
     "@google-cloud/firestore": "^5.0.2"
   },
   "peerDependencies": {

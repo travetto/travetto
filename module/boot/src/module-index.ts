@@ -154,8 +154,15 @@ class $ModuleIndex {
   /**
    * Is module installed?
    */
-  hasModule(name: string) {
+  hasModule(name: string): boolean {
     return name in this.manifest.modules;
+  }
+
+  /**
+   * Get module
+   */
+  getModule(name: string): IndexedModule | undefined {
+    return this.#modules.find(x => x.name === name);
   }
 
   /**

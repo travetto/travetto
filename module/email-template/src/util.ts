@@ -33,9 +33,9 @@ export class CompileUtil {
   static async findAllTemplates(): Promise<{ path: string, key: string }[]> {
     return Promise.all((await ResourceManager.findAll(this.TPL_EXT))
       .sort()
-      .map(async path => ({
-        path: await ResourceManager.findAbsolute(path),
-        key: path.replace(this.TPL_EXT, '')
+      .map(async pth => ({
+        path: await ResourceManager.describe(pth),
+        key: pth.replace(this.TPL_EXT, '')
       })));
   }
 
@@ -73,7 +73,7 @@ export class CompileUtil {
     const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
 
     // Wrap with body
-    tpl = (await ResourceManager.read('email/wrapper.html', 'utf8')).replace('<!-- BODY -->', tpl);
+    tpl = (await ResourceManager.read('file:/email/wrapper.html')).replace('<!-- BODY -->', tpl);
 
     // Resolve mustache partials
     tpl = await engine.resolveNested(tpl);

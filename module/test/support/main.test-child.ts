@@ -25,7 +25,7 @@ export async function main(): Promise<void> {
 
   await customLogs();
 
-  await PhaseManager.run('init', '@trv:boot/load');
+  await PhaseManager.run('init', '@trv:base/init');
 
   return new TestChildWorker().activate();
 }

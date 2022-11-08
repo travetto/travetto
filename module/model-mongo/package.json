@@ -25,10 +25,10 @@
     "directory": "module/model-mongo"
   },
   "dependencies": {
+    "@travetto/base": "file:../base",
     "@travetto/config": "file:../config",
     "@travetto/model": "file:../model",
     "@travetto/model-query": "file:../model-query",
-    "@travetto/resource": "file:../resource",
     "mongodb": "^4.10.0"
   },
   "peerDependencies": {

@@ -80,12 +80,12 @@ export class ScanFs {
    * @param handler Handler to search with
    * @param base The starting point
    */
-  static async scanDir(handler: ScanHandler, base: string = path.cwd()): Promise<ScanEntry[]> {
+  static async scanDir(handler: ScanHandler, base: string): Promise<ScanEntry[]> {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [];
 
-    if (await fs.stat(base).catch(() => false)) {
+    if (!!(await fs.stat(base).catch(() => false))) {
       dirs.push({ file: base, children: [], module: '' });
     }
 
@@ -130,7 +130,7 @@ export class ScanFs {
    * @param handler Handler to search with
    * @param base The starting point
    */
-  static scanDirSync(handler: ScanHandler, base: string = path.cwd()): ScanEntry[] {
+  static scanDirSync(handler: ScanHandler, base: string): ScanEntry[] {
     const visited = new Set<string>();
     const out: ScanEntry[] = [];
     const dirs: ScanEntry[] = [];

@@ -7,18 +7,18 @@ export class UIController {
   @Get('/')
   @Produces('text/html')
   getHomepage() {
-    return ResourceManager.readStream('/ui/index.html');
+    return ResourceManager.readStream('file:/ui/index.html');
   }
 
   @Get(/[.]js$/)
   @Produces('application/javascript')
   getJs(req: Request) {
-    return ResourceManager.readStream(req.url);
+    return ResourceManager.readStream(`file:${req.url}`);
   }
 
   @Get(/[.]css$/)
   @Produces('text/css')
   getCss(req: Request) {
-    return ResourceManager.readStream(req.url);
+    return ResourceManager.readStream(`file:${req.url}`);
   }
 }

@@ -32,7 +32,7 @@
     "@travetto/di": "file:../di",
     "@travetto/email": "file:../email",
     "@travetto/image": "file:../image",
-    "@travetto/resource": "file:../resource",
+    "@travetto/base": "file:../base",
     "@types/inline-css": "^3.0.1",
     "@types/sass": "^1.43.1",
     "@types/parse5": "^6.0.3",
