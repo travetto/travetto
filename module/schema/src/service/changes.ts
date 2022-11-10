@@ -58,13 +58,6 @@ class $SchemaChangeListener {
   }
 
   /**
-   * Reset the listener
-   */
-  reset(): void {
-    this.#mapping.clear();
-  }
-
-  /**
    * Clear dependency mappings for a given class
    */
   clearSchemaDependency(cls: Class): void {

@@ -1,6 +1,5 @@
 import * as util from 'util';
-
-import { ResourceManager } from '@travetto/resource';
+import { EmailResources } from './resources';
 
 /**
  * Style Utils
@@ -24,12 +23,10 @@ export class StyleUtil {
    * Get compiled styles
    */
   static async getStyles(): Promise<string> {
-    const file = await ResourceManager.find('email/main.scss');
-    return await this.compileSass(file, [
-      require
-        .resolve('foundation-emails/gulpfile.js')
-        .replace('gulpfile.js', 'scss'), // Include foundation-emails as part of available roots
-      ...ResourceManager.getPaths().map(x => `${x}/email`)
+    const { path } = await EmailResources.describe('email/main.scss');
+    return await this.compileSass(path, [
+      path.resolve('node_modules/foundation-emails/scss'),
+      ...EmailResources.getAllPaths()
     ]);
   }
 

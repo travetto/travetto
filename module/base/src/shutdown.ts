@@ -1,6 +1,6 @@
 import { setTimeout } from 'timers/promises';
 
-import { ModuleIndex, PackageUtil } from '@travetto/boot';
+import { PackageUtil } from '@travetto/boot';
 
 import { Util } from './util';
 import { TimeUtil } from './time';
@@ -9,7 +9,6 @@ const ogExit = process.exit;
 
 export type Closeable = {
   close(cb?: Function): unknown;
-  name?: string;
 };
 
 type UnhandledHandler = (err: Error, prom?: Promise<unknown>) => boolean | undefined | void;
@@ -129,29 +128,16 @@ class $ShutdownManager {
   }
 
   /**
-   * Register to handle closeable on shutdown
-   * @param closeable
-   */
-  onShutdown(closeable: Closeable): void;
-  /**
    * Register a shutdown handler
-   * @param name  Name to log
-   * @param handler Actual code
+   * @param name  Class/Function to log for
+   * @param handler Handler or Closeable
    * @param final If this should be run an attempt to shutdown or only on the final shutdown
    */
-  onShutdown(name: string, handler: Function, final?: boolean): void;
-  onShutdown(nameOrCloseable: string | Closeable, handler?: Function, final = false): void {
-    let name: string;
-    if (typeof nameOrCloseable !== 'string') {
-      name = nameOrCloseable.name ?? nameOrCloseable.constructor.name;
-      handler = nameOrCloseable.close.bind(nameOrCloseable);
-    } else {
-      name = nameOrCloseable;
-      handler = handler!;
+  onShutdown(src: string | { Ⲑid: string } | { constructor: { Ⲑid: string } }, handler: Function | Closeable, final: boolean = false): void {
+    if ('close' in handler) {
+      handler = handler.close.bind(handler);
     }
-    if (/[.][tj]s$/.test(name)) {
-      name = ModuleIndex.getId(name);
-    }
+    const name = typeof src === 'string' ? src : ('Ⲑid' in src ? src.Ⲑid : src.constructor.Ⲑid);
     this.#listeners.push({ name, handler, final });
   }
 

@@ -1,3 +1,5 @@
+import { ConsoleManager, PhaseManager } from '@travetto/boot';
+
 import { BaseModelCommand } from './cli.base-command';
 import { ModelExportUtil } from './bin/export';
 
@@ -10,6 +12,9 @@ export class ModelExportCommand extends BaseModelCommand {
 
   async action(provider: string, models: string[]): Promise<void> {
     try {
+      ConsoleManager.exclude('debug');
+      await PhaseManager.run('init');
+
       await this.validate(provider, models);
       const resolved = await this.resolve(provider, models);
       await ModelExportUtil.run(resolved.provider, resolved.models);

@@ -55,6 +55,4 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
     this.#emitter.on('change', callback);
     return this;
   }
-
-  reset(): void { }
 }

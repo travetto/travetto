@@ -60,10 +60,6 @@ class $DynamicClassSource {
         target.processFiles();
       })
       .on('removed', async ({ file }) => DynamicLoader.unload(file));
-
-    target.reset = () => {
-      this.#modules.clear();
-    };
   }
 }
 

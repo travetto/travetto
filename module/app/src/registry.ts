@@ -80,7 +80,7 @@ class $ApplicationRegistry {
 
     if (target) {
       if ('close' in target) {
-        ShutdownManager.onShutdown(target); // Tie shutdown into app close
+        ShutdownManager.onShutdown(target, target); // Tie shutdown into app close
       }
       if ('wait' in target) {
         await target.wait(); // Wait for close signal

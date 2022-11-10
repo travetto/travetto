@@ -1,9 +1,8 @@
 import * as fs from 'fs/promises';
 
-import { ResourceManager } from '@travetto/resource';
 import { FilePresenceManager } from '@travetto/watch';
 import type { MailTemplateEngine } from '@travetto/email';
-import { TimeUtil } from '@travetto/base';
+import { Env, TimeUtil } from '@travetto/base';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -48,7 +47,7 @@ export class TemplateUtil {
    * Watch compilation
    */
   static async watchCompile(cb?: (file: string) => void): Promise<void> {
-    new FilePresenceManager(ResourceManager.getRelativePaths().map(x => `${x}/email`), {
+    new FilePresenceManager(Env.getList('TRV_RESOURCES').map(x => `${x}/email`), {
       ignoreInitial: true,
       validFile: x =>
         !/[.]compiled[.]/.test(x) && (

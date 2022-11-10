@@ -1,6 +1,5 @@
 import * as path from '@travetto/path';
 import { TimeUtil } from '@travetto/base';
-import { PhaseManager } from '@travetto/boot';
 import { WorkPool, IterableWorkSet } from '@travetto/worker';
 
 import { buildStandardTestManager } from '../worker/standard';
@@ -35,8 +34,6 @@ export class Runner {
 
     console.debug('Running', { files });
 
-    await PhaseManager.run('test');
-
     const manager = buildStandardTestManager;
 
     const pool = new WorkPool(manager(consumer), {
@@ -63,7 +60,6 @@ export class Runner {
 
     const [file, ...args] = this.#state.args;
 
-    await PhaseManager.run('test');
     await TestExecutor.execute(consumer, file, ...args);
 
     return consumer.summarizeAsBoolean();

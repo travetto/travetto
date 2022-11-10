@@ -1,6 +1,7 @@
 import * as path from '@travetto/path';
 import { ImageConverter as ImgUtil } from '@travetto/image';
-import { Resources, StreamUtil } from '@travetto/base';
+import { StreamUtil } from '@travetto/base';
+import { EmailResources } from './resources';
 
 type Resolver = (src: string) => (string | Promise<string>);
 
@@ -44,7 +45,7 @@ export class ImageUtil {
       })
       .filter((x): x is Exclude<typeof x, undefined> => !!x)
       .map(async ([ext, src]) => {
-        const stream = await Resources.readStream(src);
+        const stream = await EmailResources.readStream(src);
         const outputStream = await ImgUtil.optimize(ext, stream);
         const buffer = await StreamUtil.streamToBuffer(outputStream);
         const data = buffer.toString('base64');

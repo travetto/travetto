@@ -70,7 +70,7 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type, manifest:
     const sourceFile = source.fileName;
     if (sourceFile?.includes('@types/node/globals') || sourceFile?.includes('typescript/lib')) {
       return { category: 'literal', type };
-    } else if (sourceFile?.endsWith(SystemUtil.EXT.outputTypes) && !manifest.knownFile(sourceFile)) {
+    } else if (sourceFile?.endsWith('.d.ts') && !manifest.knownFile(sourceFile)) {
       return { category: 'unknown', type };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };

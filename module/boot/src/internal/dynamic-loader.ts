@@ -2,8 +2,6 @@ import * as Mod from 'module';
 
 import * as path from '@travetto/path';
 
-import { ModuleIndex } from '../module-index';
-
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export const Module: NodeModule = Mod as unknown as NodeModule;
 
@@ -199,24 +197,6 @@ export class $DynamicLoader {
   async reload(filename: string): Promise<void> {
     await this.unload(filename);
     await this.load(filename);
-  }
-
-  /**
-   * Turn off compile support
-   */
-  reset(): void {
-    if (!this.#initialized) {
-      return;
-    }
-
-    this.#initialized = false;
-
-    Module._load = this.#moduleLoad;
-
-    // Unload all
-    for (const { output } of ModuleIndex.findSrc({})) {
-      this.unload(output);
-    }
   }
 }
 

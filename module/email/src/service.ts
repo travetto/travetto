@@ -1,5 +1,4 @@
-import { Env } from '@travetto/base';
-import { ResourceManager } from '@travetto/resource';
+import { Env, FileResourceProvider } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { MessageOptions, SentMessage } from './types';
@@ -16,6 +15,9 @@ export class MailService {
   #compiled = new Map<string, MessageOptions>();
   #transport: MailTransport;
   #tplEngine: MailTemplateEngine;
+  #resources = new FileResourceProvider(
+    Env.getList('TRV_RESOURCES')
+  );
 
   constructor(
     transport: MailTransport,
@@ -48,9 +50,9 @@ export class MailService {
     // Bypass cache if in dynamic mode
     if (Env.isDynamic() || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
-        ResourceManager.read(`${key}.compiled.html`),
-        ResourceManager.read(`${key}.compiled.text`).catch(() => ''),
-        ResourceManager.read(`${key}.compiled.subject`)
+        this.#resources.read(`${key}.compiled.html`),
+        this.#resources.read(`${key}.compiled.text`).catch(() => ''),
+        this.#resources.read(`${key}.compiled.subject`)
       ]);
 
       this.#compiled.set(key, { html, text, subject });

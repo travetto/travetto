@@ -1,23 +1,6 @@
 import * as crypto from 'crypto';
 
-const tsExt = '.ts';
-const dtsExt = '.d.ts';
-const tsMatcher = ((file: string): boolean => file.endsWith(tsExt) && !file.endsWith(dtsExt));
-
 export class SystemUtil {
-
-  static EXT = {
-    outputTypes: dtsExt,
-    input: tsExt,
-    inputMatcher: tsMatcher,
-  };
-
-  static PATH = {
-    src: 'src',
-    srcWithSep: 'src/',
-    support: 'support',
-    supportWithSep: 'support/',
-  };
 
   /**
    * Generate a random UUID

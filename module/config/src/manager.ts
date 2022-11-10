@@ -7,7 +7,7 @@ import { ConfigUtil } from './internal/util';
 /**
  * Manager for application configuration
  */
-class $ConfigManager {
+export class $ConfigManager {
 
   #initialized?: boolean = false;
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
@@ -122,14 +122,6 @@ class $ConfigManager {
       Util.deepAssign(ConfigUtil.lookupRoot(this.#active, namespace, true), out, 'coerce');
     }
     return out;
-  }
-
-  /**
-   * Reset
-   */
-  reset(): void {
-    this.#storage = {};
-    this.#initialized = false;
   }
 }
 
