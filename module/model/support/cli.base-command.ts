@@ -25,13 +25,6 @@ export abstract class BaseModelCommand extends CliCommand<Options> {
     Env.define();
   }
 
-  override async build(): Promise<void> {
-    await super.build();
-    ConsoleManager.exclude('debug');
-    // Init
-    await PhaseManager.run('init');
-  }
-
   getArgs(): string {
     return '[provider] [models...]';
   }

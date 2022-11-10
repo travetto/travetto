@@ -8,7 +8,7 @@ import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
 
 import { Inky } from './inky';
 import { MarkdownUtil } from './markdown';
-import { StyleUtil } from './style';
+import { StyleManager } from './style';
 import { ImageUtil } from './image';
 
 export const COMPILE_PARTS = ['html', 'subject', 'text'] as const;
@@ -73,6 +73,7 @@ export class CompileUtil {
   static async compile(tpl: string, root: string): Promise<Compilation> {
     const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
     const provider = Resources.getProvider(FileResourceProvider);
+    const styles = new StyleManager(new FileResourceProvider());
 
     // Wrap with body
     tpl = (await provider.read('email/wrapper.html')).replace('<!-- BODY -->', tpl);
@@ -87,7 +88,7 @@ export class CompileUtil {
     const [, subject] = html.match(/<title>(.*?)<\/title>/) ?? [];
 
     // Apply styles
-    html = await StyleUtil.applyStyling(html);
+    html = await styles.applyStyling(html);
 
     // Inline Images
     html = await ImageUtil.inlineImageSource(html, rel => path.resolve(root, rel));

@@ -88,13 +88,6 @@ export class ClassSource implements ChangeSource<Class> {
   }
 
   /**
-   * Clear all classes
-   */
-  reset(): void {
-    this.#classes.clear();
-  }
-
-  /**
    * Initialize
    */
   async init(): Promise<void> {

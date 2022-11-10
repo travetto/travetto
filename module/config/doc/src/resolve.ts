@@ -12,7 +12,6 @@ export async function main() {
 
   await RootRegistry.init();
 
-  await ConfigManager.reset();
   await ConfigManager.init();
   await ConfigManager.install(DBConfig, new DBConfig(), 'database');
   console.log('Config', ConfigManager.toJSON());

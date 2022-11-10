@@ -54,6 +54,10 @@ async function main(target: Function, args = process.argv.slice(2), respond = tr
   // Register source maps
   sourceMapSupport.install();
 
+  // Attach logging
+  const { ConsoleManager } = await import('@travetto/boot');
+  ᚕtrv.log = ConsoleManager.invoke.bind(ConsoleManager);
+
   const send = respond ? async function send(res: unknown): Promise<void> {
     parentPort ? parentPort.postMessage(res) : (res ? console.log(JSON.stringify(res)) : undefined);
   } : (): void => { };

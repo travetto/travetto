@@ -43,7 +43,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
 
   async postConstruct(): Promise<void> {
     this.client = new Firestore(this.config);
-    ShutdownManager.onShutdown(this.constructor.Ⲑid, () => this.client.terminate());
+    ShutdownManager.onShutdown(this, () => this.client.terminate());
   }
 
   // Storage

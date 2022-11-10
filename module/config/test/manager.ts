@@ -7,7 +7,7 @@ import { BindUtil, ValidationResultError } from '@travetto/schema';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
-import { ConfigManager } from '../src/manager';
+import { $ConfigManager } from '../src/manager';
 import { Config } from '../src/decorator';
 
 @Config('ignore')
@@ -89,20 +89,21 @@ vague:
 export class ManagerTest {
 
   envCopy: NodeJS.ProcessEnv;
-
-  async #reinit() {
-    ConfigManager.reset();
-    await ConfigManager.init();
-  }
+  config: $ConfigManager;
 
   #addConfig(yaml: string) {
-    Util.deepAssign(ConfigManager['getStorage'](), BindUtil.expandPaths(YamlUtil.parse(yaml) as Record<string, unknown>), 'coerce');
+    Util.deepAssign(this.config['getStorage'](), BindUtil.expandPaths(YamlUtil.parse(yaml) as Record<string, unknown>), 'coerce');
+  }
+
+  async  #init() {
+    this.config = new $ConfigManager();
+    await this.config.init();
   }
 
   @BeforeEach()
   async before() {
     this.envCopy = { ...process.env };
-    await this.#reinit();
+    this.#init();
     await RootRegistry.init();
   }
 
@@ -113,31 +114,30 @@ export class ManagerTest {
 
   @Test()
   async verifyBasic() {
-    const conf = ConfigManager.bindTo(TestConfig, new TestConfig(), 'db.mysql');
+    const conf = this.config.bindTo(TestConfig, new TestConfig(), 'db.mysql');
     assert(conf.name === 'Oscar');
   }
 
   @Test()
   async verifyEnv() {
     process.env.DB_MYSQL_NAME = 'Roger';
-    await this.#reinit();
 
-    const conf = ConfigManager.bindTo(TestConfig, new TestConfig(), 'db.mysql');
+    const conf = this.config.bindTo(TestConfig, new TestConfig(), 'db.mysql');
     assert(conf.name === 'Roger');
   }
 
   @Test()
   async verifyNotDefined() {
     const conf = new TestConfig();
-    ConfigManager.bindTo(TestConfig, conf, 'model.mongo');
+    this.config.bindTo(TestConfig, conf, 'model.mongo');
 
     // Default value from
     assert.deepStrictEqual(conf.anonHosts, ['a', 'b']);
 
     process.env.MODEL_MONGO_ANONHOSTS = 'a,b,c,d';
-    await this.#reinit();
+    await this.#init();
 
-    const newConf = ConfigManager.bindTo(TestConfig, new TestConfig(), 'model.mongo');
+    const newConf = this.config.bindTo(TestConfig, new TestConfig(), 'model.mongo');
 
     // Default value from
     assert.deepStrictEqual(newConf.anonHosts, ['a', 'b', 'c', 'd']);
@@ -146,21 +146,21 @@ export class ManagerTest {
   @Test()
   async verifyTopLevelKeys() {
     this.#addConfig(SAMPLE_YAML);
-    console.log('Configuration', ConfigManager.toJSON());
+    console.log('Configuration', this.config.toJSON());
 
-    const conf = ConfigManager.bindTo(Test2Config, new Test2Config(), 'test.beta');
+    const conf = this.config.bindTo(Test2Config, new Test2Config(), 'test.beta');
     assert(conf.values.length === 3);
 
-    const conf2 = ConfigManager.bindTo(Test2Config, new Test2Config(), 'test.alpha');
+    const conf2 = this.config.bindTo(Test2Config, new Test2Config(), 'test.alpha');
     assert(conf2.values.length === 3);
   }
 
   @Test()
   async environmentOverrideFalse() {
     process.env.NAME_ACTIVE = 'false';
-    await this.#reinit();
+    await this.#init();
 
-    const res = ConfigManager.bindTo(NameConfig, new NameConfig(), 'name');
+    const res = this.config.bindTo(NameConfig, new NameConfig(), 'name');
 
     assert(res.active === false);
   }
@@ -177,10 +177,10 @@ config:
 panda.user: bob
 `);
 
-    await ConfigManager.install(Panda, new Panda(), 'panda');
-    await ConfigManager.install(SecureConfig, new SecureConfig(), 'config');
+    await this.config.install(Panda, new Panda(), 'panda');
+    await this.config.install(SecureConfig, new SecureConfig(), 'config');
 
-    const all = ConfigManager.toJSON(true);
+    const all = this.config.toJSON(true);
     console.log(all);
     assert(Util.isPlainObject(all.panda));
     assert.deepStrictEqual(all.panda, { user: '**********' });
@@ -191,15 +191,15 @@ panda.user: bob
   @Test()
   async bindTo() {
     process.env.A_B_C = '5';
-    const res = ConfigManager.bindTo(CustomC, {}, 'a.b');
+    const res = this.config.bindTo(CustomC, {}, 'a.b');
     assert(res.c === 5);
 
     process.env.A_B_C = '20';
-    const res2 = ConfigManager.bindTo(CustomC, {}, 'a.b');
+    const res2 = this.config.bindTo(CustomC, {}, 'a.b');
     assert(res2.c === 20);
 
     process.env.A_B_C = 'blob';
-    const res3 = ConfigManager.bindTo(CustomC, {}, 'a.b');
+    const res3 = this.config.bindTo(CustomC, {}, 'a.b');
     assert(Number.isNaN(res3.c));
   }
 
@@ -207,7 +207,7 @@ panda.user: bob
   async nestedBindTo() {
     this.#addConfig(SAMPLE_YAML);
 
-    const res = ConfigManager.bindTo(Nested, {}, 'nested');
+    const res = this.config.bindTo(Nested, {}, 'nested');
     assert.ok(res.user);
     assert(res.user.age === 52);
     assert(res.user.height === undefined);
@@ -226,7 +226,7 @@ panda.user: bob
 
     this.#addConfig(SAMPLE_YAML);
 
-    const res = ConfigManager.bindTo(Generic, new Generic(), 'vague');
+    const res = this.config.bindTo(Generic, new Generic(), 'vague');
     assert(res.name === 'bob');
     assert.ok(res.props);
     assert(res.props.person === 20);

@@ -51,15 +51,6 @@ export abstract class Registry implements ChangeSource<Class> {
   }
 
   /**
-   * Reset parents
-   */
-  protected resetParents(): void {
-    for (const parent of this.#parents) {
-      parent.reset();
-    }
-  }
-
-  /**
    * Run initialization
    */
   async #runInit(): Promise<void> {
@@ -207,16 +198,5 @@ export abstract class Registry implements ChangeSource<Class> {
    */
   onReset(): void {
     this.#resolved = false;
-  }
-
-  /**
-   * Reset entire registry
-   */
-  reset(): void {
-    this.onReset();
-    for (const des of this.#dependents) {
-      des.reset();
-    }
-    this.#initialized = undefined;
   }
 }

@@ -87,14 +87,6 @@ class $ModuleIndex {
   }
 
   /**
-   * Clears the app scanning cache
-   */
-  reset(): void {
-    // @ts-expect-error
-    this.#modules = undefined;
-  }
-
-  /**
    * Find files from the index
    * @param folder The sub-folder to check into
    * @param filter The filter to determine if this is a valid support file

@@ -41,13 +41,14 @@ export class FileResourceProvider implements ResourceProvider {
   constructor(paths: string[] = []) {
     this.#paths = paths.map(f =>
       ModuleIndex.hasModule(f) ?
-        this.getModulePath(f, this.moduleFolder) :
+        this.getModulePath(f, this.moduleFolder ?? this.pathFolder) :
         path.resolve(f, this.pathFolder ?? '')
     );
   }
 
   moduleFolder?: string;
   pathFolder?: string;
+  maxDepth = 1000;
 
   async #getPath(file: string): Promise<string> {
     for (const sub of this.#paths) {
@@ -56,6 +57,10 @@ export class FileResourceProvider implements ResourceProvider {
       }
     }
     throw new AppError(`Unable to find: ${file}, searched=${this.#paths.join(',')}`, 'notfound');
+  }
+
+  getAllPaths(): string[] {
+    return this.#paths.slice(0);
   }
 
   getModulePath(mod: string, rel?: string): string {
@@ -80,12 +85,12 @@ export class FileResourceProvider implements ResourceProvider {
     return createReadStream(file, binary ? undefined : 'utf8');
   }
 
-  async query(filter: (file: string) => boolean): Promise<string[]> {
-    const search = [...this.#paths.map(x => [x, x] as [string, string])];
+  async query(filter: (file: string) => boolean, maxDepth = this.maxDepth): Promise<string[]> {
+    const search = [...this.#paths.map(x => [x, x, 0] as [string, string, number])];
     const seen = new Set();
     const out: string[] = [];
     while (search.length) {
-      const [folder, root] = search.shift()!;
+      const [folder, root, depth] = search.shift()!;
       for (const sub of await fs.readdir(folder)) {
         if (sub.startsWith('.')) {
           continue;
@@ -93,7 +98,9 @@ export class FileResourceProvider implements ResourceProvider {
         const resolved = path.resolve(folder, sub);
         const stats = await fs.stat(resolved);
         if (stats.isDirectory()) {
-          search.push([resolved, root])
+          if (depth + 1 < maxDepth) {
+            search.push([resolved, root, depth + 1])
+          }
         } else {
           const rel = resolved.replace(`${root}/`, '');
           if (!seen.has(rel) && filter(rel)) {

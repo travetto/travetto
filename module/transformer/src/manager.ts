@@ -63,12 +63,4 @@ export class TransformerManager {
   getTransformers(): TransformerList | undefined {
     return this.#cached!;
   }
-
-  /**
-   * Reset state
-   */
-  reset(): void {
-    this.#transformers = [];
-    this.#cached = undefined;
-  }
 }

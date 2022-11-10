@@ -1,4 +1,5 @@
 import { CliUtil } from '@travetto/cli';
+import { ConsoleManager, PhaseManager } from '@travetto/boot';
 
 import { BaseModelCommand } from './cli.base-command';
 import { ModelInstallUtil } from './bin/install';
@@ -12,6 +13,9 @@ export class ModelInstallCommand extends BaseModelCommand {
 
   async action(provider: string, models: string[]): Promise<void> {
     try {
+      ConsoleManager.exclude('debug');
+      await PhaseManager.run('init');
+
       await this.validate(provider, models);
       const resolved = await this.resolve(provider, models);
       await ModelInstallUtil.run(resolved.provider, resolved.models);

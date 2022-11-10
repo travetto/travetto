@@ -19,13 +19,6 @@ class $RootRegistry extends Registry {
     await super.onEvent(e); // Process event, and
     this.emit(e); // Send to children
   }
-
-  /**
-   * Reset self and parents
-   */
-  override onReset(): void {
-    this.resetParents();
-  }
 }
 
 export const RootRegistry = new $RootRegistry();
