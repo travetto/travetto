@@ -1,8 +1,7 @@
 import * as jws from 'jws';
 import * as assert from 'assert';
 
-import { Resources } from '@travetto/base';
-import { Suite, Test, ShouldThrow } from '@travetto/test';
+import { Suite, Test, ShouldThrow, TestFixtures } from '@travetto/test';
 
 import { JWTUtil } from '..';
 import { JWTError } from '../src/error';
@@ -10,11 +9,13 @@ import { JWTError } from '../src/error';
 @Suite('verify')
 class VerifySuite {
 
+  fixture = new TestFixtures();
+
   @Test('should first assume JSON claim set')
   async simpleVerify() {
     const payload = { iat: Math.floor(Date.now() / 1000) };
-    const priv = await Resources.read('test:/priv.pem', true);
-    const pub = await Resources.read('test:/pub.pem', true);
+    const priv = await this.fixture.read('/priv.pem', true);
+    const pub = await this.fixture.read('/pub.pem', true);
 
     const signed = jws.sign({
       header: { alg: 'RS256', typ: 'JWT' },
@@ -30,7 +31,7 @@ class VerifySuite {
   @Test('should be able to validate unsigned token')
   async validateUnsigned() {
     const payload = { iat: Math.floor(Date.now() / 1000) };
-    const priv = await Resources.read('test:/priv.pem', true);
+    const priv = await this.fixture.read('/priv.pem', true);
 
     const signed = jws.sign({
       header: { alg: 'none' },
@@ -45,7 +46,7 @@ class VerifySuite {
 
   @Test('should not mutate options')
   async noMutate() {
-    const priv = await Resources.read('test:/priv.pem', true);
+    const priv = await this.fixture.read('/priv.pem', true);
 
     const payload = { iat: Math.floor(Date.now() / 1000) };
 

@@ -2,14 +2,16 @@ import * as assert from 'assert';
 import { createReadStream } from 'fs';
 import * as os from 'os';
 
-import { Test, Suite } from '@travetto/test';
-import { ExecUtil, Resources } from '@travetto/base';
+import { Test, Suite, TestFixtures } from '@travetto/test';
+import { ExecUtil } from '@travetto/base';
 
 import { StreamUtil } from '../src/stream';
 
 
 @Suite()
 export class StreamUtilTest {
+
+  fixture = new TestFixtures();
 
   @Test()
   async bufferToStream() {
@@ -24,7 +26,7 @@ export class StreamUtilTest {
 
   @Test()
   async streamToBuffer() {
-    const stream = await Resources.readStream('test:/test.js');
+    const stream = await this.fixture.readStream('/test.js');
     const text = (await StreamUtil.streamToBuffer(stream)).toString('utf8');
     assert(text.length > 1);
     assert(text.includes('Hello World'));
@@ -43,7 +45,7 @@ export class StreamUtilTest {
 
     assert((await StreamUtil.toBuffer(unit8)).toString('utf8') === 'abcde');
 
-    const stream = await Resources.readStream('test:/test.js');
+    const stream = await this.fixture.readStream('/test.js');
     assert((await StreamUtil.toBuffer(stream)).length > 10);
   }
 
@@ -65,7 +67,7 @@ export class StreamUtilTest {
 
   @Test()
   async waitForCompletion() {
-    const { path } = await Resources.describe('test:/long.js');
+    const { path } = await this.fixture.describe('/long.js');
     const state = ExecUtil.fork(path, ['100000'], { stdio: 'pipe' });
     const stream = await StreamUtil.waitForCompletion(state.process.stdout!, () => state.result);
     const output = (await StreamUtil.toBuffer(stream)).toString('utf8').split(/\n/g);
@@ -74,7 +76,7 @@ export class StreamUtilTest {
 
   @Test()
   async pipe() {
-    const { path: echo } = await Resources.describe('test:/echo.js');
+    const { path: echo } = await this.fixture.describe('/echo.js');
     const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
     const returnedStream = await StreamUtil.execPipe(proc, createReadStream(__output));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');

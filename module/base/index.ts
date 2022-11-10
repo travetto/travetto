@@ -4,7 +4,6 @@ export * from './src/shutdown';
 export * from './src/util';
 export * from './src/stream';
 export * from './src/resource';
-export * from './src/file';
 export * from './src/types';
 export * from './src/color';
 export * from './src/time';

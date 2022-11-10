@@ -1,17 +1,18 @@
 import * as assert from 'assert';
 
-import { Suite, Test } from '@travetto/test';
-import { Resources } from '@travetto/base';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { JWTUtil } from '..';
 
 @Suite('public key start with BEGIN RSA PUBLIC KEY')
 class PublicKeySuite {
 
+  fixture = new TestFixtures();
+
   @Test('should work')
   async test() {
-    const certPub = await Resources.read('test:/rsa-public-key.pem');
-    const certPriv = await Resources.read('test:/rsa-private.pem');
+    const certPub = await this.fixture.read('/rsa-public-key.pem');
+    const certPriv = await this.fixture.read('/rsa-private.pem');
 
     const token = await JWTUtil.create({ foo: 'bar' }, { key: certPriv, alg: 'RS256' });
 
