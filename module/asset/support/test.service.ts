@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 
-import { Test, Suite, BeforeAll, TestFixtures } from '@travetto/test';
-import { Class, Resources } from '@travetto/base';
+import { Test, Suite, TestFixtures } from '@travetto/test';
+import { Class } from '@travetto/base';
 import { Inject } from '@travetto/di';
 import { NotFoundError } from '@travetto/model';
 import { InjectableSuite } from '@travetto/di/support/test.suite';
@@ -19,16 +19,12 @@ export abstract class AssetServiceSuite {
 
   serviceClass: Class;
   configClass: Class;
-
-  @BeforeAll()
-  async setup() {
-    Resources.getProvider(TestFixtures).addModule('@travetto/asset');
-  }
+  fixture = new TestFixtures(['@travetto/asset']);
 
   @Test()
   async writeBasic() {
     const service = this.assetService;
-    const { path: pth } = await Resources.describe('test:/asset.yml');
+    const { path: pth } = await this.fixture.describe('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
 
     const out = await service.upsert(file);
@@ -39,7 +35,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeHashed() {
     const service = this.assetService;
-    const { path: pth } = await Resources.describe('test:/asset.yml');
+    const { path: pth } = await this.fixture.describe('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const outHashed = await service.upsert(file, false, new HashNamingStrategy());
     const hash = await AssetUtil.hashFile(pth);
@@ -49,7 +45,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeAndGet() {
     const service = this.assetService;
-    const { path: pth } = await Resources.describe('test:/asset.yml');
+    const { path: pth } = await this.fixture.describe('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     await service.upsert(file);
 
@@ -64,7 +60,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeAndDelete() {
     const service = this.assetService;
-    const { path: pth } = await Resources.describe('test:/asset.yml');
+    const { path: pth } = await this.fixture.describe('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const loc = await service.upsert(file);
 

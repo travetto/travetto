@@ -1,6 +1,11 @@
 import { Readable } from 'stream';
+import { createReadStream } from 'fs';
+import * as fs from 'fs/promises';
+
+import * as path from '@travetto/path';
+
 import { AppError } from './error';
-import { Class, ConcreteClass } from './types';
+import { ModuleIndex } from '@travetto/boot';
 
 export type ResourceDescription = { size: number, path: string };
 
@@ -29,81 +34,75 @@ export interface ResourceProvider {
   readStream(pth: string, binary?: boolean): Promise<Readable>;
 }
 
-/**
- * Standard resource management interface allowing for look up by resource name
- */
-class $ResourceManager implements ResourceProvider {
+export class FileResourceProvider implements ResourceProvider {
+  #paths: string[];
 
-  #providersByScheme = new Map<string, ResourceProvider>();
-  #providersById = new Map<string, ResourceProvider>();
 
-  #resolvePath(pth: string): [ResourceProvider, string] {
+  constructor(paths: string[] = []) {
+    this.#paths = paths.map(f =>
+      ModuleIndex.hasModule(f) ?
+        this.getModulePath(f, this.moduleFolder) :
+        path.resolve(f, this.pathFolder ?? '')
+    );
+  }
 
-    const { groups: { scheme, rel } = {} } = /^(?<scheme>[a-z]+)?:?[\/]*(?<rel>.*)/.exec(pth)!;
-    const handler = this.#providersByScheme.get(scheme);
-    if (!handler) {
-      throw new AppError(`Unknown resource: ${pth}`, 'notfound');
+  moduleFolder?: string;
+  pathFolder?: string;
+
+  async #getPath(file: string): Promise<string> {
+    for (const sub of this.#paths) {
+      if (await fs.stat(path.resolve(sub, file)).catch(() => false)) {
+        return path.resolve(sub, file);
+      }
     }
-    return [handler, rel];
+    throw new AppError(`Unable to find: ${file}, searched=${this.#paths.join(',')}`, 'notfound');
   }
 
-  register(scheme: string, provider: ConcreteClass<ResourceProvider>): void {
-    const inst = new provider();
-    this.#providersByScheme.set(scheme, inst);
-    this.#providersById.set(provider.Ⲑid, inst);
+  getModulePath(mod: string, rel?: string): string {
+    return path.resolve(ModuleIndex.getModule(mod)!.source, rel ?? '');
   }
 
-  /**
-   * Describe the resource
-   * @param pth The path to resolve
-   */
-  describe(pth: string): Promise<ResourceDescription> {
-    const [provider, rel] = this.#resolvePath(pth);
-    return provider.describe(rel);
+  async describe(file: string): Promise<ResourceDescription> {
+    file = await this.#getPath(file);
+    const stat = await fs.stat(file);
+    return { size: stat.size, path: file };
   }
 
-  /**
-   * Read resource as text
-   * @param pth The path to read
-   */
-  read(pth: string, binary?: false): Promise<string>;
-  read(pth: string, binary: true): Promise<Buffer>;
-  read(pth: string, binary?: boolean): Promise<string | Buffer> {
-    const [provider, rel] = this.#resolvePath(pth);
-    return provider.read(rel, binary);
+  async read(file: string, binary?: false): Promise<string>
+  async read(file: string, binary: true): Promise<Buffer>
+  async read(file: string, binary = false) {
+    file = await this.#getPath(file);
+    return fs.readFile(file, binary ? undefined : 'utf8');
   }
 
-  /**
-   * Read a resource as a stream, mimicking fs.readStream
-   * @param pth The path to read
-   */
-  readStream(pth: string, binary: boolean = true): Promise<Readable> {
-    const [provider, rel] = this.#resolvePath(pth);
-    return provider.readStream(rel, binary);
+  async readStream(file: string, binary = true): Promise<Readable> {
+    file = await this.#getPath(file);
+    return createReadStream(file, binary ? undefined : 'utf8');
   }
 
-  /**
-   * Retrieve specific provider by class
-   */
-  getProvider<T extends ResourceProvider>(cls: Class<T>): T {
-    return this.#providersById.get(cls.Ⲑid) as T;
+  async query(filter: (file: string) => boolean): Promise<string[]> {
+    const search = [...this.#paths.map(x => [x, x] as [string, string])];
+    const seen = new Set();
+    const out: string[] = [];
+    while (search.length) {
+      const [folder, root] = search.shift()!;
+      for (const sub of await fs.readdir(folder)) {
+        if (sub.startsWith('.')) {
+          continue;
+        }
+        const resolved = path.resolve(folder, sub);
+        const stats = await fs.stat(resolved);
+        if (stats.isDirectory()) {
+          search.push([resolved, root])
+        } else {
+          const rel = resolved.replace(`${root}/`, '');
+          if (!seen.has(rel) && filter(rel)) {
+            out.push(rel);
+            seen.add(rel);
+          }
+        }
+      }
+    }
+    return out;
   }
-
-  /**
-   * Read resource as text
-   * @param pth The path to read
-   */
-  async readJSON<T = unknown>(pth: string): Promise<T> {
-    const [provider, rel] = this.#resolvePath(pth);
-    return JSON.parse(await provider.read(rel)) as T;
-  }
-}
-
-export const Resources = new $ResourceManager();
-
-
-export function ResourceProvider(scheme: string) {
-  return <T extends ResourceProvider>(target: ConcreteClass<T>): void => {
-    Resources.register(scheme, target);
-  };
 }

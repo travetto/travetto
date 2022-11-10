@@ -1,4 +1,4 @@
-import { Class, Resources } from '@travetto/base';
+import { Class } from '@travetto/base';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry, TestFixtures } from '@travetto/test';
@@ -10,13 +10,13 @@ import { ModelRegistry } from '../../src/registry/model';
 const Loaded = Symbol();
 
 export function ModelSuite<T extends { configClass: Class<{ autoCreate?: boolean, namespace?: string }>, serviceClass: Class }>(qualifier?: symbol) {
+  const fixtures = new TestFixtures(['@travetto/model']);
   return (target: Class<T>): void => {
+    target.prototype.fixtures = fixtures;
+
     SuiteRegistry.registerPendingListener(
       target,
       async function (this: T & { [Loaded]?: boolean }) {
-        // Track self
-        Resources.getProvider(TestFixtures).addModule('@travetto/model');
-
         await RootRegistry.init();
 
         if (!this[Loaded]) {

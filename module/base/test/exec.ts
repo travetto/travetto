@@ -1,12 +1,14 @@
 import * as assert from 'assert';
 
 import * as path from '@travetto/path';
-import { Test, Suite } from '@travetto/test';
+import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { ExecUtil, Resources } from '..';
+import { ExecUtil } from '..';
 
 @Suite()
 export class ExecUtilTest {
+
+  fixture = new TestFixtures();
 
   @Test()
   async spawn() {
@@ -32,7 +34,7 @@ export class ExecUtilTest {
 
   @Test()
   async fork() {
-    const proc = ExecUtil.fork((await Resources.describe('test:test.js')).path);
+    const proc = ExecUtil.fork((await this.fixture.describe('test.js')).path);
     const result = await proc.result;
     assert(result.stdout === 'Hello World\n');
   }
