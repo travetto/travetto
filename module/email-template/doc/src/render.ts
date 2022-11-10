@@ -1,11 +1,12 @@
-import { ResourceManager } from '@travetto/resource';
-import { CompileUtil } from '@travetto/email-template';
+import { EmailTemplateResource, EmailTemplateCompiler } from '@travetto/email-template';
 
 export async function main() {
 
-  const res = await CompileUtil.compileToDisk(
-    await ResourceManager.findAbsolute('/email/welcome.email.html')
+  const compiler = new EmailTemplateCompiler(
+    new EmailTemplateResource()
   );
+
+  const res = await compiler.compile('/welcome.email.html', true);
 
   console.log(
     res.html

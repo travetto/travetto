@@ -1,12 +1,14 @@
-import { Resources } from '@travetto/base';
+import { CommonFileResourceProvider } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { ConfigManager } from '@travetto/config';
 
 import { DBConfig } from './dbconfig';
 
 export async function main() {
+  const resource = new CommonFileResourceProvider();
+
   Object.assign(process.env, Object.fromEntries(
-    (await Resources.read('file:/env.properties'))
+    (await resource.read('/env.properties'))
       .split(/\n/g)
       .map(x => x.split(/\s*=\s*/))));
 

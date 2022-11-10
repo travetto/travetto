@@ -2,6 +2,7 @@ import { d, lib, mod } from '@travetto/doc';
 import { Application } from '@travetto/app';
 import { Field, Schema } from '@travetto/schema';
 
+import { FileResourceProvider } from '@travetto/base';
 import { RestApplication } from '@travetto/rest/src/application/rest';
 import { Controller } from '@travetto/rest/src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from '@travetto/rest/src/decorator/endpoint';
@@ -17,7 +18,6 @@ import { AsyncContextInterceptor } from '@travetto/rest/src/interceptor/context'
 
 const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
 const Response = d.SnippetLink('TravettoResponse', '@travetto/rest/src/types.d.ts', /interface TravettoResponse/);
-const ResourceManager = d.Ref('ResourceManager', '@travetto/base/src/resource.ts');
 
 const RestInterceptor = d.SnippetLink('RestInterceptor', '@travetto/rest/src/interceptor/types.ts', /interface RestInterceptor/);
 
@@ -216,7 +216,7 @@ ${d.List(
 
 This is useful for local development where you implicitly trust the cert.
 
-SSL support can be enabled by setting ${d.Input('rest.ssl.active: true')} in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the ${ResourceManager}.
+SSL support can be enabled by setting ${d.Input('rest.ssl.active: true')} in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the ${FileResourceProvider}.
 
 ${d.Section('Full Config')}
 The entire ${RestConfig} which will show the full set of valid configuration parameters for the rest module.

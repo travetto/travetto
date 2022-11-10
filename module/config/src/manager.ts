@@ -1,14 +1,16 @@
-import { Env, AppError, Class, Util, FileResourceProvider } from '@travetto/base';
+import { Env, AppError, Class, Util } from '@travetto/base';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { YamlUtil } from '@travetto/yaml';
 
 import { ConfigUtil } from './internal/util';
+import { ConfigResource } from './resource';
 
 /**
  * Manager for application configuration
  */
 export class $ConfigManager {
 
+  #resource = new ConfigResource();
   #initialized?: boolean = false;
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
   #active: Record<string, Record<string, unknown>> = {}; // All active configs
@@ -30,23 +32,13 @@ export class $ConfigManager {
    * Load all config files
    */
   async #load(): Promise<void> {
-    const profiles = ['application', ...Env.getProfiles(), Env.getName()];
-
-    const profileIndex = Object.fromEntries(Object.entries(profiles).map(([k, v]) => [v, +k] as const));
-
-    const provider = new FileResourceProvider();
-
-    const files = (await provider.query(f => !f.includes('/') && /[.]ya?ml$/.test(f)))
-      .map(file => ({ file, profile: file.replace(/[.]ya?ml$/, '') }))
-      .filter(({ profile }) => profile in profileIndex)
-      .sort((a, b) => profileIndex[a.profile] - profileIndex[b.profile]);
+    const files = await this.#resource.loadByProfiles(['application', ...Env.getProfiles(), Env.getName()]);
 
     if (files.length) {
       console.debug('Found configurations for', { files: files.map(x => x.profile) });
     }
 
-    for (const { file } of files) {
-      const text = await provider.read(file);
+    for (const { text } of files) {
       const data = YamlUtil.parse<Record<string, unknown>>(text);
       Util.deepAssign(this.#storage, BindUtil.expandPaths(data), 'coerce');
     }

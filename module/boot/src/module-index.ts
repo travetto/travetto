@@ -20,6 +20,7 @@ export type IndexedModule = {
   name: string;
   source: string;
   output: string;
+  main?: boolean;
   files: Record<string, IndexedFile[]>;
 };
 

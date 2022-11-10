@@ -2,10 +2,11 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import * as fs from 'fs/promises';
 
+import { ModuleIndex } from '@travetto/boot';
 import * as path from '@travetto/path';
 
 import { AppError } from './error';
-import { ModuleIndex } from '@travetto/boot';
+import { Env } from './env';
 
 export type ResourceDescription = { size: number, path: string };
 
@@ -34,37 +35,48 @@ export interface ResourceProvider {
   readStream(pth: string, binary?: boolean): Promise<Readable>;
 }
 
+/**
+ * Simple file-based resource provider
+ */
 export class FileResourceProvider implements ResourceProvider {
   #paths: string[];
+  #rawPaths: string[];
 
+  #getModulePath(mod: string, rel?: string): string {
+    return path.resolve(ModuleIndex.getModule(mod)!.source, rel ?? '');
+  }
 
-  constructor(paths: string[] = []) {
-    this.#paths = paths.map(f =>
-      ModuleIndex.hasModule(f) ?
-        this.getModulePath(f, this.moduleFolder ?? this.pathFolder) :
-        path.resolve(f, this.pathFolder ?? '')
-    );
+  constructor(paths: string[]) {
+    this.#rawPaths = paths;
   }
 
   moduleFolder?: string;
-  pathFolder?: string;
+  mainFolder?: string;
   maxDepth = 1000;
 
+  #getPaths() {
+    const main = ModuleIndex.manifest.main;
+    return this.#paths ??= this.#rawPaths.map(pth => {
+      const [base, sub] = pth.split('#');
+
+      return ModuleIndex.hasModule(base) ?
+        this.#getModulePath(base, sub ?? (base !== main ? this.moduleFolder : undefined) ?? this.mainFolder) :
+        path.resolve(base, sub ?? this.mainFolder ?? '')
+    });
+  }
+
   async #getPath(file: string): Promise<string> {
-    for (const sub of this.#paths) {
-      if (await fs.stat(path.resolve(sub, file)).catch(() => false)) {
-        return path.resolve(sub, file);
+    for (const sub of this.#getPaths()) {
+      const resolved = path.join(sub, file);
+      if (await fs.stat(resolved).catch(() => false)) {
+        return resolved;
       }
     }
-    throw new AppError(`Unable to find: ${file}, searched=${this.#paths.join(',')}`, 'notfound');
+    throw new AppError(`Unable to find: ${file}, searched=${this.#getPaths().join(',')}`, 'notfound');
   }
 
   getAllPaths(): string[] {
     return this.#paths.slice(0);
-  }
-
-  getModulePath(mod: string, rel?: string): string {
-    return path.resolve(ModuleIndex.getModule(mod)!.source, rel ?? '');
   }
 
   async describe(file: string): Promise<ResourceDescription> {
@@ -85,8 +97,11 @@ export class FileResourceProvider implements ResourceProvider {
     return createReadStream(file, binary ? undefined : 'utf8');
   }
 
+  /**
+   * Query using a simple predicate, looking for files recursively
+   */
   async query(filter: (file: string) => boolean, maxDepth = this.maxDepth): Promise<string[]> {
-    const search = [...this.#paths.map(x => [x, x, 0] as [string, string, number])];
+    const search = [...this.#getPaths().map(x => [x, x, 0] as [string, string, number])];
     const seen = new Set();
     const out: string[] = [];
     while (search.length) {
@@ -111,5 +126,14 @@ export class FileResourceProvider implements ResourceProvider {
       }
     }
     return out;
+  }
+}
+
+/**
+ * Simple file resource provider that relies on trv_resources
+ */
+export class CommonFileResourceProvider extends FileResourceProvider {
+  constructor(paths: string[] = Env.getList('TRV_RESOURCES')) {
+    super(paths);
   }
 }

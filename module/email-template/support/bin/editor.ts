@@ -1,10 +1,6 @@
-import { PhaseManager } from '@travetto/boot';
-
-import { TemplateUtil } from './util';
-import { SendUtil } from './send';
+import { TemplateManager } from './template';
+import { EditorSendService } from './send';
 import { EditorConfig } from './config';
-
-import { CompileUtil } from '../../src/util';
 
 type InboundMessage =
   { type: 'configure' } |
@@ -21,14 +17,21 @@ type OutboundMessage =
 /**
  * Utils for interacting with editors
  */
-class $EditorState {
+export class EditorState {
   #lastFile = '';
+  #sender: EditorSendService;
+  #template: TemplateManager;
+
+  constructor(template: TemplateManager) {
+    this.#template = template;
+    this.#sender = new EditorSendService();
+  }
 
   async renderFile(file: string): Promise<void> {
-    file = CompileUtil.TPL_EXT.test(file) ? file : this.#lastFile;
+    file = this.#template.resources.isTemplateFile(file) ? file : this.#lastFile;
     if (file) {
       try {
-        const content = await TemplateUtil.resolveCompiledTemplate(
+        const content = await this.#template.resolveCompiledTemplate(
           file, await EditorConfig.getContext()
         );
         this.response({
@@ -58,7 +61,7 @@ class $EditorState {
 
   async #onRedraw(msg: InboundMessage & { type: 'redraw' }): Promise<void> {
     try {
-      await CompileUtil.compileToDisk(msg.file);
+      await this.#template.compiler.compile(msg.file, true);
     } catch (err) {
       if (err && err instanceof Error) {
         this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
@@ -74,7 +77,7 @@ class $EditorState {
     const to = msg.to || cfg.to;
     const from = msg.from || cfg.from;
     try {
-      await SendUtil.sendEmail(msg.file, from, to, await EditorConfig.getContext());
+      await this.#sender.sendEmail(msg.file, from, to, await EditorConfig.getContext());
       this.response({ type: 'sent', to, file: msg.file });
     } catch (err) {
       if (err && err instanceof Error) {
@@ -89,9 +92,7 @@ class $EditorState {
    * Initialize context, and listeners
    */
   async init(): Promise<void> {
-    await PhaseManager.run('init');
-
-    TemplateUtil.watchCompile(f => this.renderFile(f));
+    this.#template.watchCompile(f => this.renderFile(f));
 
     process.on('message', (msg: InboundMessage) => {
       switch (msg.type) {
@@ -102,5 +103,3 @@ class $EditorState {
     });
   }
 }
-
-export const EditorState = new $EditorState();

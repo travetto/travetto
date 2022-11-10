@@ -1,24 +1,26 @@
 import { Controller, Get, Produces, Request } from '@travetto/rest';
-import { Resources } from '@travetto/base';
+import { CommonFileResourceProvider } from '@travetto/base';
 
 @Controller('/ui')
 export class UIController {
 
+  resources = new CommonFileResourceProvider()
+
   @Get('/')
   @Produces('text/html')
   getHomepage() {
-    return Resources.readStream('file:/ui/index.html');
+    return this.resources.readStream('/ui/index.html');
   }
 
   @Get(/[.]js$/)
   @Produces('application/javascript')
   getJs(req: Request) {
-    return Resources.readStream(`file:${req.url}`);
+    return this.resources.readStream(req.url);
   }
 
   @Get(/[.]css$/)
   @Produces('text/css')
   getCss(req: Request) {
-    return Resources.readStream(`file:${req.url}`);
+    return this.resources.readStream(req.url);
   }
 }

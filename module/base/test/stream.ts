@@ -67,7 +67,7 @@ export class StreamUtilTest {
 
   @Test()
   async waitForCompletion() {
-    const { path } = await this.fixture.describe('/long.js');
+    const { path } = await this.fixture.describe('long.js');
     const state = ExecUtil.fork(path, ['100000'], { stdio: 'pipe' });
     const stream = await StreamUtil.waitForCompletion(state.process.stdout!, () => state.result);
     const output = (await StreamUtil.toBuffer(stream)).toString('utf8').split(/\n/g);
@@ -76,7 +76,7 @@ export class StreamUtilTest {
 
   @Test()
   async pipe() {
-    const { path: echo } = await this.fixture.describe('/echo.js');
+    const { path: echo } = await this.fixture.describe('echo.js');
     const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
     const returnedStream = await StreamUtil.execPipe(proc, createReadStream(__output));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');

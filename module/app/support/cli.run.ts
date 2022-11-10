@@ -1,10 +1,11 @@
 import { StacktraceManager } from '@travetto/boot';
 import { CliUtil, CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
-import { Env, FileResourceProvider } from '@travetto/base';
+import { Env } from '@travetto/base';
 
 import { AppListLoader } from './bin/list';
 import { AppRunUtil } from './bin/run';
 import { HelpUtil } from './bin/help';
+import { ConfigResource } from '@travetto/config';
 
 function hasChildren(e: Error): e is Error & { errors: Error[] } {
   return !!e && ('errors' in e);
@@ -13,7 +14,6 @@ function hasChildren(e: Error): e is Error & { errors: Error[] } {
 type Options = {
   env: OptionConfig<string>;
   profile: ListOptionConfig<string>;
-  resource: ListOptionConfig<string>;
 };
 
 /**
@@ -39,8 +39,7 @@ export class AppRunCommand extends CliCommand<Options> {
   getOptions(): Options {
     return {
       env: this.option({ desc: 'Application environment' }),
-      profile: this.listOption({ desc: 'Additional application profiles' }),
-      resource: this.listOption({ desc: 'Additional resource locations' })
+      profile: this.listOption({ desc: 'Additional application profiles' })
     };
   }
 
@@ -52,10 +51,7 @@ export class AppRunCommand extends CliCommand<Options> {
     Env.define({
       env: this.cmd.env,
       dynamic: !Env.isFalse('TRV_DYNAMIC'),
-      append: {
-        TRV_PROFILES: this.cmd.profile,
-        TRV_RESOURCES: this.cmd.resource
-      }
+      append: { TRV_PROFILES: this.cmd.profile }
     });
   }
 
@@ -113,11 +109,9 @@ export class AppRunCommand extends CliCommand<Options> {
    * Tab completion support
    */
   override async complete(): Promise<Record<string, string[]>> {
-    const apps = await AppListLoader.getList() || [];
 
-    const profiles = (await new FileResourceProvider()
-      .query(x => /[.]ya?ml/.test(x) && !x.includes('/')))
-      .map(x => x.replace(/[.]ya?ml/, ''));
+    const apps = await AppListLoader.getList() ?? [];
+    const profiles = await new ConfigResource().getAvailableProfiles();
 
     return {
       '': apps.map(x => x.name).concat(['--env', '--profile']),
