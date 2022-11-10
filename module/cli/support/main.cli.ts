@@ -18,6 +18,5 @@ and invoke it locally using
 `);
     process.exit(1);
   }
-
   return ExecutionManager.run(process.argv); // Run cli
 }

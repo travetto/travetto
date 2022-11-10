@@ -1,7 +1,6 @@
 import * as sourceMapSupport from 'source-map-support';
 import * as ts from 'typescript';
 import * as fs from 'fs/promises';
-import { mkdirSync, writeFileSync } from 'fs';
 
 import { WorkspaceManager } from './workspace';
 
@@ -30,6 +29,7 @@ export class Compiler {
 
   #program: ts.Program | undefined;
   #sourceFiles: string[];
+  #fakeInputToModule: Map<string, [string, ManifestModule]>;
   #inverseSourceMap: Map<string, [string, ManifestModule]>;
   #inverseDirectoryMap: Map<string, string>;
   #bootTsconfig: string;
@@ -47,6 +47,7 @@ export class Compiler {
     this.#modules = Object.values(this.#manifest.modules);
     this.#inverseSourceMap = new Map();
     this.#inverseDirectoryMap = new Map();
+    this.#fakeInputToModule = new Map();
     this.#sourceFiles = this.#modules.flatMap(
       x => [
         ...x.files.index ?? [],
@@ -60,6 +61,7 @@ export class Compiler {
           const target = `${x.source}/${f}`;
           this.#inverseSourceMap.set(resolved, [target, x]);
           this.#inverseDirectoryMap.set(path.dirname(resolved), path.dirname(target));
+          this.#fakeInputToModule.set(`${x.output}/${f}`, [target, x]);
           return resolved;
         })
     );
@@ -149,21 +151,18 @@ export class Compiler {
       const [src] = data.sources;
 
       if (src.startsWith('node_modules')) {
-        // @ts-expect-error
-        const { groups: { mod, file } } = (src.startsWith('node_modules/@') ?
-          /^node_modules\/(?<mod>@[^/]+\/[^/]+)\/(?<file>.*)$/ :
-          /^node_modules\/(?<mod>[^/]+)\/(?<file>.*)$/
-        ).exec(src);
-        const resolved = this.#modules.find(x => x.name === mod)!;
-        data.sourceRoot = resolved.source;
-        data.sources = [file];
-        text = text.replace(sourceMapUrl, `${prefix}base64,${Buffer.from(JSON.stringify(data), 'utf8').toString('base64url')}`);
-      } else { // Normal file
-        const mod = this.#modules.find(x => x.main)!;
-        data.sourceRoot = mod.source;
+        const [file, resolved] = this.#fakeInputToModule.get(src) ?? [];
+        if (file && resolved) {
+          data.sourceRoot = resolved.source;
+          data.sources = [file];
+          text = [
+            text.substring(0, sourceMapUrlPos),
+            prefix,
+            'base64,',
+            Buffer.from(JSON.stringify(data), 'utf8').toString('base64url')
+          ].join('');
+        }
       }
-
-      text = text.replace(sourceMapUrl, `${prefix}base64,${Buffer.from(JSON.stringify(data), 'utf8').toString('base64url')}`);
     }
     return text;
   }
@@ -181,12 +180,12 @@ export class Compiler {
       host.readFile = file => ts.sys.readFile(this.#inverseSourceMap.get(file)?.[0] ?? file);
       host.fileExists = filename => this.#inverseSourceMap.has(filename) || ts.sys.fileExists(filename);
       host.directoryExists = folder => this.#inverseDirectoryMap.has(folder) || ts.sys.directoryExists(folder);
+      const ogWriteFile = host.writeFile.bind(host);
       host.writeFile = (filename: string, text: string, bom, onError, sourceFiles, data?: ts.WriteFileCallbackData) => {
         if (isSourceMapUrlPosData(data)) {
           text = this.#rewriteSourceMap(text, data.sourceMapUrlPos);
         }
-        mkdirSync(path.dirname(filename), { recursive: true });
-        writeFileSync(filename, text);
+        ogWriteFile(filename, text, bom, onError, sourceFiles, data);
       };
 
       this.#program = ts.createProgram({

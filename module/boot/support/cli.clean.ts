@@ -29,7 +29,7 @@ export class BootCleanCommand extends CliCommand<Options> {
     for (const el of await fs.readdir(cwd)) {
       if (el.startsWith('.trv') && (await fs.stat(el)).isDirectory() && (!el.startsWith('.trv_compiler') || this.cmd.full)) {
         try {
-          await fs.rmdir(el, { recursive: true });
+          await fs.rm(el, { recursive: true });
           if (!this.cmd.quiet) {
             console!.log(CliUtil.color`${{ success: 'Successfully' }} deleted temp dir ${{ path: path.join(cwd, el) }}`);
           }
