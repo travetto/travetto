@@ -5,21 +5,19 @@ import { NodemailerTransport } from '@travetto/email-nodemailer';
 import { MailTransportTarget } from '@travetto/email/src/internal/types';
 import { DependencyRegistry } from '@travetto/di';
 
-import { CompileUtil } from '../../src/util';
-
 import { EditorConfig } from './config';
 
 /**
  * Util for sending emails
  */
-export class SendUtil {
+export class EditorSendService {
 
-  static #svc: Promise<MailService>;
+  #svc: MailService;
 
   /**
    * Get mail service
    */
-  static async getMailService(): Promise<MailService> {
+  async getMailService(): Promise<MailService> {
     if (!this.#svc) {
       const senderConfig = await EditorConfig.getSenderConfig();
 
@@ -43,7 +41,7 @@ ${EditorConfig.getDefaultConfig()}`.trim();
         throw new Error(errorMessage);
       }
 
-      this.#svc = DependencyRegistry.getInstance(MailService);
+      this.#svc = await DependencyRegistry.getInstance(MailService);
     }
     return this.#svc;
   }
@@ -51,7 +49,7 @@ ${EditorConfig.getDefaultConfig()}`.trim();
   /**
    * Resolve template
    */
-  static async sendEmail(file: string, from: string, to: string, context: Record<string, unknown>): Promise<{
+  async sendEmail(key: string, from: string, to: string, context: Record<string, unknown>): Promise<{
     url?: string | false;
   }> {
     try {
@@ -62,7 +60,6 @@ ${EditorConfig.getDefaultConfig()}`.trim();
         throw new Error('Node mailer support is missing');
       }
 
-      const key = file.replace(CompileUtil.TPL_EXT, '').replace(/^.*?\/resources\//, '/');
       const info = await svc.sendCompiled<SMTPTransport.SentMessageInfo>(key, { to, context, from });
       console.log('Sent email', { to });
 

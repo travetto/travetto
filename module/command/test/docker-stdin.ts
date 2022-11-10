@@ -1,6 +1,5 @@
 import * as assert from 'assert';
 
-import { Resources } from '@travetto/base';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { DockerContainer } from '../src/docker';

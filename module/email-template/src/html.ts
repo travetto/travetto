@@ -4,8 +4,6 @@ import { Node, Element, Document } from './types';
 
 export const Parse5Adapter: TreeAdapter<DefaultTreeAdapterMap> = defaultTreeAdapter;
 
-type AttrList = { name: string, value: string }[];
-
 /**
  * Utilities for visiting html trees
  */

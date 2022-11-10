@@ -1,6 +1,6 @@
 import * as mongo from 'mongodb';
 
-import { Resources, TimeSpan } from '@travetto/base';
+import { CommonFileResourceProvider, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -56,29 +56,25 @@ export class MongoModelConfig {
   cullRate?: number | TimeSpan;
 
   /**
-   * Load a resource
-   */
-  async fetch(val: string): Promise<string> {
-    return Resources.read(val).catch(() => val);
-  }
-
-  /**
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
+    const resources = new CommonFileResourceProvider();
+    const resolve = (file: string) => resources.describe(file).then(({ path }) => path, () => file);
+
     const opts = this.options;
     if (opts.ssl) {
       if (opts.sslCert) {
-        opts.tlsCertificateFile = await this.fetch(opts.sslCert);
+        opts.tlsCertificateFile = await resolve(opts.sslCert);
       }
       if (opts.sslKey) {
-        opts.sslKey = await this.fetch(opts.sslKey);
+        opts.sslKey = await resolve(opts.sslKey);
       }
       if (opts.sslCA) {
-        opts.sslCA = await this.fetch(opts.sslCA);
+        opts.sslCA = await resolve(opts.sslCA);
       }
       if (opts.sslCRL) {
-        opts.sslCRL = await this.fetch(opts.sslCRL);
+        opts.sslCRL = await resolve(opts.sslCRL);
       }
     }
   }

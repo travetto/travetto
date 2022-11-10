@@ -1,7 +1,7 @@
 import * as timers from 'timers/promises';
 
 import * as path from '@travetto/path';
-import { Resources, TimeUtil, Util } from '@travetto/base';
+import { TimeUtil, Util } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 import { ModuleIndex } from '@travetto/boot';
 

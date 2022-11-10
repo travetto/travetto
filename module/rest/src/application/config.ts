@@ -1,7 +1,7 @@
 import * as os from 'os';
 
 import { Config } from '@travetto/config';
-import { Resources, Env, AppError } from '@travetto/base';
+import { Env, AppError, CommonFileResourceProvider } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 import { RestServerUtil } from './util';
@@ -91,8 +91,9 @@ export class RestConfig {
       return RestServerUtil.generateSslKeyPair();
     } else {
       if (this.ssl.keys.key.length < 100) {
-        this.ssl.keys.key = await Resources.read(this.ssl.keys.key);
-        this.ssl.keys.cert = await Resources.read(this.ssl.keys.cert);
+        const provider = new CommonFileResourceProvider();
+        this.ssl.keys.key = (await provider.read(this.ssl.keys.key, true)).toString('utf8');
+        this.ssl.keys.cert = (await provider.read(this.ssl.keys.cert, true)).toString('utf8');
       }
       return this.ssl.keys;
     }

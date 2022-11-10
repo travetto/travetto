@@ -1,11 +1,10 @@
 import { d, lib, mod } from '@travetto/doc';
 import { ModelQueryTypes } from '@travetto/model-query/support/doc.support';
 import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.support';
+import { FileResourceProvider } from '@travetto/base';
 
 import { MongoModelConfig } from '@travetto/model-mongo/src/config';
 import { MongoModelService } from '@travetto/model-mongo/src/service';
-
-const ResourceManager = d.SnippetLink('ResourceManager', '@travetto/base/src/resource.ts', /class [$]Resource/);
 
 export const text = d`
 ${d.Header()}
@@ -20,5 +19,5 @@ ${d.List(
 
 ${ModelCustomConfig(MongoModelConfig)}
 
-The SSL file options in ${d.Input('clientOptions')} will automatically be resolved to files when given a path.  This path can be a ${ResourceManager} path or just a standard file path.
+The SSL file options in ${d.Input('clientOptions')} will automatically be resolved to files when given a path.  This path can be a ${FileResourceProvider} path or just a standard file path.
 `;

@@ -46,6 +46,8 @@ export class ExecutionManager {
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;
+      } else {
+        console.error(err);
       }
       return command.showHelp(err);
     }

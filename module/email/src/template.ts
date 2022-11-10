@@ -1,7 +1,8 @@
 import * as Mustache from 'mustache';
 
 import { Injectable } from '@travetto/di';
-import { ResourceManager } from '@travetto/resource';
+
+import { EmailResource } from './resource';
 
 /**
  * Mail templating engine
@@ -23,6 +24,8 @@ export interface MailTemplateEngine {
 @Injectable()
 export class MustacheTemplateEngine implements MailTemplateEngine {
 
+  resources = new EmailResource();
+
   /**
    * Resolved nested templates
    */
@@ -30,7 +33,7 @@ export class MustacheTemplateEngine implements MailTemplateEngine {
     const promises: Promise<string>[] = [];
     template = template.replace(/[{]{2}>\s+(\S+)([.]html)?\s*[}]{2}/g, (all: string, name: string) => {
       promises.push(
-        ResourceManager.read(`${name}.html`, 'utf8') // Ensure html file
+        this.resources.read(`${name}.html`) // Ensure html file
           .then(contents => this.resolveNested(contents))
       );
       return `$%${promises.length - 1}%$`;

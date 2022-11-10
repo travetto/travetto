@@ -1,10 +1,12 @@
-import { Env, FileResourceProvider } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { MessageOptions, SentMessage } from './types';
 import { MailTransport } from './transport';
 import { MailTemplateEngine } from './template';
 import { MailUtil } from './util';
+import { EmailResource } from './resource';
+
 
 /**
  * Email service for sending and templating emails
@@ -15,16 +17,16 @@ export class MailService {
   #compiled = new Map<string, MessageOptions>();
   #transport: MailTransport;
   #tplEngine: MailTemplateEngine;
-  #resources = new FileResourceProvider(
-    Env.getList('TRV_RESOURCES')
-  );
+  #resources: EmailResource;
 
   constructor(
     transport: MailTransport,
-    tplEngine: MailTemplateEngine
+    tplEngine: MailTemplateEngine,
+    resources: EmailResource
   ) {
     this.#tplEngine = tplEngine;
     this.#transport = transport;
+    this.#resources = resources;
   }
 
   /**
