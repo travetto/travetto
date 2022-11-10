@@ -7,7 +7,7 @@ import type { Manifest, ManifestModuleFile, ManifestModuleFileType, ManifestModu
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean };
 
-export type ModuleIndexEntry = {
+export type IndexedFile = {
   id: string;
   module: string;
   source: string;
@@ -15,12 +15,12 @@ export type ModuleIndexEntry = {
   type: ManifestModuleFileType;
 };
 
-type IndexedModule = {
+export type IndexedModule = {
   id: string;
   name: string;
   source: string;
   output: string;
-  files: Record<string, ModuleIndexEntry[]>;
+  files: Record<string, IndexedFile[]>;
 };
 
 /**
@@ -31,8 +31,8 @@ class $ModuleIndex {
   #manifest: Manifest;
   #modules: IndexedModule[];
   #root: string;
-  #outputToEntry = new Map<string, ModuleIndexEntry>();
-  #sourceToEntry = new Map<string, ModuleIndexEntry>();
+  #outputToEntry = new Map<string, IndexedFile>();
+  #sourceToEntry = new Map<string, IndexedFile>();
 
   constructor(root: string) {
     this.#root = root;
@@ -47,7 +47,7 @@ class $ModuleIndex {
     return this.#manifest;
   }
 
-  #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): ModuleIndexEntry[] {
+  #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([f, type]) => {
       const source = path.join(m.source, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
@@ -66,6 +66,7 @@ class $ModuleIndex {
     this.#manifest = JSON.parse(fs.readFileSync(this.#resolve('manifest.json'), 'utf8'));
     this.#modules = Object.values(this.manifest.modules).map(m => ({
       ...m,
+      output: this.#resolve(m.output),
       files: Object.fromEntries(
         Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files)])
       )
@@ -81,7 +82,7 @@ class $ModuleIndex {
     }
   }
 
-  #getEntry(file: string): ModuleIndexEntry | undefined {
+  #getEntry(file: string): IndexedFile | undefined {
     return this.#outputToEntry.get(file);
   }
 
@@ -98,7 +99,7 @@ class $ModuleIndex {
    * @param folder The sub-folder to check into
    * @param filter The filter to determine if this is a valid support file
    */
-  find(config: FindConfig): ModuleIndexEntry[] {
+  find(config: FindConfig): IndexedFile[] {
     const { filter: f, folder } = config;
     const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
 
@@ -116,7 +117,7 @@ class $ModuleIndex {
    * Find files from the index
    * @param filter The filter to determine if this is a valid support file
    */
-  findSupport(config: Omit<FindConfig, 'folder'>): ModuleIndexEntry[] {
+  findSupport(config: Omit<FindConfig, 'folder'>): IndexedFile[] {
     return this.find({ ...config, folder: 'support' });
   }
 
@@ -124,11 +125,11 @@ class $ModuleIndex {
    * Find files from the index
    * @param filter The filter to determine if this is a valid support file
    */
-  findSrc(config: Omit<FindConfig, 'folder'>): ModuleIndexEntry[] {
+  findSrc(config: Omit<FindConfig, 'folder'>): IndexedFile[] {
     return this.find({ ...config, folder: 'src', includeIndex: true });
   }
 
-  findOwnSrc(): ModuleIndexEntry[] {
+  findOwnSrc(): IndexedFile[] {
     return this.findSrc({
       filter: x => !x.includes('node_modules') && x.includes('src/')
     });
@@ -138,7 +139,7 @@ class $ModuleIndex {
    * Find files from the index
    * @param filter The filter to determine if this is a valid support file
    */
-  findTest(config: Omit<FindConfig, 'folder'>): ModuleIndexEntry[] {
+  findTest(config: Omit<FindConfig, 'folder'>): IndexedFile[] {
     return this.find({ ...config, folder: 'test' });
   }
 
@@ -191,5 +192,5 @@ class $ModuleIndex {
 }
 
 export const ModuleIndex = new $ModuleIndex(
-  path.toPosix(process.env.TRV_MANIFEST_ROOT ?? path.cwd())
+  path.toPosix(process.env.TRV_OUTPUT ?? path.cwd())
 );

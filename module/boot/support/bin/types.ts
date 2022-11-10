@@ -18,6 +18,7 @@ export type ManifestModule<T = Record<string, ManifestModuleFile[]>> = {
 export type Manifest = {
   generated: number;
   buildLocation: string;
+  main: string;
   modules: Record<string, ManifestModule>;
 };
 

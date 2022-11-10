@@ -215,6 +215,7 @@ export class ManifestUtil {
 
   static wrapModules(modules: Record<string, ManifestModule>): Manifest {
     return {
+      main: Object.values(modules).find(x => x.main)?.name ?? '__tbd__',
       modules, generated: Date.now(),
       buildLocation: '__tbd__'
     };

@@ -41,7 +41,7 @@ export class ExecutionManager {
       if (args.includes('-h') || args.includes('--help')) {
         return command.showHelp();
       } else {
-        commander.parse(args);
+        await commander.parseAsync(args);
       }
     } catch (err) {
       if (!(err instanceof Error)) {

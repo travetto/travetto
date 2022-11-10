@@ -5,10 +5,8 @@ import * as path from '@travetto/path';
 
 import type { LogLevel } from '../src/types';
 
-const src = (file: string): string => path.toPosix(file).replace(/[.]js$/, '.ts');
-
 if (global.ᚕtrv) {
-  console.error(`@travetto/boot was already loaded at ${global.ᚕtrv.self} but now is trying to be loaded in ${src(__filename)}`);
+  console.error(`@travetto/boot was already loaded at ${global.ᚕtrv.self} but now is trying to be loaded in ${__filename}`);
   console.error('This means you have two versions of the framework installed, which is not supported');
   process.exit(1);
 }
@@ -57,13 +55,13 @@ async function main(target: Function, args = process.argv.slice(2), respond = tr
   sourceMapSupport.install();
 
   const send = respond ? async function send(res: unknown): Promise<void> {
-    parentPort ? parentPort.postMessage(res) : console.log(JSON.stringify(res));
+    parentPort ? parentPort.postMessage(res) : (res ? console.log(JSON.stringify(res)) : undefined);
   } : (): void => { };
 
   try { await import(path.resolve('.env')); } catch { } // Read env
   try {
     const res = await target(...args);
-    await send(res);
+    await send(await res);
     return res;
   } catch (err) {
     await send(err);
@@ -78,7 +76,7 @@ const log = (level: LogLevel, ctx: unknown, ...args: unknown[]): void => console
 const output = (file: string): string => path.toPosix(file);
 
 const utils = Object.defineProperties({}, {
-  self: { writable: false, value: src(__filename) },
+  self: { writable: false, value: __filename },
   output: { writable: false, value: output },
   main: { writable: false, value: main },
   log: { writable: true, value: log },

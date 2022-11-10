@@ -6,6 +6,7 @@ import { version as framework } from '../package.json';
 import { Package } from '../support/bin/types';
 export { Package } from '../support/bin/types';
 
+import { ModuleIndex } from './module-index';
 
 export class PackageUtil {
 
@@ -18,11 +19,12 @@ export class PackageUtil {
 
   static get main(): Package {
     if (!this.#config) {
+      const { output: mainFolder } = ModuleIndex.getModule(ModuleIndex.manifest.main)!;
       try {
-        this.#config = this.readPackage(path.cwd());
+        this.#config = this.readPackage(mainFolder);
       } catch (err: unknown) {
         if (err instanceof Error) {
-          console.warn(`Unable to locate ${path.resolve('package.json')}: ${err.message}`);
+          console.warn(`Unable to locate ${path.resolve(mainFolder, 'package.json')}: ${err.message}`);
         } else {
           throw err;
         }
