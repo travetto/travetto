@@ -54,7 +54,7 @@ class $ModuleIndex {
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
       const output = this.#resolve(m.output, js);
       const module = `${m.name}/${js}`;
-      const id = (m.main ? module : module.replace(m.name, m.id)).replace(/\/src\//, '/');
+      const id = (m.main ? module : module.replace(m.name, m.id)).replace(/[.]js$/, '');
 
       return { id, type, source, output, module };
     });

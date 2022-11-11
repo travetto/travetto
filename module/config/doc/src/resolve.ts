@@ -1,20 +1,14 @@
-import { CommonFileResourceProvider } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
-import { ConfigManager } from '@travetto/config';
+import { Configuration } from '@travetto/config';
+import { DependencyRegistry } from '@travetto/di';
+import { PhaseManager } from '@travetto/boot';
 
 import { DBConfig } from './dbconfig';
 
 export async function main() {
-  const resource = new CommonFileResourceProvider();
-
-  Object.assign(process.env, Object.fromEntries(
-    (await resource.read('/env.properties'))
-      .split(/\n/g)
-      .map(x => x.split(/\s*=\s*/))));
-
+  await PhaseManager.run('init');
   await RootRegistry.init();
-
-  await ConfigManager.init();
-  await ConfigManager.install(DBConfig, new DBConfig(), 'database');
-  console.log('Config', ConfigManager.toJSON());
+  const config = await DependencyRegistry.getInstance(Configuration);
+  await config.bindTo(DBConfig, new DBConfig(), 'database');
+  console.log('Config', await config.exportActive());
 }

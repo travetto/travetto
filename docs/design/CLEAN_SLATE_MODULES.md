@@ -136,17 +136,22 @@ Will provide a new multiphase compiler that:
 
 
 ## Pending Items
-- `trv-test` needs to be moved into `@travetto/test`
 - Rework vscode plugin:
-   * No longer depend on travetto
    * Fix how we invoke operations
-- Rework docs to:
-   * Use new system
 - Rework pack:
    * Use manifest for staging files
    * Integrate with bundler (webpack, vite, etc?)
 - Rework top-level command to start/stop all services
    * Cannot rely on module marfing
+- DI factory behavior with interfaces
+- Rewrite docs:
+   * config
+   * base
+   * boot
+- Tests
+   * config
+   * base 
+   * boot   
 
 ## Deprecated
 

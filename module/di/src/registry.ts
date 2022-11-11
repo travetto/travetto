@@ -416,6 +416,11 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       while (Object.getPrototypeOf(parentClass).Ⲑmeta?.abstract) {
         parentClass = Object.getPrototypeOf(parentClass);
       }
+      if (!this.targetToClass.has(classId)) {
+        this.targetToClass.set(classId, new Map());
+      }
+      // Make explicitly discoverable as self
+      this.targetToClass.get(classId)?.set(config.qualifier, classId);
     }
 
     const parentConfig = this.get(parentClass.Ⲑid);

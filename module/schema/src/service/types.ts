@@ -67,6 +67,10 @@ export interface ClassConfig extends DescribableConfig {
    * Is the class a sub type
    */
   subType?: boolean;
+  /**
+   * Metadata that is related to the schema structure
+   */
+  metadata?: Record<symbol, unknown>;
 }
 
 /**
@@ -148,6 +152,10 @@ export interface FieldConfig extends DescribableConfig {
    * Is the field readonly, or write only?, defaults to no restrictions
    */
   access?: 'readonly' | 'writeonly';
+  /**
+   * Is this field secret, defaults to no, can be used to hide field when exporting values
+   */
+  secret?: boolean;
 }
 
 export type ViewFieldsConfig<T> = { with: Extract<(keyof T), string>[] } | { without: Extract<(keyof T), string>[] };

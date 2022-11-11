@@ -261,6 +261,8 @@ export class AssertCheck {
   ): Promise<void> {
     let missed: Error | undefined;
 
+    assertion.file = ModuleIndex.getSourceFile(assertion.file);
+
     try {
       if ('then' in action) {
         await action;

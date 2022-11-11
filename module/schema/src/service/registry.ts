@@ -56,6 +56,30 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   }
 
   /**
+   * Retrieve class level metadata
+   * @param cls 
+   * @param prop 
+   * @param key 
+   * @returns 
+   */
+  getMetadata<K>(cls: Class, key: symbol): K | undefined {
+    const cfg = this.get(cls);
+    return cfg.metadata?.[key] as K;
+  }
+
+  /**
+   * Retrieve pending class level metadata, or create if needed
+   * @param cls 
+   * @param prop 
+   * @param key 
+   * @returns 
+   */
+  getOrCreatePendingMetadata<K>(cls: Class, key: symbol, value: K): K {
+    const cfg = this.getOrCreatePending(cls);
+    return ((cfg.metadata ??= {})[key] ??= value) as K;
+  }
+
+  /**
    * Ensure type is set properly
    */
   ensureInstanceTypeField<T>(cls: Class, o: T): void {
@@ -147,6 +171,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       class: cls,
       validators: [],
       subType: false,
+      metadata: {},
       views: {
         [AllViewⲐ]: {
           schema: {},
@@ -301,6 +326,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       schema: { ...dest.views[AllViewⲐ].schema, ...src.views?.[AllViewⲐ].schema },
       fields: [...dest.views[AllViewⲐ].fields, ...src.views?.[AllViewⲐ].fields ?? []]
     };
+    dest.metadata = { ...src.metadata ?? {}, ...dest.metadata ?? {} }
     dest.subType = src.subType || dest.subType;
     dest.title = src.title || dest.title;
     dest.validators = [...src.validators ?? [], ...dest.validators];
