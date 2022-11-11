@@ -7,17 +7,21 @@ import { envInit } from './bin/env';
 import { TestChildWorker } from '../src/worker/child';
 
 export async function customLogs(): Promise<void> {
-  const handle = await fs.open(path.resolve(`.trv-test-worker.${process.pid}.log`), 'a');
-  const stdout = handle.createWriteStream();
+  if (process.env.DEBUG?.includes('test-worker')) {
+    const handle = await fs.open(path.resolve(`.trv-test-worker.${process.pid}.log`), 'a');
+    const stdout = handle.createWriteStream();
 
-  const c = new console.Console({
-    stdout,
-    inspectOptions: { depth: 4 },
-  });
+    const c = new console.Console({
+      stdout,
+      inspectOptions: { depth: 4 },
+    });
 
-  ConsoleManager.set({
-    onLog: (level, ctx, args: unknown[]) => c[level](process.pid, ctx, ...args)
-  });
+    ConsoleManager.set({
+      onLog: (level, ctx, args: unknown[]) => c[level](process.pid, ctx, ...args)
+    });
+  } else {
+    ConsoleManager.set({ onLog: (level, ctx, args: unknown[]) => { } });
+  }
 }
 
 export async function main(): Promise<void> {

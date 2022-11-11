@@ -1,0 +1,9 @@
+{
+  "name": "doc",
+  "main": "index.ts",
+  "dependencies": {
+    "@travetto/doc": "file:../../../module/doc",
+    "@travetto/todo-app": "file:.."
+  },
+  "private": true
+}

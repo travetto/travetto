@@ -64,6 +64,12 @@ export function Writeonly(active = true): ReturnType<typeof prop> { return prop(
  */
 export function Readonly(active = true): ReturnType<typeof prop> { return prop({ access: 'readonly' }); }
 /**
+ * Mark a field as sensitive
+ * @param active This determines if this field is sensitive or not.
+ * @augments `@trv:schema/Field`
+ */
+export function Secret(active = true): ReturnType<typeof prop> { return prop({ secret: active }); }
+/**
  * Mark a field as required
  * @param active This determines if this field is required or not.
  * @param message The error message when a the constraint fails.

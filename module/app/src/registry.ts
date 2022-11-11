@@ -2,7 +2,7 @@ import { PackageUtil } from '@travetto/boot';
 import { Class, ShutdownManager, ConcreteClass, Env } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
-import { ConfigManager } from '@travetto/config';
+import { Configuration } from '@travetto/config';
 
 import { AppClass, ApplicationConfig } from './types';
 
@@ -71,8 +71,10 @@ class $ApplicationRegistry {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       new (config.target! as ConcreteClass<AppClass>)();
 
+    const rootConfig = await DependencyRegistry.getInstance(Configuration);
+
     // Show config
-    console.log('Config', ConfigManager.toJSON());
+    console.log('Config', await rootConfig.exportActive());
 
     const ret = await inst.run(...cleaned);
 

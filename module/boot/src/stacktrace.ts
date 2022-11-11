@@ -9,7 +9,7 @@ export class $StacktraceManager {
   #filterRegex: RegExp = /./g;
 
   constructor() {
-    const names = [
+    const names: string[] = [
       '@travetto/(?:watch|context)',
       'src/stacktrace',
       'internal',
@@ -18,7 +18,7 @@ export class $StacktraceManager {
       '[(]native[)]',
       'typescript',
       'tslib',
-      'source-map-support[.]js'
+      'source-map-support'
     ];
     this.#filters.push(...names);
     this.#filterRegex = new RegExp(`(${this.#filters.join('|')})`);

@@ -193,11 +193,17 @@ export class TestExecutor {
 
     const mgr = new TestPhaseManager(consumer, suite, result);
 
+    const originalEnv = { ...process.env };
+
     try {
       // Handle the BeforeAll calls
       await mgr.startPhase('all');
 
+      const suiteEnv = { ...process.env };
+
       for (const test of suite.tests) {
+        // Reset env before each test
+        process.env = { ...suiteEnv };
         const testStart = Date.now();
         const skip = await this.#skip(test, suite.instance);
         if (!skip) {
@@ -222,6 +228,9 @@ export class TestExecutor {
     } catch (err) {
       await mgr.onError(err);
     }
+
+    // Restore env
+    process.env = { ...originalEnv };
 
     result.duration = Date.now() - startTime;
 

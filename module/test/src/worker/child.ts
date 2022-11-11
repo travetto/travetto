@@ -2,9 +2,7 @@ import { ErrorUtil, PhaseManager } from '@travetto/boot';
 import { ChildCommChannel } from '@travetto/worker';
 
 import { RunnerUtil } from '../execute/util';
-
 import { Runner } from '../execute/runner';
-
 import { Events, RunEvent } from './types';
 
 /**

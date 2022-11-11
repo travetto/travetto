@@ -4,6 +4,11 @@ import { AllViewⲐ } from './internal/types';
 import { SchemaRegistry } from './service/registry';
 import { FieldConfig } from './service/types';
 
+type BindConfig = {
+  view?: string | typeof AllViewⲐ;
+  filter?: (field: FieldConfig) => boolean;
+}
+
 /**
  * Utilities for binding objects to schemas
  */
@@ -38,7 +43,7 @@ export class BindUtil {
   static register(): void {
     const proto = Object.getPrototypeOf(Function);
     proto.from = function (data: object | ClassInstance, view?: string): unknown {
-      return BindUtil.bindSchema(this, data, view);
+      return BindUtil.bindSchema(this, data, { view });
     };
   }
 
@@ -141,12 +146,12 @@ export class BindUtil {
    * Bind data to the schema for a class, with an optional view
    * @param cons The schema class to bind against
    * @param data The provided data to bind
-   * @param view The optional view to limit the binding against
+   * @param cfg The bind configuration
    */
-  static bindSchema<T>(cons: Class<T>, data?: undefined, view?: string): undefined;
-  static bindSchema<T>(cons: Class<T>, data?: null, view?: string): null;
-  static bindSchema<T>(cons: Class<T>, data?: object | T, view?: string): T;
-  static bindSchema<T>(cons: Class<T>, data?: object | T, view?: string): T | null | undefined {
+  static bindSchema<T>(cons: Class<T>, data?: undefined, cfg?: BindConfig): undefined;
+  static bindSchema<T>(cons: Class<T>, data?: null, cfg?: BindConfig): null;
+  static bindSchema<T>(cons: Class<T>, data?: object | T, cfg?: BindConfig): T;
+  static bindSchema<T>(cons: Class<T>, data?: object | T, cfg?: BindConfig): T | null | undefined {
     if (data === null || data === undefined) {
       return data;
     }
@@ -167,8 +172,19 @@ export class BindUtil {
         }
       }
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return this.bindSchemaToObject(cls, tgt, data as object, view);
+      return this.bindSchemaToObject(cls, tgt, data as object, cfg);
     }
+  }
+
+  /**
+   * Export a given instance to a plain object for external usage
+   * 
+   * @param data The class instance to copy from
+   * @param cfg The bind configuration
+   * @returns 
+   */
+  static exportSchema<T>(data: ClassInstance<T>, cfg: BindConfig): unknown {
+    return this.bindSchemaToObject(data.constructor, {} as T, data, cfg)
   }
 
   /**
@@ -176,10 +192,11 @@ export class BindUtil {
    * @param cons The schema class
    * @param obj The target object (instance of cons)
    * @param data The data to bind
-   * @param view The desired view
+   * @param cfg The bind configuration
    */
-  static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: object, view?: string | typeof AllViewⲐ): T {
-    view ??= AllViewⲐ;
+  static bindSchemaToObject<T>(cons: Class<T>, obj: T, data?: object, cfg: BindConfig = {}): T {
+    const view = cfg.view ?? AllViewⲐ; // Does not convey
+    delete cfg.view;
 
     if (!!data && !Util.isPrimitive(data)) {
       const conf = SchemaRegistry.get(cons);
@@ -199,13 +216,14 @@ export class BindUtil {
 
         for (const schemaFieldName of viewConf.fields) {
           let inboundField: string | undefined = undefined;
-          if (viewConf.schema[schemaFieldName].access === 'readonly') {
+          const field = viewConf.schema[schemaFieldName];
+          if (field.access === 'readonly' || cfg.filter?.(field) === false) {
             continue; // Skip trying to write readonly fields
           }
           if (schemaFieldName in data) {
             inboundField = schemaFieldName;
-          } else if (viewConf.schema[schemaFieldName].aliases) {
-            for (const aliasedField of (viewConf.schema[schemaFieldName].aliases ?? [])) {
+          } else if (field.aliases) {
+            for (const aliasedField of (field.aliases ?? [])) {
               if (aliasedField in data) {
                 inboundField = aliasedField;
                 break;
@@ -225,14 +243,18 @@ export class BindUtil {
 
             // Ensure its an array
             if (!Array.isArray(v) && config.array) {
-              v = [v];
+              if (typeof v === 'string' && v.includes(',')) {
+                v = v.split(/\s*,\s*/);
+              } else {
+                v = [v];
+              }
             }
 
             if (SchemaRegistry.has(config.type)) {
               if (config.array && Array.isArray(v)) {
-                v = v.map(el => this.bindSchema(config.type, el));
+                v = v.map(el => this.bindSchema(config.type, el, cfg));
               } else {
-                v = this.bindSchema(config.type, v);
+                v = this.bindSchema(config.type, v, cfg);
               }
             } else if (config.array && Array.isArray(v)) {
               v = v.map(el => this.#coerceType(config, el));
@@ -265,13 +287,13 @@ export class BindUtil {
     if (field.array) {
       const valArr = !Array.isArray(val) ? [val] : val;
       if (complex) {
-        val = valArr.map(x => this.bindSchema(field.type, x, field.view));
+        val = valArr.map(x => this.bindSchema(field.type, x, { view: field.view }));
       } else {
         val = valArr.map(x => Util.coerceType(x, field.type, false));
       }
     } else {
       if (complex) {
-        val = this.bindSchema(field.type, val, field.view);
+        val = this.bindSchema(field.type, val, { view: field.view });
       } else {
         val = Util.coerceType(val, field.type, false);
       }

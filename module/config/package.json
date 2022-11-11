@@ -1,7 +1,7 @@
 {
   "name": "@travetto/config",
   "version": "3.0.0-rc.4",
-  "description": "Environment-aware config management using yaml files",
+  "description": "Configuration support",
   "keywords": [
     "yaml",
     "decorators",
@@ -18,8 +18,7 @@
   },
   "files": [
     "index.ts",
-    "src",
-    "support"
+    "src"
   ],
   "main": "index.ts",
   "repository": {
@@ -27,17 +26,9 @@
     "directory": "module/config"
   },
   "dependencies": {
+    "@travetto/di": "file:../di",
     "@travetto/schema": "file:../schema",
-    "@travetto/transformer": "file:../transformer",
     "@travetto/yaml": "file:../yaml"
-  },
-  "peerDependencies": {
-    "@travetto/di": "file:../di"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/di": {
-      "optional": true
-    }
   },
   "travetto": {
     "id": "@trv:config",

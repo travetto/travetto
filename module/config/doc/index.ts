@@ -2,8 +2,7 @@ import { d, mod, lib } from '@travetto/doc';
 import { Field, Schema } from '@travetto/schema';
 
 import { Config as ConfigDec } from '@travetto/config/src/decorator';
-
-const ConfigLink = d.Ref('ConfigManager', '@travetto/config/src/manager.ts');
+import { Configuration } from '@travetto/config/src/configuration';
 
 export const text = d`
 ${d.Header()}
@@ -52,7 +51,7 @@ ${d.Section('Secrets')}
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under ${d.Input('config.redacted')}.
 
 ${d.Section('Consuming')}
-The ${ConfigLink} service provides direct access to all of the loaded configuration. For simplicity, a decorator, ${ConfigDec} allows for classes to automatically be bound with config information on post construction via the ${mod.Di} module. The decorator will install a ${d.Method('postConstruct')} method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The ${Configuration} service provides injectable access to all of the loaded configuration. For simplicity, a decorator, ${ConfigDec} allows for classes to automatically be bound with config information on post construction via the ${mod.Di} module. The decorator will install a ${d.Method('postConstruct')} method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 

@@ -57,7 +57,7 @@ export class FileResourceProvider implements ResourceProvider {
   #getPaths() {
     const main = ModuleIndex.manifest.main;
     return this.#paths ??= this.#rawPaths.map(pth => {
-      const [base, sub] = pth.split('#');
+      const [base, sub] = pth.replace(/^@$/, main).replace(/^@#/, `${main}#`).split('#');
 
       return ModuleIndex.hasModule(base) ?
         this.#getModulePath(base, sub ?? (base !== main ? this.moduleFolder : undefined) ?? this.mainFolder) :

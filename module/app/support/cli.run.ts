@@ -5,7 +5,6 @@ import { Env } from '@travetto/base';
 import { AppListLoader } from './bin/list';
 import { AppRunUtil } from './bin/run';
 import { HelpUtil } from './bin/help';
-import { ConfigResource } from '@travetto/config';
 
 function hasChildren(e: Error): e is Error & { errors: Error[] } {
   return !!e && ('errors' in e);
@@ -111,12 +110,7 @@ export class AppRunCommand extends CliCommand<Options> {
   override async complete(): Promise<Record<string, string[]>> {
 
     const apps = await AppListLoader.getList() ?? [];
-    const profiles = await new ConfigResource().getAvailableProfiles();
 
-    return {
-      '': apps.map(x => x.name).concat(['--env', '--profile']),
-      '--profile': profiles,
-      '-p': profiles,
-    };
+    return { '': apps.map(x => x.name).concat(['--env', '--profile']) };
   }
 }
