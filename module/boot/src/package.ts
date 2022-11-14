@@ -1,10 +1,8 @@
 import { readFileSync } from 'fs';
 
-import * as path from '@travetto/path';
+import { path, Package } from '@travetto/common';
 
 import { version as framework } from '../package.json';
-import { Package } from '../support/bin/types';
-export { Package } from '../support/bin/types';
 
 import { ModuleIndex } from './module-index';
 

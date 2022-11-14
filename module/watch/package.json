@@ -23,7 +23,7 @@
     "directory": "module/watch"
   },
   "dependencies": {
-    "@travetto/base": "file:../base"
+    "@travetto/boot": "file:../boot"
   },
   "travetto": {
     "id": "@trv:watch",

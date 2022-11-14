@@ -1,13 +1,12 @@
 /* eslint-disable no-bitwise */
 import * as ts from 'typescript';
 
-import * as path from '../../support/path';
+import { path } from '@travetto/common';
 
 import { DocUtil } from '../util/doc';
 import { CoreUtil } from '../util/core';
 import { DeclarationUtil } from '../util/declaration';
 import { LiteralUtil } from '../util/literal';
-import { SystemUtil } from '../util/system';
 
 import { Type, AnyType, UnionType, Checker } from './types';
 import { CoerceUtil } from './coerce';

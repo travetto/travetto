@@ -1,4 +1,4 @@
-// Manifest types
+
 export type ManifestModuleFileType = 'd.ts' | 'ts' | 'js' | 'json' | 'unknown' | 'fixture';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number];

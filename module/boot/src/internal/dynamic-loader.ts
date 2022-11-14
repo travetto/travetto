@@ -1,6 +1,6 @@
 import * as Mod from 'module';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export const Module: NodeModule = Mod as unknown as NodeModule;

@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { log, spawn, BuildConfig } from '../../bin/build-support';
 
-import { ManifestState } from './types';
+import type { ManifestState } from '@travetto/common';
 import { ManifestUtil } from './manifest';
 
 let manifestTemp: string;

@@ -1,7 +1,7 @@
 import * as sourceMapSupport from 'source-map-support';
 import { parentPort } from 'worker_threads';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 
 import type { LogLevel } from '../src/types';
 

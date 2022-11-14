@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { ColorUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 import { ErrorUtil } from '@travetto/boot';

@@ -25,6 +25,7 @@
     "directory": "module/transformer"
   },
   "dependencies": {
+    "@travetto/path": "file:../path",
     "tslib": "^2.4.0",
     "typescript": "^4.8.4"
   },

@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { PackageUtil } from '@travetto/boot';
 import { ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';

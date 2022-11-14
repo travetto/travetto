@@ -1,6 +1,6 @@
 import * as enquirer from 'enquirer';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { Env } from '@travetto/base';
 import { CliCommand, OptionConfig } from '@travetto/cli';
 

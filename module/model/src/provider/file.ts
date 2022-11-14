@@ -3,7 +3,7 @@ import { createReadStream } from 'fs';
 import * as os from 'os';
 import { Readable } from 'stream';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { StreamUtil, Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';

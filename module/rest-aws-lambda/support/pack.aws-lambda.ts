@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import type { AllConfigPartial } from '@travetto/pack';
 
 export const config: AllConfigPartial = {

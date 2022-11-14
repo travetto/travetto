@@ -3,7 +3,7 @@ import * as ts from 'typescript';
 import { TransformerId, TransformerState, AfterFile } from '@travetto/transformer';
 
 const INIT_MOD = '@travetto/boot/support/init';
-const PATH_MOD = '@travetto/path';
+const COMMON_MOD = '@travetto/common';
 
 /**
  *  Supporting `__output` as a file property
@@ -14,7 +14,7 @@ export class FileSourceTransformer {
 
   @AfterFile()
   static registerFileSource(state: TransformerState, node: ts.SourceFile): typeof node {
-    if (state.module === INIT_MOD || state.module.startsWith(PATH_MOD)) {
+    if (state.module === INIT_MOD || state.module.startsWith(COMMON_MOD)) {
       return node;
     }
 

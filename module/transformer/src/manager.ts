@@ -1,10 +1,12 @@
 import * as ts from 'typescript';
 
+import { ManifestModule } from '@travetto/common';
+
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
 import { TransformerState } from './state';
 import { getAllTransformers } from './register';
-import { ManifestManager, ManifestModule } from './manifest';
+import { ManifestManager } from './manifest';
 
 type TransformerList = { before: ts.TransformerFactory<ts.SourceFile>[] };
 

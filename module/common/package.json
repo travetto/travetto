@@ -1,9 +1,10 @@
 {
-  "name": "@travetto/path",
+  "name": "@travetto/common",
   "version": "3.0.0-rc.2",
-  "description": "Native path replacement",
+  "description": "Common utils, native path replacement and manfiest typings",
   "keywords": [
     "path",
+    "manifest",
     "travetto",
     "typescript"
   ],
@@ -19,12 +20,12 @@
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/path"
+    "directory": "module/common"
   },
   "dependencies": {},
   "travetto": {
-    "id": "@trv:path",
-    "displayName": "Path"
+    "id": "@trv:common",
+    "displayName": "Common"
   },
   "publishConfig": {
     "access": "public"

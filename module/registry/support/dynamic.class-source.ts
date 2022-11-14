@@ -1,4 +1,4 @@
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { ShutdownManager } from '@travetto/base';
 import { RetargettingProxy, ModuleIndex } from '@travetto/boot';
 

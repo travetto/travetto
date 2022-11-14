@@ -1,13 +1,4 @@
-import * as path from '../support/path';
-
-export type ManifestModule = {
-  source: string;
-  output: string;
-  main?: boolean;
-  local?: boolean;
-  name: string;
-  files: Record<string, [string, string, number][]>;
-};
+import { path, ManifestModule } from '@travetto/common';
 
 export class ManifestManager {
   #srcToMod: Record<string, string> = {};
