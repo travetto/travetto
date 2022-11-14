@@ -3,7 +3,7 @@ import { DependencyRegistry, Injectable } from '@travetto/di';
 
 import { ConfigParserTarget } from '../internal/types';
 import { ConfigParser } from '../parser/types';
-import { ConfigPriority, ConfigSource, ConfigValue } from './types';
+import { ConfigSource, ConfigValue } from './types';
 
 @Injectable()
 export class FileConfigSource extends CommonFileResourceProvider implements ConfigSource {
@@ -11,9 +11,9 @@ export class FileConfigSource extends CommonFileResourceProvider implements Conf
   depth = 1;
   extMatch: RegExp;
   parsers: Record<string, ConfigParser>;
-  priority = 1 as ConfigPriority;
+  priority = 1;
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     const parserClasses = await DependencyRegistry.getCandidateTypes(ConfigParserTarget);
     const parsers = await Promise.all(parserClasses.map(x => DependencyRegistry.getInstance<ConfigParser>(x.class, x.qualifier)));
 

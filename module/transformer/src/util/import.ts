@@ -35,23 +35,22 @@ export class ImportUtil {
    */
   static collectImports(src: ts.SourceFile): Map<string, Import> {
     // TODO: Replace with manifest reverse lookup
-    let pth = src.fileName;
-    const base = pth.replaceAll('\\', '/');
+    const base = src.fileName.replaceAll('\\', '/');
 
     const imports = new Map<string, Import>();
 
     for (const stmt of src.statements) {
       if (ts.isImportDeclaration(stmt) && ts.isStringLiteral(stmt.moduleSpecifier)) {
-        const path = this.optionalResolve(stmt.moduleSpecifier.text, base);
+        const resolved = this.optionalResolve(stmt.moduleSpecifier.text, base);
 
         if (stmt.importClause) {
           if (stmt.importClause.namedBindings) {
             const bindings = stmt.importClause.namedBindings;
             if (ts.isNamespaceImport(bindings)) {
-              imports.set(bindings.name.text, { path, ident: bindings.name, stmt });
+              imports.set(bindings.name.text, { path: resolved, ident: bindings.name, stmt });
             } else if (ts.isNamedImports(bindings)) {
               for (const n of bindings.elements) {
-                imports.set(n.name.text, { path, ident: n.name, stmt });
+                imports.set(n.name.text, { path: resolved, ident: n.name, stmt });
               }
             }
           }

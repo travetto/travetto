@@ -1,4 +1,4 @@
-import { d, lib, mod } from '@travetto/doc';
+import { d, lib } from '@travetto/doc';
 import { Schema } from '@travetto/schema';
 
 export const text = d`

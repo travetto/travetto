@@ -55,7 +55,7 @@ export class OutputCompiler extends Compiler {
     await this.workspace.writeRawFile('.env.js', `
 process.env.TRV_OUTPUT=process.cwd();
 process.env.TRV_COMPILED=1;
-`)
+`);
   }
 
   async watch(): Promise<void> {
@@ -85,7 +85,7 @@ process.env.TRV_COMPILED=1;
           break;
         }
         case 'added': {
-          files.push(relativeOutput)
+          files.push(relativeOutput);
           const prog = await this.getProgram(files, true);
           this.emitFile(prog, relativeOutput);
           break;

@@ -79,7 +79,7 @@ class $ModuleIndex {
     }));
 
     for (const mod of this.#modules) {
-      for (const [name, files] of Object.entries(mod.files ?? {})) {
+      for (const files of Object.values(mod.files ?? {})) {
         for (const entry of files) {
           this.#outputToEntry.set(entry.output, entry);
           this.#sourceToEntry.set(entry.source, entry);
@@ -180,7 +180,7 @@ class $ModuleIndex {
 
   /**
    * Get source file from output location
-   * @param outputFile 
+   * @param outputFile
    */
   getSourceFile(outputFile: string): string {
     return this.#outputToEntry.get(outputFile)?.source ?? outputFile;
@@ -188,7 +188,7 @@ class $ModuleIndex {
 
   /**
    * Get node module from source file
-   * @param source 
+   * @param source
    */
   getModuleFromSource(source: string): string | undefined {
     return this.#sourceToEntry.get(source)?.module;

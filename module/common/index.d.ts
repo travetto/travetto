@@ -61,6 +61,7 @@ export type Package = {
   travetto?: {
     id?: string;
     displayName?: string;
+    profileInherit?: boolean;
     profiles?: string[];
   },
   private?: boolean;
@@ -77,3 +78,8 @@ export const path: {
   resolve: (...args: string[]) => string,
   join: (root: string, ...args: string[]) => string,
 };
+
+type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string> };
+
+export var spawn: (action: string, cmd: string, cfg?: SpawnCfg) => Promise<void>;
+export var waiting: (message: string, work: () => Promise<void>) => Promise<void>;

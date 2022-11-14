@@ -88,7 +88,7 @@ export class TodoController {
   @Delete('/:id')
   async remove(id: string): Promise<void> {
     const q: ModelQuery<Todo> = { where: { id } };
-    // {{#modules.auth-rest-context}} // @doc-exclude    
+    // {{#modules.auth-rest-context}} // @doc-exclude
     if (typeof q.where !== 'string') {
       q.where!.userId = this.auth.get()?.id; // @doc-exclude
     }

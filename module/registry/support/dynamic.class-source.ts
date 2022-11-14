@@ -12,7 +12,7 @@ const IS_VALID_SOURCE = (file: string): boolean => !file.includes('node_modules'
 class $DynamicClassSource {
   #modules = new Map<string, RetargettingProxy<unknown>>();
 
-  async init(target: ClassSource) {
+  async init(target: ClassSource): Promise<void> {
     const { DynamicLoader } = await import('@travetto/boot/src/internal/dynamic-loader');
     const { FilePresenceManager } = await import('@travetto/watch');
 

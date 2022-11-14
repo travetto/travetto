@@ -36,10 +36,10 @@ export class EmailTemplateResource extends EmailResource {
       })));
   }
 
-  /** 
+  /**
    * Get the different parts from the file name
-   * @param rel 
-   * @returns 
+   * @param rel
+   * @returns
    */
   getOutputs(rel: string): { html: string, text: string, subject: string } {
     return {
@@ -50,26 +50,26 @@ export class EmailTemplateResource extends EmailResource {
   }
 
   /**
-   * Run through text and match/resolve resource urls, producing tokens 
-   * 
-   * @param text 
-   * @param patterns 
-   * @param baseRel 
-   * @returns 
+   * Run through text and match/resolve resource urls, producing tokens
+   *
+   * @param text
+   * @param patterns
+   * @param baseRel
+   * @returns
    */
   async tokenizeResources(
     text: string,
     patterns: RegExp[],
     baseRel: string
   ): Promise<{
-    text: string,
-    tokens: Map<string, string>,
-    finalize: (onToken: (token: string) => string) => string,
+    text: string;
+    tokens: Map<string, string>;
+    finalize: (onToken: (token: string) => string) => string;
   }> {
     let id = 0;
     const tokens = new Map();
     for (const pattern of patterns) {
-      for (let { [0]: all, groups: { pre, src } = { pre: '', src: '' } } of text.matchAll(pattern)) {
+      for (const { [0]: all, groups: { pre, src } = { pre: '', src: '' } } of text.matchAll(pattern)) {
         if (src.includes('://')) { // No urls
           continue;
         }
@@ -80,7 +80,7 @@ export class EmailTemplateResource extends EmailResource {
         text = text.replace(all, `${pre}${token}`);
       }
     }
-    const finalize = (onToken: (token: string) => string) => text.replace(/@@[^@]+@@/g, t => onToken(t));
+    const finalize = (onToken: (token: string) => string): string => text.replace(/@@[^@]+@@/g, t => onToken(t));
 
     return { text, tokens, finalize };
   }

@@ -26,7 +26,7 @@ export class ManifestManager {
     }
   }
 
-  get main() {
+  get main(): Manifest.Module {
     return this.#main;
   }
 
@@ -47,8 +47,8 @@ export class ManifestManager {
   }
 
   /**
-   * 
-   * @param file 
+   * Resolve a file to the "import/require" input
+   * @param file
    */
   resolveModule(file: string): string {
     file = path.toPosix(file);
@@ -57,7 +57,7 @@ export class ManifestManager {
     } else if (file in this.#outToMod) {
       file = this.#outToMod[file];
     }
-    if (file.includes('node_modules')) { // it is a module      
+    if (file.includes('node_modules')) { // it is a module
       file = file.replace(/.*node_modules\//, '');
     } else {
       file = file.replace(path.cwd(), '.');

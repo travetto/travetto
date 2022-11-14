@@ -1,4 +1,3 @@
-import { Env } from '@travetto/base';
 import { ExecutionManager } from '@travetto/cli';
 import { path } from '@travetto/common';
 
@@ -6,7 +5,7 @@ import { path } from '@travetto/common';
  * Entry point
  */
 export async function main(): Promise<void> {
-  if (!Env.isFalse('TRV_CLI_LOCAL') && !__output.startsWith(path.cwd())) { // If the current file is not under the working directory
+  if (!__output.startsWith(path.cwd())) { // If the current file is not under the working directory
     console.error(`
 The @travetto/cli is not intended to be installed globally.  Please install it within your local project
 

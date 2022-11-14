@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
-import { path } from '@travetto/common';
 
+import { path } from '@travetto/common';
 import { CliUtil, CliCommand, OptionConfig } from '@travetto/cli';
 
 type Options = {

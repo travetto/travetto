@@ -1,9 +1,17 @@
 #!/usr/bin/env node
 
 // @ts-check
-const { path } = require('@travetto/common');
+const { path, spawn } = require('@travetto/common');
 
-const { log, spawn, isFolderStale, resolveImport } = require('./build-support');
+const { log, isFolderStale } = require('./build-support');
+
+const resolveImport = (library, toRoot = false) => {
+  let res = require.resolve(library);
+  if (toRoot) {
+    res = `${res.split(`/node_modules/${library}`)[0]}/node_modules/${library}`;
+  }
+  return res;
+};
 
 /**
  *  Step 1
@@ -17,14 +25,14 @@ async function bootstrap() {
   } else {
     log('[1] Bootstrap Rebuild Skipped.');
   }
-};
+}
 
 /**
- * @param {Partial<import('./build-support').BuildConfig & { main?: string, compile?: boolean }>} cfg 
+ * @param {Partial<import('./build-support').BuildConfig & { main?: string, compile?: boolean }>} cfg
  */
 async function boot({ main, compilerFolder, outputFolder, compile, watch } = {}) {
 
-  try { require(path.resolve('.env')) } catch { }
+  try { require(path.resolve('.env')); } catch { }
 
   compilerFolder ??= process.env.TRV_COMPILER ?? path.resolve('.trv_compiler');
   outputFolder ??= process.env.TRV_OUTPUT ?? path.resolve('.trv_out');
@@ -34,7 +42,7 @@ async function boot({ main, compilerFolder, outputFolder, compile, watch } = {})
   process.env.TRV_OUTPUT = outputFolder;
 
   if (compile) {
-    await bootstrap(); // Step 1 
+    await bootstrap(); // Step 1
     await require('../support/bin/build').build({
       compilerFolder, outputFolder, watch
     });
@@ -48,6 +56,7 @@ async function boot({ main, compilerFolder, outputFolder, compile, watch } = {})
   }
   if (main) {
     require('@travetto/boot/support/init');
+    // eslint-disable-next-line no-undef
     ᚕtrv.main(require(main).main);
   }
 }

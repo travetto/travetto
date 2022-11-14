@@ -10,7 +10,7 @@ import { Todo } from '../../src/model/todo';
 class TestCRUD extends BaseModelSuite<ModelCrudSupport>  {
 
   @Test('save it')
-  async save() {
+  async save(): Promise<void> {
     const svc = await this.service;
 
     const saved = await svc.create(Todo, Todo.from({

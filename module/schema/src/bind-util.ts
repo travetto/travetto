@@ -7,7 +7,7 @@ import { FieldConfig } from './service/types';
 type BindConfig = {
   view?: string | typeof AllViewⲐ;
   filter?: (field: FieldConfig) => boolean;
-}
+};
 
 /**
  * Utilities for binding objects to schemas
@@ -178,13 +178,14 @@ export class BindUtil {
 
   /**
    * Export a given instance to a plain object for external usage
-   * 
+   *
    * @param data The class instance to copy from
    * @param cfg The bind configuration
-   * @returns 
+   * @returns
    */
-  static exportSchema<T>(data: ClassInstance<T>, cfg: BindConfig): unknown {
-    return this.bindSchemaToObject(data.constructor, {} as T, data, cfg)
+  static exportSchema<T = unknown>(data: ClassInstance, cfg: BindConfig): T {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return this.bindSchemaToObject(data.constructor, {} as typeof data, data, cfg);
   }
 
   /**

@@ -1,5 +1,3 @@
-import { ConsoleManager, PhaseManager } from '@travetto/boot';
-
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
 import { Env } from '@travetto/base';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';

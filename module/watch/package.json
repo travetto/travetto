@@ -28,6 +28,7 @@
   "travetto": {
     "id": "@trv:watch",
     "displayName": "Watch",
+    "profileInehrit": false,
     "profiles": [
       "watch"
     ]

@@ -4,7 +4,7 @@ import { AppError } from '@travetto/base';
 
 export const BasicAuthⲐ = Symbol.for('AUTH_BASIC');
 
-type User = { username: string; password: string };
+type User = { username: string, password: string };
 
 class AuthConfig {
   @InjectableFactory()
@@ -15,7 +15,7 @@ class AuthConfig {
   @InjectableFactory(BasicAuthⲐ)
   static getAuthenticator(): Authenticator<User> {
     return {
-      authenticate: u => {
+      authenticate(u) {
         if (u.username && u.password === 'password') {
           return {
             issuer: 'self',

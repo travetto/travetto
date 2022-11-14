@@ -3,11 +3,11 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { ConfigOverrides, CONFIG_OVERRIDES } from '../internal/types';
 import { ConfigData } from '../parser/types';
-import { ConfigPriority, ConfigSource, ConfigValue } from './types';
+import { ConfigSource, ConfigValue } from './types';
 
 @Injectable()
 export class OverrideConfigSource implements ConfigSource {
-  priority = 3 as ConfigPriority;
+  priority = 3;
   name = 'override';
 
   #build(): ConfigData {

@@ -1,7 +1,6 @@
-import type { Class } from '@travetto/base';
+import { Class, ShutdownManager } from '@travetto/base';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 import type { ModelType } from '@travetto/model/src/types/model';
-import { ShutdownManager } from '@travetto/base';
 
 export class ModelInstallUtil {
   static async run(provider: ModelStorageSupport, models: Class<ModelType>[]): Promise<void> {

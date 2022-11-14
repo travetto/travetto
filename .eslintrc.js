@@ -11,11 +11,18 @@ module.exports = {
   ignorePatterns: [
     ...ignorePatterns,
     'module/scaffold/templates',
+    'module/boot/support/bin/*.js'
   ],
   extends: [...ext, 'plugin:travetto/all'],
   plugins: [...plugins, 'unused-imports'],
   overrides: [
     ...overrides,
+    {
+      files: ['*.ts'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': 'warn'
+      }
+    },
     {
       files: 'module/{transformer,watch}/**',
       rules: {
@@ -23,7 +30,7 @@ module.exports = {
       }
     },
     {
-      files: 'module/boot/support/main.compiler.ts',
+      files: 'module/boot/support/bin/compiler*.ts',
       rules: {
         'no-restricted-imports': 0
       }
@@ -35,13 +42,29 @@ module.exports = {
       }
     },
     {
-      file: '**/*.js',
+      files: '{module,related}/*/doc/**/*.ts',
       rules: {
-        '@typescript-eslint/consistent-type-assertions': 0,
+        'max-len': 0,
+        '@typescript-eslint/quotes': 'warn',
+        '@typescript-eslint/indent': 0,
       }
     },
     {
       files: '{module,global-test}/*/{test,doc,support/test}/**/*.ts',
+      rules: {
+        '@typescript-eslint/consistent-type-assertions': 0,
+        '@typescript-eslint/explicit-function-return-type': 0
+      }
+    },
+    {
+      files: 'sample/*/**/*.ts',
+      rules: {
+        '@typescript-eslint/consistent-type-assertions': 0,
+        '@typescript-eslint/explicit-function-return-type': 0
+      }
+    },
+    {
+      files: 'module/scaffold/support/resources/**/*.ts',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0
@@ -65,6 +88,5 @@ module.exports = {
   rules: {
     ...rules,
     'unused-imports/no-unused-imports': 'error',
-    '@typescript-eslint/explicit-function-return-type': 'warn'
   }
 };

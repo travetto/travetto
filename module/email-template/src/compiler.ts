@@ -150,8 +150,8 @@ export class EmailTemplateCompiler {
         content ?
           fs.writeFile(file, content, { encoding: 'utf8' }) :
           fs.unlink(file).catch(() => { }) // Remove file if data not provided
-      ))
-    };
+      ));
+    }
 
     return { html, text, subject };
   }

@@ -26,7 +26,7 @@ export class DbConfig<A, B> extends Basic {
   }
 
   getUrl() {
-    console.log('work3')
+    console.log('work3');
     return 'mongodb://oscar';
   }
 }

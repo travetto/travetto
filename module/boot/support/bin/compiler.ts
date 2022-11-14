@@ -1,7 +1,6 @@
-import * as sourceMapSupport from 'source-map-support';
 import * as ts from 'typescript';
+import * as sourceMapSupport from 'source-map-support';
 import * as fs from 'fs/promises';
-import { spawnSync } from 'child_process';
 
 import { path, Manifest, Package } from '@travetto/common';
 
@@ -49,13 +48,11 @@ export class Compiler {
   #manifest: Manifest.Root;
   #delta: Manifest.Delta;
   #modules: Manifest.Module[];
-  #outputFolder: string;
 
   init(
     { manifest, delta }: Manifest.State,
     outputFolder: string
   ): typeof this {
-    this.#outputFolder = outputFolder;
     this.#mgr = new WorkspaceManager(outputFolder);
     this.#manifest = manifest;
     this.#delta = delta;
@@ -86,20 +83,20 @@ export class Compiler {
     return this;
   }
 
-  get workspace() {
+  get workspace(): WorkspaceManager {
     return this.#mgr;
   }
 
-  get manifest() {
+  get manifest(): Manifest.Root {
     return this.#manifest;
   }
 
-  get modules() {
+  get modules(): Manifest.Module[] {
     return this.#modules;
   }
 
   /**
-   * Read the given tsconfig.json values for the project 
+   * Read the given tsconfig.json values for the project
    * @param path
    * @returns
    */
@@ -163,7 +160,7 @@ export class Compiler {
   #rewriteSourceMap(text: string, sourceMapUrlPos?: number): string {
     if (sourceMapUrlPos) {
       const sourceMapUrl = text.substring(sourceMapUrlPos);
-      const [prefix, sourceMapData] = sourceMapUrl.split(`base64,`)
+      const [prefix, sourceMapData] = sourceMapUrl.split('base64,');
       const data: { sourceRoot: string, sources: string[] } = JSON.parse(Buffer.from(sourceMapData, 'base64url').toString('utf8'));
       const [src] = data.sources;
 
@@ -184,18 +181,18 @@ export class Compiler {
     return text;
   }
 
-  async #initPackages() {
+  async #initPackages(): Promise<void> {
     for (const module of this.#modules) {
       if (module.files.rootFiles?.find(([f]) => f === 'package.json')) {
         const text = (await this.#mgr.readFile(module, 'package.json'));
         const pkg: Package = JSON.parse(text);
         if (pkg.files) {
-          pkg.files = pkg.files.map(x => x.replace(/[.]ts$/, '.js'))
+          pkg.files = pkg.files.map(x => x.replace(/[.]ts$/, '.js'));
         }
         if (pkg.main) {
           pkg.main = pkg.main.replace(/[.]ts$/, '.js');
         }
-        for (const key of ["devDependencies", "dependencies", "peerDependencies"] as const) {
+        for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {
           if (key in pkg) {
             for (const dep of Object.keys(pkg[key] ?? {})) {
               if (dep in this.#manifest.modules) {
@@ -212,9 +209,7 @@ export class Compiler {
   async #initCommon(): Promise<void> {
     const mod = this.modules.find(x => x.name === '@travetto/common');
     if (mod) {
-      const output = `${this.#outputFolder}/node_modules/${mod.name}`;
-      await fs.mkdir(output, { recursive: true });
-      spawnSync('cp', ['-r', `${mod.source}/*`, output]);
+      await this.workspace.copyModule(mod);
     }
   }
 
@@ -228,11 +223,11 @@ export class Compiler {
       console.debug('Loading program', { size: rootFiles.size });
       const options = await this.#getCompilerOptions();
       const host = ts.createCompilerHost(options);
-      host.readFile = file => ts.sys.readFile(this.#inverseSourceMap.get(file)?.[0] ?? file);
-      host.fileExists = filename => this.#inverseSourceMap.has(filename) || ts.sys.fileExists(filename);
-      host.directoryExists = folder => this.#inverseDirectoryMap.has(folder) || ts.sys.directoryExists(folder);
+      host.readFile = (file: string): string | undefined => ts.sys.readFile(this.#inverseSourceMap.get(file)?.[0] ?? file);
+      host.fileExists = (filename: string): boolean => this.#inverseSourceMap.has(filename) || ts.sys.fileExists(filename);
+      host.directoryExists = (folder: string): boolean => this.#inverseDirectoryMap.has(folder) || ts.sys.directoryExists(folder);
       const ogWriteFile = host.writeFile.bind(host);
-      host.writeFile = (filename: string, text: string, bom, onError, sourceFiles, data?: ts.WriteFileCallbackData) => {
+      host.writeFile = (filename: string, text: string, bom, onError, sourceFiles, data?: ts.WriteFileCallbackData): void => {
         if (isSourceMapUrlPosData(data)) {
           text = this.#rewriteSourceMap(text, data.sourceMapUrlPos);
         }
@@ -253,7 +248,7 @@ export class Compiler {
   getTransformer?(): ts.CustomTransformers;
   outputInit?(): Promise<void>;
 
-  emitFile(prog: ts.Program, file: string) {
+  emitFile(prog: ts.Program, file: string): void {
     const result = prog.emit(
       prog.getSourceFile(file),
       undefined,

@@ -1,3 +1,4 @@
+import { ModuleIndex } from '@travetto/boot';
 import { Class, ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';
 import { ModelRegistry } from '@travetto/model';
@@ -6,7 +7,6 @@ import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/
 
 import type { ModelStorageSupport } from '../../src/service/storage';
 import type { ModelType } from '../../src/types/model';
-import { ModuleIndex } from '@travetto/boot';
 
 type CandidateNames = { providers: string[], models: string[] };
 

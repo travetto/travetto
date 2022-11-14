@@ -94,11 +94,11 @@ export class ImportManager {
     }
 
     try {
-      const importStmts = [...this.#newImports.values()].map(({ path, ident }) => {
+      const importStmts = [...this.#newImports.values()].map(({ path: resolved, ident }) => {
         const importStmt = this.factory.createImportDeclaration(
           undefined,
           this.factory.createImportClause(false, undefined, this.factory.createNamespaceImport(ident)),
-          this.factory.createStringLiteral(path)
+          this.factory.createStringLiteral(resolved)
         );
         return importStmt;
       });

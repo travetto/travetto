@@ -245,7 +245,7 @@ export const node = {
    */
   Snippet: (title: Content, file: string | Function, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) => {
     if (typeof file !== 'string') {
-      file = file.Ⲑsource
+      file = file.Ⲑsource;
     }
     const res = ResolveUtil.resolveSnippet(file, startPattern, endPattern, outline);
     return $n('code', {
