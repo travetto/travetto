@@ -6,7 +6,7 @@
     "path",
     "manifest",
     "travetto",
-    "typescript"
+    "javascript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
@@ -15,9 +15,10 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "index.ts"
+    "index.js",
+    "src"
   ],
-  "main": "index.ts",
+  "main": "index.js",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/common"

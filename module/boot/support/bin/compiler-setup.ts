@@ -1,21 +1,23 @@
+import type { Manifest } from '@travetto/common';
+
 import { Compiler } from './compiler';
 import { ManifestUtil } from './manifest';
-import { Manifest, ManifestDelta, ManifestState } from './types';
 
 export class SetupCompiler extends Compiler {
 
-  init(state: ManifestState, output: string): typeof this {
-    const outManifest: Manifest = ManifestUtil.wrapModules({});
-    const outDelta: ManifestDelta = {};
+  init(state: Manifest.State, output: string): typeof this {
+    const outManifest: Manifest.Root = ManifestUtil.wrapModules({});
+    const outDelta: Manifest.Delta = {};
     const trans = state.manifest.modules['@travetto/transformer'];
     const boot = state.manifest.modules['@travetto/boot'];
+    const watch = state.manifest.modules['@travetto/watch'];
 
     outManifest.modules['@travetto/transformer'] = {
       ...trans,
       files: {
         index: trans.files.index,
         src: trans.files.src,
-        support: trans.files.support.filter(([x]) => !x.startsWith('support/test')),
+        support: trans.files.support?.filter(([x]) => !x.startsWith('support/test')),
       }
     };
 
@@ -26,6 +28,10 @@ export class SetupCompiler extends Compiler {
         support: boot.files.support.filter(([x]) => x.startsWith('support/bin/')),
       }
     };
+
+    if (watch) {
+      outManifest.modules['@travetto/watch'] = watch;
+    }
 
     for (const [name, { files, ...mod }] of Object.entries(state.manifest.modules)) {
       const transformers = files.support?.filter(([x]) => x.startsWith('support/transform')) ?? [];
@@ -38,7 +44,7 @@ export class SetupCompiler extends Compiler {
     for (const [name, mod] of Object.entries(outManifest.modules)) {
       const allFiles = new Set<string>();
       for (const [folder, files] of Object.entries(mod.files)) {
-        for (const [file] of files) {
+        for (const [file] of files ?? []) {
           allFiles.add(file);
         }
       }

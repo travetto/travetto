@@ -1,8 +1,9 @@
 const fs = require('fs/promises');
-const path = require('path');
 const cp = require('child_process');
 const readline = require('readline');
 const timers = require('timers/promises');
+
+const { path } = require('@travetto/common');
 
 const spawn = async (action, cmd, { args = [], cwd = process.cwd(), failOnError = true, env = {} }) => {
   let stdout = process.env.DEBUG === 'build' ? 1 : 'pipe';

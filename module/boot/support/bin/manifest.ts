@@ -1,17 +1,12 @@
 import * as fs from 'fs/promises';
 import * as os from 'os';
 
-import * as path from './path';
-
-import type {
-  Manifest, ManifestModuleFile, ManifestState, ManifestModule,
-  ManifestDeltaEvent, ManifestDelta, Package
-} from '@travetto/common';
+import { Manifest, Package, path } from '@travetto/common';
 
 const resolveImport = (library: string) => require.resolve(library);
 
 type Dependency = { id?: string, version: string, name: string, folder: string, profiles: string[] };
-type DeltaModuleFiles = Record<string, ManifestModuleFile>;
+type DeltaModuleFiles = Record<string, Manifest.ModuleFile>;
 
 export class ManifestUtil {
 
@@ -100,7 +95,7 @@ export class ManifestUtil {
     return out;
   }
 
-  static async #transformFile(relative: string, full: string): Promise<ManifestModuleFile> {
+  static async #transformFile(relative: string, full: string): Promise<Manifest.ModuleFile> {
     const type = relative.endsWith('.d.ts') ? 'd.ts' : (
       relative.endsWith('.ts') ? 'ts' : (
         (relative.endsWith('.js') || relative.endsWith('mjs') || relative.endsWith('.cjs')) ? 'js' :
@@ -109,11 +104,11 @@ export class ManifestUtil {
     return [relative, type, this.#getNewest(await fs.stat(full))];
   }
 
-  static async #describeModule(rootFolder: string, { id, name, version, folder, profiles }: Dependency): Promise<ManifestModule> {
+  static async #describeModule(rootFolder: string, { id, name, version, folder, profiles }: Dependency): Promise<Manifest.Module> {
     const local = folder.includes('node_modules');
     const main = folder === rootFolder;
 
-    const files: Record<string, ManifestModuleFile[]> = {};
+    const files: Record<string, Manifest.ModuleFile[]> = {};
     const folderSet = !main ? new Set<string>(['src', 'bin', 'support']) : new Set<string>();
 
     for (const file of await this.#scanFolder(folder, folderSet)) {
@@ -157,7 +152,7 @@ export class ManifestUtil {
     };
   }
 
-  static async #buildManifestModules(rootFolder: string): Promise<Record<string, ManifestModule>> {
+  static async #buildManifestModules(rootFolder: string): Promise<Record<string, Manifest.Module>> {
     const modules = (await this.#collectPackages(rootFolder));
 
     // TODO: Revisit logic
@@ -176,7 +171,7 @@ export class ManifestUtil {
       }
     }
 
-    const out: Record<string, ManifestModule> = {};
+    const out: Record<string, Manifest.Module> = {};
     for (const mod of modules.sort((a, b) => a.name.localeCompare(b.name))) {
       const cfg = await this.#describeModule(rootFolder, mod);
       out[cfg.name] = cfg;
@@ -184,7 +179,7 @@ export class ManifestUtil {
     return out;
   }
 
-  static #flattenModuleFiles(m: ManifestModule): DeltaModuleFiles {
+  static #flattenModuleFiles(m: Manifest.Module): DeltaModuleFiles {
     const out: DeltaModuleFiles = {};
     for (const key of Object.keys(m.files)) {
       for (const [name, type, date] of m.files[key]) {
@@ -198,10 +193,10 @@ export class ManifestUtil {
 
   static async #deltaModules(
     outputFolder: string,
-    left: ManifestModule<DeltaModuleFiles>,
-    right: ManifestModule<DeltaModuleFiles>
-  ): Promise<ManifestDeltaEvent[]> {
-    const out: ManifestDeltaEvent[] = [];
+    left: Manifest.Module<DeltaModuleFiles>,
+    right: Manifest.Module<DeltaModuleFiles>
+  ): Promise<Manifest.DeltaEvent[]> {
+    const out: Manifest.DeltaEvent[] = [];
     for (const el of Object.keys(left.files)) {
       if (!(el in right.files)) {
         out.push([el, 'added']);
@@ -230,7 +225,7 @@ export class ManifestUtil {
     return out;
   }
 
-  static wrapModules(modules: Record<string, ManifestModule>): Manifest {
+  static wrapModules(modules: Record<string, Manifest.Module>): Manifest.Root {
     return {
       main: Object.values(modules).find(x => x.main)?.name ?? '__tbd__',
       modules, generated: Date.now(),
@@ -238,11 +233,11 @@ export class ManifestUtil {
     };
   }
 
-  static async buildManifest(rootFolder: string): Promise<Manifest> {
+  static async buildManifest(rootFolder: string): Promise<Manifest.Root> {
     return this.wrapModules(await this.#buildManifestModules(rootFolder));
   }
 
-  static async readManifest(folder: string): Promise<Manifest> {
+  static async readManifest(folder: string): Promise<Manifest.Root> {
     const file = path.resolve(folder, 'manifest.json');
     if (await fs.stat(file).catch(() => false)) {
       return JSON.parse(
@@ -253,7 +248,7 @@ export class ManifestUtil {
     }
   }
 
-  static async produceDelta(outputFolder: string, left: Manifest, right: Manifest): Promise<ManifestDelta> {
+  static async produceDelta(outputFolder: string, left: Manifest.Root, right: Manifest.Root): Promise<Manifest.Delta> {
     const deltaLeft = Object.fromEntries(
       Object.values(left.modules)
         .map(m => [m.name, { ...m, files: this.#flattenModuleFiles(m) }])
@@ -264,7 +259,7 @@ export class ManifestUtil {
         .map(m => [m.name, { ...m, files: this.#flattenModuleFiles(m) }])
     );
 
-    const out: Record<string, ManifestDeltaEvent[]> = {};
+    const out: Record<string, Manifest.DeltaEvent[]> = {};
 
     for (const [name, lMod] of Object.entries(deltaLeft)) {
       out[name] = await this.#deltaModules(outputFolder, lMod, deltaRight[name] ?? { files: {}, name });
@@ -273,18 +268,18 @@ export class ManifestUtil {
     return out;
   }
 
-  static async readState(file: string): Promise<ManifestState> {
-    const cfg: ManifestState = JSON.parse(await fs.readFile(file, 'utf8'));
+  static async readState(file: string): Promise<Manifest.State> {
+    const cfg: Manifest.State = JSON.parse(await fs.readFile(file, 'utf8'));
     return cfg;
   }
 
-  static async writeState(state: ManifestState, file?: string): Promise<string> {
+  static async writeState(state: Manifest.State, file?: string): Promise<string> {
     const manifestTemp = file ?? path.resolve(os.tmpdir(), `manifest-state.${Date.now()}${Math.random()}.json`);
     await fs.writeFile(manifestTemp, JSON.stringify(state), 'utf8');
     return manifestTemp;
   }
 
-  static async produceState(rootFolder: string, outputFolder: string): Promise<ManifestState> {
+  static async produceState(rootFolder: string, outputFolder: string): Promise<Manifest.State> {
     const manifest = await this.buildManifest(rootFolder);
     const oldManifest = await this.readManifest(outputFolder);
     const delta = await this.produceDelta(outputFolder, manifest, oldManifest);

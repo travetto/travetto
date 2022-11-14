@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { ManifestModule } from '@travetto/common';
+import { Manifest } from '@travetto/common';
 
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
@@ -22,7 +22,7 @@ export class TransformerManager {
   /**
    * Read all transformers from disk under the pattern support/transformer.*
    */
-  async init(transformers: string[], modules: ManifestModule[]): Promise<void> {
+  async init(transformers: string[], modules: Manifest.Module[]): Promise<void> {
     if (this.#cached) {
       return;
     }

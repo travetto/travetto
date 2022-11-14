@@ -1,6 +1,3 @@
-// Manifest types
-export * from '../support/bin/types';
-
 // Log types
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
 

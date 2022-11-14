@@ -1,7 +1,6 @@
-import * as path from 'path';
-import { log, spawn, BuildConfig } from '../../bin/build-support';
+import { path, Manifest } from '@travetto/common';
 
-import type { ManifestState } from '@travetto/common';
+import { log, spawn, BuildConfig } from '../../bin/build-support';
 import { ManifestUtil } from './manifest';
 
 let manifestTemp: string;
@@ -9,14 +8,14 @@ let manifestTemp: string;
 /**
  *  Step 2
  */
-async function buildManifest(cfg: BuildConfig): Promise<ManifestState> {
+async function buildManifest(cfg: BuildConfig): Promise<Manifest.State> {
   log('[2] Generating Manifest state');
   const state = await ManifestUtil.produceState(process.cwd(), cfg.outputFolder);
   state.manifest.buildLocation = cfg.compilerFolder;
   return state;
 }
 
-function shouldRebuildCompiler({ delta }: ManifestState): boolean {
+function shouldRebuildCompiler({ delta }: Manifest.State): boolean {
   // Did enough things change to re-stage and build the compiler
   const transformersChanged = Object.values(delta).flatMap(x => x.filter(y => y[0].startsWith('support/transform')));
   const transformerChanged = (delta['@travetto/transformer'] ?? []);
@@ -40,7 +39,7 @@ function shouldRebuildCompiler({ delta }: ManifestState): boolean {
 /**
  *  Step 3
  */
-async function compilerSetup(state: ManifestState, compilerFolder: string): Promise<void> {
+async function compilerSetup(state: Manifest.State, compilerFolder: string): Promise<void> {
   if (shouldRebuildCompiler(state)) {
     log('[3] Setting up Compiler');
     const args = [
@@ -57,7 +56,7 @@ async function compilerSetup(state: ManifestState, compilerFolder: string): Prom
 /**
  *  Step 4
  */
-async function compileOutput(state: ManifestState, { compilerFolder, outputFolder, watch = false }: BuildConfig): Promise<void> {
+async function compileOutput(state: Manifest.State, { compilerFolder, outputFolder, watch = false }: BuildConfig): Promise<void> {
   const changes = Object.values(state.delta).flat();
   if (changes.length === 0) {
     log('[4] Skipping Compilation');
