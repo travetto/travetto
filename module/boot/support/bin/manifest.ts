@@ -10,7 +10,7 @@ import type {
 
 const resolveImport = (library: string) => require.resolve(library);
 
-type Dependency = { id?: string, version: string, name: string, folder: string, profiles?: string[] };
+type Dependency = { id?: string, version: string, name: string, folder: string, profiles: string[] };
 type DeltaModuleFiles = Record<string, ManifestModuleFile>;
 
 export class ManifestUtil {
@@ -19,22 +19,27 @@ export class ManifestUtil {
     return Math.max(stat.mtimeMs, stat.ctimeMs);
   }
 
-  static async #collectPackages(folder: string, seen = new Set<string>()): Promise<Dependency[]> {
+  static async #collectPackages(folder: string, seen = new Map<string, Dependency>(), profiles: string[] = []): Promise<Dependency[]> {
     const { name, version, dependencies = {}, devDependencies = {}, peerDependencies = {}, travetto }: Package =
       JSON.parse(await fs.readFile(`${folder}/package.json`, 'utf8'));
 
     if (seen.has(name)) {
+      for (const el of profiles) {
+        seen.get(name)!.profiles.push(el);
+      }
       return [];
     }
-
-    seen.add(name);
 
     const isModule = !!travetto || folder === path.cwd();
     if (!isModule) {
       return [];
     }
 
-    const out: Dependency[] = [{ id: travetto?.id, name, version, folder, profiles: travetto?.profiles }];
+    const rootDep: Dependency = { id: travetto?.id, name, version, folder, profiles: [...travetto?.profiles ?? [], ...profiles] };
+    seen.set(name, rootDep);
+
+    const out: Dependency[] = [rootDep];
+
     const searchSpace = [
       ...Object.entries(dependencies).map(([k, v]) => [k, v, 'dep'] as const),
       ...Object.entries(devDependencies).map(([k, v]) => [k, v, 'dev'] as const),
@@ -50,14 +55,18 @@ export class ManifestUtil {
     ].sort(([a, b]) => a[0].localeCompare(b[0]));
 
     for (const [el, value, type] of searchSpace) {
+      const subProfiles = type === 'peer' ? [] : rootDep.profiles;
       if (value.startsWith('file:')) {
-        out.push(...await this.#collectPackages(path.resolve(folder, value.replace('file:', '')), seen));
+        out.push(...await this.#collectPackages(path.resolve(folder, value.replace('file:', '')), seen, subProfiles));
       } else {
+        let next: string;
         try {
-          const next = path.resolve(resolveImport(el))
-            .replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
-          out.push(...await this.#collectPackages(next, seen));
-        } catch (e) { }
+          next = path.resolve(resolveImport(el));
+        } catch {
+          continue;
+        }
+        next = next.replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
+        out.push(...await this.#collectPackages(next, seen, subProfiles));
       }
     }
     return out;
@@ -137,7 +146,7 @@ export class ManifestUtil {
 
     return {
       id,
-      profiles,
+      profiles: [...new Set(profiles)],
       name,
       version,
       main,
@@ -159,8 +168,16 @@ export class ManifestUtil {
       }
     }
 
+    // TODO: Revisit logic
+    if (!modules.some(x => x.name === '@travetto/test')) {
+      const folder = path.resolve(__dirname, '..', '..', '..', 'test');
+      if (await fs.stat(folder).catch(() => false)) {
+        modules.unshift(...(await this.#collectPackages(folder)));
+      }
+    }
+
     const out: Record<string, ManifestModule> = {};
-    for (const mod of modules) {
+    for (const mod of modules.sort((a, b) => a.name.localeCompare(b.name))) {
       const cfg = await this.#describeModule(rootFolder, mod);
       out[cfg.name] = cfg;
     }

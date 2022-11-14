@@ -66,7 +66,7 @@ async function compileOutput(state: ManifestState, { compilerFolder, outputFolde
 
   log('[4] Recompiling Sources', changes);
   const args = [
-    `${compilerFolder}/${state.manifest.modules['@travetto/boot'].output}/support/bin/compiler`,
+    `${compilerFolder}/${state.manifest.modules['@travetto/boot'].output}/support/bin/compiler-output`,
     (manifestTemp ??= await ManifestUtil.writeState(state)),
     outputFolder
   ]
