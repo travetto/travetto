@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 
 export type RunConfig = {

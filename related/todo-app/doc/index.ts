@@ -1,6 +1,6 @@
 import * as timers from 'timers/promises';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { d, lib, mod } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';

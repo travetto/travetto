@@ -6,7 +6,7 @@ import * as path from './path';
 import type {
   Manifest, ManifestModuleFile, ManifestState, ManifestModule,
   ManifestDeltaEvent, ManifestDelta, Package
-} from './types';
+} from '@travetto/common';
 
 const resolveImport = (library: string) => require.resolve(library);
 

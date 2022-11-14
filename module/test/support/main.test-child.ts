@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { ConsoleManager, PhaseManager } from '@travetto/boot';
 
 import { envInit } from './bin/env';

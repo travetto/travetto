@@ -1,6 +1,6 @@
 import { Env } from '@travetto/base';
 import { ExecutionManager } from '@travetto/cli';
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 
 /**
  * Entry point

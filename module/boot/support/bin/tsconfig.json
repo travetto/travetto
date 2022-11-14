@@ -14,7 +14,6 @@
     "compiler-output.ts",
     "path.ts",
     "manifest.ts",
-    "types.ts",
     "workspace.ts"
   ]
 }

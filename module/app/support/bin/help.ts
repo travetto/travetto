@@ -1,4 +1,4 @@
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { CliUtil } from '@travetto/cli';
 
 import type { ApplicationConfig } from '../../src/types';

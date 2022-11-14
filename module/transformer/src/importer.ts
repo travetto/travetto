@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import * as path from '../support/path';
+import { path } from '@travetto/common';
 
 import { AnyType, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';

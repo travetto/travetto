@@ -2,8 +2,7 @@ import * as assert from 'assert';
 
 import * as fs from 'fs/promises';
 
-import { Manifest } from '@travetto/boot';
-import * as path from '@travetto/path';
+import { Manifest, path } from '@travetto/common';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ExecUtil } from '@travetto/base';
 

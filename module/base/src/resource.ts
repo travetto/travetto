@@ -3,7 +3,7 @@ import { createReadStream } from 'fs';
 import * as fs from 'fs/promises';
 
 import { ModuleIndex } from '@travetto/boot';
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 
 import { AppError } from './error';
 import { Env } from './env';

@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { ModuleIndex, PackageUtil } from '@travetto/boot';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;

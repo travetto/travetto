@@ -1,7 +1,7 @@
 import { existsSync, lstatSync, readdirSync, realpathSync, Stats } from 'fs';
 import * as fs from 'fs/promises';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 
 export interface ScanEntry {
   /**

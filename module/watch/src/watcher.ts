@@ -1,6 +1,6 @@
 import { lstatSync, readdir, statSync, } from 'fs';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 
 import { ScanEntry, ScanFs, ScanHandler } from './scan';
 import { WatchEmitter } from './emitter';

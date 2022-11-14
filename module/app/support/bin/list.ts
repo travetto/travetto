@@ -1,13 +1,13 @@
 import * as fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';
+import { ModuleIndex } from '@travetto/boot';
 
 import { AppScanUtil } from '../../src/scan';
 import type { ApplicationConfig } from '../../src/types';
-import { ModuleIndex } from '@travetto/boot';
 
 /**
  * Utilities to fetch list of applications

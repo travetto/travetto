@@ -2,7 +2,7 @@ import * as os from 'os';
 import { readFileSync } from 'fs';
 import * as fs from 'fs/promises';
 
-import * as path from '@travetto/path';
+import { path } from '@travetto/common';
 import { CliCommand, OptionConfig } from '@travetto/cli';
 import { ModuleIndex } from '@travetto/boot';
 
