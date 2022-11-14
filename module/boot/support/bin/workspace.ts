@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import { ManifestModule, path } from '@travetto/common';
+import { Manifest, path } from '@travetto/common';
 
 export class WorkspaceManager {
 
@@ -14,11 +14,11 @@ export class WorkspaceManager {
     return this.#outDir;
   }
 
-  async sourceExists(module: ManifestModule, file: string): Promise<boolean> {
+  async sourceExists(module: Manifest.Module, file: string): Promise<boolean> {
     return !!(await fs.stat(path.resolve(module.source, file)).catch(() => false));
   }
 
-  async symlinkFolder(module: ManifestModule, key: string): Promise<void> {
+  async symlinkFolder(module: Manifest.Module, key: string): Promise<void> {
     if (module.files[key] && await this.sourceExists(module, key)) {
       const output = path.resolve(this.#outDir, module.output, key);
       await fs.mkdir(path.dirname(output), { recursive: true });
@@ -30,7 +30,7 @@ export class WorkspaceManager {
     }
   }
 
-  async copyFile(module: ManifestModule, file: string): Promise<void> {
+  async copyFile(module: Manifest.Module, file: string): Promise<void> {
     if (await this.sourceExists(module, file)) {
       const outFile = path.resolve(this.#outDir, module.output, file);
       console.debug('Copying', outFile);
@@ -39,7 +39,7 @@ export class WorkspaceManager {
     }
   }
 
-  async writeFile(module: ManifestModule, file: string, contents: string): Promise<void> {
+  async writeFile(module: Manifest.Module, file: string, contents: string): Promise<void> {
     const outFile = path.resolve(this.#outDir, module.output, file);
     return this.writeRawFile(outFile, contents);
   }
@@ -51,7 +51,7 @@ export class WorkspaceManager {
     await fs.writeFile(outFile, contents, 'utf8');
   }
 
-  async readFile(module: ManifestModule, file: string): Promise<string> {
+  async readFile(module: Manifest.Module, file: string): Promise<string> {
     return fs.readFile(path.resolve(module.source, file), 'utf8');
   }
 }

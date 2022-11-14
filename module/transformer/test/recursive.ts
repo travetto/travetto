@@ -12,7 +12,7 @@ const E2E_OUT = path.resolve(E2E_ROOT, '.trv_out');
 @Suite()
 export class RecursiveTransformSuite {
 
-  #manifest: Manifest;
+  #manifest: Manifest.Root;
 
   @BeforeAll()
   async init() {

@@ -69,7 +69,7 @@
     "@travetto/model-sqlite": "file:module/model-sqlite",
     "@travetto/openapi": "file:module/openapi",
     "@travetto/pack": "file:module/pack",
-    "@travetto/path": "file:module/path",
+    "@travetto/common": "file:module/common",
     "@travetto/registry": "file:module/registry",
     "@travetto/rest": "file:module/rest",
     "@travetto/rest-aws-lambda": "file:module/rest-aws-lambda",

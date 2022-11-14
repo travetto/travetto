@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { path, Manifest, ManifestModuleFile, ManifestModuleFileType, ManifestModule } from '@travetto/common';
+import { path, Manifest } from '@travetto/common';
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = {
@@ -16,7 +16,7 @@ export type IndexedFile = {
   module: string;
   source: string;
   output: string;
-  type: ManifestModuleFileType;
+  type: Manifest.ModuleFileType;
 };
 
 export type IndexedModule = {
@@ -34,7 +34,7 @@ export type IndexedModule = {
  */
 class $ModuleIndex {
 
-  #manifest: Manifest;
+  #manifest: Manifest.Root;
   #modules: IndexedModule[];
   #root: string;
   #outputToEntry = new Map<string, IndexedFile>();
@@ -49,11 +49,11 @@ class $ModuleIndex {
     return path.resolve(this.#root, ...parts).replace(/[\\]/g, '/');
   }
 
-  get manifest(): Manifest {
+  get manifest(): Manifest.Root {
     return this.#manifest;
   }
 
-  #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
+  #moduleFiles(m: Manifest.Module, files: Manifest.ModuleFile[]): IndexedFile[] {
     return files.map(([f, type]) => {
       const source = path.join(m.source, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);

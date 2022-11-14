@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 // @ts-check
-const path = require('path');
+const { path } = require('@travetto/common');
 
 const { log, spawn, isFolderStale, resolveImport } = require('./build-support');
 

@@ -24,7 +24,7 @@
     "directory": "module/boot"
   },
   "dependencies": {
-    "@travetto/path": "file:../path",
+    "@travetto/common": "file:../common",
     "@travetto/transformer": "file:../transformer",
     "@types/source-map-support": "^0.5.6",
     "source-map-support": "^0.5.21"

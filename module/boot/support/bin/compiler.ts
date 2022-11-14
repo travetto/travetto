@@ -1,11 +1,11 @@
 import * as sourceMapSupport from 'source-map-support';
 import * as ts from 'typescript';
 import * as fs from 'fs/promises';
+import { spawnSync } from 'child_process';
+
+import { path, Manifest, Package } from '@travetto/common';
 
 import { WorkspaceManager } from './workspace';
-
-import * as path from './path';
-import type { Manifest, ManifestDelta, ManifestModule, ManifestState, Package } from './types';
 import { ManifestUtil } from './manifest';
 
 const nativeCwd = process.cwd();
@@ -27,7 +27,10 @@ function isSourceMapUrlPosData(data: unknown): data is { sourceMapUrlPos: number
 
 export class Compiler {
 
-  static async main(manifestFile: string = process.argv.at(-2)!, outDir: string = process.argv.at(-1)!): Promise<void> {
+  static async main(
+    manifestFile: string = process.argv.at(-2)!,
+    outDir: string = process.argv.at(-1)!
+  ): Promise<void> {
     // Register source maps
     sourceMapSupport.install();
 
@@ -37,27 +40,29 @@ export class Compiler {
 
   #program: ts.Program | undefined;
   #sourceFiles: string[];
-  #fakeInputToModule: Map<string, [string, ManifestModule]>;
-  #inverseSourceMap: Map<string, [string, ManifestModule]>;
+  #relativeOutputToModule: Map<string, [string, Manifest.Module]>;
+  #inverseSourceMap: Map<string, [string, Manifest.Module]>;
   #inverseDirectoryMap: Map<string, string>;
   #bootTsconfig: string;
 
   #mgr: WorkspaceManager;
-  #manifest: Manifest;
-  #delta: ManifestDelta;
-  #modules: ManifestModule[];
+  #manifest: Manifest.Root;
+  #delta: Manifest.Delta;
+  #modules: Manifest.Module[];
+  #outputFolder: string;
 
   init(
-    { manifest, delta }: ManifestState,
+    { manifest, delta }: Manifest.State,
     outputFolder: string
   ): typeof this {
+    this.#outputFolder = outputFolder;
     this.#mgr = new WorkspaceManager(outputFolder);
     this.#manifest = manifest;
     this.#delta = delta;
     this.#modules = Object.values(this.#manifest.modules);
     this.#inverseSourceMap = new Map();
     this.#inverseDirectoryMap = new Map();
-    this.#fakeInputToModule = new Map();
+    this.#relativeOutputToModule = new Map();
     this.#sourceFiles = this.#modules.flatMap(
       x => [
         ...x.files.index ?? [],
@@ -67,11 +72,12 @@ export class Compiler {
       ]
         .filter(([, type]) => type === 'ts' || type === 'd.ts')
         .map(([f]) => {
-          const resolved = path.resolve(`${x.output}/${f}`);
+          const relativeOutput = `${x.output}/${f}`;
+          const resolved = path.resolve(relativeOutput);
           const target = `${x.source}/${f}`;
           this.#inverseSourceMap.set(resolved, [target, x]);
           this.#inverseDirectoryMap.set(path.dirname(resolved), path.dirname(target));
-          this.#fakeInputToModule.set(`${x.output}/${f}`, [target, x]);
+          this.#relativeOutputToModule.set(relativeOutput, [target, x]);
           return resolved;
         })
     );
@@ -162,7 +168,7 @@ export class Compiler {
       const [src] = data.sources;
 
       if (src.startsWith('node_modules')) {
-        const [file, resolved] = this.#fakeInputToModule.get(src) ?? [];
+        const [file, resolved] = this.#relativeOutputToModule.get(src) ?? [];
         if (file && resolved) {
           data.sourceRoot = resolved.source;
           data.sources = [file];
@@ -178,13 +184,47 @@ export class Compiler {
     return text;
   }
 
+  async #initPackages() {
+    for (const module of this.#modules) {
+      if (module.files.rootFiles?.find(([f]) => f === 'package.json')) {
+        const text = (await this.#mgr.readFile(module, 'package.json'));
+        const pkg: Package = JSON.parse(text);
+        if (pkg.files) {
+          pkg.files = pkg.files.map(x => x.replace(/[.]ts$/, '.js'))
+        }
+        if (pkg.main) {
+          pkg.main = pkg.main.replace(/[.]ts$/, '.js');
+        }
+        for (const key of ["devDependencies", "dependencies", "peerDependencies"] as const) {
+          if (key in pkg) {
+            for (const dep of Object.keys(pkg[key] ?? {})) {
+              if (dep in this.#manifest.modules) {
+                pkg[key]![dep] = this.#manifest.modules[dep].version;
+              }
+            }
+          }
+        }
+        this.#mgr.writeFile(module, 'package.json', JSON.stringify(pkg));
+      }
+    }
+  }
+
+  async #initCommon(): Promise<void> {
+    const mod = this.modules.find(x => x.name === '@travetto/common');
+    if (mod) {
+      const output = `${this.#outputFolder}/node_modules/${mod.name}`;
+      await fs.mkdir(output, { recursive: true });
+      spawnSync('cp', ['-r', `${mod.source}/*`, output]);
+    }
+  }
+
   /**
    * Build typescript program
    */
-  async getProgram(files: string[]): Promise<ts.Program> {
+  async getProgram(files: string[], force = false): Promise<ts.Program> {
     const rootFiles = new Set(files);
 
-    if (!this.#program) {
+    if (!this.#program || force) {
       console.debug('Loading program', { size: rootFiles.size });
       const options = await this.#getCompilerOptions();
       const host = ts.createCompilerHost(options);
@@ -209,50 +249,24 @@ export class Compiler {
     return this.#program!;
   }
 
-  async #initPackages() {
-    for (const module of this.#modules) {
-      if (module.files.rootFiles?.find(([f]) => f === 'package.json')) {
-        const text = (await this.#mgr.readFile(module, 'package.json'));
-        const pkg: Package = JSON.parse(text);
-        if (pkg.files) {
-          pkg.files = pkg.files.map(x => x.replace(/.ts$/, '.js'))
-        }
-        if (pkg.main) {
-          pkg.main = pkg.main.replace(/[.]ts$/, '.js');
-        }
-        for (const key of ["devDependencies", "dependencies", "peerDependencies"] as const) {
-          if (key in pkg) {
-            for (const dep of Object.keys(pkg[key] ?? {})) {
-              if (dep in this.#manifest.modules) {
-                pkg[key]![dep] = this.#manifest.modules[dep].version;
-              }
-            }
-          }
-        }
-        this.#mgr.writeFile(module, 'package.json', JSON.stringify(pkg));
-      }
-    }
-  }
-
   prepareTransformer?(program: ts.Program): void;
   getTransformer?(): ts.CustomTransformers;
   outputInit?(): Promise<void>;
 
-  /**
-   * Run the compiler
-   */
-  async run(): Promise<void> {
-    const start = Date.now();
+  emitFile(prog: ts.Program, file: string) {
+    const result = prog.emit(
+      prog.getSourceFile(file),
+      undefined,
+      undefined,
+      false,
+      this.getTransformer?.()
+    );
+    this.checkTranspileErrors(file, result.diagnostics);
+  }
 
-    await this.#initPackages();
-
-    await this.outputInit?.();
-
-    console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
-
-    let files = this.#sourceFiles;
-    if (this.#delta) {
-      files = [];
+  getDirtyFiles(): string[] {
+    const files = this.#delta ? [] : this.#sourceFiles;
+    if (files.length === 0) {
       for (const [modName, subs] of Object.entries(this.#delta)) {
         const mod = this.#manifest.modules[modName];
         for (const [file] of subs) {
@@ -260,6 +274,23 @@ export class Compiler {
         }
       }
     }
+    return files;
+  }
+
+  /**
+   * Run the compiler
+   */
+  async run(): Promise<void> {
+    const start = Date.now();
+
+    await this.#initCommon();
+    await this.#initPackages();
+
+    await this.outputInit?.();
+
+    console.debug('Initialized', { duration: (Date.now() - start) / 1000 });
+
+    const files = this.getDirtyFiles();
 
     // Compile with transformers
     const prog = await this.getProgram(files);
@@ -267,14 +298,7 @@ export class Compiler {
     await this.prepareTransformer?.(prog);
 
     for (const file of files) {
-      const result = prog.emit(
-        prog.getSourceFile(file),
-        undefined,
-        undefined,
-        false,
-        this.getTransformer?.()
-      );
-      this.checkTranspileErrors(file, result.diagnostics);
+      this.emitFile(prog, file);
     }
   }
 }

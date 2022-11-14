@@ -12,7 +12,6 @@
     "compiler.ts",
     "compiler-setup.ts",
     "compiler-output.ts",
-    "path.ts",
     "manifest.ts",
     "workspace.ts"
   ]
