@@ -11,7 +11,7 @@ export type ManifestModule<T = Record<string, ManifestModuleFile[]>> = {
   version: string,
   source: string;
   output: string;
-  profiles?: string[];
+  profiles: string[];
   files: T;
 };
 

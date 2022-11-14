@@ -5,7 +5,13 @@ import * as path from '@travetto/path';
 import type { Manifest, ManifestModuleFile, ManifestModuleFileType, ManifestModule } from './types';
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
-export type FindConfig = { folder?: string, filter?: ScanTest, includeIndex?: boolean };
+export type FindConfig = {
+  folder?: string;
+  filter?: ScanTest;
+  includeIndex?: boolean;
+  profiles?: string[];
+  checkProfile?: boolean;
+};
 
 export type IndexedFile = {
   id: string;
@@ -18,6 +24,7 @@ export type IndexedFile = {
 export type IndexedModule = {
   id: string;
   name: string;
+  profiles: string[];
   source: string;
   output: string;
   main?: boolean;
@@ -96,7 +103,13 @@ class $ModuleIndex {
     const { filter: f, folder } = config;
     const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
 
-    const idx = this.#modules;
+    let idx = this.#modules;
+
+    if (config.checkProfile ?? true) {
+      const activeProfiles = new Set(config.profiles ?? process.env.TRV_PROFILES?.split(/\s*,\s*/g) ?? []);
+      idx = idx.filter(m => m.profiles.length === 0 || m.profiles.some(p => activeProfiles.has(p)));
+    }
+
     const searchSpace = folder ?
       idx.flatMap(m => [...m.files[folder] ?? [], ...(config.includeIndex ? (m.files.index ?? []) : [])]) :
       idx.flatMap(m => [...Object.values(m.files)].flat());

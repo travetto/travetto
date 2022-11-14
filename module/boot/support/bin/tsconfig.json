@@ -9,9 +9,9 @@
   },
   "files": [
     "build.ts",
-    "compiler-simple.ts",
-    "compiler-setup.ts",
     "compiler.ts",
+    "compiler-setup.ts",
+    "compiler-output.ts",
     "path.ts",
     "manifest.ts",
     "types.ts",

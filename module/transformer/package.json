@@ -28,14 +28,6 @@
     "tslib": "^2.4.0",
     "typescript": "^4.8.4"
   },
-  "peerDependencies": {
-    "@travetto/test": "file:../test"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/test": {
-      "optional": true
-    }
-  },
   "travetto": {
     "id": "@trv:transformer",
     "displayName": "Transformation",
