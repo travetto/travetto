@@ -37,13 +37,13 @@ export class SetupCompiler extends Compiler {
       const transformers = files.support?.filter(([x]) => x.startsWith('support/transform')) ?? [];
       if (transformers.length) {
         outManifest.modules[name] ??= { ...mod, files: outManifest.modules[name]?.files ?? {} };
-        (outManifest.modules[name].files.support ??= []).push(...transformers)
+        (outManifest.modules[name].files.support ??= []).push(...transformers);
       }
     }
 
     for (const [name, mod] of Object.entries(outManifest.modules)) {
       const allFiles = new Set<string>();
-      for (const [folder, files] of Object.entries(mod.files)) {
+      for (const files of Object.values(mod.files)) {
         for (const [file] of files ?? []) {
           allFiles.add(file);
         }

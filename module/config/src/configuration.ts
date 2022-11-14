@@ -66,7 +66,7 @@ export class Configuration {
     this.#sources = sorted.map(x => `${x.profile}.${x.priority} - ${x.source}`);
 
     for (const { config: element } of sorted) {
-      Util.deepAssign(this.#storage, BindUtil.expandPaths(element), 'coerce')
+      Util.deepAssign(this.#storage, BindUtil.expandPaths(element), 'coerce');
     }
   }
 
@@ -78,13 +78,13 @@ export class Configuration {
     const configTargets = await DependencyRegistry.getCandidateTypes(ConfigTarget);
     const configs = await Promise.all(
       configTargets.map(async el => {
-        const inst = await DependencyRegistry.getInstance<ClassInstance>(el.class, el.qualifier)
+        const inst = await DependencyRegistry.getInstance<ClassInstance>(el.class, el.qualifier);
         return [el, inst] as const;
       })
     );
     const out: Record<string, Record<string, ConfigData>> = {};
     for (const [el, inst] of configs) {
-      const data = BindUtil.exportSchema(inst, { filter: f => !f.secret }) as ConfigData;
+      const data = BindUtil.exportSchema<ConfigData>(inst, { filter: f => !f.secret });
       (out[el.class.name] ??= {})[el.qualifier.toString()] = data;
     }
     return { sources: this.#sources, active: out };
@@ -92,11 +92,11 @@ export class Configuration {
 
   /**
    * Bind and validate configuration into class instance
-   * @param cls 
-   * @param item 
-   * @param namespace 
+   * @param cls
+   * @param item
+   * @param namespace
    * @param validate
-   * @returns 
+   * @returns
    */
   async bindTo<T>(cls: Class<T>, item: T, namespace: string, validate = true): Promise<T> {
     if (!SchemaRegistry.has(cls)) {

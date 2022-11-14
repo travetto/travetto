@@ -3,9 +3,10 @@ import type { MailTemplateEngine } from '@travetto/email';
 import { TimeUtil } from '@travetto/base';
 
 import { EmailTemplateCompiler, Compilation } from '../../src/compiler';
+import { EmailTemplateResource } from '../../src/resource';
 
 /**
- * 
+ *
  */
 export class TemplateManager {
 
@@ -17,7 +18,7 @@ export class TemplateManager {
     this.compiler = compiler;
   }
 
-  get resources() {
+  get resources(): EmailTemplateResource {
     return this.compiler.resources;
   }
 
@@ -35,7 +36,7 @@ export class TemplateManager {
     const parts = await Promise.all(
       Object.entries(files).map(
         ([key, subRel]) => this.resources.read(subRel)
-          .then(content => [key, content] as [keyof Compilation, string])
+          .then(content => [key, content] as const)
       )
     );
     return Object.fromEntries<keyof Compilation, string>(parts);

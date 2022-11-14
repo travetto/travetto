@@ -1,12 +1,11 @@
 import { ConfigData } from '../parser/types';
 
-export type ConfigPriority = 1 | 2 | 3;
-export type ConfigValue = { config: ConfigData, source: string, profile: string, priority: ConfigPriority };
+export type ConfigValue = { config: ConfigData, source: string, profile: string, priority: number };
 
 /**
  * @concrete ../internal/types:ConfigSourceTarget
  */
 export interface ConfigSource {
-  priority: ConfigPriority;
+  priority: number;
   getValues(profiles: string[]): Promise<ConfigValue[]> | ConfigValue[];
 }

@@ -57,7 +57,7 @@ class Setup {
           }
         }
       }
-    })
+    });
   }
 
   @InjectableFactory()

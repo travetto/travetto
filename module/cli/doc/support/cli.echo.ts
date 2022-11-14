@@ -1,4 +1,3 @@
-import '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
 /**

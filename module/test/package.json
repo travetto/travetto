@@ -45,6 +45,7 @@
   "travetto": {
     "id": "@trv:test",
     "displayName": "Testing",
+    "profileInherit": false,
     "profiles": [
       "test"
     ]

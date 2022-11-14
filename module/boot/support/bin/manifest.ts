@@ -3,9 +3,9 @@ import * as os from 'os';
 
 import { Manifest, Package, path } from '@travetto/common';
 
-const resolveImport = (library: string) => require.resolve(library);
+const resolveImport = (library: string): string => require.resolve(library);
 
-type Dependency = { id?: string, version: string, name: string, folder: string, profiles: string[] };
+type Dependency = Package['travetto'] & { version: string, name: string, folder: string };
 type DeltaModuleFiles = Record<string, Manifest.ModuleFile>;
 
 export class ManifestUtil {
@@ -14,13 +14,16 @@ export class ManifestUtil {
     return Math.max(stat.mtimeMs, stat.ctimeMs);
   }
 
-  static async #collectPackages(folder: string, seen = new Map<string, Dependency>(), profiles: string[] = []): Promise<Dependency[]> {
+  static async #collectPackages(folder: string, transitiveProfiles: string[] = [], seen = new Map<string, Dependency>()): Promise<Dependency[]> {
     const { name, version, dependencies = {}, devDependencies = {}, peerDependencies = {}, travetto }: Package =
       JSON.parse(await fs.readFile(`${folder}/package.json`, 'utf8'));
 
     if (seen.has(name)) {
-      for (const el of profiles) {
-        seen.get(name)!.profiles.push(el);
+      const dep = seen.get(name)!;
+      if (dep.profileInherit !== false) {
+        for (const el of transitiveProfiles) {
+          (dep.profiles ??= []).push(el);
+        }
       }
       return [];
     }
@@ -30,7 +33,8 @@ export class ManifestUtil {
       return [];
     }
 
-    const rootDep: Dependency = { id: travetto?.id, name, version, folder, profiles: [...travetto?.profiles ?? [], ...profiles] };
+    const profiles = travetto?.profileInherit !== false ? [...travetto?.profiles ?? [], ...transitiveProfiles] : [...travetto?.profiles ?? []].slice(0);
+    const rootDep: Dependency = { id: travetto?.id, name, version, folder, profiles, profileInherit: travetto?.profileInherit };
     seen.set(name, rootDep);
 
     const out: Dependency[] = [rootDep];
@@ -50,9 +54,9 @@ export class ManifestUtil {
     ].sort(([a, b]) => a[0].localeCompare(b[0]));
 
     for (const [el, value, type] of searchSpace) {
-      const subProfiles = type === 'peer' ? [] : rootDep.profiles;
+      const subProfiles = type === 'peer' ? transitiveProfiles : profiles;
       if (value.startsWith('file:')) {
-        out.push(...await this.#collectPackages(path.resolve(folder, value.replace('file:', '')), seen, subProfiles));
+        out.push(...await this.#collectPackages(path.resolve(folder, value.replace('file:', '')), subProfiles, seen));
       } else {
         let next: string;
         try {
@@ -61,7 +65,7 @@ export class ManifestUtil {
           continue;
         }
         next = next.replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
-        out.push(...await this.#collectPackages(next, seen, subProfiles));
+        out.push(...await this.#collectPackages(next, subProfiles, seen));
       }
     }
     return out;
@@ -141,11 +145,11 @@ export class ManifestUtil {
 
     return {
       id,
-      profiles: [...new Set(profiles)],
+      profiles: profiles?.includes('*') ? [] : [...new Set(profiles?.filter(x => x !== '*'))],
       name,
       version,
       main,
-      local: local,
+      local,
       source: folder,
       output: `node_modules/${name}`,
       files
@@ -153,13 +157,13 @@ export class ManifestUtil {
   }
 
   static async #buildManifestModules(rootFolder: string): Promise<Record<string, Manifest.Module>> {
-    const modules = (await this.#collectPackages(rootFolder));
+    const modules = (await this.#collectPackages(rootFolder, ['*']));
 
     // TODO: Revisit logic
     if (!modules.some(x => x.name === '@travetto/cli')) {
       const folder = path.resolve(__dirname, '..', '..', '..', 'cli');
       if (await fs.stat(folder).catch(() => false)) {
-        modules.unshift(...(await this.#collectPackages(folder)));
+        modules.unshift(...(await this.#collectPackages(folder, ['*'])));
       }
     }
 
@@ -167,7 +171,7 @@ export class ManifestUtil {
     if (!modules.some(x => x.name === '@travetto/test')) {
       const folder = path.resolve(__dirname, '..', '..', '..', 'test');
       if (await fs.stat(folder).catch(() => false)) {
-        modules.unshift(...(await this.#collectPackages(folder)));
+        modules.unshift(...(await this.#collectPackages(folder, ['*'])));
       }
     }
 
@@ -203,7 +207,7 @@ export class ManifestUtil {
       } else {
         const [, , leftTs] = left.files[el];
         const [, , rightTs] = right.files[el];
-        if (leftTs != rightTs) {
+        if (leftTs !== rightTs) {
           out.push([el, 'changed']);
         } else {
           try {

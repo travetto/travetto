@@ -18,15 +18,13 @@ export class WorkspaceManager {
     return !!(await fs.stat(path.resolve(module.source, file)).catch(() => false));
   }
 
-  async symlinkFolder(module: Manifest.Module, key: string): Promise<void> {
-    if (module.files[key] && await this.sourceExists(module, key)) {
-      const output = path.resolve(this.#outDir, module.output, key);
-      await fs.mkdir(path.dirname(output), { recursive: true });
+  async copyModule(module: Manifest.Module): Promise<void> {
+    const output = path.resolve(this.#outDir, module.output);
+    await fs.mkdir(path.dirname(output), { recursive: true });
 
-      console.debug('Symlinking', output);
-      if (!(await fs.stat(output).catch(() => false))) {
-        await fs.symlink(path.resolve(module.source, key), output);
-      }
+    console.debug('Symlinking', output);
+    if (!(await fs.stat(output).catch(() => false))) {
+      await fs.symlink(path.resolve(module.source), output);
     }
   }
 

@@ -1,6 +1,6 @@
-import { path, Manifest } from '@travetto/common';
+import { path, spawn, Manifest } from '@travetto/common';
 
-import { log, spawn, BuildConfig } from '../../bin/build-support';
+import { log, BuildConfig } from '../../bin/build-support';
 import { ManifestUtil } from './manifest';
 
 let manifestTemp: string;
@@ -46,7 +46,7 @@ async function compilerSetup(state: Manifest.State, compilerFolder: string): Pro
       path.resolve(__dirname, './compiler-setup'),
       (manifestTemp ??= await ManifestUtil.writeState(state)),
       compilerFolder
-    ]
+    ];
     await spawn('Setting up Compiler', process.argv0, { args, cwd: process.cwd() }); // Step 3.b
   } else {
     log('[3] Skipping Compiler Setup');
@@ -68,7 +68,7 @@ async function compileOutput(state: Manifest.State, { compilerFolder, outputFold
     `${compilerFolder}/${state.manifest.modules['@travetto/boot'].output}/support/bin/compiler-output`,
     (manifestTemp ??= await ManifestUtil.writeState(state)),
     outputFolder
-  ]
+  ];
   await spawn('Compiling Output', process.argv0, { args, env: { TRV_WATCH: `${watch}` }, cwd: compilerFolder });
 }
 

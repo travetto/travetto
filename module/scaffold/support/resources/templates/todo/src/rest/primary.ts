@@ -4,7 +4,7 @@ import { Controller, Get, Query } from '@travetto/rest';
 export class SimpleController {
 
   @Get('/')
-  async hello(@Query() name = 'world') {
+  async hello(@Query() name = 'world'): Promise<{ hello: string }> {
     return { hello: name };
   }
 }

@@ -5,6 +5,6 @@ import { ConfigParser } from './types';
 
 @Injectable()
 export class YAMLConfigParser implements ConfigParser {
-  ext = ['yaml', 'yml']
+  ext = ['yaml', 'yml'];
   parse = YamlUtil.parse;
 }

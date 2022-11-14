@@ -42,26 +42,27 @@ export class FileResourceProvider implements ResourceProvider {
   #paths: string[];
   #rawPaths: string[];
 
-  #getModulePath(mod: string, rel?: string): string {
-    return path.resolve(ModuleIndex.getModule(mod)!.source, rel ?? '');
-  }
+  moduleFolder?: string;
+  mainFolder?: string;
+  maxDepth = 1000;
 
   constructor(paths: string[]) {
     this.#rawPaths = paths;
   }
 
-  moduleFolder?: string;
-  mainFolder?: string;
-  maxDepth = 1000;
 
-  #getPaths() {
+  #getModulePath(mod: string, rel?: string): string {
+    return path.resolve(ModuleIndex.getModule(mod)!.source, rel ?? '');
+  }
+
+  #getPaths(): string[] {
     const main = ModuleIndex.manifest.main;
     return this.#paths ??= this.#rawPaths.map(pth => {
       const [base, sub] = pth.replace(/^@$/, main).replace(/^@#/, `${main}#`).split('#');
 
       return ModuleIndex.hasModule(base) ?
         this.#getModulePath(base, sub ?? (base !== main ? this.moduleFolder : undefined) ?? this.mainFolder) :
-        path.resolve(base, sub ?? this.mainFolder ?? '')
+        path.resolve(base, sub ?? this.mainFolder ?? '');
     });
   }
 
@@ -85,9 +86,9 @@ export class FileResourceProvider implements ResourceProvider {
     return { size: stat.size, path: file };
   }
 
-  async read(file: string, binary?: false): Promise<string>
-  async read(file: string, binary: true): Promise<Buffer>
-  async read(file: string, binary = false) {
+  async read(file: string, binary?: false): Promise<string>;
+  async read(file: string, binary: true): Promise<Buffer>;
+  async read(file: string, binary = false): Promise<string | Buffer> {
     file = await this.#getPath(file);
     return fs.readFile(file, binary ? undefined : 'utf8');
   }
@@ -101,6 +102,7 @@ export class FileResourceProvider implements ResourceProvider {
    * Query using a simple predicate, looking for files recursively
    */
   async query(filter: (file: string) => boolean, maxDepth = this.maxDepth): Promise<string[]> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const search = [...this.#getPaths().map(x => [x, x, 0] as [string, string, number])];
     const seen = new Set();
     const out: string[] = [];
@@ -114,7 +116,7 @@ export class FileResourceProvider implements ResourceProvider {
         const stats = await fs.stat(resolved);
         if (stats.isDirectory()) {
           if (depth + 1 < maxDepth) {
-            search.push([resolved, root, depth + 1])
+            search.push([resolved, root, depth + 1]);
           }
         } else {
           const rel = resolved.replace(`${root}/`, '');

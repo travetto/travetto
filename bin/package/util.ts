@@ -32,7 +32,7 @@ export type PackageType = {
     id?: string;
     displayName?: string;
     profiles?: string[];
-  },
+  };
   private?: boolean;
   publishConfig?: { access?: 'restricted' | 'public' };
 };

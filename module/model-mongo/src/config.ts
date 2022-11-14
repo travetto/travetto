@@ -60,7 +60,7 @@ export class MongoModelConfig {
    */
   async postConstruct(): Promise<void> {
     const resources = new CommonFileResourceProvider();
-    const resolve = (file: string) => resources.describe(file).then(({ path }) => path, () => file);
+    const resolve = (file: string): Promise<string> => resources.describe(file).then(({ path }) => path, () => file);
 
     const opts = this.options;
     if (opts.ssl) {

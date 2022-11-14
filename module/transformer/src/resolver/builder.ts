@@ -224,7 +224,7 @@ export const TypeBuilder: {
           ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
           ?.getSourceFile().fileName ?? '';
 
-        // Ensure we are looking at the output location 
+        // Ensure we are looking at the output location
         const sourceFile = checker.getManifest().ensureOutputFile(rawSourceFile);
 
         if (source === '.') {

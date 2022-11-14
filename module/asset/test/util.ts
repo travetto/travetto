@@ -8,7 +8,7 @@ import { AssetUtil } from '../src/util';
 @Suite()
 export class UtilTest {
 
-  fixture = new TestFixtures(['@travetto/asset']);;
+  fixture = new TestFixtures(['@travetto/asset']);
 
   @Test()
   async hashFile() {

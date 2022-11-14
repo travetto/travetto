@@ -2,7 +2,8 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
-import { CUSTOM_EMPTY, DbConfig } from './config';
+
+import { CUSTOM_EMPTY, DbConfig, Empty } from './config';
 
 
 class TestConfig {

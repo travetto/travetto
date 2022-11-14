@@ -106,8 +106,8 @@ class $DynamicDependencyRegistry {
 }
 
 export const DependencyRegistration = {
-  init(registry: typeof DependencyRegistry) {
+  init(registry: typeof DependencyRegistry): void {
     const dynamic = new $DynamicDependencyRegistry();
     dynamic.register(registry);
   }
-}
+};

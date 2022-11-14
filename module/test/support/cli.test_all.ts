@@ -6,7 +6,7 @@ import { ModuleIndex } from '@travetto/boot';
 type Options = {
   format: OptionConfig<string>;
   concurrency: OptionConfig<number>;
-  mode: OptionConfig<'scan' | 'raw'>
+  mode: OptionConfig<'scan' | 'raw'>;
 };
 
 /**
@@ -46,7 +46,7 @@ export class TestAllCommand extends CliCommand<Options> {
 
     const emitter = await TestConsumerRegistry.getInstance(this.cmd.format);
     const consumer = new RunnableTestConsumer(emitter);
-    const pool = new WorkPool(() => new TestWorker(consumer), { max: this.cmd.concurrency })
+    const pool = new WorkPool(() => new TestWorker(consumer), { max: this.cmd.concurrency });
     await pool.process(new IterableWorkSet(folders));
     process.exit(consumer.summarizeAsBoolean() ? 0 : 1);
   }

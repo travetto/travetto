@@ -1,4 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
+
 import { Config, EnvVar } from '../src/decorator';
 import { FileConfigSource } from '../src/source/file';
 import { ConfigSource } from '../src/source/types';

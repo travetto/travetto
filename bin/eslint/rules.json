@@ -336,7 +336,7 @@
   "overrides": [
     {
       "files": [
-        "doc.ts"
+        "doc/index.ts"
       ],
       "rules": {
         "max-len": "off",

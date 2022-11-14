@@ -4,7 +4,7 @@ import { CommonFileResourceProvider } from '@travetto/base';
 @Controller('/ui')
 export class UIController {
 
-  resources = new CommonFileResourceProvider()
+  resources = new CommonFileResourceProvider();
 
   @Get('/')
   @Produces('text/html')

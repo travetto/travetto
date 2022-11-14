@@ -1,5 +1,6 @@
 import { ExecUtil } from '@travetto/base';
 import { Worker } from '@travetto/worker';
+
 import { TestConsumer } from '../../src/consumer/types';
 import { TestEvent } from '../../src/model/event';
 
@@ -11,12 +12,11 @@ export class TestWorker implements Worker<string> {
   active = false;
   #consumer: TestConsumer;
 
+  kill?: () => void;
 
   constructor(consumer: TestConsumer) {
     this.#consumer = consumer;
   }
-
-  kill?: () => void;
 
   async destroy(): Promise<void> {
     this.kill?.();
@@ -28,7 +28,7 @@ export class TestWorker implements Worker<string> {
       this.active = true;
       const args = ['test', '-f', 'exec', '-c', '3'];
       const { process: proc, result } = ExecUtil.spawn('trv', args, { cwd: folder, stdio: [0, 'pipe', 2, 'ipc'], shell: false });
-      const kill = this.kill = () => proc.kill('SIGTERM');
+      const kill = this.kill = (): void => { proc.kill('SIGTERM'); };
 
       proc.on('message', (ev: TestEvent) => this.#consumer.onEvent(ev));
       proc.on('error', kill);

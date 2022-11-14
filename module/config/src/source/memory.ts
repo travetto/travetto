@@ -1,13 +1,13 @@
 import { ConfigData } from '../parser/types';
-import { ConfigPriority, ConfigSource, ConfigValue } from './types';
+import { ConfigSource, ConfigValue } from './types';
 
 
 export class MemoryConfigSource implements ConfigSource {
-  priority = 1 as ConfigPriority;
+  priority = 1;
   data: Record<string, ConfigData>;
   name = 'memory';
 
-  constructor(data: Record<string, ConfigData>, priority: ConfigPriority = 1) {
+  constructor(data: Record<string, ConfigData>, priority: number = 1) {
     this.data = data;
     this.priority = priority;
   }

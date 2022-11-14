@@ -24,7 +24,7 @@ class ImageUtilTest {
 
     const compiler = new EmailTemplateCompiler(resource);
 
-    const output = await compiler.inlineImageSource(text, '.')
+    const output = await compiler.inlineImageSource(text, '.');
 
     assert(!output.includes('red.gif'));
     assert(!output.includes('blue.gif'));

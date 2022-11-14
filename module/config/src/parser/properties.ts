@@ -15,7 +15,7 @@ export class PropertiesConfigParser implements ConfigParser {
     if (text.charCodeAt(0) === HASH || text.charCodeAt(0) === EXCL) {
       return;
     }
-    let key: number[] = [];
+    const key: number[] = [];
     let value: string | undefined;
     for (let i = 0; i < text.length; i += 1) {
       const ch = text.charCodeAt(i);
