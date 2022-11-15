@@ -33,7 +33,10 @@ export class ManifestUtil {
       return [];
     }
 
-    const profiles = travetto?.profileInherit !== false ? [...travetto?.profiles ?? [], ...transitiveProfiles] : [...travetto?.profiles ?? []].slice(0);
+    const profiles = travetto?.profileInherit !== false ?
+      [...travetto?.profiles ?? [], ...transitiveProfiles] :
+      [...travetto?.profiles ?? []].slice(0);
+
     const rootDep: Dependency = { id: travetto?.id, name, version, folder, profiles, profileInherit: travetto?.profileInherit };
     seen.set(name, rootDep);
 
@@ -102,15 +105,15 @@ export class ManifestUtil {
   static async #transformFile(relative: string, full: string): Promise<Manifest.ModuleFile> {
     const type = relative.endsWith('.d.ts') ? 'd.ts' : (
       relative.endsWith('.ts') ? 'ts' : (
-        (relative.endsWith('.js') || relative.endsWith('mjs') || relative.endsWith('.cjs')) ? 'js' :
+        (relative.endsWith('.js') || relative.endsWith('.mjs') || relative.endsWith('.cjs')) ? 'js' :
           (relative.endsWith('.json') ? 'json' : 'unknown')
       ));
     return [relative, type, this.#getNewest(await fs.stat(full))];
   }
 
   static async #describeModule(rootFolder: string, { id, name, version, folder, profiles }: Dependency): Promise<Manifest.Module> {
-    const local = folder.includes('node_modules');
     const main = folder === rootFolder;
+    const local = (!folder.includes('node_modules') && !name.startsWith('@travetto')) || main;
 
     const files: Record<string, Manifest.ModuleFile[]> = {};
     const folderSet = !main ? new Set<string>(['src', 'bin', 'support']) : new Set<string>();
@@ -138,6 +141,10 @@ export class ManifestUtil {
     // Refine non-main module
     if (!main) {
       files.rootFiles = files.rootFiles.filter(([file, type]) => type !== 'ts');
+    }
+
+    if (name === '@travetto/boot') {
+      files.support = files.support.filter(([x, v]) => v !== 'js');
     }
 
     // Cleaning up names
@@ -187,7 +194,7 @@ export class ManifestUtil {
     const out: DeltaModuleFiles = {};
     for (const key of Object.keys(m.files)) {
       for (const [name, type, date] of m.files[key]) {
-        if (type === 'ts') {
+        if (type === 'ts' || (type === 'json' && name.endsWith('package.json')) || (key === 'bin' && type === 'js')) {
           out[name] = [name, type, date];
         }
       }

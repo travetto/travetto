@@ -8,33 +8,38 @@ import { TransformerState } from './state';
 import { getAllTransformers } from './register';
 import { ManifestManager } from './manifest';
 
-type TransformerList = { before: ts.TransformerFactory<ts.SourceFile>[] };
-
 /**
  * Manages the typescript transformers
  */
 export class TransformerManager {
 
-  #cached: TransformerList | undefined;
-  #transformers: NodeTransformer<TransformerState>[] = [];
+  /**
+   * Create transformer manager
+   * @param transformerFiles 
+   * @param modules 
+   * @returns 
+   */
+  static async create(transformerFiles: string[], modules: Manifest.Module[]): Promise<TransformerManager> {
+    const transformers: NodeTransformer<TransformerState>[] = [];
+
+    for (const entry of transformerFiles) { // Exclude based on blacklist
+      transformers.push(...getAllTransformers(await import(entry)));
+    }
+
+    // Prepare a new visitor factory with a given type checker
+    return new TransformerManager(transformers, modules);
+  }
+
+  #cached: ts.CustomTransformers | undefined;
+  #transformers: NodeTransformer<TransformerState>[];
   #manifest: ManifestManager;
 
-  /**
-   * Read all transformers from disk under the pattern support/transformer.*
-   */
-  async init(transformers: string[], modules: Manifest.Module[]): Promise<void> {
-    if (this.#cached) {
-      return;
-    }
-
+  constructor(transformers: NodeTransformer<TransformerState>[], modules: Manifest.Module[]) {
+    this.#transformers = transformers;
     this.#manifest = new ManifestManager(modules);
 
-    for (const entry of transformers) { // Exclude based on blacklist
-      this.#transformers.push(...getAllTransformers(await import(entry)));
-    }
-
     console.debug('Transformers', {
-      order: this.#transformers.map(x => {
+      order: transformers.map(x => {
         const flags = [
           ...(x.target ? [] : ['all']),
           ...(x.before ? ['before'] : []),
@@ -43,11 +48,13 @@ export class TransformerManager {
         return { type: x.type, key: x.key, flags: flags.join(' ') };
       })
     });
-
-    // Prepare a new visitor factory with a given type checker
   }
 
-  build(checker: ts.TypeChecker): void {
+  /**
+   * Initialize with type checker
+   * @param checker 
+   */
+  init(checker: ts.TypeChecker): void {
     const visitor = new VisitorFactory(
       (ctx, src) => new TransformerState(src, ctx.factory, checker, this.#manifest),
       this.#transformers
@@ -62,7 +69,7 @@ export class TransformerManager {
   /**
    * Get typescript transformer object
    */
-  getTransformers(): TransformerList | undefined {
+  get(): ts.CustomTransformers | undefined {
     return this.#cached!;
   }
 }

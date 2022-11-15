@@ -1,5 +1,5 @@
 import { createWriteStream, WriteStream } from 'fs';
-import { LogLevel } from '@travetto/base';
+import { LogLevel } from '@travetto/boot';
 import { Appender } from '../types';
 
 /**

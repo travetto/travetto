@@ -2,9 +2,9 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Schema, Text, Precision, } from '@travetto/schema';
+import { ModelCrudSupport, Model, NotFoundError } from '@travetto/model';
 
 import { BaseModelSuite } from './base';
-import { ModelCrudSupport, Model, NotFoundError } from '../..';
 
 @Schema()
 class Address {

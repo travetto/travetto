@@ -1,4 +1,4 @@
-import { ExecutionState } from '@travetto/boot';
+import { ExecutionState } from '@travetto/base';
 
 import { ParentCommChannel } from './comm/parent';
 import { Worker } from './pool';

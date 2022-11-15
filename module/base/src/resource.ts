@@ -101,7 +101,7 @@ export class FileResourceProvider implements ResourceProvider {
   /**
    * Query using a simple predicate, looking for files recursively
    */
-  async query(filter: (file: string) => boolean, maxDepth = this.maxDepth): Promise<string[]> {
+  async query(filter: (file: string) => boolean, hidden = false, maxDepth = this.maxDepth): Promise<string[]> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const search = [...this.#getPaths().map(x => [x, x, 0] as [string, string, number])];
     const seen = new Set();
@@ -109,7 +109,7 @@ export class FileResourceProvider implements ResourceProvider {
     while (search.length) {
       const [folder, root, depth] = search.shift()!;
       for (const sub of await fs.readdir(folder)) {
-        if (sub.startsWith('.')) {
+        if (sub === '.' || sub === '..' || (!hidden && sub.startsWith('.'))) {
           continue;
         }
         const resolved = path.resolve(folder, sub);

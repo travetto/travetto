@@ -5,6 +5,12 @@ const { path, spawn } = require('@travetto/common');
 
 const { log, isFolderStale } = require('./build-support');
 
+/**
+ * 
+ * @param {string} library 
+ * @param {boolean} toRoot 
+ * @returns 
+ */
 const resolveImport = (library, toRoot = false) => {
   let res = require.resolve(library);
   if (toRoot) {
@@ -37,6 +43,7 @@ async function boot({ main, compilerFolder, outputFolder, compile, watch } = {})
   compilerFolder ??= process.env.TRV_COMPILER ?? path.resolve('.trv_compiler');
   outputFolder ??= process.env.TRV_OUTPUT ?? path.resolve('.trv_out');
   compile ??= process.env.TRV_COMPILED !== '1';
+  watch ??= process.env.TRV_WATCH === 'true';
 
   // Share back
   process.env.TRV_OUTPUT = outputFolder;

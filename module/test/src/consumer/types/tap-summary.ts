@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { ColorUtil } from '@travetto/boot';
+import { ColorUtil } from '@travetto/base';
 
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
