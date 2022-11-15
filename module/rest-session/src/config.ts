@@ -1,6 +1,6 @@
 import { Env } from '@travetto/base';
 import { Config } from '@travetto/config';
-import { Required } from '@travetto/schema';
+import { Required, Secret } from '@travetto/schema';
 
 /**
  * Rest session config
@@ -31,6 +31,7 @@ export class SessionConfig {
    * Secret for signing the session
    */
   @Required(Env.isProd())
+  @Secret()
   secret: string;
   /**
    * Signature key name

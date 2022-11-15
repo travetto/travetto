@@ -6,5 +6,7 @@ import { RootRegistry } from '../src/service/root';
 export const step = {
   key: '@trv:registry/init',
   after: ['@trv:boot/load'],
-  action: async (): Promise<unknown> => RootRegistry.init()
+  action: async (): Promise<unknown> => {
+    return RootRegistry.init();
+  }
 };
