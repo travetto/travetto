@@ -11,3 +11,4 @@ export * from './src/proxy';
 export * from './src/stacktrace';
 export * from './src/error';
 export * from './src/package';
+export * from './src/watch';

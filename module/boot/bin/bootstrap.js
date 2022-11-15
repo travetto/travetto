@@ -2,57 +2,49 @@
 
 // @ts-check
 const { path, spawn } = require('@travetto/common');
+const fs = require('fs/promises');
 
-const { log, isFolderStale } = require('./build-support');
+const recent = file => fs.stat(file).then(stat => Math.max(stat.ctimeMs, stat.mtimeMs));
 
-/**
- * 
- * @param {string} library 
- * @param {boolean} toRoot 
- * @returns 
- */
-const resolveImport = (library, toRoot = false) => {
-  let res = require.resolve(library);
-  if (toRoot) {
-    res = `${res.split(`/node_modules/${library}`)[0]}/node_modules/${library}`;
-  }
-  return res;
-};
-
-/**
- *  Step 1
- */
-async function bootstrap() {
-  const folder = path.resolve(__dirname, '../support/bin');
-  if (await isFolderStale(folder)) {
-    log('[1] Bootstrap Rebuilding.');
-    const TSC = `${resolveImport('typescript', true)}/bin/tsc`;
-    await spawn('Compiling Bootstrap', TSC, { cwd: folder });
-  } else {
-    log('[1] Bootstrap Rebuild Skipped.');
-  }
+async function isProjectStale(tsconfig) {
+  const folder = path.dirname(tsconfig);
+  const { files } = JSON.parse(await fs.readFile(tsconfig, 'utf8'));
+  return Promise.all(files.map(async file => {
+    const f = path.resolve(folder, file);
+    const [l, r] = await Promise.all([recent(f), recent(f.replace(/[.]ts$/, '.js'))]);
+    if (l > r) {
+      throw new Error('Stale');
+    }
+  })).then(() => false, () => true);
 }
 
+// @ts-ignore
+const log = global['__trv_boot_log__'] = process.env.DEBUG === 'build' ? console.debug.bind(console) : () => { };
+
 /**
- * @param {Partial<import('./build-support').BuildConfig & { main?: string, compile?: boolean }>} cfg
+ * @param {{outputFolder: string, compilerFolder:string, main?: string, compile?: boolean, watch?: boolean}} cfg
  */
-async function boot({ main, compilerFolder, outputFolder, compile, watch } = {}) {
+async function boot({ outputFolder, compilerFolder, compile, main, watch }) {
+  let compilerTsConfig = undefined;
 
-  try { require(path.resolve('.env')); } catch { }
-
-  compilerFolder ??= process.env.TRV_COMPILER ?? path.resolve('.trv_compiler');
-  outputFolder ??= process.env.TRV_OUTPUT ?? path.resolve('.trv_out');
-  compile ??= process.env.TRV_COMPILED !== '1';
-  watch ??= process.env.TRV_WATCH === 'true';
-
-  // Share back
-  process.env.TRV_OUTPUT = outputFolder;
-
+  // Skip compilation if not installed
   if (compile) {
-    await bootstrap(); // Step 1
-    await require('../support/bin/build').build({
-      compilerFolder, outputFolder, watch
-    });
+    try {
+      compilerTsConfig = require.resolve('@travetto/compiler/tsconfig.precompile.json');
+    } catch { }
+
+    if (compilerTsConfig) {
+      if (await isProjectStale(compilerTsConfig)) {
+        log(`[1] Bootstrap Rebuilding: ${compilerTsConfig}`);
+        const TSC = require.resolve('typescript').replace(/\/lib\/.*/, '/bin/tsc');
+        await spawn('Bootstrapping Compiler', TSC, { cwd: path.dirname(compilerTsConfig), args: ['-p', path.basename(compilerTsConfig)] });
+      } else {
+        log('[1] Bootstrap Rebuild Skipped.');
+      }
+      await require('@travetto/compiler/support/bin/build').build({
+        compilerFolder, outputFolder, watch
+      });
+    }
   }
 
   // Only  manipulate if we aren't in the output folder
@@ -61,6 +53,10 @@ async function boot({ main, compilerFolder, outputFolder, compile, watch } = {})
     // @ts-expect-error
     require('module').Module._initPaths();
   }
+
+  // Share back so ModuleIndex will pick it up
+  process.env.TRV_OUTPUT = outputFolder;
+
   if (main) {
     require('@travetto/boot/support/init');
     // eslint-disable-next-line no-undef

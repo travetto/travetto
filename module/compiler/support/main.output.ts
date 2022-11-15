@@ -1,7 +1,8 @@
-import { TransformerManager } from '@travetto/transformer';
-import { Manifest } from '@travetto/common';
+import * as fs from 'fs/promises';
 
-import { Compiler, TransformerProvider } from './compiler';
+import { Manifest, path } from '@travetto/common';
+
+import { Compiler, TransformerProvider } from '../src/compiler';
 
 export class OutputCompiler extends Compiler {
 
@@ -10,7 +11,7 @@ export class OutputCompiler extends Compiler {
   init(state: Manifest.State, outputFolder: string): typeof this {
     super.init(state, outputFolder);
 
-    this.#transformers = this.modules.flatMap(
+    this.#transformers = this.state.modules.flatMap(
       x => (x.files.support ?? [])
         .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
         .map(([f]) =>
@@ -21,13 +22,21 @@ export class OutputCompiler extends Compiler {
   }
 
   async createTransformerProvider(): Promise<TransformerProvider> {
-    return TransformerManager.create(this.#transformers, this.modules);
+    const { TransformerManager } = await import('@travetto/transformer');
+    return TransformerManager.create(this.#transformers, this.state.modules);
+  }
+
+  async writeRawFile(file: string, contents: string): Promise<void> {
+    const outFile = path.resolve(this.state.outputFolder, file);
+    console.debug('Writing', outFile);
+    await fs.mkdir(path.dirname(outFile), { recursive: true });
+    await fs.writeFile(outFile, contents, 'utf8');
   }
 
   async outputInit(): Promise<void> {
     // Write manifest
-    await this.workspace.writeRawFile('manifest.json', JSON.stringify(this.manifest));
-    await this.workspace.writeRawFile('.env.js', `
+    await this.writeRawFile('manifest.json', JSON.stringify(this.state.manifest));
+    await this.writeRawFile('.env.js', `
 process.env.TRV_OUTPUT=process.cwd();
 process.env.TRV_COMPILED=1;
 `);

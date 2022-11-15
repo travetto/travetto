@@ -16,8 +16,7 @@
   "files": [
     "index.ts",
     "src",
-    "support",
-    "tsconfig.trv.json"
+    "support"
   ],
   "main": "index.ts",
   "repository": {
@@ -31,10 +30,18 @@
     "source-map-support": "^0.5.21"
   },
   "peerDependencies": {
-    "@travetto/cli": "file:../cli"
+    "@travetto/cli": "file:../cli",
+    "@travetto/compiler": "file:../compiler",
+    "@parcel/watcher": "^2.0.7"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
+      "optional": true
+    },
+    "@travetto/compiler": {
+      "optional": true
+    },
+    "@parcel/watcher": {
       "optional": true
     }
   },

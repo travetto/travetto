@@ -30,7 +30,6 @@
     "@travetto/base": "file:../base",
     "@travetto/transformer": "file:../transformer",
     "@travetto/registry": "file:../registry",
-    "@travetto/watch": "file:../watch",
     "@travetto/worker": "file:../worker",
     "@travetto/yaml": "file:../yaml"
   },

@@ -1,5 +1,5 @@
-import { FilePresenceManager } from '@travetto/watch';
 import type { MailTemplateEngine } from '@travetto/email';
+import { WatchUtil } from '@travetto/boot';
 import { TimeUtil } from '@travetto/base';
 
 import { EmailTemplateCompiler, Compilation } from '../../src/compiler';
@@ -60,13 +60,16 @@ export class TemplateManager {
    * Watch compilation
    */
   async watchCompile(cb?: (file: string) => void): Promise<void> {
-    new FilePresenceManager(this.resources.getAllPaths(), {
-      ignoreInitial: true,
-      validFile: x =>
-        !/[.]compiled[.]/.test(x) && (
-          /[.](html|scss|css|png|jpe?g|gif|ya?ml)$/.test(x)
-        )
-    }).on('changed', async ({ file }) => {
+    await WatchUtil.buildWatcher(this.resources.getAllPaths(), async ({ type, path: file }) => {
+      if (type !== 'update') {
+        return;
+      }
+      if (/[.]compiled[.]/.test(file) ||
+        !/[.](html|scss|css|png|jpe?g|gif|ya?ml)$/.test(file)
+      ) {
+        return;
+      }
+
       try {
         console.log('Contents changed', { file });
         if (this.resources.isTemplateFile(file)) {

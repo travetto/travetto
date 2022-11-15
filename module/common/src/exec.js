@@ -83,7 +83,7 @@ const spawn = async (action, cmd, { args = [], cwd = process.cwd(), failOnError 
     if (showWaitingMessage) {
       return await waiting(`${action}...`, work);
     } else {
-      return work();
+      return await work();
     }
   } catch (err) {
     const text = Buffer.concat(stderrOutput).toString('utf8');

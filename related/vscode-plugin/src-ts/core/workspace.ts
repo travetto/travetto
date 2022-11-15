@@ -170,7 +170,6 @@ export class Workspace {
         'node:internals/**',
         'internal/**',
         '**/@travetto/context/**/*',
-        '**/@travetto/watch/**/*',
         '**/@travetto/rest/src/util/route.ts',
         '**/@travetto/**/internal/*',
         '**/tslib/**/*'

@@ -1,0 +1,194 @@
+import * as ts from 'typescript';
+import * as fs from 'fs/promises';
+import { readdirSync } from 'fs';
+
+import { Manifest, Package, path } from '@travetto/common';
+
+type InputToSource = (inputFile: string) => ({ source: string, module: Manifest.Module } | undefined);
+export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
+
+const nativeCwd = process.cwd();
+
+const NODE_VERSION = process.env.TRV_NODE_VERSION ?? process.version
+  .replace(/^.*?(\d+).*?$/, (_, v) => v);
+
+const TS_TARGET = ({
+  12: 'ES2019',
+  13: 'ES2019',
+  14: 'ES2020',
+  15: 'ESNext',
+  16: 'ESNext'
+} as const)[NODE_VERSION] ?? 'ESNext'; // Default if not found
+
+/**
+ * Standard utilities for compiler
+ */
+export class CompilerUtil {
+
+  /**
+   * Determines if write callback data has sourcemap information
+   * @param data
+   * @returns
+   */
+  static isSourceMapUrlPosData(data?: ts.WriteFileCallbackData): data is { sourceMapUrlPos: number } {
+    return data !== undefined && data !== null && typeof data === 'object' && ('sourceMapUrlPos' in data);
+  }
+
+  /**
+   * Rewrite's sourcemap locations to real folders
+   * @param text
+   * @param inputToSource
+   * @param writeData
+   * @returns
+   */
+  static rewriteSourceMap(
+    text: string,
+    inputToSource: InputToSource,
+    { sourceMapUrlPos }: ts.WriteFileCallbackData & { sourceMapUrlPos: number }
+  ): string {
+    const sourceMapUrl = text.substring(sourceMapUrlPos);
+    const [prefix, sourceMapData] = sourceMapUrl.split('base64,');
+    const data: { sourceRoot: string, sources: string[] } = JSON.parse(Buffer.from(sourceMapData, 'base64url').toString('utf8'));
+    const [src] = data.sources;
+
+    const { source: file, module } = inputToSource(src) ?? {};
+    if (file && module) {
+      data.sourceRoot = module.source;
+      data.sources = [file];
+      text = [
+        text.substring(0, sourceMapUrlPos),
+        prefix,
+        'base64,',
+        Buffer.from(JSON.stringify(data), 'utf8').toString('base64url')
+      ].join('');
+    }
+
+    return text;
+  }
+
+  /**
+   * Rewrites the package.json to target .js files instead of .ts files, and pins versions
+   * @param manifest
+   * @param file
+   * @param text
+   * @returns
+   */
+  static rewritePackageJSON(manifest: Manifest.Root, text: string): string {
+    const pkg: Package = JSON.parse(text);
+    if (pkg.files) {
+      pkg.files = pkg.files.map(x => x.replace(/[.]ts$/, '.js'));
+    }
+    if (pkg.main) {
+      pkg.main = pkg.main.replace(/[.]ts$/, '.js');
+    }
+    for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {
+      if (key in pkg) {
+        for (const dep of Object.keys(pkg[key] ?? {})) {
+          if (dep in manifest.modules) {
+            pkg[key]![dep] = manifest.modules[dep].version;
+          }
+        }
+      }
+    }
+    return JSON.stringify(pkg, null, 2);
+  }
+
+  /**
+   * Read the given tsconfig.json values for the project
+   * @param path
+   * @returns
+   */
+  static async readTsConfigOptions(file: string): Promise<ts.CompilerOptions> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const { options } = ts.parseJsonSourceFileConfigFileContent(
+      ts.readJsonConfigFile(file, ts.sys.readFile), ts.sys, nativeCwd
+    );
+    options.target = ts.ScriptTarget[TS_TARGET];
+    return options;
+  }
+
+  /**
+   * Check transpilation errors
+   * @param filename The name of the file
+   * @param diagnostics The diagnostic errors
+   */
+  static checkTranspileErrors(filename: string, diagnostics: readonly ts.Diagnostic[]): void {
+    if (diagnostics && diagnostics.length) {
+      const errors: string[] = diagnostics.slice(0, 5).map(diag => {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+        if (diag.file) {
+          const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
+          return ` @ ${diag.file.fileName.replace(nativeCwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
+        } else {
+          return ` ${message}`;
+        }
+      });
+
+      if (diagnostics.length > 5) {
+        errors.push(`${diagnostics.length - 5} more ...`);
+      }
+      throw new Error(`Transpiling ${filename.replace(nativeCwd, '.')} failed: \n${errors.join('\n')}`);
+    }
+  }
+
+  /**
+   * Allows for watching of explicit folders
+   *
+   * @param onEvent
+   * @returns
+   */
+  static async fileWatcher(
+    folders: string[],
+    onEvent: (ev: FileWatchEvent, folder: string) => void
+  ): Promise<() => Promise<void>> {
+    const watcher = await import('@parcel/watcher');
+    const subs: ReturnType<(typeof watcher)['subscribe']>[] = [];
+    for (const folder of folders) {
+      const sub = watcher.subscribe(folder, (err, events) => {
+        for (const ev of events) {
+          onEvent(ev, folder);
+        }
+      }, { ignore: ['node_modules', ...readdirSync(folder).filter(x => x.startsWith('.') && x.length > 2)] });
+      subs.push(sub);
+    }
+    const readiedSubs = await Promise.all(subs);
+    return () => Promise.all(readiedSubs.map(s => s.unsubscribe())).then(() => { });
+  }
+
+  /**
+   * Get loaded compiler options
+   */
+  static async getCompilerOptions(outputFolder: string, bootTsConfig: string): Promise<ts.CompilerOptions> {
+    const opts: Partial<ts.CompilerOptions> = {};
+    const rootDir = nativeCwd;
+    const projTsconfig = path.resolve('tsconfig.json');
+    // Fallback to base tsconfig if not found in local folder
+    const config = (await fs.stat(projTsconfig).catch(() => false)) ? projTsconfig : bootTsConfig;
+
+    return {
+      ...(await CompilerUtil.readTsConfigOptions(config)),
+      resolveJsonModule: true,
+      allowJs: true,
+      outDir: outputFolder,
+      sourceRoot: rootDir,
+      ...opts,
+      rootDir,
+    };
+  }
+
+
+  /**
+   * Naive hashing
+   */
+  static naiveHash(text: string): number {
+    let hash = 5381;
+
+    for (let i = 0; i < text.length; i++) {
+      // eslint-disable-next-line no-bitwise
+      hash = (hash * 33) ^ text.charCodeAt(i);
+    }
+
+    return Math.abs(hash);
+  }
+}

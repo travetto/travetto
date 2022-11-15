@@ -1,6 +1,5 @@
-import { path } from '@travetto/common';
 import { ShutdownManager } from '@travetto/base';
-import { RetargettingProxy, ModuleIndex } from '@travetto/boot';
+import { RetargettingProxy, ModuleIndex, WatchUtil } from '@travetto/boot';
 
 import type { ClassSource } from '../src/source/class-source';
 
@@ -14,7 +13,9 @@ class $DynamicClassSource {
 
   async init(target: ClassSource): Promise<void> {
     const { DynamicLoader } = await import('@travetto/boot/src/internal/dynamic-loader');
-    const { FilePresenceManager } = await import('@travetto/watch');
+
+    const localMods = Object.values(ModuleIndex.manifest.modules).filter(x => x.local).map(x => ModuleIndex.getModule(x.name)!);
+    const folders = localMods.map(x => x.output);
 
     ShutdownManager.onUnhandled(err => {
       if (err && (err.message ?? '').includes('Cannot find module')) { // Handle module reloading
@@ -40,23 +41,22 @@ class $DynamicClassSource {
     // Clear target on unload
     DynamicLoader.onUnload(f => this.#modules.get(f)?.setTarget(null));
 
-    const localMods = Object.values(ModuleIndex.manifest.modules).filter(x => x.local);
-
-    const folders = localMods.map(x => ModuleIndex.getModule(x.name)!.output);
-
     console.log('Watching for', folders);
 
-    new FilePresenceManager([...folders], { ignoreInitial: true, validFile: f => f.endsWith('.js') })
-      .on('added', async ({ file }) => {
-        await DynamicLoader.load(file);
-        target.processFiles(true);
-      })
-      .on('changed', async ({ file }) => {
-        console.log('FIle Changed', file);
-        await DynamicLoader.reload(file);
-        target.processFiles();
-      })
-      .on('removed', async ({ file }) => DynamicLoader.unload(file));
+    await WatchUtil.buildWatcher(folders, async ({ type, path: file }) => {
+      switch (type) {
+        case 'create': {
+          await DynamicLoader.load(file);
+          return target.processFiles(true);
+        }
+        case 'update': {
+          console.log('FIle Changed', file);
+          await DynamicLoader.reload(file);
+          return target.processFiles();
+        }
+        case 'delete': return DynamicLoader.unload(file);
+      }
+    });
   }
 }
 

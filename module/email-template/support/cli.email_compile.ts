@@ -1,7 +1,7 @@
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngine } from '@travetto/email/src/template';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
-import { ModuleIndex, PhaseManager } from '@travetto/boot';
+import { PhaseManager } from '@travetto/boot';
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
 
 import { EmailTemplateCompiler } from '../src/compiler';
@@ -35,12 +35,11 @@ export class EmailCompileCommand extends CliCommand<Options> {
     console!.log(CliUtil.color`Successfully compiled ${{ param: `${all.length}` }} templates`);
 
     if (this.cmd.watch) {
-      if (ModuleIndex.hasModule('@travetto/watch')) {
+      try {
         const template = new TemplateManager(engine, compiler);
         await template.watchCompile();
         await new Promise(r => process.on('exit', r));
-      } else {
-        console.error('@travetto/watch must be installed to watch');
+      } catch {
         process.exit(1);
       }
     }

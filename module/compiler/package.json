@@ -1,9 +1,9 @@
 {
-  "name": "@travetto/watch",
-  "version": "3.0.0-rc.2",
-  "description": "Support for making files watchable during runtime",
+  "name": "@travetto/compiler",
+  "version": "3.0.0-rc.4",
+  "description": "Compiler",
   "keywords": [
-    "file-watching",
+    "compiler",
     "travetto",
     "typescript"
   ],
@@ -15,24 +15,28 @@
   },
   "files": [
     "index.ts",
-    "src"
+    "src",
+    "support",
+    "tsconfig.precompile.json",
+    "tsconfig.trv.json"
   ],
   "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/watch"
+    "directory": "module/compiler"
   },
   "dependencies": {
-    "@travetto/boot": "file:../boot"
+    "@travetto/common": "file:../common",
+    "@travetto/transformer": "file:../transformer"
   },
   "travetto": {
-    "id": "@trv:watch",
-    "displayName": "Watch",
-    "profileInehrit": false,
+    "id": "@trv:compiler",
+    "displayName": "Compiler",
     "profiles": [
-      "watch"
+      "compile"
     ]
   },
+  "private": false,
   "publishConfig": {
     "access": "public"
   }
