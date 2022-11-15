@@ -56,7 +56,6 @@ const MAPPING = {
   SchemaFaker: '@travetto/schema-faker',
   Test: '@travetto/test',
   Transformer: '@travetto/transformer',
-  Watch: '@travetto/watch',
   Worker: '@travetto/worker',
   Yaml: '@travetto/yaml'
 };

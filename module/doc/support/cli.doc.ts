@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 
 import { path } from '@travetto/common';
-import { ModuleIndex, PhaseManager } from '@travetto/boot';
+import { PhaseManager, WatchUtil } from '@travetto/boot';
 import { Env } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
@@ -62,12 +62,7 @@ export class DocCommand extends CliCommand<Options> {
       };
 
       if (this.cmd.watch) {
-        if (ModuleIndex.hasModule('@travetto/watch')) {
-          const { WatchUtil } = await import('@travetto/watch');
-          await WatchUtil.watchFile(docFile, write, true);
-        } else {
-          console.error('@travetto/watch must be installed to use watch functionality');
-        }
+        await WatchUtil.watchFile(docFile, write);
       } else {
         try {
           await write();

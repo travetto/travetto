@@ -1,34 +1,36 @@
 {
-    "name": "@travetto/common",
-    "version": "3.0.0-rc.2",
-    "description": "Common utils, native path replacement and manfiest typings",
-    "keywords": [
-        "path",
-        "manifest",
-        "travetto",
-        "javascript"
-    ],
-    "homepage": "https://travetto.io",
-    "license": "MIT",
-    "author": {
-        "email": "travetto.framework@gmail.com",
-        "name": "Travetto Framework"
-    },
-    "files": [
-        "index.js",
-        "src"
-    ],
-    "main": "index.js",
-    "repository": {
-        "url": "https://github.com/travetto/travetto.git",
-        "directory": "module/common"
-    },
-    "dependencies": {},
-    "travetto": {
-        "id": "@trv:common",
-        "displayName": "Common"
-    },
-    "publishConfig": {
-        "access": "public"
-    }
+  "name": "@travetto/common",
+  "version": "3.0.0-rc.2",
+  "description": "Common utils, native path replacement and manfiest typings",
+  "keywords": [
+    "path",
+    "manifest",
+    "travetto",
+    "javascript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "index.js",
+    "src/exec.js",
+    "src/path.js"
+  ],
+  "types": "index.d.ts",
+  "main": "index.js",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/common"
+  },
+  "dependencies": {},
+  "travetto": {
+    "id": "@trv:common",
+    "displayName": "Common"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

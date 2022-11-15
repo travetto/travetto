@@ -109,7 +109,7 @@ class $ModuleIndex {
     }
 
     const searchSpace = folder ?
-      idx.flatMap(m => [...m.files[folder] ?? [], ...(config.includeIndex ? (m.files.index ?? []) : [])]) :
+      idx.flatMap(m => [...m.files[folder] ?? [], ...(config.includeIndex ? (m.files.$index ?? []) : [])]) :
       idx.flatMap(m => [...Object.values(m.files)].flat());
 
     return searchSpace

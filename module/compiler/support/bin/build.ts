@@ -1,9 +1,20 @@
-import { path, spawn, Manifest } from '@travetto/common';
+import { spawn, Manifest } from '@travetto/common';
 
-import { log, BuildConfig } from '../../bin/build-support';
 import { ManifestUtil } from './manifest';
 
 let manifestTemp: string;
+
+type BuildConfig = {
+  compilerFolder: string;
+  outputFolder: string;
+  watch?: boolean;
+};
+
+declare global {
+  const __trv_boot_log__: (...args: unknown[]) => void;
+}
+
+const log = __trv_boot_log__;
 
 /**
  *  Step 2
@@ -19,12 +30,12 @@ function shouldRebuildCompiler({ delta }: Manifest.State): boolean {
   // Did enough things change to re-stage and build the compiler
   const transformersChanged = Object.values(delta).flatMap(x => x.filter(y => y[0].startsWith('support/transform')));
   const transformerChanged = (delta['@travetto/transformer'] ?? []);
-  const compilerChanged = Object.values(delta['@travetto/boot'] ?? []).filter(y => /^support\/bin\//.test(y[0]));
+  const compilerChanged = Object.values(delta['@travetto/compiler'] ?? []);
 
   const changed = transformerChanged.length || transformersChanged.length || compilerChanged.length;
   if (changed) {
     if (compilerChanged.length) {
-      log('[3] Changed @travetto/boot', compilerChanged);
+      log('[3] Changed @travetto/compiler', compilerChanged);
     }
     if (transformerChanged.length) {
       log('[3] Changed @travetto/transformer', transformerChanged);
@@ -43,7 +54,7 @@ async function compilerSetup(state: Manifest.State, compilerFolder: string): Pro
   if (shouldRebuildCompiler(state)) {
     log('[3] Setting up Compiler');
     const args = [
-      path.resolve(__dirname, './compiler-setup'),
+      `${state.manifest.modules['@travetto/compiler'].source}/support/main.setup`,
       (manifestTemp ??= await ManifestUtil.writeState(state)),
       compilerFolder
     ];
@@ -65,7 +76,7 @@ async function compileOutput(state: Manifest.State, { compilerFolder, outputFold
 
   log('[4] Recompiling Sources', changes);
   const args = [
-    `${compilerFolder}/${state.manifest.modules['@travetto/boot'].output}/support/bin/compiler-output`,
+    `${compilerFolder}/${state.manifest.modules['@travetto/compiler'].output}/support/main.output`,
     (manifestTemp ??= await ManifestUtil.writeState(state)),
     outputFolder
   ];

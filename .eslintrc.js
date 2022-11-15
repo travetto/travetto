@@ -30,7 +30,7 @@ module.exports = {
       }
     },
     {
-      files: 'module/boot/support/bin/compiler*.ts',
+      files: 'module/compiler/**/*.ts',
       rules: {
         'no-restricted-imports': 0
       }

@@ -1,5 +1,5 @@
 export namespace Manifest {
-  export type ModuleFileType = 'd.ts' | 'ts' | 'js' | 'json' | 'unknown' | 'fixture';
+  export type ModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture';
 
   export type ModuleFile = [string, ModuleFileType, number];
 
