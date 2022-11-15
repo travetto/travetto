@@ -77,15 +77,18 @@ export class Configuration {
   async exportActive(): Promise<{ sources: string[], active: ConfigData }> {
     const configTargets = await DependencyRegistry.getCandidateTypes(ConfigTarget);
     const configs = await Promise.all(
-      configTargets.map(async el => {
-        const inst = await DependencyRegistry.getInstance<ClassInstance>(el.class, el.qualifier);
-        return [el, inst] as const;
-      })
+      configTargets
+        .filter(el => el.qualifier === DependencyRegistry.get(el.class).qualifier) // Is primary?
+        .sort((a, b) => a.class.name.localeCompare(b.class.name))
+        .map(async el => {
+          const inst = await DependencyRegistry.getInstance<ClassInstance>(el.class, el.qualifier);
+          return [el, inst] as const;
+        })
     );
-    const out: Record<string, Record<string, ConfigData>> = {};
+    const out: Record<string, ConfigData> = {};
     for (const [el, inst] of configs) {
-      const data = BindUtil.exportSchema<ConfigData>(inst, { filter: f => !f.secret });
-      (out[el.class.name] ??= {})[el.qualifier.toString()] = data;
+      const data = BindUtil.exportSchema<ConfigData>(inst, { filterField: f => !f.secret, filterValue: v => v !== undefined });
+      out[el.class.name] = data;
     }
     return { sources: this.#sources, active: out };
   }

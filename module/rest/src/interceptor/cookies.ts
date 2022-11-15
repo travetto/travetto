@@ -10,6 +10,7 @@ import { RestConfig } from '../application/config';
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { CorsInterceptor } from './cors';
 import { GetCacheInterceptor } from './get-cache';
+import { Secret } from '@travetto/schema';
 
 /**
  * Rest cookie configuration
@@ -31,6 +32,7 @@ export class RestCookieConfig extends ManagedInterceptorConfig {
   /**
    * The signing keys
    */
+  @Secret()
   keys = ['default-insecure'];
   /**
    * Is the cookie only valid for https

@@ -92,6 +92,7 @@ class $DynamicDependencyRegistry {
   }
 
   register(registry: typeof DependencyRegistry): void {
+    this.#registry = registry;
     this.#registryCreateInstance = registry['createInstance'].bind(registry);
     this.#registryResolveTarget = registry['resolveTarget'].bind(registry);
     this.#registryOnInstallFinalize = registry['onInstallFinalize'].bind(registry);

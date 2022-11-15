@@ -92,8 +92,8 @@ export class ClassSource implements ChangeSource<Class> {
    */
   async init(): Promise<void> {
     if (Env.isDynamic()) {
-      const { DynamicClassSource } = await import('../../support/dynamic.class-source');
-      DynamicClassSource.init(this);
+      // const { DynamicClassSource } = await import('../../support/dynamic.class-source');
+      // DynamicClassSource.init(this);
     }
 
     this.#flush();

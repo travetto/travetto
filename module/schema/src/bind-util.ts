@@ -6,7 +6,8 @@ import { FieldConfig } from './service/types';
 
 type BindConfig = {
   view?: string | typeof AllViewⲐ;
-  filter?: (field: FieldConfig) => boolean;
+  filterField?: (field: FieldConfig) => boolean;
+  filterValue?: (value: unknown, field: FieldConfig) => boolean;
 };
 
 /**
@@ -216,9 +217,10 @@ export class BindUtil {
         }
 
         for (const schemaFieldName of viewConf.fields) {
-          let inboundField: string | undefined = undefined;
           const field = viewConf.schema[schemaFieldName];
-          if (field.access === 'readonly' || cfg.filter?.(field) === false) {
+
+          let inboundField: string | undefined = undefined;
+          if (field.access === 'readonly' || cfg.filterField?.(field) === false) {
             continue; // Skip trying to write readonly fields
           }
           if (schemaFieldName in data) {
@@ -239,11 +241,14 @@ export class BindUtil {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           let v: unknown = data[inboundField as keyof typeof data];
 
-          if (v !== undefined && v !== null) {
-            const config = viewConf.schema[schemaFieldName];
+          // Filtering values
+          if (cfg.filterValue && !cfg.filterValue(v, field)) {
+            continue;
+          }
 
+          if (v !== undefined && v !== null) {
             // Ensure its an array
-            if (!Array.isArray(v) && config.array) {
+            if (!Array.isArray(v) && field.array) {
               if (typeof v === 'string' && v.includes(',')) {
                 v = v.split(/\s*,\s*/);
               } else {
@@ -251,16 +256,16 @@ export class BindUtil {
               }
             }
 
-            if (SchemaRegistry.has(config.type)) {
-              if (config.array && Array.isArray(v)) {
-                v = v.map(el => this.bindSchema(config.type, el, cfg));
+            if (SchemaRegistry.has(field.type)) {
+              if (field.array && Array.isArray(v)) {
+                v = v.map(el => this.bindSchema(field.type, el, cfg));
               } else {
-                v = this.bindSchema(config.type, v, cfg);
+                v = this.bindSchema(field.type, v, cfg);
               }
-            } else if (config.array && Array.isArray(v)) {
-              v = v.map(el => this.#coerceType(config, el));
+            } else if (field.array && Array.isArray(v)) {
+              v = v.map(el => this.#coerceType(field, el));
             } else {
-              v = this.#coerceType(config, v);
+              v = this.#coerceType(field, v);
             }
           }
 
