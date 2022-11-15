@@ -69,7 +69,7 @@ async function compileOutput(state: Manifest.State, { compilerFolder, outputFold
     (manifestTemp ??= await ManifestUtil.writeState(state)),
     outputFolder
   ];
-  await spawn('Compiling Output', process.argv0, { args, env: { TRV_WATCH: `${watch}` }, cwd: compilerFolder });
+  await spawn('Compiling Output', process.argv0, { args, env: { TRV_WATCH: `${watch}` }, cwd: compilerFolder, showWaitingMessage: !watch });
 }
 
 export async function build(cfg: BuildConfig): Promise<void> {

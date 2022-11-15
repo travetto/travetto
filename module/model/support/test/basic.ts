@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
+import { ModelCrudSupport, Model, NotFoundError } from '@travetto/model';
 
 import { BaseModelSuite } from './base';
-import { ModelCrudSupport, Model, NotFoundError } from '../..';
 
 @Model('basic_person')
 class Person {

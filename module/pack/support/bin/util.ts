@@ -7,9 +7,9 @@ const glob = require('picomatch');
 import { path } from '@travetto/common';
 import { CliUtil } from '@travetto/cli';
 import { ModuleIndex } from '@travetto/boot';
-import { ScanFs } from '@travetto/resource';
 
 import { CommonConfig, PackOperation } from './types';
+import { FileResourceProvider } from '@travetto/base';
 
 /**
  * Shared packing utils
@@ -110,13 +110,7 @@ export class PackUtil {
    * Delete all empty folders
    */
   static async removeEmptyFolders(root: string): Promise<void> {
-    for (const el of await ScanFs.scanDir({ testDir: x => true, testFile: () => false, withHidden: true }, root)) {
-      let dir = el.file;
-      while ((await fs.readdir(dir)).length === 0) { // empty
-        await fs.rmdir(dir);
-        dir = path.dirname(dir);
-      }
-    }
+    // Remove
   }
 
   /**

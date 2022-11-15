@@ -40,15 +40,11 @@ class $DynamicClassSource {
     // Clear target on unload
     DynamicLoader.onUnload(f => this.#modules.get(f)?.setTarget(null));
 
-    const folders = ModuleIndex.findOwnSrc()
-      .reduce((acc, v) => {
-        let d = path.dirname(v.output);
-        do {
-          acc.add(d);
-          d = path.dirname(d);
-        } while (!d.endsWith('/src'));
-        return acc;
-      }, new Set<string>());
+    const localMods = Object.values(ModuleIndex.manifest.modules).filter(x => x.local);
+
+    const folders = localMods.map(x => ModuleIndex.getModule(x.name)!.output);
+
+    console.log('Watching for', folders);
 
     new FilePresenceManager([...folders], { ignoreInitial: true, validFile: f => f.endsWith('.js') })
       .on('added', async ({ file }) => {
@@ -56,6 +52,7 @@ class $DynamicClassSource {
         target.processFiles(true);
       })
       .on('changed', async ({ file }) => {
+        console.log('FIle Changed', file);
         await DynamicLoader.reload(file);
         target.processFiles();
       })

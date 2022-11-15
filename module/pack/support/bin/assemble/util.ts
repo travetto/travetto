@@ -1,8 +1,7 @@
 import * as fs from 'fs/promises';
 
 import { path } from '@travetto/common';
-import { ExecUtil } from '@travetto/base';
-import { ScanFs } from '@travetto/resource';
+import { ExecUtil, FileResourceProvider } from '@travetto/base';
 
 import { DependenciesUtil, DepType } from './dependencies';
 import { PackUtil } from '../util';
@@ -30,15 +29,14 @@ export class AssembleUtil {
    * Minimize cached source files, by removing source mapping info
    */
   static async cleanBoot(ws: string): Promise<void> {
-    for (const el of await ScanFs.scanDir({
-      testFile: f => f.endsWith('.js') || f.endsWith('.d.ts'),
-      testDir: x => true
-    }, `${ws}/node_modules/@travetto/boot`)) {
-      if (el.file.endsWith('.d.ts')) {
-        await fs.writeFile(el.file, '');
-      } else if (el.file.endsWith('.js')) {
-        const content = (await fs.readFile(el.file, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
-        await fs.writeFile(el.file, content);
+    for (const el of await new FileResourceProvider([`${ws}/node_modules/@travetto/boot`]).query(
+      f => f.endsWith('.js') || f.endsWith('.d.ts'),
+    )) {
+      if (el.endsWith('.d.ts')) {
+        await fs.writeFile(el, '');
+      } else if (el.endsWith('.js')) {
+        const content = (await fs.readFile(el, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
+        await fs.writeFile(el, content);
       }
     }
   }
@@ -47,12 +45,8 @@ export class AssembleUtil {
    * Truncate all app source files, and framework source files
    */
   static async purgeSource(folders: string[]): Promise<void> {
+    // TODO: Remove
     for (const sub of folders) {
-      for (const f of await ScanFs.scanDir({ testFile: x => x.endsWith('.ts'), testDir: x => true }, sub)) {
-        if (f.stats?.isFile() && !f.module.startsWith('cli/')) {
-          await fs.writeFile(f.file, '');
-        }
-      }
     }
   }
 
@@ -80,10 +74,9 @@ export class AssembleUtil {
    */
   static async excludeFiles(root: string, files: string[]): Promise<void> {
     const checker = PackUtil.excludeChecker(files, root);
-    for (const el of await ScanFs.scanDir({ testDir: x => true, testFile: checker, withHidden: true }, root)) {
-      if (!el.stats || !el.stats.isFile()) { continue; }
+    for (const el of await new FileResourceProvider([root]).query(checker, true)) {
       try {
-        await fs.unlink(el.file);
+        await fs.unlink(el);
       } catch { }
     }
   }
@@ -94,8 +87,7 @@ export class AssembleUtil {
   static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'peer']): Promise<void> {
 
     for (const el of await DependenciesUtil.resolveDependencies({ types })) {
-      const sub = ModuleUtil.normalizeFrameworkPath(el.file, 'node_modules/')
-        .replace(/.*?node_modules/, 'node_modules');
+      const sub = el.file.replace(/.*?node_modules/, 'node_modules');
 
       const tgt = path.resolve(workspace, sub);
       await fs.mkdir(path.dirname(tgt), { recursive: true });

@@ -60,25 +60,31 @@ async function waiting(message, worker) {
 }
 
 
-const spawn = async (action, cmd, { args = [], cwd = process.cwd(), failOnError = true, env = {} }) => {
+const spawn = async (action, cmd, { args = [], cwd = process.cwd(), failOnError = true, env = {}, showWaitingMessage = true }) => {
   const stdout = process.env.DEBUG === 'build' ? 1 : 'pipe';
   const stderr = process.env.DEBUG === 'build' ? 2 : 'pipe';
   const proc = cp.spawn(cmd, args, { cwd, stdio: ['pipe', stdout, stderr], env: { ...process.env, ...env } });
   const stderrOutput = [];
   const stdoutOutput = [];
 
+  const work = () => new Promise((res, rej) => {
+    if (stderr === 'pipe') {
+      proc.stderr.on('data', d => stderrOutput.push(d));
+    }
+    if (stdout === 'pipe') {
+      proc.stdout.on('data', d => stdoutOutput.push(d));
+    }
+    proc
+      .on('exit', code => code > 0 ? rej() : res(true))
+      .on('error', rej);
+  });
+
   try {
-    return await waiting(`${action}...`, () => new Promise((res, rej) => {
-      if (stderr === 'pipe') {
-        proc.stderr.on('data', d => stderrOutput.push(d));
-      }
-      if (stdout === 'pipe') {
-        proc.stdout.on('data', d => stdoutOutput.push(d));
-      }
-      proc
-        .on('exit', code => code > 0 ? rej() : res(true))
-        .on('error', rej);
-    }));
+    if (showWaitingMessage) {
+      return await waiting(`${action}...`, work);
+    } else {
+      return work();
+    }
   } catch (err) {
     const text = Buffer.concat(stderrOutput).toString('utf8');
     console.error(text);

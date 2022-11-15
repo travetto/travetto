@@ -77,6 +77,10 @@ export class VisitorFactory<S extends State = State> {
    */
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
+      if (!file.fileName.endsWith('.ts')) { // Skip all non-ts files
+        return file;
+      }
+
       try {
         console!.debug('Processing', { file: file.fileName, pid: process.pid });
         const state = this.#getState(context, file);

@@ -203,6 +203,6 @@ export class SchemaFaker {
       out[f] = this.#value(fieldConfig);
     }
 
-    return BindUtil.bindSchema(cls, out, view);
+    return BindUtil.bindSchema(cls, out, { view });
   }
 }

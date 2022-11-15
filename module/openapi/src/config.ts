@@ -10,7 +10,7 @@ import { Required } from '@travetto/schema';
 /**
  * API Information, infers as much as possible from the package.json
  */
-@Config('api.info', { internal: true })
+@Config('api.info')
 export class ApiInfoConfig {
   @Required(false)
   contact: ContactObject;
@@ -38,7 +38,7 @@ export class ApiInfoConfig {
 /**
  * The API host, infers from rest host configuration
  */
-@Config('api.host', { internal: true })
+@Config('api.host')
 export class ApiHostConfig {
   /**
    * List of servers
@@ -53,7 +53,7 @@ export class ApiHostConfig {
 /**
  * The spec file configuration
  */
-@Config('api.spec', { internal: true })
+@Config('api.spec')
 export class ApiSpecConfig {
   /**
    * Where to output file to

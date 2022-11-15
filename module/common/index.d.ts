@@ -79,7 +79,7 @@ export const path: {
   join: (root: string, ...args: string[]) => string,
 };
 
-type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string> };
+type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string>, showWaitingMessage?: boolean };
 
 export var spawn: (action: string, cmd: string, cfg?: SpawnCfg) => Promise<void>;
 export var waiting: (message: string, work: () => Promise<void>) => Promise<void>;

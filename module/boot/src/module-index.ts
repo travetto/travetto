@@ -133,12 +133,6 @@ class $ModuleIndex {
     return this.find({ ...config, folder: 'src', includeIndex: true });
   }
 
-  findOwnSrc(): IndexedFile[] {
-    return this.findSrc({
-      filter: x => !x.includes('node_modules') && x.includes('src/')
-    });
-  }
-
   /**
    * Find files from the index
    * @param filter The filter to determine if this is a valid support file
