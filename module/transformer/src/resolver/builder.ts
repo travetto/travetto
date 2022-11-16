@@ -1,7 +1,7 @@
 /* eslint-disable no-bitwise */
 import * as ts from 'typescript';
 
-import { path } from '@travetto/common';
+import { path } from '@travetto/manifest';
 
 import { DocUtil } from '../util/doc';
 import { CoreUtil } from '../util/core';

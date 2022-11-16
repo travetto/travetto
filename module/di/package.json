@@ -27,8 +27,15 @@
     "directory": "module/di"
   },
   "dependencies": {
-    "@travetto/transformer": "file:../transformer",
     "@travetto/registry": "file:../registry"
+  },
+  "peerDependencies": {
+    "@travetto/transformer": "file:../transformer"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/transformer": {
+      "optional": true
+    }
   },
   "travetto": {
     "id": "@trv:di",

@@ -1,6 +1,7 @@
 import { existsSync } from 'fs';
 
-import { path, PackageUtil } from '@travetto/boot';
+import { PackageUtil } from '@travetto/manifest';
+import { path } from '@travetto/boot';
 
 export type ResolvedDep = { file: string, type: DepType, dep: string, version: string };
 export type DepType = 'prod' | 'dev' | 'opt' | 'peer';
@@ -60,7 +61,7 @@ export class DependenciesUtil {
       if (depth > maxDepth) { // Ignore if greater than valid max depth
         continue;
       }
-      const p = PackageUtil.readPackage(`${top}/package.json`);
+      const p = PackageUtil.readPackage(top);
       const deps: (readonly [name: string, type: DepType, version: string])[] = [];
       for (const type of types) {
         if (

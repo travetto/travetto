@@ -1,18 +1,9 @@
 {
-  "extends": "./tsconfig.trv.json",
-  "compilerOptions": {
-    "noImplicitAny": false,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "rootDir": ".",
-    "outDir": "."
-  },
+  "extends": "../manifest/tsconfig.precompile.json",
   "files": [
     "src/compiler.ts",
     "src/state.ts",
     "src/util.ts",
-    "support/bin/build.ts",
-    "support/bin/manifest.ts",
     "support/main.output.ts",
     "support/main.setup.ts",
     "index.ts"

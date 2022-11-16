@@ -1,26 +1,15 @@
-import { readFileSync } from 'fs';
+import { PackageUtil, Package, PackageDigest } from '@travetto/manifest';
+import { path, ModuleIndex } from '@travetto/boot';
 
-import { Package } from '@travetto/common';
-
-import { version as framework } from '../package.json';
-
-import { path } from './path';
-import { ModuleIndex } from './module-index';
-
-export class PackageUtil {
+export class Pkg {
 
   static #config: Package | undefined;
-
-  static readPackage(folder: string): Package {
-    const pkg: Package = JSON.parse(readFileSync(path.resolve(folder, 'package.json'), 'utf8'));
-    return pkg;
-  }
 
   static get main(): Package {
     if (!this.#config) {
       const { output: mainFolder } = ModuleIndex.getModule(ModuleIndex.manifest.main)!;
       try {
-        this.#config = this.readPackage(mainFolder);
+        this.#config = PackageUtil.readPackage(mainFolder);
       } catch (err: unknown) {
         if (err instanceof Error) {
           console.warn(`Unable to locate ${path.resolve(mainFolder, 'package.json')}: ${err.message}`);
@@ -40,8 +29,7 @@ export class PackageUtil {
     return this.#config;
   }
 
-  static mainDigest(): Record<string, unknown> {
-    const { main, name, author, license, version } = this.main;
-    return { name, main, author, license, version, framework };
+  static mainDigest(): PackageDigest {
+    return PackageUtil.digest(this.main);
   }
 }

@@ -1,6 +1,6 @@
-import { RetargettingProxy, OrderingUtil, PackageUtil } from '@travetto/boot';
+import { RetargettingProxy, OrderingUtil } from '@travetto/boot';
 
-import { Env, Class, AppError } from '@travetto/base';
+import { Pkg, Env, Class, AppError } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
 import { Application } from '@travetto/app';
@@ -12,7 +12,6 @@ import { RestInterceptor } from '../interceptor/types';
 import { ControllerRegistry } from '../registry/controller';
 import { GlobalRoute, RestInterceptorTarget } from '../internal/types';
 import { RestServer } from './server';
-
 
 /**
  * The rest application
@@ -45,7 +44,7 @@ export class RestApplication<T = unknown>  {
 
   async postConstruct(): Promise<void> {
     this.info = {
-      info: PackageUtil.mainDigest(),
+      info: Pkg.mainDigest(),
       env: Env.digest(),
       restProvider: this.server.constructor.name
     };

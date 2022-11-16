@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import * as fs from 'fs/promises';
 
-import { Manifest, path } from '@travetto/common';
+import { Manifest, path } from '@travetto/manifest';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ExecUtil } from '@travetto/base';
 

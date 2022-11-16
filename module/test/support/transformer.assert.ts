@@ -294,7 +294,7 @@ export class AssertTransformer {
     const exp = node.expression;
 
     // Determine if calling assert directly
-    if (ts.isIdentifier(exp) && exp.getText() === ASSERT_CMD) { // Straight assert
+    if (ts.isIdentifier(exp) && exp.getSourceFile() && exp.getText() === ASSERT_CMD) { // Straight assert
       const cmd = this.getCommand(state, node.arguments);
       if (cmd) {
         node = this.doAssert(state, node, cmd);

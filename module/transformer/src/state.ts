@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { path } from '@travetto/common';
+import { path } from '@travetto/manifest';
 
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';

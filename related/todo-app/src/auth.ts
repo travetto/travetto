@@ -17,7 +17,7 @@ export class ApiController {
   @Post('/login')
   @Authenticate(BasicAuthⲐ)
   async getAll() {
-    return new Redirect('/auth/self', 303);
+    return new Redirect('/auth/self', 301);
   }
 
   @Get('/self')

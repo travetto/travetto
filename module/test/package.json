@@ -28,15 +28,18 @@
   },
   "dependencies": {
     "@travetto/base": "file:../base",
-    "@travetto/transformer": "file:../transformer",
     "@travetto/registry": "file:../registry",
     "@travetto/worker": "file:../worker",
     "@travetto/yaml": "file:../yaml"
   },
   "peerDependencies": {
-    "@travetto/cli": "file:../cli"
+    "@travetto/cli": "file:../cli",
+    "@travetto/transformer": "file:../transformer"
   },
   "peerDependenciesMeta": {
+    "@travetto/transformer": {
+      "optional": true
+    },
     "@travetto/cli": {
       "optional": true
     }

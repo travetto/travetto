@@ -1,33 +1,37 @@
 import * as ts from 'typescript';
 import { mkdirSync, readFileSync, writeFile } from 'fs';
 
-import { path, Manifest } from '@travetto/common';
+import {
+  path,
+  ManifestUtil, ManifestDelta, ManifestModule,
+  ManifestModuleFileType, ManifestRoot,
+  ManifestState
+} from '@travetto/manifest';
 
-import { ManifestUtil } from '../support/bin/manifest';
 import { CompilerUtil, FileWatchEvent } from './util';
 
-const validFile = (type: Manifest.ModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
+const validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
 
 export class CompilerState {
 
   #outputFolder: string;
   #inputFiles: Set<string>;
-  #relativeInputToSource = new Map<string, { source: string, module: Manifest.Module }>();
+  #relativeInputToSource = new Map<string, { source: string, module: ManifestModule }>();
   #inputToSource = new Map<string, string>();
   #inputToOutput = new Map<string, string | undefined>();
   #inputDirectoryToSource = new Map<string, string>();
-  #sourceInputOutput = new Map<string, { input: string, output?: string, relativeInput: string, module: Manifest.Module }>();
+  #sourceInputOutput = new Map<string, { input: string, output?: string, relativeInput: string, module: ManifestModule }>();
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, ts.SourceFile>();
   #sourceHashes = new Map<string, number>();
 
-  #manifest: Manifest.Root;
-  #delta: Manifest.Delta;
-  #modules: Manifest.Module[];
+  #manifest: ManifestRoot;
+  #delta: ManifestDelta;
+  #modules: ManifestModule[];
 
   constructor(
-    { manifest, delta }: Manifest.State,
+    { manifest, delta }: ManifestState,
     outputFolder: string
   ) {
     this.#outputFolder = outputFolder;
@@ -50,7 +54,7 @@ export class CompilerState {
     return this;
   }
 
-  registerInput(module: Manifest.Module, moduleFile: string): string {
+  registerInput(module: ManifestModule, moduleFile: string): string {
     const relativeInput = `${module.output}/${moduleFile}`;
     const sourceFile = `${module.source}/${moduleFile}`;
     const sourceFolder = path.dirname(sourceFile);
@@ -85,11 +89,11 @@ export class CompilerState {
     this.#sourceContents.delete(inputFile);
   }
 
-  get manifest(): Manifest.Root {
+  get manifest(): ManifestRoot {
     return this.#manifest;
   }
 
-  get modules(): Manifest.Module[] {
+  get modules(): ManifestModule[] {
     return this.#modules;
   }
 
@@ -173,7 +177,7 @@ export class CompilerState {
       }
 
       // Update manifest on every change
-      writeFile(`${this.#outputFolder}/manifest.json`, JSON.stringify(this.#manifest), () => { });
+      writeFile(`${this.#outputFolder}/manifestjson`, JSON.stringify(this.#manifest), () => { });
     };
   }
 

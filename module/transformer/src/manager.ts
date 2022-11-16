@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { Manifest } from '@travetto/common';
+import type { Manifest } from '@travetto/manifest';
 
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
@@ -15,9 +15,9 @@ export class TransformerManager {
 
   /**
    * Create transformer manager
-   * @param transformerFiles 
-   * @param modules 
-   * @returns 
+   * @param transformerFiles
+   * @param modules
+   * @returns
    */
   static async create(transformerFiles: string[], modules: Manifest.Module[]): Promise<TransformerManager> {
     const transformers: NodeTransformer<TransformerState>[] = [];
@@ -52,7 +52,7 @@ export class TransformerManager {
 
   /**
    * Initialize with type checker
-   * @param checker 
+   * @param checker
    */
   init(checker: ts.TypeChecker): void {
     const visitor = new VisitorFactory(

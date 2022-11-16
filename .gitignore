@@ -28,13 +28,14 @@ dev.yml
 email-dev-context.json
 
 # Assets
-**/support/test-resources/logo
+**/support/fixtures/logo
 
 # Folder Specific
 module/*/LICENSE
 related/*/LICENSE
 module/*/*.tgz
 
+module/manifest/**/*.js
 module/compiler/**/*.js
 module/scaffold/**/eslintrc.json
 related/travetto.github.io/src/assets/images/vscode-plugin

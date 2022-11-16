@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { Manifest } from '@travetto/common';
+import { ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType } from '@travetto/manifest';
 
 import { path } from './path';
 
@@ -18,7 +18,7 @@ export type IndexedFile = {
   module: string;
   source: string;
   output: string;
-  type: Manifest.ModuleFileType;
+  type: ManifestModuleFileType;
 };
 
 export type IndexedModule = {
@@ -36,7 +36,7 @@ export type IndexedModule = {
  */
 class $ModuleIndex {
 
-  #manifest: Manifest.Root;
+  #manifest: ManifestRoot;
   #modules: IndexedModule[];
   #root: string;
   #outputToEntry = new Map<string, IndexedFile>();
@@ -51,11 +51,11 @@ class $ModuleIndex {
     return path.resolve(this.#root, ...parts).replace(/[\\]/g, '/');
   }
 
-  get manifest(): Manifest.Root {
+  get manifest(): ManifestRoot {
     return this.#manifest;
   }
 
-  #moduleFiles(m: Manifest.Module, files: Manifest.ModuleFile[]): IndexedFile[] {
+  #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([f, type]) => {
       const source = path.join(m.source, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
@@ -76,7 +76,7 @@ class $ModuleIndex {
       ...m,
       output: this.#resolve(m.output),
       files: Object.fromEntries(
-        Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files)])
+        Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
       )
     }));
 

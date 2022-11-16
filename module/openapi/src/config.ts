@@ -1,8 +1,8 @@
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
-import { path, PackageUtil } from '@travetto/boot';
+import { path } from '@travetto/boot';
 import { Config } from '@travetto/config';
-import { Env } from '@travetto/base';
+import { Env, Pkg } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 
@@ -25,7 +25,7 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    const info = PackageUtil.main;
+    const info = Pkg.main;
     this.contact ??= info.author ?? {};
     this.description ??= info.description;
     this.license ??= { name: info.license! };

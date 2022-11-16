@@ -24,14 +24,14 @@
     "directory": "module/boot"
   },
   "dependencies": {
-    "@travetto/common": "file:../common",
-    "@travetto/transformer": "file:../transformer",
+    "@travetto/manifest": "file:../manifest",
     "@types/source-map-support": "^0.5.6",
     "source-map-support": "^0.5.21"
   },
   "peerDependencies": {
     "@travetto/cli": "file:../cli",
     "@travetto/compiler": "file:../compiler",
+    "@travetto/transformer": "file:../transformer",
     "@parcel/watcher": "^2.0.7"
   },
   "peerDependenciesMeta": {
@@ -39,6 +39,9 @@
       "optional": true
     },
     "@travetto/compiler": {
+      "optional": true
+    },
+    "@travetto/transformer": {
       "optional": true
     },
     "@parcel/watcher": {

@@ -1,6 +1,8 @@
 import { existsSync } from 'fs';
 
-import { path, PackageUtil } from '@travetto/boot';
+import { PackageUtil } from '@travetto/manifest';
+import { Pkg } from '@travetto/base';
+import { path } from '@travetto/boot';
 
 import { FileUtil, } from './util/file';
 import { DocRunUtil, RunConfig } from './util/run';
@@ -224,7 +226,7 @@ export const node = {
    * @param install
    * @param pkg
    */
-  Header: (install = true, pkg = PackageUtil.main) =>
+  Header: (install = true, pkg = Pkg.main) =>
     $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install }),
 
   /**

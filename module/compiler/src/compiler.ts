@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as sourceMapSupport from 'source-map-support';
 import * as fs from 'fs/promises';
 
-import { Manifest } from '@travetto/common';
+import { ManifestState } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -20,13 +20,13 @@ type Emitter = (file: string, newProgram?: boolean) => void;
 export class Compiler {
 
   static async main(
-    manifestFile: string = process.argv.at(-2)!,
+    stateFile: string = process.argv.at(-2)!,
     outDir: string = process.argv.at(-1)!
   ): Promise<void> {
     // Register source maps
     sourceMapSupport.install();
 
-    const state: Manifest.State = JSON.parse(await fs.readFile(manifestFile, 'utf8'));
+    const state: ManifestState = JSON.parse(await fs.readFile(stateFile, 'utf8'));
     return new this().init(state, outDir).run();
   }
 
@@ -34,7 +34,7 @@ export class Compiler {
   #state: CompilerState;
 
   init(
-    manifestState: Manifest.State,
+    manifestState: ManifestState,
     outputFolder: string
   ): typeof this {
     this.#state = new CompilerState(manifestState, outputFolder);

@@ -3,6 +3,7 @@ export * from './src/error';
 export * from './src/shutdown';
 export * from './src/util';
 export * from './src/stream';
+export * from './src/package';
 export * from './src/resource';
 export * from './src/types';
 export * from './src/color';

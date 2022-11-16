@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import { path } from '@travetto/common';
+import { path } from '@travetto/manifest';
 
 import { Import } from '../types/shared';
 import { SystemUtil } from './system';

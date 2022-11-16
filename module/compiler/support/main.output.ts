@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 
-import { Manifest, path } from '@travetto/common';
+import { ManifestState, path } from '@travetto/manifest';
 
 import { Compiler, TransformerProvider } from '../src/compiler';
 
@@ -8,7 +8,7 @@ export class OutputCompiler extends Compiler {
 
   #transformers: string[];
 
-  init(state: Manifest.State, outputFolder: string): typeof this {
+  init(state: ManifestState, outputFolder: string): typeof this {
     super.init(state, outputFolder);
 
     this.#transformers = this.state.modules.flatMap(

@@ -3,7 +3,7 @@
   "main": "index.ts",
   "dependencies": {
     "@travetto/doc": "file:../../doc",
-    "@travetto/common": "file:.."
+    "@travetto/manifest": "file:.."
   },
   "private": true
 }
