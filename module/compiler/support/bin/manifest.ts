@@ -430,7 +430,6 @@ export class ManifestUtil {
   static updateManifestModuleFile(module: Manifest.Module, moduleFile: string, action: 'create' | 'delete' | 'update'): void {
     const fileKey = this.getFolderKey(moduleFile);
     const sourceFile = `${module.source}/${moduleFile}`;
-    console.log(moduleFile, fileKey);
     const idx = module.files[fileKey].findIndex(([f]) => f === moduleFile);
 
     switch (action) {
