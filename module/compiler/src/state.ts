@@ -67,31 +67,22 @@ export class CompilerState {
     this.#inputDirectoryToSource.set(inputFolder, sourceFolder);
     this.#relativeInputToSource.set(relativeInput, { source: sourceFile, module });
 
-    ManifestUtil.updateManifestModuleFile(module, relativeInput, 'update');
-
     return inputFile;
   }
 
   removeInput(inputFile: string): void {
     const source = this.#inputToSource.get(inputFile)!;
-    const { relativeInput, module } = this.#sourceInputOutput.get(source)!;
+    const { relativeInput } = this.#sourceInputOutput.get(source)!;
     this.#sourceInputOutput.delete(source);
     this.#inputToSource.delete(inputFile);
     this.#inputToOutput.delete(inputFile);
     this.#relativeInputToSource.delete(relativeInput);
     this.#inputFiles.delete(inputFile);
-
-    ManifestUtil.updateManifestModuleFile(module, relativeInput.replace(`${module.output}/`, ''), 'delete');
   }
 
   resetInputSource(inputFile: string): void {
     this.#sourceFileObjects.delete(inputFile);
     this.#sourceContents.delete(inputFile);
-
-    const sourceFile = this.#inputToSource.get(inputFile)!;
-    const { relativeInput, module } = this.#sourceInputOutput.get(sourceFile)!;
-
-    ManifestUtil.updateManifestModuleFile(module, relativeInput.replace(`${module.output}/`, ''), 'update');
   }
 
   get manifest(): Manifest.Root {
@@ -149,6 +140,7 @@ export class CompilerState {
           if (validFile(fileType)) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             const input = this.registerInput(mod, moduleFile);
+            ManifestUtil.updateManifestModuleFile(mod, moduleFile, 'update');
             this.#sourceHashes.set(sourceFile, hash);
             handler.create(input);
           }
@@ -158,6 +150,8 @@ export class CompilerState {
           const io = this.#sourceInputOutput.get(sourceFile);
           if (io) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
+            ManifestUtil.updateManifestModuleFile(io.module, io.relativeInput.replace(`${io.module.output}/`, ''), 'update');
+
             if (this.#sourceHashes.get(sourceFile) !== hash) {
               this.resetInputSource(io.input);
               this.#sourceHashes.set(sourceFile, hash);
@@ -170,6 +164,7 @@ export class CompilerState {
           const io = this.#sourceInputOutput.get(sourceFile);
           if (io) {
             this.removeInput(io.input);
+            ManifestUtil.updateManifestModuleFile(io.module, io.relativeInput.replace(`${io.module.output}/`, ''), 'delete');
             if (io.output) {
               handler.delete(io.output);
             }
