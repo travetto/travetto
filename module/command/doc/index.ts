@@ -1,4 +1,4 @@
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 import { d, lib } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 

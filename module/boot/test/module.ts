@@ -1,9 +1,9 @@
 import * as assert from 'assert';
 
-import { path } from '@travetto/common';
 import { Suite, Test } from '@travetto/test';
 
 import { ModuleIndex } from '../src/module-index';
+import { path } from '../src/path';
 
 @Suite()
 class ModuleIndexTests {

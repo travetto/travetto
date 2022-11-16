@@ -1,7 +1,7 @@
 import { readdirSync } from 'fs';
 import type * as watcher from '@parcel/watcher';
 
-import { path } from '@travetto/common';
+import { path } from './path';
 
 async function getWatcher(): Promise<typeof watcher> {
   try {

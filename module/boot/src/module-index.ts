@@ -1,6 +1,8 @@
 import * as fs from 'fs';
 
-import { path, Manifest } from '@travetto/common';
+import { Manifest } from '@travetto/common';
+
+import { path } from './path';
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
 export type FindConfig = {

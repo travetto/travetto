@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 import { mkdirSync } from 'fs';
 
 import { Env, FileResourceProvider, StreamUtil } from '@travetto/base';
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 
 import { ImageConverter } from './convert';
 

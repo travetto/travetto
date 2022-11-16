@@ -1,5 +1,5 @@
 import { ExecutionManager } from '@travetto/cli';
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 
 /**
  * Entry point

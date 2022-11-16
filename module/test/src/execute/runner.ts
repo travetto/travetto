@@ -1,4 +1,4 @@
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 import { TimeUtil } from '@travetto/base';
 import { WorkPool, IterableWorkSet } from '@travetto/worker';
 

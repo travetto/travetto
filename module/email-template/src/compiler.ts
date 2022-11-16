@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as util from 'util';
 
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 import { ImageConverter } from '@travetto/image';
 import { StreamUtil } from '@travetto/base';
 import type { MailTemplateEngine } from '@travetto/email';

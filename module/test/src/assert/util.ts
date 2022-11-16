@@ -1,6 +1,6 @@
 import * as util from 'util';
 
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 import { Class, ClassInstance, Util } from '@travetto/base';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';

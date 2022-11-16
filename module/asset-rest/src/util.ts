@@ -3,7 +3,7 @@ import * as fs from 'fs/promises';
 import * as os from 'os';
 import * as stream from 'stream';
 
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 import { Renderable, Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
 import { StreamUtil, AppError } from '@travetto/base';

@@ -1,6 +1,6 @@
 import * as assert from 'assert';
 
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
 import { ExecUtil } from '..';

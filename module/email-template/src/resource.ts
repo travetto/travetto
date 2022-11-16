@@ -1,4 +1,4 @@
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 import { Env } from '@travetto/base';
 import { EmailResource } from '@travetto/email';
 
