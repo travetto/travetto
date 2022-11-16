@@ -2,7 +2,7 @@ import * as ts from 'typescript';
 import * as sourceMapSupport from 'source-map-support';
 import * as fs from 'fs/promises';
 
-import { ManifestState } from '@travetto/manifest';
+import type { ManifestState } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -38,7 +38,7 @@ export class Compiler {
     outputFolder: string
   ): typeof this {
     this.#state = new CompilerState(manifestState, outputFolder);
-    this.#bootTsconfig = this.#state.resolveModuleFile('@travetto/compiler', 'tsconfig.trv.json');
+    this.#bootTsconfig = this.#state.resolveModuleFile('@travetto/manifest', 'tsconfig.trv.json');
     return this;
   }
 

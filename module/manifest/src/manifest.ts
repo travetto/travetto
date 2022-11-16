@@ -210,12 +210,6 @@ export class ManifestUtil {
       files.$root = files.$root?.filter(([file, type]) => type !== 'ts');
     }
 
-    if (name === '@travetto/compiler') {
-      for (const k of ['$index', 'src', 'support', '$root'] as const) {
-        files[k] = files[k]?.filter(([x, v]) => v !== 'js');
-      }
-    }
-
     // Cleaning up names
     id ??= (!local ? `@npm:${name}` : name).replace('/', ':');
 
@@ -269,7 +263,8 @@ export class ManifestUtil {
    */
   static #flattenModuleFiles(m: ManifestModule): Record<string, ManifestModuleFile> {
     const out: Record<string, ManifestModuleFile> = {};
-    for (const key of Object.keys(m.files)) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    for (const key of Object.keys(m.files) as (ManifestModuleFolderType[])) {
       if (!VALID_SOURCE_FOLDERS.has(key)) {
         continue;
       }
@@ -399,7 +394,7 @@ export class ManifestUtil {
   /**
    * Update manifest module file
    */
-  static updateManifestModuleFile(module: ManifestModule, moduleFile: string, action: 'create' | 'delete' | 'update') {
+  static updateManifestModuleFile(module: ManifestModule, moduleFile: string, action: 'create' | 'delete' | 'update'): void {
     const fileKey = this.getFolderKey(moduleFile);
     const sourceFile = `${module.source}/${moduleFile}`;
     const idx = module.files[fileKey]?.findIndex(([f]) => f === moduleFile);

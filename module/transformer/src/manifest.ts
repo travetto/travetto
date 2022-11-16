@@ -1,13 +1,13 @@
-import { path, Manifest } from '@travetto/manifest';
+import { path, ManifestModule } from '@travetto/manifest';
 
 export class ManifestManager {
   #srcToMod: Record<string, string> = {};
   #outToMod: Record<string, string> = {};
   #srcToOut: Record<string, string> = {};
   #outToSrc: Record<string, string> = {};
-  #main: Manifest.Module;
+  #main: ManifestModule;
 
-  constructor(modules: Manifest.Module[]) {
+  constructor(modules: ManifestModule[]) {
     for (const mod of modules) {
       if (mod.main) {
         this.#main = mod;
@@ -26,7 +26,7 @@ export class ManifestManager {
     }
   }
 
-  get main(): Manifest.Module {
+  get main(): ManifestModule {
     return this.#main;
   }
 

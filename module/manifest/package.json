@@ -4,9 +4,10 @@
   "description": "Manifest support",
   "keywords": [
     "path",
+    "package",
     "manifest",
     "travetto",
-    "javascript"
+    "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",

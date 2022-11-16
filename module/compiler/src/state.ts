@@ -177,7 +177,7 @@ export class CompilerState {
       }
 
       // Update manifest on every change
-      writeFile(`${this.#outputFolder}/manifestjson`, JSON.stringify(this.#manifest), () => { });
+      writeFile(`${this.#outputFolder}/manifest.json`, JSON.stringify(this.#manifest), () => { });
     };
   }
 
