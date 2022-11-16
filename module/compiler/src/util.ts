@@ -2,9 +2,9 @@ import * as ts from 'typescript';
 import * as fs from 'fs/promises';
 import { readdirSync } from 'fs';
 
-import { Manifest, Package, path } from '@travetto/common';
+import { ManifestModule, ManifestRoot, Package, path } from '@travetto/manifest';
 
-type InputToSource = (inputFile: string) => ({ source: string, module: Manifest.Module } | undefined);
+type InputToSource = (inputFile: string) => ({ source: string, module: ManifestModule } | undefined);
 export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
 
 const nativeCwd = process.cwd();
@@ -73,7 +73,7 @@ export class CompilerUtil {
    * @param text
    * @returns
    */
-  static rewritePackageJSON(manifest: Manifest.Root, text: string): string {
+  static rewritePackageJSON(manifest: ManifestRoot, text: string): string {
     const pkg: Package = JSON.parse(text);
     if (pkg.files) {
       pkg.files = pkg.files.map(x => x.replace(/[.]ts$/, '.js'));

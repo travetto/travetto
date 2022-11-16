@@ -1,7 +1,7 @@
 {
-  "name": "@travetto/common",
+  "name": "@travetto/manifest",
   "version": "3.0.0-rc.2",
-  "description": "Common utils, native path replacement and manfiest typings",
+  "description": "Manifest support",
   "keywords": [
     "path",
     "manifest",
@@ -15,20 +15,18 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "index.js",
-    "src/exec.js",
-    "src/path.js"
+    "index.ts",
+    "src"
   ],
-  "types": "index.d.ts",
-  "main": "index.js",
+  "main": "index.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/common"
+    "directory": "module/manifest"
   },
   "dependencies": {},
   "travetto": {
-    "id": "@trv:common",
-    "displayName": "Common"
+    "id": "@trv:manifest",
+    "displayName": "Manifest"
   },
   "publishConfig": {
     "access": "public"

@@ -1,7 +1,6 @@
 import { setTimeout } from 'timers/promises';
 
-import { PackageUtil } from '@travetto/boot';
-
+import { Pkg } from './package';
 import { Util } from './util';
 import { TimeUtil } from './time';
 
@@ -76,7 +75,7 @@ class $ShutdownManager {
       this.#shutdownCode = exitCode;
     }
 
-    const name = PackageUtil.main.name;
+    const name = Pkg.main.name;
 
     try {
       // If the err is not an exit code

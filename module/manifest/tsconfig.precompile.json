@@ -1,0 +1,17 @@
+{
+  "extends": "./tsconfig.trv.json",
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "rootDir": ".",
+    "outDir": "."
+  },
+  "files": [
+    "src/manifest.ts",
+    "src/package.ts",
+    "src/path.ts",
+    "src/types.ts",
+    "index.ts"
+  ]
+}

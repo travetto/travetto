@@ -33,7 +33,6 @@
     "@travetto/di": "file:../di",
     "@travetto/schema": "file:../schema",
     "@travetto/registry": "file:../registry",
-    "@travetto/transformer": "file:../transformer",
     "@types/cookies": "^0.7.7",
     "@types/express-serve-static-core": "^4.17.31",
     "cookies": "^0.8.0",
@@ -49,9 +48,13 @@
     "@travetto/cli": "file:../cli",
     "@travetto/test": "file:../test",
     "node-forge": "^1.3.1",
-    "@types/node-forge": "^1.3.0"
+    "@types/node-forge": "^1.3.0",
+    "@travetto/transformer": "file:../transformer"
   },
   "peerDependenciesMeta": {
+    "@travetto/transformer": {
+      "optional": true
+    },
     "@travetto/cli": {
       "optional": true
     },

@@ -25,14 +25,17 @@
     "directory": "module/cache"
   },
   "dependencies": {
-    "@travetto/transformer": "file:../transformer",
     "@travetto/di": "file:../di",
     "@travetto/model": "file:../model"
   },
   "peerDependencies": {
+    "@travetto/transformer": "file:../transformer",
     "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
+    "@travetto/transformer": {
+      "optional": true
+    },
     "@travetto/test": {
       "optional": true
     }

@@ -63,8 +63,3 @@ export class $StacktraceManager {
 }
 
 export const StacktraceManager = new $StacktraceManager();
-
-ᚕtrv.resolveStack = function (err: Error): string {
-  const stack = StacktraceManager.simplifyStack(err);
-  return stack.substring(stack.indexOf('\n') + 1);
-};

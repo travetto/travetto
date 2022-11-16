@@ -1,5 +1,4 @@
-import { PackageUtil } from '@travetto/boot';
-import { Class, ShutdownManager, ConcreteClass, Env } from '@travetto/base';
+import { Pkg, Class, ShutdownManager, ConcreteClass, Env } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
 import { Configuration } from '@travetto/config';
@@ -61,7 +60,7 @@ class $ApplicationRegistry {
 
     // Show manifest
     console.log('Manifest', {
-      info: PackageUtil.mainDigest(),
+      info: Pkg.mainDigest(),
       env: Env.digest()
     });
 

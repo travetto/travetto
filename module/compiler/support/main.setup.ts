@@ -1,30 +1,30 @@
-import type { Manifest } from '@travetto/common';
+import type { ManifestState, ManifestRoot, ManifestDelta } from '@travetto/manifest';
 
 import { Compiler } from '../src/compiler';
 
 /**
  * The compilation process to establish the working folder for all the source, with support for transformers.  This pass outputs:
- *  - @travetto/Transformer
- *  - @travetto/Compiler
- *  - @travetto/Common
+ *  - @travetto/transformer
+ *  - @travetto/compiler
+ *  - @travetto/manifest
  *  - **\/support/transformer.*
  */
 export class SetupCompiler extends Compiler {
 
-  init(state: Manifest.State, output: string): typeof this {
-    const outManifest: Manifest.Root = {
+  init(state: ManifestState, output: string): typeof this {
+    const outManifest: ManifestRoot = {
       ...state.manifest,
       modules: {},
       main: '__tbd___'
     };
-    const outDelta: Manifest.Delta = {};
+    const outDelta: ManifestDelta = {};
     const trans = state.manifest.modules['@travetto/transformer'];
     const compiler = state.manifest.modules['@travetto/compiler'];
-    const common = state.manifest.modules['@travetto/common'];
+    const manifest = state.manifest.modules['@travetto/manifest'];
 
     outManifest.modules['@travetto/transformer'] = { ...trans };
     outManifest.modules['@travetto/compiler'] = { ...compiler };
-    outManifest.modules['@travetto/common'] = { ...common };
+    outManifest.modules['@travetto/manifest'] = { ...manifest };
 
     for (const [name, { files, ...mod }] of Object.entries(state.manifest.modules)) {
       const transformers = files.support?.filter(([x]) => x.startsWith('support/transform')) ?? [];

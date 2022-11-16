@@ -28,15 +28,7 @@ export class FileMainTransformer {
       return node;
     }
 
-    state.addStatements(
-      [
-        state.factory.createImportDeclaration(
-          [],
-          undefined,
-          state.factory.createStringLiteral('@travetto/boot/support/init')
-        )
-      ], 0
-    );
+    const imp = state.importDecorator('@travetto/boot/support/init', 'invokeMain');
 
     state.addStatements([
       toStmt(
@@ -47,7 +39,7 @@ export class FileMainTransformer {
             state.createIdentifier('module')
           ),
           ts.SyntaxKind.AmpersandAmpersandToken,
-          state.factory.createCallExpression(state.createAccess('ᚕtrv', 'main'), [], [mainFn.name!])
+          state.factory.createCallExpression(imp!, [], [mainFn.name!])
         )
       )
     ]);

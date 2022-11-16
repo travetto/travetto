@@ -26,7 +26,7 @@
     "directory": "module/compiler"
   },
   "dependencies": {
-    "@travetto/common": "file:../common",
+    "@travetto/manifest": "file:../manifest",
     "@travetto/transformer": "file:../transformer"
   },
   "travetto": {

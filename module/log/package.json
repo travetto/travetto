@@ -26,8 +26,7 @@
     "directory": "module/log"
   },
   "dependencies": {
-    "@travetto/base": "file:../base",
-    "@travetto/transformer": "file:../transformer"
+    "@travetto/base": "file:../base"
   },
   "travetto": {
     "id": "@trv:log",

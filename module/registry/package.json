@@ -27,8 +27,15 @@
     "directory": "module/registry"
   },
   "dependencies": {
-    "@travetto/base": "file:../base",
+    "@travetto/base": "file:../base"
+  },
+  "peerDependencies": {
     "@travetto/transformer": "file:../transformer"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/transformer": {
+      "optional": true
+    }
   },
   "travetto": {
     "id": "@trv:registry",

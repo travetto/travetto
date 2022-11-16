@@ -1,4 +1,4 @@
-import { path, Manifest } from '@travetto/common';
+import { path, Manifest } from '@travetto/manifest';
 
 export class ManifestManager {
   #srcToMod: Record<string, string> = {};

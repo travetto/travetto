@@ -214,6 +214,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
     }
 
     cmd = cmd.action(this.runAction.bind(this));
+
     return this.#cmd = cmd;
   }
 
@@ -222,6 +223,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
    */
   async runAction(...args: unknown[]): Promise<void> {
     await this.envInit?.();
+
     if (process.env.TRV_CLI_JSON_IPC && this.jsonIpc) {
       const data = await this.jsonIpc(...args);
       if (data !== undefined) {

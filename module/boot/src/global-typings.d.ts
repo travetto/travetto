@@ -20,16 +20,6 @@ declare global {
   // Parallel to __filename, but cleansed
   var __output: string;
 
-  var ᚕtrv: {
-    // Global file loaded
-    self: string | undefined;
-    // Log replacement
-    log(level: LogLevel | 'log', ctx: { file: string, line: number }, ...args: unknown[]): void;
-    // To initialize __output
-    output(file: string): string;
-    // Main handler
-    main<T>(target: (...args: unknown[]) => T, args?: string[], respond?: boolean): Promise<T>;
-    // Resolve stack
-    resolveStack?: (err: Error) => string;
-  };
+  var ᚕtrvLog: (level: LogLevel, ctx: { file: string, line: number, category: string }, ...args: unknown[]) => void;
+  var ᚕtrvOut: (file: string) => string;
 }
