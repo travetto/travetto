@@ -1,7 +1,6 @@
 import { existsSync } from 'fs';
 
-import { path } from '@travetto/common';
-import { PackageUtil } from '@travetto/boot';
+import { path, PackageUtil } from '@travetto/boot';
 
 export type ResolvedDep = { file: string, type: DepType, dep: string, version: string };
 export type DepType = 'prod' | 'dev' | 'opt' | 'peer';

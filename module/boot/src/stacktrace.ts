@@ -1,4 +1,4 @@
-import { path } from '@travetto/common';
+import { path } from './path';
 
 /**
  * General tools for manipulating stack traces.

@@ -1,9 +1,8 @@
 import * as timers from 'timers/promises';
 
-import { path } from '@travetto/common';
+import { path, ModuleIndex } from '@travetto/boot';
 import { TimeUtil, Util } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
-import { ModuleIndex } from '@travetto/boot';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig, TestResult } from '../model/test';

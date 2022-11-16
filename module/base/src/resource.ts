@@ -2,8 +2,7 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import * as fs from 'fs/promises';
 
-import { ModuleIndex } from '@travetto/boot';
-import { path } from '@travetto/common';
+import { path, ModuleIndex } from '@travetto/boot';
 
 import { AppError } from './error';
 import { Env } from './env';

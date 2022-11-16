@@ -1,7 +1,6 @@
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
-import { path } from '@travetto/common';
-import { PackageUtil } from '@travetto/boot';
+import { path, PackageUtil } from '@travetto/boot';
 import { Config } from '@travetto/config';
 import { Env } from '@travetto/base';
 import { Required } from '@travetto/schema';

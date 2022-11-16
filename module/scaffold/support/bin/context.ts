@@ -2,7 +2,7 @@ import * as cp from 'child_process';
 import * as fs from 'fs/promises';
 import * as mustache from 'mustache';
 
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 import { Env, ExecUtil, ExecutionResult } from '@travetto/base';
 import { version } from '@travetto/boot/package.json';
 

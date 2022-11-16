@@ -2,9 +2,8 @@ import * as os from 'os';
 import { readFileSync } from 'fs';
 import * as fs from 'fs/promises';
 
-import { path } from '@travetto/common';
+import { ModuleIndex, path } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import { ModuleIndex } from '@travetto/boot';
 
 import type { RunState } from '../src/execute/types';
 

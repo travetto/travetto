@@ -1,9 +1,8 @@
 import * as os from 'os';
 import * as fs from 'fs/promises';
 
-import { path } from '@travetto/common';
+import { path, PackageUtil } from '@travetto/boot';
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
-import { PackageUtil } from '@travetto/boot';
 
 import { PackUtil } from './bin/util';
 import { CommonConfig, PackOperation } from './bin/types';

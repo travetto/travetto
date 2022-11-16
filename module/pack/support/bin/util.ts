@@ -4,12 +4,10 @@ import * as cp from 'child_process';
 // TODO: Get proper typings
 const glob = require('picomatch');
 
-import { path } from '@travetto/common';
+import { path, ModuleIndex } from '@travetto/boot';
 import { CliUtil } from '@travetto/cli';
-import { ModuleIndex } from '@travetto/boot';
 
 import { CommonConfig, PackOperation } from './types';
-import { FileResourceProvider } from '@travetto/base';
 
 /**
  * Shared packing utils

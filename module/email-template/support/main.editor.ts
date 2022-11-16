@@ -1,6 +1,5 @@
-import { path } from '@travetto/common';
+import { path, PhaseManager } from '@travetto/boot';
 import { Env } from '@travetto/base';
-import { PhaseManager } from '@travetto/boot';
 
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';

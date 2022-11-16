@@ -1,7 +1,6 @@
 import * as fs from 'fs/promises';
 
-import { path } from '@travetto/common';
-import { PhaseManager, WatchUtil } from '@travetto/boot';
+import { path, PhaseManager, WatchUtil } from '@travetto/boot';
 import { Env } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 

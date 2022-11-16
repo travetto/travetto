@@ -1,10 +1,9 @@
 import * as fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
-import { path } from '@travetto/common';
+import { path, ModuleIndex } from '@travetto/boot';
 import { ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';
-import { ModuleIndex } from '@travetto/boot';
 
 import { AppScanUtil } from '../../src/scan';
 import type { ApplicationConfig } from '../../src/types';

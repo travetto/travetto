@@ -2,7 +2,7 @@ import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import { Readable } from 'stream';
 import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 
-import { path } from '@travetto/common';
+import { path } from '@travetto/boot';
 
 /**
  * Result of an execution

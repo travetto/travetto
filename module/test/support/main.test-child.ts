@@ -1,7 +1,6 @@
 import * as fs from 'fs/promises';
 
-import { path } from '@travetto/common';
-import { ConsoleManager, PhaseManager } from '@travetto/boot';
+import { path, ConsoleManager, PhaseManager } from '@travetto/boot';
 
 import { envInit } from './bin/env';
 import { TestChildWorker } from '../src/worker/child';
