@@ -4,8 +4,7 @@
     "noImplicitAny": false,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "rootDir": ".",
-    "outDir": "."
+    "rootDir": "."
   },
   "files": [
     "src/manifest.ts",

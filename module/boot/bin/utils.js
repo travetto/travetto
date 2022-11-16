@@ -82,7 +82,7 @@ async function waiting(message, worker) {
  * @param {{args?:string[], cwd?: string, failOnError?: boolean, env?: Record<string, string>, showWaitingMessage?: boolean}} param2
  * @returns {Promise<void>}
  */
-const spawn = async (action, cmd, { args = [], cwd = process.cwd(), failOnError = true, env = {}, showWaitingMessage = true }) => {
+const spawn = async (action, cmd, { args = [], cwd, failOnError = true, env = {}, showWaitingMessage = true }) => {
   const stdout = process.env.DEBUG === 'build' ? 1 : 'pipe';
   const stderr = process.env.DEBUG === 'build' ? 2 : 'pipe';
   const proc = cp.spawn(cmd, args, { cwd, stdio: ['pipe', stdout, stderr], env: { ...process.env, ...env } });
@@ -128,13 +128,14 @@ const recent = file => fs.stat(file).then(stat => Math.max(stat.ctimeMs, stat.mt
 
 /**
  * @param {string} tsconfig
+ * @param {string} output
  */
-async function isProjectStale(tsconfig) {
-  const folder = path.dirname(tsconfig);
+async function isProjectStale(tsconfig, input, output) {
   const { files } = JSON.parse(await fs.readFile(tsconfig, 'utf8'));
   return Promise.all(files.map(async file => {
-    const f = path.resolve(folder, file);
-    const [l, r] = await Promise.all([recent(f), recent(f.replace(/[.]ts$/, '.js'))]);
+    const inputFile = path.resolve(input, file);
+    const outputFile = path.resolve(output, file).replace(/[.]ts$/, '.js');
+    const [l, r] = await Promise.all([recent(inputFile), recent(outputFile)]);
     if (l > r) {
       throw new Error('Stale');
     }
@@ -146,32 +147,54 @@ const log = process.env.DEBUG === 'build' ? console.debug.bind(console) : () => 
 
 
 /**
+ * @param {string} outputRoot
+ * @param {string} moduleName
  * @param {string} tsconfig
- * @param {{go:string, skip:string, build:string}} param2
+ * @param {string} prefix
+ * @param {string[]} args
  * @returns {Promise<void>}
  */
-async function compileProjectIfStale(tsconfig, { go, skip, build }) {
+async function compileModuleIfStale(
+  outputRoot,
+  moduleName,
+  prefix,
+  tsconfig = 'tsconfig.precompile.json',
+  ...args
+) {
   try {
-    if (tsconfig.startsWith('@')) {
-      tsconfig = require.resolve(tsconfig);
-    }
-    if (await isProjectStale(tsconfig)) {
-      log(`${go}: ${tsconfig}`);
+    tsconfig = require.resolve(`${moduleName}/${tsconfig}`);
+    const inputTarget = path.dirname(tsconfig);
+    const outputTarget = `${outputRoot}/node_modules/${moduleName}`;
+
+    if (await isProjectStale(tsconfig, inputTarget, outputTarget)) {
+      log(`${prefix} Starting, ${tsconfig}`);
       const TSC = require.resolve('typescript').replace(/\/lib\/.*/, '/bin/tsc');
-      await spawn(build, TSC, { cwd: path.dirname(tsconfig), args: ['-p', path.basename(tsconfig)] });
+      await spawn(`${prefix} Building`, TSC, { cwd: inputTarget, args: ['-p', path.basename(tsconfig), '--outDir', outputTarget, ...args] });
+
+      await fs.writeFile(`${outputTarget}/package.json`,
+        (await fs.readFile(`${inputTarget}/package.json`, 'utf8')).replace(/"index[.]ts"/g, '"index.js"')
+      );
     } else {
-      log(skip);
+      log(`${prefix} Skipped`);
     }
   } catch (err) {
     console.error(err);
   }
 }
 
+/**
+ * Add node path at runtime
+ * @param {string} folder
+ */
+function addNodePath(folder) {
+  process.env.NODE_PATH = [`${folder}/node_modules`, process.env.NODE_PATH].join(path.delimiter);
+  // @ts-expect-error
+  require('module').Module._initPaths();
+}
+
 module.exports = {
-  recent,
   spawn,
-  waiting,
-  rewriteLine,
   log,
-  compileProjectIfStale
+  addNodePath,
+  compileModuleIfStale
 };

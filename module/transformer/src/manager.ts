@@ -1,6 +1,6 @@
 import * as ts from 'typescript';
 
-import type { Manifest } from '@travetto/manifest';
+import type { ManifestModule } from '@travetto/manifest';
 
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
@@ -19,7 +19,7 @@ export class TransformerManager {
    * @param modules
    * @returns
    */
-  static async create(transformerFiles: string[], modules: Manifest.Module[]): Promise<TransformerManager> {
+  static async create(transformerFiles: string[], modules: ManifestModule[]): Promise<TransformerManager> {
     const transformers: NodeTransformer<TransformerState>[] = [];
 
     for (const entry of transformerFiles) { // Exclude based on blacklist
@@ -34,7 +34,7 @@ export class TransformerManager {
   #transformers: NodeTransformer<TransformerState>[];
   #manifest: ManifestManager;
 
-  constructor(transformers: NodeTransformer<TransformerState>[], modules: Manifest.Module[]) {
+  constructor(transformers: NodeTransformer<TransformerState>[], modules: ManifestModule[]) {
     this.#transformers = transformers;
     this.#manifest = new ManifestManager(modules);
 
