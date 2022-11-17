@@ -43,8 +43,8 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
    */
   async init(): Promise<FastifyInstance> {
     const fastConf: FastifyServerOptions = {};
-    if (isHttps(this.config.ssl.active, fastConf)) {
-      fastConf.https = (await this.config.getKeys())!;
+    if (isHttps(this.config.ssl?.active, fastConf)) {
+      fastConf.https = (await this.config.ssl?.getKeys())!;
     }
     if (this.config.trustProxy) {
       fastConf.trustProxy = true;

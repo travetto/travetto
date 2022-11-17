@@ -90,9 +90,9 @@ export class KoaRestServer implements RestServer<koa> {
 
   async listen(): Promise<ServerHandle> {
     let raw: https.Server | koa = this.raw;
-    if (this.config.ssl.active) {
+    if (this.config.ssl?.active) {
       raw = (await import('https'))
-        .createServer((await this.config.getKeys())!, this.raw.callback())
+        .createServer((await this.config.ssl?.getKeys())!, this.raw.callback())
         .listen(this.config.port, this.config.bindAddress);
     }
     this.listening = true;
