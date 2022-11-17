@@ -1,6 +1,7 @@
 import * as dynamodb from '@aws-sdk/client-dynamodb';
 
-import { Class, ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/boot';
+import { Class } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {

@@ -1,4 +1,4 @@
-import { path, PhaseManager } from '@travetto/boot';
+import { path } from '@travetto/boot';
 import { Env } from '@travetto/base';
 
 import { DependencyRegistry } from '@travetto/di';
@@ -20,7 +20,6 @@ export async function main(): Promise<void> {
     append: { TRV_RESOURCES: path.resolve(path.dirname(__output), 'resources') }
   });
 
-  await PhaseManager.run('init');
   await RootRegistry.init();
 
   const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);

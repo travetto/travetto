@@ -1,5 +1,5 @@
-import { ExecUtil } from '@travetto/base';
 import { ModuleIndex } from '@travetto/boot';
+import { ExecUtil } from '@travetto/base';
 import { WorkPool, WorkUtil, IterableWorkSet } from '@travetto/worker';
 
 export async function main(): Promise<void> {

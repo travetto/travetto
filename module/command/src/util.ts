@@ -2,7 +2,7 @@ import * as https from 'https';
 import * as http from 'http';
 import * as net from 'net';
 
-import { ExecUtil, ExecutionResult, TimeUtil } from '@travetto/base';
+import { TimeUtil, ExecUtil, ExecutionResult } from '@travetto/base';
 
 /**
  * Utilities to support command execution

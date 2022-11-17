@@ -1,6 +1,6 @@
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import { Env, ExecUtil } from '@travetto/base';
 import { ModuleIndex } from '@travetto/boot';
+import { Env, ExecUtil } from '@travetto/base';
 
 type Options = {
   output: OptionConfig<string>;

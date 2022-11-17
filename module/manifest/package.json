@@ -17,7 +17,9 @@
   },
   "files": [
     "index.ts",
-    "src"
+    "src",
+    "tsconfig.bootstrap.json",
+    "tsconfig.trv.json"
   ],
   "main": "index.ts",
   "repository": {

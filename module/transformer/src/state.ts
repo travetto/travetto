@@ -67,8 +67,8 @@ export class TransformerState implements State {
   /**
    * Import a given file
    */
-  importFile(file: string): Import {
-    return this.#imports.importFile(file);
+  importFile(file: string, name?: string): Import {
+    return this.#imports.importFile(file, name);
   }
 
   /**
@@ -128,7 +128,7 @@ export class TransformerState implements State {
    */
   importDecorator(pth: string, name: string): ts.PropertyAccessExpression | undefined {
     if (!this.#decorators.has(`${pth}:${name}`)) {
-      const ref = this.#imports.importFile(pth, this.file);
+      const ref = this.#imports.importFile(pth);
       const ident = this.factory.createIdentifier(name);
       this.#decorators.set(name, this.factory.createPropertyAccessExpression(ref.ident, ident));
     }
@@ -156,7 +156,7 @@ export class TransformerState implements State {
       dec,
       ident,
       // file: this.#manifest.ensureOutputFile(decl?.getSourceFile().fileName),
-      file: decl?.getSourceFile().fileName.replaceAll('\\', '/'),
+      file: path.toPosix(decl?.getSourceFile().fileName ?? '') || undefined,
       module: decl ? this.#manifest.resolveModule(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
       targets: DocUtil.readAugments(this.#resolver.getType(ident)),
       name: ident ?

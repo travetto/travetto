@@ -2,8 +2,8 @@ import * as fs from 'fs/promises';
 import * as cp from 'child_process';
 import { rmSync } from 'fs';
 
-import { path } from '@travetto/boot';
-import { Env, ExecUtil, ExecutionState, ExecutionResult, ShutdownManager } from '@travetto/base';
+import { path, ShutdownManager } from '@travetto/boot';
+import { Env, ExecUtil, ExecutionState, ExecutionResult } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container

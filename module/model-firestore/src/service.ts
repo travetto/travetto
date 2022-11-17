@@ -1,6 +1,7 @@
 import { DocumentData, FieldValue, Firestore, PartialWithFieldValue, Query, UpdateData } from '@google-cloud/firestore';
 
-import { ShutdownManager, Class } from '@travetto/base';
+import { ShutdownManager } from '@travetto/boot';
+import { Class } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {

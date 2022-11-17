@@ -1,3 +1,5 @@
+import { ConsoleManager } from '@travetto/boot';
+
 interface InitConfig {
   env?: string;
   dynamic?: boolean;
@@ -32,6 +34,8 @@ export class Env {
       TRV_DYNAMIC: `${dynamic}`,
       TRV_DEBUG: this.get('TRV_DEBUG', this.get('DEBUG', debug ?? (prod ? '0' : '')))
     }, set ?? {});
+
+    ConsoleManager.setDebug(process.env.TRV_DEBUG ?? false);
 
     for (const [key, values] of Object.entries(append ?? {})) {
       this.#addToList(key, ...((typeof values === 'string' ? [values] : values) ?? []));

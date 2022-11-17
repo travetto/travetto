@@ -1,7 +1,8 @@
 import * as os from 'os';
 import * as gp from 'generic-pool';
 
-import { ShutdownManager, TimeUtil } from '@travetto/base';
+import { ShutdownManager } from '@travetto/boot';
+import { TimeUtil } from '@travetto/base';
 
 import { WorkSet } from './input/types';
 

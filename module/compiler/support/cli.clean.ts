@@ -2,7 +2,7 @@ import * as fs from 'fs/promises';
 
 import { CliUtil, CliCommand, OptionConfig } from '@travetto/cli';
 
-import { path } from '..';
+import { path } from '@travetto/boot';
 
 type Options = {
   full: OptionConfig<boolean>;
@@ -12,9 +12,9 @@ type Options = {
 /**
  * `npx trv clean`
  *
- * Allows for cleaning of the cache dire
+ * Allows for cleaning of the compiler output
  */
-export class BootCleanCommand extends CliCommand<Options> {
+export class CompilerCleanCommand extends CliCommand<Options> {
 
   name = 'clean';
 

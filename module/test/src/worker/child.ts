@@ -1,4 +1,4 @@
-import { ErrorUtil, PhaseManager } from '@travetto/boot';
+import { ErrorUtil } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
 import { RunnerUtil } from '../execute/util';
@@ -62,9 +62,6 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    */
   async onRunCommand(event: RunEvent): Promise<void> {
     console.debug('Run');
-
-    // Run all remaining initializations as needed for tests
-    await PhaseManager.run('init', '*', ['@trv:registry/init']);
 
     console.debug('Running', { file: event.file });
 

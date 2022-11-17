@@ -1,4 +1,5 @@
-import { Pkg, Class, ShutdownManager, ConcreteClass, Env } from '@travetto/base';
+import { ModuleIndex, ShutdownManager } from '@travetto/boot';
+import { Pkg, Class, ConcreteClass, Env } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
 import { Configuration } from '@travetto/config';
@@ -11,6 +12,10 @@ import { AppClass, ApplicationConfig } from './types';
  */
 class $ApplicationRegistry {
   #applications = new Map<string, ApplicationConfig>();
+
+  async init() {
+    await ModuleIndex.loadSource();
+  }
 
   register(app: string, config: ApplicationConfig): void {
     this.#applications.set(app, config);

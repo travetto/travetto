@@ -29,22 +29,10 @@
     "source-map-support": "^0.5.21"
   },
   "peerDependencies": {
-    "@travetto/cli": "file:../cli",
-    "@travetto/compiler": "file:../compiler",
-    "@travetto/transformer": "file:../transformer",
-    "@parcel/watcher": "^2.0.7"
+    "@travetto/transformer": "file:../transformer"
   },
   "peerDependenciesMeta": {
-    "@travetto/cli": {
-      "optional": true
-    },
-    "@travetto/compiler": {
-      "optional": true
-    },
     "@travetto/transformer": {
-      "optional": true
-    },
-    "@parcel/watcher": {
       "optional": true
     }
   },

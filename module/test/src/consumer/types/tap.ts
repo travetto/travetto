@@ -1,7 +1,7 @@
 import { Writable } from 'stream';
 
-import { path, ErrorUtil } from '@travetto/boot';
-import { ColorUtil } from '@travetto/base';
+import { path } from '@travetto/boot';
+import { ColorUtil, ErrorUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 import { TestEvent } from '../../model/event';

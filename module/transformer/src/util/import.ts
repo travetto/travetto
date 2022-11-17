@@ -35,7 +35,7 @@ export class ImportUtil {
    */
   static collectImports(src: ts.SourceFile): Map<string, Import> {
     // TODO: Replace with manifest reverse lookup
-    const base = src.fileName.replaceAll('\\', '/');
+    const base = path.toPosix(src.fileName);
 
     const imports = new Map<string, Import>();
 

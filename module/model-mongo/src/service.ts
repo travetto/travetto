@@ -14,7 +14,8 @@ import {
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
-import { ShutdownManager, Class, AppError } from '@travetto/base';
+import { ShutdownManager } from '@travetto/boot';
+import { Class, AppError } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { DeepPartial, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 

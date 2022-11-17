@@ -3,15 +3,15 @@ const path = require('path');
 const { rmSync } = require('fs');
 try { require(path.resolve('.env')); } catch { }
 
-const compile = !/^(1|yes|on|true)/i.test(process.env.TRV_COMPILED ?? '');
+const compile = !/^(1|yes|on|true)$/i.test(process.env.TRV_COMPILED ?? '');
 const outputFolder = (process.env.TRV_OUTPUT || path.resolve('.trv_output')).replaceAll('\\', '/');
 const compilerFolder = (process.env.TRV_COMPILER || path.resolve('.trv_compiler')).replaceAll('\\', '/');
 
-(function go(cmd, ...args) {
-  const { boot } = require('@travetto/boot/bin/bootstrap');
+(async function go(cmd, ...args) {
+  const { compile: build } = require('@travetto/compiler/bin/compile');
 
   switch (cmd) {
-    case 'watch': return boot({ compile, outputFolder, compilerFolder, watch: true });
+    case 'watch': return build({ compile, outputFolder, compilerFolder, watch: true });
     case 'clean': {
       if (args.length === 0) {
         rmSync(outputFolder, { force: true, recursive: true });
@@ -21,5 +21,7 @@ const compilerFolder = (process.env.TRV_COMPILER || path.resolve('.trv_compiler'
       break;
     }
   }
-  return boot({ compile, outputFolder, compilerFolder, main: '@travetto/cli/support/main.cli' });
+  await build({ compile, outputFolder, compilerFolder });
+  process.env.TRV_MAIN = require.resolve('@travetto/cli/support/main.cli');
+  return require('@travetto/cli/support/main.cli');
 })(...process.argv.slice(2));

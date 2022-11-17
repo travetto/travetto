@@ -10,6 +10,8 @@ import { WorkUtil } from '../src/util';
 @Suite()
 export class PoolExecTest {
 
+  fixtures = new TestFixtures();
+
   @Test()
   async simple() {
 
@@ -20,7 +22,7 @@ export class PoolExecTest {
       }
     });
 
-    const launcher = await TestFixtures.find('simple.child.ts');
+    const [launcher] = await this.fixtures.query(file => file.endsWith('simple.child.ts'));
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<{ data: string }, string>(

@@ -1,4 +1,5 @@
-import { Class, ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/boot';
+import { Class } from '@travetto/base';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 import type { ModelType } from '@travetto/model/src/types/model';
 

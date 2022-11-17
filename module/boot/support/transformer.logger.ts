@@ -5,8 +5,11 @@ import {
   OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction
 } from '@travetto/transformer';
 
+const HELPER_MOD = '@travetto/boot/support/init.helper';
+
 type CustomState = TransformerState & {
   scope: { type: 'method' | 'class' | 'function', name: string }[];
+  imported?: ts.Identifier;
 };
 
 const VALID_LEVELS: Record<string, string> = {
@@ -16,8 +19,6 @@ const VALID_LEVELS: Record<string, string> = {
   warn: 'warn',
   error: 'error'
 };
-
-const INIT_MOD = '@travetto/boot/support/init';
 
 /**
  * Allows for removal of debug log messages depending on whether app is running
@@ -76,7 +77,7 @@ export class LoggerTransformer {
 
   @OnCall()
   static onLogCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
-    if (!ts.isPropertyAccessExpression(node.expression) || state.module === INIT_MOD) {
+    if (!ts.isPropertyAccessExpression(node.expression)) {
       return node;
     }
 
@@ -91,9 +92,10 @@ export class LoggerTransformer {
     const level = name.escapedText!;
 
     if (VALID_LEVELS[level]) {
+      const ident = state.imported ??= state.importFile(HELPER_MOD, 'ᚕtrv').ident;
       return state.factory.updateCallExpression(
         node,
-        state.createIdentifier('ᚕtrvLog'),
+        state.createAccess(ident, 'log'),
         node.typeArguments,
         [
           state.factory.createStringLiteral(VALID_LEVELS[level]),

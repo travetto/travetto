@@ -33,10 +33,14 @@ export class ImportManager {
   /**
    * Produces a unique ID for a given file, importing if needed
    */
-  getId(file: string): string {
+  getId(file: string, name?: string): string {
     if (!this.#ids.has(file)) {
-      const key = path.basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
-      this.#ids.set(file, `Ⲑ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
+      if (name) {
+        this.#ids.set(file, name);
+      } else {
+        const key = path.basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
+        this.#ids.set(file, `Ⲑ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
+      }
     }
     return this.#ids.get(file)!;
   }
@@ -44,7 +48,7 @@ export class ImportManager {
   /**
    * Import a file if needed, and record it's identifier
    */
-  importFile(file: string, base?: string): Import {
+  importFile(file: string, name?: string): Import {
     file = this.#manifest.resolveModule(file);
 
     // Allow for node classes to be imported directly
@@ -53,7 +57,7 @@ export class ImportManager {
     }
 
     if (!D_OR_D_TS_EXT_RE.test(file) && !this.#newImports.has(file)) {
-      const id = this.getId(file);
+      const id = this.getId(file, name);
 
       if (this.#imports.has(id)) { // Already imported, be cool
         return this.#imports.get(id)!;
@@ -73,7 +77,7 @@ export class ImportManager {
   importFromResolved(...types: AnyType[]): void {
     for (const type of types) {
       if (type.key === 'external' && type.source && type.source !== this.#file) {
-        this.importFile(type.source, this.#file);
+        this.importFile(type.source);
       }
       switch (type.key) {
         case 'external':
@@ -131,7 +135,7 @@ export class ImportManager {
     if (type.source === this.#file) {
       return factory.createIdentifier(type.name!);
     } else {
-      const { ident } = this.#imports.get(type.source) ?? this.importFile(type.source, this.#file);
+      const { ident } = this.#imports.get(type.source) ?? this.importFile(type.source);
       return factory.createPropertyAccessExpression(ident, type.name!);
     }
   }

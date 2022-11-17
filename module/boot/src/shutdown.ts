@@ -1,8 +1,6 @@
 import { setTimeout } from 'timers/promises';
 
-import { Pkg } from './package';
-import { Util } from './util';
-import { TimeUtil } from './time';
+import { ModuleIndex } from './module-index';
 
 const ogExit = process.exit;
 
@@ -12,6 +10,10 @@ export type Closeable = {
 
 type UnhandledHandler = (err: Error, prom?: Promise<unknown>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };
+
+function isPromise(a: unknown): a is Promise<unknown> {
+  return !!a && (a instanceof Promise || (typeof a === 'object') && 'then' in a);
+}
 
 /**
  * Shutdown manager, allowing for hooks into the shutdown process.
@@ -46,7 +48,7 @@ class $ShutdownManager {
       try {
         console.debug('Starting', { name });
         const res = handler();
-        if (Util.isPromise(res)) {
+        if (isPromise(res)) {
           // If a promise, queue for handling
           promises.push(res);
           res
@@ -75,7 +77,7 @@ class $ShutdownManager {
       this.#shutdownCode = exitCode;
     }
 
-    const name = Pkg.main.name;
+    const name = Object.values(ModuleIndex.manifest.modules).find(x => x.main)!.name;
 
     try {
       // If the err is not an exit code
@@ -88,10 +90,10 @@ class $ShutdownManager {
 
       // Run them all, with the ability for the shutdown to preempt
       if (promises.length) {
-        const waitTime = TimeUtil.getEnvTime('TRV_SHUTDOWN_WAIT', '2s');
+        const waitTime = +(process.env.TRV_SHUTDOWN_WAIT || '2000');
         const finalRun = Promise.race([
           ...promises,
-          TimeUtil.wait(waitTime).then(() => { throw new Error('Timeout on shutdown'); })
+          setTimeout(waitTime).then(() => { throw new Error('Timeout on shutdown'); })
         ]);
         await finalRun;
       }
@@ -162,37 +164,6 @@ class $ShutdownManager {
     const index = this.#unhandled.indexOf(handler);
     if (index >= 0) {
       this.#unhandled.splice(index, 1);
-    }
-  }
-
-  /**
-   * Listen for an unhandled event, as a promise
-   */
-  listenForUnhandled(): Promise<never> & { cancel: () => void } {
-    const uncaught = Util.resolvablePromise<never>();
-    const uncaughtWithCancel: typeof uncaught & { cancel?: () => void } = uncaught;
-    const cancel = this.onUnhandled(err => { setTimeout(1).then(() => uncaught.reject(err)); return true; }, 0);
-    uncaughtWithCancel.cancel = (): void => {
-      cancel(); // Remove the handler
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      uncaughtWithCancel.resolve(undefined as never); // Close the promise
-    };
-
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return uncaughtWithCancel as (Promise<never> & { cancel: () => void });
-  }
-
-  /**
-   * Wraps a function to capture unhandled exceptions for a period of time.
-   * Converts uncaught exception to a thrown error
-   * @param fn The function to wrap
-   */
-  async captureUnhandled<U>(fn: () => U): Promise<U> {
-    const uncaught = this.listenForUnhandled();
-    try {
-      return (await Promise.race([uncaught, fn()]));
-    } finally {
-      uncaught.cancel();
     }
   }
 }

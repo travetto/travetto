@@ -2,6 +2,8 @@ import * as ts from 'typescript';
 
 import { TransformerId, AfterFile, TransformerState } from '@travetto/transformer';
 
+const HELPER_MOD = '@travetto/boot/support/init.helper';
+
 /**
  *  Auto importing setup for main entry points
  */
@@ -28,19 +30,15 @@ export class FileMainTransformer {
       return node;
     }
 
-    const imp = state.importDecorator('@travetto/boot/support/init', 'invokeMain');
+    const { ident } = state.importFile(HELPER_MOD, 'ᚕtrv');
 
     state.addStatements([
       toStmt(
-        state.factory.createBinaryExpression(
-          state.factory.createBinaryExpression(
-            state.createAccess('require', 'main'),
-            ts.SyntaxKind.EqualsEqualsEqualsToken,
-            state.createIdentifier('module')
-          ),
-          ts.SyntaxKind.AmpersandAmpersandToken,
-          state.factory.createCallExpression(imp!, [], [mainFn.name!])
-        )
+        state.factory.createCallExpression(state.createAccess(ident, 'main'), [], [
+          mainFn.name!,
+          state.createIdentifier('__output'),
+          state.createIdentifier('module')
+        ])
       )
     ]);
 

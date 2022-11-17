@@ -1,4 +1,7 @@
-import { ShutdownManager, TimeSpan, Util } from '@travetto/base';
+import { setTimeout } from 'timers/promises';
+
+import { ShutdownManager } from '@travetto/boot';
+import { TimeSpan, Util } from '@travetto/base';
 
 import { Timeout } from './timeout';
 
@@ -11,6 +14,23 @@ function canCancel(o: unknown): o is { cancel(): unknown } {
  * Build an execution barrier to handle various limitations
  */
 export class Barrier {
+  /**
+   * Listen for an unhandled event, as a promise
+   */
+  static listenForUnhandled(): Promise<never> & { cancel: () => void } {
+    const uncaught = Util.resolvablePromise<never>();
+    const uncaughtWithCancel: typeof uncaught & { cancel?: () => void } = uncaught;
+    const cancel = ShutdownManager.onUnhandled(err => { setTimeout(1).then(() => uncaught.reject(err)); return true; }, 0);
+    uncaughtWithCancel.cancel = (): void => {
+      cancel(); // Remove the handler
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      uncaughtWithCancel.resolve(undefined as never); // Close the promise
+    };
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return uncaughtWithCancel as (Promise<never> & { cancel: () => void });
+  }
+
   #support: string[] = [];
   #barriers = new Map<string, Promise<unknown>>([]);
 
@@ -22,7 +42,7 @@ export class Barrier {
       this.add(new Timeout(timeout).wait(), true);
     }
     if (unhandled) {
-      this.add(ShutdownManager.listenForUnhandled());
+      this.add(Barrier.listenForUnhandled());
     }
   }
 

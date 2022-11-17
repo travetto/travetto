@@ -1,5 +1,5 @@
 import { Env } from '@travetto/base';
-import { PhaseManager } from '@travetto/boot';
+import { RootRegistry } from '@travetto/registry';
 
 import type { ModelStorageSupport } from '../src/service/storage';
 import { ModelCandidateUtil } from './bin/candidate';
@@ -9,7 +9,7 @@ import { ModelCandidateUtil } from './bin/candidate';
  */
 export async function main(op: keyof ModelStorageSupport): Promise<{ models: string[], providers: string[] }> {
   Env.define();
-  await PhaseManager.run('init');
+  await RootRegistry.init();
 
   return {
     models: await ModelCandidateUtil.getModelNames(),

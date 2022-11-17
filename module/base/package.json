@@ -17,8 +17,7 @@
   },
   "files": [
     "index.ts",
-    "src",
-    "support"
+    "src"
   ],
   "main": "index.ts",
   "repository": {
@@ -27,6 +26,14 @@
   },
   "dependencies": {
     "@travetto/boot": "file:../boot"
+  },
+  "peerDependencies": {
+    "@parcel/watcher": "^2.0.7"
+  },
+  "peerDependenciesMeta": {
+    "@parcel/watcher": {
+      "optional": true
+    }
   },
   "travetto": {
     "id": "@trv:base",

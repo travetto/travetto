@@ -1,6 +1,6 @@
 import * as mysql from 'mysql';
 
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/boot';
 import { AsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { Connection, SQLModelConfig } from '@travetto/model-sql';

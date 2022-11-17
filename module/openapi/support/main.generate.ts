@@ -1,10 +1,10 @@
-import { PhaseManager } from '@travetto/boot';
 import { DependencyRegistry } from '@travetto/di';
+import { RootRegistry } from '@travetto/registry';
 
 import { OpenApiService } from '../src/service';
 
 export async function main(): Promise<unknown> {
-  await PhaseManager.run('init');
+  await RootRegistry.init();
 
   const instance = await DependencyRegistry.getInstance(OpenApiService);
   return instance.spec;

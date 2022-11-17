@@ -16,9 +16,9 @@
   "files": [
     "index.ts",
     "src",
+    "bin",
     "support",
-    "tsconfig.precompile.json",
-    "tsconfig.trv.json"
+    "tsconfig.bootstrap.json"
   ],
   "main": "index.ts",
   "repository": {
@@ -28,6 +28,14 @@
   "dependencies": {
     "@travetto/manifest": "file:../manifest",
     "@travetto/transformer": "file:../transformer"
+  },
+  "peerDependencies": {
+    "@travetto/cli": "file:../cli"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/cli": {
+      "optional": true
+    }
   },
   "travetto": {
     "id": "@trv:compiler",

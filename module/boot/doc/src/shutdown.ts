@@ -1,4 +1,4 @@
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/boot';
 
 export function registerShutdownHandler() {
   ShutdownManager.onShutdown('handler-name', async () => {

@@ -207,18 +207,21 @@ export class ExecUtil {
    * @param options The worker options
    */
   static worker<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
+    const env = {
+      ...process.env,
+      TRV_DYNAMIC: '0', // Force dynamic to not cascade
+      ...((options.env !== SHARE_ENV ? options.env : {}) || {}),
+    };
     const worker = new Worker(path.resolve(file), {
       stderr: true,
       stdout: true,
       stdin: false,
       ...options,
-      env: {
-        ...process.env,
-        TRV_DYNAMIC: '0', // Force dynamic to not cascade
-        ...((options.env !== SHARE_ENV ? options.env : {}) || {}),
-      },
+      env,
       argv: args
     });
+
+    console.log('Setting up env', env);
 
     const stderr: Buffer[] = [];
     worker.stdout!.on('data', (d: string | Buffer) => { }); // Ignore

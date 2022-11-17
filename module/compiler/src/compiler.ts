@@ -38,7 +38,7 @@ export class Compiler {
     outputFolder: string
   ): typeof this {
     this.#state = new CompilerState(manifestState, outputFolder);
-    this.#bootTsconfig = this.#state.resolveModuleFile('@travetto/manifest', 'tsconfig.trv.json');
+    this.#bootTsconfig = this.#state.resolveModuleFile('@travetto/compiler', 'tsconfig.trv.json');
     return this;
   }
 

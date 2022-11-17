@@ -1,10 +1,7 @@
-import type { LogLevel } from './types';
+import './types'; // Needed (can be any import)
 
 declare global {
-  interface Error {
-    toJSON(sub?: unknown): unknown;
-    resolveStack?(text?: string): string;
-  }
+  interface Error { toJSON(sub?: unknown): unknown; }
   interface Map<K, V> { toJSON(): unknown }
   interface Set<T> { toJSON(): unknown }
   interface ObjectConstructor {
@@ -19,7 +16,4 @@ declare global {
 
   // Parallel to __filename, but cleansed
   var __output: string;
-
-  var ᚕtrvLog: (level: LogLevel, ctx: { file: string, line: number, category: string }, ...args: unknown[]) => void;
-  var ᚕtrvOut: (file: string) => string;
 }

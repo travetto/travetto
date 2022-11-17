@@ -4,11 +4,11 @@ import type * as sqlite3 from 'better-sqlite3';
 import Db = require('better-sqlite3');
 import * as pool from 'generic-pool';
 
-import { path } from '@travetto/boot';
-import { ShutdownManager, TimeUtil } from '@travetto/base';
+import { path, ShutdownManager } from '@travetto/boot';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
+import { TimeUtil } from '@travetto/base';
 
 /**
  * Connection support for Sqlite
