@@ -3,6 +3,7 @@ import { ServerResponse, IncomingMessage } from 'http';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
+import { Secret } from '@travetto/schema';
 
 import { FilterContext, Request, Response } from '../types';
 import { RestConfig } from '../application/config';
@@ -10,7 +11,6 @@ import { RestConfig } from '../application/config';
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { CorsInterceptor } from './cors';
 import { GetCacheInterceptor } from './get-cache';
-import { Secret } from '@travetto/schema';
 
 /**
  * Rest cookie configuration
@@ -83,7 +83,7 @@ export class CookiesInterceptor implements RestInterceptor<RestCookieConfig> {
   restConfig: RestConfig;
 
   finalizeConfig(config: RestCookieConfig): RestCookieConfig {
-    config.secure ??= this.restConfig.ssl.active;
+    config.secure ??= this.restConfig.ssl?.active;
     config.domain ??= this.restConfig.hostname;
     return config;
   }

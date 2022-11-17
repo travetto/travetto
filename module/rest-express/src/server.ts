@@ -106,8 +106,8 @@ export class ExpressRestServer implements RestServer<express.Application> {
 
   async listen(): Promise<ServerHandle> {
     let raw: express.Application | https.Server = this.raw;
-    if (this.config.ssl.active) {
-      const keys = await this.config.getKeys();
+    if (this.config.ssl?.active) {
+      const keys = await this.config.ssl?.getKeys();
       raw = (await import('https')).createServer(keys!, this.raw);
     }
     this.listening = true;

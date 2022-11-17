@@ -1,10 +1,9 @@
 import * as os from 'os';
 
 import { Config } from '@travetto/config';
-import { Env, AppError, CommonFileResourceProvider } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
-import { RestServerUtil } from './util';
+import { RestSslConfig } from './ssl';
 
 /**
  * Restful configuration
@@ -45,19 +44,7 @@ export class RestConfig {
   /**
    * SSL Configuration
    */
-  ssl: {
-    /**
-     * Enabled
-     */
-    active?: boolean;
-    /**
-     * SSL Keys
-     */
-    keys?: {
-      cert: string;
-      key: string;
-    };
-  } = { active: false };
+  ssl?: RestSslConfig;
 
   /**
    * Redefine base url to be the full URL if not specified
@@ -70,32 +57,7 @@ export class RestConfig {
       this.bindAddress = useIPv4 ? '0.0.0.0' : '::';
     }
     if (this.baseUrl === undefined) {
-      this.baseUrl = `http${this.ssl.active ? 's' : ''}://${this.hostname}${[80, 443].includes(this.port) ? '' : `:${this.port}`}`;
-    }
-  }
-
-  /**
-   * Get SSL keys, will generate if missing, and in dev
-   */
-  async getKeys(): Promise<{
-    key: string;
-    cert: string;
-  } | undefined> {
-    if (!this.ssl.active) {
-      return;
-    }
-    if (!this.ssl.keys) {
-      if (Env.isProd()) {
-        throw new AppError('Cannot use test keys in production', 'permissions');
-      }
-      return RestServerUtil.generateSslKeyPair();
-    } else {
-      if (this.ssl.keys.key.length < 100) {
-        const provider = new CommonFileResourceProvider();
-        this.ssl.keys.key = (await provider.read(this.ssl.keys.key, true)).toString('utf8');
-        this.ssl.keys.cert = (await provider.read(this.ssl.keys.cert, true)).toString('utf8');
-      }
-      return this.ssl.keys;
+      this.baseUrl = `http${this.ssl?.active ? 's' : ''}://${this.hostname}${[80, 443].includes(this.port) ? '' : `:${this.port}`}`;
     }
   }
 }

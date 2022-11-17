@@ -3,6 +3,7 @@
 export * from './src/application/rest';
 export * from './src/application/server';
 export * from './src/application/config';
+export * from './src/application/ssl';
 export * from './src/application/util';
 export * from './src/decorator/common';
 export * from './src/decorator/controller';
