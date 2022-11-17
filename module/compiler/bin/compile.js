@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // @ts-check
 
+const { rm } = require('fs/promises');
 const { resolve } = require('path');
 const { log, spawn, compileModuleIfStale, addNodePath } = require('./utils');
 
@@ -8,15 +9,11 @@ let manifestTemp;
 
 /**
  @typedef {{
-   compilerFolder: string;
+  compile?: boolean;
+  compilerFolder: string;
    outputFolder: string;
    watch?: boolean;
- }} BuildConfig
-
- @typedef {BuildConfig & {
-    main?: string;
-    compile?: boolean;
- }} BootConfig
+ }} CompileConfig
 
  @typedef {import('@travetto/manifest').ManifestState} ManifestState
 */
@@ -29,7 +26,7 @@ const importManifest = (compilerFolder) => require(resolve(compilerFolder, 'node
 /**
  *  Step 1
  *
- * @param {BuildConfig} config
+ * @param {CompileConfig} config
  * @return {Promise<ManifestState>}
  */
 async function buildManifest(config) {
@@ -44,7 +41,7 @@ async function buildManifest(config) {
 
 /**
  * @param {ManifestState} param0
- * @returns {boolean}
+ * @returns {{total:boolean, transformers:boolean}}
  */
 function shouldRebuildCompiler({ delta }) {
   // Did enough things change to re-stage and build the compiler
@@ -64,20 +61,29 @@ function shouldRebuildCompiler({ delta }) {
       log('[2] Compiler source changed */support/transform', transformersChanged);
     }
   }
-  return changed > 0;
+  return { total: changed > 0, transformers: transformersChanged.length > 0 };
 }
 
 /**
  *  Step 2
  * @param {ManifestState} state
- * @param {BuildConfig} config
+ * @param {CompileConfig} config
  * @return {Promise<void>}
  */
 async function buildCompiler(state, config) {
 
   await compileModuleIfStale(config.compilerFolder, '@travetto/compiler', '[2] Compiler Bootstrapping');
 
-  if (shouldRebuildCompiler(state)) {
+  const changed = shouldRebuildCompiler(state)
+
+  if (changed.transformers) {
+    log('[2] Clearing output: */support/transform changed');
+    // Delete all output on transformer changes
+    await rm(config.outputFolder, { recursive: true, force: true }).catch(() => { });
+    state = await buildManifest(config);
+  }
+
+  if (changed.total) {
     const { ManifestUtil } = importManifest(config.compilerFolder);
     const args = [
       `${config.compilerFolder}/${state.manifest.modules['@travetto/compiler'].output}/support/main.setup`,
@@ -93,47 +99,40 @@ async function buildCompiler(state, config) {
 /**
  *  Step 4
  * @param {ManifestState} state
- * @param {BuildConfig} config
+ * @param {CompileConfig} config
  * @return {Promise<void>}
  */
-async function compileOutput(state, config) {
+async function compileOutput(state, { compilerFolder, outputFolder, watch = false }) {
   const changes = Object.values(state.delta).flat();
-  if (changes.length === 0 && !(config.watch ?? false)) {
+  if (changes.length === 0 && !(watch)) {
     log('[3] Output Ready');
     return;
   }
 
   log('[3] Changed Sources', changes);
-  const { ManifestUtil } = importManifest(config.compilerFolder);
+  const { ManifestUtil } = importManifest(compilerFolder);
   const args = [
-    `${config.compilerFolder}/${state.manifest.modules['@travetto/compiler'].output}/support/main.output`,
+    `${compilerFolder}/${state.manifest.modules['@travetto/compiler'].output}/support/main.output`,
     (manifestTemp ??= await ManifestUtil.writeState(state)),
-    config.outputFolder
+    outputFolder
   ];
   await spawn('[3] Compiling', process.argv0, {
-    args, env: { TRV_WATCH: `${config.watch ?? false}` },
-    cwd: config.compilerFolder,
-    showWaitingMessage: !(config.watch ?? false)
+    args, env: { TRV_WATCH: `${watch}` },
+    cwd: compilerFolder,
+    showWaitingMessage: !(watch)
   });
 }
 
 /**
- * @param {BootConfig} config
+ * @param {CompileConfig} config
  */
-async function boot(config) {
-  let compilerTsConfig = undefined;
+async function compile(config) {
 
   // Skip compilation if not installed
-  if (config.compile || config.watch) {
-    try {
-      compilerTsConfig = require.resolve('@travetto/compiler/tsconfig.precompile.json');
-    } catch { }
-
-    if (compilerTsConfig) {
-      const state = await buildManifest(config); // Step 1
-      await buildCompiler(state, config); // Step 2
-      await compileOutput(state, config); // Step 3
-    }
+  if (config.compile !== false) {
+    const state = await buildManifest(config); // Step 1
+    await buildCompiler(state, config); // Step 2
+    await compileOutput(state, config); // Step 3
   }
 
   // Only  manipulate if we aren't in the output folder
@@ -143,15 +142,6 @@ async function boot(config) {
 
   // Share back so ModuleIndex will pick it up
   process.env.TRV_OUTPUT = config.outputFolder;
-
-  const { finalize, invokeMain } = require('@travetto/boot/support/init');
-
-  if (config.main) {
-    const { main: entryPoint } = require(config.main);
-    return invokeMain(entryPoint);
-  } else {
-    return finalize();
-  }
 }
 
-module.exports = { boot };
+module.exports = { compile };

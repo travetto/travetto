@@ -1,7 +1,16 @@
 {
-  "extends": "../manifest/tsconfig.trv.json",
   "compilerOptions": {
+    "module": "CommonJS",
+    "target": "esnext",
+    "moduleResolution": "node",
+    "lib": [
+      "es2022"
+    ],
+    "strict": true,
+    "strictPropertyInitialization": false,
     "noImplicitAny": false,
+    "noEmitOnError": false,
+    "noErrorTruncation": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "rootDir": "."

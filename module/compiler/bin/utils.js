@@ -158,7 +158,7 @@ async function compileModuleIfStale(
   outputRoot,
   moduleName,
   prefix,
-  tsconfig = 'tsconfig.precompile.json',
+  tsconfig = 'tsconfig.bootstrap.json',
   ...args
 ) {
   try {

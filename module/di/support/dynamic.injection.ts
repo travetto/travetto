@@ -1,5 +1,5 @@
-import { RetargettingProxy } from '@travetto/boot';
 import { Class, ClassInstance } from '@travetto/base';
+import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
 import type { ClassTarget, InjectableConfig } from '../src/types';

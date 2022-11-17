@@ -46,6 +46,15 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   }
 
   /**
+   * Tie bind util activation to schema registry initialization
+   */
+  async init(): Promise<unknown> {
+    const res = super.init();
+    BindUtil.register();
+    return res;
+  }
+
+  /**
    * Get subtype name for a class
    * @param cls Base class
    */

@@ -1,7 +1,7 @@
+import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngine } from '@travetto/email/src/template';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
-import { PhaseManager } from '@travetto/boot';
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
 
 import { EmailTemplateCompiler } from '../src/compiler';
@@ -24,7 +24,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    await PhaseManager.run('init');
+    await RootRegistry.init();
 
     // Let the engine template
     const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);

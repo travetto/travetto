@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 
-import { path, PhaseManager, WatchUtil } from '@travetto/boot';
-import { Env } from '@travetto/base';
+import { path } from '@travetto/boot';
+import { Env, WatchUtil } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { RenderUtil } from '../src/render/util';
@@ -42,9 +42,6 @@ export class DocCommand extends CliCommand<Options> {
 
   async action(): Promise<void> {
     console.error(process.env);
-
-    // Standard compile
-    await PhaseManager.run('init');
 
     const docFile = path.resolve(this.cmd.input);
 

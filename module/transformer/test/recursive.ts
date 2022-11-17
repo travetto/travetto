@@ -2,7 +2,7 @@ import * as assert from 'assert';
 
 import * as fs from 'fs/promises';
 
-import { Manifest, path } from '@travetto/manifest';
+import { ManifestRoot, path } from '@travetto/manifest';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { ExecUtil } from '@travetto/base';
 
@@ -12,7 +12,7 @@ const E2E_OUT = path.resolve(E2E_ROOT, '.trv_out');
 @Suite()
 export class RecursiveTransformSuite {
 
-  #manifest: Manifest.Root;
+  #manifest: ManifestRoot;
 
   @BeforeAll()
   async init() {

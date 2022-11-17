@@ -1,4 +1,5 @@
-import { PhaseManager, ConsoleManager } from '@travetto/boot';
+import { RootRegistry } from '@travetto/registry';
+import { ConsoleManager } from '@travetto/boot';
 import { Env } from '@travetto/base';
 
 import { ApplicationRegistry } from '../../src/registry';
@@ -16,14 +17,14 @@ export class AppRunUtil {
   static async run(app: ApplicationConfig | string, ...sub: string[]): Promise<void> {
 
     if (!Env.isTrue('TRV_DEBUG')) {
-      ConsoleManager.exclude('debug', true);
+      ConsoleManager.setDebug(false);
     }
 
     // Init
-    await PhaseManager.run('init');
+    await RootRegistry.init();
 
     if (!Env.isTrue('TRV_DEBUG')) {
-      ConsoleManager.exclude('debug', false);
+      ConsoleManager.setDebug(Env.get('TRV_DEBUG', ''));
     }
 
     // Convert to full app

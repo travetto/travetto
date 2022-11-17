@@ -1,5 +1,5 @@
-import { ExecUtil } from '@travetto/base';
-import { ErrorUtil, ModuleIndex } from '@travetto/boot';
+import { ModuleIndex } from '@travetto/boot';
+import { ExecUtil, ErrorUtil } from '@travetto/base';
 import { ParentCommChannel, Worker, WorkUtil } from '@travetto/worker';
 
 import { Events, RunEvent } from './types';

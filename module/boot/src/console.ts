@@ -38,12 +38,8 @@ class $ConsoleManager {
    */
   constructor() {
     this.#exclude = new Set();
-
-    if (!/^(1|true|yes|on)/i.test(process.env.TRV_DEBUG ?? '')) {
-      this.#exclude.add('debug');
-    }
-
     this.set(console); // Init to console
+    this.setDebug(process.env.TRV_DEBUG ?? '');
   }
 
   /**
@@ -55,6 +51,22 @@ class $ConsoleManager {
       this.#exclude.add(val);
     } else {
       this.#exclude.delete(val);
+    }
+  }
+
+  /**
+   * Set logging debug level
+   */
+  setDebug(debug: boolean | string): void {
+    const isSet = debug !== undefined && debug !== '';
+    const isFalse = typeof debug === 'boolean' ? !debug : /^(0|false|no|off)/i.test(debug);
+
+    if (isSet && !isFalse) {
+      this.exclude('debug', false);
+      this.#appender?.setDebug?.(debug);
+    } else {
+      this.exclude('debug', true);
+      this.#appender?.setDebug?.(false);
     }
   }
 

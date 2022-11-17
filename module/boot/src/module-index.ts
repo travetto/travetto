@@ -1,7 +1,6 @@
 import * as fs from 'fs';
 
 import { ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType } from '@travetto/manifest';
-
 import { path } from './path';
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
@@ -188,6 +187,15 @@ class $ModuleIndex {
    */
   getModuleFromSource(source: string): string | undefined {
     return this.#sourceToEntry.get(source)?.module;
+  }
+
+  /**
+   * Load all source modules
+   */
+  async loadSource(): Promise<void> {
+    for (const { output } of this.findSrc({})) {
+      await import(output);
+    }
   }
 }
 

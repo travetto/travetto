@@ -1,8 +1,8 @@
 import { createReadStream } from 'fs';
 import * as readline from 'readline';
 
-import { ShutdownManager, TimeUtil } from '@travetto/base';
-import { ModuleIndex } from '@travetto/boot';
+import { TimeUtil } from '@travetto/base';
+import { ShutdownManager, ModuleIndex } from '@travetto/boot';
 
 /**
  * Simple Test Utilities

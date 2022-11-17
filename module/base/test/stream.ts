@@ -3,8 +3,8 @@ import { createReadStream } from 'fs';
 import * as os from 'os';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { ExecUtil } from '@travetto/base';
 
+import { ExecUtil } from '../src/exec';
 import { StreamUtil } from '../src/stream';
 
 

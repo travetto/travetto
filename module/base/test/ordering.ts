@@ -1,5 +1,6 @@
 import * as assert from 'assert';
 import { Test, Suite } from '@travetto/test';
+
 import { Orderable, OrderingUtil } from '../src/ordering';
 
 @Suite()

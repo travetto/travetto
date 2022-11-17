@@ -1,4 +1,4 @@
-import { ConsoleManager, LogLevel, LineContext as BaseLineContext } from '@travetto/boot';
+import { LogLevel, LineContext, ConsoleListener } from '@travetto/boot';
 import { Env, Util } from '@travetto/base';
 
 import { Appender, Formatter, LogEvent, LogLevels } from './types';
@@ -10,12 +10,10 @@ import { LogUtil } from './util';
 
 const DefaultLoggerⲐ = Symbol.for('@trv:log/default');
 
-type LineContext = BaseLineContext & { scope?: string };
-
 /**
  * Logger service
  */
-class $Logger {
+class $Logger implements ConsoleListener {
 
   /**
    * Should we enrich the console by default
@@ -23,6 +21,9 @@ class $Logger {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   readonly #logFormat: 'line' | 'json' = Env.get('TRV_LOG_FORMAT', 'line') as 'line';
 
+  /**
+   * Log file, if needed
+   */
   readonly #logFile?: string = Env.get('TRV_LOG_FILE');
 
   /**
@@ -38,26 +39,8 @@ class $Logger {
    * List of logging filters
    */
   #filters: Partial<Record<LogLevel, (x: string) => boolean>> = {};
-  /**
-   * Which log levels to exclude
-   */
-  #exclude: Partial<Record<LogLevel, boolean>> = { debug: true };
 
-  /**
-   * Initialize
-   */
-  init(): void {
-    // Compute the debug state
-    const debugStatus = Env.isSet('TRV_DEBUG') ? !Env.isFalse('TRV_DEBUG') : !Env.isProd();
-
-    if (debugStatus !== false) {
-      delete this.#exclude.debug;
-      const filter = LogUtil.buildFilter(Env.get('TRV_DEBUG', '@app'));
-      if (filter) {
-        this.#filters.debug = filter;
-      }
-    }
-
+  constructor() {
     if (!this.#listenerMap.get(DefaultLoggerⲐ)) {
       // Build default formatter
       let formatter: Formatter;
@@ -67,8 +50,16 @@ class $Logger {
       }
       this.listenDefault(formatter, this.#logFile ? new FileAppender({ file: this.#logFile }) : undefined);
     }
+  }
 
-    ConsoleManager.set(this, true); // Make default
+  setDebug(value: boolean | string): void {
+    if (typeof value === 'boolean') {
+      if (value) {
+        this.#filters.debug = LogUtil.buildFilter('@app');
+      }
+    } else {
+      this.#filters.debug = LogUtil.buildFilter(value || '@app');
+    }
   }
 
   /**
@@ -109,13 +100,6 @@ class $Logger {
   }
 
   /**
-   * See if log level is enabled
-   */
-  enabled(level: LogLevel): boolean {
-    return !(level in this.#exclude);
-  }
-
-  /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
   onLog(level: LogLevel, { file, category, line, scope }: LineContext, [message, context, ...args]: [string, Record<string, unknown>, ...unknown[]]): void {
@@ -131,7 +115,7 @@ class $Logger {
       message = '';
     }
 
-    if ((level in this.#exclude) || (category && level in this.#filters && !this.#filters[level]!(category))) {
+    if (category && level in this.#filters && !this.#filters[level]!(category)) {
       return;
     }
 

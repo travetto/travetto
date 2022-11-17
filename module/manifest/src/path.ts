@@ -1,4 +1,4 @@
-import { extname, dirname, resolve, basename, delimiter } from 'path';
+import { extname, dirname, resolve, basename, delimiter, join } from 'path';
 
 const posix = (file: string): string => file.replaceAll('\\', '/');
 
@@ -12,4 +12,5 @@ export const path = {
   extname: (file: string): string => posix(extname(file)),
   dirname: (file: string): string => posix(dirname(file)),
   resolve: (...args: string[]): string => posix(resolve(cwd(), ...args.map(f => posix(f)))),
+  join: (root: string, ...args: string[]): string => posix(join(posix(root), ...args.map(f => posix(f)))),
 };

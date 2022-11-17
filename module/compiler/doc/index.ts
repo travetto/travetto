@@ -18,4 +18,10 @@ ${d.List(
 Additionally, there is support for common AST transformations via ${mod.Transformer}
 ${d.Section('Debugging')}
 When dealing with transformers, logging is somewhat tricky as the compiler executes before the code is loaded.  To that end, the file ${d.Path('compiler.log')} is created in the cache directory during the compilation process. This is a location that transformers should be free to log to, for debugging, and any additional feedback.
+
+${d.Section('CLI - clean')}
+
+The module provides the ability to clear the compilation cache to handle any inconsistencies that may arise.
+
+${d.Execute('Clean operation', 'trv', ['clean', '--help'])}
 `;

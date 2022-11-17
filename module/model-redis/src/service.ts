@@ -1,6 +1,7 @@
 import * as redis from 'redis';
 
-import { Class, ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/boot';
+import { Class } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import {
   ModelCrudSupport, ModelExpirySupport, ModelRegistry, ModelType, ModelStorageSupport,

@@ -1,5 +1,5 @@
 import { d, mod, lib } from '@travetto/doc';
-import { AppError, StreamUtil, Util, ExecUtil } from '@travetto/base';
+import { ExecUtil, AppError, StreamUtil, Util } from '@travetto/base';
 
 const UtilLink = d.Ref(Util.name, '@travetto/base/src/util.ts');
 const AppErrorLink = d.Ref(AppError.name, '@travetto/base/src/error.ts');
@@ -13,11 +13,10 @@ Base is the foundation of all ${lib.Travetto} applications.  It is intended to b
 
 ${d.List(
   'Environment Support',
-  'Process Execution',
-  'Shutdown Management',
   'Standard Error Support',
   'Stream Support',
-  'General Utilities'
+  'General Utilities',
+  'Process Execution',
 )}
 
 ${d.Section('Environment Support')}
@@ -31,21 +30,6 @@ ${d.List(
   d`${d.Method('getList(key: string): string[];')} - Retrieve an environmental value as a list`,
 )}
 
-${d.Section('Process Execution')}
-Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.
-
-A simple example would be:
-
-${d.Code('Running a directory listing via ls', 'src/exec.ts')}
-
-As you can see, the call returns not only the child process information, but the ${d.Input('Promise')} to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
-
-${d.Section('Shutdown Management')}
-
-Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides ${d.Method('process.exit')} to properly handle ${d.Input('SIGKILL')} and ${d.Input('SIGINT')}, with a default threshold of 3 seconds. In the advent of a ${d.Input('SIGTERM')} signal, the code exits immediately without any cleanup.
-
-As a registered shutdown handler, you can do.
-${d.Code('Registering a shutdown handler', 'src/shutdown.ts')}
 
 ${d.Section('Standard Error Support')}
 
@@ -90,5 +74,22 @@ ${d.List(
   )}`,
   d`${d.Method('uuid(len: number)')} generates a simple uuid for use within the application.`,
   d`${d.Method('allowDenyMatcher(rules[])')} builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.`
+)}
+
+
+${d.Section('Process Execution')}
+Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.
+
+A simple example would be:
+
+${d.Code('Running a directory listing via ls', 'src/exec.ts')}
+
+As you can see, the call returns not only the child process information, but the ${d.Input('Promise')} to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
+
+${d.List(
+  d`${d.Input('timeout')} as the number of milliseconds the process can run before terminating and throwing an error`,
+  d`${d.Input('quiet')} which suppresses all stdout/stderr output`,
+  d`${d.Input('stdin')} as a string, buffer or stream to provide input to the program you are running;`,
+  d`${d.Input('timeoutKill')} allows for registering functionality to execute when a process is force killed by timeout`
 )}
 `;

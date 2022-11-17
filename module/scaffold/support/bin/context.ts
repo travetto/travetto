@@ -3,8 +3,7 @@ import * as fs from 'fs/promises';
 import * as mustache from 'mustache';
 
 import { path } from '@travetto/boot';
-import { Env, ExecUtil, ExecutionResult } from '@travetto/base';
-import { version } from '@travetto/boot/package.json';
+import { Env, Pkg, ExecUtil, ExecutionResult } from '@travetto/base';
 
 import { Feature } from './features';
 
@@ -35,7 +34,7 @@ export class Context {
   #modules: Record<string, boolean>;
 
   readonly name: string;
-  readonly frameworkVersion = version.replace(/[.]\d+$/, '.0');
+  readonly frameworkVersion = Pkg.mainDigest().framework.replace(/[.]\d+$/, '.0');
   readonly author = {
     name: cp.execSync('git config user.name', { stdio: 'pipe', encoding: 'utf8' }).trim() || Env.get('USER'),
     email: cp.execSync('git config user.email', { stdio: 'pipe', encoding: 'utf8' }).trim()

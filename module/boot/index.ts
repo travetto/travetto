@@ -3,12 +3,8 @@
 
 export * from './src/class-metadata';
 export * from './src/console';
-export * from './src/phase';
-export * from './src/module-index';
 export * from './src/types';
+export * from './src/module-index';
 export * from './src/path';
-export * from './src/ordering';
-export * from './src/proxy';
 export * from './src/stacktrace';
-export * from './src/error';
-export * from './src/watch';
+export * from './src/shutdown';

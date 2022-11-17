@@ -4,6 +4,7 @@ import { TransformerState, AfterClass, DecoratorUtil, TransformerId } from '@tra
 
 const REGISTER_MOD = '@travetto/registry/src/decorator';
 const BOOT_MOD = '@travetto/boot';
+const MANIFEST_MOD = '@travetto/manifest';
 
 /**
  * Registration of all classes to support the registry
@@ -17,7 +18,7 @@ export class RegisterTransformer {
    */
   @AfterClass()
   static registerClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (state.module === REGISTER_MOD || state.module.startsWith(BOOT_MOD)) {  // Cannot process self
+    if (state.module === REGISTER_MOD || state.module.startsWith(BOOT_MOD) || state.module.startsWith(MANIFEST_MOD)) {  // Cannot process self
       return node;
     }
 

@@ -1,11 +1,11 @@
-import { PhaseManager } from '@travetto/boot';
+import { RootRegistry } from '@travetto/registry';
 import { Env } from '@travetto/base';
 
 import { DependencyRegistry } from '../src/registry';
 
-export async function invoke(...[mod, cls, method, qualifier]: (string | undefined)[]): Promise<unknown> {
+export async function main(...[mod, cls, method, qualifier]: (string | undefined)[]): Promise<unknown> {
   Env.define();
-  await PhaseManager.run('init');
+  await RootRegistry.init();
 
   const tgt = (await import(mod!))[cls!];
 
@@ -17,5 +17,3 @@ export async function invoke(...[mod, cls, method, qualifier]: (string | undefin
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   return await (inst as Record<string, () => Promise<unknown>>)[method!]();
 }
-
-invoke(...process.argv.slice(2));

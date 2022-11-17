@@ -1,5 +1,5 @@
 {
-  "extends": "./module/manifest/tsconfig.trv.json",
+  "extends": "./module/compiler/tsconfig.trv.json",
   "compilerOptions": {
     "rootDir": ".",
   }

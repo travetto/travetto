@@ -1,7 +1,7 @@
 import { readdirSync } from 'fs';
 import type * as watcher from '@parcel/watcher';
 
-import { path } from './path';
+import { path, ShutdownManager } from '@travetto/boot';
 
 async function getWatcher(): Promise<typeof watcher> {
   try {
@@ -11,6 +11,8 @@ async function getWatcher(): Promise<typeof watcher> {
     throw err;
   }
 }
+
+export type FileWatchEvent = { type: 'create' | 'update' | 'delete', path: string };
 
 /**
  * Allow for simple watching of files
@@ -23,32 +25,33 @@ export class WatchUtil {
    */
   static async buildWatcher(
     folders: string[],
-    onEvent: (ev: { type: 'create' | 'update' | 'delete', path: string }, folder: string) => void
+    onEvent: (ev: FileWatchEvent, folder: string) => void,
+    filter?: (ev: FileWatchEvent) => boolean
   ): Promise<() => Promise<void>> {
     const lib = await getWatcher();
     const subs = await Promise.all(folders.map(folder =>
       lib.subscribe(folder, (err, events) => {
         for (const ev of events) {
-          onEvent(ev, folder);
+          if (!filter || filter(ev)) {
+            onEvent(ev, folder);
+          }
         }
       }, {
         ignore: [...readdirSync(folder).filter(x => x.startsWith('.') && x.length > 2), 'node_modules']
       })
     ));
-    return () => Promise.all(subs.map(x => x.unsubscribe())).then(() => { });
+
+    // Allow for multiple calls
+    let finalProm: Promise<void> | undefined;
+    const remove = (): Promise<void> => finalProm ??= Promise.all(subs.map(x => x.unsubscribe())).then(() => { });
+
+    // Remove on shut down
+    ShutdownManager.onShutdown(this.constructor, remove);
+
+    return remove;
   }
 
-  static async watchFile(
-    source: string,
-    onChange: () => void
-  ): Promise<() => Promise<void>> {
-    return this.buildWatcher(
-      [path.dirname(source)],
-      ({ type, path: file }) => {
-        if (type === 'update' && file === source) {
-          onChange();
-        }
-      }
-    );
+  static async watchFile(source: string, onChange: () => void): Promise<() => Promise<void>> {
+    return this.buildWatcher([path.dirname(source)], onChange, ev => ev.type === 'update' && ev.path === source);
   }
 }

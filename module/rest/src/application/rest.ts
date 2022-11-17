@@ -1,5 +1,4 @@
-import { RetargettingProxy, OrderingUtil } from '@travetto/boot';
-
+import { OrderingUtil } from '@travetto/base';
 import { Pkg, Env, Class, AppError } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
@@ -122,6 +121,7 @@ export class RestApplication<T = unknown>  {
     config.instance = await DependencyRegistry.getInstance(config.class);
 
     if (Env.isDynamic()) {
+      const { RetargettingProxy } = await import('@travetto/base/src/internal/proxy');
       config.instance = RetargettingProxy.unwrap(config.instance);
     }
 

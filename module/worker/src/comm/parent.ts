@@ -1,6 +1,7 @@
 import { ChildProcess } from 'child_process';
 
-import { ExecutionState, ShutdownManager } from '@travetto/base';
+import { ExecutionState } from '@travetto/base';
+import { ShutdownManager } from '@travetto/boot';
 
 import { ProcessCommChannel } from './channel';
 

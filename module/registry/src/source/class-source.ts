@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 
+import { ModuleIndex } from '@travetto/boot';
 import { Class, Env } from '@travetto/base';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
@@ -96,6 +97,10 @@ export class ClassSource implements ChangeSource<Class> {
       await DynamicClassSource.init(this);
     }
 
+    // Ensure everything is loaded
+    await ModuleIndex.loadSource();
+
+    // Flush all load events
     this.#flush();
   }
 

@@ -3,7 +3,7 @@ import * as assert from 'assert';
 import { path } from '@travetto/boot';
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { ExecUtil } from '..';
+import { ExecUtil } from '../src/exec';
 
 @Suite()
 export class ExecUtilTest {

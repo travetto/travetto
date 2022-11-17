@@ -1,4 +1,3 @@
-import { PhaseManager } from '@travetto/boot';
 import { Configuration } from '@travetto/config';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -6,7 +5,6 @@ import { RootRegistry } from '@travetto/registry';
 import { DBConfig } from './dbconfig';
 
 export async function main() {
-  await PhaseManager.run('init');
   await RootRegistry.init();
   const config = await DependencyRegistry.getInstance(Configuration);
 
