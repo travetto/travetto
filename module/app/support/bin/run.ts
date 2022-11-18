@@ -19,7 +19,6 @@ export class AppRunUtil {
     if (!Env.isTrue('TRV_DEBUG')) {
       ConsoleManager.setDebug(false);
     }
-
     // Init
     await RootRegistry.init();
 

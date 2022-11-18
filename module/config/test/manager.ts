@@ -62,7 +62,7 @@ class Setup {
 
   @InjectableFactory()
   static getConfig(): ConfigSource {
-    return new FileConfigSource(['@#test/resources']);
+    return new FileConfigSource(['@#test/fixtures']);
   }
 }
 

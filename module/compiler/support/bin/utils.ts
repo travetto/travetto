@@ -126,7 +126,9 @@ export async function spawn(
   }
 }
 
-export const log = process.env.DEBUG === 'build' ? console.debug.bind(console) : (): void => { };
+export const log = process.env.DEBUG === 'build' ?
+  (...args: unknown[]): void => console.debug(new Date().toISOString(), ...args) :
+  (): void => { };
 
 export async function getProjectSources(
   module: string,

@@ -140,7 +140,7 @@ export class ManifestModuleUtil {
 
     return {
       id,
-      profiles: profiles?.includes('*') ? [] : [...new Set(profiles?.filter(x => x !== '*'))],
+      profiles: profiles?.includes('*') ? [] : [...new Set(profiles)],
       name,
       version,
       main,
