@@ -72,13 +72,15 @@ class $ModuleIndex {
    */
   #index(): void {
     this.#manifest = JSON.parse(fs.readFileSync(this.#resolve('manifest.json'), 'utf8'));
-    this.#modules = Object.values(this.manifest.modules).map(m => ({
-      ...m,
-      output: this.#resolve(m.output),
-      files: Object.fromEntries(
-        Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
-      )
-    }));
+    this.#modules = Object.values(this.manifest.modules)
+      .filter(m => !m.profiles.length || !m.profiles.includes('compile'))
+      .map(m => ({
+        ...m,
+        output: this.#resolve(m.output),
+        files: Object.fromEntries(
+          Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
+        )
+      }));
 
     for (const mod of this.#modules) {
       for (const files of Object.values(mod.files ?? {})) {

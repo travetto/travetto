@@ -115,7 +115,7 @@ class $Logger implements ConsoleListener {
       message = '';
     }
 
-    if (category && level in this.#filters && !this.#filters[level]!(category)) {
+    if (category && this.#filters[level] && !this.#filters[level]?.(category)) {
       return;
     }
 
