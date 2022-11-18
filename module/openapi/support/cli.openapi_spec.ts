@@ -24,7 +24,7 @@ export class OpenApiSpecCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    const result = await ExecUtil.worker(ModuleIndex.resolveImport('@travetto/openapi/support/main.generate')).message;
+    const result = await ExecUtil.worker(ModuleIndex.resolveFileImport('@travetto/openapi/support/main.generate.ts')).message;
 
     if (this.cmd.output === '-' || !this.cmd.output) {
       console.log!(result);
