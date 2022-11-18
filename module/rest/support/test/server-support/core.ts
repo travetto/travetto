@@ -4,10 +4,9 @@ import { DependencyRegistry } from '@travetto/di';
 import { TimeUtil } from '@travetto/base';
 
 import type { Request } from '../../../src/types';
-import { RestCookieConfig, RestConfig, RestApplication } from '../../..';
+import { RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '../../..';
 
 import { RestServerSupport, MakeRequestConfig, headerToShape } from './base';
-
 
 /**
  * Support for invoking http requests against the server
@@ -29,7 +28,7 @@ export class CoreRestServerSupport implements RestServerSupport {
 
     const config = await DependencyRegistry.getInstance(RestConfig);
     config.port = this.#port;
-    config.ssl.active = false; // Update config object
+    config.ssl = RestSslConfig.from({ active: false }); // Update config object
 
     this.#app = await DependencyRegistry.getInstance(RestApplication);
     const handle = await this.#app.run();

@@ -65,7 +65,7 @@ export class ModelCandidateUtil {
    */
   static async getCandidates(op: keyof ModelStorageSupport): Promise<CandidateNames> {
     return CliUtil.waiting('Resolving', () =>
-      ExecUtil.worker<CandidateNames>(ModuleIndex.resolveImport('@travetto/model/support/main.candidate'), [op]).message
+      ExecUtil.worker<CandidateNames>(ModuleIndex.resolveFileImport('@travetto/model/support/main.candidate.ts'), [op]).message
     );
   }
 

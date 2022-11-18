@@ -25,7 +25,11 @@ export class FileUtil {
    */
   static resolveFile(file: string): { resolved: string, cleaned: string } {
     if (!existsSync(path.resolve(file))) {
-      file = ModuleIndex.resolveImport(file);
+      if (file.endsWith('.ts')) {
+        file = ModuleIndex.resolveFileImport(file);
+      } else {
+        throw new Error(`Unknown file to resolve: ${file}`);
+      }
     }
     const resolved = path.resolve(file);
     // TODO: Fix name

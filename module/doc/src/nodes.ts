@@ -165,8 +165,7 @@ export const node = {
     }
 
     const script = DocRunUtil.run(cmd, args, cfg);
-    const prefix = !/.*\/doc\/.*[.]ts$/.test(cmd) ? '$' :
-      `$ node @travetto/${cfg.module ?? 'base'}/bin/main`;
+    const prefix = !/.*\/doc\/.*[.]ts$/.test(cmd) ? '$' : '$ node ';
 
     return node.Terminal(title, `${prefix} ${cmd} ${args.join(' ')}\n\n${script}`);
   },

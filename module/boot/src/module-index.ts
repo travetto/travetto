@@ -40,6 +40,7 @@ class $ModuleIndex {
   #root: string;
   #outputToEntry = new Map<string, IndexedFile>();
   #sourceToEntry = new Map<string, IndexedFile>();
+  #importToEntry = new Map<string, IndexedFile>();
 
   constructor(root: string) {
     this.#root = root;
@@ -84,6 +85,7 @@ class $ModuleIndex {
         for (const entry of files) {
           this.#outputToEntry.set(entry.output, entry);
           this.#sourceToEntry.set(entry.source, entry);
+          this.#importToEntry.set(entry.module, entry);
         }
       }
     }
@@ -168,9 +170,9 @@ class $ModuleIndex {
   /**
    * Resolve import
    */
-  resolveImport(name: string): string {
-    // TODO: Write own logic?
-    return require.resolve(name);
+  resolveFileImport(name: string): string {
+    name = name.replace(/[.]ts$/, '.js');
+    return this.#importToEntry.get(name)?.output ?? name;
   }
 
   /**

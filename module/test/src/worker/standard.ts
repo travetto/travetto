@@ -14,7 +14,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
    * Spawn a child
    */
   return () => WorkUtil.spawnedWorker(
-    () => ExecUtil.fork(ModuleIndex.resolveImport('@travetto/test/support/main.test-child')),
+    () => ExecUtil.fork(ModuleIndex.resolveFileImport('@travetto/test/support/main.test-child.ts')),
     /**
      * Child initialization
      */

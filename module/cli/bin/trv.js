@@ -8,7 +8,7 @@ const outputFolder = (process.env.TRV_OUTPUT || path.resolve('.trv_output')).rep
 const compilerFolder = (process.env.TRV_COMPILER || path.resolve('.trv_compiler')).replaceAll('\\', '/');
 
 (async function go(cmd, ...args) {
-  const { compile: build } = require('@travetto/compiler/bin/compile');
+  const { compile: build } = require('@travetto/compiler/bin/main');
 
   switch (cmd) {
     case 'watch': return build({ compile, outputFolder, compilerFolder, watch: true });
