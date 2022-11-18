@@ -1,9 +1,10 @@
 import * as assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
+import { ErrorUtil } from '../src/error-util';
 
 @Suite()
-class StackTest {
+class ErrorUtilTest {
   inner1() {
     throw new Error('Uh oh');
   }
@@ -38,12 +39,15 @@ class StackTest {
     } catch (err) {
       assert(err);
       assert(err instanceof Error);
-      assert(!err.stack?.includes('inner6'));
-      assert(!err.stack?.includes('inner5'));
-      assert(err.stack?.includes('inner4'));
-      assert(err.stack?.includes('inner3'));
-      assert(err.stack?.includes('inner2'));
-      assert(err.stack?.includes('inner1'));
+      const stack = ErrorUtil.cleanStack(err);
+      assert(!stack.includes('inner6'));
+      assert(!stack.includes('inner5'));
+      assert(stack.includes('inner4'));
+      assert(stack.includes('inner3'));
+      assert(stack.includes('inner2'));
+      assert(stack.includes('inner1'));
+
+      // assert(err?.stack === stack);
       console.warn('Error', { error: err });
     }
   }

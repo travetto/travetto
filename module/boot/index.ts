@@ -6,5 +6,4 @@ export * from './src/console';
 export * from './src/types';
 export * from './src/module-index';
 export * from './src/path';
-export * from './src/stacktrace';
 export * from './src/shutdown';

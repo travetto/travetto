@@ -102,7 +102,7 @@ export abstract class Registry implements ChangeSource<Class> {
    * Initialize, with a built-in latch to prevent concurrent initializations
    */
   async init(): Promise<unknown> {
-    console.log('Trying to initialize', { id: this.constructor.Ⲑid, uid: this.#uid, initialized: !!this.#initialized });
+    console.debug('Trying to initialize', { id: this.constructor.Ⲑid, uid: this.#uid, initialized: !!this.#initialized });
 
     if (!this.#initialized) {
       this.#initialized = this.#runInit();

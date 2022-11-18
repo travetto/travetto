@@ -10,8 +10,8 @@ export class RunnableTestConsumer implements TestConsumer {
   /**
    * Build a runnable test consumer given a format or a full consumer
    */
-  static get(consumer: string | TestConsumer): RunnableTestConsumer {
-    return new RunnableTestConsumer(TestConsumerRegistry.getInstance(consumer));
+  static async get(consumer: string | TestConsumer): Promise<RunnableTestConsumer> {
+    return new RunnableTestConsumer(await TestConsumerRegistry.getInstance(consumer));
   }
 
   #consumers: TestConsumer[];

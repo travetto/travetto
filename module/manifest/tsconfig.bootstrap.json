@@ -14,7 +14,9 @@
     "rootDir": "."
   },
   "files": [
+    "src/delta.ts",
     "src/manifest.ts",
+    "src/module.ts",
     "src/package.ts",
     "src/path.ts",
     "src/types.ts",

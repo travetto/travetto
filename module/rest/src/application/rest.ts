@@ -1,5 +1,4 @@
-import { OrderingUtil } from '@travetto/base';
-import { Pkg, Env, Class, AppError } from '@travetto/base';
+import { Pkg, Env, Class, OrderingUtil, AppError } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
 import { Application } from '@travetto/app';

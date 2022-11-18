@@ -24,13 +24,13 @@ export type ManifestModuleFolders = {
   ['support/fixtures']?: ManifestModuleFile[];
   ['support/resources']?: ManifestModuleFile[];
   $other?: ManifestModuleFile[];
-}
+};
 
 export type ManifestModuleFolderType = keyof ManifestModuleFolders;
 
 export type ManifestModule = ManifestModuleCore & {
-  files: ManifestModuleFolders
-}
+  files: ManifestModuleFolders;
+};
 
 export type ManifestRoot = {
   generated: number;

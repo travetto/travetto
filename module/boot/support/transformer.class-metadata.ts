@@ -5,7 +5,7 @@ import {
   TransformerId, AfterFunction, CoreUtil, SystemUtil
 } from '@travetto/transformer';
 
-const BOOT_MOD = '@travetto/boot';
+const BOOT_MOD_SRC = '@travetto/boot/src';
 const MANIFEST_MOD = '@travetto/manifest';
 
 const UTIL_MOD = '@travetto/boot/src/class-metadata';
@@ -33,7 +33,7 @@ export class RegisterTransformer {
    */
   @OnClass()
   static collectClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (state.module.startsWith(BOOT_MOD) || state.module.startsWith(MANIFEST_MOD)) {
+    if (state.module.startsWith(BOOT_MOD_SRC) || state.module.startsWith(MANIFEST_MOD)) {
       return node; // Exclude self
     }
     state[cls] = SystemUtil.naiveHash(node.getText());
@@ -101,7 +101,7 @@ export class RegisterTransformer {
    */
   @AfterFunction()
   static registerFunctionMetadata(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
-    if (state.module.startsWith(BOOT_MOD) || state.module.startsWith(MANIFEST_MOD) || !ts.isFunctionDeclaration(node)) {
+    if (state.module.startsWith(BOOT_MOD_SRC) || state.module.startsWith(MANIFEST_MOD) || !ts.isFunctionDeclaration(node)) {
       return node;
     }
 

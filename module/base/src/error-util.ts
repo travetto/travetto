@@ -1,8 +1,24 @@
+import { path } from '@travetto/boot';
+
 export type SerializedError = { $?: boolean, message: string, stack?: string, name: string };
 
 function isSerialized(e: unknown): e is SerializedError {
   return !!e && (typeof e === 'object') && '$' in e;
 }
+
+const DEFAULT_NAMES = [
+  '@travetto/context',
+  'src/stacktrace',
+  'internal',
+  '(?:Array.*?<anonymous>)',
+  'async_hooks',
+  '[(]native[)]',
+  'typescript',
+  'tslib',
+  'source-map-support'
+];
+
+const DEFAULT_FILTER = new RegExp(`(${DEFAULT_NAMES.join('|')})`);
 
 /**
  * Common error utilities
@@ -51,6 +67,44 @@ export class ErrorUtil {
       return err;
     } else if (e) {
       return e;
+    }
+  }
+
+  /**
+   * Clean up the stack output for an error
+   * @param err The error to filter
+   * @param filter Should the stack be filtered
+   */
+  static cleanStack(err: Error | string, filter: RegExp = DEFAULT_FILTER): string {
+    let lastLocation: string = '';
+    const cwd = path.cwd();
+    const cwdPrefix = `${cwd}/`;
+    const errText = path.toPosix(typeof err === 'string' ? err : err.stack!);
+    const body = errText
+      .split('\n')
+      .filter(x => filter.test(x))
+      .reduce<string[]>((acc, line) => {
+        const [, location] = line.split(cwd);
+
+        if (location === lastLocation) {
+          // Do nothing
+        } else {
+          if (location) {
+            lastLocation = location;
+          }
+          acc.push(line);
+        }
+        return acc;
+      }, [])
+      .map(x => x
+        .replace(cwdPrefix, './')
+        .replace(/^[\/]+/, '')
+      );
+
+    if (!filter || body.length > 2) {
+      return body.join('  \n');
+    } else {
+      return errText;
     }
   }
 }

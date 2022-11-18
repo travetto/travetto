@@ -2,8 +2,6 @@ import * as assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Text, TypeMismatchError } from '@travetto/schema';
-
-import { BaseModelSuite } from './base';
 import {
   ModelIndexedSupport, Index, ModelCrudSupport, Model,
   NotFoundError, SubTypeNotSupportedError
@@ -11,6 +9,8 @@ import {
 
 import { isIndexedSupported } from '../../src/internal/service/common';
 import { ExistsError } from '../../src/error/exists';
+
+import { BaseModelSuite } from './base';
 
 @Model({ baseType: true })
 export class Worker {

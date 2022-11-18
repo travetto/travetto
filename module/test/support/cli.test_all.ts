@@ -42,8 +42,6 @@ export class TestAllCommand extends CliCommand<Options> {
     const { WorkPool, IterableWorkSet } = await import('@travetto/worker');
     const { TestWorker } = await import('./bin/all-worker');
 
-    await TestConsumerRegistry.manualInit();
-
     const emitter = await TestConsumerRegistry.getInstance(this.cmd.format);
     const consumer = new RunnableTestConsumer(emitter);
     const pool = new WorkPool(() => new TestWorker(consumer), { max: this.cmd.concurrency });

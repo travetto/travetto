@@ -1,6 +1,5 @@
-import { StacktraceManager } from '@travetto/boot';
 import { CliUtil, CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
-import { Env } from '@travetto/base';
+import { Env, ErrorUtil } from '@travetto/base';
 
 import { AppListLoader } from './bin/list';
 import { AppRunUtil } from './bin/run';
@@ -19,6 +18,8 @@ type Options = {
  * The main entry point for the application cli
  */
 export class AppRunCommand extends CliCommand<Options> {
+  #loader: AppListLoader = new AppListLoader();
+
   name = 'run';
   allowUnknownOptions = true;
 
@@ -30,7 +31,7 @@ export class AppRunCommand extends CliCommand<Options> {
       '',
       CliUtil.color`${{ title: 'Available Applications:' }}`,
       '',
-      HelpUtil.generateAppHelpList(await AppListLoader.getList()),
+      HelpUtil.generateAppHelpList(await this.#loader.getList()),
       ''
     ].join('\n');
   }
@@ -60,7 +61,7 @@ export class AppRunCommand extends CliCommand<Options> {
   async action(app: string, args: string[]): Promise<void> {
     try {
       // Find app
-      const selected = await AppListLoader.findByName(app);
+      const selected = await this.#loader.findByName(app);
 
       // If app not found
       if (!selected) {
@@ -79,7 +80,7 @@ export class AppRunCommand extends CliCommand<Options> {
           if (hasChildren(err)) {
             console.error(err.errors.map((x: { message: string }) => CliUtil.color`● ${{ output: x.message }}`).join('\n'));
           } else {
-            const stack = StacktraceManager.simplifyStack(err);
+            const stack = ErrorUtil.cleanStack(err);
             if (!stack.includes(err.message)) {
               console.error(err.message);
             }
@@ -92,7 +93,7 @@ export class AppRunCommand extends CliCommand<Options> {
       if (!outerErr || !(outerErr instanceof Error)) {
         throw outerErr;
       }
-      await this.showHelp(outerErr, `\nUsage: ${HelpUtil.getAppUsage((await AppListLoader.findByName(app))!)}`);
+      await this.showHelp(outerErr, `\nUsage: ${HelpUtil.getAppUsage((await this.#loader.findByName(app))!)}`);
     }
   }
 
@@ -109,7 +110,7 @@ export class AppRunCommand extends CliCommand<Options> {
    */
   override async complete(): Promise<Record<string, string[]>> {
 
-    const apps = await AppListLoader.getList() ?? [];
+    const apps = await this.#loader.getList() ?? [];
 
     return { '': apps.map(x => x.name).concat(['--env', '--profile']) };
   }

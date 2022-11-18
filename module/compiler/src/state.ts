@@ -3,9 +3,8 @@ import { mkdirSync, readFileSync, writeFile } from 'fs';
 
 import {
   path,
-  ManifestUtil, ManifestDelta, ManifestModule,
-  ManifestModuleFileType, ManifestRoot,
-  ManifestState
+  ManifestModuleUtil, ManifestDelta, ManifestModule,
+  ManifestModuleFileType, ManifestRoot, ManifestState
 } from '@travetto/manifest';
 
 import { CompilerUtil, FileWatchEvent } from './util';
@@ -60,7 +59,7 @@ export class CompilerState {
     const sourceFolder = path.dirname(sourceFile);
     const inputFile = path.resolve(relativeInput);
     const inputFolder = path.dirname(inputFile);
-    const fileType = ManifestUtil.getFileType(moduleFile);
+    const fileType = ManifestModuleUtil.getFileType(moduleFile);
     const outputFile = fileType === 'typings' ?
       undefined :
       path.resolve(this.#outputFolder, (fileType === 'ts' ? relativeInput.replace(/[.]ts$/, '.js') : relativeInput));
@@ -107,7 +106,7 @@ export class CompilerState {
       for (const [modName, subs] of Object.entries(this.#delta)) {
         const mod = this.#manifest.modules[modName];
         for (const [file] of subs) {
-          const type = ManifestUtil.getFileType(file);
+          const type = ManifestModuleUtil.getFileType(file);
           if (validFile(type)) {
             files.push(path.resolve(mod.output, file));
           }
@@ -140,11 +139,11 @@ export class CompilerState {
       const moduleFile = sourceFile.replace(`${mod.source}/`, '');
       switch (type) {
         case 'create': {
-          const fileType = ManifestUtil.getFileType(moduleFile);
+          const fileType = ManifestModuleUtil.getFileType(moduleFile);
           if (validFile(fileType)) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             const input = this.registerInput(mod, moduleFile);
-            ManifestUtil.updateManifestModuleFile(mod, moduleFile, 'update');
+            ManifestModuleUtil.updateModuleFile(mod, moduleFile, 'update');
             this.#sourceHashes.set(sourceFile, hash);
             handler.create(input);
           }
@@ -154,7 +153,7 @@ export class CompilerState {
           const io = this.#sourceInputOutput.get(sourceFile);
           if (io) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
-            ManifestUtil.updateManifestModuleFile(io.module, io.relativeInput.replace(`${io.module.output}/`, ''), 'update');
+            ManifestModuleUtil.updateModuleFile(io.module, io.relativeInput.replace(`${io.module.output}/`, ''), 'update');
 
             if (this.#sourceHashes.get(sourceFile) !== hash) {
               this.resetInputSource(io.input);
@@ -168,7 +167,7 @@ export class CompilerState {
           const io = this.#sourceInputOutput.get(sourceFile);
           if (io) {
             this.removeInput(io.input);
-            ManifestUtil.updateManifestModuleFile(io.module, io.relativeInput.replace(`${io.module.output}/`, ''), 'delete');
+            ManifestModuleUtil.updateModuleFile(io.module, io.relativeInput.replace(`${io.module.output}/`, ''), 'delete');
             if (io.output) {
               handler.delete(io.output);
             }
