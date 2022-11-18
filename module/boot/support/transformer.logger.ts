@@ -92,10 +92,10 @@ export class LoggerTransformer {
     const level = name.escapedText!;
 
     if (VALID_LEVELS[level]) {
-      const ident = state.imported ??= state.importFile(HELPER_MOD, 'ᚕtrv').ident;
+      const ident = state.imported ??= state.importFile(HELPER_MOD, 'ᚕ_').ident;
       return state.factory.updateCallExpression(
         node,
-        state.createAccess(ident, 'log'),
+        state.createAccess(ident, 'trv', 'log'),
         node.typeArguments,
         [
           state.factory.createStringLiteral(VALID_LEVELS[level]),

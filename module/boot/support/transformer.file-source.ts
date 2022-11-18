@@ -3,7 +3,6 @@ import * as ts from 'typescript';
 import { TransformerId, TransformerState, AfterFile } from '@travetto/transformer';
 
 const MANIFEST_MOD = '@travetto/manifest';
-const BOOT_MOD = '@travetto/boot';
 const HELPER_MOD = '@travetto/boot/support/init.helper';
 
 /**
@@ -15,11 +14,11 @@ export class FileSourceTransformer {
 
   @AfterFile()
   static registerFileSource(state: TransformerState, node: ts.SourceFile): typeof node {
-    if (state.module.startsWith(BOOT_MOD) || state.module.startsWith(MANIFEST_MOD)) {
+    if (state.module.startsWith(HELPER_MOD) || state.module.startsWith(MANIFEST_MOD)) {
       return node;
     }
 
-    const { ident } = state.importFile(HELPER_MOD, 'ᚕtrv');
+    const { ident } = state.importFile(HELPER_MOD, 'ᚕ_');
 
     const toAdd = [
       state.factory.createVariableStatement(
@@ -30,7 +29,7 @@ export class FileSourceTransformer {
             undefined,
             undefined,
             state.factory.createCallExpression(
-              state.createAccess(ident, 'out'),
+              state.createAccess(ident, 'trv', 'out'),
               [],
               [state.createIdentifier('__filename')]
             )

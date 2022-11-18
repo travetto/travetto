@@ -20,6 +20,7 @@ let manifestTemp;
 
 /**
  * @param {string} compilerFolder
+ * @return {import('@travetto/manifest')}}
  */
 const importManifest = (compilerFolder) => require(resolve(compilerFolder, 'node_modules', '@travetto/manifest'));
 
@@ -74,7 +75,7 @@ async function buildCompiler(state, config) {
 
   await compileModuleIfStale(config.compilerFolder, '@travetto/compiler', '[2] Compiler Bootstrapping');
 
-  const changed = shouldRebuildCompiler(state)
+  const changed = shouldRebuildCompiler(state);
 
   if (changed.transformers) {
     log('[2] Clearing output: */support/transform changed');

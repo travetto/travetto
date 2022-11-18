@@ -28,7 +28,7 @@ export class TestWatcher {
     await SuiteRegistry.init();
     SuiteRegistry.listen(RootRegistry);
 
-    const consumer = new CumulativeSummaryConsumer(TestConsumerRegistry.getInstance(format));
+    const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistry.getInstance(format));
     const pool = new WorkPool(buildStandardTestManager(consumer), {
       idleTimeoutMillis: 120000,
       min: 2,

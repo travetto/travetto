@@ -28,7 +28,7 @@ export class Runner {
    * Run all files
    */
   async runFiles(): Promise<boolean> {
-    const consumer = RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
+    const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
     const files = (await RunnerUtil.getTestFiles(this.patterns));
 
@@ -55,7 +55,7 @@ export class Runner {
    * Run a single file
    */
   async runSingle(): Promise<boolean> {
-    const consumer = RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
+    const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
     consumer.onStart();
 
     const [file, ...args] = this.#state.args;

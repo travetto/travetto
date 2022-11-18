@@ -40,7 +40,10 @@ class $TestConsumerRegistry {
    * Get a consumer instance that supports summarization
    * @param consumer The consumer identifier or the actual consumer
    */
-  getInstance(consumer: string | TestConsumer): TestConsumer {
+  async getInstance(consumer: string | TestConsumer): Promise<TestConsumer> {
+    // TODO: Fix consumer registry init
+    await this.manualInit();
+
     return typeof consumer === 'string' ?
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       new ((this.get(consumer) ?? this.#primary) as ConcreteClass)() :

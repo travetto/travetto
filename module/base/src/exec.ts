@@ -221,8 +221,6 @@ export class ExecUtil {
       argv: args
     });
 
-    console.log('Setting up env', env);
-
     const stderr: Buffer[] = [];
     worker.stdout!.on('data', (d: string | Buffer) => { }); // Ignore
     worker.stderr!.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));

@@ -11,11 +11,11 @@ import type { ApplicationConfig } from '../../src/types';
 /**
  * Utilities to fetch list of applications
  */
-export class $AppListLoader {
+export class AppListLoader {
 
   #cacheConfig: string;
 
-  constructor(cacheConfig: string) {
+  constructor(cacheConfig: string = path.resolve('.trv-app-cache.json')) {
     this.#cacheConfig = cacheConfig;
   }
 
@@ -104,7 +104,3 @@ export class $AppListLoader {
     return items;
   }
 }
-
-export const AppListLoader = new $AppListLoader(
-  path.resolve('.trv-app-cache.json')
-);

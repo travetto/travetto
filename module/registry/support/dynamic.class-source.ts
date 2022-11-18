@@ -25,6 +25,7 @@ class $DynamicClassSource {
       }
     }, 0);
 
+
     // Proxy all file loads
     DynamicLoader.onLoad((name, mod) => {
       if (IS_VALID_SOURCE(name)) {
@@ -42,7 +43,7 @@ class $DynamicClassSource {
     // Clear target on unload
     DynamicLoader.onUnload(f => this.#modules.get(f)?.setTarget(null));
 
-    console.log('Watching for', folders);
+    console.debug('Watching for', folders);
 
     await WatchUtil.buildWatcher(folders, async ({ type, path: file }) => {
       switch (type) {

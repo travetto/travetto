@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+
 import type { ExecutionOptions, ExecutionState } from '../util/exec';
 import { Workspace } from './workspace';
 

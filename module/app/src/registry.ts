@@ -13,7 +13,7 @@ import { AppClass, ApplicationConfig } from './types';
 class $ApplicationRegistry {
   #applications = new Map<string, ApplicationConfig>();
 
-  async init() {
+  async init(): Promise<void> {
     await ModuleIndex.loadSource();
   }
 

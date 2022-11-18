@@ -18,10 +18,10 @@ class ModuleIndexTests {
     const modId = ModuleIndex.getId(__output);
     assert(modId === '@travetto/boot/test/module');
 
-    const modId2 = ModuleIndex.getId(path.resolve(path.dirname(__output), '..', '..', 'test', 'src', 'assert', 'util.ts'));
-    assert(modId2 === '@trv:test/assert/util');
+    const modId2 = ModuleIndex.getId(path.resolve(path.dirname(__output), '..', '..', 'test', 'src', 'assert', 'util.js'));
+    assert(modId2 === '@trv:test/src/assert/util');
 
     const modId3 = ModuleIndex.getId(path.resolve(path.dirname(__output), 'fixtures', 'simple.ts'));
-    assert(modId3 === '@travetto/boot/test/fixtures/simple');
+    assert(modId3 === '@travetto/boot/test/fixtures/simple.ts');
   }
 }

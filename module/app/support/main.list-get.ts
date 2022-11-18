@@ -9,5 +9,5 @@ import { AppListLoader } from './bin/list';
  */
 export async function main(): Promise<ApplicationConfig[]> {
   Env.define();
-  return (await AppListLoader.getList()) ?? [];
+  return (await new AppListLoader().getList()) ?? [];
 }
