@@ -1,8 +1,8 @@
 import '@arcsine/nodesh';
 import * as cp from 'child_process';
 
-import { Util } from './package/util';
-import { Packages } from './package/packages';
+import { Util } from './bin/util';
+import { Packages } from './bin/packages';
 
 Packages.yieldPublicPackages()
   .$flatMap(x => 'support/service*.ts'.$dir({ base: x._.folder }))

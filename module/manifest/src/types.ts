@@ -79,6 +79,11 @@ export type Package = {
     profileInherit?: boolean;
     profiles?: string[];
   };
+  travettoRepo?: {
+    modules?: string[];
+    global?: string[];
+    docBranch?: string;
+  };
   private?: boolean;
   publishConfig?: { access?: 'restricted' | 'public' };
 };

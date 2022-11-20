@@ -8,6 +8,14 @@ const resolveImport = (library: string): string => require.resolve(library);
 
 export type Dependency = Package['travetto'] & { version: string, name: string, folder: string };
 
+export type StdDependency = {
+  name: string;
+  version: string;
+  type: 'peer' | 'dev' | 'optional' | 'std';
+  ranged?: 'patch' | 'minor';
+  originalVersion: string;
+};
+
 export class PackageUtil {
 
   static readPackage(folder: string): Package {
@@ -18,7 +26,6 @@ export class PackageUtil {
     const { main, name, author, license, version } = pkg;
     return { name, main, author, license, version, framework };
   }
-
 
   /**
    * Find packages for a given folder (package.json), decorating dependencies along the way
@@ -62,7 +69,7 @@ export class PackageUtil {
             return false;
           }
         }),
-    ].sort(([a, b]) => a[0].localeCompare(b[0]));
+    ].sort((a, b) => a[0].localeCompare(b[0]));
 
     for (const [el, value, type] of searchSpace) {
       const subProfiles = type === 'peer' ? transitiveProfiles : profiles;

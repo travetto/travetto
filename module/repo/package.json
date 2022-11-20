@@ -1,12 +1,11 @@
 {
-  "name": "@travetto/pack",
+  "name": "@travetto/repo",
   "version": "3.0.0-rc.2",
-  "description": "Code packing utilities",
+  "description": "Monorepo utilities",
   "keywords": [
     "travetto",
     "typescript",
-    "packing",
-    "docker"
+    "monorepo"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
@@ -20,24 +19,25 @@
   ],
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/pack"
+    "directory": "module/repo"
   },
   "dependencies": {
     "@travetto/base": "file:../base",
+    "@travetto/cli": "file:../cli",
+    "@travetto/doc": "file:../doc",
+    "@travetto/test": "file:../test",
     "@types/picomatch": "^2.3.0",
     "picomatch": "^2.3.1"
   },
-  "peerDependencies": {
-    "@travetto/cli": "file:../cli"
-  },
+  "peerDependencies": {},
   "peerDependenciesMeta": {
     "@travetto/cli": {
       "optional": true
     }
   },
   "travetto": {
-    "id": "@trv:pack",
-    "displayName": "Pack"
+    "id": "@trv:repo",
+    "displayName": "Repo"
   },
   "publishConfig": {
     "access": "public"
