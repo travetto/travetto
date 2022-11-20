@@ -3,8 +3,8 @@ import * as cp from 'child_process';
 
 import '@arcsine/nodesh';
 
-import { Packages } from './package/packages';
-import { Util } from './package/util';
+import { Packages } from './bin/packages';
+import { Util } from './bin/util';
 
 Packages.yieldPublicPackages()
   .$filter(p => p.name.startsWith('@travetto'))

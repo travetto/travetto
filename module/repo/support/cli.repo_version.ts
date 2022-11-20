@@ -1,9 +1,9 @@
 import '@arcsine/nodesh';
 import { $AsyncIterable } from '@arcsine/nodesh/dist/types';
 
-import { Modules } from './package/modules';
-import { Git } from './package/git';
-import { Packages, Pkg } from './package/packages';
+import { Modules } from './bin/modules';
+import { Git } from './bin/git';
+import { Packages, Pkg } from './bin/packages';
 
 const [level, prefix] = process.argv.slice(2);
 
@@ -37,7 +37,7 @@ if (level === 'release') {
   );
 } else {
   Git.checkWorkspaceDirty('Cannot update versions with uncommitted changes').then(() =>
-    Git.yieldChangedPackages()
+    Git.findChangedModules()
       .$filter(p => p.name.startsWith('@travetto') && !p.private)
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       .$map(p => Modules.updateVersion(p, level as 'major', prefix))

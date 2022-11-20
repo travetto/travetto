@@ -151,17 +151,32 @@ export class ManifestModuleUtil {
     };
   }
 
+  static async getRepoRoot(): Promise<string | undefined> {
+    let folder = path.cwd();
+    while (!fs.stat(`${folder}/.git`).catch(() => false)) {
+      const nextFolder = path.dirname(folder);
+      if (nextFolder === folder) {
+        return undefined;
+      }
+      folder = nextFolder;
+    }
+    return folder;
+  }
+
   static async collectGlobalDependencies(declared: Dependency[]): Promise<Dependency[]> {
-    if (!process.env.TRV_GLOBAL_MODS) {
+
+    const root = await this.getRepoRoot();
+    if (!root) {
       return [];
     }
 
-    const mods = process.env.TRV_GLOBAL_MODS!.split(',').map(x => x.split(':'));
+    const pkg = await PackageUtil.readPackage(root);
+    const mods = pkg.travettoRepo?.global ?? [];
     const out: Dependency[] = [];
-    for (const [dep, profile] of mods) {
-      if (!declared.some(x => x.name === dep)) {
-        const folder = dep.replace('@travetto', process.env.TRV_GLOBAL_ROOT!);
-        out.unshift(...(await PackageUtil.collectDependencies(folder, [profile || '*'])));
+    for (const folder of mods) {
+      if (!declared.some(x => x.folder === folder)) {
+        const resolved = path.resolve(root, folder);
+        out.unshift(...(await PackageUtil.collectDependencies(resolved, [])));
       }
     }
     return out;

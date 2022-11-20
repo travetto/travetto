@@ -11,8 +11,20 @@
   "scripts": {
     "prestart": "npm ci --legacy-peer-deps",
     "start": "./bin/setup.sh",
-    "test": "trv-test",
+    "test": "trv repo:test",
     "lint": "npx eslint --ext .js --ext .ts ."
+  },
+  "travettoRepo": {
+    "modules": [
+      "module/*",
+      "related/*",
+      "sample/*",
+      "global-test/*"
+    ],
+    "global": [
+      "module/test",
+      "module/cli"
+    ]
   },
   "dependencies": {
     "@arcsine/nodesh": "^1.8.3",
