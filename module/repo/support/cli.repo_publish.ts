@@ -1,28 +1,48 @@
 import * as fs from 'fs/promises';
-import * as cp from 'child_process';
-
-import '@arcsine/nodesh';
+import { ExecUtil } from '@travetto/base';
 
 import { Packages } from './bin/packages';
-import { Util } from './bin/util';
+import { Repo } from './bin/repo';
+import { MutatingRepoCommand } from './command';
 
-Packages.yieldPublicPackages()
-  .$filter(p => p.name.startsWith('@travetto'))
-  .$map(async pkg => [await Packages.findPublishedPackageVersion(pkg), pkg] as const)
-  .$filter(([v,]) => !v)
-  .$map(([, pkg]) => pkg)
-  .$tap(pkg => fs.copyFile('LICENSE', `${pkg!._.folder}/LICENSE`))
-  .$map(pkg => {
-    const tag = pkg?.version?.replace(/^.*-(rc|latest|alpha|beta|next)[.]\d+/, (a, b) => b) || 'latest';
-    const args = [
-      'publish',
-      '--tag', tag,
-      '--access', 'public'
-    ];
-    if (!/^[~^]/.test(tag) && !/-(rc|latest|alpha|beta|next)[.]\d+$/.test(pkg.version)) {
-      args.push('--tag', 'latest');
+/**
+* `npx trv repo:publish`
+*
+* Publish all pending modules
+*/
+export class RepoPublishCommand extends MutatingRepoCommand {
+
+  name = 'repo:publish';
+
+  async action(...args: unknown[]): Promise<void> {
+    const publishedVersions = (await Repo.publicModules)
+      .map(mod =>
+        Packages.findPublishedVersion(mod.full, mod.name, mod.pkg.version)
+          .then(version => [mod, version] as const)
+      );
+
+    for (const [mod, published] of await Promise.all(publishedVersions)) {
+      if (!published) {
+        continue;
+      }
+
+      const tag = mod.pkg.version.replace(/^.*-(rc|latest|alpha|beta|next)[.]\d+/, (a, b) => b) || 'latest';
+
+      if (this.cmd.dryRun) {
+        console.log!(`[DRY-RUN] Publishing ${mod.name} with tag ${tag}`);
+      } else {
+        await fs.copyFile('LICENSE', `${mod.full}/LICENSE`);
+        const args = [
+          'publish',
+          '--tag', tag,
+          '--access', 'public'
+        ];
+        if (!/^[~^]/.test(tag) && !/-(rc|latest|alpha|beta|next)[.]\d+$/.test(mod.pkg.version)) {
+          args.push('--tag', 'latest');
+        }
+        const { result } = ExecUtil.spawn('npm', args, { cwd: mod.full, stdio: [0, 1, 2] });
+        await result;
+      }
     }
-    const proc = cp.spawn('npm', args, { shell: false, cwd: pkg!._.folder, stdio: [0, 1, 2] });
-    return Util.enhanceProcess(proc, 'npm publish');
-  })
-  .$stdout;
+  }
+}

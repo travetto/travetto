@@ -155,9 +155,9 @@ export class CliUtil {
 
     async function init(...header: string[]): Promise<void> {
       for (const line of header) {
-        console.log(line);
+        console.log!(line);
       }
-      console.log('\n'.repeat(rows));
+      console.log!('\n'.repeat(rows));
       cursorRow = rows + 1;
     }
 
@@ -177,7 +177,7 @@ export class CliUtil {
           readline.moveCursor(process.stdout, 0, row - cursorRow);
           readline.clearLine(process.stdout, 1);
           cursorRow = row + 1;
-          console.log(output);
+          console.log!(output);
         },
         async finish(): Promise<void> {
           readline.moveCursor(process.stdout, 0, rows - cursorRow);
@@ -192,7 +192,7 @@ export class CliUtil {
         },
         async finish(): Promise<void> {
           for (const response of responses) {
-            console.log(response);
+            console.log!(response);
           }
         }
       };

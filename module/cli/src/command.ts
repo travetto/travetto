@@ -29,7 +29,7 @@ export type ListOptionConfig<K extends OptionPrimitive = OptionPrimitive> = Core
 type AllOptionConfig<K extends OptionPrimitive = OptionPrimitive> = OptionConfig<K> | ListOptionConfig<K>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type OptionMap<T = any> = { [key in keyof T]: T[key] extends OptionPrimitive ? AllOptionConfig<T[key]> : never };
+export type OptionMap<T = any> = { [key in keyof T]: T[key] extends OptionPrimitive ? AllOptionConfig<T[key]> : never };
 
 type Shape<M extends OptionMap> = { [k in keyof M]: Exclude<M[k]['def'], undefined> };
 
