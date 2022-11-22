@@ -41,4 +41,8 @@ export class Semver {
     }
     return main;
   }
+
+  static incrementInplace(ver: string, level: SemverLevel, prefix?: string): string {
+    return this.format(this.increment(this.parse(ver), level, prefix));
+  }
 }

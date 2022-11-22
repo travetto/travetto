@@ -3,16 +3,35 @@ import * as fs from 'fs/promises';
 import { Package, PackageUtil, path } from '@travetto/manifest';
 import { DEP_GROUPS } from './types';
 
-export type RepoModule = { folder: string, pkg: Package };
+export type RepoModule = { full: string, rel: string, name: string, pkg: Package, ogPkg: Package, public: boolean };
+
+type ByModule<T> = {
+  name: Record<string, T>;
+  rel: Record<string, T>;
+  full: Record<string, T>;
+}
+
+type Graph = Map<RepoModule, Set<RepoModule>>;
+type Lookup = ByModule<RepoModule>;
+
+function getRepoMod(rel: string, full: string, pkg: Package): RepoModule {
+  return {
+    rel,
+    full,
+    name: pkg.name,
+    pkg,
+    ogPkg: structuredClone(pkg),
+    public: pkg.private === false
+  };
+}
 
 export class Repo {
-  static #repoRoot: Promise<string>;
+  static #root: Promise<RepoModule>;
   static #modules: Promise<RepoModule[]>;
-  static #byFolder: Promise<Record<string, RepoModule>>;
-  static #byName: Promise<Record<string, RepoModule>>;
-  static #graphByFolder: Promise<Record<string, Set<string>>>;
+  static #lookup: Promise<Lookup>;
+  static #graph: Promise<Graph>;
 
-  static async #getRepoRoot(): Promise<string> {
+  static async #getRoot(): Promise<RepoModule> {
     let folder = path.cwd();
     while (!fs.stat(`${folder}/.git`).catch(() => false)) {
       const nextFolder = path.dirname(folder);
@@ -21,26 +40,26 @@ export class Repo {
       }
       folder = nextFolder;
     }
-    return folder;
+
+    const pkg = PackageUtil.readPackage(folder);
+
+    return getRepoMod('.', folder, pkg);
   }
 
   static async #getModules(): Promise<RepoModule[]> {
-    const root = await this.repoRoot;
-    const pkg = await PackageUtil.readPackage(root);
-    const moduleFolders = pkg.travettoRepo?.modules ?? ['module'];
+    const root = await this.root;
+    const moduleFolders = root.pkg.travettoRepo?.modules ?? ['module'];
     const out: RepoModule[] = [];
     for (const folder of moduleFolders) {
-      const modRoot = path.resolve(root, folder);
+      const modRoot = path.resolve(root.full, folder);
       for (const sub of await fs.readdir(modRoot)) {
-        if (sub.startsWith('.')) {
-          continue;
-        } else {
+        if (!sub.startsWith('.')) {
           const pkgFile = path.resolve(modRoot, sub, 'package.json');
           if (await fs.stat(pkgFile).catch(() => false)) {
-            const rel = path.resolve(folder, sub);
-            out.push({
-              folder: rel, pkg: await PackageUtil.readPackage(pkgFile)
-            });
+            const full = path.resolve(folder, sub);
+            const rel = full.replace(`${root.full}/`, '');
+            const pkg = await PackageUtil.readPackage(path.resolve(modRoot, sub));
+            out.push(getRepoMod(rel, full, pkg));
           }
         }
       }
@@ -48,36 +67,44 @@ export class Repo {
     return out;
   }
 
-  static #getDeps(pkg: Package): string[] {
-    return [...DEP_GROUPS].flatMap(k =>
-      Object.entries(pkg[k] ?? {})
-        .filter(([, v]) => typeof v === 'string')
-        .map(([n]) => n)
-    );
-  }
-
-  static async #getGraphByFolder(): Promise<Record<string, Set<string>>> {
+  static async #getDeps(pkg: Package): Promise<RepoModule[]> {
     const byName = Object.fromEntries(
       (await this.modules).map((val) => [val.pkg.name, val] as const)
     );
 
-    const mapping: Record<string, Set<string>> = {};
-    (await this.modules)
-      .flatMap(({ folder: rel, pkg }) => this.#getDeps(pkg)
-        .filter(k => !!byName[k])
-        .map(dep =>
-          (mapping[byName[dep].folder] ??= new Set()).add(byName[pkg.name].folder)
-        )
-      );
-    return mapping;
+    return [...DEP_GROUPS].flatMap(k =>
+      Object.entries(pkg[k] ?? {})
+        .map(([n]) => byName[n])
+        .filter((x): x is RepoModule => !!x)
+    );
   }
 
-  static get repoRoot(): Promise<string> {
-    return this.#repoRoot ??= this.#getRepoRoot();
+  static async #getGraph(): Promise<Graph> {
+    const graph: Graph = new Map();
+    for (const mod of await this.modules) {
+      for (const dep of await this.#getDeps(mod.pkg)) {
+        if (!graph.has(dep)) {
+          graph.set(dep, new Set());
+        }
+        graph.get(dep)!.add(mod);
+      }
+    }
+    return graph;
   }
 
-  static async getRepoPackage(): Promise<Package> {
-    return PackageUtil.readPackage(await this.repoRoot);
+  static async #getLookup(): Promise<Lookup> {
+    const lookup: Lookup = { full: {}, name: {}, rel: {} };
+    for (const mod of await this.modules) {
+      lookup.full[mod.full] = mod;
+      lookup.rel[mod.rel] = mod;
+      lookup.name[mod.name] = mod;
+    }
+
+    return lookup;
+  }
+
+  static get root(): Promise<RepoModule> {
+    return this.#root ??= this.#getRoot();
   }
 
   static get modules(): Promise<RepoModule[]> {
@@ -85,53 +112,43 @@ export class Repo {
   }
 
   static get publicModules(): Promise<RepoModule[]> {
-    return this.modules.then(val => val.filter(m => m.pkg.private !== false));
+    return this.modules.then(mods => mods.filter(m => m.public));
   }
 
-  static get modulesByFolder(): Promise<Record<string, RepoModule>> {
-    return this.#byFolder ??= this.modules.then(x => Object.fromEntries(x.map(y => [y.folder, y])));
+  static get graph(): Promise<Graph> {
+    return this.#graph ??= this.#getGraph();
   }
 
-  static get modulesByName(): Promise<Record<string, RepoModule>> {
-    return this.#byName ??= this.modules.then(x => Object.fromEntries(x.map(y => [y.pkg.name, y])));
+  static get lookup(): Promise<Lookup> {
+    return this.#lookup ??= this.#getLookup();
   }
 
-  static get graphByFolder(): Promise<Record<string, Set<string>>> {
-    return this.#graphByFolder ??= this.#getGraphByFolder();
-  }
+  static async getDependentModules(root: RepoModule): Promise<RepoModule[]> {
+    const graph = await this.graph;
 
-  static getModuleByFolder(rel: string): Promise<RepoModule> {
-    return this.modulesByFolder.then(map => map[rel]);
-  }
-
-  static async getDependentModules(root: string | RepoModule): Promise<RepoModule[]> {
-
-    if (typeof root !== 'string') {
-      root = root.folder;
-    }
-
-    const graph = await this.graphByFolder;
-    const byPath = await this.modulesByFolder;
-
-    if (!graph[root]) {
+    if (!graph.has(root)) {
       return [];
     }
 
     const process = [root];
-    const out = new Set([root]);
-    const ret: RepoModule[] = [];
-    ret.push(byPath[root]);
+    const out = new Set<RepoModule>([root]);
 
     while (process.length) {
-      const first = process.shift()!;
-      for (const el of graph[first] ?? []) {
+      const next = process.shift()!;
+      for (const el of (graph.get(next) ?? [])) {
         if (!out.has(el)) {
           out.add(el);
-          ret.push(byPath[el]);
           process.push(el);
         }
       }
     }
-    return ret;
+    return [...out];
+  }
+
+  static writePackageJson(mod: RepoModule): Promise<void> {
+    return fs.writeFile(
+      path.resolve(mod.full, 'package.json'),
+      JSON.stringify(mod.pkg, null, 2), 'utf8'
+    );
   }
 }

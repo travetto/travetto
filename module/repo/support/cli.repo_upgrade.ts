@@ -1,17 +1,11 @@
-import * as fs from 'fs/promises';
-
-import { path } from '@travetto/manifest';
-import { CliCommand } from '@travetto/cli';
-
 import { Packages } from './bin/packages';
 import { Repo, RepoModule } from './bin/repo';
 import { DEP_GROUPS } from './bin/types';
-
-type Options = {};
+import { MutatingRepoCommand } from './command';
 
 function logChanges(mod: RepoModule, changes: string[]): [mod: RepoModule, message: string] | undefined {
   if (changes.length) {
-    return [mod, `${mod.folder} updated ${changes.length} dependencies - ${changes.join(', ') || 'None'}`];
+    return [mod, `${mod.rel} updated ${changes.length} dependencies - ${changes.join(', ') || 'None'}`];
   } else {
     return undefined;
   }
@@ -22,17 +16,16 @@ function logChanges(mod: RepoModule, changes: string[]): [mod: RepoModule, messa
 *
 * Upgrades all ranged dependencies
 */
-export class RepoUpgradeCommand extends CliCommand<Options> {
+export class RepoUpgradeCommand extends MutatingRepoCommand {
 
   name = 'repo:upgrade';
 
   async action(...args: unknown[]): Promise<void> {
     const pending: Promise<[mod: RepoModule, message: string] | undefined>[] = [];
-    const rootFolder = await Repo.repoRoot;
-    const rootMod = { folder: '.', pkg: await Repo.getRepoPackage() };
+    const root = await Repo.root;
 
     pending.push(
-      Packages.upgrade(rootMod, ['dependencies']).then(logChanges.bind(null, rootMod))
+      Packages.upgrade(root, ['dependencies']).then(logChanges.bind(null, root))
     );
 
     for (const mod of await Repo.modules) {
@@ -41,8 +34,12 @@ export class RepoUpgradeCommand extends CliCommand<Options> {
 
     const results = (await Promise.all(pending)).filter((x): x is Exclude<typeof x, undefined> => !!x);
     for (const [mod, msg] of results) {
-      await fs.writeFile(path.resolve(rootFolder, mod.folder, 'package.json'), JSON.stringify(mod.pkg, null, 2), 'utf8');
-      console.log(msg);
+      if (!this.cmd.dryRun) {
+        await Repo.writePackageJson(mod);
+        console.log!(msg);
+      } else {
+        console.log!(`[DRY-RUN] ${msg}`);
+      }
     }
   }
 }

@@ -25,9 +25,7 @@
     "@travetto/base": "file:../base",
     "@travetto/cli": "file:../cli",
     "@travetto/doc": "file:../doc",
-    "@travetto/test": "file:../test",
-    "@types/picomatch": "^2.3.0",
-    "picomatch": "^2.3.1"
+    "@travetto/test": "file:../test"
   },
   "peerDependencies": {},
   "peerDependenciesMeta": {

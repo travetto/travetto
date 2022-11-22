@@ -16,14 +16,15 @@
   },
   "travettoRepo": {
     "modules": [
-      "module/*",
-      "related/*",
-      "sample/*",
-      "global-test/*"
+      "module",
+      "related",
+      "sample",
+      "global-test"
     ],
     "global": [
       "module/test",
-      "module/cli"
+      "module/cli",
+      "module/repo"
     ]
   },
   "dependencies": {
