@@ -29,7 +29,7 @@
     "@travetto/config": "file:../config",
     "@travetto/model": "file:../model",
     "@travetto/model-query": "file:../model-query",
-    "mongodb": "^4.10.0"
+    "mongodb": "^4.12.0"
   },
   "peerDependencies": {
     "@travetto/command": "file:../command"

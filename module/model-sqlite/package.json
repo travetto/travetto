@@ -32,7 +32,7 @@
     "@travetto/model-query": "file:../model-query",
     "@travetto/model-sql": "file:../model-sql",
     "better-sqlite3": "^7.6.2",
-    "@types/better-sqlite3": "^7.6.0"
+    "@types/better-sqlite3": "^7.6.2"
   },
   "devDependencies": {
     "@travetto/app": "file:../app"

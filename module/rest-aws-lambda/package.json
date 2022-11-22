@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@travetto/rest": "file:../rest",
-    "@types/aws-lambda": "^8.10.106"
+    "@types/aws-lambda": "^8.10.108"
   },
   "devDependencies": {
     "node-fetch": "^2.6.7",
