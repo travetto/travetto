@@ -2,8 +2,8 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/email-template": "file:.."
+    "@travetto/doc": "*",
+    "@travetto/email-template": "*"
   },
   "private": true
 }

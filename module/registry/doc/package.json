@@ -2,10 +2,10 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/registry": "file:..",
-    "@travetto/di": "file:../../di",
-    "@travetto/schema": "file:../../schema"
+    "@travetto/doc": "*",
+    "@travetto/registry": "*",
+    "@travetto/di": "*",
+    "@travetto/schema": "*"
   },
   "private": true
 }

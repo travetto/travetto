@@ -2,9 +2,9 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/cli": "file:..",
-    "@travetto/app": "file:../../app"
+    "@travetto/doc": "*",
+    "@travetto/cli": "*",
+    "@travetto/app": "*"
   },
   "private": true
 }

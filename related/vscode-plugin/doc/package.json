@@ -3,7 +3,7 @@
   "main": "index.ts",
   "dependencies": {
     "vscode-plugin": "file:..",
-    "@travetto/app": "file:../../../module/app"
+    "@travetto/app": "*"
   },
   "private": true
 }

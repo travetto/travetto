@@ -2,14 +2,14 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/cache": "file:..",
-    "@travetto/model-dynamodb": "file:../../model-dynamodb",
-    "@travetto/model-mongo": "file:../../model-mongo",
-    "@travetto/model-elasticsearch": "file:../../model-elasticsearch",
-    "@travetto/model-redis": "file:../../model-redis",
-    "@travetto/model-sql": "file:../../model-sql",
-    "@travetto/model-s3": "file:../../model-s3"
+    "@travetto/doc": "*",
+    "@travetto/cache": "*",
+    "@travetto/model-dynamodb": "*",
+    "@travetto/model-mongo": "*",
+    "@travetto/model-elasticsearch": "*",
+    "@travetto/model-redis": "*",
+    "@travetto/model-sql": "*",
+    "@travetto/model-s3": "*"
   },
   "private": true
 }

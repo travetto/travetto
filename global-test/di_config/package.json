@@ -1,9 +1,9 @@
 {
   "name": "di_config_schema",
   "dependencies": {
-    "@travetto/di": "file:../../module/di",
-    "@travetto/schema": "file:../../module/schema",
-    "@travetto/config": "file:../../module/config"
+    "@travetto/di": "*",
+    "@travetto/schema": "*",
+    "@travetto/config": "*"
   },
   "private": true
 }

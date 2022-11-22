@@ -2,8 +2,8 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/rest-fastify": "file:.."
+    "@travetto/doc": "*",
+    "@travetto/rest-fastify": "*"
   },
   "private": true
 }

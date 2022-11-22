@@ -8,14 +8,6 @@ const resolveImport = (library: string): string => require.resolve(library);
 
 export type Dependency = Package['travetto'] & { version: string, name: string, folder: string };
 
-export type StdDependency = {
-  name: string;
-  version: string;
-  type: 'peer' | 'dev' | 'optional' | 'std';
-  ranged?: 'patch' | 'minor';
-  originalVersion: string;
-};
-
 export class PackageUtil {
 
   static readPackage(folder: string): Package {
@@ -76,8 +68,7 @@ export class PackageUtil {
       if (value.startsWith('file:')) {
         out.push(...await this.collectDependencies(path.resolve(folder, value.replace('file:', '')), subProfiles, seen));
       } else {
-        /** @type {string} */
-        let next;
+        let next: string;
         try {
           next = path.resolve(resolveImport(el));
         } catch {

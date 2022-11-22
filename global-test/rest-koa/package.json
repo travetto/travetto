@@ -1,14 +1,14 @@
 {
   "name": "rest-koa_asset-rest",
   "dependencies": {
-    "@travetto/rest-koa": "file:../../module/rest-koa",
-    "@travetto/asset-rest": "file:../../module/asset-rest",
-    "@travetto/auth-rest": "file:../../module/auth-rest",
-    "@travetto/rest-session": "file:../../module/rest-session"
+    "@travetto/rest-koa": "*",
+    "@travetto/asset-rest": "*",
+    "@travetto/auth-rest": "*",
+    "@travetto/rest-session": "*"
   },
   "devDependencies": {
-    "@travetto/test": "file:../../module/test",
-    "@travetto/cli": "file:../../module/cli"
+    "@travetto/test": "*",
+    "@travetto/cli": "*"
   },
   "private": true
 }
