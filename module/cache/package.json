@@ -29,8 +29,8 @@
     "@travetto/model": "file:../model"
   },
   "peerDependencies": {
-    "@travetto/transformer": "file:../transformer",
-    "@travetto/test": "file:../test"
+    "@travetto/test": "file:../test",
+    "@travetto/transformer": "file:../transformer"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

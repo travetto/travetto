@@ -29,8 +29,8 @@
     "@types/aws-lambda": "^8.10.108"
   },
   "devDependencies": {
-    "node-fetch": "^2.6.7",
-    "@types/node-fetch": "^2.6.2"
+    "@types/node-fetch": "^2.6.2",
+    "node-fetch": "^2.6.7"
   },
   "peerDependencies": {
     "@travetto/test": "file:../test"

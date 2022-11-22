@@ -24,9 +24,9 @@
     "directory": "module/rest-model"
   },
   "dependencies": {
+    "@travetto/model": "file:../model",
     "@travetto/rest": "file:../rest",
-    "@travetto/schema": "file:../schema",
-    "@travetto/model": "file:../model"
+    "@travetto/schema": "file:../schema"
   },
   "travetto": {
     "id": "@trv:rest-model",

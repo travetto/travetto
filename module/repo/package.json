@@ -26,7 +26,6 @@
     "@travetto/doc": "file:../doc",
     "@travetto/test": "file:../test"
   },
-  "peerDependencies": {},
   "peerDependenciesMeta": {
     "@travetto/cli": {
       "optional": true

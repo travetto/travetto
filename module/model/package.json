@@ -26,8 +26,8 @@
     "directory": "module/model"
   },
   "dependencies": {
-    "@travetto/di": "file:../di",
     "@travetto/config": "file:../config",
+    "@travetto/di": "file:../di",
     "@travetto/registry": "file:../registry",
     "@travetto/schema": "file:../schema"
   },

@@ -30,8 +30,8 @@
     "@travetto/config": "file:../config",
     "@travetto/context": "file:../context",
     "@travetto/model": "file:../model",
-    "@travetto/model-sql": "file:../model-sql",
     "@travetto/model-query": "file:../model-query",
+    "@travetto/model-sql": "file:../model-sql",
     "@types/pg": "^8.6.5",
     "pg": "^8.8.0"
   },

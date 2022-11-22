@@ -24,9 +24,9 @@
     "directory": "module/rest-model-query"
   },
   "dependencies": {
-    "@travetto/rest": "file:../rest",
     "@travetto/model": "file:../model",
     "@travetto/model-query": "file:../model-query",
+    "@travetto/rest": "file:../rest",
     "@travetto/schema": "file:../schema"
   },
   "travetto": {
