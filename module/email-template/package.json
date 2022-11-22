@@ -39,10 +39,10 @@
     "foundation-emails": "^2.4.0",
     "html-entities": "^2.3.3",
     "inline-css": "^4.0.1",
-    "sass": "^1.55.0"
+    "sass": "^1.56.1"
   },
   "peerDependencies": {
-    "parse5": "^7.1.1",
+    "parse5": "^7.1.2",
     "@travetto/cli": "file:../cli"
   },
   "peerDependenciesMeta": {

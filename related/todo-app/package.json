@@ -29,7 +29,7 @@
     "@travetto/auth-rest-session": "file:../../module/auth-rest-session",
     "@travetto/rest-session": "file:../../module/rest-session",
     "@travetto/openapi": "file:../../module/openapi",
-    "vue": "^2.7.10"
+    "vue": "^2.7.14"
   },
   "devDependencies": {
     "@travetto/pack": "file:../../module/pack",
