@@ -2,9 +2,9 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/command": "file:..",
-    "@travetto/model-elasticsearch": "file:../../model-elasticsearch"
+    "@travetto/doc": "*",
+    "@travetto/command": "*",
+    "@travetto/model-elasticsearch": "*"
   },
   "private": true
 }

@@ -2,8 +2,8 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/compiler": "file:.."
+    "@travetto/doc": "*",
+    "@travetto/compiler": "*"
   },
   "private": true
 }

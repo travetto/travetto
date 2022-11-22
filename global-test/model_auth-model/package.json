@@ -1,20 +1,20 @@
 {
   "name": "model-dynamodb_auth-model",
   "dependencies": {
-    "@travetto/model-dynamodb": "file:../../module/model-dynamodb",
-    "@travetto/model-firestore": "file:../../module/model-firestore",
-    "@travetto/model-elasticsearch": "file:../../module/model-elasticsearch",
-    "@travetto/model-mongo": "file:../../module/model-mongo",
-    "@travetto/model-mysql": "file:../../module/model-mysql",
-    "@travetto/model-postgres": "file:../../module/model-postgres",
-    "@travetto/model-redis": "file:../../module/model-redis",
-    "@travetto/model-s3": "file:../../module/model-s3",
-    "@travetto/model-sqlite": "file:../../module/model-sqlite",
-    "@travetto/auth-model": "file:../../module/auth-model"
+    "@travetto/model-dynamodb": "*",
+    "@travetto/model-firestore": "*",
+    "@travetto/model-elasticsearch": "*",
+    "@travetto/model-mongo": "*",
+    "@travetto/model-mysql": "*",
+    "@travetto/model-postgres": "*",
+    "@travetto/model-redis": "*",
+    "@travetto/model-s3": "*",
+    "@travetto/model-sqlite": "*",
+    "@travetto/auth-model": "*"
   },
   "devDependencies": {
-    "@travetto/test": "file:../../module/test",
-    "@travetto/cli": "file:../../module/cli"
+    "@travetto/test": "*",
+    "@travetto/cli": "*"
   },
   "private": true
 }

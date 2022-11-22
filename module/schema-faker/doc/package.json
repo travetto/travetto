@@ -2,8 +2,8 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/schema-faker": "file:.."
+    "@travetto/doc": "*",
+    "@travetto/schema-faker": "*"
   },
   "private": true
 }

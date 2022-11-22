@@ -2,8 +2,8 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/model-sqlite": "file:.."
+    "@travetto/doc": "*",
+    "@travetto/model-sqlite": "*"
   },
   "private": true
 }

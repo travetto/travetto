@@ -12,7 +12,8 @@
     "prestart": "npm ci --legacy-peer-deps",
     "start": "./bin/setup.sh",
     "test": "trv repo:test",
-    "lint": "npx eslint --ext .js --ext .ts ."
+    "lint": "npx eslint --ext .js --ext .ts .",
+    "upgrade-deps": "npm update -S"
   },
   "travettoRepo": {
     "global": [

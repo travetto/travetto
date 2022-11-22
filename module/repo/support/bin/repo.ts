@@ -1,6 +1,8 @@
 import * as fs from 'fs/promises';
 
 import { Package, PackageUtil, path } from '@travetto/manifest';
+import { ExecUtil } from '@travetto/base';
+
 import { DEP_GROUPS } from './types';
 
 export type RepoModule = { full: string, rel: string, name: string, pkg: Package, ogPkg: Package, public: boolean };
@@ -49,14 +51,10 @@ export class Repo {
   static async #getModules(): Promise<RepoModule[]> {
     const root = await this.root;
 
-    // TODO: Proper globbing? to match workspaces
-    const moduleFolders = [...new Set([
-      ...(root.pkg.workspaces ?? []).map(x => x.replace(/[/][*]$/, '')),
-    ])];
+    const { result } = ExecUtil.spawn('npm', ['query', '.workspace']);
+    const res: { location: string }[] = JSON.parse((await result).stdout);
 
-    if (moduleFolders.length === 0) {
-      moduleFolders.unshift('module');
-    }
+    const moduleFolders = res.map(d => d.location);
 
     const out: RepoModule[] = [];
     for (const folder of moduleFolders) {

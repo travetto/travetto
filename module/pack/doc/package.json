@@ -2,10 +2,10 @@
   "name": "doc",
   "main": "index.ts",
   "dependencies": {
-    "@travetto/doc": "file:../../doc",
-    "@travetto/pack": "file:..",
-    "@travetto/rest": "file:../../rest",
-    "@travetto/rest-aws-lambda": "file:../../rest-aws-lambda"
+    "@travetto/doc": "*",
+    "@travetto/pack": "*",
+    "@travetto/rest": "*",
+    "@travetto/rest-aws-lambda": "*"
   },
   "private": true
 }
