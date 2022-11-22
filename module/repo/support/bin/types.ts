@@ -4,3 +4,5 @@ export const DEP_GROUPS = [
 ] as const;
 
 export type DepGroup = (typeof DEP_GROUPS[number]);
+
+export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease';

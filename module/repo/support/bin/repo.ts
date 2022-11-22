@@ -1,9 +1,9 @@
 import * as fs from 'fs/promises';
 
 import { Package, PackageUtil, path } from '@travetto/manifest';
-import { ExecUtil } from '@travetto/base';
 
 import { DEP_GROUPS } from './types';
+import { Npm } from './npm';
 
 export type RepoModule = { full: string, rel: string, name: string, pkg: Package, ogPkg: Package, public: boolean };
 
@@ -23,7 +23,7 @@ function getRepoMod(rel: string, full: string, pkg: Package): RepoModule {
     name: pkg.name,
     pkg,
     ogPkg: structuredClone(pkg),
-    public: pkg.private === false
+    public: pkg.private === false || pkg.private === undefined
   };
 }
 
@@ -32,6 +32,13 @@ export class Repo {
   static #modules: Promise<RepoModule[]>;
   static #lookup: Promise<Lookup>;
   static #graph: Promise<Graph>;
+
+  static reinit(): void {
+    this.#root = undefined as any;
+    this.#modules = undefined as any;
+    this.#lookup = undefined as any;
+    this.#graph = undefined as any;
+  }
 
   static async #getRoot(): Promise<RepoModule> {
     let folder = path.cwd();
@@ -51,24 +58,15 @@ export class Repo {
   static async #getModules(): Promise<RepoModule[]> {
     const root = await this.root;
 
-    const { result } = ExecUtil.spawn('npm', ['query', '.workspace']);
-    const res: { location: string }[] = JSON.parse((await result).stdout);
-
-    const moduleFolders = res.map(d => d.location);
 
     const out: RepoModule[] = [];
-    for (const folder of moduleFolders) {
-      const modRoot = path.resolve(root.full, folder);
-      for (const sub of await fs.readdir(modRoot)) {
-        if (!sub.startsWith('.')) {
-          const pkgFile = path.resolve(modRoot, sub, 'package.json');
-          if (await fs.stat(pkgFile).catch(() => false)) {
-            const full = path.resolve(folder, sub);
-            const rel = full.replace(`${root.full}/`, '');
-            const pkg = await PackageUtil.readPackage(path.resolve(modRoot, sub));
-            out.push(getRepoMod(rel, full, pkg));
-          }
-        }
+    for (const folder of await Npm.getWorkspaceModules()) {
+      const modFull = path.resolve(root.full, folder);
+      const pkgFile = path.resolve(modFull, 'package.json');
+      if (await fs.stat(pkgFile).catch(() => false)) {
+        const rel = modFull.replace(`${root.full}/`, '');
+        const pkg = await PackageUtil.readPackage(modFull);
+        out.push(getRepoMod(rel, modFull, pkg));
       }
     }
     return out;

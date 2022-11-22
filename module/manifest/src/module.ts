@@ -3,10 +3,7 @@ import { statSync } from 'fs';
 
 import { path } from './path';
 import { Dependency, PackageUtil } from './package';
-import {
-  ManifestModule, ManifestModuleFile, ManifestModuleFileType,
-  ManifestModuleFolders, ManifestModuleFolderType
-} from './types';
+import { ManifestModule, ManifestModuleFile, ManifestModuleFileType, ManifestModuleFolderType } from './types';
 
 const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
   '.js': 'js',
@@ -28,7 +25,7 @@ export class ManifestModuleUtil {
   static getFileType(moduleFile: string): ManifestModuleFileType {
     if (moduleFile === 'package.json') {
       return 'package-json';
-    } else if (moduleFile.includes('support/fixtures/') || moduleFile.includes('test/fixtures/') || moduleFile.includes('support/resources/')) {
+    } else if (moduleFile.startsWith('support/fixtures/') || moduleFile.startsWith('test/fixtures/') || moduleFile.startsWith('support/resources/')) {
       return 'fixture';
     } else if (moduleFile.endsWith('.d.ts')) {
       return 'typings';
@@ -44,11 +41,11 @@ export class ManifestModuleUtil {
   static getFolderKey(moduleFile: string): ManifestModuleFolderType {
     const folderLocation = moduleFile.indexOf('/');
     if (folderLocation > 0) {
-      if (moduleFile.startsWith('test/fixtures')) {
+      if (moduleFile.startsWith('test/fixtures/')) {
         return 'test/fixtures';
-      } else if (moduleFile.startsWith('support/fixtures')) {
+      } else if (moduleFile.startsWith('support/fixtures/')) {
         return 'support/fixtures';
-      } else if (moduleFile.startsWith('support/resources')) {
+      } else if (moduleFile.startsWith('support/resources/')) {
         return 'support/resources';
       }
       const key = moduleFile.substring(0, folderLocation);
@@ -119,7 +116,7 @@ export class ManifestModuleUtil {
     const main = folder === rootFolder;
     const local = (!folder.includes('node_modules') && !name.startsWith('@travetto')) || main;
 
-    const files: ManifestModuleFolders = {};
+    const files: ManifestModule['files'] = {};
     const folderSet = !main ? new Set(['src', 'bin', 'support']) : new Set<string>();
 
     for (const file of await this.#scanFolder(folder, folderSet)) {

@@ -45,7 +45,7 @@ export class Git {
         }
         if (sub.value) { // we have a match
           const subRel = line.replace(path.resolve(root.full, sub.folder), '');
-          if (!/^(doc|test)\//.test(subRel)) {
+          if (!/^test\//.test(subRel)) {
             out.add(sub.value);
           }
           break;
@@ -85,10 +85,11 @@ export class Git {
   }
 
   static async checkWorkspaceDirty(errorMessage: string): Promise<void> {
-    const res1 = await ExecUtil.spawn('git', ['diff', '--quiet', '-exit-code']).result;
-    const res2 = await ExecUtil.spawn('git', ['diff', '--quiet', '-exit-code', '--cached']).result;
+    const res1 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code']).result.catchAsResult();
+    const res2 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code', '--cached']).result.catchAsResult();
     if (!res1.valid || !res2.valid) {
-      throw new Error(errorMessage);
+      console.error!(errorMessage);
+      process.exit(1);
     }
   }
 }

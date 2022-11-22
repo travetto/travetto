@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-model",
-  "version": "3.0.0-rc.4",
+  "version": "3.0.0-rc.5",
   "description": "Authentication model support for the travetto framework",
   "keywords": [
     "authentication",
@@ -25,11 +25,11 @@
     "directory": "module/auth-model"
   },
   "dependencies": {
-    "@travetto/auth": "file:../auth",
-    "@travetto/model": "file:../model"
+    "@travetto/auth": "^3.0.0-rc.3",
+    "@travetto/model": "^3.0.0-rc.5"
   },
   "peerDependencies": {
-    "@travetto/test": "file:../test"
+    "@travetto/test": "^3.0.0-rc.5"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

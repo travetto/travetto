@@ -1,6 +1,6 @@
 {
   "name": "@travetto/base",
-  "version": "3.0.0-rc.2",
+  "version": "3.0.0-rc.3",
   "description": "Environment config and common utilities for travetto applications.",
   "keywords": [
     "shutdown-helper",
@@ -25,7 +25,7 @@
     "directory": "module/base"
   },
   "dependencies": {
-    "@travetto/boot": "file:../boot"
+    "@travetto/boot": "^3.0.0-rc.1"
   },
   "peerDependencies": {
     "@parcel/watcher": "^2.0.7"

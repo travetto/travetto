@@ -1,4 +1,10 @@
 export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture';
+export type ManifestModuleFolderType =
+  '$root' | '$index' | '$package' |
+  'src' | 'bin' | 'support' | 'resources' | 'test' |
+  'test/fixtures' | 'support/fixtures' | 'support/resources' |
+  '$other';
+
 export type ManifestModuleFile = [string, ManifestModuleFileType, number];
 type ManifestModuleCore = {
   id: string;
@@ -11,25 +17,8 @@ type ManifestModuleCore = {
   profiles: string[];
 };
 
-export type ManifestModuleFolders = {
-  $root?: ManifestModuleFile[];
-  $index?: ManifestModuleFile[];
-  $package?: ManifestModuleFile[];
-  src?: ManifestModuleFile[];
-  bin?: ManifestModuleFile[];
-  support?: ManifestModuleFile[];
-  resources?: ManifestModuleFile[];
-  test?: ManifestModuleFile[];
-  ['test/fixtures']?: ManifestModuleFile[];
-  ['support/fixtures']?: ManifestModuleFile[];
-  ['support/resources']?: ManifestModuleFile[];
-  $other?: ManifestModuleFile[];
-};
-
-export type ManifestModuleFolderType = keyof ManifestModuleFolders;
-
 export type ManifestModule = ManifestModuleCore & {
-  files: ManifestModuleFolders;
+  files: Partial<Record<ManifestModuleFolderType, ManifestModuleFile[]>>;
 };
 
 export type ManifestRoot = {
@@ -39,8 +28,9 @@ export type ManifestRoot = {
   modules: Record<string, ManifestModule>;
 };
 
+export type ManifestDeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
 export type ManifestDeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
-export type ManifestDeltaEvent = [string, 'added' | 'changed' | 'removed' | 'missing' | 'dirty'];
+export type ManifestDeltaEvent = [string, ManifestDeltaEventType];
 export type ManifestDelta = Record<string, ManifestDeltaEvent[]>;
 export type ManifestState = {
   manifest: ManifestRoot;
@@ -88,4 +78,6 @@ export type Package = {
   publishConfig?: { access?: 'restricted' | 'public' };
 };
 
-export type PackageDigest = Pick<Package, 'name' | 'main' | 'author' | 'license' | 'version'> & { framework: string };
+export type PackageDigestField = 'name' | 'main' | 'author' | 'license' | 'version';
+
+export type PackageDigest = Pick<Package, PackageDigestField> & { framework: string };

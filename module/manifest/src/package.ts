@@ -4,11 +4,11 @@ import { Package, PackageDigest } from './types';
 import { path } from './path';
 import { version as framework } from '../package.json';
 
-const resolveImport = (library: string): string => require.resolve(library);
-
 export type Dependency = Package['travetto'] & { version: string, name: string, folder: string };
 
 export class PackageUtil {
+
+  static resolveImport = (library: string): string => require.resolve(library);
 
   static readPackage(folder: string): Package {
     return JSON.parse(readFileSync(path.resolve(folder, 'package.json'), 'utf8'));
@@ -55,7 +55,7 @@ export class PackageUtil {
       ...Object.entries(peerDependencies).map(([k, v]) => [k, v, 'peer'])
         .filter(([x]) => {
           try {
-            resolveImport(x);
+            this.resolveImport(x);
             return true;
           } catch {
             return false;
@@ -70,11 +70,10 @@ export class PackageUtil {
       } else {
         let next: string;
         try {
-          next = path.resolve(resolveImport(el));
+          next = path.dirname(this.resolveImport(`${el}/package.json`));
         } catch {
           continue;
         }
-        next = next.replace(new RegExp(`^(.*node_modules/${el})(.*)$`), (_, first) => first);
         out.push(...await this.collectDependencies(next, subProfiles, seen));
       }
     }

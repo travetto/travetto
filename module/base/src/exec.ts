@@ -46,7 +46,7 @@ export interface WorkerResult<T> {
 /**
  * A result that supports catching as part of the promise resolution
  */
-export type CatchableResult = Promise<ExecutionResult> & { catchAsResult?(): Promise<ExecutionResult> };
+export type CatchableResult = Promise<ExecutionResult> & { catchAsResult(): Promise<ExecutionResult> };
 
 /**
  * Execution State
@@ -116,7 +116,7 @@ export class ExecUtil {
   static enhanceProcess(proc: ChildProcess, options: ExecutionOptions, cmd: string): CatchableResult {
     const timeout = options.timeout;
 
-    const res: CatchableResult = new Promise<ExecutionResult>((resolve, reject) => {
+    const res = new Promise<ExecutionResult>((resolve, reject) => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let timer: NodeJS.Timeout;
@@ -167,9 +167,10 @@ export class ExecUtil {
         }, timeout);
       }
     });
-
-    res.catchAsResult = (): Promise<ExecutionResult> => res.catch((err: ErrorWithMeta) => err.meta!);
-    return res;
+    Object.assign(res, {
+      catchAsResult: (): Promise<ExecutionResult> => res.catch((err: ErrorWithMeta) => err.meta!)
+    });
+    return res as CatchableResult;
   }
 
   /**
