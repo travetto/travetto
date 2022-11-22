@@ -1,0 +1,70 @@
+import * as fs from 'fs/promises';
+
+import { ExecUtil } from '@travetto/base';
+
+import { RepoModule, Repo } from './repo';
+import { SemverLevel } from './types';
+
+export class Npm {
+
+  static async isPublished(mod: RepoModule): Promise<boolean> {
+    const proc = ExecUtil.spawn('npm', ['show', `${mod.name}@${mod.pkg.version}`, 'version', '--json'], { cwd: mod.full });
+
+    return proc.result
+      .catchAsResult!()
+      .then(res => {
+        if (!res.valid && !res.stderr.includes('E404')) {
+          throw new Error(res.stderr);
+        }
+        const item = res.stdout ? JSON.parse(res.stdout) : [];
+        const found = Array.isArray(item) ? item.pop() : item;
+        return !!found;
+      });
+  }
+
+  static async getWorkspaceModules(): Promise<string[]> {
+    const { result } = ExecUtil.spawn('npm', ['query', '.workspace']);
+    const res: { location: string }[] = JSON.parse((await result).stdout);
+
+    return res.map(d => d.location);
+  }
+
+  static async version(modules: RepoModule[], level: SemverLevel, preid?: string): Promise<void> {
+    const run = ExecUtil.spawn('npm', [
+      'version',
+      level,
+      ...(preid ? ['--preid', preid] : []),
+      ...modules.flatMap(m => ['-w', m.rel])
+    ], {
+      stdio: [0, 1, 2]
+    });
+    await run.result;
+  }
+
+  static async publish(mod: RepoModule, dryRun?: boolean): Promise<void> {
+    const versionTag = mod.pkg.version.replace(/^.*-(rc|alpha|beta|next)[.]\d+/, (a, b) => b);
+
+    const root = await Repo.root;
+
+    await fs.copyFile(`${root.full}/LICENSE`, `${mod.full}/LICENSE`).catch(() => { });
+
+    const { result } = ExecUtil.spawn('npm', [
+      'publish',
+      ...(dryRun ? ['--dry-run'] : []),
+      '--tag', versionTag || 'latest',
+      '--access', 'public'
+    ], { cwd: mod.full, stdio: [0, 1, 2] });
+
+    await result;
+  }
+
+  static async exec(cmd: string, args: string[]): Promise<void> {
+    const run = ExecUtil.spawn('npm', [
+      'exec',
+      '--ws',
+      cmd,
+      ...args
+    ], { stdio: [0, 1, 2] });
+    await run.result;
+  }
+}

@@ -1,47 +1,33 @@
-import * as fs from 'fs/promises';
-import { ExecUtil } from '@travetto/base';
-
-import { Packages } from './bin/packages';
+import { CliCommand, OptionConfig } from '@travetto/cli';
+import { Npm } from './bin/npm';
 import { Repo } from './bin/repo';
-import { MutatingRepoCommand } from './command';
+
+type Options = {
+  dryRun: OptionConfig<boolean>;
+}
 
 /**
 * `npx trv repo:publish`
 *
 * Publish all pending modules
 */
-export class RepoPublishCommand extends MutatingRepoCommand {
+export class RepoPublishCommand extends CliCommand<Options> {
 
   name = 'repo:publish';
 
+  getOptions(): Options {
+    return {
+      dryRun: this.boolOption({ desc: 'Dry Run?', def: true })
+    };
+  }
+
   async action(...args: unknown[]): Promise<void> {
-    const publishedVersions = (await Repo.publicModules)
-      .map(mod =>
-        Packages.findPublishedVersion(mod.full, mod.name, mod.pkg.version)
-          .then(version => [mod, version] as const)
-      );
+    const withPublished = (await Repo.publicModules)
+      .map(mod => Npm.isPublished(mod).then(published => [mod, published] as const));
 
-    for (const [mod, published] of await Promise.all(publishedVersions)) {
+    for (const [mod, published] of await Promise.all(withPublished)) {
       if (!published) {
-        continue;
-      }
-
-      const tag = mod.pkg.version.replace(/^.*-(rc|latest|alpha|beta|next)[.]\d+/, (a, b) => b) || 'latest';
-
-      if (this.cmd.dryRun) {
-        console.log!(`[DRY-RUN] Publishing ${mod.name} with tag ${tag}`);
-      } else {
-        await fs.copyFile('LICENSE', `${mod.full}/LICENSE`);
-        const args = [
-          'publish',
-          '--tag', tag,
-          '--access', 'public'
-        ];
-        if (!/^[~^]/.test(tag) && !/-(rc|latest|alpha|beta|next)[.]\d+$/.test(mod.pkg.version)) {
-          args.push('--tag', 'latest');
-        }
-        const { result } = ExecUtil.spawn('npm', args, { cwd: mod.full, stdio: [0, 1, 2] });
-        await result;
+        await Npm.publish(mod, this.cmd.dryRun);
       }
     }
   }

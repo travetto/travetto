@@ -4,7 +4,7 @@ import { spawnSync } from 'child_process';
 
 import '@arcsine/nodesh';
 
-import { Packages } from './bin/packages';
+import { Npm } from './bin/npm';
 import { Util } from './bin/util';
 
 const page = (f: string): string =>
@@ -43,11 +43,11 @@ const markdownPage = (mod: string): string =>
         spawnSync('trv-service', ['restart'], { stdio: 'inherit', encoding: 'utf8' });
       }) : undefined,
 
-  Packages.yieldByFolder('related/overview')
+  Npm.yieldByFolder('related/overview')
     .$concat(
-      Packages.yieldByFolder('related/todo-app'),
+      Npm.yieldByFolder('related/todo-app'),
       //   Packages.yieldByFolder('related/vscode-plugin'),
-      Packages.yieldPublicPackages()
+      Npm.yieldPublicPackages()
     )
     .$filter(x => !target || (x._.mod === target))
     .$parallel(async pkg => {

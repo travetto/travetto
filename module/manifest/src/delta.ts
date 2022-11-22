@@ -1,5 +1,9 @@
 import * as fs from 'fs/promises';
-import { ManifestDelta, ManifestDeltaEvent, ManifestDeltaModule, ManifestModule, ManifestModuleFile, ManifestModuleFolderType, ManifestRoot } from './types';
+import {
+  ManifestDelta, ManifestDeltaEvent, ManifestDeltaModule,
+  ManifestModule, ManifestModuleFile, ManifestModuleFolderType,
+  ManifestRoot
+} from './types';
 
 const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package']);
 

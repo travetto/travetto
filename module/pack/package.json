@@ -1,6 +1,6 @@
 {
   "name": "@travetto/pack",
-  "version": "3.0.0-rc.2",
+  "version": "3.0.0-rc.3",
   "description": "Code packing utilities",
   "keywords": [
     "travetto",
@@ -23,12 +23,12 @@
     "directory": "module/pack"
   },
   "dependencies": {
-    "@travetto/base": "file:../base",
+    "@travetto/base": "^3.0.0-rc.3",
     "@types/picomatch": "^2.3.0",
     "picomatch": "^2.3.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "file:../cli"
+    "@travetto/cli": "^3.0.0-rc.3"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

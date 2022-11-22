@@ -1,6 +1,6 @@
 {
   "name": "@travetto/log",
-  "version": "3.0.0-rc.4",
+  "version": "3.0.0-rc.5",
   "description": "Logging framework that integrates at the console.log level.",
   "keywords": [
     "typescript",
@@ -25,7 +25,7 @@
     "directory": "module/log"
   },
   "dependencies": {
-    "@travetto/base": "file:../base"
+    "@travetto/base": "^3.0.0-rc.3"
   },
   "travetto": {
     "id": "@trv:log",

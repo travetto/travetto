@@ -16,6 +16,7 @@ const compilerFolder = (process.env.TRV_COMPILER || path.resolve('.trv_compiler'
       if (args.length === 0) {
         rmSync(outputFolder, { force: true, recursive: true });
         rmSync(compilerFolder, { force: true, recursive: true });
+        console.log(`Cleaned ${process.cwd()}`);
         return;
       }
       break;

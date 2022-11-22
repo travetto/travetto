@@ -203,4 +203,9 @@ export function addNodePath(folder: string): void {
 }
 
 export const importManifest = (compilerFolder: string): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
-  import(path.resolve(compilerFolder, 'node_modules', '@travetto/manifest'));
+  import(path.resolve(compilerFolder, 'node_modules', '@travetto/manifest'))
+    .then(mod => {
+      // Ensure we resolve imports, relative to self, and not the compiler folder
+      mod.PackageUtil.resolveImport = (lib: string) => require.resolve(lib);
+      return mod;
+    });

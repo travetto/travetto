@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-redis",
-  "version": "3.0.0-rc.4",
+  "version": "3.0.0-rc.5",
   "description": "Redis backing for the travetto model module.",
   "keywords": [
     "typescript",
@@ -25,12 +25,12 @@
     "directory": "module/model-redis"
   },
   "dependencies": {
-    "@travetto/config": "file:../config",
-    "@travetto/model": "file:../model",
+    "@travetto/config": "^3.0.0-rc.5",
+    "@travetto/model": "^3.0.0-rc.5",
     "redis": "^4.5.0"
   },
   "peerDependencies": {
-    "@travetto/command": "file:../command"
+    "@travetto/command": "^3.0.0-rc.3"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {
