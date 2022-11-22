@@ -31,8 +31,8 @@
   "dependencies": {
     "@travetto/boot": "file:../boot",
     "@travetto/cli": "file:../cli",
-    "mustache": "^4.2.0",
-    "enquirer": "^2.3.6"
+    "enquirer": "^2.3.6",
+    "mustache": "^4.2.0"
   },
   "devDependencies": {
     "@types/mustache": "^4.2.1"

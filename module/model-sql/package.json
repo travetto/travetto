@@ -36,8 +36,8 @@
     "@travetto/app": "file:../app"
   },
   "peerDependencies": {
-    "@travetto/test": "file:../test",
-    "@travetto/command": "file:../command"
+    "@travetto/command": "file:../command",
+    "@travetto/test": "file:../test"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {

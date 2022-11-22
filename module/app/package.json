@@ -27,14 +27,14 @@
   },
   "dependencies": {
     "@travetto/config": "file:../config",
+    "@travetto/di": "file:../di",
     "@travetto/registry": "file:../registry",
-    "@travetto/schema": "file:../schema",
-    "@travetto/di": "file:../di"
+    "@travetto/schema": "file:../schema"
   },
   "peerDependencies": {
     "@travetto/cli": "file:../cli",
-    "@travetto/transformer": "file:../transformer",
-    "@travetto/test": "file:../test"
+    "@travetto/test": "file:../test",
+    "@travetto/transformer": "file:../transformer"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
