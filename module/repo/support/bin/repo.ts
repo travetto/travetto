@@ -48,7 +48,16 @@ export class Repo {
 
   static async #getModules(): Promise<RepoModule[]> {
     const root = await this.root;
-    const moduleFolders = root.pkg.travettoRepo?.modules ?? ['module'];
+
+    // TODO: Proper globbing? to match workspaces
+    const moduleFolders = [...new Set([
+      ...(root.pkg.workspaces ?? []).map(x => x.replace(/[/][*]$/, '')),
+    ])];
+
+    if (moduleFolders.length === 0) {
+      moduleFolders.unshift('module');
+    }
+
     const out: RepoModule[] = [];
     for (const folder of moduleFolders) {
       const modRoot = path.resolve(root.full, folder);

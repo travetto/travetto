@@ -80,10 +80,10 @@ export type Package = {
     profiles?: string[];
   };
   travettoRepo?: {
-    modules?: string[];
     global?: string[];
     docBranch?: string;
   };
+  workspaces?: string[];
   private?: boolean;
   publishConfig?: { access?: 'restricted' | 'public' };
 };

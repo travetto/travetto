@@ -21,15 +21,15 @@ export class RepoUpgradeCommand extends MutatingRepoCommand {
   name = 'repo:upgrade';
 
   async action(...args: unknown[]): Promise<void> {
-    const pending: Promise<[mod: RepoModule, message: string] | undefined>[] = [];
+    const pending: ([mod: RepoModule, message: string] | undefined)[] = [];
     const root = await Repo.root;
 
-    pending.push(
+    pending.push(await
       Packages.upgrade(root, ['dependencies']).then(logChanges.bind(null, root))
     );
 
     for (const mod of await Repo.modules) {
-      pending.push(Packages.upgrade(mod, DEP_GROUPS).then(logChanges.bind(null, mod)));
+      pending.push(await Packages.upgrade(mod, DEP_GROUPS).then(logChanges.bind(null, mod)));
     }
 
     const results = (await Promise.all(pending)).filter((x): x is Exclude<typeof x, undefined> => !!x);

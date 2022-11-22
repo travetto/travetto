@@ -171,8 +171,7 @@ export class ManifestModuleUtil {
     }
 
     const pkg = await PackageUtil.readPackage(root);
-    const mods = (pkg.travettoRepo?.global ?? []).map(x => path.resolve(root, x));
-
+    const mods = pkg.travettoRepo?.global ?? [];
     const out: Dependency[] = [];
     for (const folder of mods) {
       if (!declared.some(x => x.folder === folder)) {
