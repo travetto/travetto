@@ -153,7 +153,7 @@ export class ManifestModuleUtil {
 
   static async getRepoRoot(): Promise<string | undefined> {
     let folder = path.cwd();
-    while (!fs.stat(`${folder}/.git`).catch(() => false)) {
+    while (!(await fs.stat(`${folder}/.git`).catch(() => false))) {
       const nextFolder = path.dirname(folder);
       if (nextFolder === folder) {
         return undefined;
@@ -171,7 +171,8 @@ export class ManifestModuleUtil {
     }
 
     const pkg = await PackageUtil.readPackage(root);
-    const mods = pkg.travettoRepo?.global ?? [];
+    const mods = (pkg.travettoRepo?.global ?? []).map(x => path.resolve(root, x));
+
     const out: Dependency[] = [];
     for (const folder of mods) {
       if (!declared.some(x => x.folder === folder)) {
