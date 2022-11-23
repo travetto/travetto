@@ -1,6 +1,7 @@
 import type { Service } from '@travetto/command/support/bin/service';
+import { getVersion } from '../src/internal/version';
 
-const { version } = require(require.resolve('@elastic/elasticsearch').replace('index.js', 'package.json'));
+const version = getVersion();
 
 const port = 9200;
 

@@ -13,12 +13,13 @@ if (process.env.TRV_OUTPUT !== process.cwd().replaceAll('\\', '/')) {
       .replace(/[.]ts$/, '.js');
     if (!fs.existsSync(outputFile) || (fs.statSync(outputFile).mtimeMs < fs.statSync(inputFile).mtimeMs)) {
       const ts = require('typescript');
-      opts ??= ts.readConfigFile(path.resolve(__dirname, '..', '..', 'tsconfig.trv.json'), ts.sys.readFile).config?.compilerOptions;
+      const loc = path.resolve(__dirname, '..', 'tsconfig.trv.json');
+      opts ??= ts.readConfigFile(loc, ts.sys.readFile).config?.compilerOptions;
       fs.mkdirSync(path.dirname(outputFile), { recursive: true });
       fs.writeFileSync(outputFile, ts.transpile(fs.readFileSync(inputFile, 'utf8'), opts, inputFile));
     }
   }
-  module.exports = require('../support/.bin/compile');
+  module.exports = async () => import('../support/.bin/compile.mjs');
 } else {
-  module.exports = require('../support/bin/compile');
+  module.exports = async () => require('../support/bin/compile');
 }

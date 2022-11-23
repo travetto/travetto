@@ -1,8 +1,7 @@
 import * as fs from 'fs/promises';
 import * as cp from 'child_process';
 
-// TODO: Get proper typings
-const glob = require('picomatch');
+import * as glob from 'picomatch';
 
 import { path, ModuleIndex } from '@travetto/boot';
 import { CliUtil } from '@travetto/cli';
@@ -70,7 +69,7 @@ export class PackUtil {
       const negate = x.startsWith('!') || x.startsWith('^');
       x = negate ? x.substring(1) : x;
       x = x.replace(/^[.][/]/g, `${base}/`);
-      const match: (f: string) => boolean = glob(x, { nocase: true, dot: true, basename: base, contains: true });
+      const match: (f: string) => boolean = glob(x, { nocase: true, dot: true, basename: true, contains: true, cwd: base });
       Object.defineProperty(match, 'source', { value: x });
       return [match, negate] as const;
     });

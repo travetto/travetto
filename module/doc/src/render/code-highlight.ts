@@ -1,11 +1,4 @@
-type Lang = {};
-
-// TODO: Get proper typings
-const Prism: {
-  plugins: { NormalizeWhitespace: Record<string, Function> };
-  languages: Record<string, Lang>;
-  highlight(text: string, grammar: Lang, language: string): string;
-} = require('prismjs');
+import * as Prism from 'prismjs';
 
 import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace';
 import 'prismjs/components/prism-typescript';

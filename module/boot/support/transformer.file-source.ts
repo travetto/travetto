@@ -31,7 +31,10 @@ export class FileSourceTransformer {
             state.factory.createCallExpression(
               state.createAccess(ident, 'trv', 'out'),
               [],
-              [state.createIdentifier('__filename')]
+              [state.isEsmOutput() ?
+                state.createAccess('import', 'meta', 'url') :
+                state.createIdentifier('__filename')
+              ]
             )
           )
         ])

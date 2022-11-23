@@ -120,7 +120,7 @@ export async function compile(config: CompileConfig): Promise<void> {
 
   // Only  manipulate if we aren't in the output folder
   if (config.outputFolder !== process.cwd()) {
-    addNodePath(config.outputFolder);
+    await addNodePath(config.outputFolder);
   }
 
   // Share back so ModuleIndex will pick it up

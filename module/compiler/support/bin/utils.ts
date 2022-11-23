@@ -12,6 +12,7 @@ import type { ManifestUtil } from '@travetto/manifest';
 type ModFile = { input: string, output: string, stale: boolean };
 type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string>, showWaitingMessage?: boolean };
 
+const resolveImport = (lib: string) => require.resolve(lib)
 const recentStat = (stat: Stats): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 
 const rewriteLine = async (stream: Writable, text: string, clear = false): Promise<boolean> =>
@@ -74,7 +75,8 @@ let opts: unknown;
 
 async function getOpts(): Promise<any> {
   const ts = await import('typescript');
-  opts ??= ts.readConfigFile(path.resolve(__dirname, '..', '..', 'tsconfig.trv.json'), ts.sys.readFile).config?.compilerOptions;
+  const folder = await resolveImport('@travetto/compiler/tsconfig.trv.json');
+  opts ??= ts.readConfigFile(folder, ts.sys.readFile).config?.compilerOptions;
   return opts;
 }
 
@@ -135,7 +137,7 @@ export async function getProjectSources(
   baseOutputFolder: string,
   seed: string[] = ['package.json', 'index.ts', 'src', 'support']
 ): Promise<ModFile[]> {
-  const inputFolder = require.resolve(`${module}/package.json`).replace(/\/package[.]json$/, '');
+  const inputFolder = resolveImport(`${module}/package.json`).replace(/\/package[.]json$/, '');
 
   const folders = seed.filter(x => !/[.](ts|js|json)$/.test(x)).map(x => path.resolve(inputFolder, x));
   const files = seed.filter(x => /[.](ts|js|json)$/.test(x)).map(x => path.resolve(inputFolder, x));
@@ -179,9 +181,11 @@ export async function compileIfStale(prefix: string, files: ModFile[]): Promise<
       log(`${prefix} Starting`);
       for (const file of files.filter(x => x.stale)) {
         if (file.input.endsWith('package.json')) {
-          await fs.writeFile(file.output,
-            (await fs.readFile(file.input, 'utf8')).replace(/"index[.]ts"/g, '"index.js"')
-          );
+          const pkg: { main?: string, type?: string, files?: string[] } = JSON.parse(await fs.readFile(file.input, 'utf8'));
+          pkg.main = pkg.main?.replace(/[.]ts$/, '.js');
+          pkg.files = pkg.files?.map(f => f.replace(/[.]ts$/, '.js'));
+          // TODO: ESM Support -- pkg.type = 'module';
+          await fs.writeFile(file.output, JSON.stringify(pkg, null, 2));
         } else {
           await transpileFile(file.input, file.output);
         }
@@ -197,15 +201,17 @@ export async function compileIfStale(prefix: string, files: ModFile[]): Promise<
 /**
  * Add node path at runtime
  */
-export function addNodePath(folder: string): void {
+export async function addNodePath(folder: string): Promise<void> {
   process.env.NODE_PATH = [`${folder}/node_modules`, process.env.NODE_PATH].join(path.delimiter);
-  require('module').Module._initPaths();
+  const { Module } = await import('module');
+  // @ts-expect-error
+  Module._initPaths();
 }
 
 export const importManifest = (compilerFolder: string): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
   import(path.resolve(compilerFolder, 'node_modules', '@travetto/manifest'))
     .then(mod => {
       // Ensure we resolve imports, relative to self, and not the compiler folder
-      mod.PackageUtil.resolveImport = (lib: string) => require.resolve(lib);
+      mod.PackageUtil.resolveImport = resolveImport;
       return mod;
     });

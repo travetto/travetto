@@ -37,16 +37,25 @@ export class TransformerState implements State {
   #manifest: ManifestManager;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
+  #options: ts.CompilerOptions;
   added = new Map<number, ts.Statement[]>();
   module: string;
   file: string;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, manifest: ManifestManager) {
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, manifest: ManifestManager, options: ts.CompilerOptions) {
     this.#manifest = manifest;
     this.#imports = new ImportManager(source, factory, manifest);
     this.#resolver = new TypeResolver(checker, manifest);
     this.file = path.toPosix(this.source.fileName);
     this.module = manifest.resolveModule(this.file);
+    this.#options = options;
+  }
+
+  /**
+   * Are we building ESM Output?
+   */
+  isEsmOutput(): boolean {
+    return this.#options.module === ts.ModuleKind.CommonJS;
   }
 
   /**

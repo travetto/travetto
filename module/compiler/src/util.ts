@@ -81,6 +81,7 @@ export class CompilerUtil {
     if (pkg.main) {
       pkg.main = pkg.main.replace(/[.]ts$/, '.js');
     }
+    // TODO: ESM Support -- pkg.type = 'module';
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {
       if (key in pkg) {
         for (const dep of Object.keys(pkg[key] ?? {})) {

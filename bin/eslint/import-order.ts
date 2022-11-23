@@ -22,7 +22,7 @@ export const ImportOrder = {
   create(context: eslint.Rule.RuleContext): { Program: (ast: eslint.AST.Program) => void } {
     function Program({ body }: eslint.AST.Program): void {
 
-      if (context.getFilename().endsWith('.js')) {
+      if (/[.][mc]?js$/.test(context.getFilename())) {
         return;
       }
 
