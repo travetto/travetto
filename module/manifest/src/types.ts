@@ -39,6 +39,7 @@ export type ManifestState = {
 
 export type Package = {
   name: string;
+  type?: 'module' | 'commonjs';
   version: string;
   description?: string;
   license?: string;

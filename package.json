@@ -33,6 +33,7 @@
     "eslint-plugin-unused-imports": "^2.0.0"
   },
   "devDependencies": {
+    "@parcel/watcher": "^2.0.7",
     "@aws-sdk/client-ses": "^3.215.0",
     "@types/passport-facebook": "^2.1.11",
     "passport-facebook": "^3.0.0"

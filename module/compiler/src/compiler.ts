@@ -25,7 +25,7 @@ export class Compiler {
   init(
     manifestState: ManifestState,
     outputFolder: string
-  ): typeof this {
+  ): this {
     this.#state = new CompilerState(manifestState, outputFolder);
     this.#bootTsconfig = this.#state.resolveModuleFile('@travetto/compiler', 'tsconfig.trv.json');
 

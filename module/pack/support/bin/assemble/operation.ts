@@ -60,7 +60,7 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
     yield 'Removing Empty Folders'; await PackUtil.removeEmptyFolders(ws);
     yield 'Writing Env.js'; await PackUtil.writeEnvJs(ws, {
       ...env,
-      TRV_CACHE: `\${__dirname}/${cacheDir}`,
+      TRV_CACHE: `\${process.cwd()}/${cacheDir}`,
       ...(readonly ? { TRV_COMPILED: '1' } : {})
     });
 

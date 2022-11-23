@@ -1,4 +1,5 @@
 import * as sourceMapSupport from 'source-map-support';
+import * as url from 'url';
 import { parentPort } from 'worker_threads';
 
 import { path } from '@travetto/manifest';
@@ -25,7 +26,6 @@ async function runMain(action: Function, args: unknown[]): Promise<void> {
 
   process.exit(exitCode);
 }
-
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const setToJSON = <T>(cons: abstract new (...args: any[]) => T, handler: (val: T, ...args: any[]) => unknown): void => {
@@ -87,8 +87,12 @@ async function setup(): Promise<void> {
   await setupLogging();
 }
 
-export async function runIfMain<T>(target: Function, filename: string, isMainMod?: boolean): Promise<unknown> {
-  if (filename === path.toPosix(process.env.TRV_MAIN ?? '') || (!process.env.TRV_MAIN && isMainMod)) {
+export async function runIfMain(target: Function, filename: string, mainFile: string): Promise<unknown> {
+  mainFile = process.env.TRV_MAIN || mainFile;
+  if (mainFile.startsWith('file:')) {
+    mainFile = url.fileURLToPath(mainFile);
+  }
+  if (filename === mainFile) {
     await setup();
     return runMain(target, process.argv.slice(2));
   }
