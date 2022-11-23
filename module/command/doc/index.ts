@@ -4,7 +4,7 @@ import { DocRunUtil } from '@travetto/doc/src/util/run';
 
 import { CommandService } from '@travetto/command/src/command';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 The command module provides the necessary foundation for calling complex commands at runtime. Additionally special attention is provided to running ${lib.Docker} containers.

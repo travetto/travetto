@@ -6,7 +6,7 @@ const AppErrorLink = d.Ref(AppError.name, '@travetto/base/src/error.ts');
 const StreamUtilLink = d.Ref(StreamUtil.name, '@travetto/base/src/stream.ts');
 const ExecUtilLink = d.Ref(ExecUtil.name, '@travetto/base/src/exec.ts');
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 Base is the foundation of all ${lib.Travetto} applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:

@@ -3,7 +3,7 @@ import { CommandService } from '@travetto/command';
 
 import { ImageConverter } from '@travetto/image';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides functionality for image resizing, and png optimization. This is primarily meant to be used in conjunction with other modules, like the ${mod.Asset} module or the ${mod.EmailTemplate} module. It can also be invoked directly as needed (as it can be very handy for batch processing images on the command line).

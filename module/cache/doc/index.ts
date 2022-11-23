@@ -12,7 +12,7 @@ import { Links } from '@travetto/model/support/doc.support';
 import { Cache, EvictCache } from '@travetto/cache/src/decorator';
 import { CacheModelⲐ, CacheService } from '@travetto/cache/src/service';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without ${mod.Di}.  The code aims to handle use cases surrounding common/basic usage.

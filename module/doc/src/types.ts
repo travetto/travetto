@@ -10,7 +10,7 @@ export type Wrapper = Record<string, (c: string) => string>;
  * Document file shape
  */
 export interface DocumentShape<T extends DocNode = DocNode> {
-  text: T | (() => (T | Promise<T>));
+  text: () => (T | Promise<T>);
   wrap?: Wrapper;
 }
 
@@ -27,17 +27,12 @@ export interface RenderContextShape {
   /**
    * Github root for project
    */
-  gitBaseUrl: string;
+  baseUrl: string;
 
   /**
    * Github root for travetto framework
    */
-  travettoGitBaseUrl: string;
-
-  /**
-   * Local folder root for git
-   */
-  gitFolder: string;
+  travettoBaseUrl: string;
 
   /**
    * Get table of contents

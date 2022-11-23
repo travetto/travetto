@@ -1,11 +1,55 @@
-import * as path from 'path';
-import * as fs from 'fs/promises';
-import { spawnSync } from 'child_process';
+import { ExecUtil } from '@travetto/base';
+import { CliCommand, OptionConfig } from '@travetto/cli';
+import { path } from '@travetto/manifest';
 
-import '@arcsine/nodesh';
+import { Git } from './bin/git';
+import { Repo } from './bin/repo';
 
-import { Npm } from './bin/npm';
+type Options = {
+  changed: OptionConfig<boolean>;
+  related: OptionConfig<boolean>;
+};
+
+/**
+ * Generate docs for all modules in repo
+ */
+export class RepoDocCommand extends CliCommand<Options> {
+  name = 'repo:doc';
+
+
+  getOptions(): Options {
+    return {
+      changed: this.boolOption({ desc: 'Only doc changed modules', def: true }),
+      related: this.boolOption({ desc: 'Track related modules', def: false })
+    };
+  }
+
+  async action(): Promise<void> {
+    const modules = (await (this.cmd.changed ? Git.findChangedModulesRecursive() : Repo.modules)).map(x => x.full);
+    // Add in related
+    if (this.cmd.related) {
+      const root = await Repo.root;
+      modules.push(
+        ...(root.pkg.travettoRepo?.docRelated ?? []).map(x => path.resolve(root.full, x))
+      );
+    }
+
+    for (const mod of modules) {
+      console.log('Running', mod);
+      const res = ExecUtil.spawn('trv', ['doc', '-o', '../README.html', '-o', '../README.md'], {
+        cwd: `${mod}/doc`,
+        stdio: [0, 1, 2],
+        isolatedEnv: true,
+      });
+      await res.result;
+    }
+  }
+}
+
+/*
+import { Packages } from './bin/npm';
 import { Util } from './bin/util';
+import { ExecUtil } from '@travetto/base';
 
 const page = (f: string): string =>
   Util.resolveUnix('related/travetto.github.io/src', f);
@@ -20,7 +64,7 @@ if (target && target.startsWith(root)) {
 const copyPluginImages = async (): Promise<void> => {
   console.log('Copying Plugin images');
   await fs.mkdir(page('assets/images/vscode-plugin')).catch(() => { });
-  await 'related/vscode-plugin/images/**/*.{gif,jpg,png}'.$dir()
+  await 'related/vscode-plugin/images/** /*.{gif,jpg,png}'.$dir()
     .$map(img => fs.copyFile(img, page(`assets/images/vscode-plugin/${path.basename(img)}`)).then(x => 1))
     .$collect();
 };
@@ -43,11 +87,11 @@ const markdownPage = (mod: string): string =>
         spawnSync('trv-service', ['restart'], { stdio: 'inherit', encoding: 'utf8' });
       }) : undefined,
 
-  Npm.yieldByFolder('related/overview')
+  Packages.yieldByFolder('related/overview')
     .$concat(
-      Npm.yieldByFolder('related/todo-app'),
+      Packages.yieldByFolder('related/todo-app'),
       //   Packages.yieldByFolder('related/vscode-plugin'),
-      Npm.yieldPublicPackages()
+      Packages.yieldPublicPackages()
     )
     .$filter(x => !target || (x._.mod === target))
     .$parallel(async pkg => {
@@ -77,7 +121,7 @@ const markdownPage = (mod: string): string =>
               .replace(/^src="images\//g, `src="/assets/images/${pkg._.mod}/`)
               .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`);
             if (pkg._.mod === 'overview') {
-              content = content.replace(/<h1>([\n\r]|.)*/m, t => `<div class="documentation">\n${t}\n</div>\n`);
+              content = content.replace(/<h1>([\n\r]|.)* /m, t => `<div class="documentation">\n${t}\n</div>\n`);
             } else if (pkg._.mod === 'todo-app') {
               content = content
                 .replace(/(<h1>(?:[\n\r]|.)*)(\s*<div class="toc">(?:[\r\n]|.)*?<\/div>(?:[\r\n]|.)*?<\/div>\s*)((?:[\r\n]|.)*)/m,
@@ -91,3 +135,4 @@ const markdownPage = (mod: string): string =>
     }, { concurrent: target ? 1 : 4 })
 ]
   .$forEach(() => { });
+*/

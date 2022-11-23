@@ -6,13 +6,16 @@ import * as  readline from 'readline';
 import * as  timers from 'timers/promises';
 import { Writable } from 'stream';
 import { Stats } from 'fs';
+import {createRequire} from 'module';
 
 import type { ManifestUtil } from '@travetto/manifest';
+
+const req = createRequire(process.cwd());
 
 type ModFile = { input: string, output: string, stale: boolean };
 type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string>, showWaitingMessage?: boolean };
 
-const resolveImport = (lib: string) => require.resolve(lib)
+const resolveImport = (lib: string): string => req.resolve(lib);
 const recentStat = (stat: Stats): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 
 const rewriteLine = async (stream: Writable, text: string, clear = false): Promise<boolean> =>

@@ -5,6 +5,6 @@ export function getVersion() {
   const prop = Object.getOwnPropertySymbols(c)
     .find(x => x.toString().includes('initial-options'))!;
   // @ts-expect-error
-  const meta: string = c[prop];
+  const meta: string = c[prop].headers['x-elastic-client-meta'];
   return Object.fromEntries(meta.split(',').map(x => x.split('=')))['es'];
 }

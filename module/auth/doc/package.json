@@ -3,7 +3,9 @@
   "main": "index.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/auth": "*"
+    "@travetto/auth": "*",
+    "@travetto/jwt": "*",
+    "@travetto/model": "*"
   },
   "private": true
 }

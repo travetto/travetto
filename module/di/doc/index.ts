@@ -4,7 +4,7 @@ import { Config } from '@travetto/config';
 import { Injectable, InjectableFactory, Inject } from '@travetto/di/src/decorator';
 import { DependencyRegistry } from '@travetto/di/src/registry';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 ${lib.DependencyInjection} is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of ${lib.Typescript} and type erasure of interfaces, dependency injection only supports ${d.Input('class')}es as a type signifier. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.

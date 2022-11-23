@@ -1,6 +1,6 @@
 import { d, mod, lib } from '@travetto/doc';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 This module expands upon ${lib.Typescript}, with supplemental functionality:
 ${d.List(

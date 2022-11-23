@@ -1,4 +1,3 @@
-import { existsSync } from 'fs';
 import { FileUtil } from './file';
 
 /**
@@ -9,26 +8,20 @@ export class ResolveUtil {
   static resolveRef<T>(title: string | T, file: string): { title: string | T, file: string, line: number } {
 
     let line = 0;
-    const { resolved } = FileUtil.resolveFile(file);
-    file = resolved;
+    const res = FileUtil.read(file);
+    file = res.file;
 
-    if (!existsSync(file)) {
-      throw new Error(`${file} is not a valid location`);
-    } else {
-      const res = FileUtil.read(file);
-      file = res.file;
-      if (typeof title == 'string') {
-        if (res.content) {
-          line = res.content.split(/\n/g)
-            .findIndex(x => new RegExp(`(class|function)[ ]+${title}`).test(x));
-          if (line < 0) {
-            line = 0;
-          } else {
-            line += 1;
-          }
-          if (FileUtil.isDecorator(title, file)) {
-            title = `@${title}`;
-          }
+    if (typeof title == 'string') {
+      if (res.content) {
+        line = res.content.split(/\n/g)
+          .findIndex(x => new RegExp(`(class|function)[ ]+${title}`).test(x));
+        if (line < 0) {
+          line = 0;
+        } else {
+          line += 1;
+        }
+        if (FileUtil.isDecorator(title, file)) {
+          title = `@${title}`;
         }
       }
     }

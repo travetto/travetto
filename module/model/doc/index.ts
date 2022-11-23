@@ -7,7 +7,7 @@ import { Links } from '@travetto/model/support/doc.support';
 
 const ModelTypeSnippet = d.Snippet('ModelType', '@travetto/model/src/types/model.ts', /export interface/, /^}/);
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the ${mod.Schema}, which is used for data model validation.

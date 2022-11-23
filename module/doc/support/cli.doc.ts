@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 
 import { path } from '@travetto/boot';
-import { Env, WatchUtil } from '@travetto/base';
+import { Env, Pkg, WatchUtil } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { RenderUtil } from '../src/render/util';
@@ -22,7 +22,7 @@ export class DocCommand extends CliCommand<Options> {
   getOptions(): Options {
     return {
       input: this.option({ desc: 'Input File', def: 'index.ts' }),
-      output: this.listOption({ desc: 'Output files' }),
+      output: this.listOption({ desc: 'Output files', def: Pkg.main.travetto?.docOutput ?? [] }),
       format: this.option({ desc: 'Format', def: 'md' }),
       watch: this.boolOption({ desc: 'Watch' })
     };
@@ -41,8 +41,6 @@ export class DocCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    console.error(process.env);
-
     const docFile = path.resolve(this.cmd.input);
 
     // If specifying output

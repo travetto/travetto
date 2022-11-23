@@ -5,7 +5,7 @@ import { ModelCustomConfig, ModelTypes } from '@travetto/model/support/doc.suppo
 import { ElasticsearchModelConfig } from '@travetto/model-elasticsearch/src/config';
 import { ElasticsearchModelService } from '@travetto/model-elasticsearch/src/service';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides an ${lib.Elasticsearch}-based implementation of the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and query against ${lib.Elasticsearch}. In development mode, ${ElasticsearchModelService} will also modify the ${lib.Elasticsearch} schema in real time to minimize impact to development.

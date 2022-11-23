@@ -55,7 +55,7 @@ export class TransformerState implements State {
    * Are we building ESM Output?
    */
   isEsmOutput(): boolean {
-    return this.#options.module === ts.ModuleKind.CommonJS;
+    return this.#options.module !== ts.ModuleKind.CommonJS;
   }
 
   /**

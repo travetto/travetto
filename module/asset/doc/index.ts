@@ -7,7 +7,7 @@ import { AssetService } from '@travetto/asset';
 const Asset = d.SnippetLink('Asset', '@travetto/asset/src/types.ts', /interface Asset/);
 const AssetNamingStrategySnippet = d.Snippet('AssetNamingStrategy', '@travetto/asset/src/naming.ts', /interface AssetNamingStrategy/, /^[}]/);
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 The asset module requires an ${Links.Stream} to provide functionality for reading and writing streams. You can use any existing providers to serve as your ${Links.Stream}, or you can roll your own.

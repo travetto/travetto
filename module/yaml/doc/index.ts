@@ -1,7 +1,7 @@
 import { d, lib } from '@travetto/doc';
 import { YamlUtil } from '@travetto/yaml';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 In the desire to provide a minimal footprint, the framework provides a minimal ${lib.YAML} parser/serializer to handle standard configuration structure.

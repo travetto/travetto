@@ -6,7 +6,7 @@ const Principal = d.Snippet('Principal Structure', '@travetto/auth/src/types/pri
 const Authorizer = d.Snippet('Authorizer', '@travetto/auth/src/types/authorizer.ts', /interface Authorizer/, /^}/);
 const Authenticator = d.Snippet('Authenticator', '@travetto/auth/src/types/authenticator.ts', /interface Authenticator/, /^}/);
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides the high-level backdrop for managing security principals.  The goal of this module is to be a centralized location for various security frameworks to plug into.  The primary contributions are:

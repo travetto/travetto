@@ -5,5 +5,11 @@
     "@travetto/doc": "*",
     "@travetto/app": "*"
   },
+  "travetto": {
+    "docOutput": [
+      "../README.md",
+      "../README.html"
+    ]
+  },
   "private": true
 }

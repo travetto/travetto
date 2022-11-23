@@ -69,10 +69,12 @@ export type Package = {
     displayName?: string;
     profileInherit?: boolean;
     profiles?: string[];
+    docOutput?: string[];
+    docBaseUrl?: string;
   };
   travettoRepo?: {
     global?: string[];
-    docBranch?: string;
+    docRelated?: string[];
   };
   workspaces?: string[];
   private?: boolean;

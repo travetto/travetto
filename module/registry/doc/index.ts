@@ -5,7 +5,7 @@ const SchemaReg = d.Ref('SchemaRegistry', '@travetto/schema/src/service/registry
 const MetadataReg = d.Ref('MetadataRegistry', '@travetto/registry/src/service/metadata.ts');
 const DependencyReg = d.Ref('DependencyRegistry', '@travetto/di/src/registry.ts');
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module is the backbone for all "discovered" and "registered" behaviors within the framework. This is primarily used for building modules within the framework and not directly useful for application development.

@@ -3,7 +3,7 @@ import { ModuleIndex } from '@travetto/boot';
 
 import { Suite, Test } from '@travetto/test';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the following formats:

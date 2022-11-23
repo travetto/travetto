@@ -1,6 +1,6 @@
 import { d, lib } from '@travetto/doc';
 
-export const text = d`
+export const text = () => d`
 The goal of the framework is to provide a holistic application platform with the a focus on interactive development.
 
 ${d.Section('Philosophy')}

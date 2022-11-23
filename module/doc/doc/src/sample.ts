@@ -1,6 +1,6 @@
 import { d, mod } from '@travetto/doc';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 Sample documentation for fictional module.  This module fictitiously relies upon ${mod.Cache} functionality.

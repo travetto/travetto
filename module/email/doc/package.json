@@ -3,7 +3,8 @@
   "main": "index.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/email": "*"
+    "@travetto/email": "*",
+    "@travetto/email-template": "*"
   },
   "private": true
 }

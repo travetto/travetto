@@ -4,7 +4,7 @@ import { Field, Schema } from '@travetto/schema';
 import { Config as ConfigDec } from '@travetto/config/src/decorator';
 import { Configuration } from '@travetto/config/src/configuration';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 The config module provides support for loading application config on startup. Configuration values support the common ${lib.YAML} constructs as defined in ${mod.Yaml}.  Additionally, the configuration is built upon the ${mod.Schema} module, to enforce type correctness, and allow for validation of configuration as an 
