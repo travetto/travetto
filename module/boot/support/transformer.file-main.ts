@@ -37,7 +37,11 @@ export class FileMainTransformer {
         state.factory.createCallExpression(state.createAccess(ident, 'runIfMain'), [], [
           mainFn.name!,
           state.createIdentifier('__output'),
-          state.createIdentifier('module')
+          state.factory.createBinaryExpression(
+            state.createIdentifier('require.main'),
+            ts.SyntaxKind.EqualsEqualsEqualsToken,
+            state.createIdentifier('module'),
+          )
         ])
       )
     ]);

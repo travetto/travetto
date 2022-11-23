@@ -87,8 +87,8 @@ async function setup(): Promise<void> {
   await setupLogging();
 }
 
-export async function runIfMain(target: Function, filename: string, module: NodeJS.Module): Promise<unknown> {
-  if (filename === path.toPosix(process.env.TRV_MAIN ?? '') || (!process.env.TRV_MAIN && module === require.main)) {
+export async function runIfMain<T>(target: Function, filename: string, isMainMod?: boolean): Promise<unknown> {
+  if (filename === path.toPosix(process.env.TRV_MAIN ?? '') || (!process.env.TRV_MAIN && isMainMod)) {
     await setup();
     return runMain(target, process.argv.slice(2));
   }
