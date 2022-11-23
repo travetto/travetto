@@ -1,7 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
 
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This is primarily a set of command line tools for compiling and developing templates.  The primary input into this process is a ${d.Path('.email.html')} under the ${d.Path('resources/email')} folder.  This template drives the generation of the ${d.Input('html')} and ${d.Input('text')} outputs, as well as the ${d.Input('subject')} file.

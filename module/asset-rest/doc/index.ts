@@ -1,6 +1,6 @@
 import { d, lib, mod } from '@travetto/doc';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides a clean and direct mechanism for processing uploads, built upon ${lib.Busboy}. The module also provides some best practices with respect to temporary file deletion.

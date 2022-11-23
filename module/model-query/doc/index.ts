@@ -1,7 +1,7 @@
 import { d, mod, lib } from '@travetto/doc';
 import { Links } from '@travetto/model-query/support/doc.support';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides an enhanced query contract for ${mod.Model} implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.

@@ -38,7 +38,8 @@
   },
   "travetto": {
     "id": "@trv:boot",
-    "displayName": "Boot"
+    "displayName": "Boot",
+    "docBaseUrl": "https://github.com/travetto/travetto/tree/main"
   },
   "engines": {
     "node": ">=12.17.0"

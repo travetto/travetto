@@ -5,7 +5,6 @@ import { CliCommand } from './command';
 
 const COMMAND_PACKAGE = [
   [/^run$/, 'app', true],
-  [/^compile$/, 'compiler', true],
   [/^test$/, 'test', false],
   [/^command:service$/, 'command', true],
   [/^model:(install|export)$/, 'model', true],

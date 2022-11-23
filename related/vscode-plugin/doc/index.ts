@@ -2,7 +2,7 @@ import { d, lib, mod } from '@travetto/doc';
 import { Test, Suite } from '@travetto/test';
 import { Application } from '@travetto/app';
 
-export const text = d`
+export const text = () => d`
 ${d.RawHeader('VS Code Plugin')}
 
 The ${lib.TravettoPlugin} directly integrates with ${lib.Travetto} framework, exposing some of the ${mod.Cli} functionality.

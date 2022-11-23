@@ -1,7 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 
 import { path, ModuleIndex } from '@travetto/boot';
-import { Pkg } from '@travetto/base';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
@@ -23,17 +22,18 @@ export class FileUtil {
    * @param file
    * @returns
    */
-  static resolveFile(file: string): { resolved: string, cleaned: string } {
-    if (!existsSync(path.resolve(file))) {
+  static resolveFile(file: string): string {
+    let resolved = path.resolve(file);
+    if (!existsSync(resolved)) {
       if (file.endsWith('.ts')) {
-        file = ModuleIndex.resolveFileImport(file);
-      } else {
+        resolved = ModuleIndex.resolveFileImport(file);
+        resolved = ModuleIndex.getSourceFile(resolved);
+      }
+      if (!existsSync(resolved)) {
         throw new Error(`Unknown file to resolve: ${file}`);
       }
     }
-    const resolved = path.resolve(file);
-    // TODO: Fix name
-    return { resolved, cleaned: [resolved, Pkg.main.name].join(' ') };
+    return resolved;
   }
 
   /**
@@ -43,14 +43,14 @@ export class FileUtil {
    * @returns
    */
   static read(file: string): { content: string, language: string, file: string } {
-    const { resolved, cleaned } = this.resolveFile(file);
+    file = this.resolveFile(file);
 
-    const ext = path.extname(resolved).replace(/^[.]/, '');
+    const ext = path.extname(file).replace(/^[.]/, '');
     const language = this.#extToLang[ext] ?? ext;
 
     let text: string | undefined;
     if (language) {
-      text = readFileSync(resolved, 'utf8');
+      text = readFileSync(file, 'utf8');
 
       text = text.split(/\n/)
         .map(x => {
@@ -63,21 +63,21 @@ export class FileUtil {
         .join('\n');
     }
 
-    return { content: text ?? '', language, file: cleaned };
+    return { content: text ?? '', language, file };
   }
 
   /**
    * Determine if a file is a decorator
    */
   static isDecorator(name: string, file: string): boolean {
-    const { resolved } = this.resolveFile(file);
+    file = this.resolveFile(file);
 
-    const key = `${name}:${resolved}`;
+    const key = `${name}:${file}`;
     if (key in this.#decCache) {
       return this.#decCache[key];
     }
 
-    const text = readFileSync(resolved, 'utf8')
+    const text = readFileSync(file, 'utf8')
       .split(/\n/g);
 
     const start = text.findIndex(x => new RegExp(`function ${name}\\b`).test(x));

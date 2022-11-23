@@ -3,7 +3,8 @@
   "main": "index.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/base": "*"
+    "@travetto/base": "*",
+    "@travetto/rest": "*"
   },
   "private": true
 }

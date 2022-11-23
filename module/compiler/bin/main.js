@@ -19,7 +19,7 @@ if (process.env.TRV_OUTPUT !== process.cwd().replaceAll('\\', '/')) {
       fs.writeFileSync(outputFile, ts.transpile(fs.readFileSync(inputFile, 'utf8'), opts, inputFile));
     }
   }
-  module.exports = async () => import('../support/.bin/compile.mjs');
+  module.exports = async () => require('../support/.bin/compile');
 } else {
   module.exports = async () => require('../support/bin/compile');
 }

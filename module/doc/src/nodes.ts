@@ -1,13 +1,18 @@
 import { existsSync } from 'fs';
 
-import { PackageUtil } from '@travetto/manifest';
+import { Package, PackageUtil } from '@travetto/manifest';
 import { Pkg } from '@travetto/base';
-import { path } from '@travetto/boot';
+import { ModuleIndex, path } from '@travetto/boot';
 
 import { FileUtil, } from './util/file';
 import { DocRunUtil, RunConfig } from './util/run';
 import { Content, DocNode, TextType } from './types';
 import { ResolveUtil } from './util/resolve';
+
+let parentPkg: Package;
+try {
+  parentPkg = PackageUtil.readPackage(path.resolve('..'));
+} catch { }
 
 function $c(val: string): TextType;
 function $c(val: DocNode | string): DocNode;
@@ -161,7 +166,7 @@ export const node = {
    */
   Execute: (title: Content, cmd: string, args: string[] = [], cfg: RunConfig = {}) => {
     if (cmd !== 'trv') {
-      cmd = FileUtil.resolveFile(cmd).resolved.replace(path.cwd(), '.');
+      cmd = FileUtil.resolveFile(cmd).replace(path.cwd(), '.');
     }
 
     const script = DocRunUtil.run(cmd, args, cfg);
@@ -172,11 +177,10 @@ export const node = {
 
   /**
    * Node Module Reference
-   * @param folder
+   * @param name
    */
-  Mod(folder: string) {
-    folder = path.resolve('node_modules', folder);
-
+  Mod(name: string) {
+    const folder = ModuleIndex.getModule(name)!.source;
     const { description, travetto } = PackageUtil.readPackage(folder);
     return $n('mod', { title: $c(travetto!.displayName!), link: $c(folder), description: $c(description!) });
   },
@@ -225,8 +229,13 @@ export const node = {
    * @param install
    * @param pkg
    */
-  Header: (install = true, pkg = Pkg.main) =>
-    $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install }),
+  Header: (mod?: string, install = true) => {
+    if (!mod) {
+      mod = (Pkg.main.name === 'doc' ? parentPkg?.name : undefined) ?? Pkg.main.name;
+    }
+    const pkg = PackageUtil.readPackage(ModuleIndex.getModule(mod)!.source);
+    return $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install })
+  },
 
   /**
    * Comment

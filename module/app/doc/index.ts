@@ -2,7 +2,7 @@ import { d, mod } from '@travetto/doc';
 import { Injectable } from '@travetto/di';
 import { Application } from '@travetto/app';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 The ${mod.Base} module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, ${Application} who's job is to register entry points into the application, along with the associated  metadata. 

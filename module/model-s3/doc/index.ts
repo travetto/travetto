@@ -3,7 +3,7 @@ import { ModelCustomConfig } from '@travetto/model/support/doc.support';
 
 import { S3ModelConfig } from '@travetto/model-s3/src/config';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides an ${lib.S3}-based implementation for the ${mod.Model}.  This source allows the ${mod.Model} module to read, write and stream against ${lib.S3}.

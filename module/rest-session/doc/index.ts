@@ -5,7 +5,7 @@ import { Session } from '@travetto/rest-session';
 const Request = d.SnippetLink('TravettoRequest', '@travetto/rest-session/src/types.d.ts', /interface TravettoRequest/);
 const SessionData = d.SnippetLink('SessionData', '@travetto/rest-session/src/session.ts', /interface SessionData/);
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This is a module that adds session support to the ${mod.Rest} framework.  Sessions are represented as:

@@ -1,7 +1,7 @@
 import { d, mod, lib } from '@travetto/doc';
 import { RestApplication } from '@travetto/rest';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 The module is an ${lib.Express} provider for the ${mod.Rest} module.  This module provides an implementation of ${RestApplication} for automatic injection in the default Rest server.

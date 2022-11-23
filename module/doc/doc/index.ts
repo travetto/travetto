@@ -1,11 +1,12 @@
 import { readFileSync } from 'fs';
 
 import { d, lib } from '@travetto/doc';
+import { ModuleIndex } from '@travetto/boot';
 
 type Feature = { text: string, name: string };
 
 function getNodes(): ReturnType<(typeof d)['List']> {
-  const lines = readFileSync('@travetto/doc/src/nodes.ts', 'utf8').split(/\n/g);
+  const lines = readFileSync(ModuleIndex.resolveFileImport('@travetto/doc/src/nodes.ts'), 'utf8').split(/\n/g);
   let feature: Partial<Feature> | undefined;
   const features: Feature[] = [];
   for (const line of lines) {
@@ -26,12 +27,12 @@ function getNodes(): ReturnType<(typeof d)['List']> {
   );
 }
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides the ability to generate documentation in ${lib.HTML} and/or ${lib.Markdown}.  The module relies on integrating with the source of the project, and providing a fully referenced code-base.  This allows for automatic updates when code is changed and/or refactored. 
 
-${d.Code('Document Sample', 'src/sample/doc.ts')}
+${d.Code('Document Sample', 'src/sample.ts')}
 
 ${d.Snippet('Document Context', '@travetto/doc/src/types.ts', /interface DocumentShape/, /^}/)}
 
@@ -41,7 +42,7 @@ ${d.Note('By design all the node types provided are synchronous in nature.  This
 
 ${d.Section('Node Types')}
 
-${getNodes()}
+${getNodes()}f
 
 ${d.Section('Libraries')}
 

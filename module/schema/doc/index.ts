@@ -6,7 +6,7 @@ import {
   Currency, LongText, Text, Readonly, Writeonly, Schema, Describe
 } from '@travetto/schema';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is 

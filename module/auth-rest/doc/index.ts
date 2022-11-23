@@ -4,11 +4,11 @@ import { Context } from '@travetto/rest';
 import { AuthService, Authenticate, Unauthenticated, Authenticated } from '@travetto/auth-rest';
 
 const Principal = d.SnippetLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
-const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
-const Response = d.SnippetLink('TravettoResponse', '@travetto/rest/src/types.d.ts', /interface TravettoResponse/);
+const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/typings.d.ts', /interface TravettoRequest/);
+const Response = d.SnippetLink('TravettoResponse', '@travetto/rest/src/typings.d.ts', /interface TravettoResponse/);
 const Authenticator = d.SnippetLink('Authenticator', '@travetto/auth/src/types/authenticator.ts', /interface Authenticator/);
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This is a primary integration for the ${mod.Auth} module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  

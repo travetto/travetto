@@ -1,6 +1,6 @@
 import { d, lib } from '@travetto/doc';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 Boot is basic environment  awareness coupled with typescript bootstrapping for ${lib.Travetto} apps and libraries.  It has support for the following key areas:

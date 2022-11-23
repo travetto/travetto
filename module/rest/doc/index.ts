@@ -16,12 +16,12 @@ import { CookiesInterceptor, RestCookieConfig } from '@travetto/rest/src/interce
 import { RestConfig } from '@travetto/rest/src/application/config';
 import { AsyncContextInterceptor } from '@travetto/rest/src/interceptor/context';
 
-const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/types.d.ts', /interface TravettoRequest/);
-const Response = d.SnippetLink('TravettoResponse', '@travetto/rest/src/types.d.ts', /interface TravettoResponse/);
+const Request = d.SnippetLink('TravettoRequest', '@travetto/rest/src/typings.d.ts', /interface TravettoRequest/);
+const Response = d.SnippetLink('TravettoResponse', '@travetto/rest/src/typings.d.ts', /interface TravettoResponse/);
 
 const RestInterceptor = d.SnippetLink('RestInterceptor', '@travetto/rest/src/interceptor/types.ts', /interface RestInterceptor/);
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles ${lib.Express} in the ${Request} and ${Response} objects). This module is built upon the ${mod.Schema} structure, and all controller method parameters follow the same rules/abilities as any ${Field} in a standard ${Schema} class.
@@ -80,7 +80,7 @@ ${d.List(
   d`${Path} - Path params`,
   d`${Query} - Query params`,
   d`${Body} - Request body (in it's entirety), with support for validation`,
-  d`${QuerySchema()} - Allows for mapping the query parameters to a full object`,
+  d`${QuerySchema} - Allows for mapping the query parameters to a full object`,
   d`${Header} - Header values`,
   d`${Context} - Special values exposed (e.g. ${Request}, ${Response}, etc.)`,
 )}

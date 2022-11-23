@@ -1,7 +1,7 @@
 /* eslint-disable no-regex-spaces */
 import { d, mod } from '@travetto/doc';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 ${d.Section('CLI - pack')} 

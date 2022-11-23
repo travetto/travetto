@@ -3,10 +3,10 @@ import { d, lib, mod } from '@travetto/doc';
 import { NullTransport } from '@travetto/email/src/transport';
 import { MailConfig } from '@travetto/email/src/config';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
-A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the ${NullTransport} which will just drop emails. The structure of the API is derived from  ${lib.NodeMailer}, but is compatible with any library that can handle the ${d.SnippetLink('MessageOptions', 'src/types.ts', /interface MessageOptions/)} input.
+A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the ${NullTransport} which will just drop emails. The structure of the API is derived from  ${lib.NodeMailer}, but is compatible with any library that can handle the ${d.SnippetLink('MessageOptions', '@travetto/email/src/types.ts', /interface MessageOptions/)} input.
 
 To expose the necessary email transport, the following pattern is commonly used:
 

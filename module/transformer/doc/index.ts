@@ -1,6 +1,6 @@
 import { d, lib, mod } from '@travetto/doc';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides support for enhanced AST transformations, and declarative transformer registration, with common patterns to support all the transformers used throughout the framework. Transformations are located by ${d.Path('support/transformer.<name>.ts')} as the filename. 

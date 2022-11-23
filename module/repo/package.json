@@ -21,10 +21,7 @@
     "directory": "module/repo"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.3",
-    "@travetto/cli": "^3.0.0-rc.3",
-    "@travetto/doc": "^3.0.0-rc.3",
-    "@travetto/test": "^3.0.0-rc.5"
+    "@travetto/cli": "^3.0.0-rc.3"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

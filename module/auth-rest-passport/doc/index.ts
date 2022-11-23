@@ -1,7 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
 import { PassportAuthenticator } from '@travetto/auth-rest-passport';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This is a primary integration for the ${mod.AuthRest} module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  

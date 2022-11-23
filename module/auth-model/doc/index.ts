@@ -3,7 +3,7 @@ import { Links } from '@travetto/model/support/doc.support';
 
 const RegisteredPrincipal = d.Snippet('Registered Principal', '@travetto/auth-model/src/model.ts', /interface RegisteredPrincipal/, /^[}]/);
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module supports the integration between the ${mod.Auth} module and the ${mod.Model}. 

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType } from '@travetto/manifest';
+import { ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType, Package, PackageUtil } from '@travetto/manifest';
 import { path } from './path';
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
@@ -48,7 +48,7 @@ class $ModuleIndex {
   }
 
   #resolve(...parts: string[]): string {
-    return path.resolve(this.#root, ...parts).replace(/[\\]/g, '/');
+    return path.resolve(this.#root, ...parts);
   }
 
   get manifest(): ManifestRoot {
@@ -73,7 +73,6 @@ class $ModuleIndex {
   #index(): void {
     this.#manifest = JSON.parse(fs.readFileSync(this.#resolve('manifest.json'), 'utf8'));
     this.#modules = Object.values(this.manifest.modules)
-      .filter(m => !m.profiles.length || !m.profiles.includes('compile'))
       .map(m => ({
         ...m,
         output: this.#resolve(m.output),
@@ -173,7 +172,7 @@ class $ModuleIndex {
    * Resolve import
    */
   resolveFileImport(name: string): string {
-    name = name.replace(/[.]ts$/, '.js');
+    name = !name.endsWith('.d.ts') ? name.replace(/[.]ts$/, '.js') : name;
     return this.#importToEntry.get(name)?.output ?? name;
   }
 

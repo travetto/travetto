@@ -3,7 +3,7 @@ import { ModuleIndex } from '@travetto/boot';
 
 const ConsoleManager = d.Ref('ConsoleManager', '@travetto/boot/src/console.ts');
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides logging functionality, building upon ${ConsoleManager} in the ${mod.Base} module.  This is all ultimately built upon ${lib.Console} operations. 

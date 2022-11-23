@@ -3,7 +3,15 @@
   "main": "index.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/rest": "*"
+    "@travetto/rest": "*",
+    "@travetto/auth-rest": "*",
+    "@travetto/asset-rest": "*"
+  },
+  "travetto": {
+    "docOutput": [
+      "../README.md",
+      "../README.html"
+    ]
   },
   "private": true
 }

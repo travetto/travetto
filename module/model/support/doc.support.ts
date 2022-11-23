@@ -5,12 +5,12 @@ import { Config } from '@travetto/config';
 import { AllType, AllTypeMap } from '@travetto/doc/src/nodes';
 
 export const Links = {
-  Basic: d.SnippetLink('Basic', '@travetto/model/src/service/basic', /export interface/),
-  Crud: d.SnippetLink('CRUD', '@travetto/model/src/service/crud', /export interface/),
-  Expiry: d.SnippetLink('Expiry', '@travetto/model/src/service/expiry', /export interface/),
-  Indexed: d.SnippetLink('Indexed', '@travetto/model/src/service/indexed', /export interface/),
-  Bulk: d.SnippetLink('Bulk', '@travetto/model/src/service/bulk', /export interface/),
-  Stream: d.SnippetLink('Streaming', '@travetto/model/src/service/stream', /export interface/),
+  Basic: d.SnippetLink('Basic', '@travetto/model/src/service/basic.ts', /export interface/),
+  Crud: d.SnippetLink('CRUD', '@travetto/model/src/service/crud.ts', /export interface/),
+  Expiry: d.SnippetLink('Expiry', '@travetto/model/src/service/expiry.ts', /export interface/),
+  Indexed: d.SnippetLink('Indexed', '@travetto/model/src/service/indexed.ts', /export interface/),
+  Bulk: d.SnippetLink('Bulk', '@travetto/model/src/service/bulk.ts', /export interface/),
+  Stream: d.SnippetLink('Streaming', '@travetto/model/src/service/stream.ts', /export interface/),
 };
 
 export const ModelTypes = (file: string | Function): AllTypeMap['SnippetLink'][] => {

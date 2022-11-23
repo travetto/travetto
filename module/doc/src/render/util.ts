@@ -3,6 +3,8 @@ import { Html } from './html';
 import { Markdown } from './markdown';
 import { DocumentShape, Wrapper } from '../types';
 import { AllType } from '../nodes';
+import { ModuleIndex } from '@travetto/boot';
+import { ManifestModuleUtil, PackageUtil } from '@travetto/manifest';
 
 const renderers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
 
@@ -29,20 +31,32 @@ export class RenderUtil {
       throw new Error(`Unknown renderer with format: ${fmt}`);
     }
 
+    const mod = await ModuleIndex.getModuleFromSource(file);
+
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const res = (await import(file)) as DocumentShape;
+    const res = await import(mod!) as DocumentShape;
 
     if (!this.#imported.has(file)) {
       this.#imported.set(file, {
         wrap: res.wrap,
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        root: ('_type' in res.text ? res.text : await res.text()) as AllType
+        root: await res.text() as AllType
       });
     }
 
     const { wrap, root } = this.#imported.get(file)!;
 
-    const ctx = new RenderContext(file);
+    const repoRoot = await ManifestModuleUtil.getRepoRoot();
+    const repoPkg = PackageUtil.readPackage(repoRoot!);
+    const manifestPkg = PackageUtil.readPackage(ModuleIndex.getModule('@travetto/boot')!.source);
+
+    const repoBaseUrl = repoPkg.travetto?.docBaseUrl ?? '.';
+
+    const ctx = new RenderContext(file,
+      repoRoot!,
+      repoBaseUrl,
+      repoBaseUrl.includes('travetto.github') ? repoBaseUrl : manifestPkg.travetto!.docBaseUrl!
+    );
     const content = renderers[fmt].render(root, ctx).replace(/\n{3,100}/msg, '\n\n').trim();
     const preamble = renderers[fmt].render(ctx.preamble, ctx);
     return `${preamble}\n${wrap?.[fmt]?.(content) ?? content}\n`;

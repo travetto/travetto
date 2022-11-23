@@ -23,7 +23,8 @@ export class ClassMetadataUtil {
    * @param `file` Filename
    */
   static initFunctionMeta(fn: Function, file: string): boolean {
-    return this.#writeMeta(fn, { file });
+    const source = ModuleIndex.getSourceFile(file);
+    return this.#writeMeta(fn, { source });
   }
 
   /**

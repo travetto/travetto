@@ -3,7 +3,7 @@ import { d, lib } from '@travetto/doc';
 import { WithAsyncContext } from '@travetto/context/src/decorator';
 import { AsyncContext } from '@travetto/context/src/service';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 This module provides a wrapper around node's ${lib.AsyncHooks} to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow.

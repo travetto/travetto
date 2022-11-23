@@ -1,7 +1,7 @@
 import { d, lib } from '@travetto/doc';
 import { Schema } from '@travetto/schema';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 In the course of application development, there is often a need to generate fake data on demand. Given all the information that we have about the schemas provided, translating that into data generation is fairly straightforward.  The generation utility is built upon ${lib.Faker}, mapping data types, and various field names into specific ${lib.Faker} generation routines.

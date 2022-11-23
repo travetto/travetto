@@ -1,6 +1,6 @@
 import { d, lib } from '@travetto/doc';
 
-export const text = d`
+export const text = () => d`
 ${d.Header()}
 
 ${d.Install('Specific SQL Client: mysql', '@travetto/model-mysql')}
