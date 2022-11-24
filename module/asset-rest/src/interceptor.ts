@@ -1,4 +1,4 @@
-import * as busboy from 'busboy';
+import busboy from 'busboy';
 
 import { Asset } from '@travetto/asset';
 import { Inject, Injectable } from '@travetto/di';

@@ -1,4 +1,4 @@
-import * as jws from 'jws';
+import type * as jws from 'jws';
 
 export type AlgType = jws.Header['alg'];
 

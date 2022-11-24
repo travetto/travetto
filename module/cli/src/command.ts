@@ -1,5 +1,5 @@
 import { appendFile } from 'fs/promises';
-import * as commander from 'commander';
+import type * as commander from 'commander';
 
 import { CliUtil } from './util';
 import { CompletionConfig } from './autocomplete';

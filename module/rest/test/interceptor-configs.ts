@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Class } from '@travetto/base';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';

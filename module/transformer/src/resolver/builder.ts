@@ -1,5 +1,5 @@
 /* eslint-disable no-bitwise */
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import { path } from '@travetto/manifest';
 

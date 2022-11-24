@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import type { default as ts } from 'typescript';
 
 /**
  * Param documentation

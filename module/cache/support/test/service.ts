@@ -1,15 +1,15 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { ModelExpirySupport } from '@travetto/model';
 import { Inject, Injectable } from '@travetto/di';
-import { InjectableSuite } from '@travetto/di/support/test.suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 import { Class, TimeUtil } from '@travetto/base';
 
-import { Cache, EvictCache } from '../src/decorator';
-import { CacheModelⲐ, CacheService } from '../src/service';
-import { CacheUtil } from '../src/util';
+import { Cache, EvictCache } from '../../src/decorator';
+import { CacheModelⲐ, CacheService } from '../../src/service';
+import { CacheUtil } from '../../src/util';
 
 class User { }
 

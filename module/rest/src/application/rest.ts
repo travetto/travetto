@@ -2,6 +2,7 @@ import { Pkg, Env, Class, OrderingUtil, AppError } from '@travetto/base';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
 import { Application } from '@travetto/app';
+import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 
 import { RouteConfig, Request, ServerHandle } from '../types';
 import { RestConfig } from './config';
@@ -120,7 +121,6 @@ export class RestApplication<T = unknown>  {
     config.instance = await DependencyRegistry.getInstance(config.class);
 
     if (Env.isDynamic()) {
-      const { RetargettingProxy } = await import('@travetto/base/src/internal/proxy');
       config.instance = RetargettingProxy.unwrap(config.instance);
     }
 

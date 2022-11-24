@@ -1,6 +1,6 @@
 import type * as https from 'https';
-import * as express from 'express';
-import * as compression from 'compression';
+import express from 'express';
+import compression from 'compression';
 
 import { Inject, Injectable } from '@travetto/di';
 import { RestInterceptor, Request, RestConfig, RouteUtil, RestServer, RouteConfig, LoggingInterceptor } from '@travetto/rest';

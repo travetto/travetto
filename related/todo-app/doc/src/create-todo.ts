@@ -1,4 +1,4 @@
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
 export async function main() {
   const res = await fetch('http://localhost:3000/todo', {

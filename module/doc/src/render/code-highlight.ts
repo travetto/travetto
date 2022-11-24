@@ -1,4 +1,4 @@
-import * as Prism from 'prismjs';
+import { plugins, highlight as prismHighlight, languages } from 'prismjs';
 
 import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace';
 import 'prismjs/components/prism-typescript';
@@ -11,14 +11,14 @@ import 'prismjs/components/prism-sql';
 import 'prismjs/components/prism-properties';
 import 'prismjs/components/prism-bash';
 
-Prism.plugins.NormalizeWhitespace.setDefaults({
+plugins.NormalizeWhitespace.setDefaults({
   'remove-trailing': true,
   'remove-indent': true,
   'left-trim': true,
   'right-trim': true
 });
 
-const nw = Prism.plugins.NormalizeWhitespace;
+const nw = plugins.NormalizeWhitespace;
 
 const tokenMapping: { [key: string]: string } = {
   gt: '>',
@@ -37,7 +37,7 @@ export function highlight(text: string, lang: string): string | undefined {
     .replace(/&([a-z][^;]*);/g, (a, k) => tokenMapping[k] || a);
 
   try {
-    return Prism.highlight(text, Prism.languages[lang], lang)
+    return prismHighlight(text, languages[lang], lang)
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
   } catch (err) {

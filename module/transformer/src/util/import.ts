@@ -1,9 +1,8 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
-import { path } from '@travetto/manifest';
+import { PackageUtil, path } from '@travetto/manifest';
 
 import { Import } from '../types/shared';
-import { SystemUtil } from './system';
 
 /**
  * Import utilities
@@ -24,7 +23,7 @@ export class ImportUtil {
       return path.resolve('node_modules', file);
     }
     try {
-      return SystemUtil.resolveImport(file);
+      return PackageUtil.resolveImport(file);
     } catch {
       return file;
     }

@@ -1,11 +1,11 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Schema, FieldConfig } from '@travetto/schema';
 import { Suite, Test } from '@travetto/test';
 import { BaseModelSuite } from '@travetto/model/support/test/base';
 
-import { VisitStack } from '../src/internal/util';
-import { SQLModelService } from '../src/service';
+import { VisitStack } from '../../src/internal/util';
+import { SQLModelService } from '../../src/service';
 
 @Schema()
 class User {

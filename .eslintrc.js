@@ -10,8 +10,7 @@ module.exports = {
   ...rest,
   ignorePatterns: [
     ...ignorePatterns,
-    'module/scaffold/templates',
-    'module/boot/support/bin/*.js'
+    'module/scaffold/templates'
   ],
   extends: [...ext, 'plugin:travetto/all'],
   plugins: [...plugins, 'unused-imports'],
@@ -24,13 +23,7 @@ module.exports = {
       }
     },
     {
-      files: 'module/{transformer,watch}/**',
-      rules: {
-        'no-restricted-imports': 0
-      }
-    },
-    {
-      files: 'module/compiler/**/*.ts',
+      files: 'module/{transformer,compiler}/**',
       rules: {
         'no-restricted-imports': 0
       }
@@ -57,21 +50,14 @@ module.exports = {
       }
     },
     {
-      files: 'sample/*/**/*.ts',
+      files: 'sample/**/*.ts',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0
       }
     },
     {
-      files: 'module/scaffold/support/resources/**/*.ts',
-      rules: {
-        '@typescript-eslint/consistent-type-assertions': 0,
-        '@typescript-eslint/explicit-function-return-type': 0
-      }
-    },
-    {
-      files: 'module/*/support/test.*.ts',
+      files: 'module/scaffold/support/{resources,fixtures}/**/*.ts',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0

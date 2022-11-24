@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { ModuleIndex } from '@travetto/boot';
 import { Util, AppError, ClassInstance, Class } from '@travetto/base';

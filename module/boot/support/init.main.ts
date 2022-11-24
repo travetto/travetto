@@ -1,4 +1,4 @@
-import * as sourceMapSupport from 'source-map-support';
+import { install } from 'source-map-support';
 import * as url from 'url';
 import { parentPort } from 'worker_threads';
 
@@ -37,7 +37,7 @@ const setToJSON = <T>(cons: abstract new (...args: any[]) => T, handler: (val: T
 };
 
 async function setupLogging(): Promise<void> {
-  const { ConsoleManager } = await import('../src/console');
+  const { ConsoleManager } = await import('../src/console.js');
 
   // Declare log target
   trv.log = ConsoleManager.invoke.bind(ConsoleManager);
@@ -78,10 +78,10 @@ async function setup(): Promise<void> {
 
   // Setup stack traces
   Error.stackTraceLimit = 50; // Deep limit
-  sourceMapSupport.install(); // Register source maps
+  install(); // Register source maps
 
   // Register shutdown handler
-  const { ShutdownManager } = await import('../src/shutdown');
+  const { ShutdownManager } = await import('../src/shutdown.js');
   ShutdownManager.register();
 
   await setupLogging();

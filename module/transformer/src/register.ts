@@ -1,4 +1,5 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
+
 import { DecoratorMeta, NodeTransformer, State, TransformPhase, TransformerType, Transformer, TransformerId } from './types/visitor';
 
 const HandlersProp = Symbol.for('@trv:transformer/handlers');

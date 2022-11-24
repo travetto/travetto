@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import { TransformerId, TransformerState, AfterFile } from '@travetto/transformer';
 
@@ -23,21 +23,24 @@ export class FileSourceTransformer {
     const toAdd = [
       state.factory.createVariableStatement(
         [],
-        state.factory.createVariableDeclarationList([
-          state.factory.createVariableDeclaration(
-            '__output',
-            undefined,
-            undefined,
-            state.factory.createCallExpression(
-              state.createAccess(ident, 'trv', 'out'),
-              [],
-              [state.isEsmOutput() ?
-                state.createAccess('import', 'meta', 'url') :
-                state.createIdentifier('__filename')
-              ]
+        state.factory.createVariableDeclarationList(
+          [
+            state.factory.createVariableDeclaration(
+              '__output',
+              undefined,
+              undefined,
+              state.factory.createCallExpression(
+                state.createAccess(ident, 'trv', 'out'),
+                [],
+                [state.isEsmOutput() ?
+                  state.createAccess('import', 'meta', 'url') :
+                  state.createIdentifier('__filename')
+                ]
+              )
             )
-          )
-        ])
+          ],
+          ts.NodeFlags.Const
+        )
       )
     ];
 

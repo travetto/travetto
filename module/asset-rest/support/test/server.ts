@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { AssetUtil, Asset } from '@travetto/asset';
 import { StreamUtil } from '@travetto/base';
@@ -6,7 +6,7 @@ import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 
-import { Upload, UploadAll } from '../src/decorator';
+import { Upload, UploadAll } from '../../src/decorator';
 
 type FileUpload = { name: string, resource: string, type: string };
 

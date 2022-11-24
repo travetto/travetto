@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';

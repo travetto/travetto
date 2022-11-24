@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 
 import { JWTUtil } from '..';

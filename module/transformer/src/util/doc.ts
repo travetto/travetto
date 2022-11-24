@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import { DeclDocumentation } from '../types/shared';
 import { CoreUtil } from './core';

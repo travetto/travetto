@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Util } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';

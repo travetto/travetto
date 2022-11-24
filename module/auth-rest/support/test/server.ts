@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Controller, FilterContext, Get, Post, Redirect, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
@@ -7,9 +7,9 @@ import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 import { AppError } from '@travetto/base';
 import { Authenticator, Principal } from '@travetto/auth';
 
-import { Authenticate, Authenticated } from '../src/decorator';
-import { PrincipalEncoder } from '../src/encoder';
-import { AuthService } from '../src/service';
+import { Authenticate, Authenticated } from '../../src/decorator';
+import { PrincipalEncoder } from '../../src/encoder';
+import { AuthService } from '../../src/service';
 
 const TestAuthⲐ = Symbol.for('TEST_AUTH');
 

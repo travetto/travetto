@@ -236,7 +236,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   override async init(): Promise<void> {
     await super.init();
     if (Env.isDynamic()) {
-      const { DependencyRegistration } = await import('../support/dynamic.injection');
+      const { DependencyRegistration } = await import('../support/dynamic.injection.js');
       DependencyRegistration.init(this);
     }
   }

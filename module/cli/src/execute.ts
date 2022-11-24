@@ -1,9 +1,10 @@
 import { program as commander } from 'commander';
 
+import { PackageUtil } from '@travetto/manifest';
+
 import { AutocompleteUtil, CompletionConfig } from './autocomplete';
 import { CliCommandManager } from './command-manager';
 import { HelpUtil } from './help';
-import { version } from '../package.json';
 
 /**
  * Execution manager
@@ -60,7 +61,7 @@ export class ExecutionManager {
   static async run(args: string[]): Promise<void> {
     const width = +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 120);
     commander
-      .version(version)
+      .version(PackageUtil.getFrameworkVersion())
       .configureOutput({ getOutHelpWidth: () => width, getErrHelpWidth: () => width });
 
     const cmd = args[2];

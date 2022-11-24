@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';

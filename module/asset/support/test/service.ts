@@ -1,13 +1,13 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { Class } from '@travetto/base';
 import { Inject } from '@travetto/di';
 import { NotFoundError } from '@travetto/model';
-import { InjectableSuite } from '@travetto/di/support/test.suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 
-import { HashNamingStrategy, AssetService, AssetUtil } from '../index';
+import { HashNamingStrategy, AssetService, AssetUtil } from '../../index';
 
 @Suite()
 @ModelSuite()

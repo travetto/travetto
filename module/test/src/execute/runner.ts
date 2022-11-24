@@ -32,7 +32,7 @@ export class Runner {
 
     const files = (await RunnerUtil.getTestFiles(this.patterns));
 
-    console.debug('Running', { files });
+    console.debug('Running', { files, patterns: this.patterns });
 
     const manager = buildStandardTestManager;
 

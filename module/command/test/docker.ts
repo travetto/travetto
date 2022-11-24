@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 import * as timers from 'timers/promises';
 
 import { Suite, Test } from '@travetto/test';

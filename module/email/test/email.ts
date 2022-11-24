@@ -1,8 +1,8 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
-import { InjectableSuite } from '@travetto/di/support/test.suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite';
 
 import { MailService, MailTransport, NullTransport } from '../';
 

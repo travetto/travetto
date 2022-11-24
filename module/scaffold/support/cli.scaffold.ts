@@ -1,4 +1,4 @@
-import * as enquirer from 'enquirer';
+import enquirer from 'enquirer';
 
 import { path } from '@travetto/boot';
 import { Env } from '@travetto/base';

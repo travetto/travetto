@@ -1,4 +1,4 @@
-import * as passport from 'passport';
+import passport from 'passport';
 
 import { Util } from '@travetto/base';
 import { Request } from '@travetto/rest';

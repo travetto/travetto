@@ -1,5 +1,4 @@
-import * as ts from 'typescript';
-
+import ts from 'typescript';
 /**
  * Utilities for dealing with literals
  */

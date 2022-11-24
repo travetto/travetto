@@ -1,5 +1,5 @@
-export { AllConfig, AllConfigPartial } from './support/bin/pack';
-export { CommonConfig } from './support/bin/types';
-export { AssembleConfig } from './support/bin/assemble/operation';
-export { ZipConfig } from './support/bin/zip';
-export { DockerConfig } from './support/bin/docker';
+export type { AllConfig, AllConfigPartial } from './support/bin/pack';
+export type { CommonConfig } from './support/bin/types';
+export type { AssembleConfig } from './support/bin/assemble/operation';
+export type { ZipConfig } from './support/bin/zip';
+export type { DockerConfig } from './support/bin/docker';

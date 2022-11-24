@@ -1,5 +1,5 @@
-import * as inflation from 'inflation';
-import * as rawBody from 'raw-body';
+import inflation from 'inflation';
+import rawBody from 'raw-body';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';

@@ -1,4 +1,4 @@
-import * as jws from 'jws';
+import type * as jws from 'jws';
 
 import { JWTError } from './error';
 import { VerifyOptions, Payload, AlgType } from './types';

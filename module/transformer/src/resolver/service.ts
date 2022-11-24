@@ -1,6 +1,6 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
-import { AnyType, Checker } from './types';
+import type { AnyType, Checker } from './types';
 import { TypeCategorize, TypeBuilder } from './builder';
 import { VisitCache } from './cache';
 import { DocUtil } from '../util/doc';

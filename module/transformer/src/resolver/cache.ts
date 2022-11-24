@@ -1,5 +1,5 @@
-import * as ts from 'typescript';
-import { AnyType } from './types';
+import ts from 'typescript';
+import type { AnyType } from './types';
 
 /**
  * Cache for handling recursive checks

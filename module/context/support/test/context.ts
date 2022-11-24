@@ -2,7 +2,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/base';
 import { SuiteRegistry } from '@travetto/test';
 
-import { AsyncContext } from '../src/service';
+import { AsyncContext } from '../../src/service';
 
 const Init = Symbol();
 

@@ -35,6 +35,5 @@ export const PendingRegister = new $PendingRegister();
 /**
  * Decorator to track class as pending
  */
-export function Register() {
-  return (target: Class): void => PendingRegister.add(target);
-}
+export const Register = () =>
+  (target: Class): void => PendingRegister.add(target);

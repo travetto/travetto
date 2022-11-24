@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 import { ParameterObject } from 'openapi3-ts/src/model/OpenApi';
 import { Readable } from 'stream';
 

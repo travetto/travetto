@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import * as cp from 'child_process';
 
-import * as glob from 'picomatch';
+import glob from 'picomatch';
 
 import { path, ModuleIndex } from '@travetto/boot';
 import { CliUtil } from '@travetto/cli';

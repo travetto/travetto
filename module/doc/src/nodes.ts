@@ -234,7 +234,7 @@ export const node = {
       mod = (Pkg.main.name === 'doc' ? parentPkg?.name : undefined) ?? Pkg.main.name;
     }
     const pkg = PackageUtil.readPackage(ModuleIndex.getModule(mod)!.source);
-    return $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install })
+    return $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
   },
 
   /**

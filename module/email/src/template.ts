@@ -1,4 +1,4 @@
-import * as Mustache from 'mustache';
+import { render } from 'mustache';
 
 import { Injectable } from '@travetto/di';
 
@@ -46,6 +46,6 @@ export class MustacheTemplateEngine implements MailTemplateEngine {
    * Interpolate text with data
    */
   template(text: string, data: Record<string, unknown>): string {
-    return Mustache.render(text, data);
+    return render(text, data);
   }
 }
