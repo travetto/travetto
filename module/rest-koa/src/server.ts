@@ -1,7 +1,7 @@
 import type * as https from 'https';
-import * as koa from 'koa';
-import * as kCompress from 'koa-compress';
-import * as kRouter from 'koa-router';
+import koa from 'koa';
+import kCompress from 'koa-compress';
+import kRouter from 'koa-router';
 
 import { Injectable, Inject } from '@travetto/di';
 import { RestConfig, RestServer, RouteConfig, RestCookieConfig } from '@travetto/rest';

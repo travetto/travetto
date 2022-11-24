@@ -1,4 +1,4 @@
-import * as Mod from 'module';
+import Mod from 'module';
 
 import { path } from '@travetto/boot';
 
@@ -84,25 +84,6 @@ export class $DynamicLoader {
   #loadHandlers: LoadHandler[] = [];
 
   /**
-   * Check for module cycles
-   */
-  #checkForCycles(mod: unknown, request: string, parent: NodeJS.Module): void {
-    if (parent && !parent.loaded) { // Standard ts compiler output
-      const desc = mod ? Object.getOwnPropertyDescriptors(mod) : {};
-      if (!mod || !('Ⲑtrv' in desc)) {
-        try {
-          const p = Module._resolveFilename!(request, parent);
-          if (p && !p.includes('node_modules')) {
-            throw new Error(`Unable to load ${p}, most likely a cyclical dependency`);
-          }
-        } catch {
-          // Ignore if we can't resolve
-        }
-      }
-    }
-  }
-
-  /**
    * When a module load is requested
    * @param request path to file
    * @param parent parent Module
@@ -111,7 +92,6 @@ export class $DynamicLoader {
     let mod: unknown;
     try {
       mod = this.#moduleLoad.apply(null, [request, parent]);
-      this.#checkForCycles(mod, request, parent);
     } catch (err: unknown) {
       if (!(err instanceof Error)) {
         throw err;

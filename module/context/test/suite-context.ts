@@ -1,11 +1,11 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { InjectableSuite } from '@travetto/di/support/test.suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite';
 
 import { AsyncContext, WithAsyncContext } from '..';
-import { WithSuiteContext } from '../support/test.context';
+import { WithSuiteContext } from '../support/test/context';
 
 @Suite()
 @InjectableSuite()

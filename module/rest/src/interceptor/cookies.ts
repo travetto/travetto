@@ -1,4 +1,4 @@
-import * as cookies from 'cookies';
+import cookies from 'cookies';
 import { ServerResponse, IncomingMessage } from 'http';
 
 import { Injectable, Inject } from '@travetto/di';

@@ -1,3 +1,4 @@
+import type { CompilerOptions } from 'typescript';
 import * as fs from 'fs/promises';
 
 import * as  cp from 'child_process';
@@ -6,11 +7,12 @@ import * as  readline from 'readline';
 import * as  timers from 'timers/promises';
 import { Writable } from 'stream';
 import { Stats } from 'fs';
-import {createRequire} from 'module';
+import { createRequire } from 'module';
 
 import type { ManifestUtil } from '@travetto/manifest';
 
 const req = createRequire(process.cwd());
+const rootPkg = fs.readFile(path.resolve('package.json'), 'utf8').then(v => JSON.parse(v), v => ({}));
 
 type ModFile = { input: string, output: string, stale: boolean };
 type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string>, showWaitingMessage?: boolean };
@@ -18,6 +20,9 @@ type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Re
 const resolveImport = (lib: string): string => req.resolve(lib);
 const recentStat = (stat: Stats): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 
+/**
+ * Rewrite command line text
+ */
 const rewriteLine = async (stream: Writable, text: string, clear = false): Promise<boolean> =>
   new Promise(r => readline.cursorTo(stream, 0, undefined, () => {
     if (clear) {
@@ -30,6 +35,9 @@ const rewriteLine = async (stream: Writable, text: string, clear = false): Promi
     r(true);
   }));
 
+/**
+ * Waiting indicator
+ */
 async function waiting<T>(message: string, worker: () => Promise<T>): Promise<T | undefined> {
   const waitState = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
   const delay = 100;
@@ -74,23 +82,43 @@ async function waiting<T>(message: string, worker: () => Promise<T>): Promise<T 
   }
 }
 
-let opts: unknown;
+let _opts: CompilerOptions;
 
-async function getOpts(): Promise<any> {
-  const ts = await import('typescript');
+/**
+ * Get ts compiler options
+ */
+async function getOpts(): Promise<CompilerOptions> {
+  const { default: ts } = await import('typescript');
   const folder = await resolveImport('@travetto/compiler/tsconfig.trv.json');
-  opts ??= ts.readConfigFile(folder, ts.sys.readFile).config?.compilerOptions;
-  return opts;
+  if (_opts === undefined) {
+    _opts = ts.readConfigFile(folder, ts.sys.readFile).config?.compilerOptions;
+    const { type } = await rootPkg;
+
+    if (type !== undefined) {
+      _opts.module = `${type}`.toLowerCase() === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
+    }
+  }
+  return _opts;
 }
 
 /**
  * Transpiles a file
  */
 async function transpileFile(inputFile: string, outputFile: string): Promise<void> {
-  const ts = await import('typescript');
-  await fs.writeFile(outputFile, ts.transpile(await fs.readFile(inputFile, 'utf8'), await getOpts(), inputFile));
+  const { default: ts } = await import('typescript');
+
+  const opts = await getOpts();
+
+  const content = ts.transpile(await fs.readFile(inputFile, 'utf8'), opts, inputFile)
+    .replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
+    .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
+
+  await fs.writeFile(outputFile, content);
 }
 
+/**
+ * Allows for triggering a subprocess that can be watched, and provides consistent logging support
+ */
 export async function spawn(
   action: string, cmd: string,
   { args = [], cwd, failOnError = true, env = {}, showWaitingMessage = true }: SpawnCfg
@@ -131,10 +159,16 @@ export async function spawn(
   }
 }
 
+/**
+ * Common logging support
+ */
 export const log = process.env.DEBUG === 'build' ?
   (...args: unknown[]): void => console.debug(new Date().toISOString(), ...args) :
   (): void => { };
 
+/**
+ * Scan directory to find all project sources for comparison
+ */
 export async function getProjectSources(
   module: string,
   baseOutputFolder: string,
@@ -178,6 +212,9 @@ export async function getProjectSources(
   return out;
 }
 
+/**
+ * Recompile folder if stale
+ */
 export async function compileIfStale(prefix: string, files: ModFile[]): Promise<void> {
   try {
     if (files.some(f => f.stale)) {
@@ -187,7 +224,9 @@ export async function compileIfStale(prefix: string, files: ModFile[]): Promise<
           const pkg: { main?: string, type?: string, files?: string[] } = JSON.parse(await fs.readFile(file.input, 'utf8'));
           pkg.main = pkg.main?.replace(/[.]ts$/, '.js');
           pkg.files = pkg.files?.map(f => f.replace(/[.]ts$/, '.js'));
-          // TODO: ESM Support -- pkg.type = 'module';
+          const { default: ts } = await import('typescript');
+          const opts = await getOpts();
+          pkg.type = opts.module !== ts.ModuleKind.CommonJS ? 'module' : 'commonjs';
           await fs.writeFile(file.output, JSON.stringify(pkg, null, 2));
         } else {
           await transpileFile(file.input, file.output);
@@ -211,8 +250,11 @@ export async function addNodePath(folder: string): Promise<void> {
   Module._initPaths();
 }
 
+/**
+ * Import the manifest utils once compiled
+ */
 export const importManifest = (compilerFolder: string): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
-  import(path.resolve(compilerFolder, 'node_modules', '@travetto/manifest'))
+  import(path.resolve(compilerFolder, 'node_modules', '@travetto/manifest/index.js'))
     .then(mod => {
       // Ensure we resolve imports, relative to self, and not the compiler folder
       mod.PackageUtil.resolveImport = resolveImport;

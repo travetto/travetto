@@ -1,4 +1,4 @@
-import * as lambda from 'aws-lambda';
+import type * as lambda from 'aws-lambda';
 
 import { DependencyRegistry } from '@travetto/di';
 import { Request, ServerHandle, RestCookieConfig } from '@travetto/rest';
@@ -8,7 +8,7 @@ import {
 } from '@travetto/rest/support/test/server-support/base';
 import { Util } from '@travetto/base';
 
-import { AwsLambdaRestApplication } from '../src/server';
+import { AwsLambdaRestApplication } from '../../src/server';
 
 const baseLambdaEvent: Pick<lambda.APIGatewayProxyEvent, 'resource' | 'pathParameters' | 'stageVariables'> = {
   resource: '/{proxy+}',

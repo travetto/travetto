@@ -1,4 +1,4 @@
-import * as alf from '@fastify/aws-lambda';
+import alf from '@fastify/aws-lambda';
 
 import { Inject, Injectable } from '@travetto/di';
 import { ServerHandle } from '@travetto/rest/src/types';
@@ -22,7 +22,6 @@ export class AwsLambdaFastifyRestServer extends FastifyRestServer implements Aws
 
   override async init(): Promise<this['raw']> {
     const ret = await super.init();
-    // @ts-expect-error
     this.handle = alf(ret, this.awsConfig);
     return ret;
   }

@@ -1,4 +1,4 @@
-import * as express from 'express';
+import express from 'express';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
 import { NodeEntityⲐ, ProviderEntityⲐ } from '@travetto/rest/src/internal/symbol';

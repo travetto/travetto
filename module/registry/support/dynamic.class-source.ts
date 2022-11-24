@@ -4,8 +4,6 @@ import { ModuleIndex, ShutdownManager } from '@travetto/boot';
 
 import type { ClassSource } from '../src/source/class-source';
 
-const IS_VALID_SOURCE = (file: string): boolean => !file.includes('node_modules') && file.includes('src/');
-
 /**
  * Wraps the class source supporting real-time changes to files
  */
@@ -13,9 +11,9 @@ class $DynamicClassSource {
   #modules = new Map<string, RetargettingProxy<unknown>>();
 
   async init(target: ClassSource): Promise<void> {
-    const { DynamicLoader } = await import('@travetto/base/src/internal/dynamic-loader');
+    const { DynamicLoader } = await import('@travetto/base/src/internal/dynamic-loader.js');
 
-    const localMods = Object.values(ModuleIndex.manifest.modules).filter(x => x.local).map(x => ModuleIndex.getModule(x.name)!);
+    const localMods = ModuleIndex.getLocalModules();
     const folders = localMods.map(x => x.output);
 
     ShutdownManager.onUnhandled(err => {
@@ -28,7 +26,7 @@ class $DynamicClassSource {
 
     // Proxy all file loads
     DynamicLoader.onLoad((name, mod) => {
-      if (IS_VALID_SOURCE(name)) {
+      if (ModuleIndex.getModuleFromSource(name)?.local) {
         if (!this.#modules.has(name)) {
           this.#modules.set(name, new RetargettingProxy(mod));
         } else {
@@ -40,8 +38,7 @@ class $DynamicClassSource {
       }
     });
 
-    // Clear target on unload
-    DynamicLoader.onUnload(f => this.#modules.get(f)?.setTarget(null));
+    DynamicLoader.init();
 
     console.debug('Watching for', folders);
 
@@ -55,7 +52,10 @@ class $DynamicClassSource {
           await DynamicLoader.reload(file);
           return target.processFiles();
         }
-        case 'delete': return DynamicLoader.unload(file);
+        case 'delete': {
+          this.#modules.get(file)?.setTarget(null);
+          await DynamicLoader.unload(file);
+        }
       }
     });
   }

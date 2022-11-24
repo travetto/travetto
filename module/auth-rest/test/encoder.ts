@@ -1,9 +1,9 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext, Request, Response } from '@travetto/rest';
-import { InjectableSuite } from '@travetto/di/support/test.suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ValueAccessor } from '@travetto/rest/src/internal/accessor';
 import { Principal } from '@travetto/auth/src/types/principal';
 import { Config } from '@travetto/config';

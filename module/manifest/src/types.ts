@@ -6,7 +6,7 @@ export type ManifestModuleFolderType =
   '$other';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number];
-type ManifestModuleCore = {
+export type ManifestModuleCore = {
   id: string;
   name: string;
   main?: boolean;

@@ -6,7 +6,6 @@ import { path, ModuleIndex } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli';
 
 import type { RunState } from '../src/execute/types';
-
 import { envInit } from './bin/env';
 
 const modes = ['single', 'standard'] as const;
@@ -87,7 +86,7 @@ export class TestCommand extends CliCommand<Options> {
   }
 
   async action(regexes: string[]): Promise<void> {
-    const { runTests } = await import('./bin/run');
+    const { runTests } = await import('./bin/run.js');
 
     const [first] = regexes;
 

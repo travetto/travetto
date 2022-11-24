@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { ModelCrudSupport } from '@travetto/model';
 import { BaseModelSuite } from '@travetto/model/support/test/base';

@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 import { cleanseTemplate, cleanseOutput } from './util';

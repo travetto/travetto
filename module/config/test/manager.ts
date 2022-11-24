@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Test, Suite, BeforeEach } from '@travetto/test';
 import { ValidationResultError } from '@travetto/schema';

@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import {
   TransformerState, DecoratorMeta, OnMethod, OnClass, CoreUtil, DecoratorUtil, TransformerId

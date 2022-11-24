@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import { path } from '@travetto/manifest';
 
@@ -226,7 +226,7 @@ export class TransformerState implements State {
    * Finalize the source file for emission
    */
   finalize(ret: ts.SourceFile): ts.SourceFile {
-    ret = this.#imports.finalize(ret);
+    ret = this.#imports.finalize(ret, this.#resolver.getChecker());
     return ret;
   }
 

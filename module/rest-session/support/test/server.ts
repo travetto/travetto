@@ -1,13 +1,13 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Controller, Get, Body, Post, Put, Request } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
-import { InjectableSuite } from '@travetto/di/support/test.suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { TimeUtil } from '@travetto/base';
 
-import { SessionData, SessionConfig } from '../index';
+import { SessionData, SessionConfig } from '../../index';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 

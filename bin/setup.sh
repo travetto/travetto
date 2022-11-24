@@ -1,5 +1,4 @@
 #!/bin/bash
-ROOT=$(realpath $(dirname $(dirname $0)))
-
+ROOT=`pwd`
 ln -sf $ROOT/module/cli/bin/trv.js $ROOT/.bin/trv
-npx tsc -p bin/eslint/tsocnfig.json > /dev/null
+npx tsc -p $ROOT/bin/eslint/tsocnfig.json > /dev/null

@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 import { mkdirSync, readFileSync, writeFile } from 'fs';
 
 import {
@@ -206,7 +206,7 @@ export class CompilerState {
       ): void => {
         mkdirSync(path.dirname(outputFile), { recursive: true });
         if (outputFile.endsWith('package.json')) {
-          text = CompilerUtil.rewritePackageJSON(this.manifest, text);
+          text = CompilerUtil.rewritePackageJSON(this.manifest, text, options);
         } else if (CompilerUtil.isSourceMapUrlPosData(data)) {
           text = CompilerUtil.rewriteSourceMap(text, f => this.#relativeInputToSource.get(f), data);
         }

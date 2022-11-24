@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 
-import * as koa from 'koa';
+import koa from 'koa';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
 import { NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from '@travetto/rest/src/internal/symbol';

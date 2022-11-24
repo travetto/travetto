@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 import * as fs from 'fs/promises';
 
 import { ManifestState, path } from '@travetto/manifest';
@@ -33,7 +33,7 @@ export class Compiler {
       x => (x.files.support ?? [])
         .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
         .map(([f]) =>
-          (`${manifestState.manifest.buildLocation}/${x.output}/${f}`.replace(/[.][tj]s$/, ''))
+          (`${manifestState.manifest.buildLocation}/${x.output}/${f}`.replace(/[.][tj]s$/, '.js'))
         )
     );
 
@@ -85,7 +85,11 @@ process.env.TRV_COMPILED=1;
     let program: ts.Program;
 
     const transformers = await this.createTransformerProvider();
-    const options = await CompilerUtil.getCompilerOptions(this.#state.outputFolder, this.#bootTsconfig);
+    const options = await CompilerUtil.getCompilerOptions(
+      this.#state.outputFolder,
+      this.#bootTsconfig,
+      this.#state.manifest.modules[this.#state.manifest.main].source
+    );
     const host = this.state.getCompilerHost(options);
 
     const emit = (file: string, needsNewProgram = program === undefined): void => {

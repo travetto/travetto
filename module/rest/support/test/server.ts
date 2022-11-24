@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 import { StreamUtil } from '@travetto/base';

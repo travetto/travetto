@@ -3,7 +3,7 @@ export * from './src/visitor';
 export * from './src/register';
 export * from './src/types/visitor';
 export * from './src/types/shared';
-export { AnyType } from './src/resolver/types';
+export type { AnyType } from './src/resolver/types';
 export * from './src/manager';
 
 export * from './src/util/core';

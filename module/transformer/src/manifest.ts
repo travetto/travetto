@@ -5,6 +5,7 @@ export class ManifestManager {
   #outToMod: Record<string, string> = {};
   #srcToOut: Record<string, string> = {};
   #outToSrc: Record<string, string> = {};
+  #modToSrc: Record<string, string> = {};
   #main: ManifestModule;
 
   constructor(modules: ManifestModule[]) {
@@ -21,6 +22,8 @@ export class ManifestManager {
           this.#outToMod[out] = modImp;
           this.#srcToOut[src] = out;
           this.#outToSrc[`${mod.output}/${file}`] = src;
+          this.#modToSrc[modImp] = src;
+          this.#modToSrc[modImp.replace(/[.][tjm]s$/, '')] = src;
         }
       }
     }
@@ -31,7 +34,7 @@ export class ManifestManager {
   }
 
   knownFile(file: string): boolean {
-    return file && file in this.#srcToMod || file in this.#outToMod;
+    return !!file && (file in this.#srcToMod || file in this.#outToMod || file in this.#modToSrc);
   }
 
   ensureOutputFile(file: string): string;

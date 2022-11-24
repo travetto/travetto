@@ -1,5 +1,5 @@
 import { parse } from 'parse5';
-import * as htmlEntities from 'html-entities';
+import { decode as decodeEntities } from 'html-entities';
 
 import { Element } from './types';
 import { HtmlUtil, Parse5Adapter } from './html';
@@ -57,7 +57,7 @@ export class MarkdownUtil {
     let simple = html.replace(/&#xA0;/g, ' '); // Remove entities
 
     // Decode all encoded pieces
-    simple = htmlEntities.decode(simple);
+    simple = decodeEntities(simple);
 
     const output: string[] = [];
 

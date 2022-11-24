@@ -1,13 +1,13 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { AppError, Class } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { ModelCrudSupport, Model } from '@travetto/model';
-import { InjectableSuite } from '@travetto/di/support/test.suite';
+import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 
-import { ModelAuthService, RegisteredPrincipal } from '../src/model';
+import { ModelAuthService, RegisteredPrincipal } from '../../src/model';
 
 export const TestModelSvcⲐ = Symbol.for('@trv:auth/test-model-svc');
 

@@ -1,4 +1,4 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
 import { OnProperty, TransformerState, OnMethod, OnClass, TransformerId } from '@travetto/transformer';
 

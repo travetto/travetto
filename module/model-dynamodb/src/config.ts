@@ -1,4 +1,4 @@
-import * as dynamodb from '@aws-sdk/client-dynamodb';
+import type * as dynamodb from '@aws-sdk/client-dynamodb';
 
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';

@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 
-import { ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType, Package, PackageUtil } from '@travetto/manifest';
+import { ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType, ManifestModuleCore } from '@travetto/manifest';
 import { path } from './path';
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
@@ -20,13 +20,7 @@ export type IndexedFile = {
   type: ManifestModuleFileType;
 };
 
-export type IndexedModule = {
-  id: string;
-  name: string;
-  profiles: string[];
-  source: string;
-  output: string;
-  main?: boolean;
+export type IndexedModule = ManifestModuleCore & {
   files: Record<string, IndexedFile[]>;
 };
 
@@ -94,6 +88,14 @@ class $ModuleIndex {
 
   #getEntry(file: string): IndexedFile | undefined {
     return this.#outputToEntry.get(file);
+  }
+
+  /**
+   * Get all local modules
+   * @returns
+   */
+  getLocalModules(): IndexedModule[] {
+    return this.#modules.filter(x => x.local);
   }
 
   /**
@@ -185,20 +187,31 @@ class $ModuleIndex {
   }
 
   /**
-   * Get node module from source file
+   * Get module name from source file
    * @param source
    */
-  getModuleFromSource(source: string): string | undefined {
+  getModuleNameFromSource(source: string): string | undefined {
     return this.#sourceToEntry.get(source)?.module;
+  }
+
+  /**
+   * Get module from source file
+   * @param source
+   */
+  getModuleFromSource(source: string): IndexedModule | undefined {
+    const name = this.getModuleNameFromSource(source);
+    return name ? this.getModule(name) : undefined;
   }
 
   /**
    * Load all source modules
    */
   async loadSource(): Promise<void> {
+    const loading: Promise<unknown>[] = [];
     for (const { output } of this.findSrc({})) {
-      await import(output);
+      loading.push(import(output));
     }
+    await Promise.all(loading);
   }
 }
 

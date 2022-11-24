@@ -1,4 +1,4 @@
-import * as passport from 'passport';
+import passport from 'passport';
 
 import { Authenticator, Principal } from '@travetto/auth';
 import { FilterContext, Request, Response } from '@travetto/rest';

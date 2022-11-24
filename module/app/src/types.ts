@@ -1,4 +1,5 @@
-import type { Class, Closeable } from '@travetto/base';
+import type { Closeable } from '@travetto/boot';
+import type { Class } from '@travetto/base';
 import type { FieldConfig } from '@travetto/schema';
 
 type OrProm<T> = T | Promise<T>;

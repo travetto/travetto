@@ -1,4 +1,4 @@
-import * as assert from 'assert';
+import assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';

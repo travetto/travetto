@@ -1,4 +1,4 @@
-import * as  serverless from '@vendia/serverless-express';
+import { configure } from '@vendia/serverless-express';
 
 import { Inject, Injectable } from '@travetto/di';
 import { ServerHandle } from '@travetto/rest';
@@ -32,7 +32,7 @@ export class AwsLambdaExpressRestServer extends ExpressRestServer implements Aws
   override async init(): Promise<this['raw']> {
     const ret = await super.init();
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.#handler = serverless.configure({ app: ret, ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandle;
+    this.#handler = configure({ app: ret, ...this.awsConfig.toJSON() }) as unknown as AwsLambdaHandle;
     return ret;
   }
 

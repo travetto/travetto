@@ -1,7 +1,6 @@
 import * as fs from 'fs/promises';
 
-import type * as sqlite3 from 'better-sqlite3';
-import Db = require('better-sqlite3');
+import Db, * as sqlite3 from 'better-sqlite3';
 import * as pool from 'generic-pool';
 
 import { path, ShutdownManager } from '@travetto/boot';

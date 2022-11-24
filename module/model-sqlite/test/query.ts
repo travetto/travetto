@@ -2,7 +2,7 @@ import { Suite } from '@travetto/test';
 import { AsyncContext } from '@travetto/context';
 import { InjectableFactory } from '@travetto/di';
 
-import { WithSuiteContext } from '@travetto/context/support/test.context';
+import { WithSuiteContext } from '@travetto/context/support/test/context';
 import { ModelQuerySuite } from '@travetto/model-query/support/test/query';
 import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';

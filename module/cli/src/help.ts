@@ -1,4 +1,4 @@
-import * as commander from 'commander';
+import type * as commander from 'commander';
 
 import { CliUtil } from './util';
 

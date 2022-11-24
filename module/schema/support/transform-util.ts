@@ -1,5 +1,5 @@
-import * as ts from 'typescript';
-import { AnyType, DeclarationUtil, DecoratorUtil, DocUtil, ParamDocumentation, TransformerId, TransformerState } from '@travetto/transformer';
+import ts from 'typescript';
+import { type AnyType, DeclarationUtil, DecoratorUtil, DocUtil, ParamDocumentation, TransformerId, TransformerState } from '@travetto/transformer';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
 const FIELD_MOD = '@travetto/schema/src/decorator/field';

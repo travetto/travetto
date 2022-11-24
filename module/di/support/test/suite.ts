@@ -2,7 +2,7 @@ import { Class, ClassInstance } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry } from '@travetto/test';
 
-import { DependencyRegistry } from '../src/registry';
+import { DependencyRegistry } from '../../src/registry';
 
 /**
  * Registers a suite as injectable

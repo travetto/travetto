@@ -1,6 +1,6 @@
 import { InjectableFactory } from '@travetto/di';
 import { Suite } from '@travetto/test';
-import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/support/test.model';
+import { AuthModelServiceSuite, TestModelSvcⲐ } from '@travetto/auth-model/support/test/model';
 
 import { MongoModelConfig, MongoModelService } from '@travetto/model-mongo';
 

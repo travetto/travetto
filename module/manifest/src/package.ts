@@ -1,22 +1,29 @@
 import { readFileSync } from 'fs';
+import { createRequire } from 'module';
 
 import { Package, PackageDigest } from './types';
 import { path } from './path';
-import { version as framework } from '../package.json';
 
 export type Dependency = Package['travetto'] & { version: string, name: string, folder: string };
 
 export class PackageUtil {
 
-  static resolveImport = (library: string): string => require.resolve(library);
+  static #req = createRequire(process.cwd());
+  static #framework: Package;
+
+  static resolveImport = (library: string): string => this.#req.resolve(library);
 
   static readPackage(folder: string): Package {
     return JSON.parse(readFileSync(path.resolve(folder, 'package.json'), 'utf8'));
   }
 
+  static getFrameworkVersion(): string {
+    return (this.#framework ??= this.readPackage(path.dirname(this.resolveImport('@travetto/manifest/package.json')))).version;
+  }
+
   static digest(pkg: Package): PackageDigest {
     const { main, name, author, license, version } = pkg;
-    return { name, main, author, license, version, framework };
+    return { name, main, author, license, version, framework: this.getFrameworkVersion() };
   }
 
   /**

@@ -1,8 +1,8 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 import * as fs from 'fs/promises';
 import { readdirSync } from 'fs';
 
-import { ManifestModule, ManifestRoot, Package, path } from '@travetto/manifest';
+import { ManifestModule, ManifestRoot, Package, PackageUtil, path } from '@travetto/manifest';
 
 type InputToSource = (inputFile: string) => ({ source: string, module: ManifestModule } | undefined);
 export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
@@ -73,7 +73,7 @@ export class CompilerUtil {
    * @param text
    * @returns
    */
-  static rewritePackageJSON(manifest: ManifestRoot, text: string): string {
+  static rewritePackageJSON(manifest: ManifestRoot, text: string, opts: ts.CompilerOptions): string {
     const pkg: Package = JSON.parse(text);
     if (pkg.files) {
       pkg.files = pkg.files.map(x => x.replace(/[.]ts$/, '.js'));
@@ -81,7 +81,7 @@ export class CompilerUtil {
     if (pkg.main) {
       pkg.main = pkg.main.replace(/[.]ts$/, '.js');
     }
-    // TODO: ESM Support -- pkg.type = 'module';
+    pkg.type = opts.module !== ts.ModuleKind.CommonJS ? 'module' : 'commonjs';
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {
       if (key in pkg) {
         for (const dep of Object.keys(pkg[key] ?? {})) {
@@ -160,15 +160,24 @@ export class CompilerUtil {
   /**
    * Get loaded compiler options
    */
-  static async getCompilerOptions(outputFolder: string, bootTsConfig: string): Promise<ts.CompilerOptions> {
+  static async getCompilerOptions(outputFolder: string, bootTsConfig: string, mainFolder?: string): Promise<ts.CompilerOptions> {
     const opts: Partial<ts.CompilerOptions> = {};
     const rootDir = nativeCwd;
     const projTsconfig = path.resolve('tsconfig.json');
     // Fallback to base tsconfig if not found in local folder
     const config = (await fs.stat(projTsconfig).catch(() => false)) ? projTsconfig : bootTsConfig;
+    const base = await CompilerUtil.readTsConfigOptions(config);
+
+    if (mainFolder) {
+      const { type } = PackageUtil.readPackage(mainFolder);
+
+      if (type !== undefined) {
+        base.module = `${type}`.toLowerCase() === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
+      }
+    }
 
     return {
-      ...(await CompilerUtil.readTsConfigOptions(config)),
+      ...base,
       resolveJsonModule: true,
       allowJs: true,
       outDir: outputFolder,

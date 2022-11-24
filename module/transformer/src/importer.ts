@@ -1,14 +1,15 @@
-import * as ts from 'typescript';
+import ts from 'typescript';
 
-import { path } from '@travetto/manifest';
+import { PackageUtil, path } from '@travetto/manifest';
 
 import { AnyType, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';
 import { CoreUtil } from './util/core';
 import { Import } from './types/shared';
+import { LiteralUtil } from './util/literal';
+import { DeclarationUtil } from './util/declaration';
 
 import { ManifestManager } from './manifest';
-import { SystemUtil } from './util/system';
 
 const D_OR_D_TS_EXT_RE = /[.]d([.]ts)?$/;
 
@@ -28,6 +29,63 @@ export class ImportManager {
     this.#imports = ImportUtil.collectImports(source);
     this.#file = path.toPosix(source.fileName);
     this.#manifest = manifest;
+  }
+
+  #getImportFile(spec?: ts.Expression): string | undefined {
+    if (spec && ts.isStringLiteral(spec)) {
+      return spec.text.replace(/^['"]|["']$/g, '');
+    }
+  }
+
+  #rewriteModuleSpecifier(spec: ts.Expression | undefined): ts.Expression | undefined {
+    const file = this.#getImportFile(spec);
+    if (
+      file &&
+      (file.startsWith('.') || this.#manifest.knownFile(file)) &&
+      !/[.]([mc]?js|ts|json)$/.test(file)
+    ) {
+      return LiteralUtil.fromLiteral(this.factory, `${file}.js`);
+    }
+    return spec;
+  }
+
+  #rewriteImportClause(
+    spec: ts.Expression | undefined,
+    clause: ts.ImportClause | undefined,
+    checker: ts.TypeChecker
+  ): ts.ImportClause | undefined {
+    if (!(spec && clause?.namedBindings && ts.isNamedImports(clause.namedBindings))) {
+      return clause;
+    }
+
+    const file = this.#getImportFile(spec);
+    if (!(file && (file.startsWith('.') || this.#manifest.knownFile(file)))) {
+      return clause;
+    }
+
+    const bindings = clause.namedBindings;
+    const newBindings: ts.ImportSpecifier[] = [];
+    // Remove all type only imports
+    for (const el of bindings.elements) {
+      if (!el.isTypeOnly) {
+        const type = checker.getTypeAtLocation(el.name);
+        const objFlags = DeclarationUtil.getObjectFlags(type);
+        const typeFlags = type.getFlags();
+        if (objFlags || typeFlags !== 1) {
+          newBindings.push(el);
+        }
+      }
+    }
+    if (newBindings.length !== bindings.elements.length) {
+      return this.factory.updateImportClause(
+        clause,
+        clause.isTypeOnly,
+        clause.name,
+        this.factory.createNamedImports(newBindings)
+      );
+    } else {
+      return clause;
+    }
   }
 
   /**
@@ -53,7 +111,7 @@ export class ImportManager {
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {
-      file = SystemUtil.resolveImport(file.replace(/.*@types\/node\//, '').replace(D_OR_D_TS_EXT_RE, ''));
+      file = PackageUtil.resolveImport(file.replace(/.*@types\/node\//, '').replace(D_OR_D_TS_EXT_RE, ''));
     }
 
     if (!D_OR_D_TS_EXT_RE.test(file) && !this.#newImports.has(file)) {
@@ -121,11 +179,45 @@ export class ImportManager {
     }
   }
 
+  finalizeImportExportExtension(ret: ts.SourceFile, checker: ts.TypeChecker): ts.SourceFile {
+    const toAdd: ts.Statement[] = [];
+
+    for (const stmt of ret.statements) {
+      if (ts.isExportDeclaration(stmt)) {
+        if (!stmt.isTypeOnly) {
+          toAdd.push(this.factory.updateExportDeclaration(
+            stmt,
+            stmt.modifiers,
+            stmt.isTypeOnly,
+            stmt.exportClause,
+            this.#rewriteModuleSpecifier(stmt.moduleSpecifier),
+            stmt.assertClause
+          ));
+        }
+      } else if (ts.isImportDeclaration(stmt)) {
+        if (!stmt.importClause?.isTypeOnly) {
+          toAdd.push(this.factory.updateImportDeclaration(
+            stmt,
+            stmt.modifiers,
+            this.#rewriteImportClause(stmt.moduleSpecifier, stmt.importClause, checker)!,
+            this.#rewriteModuleSpecifier(stmt.moduleSpecifier)!,
+            stmt.assertClause
+          ));
+        }
+      } else {
+        toAdd.push(stmt);
+      }
+    }
+    return CoreUtil.updateSource(this.factory, ret, toAdd);
+  }
+
   /**
    * Reset the imports into the source file
    */
-  finalize(ret: ts.SourceFile): ts.SourceFile {
-    return this.finalizeNewImports(ret) ?? ret;
+  finalize(ret: ts.SourceFile, checker: ts.TypeChecker): ts.SourceFile {
+    ret = this.finalizeNewImports(ret) ?? ret;
+    ret = this.finalizeImportExportExtension(ret, checker) ?? ret;
+    return ret;
   }
 
   /**
