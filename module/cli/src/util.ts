@@ -1,5 +1,5 @@
-import * as timers from 'timers/promises';
-import * as readline from 'readline';
+import timers from 'timers/promises';
+import readline from 'readline';
 import { Writable } from 'stream';
 
 import { ColorUtil } from '@travetto/base';
@@ -180,7 +180,7 @@ export class CliUtil {
           console.log!(output);
         },
         async finish(): Promise<void> {
-          readline.moveCursor(process.stdout, 0, rows - cursorRow);
+          readline.moveCursor(process.stdout, 0, rows - cursorRow + 1);
           CliUtil.#enableCursor();
         }
       };

@@ -1,5 +1,5 @@
-import * as  fs from 'fs/promises';
-import * as  os from 'os';
+import fs from 'fs/promises';
+import os from 'os';
 
 import { path } from './path';
 import { ManifestModule, ManifestRoot, ManifestState } from './types';

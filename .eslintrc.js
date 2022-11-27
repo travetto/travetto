@@ -29,7 +29,7 @@ module.exports = {
       }
     },
     {
-      files: '{module,sample,global-test}/*/support/transform*',
+      files: '{module,global-test}/*/support/transform*',
       rules: {
         'no-restricted-imports': 0
       }
@@ -44,13 +44,6 @@ module.exports = {
     },
     {
       files: '{module,global-test}/*/{test,doc,support/test}/**/*.ts',
-      rules: {
-        '@typescript-eslint/consistent-type-assertions': 0,
-        '@typescript-eslint/explicit-function-return-type': 0
-      }
-    },
-    {
-      files: 'sample/**/*.ts',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0

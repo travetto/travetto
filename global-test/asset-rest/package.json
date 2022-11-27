@@ -1,0 +1,17 @@
+{
+  "name": "asset-rest",
+  "dependencies": {
+    "@travetto/rest-express": "*",
+    "@travetto/rest-express-lambda": "*",
+    "@travetto/rest-koa": "*",
+    "@travetto/rest-koa-lambda": "*",
+    "@travetto/rest-fastify": "*",
+    "@travetto/rest-fastify-lambda": "*",
+    "@travetto/asset-rest": "*"
+  },
+  "devDependencies": {
+    "@travetto/test": "*",
+    "@travetto/cli": "*"
+  },
+  "private": true
+}

@@ -40,7 +40,6 @@
   "travetto": {
     "id": "@trv:compiler",
     "displayName": "Compiler",
-    "profileInherit": false,
     "profiles": [
       "compile"
     ]

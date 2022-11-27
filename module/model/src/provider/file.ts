@@ -1,6 +1,6 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import { createReadStream } from 'fs';
-import * as os from 'os';
+import os from 'os';
 import { Readable } from 'stream';
 
 import { path } from '@travetto/boot';

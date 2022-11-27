@@ -1,6 +1,6 @@
-import * as os from 'os';
+import os from 'os';
 import { readFileSync } from 'fs';
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
 import { path, ModuleIndex } from '@travetto/boot';
 import { CliCommand, OptionConfig } from '@travetto/cli';
@@ -26,11 +26,8 @@ export class TestCommand extends CliCommand<Options> {
   getTypes(): string[] {
     if (!this._types) {
       this._types = ModuleIndex
-        .find({
-          folder: 'src',
-          filter: /consumer\/types\/.*/
-        })
-        .map(x => readFileSync(`${x.output}`, 'utf8').match(/Consumable.[(]'([^']+)/)?.[1])
+        .findSrc({ filter: /consumer\/types\/.*/, profiles: ['test'] })
+        .map(x => readFileSync(`${x.output}`, 'utf8').match(/Consumable.?[(]'([^']+)/)?.[1])
         .filter((x?: string): x is string => !!x);
     }
     return this._types;

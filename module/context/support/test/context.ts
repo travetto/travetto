@@ -1,5 +1,6 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Class } from '@travetto/base';
+import { RootRegistry } from '@travetto/registry';
 import { SuiteRegistry } from '@travetto/test';
 
 import { AsyncContext } from '../../src/service';
@@ -22,6 +23,7 @@ export function WithSuiteContext(data: Record<string, unknown> = {}) {
       async function (this: { [Init]?: boolean } & Record<string, Function>) {
         if (!this[Init]) {
           this[Init] = true;
+          await RootRegistry.init();
           const ctx = await DependencyRegistry.getInstance(AsyncContext);
           for (const t of SuiteRegistry.get(target).tests) {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

@@ -1,7 +1,7 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import { createReadStream } from 'fs';
-import * as crypto from 'crypto';
-import { getExtension, getType } from 'mime';
+import crypto from 'crypto';
+import mime from 'mime';
 
 import { path } from '@travetto/boot';
 import { StreamMeta } from '@travetto/model';
@@ -47,7 +47,7 @@ export class AssetUtil {
    * Detect file type from location on disk
    */
   static async detectFileType(filePath: string): Promise<{ ext: string, mime: string } | undefined> {
-    const fileType = await import('file-type');
+    const fileType = (await import('file-type')).default;
     const buffer = await this.readChunk(filePath, 4100);
     return fileType.fromBuffer(buffer);
   }
@@ -58,7 +58,7 @@ export class AssetUtil {
    */
   static async ensureFileExtension(filePath: string): Promise<string> {
     const type = await this.resolveFileType(filePath);
-    const ext = getExtension(type);
+    const ext = mime.getExtension(type);
     const newFile = filePath.replace(/[.][^.]+$/, ext!);
 
     if (filePath !== newFile) {
@@ -79,7 +79,7 @@ export class AssetUtil {
     if (detected) {
       contentType = detected.mime;
     } else {
-      contentType = getType(pth) ?? contentType;
+      contentType = mime.getType(pth) ?? contentType;
     }
 
     return contentType;

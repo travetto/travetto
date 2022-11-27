@@ -22,11 +22,11 @@ export class PoolExecTest {
       }
     });
 
-    const [launcher] = await this.fixtures.query(file => file.endsWith('simple.child.ts'));
+    const launcher = await this.fixtures.describe((await this.fixtures.queryFirst(file => file.endsWith('simple.child.mjs')))!);
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<{ data: string }, string>(
-        () => ExecUtil.fork(launcher),
+        () => ExecUtil.fork(launcher.path, [], { cwd: process.env.TRV_OUTPUT }),
         ch => ch.once('ready'),
         async (channel, inp: string) => {
           const res = channel.once('response');

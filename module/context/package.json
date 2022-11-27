@@ -25,14 +25,13 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/context"
   },
-  "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.5",
+  "dependencies": {
     "@travetto/di": "^3.0.0-rc.5"
   },
+  "peerDependencies": {
+    "@travetto/test": "^3.0.0-rc.5"
+  },
   "peerDependenciesMeta": {
-    "@travetto/di": {
-      "optional": true
-    },
     "@travetto/test": {
       "optional": true
     }

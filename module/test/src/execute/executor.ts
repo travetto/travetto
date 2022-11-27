@@ -1,4 +1,4 @@
-import * as timers from 'timers/promises';
+import timers from 'timers/promises';
 
 import { path, ModuleIndex } from '@travetto/boot';
 import { TimeUtil, Util } from '@travetto/base';

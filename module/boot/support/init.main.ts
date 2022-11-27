@@ -1,5 +1,5 @@
 import { install } from 'source-map-support';
-import * as url from 'url';
+import url from 'url';
 import { parentPort } from 'worker_threads';
 
 import { path } from '@travetto/manifest';

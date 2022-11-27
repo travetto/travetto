@@ -1,5 +1,5 @@
-import * as os from 'os';
-import * as fs from 'fs/promises';
+import os from 'os';
+import fs from 'fs/promises';
 
 import { path } from '@travetto/boot';
 import { Pkg } from '@travetto/base';

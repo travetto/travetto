@@ -1,7 +1,7 @@
 import { createWriteStream } from 'fs';
-import * as fs from 'fs/promises';
-import * as os from 'os';
-import * as stream from 'stream';
+import fs from 'fs/promises';
+import os from 'os';
+import stream from 'stream';
 
 import { path } from '@travetto/boot';
 import { Renderable, Request, Response } from '@travetto/rest';

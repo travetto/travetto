@@ -1,4 +1,4 @@
-import { Inky } from '../../src/inky';
+import { Inky } from '../../src/inky/service';
 import { InkyComponentFactory } from '../../src/inky/factory';
 
 export function cleanseOutput(output: string) {

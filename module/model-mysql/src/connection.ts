@@ -1,4 +1,4 @@
-import * as mysql from 'mysql';
+import mysql from 'mysql';
 
 import { ShutdownManager } from '@travetto/boot';
 import { AsyncContext } from '@travetto/context';

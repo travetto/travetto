@@ -1,78 +1,101 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const { createRequire } = require('module');
-const path = require('path');
+// @ts-check
 
-let _opts;
-let pkg = false;
+const fs = require('fs/promises');
+const path = require('path');
+const { createRequire } = require('module');
+
+const { transpileFile, writePackageJson, writeJsFile, getContext } = require('./transpile');
 
 const NAME = '@travetto/precompiler';
+const FILES = ['support/bin/compile.ts', 'support/bin/utils.ts', 'bin/transpile.js', 'package.json'];
 
-function getOpts() {
-  const ts = require('typescript');
-  const loc = path.resolve(__dirname, '..', 'tsconfig.trv.json');
-  if (_opts === undefined) {
-    _opts = ts.readConfigFile(loc, ts.sys.readFile).config?.compilerOptions;
-    try {
-      const { type } = require(`${process.cwd()}/package.json`);
-      if (type) {
-        _opts.module = type.toLowerCase() === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
-      }
-    } catch { }
+/**
+ * @typedef {import('./transpile').CompileContext} CompileContext
+ */
+
+/**
+ * @param {CompileContext} ctx
+ */
+async function $compile(ctx) {
+  if (ctx.compiled) {
+    return;
   }
-  return _opts;
-}
 
-function writePackageJson(outputFolder, files, opts) {
-  if (!pkg) {
-    const ts = require('typescript');
-    const isEsm = opts.module !== ts.ModuleKind.CommonJS;
-    pkg = require('../package.json');
-    fs.writeFileSync(`${outputFolder}/package.json`, JSON.stringify({
-      ...pkg,
-      files: files.map(x => x.replace('.ts', '.js')),
-      name: NAME,
-      main: 'compile.js',
-      type: isEsm ? 'module' : 'commonjs'
-    }, null, 2));
-  }
-}
+  const root = path.resolve(__dirname, '..');
 
-function transpile(inputFile, outputFile, opts) {
-  const ts = require('typescript');
+  const output = path.resolve(ctx.compilerFolder, `node_modules/${NAME}`);
 
-  const content = ts.transpile(fs.readFileSync(inputFile, 'utf8'), opts, inputFile)
-    .replace(/^(import.*?from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`);
-
-  fs.mkdirSync(path.dirname(outputFile), { recursive: true });
-  fs.writeFileSync(outputFile, content);
-}
-
-async function compile({ compilerFolder, ...rest }) {
-  const root = path.resolve(__dirname, '../support/bin');
-  const output = path.resolve(compilerFolder, `node_modules/${NAME}`);
-  const files = fs.readdirSync(root);
-  for (const el of files) {
+  for (const el of FILES) {
     const inputFile = path.resolve(root, el);
     const outputFile = path.resolve(output, el.replace(/[.]ts$/, '.js'));
 
-    if (!fs.existsSync(outputFile) || (fs.statSync(outputFile).mtimeMs < fs.statSync(inputFile).mtimeMs)) {
-      const opts = getOpts();
-      transpile(inputFile, outputFile, opts);
-      writePackageJson(output, files, opts);
+    const [outStat, inStat] = await Promise.all([
+      fs.stat(outputFile).catch(() => undefined),
+      fs.stat(inputFile)
+    ]);
+
+    if (!outStat || (outStat.mtimeMs < inStat.mtimeMs)) {
+      await fs.mkdir(path.dirname(outputFile), { recursive: true });
+
+      if (inputFile.endsWith('.ts')) {
+        await transpileFile(ctx, inputFile, outputFile);
+      } else if (inputFile.endsWith('.js')) {
+        await writeJsFile(ctx, inputFile, outputFile);
+      } else if (inputFile.endsWith('.json')) {
+        await writePackageJson(ctx, inputFile, outputFile, (pkg) => {
+          pkg.files = FILES;
+          pkg.name = NAME;
+          pkg.main = FILES[0].replace(/[.]ts$/, '.js');
+          return pkg;
+        });
+      }
     }
   }
-  const isEsm = require(`${output}/package.json`).type === 'module';
-  const req = createRequire(`${compilerFolder}/node_modules`);
-  const loc = req.resolve(NAME);
 
-  const mod = await (isEsm ? import(loc) : require(loc));
-  return mod.compile({ compilerFolder, ...rest });
+  const loc = `${ctx.compilerFolder}/node_modules/${NAME}/${FILES[0].replace(/[.]ts$/, '.js')}`;
+  /** @type {import('../support/bin/compile')} */
+  let mod;
+  try {
+    mod = require(loc);
+  } catch {
+    mod = await import(loc);
+  }
+  return mod.compile(ctx);
 }
 
-if (process.env.TRV_OUTPUT !== process.cwd().replaceAll('\\', '/')) {
-  module.exports = compile;
-} else {
-  module.exports = async () => { };
+/**
+ *
+ * @param {CompileContext} ctx
+ */
+async function $clean(ctx) {
+  if (!ctx.compiled) {
+    await fs.rm(ctx.outputFolder, { force: true, recursive: true });
+    await fs.rm(ctx.compilerFolder, { force: true, recursive: true });
+    console.log(`Cleaned ${ctx.cwd}`);
+  }
 }
+
+/**
+ * @param {CompileContext['op']} op
+ * @param {string} [main]
+ * @return {Promise<string|undefined>}
+ */
+async function exec(op, main) {
+  const ctx = await getContext(op);
+  switch (ctx.op) {
+    case 'clean': await $clean(ctx); break;
+    case 'watch': await $compile(ctx); break;
+    default: {
+      await $compile(ctx);
+      if (main && !main.startsWith('/')) {
+        const req = createRequire(`${ctx.outputFolder}/node_modules`);
+        main = req.resolve(main);
+      }
+      return main;
+    }
+  }
+}
+
+module.exports = { exec };

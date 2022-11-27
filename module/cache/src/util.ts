@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 
 import { Util } from '@travetto/base';
 import { CoreCacheConfig } from './types';

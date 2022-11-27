@@ -1,4 +1,4 @@
-import * as https from 'https';
+import https from 'https';
 import compress from '@fastify/compress';
 
 import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';

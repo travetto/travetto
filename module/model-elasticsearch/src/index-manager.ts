@@ -1,4 +1,4 @@
-import * as es from '@elastic/elasticsearch';
+import es from '@elastic/elasticsearch';
 import { Reindex } from '@elastic/elasticsearch/api/requestParams';
 
 import { Class } from '@travetto/base';

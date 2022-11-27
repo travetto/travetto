@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
 import { CliUtil, CliCommand, OptionConfig } from '@travetto/cli';
 

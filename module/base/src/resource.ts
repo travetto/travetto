@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { createReadStream } from 'fs';
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
 import { path, ModuleIndex } from '@travetto/boot';
 
@@ -49,7 +49,6 @@ export class FileResourceProvider implements ResourceProvider {
     this.#rawPaths = paths;
   }
 
-
   #getModulePath(mod: string, rel?: string): string {
     return path.resolve(ModuleIndex.getModule(mod)!.source, rel ?? '');
   }
@@ -76,7 +75,7 @@ export class FileResourceProvider implements ResourceProvider {
   }
 
   getAllPaths(): string[] {
-    return this.#paths.slice(0);
+    return this.#getPaths().slice(0);
   }
 
   async describe(file: string): Promise<ResourceDescription> {
@@ -107,7 +106,7 @@ export class FileResourceProvider implements ResourceProvider {
     const out: string[] = [];
     while (search.length) {
       const [folder, root, depth] = search.shift()!;
-      for (const sub of await fs.readdir(folder)) {
+      for (const sub of await fs.readdir(folder).catch(() => [])) {
         if (sub === '.' || sub === '..' || (!hidden && sub.startsWith('.'))) {
           continue;
         }
@@ -128,13 +127,21 @@ export class FileResourceProvider implements ResourceProvider {
     }
     return out;
   }
+
+  /**
+   * Query for first matching
+  */
+  async queryFirst(filter: (file: string) => boolean, hidden = false, maxDepth = this.maxDepth): Promise<string | undefined> {
+    const [res] = await this.query(filter, hidden, maxDepth);
+    return res;
+  }
 }
 
 /**
  * Simple file resource provider that relies on trv_resources
  */
 export class CommonFileResourceProvider extends FileResourceProvider {
-  constructor(paths: string[] = Env.getList('TRV_RESOURCES')) {
+  constructor(paths: string[] = [...Env.getList('TRV_RESOURCES'), path.resolve('resources')]) {
     super(paths);
   }
 }

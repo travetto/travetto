@@ -1,5 +1,5 @@
 import { mkdirSync } from 'fs';
-import * as os from 'os';
+import os from 'os';
 
 import type { Service } from '@travetto/command/support/bin/service';
 

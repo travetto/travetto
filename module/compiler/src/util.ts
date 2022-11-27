@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import { readdirSync } from 'fs';
 
 import { ManifestModule, ManifestRoot, Package, PackageUtil, path } from '@travetto/manifest';
@@ -109,28 +109,26 @@ export class CompilerUtil {
   }
 
   /**
-   * Check transpilation errors
+   * Build transpilation error
    * @param filename The name of the file
    * @param diagnostics The diagnostic errors
    */
-  static checkTranspileErrors(filename: string, diagnostics: readonly ts.Diagnostic[]): void {
-    if (diagnostics && diagnostics.length) {
-      const errors: string[] = diagnostics.slice(0, 5).map(diag => {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
-        if (diag.file) {
-          const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
-          return ` @ ${diag.file.fileName.replace(nativeCwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
-        } else {
-          return ` ${message}`;
-        }
-      });
-
-      if (diagnostics.length > 5) {
-        errors.push(`${diagnostics.length - 5} more ...`);
+  static buildTranspileError(filename: string, diagnostics: readonly ts.Diagnostic[]): Error {
+    const errors: string[] = diagnostics.slice(0, 5).map(diag => {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');
+      if (diag.file) {
+        const { line, character } = diag.file.getLineAndCharacterOfPosition(diag.start!);
+        return ` @ ${diag.file.fileName.replace(nativeCwd, '.')}(${line + 1}, ${character + 1}): ${message}`;
+      } else {
+        return ` ${message}`;
       }
-      throw new Error(`Transpiling ${filename.replace(nativeCwd, '.')} failed: \n${errors.join('\n')}`);
+    });
+
+    if (diagnostics.length > 5) {
+      errors.push(`${diagnostics.length - 5} more ...`);
     }
+    return new Error(`Transpiling ${filename.replace(nativeCwd, '.')} failed: \n${errors.join('\n')}`);
   }
 
   /**

@@ -5,6 +5,9 @@ import { ConfigParserTarget } from '../internal/types';
 import { ConfigParser } from '../parser/types';
 import { ConfigSource, ConfigValue } from './types';
 
+/**
+ * File-base config source, builds on common file resource provider (looks at TRV_RESOURCES)
+ */
 @Injectable()
 export class FileConfigSource extends CommonFileResourceProvider implements ConfigSource {
 
@@ -30,6 +33,7 @@ export class FileConfigSource extends CommonFileResourceProvider implements Conf
 
   async getValues(profiles: string[]): Promise<ConfigValue[]> {
     const out: ConfigValue[] = [];
+
     for (const file of await this.query(f => this.extMatch.test(f))) {
       const ext = file.split('.')[1];
       const profile = file.replace(`.${ext}`, '');

@@ -82,6 +82,7 @@
         "recurse",
         "regexes",
         "Reindex",
+        "reinit",
         "Renderable",
         "repo",
         "Retargetting",

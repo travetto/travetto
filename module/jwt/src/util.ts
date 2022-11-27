@@ -1,4 +1,4 @@
-import * as jws from 'jws';
+import jws from 'jws';
 
 import { JWTError } from './error';
 import { Payload, SignOptions, SignHeader, TypedSig, VerifyOptions } from './types';

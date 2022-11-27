@@ -1,4 +1,4 @@
-import * as timers from 'timers/promises';
+import timers from 'timers/promises';
 
 import { path } from '@travetto/boot';
 import { d, lib, mod } from '@travetto/doc';

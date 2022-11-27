@@ -5,3 +5,4 @@ export * from './src/model/test';
 export * from './src/model/event';
 export * from './src/registry/suite';
 export * from './src/fixture';
+export * from './src/consumer/types';

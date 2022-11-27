@@ -1,5 +1,5 @@
-import * as cp from 'child_process';
-import * as fs from 'fs/promises';
+import cp from 'child_process';
+import fs from 'fs/promises';
 import { render } from 'mustache';
 
 import { path } from '@travetto/boot';

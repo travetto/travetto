@@ -1,5 +1,6 @@
 import type * as lambda from 'aws-lambda';
 
+import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { Request, ServerHandle, RestCookieConfig } from '@travetto/rest';
 import {
@@ -61,13 +62,15 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
 
   #lambda: AwsLambdaRestApplication;
 
-  async init(): Promise<ServerHandle> {
+  async init(qualifier?: symbol): Promise<ServerHandle> {
+    await RootRegistry.init();
+
     Object.assign(
       await DependencyRegistry.getInstance(RestCookieConfig),
       { active: true, secure: false, signed: false }
     );
 
-    this.#lambda = await DependencyRegistry.getInstance(AwsLambdaRestApplication);
+    this.#lambda = await DependencyRegistry.getInstance(AwsLambdaRestApplication, qualifier);
     return await this.#lambda.run();
   }
 

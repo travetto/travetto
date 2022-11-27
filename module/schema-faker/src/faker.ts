@@ -1,4 +1,4 @@
-import * as faker from 'faker';
+import faker from 'faker';
 
 import { Class } from '@travetto/base';
 import { BindUtil, SchemaRegistry, FieldConfig, CommonRegExp } from '@travetto/schema';

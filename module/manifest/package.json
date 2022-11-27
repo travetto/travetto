@@ -21,6 +21,9 @@
     "tsconfig.bootstrap.json"
   ],
   "main": "index.ts",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/manifest"

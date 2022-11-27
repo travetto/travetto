@@ -1,5 +1,5 @@
 import assert from 'assert';
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 import { Readable } from 'stream';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
@@ -10,7 +10,7 @@ import { ModelStreamSupport } from '../../src/service/stream';
 @Suite()
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
 
-  fixture = new TestFixtures(['@travetto/model']);
+  fixture = new TestFixtures(['@travetto/model#support/fixtures']);
 
   async getHash(stream: Readable): Promise<string> {
     const hash = crypto.createHash('sha1');

@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { createReadStream } from 'fs';
-import * as os from 'os';
+import os from 'os';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 

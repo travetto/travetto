@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
 import { Package, PackageUtil, path } from '@travetto/manifest';
 
@@ -11,7 +11,7 @@ type ByModule<T> = {
   name: Record<string, T>;
   rel: Record<string, T>;
   full: Record<string, T>;
-}
+};
 
 type Graph = Map<RepoModule, Set<RepoModule>>;
 type Lookup = ByModule<RepoModule>;
@@ -28,16 +28,16 @@ function getRepoMod(rel: string, full: string, pkg: Package): RepoModule {
 }
 
 export class Repo {
-  static #root: Promise<RepoModule>;
-  static #modules: Promise<RepoModule[]>;
-  static #lookup: Promise<Lookup>;
-  static #graph: Promise<Graph>;
+  static #root?: Promise<RepoModule>;
+  static #modules?: Promise<RepoModule[]>;
+  static #lookup?: Promise<Lookup>;
+  static #graph?: Promise<Graph>;
 
   static reinit(): void {
-    this.#root = undefined as any;
-    this.#modules = undefined as any;
-    this.#lookup = undefined as any;
-    this.#graph = undefined as any;
+    this.#root = undefined;
+    this.#modules = undefined;
+    this.#lookup = undefined;
+    this.#graph = undefined;
   }
 
   static async #getRoot(): Promise<RepoModule> {

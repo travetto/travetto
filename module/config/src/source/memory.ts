@@ -1,7 +1,9 @@
 import { ConfigData } from '../parser/types';
 import { ConfigSource, ConfigValue } from './types';
 
-
+/**
+ * Meant to be instantiated and provided as a unique config source
+ */
 export class MemoryConfigSource implements ConfigSource {
   priority = 1;
   data: Record<string, ConfigData>;

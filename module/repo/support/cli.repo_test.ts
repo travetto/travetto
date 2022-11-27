@@ -1,6 +1,8 @@
-import * as os from 'os';
+import os from 'os';
 
 import { CliCommand, OptionConfig } from '@travetto/cli';
+import { FileResourceProvider } from '@travetto/base';
+import { PackageUtil, path } from '@travetto/manifest';
 
 import { Git } from './bin/git';
 import { Repo } from './bin/repo';
@@ -31,12 +33,28 @@ export class RepoTestCommand extends CliCommand<Options> {
     const { TestConsumerRegistry } = await import('@travetto/test/src/consumer/registry');
     const { RunnableTestConsumer } = await import('@travetto/test/src/consumer/types/runnable');
     const { WorkPool, IterableWorkSet } = await import('@travetto/worker');
-    const { TestWorker } = await import('@travetto/test/support/bin/all-worker');
+    const { TestWorker } = await import('./bin/test');
 
     const emitter = await TestConsumerRegistry.getInstance(this.cmd.format);
     const consumer = new RunnableTestConsumer(emitter);
     const pool = new WorkPool(() => new TestWorker(consumer), { max: this.cmd.concurrency });
-    await pool.process(new IterableWorkSet(modules.map(x => x.rel)));
+
+    const folders = new Set(modules.map(x => x.rel));
+
+    const globalTests = new FileResourceProvider([path.resolve('global-test')]);
+
+    for (const pkgJson of await globalTests.query(f => f.endsWith('package.json'))) {
+      const resolved = (await globalTests.describe(pkgJson)).path;
+      const folder = path.dirname(resolved);
+      const pkg = PackageUtil.readPackage(folder);
+      for (const mod of modules) {
+        if (pkg.dependencies?.[mod.name]) {
+          folders.add(folder);
+        }
+      }
+    }
+
+    await pool.process(new IterableWorkSet(folders));
     process.exit(consumer.summarizeAsBoolean() ? 0 : 1);
   }
 }

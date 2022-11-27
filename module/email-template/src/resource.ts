@@ -13,7 +13,8 @@ export class EmailTemplateResource extends EmailResource {
   constructor(paths: string[] = ['@travetto/email-template']) {
     super([
       ...paths,
-      ...Env.getList('TRV_RESOURCES')
+      ...Env.getList('TRV_RESOURCES'),
+      path.resolve('resources')
     ]);
   }
 

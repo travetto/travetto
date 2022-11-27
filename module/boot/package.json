@@ -41,9 +41,6 @@
     "displayName": "Boot",
     "docBaseUrl": "https://github.com/travetto/travetto/tree/main"
   },
-  "engines": {
-    "node": ">=12.17.0"
-  },
   "private": false,
   "publishConfig": {
     "access": "public"
