@@ -31,7 +31,6 @@
   "travetto": {
     "id": "@trv:transformer",
     "displayName": "Transformation",
-    "profileInherit": false,
     "profiles": [
       "compile"
     ]

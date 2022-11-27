@@ -1,5 +1,5 @@
 import assert from 'assert';
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { StreamUtil } from '@travetto/base';

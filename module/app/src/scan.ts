@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import fs from 'fs';
 
 import { ModuleIndex } from '@travetto/boot';
 import { SchemaRegistry } from '@travetto/schema';

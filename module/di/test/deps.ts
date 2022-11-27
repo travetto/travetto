@@ -28,7 +28,7 @@ export class InterfaceType implements BaseType {
 export class Database {
 
   @Inject()
-  dbConfig: DbConfig<unknown, unknown>;
+  dbConfig: DbConfig;
 
   @Inject({ optional: true })
   altConfig: AltConfig;

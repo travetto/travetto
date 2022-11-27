@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import { OpenAPIObject } from 'openapi3-ts';
 
 import { path } from '@travetto/boot';

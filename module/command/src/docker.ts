@@ -1,5 +1,5 @@
-import * as fs from 'fs/promises';
-import * as cp from 'child_process';
+import fs from 'fs/promises';
+import cp from 'child_process';
 import { rmSync } from 'fs';
 
 import { path, ShutdownManager } from '@travetto/boot';

@@ -1,5 +1,5 @@
 import assert from 'assert';
-import * as asyncHooks from 'async_hooks';
+import asyncHooks from 'async_hooks';
 
 import { BeforeEach, Suite, Test } from '@travetto/test';
 import { TimeUtil } from '@travetto/base';

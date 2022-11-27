@@ -1,6 +1,6 @@
-import * as fs from 'fs';
+import fs from 'fs';
 
-import { ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType, ManifestModuleCore } from '@travetto/manifest';
+import { ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType, ManifestModuleCore, PACKAGE_STD_PROFILE, ManifestProfile } from '@travetto/manifest';
 import { path } from './path';
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
@@ -17,6 +17,7 @@ export type IndexedFile = {
   module: string;
   source: string;
   output: string;
+  profile: ManifestProfile;
   type: ManifestModuleFileType;
 };
 
@@ -50,14 +51,14 @@ class $ModuleIndex {
   }
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
-    return files.map(([f, type]) => {
+    return files.map(([f, type, ts, profile = 'std']) => {
       const source = path.join(m.source, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
       const output = this.#resolve(m.output, js);
       const module = `${m.name}/${js}`;
       const id = (m.main ? module : module.replace(m.name, m.id)).replace(/[.]js$/, '');
 
-      return { id, type, source, output, module };
+      return { id, type, source, output, module, profile };
     });
   }
 
@@ -109,14 +110,21 @@ class $ModuleIndex {
 
     let idx = this.#modules;
 
-    if (config.checkProfile ?? true) {
-      const activeProfiles = new Set(config.profiles ?? process.env.TRV_PROFILES?.split(/\s*,\s*/g) ?? []);
+    const checkProfile = config.checkProfile ?? true;
+
+    const activeProfiles = new Set([PACKAGE_STD_PROFILE, ...(config.profiles ?? process.env.TRV_PROFILES?.split(/\s*,\s*/g) ?? [])]);
+
+    if (checkProfile) {
       idx = idx.filter(m => m.profiles.length === 0 || m.profiles.some(p => activeProfiles.has(p)));
     }
 
-    const searchSpace = folder ?
+    let searchSpace = folder ?
       idx.flatMap(m => [...m.files[folder] ?? [], ...(config.includeIndex ? (m.files.$index ?? []) : [])]) :
       idx.flatMap(m => [...Object.values(m.files)].flat());
+
+    if (checkProfile) {
+      searchSpace = searchSpace.filter(fi => activeProfiles.has(fi.profile));
+    }
 
     return searchSpace
       .filter(({ type }) => type === 'ts')
@@ -207,11 +215,9 @@ class $ModuleIndex {
    * Load all source modules
    */
   async loadSource(): Promise<void> {
-    const loading: Promise<unknown>[] = [];
     for (const { output } of this.findSrc({})) {
-      loading.push(import(output));
+      await import(output);
     }
-    await Promise.all(loading);
   }
 }
 

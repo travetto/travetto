@@ -1,11 +1,13 @@
-export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture';
+export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture' | 'md';
 export type ManifestModuleFolderType =
   '$root' | '$index' | '$package' |
   'src' | 'bin' | 'support' | 'resources' | 'test' |
   'test/fixtures' | 'support/fixtures' | 'support/resources' |
   '$other';
 
-export type ManifestModuleFile = [string, ManifestModuleFileType, number];
+export type ManifestProfile = 'std' | 'compile' | 'test';
+
+export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestProfile];
 export type ManifestModuleCore = {
   id: string;
   name: string;
@@ -67,8 +69,7 @@ export type Package = {
   travetto?: {
     id?: string;
     displayName?: string;
-    profileInherit?: boolean;
-    profiles?: string[];
+    profiles?: ManifestProfile[];
     docOutput?: string[];
     docBaseUrl?: string;
   };
@@ -80,6 +81,8 @@ export type Package = {
   private?: boolean;
   publishConfig?: { access?: 'restricted' | 'public' };
 };
+
+export const PACKAGE_STD_PROFILE = 'std';
 
 export type PackageDigestField = 'name' | 'main' | 'author' | 'license' | 'version';
 

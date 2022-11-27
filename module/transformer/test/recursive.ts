@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
 import { ManifestRoot, path } from '@travetto/manifest';
 import { BeforeAll, Suite, Test } from '@travetto/test';

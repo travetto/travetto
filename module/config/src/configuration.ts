@@ -22,9 +22,7 @@ export class Configuration {
     );
   }
 
-
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
-
   #profiles: string[] = ['application', ...Env.getProfiles(), 'override'];
   #sources: string[] = [];
 
@@ -95,11 +93,6 @@ export class Configuration {
 
   /**
    * Bind and validate configuration into class instance
-   * @param cls
-   * @param item
-   * @param namespace
-   * @param validate
-   * @returns
    */
   async bindTo<T>(cls: Class<T>, item: T, namespace: string, validate = true): Promise<T> {
     if (!SchemaRegistry.has(cls)) {

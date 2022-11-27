@@ -22,7 +22,7 @@ function isMetadataBearer(o: unknown): o is MetadataBearer {
 }
 
 function hasContentType<T>(o: T): o is T & { contenttype?: string } {
-  return o && 'contenttype' in o;
+  return o !== undefined && o !== null && Object.hasOwn(o, 'contenttype');
 }
 
 const STREAM_SPACE = '@trv:stream';

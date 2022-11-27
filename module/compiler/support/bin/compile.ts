@@ -1,31 +1,27 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
 import type { ManifestState } from '@travetto/manifest';
 
 import { log, spawn, compileIfStale, getProjectSources, addNodePath, importManifest } from './utils';
 
-let manifestTemp;
+import type { CompileContext } from '../../bin/transpile';
 
-type CompileConfig = {
-  compile?: boolean;
-  compilerFolder: string;
-  outputFolder: string;
-  watch?: boolean;
-};
+let manifestTemp;
 
 /**
  *  Step 1
  */
-async function buildManifest(config: CompileConfig): Promise<ManifestState> {
+async function buildManifest(ctx: CompileContext): Promise<ManifestState> {
   await compileIfStale(
+    ctx,
     '[1] Manifest Bootstrapping',
-    await getProjectSources('@travetto/manifest', config.compilerFolder),
+    await getProjectSources(ctx, '@travetto/manifest'),
   );
 
   log('[1] Manifest Generation');
-  const { ManifestUtil } = await importManifest(config.compilerFolder);
-  const state = await ManifestUtil.produceState(process.cwd(), config.outputFolder);
-  state.manifest.buildLocation = config.compilerFolder;
+  const { ManifestUtil } = await importManifest(ctx.compilerFolder);
+  const state = await ManifestUtil.produceState(process.cwd(), ctx.outputFolder);
+  state.manifest.buildLocation = ctx.compilerFolder;
   return state;
 }
 
@@ -55,15 +51,17 @@ function shouldRebuildCompiler({ delta }: ManifestState): { total: boolean, tran
 /**
  *  Step 2
  */
-async function buildCompiler(state: ManifestState, config: CompileConfig): Promise<void> {
+async function buildCompiler(state: ManifestState, ctx: CompileContext): Promise<void> {
   await compileIfStale(
+    ctx,
     '[2] Compiler Bootstrapping',
-    await getProjectSources('@travetto/compiler', config.compilerFolder),
+    await getProjectSources(ctx, '@travetto/compiler'),
   );
 
   await compileIfStale(
+    ctx,
     '[2] Compiler Bootstrapping',
-    await getProjectSources('@travetto/transformer', config.compilerFolder),
+    await getProjectSources(ctx, '@travetto/transformer'),
   );
 
   const changed = shouldRebuildCompiler(state);
@@ -71,13 +69,14 @@ async function buildCompiler(state: ManifestState, config: CompileConfig): Promi
   if (changed.transformers.length) {
     log('[2] Clearing output: */support/transform changed');
     // Delete all output on transformer changes
-    await fs.rm(config.outputFolder, { recursive: true, force: true }).catch(() => { });
-    state = await buildManifest(config);
+    await fs.rm(ctx.outputFolder, { recursive: true, force: true }).catch(() => { });
+    state = await buildManifest(ctx);
     let x = 0;
     for (const [mod, file] of changed.transformers) {
       await compileIfStale(
+        ctx,
         `[2.${x += 1}] ${file} Bootstrapping`,
-        await getProjectSources(mod, config.compilerFolder, ['package.json', file])
+        await getProjectSources(ctx, mod, ['package.json', file])
       );
     }
   }
@@ -88,41 +87,41 @@ async function buildCompiler(state: ManifestState, config: CompileConfig): Promi
 /**
  *  Step 4
  */
-async function compileOutput(state: ManifestState, { compilerFolder, outputFolder, watch = false }: CompileConfig): Promise<void> {
+async function compileOutput(state: ManifestState, ctx: CompileContext): Promise<void> {
   const changes = Object.values(state.delta).flat();
-  if (changes.length === 0 && !(watch)) {
+  if (changes.length === 0 && ctx.op === 'build') {
     log('[3] Output Ready');
     return;
   }
 
   log('[3] Changed Sources', changes);
-  const { ManifestUtil } = await importManifest(compilerFolder);
+  const { ManifestUtil } = await importManifest(ctx.compilerFolder);
   const args = [
-    `${compilerFolder}/${state.manifest.modules['@travetto/compiler'].output}/support/main.output`,
+    `${ctx.compilerFolder}/${state.manifest.modules['@travetto/compiler'].output}/support/main.output`,
     (manifestTemp ??= await ManifestUtil.writeState(state)),
-    outputFolder
+    ctx.outputFolder
   ];
   await spawn('[3] Compiling', process.argv0, {
-    args, env: { TRV_WATCH: `${watch}` },
-    cwd: compilerFolder,
-    showWaitingMessage: !(watch)
+    args, env: { TRV_WATCH: `${ctx.op === 'watch'}` },
+    cwd: ctx.compilerFolder,
+    showWaitingMessage: ctx.op === 'build'
   });
 }
 
-export async function compile(config: CompileConfig): Promise<void> {
+export async function compile(ctx: CompileContext): Promise<void> {
 
   // Skip compilation if not installed
-  if (config.compile !== false) {
-    const state = await buildManifest(config); // Step 1
-    await buildCompiler(state, config); // Step 2
-    await compileOutput(state, config); // Step 3
+  if (ctx.compiled !== true) {
+    const state = await buildManifest(ctx); // Step 1
+    await buildCompiler(state, ctx); // Step 2
+    await compileOutput(state, ctx); // Step 3
   }
 
   // Only  manipulate if we aren't in the output folder
-  if (config.outputFolder !== process.cwd()) {
-    await addNodePath(config.outputFolder);
+  if (ctx.outputFolder !== ctx.cwd) {
+    await addNodePath(ctx.outputFolder);
   }
 
   // Share back so ModuleIndex will pick it up
-  process.env.TRV_OUTPUT = config.outputFolder;
+  process.env.TRV_OUTPUT = ctx.outputFolder;
 }

@@ -1,21 +1,23 @@
-import type { CompilerOptions } from 'typescript';
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
-import * as  cp from 'child_process';
-import * as  path from 'path';
-import * as  readline from 'readline';
-import * as  timers from 'timers/promises';
+import cp from 'child_process';
+import path from 'path';
+import readline from 'readline';
+import timers from 'timers/promises';
 import { Writable } from 'stream';
-import { Stats } from 'fs';
+import { type Stats } from 'fs';
 import { createRequire } from 'module';
 
 import type { ManifestUtil } from '@travetto/manifest';
 
-const req = createRequire(process.cwd());
-const rootPkg = fs.readFile(path.resolve('package.json'), 'utf8').then(v => JSON.parse(v), v => ({}));
+import { type CompileContext, transpileFile, writePackageJson } from '../../bin/transpile';
+
+const req = createRequire(`${process.cwd()}/node_modules`);
 
 type ModFile = { input: string, output: string, stale: boolean };
 type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string>, showWaitingMessage?: boolean };
+
+const SOURCE_SEED = ['package.json', 'index.ts', 'src', 'support'];
 
 const resolveImport = (lib: string): string => req.resolve(lib);
 const recentStat = (stat: Stats): number => Math.max(stat.ctimeMs, stat.mtimeMs);
@@ -82,40 +84,6 @@ async function waiting<T>(message: string, worker: () => Promise<T>): Promise<T 
   }
 }
 
-let _opts: CompilerOptions;
-
-/**
- * Get ts compiler options
- */
-async function getOpts(): Promise<CompilerOptions> {
-  const { default: ts } = await import('typescript');
-  const folder = await resolveImport('@travetto/compiler/tsconfig.trv.json');
-  if (_opts === undefined) {
-    _opts = ts.readConfigFile(folder, ts.sys.readFile).config?.compilerOptions;
-    const { type } = await rootPkg;
-
-    if (type !== undefined) {
-      _opts.module = `${type}`.toLowerCase() === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
-    }
-  }
-  return _opts;
-}
-
-/**
- * Transpiles a file
- */
-async function transpileFile(inputFile: string, outputFile: string): Promise<void> {
-  const { default: ts } = await import('typescript');
-
-  const opts = await getOpts();
-
-  const content = ts.transpile(await fs.readFile(inputFile, 'utf8'), opts, inputFile)
-    .replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
-    .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
-
-  await fs.writeFile(outputFile, content);
-}
-
 /**
  * Allows for triggering a subprocess that can be watched, and provides consistent logging support
  */
@@ -142,10 +110,14 @@ export async function spawn(
   });
 
   try {
+    let res;
     if (showWaitingMessage) {
-      return await waiting(`${action}...`, work);
+      res = await waiting(`${action}...`, work);
     } else {
-      return await work();
+      res = await work();
+    }
+    if (!res) {
+      throw new Error();
     }
   } catch (err) {
     const text = Buffer.concat(stderrOutput).toString('utf8');
@@ -170,11 +142,11 @@ export const log = process.env.DEBUG === 'build' ?
  * Scan directory to find all project sources for comparison
  */
 export async function getProjectSources(
-  module: string,
-  baseOutputFolder: string,
-  seed: string[] = ['package.json', 'index.ts', 'src', 'support']
+  ctx: CompileContext, module: string, seed: string[] = SOURCE_SEED
 ): Promise<ModFile[]> {
-  const inputFolder = resolveImport(`${module}/package.json`).replace(/\/package[.]json$/, '');
+  const inputFolder = (ctx.main === module) ?
+    process.cwd() :
+    path.dirname(resolveImport(`${module}/package.json`));
 
   const folders = seed.filter(x => !/[.](ts|js|json)$/.test(x)).map(x => path.resolve(inputFolder, x));
   const files = seed.filter(x => /[.](ts|js|json)$/.test(x)).map(x => path.resolve(inputFolder, x));
@@ -200,7 +172,7 @@ export async function getProjectSources(
     }
   }
 
-  const outputFolder = `${baseOutputFolder}/node_modules/${module}`;
+  const outputFolder = `${ctx.compilerFolder}/node_modules/${module}`;
   const out: ModFile[] = [];
   for (const input of files) {
     const output = input.replace(inputFolder, outputFolder).replace(/[.]ts$/, '.js');
@@ -209,27 +181,22 @@ export async function getProjectSources(
     await fs.mkdir(path.dirname(output), { recursive: true, });
     out.push({ input, output, stale: inputTs > outputTs });
   }
+
   return out;
 }
 
 /**
  * Recompile folder if stale
  */
-export async function compileIfStale(prefix: string, files: ModFile[]): Promise<void> {
+export async function compileIfStale(ctx: CompileContext, prefix: string, files: ModFile[]): Promise<void> {
   try {
     if (files.some(f => f.stale)) {
       log(`${prefix} Starting`);
       for (const file of files.filter(x => x.stale)) {
         if (file.input.endsWith('package.json')) {
-          const pkg: { main?: string, type?: string, files?: string[] } = JSON.parse(await fs.readFile(file.input, 'utf8'));
-          pkg.main = pkg.main?.replace(/[.]ts$/, '.js');
-          pkg.files = pkg.files?.map(f => f.replace(/[.]ts$/, '.js'));
-          const { default: ts } = await import('typescript');
-          const opts = await getOpts();
-          pkg.type = opts.module !== ts.ModuleKind.CommonJS ? 'module' : 'commonjs';
-          await fs.writeFile(file.output, JSON.stringify(pkg, null, 2));
+          await writePackageJson(ctx, file.input, file.output);
         } else {
-          await transpileFile(file.input, file.output);
+          await transpileFile(ctx, file.input, file.output);
         }
       }
     } else {
@@ -254,9 +221,4 @@ export async function addNodePath(folder: string): Promise<void> {
  * Import the manifest utils once compiled
  */
 export const importManifest = (compilerFolder: string): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
-  import(path.resolve(compilerFolder, 'node_modules', '@travetto/manifest/index.js'))
-    .then(mod => {
-      // Ensure we resolve imports, relative to self, and not the compiler folder
-      mod.PackageUtil.resolveImport = resolveImport;
-      return mod;
-    });
+  import(path.resolve(compilerFolder, 'node_modules', '@travetto/manifest/index.js'));

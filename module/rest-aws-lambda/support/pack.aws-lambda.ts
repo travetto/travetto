@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
 import { path } from '@travetto/boot';
 import type { AllConfigPartial } from '@travetto/pack';

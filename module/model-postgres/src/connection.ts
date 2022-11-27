@@ -1,4 +1,4 @@
-import * as pg from 'pg';
+import pg from 'pg';
 
 import { ShutdownManager } from '@travetto/boot';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';

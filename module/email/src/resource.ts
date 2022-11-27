@@ -1,7 +1,7 @@
-import { Env, FileResourceProvider } from '@travetto/base';
+import { CommonFileResourceProvider } from '@travetto/base';
 import { InjectableFactory } from '@travetto/di';
 
-export class EmailResource extends FileResourceProvider {
+export class EmailResource extends CommonFileResourceProvider {
 
   @InjectableFactory()
   static getResources(): EmailResource {
@@ -11,6 +11,6 @@ export class EmailResource extends FileResourceProvider {
   mainFolder = 'email';
 
   constructor(paths?: string[]) {
-    super(paths ?? Env.getList('TRV_RESOURCES'));
+    super(paths);
   }
 }

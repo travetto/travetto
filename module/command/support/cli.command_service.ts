@@ -26,7 +26,7 @@ export class CliServiceCommand extends CliCommand<{}> {
     if (!mode) {
       const list = all.map(x => CliUtil.color` * ${{ identifier: x.name }}@${{ type: x.version }}`);
       await this.showHelp(undefined,
-        CliUtil.color`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${list.join('\n')}\n`);
+        CliUtil.color`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${list.join('\n')}`);
     }
 
     const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;

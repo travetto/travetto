@@ -21,16 +21,17 @@ export abstract class BaseRestSuite {
   #support: RestServerSupport;
 
   type: ConcreteClass<RestServerSupport>;
+  qualifier?: symbol;
 
   @BeforeAll()
   async initServer(): Promise<void> {
     if (!this.type || this.type === CoreRestServerSupport) {
-      this.#support = new CoreRestServerSupport((Util.naiveHash(this.constructor.Ⲑid) % 60000) + 1000);
+      this.#support = new CoreRestServerSupport((Util.naiveHash(this.constructor.Ⲑid) % 60000) + 2000);
     } else {
       this.#support = new this.type();
     }
     await RootRegistry.init();
-    this.#handle = await this.#support.init();
+    this.#handle = await this.#support.init(this.qualifier);
   }
 
   async getOutput<T>(t: Buffer): Promise<T | string> {

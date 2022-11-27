@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 
 import { ManifestState, path } from '@travetto/manifest';
 
@@ -11,7 +11,8 @@ export type TransformerProvider = {
   get(): ts.CustomTransformers | undefined;
 };
 
-type Emitter = (file: string, newProgram?: boolean) => void;
+type EmitErrorHandler = (file: string, errors: Error | readonly ts.Diagnostic[]) => void;
+type Emitter = (file: string, newProgram?: boolean, onError?: EmitErrorHandler) => void;
 
 /**
  * Compilation support
@@ -92,16 +93,31 @@ process.env.TRV_COMPILED=1;
     );
     const host = this.state.getCompilerHost(options);
 
-    const emit = (file: string, needsNewProgram = program === undefined): void => {
-      console.error('Emitting file', file);
+    const emit = (file: string, needsNewProgram = program === undefined, onError?: EmitErrorHandler): void => {
+      console.log('Emitting file', file);
       if (needsNewProgram) {
         program = ts.createProgram({ rootNames: this.#state.getAllFiles(), host, options, oldProgram: program });
         transformers.init(program.getTypeChecker());
       }
-      const result = program.emit(
-        program.getSourceFile(file)!, host.writeFile, undefined, false, transformers.get()
-      );
-      CompilerUtil.checkTranspileErrors(file, result.diagnostics);
+      try {
+        const result = program.emit(
+          program.getSourceFile(file)!, host.writeFile, undefined, false, transformers.get()
+        );
+
+        if (result.diagnostics && result.diagnostics.length) {
+          if (onError) {
+            onError(file, result.diagnostics);
+          } else {
+            throw CompilerUtil.buildTranspileError(file, result.diagnostics);
+          }
+        }
+      } catch (err) {
+        if (onError && (err instanceof Error)) {
+          onError(file, err);
+        } else {
+          throw err;
+        }
+      }
     };
 
     return emit;
@@ -119,8 +135,17 @@ process.env.TRV_COMPILED=1;
     const emit = await this.getCompiler();
 
     // Emit dirty files
+    const errs: Parameters<EmitErrorHandler>[] = [];
     for (const file of this.state.getDirtyFiles()) {
-      emit(file);
+      emit(file, undefined, (f, val) => errs.push([f, val]));
+    }
+
+    if (errs.length) {
+      for (const [file, diags] of errs) {
+        const err = diags instanceof Error ? diags : CompilerUtil.buildTranspileError(file, diags);
+        console.error(err);
+      }
+      process.exit(-1);
     }
 
     if (this.isWatching()) {

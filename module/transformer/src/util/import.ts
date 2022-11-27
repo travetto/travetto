@@ -16,8 +16,7 @@ export class ImportUtil {
       base = path.dirname(base);
     }
     if (base && file.startsWith('.')) {
-      const resolved = path.resolve(base, file);
-      return resolved;
+      return path.resolve(base, file);
       // TODO: Replace with manifest reverse lookup
     } else if (file.startsWith('@')) {
       return path.resolve('node_modules', file);

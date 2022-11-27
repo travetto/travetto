@@ -1,6 +1,6 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
-import * as cp from 'child_process';
+import cp from 'child_process';
 
 import { path } from '@travetto/boot';
 import { ExecUtil } from '@travetto/base';

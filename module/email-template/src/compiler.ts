@@ -1,5 +1,5 @@
-import * as fs from 'fs/promises';
-import * as util from 'util';
+import fs from 'fs/promises';
+import util from 'util';
 
 import { path } from '@travetto/boot';
 import { ImageConverter } from '@travetto/image';
@@ -8,7 +8,7 @@ import type { MailTemplateEngine } from '@travetto/email';
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
 
-import { Inky } from './inky';
+import { Inky } from './inky/service';
 import { MarkdownUtil } from './markdown';
 import { EmailTemplateResource } from './resource';
 
@@ -81,7 +81,7 @@ export class EmailTemplateCompiler {
 
   async inlineCss(html: string, css: string): Promise<string> {
     // Inline css
-    const inlineCss = await import('inline-css');
+    const { default: inlineCss } = await import('inline-css');
     html = (await inlineCss(html, {
       url: 'https://app.dev',
       preserveMediaQueries: true,

@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import assert from 'assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
@@ -8,7 +8,7 @@ import { AssetUtil } from '../src/util';
 @Suite()
 export class UtilTest {
 
-  fixture = new TestFixtures(['@travetto/asset']);
+  fixture = new TestFixtures(['@travetto/asset#support/fixtures']);
 
   @Test()
   async hashFile() {

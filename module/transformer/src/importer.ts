@@ -44,7 +44,11 @@ export class ImportManager {
       (file.startsWith('.') || this.#manifest.knownFile(file)) &&
       !/[.]([mc]?js|ts|json)$/.test(file)
     ) {
-      return LiteralUtil.fromLiteral(this.factory, `${file}.js`);
+      if (file.endsWith('..') || file.endsWith('../')) {
+        return LiteralUtil.fromLiteral(this.factory, `${file.replace(/[/]$/, '')}/index.js`);
+      } else {
+        return LiteralUtil.fromLiteral(this.factory, `${file}.js`);
+      }
     }
     return spec;
   }

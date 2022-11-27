@@ -1,4 +1,4 @@
-import * as crypto from 'crypto';
+import crypto from 'crypto';
 
 import { Class, Util } from '@travetto/base';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';

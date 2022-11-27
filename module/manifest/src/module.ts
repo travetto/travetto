@@ -1,16 +1,17 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import { statSync } from 'fs';
 
 import { path } from './path';
 import { Dependency, PackageUtil } from './package';
-import { ManifestModule, ManifestModuleFile, ManifestModuleFileType, ManifestModuleFolderType } from './types';
+import { ManifestModule, ManifestModuleFile, ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, PACKAGE_STD_PROFILE } from './types';
 
 const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
   '.js': 'js',
   '.mjs': 'js',
   '.cjs': 'js',
   '.json': 'json',
-  '.ts': 'ts'
+  '.ts': 'ts',
+  '.md': 'md'
 };
 
 export class ManifestModuleUtil {
@@ -32,6 +33,19 @@ export class ManifestModuleUtil {
     } else {
       const ext = path.extname(moduleFile);
       return EXT_MAPPING[ext] ?? 'unknown';
+    }
+  }
+
+  /**
+   * Get file type for a file name
+   */
+  static getFileProfile(moduleFile: string): ManifestProfile | undefined {
+    if (moduleFile.startsWith('support/transform')) {
+      return 'compile';
+    } else if (moduleFile.startsWith('support/test/') || moduleFile.startsWith('test/')) {
+      return 'test';
+    } else {
+      return;
     }
   }
 
@@ -106,7 +120,9 @@ export class ManifestModuleUtil {
    * Convert file (by ext) to a known file type and also retrieve its latest timestamp
    */
   static async #transformFile(moduleFile: string, full: string): Promise<ManifestModuleFile> {
-    return [moduleFile, this.getFileType(moduleFile), this.#getNewest(await fs.stat(full))];
+    const res: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), this.#getNewest(await fs.stat(full))];
+    const profile = this.getFileProfile(moduleFile);
+    return profile ? [...res, profile] : res;
   }
 
   /**
@@ -137,7 +153,7 @@ export class ManifestModuleUtil {
 
     return {
       id,
-      profiles: profiles?.includes('*') ? [] : [...new Set(profiles)],
+      profiles: profiles?.includes(PACKAGE_STD_PROFILE) ? [PACKAGE_STD_PROFILE] : [...new Set(profiles)],
       name,
       version,
       main,
@@ -148,6 +164,10 @@ export class ManifestModuleUtil {
     };
   }
 
+  /**
+   * Find repo root by looking for .git folder
+   * @returns
+   */
   static async getRepoRoot(): Promise<string | undefined> {
     let folder = path.cwd();
     while (!(await fs.stat(`${folder}/.git`).catch(() => false))) {
@@ -160,7 +180,12 @@ export class ManifestModuleUtil {
     return folder;
   }
 
-  static async collectGlobalDependencies(declared: Dependency[]): Promise<Dependency[]> {
+  /**
+   * Get global dependencies from package.json/travettoRepo/global
+   * @param declared
+   * @returns
+   */
+  static async collectGlobalDependencies(seen: Map<string, Dependency>): Promise<Dependency[]> {
 
     const root = await this.getRepoRoot();
     if (!root) {
@@ -171,10 +196,8 @@ export class ManifestModuleUtil {
     const mods = pkg.travettoRepo?.global ?? [];
     const out: Dependency[] = [];
     for (const folder of mods) {
-      if (!declared.some(x => x.folder === folder)) {
-        const resolved = path.resolve(root, folder);
-        out.unshift(...(await PackageUtil.collectDependencies(resolved, [])));
-      }
+      const resolved = path.resolve(root, folder);
+      out.unshift(...(await PackageUtil.collectDependencies(resolved, [], seen)));
     }
     return out;
   }
@@ -183,11 +206,12 @@ export class ManifestModuleUtil {
    * Produce all modules for a given manifest folder, adding in some given modules when developing framework
    */
   static async produceModules(rootFolder: string): Promise<Record<string, ManifestModule>> {
-    const declared = await PackageUtil.collectDependencies(rootFolder, ['*']);
+    const seen = new Map<string, Dependency>();
+    const declared = await PackageUtil.collectDependencies(rootFolder, [], seen);
 
     const allModules = [
       ...declared,
-      ...(await this.collectGlobalDependencies(declared))
+      ...(await this.collectGlobalDependencies(seen))
     ].sort((a, b) => a.name.localeCompare(b.name));
 
     const out: Record<string, ManifestModule> = {};

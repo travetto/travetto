@@ -3,8 +3,7 @@ import fetch from 'node-fetch';
 import { DependencyRegistry } from '@travetto/di';
 import { TimeUtil } from '@travetto/base';
 
-import type { Request } from '../../../src/types';
-import { RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '../../..';
+import { type Request, RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '../../..';
 
 import { RestServerSupport, MakeRequestConfig, headerToShape } from './base';
 
@@ -20,7 +19,7 @@ export class CoreRestServerSupport implements RestServerSupport {
     this.#port = port;
   }
 
-  async init() {
+  async init(qualifier?: symbol) {
     Object.assign(
       await DependencyRegistry.getInstance(RestCookieConfig),
       { active: true, secure: false, signed: false }
@@ -30,7 +29,7 @@ export class CoreRestServerSupport implements RestServerSupport {
     config.port = this.#port;
     config.ssl = RestSslConfig.from({ active: false }); // Update config object
 
-    this.#app = await DependencyRegistry.getInstance(RestApplication);
+    this.#app = await DependencyRegistry.getInstance(RestApplication, qualifier);
     const handle = await this.#app.run();
 
     const start = Date.now();

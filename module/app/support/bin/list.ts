@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
 import { path, ModuleIndex } from '@travetto/boot';

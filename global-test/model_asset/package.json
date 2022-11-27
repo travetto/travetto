@@ -1,5 +1,6 @@
 {
-  "name": "model-mongo_asset",
+  "name": "model_asset",
+  "type": "module",
   "dependencies": {
     "@travetto/model-mongo": "*",
     "@travetto/model-s3": "*",

@@ -1,4 +1,4 @@
-import * as timers from 'timers/promises';
+import timers from 'timers/promises';
 
 import { Env } from './env';
 

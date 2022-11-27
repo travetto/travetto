@@ -1,13 +1,11 @@
-import * as fs from 'fs/promises';
-
 import Db, * as sqlite3 from 'better-sqlite3';
-import * as pool from 'generic-pool';
+import pool from 'generic-pool';
 
+import { TimeUtil } from '@travetto/base';
 import { path, ShutdownManager } from '@travetto/boot';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
-import { TimeUtil } from '@travetto/base';
 
 /**
  * Connection support for Sqlite
@@ -43,23 +41,24 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
     }
   }
 
+  async #create(): Promise<sqlite3.Database> {
+    const file = path.resolve(this.#config.options.file ?? '.trv-sqlite_db');
+    const db = new Db(file, this.#config.options);
+    await db.pragma('foreign_keys = ON');
+    await db.pragma('journal_mode = WAL');
+    db.function('regexp', (a, b) => new RegExp(a).test(b) ? 1 : 0);
+    return db;
+  }
+
   /**
    * Initializes connection and establishes crypto extension for use with hashing
    */
   @WithAsyncContext()
   override async init(): Promise<void> {
-    this.#pool = pool.createPool({
-      create: () => this.#withRetries(async () => {
-        const handle = await fs.open(path.resolve(this.#config.options.file ?? '.trv-sqlite_db'));
-        const buffer = await handle.readFile();
-        await handle.close();
+    await this.#create();
 
-        const db = new Db(buffer, this.#config.options);
-        await db.pragma('foreign_keys = ON');
-        await db.pragma('journal_mode = WAL');
-        db.function('regexp', (a, b) => new RegExp(a).test(b) ? 1 : 0);
-        return db;
-      }),
+    this.#pool = pool.createPool<sqlite3.Database>({
+      create: () => this.#withRetries(() => this.#create()),
       destroy: async db => { db.close(); }
     }, { max: 1 });
 
@@ -89,7 +88,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
   }
 
   async acquire(): Promise<Db.Database> {
-    return this.#pool.acquire();
+    return await this.#pool.acquire();
   }
 
   async release(db: sqlite3.Database): Promise<void> {

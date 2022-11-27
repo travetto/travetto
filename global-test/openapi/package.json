@@ -1,0 +1,12 @@
+{
+  "name": "openapi",
+  "dependencies": {
+    "@travetto/rest": "*",
+    "@travetto/openapi": "*"
+  },
+  "devDependencies": {
+    "@travetto/test": "*",
+    "@travetto/cli": "*"
+  },
+  "private": true
+}

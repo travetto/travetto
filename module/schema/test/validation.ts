@@ -3,7 +3,7 @@ import assert from 'assert';
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { SchemaValidator, ValidationResultError, SchemaRegistry, ValidationError } from '../';
+import { SchemaValidator, ValidationResultError, SchemaRegistry, ValidationError } from '..';
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaz,
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque
@@ -31,6 +31,7 @@ class Validation {
       await SchemaValidator.validate(Response, r);
       assert.fail('Validation should have failed');
     } catch (err) {
+      assert(err instanceof ValidationResultError);
       console.warn('Validation Failed', { error: err });
       assert(findError(err.errors, 'url', 'not a valid url'));
       assert(findError(err.errors, 'timestamp', 'is required'));
@@ -51,14 +52,11 @@ class Validation {
       await SchemaValidator.validate(Parent, res);
       assert.fail('Validation should have failed');
     } catch (err) {
-      if (err instanceof ValidationResultError) {
-        assert(findError(err.errors, 'responses', 'required'));
-        assert(findError(err.errors, 'response.pandaState', 'TIRED'));
-        assert(findError(err.errors, 'response.url', 'not a valid url'));
-        assert(findError(err.errors, 'response.timestamp', 'is required'));
-      } else {
-        throw err;
-      }
+      assert(err instanceof ValidationResultError);
+      assert(findError(err.errors, 'responses', 'required'));
+      assert(findError(err.errors, 'response.pandaState', 'TIRED'));
+      assert(findError(err.errors, 'response.url', 'not a valid url'));
+      assert(findError(err.errors, 'response.timestamp', 'is required'));
     }
   }
 
@@ -114,13 +112,10 @@ class Validation {
       await SchemaValidator.validate(CustomValidated, obj);
       assert(false);
     } catch (err) {
-      if (err instanceof ValidationResultError) {
-        assert(err.errors[0].path === 'age1');
-        assert(err.errors[0].kind === 'custom');
-        assert(err.errors[0].message === 'age1 + age2 cannot be even');
-      } else {
-        throw err;
-      }
+      assert(err instanceof ValidationResultError);
+      assert(err.errors[0].path === 'age1');
+      assert(err.errors[0].kind === 'custom');
+      assert(err.errors[0].message === 'age1 + age2 cannot be even');
     }
   }
 
@@ -256,16 +251,13 @@ class Validation {
     try {
       await SchemaValidator.validate(AllAs, item);
     } catch (err) {
-      if (err instanceof ValidationResultError) {
-        assert(err.errors[0].path === 'all[0].b');
-        assert(err.errors[0].message === 'all[0].b is required');
-        assert(err.errors[1].path === 'all[1].b');
-        assert(err.errors[1].message === 'all[1].b is required');
-        assert(err.errors[2].path === 'all[1].c');
-        assert(err.errors[2].message === 'all[1].c is required');
-      } else {
-        throw err;
-      }
+      assert(err instanceof ValidationResultError);
+      assert(err.errors[0].path === 'all[0].b');
+      assert(err.errors[0].message === 'all[0].b is required');
+      assert(err.errors[1].path === 'all[1].b');
+      assert(err.errors[1].message === 'all[1].b is required');
+      assert(err.errors[2].path === 'all[1].c');
+      assert(err.errors[2].message === 'all[1].c is required');
     }
   }
 
@@ -355,16 +347,13 @@ class Validation {
     try {
       await SchemaValidator.validate(AllAs, item);
     } catch (err) {
-      if (err instanceof ValidationResultError) {
-        assert(err.errors[0].path === 'all[0].b');
-        assert(err.errors[0].message === 'all[0].b is required');
-        assert(err.errors[1].path === 'all[1].b');
-        assert(err.errors[1].message === 'all[1].b is required');
-        assert(err.errors[2].path === 'all[1].c');
-        assert(err.errors[2].message === 'all[1].c is required');
-      } else {
-        throw err;
-      }
+      assert(err instanceof ValidationResultError);
+      assert(err.errors[0].path === 'all[0].b');
+      assert(err.errors[0].message === 'all[0].b is required');
+      assert(err.errors[1].path === 'all[1].b');
+      assert(err.errors[1].message === 'all[1].b is required');
+      assert(err.errors[2].path === 'all[1].c');
+      assert(err.errors[2].message === 'all[1].c is required');
     }
   }
 
@@ -372,15 +361,12 @@ class Validation {
   async verifyAccessors() {
     await assert.rejects(() => SchemaValidator.validate(Accessors, {} as unknown),
       err => {
-        if (err instanceof ValidationResultError) {
-          assert(err.errors.length === 2);
-          assert(err.errors[0].path === 'color');
-          assert(err.errors[0].message === 'color is required');
-          assert(err.errors[1].path === 'area');
-          assert(err.errors[1].message === 'area is required');
-        } else {
-          throw err;
-        }
+        assert(err instanceof ValidationResultError);
+        assert(err.errors.length === 2);
+        assert(err.errors[0].path === 'color');
+        assert(err.errors[0].message === 'color is required');
+        assert(err.errors[1].path === 'area');
+        assert(err.errors[1].message === 'area is required');
       });
 
     await assert.doesNotReject(() =>

@@ -17,7 +17,7 @@ export type MakeRequestResponse<T> = {
 };
 
 export interface RestServerSupport {
-  init(): Promise<ServerHandle>;
+  init(qualifier?: symbol): Promise<ServerHandle>;
   execute(method: Request['method'], path: string, cfg?: MakeRequestConfig<Buffer>): Promise<MakeRequestResponse<Buffer>>;
 }
 

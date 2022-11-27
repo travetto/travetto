@@ -1,4 +1,4 @@
-import * as util from 'util';
+import util from 'util';
 
 import { path } from '@travetto/boot';
 import { Class, ClassInstance, Util } from '@travetto/base';

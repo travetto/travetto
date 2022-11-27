@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import { existsSync } from 'fs';
 
 import { path } from '@travetto/boot';

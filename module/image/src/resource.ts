@@ -1,8 +1,8 @@
-import * as fs from 'fs/promises';
+import fs from 'fs/promises';
 import { Readable } from 'stream';
 import { mkdirSync } from 'fs';
 
-import { Env, FileResourceProvider, StreamUtil } from '@travetto/base';
+import { CommonFileResourceProvider, Env, StreamUtil } from '@travetto/base';
 import { path } from '@travetto/boot';
 
 import { ImageConverter } from './convert';
@@ -10,12 +10,12 @@ import { ImageConverter } from './convert';
 /**
  * Resource provider for images that allows for real-time optimization
  */
-export class ImageOptimizingResourceProvider extends FileResourceProvider {
+export class ImageOptimizingResourceProvider extends CommonFileResourceProvider {
 
   #cacheRoot: string;
 
   constructor(paths?: string[], cacheRoot?: string) {
-    super(paths ?? Env.getList('TRV_RESOURCES'));
+    super(paths);
 
     this.#cacheRoot = cacheRoot ?? path.resolve(Env.get('TRV_IMAGE_CACHE', '.trv_images'));
     mkdirSync(this.#cacheRoot, { recursive: true });

@@ -1,4 +1,4 @@
-import * as asyncHooks from 'async_hooks';
+import asyncHooks from 'async_hooks';
 
 import { Injectable } from '@travetto/di';
 import { AppError } from '@travetto/base';

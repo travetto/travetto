@@ -1,5 +1,5 @@
 import assert from 'assert';
-import * as timers from 'timers/promises';
+import timers from 'timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { DockerContainer, CommandUtil } from '@travetto/command';

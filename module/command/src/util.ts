@@ -1,6 +1,6 @@
-import * as https from 'https';
-import * as http from 'http';
-import * as net from 'net';
+import https from 'https';
+import http from 'http';
+import net from 'net';
 
 import { TimeUtil, ExecUtil, ExecutionResult } from '@travetto/base';
 

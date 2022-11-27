@@ -5,6 +5,10 @@ import { ConfigOverrides, CONFIG_OVERRIDES } from '../internal/types';
 import { ConfigData } from '../parser/types';
 import { ConfigSource, ConfigValue } from './types';
 
+/**
+ * Overridable config source, provides ability to override field level values, currently used by
+ * - @EnvVar as a means to allow environment specific overrides
+ */
 @Injectable()
 export class OverrideConfigSource implements ConfigSource {
   priority = 3;

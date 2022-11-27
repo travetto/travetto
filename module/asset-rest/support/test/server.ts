@@ -5,6 +5,7 @@ import { StreamUtil } from '@travetto/base';
 import { Controller, Post, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
+import { RootRegistry } from '@travetto/registry';
 
 import { Upload, UploadAll } from '../../src/decorator';
 
@@ -63,6 +64,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   @BeforeAll()
   async init() {
     this.fixture = new TestFixtures(['@travetto/asset']);
+    await RootRegistry.init();
   }
 
   @Test()

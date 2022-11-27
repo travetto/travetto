@@ -1,4 +1,4 @@
-import * as jws from 'jws';
+import jws from 'jws';
 import assert from 'assert';
 
 import { Suite, Test, ShouldThrow, TestFixtures } from '@travetto/test';

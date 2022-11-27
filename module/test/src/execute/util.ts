@@ -1,5 +1,5 @@
 import { createReadStream } from 'fs';
-import * as readline from 'readline';
+import readline from 'readline';
 
 import { TimeUtil } from '@travetto/base';
 import { ShutdownManager, ModuleIndex } from '@travetto/boot';
