@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerId, AfterFile, TransformerState } from '@travetto/transformer';
+import { AfterFile, TransformerState } from '@travetto/transformer';
 
 const MAIN_MOD = '@travetto/boot/support/init.main';
 
@@ -8,8 +8,6 @@ const MAIN_MOD = '@travetto/boot/support/init.main';
  *  Auto importing setup for main entry points
  */
 export class FileMainTransformer {
-
-  static [TransformerId] = '@trv:boot';
 
   @AfterFile()
   static registerMainMethod(state: TransformerState, node: ts.SourceFile): typeof node {

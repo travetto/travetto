@@ -26,10 +26,10 @@ export type TransformerType =
   'class' | 'method' | 'property' | 'getter' | 'setter' | 'parameter' |
   'static-method' | 'call' | 'function' | 'file';
 
-export const TransformerId = Symbol.for('@trv:transformer/id');
+export const ModuleNameⲐ = Symbol.for('@travetto/transformer:id');
 
 export type Transformer = {
-  [TransformerId]: string;
+  [ModuleNameⲐ]?: string;
   name: string;
 };
 

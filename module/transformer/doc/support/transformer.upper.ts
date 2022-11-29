@@ -1,10 +1,8 @@
 import ts from 'typescript';
 
-import { OnProperty, TransformerState, OnMethod, OnClass, TransformerId } from '@travetto/transformer';
+import { OnProperty, TransformerState, OnMethod, OnClass } from '@travetto/transformer';
 
 export class MakeUpper {
-
-  static [TransformerId] = '@trv:transformer-test';
 
   @OnProperty()
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {

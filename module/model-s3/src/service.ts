@@ -25,7 +25,7 @@ function hasContentType<T>(o: T): o is T & { contenttype?: string } {
   return o !== undefined && o !== null && Object.hasOwn(o, 'contenttype');
 }
 
-const STREAM_SPACE = '@trv:stream';
+const STREAM_SPACE = '@travetto/model-s3:stream';
 
 /**
  * Asset source backed by S3

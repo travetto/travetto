@@ -104,7 +104,7 @@ async function compileOutput(state: ManifestState, ctx: CompileContext): Promise
   await spawn('[3] Compiling', process.argv0, {
     args, env: { TRV_WATCH: `${ctx.op === 'watch'}` },
     cwd: ctx.compilerFolder,
-    showWaitingMessage: ctx.op === 'build'
+    showWaitingMessage: ctx.op === 'build' && !process.env.DEBUG
   });
 }
 

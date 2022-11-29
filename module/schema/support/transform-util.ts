@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { type AnyType, DeclarationUtil, DecoratorUtil, DocUtil, ParamDocumentation, TransformerId, TransformerState } from '@travetto/transformer';
+import { type AnyType, DeclarationUtil, DecoratorUtil, DocUtil, ParamDocumentation, ModuleNameⲐ, TransformerState } from '@travetto/transformer';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
 const FIELD_MOD = '@travetto/schema/src/decorator/field';
@@ -129,7 +129,7 @@ export class SchemaTransformUtil {
 
     const params: ts.Expression[] = [];
 
-    const existing = state.findDecorator({ [TransformerId]: '@trv:schema', name: 'util' }, node, 'Field', FIELD_MOD);
+    const existing = state.findDecorator('@travetto/schema', node, 'Field', FIELD_MOD);
     if (!existing) {
       const resolved = this.toConcreteType(state, typeExpr, node, config.root);
       params.push(resolved);

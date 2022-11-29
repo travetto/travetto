@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, AfterClass, DecoratorUtil, TransformerId } from '@travetto/transformer';
+import { TransformerState, AfterClass, DecoratorUtil } from '@travetto/transformer';
 
 const REGISTER_MOD = '@travetto/registry/src/decorator';
 const BOOT_MOD = '@travetto/boot';
@@ -11,8 +11,6 @@ const MANIFEST_MOD = '@travetto/manifest';
  * Registration of all classes to support the registry
  */
 export class RegisterTransformer {
-
-  static [TransformerId] = '@trv:registry';
 
   /**
    * After visiting each class, register all the collected metadata

@@ -1,6 +1,6 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ConcreteClass<T = any> = new (...args: any[]) => T;
-const ProxyTargetⲐ = Symbol.for('@trv:base/proxy-target');
+const ProxyTargetⲐ = Symbol.for('@travetto/base:proxy-target');
 
 const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () { });
 const GeneratorFunction = Object.getPrototypeOf(function* () { });

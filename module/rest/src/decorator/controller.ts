@@ -3,8 +3,8 @@ import { ControllerRegistry } from '../registry/controller';
 
 /**
  * Decorator to register a new rest controller
- * @augments `@trv:di/Injectable`
- * @augments `@trv:rest/Controller`
+ * @augments `@travetto/di:Injectable`
+ * @augments `@travetto/rest:Controller`
  */
 export function Controller(path = '') {
   return function <T>(target: Class<T>): void {

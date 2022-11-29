@@ -1,7 +1,7 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, TransformerId, DecoratorMeta, LiteralUtil, AnyType
+  TransformerState, OnClass, OnMethod, DocUtil, DecoratorUtil, DecoratorMeta, LiteralUtil, AnyType
 } from '@travetto/transformer';
 import { SchemaTransformUtil } from '@travetto/schema/support/transform-util';
 
@@ -13,8 +13,6 @@ const ENDPOINT_DEC_FILE = '@travetto/rest/src/decorator/endpoint';
  * Handle @Controller, @Endpoint
  */
 export class RestTransformer {
-
-  static [TransformerId] = '@trv:rest';
 
   /**
    * Handle endpoint parameter
@@ -34,7 +32,7 @@ export class RestTransformer {
 
     const isContext =
       (paramType.key === 'external' &&
-        DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@trv:rest/Context')
+        DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@travetto/rest:Context')
       ) ||
       (pDec && !/(Path|Header|Query|Body|Param|QuerySchema)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
 
@@ -69,7 +67,7 @@ export class RestTransformer {
         }
       } else if (epDec.ident.getText() !== 'All') { // Treat all separate
         // Treat as schema, and see if endpoint supports a body for default behavior on untyped
-        detectedParamType = epDec.targets?.includes('@trv:http/Body') ? 'Body' : 'QuerySchema';
+        detectedParamType = epDec.targets?.includes('@travetto/http:Body') ? 'Body' : 'QuerySchema';
         config.name = '';
       }
       node = SchemaTransformUtil.computeField(state, node, config);

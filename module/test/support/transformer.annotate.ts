@@ -1,15 +1,13 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnMethod, OnClass, CoreUtil, DecoratorUtil, TransformerId
+  TransformerState, DecoratorMeta, OnMethod, OnClass, CoreUtil, DecoratorUtil
 } from '@travetto/transformer';
 
 /**
  * Annotate tests and suites for better diagnostics
  */
 export class AnnotationTransformer {
-
-  static [TransformerId] = '@trv:test';
 
   /**
    * Build source annotation, indicating line ranges

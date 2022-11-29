@@ -3,7 +3,7 @@ import { ContextProvider } from '@travetto/rest';
 
 /**
  * @concrete ./internal/types:SessionDataTarget
- * @augments `@trv:rest/Context`
+ * @augments `@travetto/rest:Context`
  */
 export interface SessionData {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -12,7 +12,7 @@ export interface SessionData {
 
 /**
  * Full session object, with metadata
- * @augments `@trv:rest/Context`
+ * @augments `@travetto/rest:Context`
  */
 @ContextProvider((c, req) => req.session)
 export class Session<T extends SessionData = SessionData>  {

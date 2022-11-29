@@ -4,7 +4,7 @@ import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta } from '@tra
 import { Asset } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
 
-export const AssetModelⲐ = Symbol.for('@trv:asset/model');
+export const AssetModelⲐ = Symbol.for('@travetto/asset:model');
 
 /**
  * Services asset CRUD operations.  Takes in a source is defined elsewhere.

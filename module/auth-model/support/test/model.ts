@@ -9,7 +9,7 @@ import { ModelSuite } from '@travetto/model/support/test/suite';
 
 import { ModelAuthService, RegisteredPrincipal } from '../../src/model';
 
-export const TestModelSvcⲐ = Symbol.for('@trv:auth/test-model-svc');
+export const TestModelSvcⲐ = Symbol.for('@travetto/auth:test-model-svc');
 
 @Model({ autoCreate: false })
 class User implements RegisteredPrincipal {

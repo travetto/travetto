@@ -60,7 +60,7 @@ export class Compiler {
 
   async createTransformerProvider(): Promise<TransformerProvider> {
     const { TransformerManager } = await import('@travetto/transformer');
-    return TransformerManager.create(this.#transformers, this.state.modules);
+    return TransformerManager.create(this.#transformers, this.state.manifest);
   }
 
   async writeRawFile(file: string, contents: string): Promise<void> {
@@ -94,7 +94,7 @@ process.env.TRV_COMPILED=1;
     const host = this.state.getCompilerHost(options);
 
     const emit = (file: string, needsNewProgram = program === undefined, onError?: EmitErrorHandler): void => {
-      console.log('Emitting file', file);
+      console.log('Emitting file', file.replace(this.#state.manifest.buildLocation, this.#state.outputFolder).replace(/[.]ts$/, '.js'));
       if (needsNewProgram) {
         program = ts.createProgram({ rootNames: this.#state.getAllFiles(), host, options, oldProgram: program });
         transformers.init(program.getTypeChecker());

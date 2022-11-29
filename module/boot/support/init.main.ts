@@ -40,7 +40,7 @@ async function setupLogging(): Promise<void> {
   const { ConsoleManager } = await import('../src/console.js');
 
   // Declare log target
-  trv.log = ConsoleManager.invoke.bind(ConsoleManager);
+  trv.log = (await ConsoleManager.init()).invoke.bind(ConsoleManager);
 
   // Attempt to setup logger
   try {

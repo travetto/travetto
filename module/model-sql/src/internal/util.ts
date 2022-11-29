@@ -6,7 +6,7 @@ import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { DialectState, InsertWrapper, VisitHandler, VisitState, VisitInstanceNode, OrderBy } from './types';
 
-const TableⲐ = Symbol.for('@trv:model-sql/table');
+const TableⲐ = Symbol.for('@travetto/model-sql:table');
 
 export type VisitStack = {
   [TableⲐ]?: string;

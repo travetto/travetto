@@ -1,15 +1,15 @@
-import { path, ManifestModule } from '@travetto/manifest';
+import { path, ManifestModule, ManifestRoot } from '@travetto/manifest';
+
+type ManifestEntry = { import: string, out: string, src: string, module: string };
 
 export class ManifestManager {
-  #srcToMod: Record<string, string> = {};
-  #outToMod: Record<string, string> = {};
-  #srcToOut: Record<string, string> = {};
-  #outToSrc: Record<string, string> = {};
-  #modToSrc: Record<string, string> = {};
+  #srcToEntry: Record<string, ManifestEntry> = {};
+  #outToEntry: Record<string, ManifestEntry> = {};
+  #modToEntry: Record<string, ManifestEntry> = {};
   #main: ManifestModule;
 
-  constructor(modules: ManifestModule[]) {
-    for (const mod of modules) {
+  constructor(manifest: ManifestRoot) {
+    for (const mod of Object.values(manifest.modules)) {
       if (mod.main) {
         this.#main = mod;
       }
@@ -18,12 +18,16 @@ export class ManifestManager {
           const src = path.resolve(mod.source, file);
           const out = path.resolve(mod.output, file);
           const modImp = `${mod.name}/${file}`;
-          this.#srcToMod[src] = modImp;
-          this.#outToMod[out] = modImp;
-          this.#srcToOut[src] = out;
-          this.#outToSrc[`${mod.output}/${file}`] = src;
-          this.#modToSrc[modImp] = src;
-          this.#modToSrc[modImp.replace(/[.][tjm]s$/, '')] = src;
+          const entry = { import: modImp, out, src, module: mod.name };
+          this.#srcToEntry[src] = entry;
+
+          this.#outToEntry[out] = entry;
+          this.#outToEntry[out.replace(/[.][tjm]s$/, '')] = entry;
+          this.#outToEntry[out.replace(/[.]ts$/, '.js')] = entry;
+
+          this.#modToEntry[modImp] = entry;
+          this.#modToEntry[modImp.replace(/[.][tjm]s$/, '')] = entry;
+          this.#modToEntry[modImp.replace(/[.]ts$/, '.js')] = entry;
         }
       }
     }
@@ -34,19 +38,24 @@ export class ManifestManager {
   }
 
   knownFile(file: string): boolean {
-    return !!file && (file in this.#srcToMod || file in this.#outToMod || file in this.#modToSrc);
+    return !!file && (file in this.#srcToEntry || file in this.#outToEntry || file in this.#modToEntry);
   }
 
   ensureOutputFile(file: string): string;
   ensureOutputFile(file?: string): string | undefined {
     if (file) {
       file = path.toPosix(file);
-      return this.#srcToOut[file] ?? file;
+      return this.#srcToEntry[file]?.out ?? file;
     }
   }
 
   toSource(file: string): string {
-    return this.#outToSrc[file.replace(/.*node_modules/g, 'node_modules')] ?? file;
+    const resolved = file.replace(/.*node_modules/g, 'node_modules');
+    return this.#outToEntry[resolved]?.src ?? file;
+  }
+
+  getEntry(file: string): ManifestEntry {
+    return this.#srcToEntry[file] ?? this.#outToEntry[file] ?? this.#modToEntry[file];
   }
 
   /**
@@ -55,11 +64,7 @@ export class ManifestManager {
    */
   resolveModule(file: string): string {
     file = path.toPosix(file);
-    if (file in this.#srcToMod) {
-      file = this.#srcToMod[file];
-    } else if (file in this.#outToMod) {
-      file = this.#outToMod[file];
-    }
+    file = this.getEntry(file)?.import ?? file;
     if (file.includes('node_modules')) { // it is a module
       file = file.replace(/.*node_modules\//, '');
     } else {

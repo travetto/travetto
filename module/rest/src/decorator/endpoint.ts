@@ -21,53 +21,53 @@ function Endpoint(method: MethodOrAll, path: PathType = '/', extra: Partial<Endp
 /**
  * Registers for ALL HTTP verbs
  * @param path The path to route the request to
- * @augments `@trv:http/Body`
- * @augments `@trv:rest/Endpoint`
+ * @augments `@travetto/http:Body`
+ * @augments `@travetto/rest:Endpoint`
  */
 export function All(path?: PathType): RouteDecorator { return Endpoint('all', path); }
 /**
  * Registers GET requests
  * @param path The path to route the request to
- * @augments `@trv:rest/Endpoint`
+ * @augments `@travetto/rest:Endpoint`
  */
 export function Get(path?: PathType): RouteDecorator { return Endpoint('get', path); }
 /**
  * Registers POST requests
  * @param path The path to route the request to
- * @augments `@trv:http/Body`
- * @augments `@trv:rest/Endpoint`
+ * @augments `@travetto/http:Body`
+ * @augments `@travetto/rest:Endpoint`
  */
 export function Post(path?: PathType): RouteDecorator { return Endpoint('post', path); }
 /**
  * Registers PUT requests
  * @param path The path to route the request to
- * @augments `@trv:http/Body`
- * @augments `@trv:rest/Endpoint`
+ * @augments `@travetto/http:Body`
+ * @augments `@travetto/rest:Endpoint`
  */
 export function Put(path?: PathType): RouteDecorator { return Endpoint('put', path); }
 /**
  * Registers PATCH requests
  * @param path The path to route the request to
- * @augments `@trv:http/Body`
- * @augments `@trv:rest/Endpoint`
+ * @augments `@travetto/http:Body`
+ * @augments `@travetto/rest:Endpoint`
  */
 export function Patch(path?: PathType): RouteDecorator { return Endpoint('patch', path); }
 /**
  * Registers DELETE requests
  * @param path The path to route the request to
- * @augments `@trv:rest/Endpoint`
+ * @augments `@travetto/rest:Endpoint`
  */
 export function Delete(path?: PathType): RouteDecorator { return Endpoint('delete', path); }
 /**
  * Registers HEAD requests
  * @param path The path to route the request to
- * @augments `@trv:rest/Endpoint`
+ * @augments `@travetto/rest:Endpoint`
  */
 export function Head(path?: PathType): RouteDecorator { return Endpoint('head', path); }
 /**
  * Registers OPTIONS requests
  * @param path The path to route the request to
- * @augments `@trv:rest/Endpoint`
+ * @augments `@travetto/rest:Endpoint`
  */
 export function Options(path?: PathType): RouteDecorator { return Endpoint('options', path); }
 

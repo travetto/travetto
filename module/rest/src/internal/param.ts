@@ -1,7 +1,7 @@
 import { BindUtil } from '@travetto/schema';
 import { ParamConfig } from '../types';
 
-const QuerySchemaⲐ: unique symbol = Symbol.for('@trv:rest/schema-query');
+const QuerySchemaⲐ: unique symbol = Symbol.for('@travetto/rest:schema-query');
 
 declare global {
   interface TravettoRequest {

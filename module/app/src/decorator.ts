@@ -14,8 +14,8 @@ export type AppDecorator = { description?: string };
  * compiler will automatically infer the parameters from the `run` method of
  * the class.
  *
- * @augments `@trv:app/Application`
- * @augments `@trv:di/Injectable`
+ * @augments `@travetto/app:Application`
+ * @augments `@travetto/di:Injectable`
  */
 export function Application(name: string, config?: AppDecorator) {
   return <T extends Class<AppClass>>(target: T): void => {

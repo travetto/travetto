@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerId, TransformerState, AfterFile } from '@travetto/transformer';
+import { TransformerState, AfterFile } from '@travetto/transformer';
 
 const MANIFEST_MOD = '@travetto/manifest';
 const HELPER_MOD = '@travetto/boot/support/init.helper';
@@ -9,8 +9,6 @@ const HELPER_MOD = '@travetto/boot/support/init.helper';
  *  Supporting `__output` as a file property
  */
 export class FileSourceTransformer {
-
-  static [TransformerId] = '@trv:boot';
 
   @AfterFile()
   static registerFileSource(state: TransformerState, node: ts.SourceFile): typeof node {

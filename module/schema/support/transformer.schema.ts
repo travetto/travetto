@@ -1,13 +1,13 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, TransformerId, OnGetter, OnSetter
+  TransformerState, OnProperty, OnClass, AfterClass, DecoratorMeta, DocUtil, DeclarationUtil, OnGetter, OnSetter
 } from '@travetto/transformer';
 
 import { SchemaTransformUtil } from './transform-util';
 
-const inSchema = Symbol.for('@trv:schema/schema');
-const accessors = Symbol.for('@trv:schema/schema');
+const inSchema = Symbol.for('@travetto/schema:schema');
+const accessors = Symbol.for('@travetto/schema:schema');
 
 interface AutoState {
   [inSchema]?: boolean;
@@ -21,8 +21,6 @@ const COMMON_MOD = '@travetto/schema/src/decorator/common';
  * Processes `@Schema` to register class as a valid Schema
  */
 export class SchemaTransformer {
-
-  static [TransformerId] = '@trv:schema';
 
   /**
    * Track schema on start

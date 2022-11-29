@@ -12,8 +12,8 @@ type UploadConfig = Partial<Pick<RestAssetConfig, 'types' | 'maxSize' | 'deleteF
 /**
  * Allows for supporting uploads
  *
- * @augments `@trv:asset-rest/Upload`
- * @augments `@trv:rest/Param`
+ * @augments `@travetto/asset-rest:Upload`
+ * @augments `@travetto/rest:Param`
  */
 export function Upload(
   param: string | Partial<ParamConfig> & UploadConfig = {}
@@ -56,8 +56,8 @@ export function Upload(
 /**
  * Allows for supporting uploads
  *
- * @augments `@trv:asset-rest/Upload`
- * @augments `@trv:rest/Endpoint`
+ * @augments `@travetto/asset-rest:Upload`
+ * @augments `@travetto/rest:Endpoint`
  */
 export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
   return function (target: ClassInstance, propertyKey: string): void {

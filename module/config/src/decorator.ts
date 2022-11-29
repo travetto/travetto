@@ -7,8 +7,8 @@ import { ConfigTarget, ConfigOverrides, CONFIG_OVERRIDES } from './internal/type
 
 /**
  * Indicates that the given class should be populated with the configured fields, on instantiation
- * @augments `@trv:schema/Schema`
- * @augments `@trv:di/Injectable`
+ * @augments `@travetto/schema:Schema`
+ * @augments `@travetto/di:Injectable`
  */
 export function Config(ns: string) {
   return <T extends Class>(target: T): T => {

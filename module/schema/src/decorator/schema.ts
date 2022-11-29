@@ -7,7 +7,7 @@ import { ValidatorFn } from '../validate/types';
 /**
  * Register a class as a Schema
  *
- * @augments `@trv:schema/Schema`
+ * @augments `@travetto/schema:Schema`
  */
 export function Schema() { // Auto is used during compilation
   return <T, U extends Class<T>>(target: U): U => {

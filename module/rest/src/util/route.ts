@@ -8,7 +8,7 @@ import { HeadersAddedⲐ, InterceptorConfigsⲐ } from '../internal/symbol';
 import { ParamExtractor } from './param';
 import { RouteCheckUtil } from './route-check';
 
-const RouteChecker = Symbol.for('@trv:rest/route-checker');
+const RouteChecker = Symbol.for('@travetto/rest:route-checker');
 
 const ident: FilterNext = ((x?: unknown) => x);
 

@@ -8,7 +8,7 @@ import { CacheAware, CacheConfigⲐ, EvictConfigⲐ } from './internal/types';
  * Indicates a method is intended to cache.  The return type must be properly serializable
  * @param field The field of the cache source
  * @param config The additional cache configuration
- * @augments `@trv:cache/Cache`
+ * @augments `@travetto/cache:Cache`
  */
 export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, maxAge: number | TimeSpan, config?: Omit<CacheConfig, 'maxAge'>): MethodDecorator;
 export function Cache<F extends string, U extends Record<F, CacheService>>(field: F, cfg?: CacheConfig): MethodDecorator;
@@ -35,7 +35,7 @@ export function Cache<F extends string, U extends Record<F, CacheService>>(
  * freshest data will be collected
  * @param field The field of the cache source
  * @param config The additional cache configuration
- * @augments `@trv:cache/Evict`
+ * @augments `@travetto/cache:Evict`
  */
 export function EvictCache<F extends string, U extends Record<F, CacheService>>(field: F, config: CoreCacheConfig = {}) {
   return function <R extends Promise<unknown>>(target: U & CacheAware, propertyKey: string, descriptor: MethodDescriptor<R>): void {

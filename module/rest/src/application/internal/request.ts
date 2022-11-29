@@ -3,7 +3,7 @@ import { IncomingHttpHeaders } from 'http';
 import { Request, ContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
 
-const ParsedType = Symbol.for('@trv:rest/content-type');
+const ParsedType = Symbol.for('@travetto/rest:content-type');
 
 /**
  * Base Request object

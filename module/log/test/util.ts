@@ -15,24 +15,24 @@ class UtilTest {
 
     let filter2 = LogUtil.buildFilter('@');
     assert(filter2);
-    assert(filter2('@trv:log/src/'));
-    assert(!filter2('@trv:log2/src/sub'));
+    assert(filter2('@travetto/log/src:'));
+    assert(!filter2('@travetto/log2/src:sub'));
 
     filter2 = LogUtil.buildFilter('*,-@');
     assert(filter2);
-    assert(!filter2('@trv:log/src/sub'));
-    assert(filter2('@trv:log2/src/sub/2'));
+    assert(!filter2('@travetto/log/src:sub'));
+    assert(filter2('@travetto/log2/src/sub:2'));
 
     filter2 = LogUtil.buildFilter('@travetto/boot');
     assert(filter2);
-    assert(filter2('@trv:boot/src/sub'));
-    assert(!filter2('@trv:log/src/sub/2'));
+    assert(filter2('@travetto/boot/src:sub'));
+    assert(!filter2('@travetto/log/src/sub:2'));
 
 
-    filter2 = LogUtil.buildFilter('@travetto/boot,@trv:log');
+    filter2 = LogUtil.buildFilter('@travetto/boot,@travetto/log');
     assert(filter2);
-    assert(filter2('@trv:boot/src/sub'));
-    assert(filter2('@trv:log/src/sub/2'));
-    assert(!filter2('@trv:manifest/src/sub/2'));
+    assert(filter2('@travetto/boot/src:sub'));
+    assert(filter2('@travetto/log/src/sub:2'));
+    assert(!filter2('@travetto/manifest/src/sub:2'));
   }
 }

@@ -25,10 +25,10 @@ The ${d.Input('debug')} messages can be filtered using the patterns from the ${l
 
 ${d.Terminal('Sample environment flags', `
 # Debug
-$ DEBUG=@app:*,-@trv:model npx trv run app
-$ DEBUG=-@trv:registry npx trv run app
-$ DEBUG=@trv:rest npx trv run app
-$ DEBUG=@trv:*,-@trv:model npx trv run app
+$ DEBUG=-@travetto/model npx trv run app
+$ DEBUG=-@travetto/registry npx trv run app
+$ DEBUG=@travetto/rest npx trv run app
+$ DEBUG=@travetto/*,-@travetto/model npx trv run app
 `)}
 
 ${d.Note(d`In production mode, all ${d.Method('console.debug')} invocations are compiled away for performance/security reasons. This means that the code is actually removed, and will not execute.`)}
@@ -62,7 +62,7 @@ The corresponding output would be
 
 ${d.Execute('Logging output', 'support/main.output.ts', [], {
   env: {
-    TRV_DEBUG: '@trv:log',
+    TRV_DEBUG: '@travetto/log',
     TRV_LOG_PLAIN: '0'
   },
   filter: l => l.startsWith(`${new Date().getFullYear()}`)
