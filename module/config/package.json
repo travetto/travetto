@@ -31,7 +31,6 @@
     "@travetto/yaml": "^3.0.0-rc.3"
   },
   "travetto": {
-    "id": "@trv:config",
     "displayName": "Configuration"
   },
   "publishConfig": {

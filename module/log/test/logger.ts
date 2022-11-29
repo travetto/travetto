@@ -19,6 +19,7 @@ class LoggerTest {
     const events: LogEvent[] = [];
     Logger.listen('test', e => events.push(e));
 
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     (function (ᚕ_) {
       console.log('Hello', { args: [1, 2, 3] });
     })({

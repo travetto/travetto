@@ -31,7 +31,6 @@
     "@vendia/serverless-express": "^4.10.1"
   },
   "travetto": {
-    "id": "@trv:rest-koa-lambda",
     "displayName": "Koa REST AWS Lambda Source"
   },
   "publishConfig": {

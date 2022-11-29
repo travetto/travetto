@@ -28,7 +28,6 @@
     "@travetto/base": "^3.0.0-rc.3"
   },
   "travetto": {
-    "id": "@trv:log",
     "displayName": "Logging"
   },
   "publishConfig": {

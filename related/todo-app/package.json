@@ -37,6 +37,9 @@
     "@travetto/command": "*",
     "@travetto/test": "*"
   },
+  "travetto": {
+    "id": "@trv:todo"
+  },
   "private": true,
   "publishConfig": {
     "access": "restricted"

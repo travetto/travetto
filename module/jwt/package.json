@@ -28,7 +28,6 @@
     "jws": "^4.0.0"
   },
   "travetto": {
-    "id": "@trv:jwt",
     "displayName": "JWT"
   },
   "publishConfig": {

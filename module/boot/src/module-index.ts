@@ -1,6 +1,9 @@
 import fs from 'fs';
 
-import { ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType, ManifestModuleCore, PACKAGE_STD_PROFILE, ManifestProfile } from '@travetto/manifest';
+import {
+  ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType,
+  ManifestModuleCore, PACKAGE_STD_PROFILE, ManifestProfile
+} from '@travetto/manifest';
 import { path } from './path';
 
 type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
@@ -56,7 +59,7 @@ class $ModuleIndex {
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
       const output = this.#resolve(m.output, js);
       const module = `${m.name}/${js}`;
-      const id = (m.main ? module : module.replace(m.name, m.id)).replace(/[.]js$/, '');
+      const id = module.replace(m.name, _ => `${_}:`).replace(/[.][tj]s$/, '');
 
       return { id, type, source, output, module, profile };
     });
@@ -88,7 +91,7 @@ class $ModuleIndex {
   }
 
   #getEntry(file: string): IndexedFile | undefined {
-    return this.#outputToEntry.get(file);
+    return this.#outputToEntry.get(file) ?? this.#sourceToEntry.get(file);
   }
 
   /**

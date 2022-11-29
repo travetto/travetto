@@ -45,7 +45,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:test",
     "displayName": "Testing",
     "profiles": [
       "test"

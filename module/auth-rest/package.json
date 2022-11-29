@@ -39,7 +39,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:auth-rest",
     "displayName": "Rest Auth"
   },
   "private": false,

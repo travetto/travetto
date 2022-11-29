@@ -37,7 +37,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:context",
     "displayName": "Async Context"
   },
   "publishConfig": {

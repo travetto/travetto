@@ -36,7 +36,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:base",
     "displayName": "Base"
   },
   "private": false,

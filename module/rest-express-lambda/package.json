@@ -31,7 +31,6 @@
     "@vendia/serverless-express": "^4.10.1"
   },
   "travetto": {
-    "id": "@trv:rest-express-lambda",
     "displayName": "Express REST AWS Lambda Source"
   },
   "publishConfig": {

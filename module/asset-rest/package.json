@@ -40,7 +40,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:asset-rest",
     "displayName": "Asset Rest Support"
   },
   "private": false,

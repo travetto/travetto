@@ -48,7 +48,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:model-sql",
     "displayName": "SQL Model Service"
   },
   "publishConfig": {

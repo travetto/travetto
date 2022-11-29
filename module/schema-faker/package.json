@@ -30,7 +30,6 @@
     "faker": "^5.5.3"
   },
   "travetto": {
-    "id": "@trv:schema-faker",
     "displayName": "Schema Faker"
   },
   "publishConfig": {

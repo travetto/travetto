@@ -38,7 +38,6 @@
     "@travetto/app": "^3.0.0-rc.5"
   },
   "travetto": {
-    "id": "@trv:model-sqlite",
     "displayName": "SQLite Model Service"
   },
   "publishConfig": {

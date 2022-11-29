@@ -41,7 +41,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:doc",
     "displayName": "Documentation"
   },
   "private": false,

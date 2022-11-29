@@ -44,7 +44,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:model-elasticsearch",
     "displayName": "Elasticsearch Model Source"
   },
   "publishConfig": {

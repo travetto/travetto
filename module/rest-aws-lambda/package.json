@@ -41,7 +41,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:rest-aws-lambda",
     "displayName": "RESTful AWS Lambda"
   },
   "publishConfig": {

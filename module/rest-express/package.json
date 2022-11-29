@@ -31,7 +31,6 @@
     "express": "^4.18.2"
   },
   "travetto": {
-    "id": "@trv:rest-express",
     "displayName": "Express REST Source"
   },
   "publishConfig": {

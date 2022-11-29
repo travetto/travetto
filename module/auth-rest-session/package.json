@@ -32,7 +32,6 @@
     "@travetto/rest-session": "^3.0.0-rc.5"
   },
   "travetto": {
-    "id": "@trv:auth-rest-session",
     "displayName": "Rest Auth Session"
   },
   "private": false,

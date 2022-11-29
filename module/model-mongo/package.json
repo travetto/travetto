@@ -40,7 +40,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:model-mongo",
     "displayName": "MongoDB Model Support"
   },
   "publishConfig": {

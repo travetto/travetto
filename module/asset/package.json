@@ -40,7 +40,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:asset",
     "displayName": "Asset"
   },
   "private": false,

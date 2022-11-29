@@ -40,7 +40,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:model-query",
     "displayName": "Data Model Querying"
   },
   "publishConfig": {

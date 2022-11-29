@@ -31,7 +31,6 @@
     "@travetto/transformer": "^3.0.0-rc.5"
   },
   "travetto": {
-    "id": "@trv:schema",
     "displayName": "Schema"
   },
   "publishConfig": {
