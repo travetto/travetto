@@ -29,7 +29,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:repo",
     "displayName": "Repo"
   },
   "publishConfig": {

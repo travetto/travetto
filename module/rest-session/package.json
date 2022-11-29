@@ -38,7 +38,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:rest-session",
     "displayName": "REST Session"
   },
   "publishConfig": {

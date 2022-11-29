@@ -30,7 +30,6 @@
     "generic-pool": "^3.9.0"
   },
   "travetto": {
-    "id": "@trv:worker",
     "displayName": "Worker"
   },
   "publishConfig": {

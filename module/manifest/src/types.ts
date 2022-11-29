@@ -9,7 +9,6 @@ export type ManifestProfile = 'std' | 'compile' | 'test';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestProfile];
 export type ManifestModuleCore = {
-  id: string;
   name: string;
   main?: boolean;
   local?: boolean;
@@ -67,7 +66,6 @@ export type Package = {
   peerDependenciesMeta?: Record<string, { optional?: boolean }>;
   optionalDependencies?: Record<string, string>;
   travetto?: {
-    id?: string;
     displayName?: string;
     profiles?: ManifestProfile[];
     docOutput?: string[];

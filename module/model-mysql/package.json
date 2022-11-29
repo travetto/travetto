@@ -47,7 +47,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:model-mysql",
     "displayName": "MySQL Model Service"
   },
   "publishConfig": {

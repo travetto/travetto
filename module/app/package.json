@@ -48,7 +48,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:app",
     "displayName": "Application"
   },
   "private": false,

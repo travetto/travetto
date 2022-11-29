@@ -29,7 +29,6 @@
     "typescript": "^4.9.3"
   },
   "travetto": {
-    "id": "@trv:transformer",
     "displayName": "Transformation",
     "profiles": [
       "compile"

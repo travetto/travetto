@@ -44,7 +44,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:model",
     "displayName": "Data Modeling Support"
   },
   "publishConfig": {

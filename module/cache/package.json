@@ -41,7 +41,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:cache",
     "displayName": "Caching"
   },
   "publishConfig": {

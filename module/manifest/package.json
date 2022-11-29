@@ -30,7 +30,6 @@
   },
   "dependencies": {},
   "travetto": {
-    "id": "@trv:manifest",
     "displayName": "Manifest"
   },
   "publishConfig": {

@@ -34,7 +34,6 @@
     "passport": "^0.6.0"
   },
   "travetto": {
-    "id": "@trv:auth-rest-passport",
     "displayName": "Rest Auth Passport"
   },
   "private": false,

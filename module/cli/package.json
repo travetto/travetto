@@ -40,7 +40,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:cli",
     "displayName": "Command Line Interface"
   },
   "publishConfig": {

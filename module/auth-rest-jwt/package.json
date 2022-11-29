@@ -34,7 +34,6 @@
     "@travetto/rest": "^3.0.0-rc.5"
   },
   "travetto": {
-    "id": "@trv:auth-rest-jwt",
     "displayName": "Rest Auth JWT"
   },
   "private": false,

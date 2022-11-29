@@ -36,7 +36,6 @@
     }
   },
   "travetto": {
-    "id": "@trv:command",
     "displayName": "Command"
   },
   "publishConfig": {

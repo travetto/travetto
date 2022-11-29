@@ -128,7 +128,7 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async #describeModule(rootFolder: string, { id, name, version, folder, profiles }: Dependency): Promise<ManifestModule> {
+  static async #describeModule(rootFolder: string, { name, version, folder, profiles }: Dependency): Promise<ManifestModule> {
     const main = folder === rootFolder;
     const local = (!folder.includes('node_modules') && !name.startsWith('@travetto')) || main;
 
@@ -148,11 +148,7 @@ export class ManifestModuleUtil {
       files.$root = files.$root?.filter(([file, type]) => type !== 'ts');
     }
 
-    // Cleaning up names
-    id ??= (!local ? `@npm:${name}` : name).replace('/', ':');
-
     return {
-      id,
       profiles: profiles?.includes(PACKAGE_STD_PROFILE) ? [PACKAGE_STD_PROFILE] : [...new Set(profiles)],
       name,
       version,
