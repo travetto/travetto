@@ -14,7 +14,7 @@ export class ModelInstallCommand extends BaseModelCommand {
 
   async action(provider: string, models: string[]): Promise<void> {
     try {
-      ConsoleManager.exclude('debug');
+      ConsoleManager.setDebug(false);
       await RootRegistry.init();
 
       await this.validate(provider, models);

@@ -1,7 +1,7 @@
 // Log types
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
 
-export type LineContext = { file: string, line: number, category: string, scope?: string };
+export type LineContext = { source: string, line: number, module: string, modulePath: string, scope?: string };
 
 export interface ConsoleListener {
   setDebug?(val: string | boolean): void;
