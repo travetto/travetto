@@ -1,7 +1,7 @@
 import { LogLevel, LineContext, ConsoleListener } from '@travetto/boot';
 import { Env, Util } from '@travetto/base';
 
-import { Appender, Formatter, LogEvent, LogLevels } from './types';
+import { Appender, Formatter, LogEvent } from './types';
 import { LineFormatter } from './formatter/line';
 import { JsonFormatter } from './formatter/json';
 import { ConsoleAppender } from './appender/console';
@@ -35,11 +35,6 @@ class $Logger implements ConsoleListener {
    */
   #listeners: ((ev: LogEvent) => void)[] = [];
 
-  /**
-   * List of logging filters
-   */
-  #filters: Partial<Record<LogLevel, (x: string) => boolean>> = {};
-
   constructor() {
     if (!this.#listenerMap.get(DefaultLoggerⲐ)) {
       // Build default formatter
@@ -49,16 +44,6 @@ class $Logger implements ConsoleListener {
         case 'json': formatter = new JsonFormatter(); break;
       }
       this.listenDefault(formatter, this.#logFile ? new FileAppender({ file: this.#logFile }) : undefined);
-    }
-  }
-
-  setDebug(value: boolean | string): void {
-    if (typeof value === 'boolean') {
-      if (value) {
-        this.#filters.debug = LogUtil.buildFilter('@app');
-      }
-    } else {
-      this.#filters.debug = LogUtil.buildFilter(value || '@app');
     }
   }
 
@@ -102,9 +87,7 @@ class $Logger implements ConsoleListener {
   /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
-  onLog(level: LogLevel, { file, category, line, scope }: LineContext, [message, context, ...args]: [string, Record<string, unknown>, ...unknown[]]): void {
-    level = (level in LogLevels) ? level : 'info';
-
+  onLog(level: LogLevel, ctx: LineContext, [message, context, ...args]: [string, Record<string, unknown>, ...unknown[]]): void {
     if (!Util.isPlainObject(context)) {
       args.unshift(context);
       context = {};
@@ -115,18 +98,11 @@ class $Logger implements ConsoleListener {
       message = '';
     }
 
-    if (category && this.#filters[level] && !this.#filters[level]?.(category)) {
-      return;
-    }
-
     // Allow for controlled order of event properties
     const finalEvent: LogEvent = {
       timestamp: new Date().toISOString(),
       level,
-      file,
-      line,
-      category,
-      scope,
+      ...ctx,
       message: message !== '' ? message : undefined,
       context,
       args: args.filter(x => x !== undefined)

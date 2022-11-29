@@ -1,7 +1,6 @@
 import { ModuleIndex } from './module-index';
 import { ConsoleListener, LineContext, LogLevel } from './types';
 
-
 function wrap(target: Console): ConsoleListener {
   return {
     onLog(level: LogLevel, ctx: LineContext, args: unknown[]): void {
@@ -29,15 +28,14 @@ class $ConsoleManager {
   #appender: ConsoleListener;
 
   /**
-   * List of log levels to exclude
+   * List of logging filters
    */
-  readonly #exclude = new Set<string>([]);
+  #filters: Partial<Record<LogLevel, (x: LineContext) => boolean>> = {};
 
   /**
    * Unique key to use as a logger function
    */
   constructor() {
-    this.#exclude = new Set();
     this.set(console); // Init to console
     this.setDebug(process.env.TRV_DEBUG ?? '');
   }
@@ -46,11 +44,15 @@ class $ConsoleManager {
    * Add exclusion
    * @private
    */
-  exclude(val: string, add = true): void {
-    if (add) {
-      this.#exclude.add(val);
+  filter(level: LogLevel, filter?: boolean | ((ctx: LineContext) => boolean)): void {
+    if (filter !== undefined) {
+      if (typeof filter === 'boolean') {
+        const v = filter;
+        filter = (): boolean => v;
+      }
+      this.#filters[level] = filter;
     } else {
-      this.#exclude.delete(val);
+      delete this.#filters[level];
     }
   }
 
@@ -62,11 +64,10 @@ class $ConsoleManager {
     const isFalse = typeof debug === 'boolean' ? !debug : /^(0|false|no|off)/i.test(debug);
 
     if (isSet && !isFalse) {
-      this.exclude('debug', false);
-      this.#appender?.setDebug?.(debug);
+      const filter = ModuleIndex.buildModuleFilter(typeof debug === 'string' ? debug : '', 'local');
+      this.filter('debug', ctx => filter(ctx.module));
     } else {
-      this.exclude('debug', true);
-      this.#appender?.setDebug?.(false);
+      this.filter('debug', () => false);
     }
   }
 
@@ -74,15 +75,17 @@ class $ConsoleManager {
    * Handle direct call in lieu of the console.* commands
    */
   invoke(level: LogLevel, ctx: LineContext, ...args: unknown[]): void {
-    if (this.#exclude.has(level)) {
-      return; // Do nothing
-    }
-
     // Resolve input to source file
-    ctx.file = ModuleIndex.getSourceFile(ctx.file);
-    ctx.category = ModuleIndex.getId(ctx.file);
+    ctx.source = ModuleIndex.getSourceFile(ctx.source);
+    const mod = ModuleIndex.getModuleFromSource(ctx.source)!;
+    ctx.module = mod.name;
+    ctx.modulePath = ctx.source.split(mod.source)[1];
 
-    return this.#appender.onLog(level, ctx, args);
+    if (this.#filters[level] && !this.#filters[level]!(ctx)) {
+      return; // Do nothing
+    } else {
+      return this.#appender.onLog(level, ctx, args);
+    }
   }
 
   /**

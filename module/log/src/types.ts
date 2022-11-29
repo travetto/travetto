@@ -1,4 +1,4 @@
-import { LogLevel } from '@travetto/boot';
+import { LineContext, LogLevel } from '@travetto/boot';
 
 /**
  * Log levels, numerically
@@ -13,7 +13,7 @@ export const LogLevels = {
 /**
  * Logging event
  */
-export interface LogEvent {
+export interface LogEvent extends LineContext {
   /**
    * Time of event, ISO 8601 timestamp
    */
@@ -22,22 +22,6 @@ export interface LogEvent {
    * Log level
    */
   level: LogLevel;
-  /**
-   * File
-   */
-  file: string;
-  /**
-   * Line number
-   */
-  line: number;
-  /**
-   * Categorization of file into a readable name
-   */
-  category: string;
-  /**
-   * The scope of identifiers to the location of the log statement
-   */
-  scope?: string;
   /**
    * Log message
    */

@@ -100,7 +100,7 @@ export class LoggerTransformer {
         [
           state.factory.createStringLiteral(VALID_LEVELS[level]),
           LiteralUtil.fromLiteral(state.factory, {
-            file: state.createIdentifier('__output'),
+            source: state.createIdentifier('__output'), // Translated by ConsoleManager
             line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
             scope: state.scope?.map(x => x.name).join(':'),
           }),

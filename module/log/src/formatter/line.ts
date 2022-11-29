@@ -81,8 +81,8 @@ export class LineFormatter implements Formatter {
       out.push(level);
     }
 
-    if (ev.file && opts.location) {
-      const ns = ev.category;
+    if (ev.source && opts.location) {
+      const ns = `${ev.module}:${ev.modulePath}`;
       let loc = ev.line ? `${ns}:${ev.line}` : ns;
       if (opts.colorize) {
         loc = STYLES.location(loc);

@@ -47,7 +47,7 @@ export class PackageUtil {
 
     const profiles = [...travetto?.profiles ?? [PACKAGE_STD_PROFILE], ...transitiveProfiles].slice(0);
 
-    const rootDep: Dependency = { id: travetto?.id, name, version, folder, profiles };
+    const rootDep: Dependency = { name, version, folder, profiles };
     seen.set(name, rootDep);
 
     const out: Dependency[] = [rootDep];

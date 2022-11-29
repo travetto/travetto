@@ -222,6 +222,28 @@ class $ModuleIndex {
       await import(output);
     }
   }
+
+  /**
+   * Build filter for module names
+   */
+  buildModuleFilter(exprList: string, defaults?: 'local' | 'all'): (mod: string) => boolean {
+    const allMods = Object.keys(this.manifest.modules);
+    const active = new Set<string>(
+      defaults === 'local' ? this.getLocalModules().map(x => x.name) :
+        (defaults === 'all' ? allMods : [])
+    );
+
+    for (const expr of exprList.split(/\s*,\s*/g)) {
+      const [, neg, mod] = expr.match(/(-|[+])?([^+- ]+)$/)!;
+      if (mod) {
+        const patt = new RegExp(`^${mod.replace(/[*]/g, '.*')}$`);
+        for (const m of allMods.filter(x => patt.test(x))) {
+          active[neg ? 'delete' : 'add'](m);
+        }
+      }
+    }
+    return mod => active.has(mod);
+  }
 }
 
 export const ModuleIndex = new $ModuleIndex(

@@ -23,17 +23,16 @@ export class LogUtil {
   /**
    * Build a filter element
    */
-  static buildFilterPart(p: string): { key: 'exc' | 'inc', filter: string[] } {
-    const [, neg, prop] = p.match(/(-|[+])?(.*)/)!;
-    const cleaned = (/^.*:[^\/]*[^*]$/.test(prop) ? `${prop}/*` : prop).replace(/([\/.])/g, a => `\\${a}`);
+  static buildModuleFilter(expr: string): { key: 'exc' | 'inc', filter: string[] } {
+    const [, neg, mod] = expr.match(/(-|[+])?(.*)/)!;
     const key: 'exc' | 'inc' = neg ? 'exc' : 'inc';
     const filter: string[] = [];
 
-    // Auto wildcard for modules
-    if (cleaned.startsWith('@app')) {
-      filter.push('./src', './support', './test');
+    if (mod === '*') {
+      filter.push('*');
     } else {
-      filter.push(cleaned);
+      // Auto wildcard for modules
+      filter.push(`${mod}:.*`);
     }
 
     return { key, filter };
@@ -46,20 +45,20 @@ export class LogUtil {
     const config: { inc: string[], exc: string[] } = { inc: [], exc: [] };
     const { inc, exc } = config;
 
-    for (const p of v.split(/\s*,\s*/)) {
-      const { key, filter } = this.buildFilterPart(p);
+    for (const mod of v.split(/\s*,\s*/)) {
+      const { key, filter } = this.buildModuleFilter(mod);
       config[key].push(...filter);
     }
 
     if (inc.includes('*')) {
       inc.splice(0, inc.length);
     } else if (inc.length === 0 && exc.length) { // If excluding and nothing included
-      const { key, filter } = this.buildFilterPart('@app');
+      const { key, filter } = this.buildModuleFilter('@');
       config[key].push(...filter); // Listen to src by default if not explicit
     }
 
-    const incRe = new RegExp(`^(${inc.join('|').replace(/[.]/g, '[.]').replace(/[*]/g, '.*')})`);
-    const excRe = new RegExp(`^(${exc.join('|').replace(/[.]/g, '[.]').replace(/[*]/g, '.*')})`);
+    const incRe = new RegExp(`^(${inc.join('|')})`);
+    const excRe = new RegExp(`^(${exc.join('|')})`);
 
     if (inc.length && exc.length) {
       return (x: string) => incRe.test(x) && !excRe.test(x);

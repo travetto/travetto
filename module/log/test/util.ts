@@ -10,25 +10,29 @@ class UtilTest {
   @Test()
   async testFilters() {
 
-    let filter = LogUtil.buildFilter('*');
+    const filter = LogUtil.buildFilter('*');
     assert(filter === undefined);
 
-    filter = LogUtil.buildFilter('@app:*');
-    assert(filter!('./src/'));
+    let filter2 = LogUtil.buildFilter('@');
+    assert(filter2);
+    assert(filter2('@trv:log/src/'));
+    assert(!filter2('@trv:log2/src/sub'));
 
-    filter = LogUtil.buildFilter('@app');
-    assert(filter!('./src/'));
+    filter2 = LogUtil.buildFilter('*,-@');
+    assert(filter2);
+    assert(!filter2('@trv:log/src/sub'));
+    assert(filter2('@trv:log2/src/sub/2'));
 
-    filter = LogUtil.buildFilter('@app:sub/*');
-    assert(!filter!('./src/sub'));
-    assert(filter!('./src/sub/2'));
+    filter2 = LogUtil.buildFilter('@travetto/boot');
+    assert(filter2);
+    assert(filter2('@trv:boot/src/sub'));
+    assert(!filter2('@trv:log/src/sub/2'));
 
-    filter = LogUtil.buildFilter('@app:sub');
-    assert(!filter!('./src/sub'));
-    assert(filter!('./src/sub/2'));
 
-    filter = LogUtil.buildFilter('@app:sub,-@app:sub/2');
-    assert(filter!('./src/sub/@'));
-    assert(!filter!('./src/sub/2'));
+    filter2 = LogUtil.buildFilter('@travetto/boot,@trv:log');
+    assert(filter2);
+    assert(filter2('@trv:boot/src/sub'));
+    assert(filter2('@trv:log/src/sub/2'));
+    assert(!filter2('@trv:manifest/src/sub/2'));
   }
 }
