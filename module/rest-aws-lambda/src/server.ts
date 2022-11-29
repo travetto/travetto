@@ -4,7 +4,7 @@ import { RestServer, RestApplication } from '@travetto/rest';
 
 import { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types';
 
-export const AwsLambdaⲐ = Symbol.for('@trv:rest-aws-lambda/entry');
+export const AwsLambdaⲐ = Symbol.for('@travetto/rest-aws-lambda:entry');
 
 
 /**

@@ -1,8 +1,8 @@
 import { Util } from '@travetto/base';
 import { AsyncContext } from '@travetto/context';
 
-const ContextActiveⲐ: unique symbol = Symbol.for('@trv:model/sql-active');
-const TxActiveⲐ: unique symbol = Symbol.for('@trv:model/sql-transaction');
+const ContextActiveⲐ: unique symbol = Symbol.for('@travetto/model:sql-active');
+const TxActiveⲐ: unique symbol = Symbol.for('@travetto/model:sql-transaction');
 
 export type TransactionType = 'required' | 'isolated' | 'force';
 

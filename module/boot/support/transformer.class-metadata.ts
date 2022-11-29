@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import {
   TransformerState, OnMethod, OnClass, AfterClass,
-  TransformerId, AfterFunction, CoreUtil, SystemUtil
+  AfterFunction, CoreUtil, SystemUtil
 } from '@travetto/transformer';
 
 const BOOT_MOD_SRC = '@travetto/boot/src';
@@ -11,8 +11,8 @@ const MANIFEST_MOD = '@travetto/manifest';
 const UTIL_MOD = '@travetto/boot/src/class-metadata';
 const UTIL_CLS = 'ClassMetadataUtil';
 
-const methods = Symbol.for('@trv:boot/methods');
-const cls = Symbol.for('@trv:boot/class');
+const methods = Symbol.for('@travetto/boot:methods');
+const cls = Symbol.for('@travetto/boot:class');
 
 interface MetadataInfo {
   [methods]?: {
@@ -25,8 +25,6 @@ interface MetadataInfo {
  * Providing metadata for classes
  */
 export class RegisterTransformer {
-
-  static [TransformerId] = '@trv:boot';
 
   /**
    * Hash each class

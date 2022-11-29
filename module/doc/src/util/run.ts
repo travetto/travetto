@@ -70,7 +70,7 @@ export class DocRunUtil {
     text = text.trim()
       // eslint-disable-next-line no-control-regex
       .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
-      .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@trv:')
+      .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@travetto/')
       .replace(new RegExp(path.cwd(), 'g'), '.')
       .replace(/([.]trv_cache)[_A-Za-z0-9]+/g, (_, b) => b)
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))

@@ -31,7 +31,7 @@ export class RenderUtil {
       throw new Error(`Unknown renderer with format: ${fmt}`);
     }
 
-    const mod = await ModuleIndex.getModuleNameFromSource(file);
+    const mod = ModuleIndex.getFromSource(file)?.import;
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const res = await import(mod!) as DocumentShape;

@@ -13,8 +13,8 @@ export function AssertCheck(): MethodDecorator {
 /**
  * The `@Test` decorator register a test to be run as part of the enclosing suite.
  * @param description The test description
- * @augments `@trv:test/Test`
- * @augments `@trv:test/AssertCheck`
+ * @augments `@travetto/test:Test`
+ * @augments `@travetto/test:AssertCheck`
  */
 export function Test(): MethodDecorator;
 export function Test(...rest: Partial<TestConfig>[]): MethodDecorator;

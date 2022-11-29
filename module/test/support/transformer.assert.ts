@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, OnCall, DeclarationUtil, CoreUtil, TransformerId, OnMethod, AfterMethod } from '@travetto/transformer';
+import { TransformerState, OnCall, DeclarationUtil, CoreUtil, OnMethod, AfterMethod } from '@travetto/transformer';
 
 /**
  * Which types are candidates for deep literal checking
@@ -48,8 +48,8 @@ const METHODS: Record<string, Function[]> = {
 
 const OP_TOKEN_TO_NAME = new Map<number, keyof typeof OPTOKEN_ASSERT>();
 
-const AssertⲐ = Symbol.for('@trv:test/assert');
-const IsTestⲐ = Symbol.for('@trv:test/valid');
+const AssertⲐ = Symbol.for('@travetto/test:assert');
+const IsTestⲐ = Symbol.for('@travetto/test:valid');
 
 /**
  * Assert transformation state
@@ -89,8 +89,6 @@ interface Command {
  * and result generation
  */
 export class AssertTransformer {
-
-  static [TransformerId] = '@trv:test';
 
   /**
    * Resolves optoken to syntax kind.  Relies on `ts`

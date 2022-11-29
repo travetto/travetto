@@ -1,10 +1,8 @@
 import ts from 'typescript';
 
-import { TransformerId, TransformerState, OnMethod } from '@travetto/transformer';
+import { TransformerState, OnMethod } from '@travetto/transformer';
 
 export class MakeUpper {
-
-  static [TransformerId] = '@trv:transformer-test';
 
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): typeof node {

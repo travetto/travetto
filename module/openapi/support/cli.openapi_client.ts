@@ -68,7 +68,7 @@ export class OpenApiClientCommand extends CliCommand<Options> {
     const presetEntries = Object
       .entries(presets)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([k, [cmd, v]]) => [`@trv:${k}`.padEnd(presetLen + 5), [cmd, this.presetMap(v)]] as const);
+      .map(([k, [cmd, v]]) => [`@travetto/${k}`.padEnd(presetLen + 5), [cmd, this.presetMap(v)]] as const);
 
     const presetText = CliUtil.color`
 ${{ subtitle: 'Available Presets' }}
@@ -97,8 +97,8 @@ ${this.getListOfFormats().map(x => CliUtil.color`* ${{ input: x }}`).join('\n')}
 
     let propMap = Object.fromEntries(this.cmd.props?.map(p => p.split('=')) ?? []);
 
-    if (format.startsWith('@trv:')) {
-      const key = format.split('@trv:')[1];
+    if (format.startsWith('@travetto/')) {
+      const key = format.split('@travetto/')[1];
       const [fmt, props] = (await this.getPresets())[key];
       format = fmt;
       propMap = { ...props, ...propMap };

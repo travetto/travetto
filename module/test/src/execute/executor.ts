@@ -248,7 +248,7 @@ export class TestExecutor {
 
     file = path.resolve(file);
 
-    const module = ModuleIndex.getModuleNameFromSource(file) ?? file;
+    const module = ModuleIndex.getFromSource(file)?.import ?? file;
 
     try {
       await import(module);

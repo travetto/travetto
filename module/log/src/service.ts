@@ -8,7 +8,7 @@ import { ConsoleAppender } from './appender/console';
 import { FileAppender } from './appender/file';
 import { LogUtil } from './util';
 
-const DefaultLoggerⲐ = Symbol.for('@trv:log/default');
+const DefaultLoggerⲐ = Symbol.for('@travetto/log:default');
 
 /**
  * Logger service

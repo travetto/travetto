@@ -8,7 +8,7 @@ import { CacheError } from './error';
 import { CacheUtil } from './util';
 import { CacheAware, CacheConfigⲐ, EvictConfigⲐ } from './internal/types';
 
-export const CacheModelⲐ = Symbol.for('@trv:cache/model');
+export const CacheModelⲐ = Symbol.for('@travetto/cache:model');
 
 const INFINITE_MAX_AGE = '5000-01-01';
 

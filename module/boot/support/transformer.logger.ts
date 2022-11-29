@@ -1,7 +1,7 @@
 import ts from 'typescript';
 
 import {
-  TransformerId, TransformerState, OnCall, LiteralUtil,
+  TransformerState, OnCall, LiteralUtil,
   OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction
 } from '@travetto/transformer';
 
@@ -25,8 +25,6 @@ const VALID_LEVELS: Record<string, string> = {
  * in prod mode.
  */
 export class LoggerTransformer {
-
-  static [TransformerId] = '@trv:boot';
 
   static initState(state: CustomState): void {
     state.scope = state.scope ?? [];

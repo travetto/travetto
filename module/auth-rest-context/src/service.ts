@@ -2,7 +2,7 @@ import { Principal } from '@travetto/auth';
 import { AsyncContext } from '@travetto/context';
 import { Inject, Injectable } from '@travetto/di';
 
-const PrincipalⲐ = Symbol.for('@trv:auth/principal');
+const PrincipalⲐ = Symbol.for('@travetto/auth:principal');
 
 /**
  * Provides global context to accessing principal

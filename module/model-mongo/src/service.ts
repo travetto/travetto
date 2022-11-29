@@ -35,7 +35,7 @@ import { ModelUtil } from '@travetto/model/src/internal/util';
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
 
-const IdxFieldsⲐ = Symbol.for('@trv:model-mongo/idx');
+const IdxFieldsⲐ = Symbol.for('@travetto/model-mongo:idx');
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 const asFielded = <T extends ModelType>(cfg: IndexConfig<T>): { [IdxFieldsⲐ]: mongo.Sort } => (cfg as unknown as { [IdxFieldsⲐ]: mongo.Sort });

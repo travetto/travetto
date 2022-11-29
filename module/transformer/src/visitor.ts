@@ -82,7 +82,6 @@ export class VisitorFactory<S extends State = State> {
       }
 
       try {
-        console!.debug('Processing', { file: file.fileName, pid: process.pid });
         const state = this.#getState(context, file);
         let ret = this.visit(state, context, file);
 

@@ -1,7 +1,7 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, CoreUtil, DecoratorUtil, TransformerId, AfterClass
+  TransformerState, DecoratorMeta, CoreUtil, DecoratorUtil, AfterClass
 } from '@travetto/transformer';
 import { SchemaTransformUtil } from '@travetto/schema/support/transform-util';
 
@@ -9,8 +9,6 @@ import { SchemaTransformUtil } from '@travetto/schema/support/transform-util';
  * Converts classes with `@Application` to auto register with the `ApplicationRegistry`
  */
 export class ApplicationTransformer {
-
-  static [TransformerId] = '@trv:app';
 
   /**
    * On presence of `@Application`

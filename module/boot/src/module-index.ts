@@ -17,6 +17,7 @@ export type FindConfig = {
 
 export type IndexedFile = {
   id: string;
+  import: string;
   module: string;
   source: string;
   output: string;
@@ -35,6 +36,7 @@ class $ModuleIndex {
 
   #manifest: ManifestRoot;
   #modules: IndexedModule[];
+  #modulesByName: Record<string, IndexedModule> = {};
   #root: string;
   #outputToEntry = new Map<string, IndexedFile>();
   #sourceToEntry = new Map<string, IndexedFile>();
@@ -58,10 +60,10 @@ class $ModuleIndex {
       const source = path.join(m.source, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
       const output = this.#resolve(m.output, js);
-      const module = `${m.name}/${js}`;
-      const id = module.replace(m.name, _ => `${_}:`).replace(/[.][tj]s$/, '');
+      const modImport = `${m.name}/${js}`;
+      const id = modImport.replace(`${m.name}/`, _ => _.replace(/[/]$/, ':')).replace(/[.][tj]s$/, '');
 
-      return { id, type, source, output, module, profile };
+      return { id, type, source, output, import: modImport, profile, module: m.name };
     });
   }
 
@@ -84,10 +86,11 @@ class $ModuleIndex {
         for (const entry of files) {
           this.#outputToEntry.set(entry.output, entry);
           this.#sourceToEntry.set(entry.source, entry);
-          this.#importToEntry.set(entry.module, entry);
+          this.#importToEntry.set(entry.import, entry);
         }
       }
     }
+    this.#modulesByName = Object.fromEntries(this.#modules.map(x => [x.name, x]));
   }
 
   #getEntry(file: string): IndexedFile | undefined {
@@ -178,7 +181,7 @@ class $ModuleIndex {
    * Get module
    */
   getModule(name: string): IndexedModule | undefined {
-    return this.#modules.find(x => x.name === name);
+    return this.#modulesByName[name];
   }
 
   /**
@@ -198,11 +201,11 @@ class $ModuleIndex {
   }
 
   /**
-   * Get module name from source file
+   * Get indexed module from source file
    * @param source
    */
-  getModuleNameFromSource(source: string): string | undefined {
-    return this.#sourceToEntry.get(source)?.module;
+  getFromSource(source: string): IndexedFile | undefined {
+    return this.#sourceToEntry.get(source);
   }
 
   /**
@@ -210,7 +213,7 @@ class $ModuleIndex {
    * @param source
    */
   getModuleFromSource(source: string): IndexedModule | undefined {
-    const name = this.getModuleNameFromSource(source);
+    const name = this.getFromSource(source)?.module;
     return name ? this.getModule(name) : undefined;
   }
 
@@ -224,9 +227,9 @@ class $ModuleIndex {
   }
 
   /**
-   * Build filter for module names
+   * Build module list from an expression list (e.g. `@travetto/app,-@travetto/log)
    */
-  buildModuleFilter(exprList: string, defaults?: 'local' | 'all'): (mod: string) => boolean {
+  getModuleList(exprList: string, defaults?: 'local' | 'all'): Set<string> {
     const allMods = Object.keys(this.manifest.modules);
     const active = new Set<string>(
       defaults === 'local' ? this.getLocalModules().map(x => x.name) :
@@ -234,7 +237,7 @@ class $ModuleIndex {
     );
 
     for (const expr of exprList.split(/\s*,\s*/g)) {
-      const [, neg, mod] = expr.match(/(-|[+])?([^+- ]+)$/)!;
+      const [, neg, mod] = expr.match(/(-|[+])?([^+\- ]+)$/)!;
       if (mod) {
         const patt = new RegExp(`^${mod.replace(/[*]/g, '.*')}$`);
         for (const m of allMods.filter(x => patt.test(x))) {
@@ -242,7 +245,7 @@ class $ModuleIndex {
         }
       }
     }
-    return mod => active.has(mod);
+    return active;
   }
 }
 

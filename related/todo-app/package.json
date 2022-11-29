@@ -38,7 +38,7 @@
     "@travetto/test": "*"
   },
   "travetto": {
-    "id": "@trv:todo"
+    "displayName": "Todo Application"
   },
   "private": true,
   "publishConfig": {

@@ -1,7 +1,7 @@
 import ts from 'typescript';
 
 import {
-  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, TransformerId, OnSetter
+  TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, OnSetter, ModuleNameⲐ
 } from '@travetto/transformer';
 
 const INJECTABLE_MOD = '@travetto/di/src/decorator';
@@ -10,8 +10,6 @@ const INJECTABLE_MOD = '@travetto/di/src/decorator';
  * Injectable/Injection transformer
  */
 export class InjectableTransformer {
-
-  static [TransformerId] = '@trv:di';
 
   /**
    * Handle a specific declaration param/property
@@ -108,12 +106,14 @@ export class InjectableTransformer {
   static registerInjectSetter(state: TransformerState, node: ts.SetAccessorDeclaration, dm?: DecoratorMeta): typeof node {
     const decl = state.findDecorator(this, node, 'Inject', INJECTABLE_MOD);
 
+    const modifiers = DecoratorUtil.spliceDecorators(node, decl, [
+      state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)),
+    ], 0);
+
     // Doing decls
     return state.factory.updateSetAccessorDeclaration(
       node,
-      DecoratorUtil.spliceDecorators(node, decl, [
-        state.createDecorator(INJECTABLE_MOD, 'Inject', ...this.processDeclaration(state, node)),
-      ], 0),
+      modifiers,
       node.name,
       node.parameters,
       node.body

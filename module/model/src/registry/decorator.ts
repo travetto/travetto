@@ -7,7 +7,7 @@ import { IndexConfig, ModelOptions } from './types';
 /**
  * Model decorator, extends `@Schema`
  *
- * @augments `@trv:schema/Schema`
+ * @augments `@travetto/schema:Schema`
  */
 export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
   return function <T extends ModelType, U extends Class<T>>(target: U): U {
@@ -31,7 +31,7 @@ export function Index<T>(...indices: IndexConfig<any>[]) {
 
 /**
  * Model field decorator for denoting expiry date/time
- * @augments `@trv:schema/Field`
+ * @augments `@travetto/schema:Field`
  */
 export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K): void => {

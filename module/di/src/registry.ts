@@ -10,7 +10,7 @@ export type Resolved<T> = { config: InjectableConfig<T>, qualifier: symbol, id: 
 
 export type ResolutionType = 'strict' | 'loose' | 'any';
 
-const PrimaryCandidateⲐ = Symbol.for('@trv:di/primary');
+const PrimaryCandidateⲐ = Symbol.for('@travetto/di:primary');
 
 function hasPostConstruct(o: unknown): o is { postConstruct: () => Promise<unknown> } {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

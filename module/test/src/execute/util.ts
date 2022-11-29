@@ -38,7 +38,7 @@ export class RunnerUtil {
    */
   static async getTestFiles(globs: RegExp[]): Promise<string[]> {
     const files = ModuleIndex.findTest({})
-      .filter(f => globs.some(g => g.test(f.module)));
+      .filter(f => globs.some(g => g.test(f.import)));
 
     const validFiles = files
       .map(f => this.isTestFile(f.source).then(valid => ({ file: f.source, valid })));

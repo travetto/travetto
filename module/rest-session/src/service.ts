@@ -11,12 +11,12 @@ import { SessionConfig } from './config';
 /**
  * Session model service identifier
  */
-export const SessionModelⲐ = Symbol.for('@trv:rest-session/model');
+export const SessionModelⲐ = Symbol.for('@travetto/rest-session:model');
 
 /**
  * Symbol for accessing the raw session
  */
-export const SessionⲐ = Symbol.for('@trv:rest-session/data');
+export const SessionⲐ = Symbol.for('@travetto/rest-session:data');
 
 /**
  * Declare the session on the request

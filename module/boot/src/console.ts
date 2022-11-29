@@ -1,3 +1,4 @@
+import util from 'util';
 import { ModuleIndex } from './module-index';
 import { ConsoleListener, LineContext, LogLevel } from './types';
 
@@ -7,6 +8,28 @@ function wrap(target: Console): ConsoleListener {
       return target[level](...args);
     }
   };
+}
+
+/**
+ * Registers handler for `debug` module in npm ecosystem
+ * @param mgr 
+ */
+async function initNpmDebug(mgr: $ConsoleManager) {
+  try {
+    const { default: debug } = await import('debug');
+    debug.formatArgs = function (args: string[]) {
+      args.unshift(this.namespace);
+      args.push(debug.humanize(this.diff));
+    };
+    debug.log = (...args: string[]) => mgr.invoke('debug', {
+      line: 0,
+      module: '@npm:debug',
+      modulePath: args[0],
+      source: __output,
+    }, util.format(...args.slice(1)));
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 /**
@@ -32,12 +55,11 @@ class $ConsoleManager {
    */
   #filters: Partial<Record<LogLevel, (x: LineContext) => boolean>> = {};
 
-  /**
-   * Unique key to use as a logger function
-   */
-  constructor() {
+  async init(): Promise<this> {
     this.set(console); // Init to console
     this.setDebug(process.env.TRV_DEBUG ?? '');
+    await initNpmDebug(this);
+    return this;
   }
 
   /**
@@ -64,8 +86,10 @@ class $ConsoleManager {
     const isFalse = typeof debug === 'boolean' ? !debug : /^(0|false|no|off)/i.test(debug);
 
     if (isSet && !isFalse) {
-      const filter = ModuleIndex.buildModuleFilter(typeof debug === 'string' ? debug : '', 'local');
-      this.filter('debug', ctx => filter(ctx.module));
+      const active = ModuleIndex.getModuleList(typeof debug === 'string' ? debug : '', 'local');
+      active.add('@npm:debug')
+      this.filter('debug', ctx => active.has(ctx.module));
+
     } else {
       this.filter('debug', () => false);
     }
@@ -76,15 +100,19 @@ class $ConsoleManager {
    */
   invoke(level: LogLevel, ctx: LineContext, ...args: unknown[]): void {
     // Resolve input to source file
-    ctx.source = ModuleIndex.getSourceFile(ctx.source);
-    const mod = ModuleIndex.getModuleFromSource(ctx.source)!;
-    ctx.module = mod.name;
-    ctx.modulePath = ctx.source.split(mod.source)[1];
+    const source = ModuleIndex.getSourceFile(ctx.source);
+    const mod = ModuleIndex.getModuleFromSource(source);
+    const outCtx = {
+      ...ctx,
+      source,
+      module: ctx.module ?? mod?.name!,
+      modulePath: ctx.modulePath ?? (mod ? source.split(`${mod.source}/`)[1] : '')
+    };
 
-    if (this.#filters[level] && !this.#filters[level]!(ctx)) {
+    if (this.#filters[level] && !this.#filters[level]!(outCtx)) {
       return; // Do nothing
     } else {
-      return this.#appender.onLog(level, ctx, args);
+      return this.#appender.onLog(level, outCtx, args);
     }
   }
 

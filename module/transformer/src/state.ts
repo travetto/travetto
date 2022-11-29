@@ -3,7 +3,7 @@ import ts from 'typescript';
 import { path } from '@travetto/manifest';
 
 import { ExternalType, AnyType } from './resolver/types';
-import { State, DecoratorMeta, Transformer, TransformerId } from './types/visitor';
+import { State, DecoratorMeta, Transformer, ModuleNameⲐ } from './types/visitor';
 import { TypeResolver } from './resolver/service';
 import { ImportManager } from './importer';
 import { ManifestManager } from './manifest';
@@ -280,8 +280,9 @@ export class TransformerState implements State {
    * @param name
    * @param module
    */
-  findDecorator(cls: Transformer, node: ts.Node, name: string, module?: string): ts.Decorator | undefined {
-    const target = `${cls[TransformerId]}/${name}`;
+  findDecorator(mod: string | Transformer, node: ts.Node, name: string, module?: string): ts.Decorator | undefined {
+    mod = typeof mod === 'string' ? mod : mod[ModuleNameⲐ]!;
+    const target = `${mod}:${name}`;
     return this.getDecoratorList(node)
       .find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.dec;
   }
