@@ -62,7 +62,7 @@ The corresponding output would be
 
 ${d.Execute('Logging output', 'support/main.output.ts', [], {
   env: {
-    TRV_DEBUG: '@travetto/log',
+    DEBUG: '@travetto/log',
     TRV_LOG_PLAIN: '0'
   },
   filter: l => l.startsWith(`${new Date().getFullYear()}`)

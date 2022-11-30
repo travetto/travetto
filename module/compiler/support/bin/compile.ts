@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 
 import type { ManifestState } from '@travetto/manifest';
 
-import { log, spawn, compileIfStale, getProjectSources, addNodePath, importManifest } from './utils';
+import { log, spawn, compileIfStale, getProjectSources, addNodePath, importManifest, IS_DEBUG } from './utils';
 
 import type { CompileContext } from '../../bin/transpile';
 
@@ -104,7 +104,7 @@ async function compileOutput(state: ManifestState, ctx: CompileContext): Promise
   await spawn('[3] Compiling', process.argv0, {
     args, env: { TRV_WATCH: `${ctx.op === 'watch'}` },
     cwd: ctx.compilerFolder,
-    showWaitingMessage: ctx.op === 'build' && !process.env.DEBUG
+    showWaitingMessage: ctx.op === 'build' && !IS_DEBUG
   });
 }
 

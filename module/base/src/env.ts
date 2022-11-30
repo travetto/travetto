@@ -32,10 +32,10 @@ export class Env {
     Object.assign(process.env, {
       NODE_ENV: prod ? 'production' : 'development',
       TRV_DYNAMIC: `${dynamic}`,
-      TRV_DEBUG: this.get('TRV_DEBUG', this.get('DEBUG', debug ?? (prod ? '0' : '')))
+      DEBUG: debug
     }, set ?? {});
 
-    ConsoleManager.setDebug(process.env.TRV_DEBUG ?? false);
+    ConsoleManager.setDebugFromEnv();
 
     for (const [key, values] of Object.entries(append ?? {})) {
       this.#addToList(key, ...((typeof values === 'string' ? [values] : values) ?? []));
@@ -47,7 +47,7 @@ export class Env {
    */
   static getAll(): Record<string, unknown> {
     return Object.fromEntries(Object.entries(process.env)
-      .filter(([k]) => /^(TRV_.*|NODE_(PATH|OPTIONS)|PATH)$/.test(k))
+      .filter(([k]) => /^(TRV_.*|NODE_(PATH|OPTIONS)|PATH|DEBUG|FORCE_COLOR|NO_COLOR)$/.test(k))
       .sort((a, b) => a[0].localeCompare(b[0]))
     );
   }

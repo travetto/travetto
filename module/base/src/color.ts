@@ -28,11 +28,7 @@ export class ColorUtil {
    */
   static get colorize(): boolean {
     if (this.#colorize === undefined) {
-      if (Env.isSet('TRV_COLOR')) {
-        this.#colorize = Env.isTrue('TRV_COLOR');
-      } else {
-        this.#colorize = Env.isTrue('FORCE_COLOR') || (!Env.isTrue('NO_COLOR') && process.stdout.isTTY);
-      }
+      this.#colorize = Env.isTrue('FORCE_COLOR') || (!Env.isTrue('NO_COLOR') && process.stdout.isTTY);
     }
     return this.#colorize;
   }
