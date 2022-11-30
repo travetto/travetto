@@ -57,7 +57,7 @@ class $ConsoleManager {
 
   async init(): Promise<this> {
     this.set(console); // Init to console
-    this.setDebug(process.env.TRV_DEBUG ?? '');
+    this.setDebugFromEnv();
     await initNpmDebug(this);
     return this;
   }
@@ -76,6 +76,11 @@ class $ConsoleManager {
     } else {
       delete this.#filters[level];
     }
+  }
+
+  setDebugFromEnv() {
+    const notProd = !/prod/i.test(process.env.NODE_ENV ?? '');
+    this.setDebug(process.env.DEBUG ?? (notProd ? '@local' : false));
   }
 
   /**

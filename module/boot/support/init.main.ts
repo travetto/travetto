@@ -49,7 +49,7 @@ async function setupLogging(): Promise<void> {
   } catch { }
 
   // Set debug state
-  ConsoleManager.setDebug(process.env.TRV_DEBUG ?? false);
+  ConsoleManager.setDebugFromEnv();
 }
 
 // Setup everything

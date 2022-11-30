@@ -55,8 +55,7 @@ export class DocRunUtil {
         shell: '/bin/bash',
         env: {
           ...Env.getAll(),
-          DEBUG: '',
-          TRV_DEBUG: '0',
+          DEBUG: '0',
           ...(config.env ?? {})
         }
       }

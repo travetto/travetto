@@ -6,7 +6,7 @@ import { envInit } from './bin/env';
 import { TestChildWorker } from '../src/worker/child';
 
 export async function customLogs(): Promise<void> {
-  if (process.env.DEBUG?.includes('test-worker')) {
+  if (/\b@travetto[/]test\b/.test(process.env.DEBUG ?? '')) {
     const handle = await fs.open(path.resolve(`.trv-test-worker.${process.pid}.log`), 'a');
     const stdout = handle.createWriteStream();
 

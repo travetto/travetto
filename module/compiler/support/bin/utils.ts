@@ -19,6 +19,8 @@ type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Re
 
 const SOURCE_SEED = ['package.json', 'index.ts', 'src', 'support'];
 
+export const IS_DEBUG = /\b([*]|build)\b/.test(process.env.DEBUG ?? '');
+
 const resolveImport = (lib: string): string => req.resolve(lib);
 const recentStat = (stat: Stats): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 
@@ -91,8 +93,8 @@ export async function spawn(
   action: string, cmd: string,
   { args = [], cwd, failOnError = true, env = {}, showWaitingMessage = true }: SpawnCfg
 ): Promise<boolean | undefined> {
-  const stdout = process.env.DEBUG === 'build' ? 1 : 'pipe';
-  const stderr = process.env.DEBUG === 'build' ? 2 : 'pipe';
+  const stdout = IS_DEBUG ? 1 : 'pipe';
+  const stderr = IS_DEBUG ? 2 : 'pipe';
   const proc = cp.spawn(cmd, args, { cwd, stdio: ['pipe', stdout, stderr], env: { ...process.env, ...env } });
   const stderrOutput: Buffer[] = [];
   const stdoutOutput: Buffer[] = [];
@@ -134,7 +136,7 @@ export async function spawn(
 /**
  * Common logging support
  */
-export const log = process.env.DEBUG === 'build' ?
+export const log = IS_DEBUG ?
   (...args: unknown[]): void => console.debug(new Date().toISOString(), ...args) :
   (): void => { };
 

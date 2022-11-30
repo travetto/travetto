@@ -9,17 +9,6 @@ export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: strin
 
 const nativeCwd = process.cwd();
 
-const NODE_VERSION = process.env.TRV_NODE_VERSION ?? process.version
-  .replace(/^.*?(\d+).*?$/, (_, v) => v);
-
-const TS_TARGET = ({
-  12: 'ES2019',
-  13: 'ES2019',
-  14: 'ES2020',
-  15: 'ESNext',
-  16: 'ESNext'
-} as const)[NODE_VERSION] ?? 'ESNext'; // Default if not found
-
 /**
  * Standard utilities for compiler
  */
@@ -104,7 +93,7 @@ export class CompilerUtil {
     const { options } = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(file, ts.sys.readFile), ts.sys, nativeCwd
     );
-    options.target = ts.ScriptTarget[TS_TARGET];
+    options.target = ts.ScriptTarget.ESNext;
     return options;
   }
 

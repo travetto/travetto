@@ -16,14 +16,14 @@ export class AppRunUtil {
    */
   static async run(app: ApplicationConfig | string, ...sub: string[]): Promise<void> {
 
-    if (!Env.isTrue('TRV_DEBUG')) {
+    if (!Env.isTrue('DEBUG')) {
       ConsoleManager.setDebug(false);
     }
     // Init
     await RootRegistry.init();
 
-    if (!Env.isTrue('TRV_DEBUG')) {
-      ConsoleManager.setDebug(Env.get('TRV_DEBUG', ''));
+    if (!Env.isTrue('DEBUG')) {
+      ConsoleManager.setDebugFromEnv();
     }
 
     // Convert to full app
