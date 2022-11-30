@@ -73,6 +73,7 @@
         "pgcrypto",
         "picomatch",
         "pngquant",
+        "precompiler",
         "prismjs",
         "promisify",
         "proxied",

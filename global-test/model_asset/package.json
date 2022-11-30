@@ -1,14 +1,9 @@
 {
   "name": "model_asset",
-  "type": "module",
   "dependencies": {
     "@travetto/model-mongo": "*",
     "@travetto/model-s3": "*",
     "@travetto/asset": "*"
-  },
-  "devDependencies": {
-    "@travetto/test": "*",
-    "@travetto/cli": "*"
   },
   "private": true
 }

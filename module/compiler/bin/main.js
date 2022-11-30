@@ -9,27 +9,25 @@ const { createRequire } = require('module');
 const { transpileFile, writePackageJson, writeJsFile, getContext } = require('./transpile');
 
 const NAME = '@travetto/precompiler';
-const FILES = ['support/bin/compile.ts', 'support/bin/utils.ts', 'bin/transpile.js', 'package.json'];
+const FILES = ['support/bin/compiler-bootstrap.ts', 'support/bin/utils.ts', 'bin/transpile.js', 'package.json'];
+const OUT_FILES = FILES.map(x => x.replace(/[.]ts$/, '.js'));
 
 /**
- * @typedef {import('./transpile').CompileContext} CompileContext
+ * @typedef {import('@travetto/manifest').ManifestContext} ManifestContext
  */
 
 /**
- * @param {CompileContext} ctx
+ * @param {ManifestContext} ctx
+ * @param {boolean} [watch]
  */
-async function $compile(ctx) {
-  if (ctx.compiled) {
-    return;
-  }
-
+async function $compile(ctx, watch) {
   const root = path.resolve(__dirname, '..');
 
-  const output = path.resolve(ctx.compilerFolder, `node_modules/${NAME}`);
+  const precompiler = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', NAME);
 
   for (const el of FILES) {
     const inputFile = path.resolve(root, el);
-    const outputFile = path.resolve(output, el.replace(/[.]ts$/, '.js'));
+    const outputFile = path.resolve(precompiler, el.replace(/[.]ts$/, '.js'));
 
     const [outStat, inStat] = await Promise.all([
       fs.stat(outputFile).catch(() => undefined),
@@ -45,7 +43,7 @@ async function $compile(ctx) {
         await writeJsFile(ctx, inputFile, outputFile);
       } else if (inputFile.endsWith('.json')) {
         await writePackageJson(ctx, inputFile, outputFile, (pkg) => {
-          pkg.files = FILES;
+          pkg.files = OUT_FILES;
           pkg.name = NAME;
           pkg.main = FILES[0].replace(/[.]ts$/, '.js');
           return pkg;
@@ -54,45 +52,46 @@ async function $compile(ctx) {
     }
   }
 
-  const loc = `${ctx.compilerFolder}/node_modules/${NAME}/${FILES[0].replace(/[.]ts$/, '.js')}`;
-  /** @type {import('../support/bin/compile')} */
-  let mod;
+  const loc = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', NAME, OUT_FILES[0]);
+  /** @type {import('../support/bin/compiler-bootstrap')} */
+  let bootstrap;
   try {
-    mod = require(loc);
+    bootstrap = require(loc);
   } catch {
-    mod = await import(loc);
+    bootstrap = await import(loc);
   }
-  return mod.compile(ctx);
+  return bootstrap.compile(ctx, watch);
 }
 
 /**
  *
- * @param {CompileContext} ctx
+ * @param {ManifestContext} ctx
  */
 async function $clean(ctx) {
-  if (!ctx.compiled) {
-    await fs.rm(ctx.outputFolder, { force: true, recursive: true });
-    await fs.rm(ctx.compilerFolder, { force: true, recursive: true });
-    console.log(`Cleaned ${ctx.cwd}`);
-  }
+  await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { force: true, recursive: true });
+  await fs.rm(path.resolve(ctx.workspacePath, ctx.compilerFolder), { force: true, recursive: true });
+  console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
 }
 
 /**
- * @param {CompileContext['op']} op
+ * @param {import('./transpile').CompileCommand} [op]
  * @param {string} [main]
  * @return {Promise<string|undefined>}
  */
 async function exec(op, main) {
-  const ctx = await getContext(op);
-  switch (ctx.op) {
-    case 'clean': await $clean(ctx); break;
-    case 'watch': await $compile(ctx); break;
+  const ctx = await getContext();
+  await (op === 'clean' ? $clean : $compile)(ctx, op === 'watch');
+  switch (op) {
+    case 'clean':
+    case 'watch':
+    case 'build': return process.exit(0);
     default: {
-      await $compile(ctx);
       if (main && !main.startsWith('/')) {
-        const req = createRequire(`${ctx.outputFolder}/node_modules`);
+        const req = createRequire(path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules'));
         main = req.resolve(main);
       }
+      process.env.TRV_MANIFEST = ctx.mainModule;
+      process.env.TRV_OUTPUT = path.resolve(ctx.workspacePath, ctx.outputFolder);
       return main;
     }
   }

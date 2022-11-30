@@ -4,9 +4,10 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { Util } from '@travetto/base';
 
-import { ControllerRegistry, CacheControl } from '../';
+import { ControllerRegistry } from '../src/registry/controller';
 import { Controller } from '../src/decorator/controller';
 import { Patch } from '../src/decorator/endpoint';
+import { CacheControl } from '../src/decorator/common';
 
 @Controller('/test')
 class TestController {

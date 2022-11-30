@@ -13,14 +13,23 @@ export class PackageUtil {
 
   static resolveImport = (library: string): string => this.#req.resolve(library);
 
+  /**
+   * Read a package.json from a given folder
+   */
   static readPackage(folder: string): Package {
     return JSON.parse(readFileSync(path.resolve(folder, 'package.json'), 'utf8'));
   }
 
+  /**
+   * Get version of manifest package
+   */
   static getFrameworkVersion(): string {
     return (this.#framework ??= this.readPackage(path.dirname(this.resolveImport('@travetto/manifest/package.json')))).version;
   }
 
+  /**
+   * Produce simple digest of package
+   */
   static digest(pkg: Package): PackageDigest {
     const { main, name, author, license, version } = pkg;
     return { name, main, author, license, version, framework: this.getFrameworkVersion() };
@@ -29,16 +38,13 @@ export class PackageUtil {
   /**
    * Find packages for a given folder (package.json), decorating dependencies along the way
    */
-  static async collectDependencies(folder: string, transitiveProfiles: ManifestProfile[] = [], seen = new Map<string, Dependency>()): Promise<Dependency[]> {
+  static async collectDependencies(folder: string, transitiveProfiles: ManifestProfile[] = [], seen = new Map<string, Dependency>(), walk: string[] = []): Promise<Dependency[]> {
     const { name, version, dependencies = {}, devDependencies = {}, travetto } = this.readPackage(folder);
     const isModule = !!travetto || folder === path.cwd();
 
     if (seen.has(name)) {
-      const dep = seen.get(name);
-      if (dep) {
-        for (const el of transitiveProfiles) {
-          (dep.profiles ??= []).push(el);
-        }
+      for (const el of transitiveProfiles) {
+        (seen.get(name)!.profiles ??= []).push(el);
       }
       return [];
     } else if (!isModule) {
@@ -68,7 +74,7 @@ export class PackageUtil {
           continue;
         }
       }
-      out.push(...await this.collectDependencies(next, profiles, seen));
+      out.push(...await this.collectDependencies(next, profiles, seen, [...walk, name]));
     }
     return out;
   }

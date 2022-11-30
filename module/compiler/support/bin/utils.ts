@@ -8,9 +8,9 @@ import { Writable } from 'stream';
 import { type Stats } from 'fs';
 import { createRequire } from 'module';
 
-import type { ManifestUtil } from '@travetto/manifest';
+import type { ManifestContext, ManifestUtil } from '@travetto/manifest';
 
-import { type CompileContext, transpileFile, writePackageJson } from '../../bin/transpile';
+import { transpileFile, writePackageJson } from '../../bin/transpile';
 
 const req = createRequire(`${process.cwd()}/node_modules`);
 
@@ -144,9 +144,9 @@ export const log = IS_DEBUG ?
  * Scan directory to find all project sources for comparison
  */
 export async function getProjectSources(
-  ctx: CompileContext, module: string, seed: string[] = SOURCE_SEED
+  ctx: ManifestContext, module: string, seed: string[] = SOURCE_SEED
 ): Promise<ModFile[]> {
-  const inputFolder = (ctx.main === module) ?
+  const inputFolder = (ctx.mainModule === module) ?
     process.cwd() :
     path.dirname(resolveImport(`${module}/package.json`));
 
@@ -174,7 +174,7 @@ export async function getProjectSources(
     }
   }
 
-  const outputFolder = `${ctx.compilerFolder}/node_modules/${module}`;
+  const outputFolder = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', module);
   const out: ModFile[] = [];
   for (const input of files) {
     const output = input.replace(inputFolder, outputFolder).replace(/[.]ts$/, '.js');
@@ -190,7 +190,7 @@ export async function getProjectSources(
 /**
  * Recompile folder if stale
  */
-export async function compileIfStale(ctx: CompileContext, prefix: string, files: ModFile[]): Promise<void> {
+export async function compileIfStale(ctx: ManifestContext, prefix: string, files: ModFile[]): Promise<void> {
   try {
     if (files.some(f => f.stale)) {
       log(`${prefix} Starting`);
@@ -222,5 +222,5 @@ export async function addNodePath(folder: string): Promise<void> {
 /**
  * Import the manifest utils once compiled
  */
-export const importManifest = (compilerFolder: string): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
-  import(path.resolve(compilerFolder, 'node_modules', '@travetto/manifest/index.js'));
+export const importManifest = (ctx: ManifestContext): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
+  import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto', 'manifest', 'index.js'));

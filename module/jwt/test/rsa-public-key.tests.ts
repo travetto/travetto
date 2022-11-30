@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
-import { JWTUtil } from '..';
+import { JWTUtil } from '../src/util';
 
 @Suite('public key start with BEGIN RSA PUBLIC KEY')
 class PublicKeySuite {

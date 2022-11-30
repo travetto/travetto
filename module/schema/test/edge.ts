@@ -3,7 +3,7 @@ import assert from 'assert';
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { Schema } from '..';
+import { Schema } from '../src/decorator/schema';
 import { SchemaValidator } from '../src/validate/validator';
 
 @Schema()

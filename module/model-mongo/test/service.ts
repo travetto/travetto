@@ -11,7 +11,8 @@ import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
 import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
-import { MongoModelConfig, MongoModelService } from '..';
+import { MongoModelConfig } from '../src/config';
+import { MongoModelService } from '../src/service';
 
 @Suite()
 export class MongoBasicSuite extends ModelBasicSuite {

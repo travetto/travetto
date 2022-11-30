@@ -1,5 +1,7 @@
 import { Suite, Test, ShouldThrow } from '@travetto/test';
-import { JWTUtil, JWTError } from '..';
+
+import { JWTUtil } from '../src/util';
+import { JWTError } from '../src/error';
 
 const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.t-IDcSemACt8x4iTMCda8Yhe3iZaWbvV5XKSTbuAn0M';
 

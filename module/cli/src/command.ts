@@ -127,7 +127,10 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   boolOption(cfg: OptionConfig<boolean>): OptionConfig<boolean> {
     return {
       type: Boolean,
-      combine: CliUtil.toBool.bind(CliUtil),
+      combine: (val, curr) => {
+        // TODO: This needs to be resolved?
+        return CliUtil.toBool(val)!;
+      },
       completion: true,
       ...cfg
     };
@@ -209,8 +212,10 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
       if (cfg.type !== Boolean || cfg.def) {
         key = `${key} <${cfg.name}>`;
       }
-      // @ts-expect-error
-      cmd = cfg.combine ? cmd.option(key, cfg.desc, cfg.combine, cfg.def) : cmd.option(key, cfg.desc, (cur, acc) => cur, cfg.def);
+      cmd = cfg.combine ?
+        // @ts-expect-error
+        cmd.option(key, cfg.desc, cfg.combine, cfg.def) :
+        cmd.option(key, cfg.desc, (cur, acc) => cur, cfg.def);
     }
 
     cmd = cmd.action(this.runAction.bind(this));

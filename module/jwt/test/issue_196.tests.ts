@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
 
-import { JWTUtil } from '..';
+import { JWTUtil } from '../src/util';
 
 function atob(str: string) {
   return Buffer.from(str, 'base64').toString('binary');

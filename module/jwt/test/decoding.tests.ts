@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { Suite, Test, ShouldThrow } from '@travetto/test';
 
-import { JWTUtil } from '..';
+import { JWTUtil } from '../src/util';
 
 @Suite('decoding')
 class DecodingTest {

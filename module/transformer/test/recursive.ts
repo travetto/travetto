@@ -23,7 +23,7 @@ export class RecursiveTransformSuite {
   }
 
   async readFile(file: string): Promise<string> {
-    const main = this.#manifest.modules[this.#manifest.main];
+    const main = this.#manifest.modules[this.#manifest.mainModule];
     return fs.readFile(path.resolve(E2E_OUT, main.output, file.replace(/[.]ts$/, '.js')), 'utf8');
   }
 

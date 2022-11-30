@@ -5,7 +5,7 @@ const og = Module._resolveFilename.bind(Module);
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 Module._resolveFilename = (r, ...args) => /plugin-travetto/.test(r) ? require.resolve('./.bin/eslint') : og(r, ...args);
 
-const { ignorePatterns, plugins, rules, overrides, extends: ext, ...rest } = require('./bin/eslint/rules.json');
+const { ignorePatterns, plugins, rules, overrides, extends: ext, ...rest } = require('./eslint/rules.json');
 module.exports = {
   ...rest,
   ignorePatterns: [

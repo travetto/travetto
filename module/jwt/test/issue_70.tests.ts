@@ -1,6 +1,6 @@
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
-import { JWTUtil } from '..';
+import { JWTUtil } from '../src/util';
 
 @Suite('issue 70 - public key start with BEING PUBLIC KEY')
 class Issue70 {

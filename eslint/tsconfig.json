@@ -4,6 +4,7 @@
       "ES2022"
     ],
     "target": "ES2022",
-    "module": "CommonJS"
+    "module": "CommonJS",
+    "skipLibCheck": true
   },
 }

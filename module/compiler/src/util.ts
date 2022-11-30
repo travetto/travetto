@@ -147,7 +147,7 @@ export class CompilerUtil {
   /**
    * Get loaded compiler options
    */
-  static async getCompilerOptions(outputFolder: string, bootTsConfig: string, mainFolder?: string): Promise<ts.CompilerOptions> {
+  static async getCompilerOptions(outputFolder: string, bootTsConfig: string, workspace: string): Promise<ts.CompilerOptions> {
     const opts: Partial<ts.CompilerOptions> = {};
     const rootDir = nativeCwd;
     const projTsconfig = path.resolve('tsconfig.json');
@@ -155,12 +155,10 @@ export class CompilerUtil {
     const config = (await fs.stat(projTsconfig).catch(() => false)) ? projTsconfig : bootTsConfig;
     const base = await CompilerUtil.readTsConfigOptions(config);
 
-    if (mainFolder) {
-      const { type } = PackageUtil.readPackage(mainFolder);
+    const { type } = PackageUtil.readPackage(workspace);
 
-      if (type !== undefined) {
-        base.module = `${type}`.toLowerCase() === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
-      }
+    if (type !== undefined) {
+      base.module = `${type}`.toLowerCase() === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
     }
 
     return {

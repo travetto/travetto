@@ -5,8 +5,8 @@ import { ModelQueryCrudSuite } from '@travetto/model-query/support/test/crud';
 import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest';
 
-import { ElasticsearchModelConfig, ElasticsearchModelService } from '..';
-
+import { ElasticsearchModelConfig } from '../src/config';
+import { ElasticsearchModelService } from '../src/service';
 
 @Suite()
 export class ElasticsearchQuerySuite extends ModelQuerySuite {

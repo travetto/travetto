@@ -4,7 +4,8 @@ import { Test, Suite } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 
-import { MailService, MailTransport, NullTransport } from '../index';
+import { MailService } from '../src/service';
+import { MailTransport, NullTransport } from '../src/transport';
 
 class Config {
   @InjectableFactory()

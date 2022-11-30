@@ -6,7 +6,8 @@ import { ModelQueryFacetSuite } from '@travetto/model-query/support/test/facet';
 import { ModelQueryPolymorphismSuite } from '@travetto/model-query/support/test/polymorphism';
 import { ModelQuerySuggestSuite } from '@travetto/model-query/support/test/suggest';
 
-import { MongoModelConfig, MongoModelService } from '..';
+import { MongoModelConfig } from '../src/config';
+import { MongoModelService } from '../src/service';
 
 @Suite()
 export class MongoQuerySuite extends ModelQuerySuite {

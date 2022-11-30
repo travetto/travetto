@@ -13,7 +13,6 @@ const validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || ty
 
 export class CompilerState {
 
-  #outputFolder: string;
   #inputFiles: Set<string>;
   #relativeInputToSource = new Map<string, { source: string, module: ManifestModule }>();
   #inputToSource = new Map<string, string>();
@@ -29,11 +28,7 @@ export class CompilerState {
   #delta: ManifestDelta;
   #modules: ManifestModule[];
 
-  constructor(
-    { manifest, delta }: ManifestState,
-    outputFolder: string
-  ) {
-    this.#outputFolder = outputFolder;
+  constructor({ manifest, delta }: ManifestState) {
     this.#manifest = manifest;
     this.#delta = delta;
     this.#modules = Object.values(this.#manifest.modules);
@@ -62,7 +57,11 @@ export class CompilerState {
     const fileType = ManifestModuleUtil.getFileType(moduleFile);
     const outputFile = fileType === 'typings' ?
       undefined :
-      path.resolve(this.#outputFolder, (fileType === 'ts' ? relativeInput.replace(/[.]ts$/, '.js') : relativeInput));
+      path.resolve(
+        this.#manifest.workspacePath,
+        this.#manifest.outputFolder,
+        (fileType === 'ts' ? relativeInput.replace(/[.]ts$/, '.js') : relativeInput)
+      );
 
     this.#inputToSource.set(inputFile, sourceFile);
     this.#sourceInputOutput.set(sourceFile, { input: inputFile, output: outputFile, relativeInput, module });
@@ -96,25 +95,23 @@ export class CompilerState {
     return this.#modules;
   }
 
-  get outputFolder(): string {
-    return this.#outputFolder;
-  }
-
   getDirtyFiles(): string[] {
     if (this.#delta && Object.keys(this.#delta).length) { // If we have any changes
       const files: string[] = [];
       const sources: string[] = [];
+      const changes: unknown[] = [];
       for (const [modName, subs] of Object.entries(this.#delta)) {
         const mod = this.#manifest.modules[modName];
-        for (const [file] of subs) {
+        for (const [file, event] of subs) {
           const type = ManifestModuleUtil.getFileType(file);
           if (validFile(type)) {
             files.push(path.resolve(mod.output, file));
             sources.push(path.resolve(mod.source, file));
+            changes.push([file, event]);
           }
         }
       }
-      console.log('Changed files', sources);
+      console.log('Changed files', changes);
       return files;
     } else {
       return [...this.#inputFiles];
@@ -178,7 +175,14 @@ export class CompilerState {
       }
 
       // Update manifest on every change
-      writeFile(`${this.#outputFolder}/manifest.json`, JSON.stringify(this.#manifest), () => { });
+      writeFile(
+        path.resolve(
+          this.#manifest.workspacePath,
+          this.#manifest.outputFolder,
+          this.#manifest.manifestFile
+        ),
+        JSON.stringify(this.#manifest),
+        () => { });
     };
   }
 

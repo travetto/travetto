@@ -1,7 +1,7 @@
 {
   "name": "@travetto/schema",
   "version": "3.0.0-rc.5",
-  "description": "Data type registry for runtime validation, reflection and binding. ",
+  "description": "Data type registry for runtime validation, reflection and binding.",
   "keywords": [
     "schema",
     "ast-transformations",
@@ -27,8 +27,15 @@
     "directory": "module/schema"
   },
   "dependencies": {
-    "@travetto/registry": "^3.0.0-rc.5",
+    "@travetto/registry": "^3.0.0-rc.5"
+  },
+  "peerDependencies": {
     "@travetto/transformer": "^3.0.0-rc.5"
+  },
+  "peerDependenciesMeta": {
+    "@travetto/transformer": {
+      "optional": true
+    }
   },
   "travetto": {
     "displayName": "Schema"

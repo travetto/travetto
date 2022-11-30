@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
-import { JWTUtil } from '..';
+import { JWTUtil } from '../src/util';
 
 @Suite('issue 147 - signing with a sealed payload')
 class Issue147Suite {

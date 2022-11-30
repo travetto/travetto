@@ -1,7 +1,9 @@
 import assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
-import { Registry, MethodSource, RootRegistry } from '../';
+import { Registry } from '../src/registry';
+import { MethodSource, } from '../src/source/method-source';
+import { RootRegistry } from '../src/service/root';
 
 class Simple extends Registry {
 }

@@ -5,7 +5,8 @@ import { ModelCrudSuite } from '@travetto/model/support/test/crud';
 import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
-import { FirestoreModelConfig, FirestoreModelService } from '..';
+import { FirestoreModelConfig } from '../src/config';
+import { FirestoreModelService } from '../src/service';
 
 @Suite()
 export class FirestoreBasicSuite extends ModelBasicSuite {

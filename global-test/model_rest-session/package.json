@@ -1,5 +1,5 @@
 {
-  "name": "model-dynamodb_rest-session_rest-express",
+  "name": "model_rest-session",
   "dependencies": {
     "@travetto/model-dynamodb": "*",
     "@travetto/model-firestore": "*",
@@ -12,10 +12,6 @@
     "@travetto/model-sqlite": "*",
     "@travetto/rest-session": "*",
     "@travetto/rest-express": "*"
-  },
-  "devDependencies": {
-    "@travetto/test": "*",
-    "@travetto/cli": "*"
   },
   "private": true
 }
