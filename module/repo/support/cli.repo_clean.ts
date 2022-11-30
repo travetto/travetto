@@ -1,6 +1,6 @@
 import { CliCommand } from '@travetto/cli';
 
-import { Npm } from './bin/npm';
+import { RepoWorker } from './bin/work';
 
 /**
  * `npx trv repo:clean`
@@ -12,6 +12,12 @@ export class RepoCleanCommand extends CliCommand {
   name = 'repo:clean';
 
   async action(...args: unknown[]): Promise<void> {
-    await Npm.exec('trv', ['clean']);
+    await RepoWorker.exec(
+      folder => RepoWorker.forCommand(folder, 'trv', ['clean'], 'inherit'),
+      {
+        mode: 'all',
+        workers: 100
+      }
+    );
   }
 }

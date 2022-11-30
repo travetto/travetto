@@ -73,10 +73,12 @@ export class Compiler {
   async outputInit(): Promise<void> {
     // Write manifest
     await this.writeRawFile('manifest.json', JSON.stringify(this.state.manifest));
-    await this.writeRawFile('.env.js', `
-process.env.TRV_OUTPUT=process.cwd();
-process.env.TRV_COMPILED=1;
-`);
+    await this.writeRawFile('.env.js', [
+      ['TRV_OUTPUT', 'process.cwd()'],
+      ['TRV_COMPILED', '1']
+    ]
+      .map(([k, v]) => `process.env.${k}=${v};`)
+      .join('\n'));
   }
 
   /**

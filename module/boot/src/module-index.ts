@@ -61,7 +61,10 @@ class $ModuleIndex {
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
       const output = this.#resolve(m.output, js);
       const modImport = `${m.name}/${js}`;
-      const id = modImport.replace(`${m.name}/`, _ => _.replace(/[/]$/, ':')).replace(/[.][tj]s$/, '');
+      let id = modImport.replace(`${m.name}/`, _ => _.replace(/[/]$/, ':'));
+      if (type === 'ts' || type === 'js') {
+        id = id.replace(/[.]js$/, '');
+      }
 
       return { id, type, source, output, import: modImport, profile, module: m.name };
     });
@@ -229,15 +232,15 @@ class $ModuleIndex {
   /**
    * Build module list from an expression list (e.g. `@travetto/app,-@travetto/log)
    */
-  getModuleList(exprList: string, defaults?: 'local' | 'all'): Set<string> {
+  getModuleList(mode: 'local' | 'all', exprList: string = ''): Set<string> {
     const allMods = Object.keys(this.manifest.modules);
     const active = new Set<string>(
-      defaults === 'local' ? this.getLocalModules().map(x => x.name) :
-        (defaults === 'all' ? allMods : [])
+      mode === 'local' ? this.getLocalModules().map(x => x.name) :
+        (mode === 'all' ? allMods : [])
     );
 
     for (const expr of exprList.split(/\s*,\s*/g)) {
-      const [, neg, mod] = expr.match(/(-|[+])?([^+\- ]+)$/)!;
+      const [, neg, mod] = expr.match(/(-|[+])?([^+\- ]+)$/) ?? [];
       if (mod) {
         const patt = new RegExp(`^${mod.replace(/[*]/g, '.*')}$`);
         for (const m of allMods.filter(x => patt.test(x))) {

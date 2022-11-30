@@ -5,8 +5,6 @@ The common environment variables throughout the code base:
 * `TRV_PROFILES`= ['application'] - Additional profiles to run app under
 * `TRV_RESOURCES` = ['resources'] - The folders to use for resource lookup
 * `TRV_DYNAMIC` = 0|1             - Whether or not to run the program in dynamic mode, allowing for real-time updates
-* `TRV_OUTPUT` = string           - The output directory for compilation, defaults to `.trv_output` of the cwd
-* `TRV_COMPILER` = string         - The output directory of the compiler, defaults to `.trv_compiler` of the cwd
 * `TRV_SHUTDOWN_WAIT` = 2s        - The max time to wait for shutdown to finish after initial SIGINT, default `2s`
 
 ## Logging 
@@ -18,8 +16,8 @@ The common environment variables throughout the code base:
 * `TRV_LOG_FORMAT` = json|text    - Determines desired log format
 
 ## Tests
-* `TRV_TEST_PHASE_TIMEOUT` = 15s  - The default time to wait for each phase to finish, default `15s`
-* `TRV_TEST_TIMEOUT` = 5s         - The default time for a single test to finish, default `5s`
+* `TRV_TEST_PHASE_TIMEOUT` = 15s  - The default time to wait for each phase to finish.
+* `TRV_TEST_TIMEOUT` = 5s         - The default time for a single test to finish.
 * `TRV_TEST_DELAY` = 0s           - An additional wait for triggering test runs, useful for code that takes time to warm up
 
 ## Cli
@@ -30,3 +28,7 @@ The common environment variables throughout the code base:
 
 ## Framework
 * `TRV_CONSOLE_WIDTH`             - An override for controlling output-width for cli-based operations.
+
+## Build
+* `TRV_OUTPUT` = string           - The output directory for compilation, defaults to `.trv_output` of the cwd
+* `TRV_COMPILER` = string         - The output directory of the compiler, defaults to `.trv_compiler` of the cwd

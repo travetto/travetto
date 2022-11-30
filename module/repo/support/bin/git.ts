@@ -1,5 +1,6 @@
 import { ExecUtil } from '@travetto/base';
 import { path } from '@travetto/manifest';
+import { type Worker } from '@travetto/worker';
 
 import { RepoModule, Repo } from './repo';
 
