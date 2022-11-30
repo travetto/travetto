@@ -9,9 +9,5 @@
     "@travetto/rest-fastify-lambda": "*",
     "@travetto/rest-session": "*"
   },
-  "devDependencies": {
-    "@travetto/test": "*",
-    "@travetto/cli": "*"
-  },
   "private": true
 }

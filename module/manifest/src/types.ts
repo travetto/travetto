@@ -22,10 +22,18 @@ export type ManifestModule = ManifestModuleCore & {
   files: Partial<Record<ManifestModuleFolderType, ManifestModuleFile[]>>;
 };
 
-export type ManifestRoot = {
+export type ManifestContext = {
+  manifestFile: string;
+  mainModule: string;
+  mainPath: string;
+  workspacePath: string;
+  outputFolder: string;
+  compilerFolder: string;
+  monoRepo?: boolean;
+};
+
+export type ManifestRoot = ManifestContext & {
   generated: number;
-  buildLocation: string;
-  main: string;
   modules: Record<string, ManifestModule>;
 };
 
@@ -75,6 +83,7 @@ export type Package = {
     globalModules?: string[];
     globalTests?: string[];
     docRelated?: string[];
+    docBaseUrl?: string;
   };
   workspaces?: string[];
   private?: boolean;

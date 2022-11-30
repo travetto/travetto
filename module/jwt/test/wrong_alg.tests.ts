@@ -1,6 +1,6 @@
 import { Suite, Test, ShouldThrow, TestFixtures } from '@travetto/test';
 
-import { JWTUtil } from '..';
+import { JWTUtil } from '../src/util';
 
 const TOKEN = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmb28iOiJiYXIiLCJpYXQiOjE0MjY1NDY5MTl9.ETgkTn8BaxIX4YqvUWVFPmum3moNZ7oARZtSBXb_vP4';
 

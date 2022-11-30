@@ -3,7 +3,11 @@ import assert from 'assert';
 import { Suite, Test, BeforeAll, ShouldThrow } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 
-import { SchemaValidator, ValidationResultError, SchemaRegistry, ValidationError } from '..';
+import { SchemaRegistry } from '../src/service/registry';
+import { ValidationResultError } from '../src/validate/error';
+import { ValidationError } from '../src/validate/types';
+import { SchemaValidator } from '../src/validate/validator';
+
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaz,
   CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque

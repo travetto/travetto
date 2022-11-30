@@ -1,5 +1,5 @@
 {
-  "name": "model-dynamodb_auth-model",
+  "name": "model_auth-model",
   "dependencies": {
     "@travetto/model-dynamodb": "*",
     "@travetto/model-firestore": "*",
@@ -11,10 +11,6 @@
     "@travetto/model-s3": "*",
     "@travetto/model-sqlite": "*",
     "@travetto/auth-model": "*"
-  },
-  "devDependencies": {
-    "@travetto/test": "*",
-    "@travetto/cli": "*"
   },
   "private": true
 }

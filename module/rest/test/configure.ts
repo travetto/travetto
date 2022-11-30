@@ -4,7 +4,10 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { Controller, ControllerRegistry, Get, Path } from '../';
+import { Controller, } from '../src/decorator/controller';
+import { Get } from '../src/decorator/endpoint';
+import { Path } from '../src/decorator/param';
+import { ControllerRegistry } from '../src/registry/controller';
 
 /**
  * Test Controller For Fun

@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import os from 'os';
 
 import { path } from './path';
-import { ManifestModule, ManifestRoot, ManifestState } from './types';
+import { ManifestContext, ManifestRoot, ManifestState } from './types';
 
 import { ManifestModuleUtil } from './module';
 import { ManifestDeltaUtil } from './delta';
@@ -13,34 +13,29 @@ import { ManifestDeltaUtil } from './delta';
 export class ManifestUtil {
 
   /**
-   * Utility for manifest boilerplate
-   */
-  static wrapModules(modules: Record<string, ManifestModule>): ManifestRoot {
-    return {
-      main: Object.values(modules).find(x => x.main)?.name ?? '__tbd__',
-      modules, generated: Date.now(),
-      buildLocation: '__tbd__'
-    };
-  }
-
-  /**
    * Produce manifest in memory
    */
-  static async buildManifest(rootFolder: string): Promise<ManifestRoot> {
-    return this.wrapModules(await ManifestModuleUtil.produceModules(rootFolder));
+  static async buildManifest(ctx: ManifestContext): Promise<ManifestRoot> {
+    return {
+      modules: await ManifestModuleUtil.produceModules(ctx),
+      generated: Date.now(),
+      ...ctx
+    };
   }
 
   /**
    * Read manifest from a folder
    */
-  static async readManifest(folder: string): Promise<ManifestRoot> {
-    const file = path.resolve(folder, 'manifest.json');
+  static async readManifest(ctx: ManifestContext): Promise<ManifestRoot> {
+    const file = path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile);
     if (await fs.stat(file).catch(() => false)) {
-      return JSON.parse(
-        await fs.readFile(file, 'utf8')
-      );
+      return JSON.parse(await fs.readFile(file, 'utf8'));
     } else {
-      return this.wrapModules({});
+      return {
+        modules: {},
+        generated: Date.now(),
+        ...ctx,
+      };
     }
   }
 
@@ -63,10 +58,14 @@ export class ManifestUtil {
   /**
    * Generate the manifest and delta as a single output
    */
-  static async produceState(rootFolder: string, outputFolder: string): Promise<ManifestState> {
-    const manifest = await this.buildManifest(rootFolder);
-    const oldManifest = await this.readManifest(outputFolder);
-    const delta = await ManifestDeltaUtil.produceDelta(outputFolder, manifest, oldManifest);
+  static async produceState(ctx: ManifestContext): Promise<ManifestState> {
+    const manifest = await this.buildManifest(ctx);
+    const oldManifest = await this.readManifest(ctx);
+    const delta = await ManifestDeltaUtil.produceDelta(
+      path.resolve(manifest.workspacePath, ctx.outputFolder),
+      manifest,
+      oldManifest
+    );
     return { manifest, delta };
   }
 }

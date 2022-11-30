@@ -2,6 +2,7 @@ import assert from 'assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { ExecUtil } from '@travetto/base';
+import { ModuleIndex } from '@travetto/boot';
 
 import { WorkPool } from '../src/pool';
 import { IterableWorkSet } from '../src/input/iterable';
@@ -22,11 +23,13 @@ export class PoolExecTest {
       }
     });
 
-    const launcher = await this.fixtures.describe((await this.fixtures.queryFirst(file => file.endsWith('simple.child.mjs')))!);
+    const launcher = await this.fixtures
+      .queryFirst(file => file.endsWith('simple.child.mjs'))
+      .then(rel => this.fixtures.describe(rel!));
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<{ data: string }, string>(
-        () => ExecUtil.fork(launcher.path, [], { cwd: process.env.TRV_OUTPUT }),
+        () => ExecUtil.fork(launcher.path, [], { cwd: ModuleIndex.root }),
         ch => ch.once('ready'),
         async (channel, inp: string) => {
           const res = channel.once('response');

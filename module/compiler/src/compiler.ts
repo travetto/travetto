@@ -1,7 +1,8 @@
 import ts from 'typescript';
 import fs from 'fs/promises';
+import path from 'path';
 
-import { ManifestState, path } from '@travetto/manifest';
+import { ManifestState } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -23,18 +24,20 @@ export class Compiler {
   #state: CompilerState;
   #transformers: string[];
 
-  init(
-    manifestState: ManifestState,
-    outputFolder: string
-  ): this {
-    this.#state = new CompilerState(manifestState, outputFolder);
+  init(manifestState: ManifestState): this {
+    this.#state = new CompilerState(manifestState);
     this.#bootTsconfig = this.#state.resolveModuleFile('@travetto/compiler', 'tsconfig.trv.json');
 
     this.#transformers = this.state.modules.flatMap(
       x => (x.files.support ?? [])
         .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
         .map(([f]) =>
-          (`${manifestState.manifest.buildLocation}/${x.output}/${f}`.replace(/[.][tj]s$/, '.js'))
+          path.resolve(
+            this.#state.manifest.workspacePath,
+            this.#state.manifest.compilerFolder,
+            x.output,
+            f.replace(/[.][tj]s$/, '.js')
+          )
         )
     );
 
@@ -63,22 +66,22 @@ export class Compiler {
     return TransformerManager.create(this.#transformers, this.state.manifest);
   }
 
-  async writeRawFile(file: string, contents: string): Promise<void> {
-    const outFile = path.resolve(this.state.outputFolder, file);
+  async writeRawFile(file: string, contents: string, mode?: string): Promise<void> {
+    const outFile = path.resolve(
+      this.#state.manifest.workspacePath,
+      this.#state.manifest.outputFolder,
+      file
+    );
     console.debug('Writing', outFile);
     await fs.mkdir(path.dirname(outFile), { recursive: true });
-    await fs.writeFile(outFile, contents, 'utf8');
+    await fs.writeFile(outFile, contents, { encoding: 'utf8', mode });
   }
 
   async outputInit(): Promise<void> {
     // Write manifest
-    await this.writeRawFile('manifest.json', JSON.stringify(this.state.manifest));
-    await this.writeRawFile('.env.js', [
-      ['TRV_OUTPUT', 'process.cwd()'],
-      ['TRV_COMPILED', '1']
-    ]
-      .map(([k, v]) => `process.env.${k}=${v};`)
-      .join('\n'));
+    await this.writeRawFile(this.#state.manifest.manifestFile, JSON.stringify(this.state.manifest));
+    await this.writeRawFile('trv', '#!/bin/sh\nnode node_modules/@travetto/cli/support/main.cli.js $@\n', '755');
+    await this.writeRawFile('trv.cmd', 'node node_modules/@travetto/cli/support/main.cli.js %*\n', '755');
   }
 
   /**
@@ -89,14 +92,24 @@ export class Compiler {
 
     const transformers = await this.createTransformerProvider();
     const options = await CompilerUtil.getCompilerOptions(
-      this.#state.outputFolder,
+      path.resolve(
+        this.#state.manifest.workspacePath,
+        this.#state.manifest.outputFolder,
+      ),
       this.#bootTsconfig,
-      this.#state.manifest.modules[this.#state.manifest.main].source
+      this.#state.manifest.workspacePath
     );
     const host = this.state.getCompilerHost(options);
 
     const emit = (file: string, needsNewProgram = program === undefined, onError?: EmitErrorHandler): void => {
-      console.log('Emitting file', file.replace(this.#state.manifest.buildLocation, this.#state.outputFolder).replace(/[.]ts$/, '.js'));
+      console.log('Emitting file',
+        file
+          .replace(/[.]ts$/, '.js')
+          .replace(
+            this.#state.manifest.compilerFolder,
+            this.#state.manifest.outputFolder
+          )
+      );
       if (needsNewProgram) {
         program = ts.createProgram({ rootNames: this.#state.getAllFiles(), host, options, oldProgram: program });
         transformers.init(program.getTypeChecker());

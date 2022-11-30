@@ -4,7 +4,8 @@ import asyncHooks from 'async_hooks';
 import { BeforeEach, Suite, Test } from '@travetto/test';
 import { TimeUtil } from '@travetto/base';
 
-import { AsyncContext, WithAsyncContext } from '../';
+import { AsyncContext } from '../src/service';
+import { WithAsyncContext } from '../src/decorator';
 
 @Suite()
 class VerifyContext {

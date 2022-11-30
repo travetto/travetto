@@ -3,9 +3,5 @@
   "dependencies": {
     "@travetto/transformer": "*"
   },
-  "devDependencies": {
-    "@travetto/test": "*",
-    "@travetto/cli": "*"
-  },
   "private": true
 }

@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { createRequire } from 'module';
 
 import {
   ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType,
@@ -34,6 +35,7 @@ export type IndexedModule = ManifestModuleCore & {
  */
 class $ModuleIndex {
 
+  #manifestFile: string;
   #manifest: ManifestRoot;
   #modules: IndexedModule[];
   #modulesByName: Record<string, IndexedModule> = {};
@@ -42,12 +44,21 @@ class $ModuleIndex {
   #sourceToEntry = new Map<string, IndexedFile>();
   #importToEntry = new Map<string, IndexedFile>();
 
-  constructor(root: string) {
-    this.#root = root;
+  constructor(
+    root: string | undefined = process.env.TRV_OUTPUT,
+    manifestFile: string | undefined = process.env.TRV_MANIFEST
+  ) {
+    this.#root = root ?? process.cwd();
+    this.#manifestFile = manifestFile ?? path.resolve(this.#root, 'manifest.json');
+    if (!this.#manifestFile.endsWith('.json')) {
+      // IF not a file
+      const req = createRequire(path.resolve('node_modules'));
+      this.#manifestFile = req.resolve(`${this.#manifestFile}/manifest.json`);
+    }
     this.#index();
   }
 
-  #resolve(...parts: string[]): string {
+  #resolveOutput(...parts: string[]): string {
     return path.resolve(this.#root, ...parts);
   }
 
@@ -55,11 +66,15 @@ class $ModuleIndex {
     return this.#manifest;
   }
 
+  get root(): string {
+    return this.#root;
+  }
+
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([f, type, ts, profile = 'std']) => {
       const source = path.join(m.source, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
-      const output = this.#resolve(m.output, js);
+      const output = this.#resolveOutput(m.output, js);
       const modImport = `${m.name}/${js}`;
       let id = modImport.replace(`${m.name}/`, _ => _.replace(/[/]$/, ':'));
       if (type === 'ts' || type === 'js') {
@@ -74,11 +89,11 @@ class $ModuleIndex {
    * Get index of all source files
    */
   #index(): void {
-    this.#manifest = JSON.parse(fs.readFileSync(this.#resolve('manifest.json'), 'utf8'));
+    this.#manifest = JSON.parse(fs.readFileSync(this.#manifestFile, 'utf8'));
     this.#modules = Object.values(this.manifest.modules)
       .map(m => ({
         ...m,
-        output: this.#resolve(m.output),
+        output: this.#resolveOutput(m.output),
         files: Object.fromEntries(
           Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
         )
@@ -252,6 +267,4 @@ class $ModuleIndex {
   }
 }
 
-export const ModuleIndex = new $ModuleIndex(
-  path.toPosix(process.env.TRV_OUTPUT ?? path.cwd())
-);
+export const ModuleIndex = new $ModuleIndex();

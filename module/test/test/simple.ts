@@ -2,7 +2,8 @@ import assert from 'assert';
 
 import { TimeUtil } from '@travetto/base';
 
-import { Suite, Test, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../';
+import { Test } from '../src/decorator/test';
+import { Suite, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../src/decorator/suite';
 
 let a: unknown = 0; a = 1;
 

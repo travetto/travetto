@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { Suite, Test, ShouldThrow, BeforeEach } from '@travetto/test';
 
-import { JWTUtil } from '..';
+import { JWTUtil } from '../src/util';
 import { JWTError } from '../src/error';
 
 @Suite('HS256')

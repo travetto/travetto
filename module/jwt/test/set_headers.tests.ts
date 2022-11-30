@@ -1,7 +1,7 @@
 import assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
-import { JWTUtil } from '..';
+import { JWTUtil } from '../src/util';
 
 @Suite('set header')
 class HeaderSuite {

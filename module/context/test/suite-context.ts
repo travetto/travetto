@@ -4,7 +4,8 @@ import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 
-import { AsyncContext, WithAsyncContext } from '../index';
+import { WithAsyncContext } from '../src/decorator';
+import { AsyncContext } from '../src/service';
 import { WithSuiteContext } from '../support/test/context';
 
 @Suite()

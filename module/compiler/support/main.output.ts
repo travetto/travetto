@@ -6,6 +6,5 @@ import { ManifestState } from '@travetto/manifest';
 import { Compiler } from '../src/compiler';
 
 install();
-const [stateFile, outDir] = process.argv.slice(2);
-const state: ManifestState = JSON.parse(readFileSync(stateFile, 'utf8'));
-new Compiler().init(state, outDir).run();
+const state: ManifestState = JSON.parse(readFileSync(process.argv[2], 'utf8'));
+new Compiler().init(state).run();

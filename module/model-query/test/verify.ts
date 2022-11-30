@@ -6,7 +6,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { Model, ModelType } from '@travetto/model';
 
-import { ModelQuery, Query } from '..';
+import { ModelQuery, Query } from '../src/model/query';
 import { QueryLanguageParser } from '../src/internal/query/parser';
 import { QueryVerifier } from '../src/internal/query/verifier';
 

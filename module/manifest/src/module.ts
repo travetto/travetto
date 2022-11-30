@@ -3,7 +3,11 @@ import { statSync } from 'fs';
 
 import { path } from './path';
 import { Dependency, PackageUtil } from './package';
-import { ManifestModule, ManifestModuleFile, ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, PACKAGE_STD_PROFILE } from './types';
+import {
+  ManifestContext,
+  ManifestModule, ManifestModuleFile, ManifestModuleFileType,
+  ManifestModuleFolderType, ManifestProfile, PACKAGE_STD_PROFILE
+} from './types';
 
 const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
   '.js': 'js',
@@ -105,7 +109,9 @@ export class ManifestModuleUtil {
       for (const sub of await fs.readdir(top)) {
         const stat = await fs.stat(`${top}/${sub}`);
         if (stat.isFile()) {
-          out.push(`${top}/${sub}`);
+          if (!sub.startsWith('.')) {
+            out.push(`${top}/${sub}`);
+          }
         } else {
           if (!sub.includes('node_modules') && !sub.startsWith('.') && (depth > 0 || !includeTopFolders.size || includeTopFolders.has(sub))) {
             stack.push([`${top}/${sub}`, depth + 1]);
@@ -161,38 +167,16 @@ export class ManifestModuleUtil {
   }
 
   /**
-   * Find repo root by looking for .git folder
-   * @returns
-   */
-  static async getRepoRoot(): Promise<string | undefined> {
-    let folder = path.cwd();
-    while (!(await fs.stat(`${folder}/.git`).catch(() => false))) {
-      const nextFolder = path.dirname(folder);
-      if (nextFolder === folder) {
-        return undefined;
-      }
-      folder = nextFolder;
-    }
-    return folder;
-  }
-
-  /**
    * Get global dependencies from package.json/travettoRepo/global
    * @param declared
    * @returns
    */
-  static async collectGlobalDependencies(seen: Map<string, Dependency>): Promise<Dependency[]> {
-
-    const root = await this.getRepoRoot();
-    if (!root) {
-      return [];
-    }
-
-    const pkg = await PackageUtil.readPackage(root);
+  static async collectGlobalDependencies(workspace: string, seen: Map<string, Dependency>): Promise<Dependency[]> {
+    const pkg = PackageUtil.readPackage(workspace);
     const mods = pkg.travettoRepo?.globalModules ?? [];
     const out: Dependency[] = [];
-    for (const folder of mods) {
-      const resolved = path.resolve(root, folder);
+    for (const modFolder of mods) {
+      const resolved = path.resolve(workspace, modFolder);
       out.unshift(...(await PackageUtil.collectDependencies(resolved, [], seen)));
     }
     return out;
@@ -201,18 +185,18 @@ export class ManifestModuleUtil {
   /**
    * Produce all modules for a given manifest folder, adding in some given modules when developing framework
    */
-  static async produceModules(rootFolder: string): Promise<Record<string, ManifestModule>> {
+  static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
     const seen = new Map<string, Dependency>();
-    const declared = await PackageUtil.collectDependencies(rootFolder, [], seen);
+    const declared = await PackageUtil.collectDependencies(ctx.mainPath, [], seen);
 
     const allModules = [
       ...declared,
-      ...(await this.collectGlobalDependencies(seen))
+      ...(ctx.monoRepo ? await this.collectGlobalDependencies(ctx.workspacePath, seen) : [])
     ].sort((a, b) => a.name.localeCompare(b.name));
 
     const out: Record<string, ManifestModule> = {};
     for (const mod of allModules) {
-      const cfg = await this.#describeModule(rootFolder, mod);
+      const cfg = await this.#describeModule(ctx.mainPath, mod);
       out[cfg.name] = cfg;
     }
     return out;

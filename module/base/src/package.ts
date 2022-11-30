@@ -7,7 +7,7 @@ export class Pkg {
 
   static get main(): Package {
     if (!this.#config) {
-      const { output: mainFolder } = ModuleIndex.getModule(ModuleIndex.manifest.main)!;
+      const { output: mainFolder } = ModuleIndex.getModule(ModuleIndex.manifest.mainModule)!;
       try {
         this.#config = PackageUtil.readPackage(mainFolder);
       } catch (err: unknown) {

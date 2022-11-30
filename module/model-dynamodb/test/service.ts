@@ -6,7 +6,8 @@ import { ModelExpirySuite } from '@travetto/model/support/test/expiry';
 import { ModelIndexedSuite } from '@travetto/model/support/test/indexed';
 import { ModelPolymorphismSuite } from '@travetto/model/support/test/polymorphism';
 
-import { DynamoDBModelConfig, DynamoDBModelService } from '..';
+import { DynamoDBModelConfig } from '../src/config';
+import { DynamoDBModelService } from '../src/service';
 
 @Suite()
 export class DynamoDBBasicSuite extends ModelBasicSuite {

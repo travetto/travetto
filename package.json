@@ -6,6 +6,7 @@
   "publishConfig": {
     "access": "restricted"
   },
+  "type": "module",
   "private": true,
   "name": "@travetto/mono-repo",
   "license": "MIT",
@@ -15,9 +16,6 @@
     "test": "trv repo:test",
     "lint": "npx eslint --ext .js --ext .ts .",
     "upgrade-deps": "npm update -S"
-  },
-  "travetto": {
-    "docBaseUrl": "https://github.com/travetto/travetto/tree/main"
   },
   "travettoRepo": {
     "globalModules": [
@@ -42,7 +40,8 @@
       "related/todo-app",
       "related/overview",
       "related/vscode-plugin"
-    ]
+    ],
+    "docBaseUrl": "https://github.com/travetto/travetto/tree/main"
   },
   "workspaces": [
     "module/*"

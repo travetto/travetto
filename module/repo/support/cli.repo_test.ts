@@ -2,15 +2,14 @@ import os from 'os';
 
 import { CliCommand, OptionConfig } from '@travetto/cli';
 import { type TestEvent } from '@travetto/test';
-import { PackageUtil } from '@travetto/manifest';
 
-import { CmdConfig, RepoWorker } from './bin/work';
-import { Repo } from './bin/repo';
+import { ServiceRunner } from './bin/service';
+import { Exec } from './bin/exec';
 
 type Options = {
-  changed: OptionConfig<boolean>;
+  mode: OptionConfig<'changed' | 'all'>;
   format: OptionConfig<string>;
-  concurrency: OptionConfig<number>;
+  workers: OptionConfig<number>;
 };
 
 /**
@@ -21,50 +20,34 @@ export class RepoTestCommand extends CliCommand<Options> {
 
   getOptions(): Options {
     return {
-      changed: this.boolOption({ desc: 'Only test changed modules', def: true }),
+      mode: this.choiceOption({ desc: 'Only test changed modules', def: 'changed', choices: ['all', 'changed'] }),
       format: this.option({ desc: 'Output format for test results', def: 'tap' }),
-      concurrency: this.intOption({ desc: 'Number of tests to run concurrently', lower: 1, upper: 32, def: Math.min(4, os.cpus().length - 1) })
+      workers: this.intOption({ desc: 'Number of tests to run concurrently', lower: 1, upper: 32, def: Math.min(4, os.cpus().length - 1) })
     };
   }
 
   async action(): Promise<void> {
-    const { TestConsumerRegistry } = await import('@travetto/test/src/consumer/registry');
-    const { RunnableTestConsumer } = await import('@travetto/test/src/consumer/types/runnable');
+    const { TestConsumerRegistry } = await import('@travetto/test/src/consumer/registry.js');
+    const { RunnableTestConsumer } = await import('@travetto/test/src/consumer/types/runnable.js');
 
     const emitter = await TestConsumerRegistry.getInstance(this.cmd.format);
     const consumer = new RunnableTestConsumer(emitter);
 
-    const baseConfig: CmdConfig = {
-      extraFolders: (await Repo.root).pkg.travettoRepo?.globalTests,
-      extraFilter: (extra, folderSet) => {
-        try {
-          const pkg = PackageUtil.readPackage(extra);
-          for (const [, { name }] of folderSet) {
-            if (name in (pkg.dependencies ?? {})) {
-              return true;
-            }
-          }
-        } catch { }
-        return false;
-      },
-      mode: this.cmd.changed ? 'changed' : 'all',
-      workers: this.cmd.concurrency
-    };
-
     // Build all
-    await RepoWorker.exec(
-      folder => RepoWorker.forCommand(folder, 'trv', [], [0, 'ignore', 'pipe']),
-      { ...baseConfig, workers: 4 }
-    );
+    await Exec.build({ globalTests: true, mode: this.cmd.mode });
+
+    // Ensure services are healthy
+    await ServiceRunner.runService(['restart'], { stdio: 'ignore' });
 
     // Run test
-    await RepoWorker.exec((folder) => {
-      const { process: proc, ...result } = RepoWorker.forCommand(
-        folder, 'trv', ['test', '-f', 'exec', '-c', '3'], [0, 'pipe', 2, 'ipc']
+    await Exec.parallel((folder) => {
+      const { process: proc, ...result } = Exec.forCommand(
+        folder, 'trv', ['test', '-f', 'exec', '-c', '3'],
+        { stdio: [0, 'pipe', 2, 'ipc'], env: { TRV_MANIFEST: '' } }
       );
       proc.on('message', (ev: TestEvent) => consumer.onEvent(ev));
       return result;
-    }, baseConfig);
+    }, { mode: this.cmd.mode, globalTests: true, workers: this.cmd.workers });
 
     process.exit(consumer.summarizeAsBoolean() ? 0 : 1);
   }
