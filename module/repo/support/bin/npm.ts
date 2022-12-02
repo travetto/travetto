@@ -2,13 +2,13 @@ import fs from 'fs/promises';
 
 import { ExecUtil } from '@travetto/base';
 
-import { RepoModule, Repo } from './repo';
 import { SemverLevel } from './types';
+import { IndexedModule, ModuleIndex } from '@travetto/boot';
 
 export class Npm {
 
-  static async isPublished(mod: RepoModule): Promise<boolean> {
-    const proc = ExecUtil.spawn('npm', ['show', `${mod.name}@${mod.pkg.version}`, 'version', '--json'], { cwd: mod.full });
+  static async isPublished(mod: IndexedModule): Promise<boolean> {
+    const proc = ExecUtil.spawn('npm', ['show', `${mod.name}@${mod.version}`, 'version', '--json'], { cwd: mod.source });
 
     return proc.result
       .catchAsResult!()
@@ -29,31 +29,31 @@ export class Npm {
     return res.map(d => d.location);
   }
 
-  static async version(modules: RepoModule[], level: SemverLevel, preid?: string): Promise<void> {
+  static async version(modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
     const run = ExecUtil.spawn('npm', [
       'version',
       level,
       ...(preid ? ['--preid', preid] : []),
-      ...modules.flatMap(m => ['-w', m.rel])
+      ...modules.flatMap(m => ['-w', m.workspaceRelative])
     ], {
       stdio: [0, 1, 2]
     });
     await run.result;
   }
 
-  static async publish(mod: RepoModule, dryRun?: boolean): Promise<void> {
-    const versionTag = mod.pkg.version.replace(/^.*-(rc|alpha|beta|next)[.]\d+/, (a, b) => b);
+  static async publish(mod: IndexedModule, dryRun?: boolean): Promise<void> {
+    const versionTag = mod.version.replace(/^.*-(rc|alpha|beta|next)[.]\d+/, (a, b) => b);
 
-    const root = await Repo.root;
+    const root = await ModuleIndex.manifest.workspacePath;
 
-    await fs.copyFile(`${root.full}/LICENSE`, `${mod.full}/LICENSE`).catch(() => { });
+    await fs.copyFile(`${root}/LICENSE`, `${mod.source}/LICENSE`).catch(() => { });
 
     const { result } = ExecUtil.spawn('npm', [
       'publish',
       ...(dryRun ? ['--dry-run'] : []),
       '--tag', versionTag || 'latest',
       '--access', 'public'
-    ], { cwd: mod.full, stdio: [0, 1, 2] });
+    ], { cwd: mod.source, stdio: [0, 1, 2] });
 
     await result;
   }

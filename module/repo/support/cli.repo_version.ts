@@ -1,4 +1,5 @@
 import { CliCommand } from '@travetto/cli';
+import { CliModuleUtil } from '@travetto/cli/src/module';
 
 import { Git } from './bin/git';
 import { Npm } from './bin/npm';
@@ -21,14 +22,14 @@ export class RepoVersionCommand extends CliCommand {
   async action(level: SemverLevel, prefix?: string): Promise<void> {
     await Git.checkWorkspaceDirty('Cannot update versions with uncommitted changes');
 
-    const modules = await Git.findChangedModulesRecursive();
+    const modules = await CliModuleUtil.findModules('changed');
     await Npm.version(modules, level, prefix);
 
     // Force a reload
     Repo.reinit();
 
     const lookup = await Repo.lookup;
-    const refreshed = modules.map(old => lookup.rel[old.rel]);
+    const refreshed = modules.map(old => lookup.rel[old.source]);
 
     const graph = await Repo.graph;
     for (const mod of refreshed) {

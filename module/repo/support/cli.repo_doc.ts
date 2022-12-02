@@ -1,9 +1,7 @@
 import { ExecUtil } from '@travetto/base';
-import { CliCommand, OptionConfig } from '@travetto/cli';
-import { path } from '@travetto/manifest';
-
-import { Git } from './bin/git';
-import { Repo } from './bin/repo';
+import { ModuleIndex } from '@travetto/boot';
+import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
+import { PackageUtil, path } from '@travetto/manifest';
 
 type Options = {
   changed: OptionConfig<boolean>;
@@ -25,12 +23,12 @@ export class RepoDocCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    const modules = (await (this.cmd.changed ? Git.findChangedModulesRecursive() : Repo.modules)).map(x => x.full);
+    const modules = (await CliModuleUtil.findModules(this.cmd.changed ? 'changed' : 'all')).map(x => x.source);
     // Add in related
     if (this.cmd.related) {
-      const root = await Repo.root;
+      const root = PackageUtil.readPackage(ModuleIndex.manifest.workspacePath);
       modules.push(
-        ...(root.pkg.travettoRepo?.docRelated ?? []).map(x => path.resolve(root.full, x))
+        ...(root.travettoRepo?.docRelated ?? []).map(x => path.resolve(ModuleIndex.manifest.workspacePath, x))
       );
     }
 

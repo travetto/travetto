@@ -1,5 +1,4 @@
 import fs from 'fs/promises';
-import { statSync } from 'fs';
 
 import { path } from './path';
 import { Dependency, PackageUtil } from './package';
@@ -134,12 +133,12 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async #describeModule(rootFolder: string, { name, version, folder, profiles }: Dependency): Promise<ManifestModule> {
+  static async #describeModule(rootFolder: string, { name, version, folder, profileSet, parentSet, internal }: Dependency, localAsMain = false): Promise<ManifestModule> {
     const main = folder === rootFolder;
-    const local = (!folder.includes('node_modules') && !name.startsWith('@travetto')) || main;
+    const local = !folder.includes('node_modules') || main;
 
     const files: ManifestModule['files'] = {};
-    const folderSet = !main ? new Set(['src', 'bin', 'support']) : new Set<string>();
+    const folderSet = (main || (local && localAsMain)) ? new Set<string>() : new Set(['src', 'bin', 'support']);
 
     for (const file of await this.#scanFolder(folder, folderSet)) {
       // Group by top folder
@@ -155,7 +154,9 @@ export class ManifestModuleUtil {
     }
 
     return {
-      profiles: profiles?.includes(PACKAGE_STD_PROFILE) ? [PACKAGE_STD_PROFILE] : [...new Set(profiles)],
+      profiles: profileSet?.has(PACKAGE_STD_PROFILE) ? [PACKAGE_STD_PROFILE] : [...profileSet],
+      parents: [...parentSet].sort(),
+      internal,
       name,
       version,
       main,
@@ -177,7 +178,7 @@ export class ManifestModuleUtil {
     const out: Dependency[] = [];
     for (const modFolder of mods) {
       const resolved = path.resolve(workspace, modFolder);
-      out.unshift(...(await PackageUtil.collectDependencies(resolved, [], seen)));
+      out.unshift(...(await PackageUtil.collectDependencies(resolved, { seen }, true)));
     }
     return out;
   }
@@ -187,7 +188,7 @@ export class ManifestModuleUtil {
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
     const seen = new Map<string, Dependency>();
-    const declared = await PackageUtil.collectDependencies(ctx.mainPath, [], seen);
+    const declared = await PackageUtil.collectDependencies(ctx.mainPath, { seen });
 
     const allModules = [
       ...declared,
@@ -196,7 +197,8 @@ export class ManifestModuleUtil {
 
     const out: Record<string, ManifestModule> = {};
     for (const mod of allModules) {
-      const cfg = await this.#describeModule(ctx.mainPath, mod);
+      // If we are the workspace root, treat all local modules as "main"
+      const cfg = await this.#describeModule(ctx.mainPath, mod, ctx.workspacePath === ctx.mainPath);
       out[cfg.name] = cfg;
     }
     return out;

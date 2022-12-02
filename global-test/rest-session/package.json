@@ -1,5 +1,6 @@
 {
-  "name": "rest-session",
+  "name": "@travetto-test/rest-session",
+  "version": "0.0.0",
   "dependencies": {
     "@travetto/rest-express": "*",
     "@travetto/rest-express-lambda": "*",

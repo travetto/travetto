@@ -1,5 +1,6 @@
 {
-  "name": "auth-rest",
+  "name": "@travetto-test/auth-rest",
+  "version": "0.0.0",
   "dependencies": {
     "@travetto/rest-express": "*",
     "@travetto/rest-express-lambda": "*",

@@ -1,5 +1,6 @@
 {
-  "name": "model_auth-model",
+  "name": "@travetto-test/model_auth-model",
+  "version": "0.0.0",
   "dependencies": {
     "@travetto/model-dynamodb": "*",
     "@travetto/model-firestore": "*",

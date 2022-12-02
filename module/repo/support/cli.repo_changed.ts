@@ -1,7 +1,4 @@
-
-import { CliCommand } from '@travetto/cli';
-import { Git } from './bin/git';
-
+import { CliCommand, CliModuleUtil } from '@travetto/cli';
 /**
  * `npx trv repo:changed`
  *
@@ -12,8 +9,8 @@ export class RepoChangedCommand extends CliCommand {
   name = 'repo:changed';
 
   async action(...args: unknown[]): Promise<void> {
-    for (const mod of await Git.findChangedModulesRecursive()) {
-      console.log!(mod.rel);
+    for (const mod of await CliModuleUtil.findModules('changed')) {
+      console.log!(mod.workspaceRelative);
     }
   }
 }
