@@ -2,9 +2,8 @@ import * as mongo from 'mongodb';
 
 import { Class, Util } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
-import { ModelType } from '@travetto/model';
+import type { ModelType, IndexField } from '@travetto/model';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { IndexField } from '@travetto/model/src/registry/types';
 
 /**
  * Converting units to various radians
@@ -19,7 +18,6 @@ const RADIANS_TO: Record<DistanceUnit, number> = {
 
 export type WithId<T> = T & { _id?: mongo.Binary };
 const isWithId = <T extends ModelType>(o: T): o is WithId<T> => o && '_id' in o;
-
 
 /**
  * Basic mongo utils for conforming to the model module

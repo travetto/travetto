@@ -12,7 +12,7 @@ export class RestSslConfig {
     let forge;
 
     try {
-      forge = await import('node-forge');
+      forge = (await import('node-forge')).default;
     } catch {
       throw new Error('In order to generate SSL keys, you must install node-forge, "npm i --save-dev node-forge"');
     }

@@ -6,6 +6,7 @@ import { RootRegistry } from '@travetto/registry';
 import { Schema } from '../src/decorator/schema';
 import { SpecialType } from './models/pointer';
 import { SchemaValidator } from '../src/validate/validator';
+import { ValidationResultError } from '../src/validate/error';
 
 @Schema()
 class Custom {
@@ -38,6 +39,7 @@ class PointerSuite {
       await SchemaValidator.validate(Custom, Custom.from({ pointer: false }));
       assert(false);
     } catch (err) {
+      assert(err instanceof ValidationResultError);
       assert(err.errors?.[0].kind === 'type');
     }
 
@@ -45,6 +47,7 @@ class PointerSuite {
       await SchemaValidator.validate(Custom, Custom.from({ pointer: 1000 }));
       assert(false);
     } catch (err) {
+      assert(err instanceof ValidationResultError);
       assert(err.errors?.[0].kind === 'maxlength');
     }
 
@@ -52,6 +55,7 @@ class PointerSuite {
       await SchemaValidator.validate(Custom, Custom.from({}));
       assert(false);
     } catch (err) {
+      assert(err instanceof ValidationResultError);
       assert(err.errors?.[0].kind === 'required');
     }
 

@@ -1,4 +1,4 @@
-import { Schema, Field, Required } from '../../';
+import { Schema, Field, Required } from '@travetto/schema';
 
 @Schema()
 export class Address {

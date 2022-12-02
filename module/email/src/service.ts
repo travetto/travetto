@@ -7,7 +7,6 @@ import { MailTemplateEngine } from './template';
 import { MailUtil } from './util';
 import { EmailResource } from './resource';
 
-
 /**
  * Email service for sending and templating emails
  */
