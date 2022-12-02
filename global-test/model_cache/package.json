@@ -1,5 +1,6 @@
 {
-  "name": "model_cache",
+  "name": "@travetto-test/model_cache",
+  "version": "0.0.0",
   "dependencies": {
     "@travetto/model-dynamodb": "*",
     "@travetto/model-firestore": "*",
@@ -11,10 +12,6 @@
     "@travetto/model-s3": "*",
     "@travetto/model-sqlite": "*",
     "@travetto/cache": "*"
-  },
-  "devDependencies": {
-    "@travetto/test": "*",
-    "@travetto/cli": "*"
   },
   "private": true
 }

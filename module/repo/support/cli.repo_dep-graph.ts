@@ -1,6 +1,6 @@
-import { CliCommand } from '@travetto/cli';
-
-import { Repo } from './bin/repo';
+import { ModuleIndex } from '@travetto/boot';
+import { CliCommand, CliModuleUtil } from '@travetto/cli';
+import { PackageUtil } from '@travetto/manifest';
 
 /**
  * `npx trv repo:dep-graph`
@@ -12,13 +12,13 @@ export class RepoDepGraphCommand extends CliCommand {
   name = 'repo:dep-graph';
 
   async action(...args: unknown[]): Promise<void> {
-    const graph = await Repo.graph;
+    const root = PackageUtil.readPackage(ModuleIndex.manifest.workspacePath);
 
     console.log!('digraph g {');
-    for (const [pkg, deps] of graph.entries()) {
-      for (const dep of deps) {
-        if (dep.public) {
-          console.log!(`  "${dep.name}" -> "${pkg.name}";`)
+    for (const el of await CliModuleUtil.findModules('all')) {
+      for (const dep of el.parents) {
+        if (dep !== root.name) {
+          console.log!(`  "${dep}" -> "${el.name}";`);
         }
       }
     }

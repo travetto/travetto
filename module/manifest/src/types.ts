@@ -16,6 +16,8 @@ export type ManifestModuleCore = {
   source: string;
   output: string;
   profiles: string[];
+  parents: string[];
+  internal?: boolean;
 };
 
 export type ManifestModule = ManifestModuleCore & {
@@ -81,7 +83,6 @@ export type Package = {
   };
   travettoRepo?: {
     globalModules?: string[];
-    globalTests?: string[];
     docRelated?: string[];
     docBaseUrl?: string;
   };

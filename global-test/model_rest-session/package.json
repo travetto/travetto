@@ -1,5 +1,6 @@
 {
-  "name": "model_rest-session",
+  "name": "@travetto-test/model_rest-session",
+  "version": "0.0.0",
   "dependencies": {
     "@travetto/model-dynamodb": "*",
     "@travetto/model-firestore": "*",

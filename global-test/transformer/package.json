@@ -1,7 +1,0 @@
-{
-  "name": "transformer-test",
-  "dependencies": {
-    "@travetto/transformer": "*"
-  },
-  "private": true
-}

@@ -83,22 +83,28 @@ export class TestCommand extends CliCommand<Options> {
   }
 
   async action(regexes: string[]): Promise<void> {
-    const { runTests } = await import('./bin/run.js');
+    // If we are in a mono-repo, at root
+    if (ModuleIndex.manifest.workspacePath === ModuleIndex.manifest.mainPath && ModuleIndex.manifest.monoRepo) {
+      const { runWorkspace } = await import('./bin/run-workspace.js');
+      await runWorkspace(this.cmd.format, +this.cmd.concurrency);
+    } else {
+      const { runTests } = await import('./bin/run.js');
 
-    const [first] = regexes;
+      const [first] = regexes;
 
-    const state: RunState = {
-      args: regexes,
-      mode: this.cmd.mode,
-      concurrency: +this.cmd.concurrency,
-      format: this.cmd.format
-    };
+      const state: RunState = {
+        args: regexes,
+        mode: this.cmd.mode,
+        concurrency: +this.cmd.concurrency,
+        format: this.cmd.format
+      };
 
-    switch (state.mode) {
-      case 'single': await this.onSingle(state, first); break;
-      case 'standard': await this.onStandard(state, first); break;
+      switch (state.mode) {
+        case 'single': await this.onSingle(state, first); break;
+        case 'standard': await this.onStandard(state, first); break;
+      }
+
+      await runTests(state);
     }
-
-    await runTests(state);
   }
 }

@@ -1,5 +1,6 @@
 {
-  "name": "openapi",
+  "name": "@travetto-test/openapi",
+  "version": "0.0.0",
   "dependencies": {
     "@travetto/rest": "*",
     "@travetto/openapi": "*"

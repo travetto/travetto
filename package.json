@@ -6,7 +6,6 @@
   "publishConfig": {
     "access": "restricted"
   },
-  "type": "module",
   "private": true,
   "name": "@travetto/mono-repo",
   "license": "MIT",
@@ -25,17 +24,6 @@
       "module/command",
       "module/repo"
     ],
-    "globalTests": [
-      "global-test/asset-rest",
-      "global-test/auth-rest",
-      "global-test/model_asset",
-      "global-test/model_auth-model",
-      "global-test/model_cache",
-      "global-test/model_rest-session",
-      "global-test/openapi",
-      "global-test/rest-session",
-      "global-test/transformer"
-    ],
     "docRelated": [
       "related/todo-app",
       "related/overview",
@@ -44,7 +32,8 @@
     "docBaseUrl": "https://github.com/travetto/travetto/tree/main"
   },
   "workspaces": [
-    "module/*"
+    "module/*",
+    "global-test/*"
   ],
   "dependencies": {
     "@types/eslint": "^8.4.10",

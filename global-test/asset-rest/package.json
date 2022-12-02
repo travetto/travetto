@@ -1,5 +1,6 @@
 {
-  "name": "asset-rest",
+  "name": "@travetto-test/asset-rest",
+  "version": "0.0.0",
   "dependencies": {
     "@travetto/rest-express": "*",
     "@travetto/rest-express-lambda": "*",

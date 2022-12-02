@@ -54,7 +54,7 @@ async function $getWorkspaceRoot() {
   }
   if (await fs.stat(`${folder}/package.json`).catch(() => false)) {
     const pkg = await $getPkg(folder);
-    if (!!pkg.travettoRepo) {
+    if (!!pkg.workspaces) {
       return folder;
     }
   }
@@ -163,8 +163,8 @@ async function getContext() {
   const workspacePath = path.resolve(await $getWorkspaceRoot());
   const mainPath = toPosix(process.cwd());
 
-  const { name: mainModule, travettoRepo } = (await $getPkg(mainPath));
-  const monoRepo = workspacePath !== mainPath || !!travettoRepo;
+  const { name: mainModule, workspaces } = (await $getPkg(mainPath));
+  const monoRepo = workspacePath !== mainPath || !!workspaces;
 
   // All relative to workspacePath
   const manifestFile = monoRepo ? `node_modules/${mainModule}/manifest.json` : 'manifest.json';

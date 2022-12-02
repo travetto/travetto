@@ -28,6 +28,7 @@ export type IndexedFile = {
 
 export type IndexedModule = ManifestModuleCore & {
   files: Record<string, IndexedFile[]>;
+  workspaceRelative: string;
 };
 
 /**
@@ -94,6 +95,7 @@ class $ModuleIndex {
       .map(m => ({
         ...m,
         output: this.#resolveOutput(m.output),
+        workspaceRelative: m.source.replace(`${this.#manifest.workspacePath}/`, ''),
         files: Object.fromEntries(
           Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
         )
@@ -265,6 +267,26 @@ class $ModuleIndex {
     }
     return active;
   }
+
+  /**
+   * Get all modules (transitively) that depend on this module
+   */
+  getDependentModules(root: IndexedModule): IndexedModule[] {
+    const seen = new Set<string>();
+    const out: IndexedModule[] = [];
+    const toProcess = [root.name];
+    while (toProcess.length) {
+      const next = toProcess.shift()!;
+      if (seen.has(next)) {
+        continue;
+      }
+      const mod = ModuleIndex.getModule(next)!;
+      toProcess.push(...mod.parents);
+      out.push(mod);
+    }
+    return out;
+  }
+
 }
 
 export const ModuleIndex = new $ModuleIndex();

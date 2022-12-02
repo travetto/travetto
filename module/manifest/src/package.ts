@@ -1,10 +1,24 @@
 import { readFileSync } from 'fs';
 import { createRequire } from 'module';
+import { execSync } from 'child_process';
 
 import { ManifestProfile, Package, PackageDigest, PACKAGE_STD_PROFILE } from './types';
 import { path } from './path';
 
-export type Dependency = Package['travetto'] & { version: string, name: string, folder: string };
+export type Dependency = Package['travetto'] & {
+  version: string;
+  name: string;
+  internal?: boolean;
+  folder: string;
+  parentSet: Set<string>;
+  profileSet: Set<ManifestProfile>;
+};
+
+type CollectState = {
+  profiles: Set<ManifestProfile>;
+  seen: Map<string, Dependency>;
+  parent?: string;
+}
 
 export class PackageUtil {
 
@@ -35,35 +49,65 @@ export class PackageUtil {
     return { name, main, author, license, version, framework: this.getFrameworkVersion() };
   }
 
+  static async resolveWorkspaceFolders(folder: string): Promise<string[]> {
+    const text = execSync('npm query .workspace', { cwd: folder, encoding: 'utf8' });
+    const res: { location: string }[] = JSON.parse(text);
+    return res.map(d => d.location);
+  }
+
   /**
    * Find packages for a given folder (package.json), decorating dependencies along the way
    */
-  static async collectDependencies(folder: string, transitiveProfiles: ManifestProfile[] = [], seen = new Map<string, Dependency>(), walk: string[] = []): Promise<Dependency[]> {
-    const { name, version, dependencies = {}, devDependencies = {}, travetto } = this.readPackage(folder);
-    const isModule = !!travetto || folder === path.cwd();
+  static async collectDependencies(
+    folder: string,
+    inState: Partial<CollectState> = {},
+    isModule?: boolean
+  ): Promise<Dependency[]> {
+    const state: CollectState = { seen: new Map(), profiles: new Set(), ...inState };
 
-    if (seen.has(name)) {
-      for (const el of transitiveProfiles) {
-        (seen.get(name)!.profiles ??= []).push(el);
+    const { name, version, dependencies = {}, devDependencies = {}, workspaces, travetto, ['private']: isPrivate } = this.readPackage(folder);
+    isModule ??= (!!travetto || folder === path.cwd());
+
+    if (state.seen.has(name)) {
+      const self = state.seen.get(name)!;
+      for (const el of state.profiles) {
+        (self.profileSet ??= new Set()).add(el);
+      }
+      if (state.parent) {
+        (self.parentSet ??= new Set()).add(state.parent);
       }
       return [];
     } else if (!isModule) {
       return [];
     }
 
-    const profiles = [...travetto?.profiles ?? [PACKAGE_STD_PROFILE], ...transitiveProfiles].slice(0);
+    const profileSet = new Set([...travetto?.profiles ?? [PACKAGE_STD_PROFILE], ...state.profiles]);
 
-    const rootDep: Dependency = { name, version, folder, profiles };
-    seen.set(name, rootDep);
+    const rootDep: Dependency = {
+      name, version, folder,
+      profileSet,
+      internal: isPrivate === true,
+      parentSet: new Set(state.parent ? [state.parent] : [])
+    };
+    state.seen.set(name, rootDep);
 
     const out: Dependency[] = [rootDep];
 
-    const searchSpace = [
-      ...Object.entries(dependencies).map(([k, v]) => [k, v, 'dep']),
-      ...Object.entries(devDependencies).map(([k, v]) => [k, v, 'dev'])
+    const searchSpace: (readonly [name: string, version: string, type: 'dep' | 'dev', profileSet: Set<ManifestProfile>, isModule?: boolean])[] = [
+      ...Object.entries(dependencies).map(([k, v]) => [k, v, 'dep', profileSet, undefined] as const),
+      ...Object.entries(devDependencies).map(([k, v]) => [k, v, 'dev', profileSet, undefined] as const)
     ].sort((a, b) => a[0].localeCompare(b[0]));
 
-    for (const [el, value] of searchSpace) {
+    // We have a monorepo, collect local modules, and global-tests as needed
+    if (workspaces) {
+      const resolved = await this.resolveWorkspaceFolders(folder);
+      for (const mod of resolved) {
+        const pkg = PackageUtil.readPackage(mod);
+        searchSpace.push([pkg.name, '*', 'dep', new Set(), true]);
+      }
+    }
+
+    for (const [el, value, type, profiles, isModule] of searchSpace) {
       let next: string;
       if (value.startsWith('file:')) {
         next = path.resolve(folder, value.replace('file:', ''));
@@ -74,7 +118,7 @@ export class PackageUtil {
           continue;
         }
       }
-      out.push(...await this.collectDependencies(next, profiles, seen, [...walk, name]));
+      out.push(...await this.collectDependencies(next, { seen: state.seen, parent: name, profiles }, isModule));
     }
     return out;
   }

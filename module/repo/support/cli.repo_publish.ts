@@ -1,6 +1,5 @@
-import { CliCommand, OptionConfig } from '@travetto/cli';
+import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 import { Npm } from './bin/npm';
-import { Repo } from './bin/repo';
 
 type Options = {
   dryRun: OptionConfig<boolean>;
@@ -22,7 +21,8 @@ export class RepoPublishCommand extends CliCommand<Options> {
   }
 
   async action(...args: unknown[]): Promise<void> {
-    const withPublished = (await Repo.publicModules)
+    const withPublished = (await CliModuleUtil.findModules('all'))
+      .filter(mod => !mod.internal)
       .map(mod => Npm.isPublished(mod).then(published => [mod, published] as const));
 
     for (const [mod, published] of await Promise.all(withPublished)) {
