@@ -1,7 +1,7 @@
 import {
   Schema, Float, MinLength, Match, Max, Min,
   CommonRegExp, View, Url, Required, Validator
-} from '../..';
+} from '@travetto/schema';
 
 @Schema()
 @Validator((o: CustomValidated) => {

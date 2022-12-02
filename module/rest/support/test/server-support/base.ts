@@ -1,8 +1,7 @@
 import { Headers } from 'node-fetch';
 
 import { Request } from '@travetto/rest/src/types';
-
-import { ServerHandle } from '../../..';
+import { ServerHandle } from '@travetto/rest';
 
 export type MakeRequestConfig<T> = {
   query?: Record<string, string>;

@@ -201,32 +201,4 @@ export class ManifestModuleUtil {
     }
     return out;
   }
-
-  /**
-   * Update manifest module file
-   */
-  static updateModuleFile(module: ManifestModule, moduleFile: string, action: 'create' | 'delete' | 'update'): void {
-    const fileKey = this.getFolderKey(moduleFile);
-    const sourceFile = `${module.source}/${moduleFile}`;
-    const idx = module.files[fileKey]?.findIndex(([f]) => f === moduleFile);
-
-    switch (action) {
-      case 'create': {
-        (module.files[fileKey] ??= []).push([moduleFile, this.getFileType(moduleFile), this.#getNewest(statSync(sourceFile))]);
-        break;
-      }
-      case 'delete': {
-        if (idx !== undefined && idx >= 0) {
-          module.files[fileKey]!.splice(idx, 1);
-        }
-        break;
-      }
-      case 'update': {
-        if (idx !== undefined && idx >= 0) {
-          module.files[fileKey]![idx][2] = this.#getNewest(statSync(sourceFile));
-        }
-        break;
-      }
-    }
-  }
 }

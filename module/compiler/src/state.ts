@@ -142,7 +142,6 @@ export class CompilerState {
           if (validFile(fileType)) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             const input = this.registerInput(mod, moduleFile);
-            ManifestModuleUtil.updateModuleFile(mod, moduleFile, 'update');
             this.#sourceHashes.set(sourceFile, hash);
             handler.create(input);
           }
@@ -152,8 +151,6 @@ export class CompilerState {
           const io = this.#sourceInputOutput.get(sourceFile);
           if (io) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
-            ManifestModuleUtil.updateModuleFile(io.module, io.relativeInput.replace(`${io.module.output}/`, ''), 'update');
-
             if (this.#sourceHashes.get(sourceFile) !== hash) {
               this.resetInputSource(io.input);
               this.#sourceHashes.set(sourceFile, hash);
@@ -166,7 +163,6 @@ export class CompilerState {
           const io = this.#sourceInputOutput.get(sourceFile);
           if (io) {
             this.removeInput(io.input);
-            ManifestModuleUtil.updateModuleFile(io.module, io.relativeInput.replace(`${io.module.output}/`, ''), 'delete');
             if (io.output) {
               handler.delete(io.output);
             }

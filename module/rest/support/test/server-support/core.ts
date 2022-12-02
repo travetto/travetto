@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 import { DependencyRegistry } from '@travetto/di';
 import { TimeUtil } from '@travetto/base';
 
-import { type Request, RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '../../..';
+import { type Request, RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '@travetto/rest';
 
 import { RestServerSupport, MakeRequestConfig, headerToShape } from './base';
 
