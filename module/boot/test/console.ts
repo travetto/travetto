@@ -13,7 +13,7 @@ export class ConsoleManagerTest {
     ConsoleManager.set({
       onLog: (level, ctx, args) => logs.push({ level, ctx, args })
     });
-    trv.log('info', { file: '', line: 0, category: '' }, 'a', 'b', 'c');
+    trv.log('info', { source: '', line: 0, module: '@travetto/boot', modulePath: 'test/console.js' }, 'a', 'b', 'c');
     assert(logs.length === 1);
     assert.deepStrictEqual(logs[0].args, ['a', 'b', 'c']);
   }

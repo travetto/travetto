@@ -49,6 +49,9 @@ export class PackageUtil {
     return { name, main, author, license, version, framework: this.getFrameworkVersion() };
   }
 
+  /**
+   * Find workspace values from folder
+   */
   static async resolveWorkspaceFolders(folder: string): Promise<string[]> {
     const text = execSync('npm query .workspace', { cwd: folder, encoding: 'utf8' });
     const res: { location: string }[] = JSON.parse(text);

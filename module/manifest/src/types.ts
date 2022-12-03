@@ -83,7 +83,6 @@ export type Package = {
   };
   travettoRepo?: {
     globalModules?: string[];
-    docRelated?: string[];
     docBaseUrl?: string;
   };
   workspaces?: string[];

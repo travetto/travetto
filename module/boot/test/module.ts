@@ -29,7 +29,7 @@ class ModuleIndexTests {
   async testModuleExpression() {
 
     const found = ModuleIndex.getModuleList('local');
-    assert(found.size === 1);
+    assert(found.size >= 1);
     assert(found.has('@travetto/boot'));
 
     let found2 = ModuleIndex.getModuleList('all');
@@ -48,7 +48,7 @@ class ModuleIndexTests {
     assert(found2.has('@travetto/manifest'));
 
     let found3 = ModuleIndex.getModuleList('local', '-@travetto/boot');
-    assert(found3.size === 0);
+    assert(found3.size === found.size - 1);
     assert(!found3.has('@travetto/boot'));
 
     found3 = ModuleIndex.getModuleList('local', '*,-@travetto/boot');
@@ -57,7 +57,7 @@ class ModuleIndexTests {
     assert(found3.has('@travetto/manifest'));
 
     found3 = ModuleIndex.getModuleList('local', '*,-@travetto/*');
-    assert(found3.size === 0);
+    assert(!found3.size);
     assert(!found3.has('@travetto/boot'));
     assert(!found3.has('@travetto/manifest'));
   }
