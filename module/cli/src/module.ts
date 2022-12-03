@@ -72,8 +72,9 @@ export class CliModuleUtil {
    * @returns
    */
   static async findModules(mode: 'all' | 'changed'): Promise<IndexedModule[]> {
-    return mode === 'changed' ?
+    return (mode === 'changed' ?
       await this.findChangedModulesRecursive() :
-      [...ModuleIndex.getModuleList('all')].map(x => ModuleIndex.getModule(x)!);
+      [...ModuleIndex.getModuleList('all')].map(x => ModuleIndex.getModule(x)!)
+    ).filter(x => x.source !== ModuleIndex.manifest.workspacePath);
   }
 }

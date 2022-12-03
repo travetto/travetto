@@ -1,24 +1,28 @@
 import ts from 'typescript';
 
-import { TransformerState, OnMethod } from '@travetto/transformer';
+import { TransformerState, AfterMethod } from '@travetto/transformer';
 
 export class MakeUpper {
 
-  @OnMethod()
+  @AfterMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): typeof node {
-    if (!state.module.startsWith('transformer-test/')) { // Only apply to my source code
+    if (!state.module.startsWith('@travetto-test/transformer/src/tree')) { // Only apply to my source code
       return node;
     }
     return state.factory.updateMethodDeclaration(
       node,
       node.modifiers,
       node.asteriskToken,
-      state.createIdentifier(node.name.getText().toUpperCase()),
+      node.name,
       node.questionToken,
       node.typeParameters,
       node.parameters,
       node.type,
-      node.body
+      state.factory.createBlock([
+        state.factory.createReturnStatement(
+          state.fromLiteral(node.name.getText().toUpperCase())
+        )
+      ])
     );
   }
 }

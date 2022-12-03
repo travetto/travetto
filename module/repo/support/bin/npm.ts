@@ -7,6 +7,9 @@ import { SemverLevel } from './types';
 
 export class Npm {
 
+  /**
+   * Is a module already published
+   */
   static async isPublished(mod: IndexedModule): Promise<boolean> {
     const proc = ExecUtil.spawn('npm', ['show', `${mod.name}@${mod.version}`, 'version', '--json'], { cwd: mod.source });
 
@@ -22,13 +25,9 @@ export class Npm {
       });
   }
 
-  static async getWorkspaceModules(): Promise<string[]> {
-    const { result } = ExecUtil.spawn('npm', ['query', '.workspace']);
-    const res: { location: string }[] = JSON.parse((await result).stdout);
-
-    return res.map(d => d.location);
-  }
-
+  /**
+   * Setting the version
+   */
   static async version(modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
     const run = ExecUtil.spawn('npm', [
       'version',
@@ -41,6 +40,9 @@ export class Npm {
     await run.result;
   }
 
+  /**
+   * Publish a module
+   */
   static async publish(mod: IndexedModule, dryRun?: boolean): Promise<void> {
     const versionTag = mod.version.replace(/^.*-(rc|alpha|beta|next)[.]\d+/, (a, b) => b);
 
@@ -56,15 +58,5 @@ export class Npm {
     ], { cwd: mod.source, stdio: [0, 1, 2] });
 
     await result;
-  }
-
-  static async exec(cmd: string, args: string[]): Promise<void> {
-    const run = ExecUtil.spawn('npm', [
-      'exec',
-      '--ws',
-      cmd,
-      ...args
-    ], { stdio: [0, 1, 2] });
-    await run.result;
   }
 }

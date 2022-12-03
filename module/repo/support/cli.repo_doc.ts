@@ -1,7 +1,5 @@
 import { ExecUtil } from '@travetto/base';
-import { ModuleIndex } from '@travetto/boot';
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
-import { PackageUtil, path } from '@travetto/manifest';
 
 type Options = {
   changed: OptionConfig<boolean>;
@@ -24,17 +22,10 @@ export class RepoDocCommand extends CliCommand<Options> {
 
   async action(): Promise<void> {
     const modules = (await CliModuleUtil.findModules(this.cmd.changed ? 'changed' : 'all')).map(x => x.source);
-    // Add in related
-    if (this.cmd.related) {
-      const root = PackageUtil.readPackage(ModuleIndex.manifest.workspacePath);
-      modules.push(
-        ...(root.travettoRepo?.docRelated ?? []).map(x => path.resolve(ModuleIndex.manifest.workspacePath, x))
-      );
-    }
 
     for (const mod of modules) {
       console.log('Running', mod);
-      const res = ExecUtil.spawn('trv', ['doc', '-o', '../README.html', '-o', '../README.md'], {
+      const res = ExecUtil.spawn('npx', ['trv', 'doc', '-o', '../README.html', '-o', '../README.md'], {
         cwd: `${mod}/doc`,
         stdio: [0, 1, 2],
         isolatedEnv: true,
