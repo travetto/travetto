@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 
 import { ExecUtil } from '@travetto/base';
+import { IndexedModule, ModuleIndex } from '@travetto/boot';
 
 import { SemverLevel } from './types';
-import { IndexedModule, ModuleIndex } from '@travetto/boot';
 
 export class Npm {
 

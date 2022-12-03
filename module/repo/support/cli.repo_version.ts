@@ -3,7 +3,6 @@ import { CliModuleUtil } from '@travetto/cli/src/module';
 
 import { Git } from './bin/git';
 import { Npm } from './bin/npm';
-import { Repo } from './bin/repo';
 import { DEP_GROUPS, SemverLevel } from './bin/types';
 
 /**
@@ -15,8 +14,8 @@ export class RepoVersionCommand extends CliCommand {
 
   name = 'repo:version';
 
-  getArgs() {
-    return `[level] [prefix?]`;
+  getArgs(): string {
+    return '[level] [prefix?]';
   }
 
   async action(level: SemverLevel, prefix?: string): Promise<void> {

@@ -3,7 +3,7 @@ import { Npm } from './bin/npm';
 
 type Options = {
   dryRun: OptionConfig<boolean>;
-}
+};
 
 /**
 * `npx trv repo:publish`

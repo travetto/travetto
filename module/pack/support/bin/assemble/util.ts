@@ -46,7 +46,7 @@ export class AssembleUtil {
    */
   static async purgeSource(folders: string[]): Promise<void> {
     // TODO: Remove
-    for (const sub of folders) {
+    for (const _ of folders) {
     }
   }
 

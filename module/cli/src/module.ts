@@ -9,7 +9,7 @@ export class CliModuleUtil {
 
   /**
    * Find the last code release
-   * @returns 
+   * @returns
    */
   static async findLastRelease(): Promise<string> {
     const root = await ModuleIndex.manifest;
@@ -22,8 +22,8 @@ export class CliModuleUtil {
 
   /**
    * Find all modules that changed since hash
-   * @param hash 
-   * @returns 
+   * @param hash
+   * @returns
    */
   static async findChangedModulesSince(hash: string): Promise<IndexedModule[]> {
     const root = await ModuleIndex.manifest;
@@ -41,10 +41,10 @@ export class CliModuleUtil {
 
 
   /**
-   * Find modules that changed, and the dependent modules 
-   * @param hash 
-   * @param transitive 
-   * @returns 
+   * Find modules that changed, and the dependent modules
+   * @param hash
+   * @param transitive
+   * @returns
    */
   static async findChangedModulesRecursive(hash?: string, transitive = true): Promise<IndexedModule[]> {
     if (!hash) {
@@ -66,14 +66,14 @@ export class CliModuleUtil {
   }
 
   /**
-   * Find modules that changed, and the dependent modules 
-   * @param hash 
-   * @param transitive 
-   * @returns 
+   * Find modules that changed, and the dependent modules
+   * @param hash
+   * @param transitive
+   * @returns
    */
   static async findModules(mode: 'all' | 'changed'): Promise<IndexedModule[]> {
     return mode === 'changed' ?
       await this.findChangedModulesRecursive() :
-      [...ModuleIndex.getModuleList('all')].map(x => ModuleIndex.getModule(x)!)
+      [...ModuleIndex.getModuleList('all')].map(x => ModuleIndex.getModule(x)!);
   }
 }

@@ -1,4 +1,5 @@
 import util from 'util';
+
 import { ModuleIndex } from './module-index';
 import { ConsoleListener, LineContext, LogLevel } from './types';
 
@@ -12,16 +13,16 @@ function wrap(target: Console): ConsoleListener {
 
 /**
  * Registers handler for `debug` module in npm ecosystem
- * @param mgr 
+ * @param mgr
  */
-async function initNpmDebug(mgr: $ConsoleManager) {
+async function initNpmDebug(mgr: $ConsoleManager): Promise<void> {
   try {
     const { default: debug } = await import('debug');
-    debug.formatArgs = function (args: string[]) {
+    debug.formatArgs = function (args: string[]): void {
       args.unshift(this.namespace);
       args.push(debug.humanize(this.diff));
     };
-    debug.log = (...args: string[]) => mgr.invoke('debug', {
+    debug.log = (...args: string[]): void => mgr.invoke('debug', {
       line: 0,
       module: '@npm:debug',
       modulePath: args[0],
@@ -78,7 +79,7 @@ class $ConsoleManager {
     }
   }
 
-  setDebugFromEnv() {
+  setDebugFromEnv(): void {
     const notProd = !/prod/i.test(process.env.NODE_ENV ?? '');
     this.setDebug(process.env.DEBUG ?? (notProd ? '@local' : false));
   }
@@ -91,8 +92,8 @@ class $ConsoleManager {
     const isFalse = typeof debug === 'boolean' ? !debug : /^(0|false|no|off)/i.test(debug);
 
     if (isSet && !isFalse) {
-      const active = ModuleIndex.getModuleList(typeof debug === 'string' ? debug : '', 'local');
-      active.add('@npm:debug')
+      const active = ModuleIndex.getModuleList('local', typeof debug === 'string' ? debug : '');
+      active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
 
     } else {
@@ -110,7 +111,7 @@ class $ConsoleManager {
     const outCtx = {
       ...ctx,
       source,
-      module: ctx.module ?? mod?.name!,
+      module: ctx.module ?? mod!.name,
       modulePath: ctx.modulePath ?? (mod ? source.split(`${mod.source}/`)[1] : '')
     };
 

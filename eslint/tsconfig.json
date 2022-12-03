@@ -5,6 +5,7 @@
     ],
     "target": "ES2022",
     "module": "CommonJS",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "outDir": "../.bin/eslint"
   },
 }

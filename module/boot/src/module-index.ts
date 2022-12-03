@@ -280,13 +280,12 @@ class $ModuleIndex {
       if (seen.has(next)) {
         continue;
       }
-      const mod = ModuleIndex.getModule(next)!;
+      const mod = this.getModule(next)!;
       toProcess.push(...mod.parents);
       out.push(mod);
     }
     return out;
   }
-
 }
 
 export const ModuleIndex = new $ModuleIndex();

@@ -4,8 +4,7 @@ import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
 import { TimeUtil } from '@travetto/base';
 
-import { Schema } from '../src/decorator/schema';
-import { Validator } from '../src/decorator/schema';
+import { Schema, Validator } from '../src/decorator/schema';
 import { SchemaValidator } from '../src/validate/validator';
 import { ValidationResultError } from '../src/validate/error';
 
