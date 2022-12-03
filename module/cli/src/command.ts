@@ -127,10 +127,9 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   boolOption(cfg: OptionConfig<boolean>): OptionConfig<boolean> {
     return {
       type: Boolean,
-      combine: (val, curr) => {
+      combine: (val, curr): boolean =>
         // TODO: This needs to be resolved?
-        return CliUtil.toBool(val)!;
-      },
+        CliUtil.toBool(val)!,
       completion: true,
       ...cfg
     };

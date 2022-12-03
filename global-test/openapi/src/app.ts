@@ -10,7 +10,7 @@ export class SampleApp {
     this.#app = app;
   }
 
-  run() {
-    return this.#app.run();
+  async run(): Promise<void> {
+    await this.#app.run();
   }
 }

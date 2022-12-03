@@ -40,7 +40,7 @@ export async function runWorkspace(format: string, workers: number): Promise<voi
           env: { TRV_MANIFEST: '' }
         });
         res.process.on('message', (ev: TestEvent) => consumer.onEvent(ev));
-        this.destroy = async () => { res.process.kill('SIGKILL'); };
+        this.destroy = async (): Promise<void> => { res.process.kill('SIGKILL'); };
         return res.result.finally(() => this.active = false);
       },
     };

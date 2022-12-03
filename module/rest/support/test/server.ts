@@ -1,6 +1,7 @@
 import assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
+
 import { BaseRestSuite } from './base';
 import { TestController } from './controller';
 import { ControllerRegistry } from '../../src/registry/controller';

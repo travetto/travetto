@@ -18,7 +18,7 @@ type CollectState = {
   profiles: Set<ManifestProfile>;
   seen: Map<string, Dependency>;
   parent?: string;
-}
+};
 
 export class PackageUtil {
 
@@ -107,7 +107,7 @@ export class PackageUtil {
       }
     }
 
-    for (const [el, value, type, profiles, isModule] of searchSpace) {
+    for (const [el, value, _, profiles, isDepModule] of searchSpace) {
       let next: string;
       if (value.startsWith('file:')) {
         next = path.resolve(folder, value.replace('file:', ''));
@@ -118,7 +118,7 @@ export class PackageUtil {
           continue;
         }
       }
-      out.push(...await this.collectDependencies(next, { seen: state.seen, parent: name, profiles }, isModule));
+      out.push(...await this.collectDependencies(next, { seen: state.seen, parent: name, profiles }, isDepModule));
     }
     return out;
   }

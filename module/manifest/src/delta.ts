@@ -1,3 +1,4 @@
+import { type Stats } from 'fs';
 import fs from 'fs/promises';
 import {
   ManifestDelta, ManifestDeltaEvent, ManifestDeltaModule,
@@ -21,7 +22,8 @@ export class ManifestDeltaUtil {
    */
   static async #deltaModules(outputFolder: string, left: ManifestDeltaModule, right: ManifestDeltaModule): Promise<ManifestDeltaEvent[]> {
     const out: ManifestDeltaEvent[] = [];
-    const getStat = (f: string) => fs.stat(`${outputFolder}/${left.output}/${f.replace(/[.]ts$/, '.js')}`).catch(() => { });
+    const getStat = (f: string): Promise<Stats | void> =>
+      fs.stat(`${outputFolder}/${left.output}/${f.replace(/[.]ts$/, '.js')}`).catch(() => { });
 
     for (const el of Object.keys(left.files)) {
 
