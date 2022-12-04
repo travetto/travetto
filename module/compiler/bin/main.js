@@ -18,9 +18,9 @@ const OUT_FILES = FILES.map(x => x.replace(/[.]ts$/, '.js'));
 
 /**
  * @param {ManifestContext} ctx
- * @param {boolean} [watch]
+ * @return {Promise<import('../support/bin/compiler-bootstrap')>}
  */
-async function $compile(ctx, watch) {
+async function $getBootstrap(ctx) {
   const root = path.resolve(__dirname, '..');
 
   const precompiler = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', NAME);
@@ -60,17 +60,7 @@ async function $compile(ctx, watch) {
   } catch {
     bootstrap = await import(loc);
   }
-  return bootstrap.compile(ctx, watch);
-}
-
-/**
- *
- * @param {ManifestContext} ctx
- */
-async function $clean(ctx) {
-  await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { force: true, recursive: true });
-  await fs.rm(path.resolve(ctx.workspacePath, ctx.compilerFolder), { force: true, recursive: true });
-  console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
+  return bootstrap;
 }
 
 /**
@@ -80,12 +70,26 @@ async function $clean(ctx) {
  */
 async function exec(op, main) {
   const ctx = await getContext();
-  await (op === 'clean' ? $clean : $compile)(ctx, op === 'watch');
   switch (op) {
-    case 'clean':
-    case 'watch':
-    case 'build': return process.exit(0);
-    default: {
+    case 'clean': {
+      await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { force: true, recursive: true });
+      await fs.rm(path.resolve(ctx.workspacePath, ctx.compilerFolder), { force: true, recursive: true });
+      console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
+      break;
+    }
+    case 'manifest': {
+      const bootstrap = await $getBootstrap(ctx);
+      await bootstrap.writeManifest(
+        ctx,
+        await (await bootstrap.buildManifest(ctx)).manifest
+      );
+      console.log(`Wrote manifest ${path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile)}`);
+      break;
+    }
+    case 'build':
+    case 'watch': await (await $getBootstrap(ctx)).compile(ctx, op === 'watch'); break;
+    default:
+      await (await $getBootstrap(ctx)).compile(ctx);
       if (main && !main.startsWith('/')) {
         const req = createRequire(path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules'));
         main = req.resolve(main);
@@ -93,8 +97,8 @@ async function exec(op, main) {
       process.env.TRV_MANIFEST = ctx.mainModule;
       process.env.TRV_OUTPUT = path.resolve(ctx.workspacePath, ctx.outputFolder);
       return main;
-    }
   }
+  process.exit(0);
 }
 
 module.exports = { exec };

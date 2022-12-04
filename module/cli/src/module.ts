@@ -1,11 +1,19 @@
-import { ExecUtil } from '@travetto/base';
+import os from 'os';
+
+import { ExecUtil, ExecutionOptions } from '@travetto/base';
 import { IndexedModule, ModuleIndex } from '@travetto/boot';
 import { path } from '@travetto/manifest';
+import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
 
 /**
  * Simple utilities for understanding modules for CLI use cases
  */
 export class CliModuleUtil {
+
+  static isMonoRepoRoot(): boolean {
+    return !!ModuleIndex.manifest.monoRepo &&
+      ModuleIndex.manifest.workspacePath === ModuleIndex.manifest.mainPath;
+  }
 
   /**
    * Find the last code release
@@ -76,5 +84,60 @@ export class CliModuleUtil {
       await this.findChangedModulesRecursive() :
       [...ModuleIndex.getModuleList('all')].map(x => ModuleIndex.getModule(x)!)
     ).filter(x => x.source !== ModuleIndex.manifest.workspacePath);
+  }
+
+  /**
+   * Run on all modules
+   */
+  static async runOnModules<T>(
+    mode: 'all' | 'changed',
+    [cmd, ...args]: [string, ...string[]],
+    onMessage: (folder: string, msg: T) => void,
+    workerCount = os.cpus.length - 1
+  ): Promise<void> {
+    // Run test
+    const folders = (await CliModuleUtil.findModules(mode)).map(x => x.workspaceRelative);
+    let id = 1;
+    const pool = new WorkPool(async () => {
+      const worker: Worker<string> = {
+        id: id += 1,
+        active: false,
+        async destroy() {
+          this.active = false;
+        },
+        async execute(folder: string) {
+          try {
+            this.active = true;
+
+            const opts: ExecutionOptions = {
+              cwd: folder,
+              stdio: [0, process.env.DEBUG ? 'inherit' : 'pipe', 2, 'ipc'],
+              env: {
+                TRV_MANIFEST: '',
+                TRV_OUTPUT: process.env.TRV_OUTPUT
+              }
+            };
+
+            await ExecUtil.spawn('trv', ['manifest'], { ...opts, stdio: 'ignore' }).result;
+
+            const res = ExecUtil.spawn(cmd, args, opts);
+            res.process.on('message', (msg: T) => onMessage(folder, msg));
+            this.destroy = async (): Promise<void> => {
+              this.active = false;
+              res.process.kill('SIGTERM');
+            };
+            await res.result;
+          } catch {
+            // Ignore
+          } finally {
+            this.active = false;
+          }
+        },
+      };
+      return worker;
+    }, { max: workerCount, min: workerCount });
+
+    const work = new IterableWorkSet(folders);
+    await pool.process(work);
   }
 }

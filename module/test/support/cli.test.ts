@@ -3,7 +3,7 @@ import { readFileSync } from 'fs';
 import fs from 'fs/promises';
 
 import { path, ModuleIndex } from '@travetto/boot';
-import { CliCommand, OptionConfig } from '@travetto/cli';
+import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 
 import type { RunState } from '../src/execute/types';
 import { envInit } from './bin/env';
@@ -84,7 +84,7 @@ export class TestCommand extends CliCommand<Options> {
 
   async action(regexes: string[]): Promise<void> {
     // If we are in a mono-repo, at root
-    if (ModuleIndex.manifest.workspacePath === ModuleIndex.manifest.mainPath && ModuleIndex.manifest.monoRepo) {
+    if (CliModuleUtil.isMonoRepoRoot()) {
       const { runWorkspace } = await import('./bin/run-workspace.js');
       await runWorkspace(this.cmd.format, +this.cmd.concurrency);
     } else {

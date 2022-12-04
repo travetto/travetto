@@ -3,7 +3,7 @@ import { parentPort } from 'worker_threads';
 
 import { path, ModuleIndex } from '@travetto/boot';
 import { ExecUtil } from '@travetto/base';
-import { CliUtil } from '@travetto/cli';
+import { CliModuleUtil, CliUtil } from '@travetto/cli';
 
 import { AppScanUtil } from '../../src/scan';
 import type { ApplicationConfig } from '../../src/types';
@@ -60,13 +60,32 @@ export class AppListLoader {
    * Compile code, and look for `@Application` annotations
    */
   async buildList(): Promise<ApplicationConfig[]> {
-    if (!parentPort) { // If top level, recurse
-      return CliUtil.waiting('Collecting', () =>
-        ExecUtil.worker<ApplicationConfig[]>(ModuleIndex.resolveFileImport('@travetto/app/support/main.list-build.ts')).message
-      );
-    } else {
-      const list = await AppScanUtil.scanList();
-      return list.map(({ target, ...rest }) => rest);
+    try {
+      if (parentPort) { // If top level, recurse
+        const list = await AppScanUtil.scanList();
+        return list.map(({ target, ...rest }) => rest);
+      } else if (!CliModuleUtil.isMonoRepoRoot()) {
+        return await ExecUtil.worker<ApplicationConfig[]>(
+          ModuleIndex.resolveFileImport('@travetto/app/support/main.list-build.ts')
+        ).message;
+      } else {
+        const configs: ApplicationConfig[] = [];
+        await CliUtil.waiting('Collecting', () =>
+          CliModuleUtil.runOnModules('all',
+            ['trv', 'main', '@travetto/app/support/main.list-build.ts'],
+            (folder, perFolder: ApplicationConfig[]) => {
+              const module = ModuleIndex.getModuleByFolder(folder)!.name;
+              configs.push(...perFolder.map(x => ({
+                ...x,
+                name: `${module}:${x.name}`
+              })));
+            },
+          )
+        );
+        return configs;
+      }
+    } catch (err) {
+      return [];
     }
   }
 
