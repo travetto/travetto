@@ -16,11 +16,11 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "index.ts",
+    "__index__.ts",
     "src",
     "tsconfig.bootstrap.json"
   ],
-  "main": "index.ts",
+  "main": "__index__.ts",
   "engines": {
     "node": ">=18.0.0"
   },

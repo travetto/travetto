@@ -17,6 +17,15 @@ const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
   '.md': 'md'
 };
 
+const INDEX_FILES = new Set([
+  'index.ts',
+  'index.js',
+  '__index__.ts',
+  '__index__.js',
+  '__index.ts',
+  '__index.js'
+]);
+
 export class ManifestModuleUtil {
 
   static #getNewest(stat: { mtimeMs: number, ctimeMs: number }): number {
@@ -74,7 +83,7 @@ export class ManifestModuleUtil {
         case 'support': return key;
         default: return '$other';
       }
-    } else if (moduleFile === 'index.ts' || moduleFile === 'index.js') {
+    } else if (INDEX_FILES.has(moduleFile)) {
       return '$index';
     } else if (moduleFile === 'package.json') {
       return '$package';

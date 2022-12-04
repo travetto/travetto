@@ -104,14 +104,4 @@ export class AppRunCommand extends CliCommand<Options> {
       return { name: app, args };
     }
   }
-
-  /**
-   * Tab completion support
-   */
-  override async complete(): Promise<Record<string, string[]>> {
-
-    const apps = await this.#loader.getList() ?? [];
-
-    return { '': apps.map(x => x.name).concat(['--env', '--profile']) };
-  }
 }

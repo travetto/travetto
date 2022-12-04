@@ -17,11 +17,11 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "index.ts",
+    "__index__.ts",
     "src",
     "support"
   ],
-  "main": "index.ts",
+  "main": "__index__.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/model-sql"

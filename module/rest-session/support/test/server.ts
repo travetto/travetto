@@ -7,7 +7,8 @@ import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { TimeUtil } from '@travetto/base';
 
-import { SessionData, SessionConfig } from '../../index';
+import { SessionData } from '../../src/session';
+import { SessionConfig } from '../../src/config';
 
 type Aged = { age: number, payload?: Record<string, unknown> };
 

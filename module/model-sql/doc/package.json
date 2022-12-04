@@ -1,6 +1,6 @@
 {
   "name": "doc",
-  "main": "index.ts",
+  "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
     "@travetto/model-sql": "*"

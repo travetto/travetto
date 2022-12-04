@@ -2,7 +2,6 @@ import { program as commander } from 'commander';
 
 import { PackageUtil } from '@travetto/manifest';
 
-import { AutocompleteUtil, CompletionConfig } from './autocomplete';
 import { CliCommandManager } from './command-manager';
 import { HelpUtil } from './help';
 
@@ -10,17 +9,6 @@ import { HelpUtil } from './help';
  * Execution manager
  */
 export class ExecutionManager {
-
-  /**
-   * Run tab completion given the full args list
-   */
-  static async runCompletion(args: string[]): Promise<void> {
-    const cfg: CompletionConfig = { all: [], task: {} };
-    await CliCommandManager.loadAllCommands(x => x.setupCompletion(cfg));
-    const res = await AutocompleteUtil.getCompletion(cfg, args.slice(3));
-    console.log(res.join(' '));
-    return;
-  }
 
   /**
    * Run command
@@ -66,16 +54,12 @@ export class ExecutionManager {
 
     const cmd = args[2];
 
-    if (cmd === 'complete') {
-      await this.runCompletion(args);
+    if (cmd && !cmd.startsWith('-')) {
+      await this.runCommand(args);
     } else {
-      if (cmd && !cmd.startsWith('-')) {
-        await this.runCommand(args);
-      } else {
-        // Load all commands
-        await CliCommandManager.loadAllCommands(x => x.setup(commander));
-        HelpUtil.showHelp(commander);
-      }
+      // Load all commands
+      await CliCommandManager.loadAllCommands(x => x.setup(commander));
+      HelpUtil.showHelp(commander);
     }
   }
 }

@@ -14,13 +14,16 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "index.ts",
+    "__index__.ts",
     "src",
     "bin",
     "support",
     "tsconfig.trv.json"
   ],
-  "main": "index.ts",
+  "main": "__index__.ts",
+  "bin": {
+    "trv": "bin/trv.js"
+  },
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/compiler"
