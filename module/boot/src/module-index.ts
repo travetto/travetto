@@ -40,6 +40,7 @@ class $ModuleIndex {
   #manifest: ManifestRoot;
   #modules: IndexedModule[];
   #modulesByName: Record<string, IndexedModule> = {};
+  #modulesByFolder: Record<string, IndexedModule> = {};
   #root: string;
   #outputToEntry = new Map<string, IndexedFile>();
   #sourceToEntry = new Map<string, IndexedFile>();
@@ -51,9 +52,10 @@ class $ModuleIndex {
   ) {
     this.#root = root ?? process.cwd();
     this.#manifestFile = manifestFile ?? path.resolve(this.#root, 'manifest.json');
+
     if (!this.#manifestFile.endsWith('.json')) {
       // IF not a file
-      const req = createRequire(path.resolve('node_modules'));
+      const req = createRequire(path.resolve(this.#root, 'node_modules'));
       this.#manifestFile = req.resolve(`${this.#manifestFile}/manifest.json`);
     }
     this.#index();
@@ -111,6 +113,7 @@ class $ModuleIndex {
       }
     }
     this.#modulesByName = Object.fromEntries(this.#modules.map(x => [x.name, x]));
+    this.#modulesByFolder = Object.fromEntries(this.#modules.map(x => [x.workspaceRelative, x]));
   }
 
   #getEntry(file: string): IndexedFile | undefined {
@@ -202,6 +205,13 @@ class $ModuleIndex {
    */
   getModule(name: string): IndexedModule | undefined {
     return this.#modulesByName[name];
+  }
+
+  /**
+   * Get module by folder
+   */
+  getModuleByFolder(folder: string): IndexedModule | undefined {
+    return this.#modulesByFolder[folder];
   }
 
   /**

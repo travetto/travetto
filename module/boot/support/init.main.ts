@@ -20,6 +20,8 @@ async function runMain(action: Function, args: unknown[]): Promise<void> {
 
   if (parentPort) {
     parentPort.postMessage(res);
+  } else if (process.send) {
+    process.send(res);
   } else if (res) {
     process.stdout.write(`${JSON.stringify(res)}\n`);
   }

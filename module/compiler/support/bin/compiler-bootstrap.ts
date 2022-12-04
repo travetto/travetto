@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs/promises';
 
-import type { ManifestState, ManifestContext } from '@travetto/manifest';
+import type { ManifestState, ManifestContext, ManifestRoot } from '@travetto/manifest';
 
 import { log, spawn, compileIfStale, getProjectSources, addNodePath, importManifest, IS_DEBUG } from './utils';
 
@@ -10,7 +10,7 @@ let manifestTemp;
 /**
  *  Step 1
  */
-async function buildManifest(ctx: ManifestContext): Promise<ManifestState> {
+export async function buildManifest(ctx: ManifestContext): Promise<ManifestState> {
   await compileIfStale(
     ctx,
     '[1] Manifest Bootstrapping',
@@ -20,6 +20,18 @@ async function buildManifest(ctx: ManifestContext): Promise<ManifestState> {
   log('[1] Manifest Generation');
   const { ManifestUtil } = await importManifest(ctx);
   return ManifestUtil.produceState(ctx);
+}
+
+export async function writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
+  // Write manifest in the scenario we are in mono-repo state where everything pre-existed
+  await fs.writeFile(
+    path.resolve(
+      ctx.workspacePath,
+      ctx.outputFolder,
+      ctx.manifestFile
+    ),
+    JSON.stringify(manifest)
+  );
 }
 
 function shouldRebuildCompiler({ delta }: ManifestState): { total: boolean, transformers: [string, string][] } {
@@ -92,16 +104,7 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
 
   if (changes.length === 0 && !watch) {
     log('[3] Output Ready');
-    // Write manifest in the scenario we are in mono-repo state where everything pre-existed
-    await fs.writeFile(
-      path.resolve(
-        ctx.workspacePath,
-        ctx.outputFolder,
-        ctx.manifestFile
-      ),
-      JSON.stringify(state.manifest)
-    );
-    return;
+    return await writeManifest(ctx, state.manifest);
   }
 
   const { ManifestUtil } = await importManifest(ctx);
