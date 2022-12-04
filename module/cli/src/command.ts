@@ -2,10 +2,7 @@ import { appendFile } from 'fs/promises';
 import type * as commander from 'commander';
 
 import { CliUtil } from './util';
-import { CompletionConfig } from './autocomplete';
 import { HelpUtil } from './help';
-
-type Completion = Record<string, string[]>;
 
 type OptionPrimitive = string | number | boolean;
 
@@ -237,35 +234,5 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
       }
     }
     return await this.action(...args);
-  }
-
-  /**
-   * Collection tab completion information
-   */
-  async setupCompletion(config: CompletionConfig): Promise<void> {
-    const task = await this.complete();
-    config.all = [...config.all, this.name];
-    if (task) {
-      config.task[this.name] = task;
-    }
-  }
-
-  /**
-   * Return tab completion information
-   */
-  async complete(): Promise<Completion | void> {
-    const out: Completion = { '': [] };
-    for (const el of await this.finalizeOptions()) {
-      if (el.completion) {
-        out[''] = [...out['']!, `--${el.name} `];
-        if ('choices' in el && el.choices) {
-          out[`--${el.name} `] = el.choices.map(x => `${x}`);
-          if (el.short) {
-            out[`- ${el.short} `] = el.choices.map(x => `${x}`);
-          }
-        }
-      }
-    }
-    return out;
   }
 }

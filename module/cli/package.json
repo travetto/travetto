@@ -14,15 +14,11 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "index.ts",
+    "__index__.ts",
     "src",
-    "support",
-    "bin"
+    "support"
   ],
-  "main": "index.ts",
-  "bin": {
-    "trv": "bin/trv.js"
-  },
+  "main": "__index__.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/cli"
@@ -30,14 +26,6 @@
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.3",
     "commander": "^9.4.1"
-  },
-  "peerDependencies": {
-    "@travetto/compiler": "^3.0.0-rc.5"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/compiler": {
-      "optional": true
-    }
   },
   "travetto": {
     "displayName": "Command Line Interface"

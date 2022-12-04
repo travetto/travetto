@@ -21,7 +21,7 @@ export class DocCommand extends CliCommand<Options> {
 
   getOptions(): Options {
     return {
-      input: this.option({ desc: 'Input File', def: 'index.ts' }),
+      input: this.option({ desc: 'Input File', def: 'README.ts' }),
       output: this.listOption({ desc: 'Output files', def: Pkg.main.travetto?.docOutput ?? [] }),
       format: this.option({ desc: 'Format', def: 'md' }),
       watch: this.boolOption({ desc: 'Watch' })

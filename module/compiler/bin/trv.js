@@ -11,6 +11,12 @@ const { transpileFile, writePackageJson, writeJsFile, getContext } = require('./
 const NAME = '@travetto/precompiler';
 const FILES = ['support/bin/compiler-bootstrap.ts', 'support/bin/utils.ts', 'bin/transpile.js', 'package.json'];
 const OUT_FILES = FILES.map(x => x.replace(/[.]ts$/, '.js'));
+/** @typedef {import('./transpile').CompileCommand} CompileCommand */
+
+/** @type {CompileCommand[]} */
+const COMMANDS = ['build', 'clean', 'watch', 'manifest', 'main', 'default'];
+
+const CMD_MAPPING = Object.fromEntries(COMMANDS.map(x => [x, x]));
 
 /**
  * @typedef {import('@travetto/manifest').ManifestContext} ManifestContext
@@ -64,7 +70,7 @@ async function $getBootstrap(ctx) {
 }
 
 /**
- * @param {import('./transpile').CompileCommand} [op]
+ * @param {import('./transpile').CompileCommand} op
  * @param {string} [main]
  * @return {Promise<string|undefined>}
  */
@@ -88,17 +94,22 @@ async function exec(op, main) {
     }
     case 'build':
     case 'watch': await (await $getBootstrap(ctx)).compile(ctx, op === 'watch'); break;
-    default:
+    case 'default':
+      main = '@travetto/cli/support/main.cli.ts';
+    // eslint-disable-next-line no-fallthrough
+    case 'main':
       await (await $getBootstrap(ctx)).compile(ctx);
+      main = (main ?? '').replace(/[.]ts$/, '.js');
       if (main && !main.startsWith('/')) {
         const req = createRequire(path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules'));
         main = req.resolve(main);
       }
       process.env.TRV_MANIFEST = ctx.mainModule;
       process.env.TRV_OUTPUT = path.resolve(ctx.workspacePath, ctx.outputFolder);
-      return main;
+      await import(process.env.TRV_MAIN = main);
+      return;
   }
   process.exit(0);
 }
 
-module.exports = { exec };
+exec(CMD_MAPPING[process.argv[2]] ?? 'default', process.argv[3]);

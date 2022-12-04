@@ -15,7 +15,7 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "index.ts",
+    "__index__.ts",
     "support"
   ],
   "repository": {

@@ -1,7 +1,7 @@
 import type { ManifestContext, Package } from '@travetto/manifest';
 
 declare namespace Transpile {
-  type CompileCommand = 'build' | 'watch' | 'clean' | 'manifest' | 'main';
+  type CompileCommand = 'build' | 'watch' | 'clean' | 'manifest' | 'main' | 'default';
 
   /**
    * Writes a package json file

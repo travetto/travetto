@@ -87,10 +87,6 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
     return out.join('\n');
   }
 
-  override async complete(): Promise<Record<string, string[]>> {
-    return { '': (await PackUtil.modeList()).map(x => x.name!) };
-  }
-
   async action(): Promise<void> {
     const resolved = await this.resolveConfigs();
     if (await fs.stat(path.resolve(resolved.workspace, '.git')).catch(() => { })) {

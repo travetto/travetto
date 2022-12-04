@@ -17,7 +17,7 @@ const req = createRequire(`${process.cwd()}/node_modules`);
 type ModFile = { input: string, output: string, stale: boolean };
 type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string>, showWaitingMessage?: boolean };
 
-const SOURCE_SEED = ['package.json', 'index.ts', 'src', 'support'];
+const SOURCE_SEED = ['package.json', 'index.ts', '__index__.ts', 'src', 'support'];
 
 export const IS_DEBUG = /\b([*]|build)\b/.test(process.env.DEBUG ?? '');
 
@@ -178,10 +178,12 @@ export async function getProjectSources(
   const out: ModFile[] = [];
   for (const input of files) {
     const output = input.replace(inputFolder, outputFolder).replace(/[.]ts$/, '.js');
-    const inputTs = await fs.stat(input).then(recentStat);
-    const outputTs = await fs.stat(output).then(recentStat, () => 0);
-    await fs.mkdir(path.dirname(output), { recursive: true, });
-    out.push({ input, output, stale: inputTs > outputTs });
+    const inputTs = await fs.stat(input).then(recentStat, () => 0);
+    if (inputTs) {
+      const outputTs = await fs.stat(output).then(recentStat, () => 0);
+      await fs.mkdir(path.dirname(output), { recursive: true, });
+      out.push({ input, output, stale: inputTs > outputTs });
+    }
   }
 
   return out;
@@ -223,4 +225,4 @@ export async function addNodePath(folder: string): Promise<void> {
  * Import the manifest utils once compiled
  */
 export const importManifest = (ctx: ManifestContext): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
-  import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto', 'manifest', 'index.js'));
+  import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto', 'manifest', '__index__.js'));
