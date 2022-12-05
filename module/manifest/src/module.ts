@@ -56,7 +56,7 @@ export class ManifestModuleUtil {
       return 'compile';
     } else if (moduleFile.startsWith('support/test/') || moduleFile.startsWith('test/')) {
       return 'test';
-    } else if (moduleFile.startsWith('doc/')) {
+    } else if (moduleFile.startsWith('doc/') || moduleFile === 'README.ts') {
       return 'doc';
     } else {
       return;
@@ -86,6 +86,8 @@ export class ManifestModuleUtil {
         case 'support': return key;
         default: return '$other';
       }
+    } else if (moduleFile === 'README.ts') {
+      return 'doc';
     } else if (INDEX_FILES.has(moduleFile)) {
       return '$index';
     } else if (moduleFile === 'package.json') {
@@ -98,7 +100,7 @@ export class ManifestModuleUtil {
   /**
    * Simple file scanning
    */
-  static async #scanFolder(folder: string, includeTopFolders = new Set<string>()): Promise<string[]> {
+  static async #scanFolder(folder: string, topFolders = new Set<string>(), topFiles = new Set<string>()): Promise<string[]> {
     const out: string[] = [];
     if (!fs.stat(folder).catch(() => false)) {
       return out;
@@ -120,11 +122,11 @@ export class ManifestModuleUtil {
       for (const sub of await fs.readdir(top)) {
         const stat = await fs.stat(`${top}/${sub}`);
         if (stat.isFile()) {
-          if (!sub.startsWith('.')) {
+          if (!sub.startsWith('.') && (depth > 0 || !topFiles.size || topFiles.has(sub))) {
             out.push(`${top}/${sub}`);
           }
         } else {
-          if (!sub.includes('node_modules') && !sub.startsWith('.') && (depth > 0 || !includeTopFolders.size || includeTopFolders.has(sub))) {
+          if (!sub.includes('node_modules') && !sub.startsWith('.') && (depth > 0 || !topFolders.size || topFolders.has(sub))) {
             stack.push([`${top}/${sub}`, depth + 1]);
           }
         }
@@ -147,12 +149,13 @@ export class ManifestModuleUtil {
    */
   static async #describeModule(rootFolder: string, { name, version, folder, profileSet, parentSet, internal }: Dependency, localAsMain = false): Promise<ManifestModule> {
     const main = folder === rootFolder;
-    const local = !folder.includes('node_modules') || main;
+    const local = internal || !folder.includes('node_modules') || main;
 
     const files: ManifestModule['files'] = {};
     const folderSet = (main || (local && localAsMain)) ? new Set<string>() : new Set(['src', 'bin', 'support']);
+    const fileSet = (main || (local && localAsMain)) ? new Set<string>() : new Set([...INDEX_FILES, 'package.json']);
 
-    for (const file of await this.#scanFolder(folder, folderSet)) {
+    for (const file of await this.#scanFolder(folder, folderSet, fileSet)) {
       // Group by top folder
       const moduleFile = file.replace(`${folder}/`, '');
       const entry = await this.#transformFile(moduleFile, file);

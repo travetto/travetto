@@ -1,15 +1,15 @@
 import fs from 'fs/promises';
 
 import { path } from '@travetto/boot';
-import { Env, Pkg, WatchUtil } from '@travetto/base';
+import { Env, WatchUtil } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { RenderUtil } from '../src/render/util';
 
 type Options = {
   input: OptionConfig<string>;
-  output: ListOptionConfig<string>;
-  format: OptionConfig<string>;
+  outputBase: OptionConfig<string>;
+  formats: ListOptionConfig<string>;
   watch: OptionConfig<boolean>;
 };
 
@@ -22,8 +22,8 @@ export class DocCommand extends CliCommand<Options> {
   getOptions(): Options {
     return {
       input: this.option({ desc: 'Input File', def: 'README.ts' }),
-      output: this.listOption({ desc: 'Output files', def: Pkg.main.travetto?.docOutput ?? [] }),
-      format: this.option({ desc: 'Format', def: 'md' }),
+      outputBase: this.option({ desc: 'Output Base', def: '' }),
+      formats: this.listOption({ desc: 'Formats', def: ['md', 'html'] }),
       watch: this.boolOption({ desc: 'Watch' })
     };
   }
@@ -42,31 +42,28 @@ export class DocCommand extends CliCommand<Options> {
 
   async action(): Promise<void> {
     const docFile = path.resolve(this.cmd.input);
+    const outputBase = this.cmd.outputBase || path.basename(this.cmd.input).replace(/[.]ts$/, '');
+    const outputs = this.cmd.formats.map(fmt => [fmt, path.resolve(`${outputBase}.${fmt}`)]);
 
     // If specifying output
-    if (this.cmd.output.length) {
-      const write = async (): Promise<void> => {
-        RenderUtil.purge(docFile);
-        for (const out of this.cmd.output) {
-          const fmt = path.extname(out) ?? this.cmd.format;
-          const finalName = path.resolve(out);
-          const result = await RenderUtil.render(docFile, fmt);
-          await fs.writeFile(finalName, result, 'utf8');
-        }
-      };
-
-      if (this.cmd.watch) {
-        await WatchUtil.watchFile(docFile, write);
-      } else {
-        try {
-          await write();
-        } catch (err) {
-          console.error(path.cwd(), err);
-          process.exit(1);
-        }
+    const write = async (): Promise<void> => {
+      RenderUtil.purge(docFile);
+      for (const [fmt, out] of outputs) {
+        const finalName = path.resolve(out);
+        const result = await RenderUtil.render(docFile, fmt);
+        await fs.writeFile(finalName, result, 'utf8');
       }
+    };
+
+    if (this.cmd.watch) {
+      await WatchUtil.watchFile(docFile, write);
     } else {
-      console.log(await RenderUtil.render(docFile, this.cmd.format));
+      try {
+        await write();
+      } catch (err) {
+        console.error(path.cwd(), err);
+        process.exit(1);
+      }
     }
   }
 }

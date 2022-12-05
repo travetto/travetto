@@ -1,0 +1,9 @@
+{
+  "name": "@travetto-doc/app",
+  "dependencies": {
+    "@travetto/app": "*"
+  },
+  "travetto": {
+    "isolated": true
+  }
+}

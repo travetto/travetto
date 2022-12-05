@@ -5,11 +5,12 @@ import {
   ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType,
   ManifestModuleCore, PACKAGE_STD_PROFILE, ManifestProfile
 } from '@travetto/manifest';
+
 import { path } from './path';
 
-type ScanTest = ((x: string) => boolean) | { test: (x: string) => boolean };
+type ScanTest = ((full: string) => boolean) | { test: (full: string) => boolean };
 export type FindConfig = {
-  folder?: string;
+  folders?: string[];
   filter?: ScanTest;
   includeIndex?: boolean;
   profiles?: string[];
@@ -22,6 +23,7 @@ export type IndexedFile = {
   module: string;
   source: string;
   output: string;
+  relative: string;
   profile: ManifestProfile;
   type: ManifestModuleFileType;
 };
@@ -53,10 +55,16 @@ class $ModuleIndex {
     this.#root = root ?? process.cwd();
     this.#manifestFile = manifestFile ?? path.resolve(this.#root, 'manifest.json');
 
+    // IF not a file
     if (!this.#manifestFile.endsWith('.json')) {
-      // IF not a file
-      const req = createRequire(path.resolve(this.#root, 'node_modules'));
-      this.#manifestFile = req.resolve(`${this.#manifestFile}/manifest.json`);
+      try {
+        // Try to resolve
+        const req = createRequire(path.resolve(this.#root, 'node_modules'));
+        this.#manifestFile = req.resolve(`${this.#manifestFile}/manifest.json`);
+      } catch {
+        // Fallback to assumed node_modules pattern
+        this.#manifestFile = `${this.#root}/node_modules/${this.#manifestFile}/manifest.json`;
+      }
     }
     this.#index();
   }
@@ -88,7 +96,7 @@ class $ModuleIndex {
         id = id.replace(/[.]js$/, '');
       }
 
-      return { id, type, source, output, import: modImport, profile, module: m.name };
+      return { id, type, source, output, import: modImport, profile, relative: f, module: m.name };
     });
   }
 
@@ -138,7 +146,7 @@ class $ModuleIndex {
    * @param filter The filter to determine if this is a valid support file
    */
   find(config: FindConfig): IndexedFile[] {
-    const { filter: f, folder } = config;
+    const { filter: f, folders } = config;
     const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
 
     let idx = this.#modules;
@@ -151,8 +159,8 @@ class $ModuleIndex {
       idx = idx.filter(m => m.profiles.length === 0 || m.profiles.some(p => activeProfiles.has(p)));
     }
 
-    let searchSpace = folder ?
-      idx.flatMap(m => [...m.files[folder] ?? [], ...(config.includeIndex ? (m.files.$index ?? []) : [])]) :
+    let searchSpace = folders ?
+      idx.flatMap(m => [...folders.flatMap(fo => m.files[fo] ?? []), ...(config.includeIndex ? (m.files.$index ?? []) : [])]) :
       idx.flatMap(m => [...Object.values(m.files)].flat());
 
     if (checkProfile) {
@@ -169,15 +177,15 @@ class $ModuleIndex {
    * @param filter The filter to determine if this is a valid support file
    */
   findSupport(config: Omit<FindConfig, 'folder'>): IndexedFile[] {
-    return this.find({ ...config, folder: 'support' });
+    return this.find({ ...config, folders: ['support'] });
   }
 
   /**
    * Find files from the index
    * @param filter The filter to determine if this is a valid support file
    */
-  findSrc(config: Omit<FindConfig, 'folder'>): IndexedFile[] {
-    return this.find({ ...config, folder: 'src', includeIndex: true });
+  findSrc(config: Omit<FindConfig, 'folder'> = {}): IndexedFile[] {
+    return this.find({ ...config, includeIndex: true, folders: ['src'] });
   }
 
   /**
@@ -185,7 +193,7 @@ class $ModuleIndex {
    * @param filter The filter to determine if this is a valid support file
    */
   findTest(config: Omit<FindConfig, 'folder'>): IndexedFile[] {
-    return this.find({ ...config, folder: 'test' });
+    return this.find({ ...config, folders: ['test'] });
   }
 
   /**
@@ -255,7 +263,7 @@ class $ModuleIndex {
    * Load all source modules
    */
   async loadSource(): Promise<void> {
-    for (const { output } of this.findSrc({})) {
+    for (const { output } of this.findSrc()) {
       await import(output);
     }
   }

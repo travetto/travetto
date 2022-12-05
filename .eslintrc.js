@@ -35,15 +35,17 @@ module.exports = {
       }
     },
     {
-      files: '{module,related}/*/doc/**/*.ts',
+      files: '{module,related}/*/{doc/**/*.ts,README.ts}',
       rules: {
         'max-len': 0,
         '@typescript-eslint/quotes': 'warn',
         '@typescript-eslint/indent': 0,
+        '@typescript-eslint/consistent-type-assertions': 0,
+        '@typescript-eslint/explicit-function-return-type': 0,
       }
     },
     {
-      files: '{module,global-test}/*/{test,doc,support/test}/**/*.ts',
+      files: '{module,global-test}/*/{test,support/test}/**/*.ts',
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0

@@ -76,6 +76,7 @@ export type Package = {
   peerDependenciesMeta?: Record<string, { optional?: boolean }>;
   optionalDependencies?: Record<string, string>;
   travetto?: {
+    isolated?: boolean;
     displayName?: string;
     profiles?: ManifestProfile[];
     docOutput?: string[];

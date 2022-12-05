@@ -49,7 +49,7 @@ async function $getWorkspaceRoot() {
     folder = path.dirname(folder);
     try {
       const pkg = await $getPkg(folder);
-      if (!!pkg.workspaces) {
+      if (!!pkg.workspaces || pkg.travetto?.isolated) {
         return folder;
       }
     } catch { }

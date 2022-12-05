@@ -11,34 +11,42 @@ With the application, the ${d.Method('run')} method is the entry point that will
 
 For example:
 
-${d.Code(d`Example of ${Application.name} target`, 'src/entry-simple.ts')}
+${d.Code(d`Example of ${Application.name} target`, 'doc/entry-simple.ts')}
 
 Additionally, the ${Application} decorator exposes some additional functionality, which can be used to launch the application.
 
 ${d.Section(d`${d.Method('.run()')} Arguments`)}
 The arguments specified in the ${d.Method('run')} method are extracted via code transformation, and are able to be bound when invoking the application.  Whether from the command line or a plugin, the parameters will be mapped to the inputs of ${d.Method('run')}.  For instance:
   
-${d.Code(d`Simple Entry Point with Parameters`, 'src/domain.ts')}
+${d.Code(d`Simple Entry Point with Parameters`, 'doc/domain.ts')}
 
 ${d.Section('CLI - run')}
 
 The run command allows for invocation of applications as defined by the ${Application} decorator.  Additionally, the environment can manually be specified (dev, test, prod).
 
-${d.Execute('CLI Run Help', 'trv', ['run', '--help'])}
+${d.Execute('CLI Run Help', 'trv', ['run', '--help'], {
+  cwd: './doc-exec'
+})}
 
 Running without specifying an application ${d.Command('trv', 'run')}, will display all the available apps, and would look like:
 
-${d.Execute('Sample CLI Output', 'trv', ['run'])}
+${d.Execute('Sample CLI Output', 'trv', ['run'], {
+  cwd: './doc-exec'
+})}
 
 To invoke the ${d.Input('simple')} application, you need to pass ${d.Input('domain')} where port is optional with a default.
   
-${d.Execute('Invoke Simple', 'trv', ['run', 'simple-domain', 'my-domain.biz', '4000'])}
+${d.Execute('Invoke Simple', 'trv', ['run', 'simple-domain', 'my-domain.biz', '4000'], {
+  cwd: './doc-exec'
+})}
 
 ${d.Section('Type Checking')}
 
 The parameters to ${d.Method('run')} will be type checked, to ensure proper evaluation.
 
-${d.Execute('Invoke Simple with bad port', 'trv', ['run', 'simple-domain', 'my-domain.biz', 'orange'])}
+${d.Execute('Invoke Simple with bad port', 'trv', ['run', 'simple-domain', 'my-domain.biz', 'orange'], {
+  cwd: './doc-exec'
+})}
 
 The types are inferred from the ${d.Method('.run()')} method parameters, but can be overridden in the ${Application} 
 annotation to support customization. Only primitive types are supported:
@@ -52,5 +60,5 @@ ${d.List(
   
 Customizing the types is done by name, and allows for greater control:
 
-${d.Code('Complex Entry Point with Customization', 'src/complex.ts')}
+${d.Code('Complex Entry Point with Customization', 'doc/complex.ts')}
 `;

@@ -5,7 +5,7 @@ import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base'
 
 export type RunConfig = {
   filter?: (line: string) => boolean;
-  module?: 'base' | 'boot';
+  module?: string;
   env?: Record<string, string>;
   cwd?: string;
 };
@@ -56,6 +56,7 @@ export class DocRunUtil {
         env: {
           ...Env.getAll(),
           DEBUG: '0',
+          ...(config.module ? { TRV_MANIFEST: config.module } : {}),
           ...(config.env ?? {})
         }
       }
@@ -99,12 +100,14 @@ export class DocRunUtil {
     let final: string;
     try {
       const state = this.runState(cmd, args, config);
-      const res = spawnSync(state.cmd, state.args, {
+      const spawnCfg = {
         ...state.opts,
         stdio: 'pipe' as const,
         encoding: 'utf8',
         maxBuffer: 1024 * 1024 * 20,
-      });
+      } as const;
+
+      const res = spawnSync(state.cmd, state.args, spawnCfg);
 
       if (res.error) {
         throw res.error;
