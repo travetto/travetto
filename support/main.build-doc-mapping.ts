@@ -32,5 +32,6 @@ export async function main(): Promise<void> {
     description: '${mod.description?.replaceAll("'", '\\\'')}'
   }`);
   }
+
   process.stdout.write(`{\n${text.join(',')}\n}\n`);
 }

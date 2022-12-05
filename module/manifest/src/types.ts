@@ -1,11 +1,11 @@
 export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture' | 'md';
 export type ManifestModuleFolderType =
   '$root' | '$index' | '$package' |
-  'src' | 'bin' | 'support' | 'resources' | 'test' |
+  'src' | 'bin' | 'support' | 'resources' | 'test' | 'doc' |
   'test/fixtures' | 'support/fixtures' | 'support/resources' |
   '$other';
 
-export type ManifestProfile = 'std' | 'compile' | 'test';
+export type ManifestProfile = 'std' | 'compile' | 'test' | 'doc';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestProfile];
 export type ManifestModuleCore = {

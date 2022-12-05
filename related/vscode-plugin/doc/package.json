@@ -1,9 +1,0 @@
-{
-  "name": "doc",
-  "main": "README.ts",
-  "dependencies": {
-    "vscode-plugin": "file:..",
-    "@travetto/app": "*"
-  },
-  "private": true
-}

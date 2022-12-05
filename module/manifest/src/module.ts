@@ -56,6 +56,8 @@ export class ManifestModuleUtil {
       return 'compile';
     } else if (moduleFile.startsWith('support/test/') || moduleFile.startsWith('test/')) {
       return 'test';
+    } else if (moduleFile.startsWith('doc/')) {
+      return 'doc';
     } else {
       return;
     }
@@ -79,6 +81,7 @@ export class ManifestModuleUtil {
         case 'src':
         case 'bin':
         case 'test':
+        case 'doc':
         case 'resources':
         case 'support': return key;
         default: return '$other';

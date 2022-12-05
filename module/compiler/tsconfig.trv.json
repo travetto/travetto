@@ -13,8 +13,8 @@
     "noEmitOnError": false,
     "noErrorTruncation": true,
     "resolveJsonModule": true,
-    "sourceMap": false,
-    "inlineSourceMap": true,
+    "sourceMap": true,
+    "inlineSourceMap": false,
     "removeComments": true,
     "importHelpers": true,
     "outDir": "build/"
