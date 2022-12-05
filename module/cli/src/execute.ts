@@ -1,6 +1,7 @@
 import { program as commander } from 'commander';
 
 import { PackageUtil } from '@travetto/manifest';
+import { ModuleIndex } from '@travetto/boot';
 
 import { CliCommandManager } from './command-manager';
 import { HelpUtil } from './help';
@@ -54,7 +55,10 @@ export class ExecutionManager {
 
     const cmd = args[2];
 
-    if (cmd && !cmd.startsWith('-')) {
+    if (cmd === 'main') {
+      const mainFile = ModuleIndex.resolveFileImport(process.argv[3])!;
+      await import(process.env.TRV_MAIN = mainFile);
+    } else if (cmd && !cmd.startsWith('-')) {
       await this.runCommand(args);
     } else {
       // Load all commands

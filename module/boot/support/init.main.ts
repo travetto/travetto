@@ -55,7 +55,14 @@ async function setupLogging(): Promise<void> {
 }
 
 // Setup everything
+let initialized = false;
 async function setup(): Promise<void> {
+  if (initialized) {
+    return;
+  } else {
+    initialized = true;
+  }
+
   // Read .env setup
   try { await import(path.resolve('.env')); } catch { }
 
@@ -87,7 +94,7 @@ async function setup(): Promise<void> {
   ShutdownManager.register();
 
   await setupLogging();
-}
+};
 
 export async function runIfMain(target: Function, filename: string, mainFile: string): Promise<unknown> {
   mainFile = process.env.TRV_MAIN || mainFile;

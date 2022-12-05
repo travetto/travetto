@@ -154,6 +154,48 @@ async function writeJsFile(ctx, inputFile, outputFile) {
 }
 
 /**
+ * Write an entire package
+ * @param {ManifestContext} ctx
+ * @param {string} name
+ * @param {string} sourcePath
+ * @param {string} mainSource
+ * @param {string[]} extraSources
+ */
+async function buildPackage(ctx, name, sourcePath, mainSource, extraSources) {
+  const path = await $getPath();
+  const fs = await $getFs();
+
+  const files = [mainSource, ...extraSources].map(x => ({ src: x, out: x.replace(/[.]ts$/, '.js') }));
+  const main = files[0].out;
+  const outputPath = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', name);
+
+  for (const { src, out } of files) {
+    const inputFile = path.resolve(sourcePath, src);
+    const outputFile = path.resolve(outputPath, out);
+
+    const [outStat, inStat] = await Promise.all([
+      fs.stat(outputFile).catch(() => undefined),
+      fs.stat(inputFile)
+    ]);
+
+    if (!outStat || (outStat.mtimeMs < inStat.mtimeMs)) {
+      await fs.mkdir(path.dirname(outputFile), { recursive: true });
+
+      if (inputFile.endsWith('.ts')) {
+        await transpileFile(ctx, inputFile, outputFile);
+      } else if (inputFile.endsWith('.js')) {
+        await writeJsFile(ctx, inputFile, outputFile);
+      } else if (inputFile.endsWith('.json')) {
+        await writePackageJson(ctx, inputFile, outputFile,
+          (pkg) => ({ ...pkg, files: files.map(x => x.out), name, main }));
+      }
+    }
+  }
+
+  return path.resolve(outputPath, main);
+}
+
+/**
  * Gets build context
  * @return {Promise<ManifestContext>}
  */
@@ -180,4 +222,4 @@ async function getContext() {
   };
 }
 
-module.exports = { transpileFile, writePackageJson, writeJsFile, getContext };
+module.exports = { transpileFile, writePackageJson, writeJsFile, buildPackage, getContext };

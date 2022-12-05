@@ -128,9 +128,10 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
   });
 }
 
-export async function compile(ctx: ManifestContext, watch?: boolean): Promise<void> {
+export async function compile(ctx: ManifestContext, watch?: boolean): Promise<ManifestState> {
   const state = await buildManifest(ctx); // Step 1
   await buildCompiler(state, ctx); // Step 2
   await compileOutput(state, ctx, watch); // Step 3
   await addNodePath(path.resolve(ctx.workspacePath, ctx.outputFolder));
+  return state;
 }

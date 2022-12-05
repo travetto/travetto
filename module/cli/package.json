@@ -16,8 +16,10 @@
   "files": [
     "__index__.ts",
     "src",
-    "support"
+    "support",
+    "bin"
   ],
+  "bin": "trv.js",
   "main": "__index__.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
