@@ -3,9 +3,7 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/auth": "*",
-    "@travetto/jwt": "*",
-    "@travetto/model": "*"
+    "@travetto/auth": "*"
   },
   "private": true
 }

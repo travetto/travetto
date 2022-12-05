@@ -3,16 +3,7 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/auth-model": "*",
-    "@travetto/model-dynamodb": "*",
-    "@travetto/model-elasticsearch": "*",
-    "@travetto/model-firestore": "*",
-    "@travetto/model-mongo": "*",
-    "@travetto/model-redis": "*",
-    "@travetto/model-s3": "*",
-    "@travetto/model-mysql": "*",
-    "@travetto/model-postgres": "*",
-    "@travetto/model-sqlite": "*"
+    "@travetto/auth-model": "*"
   },
   "private": true
 }

@@ -1,11 +1,5 @@
 import { d, mod, lib } from '@travetto/doc';
 import { FileModelService, MemoryModelService } from '@travetto/model';
-import { DynamoDBModelService } from '@travetto/model-dynamodb';
-import { MongoModelService } from '@travetto/model-mongo';
-import { ElasticsearchModelService } from '@travetto/model-elasticsearch';
-import { RedisModelService } from '@travetto/model-redis';
-import { SQLModelService } from '@travetto/model-sql';
-import { S3ModelService } from '@travetto/model-s3';
 
 import { Links } from '@travetto/model/support/doc.support';
 
@@ -23,13 +17,15 @@ ${d.Install('provider', '@travetto/model-{provider}')}
 
 Currently, the following are packages that provide ${Links.Expiry}:
 ${d.List(
-  d`${mod.Model} - ${FileModelService}, ${MemoryModelService}`,
-  d`${mod.ModelDynamodb} - ${DynamoDBModelService}`,
-  d`${mod.ModelElasticsearch} - ${ElasticsearchModelService}`,
-  d`${mod.ModelMongo} - ${MongoModelService}`,
-  d`${mod.ModelRedis} - ${RedisModelService}`,
-  d`${mod.ModelS3} - ${S3ModelService}`,
-  d`${mod.ModelSql} - ${SQLModelService}`,
+  d`${mod.Model} - ${mod.Model.name}: ${FileModelService}, ${MemoryModelService}`,
+  d`${mod.ModelDynamodb} - ${mod.ModelDynamodb.name}`,
+  d`${mod.ModelElasticsearch} - ${mod.ModelElasticsearch.name}`,
+  d`${mod.ModelMongo} - ${mod.ModelMongo.name}`,
+  d`${mod.ModelRedis} - ${mod.ModelRedis.name}`,
+  d`${mod.ModelS3} - ${mod.ModelS3.name}`,
+  d`${mod.ModelPostgres} - ${mod.ModelPostgres.name}`,
+  d`${mod.ModelMysql} - ${mod.ModelMysql.name}`,
+  d`${mod.ModelSqlite} - ${mod.ModelSqlite.name}`,
 )}
 
 ${d.Section('Decorators')}

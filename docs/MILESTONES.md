@@ -348,6 +348,14 @@ All "extension" points have been moved to their own modules, removing support fo
 ### Transpilation/Loading Overhaul
 One of the primary goals here is to end up with a `.trv_cache` folder that is directly invokable without the framework. The ideal here is the previous work around a "readonly" mode is replaced in a world where there is only javascript files.  This provides an increased level of security while setting the stage for integrating with existing js bundlers.  This will have ramifications in the pack extension.
 
+### Logging Overhaul
+
+### Config Overhaul
+
+### ResourceManager Overhaul
+
+### VS Code extension overhaul
+
 ### New Modules (or old but new)
 * Auth-model - Holds model for auth persistence with the model framework
 * Auth-rest-jwt - Support for auth-rest and jwt tokens
