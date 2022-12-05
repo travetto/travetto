@@ -12,6 +12,7 @@ export type Dependency = Package['travetto'] & {
   folder: string;
   parentSet: Set<string>;
   profileSet: Set<ManifestProfile>;
+  isolated?: boolean;
 };
 
 type CollectState = {
@@ -24,6 +25,7 @@ export class PackageUtil {
 
   static #req = createRequire(`${process.cwd()}/node_modules`);
   static #framework: Package;
+  static #cache: Record<string, Package> = {};
 
   static resolveImport = (library: string): string => this.#req.resolve(library);
 
@@ -31,14 +33,17 @@ export class PackageUtil {
    * Read a package.json from a given folder
    */
   static readPackage(folder: string): Package {
-    return JSON.parse(readFileSync(path.resolve(folder, 'package.json'), 'utf8'));
+    return this.#cache[folder] ??= JSON.parse(readFileSync(
+      folder.endsWith('.json') ? folder : path.resolve(folder, 'package.json'),
+      'utf8'
+    ));
   }
 
   /**
    * Get version of manifest package
    */
   static getFrameworkVersion(): string {
-    return (this.#framework ??= this.readPackage(path.dirname(this.resolveImport('@travetto/manifest/package.json')))).version;
+    return (this.#framework ??= this.readPackage(this.resolveImport('@travetto/manifest/package.json'))).version;
   }
 
   /**
@@ -70,6 +75,11 @@ export class PackageUtil {
 
     const { name, version, dependencies = {}, devDependencies = {}, workspaces, travetto, ['private']: isPrivate } = this.readPackage(folder);
     isModule ??= (!!travetto || folder === path.cwd());
+
+    // Skip reading if a child and isolated
+    if (inState.parent && travetto?.isolated) {
+      return [];
+    }
 
     if (state.seen.has(name)) {
       const self = state.seen.get(name)!;

@@ -1,6 +1,6 @@
 import util from 'util';
 
-import { path } from '@travetto/boot';
+import { ModuleIndex, path } from '@travetto/boot';
 import { Class, ClassInstance, Util } from '@travetto/base';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
@@ -94,7 +94,7 @@ export class AssertUtil {
 
     const msg = error.message.split(/\n/)[0];
 
-    const core = { file, classId: suite.classId, methodName };
+    const core = { file, classId: suite.classId, methodName, module: ModuleIndex.manifest.mainModule };
     const coreAll = { ...core, description: msg, lines: { start: line, end: line, codeStart: line } };
 
     const assert: Assertion = {

@@ -28,6 +28,7 @@
   },
   "workspaces": [
     "module/*",
+    "module/*/doc-exec",
     "global-test/*",
     "related/overview",
     "related/todo-app"
