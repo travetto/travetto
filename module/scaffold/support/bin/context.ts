@@ -1,9 +1,8 @@
-import cp from 'child_process';
 import fs from 'fs/promises';
 import { render } from 'mustache';
 
 import { path } from '@travetto/boot';
-import { Env, Pkg, ExecUtil, ExecutionResult } from '@travetto/base';
+import { Pkg, ExecUtil, ExecutionResult } from '@travetto/base';
 
 import { Feature } from './features';
 
@@ -35,10 +34,6 @@ export class Context {
 
   readonly name: string;
   readonly frameworkVersion = Pkg.mainDigest().framework.replace(/[.]\d+$/, '.0');
-  readonly author = {
-    name: cp.execSync('git config user.name', { stdio: 'pipe', encoding: 'utf8' }).trim() || Env.get('USER'),
-    email: cp.execSync('git config user.email', { stdio: 'pipe', encoding: 'utf8' }).trim()
-  };
 
   constructor(name: string, template: string, targetDir: string) {
     this.name = name;

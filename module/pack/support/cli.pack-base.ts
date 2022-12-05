@@ -1,9 +1,8 @@
 import os from 'os';
-import fs from 'fs/promises';
 
 import { path } from '@travetto/boot';
 import { Pkg } from '@travetto/base';
-import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
+import { CliCommand, CliScmUtil, CliUtil, OptionConfig } from '@travetto/cli';
 
 import { PackUtil } from './bin/util';
 import { CommonConfig, PackOperation } from './bin/types';
@@ -89,7 +88,7 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
 
   async action(): Promise<void> {
     const resolved = await this.resolveConfigs();
-    if (await fs.stat(path.resolve(resolved.workspace, '.git')).catch(() => { })) {
+    if (await CliScmUtil.isRepoRoot(resolved.workspace)) {
       throw new Error('Refusing to use workspace with a .git directory');
     }
     return PackUtil.runOperation(this.operation, resolved);
