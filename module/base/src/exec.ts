@@ -170,6 +170,7 @@ export class ExecUtil {
     Object.assign(res, {
       catchAsResult: (): Promise<ExecutionResult> => res.catch((err: ErrorWithMeta) => err.meta!)
     });
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return res as CatchableResult;
   }
 
@@ -210,7 +211,7 @@ export class ExecUtil {
   static worker<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
     const env = {
       ...process.env,
-      TRV_DYNAMIC: '0', // Force dynamic to not cascade
+      TRV_MAIN: '',
       ...((options.env !== SHARE_ENV ? options.env : {}) || {}),
     };
     const worker = new Worker(path.resolve(file), {
@@ -223,7 +224,8 @@ export class ExecUtil {
     });
 
     const stderr: Buffer[] = [];
-    worker.stdout!.on('data', (d: string | Buffer) => { }); // Ignore
+    const stdout: Buffer[] = [];
+    worker.stdout!.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
     worker.stderr!.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
 
     const result = new Promise<number>((res, rej) =>

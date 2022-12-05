@@ -5,6 +5,7 @@ import { CliModuleUtil } from '@travetto/cli';
 
 import { ApplicationRegistry } from '../../src/registry';
 import type { ApplicationConfig } from '../../src/types';
+import { AppListLoader } from './list';
 
 /**
  * Supporting app execution
@@ -16,15 +17,16 @@ export class AppRunUtil {
    * loading framework and compiling
    */
   static async run(app: ApplicationConfig | string, ...sub: string[]): Promise<void> {
-    const selected = typeof app === 'string' ? app : app.name;
+    if (typeof app === 'string') {
+      app = (await new AppListLoader().findByName(app))!;
+    }
 
-    if (CliModuleUtil.isMonoRepoRoot() && selected.includes(':')) {
-      const [mod, name] = selected.split(':');
+    if (CliModuleUtil.isMonoRepoRoot() && app.moduleName) {
       await ExecUtil.spawn(
         'trv',
-        ['run', name, ...sub],
+        ['run', app.name, ...sub],
         {
-          cwd: ModuleIndex.getModule(mod)!.source,
+          cwd: ModuleIndex.getModule(app.module)!.source,
           env: { TRV_MANIFEST: '' },
           stdio: 'inherit'
         }

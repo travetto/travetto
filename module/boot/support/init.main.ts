@@ -10,6 +10,8 @@ async function runMain(action: Function, args: unknown[]): Promise<void> {
   let res: unknown | undefined;
   let exitCode = 0;
 
+  const initialMain = process.env.TRV_MAIN;
+
   try {
     res = await action(...args);
   } catch (err) {
@@ -18,15 +20,17 @@ async function runMain(action: Function, args: unknown[]): Promise<void> {
     exitCode = (res instanceof Error) ? (res as { code?: number })['code'] ?? 1 : 1;
   }
 
-  if (parentPort) {
-    parentPort.postMessage(res);
-  } else if (process.send) {
-    process.send(res);
-  } else if (res) {
-    process.stdout.write(`${JSON.stringify(res)}\n`);
+  // If not delegated
+  if (initialMain === process.env.TRV_MAIN) {
+    if (parentPort) {
+      parentPort.postMessage(res);
+    } else if (process.send) {
+      process.send(res);
+    } else if (res) {
+      process.stdout.write(`${JSON.stringify(res)}\n`);
+    }
+    process.exit(exitCode);
   }
-
-  process.exit(exitCode);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,7 +98,7 @@ async function setup(): Promise<void> {
   ShutdownManager.register();
 
   await setupLogging();
-};
+}
 
 export async function runIfMain(target: Function, filename: string, mainFile: string): Promise<unknown> {
   mainFile = process.env.TRV_MAIN || mainFile;

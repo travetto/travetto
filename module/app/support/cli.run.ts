@@ -70,8 +70,7 @@ export class AppRunCommand extends CliCommand<Options> {
 
         // Run otherwise
         try {
-          await AppRunUtil.run(selected, ...args);
-          process.exit(0);
+          return await AppRunUtil.run(selected, ...args);
         } catch (err) {
           if (!err || !(err instanceof Error)) {
             throw err;

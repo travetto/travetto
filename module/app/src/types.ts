@@ -16,6 +16,8 @@ export type AppClass = {
  */
 export interface ApplicationConfig<T extends AppClass = AppClass> {
   name: string; // App name
+  moduleName?: string; // Module + name
+  module: string;
   filename: string; // Location of file for app
   description?: string;
   start: number; // Start of app

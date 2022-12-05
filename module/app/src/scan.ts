@@ -3,7 +3,7 @@ import fs from 'fs';
 import { ModuleIndex } from '@travetto/boot';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { ApplicationConfig } from './types';
+import type { ApplicationConfig } from './types';
 import { ApplicationRegistry } from './registry';
 
 /**
