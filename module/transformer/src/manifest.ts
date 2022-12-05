@@ -22,11 +22,11 @@ export class ManifestManager {
           this.#srcToEntry[src] = entry;
 
           this.#outToEntry[out] = entry;
-          this.#outToEntry[out.replace(/[.][tjm]s$/, '')] = entry;
+          this.#outToEntry[out.replace(/[.][tj]s$/, '')] = entry;
           this.#outToEntry[out.replace(/[.]ts$/, '.js')] = entry;
 
           this.#modToEntry[modImp] = entry;
-          this.#modToEntry[modImp.replace(/[.][tjm]s$/, '')] = entry;
+          this.#modToEntry[modImp.replace(/[.][tj]s$/, '')] = entry;
           this.#modToEntry[modImp.replace(/[.]ts$/, '.js')] = entry;
         }
       }

@@ -210,8 +210,10 @@ export class CompilerState {
         mkdirSync(path.dirname(outputFile), { recursive: true });
         if (outputFile.endsWith('package.json')) {
           text = CompilerUtil.rewritePackageJSON(this.manifest, text, options);
-        } else if (outputFile.endsWith('.map')) {
+        } else if (!options.inlineSourceMap && options.sourceMap && outputFile.endsWith('.map')) {
           text = CompilerUtil.rewriteSourceMap(text, f => this.#relativeInputToSource.get(f));
+        } else if (options.inlineSourceMap && CompilerUtil.isSourceMapUrlPosData(data)) {
+          text = CompilerUtil.rewriteInlineSourceMap(text, f => this.#relativeInputToSource.get(f), data);
         }
         ts.sys.writeFile(outputFile, text, bom);
       },
