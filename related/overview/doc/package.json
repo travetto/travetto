@@ -1,8 +1,0 @@
-{
-  "name": "doc",
-  "main": "README.ts",
-  "dependencies": {
-    "@travetto/overview": "file:.."
-  },
-  "private": true
-}

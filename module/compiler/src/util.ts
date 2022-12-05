@@ -25,31 +25,17 @@ export class CompilerUtil {
 
   /**
    * Rewrite's sourcemap locations to real folders
-   * @param text
-   * @param inputToSource
-   * @param writeData
    * @returns
    */
-  static rewriteSourceMap(
-    text: string,
-    inputToSource: InputToSource,
-    { sourceMapUrlPos }: ts.WriteFileCallbackData & { sourceMapUrlPos: number }
-  ): string {
-    const sourceMapUrl = text.substring(sourceMapUrlPos);
-    const [prefix, sourceMapData] = sourceMapUrl.split('base64,');
-    const data: { sourceRoot: string, sources: string[] } = JSON.parse(Buffer.from(sourceMapData, 'base64url').toString('utf8'));
+  static rewriteSourceMap(text: string, inputToSource: InputToSource): string {
+    const data: { sourceRoot: string, sources: string[] } = JSON.parse(text);
     const [src] = data.sources;
 
     const { source: file, module } = inputToSource(src) ?? {};
     if (file && module) {
       data.sourceRoot = module.source;
-      data.sources = [file];
-      text = [
-        text.substring(0, sourceMapUrlPos),
-        prefix,
-        'base64,',
-        Buffer.from(JSON.stringify(data), 'utf8').toString('base64url')
-      ].join('');
+      data.sources = [file.replace(`${module.source}/`, './')];
+      text = JSON.stringify(data, null, 2);
     }
 
     return text;

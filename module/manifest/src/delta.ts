@@ -6,7 +6,7 @@ import {
   ManifestRoot
 } from './types';
 
-const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package']);
+const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package', 'doc']);
 
 /**
  * Produce delta for the manifest

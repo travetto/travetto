@@ -37,6 +37,7 @@ export class CompilerState {
         ...x.files.bin ?? [],
         ...x.files.src ?? [],
         ...x.files.support ?? [],
+        ...x.files.doc ?? [],
         ...x.files.test ?? [],
         ...x.files.$index ?? [],
         ...x.files.$package ?? []
@@ -209,8 +210,8 @@ export class CompilerState {
         mkdirSync(path.dirname(outputFile), { recursive: true });
         if (outputFile.endsWith('package.json')) {
           text = CompilerUtil.rewritePackageJSON(this.manifest, text, options);
-        } else if (CompilerUtil.isSourceMapUrlPosData(data)) {
-          text = CompilerUtil.rewriteSourceMap(text, f => this.#relativeInputToSource.get(f), data);
+        } else if (outputFile.endsWith('.map')) {
+          text = CompilerUtil.rewriteSourceMap(text, f => this.#relativeInputToSource.get(f));
         }
         ts.sys.writeFile(outputFile, text, bom);
       },
