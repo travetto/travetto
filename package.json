@@ -21,7 +21,8 @@
       "module/test",
       "module/cli",
       "module/compiler",
-      "module/command"
+      "module/command",
+      "module/doc"
     ],
     "docBaseUrl": "https://github.com/travetto/travetto/tree/main"
   },

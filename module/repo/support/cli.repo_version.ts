@@ -1,10 +1,9 @@
 import fs from 'fs/promises';
 
-import { CliCommand } from '@travetto/cli';
+import { CliCommand, CliScmUtil } from '@travetto/cli';
 import { CliModuleUtil } from '@travetto/cli/src/module';
 import { Package, PackageUtil } from '@travetto/manifest';
 
-import { Git } from './bin/git';
 import { Npm } from './bin/npm';
 import { DEP_GROUPS, SemverLevel } from './bin/types';
 
@@ -22,7 +21,10 @@ export class RepoVersionCommand extends CliCommand {
   }
 
   async action(level: SemverLevel, prefix?: string): Promise<void> {
-    await Git.checkWorkspaceDirty('Cannot update versions with uncommitted changes');
+    if (await CliScmUtil.isWorkspaceDirty()) {
+      console.error('Cannot update versions with uncommitted changes');
+      process.exit(1);
+    }
 
     const changed = (await CliModuleUtil.findModules('changed')).filter(x => !x.internal);
     await Npm.version(changed, level, prefix);
@@ -51,7 +53,7 @@ export class RepoVersionCommand extends CliCommand {
       for (const mod of refreshed) {
         await fs.writeFile(`${packages[mod.name].mod.source}/package.json`, JSON.stringify(mod, null, 2), 'utf8');
       }
-      console.log!(await Git.publishCommit(changed.map(x => x.name).join(',')));
+      console.log!(await CliScmUtil.createCommit(`Publish ${changed.map(x => x.name).join(',')}`));
     }
   }
 }

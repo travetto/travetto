@@ -41,24 +41,20 @@ async function $getPkg(inputFolder) {
  * @return {Promise<string>}
  */
 async function $getWorkspaceRoot() {
-  const top = process.cwd();
-  let folder = top;
-  const fs = await $getFs();
   const path = await $getPath();
-  while (!(await fs.stat(`${folder}/.git`).catch(() => false))) {
-    const nextFolder = path.dirname(folder);
-    if (nextFolder === folder) {
-      break;
-    }
-    folder = nextFolder;
+  let folder = process.cwd();
+  let prevFolder = '';
+  while (folder !== prevFolder) {
+    prevFolder = folder;
+    folder = path.dirname(folder);
+    try {
+      const pkg = await $getPkg(folder);
+      if (!!pkg.workspaces) {
+        return folder;
+      }
+    } catch { }
   }
-  if (await fs.stat(`${folder}/package.json`).catch(() => false)) {
-    const pkg = await $getPkg(folder);
-    if (!!pkg.workspaces) {
-      return folder;
-    }
-  }
-  return top;
+  return process.cwd();
 }
 
 /**
