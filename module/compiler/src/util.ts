@@ -35,10 +35,33 @@ export class CompilerUtil {
     if (file && module) {
       data.sourceRoot = module.source;
       data.sources = [file.replace(`${module.source}/`, './')];
-      text = JSON.stringify(data, null, 2);
+      text = JSON.stringify(data);
     }
 
     return text;
+  }
+
+  /**
+   * Rewrite's inline sourcemap locations to real folders
+   * @param text
+   * @param inputToSource
+   * @param writeData
+   * @returns
+   */
+  static rewriteInlineSourceMap(
+    text: string,
+    inputToSource: InputToSource,
+    { sourceMapUrlPos }: ts.WriteFileCallbackData & { sourceMapUrlPos: number }
+  ): string {
+    const sourceMapUrl = text.substring(sourceMapUrlPos);
+    const [prefix, sourceMapData] = sourceMapUrl.split('base64,');
+    const rewritten = this.rewriteSourceMap(Buffer.from(sourceMapData, 'base64url').toString('utf8'), inputToSource);
+    return [
+      text.substring(0, sourceMapUrlPos),
+      prefix,
+      'base64,',
+      Buffer.from(rewritten, 'utf8').toString('base64url')
+    ].join('');
   }
 
   /**
