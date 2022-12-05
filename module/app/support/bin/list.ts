@@ -74,11 +74,14 @@ export class AppListLoader {
           CliModuleUtil.runOnModules('all',
             ['trv', 'main', '@travetto/app/support/main.list-build.ts'],
             (folder, perFolder: ApplicationConfig[]) => {
-              const module = ModuleIndex.getModuleByFolder(folder)!.name;
-              configs.push(...perFolder.map(x => ({
-                ...x,
-                name: `${module}:${x.name}`
-              })));
+              if (perFolder.length && perFolder[0].module !== ModuleIndex.manifest.mainModule) {
+                for (const m of perFolder) {
+                  if (m) {
+                    m.moduleName = `${m.module}:${m.name}`;
+                  }
+                }
+              }
+              configs.push(...perFolder);
             },
           )
         );
@@ -94,7 +97,7 @@ export class AppListLoader {
    * @param name
    */
   async findByName(name: string): Promise<ApplicationConfig | undefined> {
-    return (await this.getList())?.find(x => x.name === name);
+    return (await this.getList())?.find(x => x.moduleName ? x.moduleName === name : x.name === name);
   }
 
   /**

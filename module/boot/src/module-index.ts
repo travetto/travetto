@@ -73,6 +73,10 @@ class $ModuleIndex {
     return this.#root;
   }
 
+  get manifestFile(): string {
+    return this.#manifestFile;
+  }
+
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([f, type, ts, profile = 'std']) => {
       const source = path.join(m.source, f);

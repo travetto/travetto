@@ -1,6 +1,6 @@
 import { Env } from '@travetto/base';
 
-import { ApplicationConfig } from '../src/types';
+import type { ApplicationConfig } from '../src/types';
 
 import { AppListLoader } from './bin/list';
 

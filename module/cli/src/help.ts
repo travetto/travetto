@@ -98,16 +98,16 @@ export class HelpUtil {
   /**
    * Show the help
    * @param command
-   * @param message
+   * @param failure
    * @param extra
    */
-  static showHelp(command: commander.Command, message?: string, extra?: string): never {
-    if (message) {
-      console!.error(CliUtil.color`${{ failure: message }}\n`);
+  static showHelp(command: commander.Command, failure?: string, extra?: string): never {
+    if (failure) {
+      console!.error(CliUtil.color`${{ failure }}\n`);
     }
-    console![message ? 'error' : 'log'](
+    console![failure ? 'error' : 'log'](
       HelpUtil.getHelpText(command.helpInformation(), extra)
     );
-    process.exit(message ? 1 : 0);
+    process.exit(failure ? 1 : 0);
   }
 }

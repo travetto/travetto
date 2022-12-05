@@ -2,6 +2,7 @@ import { lstatSync } from 'fs';
 
 import { Class } from '@travetto/base';
 import { SchemaRegistry } from '@travetto/schema';
+import { ModuleIndex } from '@travetto/boot';
 
 import { ApplicationConfig, AppClass } from './types';
 import { ApplicationRegistry } from './registry';
@@ -23,6 +24,7 @@ export function Application(name: string, config?: AppDecorator) {
     const out: Partial<ApplicationConfig> = {
       ...config ?? {},
       target,
+      module: ModuleIndex.manifest.mainModule,
       filename: target.Ⲑsource,
       targetId: target.Ⲑid,
       name: name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-').replace(/([a-z])([A-Z])/g, (_, l, u) => `${l}-${u.toLowerCase()}`),
