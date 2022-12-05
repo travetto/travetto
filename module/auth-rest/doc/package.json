@@ -3,8 +3,7 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/auth-rest": "*",
-    "@travetto/app": "*"
+    "@travetto/auth-rest": "*"
   },
   "private": true
 }

@@ -4,7 +4,7 @@ import { Todo } from '@travetto/scaffold/support/resources/templates/todo/src/mo
 import { TodoController } from '@travetto/scaffold/support/resources/templates/todo/src/rest/todo';
 
 export const text = () => d`
-${d.Header(false)}
+${d.Header(undefined, false)}
 
 A simple tool for scaffolding a reference project.  To get started, you need to make sure:
 

@@ -137,5 +137,5 @@ repetitive functionality, that is unable to be shared due to not relying upon in
 
 To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
 
-${d.Code('MongoDB Service Test Configuration', '@travetto/model-mongo/test/service.query.ts')}
+${d.Code('MongoDB Service Test Configuration', './test/service.query.ts')}
 `;

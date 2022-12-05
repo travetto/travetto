@@ -1,4 +1,4 @@
-import { path } from '@travetto/boot';
+import { ModuleIndex } from '@travetto/boot';
 import { d, lib } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 
@@ -33,11 +33,11 @@ ${d.Execute('Command Service', 'trv', ['command:service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${d.Terminal('All Services', DocRunUtil.run('trv-service', ['status'], { cwd: path.resolve(path.dirname(__output), '..', '..') }))}
+${d.Terminal('All Services', DocRunUtil.run('trv', ['command:service', 'status'], { cwd: ModuleIndex.manifest.workspacePath }))}
 
 ${d.SubSection('Defining new Services')}
 
-The services are defined as plain javascript files within the framework and can easily be extended:
+The services are defined as plain typescript files within the framework and can easily be extended:
 
-${d.Code('Sample Service Definition', '@travetto/model-elasticsearch/support/service.elasticsearch.ts')}
+${d.Code('Sample Service Definition', 'support/service.mongo.ts')}
 `;

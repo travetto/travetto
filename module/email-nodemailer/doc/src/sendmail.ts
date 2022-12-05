@@ -1,5 +1,5 @@
 import { InjectableFactory } from '@travetto/di';
-import { NodemailerTransport } from '@travetto/email';
+import { NodemailerTransport } from '@travetto/email-nodemailer';
 
 class Config {
   @InjectableFactory()

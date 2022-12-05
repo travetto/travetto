@@ -3,8 +3,7 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/cli": "*",
-    "@travetto/app": "*"
+    "@travetto/cli": "*"
   },
   "private": true
 }

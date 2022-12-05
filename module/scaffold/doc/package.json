@@ -3,11 +3,7 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/scaffold": "*",
-    "@travetto/auth-rest-context": "*",
-    "@travetto/auth-rest": "*",
-    "@travetto/model": "*",
-    "@travetto/model-query": "*"
+    "@travetto/scaffold": "*"
   },
   "private": true
 }

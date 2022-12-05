@@ -14,15 +14,15 @@ ${d.Install('provider', '@travetto/model-{provider}')}
 
 Currently, the following are packages that provide ${Links.Crud}:
 ${d.List(
-  d`${mod.ModelDynamodb} - @travetto/model-dynamodb`,
-  d`${mod.ModelElasticsearch} @travetto/model-elasticsearch`,
-  d`${mod.ModelFirestore} @travetto/model-firestore`,
-  d`${mod.ModelMongo} @travetto/model-mongo`,
-  d`${mod.ModelRedis} @travetto/model-redis`,
-  d`${mod.ModelS3} @travetto/model-s3`,
-  d`${mod.ModelMysql} @travetto/model-mysql`,
-  d`${mod.ModelPostgres} @travetto/model-postgres`,
-  d`${mod.ModelSQLite} @travetto/model-sqlite`,
+  d`${mod.ModelDynamodb} - ${mod.ModelDynamodb.name}`,
+  d`${mod.ModelElasticsearch} - ${mod.ModelElasticsearch.name}`,
+  d`${mod.ModelFirestore} - ${mod.ModelFirestore.name}`,
+  d`${mod.ModelMongo} - ${mod.ModelMongo.name}`,
+  d`${mod.ModelRedis} - ${mod.ModelRedis.name}`,
+  d`${mod.ModelS3} - ${mod.ModelS3.name}`,
+  d`${mod.ModelMysql} - ${mod.ModelMysql.name}`,
+  d`${mod.ModelPostgres} - ${mod.ModelPostgres.name}`,
+  d`${mod.ModelSqlite} - ${mod.ModelSqlite.name}`,
 )}
 
 The module itself is fairly straightforward, and truly the only integration point for this module to work is defined at the model level.  The contract for authentication is established in code as providing translation to and from a ${RegisteredPrincipal.link}

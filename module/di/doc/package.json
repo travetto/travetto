@@ -3,9 +3,7 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/di": "*",
-    "@travetto/model-mongo": "*",
-    "@travetto/rest": "*"
+    "@travetto/di": "*"
   },
   "private": true
 }

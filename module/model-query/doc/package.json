@@ -3,10 +3,7 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/model-query": "*",
-    "@travetto/model-mongo": "*",
-    "@travetto/model-elasticsearch": "*",
-    "@travetto/model-sql": "*"
+    "@travetto/model-query": "*"
   },
   "private": true
 }

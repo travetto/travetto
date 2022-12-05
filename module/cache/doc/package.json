@@ -3,13 +3,7 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/cache": "*",
-    "@travetto/model-dynamodb": "*",
-    "@travetto/model-mongo": "*",
-    "@travetto/model-elasticsearch": "*",
-    "@travetto/model-redis": "*",
-    "@travetto/model-sql": "*",
-    "@travetto/model-s3": "*"
+    "@travetto/cache": "*"
   },
   "private": true
 }

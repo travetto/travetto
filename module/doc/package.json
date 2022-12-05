@@ -18,7 +18,7 @@
     "src",
     "support"
   ],
-  "main": "README.ts",
+  "main": "__index__.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/doc"

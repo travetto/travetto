@@ -24,8 +24,8 @@ export class Simple {
   }
 
   /**
- * @param file A file to upload
- */
+   * @param file A file to upload
+   */
   @Post('/files')
   @UploadAll()
   loadFiles({ files }: Request) {

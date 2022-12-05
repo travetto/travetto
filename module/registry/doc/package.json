@@ -3,9 +3,7 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/registry": "*",
-    "@travetto/di": "*",
-    "@travetto/schema": "*"
+    "@travetto/registry": "*"
   },
   "private": true
 }

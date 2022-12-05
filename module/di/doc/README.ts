@@ -1,4 +1,4 @@
-import { d, lib } from '@travetto/doc';
+import { d, lib, mod } from '@travetto/doc';
 import { Config } from '@travetto/config';
 
 import { Injectable, InjectableFactory, Inject } from '@travetto/di/src/decorator';
@@ -10,7 +10,7 @@ ${d.Header()}
 ${lib.DependencyInjection} is a framework primitive.  When used in conjunction with automatic file scanning, it provides for handling of application dependency wiring. Due to the nature of ${lib.Typescript} and type erasure of interfaces, dependency injection only supports ${d.Input('class')}es as a type signifier. The primary goal of dependency injection is to allow for separation of concerns of object creation and it's usage.
 
 ${d.Section('Declaration')}
-The ${Injectable} and ${InjectableFactory} decorators provide the registration of dependencies.   Dependency declaration revolves around exposing ${d.Input('class')}es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementations (e.g. ${d.Ref('MongoModelService', '@travetto/model-mongo/src/service.ts')} provides itself as an injectable candidate for ${d.Ref('ModelCrudSupport', '@travetto/model/src/service/crud.ts')}.
+The ${Injectable} and ${InjectableFactory} decorators provide the registration of dependencies.   Dependency declaration revolves around exposing ${d.Input('class')}es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementation.
 
 ${d.Code(d`Example ${Injectable.name}`, 'src/injectable.ts')}
 
@@ -31,7 +31,7 @@ ${d.Code(d`Example ${InjectableFactory.name}`, 'src/injectable-factory.ts')}
 
 Given the ${d.Input('static')} method ${d.Input('initService')}, the function will be provided as a valid candidate for ${d.Input('CoolService')}.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
 
-${d.Note(d`Other modules are able to provide aliases to ${Injectable} that also provide additional functionality.  For example, the ${Config} or the ${d.Ref('Controller', '@travetto/rest/src/decorator/controller.ts')} decorator registers the associated class as an injectable element.`)}
+${d.Note(d`Other modules are able to provide aliases to ${Injectable} that also provide additional functionality.  For example, the ${Config} or the ${mod.Rest} module @Controller decorator registers the associated class as an injectable element.`)}
 
 
 ${d.Section('Injection')}
@@ -67,4 +67,8 @@ ${d.Section('Manual Invocation')}
 Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the ${d.Ref('DependencyRegistry', DependencyRegistry.constructor)}. The registry allows for requesting a dependency by class reference:
 
 ${d.Code(d`Example of Manual Lookup`, 'src/injectable-manual.ts')}
+
+Additionally, support for interfaces (over class inheritance) is provided, but requires binding the interface to a concrete class as the interface does not exist at runtime.
+
+${d.Code(d`Example Interface Injection`, 'src/injectable-interface.ts')}
 `;

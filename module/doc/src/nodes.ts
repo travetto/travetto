@@ -179,10 +179,17 @@ export const node = {
    * Node Module Reference
    * @param name
    */
-  Mod(name: string) {
-    const folder = ModuleIndex.getModule(name)!.source;
-    const { description, travetto } = PackageUtil.readPackage(folder);
-    return $n('mod', { title: $c(travetto!.displayName!), link: $c(folder), description: $c(description!) });
+  Mod(name: string, cfg?: { folder: string, displayName: string, description: string }) {
+    if (!cfg) {
+      const folder = ModuleIndex.getModule(name)!.source;
+      const pkg = PackageUtil.readPackage(folder);
+      cfg = {
+        folder,
+        displayName: pkg.travetto!.displayName!,
+        description: pkg.description!
+      };
+    }
+    return $n('mod', { title: $c(cfg.displayName), link: $c(cfg.folder), description: $c(cfg.description), name: $c(name) });
   },
 
   /**

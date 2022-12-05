@@ -3,8 +3,6 @@
   "main": "README.ts",
   "dependencies": {
     "@travetto/doc": "*",
-    "@travetto/email-template": "*",
-    "@travetto/asset": "*",
     "@travetto/image": "*"
   },
   "private": true
