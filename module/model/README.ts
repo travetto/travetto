@@ -1,11 +1,11 @@
 import { d, mod, lib } from '@travetto/doc';
 
-import { FileModelService } from '@travetto/model/src/provider/file';
-import { MemoryModelService } from '@travetto/model/src/provider/memory';
-import { Model } from '@travetto/model/src/registry/decorator';
-import { Links } from '@travetto/model/support/doc.support';
+import { FileModelService } from './src/provider/file';
+import { MemoryModelService } from './src/provider/memory';
+import { Model } from './src/registry/decorator';
+import { Links } from './support/doc.support';
 
-const ModelTypeSnippet = d.Snippet('ModelType', '@travetto/model/src/types/model.ts', /export interface/, /^}/);
+const ModelTypeSnippet = d.Snippet('ModelType', 'src/types/model.ts', /export interface/, /^}/);
 
 export const text = () => d`
 ${d.Header()}
@@ -19,36 +19,36 @@ The module is mainly composed of contracts.  The contracts define the expected i
 ${d.SubSection(Links.Basic)}
 All ${mod.Model} implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
 
-${d.Snippet('Basic Contract', '@travetto/model/src/service/basic.ts', /export interface ModelBasic/, /^}/)}
+${d.Snippet('Basic Contract', 'src/service/basic.ts', /export interface ModelBasic/, /^}/)}
 
 ${d.SubSection(Links.Crud)}
 The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in ${mod.Auth}, is an example of a module that only needs create, read and delete, and so any implementation of ${mod.Model} that honors this contract, can be used with the ${mod.Auth} model extension.
 
-${d.Snippet('Crud Contract', '@travetto/model/src/service/crud.ts', /export interface ModelCrud/, /^}/)}
+${d.Snippet('Crud Contract', 'src/service/crud.ts', /export interface ModelCrud/, /^}/)}
 
 ${d.SubSection(Links.Indexed)}
 Additionally, an implementation may support the ability for basic indexed queries. This is not the full featured query support of ${mod.ModelQuery}, but
 allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.  
 
-${d.Snippet('Indexed Contract', '@travetto/model/src/service/indexed.ts', /export interface ModelIndexed/, /^}/)}
+${d.Snippet('Indexed Contract', 'src/service/indexed.ts', /export interface ModelIndexed/, /^}/)}
 
 ${d.SubSection(Links.Expiry)}
 
 Certain implementations will also provide support for automatic expiry of data at runtime.  This is extremely useful for temporary data as, and is used in the ${mod.Cache} module for expiring data accordingly.
 
-${d.Snippet('Expiry Contract', '@travetto/model/src/service/expiry.ts', /export interface ModelExpiry/, /^}/)}
+${d.Snippet('Expiry Contract', 'src/service/expiry.ts', /export interface ModelExpiry/, /^}/)}
 
 ${d.SubSection(Links.Stream)}
 
 Some implementations also allow for the ability to read/write binary data as a stream.  Given that all implementations can store ${lib.Base64} encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.  This pattern is currently used by ${mod.Asset} for reading and writing asset data.
 
-${d.Snippet('Stream Contract', '@travetto/model/src/service/stream.ts', /export interface ModelStream/, /^}/)}
+${d.Snippet('Stream Contract', 'src/service/stream.ts', /export interface ModelStream/, /^}/)}
 
 ${d.SubSection(Links.Bulk)}
 
 Finally, there is support for bulk operations.  This is not to simply imply issuing many commands at in parallel, but implementation support for an atomic/bulk operation.  This should allow for higher throughput on data ingest, and potentially for atomic support on transactions.  
 
-${d.Snippet('Bulk Contract', '@travetto/model/src/service/bulk.ts', /export interface ModelBulk/, /^}/)}
+${d.Snippet('Bulk Contract', 'src/service/bulk.ts', /export interface ModelBulk/, /^}/)}
 
 ${d.Section('Declaration')}
 Models are declared via the ${Model} decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the ${ModelTypeSnippet.link}
@@ -76,7 +76,7 @@ ${d.Section('Custom Model Service')}
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
 repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the ${mod.Model} implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
 
-${d.Code('Memory Service', '@travetto/model/src/provider/memory.ts', true)}
+${d.Code('Memory Service', 'src/provider/memory.ts', true)}
 
 To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
 
