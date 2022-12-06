@@ -7,5 +7,5 @@ The module provides support basic support with AWS lambdas. When using one of th
 
 ${d.Section('Packaging Lambdas')}
 
-${d.Execute('Invoking a Package Build', 'trv', ['pack', 'rest/lambda', '-h'])}
+${'TODO: Pending Pack' ?? d.Execute('Invoking a Package Build', 'trv', ['pack', 'rest/lambda', '-h'])}
 `;
