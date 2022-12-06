@@ -23,11 +23,11 @@ ${d.List(
 
 If you are using more than one ${Links.Stream} service, you will need to declare which one is intended to be used by the asset service.  This can be accomplished by:
 
-${d.Code('Configuration Methods', 'src/asset-config.ts')}
+${d.Code('Configuration Methods', 'doc/asset-config.ts')}
 
 Reading of and writing assets uses the ${AssetService}.  Below you can see an example dealing with a user's profile image.
 
-${d.Code('User Profile Images', 'src/user-profile.ts')}
+${d.Code('User Profile Images', 'doc/user-profile.ts')}
 
 ${d.Section('Naming Strategies')}
 
@@ -47,5 +47,5 @@ ${d.Code('Asset Structure', '@travetto/asset/src/types.ts')}
 
 To get the asset information, you would call:
 
-${d.Code('Fetching Asset Info', 'src/user-profile-meta.ts')}
+${d.Code('Fetching Asset Info', 'doc/user-profile-meta.ts')}
 `;
