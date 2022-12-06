@@ -20,6 +20,6 @@ export class CliEchoCommand extends CliCommand {
     if (this.cmd.uppercase) {
       args = args.map(x => x.toUpperCase());
     }
-    console.log(args);
+    console.log!(args);
   }
 }

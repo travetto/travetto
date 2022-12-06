@@ -1,0 +1,9 @@
+{
+  "name": "@travetto-doc/cli",
+  "dependencies": {
+    "@travetto/cli": "*"
+  },
+  "travetto": {
+    "isolated": true
+  }
+}
