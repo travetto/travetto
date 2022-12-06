@@ -13,6 +13,7 @@ export type Dependency = Package['travetto'] & {
   parentSet: Set<string>;
   profileSet: Set<ManifestProfile>;
   isolated?: boolean;
+  mergePatterns: RegExp[];
 };
 
 type CollectState = {
@@ -95,11 +96,14 @@ export class PackageUtil {
     }
 
     const profileSet = new Set([...travetto?.profiles ?? [PACKAGE_STD_PROFILE], ...state.profiles]);
+    const mergePatterns = [...travetto?.mergeWith ?? [], ...workspaces ?? []]
+      .map(x => new RegExp(`^${x.replace(/[*]/g, '.*?')}`));
 
     const rootDep: Dependency = {
       name, version, folder,
       profileSet,
       internal: isPrivate === true,
+      mergePatterns,
       parentSet: new Set(state.parent ? [state.parent] : [])
     };
     state.seen.set(name, rootDep);

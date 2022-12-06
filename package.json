@@ -16,6 +16,13 @@
     "lint": "npx eslint --ext .js --ext .ts .",
     "upgrade-deps": "npm update -S"
   },
+  "travetto": {
+    "mergeWith": [
+      "@travetto/*",
+      "@travetto-test/*",
+      "@travetto-doc/*"
+    ]
+  },
   "travettoRepo": {
     "globalModules": [
       "module/test",

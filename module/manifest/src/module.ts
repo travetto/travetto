@@ -38,7 +38,11 @@ export class ManifestModuleUtil {
   static getFileType(moduleFile: string): ManifestModuleFileType {
     if (moduleFile === 'package.json') {
       return 'package-json';
-    } else if (moduleFile.startsWith('support/fixtures/') || moduleFile.startsWith('test/fixtures/') || moduleFile.startsWith('support/resources/')) {
+    } else if (
+      moduleFile.startsWith('support/fixtures/') ||
+      moduleFile.startsWith('test/fixtures/') ||
+      moduleFile.startsWith('support/resources/')
+    ) {
       return 'fixture';
     } else if (moduleFile.endsWith('.d.ts')) {
       return 'typings';
@@ -147,13 +151,14 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async #describeModule(rootFolder: string, { name, version, folder, profileSet, parentSet, internal }: Dependency, localAsMain = false): Promise<ManifestModule> {
-    const main = folder === rootFolder;
+  static async #describeModule(root: Dependency, { name, version, folder, profileSet, parentSet, internal }: Dependency): Promise<ManifestModule> {
+    const main = folder === root.folder;
     const local = internal || !folder.includes('node_modules') || main;
+    const treatAsMain = root.mergePatterns.some(x => x.test(name));
 
     const files: ManifestModule['files'] = {};
-    const folderSet = (main || (local && localAsMain)) ? new Set<string>() : new Set(['src', 'bin', 'support']);
-    const fileSet = (main || (local && localAsMain)) ? new Set<string>() : new Set([...INDEX_FILES, 'package.json']);
+    const folderSet = (main || treatAsMain) ? new Set<string>() : new Set(['src', 'bin', 'support']);
+    const fileSet = (main || treatAsMain) ? new Set<string>() : new Set([...INDEX_FILES, 'package.json']);
 
     for (const file of await this.#scanFolder(folder, folderSet, fileSet)) {
       // Group by top folder
@@ -211,9 +216,11 @@ export class ManifestModuleUtil {
     ].sort((a, b) => a.name.localeCompare(b.name));
 
     const out: Record<string, ManifestModule> = {};
+    const main = declared.find(x => x.name === ctx.mainModule)!;
+
     for (const mod of allModules) {
       // If we are the workspace root, treat all local modules as "main"
-      const cfg = await this.#describeModule(ctx.mainPath, mod, ctx.workspacePath === ctx.mainPath);
+      const cfg = await this.#describeModule(main, mod);
       out[cfg.name] = cfg;
     }
     return out;

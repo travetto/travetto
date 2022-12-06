@@ -4,6 +4,9 @@
     "@travetto/app": "*"
   },
   "travetto": {
-    "isolated": true
+    "isolated": true,
+    "mergeWith": [
+      "@travetto/app"
+    ]
   }
 }

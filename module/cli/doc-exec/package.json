@@ -4,6 +4,9 @@
     "@travetto/cli": "*"
   },
   "travetto": {
-    "isolated": true
+    "isolated": true,
+    "mergeWith": [
+      "@travetto/cli"
+    ]
   }
 }
