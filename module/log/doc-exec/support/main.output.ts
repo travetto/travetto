@@ -1,0 +1,1 @@
+export * from '@travetto/log/doc/output';

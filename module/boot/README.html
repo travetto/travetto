@@ -40,3 +40,86 @@ As a registered shutdown handler, you can do.
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
+
+<h2 id="console-management">Console Management</h2>
+
+This module provides logging functionality, built upon <a target="_blank" class="external-link" href="https://nodejs.org/api/console.html">console</a> operations. 
+
+The supported operations are:
+<ul> <li><code class="item method">console.error</code> which logs at the <code class="item input">ERROR</code> level</li>
+ <li><code class="item method">console.warn</code> which logs at the <code class="item input">WARN</code> level</li>
+ <li><code class="item method">console.info</code> which logs at the <code class="item input">INFO</code> level</li>
+ <li><code class="item method">console.debug</code> which logs at the <code class="item input">DEBUG</code> level</li>
+ <li><code class="item method">console.log</code> which logs at the <code class="item input">INFO</code> level</li></ul>
+
+<p class="note"><strong>Note</strong> All other console methods are excluded, specifically <code class="item method">trace</code>, <code class="item method">inspect</code>, <code class="item method">dir</code>, <code class="item method">time</code>/<code class="item method">timeEnd</code></p>
+
+<h2 id="how-logging-is-instrumented">How Logging is Instrumented</h2>
+
+All of the logging instrumentation occurs at transpilation time.  All <code class="item method">console.*</code> methods are replaced with a call to a globally defined variable that delegates to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src/console.ts">ConsoleManager</a>.  This module, hooks into the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/boot/src/console.ts">ConsoleManager</a> and receives all logging events from all files compiled by the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>.
+
+A sample of the instrumentation would be:
+
+      <figure class="code">
+      <figcaption class="code">Sample logging at various levels
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/boot/doc/transpile.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">work</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">'Start Work'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token number">1</span> <span class="token operator">/</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">'Divide by zero'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> error<span class="token operator">:</span> err <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">'End Work'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+      <figure class="code">
+      <figcaption class="code">Sample After Transpilation
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/boot/doc/transpile.js">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-javascript"><span class="token string">"use strict"</span><span class="token punctuation">;</span>
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> <span class="token string">"__esModule"</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+exports<span class="token punctuation">.</span>work <span class="token operator">=</span> <span class="token keyword">void</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> tslib_1 <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"tslib"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> ᚕ_ <span class="token operator">=</span> tslib_1<span class="token punctuation">.</span><span class="token function">__importStar</span><span class="token punctuation">(</span><span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"@travetto/boot/support/init.helper.js"</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> __output <span class="token operator">=</span> ᚕ_<span class="token punctuation">.</span>trv<span class="token punctuation">.</span><span class="token function">out</span><span class="token punctuation">(</span>__filename<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">function</span> <span class="token function">work</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    ᚕ_<span class="token punctuation">.</span>trv<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"debug"</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token literal-property property">source</span><span class="token operator">:</span> __output<span class="token punctuation">,</span> <span class="token literal-property property">line</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token literal-property property">scope</span><span class="token operator">:</span> <span class="token string">"work"</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> <span class="token string">'Start Work'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token number">1</span> <span class="token operator">/</span> <span class="token number">0</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        ᚕ_<span class="token punctuation">.</span>trv<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"error"</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token literal-property property">source</span><span class="token operator">:</span> __output<span class="token punctuation">,</span> <span class="token literal-property property">line</span><span class="token operator">:</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token literal-property property">scope</span><span class="token operator">:</span> <span class="token string">"work"</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> <span class="token string">'Divide by zero'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token literal-property property">error</span><span class="token operator">:</span> err <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    ᚕ_<span class="token punctuation">.</span>trv<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"debug"</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token literal-property property">source</span><span class="token operator">:</span> __output<span class="token punctuation">,</span> <span class="token literal-property property">line</span><span class="token operator">:</span> <span class="token number">9</span><span class="token punctuation">,</span> <span class="token literal-property property">scope</span><span class="token operator">:</span> <span class="token string">"work"</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> <span class="token string">'End Work'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span>
+exports<span class="token punctuation">.</span>work <span class="token operator">=</span> work<span class="token punctuation">;</span></code></pre>     
+      </figure>
+
+<h3 id="filtering-debug">Filtering Debug</h3>
+
+The <code class="item input">debug</code> messages can be filtered using the patterns from the <a target="_blank" class="external-link" href="https://www.npmjs.com/package/debug">debug</a>.  You can specify wild cards to only <code class="item input">DEBUG</code> specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
+
+      <figure class="terminal">
+      <figcaption class="terminal">Sample environment flags
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token comment"># Debug</span>
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>-@travetto/model npx trv run app
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>-@travetto/registry npx trv run app
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@travetto/rest npx trv run app
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>@travetto/*,-@travetto/model npx trv run app</code></pre>     
+      </figure>
+
+Additionally, the logging framework will merge <a target="_blank" class="external-link" href="https://www.npmjs.com/package/debug">debug</a> into the output stream, and supports the standard usage
+
+      <figure class="terminal">
+      <figcaption class="terminal">Sample environment flags for standard usage
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token comment"># Debug</span>
+$ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>express:*,@travetto/rest npx trv run rest</code></pre>     
+      </figure>

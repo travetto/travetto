@@ -7,7 +7,7 @@ This module is a simple component to support ${lib.JWT} signing and verification
 
 The API exposes:
 
-${d.Snippet('Signing Options', '@travetto/jwt/src/types.ts', /export.*SignOptions/, /^[}]/)}
-${d.Snippet('Verify Options', '@travetto/jwt/src/types.ts', /export.*VerifyOptions/, /^[}]/)}
-${d.Snippet('API', '@travetto/jwt/src/util.ts', /export.*class JWTUtil/, /^[}]/, true)}
+${d.Snippet('Signing Options', 'src/types.ts', /export.*SignOptions/, /^[}]/)}
+${d.Snippet('Verify Options', 'src/types.ts', /export.*VerifyOptions/, /^[}]/)}
+${d.Snippet('API', 'src/util.ts', /export.*class JWTUtil/, /^[}]/, true)}
 `;
