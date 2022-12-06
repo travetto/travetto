@@ -1,0 +1,12 @@
+{
+  "name": "@travetto-doc/config",
+  "dependencies": {
+    "@travetto/config": "*"
+  },
+  "travetto": {
+    "isolated": true,
+    "mergeWith": [
+      "@travetto/config"
+    ]
+  }
+}
