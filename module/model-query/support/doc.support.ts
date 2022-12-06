@@ -4,10 +4,10 @@ import { d } from '@travetto/doc';
 import { AllTypeMap } from '@travetto/doc/src/nodes';
 
 export const Links = {
-  QueryCrud: d.SnippetLink('Query Crud', '@travetto/model-query/src/service/crud', /export interface/),
-  QueryFacet: d.SnippetLink('Facet', '@travetto/model-query/src/service/facet', /export interface/),
-  QuerySuggest: d.SnippetLink('Suggest', '@travetto/model-query/src/service/suggest', /export interface/),
-  Query: d.SnippetLink('Query', '@travetto/model-query/src/service/query', /export interface/),
+  QueryCrud: d.SnippetLink('Query Crud', '@travetto/model-query/src/service/crud.ts', /export interface/),
+  QueryFacet: d.SnippetLink('Facet', '@travetto/model-query/src/service/facet.ts', /export interface/),
+  QuerySuggest: d.SnippetLink('Suggest', '@travetto/model-query/src/service/suggest.ts', /export interface/),
+  Query: d.SnippetLink('Query', '@travetto/model-query/src/service/query.ts', /export interface/),
 };
 
 export const ModelQueryTypes = (file: string | Function): AllTypeMap['SnippetLink'][] => {
