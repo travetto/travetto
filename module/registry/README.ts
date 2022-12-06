@@ -1,8 +1,8 @@
 import { d, mod } from '@travetto/doc';
 
-const RootReg = d.Ref('RootRegistry', '@travetto/registry/src/service/root.ts');
-const MetadataReg = d.Ref('MetadataRegistry', '@travetto/registry/src/service/metadata.ts');
-const DynamicClassSource = d.Ref('DynamicClassSource', '@travetto/registry/support/dynamic.class-source.ts');
+const RootReg = d.Ref('RootRegistry', 'src/service/root.ts');
+const MetadataReg = d.Ref('MetadataRegistry', 'src/service/metadata.ts');
+const DynamicClassSource = d.Ref('DynamicClassSource', 'support/dynamic.class-source.ts');
 
 
 export const text = () => d`
@@ -25,7 +25,7 @@ ${d.Ordered(
 
 This flow ensures all files are loaded and processed before application starts. A sample registry could like:
 
-${d.Code('Sample Registry', 'src/registry.ts')}
+${d.Code('Sample Registry', 'doc/registry.ts')}
 
 The registry is a ${MetadataReg} that similar to the ${mod.Schema}'s Schema registry and ${mod.Di}'s Dependency registry.
 
