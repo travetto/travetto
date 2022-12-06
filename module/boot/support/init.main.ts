@@ -6,33 +6,6 @@ import { path } from '@travetto/manifest';
 
 import { trv } from './init.helper';
 
-async function runMain(action: Function, args: unknown[]): Promise<void> {
-  let res: unknown | undefined;
-  let exitCode = 0;
-
-  const initialMain = process.env.TRV_MAIN;
-
-  try {
-    res = await action(...args);
-  } catch (err) {
-    res = err;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    exitCode = (res instanceof Error) ? (res as { code?: number })['code'] ?? 1 : 1;
-  }
-
-  // If not delegated
-  if (initialMain === process.env.TRV_MAIN) {
-    if (parentPort) {
-      parentPort.postMessage(res);
-    } else if (process.send) {
-      process.send(res);
-    } else if (res) {
-      process.stdout.write(`${JSON.stringify(res)}\n`);
-    }
-    process.exit(exitCode);
-  }
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const setToJSON = <T>(cons: abstract new (...args: any[]) => T, handler: (val: T, ...args: any[]) => unknown): void => {
   Object.defineProperty(cons.prototype, 'toJSON', {
@@ -100,13 +73,37 @@ async function setup(): Promise<void> {
   await setupLogging();
 }
 
+export async function runMain(action: Function, args: unknown[] = process.argv.slice(2)): Promise<void> {
+  await setup();
+
+  let res: unknown | undefined;
+  let exitCode = 0;
+
+  try {
+    res = await action(...args);
+  } catch (err) {
+    res = err;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    exitCode = (res instanceof Error) ? (res as { code?: number })['code'] ?? 1 : 1;
+  }
+
+  // If not delegated
+  if (parentPort) {
+    parentPort.postMessage(res);
+  } else if (process.send) {
+    process.send(res);
+  } else if (res) {
+    process.stdout.write(`${JSON.stringify(res)}\n`);
+  }
+  process.exit(exitCode);
+}
+
 export async function runIfMain(target: Function, filename: string, mainFile: string): Promise<unknown> {
   mainFile = process.env.TRV_MAIN || mainFile;
   if (mainFile.startsWith('file:')) {
     mainFile = url.fileURLToPath(mainFile);
   }
   if (filename === mainFile) {
-    await setup();
-    return runMain(target, process.argv.slice(2));
+    return await runMain(target);
   }
 }

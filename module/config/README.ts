@@ -35,17 +35,17 @@ ${d.Section('A Complete Example')}
 
 A more complete example setup would look like:
 
-${d.Config('resources/application.yml', 'resources/application.yml')}
+${d.Config('resources/application.yml', 'doc/resources/application.yml')}
 
-${d.Config('resources/prod.yml', 'resources/prod.yml')}
+${d.Config('resources/prod.yml', 'doc/resources/prod.yml')}
 
 with environment variables
 
-${d.Config('Environment variables', 'resources/env.properties', 'properties')}
+${d.Config('Environment variables', 'doc/resources/env.properties', 'properties')}
 
 At runtime the resolved config would be:
 
-${d.Execute('Runtime Resolution', 'src/resolve.ts')}
+${d.Execute('Runtime Resolution', 'doc/resolve.ts')}
 
 ${d.Section('Secrets')}
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under ${d.Input('config.redacted')}.
@@ -55,15 +55,20 @@ The ${Configuration} service provides injectable access to all of the loaded con
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
-${d.Code('Database config object', 'src/dbconfig.ts')}
+${d.Code('Database config object', 'doc/dbconfig.ts')}
 
 Using the above config files, you'll notice that the port is not specified (its only specified in the environment variables).  This means when the application attempts to start up, it will fail if the port is not specified via an environment variable:
 
-${d.Execute('Resolved database config', 'src/dbconfig-run.ts')}
+${d.Execute('Resolved database config', 'trv', ['main', 'support/main.dbconfig-run.ts'], {
+  cwd: './doc-exec'
+})}
 
 What you see, is that the configuration structure must be honored and the application will fail to start if the constraints do not hold true.  This helps to ensure that the configuration, as input to the system, is verified and correct.
 
 By passing in the port via the environment variable, the config will construct properly, and the application will startup correctly:
 
-${d.Execute('Resolved database config', 'src/dbconfig-run.ts', [], { env: { DATABASE_PORT: '200' } })}
+${d.Execute('Resolved database config', 'trv', ['main', 'support/main.dbconfig-run.ts'], {
+  env: { DATABASE_PORT: '200' },
+  cwd: './doc-exec'
+})}
 `;

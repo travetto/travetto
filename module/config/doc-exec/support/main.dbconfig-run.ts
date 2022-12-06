@@ -1,10 +1,9 @@
 import { Configuration } from '@travetto/config';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
+import { DBConfig } from '@travetto/config/doc/dbconfig';
 
-import { DBConfig } from './dbconfig';
-
-export async function main() {
+export async function main(): Promise<void> {
   await RootRegistry.init();
   const config = await DependencyRegistry.getInstance(Configuration);
 
