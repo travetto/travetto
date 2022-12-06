@@ -9,7 +9,9 @@ As is the custom, modules are able to register their own cli extensions as scrip
 
 ${d.Section('General')}
 
-${d.Execute('General Usage', 'trv', ['--help'])}
+${d.Execute('General Usage', 'trv', ['--help'], {
+  cwd: './doc-exec'
+})}
 
 This will show all the available options/choices that are exposed given the currently installed modules.
 
@@ -17,14 +19,18 @@ ${d.Section('Extending')}
 
 Extending the ${d.Input('cli')} is fairly straightforward.  It is built upon ${lib.Commander}, with a model that is extensible:
 
-${d.Code('Echo Command', 'support/cli.echo.ts')}
+${d.Code('Echo Command', 'doc/echo.ts')}
 
 With the corresponding output:
 
-${d.Execute('Echo Command Help', 'trv', ['echo', '--help'])}
+${d.Execute('Echo Command Help', 'trv', ['echo', '--help'], {
+  cwd: './doc-exec'
+})}
 
 And actually using it:
 
-${d.Execute('Echo Command Run', 'trv', ['echo', '-u', 'bOb', 'rOb', 'DRoP'])}
+${d.Execute('Echo Command Run', 'trv', ['echo', '-u', 'bOb', 'rOb', 'DRoP'], {
+  cwd: './doc-exec'
+})}
 
 `;
