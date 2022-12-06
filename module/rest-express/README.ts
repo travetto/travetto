@@ -8,10 +8,10 @@ The module is an ${lib.Express} provider for the ${mod.Rest} module.  This modul
 
 ${d.Section('Customizing Rest App')}
 
-${d.Code('Customizing the Express App', 'src/customize.ts')}
+${d.Code('Customizing the Express App', 'doc/customize.ts')}
 
 ${d.Section('Default Middleware')}
 When working with an ${lib.Express} applications, the module provides what is assumed to be a sufficient set of basic filters. Specifically:
 
-${d.Snippet('Configured Middleware', '@travetto/rest-express/src/server.ts', /const app\s*=/, /compress/)}
+${d.Snippet('Configured Middleware', 'src/server.ts', /const app\s*=/, /compress/)}
 `;

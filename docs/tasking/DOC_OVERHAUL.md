@@ -5,6 +5,7 @@
 - Auth JWT
 - Auth Rest Session
 - Auth Rest Context
+- Repo
 
 ## Outdated
 - Boot
@@ -12,3 +13,5 @@
 - Config
 - Log
 - Model SQL
+- Registry
+- Rest Session
