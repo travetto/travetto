@@ -1,7 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
 import { Config } from '@travetto/config';
 
-import { Injectable, InjectableFactory, Inject } from '@travetto/di/src/decorator';
+import { Injectable, InjectableFactory, Inject } from '@travetto/di';
 import { DependencyRegistry } from '@travetto/di/src/registry';
 
 export const text = () => d`
@@ -12,21 +12,21 @@ ${lib.DependencyInjection} is a framework primitive.  When used in conjunction w
 ${d.Section('Declaration')}
 The ${Injectable} and ${InjectableFactory} decorators provide the registration of dependencies.   Dependency declaration revolves around exposing ${d.Input('class')}es and subtypes thereof to provide necessary functionality.  Additionally, the framework will utilize dependencies to satisfy contracts with various implementation.
 
-${d.Code(d`Example ${Injectable.name}`, 'src/injectable.ts')}
+${d.Code(d`Example ${Injectable.name}`, 'doc/injectable.ts')}
 
 When declaring a dependency, you can also provide a token to allow for multiple instances of the dependency to be defined.  This can be used in many situations:
 
-${d.Code(d`Example ${Injectable.name} with multiple targets`, 'src/injectable-multiple.ts')}
+${d.Code(d`Example ${Injectable.name} with multiple targets`, 'doc/injectable-multiple.ts')}
 
 
 As you can see, the ${d.Input('target')} field is also set, which indicates to the dependency registration process what ${d.Input('class')} the injectable is compatible with.  Additionally, when using ${d.Input('abstract')} classes, the parent ${d.Input('class')} is always considered as a valid candidate type.
 
-${d.Code(d`Example ${Injectable.name} with target via abstract class`, 'src/injectable-abstract.ts')}
+${d.Code(d`Example ${Injectable.name} with target via abstract class`, 'doc/injectable-abstract.ts')}
 
 In this scenario, ${d.Input('SpecificService')} is a valid candidate for ${d.Input('BaseService')} due to the abstract inheritance. Sometimes, you may want to provide a slight variation to  a dependency without extending a class.  To this end, the ${InjectableFactory} decorator denotes a ${d.Input('static')} class method that produces an ${Injectable}.
 
 
-${d.Code(d`Example ${InjectableFactory.name}`, 'src/injectable-factory.ts')}
+${d.Code(d`Example ${InjectableFactory.name}`, 'doc/injectable-factory.ts')}
 
 
 Given the ${d.Input('static')} method ${d.Input('initService')}, the function will be provided as a valid candidate for ${d.Input('CoolService')}.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
@@ -40,35 +40,35 @@ Once all of your necessary dependencies are defined, now is the time to provide 
 
 The ${Inject} decorator, which denotes a desire to inject a value directly.  These will be set post construction.
 
-${d.Code(d`Example ${Injectable.name} with dependencies as ${Inject} fields`, 'src/injectable-fields.ts')}
+${d.Code(d`Example ${Injectable.name} with dependencies as ${Inject} fields`, 'doc/injectable-fields.ts')}
 
 
 The ${Injectable} constructor params, which will be provided as the instance is being constructed.
 
-${d.Code(d`Example ${Injectable.name} with dependencies in constructor`, 'src/injectable-constructor.ts')}
+${d.Code(d`Example ${Injectable.name} with dependencies in constructor`, 'doc/injectable-constructor.ts')}
 
 Via ${InjectableFactory} params, which are comparable to constructor params
 
-${d.Code(d`Example ${InjectableFactory.name} with parameters as dependencies`, 'src/injectable-factory-params.ts')}
+${d.Code(d`Example ${InjectableFactory.name} with parameters as dependencies`, 'doc/injectable-factory-params.ts')}
 
 
 ${d.SubSection('Multiple Candidates for the Same Type')}
 
 If you are building modules for others to consume, often times it is possible to end up with multiple implementations for the same class.  
 
-${d.Code(d`Example Multiple Candidate Types`, 'src/injectable-multiple-default.ts')}
+${d.Code(d`Example Multiple Candidate Types`, 'doc/injectable-multiple-default.ts')}
 
 By default, if there is only one candidate without qualification, then that candidate will be used.  If multiple candidates are found, then the injection system will bail.  To overcome this the end user will need to specify which candidate type should be considered ${d.Input('primary')}:
 
-${d.Code(d`Example Multiple Candidate Types`, 'src/injectable-multiple-primary.ts')}
+${d.Code(d`Example Multiple Candidate Types`, 'doc/injectable-multiple-primary.ts')}
 
 ${d.Section('Manual Invocation')}
 
 Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the ${d.Ref('DependencyRegistry', DependencyRegistry.constructor)}. The registry allows for requesting a dependency by class reference:
 
-${d.Code(d`Example of Manual Lookup`, 'src/injectable-manual.ts')}
+${d.Code(d`Example of Manual Lookup`, 'doc/injectable-manual.ts')}
 
 Additionally, support for interfaces (over class inheritance) is provided, but requires binding the interface to a concrete class as the interface does not exist at runtime.
 
-${d.Code(d`Example Interface Injection`, 'src/injectable-interface.ts')}
+${d.Code(d`Example Interface Injection`, 'doc/injectable-interface.ts')}
 `;
