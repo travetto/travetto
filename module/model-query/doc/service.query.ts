@@ -11,7 +11,7 @@ import { ModelQueryFacetSupport } from '@travetto/model-query/src/service/facet'
 import { Config } from '@travetto/config';
 import { Injectable } from '@travetto/di';
 
-import { QueryModelService } from '../src/query-service';
+import { QueryModelService } from './query-service';
 
 @Config()
 class CustomModelConfig { }
