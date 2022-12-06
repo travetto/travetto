@@ -9,5 +9,5 @@ Once the files are uploaded, they are exposed on ${mod.Rest}'s request object as
 
 A simple example:
 
-${d.Code('Rest controller with upload support', './src/simple-controller.ts')}
+${d.Code('Rest controller with upload support', 'doc/simple-controller.ts')}
 `;
