@@ -1,12 +1,14 @@
 import { readFileSync } from 'fs';
 
-import { d, lib } from '@travetto/doc';
 import { ModuleIndex } from '@travetto/boot';
+
+import { d } from './src/doc';
+import { lib } from './src/lib';
 
 type Feature = { text: string, name: string };
 
 function getNodes(): ReturnType<(typeof d)['List']> {
-  const lines = readFileSync(ModuleIndex.resolveFileImport('@travetto/doc/src/nodes.ts'), 'utf8').split(/\n/g);
+  const lines = readFileSync(ModuleIndex.getSourceFile(ModuleIndex.resolveFileImport('@travetto/doc/src/nodes.ts')), 'utf8').split(/\n/g);
   let feature: Partial<Feature> | undefined;
   const features: Feature[] = [];
   for (const line of lines) {
@@ -32,9 +34,9 @@ ${d.Header()}
 
 This module provides the ability to generate documentation in ${lib.HTML} and/or ${lib.Markdown}.  The module relies on integrating with the source of the project, and providing a fully referenced code-base.  This allows for automatic updates when code is changed and/or refactored. 
 
-${d.Code('Document Sample', 'src/sample.ts')}
+${d.Code('Document Sample', 'doc/sample.ts')}
 
-${d.Snippet('Document Context', '@travetto/doc/src/types.ts', /interface DocumentShape/, /^}/)}
+${d.Snippet('Document Context', 'src/types.ts', /interface DocumentShape/, /^}/)}
 
 As you can see, you need to export a field named ${d.Field('text')} as the body of the help text. The ${d.Field('text')} field can be either a direct invocation or an async function that returns the expected document output.  
 
@@ -57,9 +59,13 @@ ${d.Section('CLI - doc')}
 
 The run command allows for generating documentation output.
 
-${d.Execute('CLI Doc Help', 'trv', ['doc', '--help'])}
+${d.Execute('CLI Doc Help', 'trv', ['doc', '--help'], {
+  cwd: './doc-exec'
+})}
 
 By default, running the command will output the ${lib.Markdown} content directly to the terminal.
 
-${d.Execute('Sample CLI Output', 'trv', ['doc', '-i', 'src/sample.ts', '-f', 'html'])}
+${d.Execute('Sample CLI Output', 'trv', ['doc', '-f', 'html', '--stdout'], {
+  cwd: './doc-exec'
+})}
 `;
