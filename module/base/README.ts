@@ -1,10 +1,10 @@
 import { d, mod, lib } from '@travetto/doc';
 import { ExecUtil, AppError, StreamUtil, Util } from '@travetto/base';
 
-const UtilLink = d.Ref(Util.name, '@travetto/base/src/util.ts');
-const AppErrorLink = d.Ref(AppError.name, '@travetto/base/src/error.ts');
-const StreamUtilLink = d.Ref(StreamUtil.name, '@travetto/base/src/stream.ts');
-const ExecUtilLink = d.Ref(ExecUtil.name, '@travetto/base/src/exec.ts');
+const UtilLink = d.Ref(Util.name, 'src/util.ts');
+const AppErrorLink = d.Ref(AppError.name, 'src/error.ts');
+const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
+const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
 
 export const text = () => d`
 ${d.Header()}
@@ -82,7 +82,7 @@ Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${d.Method('spawn')} 
 
 A simple example would be:
 
-${d.Code('Running a directory listing via ls', 'src/exec.ts')}
+${d.Code('Running a directory listing via ls', 'doc/exec.ts')}
 
 As you can see, the call returns not only the child process information, but the ${d.Input('Promise')} to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
 
