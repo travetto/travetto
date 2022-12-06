@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import util from 'util';
+import { createRequire } from 'module';
 
 import { path } from '@travetto/boot';
 import { ImageConverter } from '@travetto/image';
@@ -13,6 +14,8 @@ import { MarkdownUtil } from './markdown';
 import { EmailTemplateResource } from './resource';
 
 export type Compilation = { html: string, text: string, subject: string };
+
+const req = createRequire(path.cwd());
 
 /**
  * Utilities for templating
@@ -126,8 +129,7 @@ export class EmailTemplateCompiler {
       await EmailTemplateCompiler.compileSass(
         (await this.resources.describe('main.scss')).path,
         [
-          // TODO: need to look at require paths
-          path.resolve('node_modules/foundation-emails/scss'),
+          path.dirname(req.resolve('foundation-emails/scss/_global.scss')),
           ...this.resources.getAllPaths()
         ]
       )

@@ -8,8 +8,6 @@ export class EmailResource extends CommonFileResourceProvider {
     return new EmailResource();
   }
 
-  mainFolder = 'email';
-
   constructor(paths?: string[]) {
     super(paths);
   }
