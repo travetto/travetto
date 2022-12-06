@@ -1,4 +1,5 @@
 import { d, lib, mod } from '@travetto/doc';
+import { path } from '@travetto/manifest';
 
 
 export const text = () => d`
@@ -51,7 +52,7 @@ ${d.Section('Images')}
 
 When referencing an image from the ${d.Path('resources')} folder in a template, e.g.
 
-${d.Code('Sample Image Reference', 'resources/email/sample-image.html')}
+${d.Code('Sample Image Reference', 'doc/email/sample-image.html')}
 
 The image will be extracted out and embedded in the email as a multi part message.  This allows for compression and optimization of images as well as externalizing resources that may not be immediately public.  The currently supported set of image types are:
 
@@ -91,7 +92,7 @@ ${d.List(
 
 ${d.Section('Templating Example')}
 
-${d.Code('Example inky template with mustache support', 'resources/email/example.email.html')}
+${d.Code('Example inky template with mustache support', 'doc/email/example.email.html')}
 
 which will then interpolate the context to replace ${d.Input('left')} and ${d.Input('right')}, and compile to a final html output. When using ${lib.Mustache} expressions, make sure to use ${d.Input('{{{ }}}')}, triple braces on complex text, to prevent ${lib.Mustache} from escaping any characters.
 
@@ -99,11 +100,16 @@ ${d.Section('Example inky template with partials')}
 
 Given two files, ${d.Path('resources/email/welcome.html')} and ${d.Path('resources/email/footer.hml')}
 
-${d.Code('resources/email/welcome.html', 'resources/email/welcome.email.html')}
+${d.Code('resources/email/welcome.html', 'doc/email/welcome.email.html')}
 
-${d.Code('resources/email/footer.html', 'resources/email/footer.html')}
+${d.Code('resources/email/footer.html', 'doc/email/footer.html')}
 
 The final template will render as:
 
-${d.Execute('Final Output, with styling removed', 'src/render.ts')}
+${d.Execute('Final Output, with styling removed', 'trv', ['main', 'support/main.render.ts'], {
+  cwd: './doc-exec',
+  env: {
+    TRV_RESOURCES: `${path.resolve('doc')}`
+  }
+})}
 `;

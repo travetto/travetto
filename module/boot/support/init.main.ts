@@ -48,7 +48,15 @@ async function setup(): Promise<void> {
 
   // Remove to prevent __proto__ pollution in JSON
   const objectProto = Object.prototype.__proto__;
-  Object.defineProperty(Object.prototype, '__proto__', { writable: false, value: objectProto });
+  Object.defineProperty(
+    Object.prototype, '__proto__',
+    {
+      get() { return objectProto; },
+      set(val) {
+        Object.setPrototypeOf(this, val);
+      }
+    }
+  );
 
   // Enable maps to be serialized as json
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
