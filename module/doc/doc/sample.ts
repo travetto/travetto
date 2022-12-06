@@ -13,7 +13,7 @@ ${d.Ordered(
 
 ${d.Section('Content')}
 
-${d.Code('Document Sample', './test.ts')}
+${d.Code('Document Sample', './src/test.ts')}
 
 ${d.SubSection('Output')}
 

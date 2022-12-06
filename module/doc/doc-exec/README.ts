@@ -1,0 +1,1 @@
+export * from '@travetto/doc/doc/sample';
