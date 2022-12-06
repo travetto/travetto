@@ -81,6 +81,7 @@ export type Package = {
     profiles?: ManifestProfile[];
     docOutput?: string[];
     docBaseUrl?: string;
+    mergeWith?: string[];
   };
   travettoRepo?: {
     globalModules?: string[];
