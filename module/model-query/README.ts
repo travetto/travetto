@@ -1,5 +1,5 @@
 import { d, mod, lib } from '@travetto/doc';
-import { Links } from '@travetto/model-query/support/doc.support';
+import { Links } from './support/doc.support';
 
 export const text = () => d`
 ${d.Header()}
@@ -11,23 +11,23 @@ ${d.Section('Contracts')}
 ${d.SubSection(Links.Query)}
 This contract provides the ability to apply the query support to return one or many items, as well as providing counts against a specific query.
 
-${d.Snippet(Links.Query.title, '@travetto/model-query/src/service/query.ts', /export interface/, /^}/)}
+${d.Snippet(Links.Query.title, 'src/service/query.ts', /export interface/, /^}/)}
 
 ${d.SubSection(Links.QueryCrud)}
 Reinforcing the complexity provided in these contracts, the ${Links.QueryCrud} contract allows for bulk update/deletion by query.  This requires the underlying implementation to support these operations.
 
-${d.Snippet(Links.QueryCrud.title, '@travetto/model-query/src/service/crud.ts', /export interface/, /^}/)}
+${d.Snippet(Links.QueryCrud.title, 'src/service/crud.ts', /export interface/, /^}/)}
 
 
 ${d.SubSection(Links.QueryFacet)}
 With the complex nature of the query support, the ability to find counts by groups is a common and desirable pattern. This contract allows for faceting on a given field, with query filtering.
 
-${d.Snippet(Links.QueryFacet.title, '@travetto/model-query/src/service/facet.ts', /export interface/, /^}/)}
+${d.Snippet(Links.QueryFacet.title, 'src/service/facet.ts', /export interface/, /^}/)}
 
 ${d.SubSection(Links.QuerySuggest)}
 Additionally, this same pattern avails it self in a set of suggestion methods that allow for powering auto completion and type-ahead functionalities.
 
-${d.Snippet(Links.QuerySuggest.title, '@travetto/model-query/src/service/suggest.ts', /export interface/, /^}/)}
+${d.Snippet(Links.QuerySuggest.title, 'src/service/suggest.ts', /export interface/, /^}/)}
 
 ${d.Section('Implementations')}
 
@@ -98,7 +98,7 @@ ${d.List(
 
 A sample query for ${d.Input('User')}'s might be:
 
-${d.Code('Using the query structure for specific queries', 'src/user-query.ts')}
+${d.Code('Using the query structure for specific queries', 'doc/user-query.ts')}
 
 This would find all users who are over ${d.Input('35')} and that have the ${d.Input('contact')} field specified.
 
@@ -137,5 +137,5 @@ repetitive functionality, that is unable to be shared due to not relying upon in
 
 To enforce that these contracts are honored, the module provides shared test suites to allow for custom implementations to ensure they are adhering to the contract's expected behavior.
 
-${d.Code('MongoDB Service Test Configuration', './test/service.query.ts')}
+${d.Code('MongoDB Service Test Configuration', 'doc/service.query.ts')}
 `;
