@@ -6,7 +6,7 @@ import { CliCommand } from './command';
 const COMMAND_PACKAGE = [
   [/^run$/, 'app', true],
   [/^test$/, 'test', false],
-  [/^command:service$/, 'command', true],
+  [/^service$/, 'command', true],
   [/^model:(install|export)$/, 'model', true],
   [/^openapi:(spec|client)$/, 'openapi', true],
   [/^email:(compile|dev)$/, 'email-template', false],
@@ -32,7 +32,13 @@ export class CliCommandManager {
   /**
    * Load command
    */
-  static async loadCommand(cmd: string, op?: (p: CliCommand) => unknown): Promise<CliCommand> {
+  static async loadCommand(
+    cmd: string,
+    cfg: {
+      filter?: (p: CliCommand) => boolean,
+      failOnMissing?: boolean
+    } = {}
+  ): Promise<CliCommand | undefined> {
     const command = cmd.replace(/:/g, '_');
     const found = this.getCommandMapping().get(command)!;
     if (!found) {
@@ -46,31 +52,43 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
       }
       throw new Error(`Unknown command: ${cmd}`);
     }
-    const values = Object.values<{ new(...args: unknown[]): unknown }>(await import(found));
-    for (const v of values) {
-      try {
-        const inst = new v();
-        if (inst instanceof CliCommand) {
-          if (op) {
-            await op(inst);
+    try {
+      const values = Object.values<{ new(...args: unknown[]): unknown }>(await import(found));
+      for (const v of values) {
+        try {
+          const inst = new v();
+          if (inst instanceof CliCommand && (!cfg.filter || cfg.filter(inst))) {
+            return inst;
           }
-          return inst;
-        }
-      } catch { }
+        } catch { }
+      }
+    } catch (importErr) {
+      console.error(`Import error: ${cmd}`, importErr);
     }
-    throw new Error(`Not a valid command: ${cmd}`);
+    if (cfg.failOnMissing ?? false) {
+      throw new Error(`Not a valid command: ${cmd}`);
+    }
   }
 
   /**
    * Load all available commands
    */
   static async loadAllCommands(op?: (p: CliCommand) => unknown | Promise<unknown>): Promise<CliCommand[]> {
-    return Promise.all(
+    const commands = await Promise.all(
       [...this.getCommandMapping().keys()]
-        .sort((a, b) => a.localeCompare(b))
-        .map(k => this.loadCommand(k, op).catch(() => undefined))
-    ).then((values) =>
-      values.filter((cmd): cmd is CliCommand => !!cmd)
+        .map(k => this.loadCommand(k, {
+          filter(cmd: CliCommand) {
+            return cmd.constructor.Ⲑmeta?.abstract !== true && cmd.isActive?.() !== false;
+          }
+        }))
     );
+
+    return await Promise.all(commands
+      .filter((x): x is Exclude<typeof x, undefined> => !!x)
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map(async x => {
+        await op?.(x);
+        return x;
+      }));
   }
 }

@@ -24,7 +24,7 @@ async function $getBootstrap(ctx) {
  * @param {import('@travetto/manifest').ManifestContext} ctx
  * @param {boolean} [watch]
  */
-const compile = async (ctx, watch) => await (await $getBootstrap(ctx)).compile(ctx, watch);
+const compile = (ctx, watch) => $getBootstrap(ctx).then(({ compile: go }) => go(ctx, watch));
 
 /** @param {string} op */
 async function exec(op) {

@@ -58,10 +58,10 @@ export class PackageUtil {
   /**
    * Find workspace values from folder
    */
-  static async resolveWorkspaceFolders(folder: string): Promise<string[]> {
+  static async resolveWorkspaces(folder: string): Promise<{ name: string, folder: string }[]> {
     const text = execSync('npm query .workspace', { cwd: folder, encoding: 'utf8' });
-    const res: { location: string }[] = JSON.parse(text);
-    return res.map(d => d.location);
+    const res: { location: string, name: string }[] = JSON.parse(text);
+    return res.map(d => ({ folder: d.location, name: d.name }));
   }
 
   /**
@@ -95,8 +95,10 @@ export class PackageUtil {
       return [];
     }
 
+    const resolvedWorkspaces = workspaces?.length ? (await this.resolveWorkspaces(folder)) : [];
+
     const profileSet = new Set([...travetto?.profiles ?? [PACKAGE_STD_PROFILE], ...state.profiles]);
-    const mergePatterns = [...travetto?.mergeWith ?? [], ...workspaces ?? []]
+    const mergePatterns = [...travetto?.mergeWith ?? [], ...resolvedWorkspaces?.map(x => x.name) ?? []]
       .map(x => new RegExp(`^${x.replace(/[*]/g, '.*?')}`));
 
     const rootDep: Dependency = {
@@ -116,11 +118,9 @@ export class PackageUtil {
     ].sort((a, b) => a[0].localeCompare(b[0]));
 
     // We have a monorepo, collect local modules, and global-tests as needed
-    if (workspaces) {
-      const resolved = await this.resolveWorkspaceFolders(folder);
-      for (const mod of resolved) {
-        const pkg = PackageUtil.readPackage(mod);
-        searchSpace.push([pkg.name, '*', 'dep', new Set(), true]);
+    if (resolvedWorkspaces) {
+      for (const dep of resolvedWorkspaces) {
+        searchSpace.push([dep.name, '*', 'dep', new Set(), true]);
       }
     }
 

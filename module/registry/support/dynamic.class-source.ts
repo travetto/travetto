@@ -10,6 +10,15 @@ import type { ClassSource } from '../src/source/class-source';
 class $DynamicClassSource {
   #modules = new Map<string, RetargettingProxy<unknown>>();
 
+  #setMod(file: string, mod?: unknown): unknown {
+    if (!this.#modules.has(file)) {
+      this.#modules.set(file, new RetargettingProxy(mod));
+    } else {
+      this.#modules.get(file)!.setTarget(mod);
+    }
+    return this.#modules.get(file)!.get();
+  }
+
   async init(target: ClassSource): Promise<void> {
     const { DynamicLoader } = await import('@travetto/base/src/internal/dynamic-loader.js');
 
@@ -23,24 +32,13 @@ class $DynamicClassSource {
       }
     }, 0);
 
-
     // Proxy all file loads
-    DynamicLoader.onLoad((name, mod) => {
-      if (ModuleIndex.getModuleFromSource(name)?.local) {
-        if (!this.#modules.has(name)) {
-          this.#modules.set(name, new RetargettingProxy(mod));
-        } else {
-          this.#modules.get(name)!.setTarget(mod);
-        }
-        return this.#modules.get(name)!.get();
-      } else {
-        return mod;
-      }
-    });
+    DynamicLoader.onLoad((name, mod) =>
+      ModuleIndex.getModuleFromSource(name)?.local ? this.#setMod(name, mod) : mod);
 
     DynamicLoader.init();
 
-    console.debug('Watching for', folders);
+    console.log('Watching for', folders);
 
     await WatchUtil.buildWatcher(folders, async ({ type, path: file }) => {
       switch (type) {
@@ -53,11 +51,11 @@ class $DynamicClassSource {
           return target.processFiles();
         }
         case 'delete': {
-          this.#modules.get(file)?.setTarget(null);
+          this.#setMod(file, null);
           await DynamicLoader.unload(file);
         }
       }
-    });
+    }, ({ path }) => path.endsWith('.js'));
   }
 }
 

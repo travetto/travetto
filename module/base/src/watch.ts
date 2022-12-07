@@ -37,7 +37,9 @@ export class WatchUtil {
           }
         }
       }, {
-        ignore: [...readdirSync(folder).filter(x => x.startsWith('.') && x.length > 2), 'node_modules']
+        ignore: [
+          ...readdirSync(folder).filter(x => x.startsWith('.') && x.length > 2)
+        ]
       })
     ));
 

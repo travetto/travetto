@@ -79,7 +79,10 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
    * Supports JSON IPC?
    */
   jsonIpc?(...args: unknown[]): Promise<unknown>;
-
+  /**
+   * Is the command active/eligible for usage
+   */
+  isActive?(): boolean;
   /**
    * Define option
    */

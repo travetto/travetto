@@ -14,7 +14,7 @@ export async function runWorkspace(format: string, workerCount: number): Promise
 
   // Ensure services are healthy
   if (ModuleIndex.hasModule('@travetto/command')) {
-    await ExecUtil.spawn('trv', ['command:service', 'start'], { stdio: 'ignore' }).result;
+    await ExecUtil.spawn('trv', ['service', 'start'], { stdio: 'ignore' }).result;
   }
 
   await CliModuleUtil.runOnModules(

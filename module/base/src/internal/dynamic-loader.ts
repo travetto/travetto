@@ -1,4 +1,4 @@
-import Mod from 'module';
+import { Module as Mod } from 'module';
 
 import { path } from '@travetto/boot';
 

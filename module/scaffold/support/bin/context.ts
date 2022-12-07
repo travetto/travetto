@@ -1,5 +1,5 @@
 import fs from 'fs/promises';
-import { render } from 'mustache';
+import mustache from 'mustache';
 
 import { path } from '@travetto/boot';
 import { Pkg, ExecUtil, ExecutionResult } from '@travetto/base';
@@ -94,7 +94,7 @@ export class Context {
   async template(file: string, { rename }: ListingEntry): Promise<void> {
     const contents = await fs.readFile(this.source(file), 'utf-8');
     const out = this.destination(rename ?? file);
-    const rendered = render(contents, this).replace(/^\s*(\/\/|#)\s*\n/gsm, '');
+    const rendered = mustache.render(contents, this).replace(/^\s*(\/\/|#)\s*\n/gsm, '');
     await fs.mkdir(path.dirname(out), { recursive: true });
     await fs.writeFile(out, rendered, 'utf8');
   }

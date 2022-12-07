@@ -1,24 +1,24 @@
-import { plugins, highlight as prismHighlight, languages } from 'prismjs';
+import { default as prismjs } from 'prismjs';
 
-import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace';
-import 'prismjs/components/prism-typescript';
-import 'prismjs/components/prism-javascript';
-import 'prismjs/components/prism-css';
-import 'prismjs/components/prism-scss';
-import 'prismjs/components/prism-yaml';
-import 'prismjs/components/prism-json';
-import 'prismjs/components/prism-sql';
-import 'prismjs/components/prism-properties';
-import 'prismjs/components/prism-bash';
+import 'prismjs/plugins/normalize-whitespace/prism-normalize-whitespace.js';
+import 'prismjs/components/prism-typescript.js';
+import 'prismjs/components/prism-javascript.js';
+import 'prismjs/components/prism-css.js';
+import 'prismjs/components/prism-scss.js';
+import 'prismjs/components/prism-yaml.js';
+import 'prismjs/components/prism-json.js';
+import 'prismjs/components/prism-sql.js';
+import 'prismjs/components/prism-properties.js';
+import 'prismjs/components/prism-bash.js';
 
-plugins.NormalizeWhitespace.setDefaults({
+prismjs.plugins.NormalizeWhitespace.setDefaults({
   'remove-trailing': true,
   'remove-indent': true,
   'left-trim': true,
   'right-trim': true
 });
 
-const nw = plugins.NormalizeWhitespace;
+const nw = prismjs.plugins.NormalizeWhitespace;
 
 const tokenMapping: { [key: string]: string } = {
   gt: '>',
@@ -37,7 +37,7 @@ export function highlight(text: string, lang: string): string | undefined {
     .replace(/&([a-z][^;]*);/g, (a, k) => tokenMapping[k] || a);
 
   try {
-    return prismHighlight(text, languages[lang], lang)
+    return prismjs.highlight(text, prismjs.languages[lang], lang)
       .replace(/(@\s*<span[^>]*)function("\s*>)/g, (a, pre, post) => `${pre}meta${post}`)
       .replace(/[{}]/g, a => `{{'${a}'}}`);
   } catch (err) {
