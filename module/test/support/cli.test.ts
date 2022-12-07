@@ -1,9 +1,9 @@
-import os from 'os';
 import { readFileSync } from 'fs';
 import fs from 'fs/promises';
 
 import { path, ModuleIndex } from '@travetto/boot';
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
+import { WorkPool } from '@travetto/worker';
 
 import type { RunState } from '../src/execute/types';
 import { envInit } from './bin/env';
@@ -36,7 +36,7 @@ export class TestCommand extends CliCommand<Options> {
   getOptions(): Options {
     return {
       format: this.choiceOption({ desc: 'Output format for test results', def: 'tap', choices: this.getTypes() }),
-      concurrency: this.intOption({ desc: 'Number of tests to run concurrently', lower: 1, upper: 32, def: Math.min(4, os.cpus().length - 1) }),
+      concurrency: this.intOption({ desc: 'Number of tests to run concurrently', lower: 1, upper: 32, def: WorkPool.DEFAULT_SIZE }),
       mode: this.choiceOption({ desc: 'Test run mode', def: 'standard', choices: [...modes] })
     };
   }

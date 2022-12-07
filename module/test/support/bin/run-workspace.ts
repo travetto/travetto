@@ -7,7 +7,7 @@ import { TestConsumerRegistry } from '../../src/consumer/registry';
 import { RunnableTestConsumer } from '../../src/consumer/types/runnable';
 import { TestEvent } from '../../src/model/event';
 
-export async function runWorkspace(format: string, workers: number): Promise<void> {
+export async function runWorkspace(format: string, workerCount: number): Promise<void> {
 
   const emitter = await TestConsumerRegistry.getInstance(format);
   const consumer = new RunnableTestConsumer(emitter);
@@ -20,8 +20,10 @@ export async function runWorkspace(format: string, workers: number): Promise<voi
   await CliModuleUtil.runOnModules(
     'changed',
     ['trv', 'test', '-f', 'exec', '-c', '3'],
-    (folder, ev: TestEvent) => consumer.onEvent(ev),
-    workers
+    {
+      onMessage: (folder, ev: TestEvent) => consumer.onEvent(ev),
+      workerCount
+    }
   );
 
   process.exit(consumer.summarizeAsBoolean() ? 0 : 1);
