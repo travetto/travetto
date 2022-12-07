@@ -3,14 +3,8 @@ import { NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
-// {{#modules.auth-rest}}
-import { Authenticated } from '@travetto/auth-rest';
-// {{/modules.auth-rest}}
-// {{#modules.auth-rest-context}}
-import { AuthContextService } from '@travetto/auth-rest-context';
-// {{/modules.auth-rest-context}}
 
-import { Todo } from '../model/todo';
+import { Todo } from './model';
 
 @Schema()
 class Query {
@@ -21,18 +15,10 @@ class Query {
  * Controller for managing all aspects of the Todo lifecycle
  */
 @Controller('/todo')
-// {{#modules.auth-rest}}
-@Authenticated()
-// {{/modules.auth-rest}}
 export class TodoController {
 
   @Inject()
   source: ModelQueryCrudSupport;
-
-  // {{#modules.auth-rest-context}}
-  @Inject()
-  auth: AuthContextService;
-  // {{/modules.auth-rest-context}}
 
   /**
    * Get all Todos
@@ -40,9 +26,6 @@ export class TodoController {
   @Get('/')
   async getAll(query: Query): Promise<Todo[]> {
     query.q ??= {};
-    // {{#modules.auth-rest-context}}
-    query.q.userId = this.auth.get()?.id;
-    // {{/modules.auth-rest-context}}
     return this.source.query(Todo, { where: query.q });
   }
 
@@ -52,11 +35,8 @@ export class TodoController {
   @Get('/:id')
   async getOne(id: string): Promise<Todo> {
     const q: ModelQuery<Todo> = { where: { id } };
-    // {{#modules.auth-rest-context}}
     if (typeof q.where !== 'string') {
-      q.where!.userId = this.auth.get()?.id;
     }
-    // {{/modules.auth-rest-context}}
     return this.source.queryOne(Todo, q);
   }
 
@@ -65,9 +45,6 @@ export class TodoController {
    */
   @Post('/')
   async save(todo: Todo): Promise<Todo> {
-    // {{#modules.auth-rest-context}}
-    todo.userId = this.auth.get()?.id;
-    // {{/modules.auth-rest-context}}
     return this.source.create(Todo, todo);
   }
 
@@ -76,9 +53,6 @@ export class TodoController {
    */
   @Put('/:id')
   async update(todo: Todo): Promise<Todo> {
-    // {{#modules.auth-rest-context}}
-    todo.userId = this.auth.get()?.id;
-    // {{/modules.auth-rest-context}}
     return this.source.update(Todo, todo);
   }
 
@@ -88,11 +62,8 @@ export class TodoController {
   @Delete('/:id')
   async remove(id: string): Promise<void> {
     const q: ModelQuery<Todo> = { where: { id } };
-    // {{#modules.auth-rest-context}}
     if (typeof q.where !== 'string') {
-      q.where!.userId = this.auth.get()?.id;
     }
-    // {{/modules.auth-rest-context}}
     if (await this.source.deleteByQuery(Todo, q) !== 1) {
       throw new NotFoundError(Todo, id);
     }
