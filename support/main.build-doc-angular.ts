@@ -1,34 +1,3 @@
-import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
-
-type Options = {
-  changed: OptionConfig<boolean>;
-  related: OptionConfig<boolean>;
-};
-
-/**
- * Generate docs for all modules in repo
- */
-export class RepoDocCommand extends CliCommand<Options> {
-  name = 'repo:doc';
-
-
-  getOptions(): Options {
-    return {
-      changed: this.boolOption({ desc: 'Only doc changed modules', def: true }),
-      related: this.boolOption({ desc: 'Track related modules', def: false })
-    };
-  }
-
-  async action(): Promise<void> {
-    await CliModuleUtil.runOnModules(
-      this.cmd.changed ? 'changed' : 'all',
-      ['trv', 'doc'],
-      (folder, msg) => {
-        console.log(folder, msg);
-      }
-    );
-  }
-}
 
 /*
 import { Packages } from './bin/npm';
