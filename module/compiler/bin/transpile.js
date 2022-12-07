@@ -45,14 +45,14 @@ async function $getWorkspaceRoot() {
   let folder = process.cwd();
   let prevFolder = '';
   while (folder !== prevFolder) {
-    prevFolder = folder;
-    folder = path.dirname(folder);
     try {
       const pkg = await $getPkg(folder);
-      if (!!pkg.workspaces || pkg.travetto?.isolated) {
+      if (!!pkg.workspaces || !!pkg.travetto?.isolated) {
         return folder;
       }
     } catch { }
+    prevFolder = folder;
+    folder = path.dirname(folder);
   }
   return process.cwd();
 }
@@ -201,7 +201,7 @@ async function getContext() {
   const workspacePath = path.resolve(await $getWorkspaceRoot());
   const mainPath = toPosix(process.cwd());
 
-  const { name: mainModule, workspaces } = (await $getPkg(mainPath));
+  const { name: mainModule, workspaces, travettoRepo } = (await $getPkg(mainPath));
   const monoRepo = workspacePath !== mainPath || !!workspaces;
 
   // All relative to workspacePath
@@ -213,7 +213,7 @@ async function getContext() {
     workspacePath,
     monoRepo,
     manifestFile,
-    outputFolder: '.trv_output',
+    outputFolder: travettoRepo?.outputFolder ?? '.trv_output',
     compilerFolder: '.trv_compiler'
   };
 }

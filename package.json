@@ -32,7 +32,8 @@
     "module/*/doc-exec",
     "global-test/*",
     "related/overview",
-    "related/todo-app"
+    "related/todo-app",
+    "related/vscode-plugin"
   ],
   "overrides": {
     "compression": {
