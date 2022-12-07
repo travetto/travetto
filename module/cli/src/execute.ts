@@ -22,7 +22,7 @@ export class ExecutionManager {
 
     try {
       // Load a single command
-      command = await CliCommandManager.loadCommand(cmd);
+      command = (await CliCommandManager.loadCommand(cmd, { failOnMissing: true }))!;
       await command.setup(commander);
     } catch (err) {
       return HelpUtil.showHelp(commander, `Unknown command ${cmd}`);

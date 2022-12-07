@@ -59,13 +59,6 @@ export class TodoTest {
 
     await this.svc.remove(saved.id);
 
-    try {
-      await this.svc.get(saved.id);
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
-      }
-      assert(err.message);
-    }
+    await assert.rejects(() => this.svc.get(saved.id), /Todo.*not found/);
   }
 }

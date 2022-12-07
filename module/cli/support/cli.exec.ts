@@ -1,6 +1,7 @@
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 import { ExecutionOptions } from '@travetto/base';
 import { WorkPool } from '@travetto/worker';
+import { ModuleIndex } from '@travetto/boot';
 
 type Options = {
   changed: OptionConfig<boolean>;
@@ -11,10 +12,14 @@ type Options = {
  * Repo execution
  */
 export class RepoExecCommand extends CliCommand<Options> {
-  name = 'repo:exec';
+  name = 'exec';
 
   baseArgs: string[] = [];
   stdio?: ExecutionOptions['stdio'] = 'inherit';
+
+  isActive() {
+    return !!ModuleIndex.manifest.monoRepo;
+  }
 
   getOptions(): Options {
     return {

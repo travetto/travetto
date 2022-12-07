@@ -8,7 +8,7 @@ import { ServiceUtil } from './bin/service';
  * Allows for running services
  */
 export class CliServiceCommand extends CliCommand<{}> {
-  name = 'command:service';
+  name = 'service';
 
   getArgs(): string {
     return '[start|stop|restart|status] [...services]';

@@ -212,14 +212,7 @@ export class TodoTest {
 
     await this.svc.remove(saved.id);
 
-    try {
-      await this.svc.get(saved.id);
-    } catch (err) {
-      if (!(err instanceof Error)) {
-        throw err;
-      }
-      assert(err.message);
-    }
+    await assert.rejects(() => this.svc.get(saved.id), /Todo.*not found/);
   }
 }
 ```
@@ -371,7 +364,7 @@ First we must start the application:
       version: '0.0.0'
     },
     ApiSpecConfig: { output: './openapi.yml', persist: false, skipRoutes: false, exposeAllSchemas: false },
-    FileModelConfig: { folder: '/tmp/d706908e15', namespace: '.' },
+    FileModelConfig: { folder: '/tmp/4a387b568d', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
       hosts: [ 'localhost' ],
@@ -467,96 +460,6 @@ $ trv main support/main.list-todo.ts
     id: '3aed76ee063d13feec2e5e95b45513eb',
     text: 'New Todo',
     created: '2022-03-14T04:00:05.719Z'
-  },
-  {
-    id: '78291e7104077ba279b4e30fdacfc55b',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:06.119Z'
-  },
-  {
-    id: '9e3be2244035fe95813c97b18ef067eb',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:06.614Z'
-  },
-  {
-    id: '8025287189fe3a4a967d40c087b25149',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:06.826Z'
-  },
-  {
-    id: '8578fa73d4b6264fbb1042ba686f3de2',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:07.098Z'
-  },
-  {
-    id: 'e90f25a449c4254561d923f2a2f96721',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:08.018Z'
-  },
-  {
-    id: '7e1009311a5482ddd65b631704083099',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:08.233Z'
-  },
-  {
-    id: 'cb60eec71233aaefe1bd4b0867b24a80',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:08.279Z'
-  },
-  {
-    id: 'a3cd483543391247479a4b76a9d520ca',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:08.772Z'
-  },
-  {
-    id: '5e0eaa9280df3edf2d1d6c23e634bc5c',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:09.497Z'
-  },
-  {
-    id: 'ef954d9c11b2ec21f88c66ad8d36fe1e',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:10.280Z'
-  },
-  {
-    id: '0fdca2d2567d9d4ad39f50b080abc51d',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:10.670Z'
-  },
-  {
-    id: '62f883d88bb93d247c7f2a9b9c53a981',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:11.081Z'
-  },
-  {
-    id: 'bd754c4311c0775cfa8d3c527155fdc5',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:11.939Z'
-  },
-  {
-    id: '3f6079b34de8964402ebd679cfe9af4e',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:12.224Z'
-  },
-  {
-    id: 'e3e3b74f245182951dfdf5f6fde8f141',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:12.512Z'
-  },
-  {
-    id: 'f31b301c70dd32c823c93f5fedbddbcf',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:12.679Z'
-  },
-  {
-    id: 'e9bba8977f62a728f73fb8df5dd53064',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:13.361Z'
-  },
-  {
-    id: '22d267beac26512322469ad716483ebf',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:14.254Z'
   }
 ]
 ```

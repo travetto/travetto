@@ -1,6 +1,5 @@
 import type { MailTemplateEngine } from '@travetto/email';
-import { WatchUtil } from '@travetto/boot';
-import { TimeUtil } from '@travetto/base';
+import { WatchUtil, TimeUtil } from '@travetto/base';
 
 import { EmailTemplateCompiler, Compilation } from '../../src/compiler';
 import { EmailTemplateResource } from '../../src/resource';

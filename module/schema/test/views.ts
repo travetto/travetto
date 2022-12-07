@@ -76,6 +76,5 @@ export class ViewsTest {
     assert.ok(auth.age);
     assert.ok(!auth.password);
     assert.ok(auth.id);
-
   }
 }
