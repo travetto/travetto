@@ -93,9 +93,7 @@ export class CliModuleUtil {
               this.active = false;
               res.process.kill('SIGTERM');
             };
-            await res.result;
-          } catch {
-            // Ignore
+            await res.result.catchAsResult();
           } finally {
             this.active = false;
           }
