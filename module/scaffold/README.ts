@@ -1,7 +1,7 @@
 import { d, lib, mod } from '@travetto/doc';
 
-import { Todo } from '@travetto/scaffold/support/resources/templates/todo/src/model/todo';
-import { TodoController } from '@travetto/scaffold/support/resources/templates/todo/src/rest/todo';
+import { Todo } from './doc/model';
+import { TodoController } from './doc/rest';
 
 export const text = () => d`
 ${d.Header(undefined, false)}
