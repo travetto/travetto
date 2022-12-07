@@ -2,11 +2,10 @@ import fs from 'fs';
 import { createRequire } from 'module';
 
 import {
+  path,
   ManifestRoot, ManifestModule, ManifestModuleFile, ManifestModuleFileType,
   ManifestModuleCore, PACKAGE_STD_PROFILE, ManifestProfile
 } from '@travetto/manifest';
-
-import { path } from './path';
 
 type ScanTest = ((full: string) => boolean) | { test: (full: string) => boolean };
 export type FindConfig = {
@@ -36,7 +35,7 @@ export type IndexedModule = ManifestModuleCore & {
 /**
  * Module index, files to be loaded at runtime
  */
-class $ModuleIndex {
+export class $ModuleIndex {
 
   #manifestFile: string;
   #manifest: ManifestRoot;

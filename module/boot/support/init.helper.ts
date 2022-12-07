@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'url';
 
+// Avoids issues with transpiling
 import { path } from '@travetto/manifest';
 
 import type { LogLevel, LineContext } from '../src/types';

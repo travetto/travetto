@@ -84,6 +84,7 @@ export type Package = {
     mergeWith?: string[];
   };
   travettoRepo?: {
+    outputFolder?: string;
     globalModules?: string[];
     docBaseUrl?: string;
   };

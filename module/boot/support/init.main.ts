@@ -33,7 +33,7 @@ async function setupLogging(): Promise<void> {
 
 // Setup everything
 let initialized = false;
-async function setup(): Promise<void> {
+export async function setup(): Promise<void> {
   if (initialized) {
     return;
   } else {
