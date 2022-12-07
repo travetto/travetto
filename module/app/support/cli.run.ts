@@ -50,7 +50,6 @@ export class AppRunCommand extends CliCommand<Options> {
   envInit(): void {
     Env.define({
       env: this.cmd.env,
-      dynamic: !Env.isFalse('TRV_DYNAMIC'),
       append: { TRV_PROFILES: this.cmd.profile }
     });
   }
