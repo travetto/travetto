@@ -1,0 +1,1 @@
+export * from '@travetto/yaml/doc/serialize';
