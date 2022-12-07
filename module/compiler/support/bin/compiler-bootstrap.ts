@@ -116,10 +116,11 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
       state.manifest.modules['@travetto/compiler'].output,
       'support/main.output'
     ),
-    (manifestTemp ??= await ManifestUtil.writeState(state))
+    (manifestTemp ??= await ManifestUtil.writeState(state)),
+    `${!!watch}`
   ];
   await spawn('[3] Compiling', process.argv0, {
-    args, env: { TRV_WATCH: `${!!watch}` },
+    args,
     cwd: path.resolve(
       ctx.workspacePath,
       ctx.compilerFolder,

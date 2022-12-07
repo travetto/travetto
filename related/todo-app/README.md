@@ -364,7 +364,7 @@ First we must start the application:
       version: '0.0.0'
     },
     ApiSpecConfig: { output: './openapi.yml', persist: false, skipRoutes: false, exposeAllSchemas: false },
-    FileModelConfig: { folder: '/tmp/4a387b568d', namespace: '.' },
+    FileModelConfig: { folder: '/tmp/ef061e766c', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
       hosts: [ 'localhost' ],
@@ -460,6 +460,11 @@ $ trv main support/main.list-todo.ts
     id: '3aed76ee063d13feec2e5e95b45513eb',
     text: 'New Todo',
     created: '2022-03-14T04:00:05.719Z'
+  },
+  {
+    id: '734e307bc66d442ae78291e7104077ba',
+    text: 'New Todo',
+    created: '2022-03-14T04:00:06.119Z'
   }
 ]
 ```

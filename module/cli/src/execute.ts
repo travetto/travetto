@@ -1,7 +1,7 @@
 import { program as commander } from 'commander';
 
 import { PackageUtil, path } from '@travetto/manifest';
-import { ModuleIndex } from '@travetto/boot';
+import { ConsoleManager, ModuleIndex } from '@travetto/boot';
 import { runMain } from '@travetto/boot/support/init.main';
 
 import { CliCommandManager } from './command-manager';
@@ -49,7 +49,7 @@ export class ExecutionManager {
    * @param args
    */
   static async run(args: string[]): Promise<void> {
-    const width = +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 120);
+    const width = ConsoleManager.lineWidth;
     commander
       .version(PackageUtil.getFrameworkVersion())
       .configureOutput({ getOutHelpWidth: () => width, getErrHelpWidth: () => width });

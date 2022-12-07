@@ -1,7 +1,7 @@
 import { Env } from '@travetto/base';
 import type { Service } from '@travetto/command/support/bin/service';
 
-const version = Env.get('TRV_SERVICE_FIRESTORE', 'latest');
+const version = Env.get('FIRESTORE_VERSION', 'latest');
 
 export const service: Service = {
   name: 'firestore',

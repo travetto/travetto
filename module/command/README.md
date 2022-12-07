@@ -75,15 +75,15 @@ export class ImageCompressor {
 }
 ```
 
-## CLI - command:service
+## CLI - service
 
 The module provides the ability to start/stop/restart services as [docker](https://www.docker.com/community-edition) containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
 **Terminal: Command Service**
 ```bash
-$ trv command:service --help
+$ trv service --help
 
-Usage:  command:service [options] [start|stop|restart|status] [...services]
+Usage:  service [options] [start|stop|restart|status] [...services]
 
 Options:
   -h, --help  display help for command
@@ -115,7 +115,7 @@ The services are defined as plain typescript files within the framework and can 
 import { Env } from '@travetto/base';
 import type { Service } from '@travetto/command/support/bin/service';
 
-const version = Env.get('TRV_SERVICE_MONGO', '4.4');
+const version = Env.get('MONGO_VERSION', '4.4');
 
 export const service: Service = {
   name: 'mongodb',

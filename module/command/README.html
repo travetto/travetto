@@ -82,7 +82,7 @@ While docker containers provide a high level of flexibility, performance can be 
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<h2 id="cli-command-service">CLI - command:service</h2>
+<h2 id="cli-service">CLI - service</h2>
 
 The module provides the ability to start/stop/restart services as <a target="_blank" class="external-link" href="https://www.docker.com/community-edition">docker</a> containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
@@ -90,9 +90,9 @@ The module provides the ability to start/stop/restart services as <a target="_bl
       <figcaption class="terminal">Command Service
       
       </figcaption>
-      <pre><code class="language-bash">$ trv command:service <span class="token parameter variable">--help</span>
+      <pre><code class="language-bash">$ trv <span class="token function">service</span> <span class="token parameter variable">--help</span>
 
-Usage:  command:service <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>start<span class="token operator">|</span>stop<span class="token operator">|</span>restart<span class="token operator">|</span>status<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">..</span>.services<span class="token punctuation">]</span>
+Usage:  <span class="token function">service</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>start<span class="token operator">|</span>stop<span class="token operator">|</span>restart<span class="token operator">|</span>status<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">..</span>.services<span class="token punctuation">]</span>
 
 Options:
   -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
@@ -128,7 +128,7 @@ The services are defined as plain typescript files within the framework and can 
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> Service <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/command/support/bin/service'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">const</span> version <span class="token operator">=</span> Env<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'TRV_SERVICE_MONGO'</span><span class="token punctuation">,</span> <span class="token string">'4.4'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> version <span class="token operator">=</span> Env<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'MONGO_VERSION'</span><span class="token punctuation">,</span> <span class="token string">'4.4'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> service<span class="token operator">:</span> Service <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   name<span class="token operator">:</span> <span class="token string">'mongodb'</span><span class="token punctuation">,</span>

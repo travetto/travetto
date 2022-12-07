@@ -157,14 +157,15 @@ Sample documentation for fictional module.  This module fictitiously relies upon
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
 Options:
-  -V, <span class="token parameter variable">--version</span>                                              output the version number
-  -h, <span class="token parameter variable">--help</span>                                                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -V, <span class="token parameter variable">--version</span>                                      output the version number
+  -h, <span class="token parameter variable">--help</span>                                         display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Commands:
-  command:service <span class="token punctuation">[</span>start<span class="token operator">|</span>stop<span class="token operator">|</span>restart<span class="token operator">|</span>status<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">..</span>.services<span class="token punctuation">]</span>
   doc <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+  <span class="token builtin class-name">exec</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">..</span>.args<span class="token punctuation">]</span>
+  <span class="token function">service</span> <span class="token punctuation">[</span>start<span class="token operator">|</span>stop<span class="token operator">|</span>restart<span class="token operator">|</span>status<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">..</span>.services<span class="token punctuation">]</span>
   <span class="token builtin class-name">test</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>regexes<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-  <span class="token builtin class-name">help</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>                                             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  <span class="token builtin class-name">help</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>                                     display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 "@travetto-doc/doc wrote docs for README.ts"
 ```

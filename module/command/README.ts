@@ -25,15 +25,15 @@ While docker containers provide a high level of flexibility, performance can be 
 
 ${d.Code('Command Service example, using pngquant', 'doc/service.ts')}
 
-${d.Section('CLI - command:service')}
+${d.Section('CLI - service')}
 
 The module provides the ability to start/stop/restart services as ${lib.Docker} containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
-${d.Execute('Command Service', 'trv', ['command:service', '--help'])}
+${d.Execute('Command Service', 'trv', ['service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${d.Terminal('All Services', DocRunUtil.run('trv', ['command:service', 'status'], { cwd: ModuleIndex.manifest.workspacePath }))}
+${d.Terminal('All Services', DocRunUtil.run('trv', ['service', 'status'], { cwd: ModuleIndex.manifest.workspacePath }))}
 
 ${d.SubSection('Defining new Services')}
 
