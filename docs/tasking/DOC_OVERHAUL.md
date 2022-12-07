@@ -15,3 +15,4 @@
 - Model SQL
 - Registry
 - Rest Session
+- Compiler

@@ -166,4 +166,5 @@ Commands:
   <span class="token builtin class-name">test</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>regexes<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
   <span class="token builtin class-name">help</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>                                             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
+"@travetto-doc/doc wrote docs for README.ts"
 ```

@@ -1,4 +1,3 @@
-import { ExecUtil } from '@travetto/base';
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 
 type Options = {
@@ -21,17 +20,13 @@ export class RepoDocCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    const modules = (await CliModuleUtil.findModules(this.cmd.changed ? 'changed' : 'all')).map(x => x.source);
-
-    for (const mod of modules) {
-      console.log('Running', mod);
-      const res = ExecUtil.spawn('npx', ['trv', 'doc', '-o', '../README.html', '-o', '../README.md'], {
-        cwd: `${mod}/doc`,
-        stdio: [0, 1, 2],
-        isolatedEnv: true,
-      });
-      await res.result;
-    }
+    await CliModuleUtil.runOnModules(
+      this.cmd.changed ? 'changed' : 'all',
+      ['trv', 'doc'],
+      (folder, msg) => {
+        console.log(folder, msg);
+      }
+    );
   }
 }
 

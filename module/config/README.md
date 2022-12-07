@@ -129,12 +129,13 @@ By passing in the port via the environment variable, the config will construct p
 $ trv main support/main.dbconfig-run.ts
 
 Config {
-  sources: [
-    'application.1 - file://application.yml',
-    'override.3 - memory://override'
-  ],
+  sources: [ 'application.1 - file://application.yml', 'override.3 - memory://override' ],
   active: {
-    DBConfig: { host: 'localhost', port: 200, creds: [creds_7_45Ⲑsyn] }
+    DBConfig: {
+      host: 'localhost',
+      port: 200,
+      creds: creds_7_45Ⲑsyn { user: 'test', password: 'test' }
+    }
   }
 }
 ```

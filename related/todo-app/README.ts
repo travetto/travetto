@@ -39,7 +39,7 @@ ${d.Section('Prerequisites')}
 
 Install
 ${d.List(
-    d`${lib.NodeDownload} v15.x+ (recommended, but v12.x+ supported)`,
+    d`${lib.NodeDownload} v19.x+ (recommended, but v18.x+ supported)`,
     d`${lib.MongoDownload} 3.6+ (required)`,
     d`${lib.VSCodeDownload} (recommended)`,
     d`${lib.TravettoPlugin} (recommended)`
@@ -54,7 +54,7 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,test,rest-express,model-mongo}
+$ npm i @travetto/{log,test,rest-express,model-mongo,compiler,cli}
 `)}
 
 ${d.Section('Establishing The Model')}
@@ -92,7 +92,7 @@ ${d.Section('Writing Unit tests')}
 
 After we have established our service layer, we will now construct some simple tests to verify the service layer is running correctly. By default we set the database schema name under ${d.Path('test/resources/application.yml')} to ensure we aren't writing to our dev database.
 
-${d.Code('Test YAML', 'test/resources/application.yml')}
+${d.Code('Test YAML', 'resources/test.yml')}
 
 Now the tests should be defined at ${d.Path('test/service.ts')}
 
@@ -115,11 +115,11 @@ next, let's execute ${lib.Fetch} requests to interact with the new api:
 
 ${d.Code('Creating Todo by fetch', 'doc/create-todo.ts')}
 
-${d.Execute('Create Output', 'doc/create-todo.ts', [], { env: { TRV_LOG_PLAIN: '1' }, module: 'boot' })}
+${d.Execute('Create Output', 'trv', ['main', 'support/main.create-todo.ts'], { env: { TRV_LOG_PLAIN: '1' }, cwd: './doc-exec' })}
 
 ${d.Code('Listing Todos by fetch', 'doc/list-todo.ts')}
 
-${d.Execute('Listing Output', 'doc/list-todo.ts', [], { env: { TRV_LOG_PLAIN: '1' }, module: 'boot' })}
+${d.Execute('Listing Output', 'trv', ['main', 'support/main.list-todo.ts'], { env: { TRV_LOG_PLAIN: '1' }, cwd: './doc-exec' })}
 `;
 
   // Wrap it up
