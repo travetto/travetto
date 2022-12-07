@@ -1,11 +1,10 @@
-import { ModuleIndex } from '@travetto/boot';
 import { ExecUtil } from '@travetto/base';
 import { WorkPool, WorkUtil, IterableWorkSet } from '@travetto/worker';
 
 export async function main(): Promise<void> {
   const pool = new WorkPool(() =>
     WorkUtil.spawnedWorker<{ data: string }, string>(
-      () => ExecUtil.fork(ModuleIndex.resolveFileImport('doc/src/spawned.ts')),
+      () => ExecUtil.spawn('trv', ['main', 'support/main.spawned.ts']),
       ch => ch.once('ready'), // Wait for child to indicate it is ready
       async (channel, inp) => {
         const res = channel.once('response'); //  Register response listener
@@ -21,6 +20,5 @@ export async function main(): Promise<void> {
       }
     )
   );
-
   await pool.process(new IterableWorkSet([1, 2, 3, 4, 5])).then(x => pool.shutdown());
 }

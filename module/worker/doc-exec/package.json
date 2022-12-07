@@ -1,0 +1,12 @@
+{
+  "name": "@travetto-doc/worker",
+  "dependencies": {
+    "@travetto/worker": "*"
+  },
+  "travetto": {
+    "isolated": true,
+    "mergeWith": [
+      "@travetto/worker"
+    ]
+  }
+}
