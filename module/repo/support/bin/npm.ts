@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import { ExecUtil } from '@travetto/base';
 import { IndexedModule, ModuleIndex } from '@travetto/boot';
 
-import { SemverLevel } from './types';
+export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease';
 
 export class Npm {
 

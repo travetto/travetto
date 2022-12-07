@@ -2,10 +2,9 @@ import fs from 'fs/promises';
 
 import { CliCommand, CliScmUtil } from '@travetto/cli';
 import { CliModuleUtil } from '@travetto/cli/src/module';
-import { Package, PackageUtil } from '@travetto/manifest';
+import { Package, PackageUtil, PACKAGE_DEP_GROUPS } from '@travetto/manifest';
 
-import { Npm } from './bin/npm';
-import { DEP_GROUPS, SemverLevel } from './bin/types';
+import { Npm, SemverLevel } from './bin/npm';
 
 /**
 * `npx trv repo:version`
@@ -39,7 +38,7 @@ export class RepoVersionCommand extends CliCommand {
     for (const mod of changed) {
       for (const dep of all) {
         const { pkg: depPkg } = packages[dep.name];
-        for (const field of DEP_GROUPS) {
+        for (const field of PACKAGE_DEP_GROUPS) {
           if (depPkg[field] && mod.name in depPkg[field]! && /^[*]|(file:.*)$/.test(depPkg[field]![mod.name])) {
             depPkg[field]![mod.name] = `^${packages[mod.name].pkg.version}`;
             refreshed.add(depPkg);

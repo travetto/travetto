@@ -92,6 +92,11 @@ export type Package = {
   publishConfig?: { access?: 'restricted' | 'public' };
 };
 
+export const PACKAGE_DEP_GROUPS = [
+  'dependencies', 'devDependencies',
+  'peerDependencies', 'optionalDependencies',
+] as const;
+
 export const PACKAGE_STD_PROFILE = 'std';
 
 export type PackageDigestField = 'name' | 'main' | 'author' | 'license' | 'version';

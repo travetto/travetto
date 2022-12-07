@@ -55,11 +55,13 @@ async function exec(op) {
       console.log(`Built to ${ctx.workspacePath}/${ctx.outputFolder}`);
       return process.exit(0);
     default: {
-      const state = await compile(ctx);
-      process.env.TRV_MANIFEST = state.manifest.mainModule;
-      process.env.TRV_OUTPUT = `${state.manifest.workspacePath}/${state.manifest.outputFolder}`;
-      process.env.TRV_MAIN = `${process.env.TRV_OUTPUT}/${state.manifest.modules['@travetto/cli'].output}/support/main.cli.js`;
-      await import(process.env.TRV_MAIN);
+      const path = require('path/posix');
+      const { manifest } = await compile(ctx);
+      const out = path.join(ctx.workspacePath, ctx.outputFolder);
+      const cliMain = path.join(out, manifest.modules['@travetto/cli'].output, 'support', 'main.cli.js');
+      process.env.TRV_MANIFEST = ctx.mainModule;
+      process.env.TRV_OUTPUT = out;
+      await import(process.env.TRV_MAIN = cliMain);
       return;
     }
   }
