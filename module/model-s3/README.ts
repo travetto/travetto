@@ -1,7 +1,7 @@
 import { d, mod, lib } from '@travetto/doc';
 import { ModelCustomConfig } from '@travetto/model/support/doc.support';
 
-import { S3ModelConfig } from '@travetto/model-s3/src/config';
+import { S3ModelConfig } from './src/config';
 
 export const text = () => d`
 ${d.Header()}
