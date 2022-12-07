@@ -1,5 +1,3 @@
-import os from 'os';
-
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
 
@@ -32,7 +30,7 @@ export class TestWatcher {
     const pool = new WorkPool(buildStandardTestManager(consumer), {
       idleTimeoutMillis: 120000,
       min: 2,
-      max: os.cpus.length - 1
+      max: WorkPool.DEFAULT_SIZE
     });
 
     new MethodSource(RootRegistry).on(e => {

@@ -1,5 +1,6 @@
-import os from 'os';
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
+import { ExecutionOptions } from '@travetto/base';
+import { WorkPool } from '@travetto/worker';
 
 type Options = {
   changed: OptionConfig<boolean>;
@@ -13,11 +14,12 @@ export class RepoExecCommand extends CliCommand<Options> {
   name = 'repo:exec';
 
   baseArgs: string[] = [];
+  stdio?: ExecutionOptions['stdio'] = 'inherit';
 
   getOptions(): Options {
     return {
       changed: this.boolOption({ desc: 'Only changed modules', def: true }),
-      workers: this.option({ desc: 'Number of concurrent workers', def: Math.min(4, os.cpus.length - 1) }),
+      workers: this.option({ desc: 'Number of concurrent workers', def: WorkPool.DEFAULT_SIZE }),
     };
   }
 
@@ -30,7 +32,11 @@ export class RepoExecCommand extends CliCommand<Options> {
       this.cmd.changed ? 'changed' : 'all',
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       [...this.baseArgs, ...this.args] as [string, ...string[]],
-      (folder, msg) => console.log(folder, msg)
+      {
+        onMessage: (folder, msg) => console.log!(folder, msg),
+        workerCount: this.cmd.workers,
+        stdio: this.stdio
+      }
     );
   }
 }

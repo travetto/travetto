@@ -1,5 +1,3 @@
-import os from 'os';
-
 import { ExecUtil, ExecutionOptions } from '@travetto/base';
 import { IndexedModule, ModuleIndex } from '@travetto/boot';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
@@ -60,9 +58,15 @@ export class CliModuleUtil {
   static async runOnModules<T>(
     mode: 'all' | 'changed',
     [cmd, ...args]: [string, ...string[]],
-    onMessage: (folder: string, msg: T) => void,
-    workerCount = os.cpus.length - 1
+    config: {
+      onMessage?: (folder: string, msg: T) => void;
+      workerCount?: number;
+      stdio?: ExecutionOptions['stdio'];
+    } = {}
   ): Promise<void> {
+
+    const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
+
     // Run test
     const folders = (await CliModuleUtil.findModules(mode)).map(x => x.workspaceRelative);
     let id = 1;
@@ -79,16 +83,14 @@ export class CliModuleUtil {
 
             const opts: ExecutionOptions = {
               cwd: folder,
-              stdio: [0, process.env.DEBUG ? 'inherit' : 'pipe', 2, 'ipc'],
+              stdio: config.stdio ?? [0, process.env.DEBUG ? 'inherit' : 'pipe', 2, 'ipc'],
               env: {
                 TRV_MANIFEST: ''
               }
             };
 
-            await ExecUtil.spawn('trv', ['manifest'], { ...opts, stdio: 'ignore' }).result;
-
             const res = ExecUtil.spawn(cmd, args, opts);
-            res.process.on('message', (msg: T) => onMessage(folder, msg));
+            res.process.on('message', (msg: T) => config.onMessage?.(folder, msg));
             this.destroy = async (): Promise<void> => {
               this.active = false;
               res.process.kill('SIGTERM');
