@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 
 import { path } from '@travetto/boot';
-import { Env, WatchUtil } from '@travetto/base';
+import { sendResponse } from '@travetto/boot/support/init.main';
+import { Env, Pkg, WatchUtil } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { RenderUtil } from '../src/render/util';
@@ -44,6 +45,10 @@ export class DocCommand extends CliCommand<Options> {
 
   async action(): Promise<void> {
     const docFile = path.resolve(this.cmd.input);
+    if (!(await fs.stat(docFile).catch(() => false))) {
+      return sendResponse(1, `${Pkg.main.name} does not have ${this.cmd.input}`);
+    }
+
     if (this.cmd.formats.length === 0) {
       this.cmd.formats.push('md', 'html');
     }
@@ -69,9 +74,9 @@ export class DocCommand extends CliCommand<Options> {
     } else {
       try {
         await write();
+        sendResponse(0, `${Pkg.main.name} wrote docs for ${this.cmd.input}`);
       } catch (err) {
-        console.error(path.cwd(), err);
-        process.exit(1);
+        sendResponse(1, `${err}`);
       }
     }
   }

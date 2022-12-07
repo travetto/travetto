@@ -81,6 +81,17 @@ async function setup(): Promise<void> {
   await setupLogging();
 }
 
+export function sendResponse(exitCode: number, message: unknown): void {
+  if (parentPort) {
+    parentPort.postMessage(message);
+  } else if (process.send) {
+    process.send(message);
+  } else if (message) {
+    process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${JSON.stringify(message)}\n`);
+  }
+  process.exit(exitCode);
+}
+
 export async function runMain(action: Function, args: unknown[] = process.argv.slice(2)): Promise<void> {
   await setup();
 
@@ -95,15 +106,7 @@ export async function runMain(action: Function, args: unknown[] = process.argv.s
     exitCode = (res instanceof Error) ? (res as { code?: number })['code'] ?? 1 : 1;
   }
 
-  // If not delegated
-  if (parentPort) {
-    parentPort.postMessage(res);
-  } else if (process.send) {
-    process.send(res);
-  } else if (res) {
-    process.stdout.write(`${JSON.stringify(res)}\n`);
-  }
-  process.exit(exitCode);
+  sendResponse(exitCode, res);
 }
 
 export async function runIfMain(target: Function, filename: string, mainFile: string): Promise<unknown> {
