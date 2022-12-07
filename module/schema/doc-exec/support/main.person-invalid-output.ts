@@ -1,6 +1,9 @@
-import { validate } from './person-binding-invalid';
+import { RootRegistry } from '@travetto/registry';
+import { validate } from '@travetto/schema/doc/person-binding-invalid';
 
 export async function main(): Promise<void> {
+  await RootRegistry.init();
+
   try {
     await validate();
   } catch (err) {

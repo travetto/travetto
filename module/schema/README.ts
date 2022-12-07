@@ -1,10 +1,13 @@
 import { d, lib, mod } from '@travetto/doc';
 
 import {
-  Field, Required, Enum, Match, MinLength, MaxLength,
-  Min, Max, Email, Telephone, Url, Ignore, Integer, Float,
-  Currency, LongText, Text, Readonly, Writeonly, Schema, Describe
-} from '@travetto/schema';
+  Currency, Email, Enum, Field, Float, Ignore, Integer,
+  LongText, Match, Max, MaxLength, Min, MinLength, Readonly,
+  Required, Telephone, Url, Writeonly, Text
+} from './src/decorator/field';
+
+import { Schema } from './src/decorator/schema';
+import { Describe } from './src/decorator/common';
 
 export const text = () => d`
 ${d.Header()}
@@ -29,11 +32,11 @@ ${d.List(
 
 The ${d.Input('title')} will be picked up from the ${lib.JSDoc} comments, and additionally all fields can be set using the ${Describe} decorator.
 
-${d.Code('Sample User Schema', 'src/user.ts')}
+${d.Code('Sample User Schema', 'doc/user.ts')}
 
 From this schema, the registry would have the following information:
 
-${d.Config('User schemas as a YAML file', 'resources/user.yml')}
+${d.Config('User schemas as a YAML file', 'doc/user.yml')}
 
 
 ${d.SubSection('Fields')}
@@ -79,15 +82,17 @@ At runtime, once a schema is registered, a programmer can utilize this structure
 ${d.SubSection('Binding')}
 Binding is a very simple operation, as it takes in a class registered as as ${Schema} and a JS object that will be the source of the binding. Given the schema:
 
-${d.Code('Sub Schemas via Address', 'src/person.ts')}
+${d.Code('Sub Schemas via Address', 'doc/person.ts')}
 
 A binding operation could look like:
 
-${d.Code('Binding from JSON to Schema', 'src/person-binding.ts')}
+${d.Code('Binding from JSON to Schema', 'doc/person-binding.ts')}
 
 and the output would be a ${d.Input('Person')} instance with the following structure
 
-${d.Execute('Sample data output after binding', 'src/person-output.ts')}
+${d.Execute('Sample data output after binding', 'trv', ['main', 'support/main.person-output.ts'], {
+  cwd: './doc-exec'
+})}
 
 ${d.Note("Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.")}
 
@@ -95,21 +100,23 @@ ${d.SubSection('Validation')}
 
 Validation is very similar to binding, but instead of attempting to assign values, any mismatch or violation of the schema will result in errors. All errors will be collected and returned. Given the same schema as above,
 
-${d.Code('Sub Schemas via Address', 'src/person.ts')}
+${d.Code('Sub Schemas via Address', 'doc/person.ts')}
 
 But now with an invalid json object
 
-${d.Code('Read Person, and validate', 'src/person-binding-invalid.ts')}
+${d.Code('Read Person, and validate', 'doc/person-binding-invalid.ts')}
 
 would produce an exception similar to following structure
 
-${d.Execute('Sample error output', 'src/person-invalid-output.ts')}
+${d.Execute('Sample error output', 'trv', ['main', 'support/main.person-invalid-output.ts'], {
+  cwd: './doc-exec'
+})}
 
 ${d.SubSection('Custom Validators')}
 
 Within the schema framework, it is possible to add custom validators class level.  This allows for more flexibility when dealing with specific situations (e.g. password requirements or ensuring two fields match)
 
-${d.Code('Password Validator', 'src/password-validator.ts')}
+${d.Code('Password Validator', 'doc/password-validator.ts')}
 
 When the validator is executed, it has access to the entire object, and you can check any of the values.  The validator expects an object of a specific structure if you are looking to indicate an error has occurred.
 
@@ -124,7 +131,7 @@ To that end, the module supports two concepts:
 ${d.SubSection('Type Adapters')}
 This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the ${mod.ModelQuery} module handles geo data.
 
-${d.Code('Simple Custom Type', 'src/custom-type.ts')}
+${d.Code('Simple Custom Type', 'doc/custom-type.ts')}
 
 What you can see here is that the ${d.Input('Point')} type is now backed by a class that supports:
 
@@ -133,9 +140,11 @@ ${d.List(
   d`${d.Method('bindSchema')} - Will run during binding to ensure correct behavior.`,
 )}
 
-${d.Code('Simple Custom Type Usage', 'src/custom-type-usage.ts')}
+${d.Code('Simple Custom Type Usage', 'doc/custom-type-usage.ts')}
 
 All that happens now, is the type is exported, and the class above is able to properly handle point as an ${d.Input('[x, y]')} tuple.  All standard binding and validation patterns are supported, and type enforcement will work as expected.
 
-${d.Execute('Custom Type Validation', 'src/custom-type-output.ts')};
+${d.Execute('Custom Type Validation', 'trv', ['main', 'support/main.custom-type-output.ts'], {
+  cwd: './doc-exec'
+})}
 `;
