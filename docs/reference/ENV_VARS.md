@@ -27,8 +27,7 @@ The common environment variables throughout the code base:
 * `TRV_DOCKER` = 0|ns             - Docker support, if non-zero, acts as the docker namespace.  If `0`, disables running if docker should even be considered when running a command service, defaults to `undefined`
 
 ## Framework
-* `TRV_CONSOLE_WIDTH`             - An override for controlling output-width for cli-based operations.
+* `TRV_CONSOLE_WIDTH`             - An override for controlling output-width for console operations.
 
 ## Build
 * `TRV_OUTPUT` = string           - The output directory for compilation, defaults to `.trv_output` of the cwd
-* `TRV_COMPILER` = string         - The output directory of the compiler, defaults to `.trv_compiler` of the cwd

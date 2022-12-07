@@ -21,15 +21,16 @@ $ trv --help
 Usage:  [options] [command]
 
 Options:
-  -V, --version                                              output the version number
-  -h, --help                                                 display help for command
+  -V, --version                                      output the version number
+  -h, --help                                         display help for command
 
 Commands:
-  command:service [start|stop|restart|status] [...services]
   doc [options]
   echo [options] [args...]
+  exec [options] [command] [...args]
+  service [start|stop|restart|status] [...services]
   test [options] [regexes...]
-  help [command]                                             display help for command
+  help [command]                                     display help for command
 ```
 
 This will show all the available options/choices that are exposed given the currently installed modules.

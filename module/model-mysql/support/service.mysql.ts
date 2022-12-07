@@ -1,7 +1,7 @@
 import { Env } from '@travetto/base';
 import type { Service } from '@travetto/command/support/bin/service';
 
-const version = Env.get('TRV_SERVICE_MYSQL', '5.6');
+const version = Env.get('MYSQL_VERSION', '5.6');
 
 export const service: Service = {
   name: 'mysql',

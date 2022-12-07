@@ -139,14 +139,10 @@ export class Compiler {
     return emit;
   }
 
-  isWatching(): boolean {
-    return process.env.TRV_WATCH === 'true';
-  }
-
   /**
    * Run the compiler
    */
-  async run(): Promise<void> {
+  async run(watch?: boolean): Promise<void> {
     await this.outputInit();
     const emit = await this.getCompiler();
 
@@ -164,7 +160,7 @@ export class Compiler {
       process.exit(-1);
     }
 
-    if (this.isWatching()) {
+    if (watch) {
       await this.#watchLocalModules(emit);
       await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24));
     }

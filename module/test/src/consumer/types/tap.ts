@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { path } from '@travetto/boot';
+import { ConsoleManager, path } from '@travetto/boot';
 import { ColorUtil, ErrorUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
@@ -41,7 +41,8 @@ export class TapEmitter implements TestConsumer {
    * Output supplemental data (e.g. logs)
    */
   logMeta(obj: Record<string, unknown>): void {
-    let body = YamlUtil.serialize(obj, { wordwrap: +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 80) - 5 });
+    const lineLength = ConsoleManager.lineWidth - 5;
+    let body = YamlUtil.serialize(obj, { wordwrap: lineLength });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
   }

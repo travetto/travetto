@@ -56,6 +56,10 @@ class $ConsoleManager {
    */
   #filters: Partial<Record<LogLevel, (x: LineContext) => boolean>> = {};
 
+  get lineWidth(): number {
+    return +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 120)
+  }
+
   async init(): Promise<this> {
     this.set(console); // Init to console
     this.setDebugFromEnv();
