@@ -34,7 +34,7 @@ export class CompilerUtil {
     const { source: file, module } = inputToSource(src) ?? {};
     if (file && module) {
       data.sourceRoot = module.source;
-      data.sources = [file.replace(`${module.source}/`, './')];
+      data.sources = [file.replace(`${module.source}/`, '')];
       text = JSON.stringify(data);
     }
 

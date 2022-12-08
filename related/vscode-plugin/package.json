@@ -17,11 +17,12 @@
     "name": "Travetto Framework"
   },
   "files": [
-    "src-ts/",
+    "bin",
+    "src",
     "README.md",
     "CHANGELOG.md"
   ],
-  "main": "./out/node_modules/travetto-plugin/src/extension",
+  "main": "./out/node_modules/travetto-plugin/bin/launch",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "related/vscode-plugin"
