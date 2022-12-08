@@ -105,6 +105,7 @@ export class TestExecutor {
 
     const result: TestResult = {
       methodName: test.methodName,
+      module: ModuleIndex.manifest.mainModule,
       description: test.description,
       classId: test.classId,
       lines: { ...test.lines },

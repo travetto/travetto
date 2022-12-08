@@ -1,6 +1,6 @@
-import type * as ts from 'typescript';
+import type ts from 'typescript';
 
-import { ManifestManager } from '../manifest';
+import { TransformerIndex } from '../manifest-index';
 
 /**
  * Base type for a simplistic type structure
@@ -39,7 +39,7 @@ export interface ExternalType extends Type<'external'> {
   /**
    *  Location the type came from, for class references
    */
-  source: string;
+  importName: string;
   /**
    * Type arguments
    */
@@ -57,7 +57,7 @@ export interface ShapeType extends Type<'shape'> {
   /**
    *  Location the type came from, for class references
    */
-  source: string;
+  importName: string;
   /**
    * Does not include methods, used for shapes not concrete types
    */
@@ -158,5 +158,5 @@ export interface Checker {
   getPropertiesOfType(type: ts.Type): ts.Symbol[];
   getTypeAsString(type: ts.Type): string | undefined;
   getType(node: ts.Node): ts.Type;
-  getManifest(): ManifestManager;
+  getIndex(): TransformerIndex;
 }

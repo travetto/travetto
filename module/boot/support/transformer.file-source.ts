@@ -12,7 +12,7 @@ export class FileSourceTransformer {
 
   @AfterFile()
   static registerFileSource(state: TransformerState, node: ts.SourceFile): typeof node {
-    if (state.module.startsWith(HELPER_MOD) || state.module.startsWith(MANIFEST_MOD)) {
+    if (state.import === HELPER_MOD || state.import.startsWith(MANIFEST_MOD)) {
       return node;
     }
 

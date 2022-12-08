@@ -31,7 +31,7 @@ export class RegisterTransformer {
    */
   @OnClass()
   static collectClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (state.module.startsWith(BOOT_MOD_SRC) || state.module.startsWith(MANIFEST_MOD)) {
+    if (state.import.startsWith(BOOT_MOD_SRC) || state.import.startsWith(MANIFEST_MOD)) {
       return node; // Exclude self
     }
     state[cls] = SystemUtil.naiveHash(node.getText());
@@ -99,7 +99,7 @@ export class RegisterTransformer {
    */
   @AfterFunction()
   static registerFunctionMetadata(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
-    if (state.module.startsWith(BOOT_MOD_SRC) || state.module.startsWith(MANIFEST_MOD) || !ts.isFunctionDeclaration(node)) {
+    if (state.import.startsWith(BOOT_MOD_SRC) || state.import.startsWith(MANIFEST_MOD) || !ts.isFunctionDeclaration(node)) {
       return node;
     }
 

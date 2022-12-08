@@ -8,8 +8,7 @@ import { CoreUtil } from './util/core';
 import { Import } from './types/shared';
 import { LiteralUtil } from './util/literal';
 import { DeclarationUtil } from './util/declaration';
-
-import { ManifestManager } from './manifest';
+import { TransformerIndex } from './manifest-index';
 
 const D_OR_D_TS_EXT_RE = /[.]d([.]ts)?$/;
 
@@ -22,13 +21,13 @@ export class ImportManager {
   #imports: Map<string, Import>;
   #idx: Record<string, number> = {};
   #ids = new Map<string, string>();
-  #file: string;
-  #manifest: ManifestManager;
+  #importName: string;
+  #index: TransformerIndex;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, manifest: ManifestManager) {
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, index: TransformerIndex) {
     this.#imports = ImportUtil.collectImports(source);
-    this.#file = path.toPosix(source.fileName);
-    this.#manifest = manifest;
+    this.#index = index;
+    this.#importName = index.getImportName(source.fileName);
   }
 
   #getImportFile(spec?: ts.Expression): string | undefined {
@@ -38,13 +37,13 @@ export class ImportManager {
   }
 
   #rewriteModuleSpecifier(spec: ts.Expression | undefined): ts.Expression | undefined {
-    const file = this.#getImportFile(spec);
+    const fileOrImport = this.#getImportFile(spec);
     if (
-      file &&
-      (file.startsWith('.') || this.#manifest.knownFile(file)) &&
-      !/[.]([mc]?js|ts|json)$/.test(file)
+      fileOrImport &&
+      (fileOrImport.startsWith('.') || this.#index.getFromImport(fileOrImport)) &&
+      !/[.]([mc]?js|ts|json)$/.test(fileOrImport)
     ) {
-      return LiteralUtil.fromLiteral(this.factory, `${file}.js`);
+      return LiteralUtil.fromLiteral(this.factory, `${fileOrImport}.js`);
     }
     return spec;
   }
@@ -58,8 +57,8 @@ export class ImportManager {
       return clause;
     }
 
-    const file = this.#getImportFile(spec);
-    if (!(file && (file.startsWith('.') || this.#manifest.knownFile(file)))) {
+    const fileOrImport = this.#getImportFile(spec);
+    if (!(fileOrImport && (fileOrImport.startsWith('.') || this.#index.getFromImport(fileOrImport)))) {
       return clause;
     }
 
@@ -107,7 +106,7 @@ export class ImportManager {
    * Import a file if needed, and record it's identifier
    */
   importFile(file: string, name?: string): Import {
-    file = this.#manifest.resolveModule(file);
+    file = this.#index.getImportName(file);
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {
@@ -134,8 +133,8 @@ export class ImportManager {
    */
   importFromResolved(...types: AnyType[]): void {
     for (const type of types) {
-      if (type.key === 'external' && type.source && type.source !== this.#file) {
-        this.importFile(type.source);
+      if (type.key === 'external' && type.importName && type.importName !== this.#importName) {
+        this.importFile(type.importName);
       }
       switch (type.key) {
         case 'external':
@@ -224,10 +223,10 @@ export class ImportManager {
    * Get the identifier and import if needed
    */
   getOrImport(factory: ts.NodeFactory, type: ExternalType): ts.Identifier | ts.PropertyAccessExpression {
-    if (type.source === this.#file) {
+    if (type.importName === this.#importName) {
       return factory.createIdentifier(type.name!);
     } else {
-      const { ident } = this.#imports.get(type.source) ?? this.importFile(type.source);
+      const { ident } = this.#imports.get(type.importName) ?? this.importFile(type.importName);
       return factory.createPropertyAccessExpression(ident, type.name!);
     }
   }

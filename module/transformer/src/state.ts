@@ -6,7 +6,6 @@ import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, ModuleNameⲐ } from './types/visitor';
 import { TypeResolver } from './resolver/service';
 import { ImportManager } from './importer';
-import { ManifestManager } from './manifest';
 import { Import } from './types/shared';
 
 import { DocUtil } from './util/doc';
@@ -15,6 +14,7 @@ import { DeclarationUtil } from './util/declaration';
 import { CoreUtil } from './util/core';
 import { LiteralUtil } from './util/literal';
 import { SystemUtil } from './util/system';
+import { TransformerIndex } from './manifest-index';
 
 function hasOriginal(n: unknown): n is { original: ts.Node } {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -34,20 +34,20 @@ export class TransformerState implements State {
 
   #resolver: TypeResolver;
   #imports: ImportManager;
-  #manifest: ManifestManager;
+  #index: TransformerIndex;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
   #options: ts.CompilerOptions;
   added = new Map<number, ts.Statement[]>();
-  module: string;
+  import: string;
   file: string;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, manifest: ManifestManager, options: ts.CompilerOptions) {
-    this.#manifest = manifest;
-    this.#imports = new ImportManager(source, factory, manifest);
-    this.#resolver = new TypeResolver(checker, manifest);
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, index: TransformerIndex, options: ts.CompilerOptions) {
+    this.#index = index;
+    this.#imports = new ImportManager(source, factory, index);
+    this.#resolver = new TypeResolver(checker, index);
     this.file = path.toPosix(this.source.fileName);
-    this.module = manifest.resolveModule(this.file);
+    this.import = this.#index.getImportName(this.file, true);
     this.#options = options;
   }
 
@@ -95,7 +95,9 @@ export class TransformerState implements State {
   resolveExternalType(node: ts.Node): ExternalType {
     const resolved = this.resolveType(node);
     if (resolved.key !== 'external') {
-      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${this.#manifest.toSource(node.getSourceFile().fileName)}`);
+      const file = node.getSourceFile().fileName;
+      const src = this.#index.getImportName(file);
+      throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${src}`);
     }
     return resolved;
   }
@@ -155,24 +157,24 @@ export class TransformerState implements State {
   /**
    * Read a decorator's metadata
    */
-  getDecoratorMeta(dec: ts.Decorator): DecoratorMeta {
+  getDecoratorMeta(dec: ts.Decorator): DecoratorMeta | undefined {
     const ident = DecoratorUtil.getDecoratorIdent(dec);
     const decl = DeclarationUtil.getPrimaryDeclarationNode(
       this.#resolver.getType(ident)
     );
+    const src = decl?.getSourceFile().fileName;
+    const mod = src ? this.#index.getImportName(src, true) : undefined;
+    const file = this.#index.getFromImport(mod ?? '')?.output;
+    const targets = DocUtil.readAugments(this.#resolver.getType(ident));
+    const module = file ? mod : undefined;
+    const name = ident ?
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      ident.escapedText! as string :
+      undefined;
 
-    return {
-      dec,
-      ident,
-      // file: this.#manifest.ensureOutputFile(decl?.getSourceFile().fileName),
-      file: path.toPosix(decl?.getSourceFile().fileName ?? '') || undefined,
-      module: decl ? this.#manifest.resolveModule(decl.getSourceFile().fileName) : undefined, // All #decorators will be absolute
-      targets: DocUtil.readAugments(this.#resolver.getType(ident)),
-      name: ident ?
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        ident.escapedText! as string :
-        undefined
-    };
+    if (ident && name) {
+      return { dec, ident, file, module, targets, name };
+    }
   }
 
   /**
@@ -181,7 +183,7 @@ export class TransformerState implements State {
   getDecoratorList(node: ts.Node): DecoratorMeta[] {
     return ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? [])
       .map(dec => this.getDecoratorMeta(dec))
-      .filter(x => !!x.ident) : [];
+      .filter((x): x is DecoratorMeta => !!x) : [];
   }
 
   /**
@@ -283,8 +285,8 @@ export class TransformerState implements State {
   findDecorator(mod: string | Transformer, node: ts.Node, name: string, module?: string): ts.Decorator | undefined {
     mod = typeof mod === 'string' ? mod : mod[ModuleNameⲐ]!;
     const target = `${mod}:${name}`;
-    return this.getDecoratorList(node)
-      .find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.dec;
+    const list = this.getDecoratorList(node);
+    return list.find(x => x.targets?.includes(target) && (!module || x.name === name && x.module === module))?.dec;
   }
 
   /**

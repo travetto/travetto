@@ -14,7 +14,7 @@ export class FileMainTransformer {
     const toStmt = (x: ts.Expression): ts.Statement => state.factory.createExpressionStatement(x);
 
     // If not a main file
-    if (!/[/]main[.]/.test(state.module)) {
+    if (!/[/]main[.]/.test(state.import)) {
       return node;
     }
 

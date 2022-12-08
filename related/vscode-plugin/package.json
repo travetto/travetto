@@ -27,7 +27,7 @@
     "directory": "related/vscode-plugin"
   },
   "scripts": {
-    "vscode:prepublish": "cp ../../LICENSE . && npm run compile",
+    "vscode:prepublish": "cp ../../LICENSE . && npx trv build",
     "package": "vsce package"
   },
   "dependencies": {
