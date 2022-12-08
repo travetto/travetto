@@ -551,6 +551,8 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor as Class<T>): Promise<void> {
+    console.log!('Injecting fields', this.get(cls).dependencies);
+
     this.verifyInitialized();
     // Compute fields to be auto-wired
     return await this.resolveFieldDependencies(this.get(cls), o);

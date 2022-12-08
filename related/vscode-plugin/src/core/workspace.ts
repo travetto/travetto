@@ -4,6 +4,7 @@ import cp from 'child_process';
 
 import { path } from '@travetto/manifest';
 import { CatchableResult, ExecUtil, ExecutionOptions, ExecutionResult, ExecutionState } from '@travetto/base';
+import { ModuleIndex } from '@travetto/boot';
 
 type ForkResult = ExecutionState<CatchableResult>;
 
@@ -14,6 +15,8 @@ export class Workspace {
 
   static readonly context: vscode.ExtensionContext;
   static readonly folder: vscode.WorkspaceFolder;
+  static readonly extensionIndex: ModuleIndex;
+  static readonly workspaceIndex: ModuleIndex;
 
   /**
    * Get workspace path
@@ -44,11 +47,25 @@ export class Workspace {
    * Initialize extension context
    * @param context
    */
-  static init(context: vscode.ExtensionContext): void {
+  static async init(
+    context: vscode.ExtensionContext,
+    extensionIndex: ModuleIndex,
+    workspaceIndex: ModuleIndex
+  ): Promise<void> {
     // @ts-expect-error
     this.context = context;
     // @ts-expect-error
     [this.folder] = vscode.workspace.workspaceFolders!;
+    // @ts-expect-error
+    this.extensionIndex = extensionIndex;
+    // @ts-expect-error
+    this.workspaceIndex = workspaceIndex;
+
+    for (const mod of this.extensionIndex.findSrc({
+      filter: f => /.*\/feature.*?\/main[.]/.test(f)
+    })) {
+      await import(mod.output);
+    }
   }
 
   /**

@@ -1,7 +1,7 @@
 /* eslint-disable no-bitwise */
 import ts from 'typescript';
 
-import { path } from '@travetto/manifest';
+import { ManifestIndex, path } from '@travetto/manifest';
 
 import { DocUtil } from '../util/doc';
 import { CoreUtil } from '../util/core';
@@ -10,7 +10,6 @@ import { LiteralUtil } from '../util/literal';
 
 import { Type, AnyType, UnionType, Checker } from './types';
 import { CoerceUtil } from './coerce';
-import { ManifestManager } from '../manifest';
 
 /**
  * List of global types that can be parameterized
@@ -39,7 +38,7 @@ type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape
 /**
  * Type categorizer, input for builder
  */
-export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type, manifest: ManifestManager): { category: Category, type: ts.Type } {
+export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type, index: ManifestIndex): { category: Category, type: ts.Type } {
   const flags = type.getFlags();
   const objectFlags = DeclarationUtil.getObjectFlags(type) ?? 0;
 
@@ -69,7 +68,7 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type, manifest:
     const sourceFile = source.fileName;
     if (sourceFile?.includes('@types/node/globals') || sourceFile?.includes('typescript/lib')) {
       return { category: 'literal', type };
-    } else if (sourceFile?.endsWith('.d.ts') && !manifest.knownFile(sourceFile)) {
+    } else if (sourceFile?.endsWith('.d.ts') && !index.getFromSource(sourceFile)) {
       return { category: 'unknown', type };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };
@@ -145,14 +144,10 @@ export const TypeBuilder: {
   },
   external: {
     build: (checker, type) => {
-      const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
       const name = CoreUtil.getSymbol(type)?.getName();
-      return {
-        key: 'external',
-        name,
-        source: source.fileName,
-        tsTypeArguments: checker.getAllTypeArguments(type)
-      };
+      const importName = checker.getIndex().getImportName(type);
+      const tsTypeArguments = checker.getAllTypeArguments(type);
+      return { key: 'external', name, importName, tsTypeArguments };
     }
   },
   union: {
@@ -183,9 +178,10 @@ export const TypeBuilder: {
   },
   shape: {
     build: (checker, type, alias?) => {
-      const fieldNodes: Record<string, ts.Type> = {};
-      const name = CoreUtil.getSymbol(alias ?? type);
-      const source = DeclarationUtil.getPrimaryDeclarationNode(type)?.getSourceFile();
+      const tsFieldTypes: Record<string, ts.Type> = {};
+      const name = CoreUtil.getSymbol(alias ?? type)?.getName();
+      const importName = checker.getIndex().getImportName(type);
+      const tsTypeArguments = checker.getAllTypeArguments(type);
       for (const member of checker.getPropertiesOfType(type)) {
         const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
         if (DeclarationUtil.isPublic(dec)) { // If public
@@ -194,19 +190,11 @@ export const TypeBuilder: {
             !member.getName().includes('@') && // if not a symbol
             !memberType.getCallSignatures().length // if not a function
           ) {
-            fieldNodes[member.getName()] = memberType;
+            tsFieldTypes[member.getName()] = memberType;
           }
         }
       }
-      return {
-        key: 'shape',
-        name: name?.getName(),
-        // source: checker.getManifest().ensureOutputFile(source?.fileName),
-        source: source?.fileName,
-        tsFieldTypes: fieldNodes,
-        tsTypeArguments: checker.getAllTypeArguments(type),
-        fieldTypes: {}
-      };
+      return { key: 'shape', name, importName, tsFieldTypes, tsTypeArguments, fieldTypes: {} };
     }
   },
   concrete: {
@@ -214,26 +202,26 @@ export const TypeBuilder: {
       const [tag] = DocUtil.readDocTag(type, 'concrete');
       if (tag) {
         // eslint-disable-next-line prefer-const
-        let [source, name, ext] = tag.split(':');
+        let [importName, name] = tag.split(':');
         if (!name) {
-          name = source;
-          source = '.';
+          name = importName;
+          importName = '.';
         }
 
-        const rawSourceFile: string = DeclarationUtil.getDeclarations(type)
-          ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
-          ?.getSourceFile().fileName ?? '';
+        // Resolving relative to source file
+        if (importName.startsWith('.')) {
+          const rawSourceFile: string = DeclarationUtil.getDeclarations(type)
+            ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
+            ?.getSourceFile().fileName ?? '';
 
-        // Ensure we are looking at the output location
-        const sourceFile = checker.getManifest().ensureOutputFile(rawSourceFile);
-
-        if (source === '.') {
-          source = sourceFile;
-        } else if (source.startsWith('.')) {
-          source = path.resolve(path.dirname(sourceFile), source);
+          if (importName === '.') {
+            importName = checker.getIndex().getImportName(rawSourceFile);
+          } else {
+            const base = path.dirname(rawSourceFile);
+            importName = checker.getIndex().getImportName(path.resolve(base, importName));
+          }
         }
-
-        return { key: 'external', name, source: ext === 'node' ? source : path.resolve(sourceFile, source) };
+        return { key: 'external', name, importName };
       }
     }
   }

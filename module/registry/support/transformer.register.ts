@@ -17,11 +17,11 @@ export class RegisterTransformer {
    */
   @AfterClass()
   static registerClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (state.module === REGISTER_MOD ||
+    if (state.import === REGISTER_MOD ||
       (
-        state.module.startsWith(BOOT_MOD_SRC) ||
-        state.module.startsWith(BASE_MOD_SRC) ||
-        state.module.startsWith(MANIFEST_MOD)
+        state.import.startsWith(BOOT_MOD_SRC) ||
+        state.import.startsWith(BASE_MOD_SRC) ||
+        state.import.startsWith(MANIFEST_MOD)
       )
     ) {  // Cannot process self
       return node;

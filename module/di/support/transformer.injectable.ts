@@ -30,10 +30,9 @@ export class InjectableTransformer {
       optional = state.fromLiteral(true);
     }
 
-    args.unshift(state.fromLiteral({
-      target: state.getOrImport(state.resolveExternalType(ts.isSetAccessorDeclaration(param) ? param.parameters[0] : param)),
-      optional
-    }));
+    const keyParam = ts.isSetAccessorDeclaration(param) ? param.parameters[0] : param;
+    const target = state.getOrImport(state.resolveExternalType(keyParam));
+    args.unshift(state.fromLiteral({ target, optional }));
 
     return args;
   }

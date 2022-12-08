@@ -1,12 +1,12 @@
 import ts from 'typescript';
 
-import type { ManifestRoot } from '@travetto/manifest';
+import { ManifestRoot } from '@travetto/manifest';
 
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
 import { TransformerState } from './state';
 import { getAllTransformers } from './register';
-import { ManifestManager } from './manifest';
+import { TransformerIndex } from './manifest-index';
 
 /**
  * Manages the typescript transformers
@@ -21,25 +21,24 @@ export class TransformerManager {
    */
   static async create(transformerFiles: string[], manifest: ManifestRoot): Promise<TransformerManager> {
     const transformers: NodeTransformer<TransformerState>[] = [];
-    const mgr = new ManifestManager(manifest);
+    const idx = new TransformerIndex('.', manifest);
 
     for (const file of transformerFiles) { // Exclude based on blacklist
-      const src = mgr.toSource(file);
-      const entry = mgr.getEntry(src);
+      const entry = idx.getEntry(file)!;
       transformers.push(...getAllTransformers(await import(file), entry.module));
     }
 
     // Prepare a new visitor factory with a given type checker
-    return new TransformerManager(transformers, mgr);
+    return new TransformerManager(transformers, idx);
   }
 
   #cached: ts.CustomTransformers | undefined;
   #transformers: NodeTransformer<TransformerState>[];
-  #manifest: ManifestManager;
+  #index: TransformerIndex;
 
-  constructor(transformers: NodeTransformer<TransformerState>[], manifestManager: ManifestManager) {
+  constructor(transformers: NodeTransformer<TransformerState>[], index: TransformerIndex) {
     this.#transformers = transformers;
-    this.#manifest = manifestManager;
+    this.#index = index;
 
     console.debug('Transformers', {
       order: transformers.map(x => {
@@ -59,7 +58,7 @@ export class TransformerManager {
    */
   init(checker: ts.TypeChecker): void {
     const visitor = new VisitorFactory(
-      (ctx, src) => new TransformerState(src, ctx.factory, checker, this.#manifest, ctx.getCompilerOptions()),
+      (ctx, src) => new TransformerState(src, ctx.factory, checker, this.#index, ctx.getCompilerOptions()),
       this.#transformers
     );
 
