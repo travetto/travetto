@@ -42,6 +42,7 @@ async function $getPkg(inputFolder) {
  */
 async function $getWorkspaceRoot() {
   const path = await $getPath();
+  const fs = await $getFs();
   let folder = process.cwd();
   let prevFolder = '';
   while (folder !== prevFolder) {
@@ -51,6 +52,9 @@ async function $getWorkspaceRoot() {
         return folder;
       }
     } catch { }
+    if (await fs.stat(path.resolve(folder, '.git')).catch(() => { })) {
+      break;
+    }
     prevFolder = folder;
     folder = path.dirname(folder);
   }

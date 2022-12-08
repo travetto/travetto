@@ -43,7 +43,8 @@ async function exec(op) {
       const { writeManifest, buildManifest } = await $getBootstrap(ctx);
       const manifest = (await buildManifest(ctx)).manifest;
       await writeManifest(ctx, manifest);
-      console.log(`Wrote manifest ${ctx.workspacePath}/${ctx.outputFolder}/${ctx.manifestFile}`);
+      const output = `${ctx.workspacePath}/${ctx.outputFolder}/${ctx.manifestFile}`;
+      console.log(`Wrote manifest ${output}`);
       return process.exit(0);
     }
     case 'watch':
