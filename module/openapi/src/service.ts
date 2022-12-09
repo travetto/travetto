@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import { OpenAPIObject } from 'openapi3-ts';
 
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistry, RestConfig } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';

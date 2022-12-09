@@ -1,5 +1,5 @@
 import { d, lib, mod } from '@travetto/doc';
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 
 import { Suite } from './src/decorator/suite';
 import { Test } from './src/decorator/test';
@@ -34,7 +34,7 @@ ${d.Code('Example assertion for deep comparison', 'doc/assert-example.ts')}
 
 would translate to:
 
-${d.Code('Transpiled test Code', ModuleIndex.resolveFileImport('@travetto/test/doc/assert-example.ts'), false, 'javascript')}
+${d.Code('Transpiled test Code', RootIndex.resolveFileImport('@travetto/test/doc/assert-example.ts'), false, 'javascript')}
 
 This would ultimately produce the error like:
 

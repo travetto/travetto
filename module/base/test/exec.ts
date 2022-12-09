@@ -1,9 +1,10 @@
 import assert from 'assert';
 
-import { path } from '@travetto/boot';
 import { Test, Suite, TestFixtures } from '@travetto/test';
+import { path } from '@travetto/manifest';
 
 import { ExecUtil } from '../src/exec';
+
 
 @Suite()
 export class ExecUtilTest {

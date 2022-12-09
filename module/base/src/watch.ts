@@ -1,7 +1,8 @@
 import { readdirSync } from 'fs';
 import type * as watcher from '@parcel/watcher';
 
-import { path, ShutdownManager } from '@travetto/boot';
+import { ShutdownManager } from '@travetto/base';
+import { path } from '@travetto/manifest';
 
 async function getWatcher(): Promise<typeof watcher> {
   try {

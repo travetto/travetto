@@ -1,8 +1,8 @@
 import { createReadStream } from 'fs';
 import readline from 'readline';
 
-import { TimeUtil } from '@travetto/base';
-import { ShutdownManager, ModuleIndex } from '@travetto/boot';
+import { ShutdownManager, TimeUtil } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 
 /**
  * Simple Test Utilities
@@ -37,7 +37,7 @@ export class RunnerUtil {
    * Find all valid test files given the globs
    */
   static async getTestFiles(globs: RegExp[]): Promise<string[]> {
-    const files = ModuleIndex.findTest({})
+    const files = RootIndex.findTest({})
       .filter(f => globs.some(g => g.test(f.import)));
 
     const validFiles = files

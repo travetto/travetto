@@ -2,8 +2,7 @@ import ts from 'typescript';
 
 import { TransformerState, AfterFile } from '@travetto/transformer';
 
-const MANIFEST_MOD = '@travetto/manifest';
-const HELPER_MOD = '@travetto/boot/support/init.helper';
+const HELPER_MOD = '@travetto/manifest/src/path';
 
 /**
  *  Supporting `__output` as a file property
@@ -12,11 +11,11 @@ export class FileSourceTransformer {
 
   @AfterFile()
   static registerFileSource(state: TransformerState, node: ts.SourceFile): typeof node {
-    if (state.import === HELPER_MOD || state.import.startsWith(MANIFEST_MOD)) {
+    if (state.importName === HELPER_MOD) {
       return node;
     }
 
-    const { ident } = state.importFile(HELPER_MOD, 'ᚕ_');
+    const { ident } = state.importFile(HELPER_MOD, 'ᚕ_p');
 
     const toAdd = [
       state.factory.createVariableStatement(
@@ -28,12 +27,9 @@ export class FileSourceTransformer {
               undefined,
               undefined,
               state.factory.createCallExpression(
-                state.createAccess(ident, 'trv', 'out'),
+                state.createAccess(ident, 'path', 'forSrc'),
                 [],
-                [state.isEsmOutput() ?
-                  state.createAccess('import', 'meta', 'url') :
-                  state.createIdentifier('__filename')
-                ]
+                [state.getFilenameIdentifier()]
               )
             )
           ],

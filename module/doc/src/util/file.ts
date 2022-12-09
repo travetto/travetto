@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 
-import { path, ModuleIndex } from '@travetto/boot';
+import { path, RootIndex } from '@travetto/manifest';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
@@ -26,8 +26,8 @@ export class FileUtil {
     let resolved = path.resolve(file);
     if (!existsSync(resolved)) {
       if (file.endsWith('.ts')) {
-        resolved = ModuleIndex.resolveFileImport(file);
-        resolved = ModuleIndex.getSourceFile(resolved);
+        resolved = RootIndex.resolveFileImport(file);
+        resolved = RootIndex.getSourceFile(resolved);
       }
       if (!existsSync(resolved)) {
         throw new Error(`Unknown file to resolve: ${file}`);

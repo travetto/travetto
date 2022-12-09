@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 
 import { d } from './src/doc';
 import { lib } from './src/lib';
@@ -8,7 +8,7 @@ import { lib } from './src/lib';
 type Feature = { text: string, name: string };
 
 function getNodes(): ReturnType<(typeof d)['List']> {
-  const lines = readFileSync(ModuleIndex.getSourceFile(ModuleIndex.resolveFileImport('@travetto/doc/src/nodes.ts')), 'utf8').split(/\n/g);
+  const lines = readFileSync(RootIndex.getSourceFile(RootIndex.resolveFileImport('@travetto/doc/src/nodes.ts')), 'utf8').split(/\n/g);
   let feature: Partial<Feature> | undefined;
   const features: Feature[] = [];
   for (const line of lines) {

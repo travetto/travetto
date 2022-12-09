@@ -1,5 +1,4 @@
-import { ModuleIndex } from '@travetto/boot';
-import { PackageUtil } from '@travetto/manifest';
+import { RootIndex, PackageUtil } from '@travetto/manifest';
 
 import { RenderContext } from './context';
 import { Html } from './html';
@@ -32,7 +31,7 @@ export class RenderUtil {
       throw new Error(`Unknown renderer with format: ${fmt}`);
     }
 
-    const mod = ModuleIndex.getFromSource(file)?.import;
+    const mod = RootIndex.getFromSource(file)?.import;
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const res = await import(mod!) as DocumentShape;
@@ -47,9 +46,9 @@ export class RenderUtil {
 
     const { wrap, root } = this.#imported.get(file)!;
 
-    const manifestPkg = PackageUtil.readPackage(ModuleIndex.getModule('@travetto/boot')!.source);
+    const manifestPkg = PackageUtil.readPackage(RootIndex.getModule('@travetto/manifest')!.source);
 
-    const mf = ModuleIndex.manifest;
+    const mf = RootIndex.manifest;
 
     const repoBaseUrl = (mf.monoRepo ?
       PackageUtil.readPackage(mf.workspacePath).travettoRepo?.docBaseUrl :

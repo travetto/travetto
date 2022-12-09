@@ -1,13 +1,12 @@
 import os from 'os';
 
-import { path } from '@travetto/boot';
-import { Pkg } from '@travetto/base';
+import { path, RootIndex } from '@travetto/manifest';
 import { CliCommand, CliScmUtil, CliUtil, OptionConfig } from '@travetto/cli';
 
 import { PackUtil } from './bin/util';
 import { CommonConfig, PackOperation } from './bin/types';
 
-const packName = `pack_${Pkg.main.name}`
+const packName = `pack_${RootIndex.main.name}`
   .toLowerCase()
   .replace(/[^a-z]+/g, '_')
   .replace(/_+/g, '_');

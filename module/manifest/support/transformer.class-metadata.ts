@@ -5,14 +5,14 @@ import {
   AfterFunction, CoreUtil, SystemUtil
 } from '@travetto/transformer';
 
-const BOOT_MOD_SRC = '@travetto/boot/src';
 const MANIFEST_MOD = '@travetto/manifest';
+const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
 
-const UTIL_MOD = '@travetto/boot/src/class-metadata';
+const UTIL_MOD = `${MANIFEST_MOD}/src/class-metadata`;
 const UTIL_CLS = 'ClassMetadataUtil';
 
-const methods = Symbol.for('@travetto/boot:methods');
-const cls = Symbol.for('@travetto/boot:class');
+const methods = Symbol.for(`${MANIFEST_MOD}:methods`);
+const cls = Symbol.for(`${MANIFEST_MOD}:class`);
 
 interface MetadataInfo {
   [methods]?: {
@@ -26,12 +26,21 @@ interface MetadataInfo {
  */
 export class RegisterTransformer {
 
+  static #valid(state: TransformerState): boolean {
+    return !state.importName.startsWith(MANIFEST_MOD) ||
+      (
+        !state.importName.includes('/src/') &&
+        !state.importName.includes('/support/') &&
+        state.importName !== MANIFEST_IDX
+      );
+  }
+
   /**
    * Hash each class
    */
   @OnClass()
   static collectClassMetadata(state: TransformerState & MetadataInfo, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (state.import.startsWith(BOOT_MOD_SRC) || state.import.startsWith(MANIFEST_MOD)) {
+    if (!this.#valid(state)) {
       return node; // Exclude self
     }
     state[cls] = SystemUtil.naiveHash(node.getText());
@@ -70,7 +79,7 @@ export class RegisterTransformer {
       [],
       [
         state.createIdentifier(name),
-        state.createIdentifier('__output'),
+        state.getFilenameIdentifier(),
         state.fromLiteral(state[cls]!),
         state.extendObjectLiteral(state[methods] || {}),
         state.fromLiteral(CoreUtil.isAbstract(node)),
@@ -99,7 +108,7 @@ export class RegisterTransformer {
    */
   @AfterFunction()
   static registerFunctionMetadata(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
-    if (state.import.startsWith(BOOT_MOD_SRC) || state.import.startsWith(MANIFEST_MOD) || !ts.isFunctionDeclaration(node)) {
+    if (!this.#valid(state) || !ts.isFunctionDeclaration(node)) {
       return node;
     }
 
@@ -111,7 +120,7 @@ export class RegisterTransformer {
         [],
         [
           state.createIdentifier(node.name),
-          state.createIdentifier('__output'),
+          state.getFilenameIdentifier(),
         ]
       );
       state.addStatements([

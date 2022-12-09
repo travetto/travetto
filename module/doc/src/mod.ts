@@ -45,10 +45,6 @@ const MAPPING = {
     name: '@travetto/base', folder: 'module/base', displayName: 'Base',
     description: 'Environment config and common utilities for travetto applications.'
   },
-  Boot: {
-    name: '@travetto/boot', folder: 'module/boot', displayName: 'Boot',
-    description: 'Bootstrapping and application phase management for travetto applications.'
-  },
   Cache: {
     name: '@travetto/cache', folder: 'module/cache', displayName: 'Caching',
     description: 'Caching functionality with decorators for declarative use.'

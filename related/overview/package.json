@@ -19,7 +19,7 @@
     "directory": "related/overview"
   },
   "dependencies": {
-    "@travetto/boot": "*"
+    "@travetto/base": "*"
   },
   "travetto": {
     "displayName": "Overview Docs"

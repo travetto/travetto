@@ -1,8 +1,8 @@
 import fs from 'fs/promises';
 import mustache from 'mustache';
 
-import { path } from '@travetto/boot';
-import { Pkg, ExecUtil, ExecutionResult } from '@travetto/base';
+import { path, RootIndex } from '@travetto/manifest';
+import { ExecUtil, ExecutionResult } from '@travetto/base';
 
 import { Feature } from './features';
 
@@ -33,7 +33,7 @@ export class Context {
   #modules: Record<string, boolean>;
 
   readonly name: string;
-  readonly frameworkVersion = Pkg.mainDigest().framework.replace(/[.]\d+$/, '.0');
+  readonly frameworkVersion = RootIndex.mainDigest().framework.replace(/[.]\d+$/, '.0');
 
   constructor(name: string, template: string, targetDir: string) {
     this.name = name;

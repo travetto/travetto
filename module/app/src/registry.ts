@@ -1,5 +1,5 @@
-import { ModuleIndex, ShutdownManager } from '@travetto/boot';
-import { Pkg, Class, ConcreteClass, Env } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
+import { ShutdownManager, Class, ConcreteClass, Env } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
 import { Configuration } from '@travetto/config';
@@ -14,7 +14,7 @@ class $ApplicationRegistry {
   #applications = new Map<string, ApplicationConfig>();
 
   async init(): Promise<void> {
-    await ModuleIndex.loadSource();
+    await RootIndex.loadSource();
   }
 
   register(app: string, config: ApplicationConfig): void {
@@ -65,7 +65,7 @@ class $ApplicationRegistry {
 
     // Show manifest
     console.log('Manifest', {
-      info: Pkg.mainDigest(),
+      info: RootIndex.mainDigest(),
       env: Env.digest()
     });
 

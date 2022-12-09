@@ -1,6 +1,6 @@
 import { d, lib, mod } from '@travetto/doc';
 
-const ConsoleManager = d.Ref('ConsoleManager', '@travetto/boot/src/console.ts');
+const ConsoleManager = d.Ref('ConsoleManager', '@travetto/base/src/console.ts');
 
 export const text = () => d`
 ${d.Header()}

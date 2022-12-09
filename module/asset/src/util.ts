@@ -3,7 +3,7 @@ import { createReadStream } from 'fs';
 import crypto from 'crypto';
 import mime from 'mime';
 
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 import { StreamMeta } from '@travetto/model';
 
 import { Asset } from './types';

@@ -1,8 +1,8 @@
-import { Pkg, Env, Class, OrderingUtil, AppError } from '@travetto/base';
+import { RetargettingProxy, Env, Class, AppError, Util } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 import { DependencyRegistry, Inject } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
 import { Application } from '@travetto/app';
-import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
 
 import { RouteConfig, Request, ServerHandle } from '../types';
 import { RestConfig } from './config';
@@ -43,7 +43,7 @@ export class RestApplication<T = unknown>  {
 
   async postConstruct(): Promise<void> {
     this.info = {
-      info: Pkg.mainDigest(),
+      info: RootIndex.mainDigest(),
       env: Env.digest(),
       restProvider: this.server.constructor.name
     };
@@ -87,7 +87,7 @@ export class RestApplication<T = unknown>  {
     }
 
     const ordered = instances.map(x => ({ key: x.constructor, before: x.before, after: x.after, target: x }));
-    const sorted = OrderingUtil.compute(ordered).map(x => x.target);
+    const sorted = Util.ordered(ordered).map(x => x.target);
 
     console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });
     return sorted;

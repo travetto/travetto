@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 import { createReadStream } from 'fs';
 import fs from 'fs/promises';
 
-import { path, ModuleIndex } from '@travetto/boot';
+import { path, RootIndex } from '@travetto/manifest';
 
 import { AppError } from './error';
 import { Env } from './env';
@@ -50,15 +50,15 @@ export class FileResourceProvider implements ResourceProvider {
   }
 
   #getModulePath(mod: string, rel?: string): string {
-    return path.resolve(ModuleIndex.getModule(mod)!.source, rel ?? '');
+    return path.resolve(RootIndex.getModule(mod)!.source, rel ?? '');
   }
 
   #getPaths(): string[] {
-    const main = ModuleIndex.manifest.mainModule;
+    const main = RootIndex.manifest.mainModule;
     return this.#paths ??= this.#rawPaths.map(pth => {
       const [base, sub] = pth.replace(/^@$/, main).replace(/^@#/, `${main}#`).split('#');
 
-      return ModuleIndex.hasModule(base) ?
+      return RootIndex.hasModule(base) ?
         this.#getModulePath(base, sub ?? (base !== main ? this.moduleFolder : undefined) ?? this.mainFolder) :
         path.resolve(base, sub ?? this.mainFolder ?? '');
     });

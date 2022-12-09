@@ -1,6 +1,5 @@
-import { WatchUtil } from '@travetto/base';
-import { RetargettingProxy } from '@travetto/base/src/internal/proxy';
-import { ModuleIndex, ShutdownManager } from '@travetto/boot';
+import { RetargettingProxy, ShutdownManager, WatchUtil } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 
 import type { ClassSource } from '../src/source/class-source';
 
@@ -22,7 +21,7 @@ class $DynamicClassSource {
   async init(target: ClassSource): Promise<void> {
     const { DynamicLoader } = await import('@travetto/base/src/internal/dynamic-loader.js');
 
-    const localMods = ModuleIndex.getLocalModules();
+    const localMods = RootIndex.getLocalModules();
     const folders = localMods.map(x => x.output);
 
     ShutdownManager.onUnhandled(err => {
@@ -34,7 +33,7 @@ class $DynamicClassSource {
 
     // Proxy all file loads
     DynamicLoader.onLoad((name, mod) =>
-      ModuleIndex.getModuleFromSource(name)?.local ? this.#setMod(name, mod) : mod);
+      RootIndex.getModuleFromSource(name)?.local ? this.#setMod(name, mod) : mod);
 
     DynamicLoader.init();
 

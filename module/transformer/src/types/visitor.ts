@@ -14,7 +14,7 @@ export type DecoratorMeta = {
 
 export type State = {
   source: ts.SourceFile;
-  import: string;
+  importName: string;
   added: Map<number, ts.Statement[]>;
   getDecoratorList(node: ts.Node): DecoratorMeta[];
   finalize(src: ts.SourceFile): ts.SourceFile;

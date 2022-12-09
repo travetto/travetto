@@ -1,6 +1,5 @@
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 import { Env } from '@travetto/base';
-
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';

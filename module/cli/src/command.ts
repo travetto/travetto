@@ -1,9 +1,10 @@
 import { appendFile, mkdir } from 'fs/promises';
 import type * as commander from 'commander';
 
+import { path } from '@travetto/manifest';
+
 import { CliUtil } from './util';
 import { HelpUtil } from './help';
-import { path } from '@travetto/boot';
 
 type OptionPrimitive = string | number | boolean;
 

@@ -39,7 +39,7 @@ export class TransformerState implements State {
   #decorators = new Map<string, ts.PropertyAccessExpression>();
   #options: ts.CompilerOptions;
   added = new Map<number, ts.Statement[]>();
-  import: string;
+  importName: string;
   file: string;
 
   constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, index: TransformerIndex, options: ts.CompilerOptions) {
@@ -47,7 +47,7 @@ export class TransformerState implements State {
     this.#imports = new ImportManager(source, factory, index);
     this.#resolver = new TypeResolver(checker, index);
     this.file = path.toPosix(this.source.fileName);
-    this.import = this.#index.getImportName(this.file, true);
+    this.importName = this.#index.getImportName(this.file, true);
     this.#options = options;
   }
 
@@ -273,6 +273,24 @@ export class TransformerState implements State {
    */
   createIdentifier(name: string | { getText(): string }): ts.Identifier {
     return this.factory.createIdentifier(typeof name === 'string' ? name : name.getText());
+  }
+
+  /**
+   * Get filename identifier, regardless of module system
+   */
+  getFilenameIdentifier(): ts.Expression {
+    return this.isEsmOutput() ?
+      this.createAccess('import', 'meta', 'url') :
+      this.createIdentifier('__filename');
+  }
+
+  /**
+   * Get the entry file identifier, supports both ESM and commonjs
+   */
+  getEntryFileIdentifier(): ts.Expression {
+    return this.isEsmOutput() ?
+      this.factory.createElementAccessExpression(this.createAccess('process', 'argv'), 1) :
+      this.createAccess('require', 'main', 'filename');
   }
 
   /**

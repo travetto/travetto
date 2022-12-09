@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import cp from 'child_process';
 
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
 import { CliCommand, CliUtil, OptionConfig, ListOptionConfig } from '@travetto/cli';
 

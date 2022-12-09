@@ -1,4 +1,4 @@
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 import { CliUtil } from '@travetto/cli';
 
 import { CommandUtil } from '../../src/util';
@@ -155,7 +155,7 @@ export class ServiceUtil {
    */
   static async findAll(): Promise<Service[]> {
     return (await Promise.all(
-      ModuleIndex.findSupport({ filter: x => /\/service[.]/.test(x) })
+      RootIndex.findSupport({ filter: x => /\/service[.]/.test(x) })
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         .map(async x => (await import(x.output)).service as Service)
     ))

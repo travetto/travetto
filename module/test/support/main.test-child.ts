@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 
-import { path, ConsoleManager } from '@travetto/boot';
+import { ConsoleManager } from '@travetto/base';
+import { path } from '@travetto/manifest';
 
 import { envInit } from './bin/env';
 import { TestChildWorker } from '../src/worker/child';

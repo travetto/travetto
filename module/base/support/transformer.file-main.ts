@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { AfterFile, TransformerState } from '@travetto/transformer';
 
-const MAIN_MOD = '@travetto/boot/support/init.main';
+const MAIN_MOD = '@travetto/base/support/init.main';
 
 /**
  *  Auto importing setup for main entry points
@@ -14,7 +14,7 @@ export class FileMainTransformer {
     const toStmt = (x: ts.Expression): ts.Statement => state.factory.createExpressionStatement(x);
 
     // If not a main file
-    if (!/[/]main[.]/.test(state.import)) {
+    if (!/[/]main[.]/.test(state.importName)) {
       return node;
     }
 
@@ -34,10 +34,8 @@ export class FileMainTransformer {
       toStmt(
         state.factory.createCallExpression(state.createAccess(ident, 'runIfMain'), [], [
           mainFn.name!,
-          state.createIdentifier('__output'),
-          state.isEsmOutput() ?
-            state.factory.createElementAccessExpression(state.createAccess('process', 'argv'), 1) :
-            state.createAccess('require', 'main', 'filename')
+          state.getFilenameIdentifier(),
+          state.getEntryFileIdentifier()
         ])
       )
     ]);

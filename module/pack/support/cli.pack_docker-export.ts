@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import { existsSync } from 'fs';
 
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 type Options = {

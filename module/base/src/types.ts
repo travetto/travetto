@@ -6,3 +6,12 @@ export type ClassInstance<T = any> = T & {
 };
 
 export type Primitive = number | boolean | string | Date | Error;
+
+export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
+
+export type LineContext = { source: string, line: number, module: string, modulePath: string, scope?: string };
+
+export interface ConsoleListener {
+  setDebug?(val: string | boolean): void;
+  onLog<T extends LineContext>(context: LogLevel, ctx: T, args: unknown[]): void;
+}

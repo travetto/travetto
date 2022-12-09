@@ -1,4 +1,4 @@
-import { LogLevel } from '@travetto/boot';
+import { LogLevel } from '@travetto/base';
 import { Appender } from '../types';
 
 /**

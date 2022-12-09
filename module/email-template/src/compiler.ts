@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import util from 'util';
 import { createRequire } from 'module';
 
-import { path } from '@travetto/boot';
 import { ImageConverter } from '@travetto/image';
+import { path } from '@travetto/manifest';
 import { StreamUtil } from '@travetto/base';
 import type { MailTemplateEngine } from '@travetto/email';
 import { DependencyRegistry } from '@travetto/di';

@@ -1,5 +1,5 @@
 import { CliCommand, OptionConfig } from '@travetto/cli';
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/base';
 
 type Options = {
@@ -24,7 +24,7 @@ export class OpenApiSpecCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    const result = await ExecUtil.worker(ModuleIndex.resolveFileImport('@travetto/openapi/support/main.generate.ts')).message;
+    const result = await ExecUtil.worker(RootIndex.resolveFileImport('@travetto/openapi/support/main.generate.ts')).message;
 
     if (this.cmd.output === '-' || !this.cmd.output) {
       console.log!(result);
