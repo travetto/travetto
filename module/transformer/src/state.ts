@@ -256,7 +256,7 @@ export class TransformerState implements State {
   /**
    * Create property access
    */
-  createAccess(first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | ts.Identifier)[]): ts.PropertyAccessExpression {
+  createAccess(first: string | ts.Expression, second: string | ts.Identifier, ...items: (string | number | ts.Identifier)[]): ts.Expression {
     return CoreUtil.createAccess(this.factory, first, second, ...items);
   }
 
@@ -289,7 +289,7 @@ export class TransformerState implements State {
    */
   getEntryFileIdentifier(): ts.Expression {
     return this.isEsmOutput() ?
-      this.factory.createElementAccessExpression(this.createAccess('process', 'argv'), 1) :
+      this.createAccess('process', 'argv', 1) :
       this.createAccess('require', 'main', 'filename');
   }
 

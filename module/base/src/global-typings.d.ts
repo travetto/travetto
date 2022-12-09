@@ -13,7 +13,4 @@ declare global {
     // eslint-disable-next-line @typescript-eslint/naming-convention
     __proto__: unknown;
   }
-
-  // Parallel to __filename, but cleansed
-  var __output: string;
 }

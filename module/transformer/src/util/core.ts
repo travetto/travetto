@@ -88,13 +88,15 @@ export class CoreUtil {
     factory: ts.NodeFactory,
     first: string | ts.Expression,
     second: string | ts.Identifier,
-    ...items: (string | ts.Identifier)[]
-  ): ts.PropertyAccessExpression {
+    ...items: (string | number | ts.Identifier)[]
+  ): ts.Expression {
     if (typeof first === 'string') {
       first = factory.createIdentifier(first);
     }
-    return items.reduce(
-      (acc, p) => factory.createPropertyAccessExpression(acc, p),
+    return items.reduce<ts.Expression>(
+      (acc, p) => typeof p === 'number' ?
+        factory.createElementAccessExpression(acc, p) :
+        factory.createPropertyAccessExpression(acc, p),
       factory.createPropertyAccessExpression(first, second)
     );
   }
