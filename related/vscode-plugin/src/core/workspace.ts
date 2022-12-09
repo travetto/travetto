@@ -1,11 +1,6 @@
 import vscode from 'vscode';
-import fs from 'fs/promises';
-import cp from 'child_process';
 
-import { path, ManifestIndex } from '@travetto/manifest';
-import { CatchableResult, ExecUtil, ExecutionOptions, ExecutionResult, ExecutionState } from '@travetto/base';
-
-type ForkResult = ExecutionState<CatchableResult>;
+import { ManifestIndex } from '@travetto/manifest';
 
 /**
  * Standard set of workspace utilities
@@ -21,14 +16,14 @@ export class Workspace {
    * Get workspace path
    */
   static get path(): string {
-    return this.folder.uri.fsPath;
+    return this.workspaceIndex.manifest.workspacePath;
   }
 
   /**
    * Get workspace uri
    */
   static get uri(): vscode.Uri {
-    return this.folder.uri;
+    return vscode.Uri.file(this.path);
   }
 
   /**
@@ -36,10 +31,7 @@ export class Workspace {
    * @param extra Additional env vars to add
    */
   static getDefaultEnv(extra: Record<string, string> = {}): Record<string, string> {
-    return {
-      FORCE_COLOR: 'true',
-      ...extra
-    };
+    return { FORCE_COLOR: 'true', ...extra };
   }
 
   /**
@@ -53,8 +45,6 @@ export class Workspace {
   ): Promise<void> {
     // @ts-expect-error
     this.context = context;
-    // @ts-expect-error
-    [this.folder] = vscode.workspace.workspaceFolders!;
     // @ts-expect-error
     this.extensionIndex = extensionIndex;
     // @ts-expect-error
@@ -84,82 +74,11 @@ export class Workspace {
   }
 
   /**
-   * Resolve workspace path
-   */
-  static resolve(...p: string[]): string {
-    return path.resolve(this.path, ...p);
-  }
-
-  /**
-   * Resolve workspace path
-   */
-  static resolveModule(...p: string[]): string {
-    return this.resolve('node_modules', ...p);
-  }
-
-  /**
-   * Run a main script
-   */
-  static runMain(main: string, args?: string[], opts?: ExecutionOptions & { format: undefined }): ForkResult;
-  static runMain(main: string, args: string[], opts: ExecutionOptions & { format: 'raw' }): ForkResult;
-  static runMain<T>(main: string, args: string[], opts: ExecutionOptions & { format: 'json' }): Promise<T>;
-  static runMain(main: string, args: string[], opts: ExecutionOptions & { format: 'text' }): Promise<string>;
-  static runMain(main: string, args: string[] = [], opts: ExecutionOptions & { format?: string } = {}): Promise<string | object> | ForkResult {
-    const boot = this.resolveModule(this.binPath('boot', 'main'));
-    // Do not run inside of electron
-    const exec = ExecUtil.spawn('node', [boot, main, ...args], {
-      cwd: Workspace.path,
-      ...opts,
-      env: {
-        NODE_PATH: path.resolve('..', '..', '.bin').replaceAll('\\', '/'),
-        ...(opts.env ?? {}),
-      }
-    });
-    switch (opts.format) {
-      case 'text': return exec.result.then(r => r.stdout);
-      case 'json': return exec.result.then(r => JSON.parse(r.stdout));
-      default: return exec;
-    }
-  }
-
-  /**
-   * Get a bin path for a module
-   */
-  static binPath(module: string, script: string): string {
-    return `@travetto/${module}/bin/${script}`;
-  }
-
-  /**
-   * Get a bin path for a module
-   */
-  static mainPath(module: string, script: string): string {
-    return `@travetto/${module}/support/main.${script}`;
-  }
-
-  /**
-   * Build workspace code
-   */
-  static async buildCode(): Promise<ExecutionResult | string> {
-    const { result } = await this.runMain(this.mainPath('base', 'build'));
-
-    try {
-      return await Promise.race([result, this.sleep(500).then(() => { throw new Error(); })]);
-    } catch { // Handle timeout
-      await vscode.window.withProgress({
-        location: vscode.ProgressLocation.Notification,
-        title: 'Building...',
-        cancellable: false
-      }, () => result);
-      return (await result).stdout;
-    }
-  }
-
-  /**
    * See if module is installed
    * @param module
    */
   static async isInstalled(module: string): Promise<boolean> {
-    return !!(await fs.stat(this.resolveModule(module)).catch(() => { }));
+    return this.workspaceIndex.hasModule(module);
   }
 
   /**
@@ -193,7 +112,7 @@ export class Workspace {
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
       name,
-      program: this.resolveModule(this.binPath('boot', 'main')),
+      program: this.workspaceIndex.manifest.workspacePath,
       // eslint-disable-next-line no-template-curly-in-string
       args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
       env: { FORCE_COLOR: 'true', ...env }
@@ -239,30 +158,5 @@ export class Workspace {
       vscode.debug.removeBreakpoints([breakpoint]);
       remove.dispose();
     });
-  }
-
-  /**
-   * Remove directory, determine if errors should be ignored
-   * @param src The folder to copy
-   * @param dest The folder to copy to
-   * @param ignore Should errors be ignored
-   */
-  static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
-    try {
-      await new Promise<void>((res, rej) => {
-        const [cmd, args] = process.platform === 'win32' ?
-          ['xcopy', ['/y', '/h', '/s', path.toNative(src), path.toNative(dest)]] :
-          ['cp', ['-r', '-p', src, dest]];
-
-        const proc = cp.spawn([cmd, ...args].join(' '), {});
-        proc
-          .on('error', err => rej(err))
-          .on('exit', (code: number) => code > 0 ? rej(new Error('Failed to copy')) : res());
-      });
-    } catch (err) {
-      if (!ignore) {
-        throw err;
-      }
-    }
   }
 }

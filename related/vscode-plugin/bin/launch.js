@@ -12,7 +12,7 @@ async function activate(context) {
   process.env.TRV_OUTPUT = out;
   process.env.TRV_MANIFEST = `${out}/${ctx.manifestFile}`;
 
-  const { setup } = await import('@travetto/boot/support/init.main');
+  const { setup } = await import('@travetto/base/support/init.main');
   setup();
 
   const ext = await import('../src/extension.js');
