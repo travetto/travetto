@@ -6,28 +6,28 @@ import { path } from '@travetto/manifest';
 import { RootIndex } from '../src/root-index';
 
 @Suite()
-class ModuleIndexTests {
+class RootIndexTests {
   @Test()
   testFind() {
     const files = RootIndex.find({});
-    assert(files.some(x => x.output.endsWith('test/module.js')));
+    assert(files.some(x => x.output.endsWith('test/root-index.js')));
   }
 
   @Test()
   async getId() {
-    const location = RootIndex.getEntry('@travetto/manifest/test/module');
+    const location = RootIndex.getModule('@travetto/manifest');
     assert(location);
 
     const { output } = location;
 
-    const modId = RootIndex.getId(output);
-    assert(modId === '@travetto/manifest:test/module');
+    const modId = RootIndex.getId(path.resolve(output, 'test', 'root-index.js'));
+    assert(modId === '@travetto/manifest:test/root-index');
 
-    const modId2 = RootIndex.getId(path.resolve(path.dirname(output), '..', '..', 'test', 'src', 'assert', 'util.js'));
+    const modId2 = RootIndex.getId(path.resolve(RootIndex.getModule('@travetto/test')!.output, 'src', 'assert', 'util.js'));
     assert(modId2 === '@travetto/test:src/assert/util');
 
-    const modId3 = RootIndex.getId(path.resolve(path.dirname(output), 'fixtures', 'simple.ts'));
-    assert(modId3 === '@travetto/base:test/fixtures/simple.ts');
+    const modId3 = RootIndex.getId(path.resolve(output, 'test', 'fixtures', 'simple.ts'));
+    assert(modId3 === '@travetto/manifest:test/fixtures/simple.ts');
   }
 
   @Test()

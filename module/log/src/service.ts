@@ -49,10 +49,14 @@ class $Logger implements ConsoleListener {
   /**
    * Add log event listener
    */
-  listen(key: string | symbol, handler: (ev: LogEvent) => void): void {
+  listen(key: string | symbol, handler: (ev: LogEvent) => void, idx = -1): void {
     this.removeListener(key);
     this.#listenerMap.set(key, handler);
-    this.#listeners.push(handler);
+    if (idx < 0) {
+      this.#listeners.push(handler);
+    } else {
+      this.#listeners.splice(idx, 0, handler);
+    }
   }
 
   /**

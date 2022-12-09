@@ -80,7 +80,7 @@ export class StreamUtilTest {
     const { path: echo } = await this.fixture.describe('echo.js');
     const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
     const returnedStream = await StreamUtil.execPipe(proc, createReadStream(
-      RootIndex.getEntry('@travetto/base/test/stream')!.output
+      RootIndex.getFromImport('@travetto/base/test/stream')!.output
     ));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('ExecUtil.fork(echo'));
