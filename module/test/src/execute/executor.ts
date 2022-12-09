@@ -1,6 +1,6 @@
 import timers from 'timers/promises';
 
-import { path, ModuleIndex } from '@travetto/boot';
+import { path, RootIndex } from '@travetto/manifest';
 import { TimeUtil, Util } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
@@ -64,7 +64,7 @@ export class TestExecutor {
    */
   static failFile(consumer: TestConsumer, file: string, err: Error): void {
     const name = path.basename(file);
-    const classId = ModuleIndex.getId(file, name);
+    const classId = RootIndex.getId(file, name);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const suite = { class: { name }, classId, duration: 0, lines: { start: 1, end: 1 }, file, } as SuiteConfig & SuiteResult;
     err.message = err.message.replace(path.cwd(), '.');
@@ -105,7 +105,7 @@ export class TestExecutor {
 
     const result: TestResult = {
       methodName: test.methodName,
-      module: ModuleIndex.manifest.mainModule,
+      module: RootIndex.manifest.mainModule,
       description: test.description,
       classId: test.classId,
       lines: { ...test.lines },
@@ -249,7 +249,7 @@ export class TestExecutor {
 
     file = path.resolve(file);
 
-    const module = ModuleIndex.getFromSource(file)?.import ?? file;
+    const module = RootIndex.getFromSource(file)?.import ?? file;
 
     try {
       await import(module);

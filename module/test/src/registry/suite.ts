@@ -1,5 +1,5 @@
 import { Class, ConcreteClass } from '@travetto/base';
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 import { MetadataRegistry } from '@travetto/registry';
 
 import { SuiteConfig } from '../model/suite';
@@ -20,7 +20,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPending(cls: Class): Partial<SuiteConfig> {
     return {
       class: cls,
-      module: ModuleIndex.manifest.mainModule,
+      module: RootIndex.manifest.mainModule,
       classId: cls.Ⲑid,
       file: cls.Ⲑsource,
       tests: [],
@@ -34,7 +34,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   override createPendingField(cls: Class, fn: Function): Partial<TestConfig> {
     return {
       class: cls,
-      module: ModuleIndex.manifest.mainModule,
+      module: RootIndex.manifest.mainModule,
       file: cls.Ⲑsource,
       methodName: fn.name
     };

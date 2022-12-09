@@ -1,8 +1,7 @@
 import fs from 'fs/promises';
 
 import { Env, ExecUtil } from '@travetto/base';
-import { IndexedModule, ModuleIndex } from '@travetto/boot';
-import { path } from '@travetto/manifest';
+import { IndexedModule, RootIndex, path } from '@travetto/manifest';
 
 export class CliScmUtil {
   /**
@@ -37,7 +36,7 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string> {
-    const root = await ModuleIndex.manifest;
+    const root = await RootIndex.manifest;
     const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: root.workspacePath });
     return (await result)
       .stdout.split(/\n/)
@@ -51,14 +50,14 @@ export class CliScmUtil {
    * @returns
    */
   static async findChangedModulesSince(hash: string): Promise<IndexedModule[]> {
-    const root = await ModuleIndex.manifest;
+    const root = await RootIndex.manifest;
 
     const result = await ExecUtil.spawn('git', ['diff', '--name-only', `HEAD..${hash}`], { cwd: root.workspacePath }).result;
     const out = new Set<IndexedModule>();
     for (const line of result.stdout.split(/\n/g)) {
-      const mod = ModuleIndex.getFromSource(path.resolve(root.workspacePath, line));
+      const mod = RootIndex.getFromSource(path.resolve(root.workspacePath, line));
       if (mod) {
-        out.add(ModuleIndex.getModule(mod.module)!);
+        out.add(RootIndex.getModule(mod.module)!);
       }
     }
     return [...out].sort((a, b) => a.name.localeCompare(b.name));

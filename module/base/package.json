@@ -17,7 +17,8 @@
   },
   "files": [
     "__index__.ts",
-    "src"
+    "src",
+    "support"
   ],
   "main": "__index__.ts",
   "repository": {
@@ -25,12 +26,18 @@
     "directory": "module/base"
   },
   "dependencies": {
-    "@travetto/boot": "^3.0.0-rc.1"
+    "@travetto/manifest": "^3.0.0-rc.3",
+    "@types/source-map-support": "^0.5.6",
+    "source-map-support": "^0.5.21"
   },
   "peerDependencies": {
+    "@travetto/transformer": "^3.0.0-rc.5",
     "@parcel/watcher": "^2.0.7"
   },
   "peerDependenciesMeta": {
+    "@travetto/transformer": {
+      "optional": true
+    },
     "@parcel/watcher": {
       "optional": true
     }

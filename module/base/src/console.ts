@@ -1,7 +1,8 @@
 import util from 'util';
 
-import { ModuleIndex } from './module-index';
-import { ConsoleListener, LineContext, LogLevel } from './types';
+import { RootIndex } from '@travetto/manifest';
+
+import type { ConsoleListener, LineContext, LogLevel } from './types';
 
 function wrap(target: Console): ConsoleListener {
   return {
@@ -11,6 +12,7 @@ function wrap(target: Console): ConsoleListener {
   };
 }
 
+// TODO: Externalize
 /**
  * Registers handler for `debug` module in npm ecosystem
  * @param mgr
@@ -60,10 +62,17 @@ class $ConsoleManager {
     return +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 120);
   }
 
-  async init(): Promise<this> {
+  async register(): Promise<this> {
     this.set(console); // Init to console
     this.setDebugFromEnv();
     await initNpmDebug(this);
+
+    // Attempt to setup logger
+    try {
+      const { Logger } = await import('@travetto/log');
+      this.set(Logger, true); // Make default
+    } catch { }
+
     return this;
   }
 
@@ -85,7 +94,7 @@ class $ConsoleManager {
 
   setDebugFromEnv(): void {
     const notProd = !/prod/i.test(process.env.NODE_ENV ?? '');
-    this.setDebug(process.env.DEBUG ?? (notProd ? '@local' : false));
+    this.setDebug(process.env.DEBUG ?? (notProd ? '@' : false));
   }
 
   /**
@@ -96,7 +105,7 @@ class $ConsoleManager {
     const isFalse = typeof debug === 'boolean' ? !debug : /^(0|false|no|off)/i.test(debug);
 
     if (isSet && !isFalse) {
-      const active = ModuleIndex.getModuleList('local', typeof debug === 'string' ? debug : '');
+      const active = RootIndex.getModuleList('local', typeof debug === 'string' ? debug : '');
       active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
 
@@ -110,12 +119,12 @@ class $ConsoleManager {
    */
   invoke(level: LogLevel, ctx: LineContext, ...args: unknown[]): void {
     // Resolve input to source file
-    const source = ModuleIndex.getSourceFile(ctx.source);
-    const mod = ModuleIndex.getModuleFromSource(source);
+    const source = RootIndex.getSourceFile(ctx.source);
+    const mod = RootIndex.getModuleFromSource(source);
     const outCtx = {
       ...ctx,
       source,
-      module: ctx.module ?? mod!.name,
+      module: ctx.module ?? mod?.name,
       modulePath: ctx.modulePath ?? (mod ? source.split(`${mod.source}/`)[1] : '')
     };
 
@@ -151,3 +160,4 @@ class $ConsoleManager {
 }
 
 export const ConsoleManager = new $ConsoleManager();
+export const log = ConsoleManager.invoke.bind(ConsoleManager);

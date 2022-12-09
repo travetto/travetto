@@ -1,5 +1,4 @@
-import { LogLevel, LineContext, ConsoleListener } from '@travetto/boot';
-import { Env, Util } from '@travetto/base';
+import { Env, Util, LogLevel, LineContext, ConsoleListener } from '@travetto/base';
 
 import { Appender, Formatter, LogEvent } from './types';
 import { LineFormatter } from './formatter/line';

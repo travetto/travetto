@@ -5,7 +5,7 @@ import {
   OnClass, AfterClass, OnMethod, AfterMethod, AfterFunction, OnFunction
 } from '@travetto/transformer';
 
-const HELPER_MOD = '@travetto/boot/support/init.helper';
+const HELPER_MOD = '@travetto/base/src/console';
 
 type CustomState = TransformerState & {
   scope: { type: 'method' | 'class' | 'function', name: string }[];
@@ -90,10 +90,10 @@ export class LoggerTransformer {
     const level = name.escapedText!;
 
     if (VALID_LEVELS[level]) {
-      const ident = state.imported ??= state.importFile(HELPER_MOD, 'ᚕ_').ident;
+      const ident = state.imported ??= state.importFile(HELPER_MOD, 'ᚕ_c').ident;
       return state.factory.updateCallExpression(
         node,
-        state.createAccess(ident, 'trv', 'log'),
+        state.createAccess(ident, 'log'),
         node.typeArguments,
         [
           state.factory.createStringLiteral(VALID_LEVELS[level]),

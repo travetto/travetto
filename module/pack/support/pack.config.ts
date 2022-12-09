@@ -50,7 +50,7 @@ export const config: AllConfigPartial = {
       mod('typescript/'),
       mod('@types/'),
       `^./${mod('@travetto/**/*.ts')}`,
-      `^./${mod('@travetto/boot/tsconfig.trv.json')}`,
+      `^./${mod('@travetto/compiler/tsconfig.trv.json')}`,
       '^./resources/',
       '^./src/',
     ]

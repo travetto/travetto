@@ -1,4 +1,4 @@
-import { LineContext, LogLevel } from '@travetto/boot';
+import { LineContext, LogLevel } from '@travetto/base';
 
 /**
  * Log levels, numerically

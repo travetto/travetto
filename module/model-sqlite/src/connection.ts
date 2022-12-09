@@ -1,8 +1,8 @@
 import Db, * as sqlite3 from 'better-sqlite3';
 import pool from 'generic-pool';
 
-import { TimeUtil } from '@travetto/base';
-import { path, ShutdownManager } from '@travetto/boot';
+import { path } from '@travetto/manifest';
+import { ShutdownManager, TimeUtil } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';

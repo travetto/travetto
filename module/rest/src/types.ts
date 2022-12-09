@@ -1,5 +1,4 @@
-import { Closeable } from '@travetto/boot';
-import { Class } from '@travetto/base';
+import { Closeable, Class } from '@travetto/base';
 
 import { RestInterceptor } from './interceptor/types';
 

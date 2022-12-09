@@ -1,4 +1,4 @@
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 import { Class, ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';
 import { ModelRegistry } from '@travetto/model';
@@ -65,7 +65,7 @@ export class ModelCandidateUtil {
    */
   static async getCandidates(op: keyof ModelStorageSupport): Promise<CandidateNames> {
     return CliUtil.waiting('Resolving', () =>
-      ExecUtil.worker<CandidateNames>(ModuleIndex.resolveFileImport('@travetto/model/support/main.candidate.ts'), [op]).message
+      ExecUtil.worker<CandidateNames>(RootIndex.resolveFileImport('@travetto/model/support/main.candidate.ts'), [op]).message
     );
   }
 

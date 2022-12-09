@@ -1,4 +1,4 @@
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 import { CliUtil } from '@travetto/cli';
 
 import type { ApplicationConfig } from '../../src/types';

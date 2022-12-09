@@ -3,7 +3,7 @@ import cp from 'child_process';
 
 import glob from 'picomatch';
 
-import { path, ModuleIndex } from '@travetto/boot';
+import { path, RootIndex } from '@travetto/manifest';
 import { CliUtil } from '@travetto/cli';
 
 import { CommonConfig, PackOperation } from './types';
@@ -49,7 +49,7 @@ export class PackUtil {
   static async modeList(): Promise<Partial<CommonConfig>[]> {
     if (!this.#modes) {
       this.#modes = await Promise.all(
-        ModuleIndex.findSupport({ filter: f => /\/pack[.].*[.]/.test(f) })
+        RootIndex.findSupport({ filter: f => /\/pack[.].*[.]/.test(f) })
           .map(async (x) => {
             const req: Partial<CommonConfig> = (await import(x.output)).config;
             req.file = x.import.replace(/^node_modules\//, '');

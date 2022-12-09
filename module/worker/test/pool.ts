@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { ExecUtil } from '@travetto/base';
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 
 import { WorkPool } from '../src/pool';
 import { IterableWorkSet } from '../src/input/iterable';
@@ -29,7 +29,7 @@ export class PoolExecTest {
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<{ data: string }, string>(
-        () => ExecUtil.fork(launcher.path, [], { cwd: ModuleIndex.root }),
+        () => ExecUtil.fork(launcher.path, [], { cwd: RootIndex.root }),
         ch => ch.once('ready'),
         async (channel, inp: string) => {
           const res = channel.once('response');

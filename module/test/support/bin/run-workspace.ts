@@ -1,6 +1,6 @@
 
 import { ExecUtil } from '@travetto/base';
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli/src/module';
 
 import { TestConsumerRegistry } from '../../src/consumer/registry';
@@ -13,7 +13,7 @@ export async function runWorkspace(format: string, workerCount: number): Promise
   const consumer = new RunnableTestConsumer(emitter);
 
   // Ensure services are healthy
-  if (ModuleIndex.hasModule('@travetto/command')) {
+  if (RootIndex.hasModule('@travetto/command')) {
     await ExecUtil.spawn('trv', ['service', 'start'], { stdio: 'ignore' }).result;
   }
 

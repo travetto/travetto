@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 import { ExecUtil, FileResourceProvider } from '@travetto/base';
 
 import { DependenciesUtil, DepType } from './dependencies';
@@ -21,22 +21,6 @@ export class AssembleUtil {
       if (el.endsWith('.ts') || el.endsWith('.js')) {
         const content = (await fs.readFile(`${cache}/${el}`, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
         await fs.writeFile(`${cache}/${el}`, content);
-      }
-    }
-  }
-
-  /**
-   * Minimize cached source files, by removing source mapping info
-   */
-  static async cleanBoot(ws: string): Promise<void> {
-    for (const el of await new FileResourceProvider([`${ws}/node_modules/@travetto/boot`]).query(
-      f => f.endsWith('.js') || f.endsWith('.d.ts'),
-    )) {
-      if (el.endsWith('.d.ts')) {
-        await fs.writeFile(el, '');
-      } else if (el.endsWith('.js')) {
-        const content = (await fs.readFile(el, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
-        await fs.writeFile(el, content);
       }
     }
   }

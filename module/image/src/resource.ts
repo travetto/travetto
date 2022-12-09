@@ -2,8 +2,8 @@ import fs from 'fs/promises';
 import { Readable } from 'stream';
 import { mkdirSync } from 'fs';
 
+import { path } from '@travetto/manifest';
 import { CommonFileResourceProvider, Env, StreamUtil } from '@travetto/base';
-import { path } from '@travetto/boot';
 
 import { ImageConverter } from './convert';
 

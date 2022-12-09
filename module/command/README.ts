@@ -1,4 +1,4 @@
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 import { d, lib } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 
@@ -33,7 +33,7 @@ ${d.Execute('Command Service', 'trv', ['service', '--help'])}
 
 A sample of all services available to the entire framework:
 
-${d.Terminal('All Services', DocRunUtil.run('trv', ['service', 'status'], { cwd: ModuleIndex.manifest.workspacePath }))}
+${d.Terminal('All Services', DocRunUtil.run('trv', ['service', 'status'], { cwd: RootIndex.manifest.workspacePath }))}
 
 ${d.SubSection('Defining new Services')}
 

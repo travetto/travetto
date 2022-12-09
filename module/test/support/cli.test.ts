@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 import fs from 'fs/promises';
 
-import { path, ModuleIndex } from '@travetto/boot';
+import { path, RootIndex } from '@travetto/manifest';
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 
@@ -25,7 +25,7 @@ export class TestCommand extends CliCommand<Options> {
 
   getTypes(): string[] {
     if (!this._types) {
-      this._types = ModuleIndex
+      this._types = RootIndex
         .findSrc({ filter: /consumer\/types\/.*/, profiles: ['test'] })
         .map(x => readFileSync(`${x.output}`, 'utf8').match(/Consumable.?[(]'([^']+)/)?.[1])
         .filter((x?: string): x is string => !!x);

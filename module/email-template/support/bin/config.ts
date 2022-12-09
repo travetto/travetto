@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {

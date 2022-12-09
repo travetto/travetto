@@ -1,5 +1,5 @@
 import { ExecUtil, ExecutionOptions } from '@travetto/base';
-import { IndexedModule, ModuleIndex } from '@travetto/boot';
+import { IndexedModule, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
 
 import { CliScmUtil } from './scm';
@@ -10,8 +10,8 @@ import { CliScmUtil } from './scm';
 export class CliModuleUtil {
 
   static isMonoRepoRoot(): boolean {
-    return !!ModuleIndex.manifest.monoRepo &&
-      ModuleIndex.manifest.workspacePath === ModuleIndex.manifest.mainPath;
+    return !!RootIndex.manifest.monoRepo &&
+      RootIndex.manifest.workspacePath === RootIndex.manifest.mainPath;
   }
 
   /**
@@ -29,7 +29,7 @@ export class CliModuleUtil {
     for (const mod of await CliScmUtil.findChangedModulesSince(hash)) {
       out.set(mod.name, mod);
       if (transitive) {
-        for (const sub of await ModuleIndex.getDependentModules(mod)) {
+        for (const sub of await RootIndex.getDependentModules(mod)) {
           out.set(sub.name, sub);
         }
       }
@@ -48,8 +48,8 @@ export class CliModuleUtil {
   static async findModules(mode: 'all' | 'changed'): Promise<IndexedModule[]> {
     return (mode === 'changed' ?
       await this.findChangedModulesRecursive() :
-      [...ModuleIndex.getModuleList('all')].map(x => ModuleIndex.getModule(x)!)
-    ).filter(x => x.source !== ModuleIndex.manifest.workspacePath);
+      [...RootIndex.getModuleList('all')].map(x => RootIndex.getModule(x)!)
+    ).filter(x => x.source !== RootIndex.manifest.workspacePath);
   }
 
   /**

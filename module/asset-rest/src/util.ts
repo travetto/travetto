@@ -3,9 +3,9 @@ import fs from 'fs/promises';
 import os from 'os';
 import stream from 'stream';
 
-import { path } from '@travetto/boot';
 import { Renderable, Request, Response } from '@travetto/rest';
 import { Asset, AssetUtil } from '@travetto/asset';
+import { path } from '@travetto/manifest';
 import { StreamUtil, AppError } from '@travetto/base';
 
 export type WithCleanup<T> = [T, () => Promise<unknown | void> | void | unknown];

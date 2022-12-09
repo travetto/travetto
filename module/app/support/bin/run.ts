@@ -1,6 +1,6 @@
 import { RootRegistry } from '@travetto/registry';
-import { ConsoleManager, ModuleIndex } from '@travetto/boot';
-import { Env, ExecUtil } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
+import { Env, ExecUtil, ConsoleManager } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 
 import { ApplicationRegistry } from '../../src/registry';
@@ -26,7 +26,7 @@ export class AppRunUtil {
         'trv',
         ['run', app.name, ...sub],
         {
-          cwd: ModuleIndex.getModule(app.module)!.source,
+          cwd: RootIndex.getModule(app.module)!.source,
           env: { TRV_MANIFEST: '' },
           stdio: 'inherit'
         }

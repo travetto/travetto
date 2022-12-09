@@ -1,5 +1,5 @@
 import { CliUtil } from '@travetto/cli';
-import { ConsoleManager } from '@travetto/boot';
+import { ConsoleManager } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 
 import { BaseModelCommand } from './cli.base-command';

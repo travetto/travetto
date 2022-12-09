@@ -1,10 +1,10 @@
 import { install } from 'source-map-support';
-import url from 'url';
-import { parentPort } from 'worker_threads';
 
 import { path } from '@travetto/manifest';
 
-import { trv } from './init.helper';
+import { ConsoleManager } from '../src/console';
+import { ExecUtil } from '../src/exec';
+import { ShutdownManager } from '../src/shutdown';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const setToJSON = <T>(cons: abstract new (...args: any[]) => T, handler: (val: T, ...args: any[]) => unknown): void => {
@@ -14,22 +14,6 @@ const setToJSON = <T>(cons: abstract new (...args: any[]) => T, handler: (val: T
     value: function (this: T, ...args: any[]) { return handler(this, ...args); }
   });
 };
-
-async function setupLogging(): Promise<void> {
-  const { ConsoleManager } = await import('../src/console.js');
-
-  // Declare log target
-  trv.log = (await ConsoleManager.init()).invoke.bind(ConsoleManager);
-
-  // Attempt to setup logger
-  try {
-    const { Logger } = await import('@travetto/log');
-    ConsoleManager.set(Logger, true); // Make default
-  } catch { }
-
-  // Set debug state
-  ConsoleManager.setDebugFromEnv();
-}
 
 // Setup everything
 let initialized = false;
@@ -75,21 +59,10 @@ export async function setup(): Promise<void> {
   install(); // Register source maps
 
   // Register shutdown handler
-  const { ShutdownManager } = await import('../src/shutdown.js');
   ShutdownManager.register();
 
-  await setupLogging();
-}
-
-export function sendResponse(exitCode: number, message: unknown): void {
-  if (parentPort) {
-    parentPort.postMessage(message);
-  } else if (process.send) {
-    process.send(message);
-  } else if (message) {
-    process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${JSON.stringify(message)}\n`);
-  }
-  process.exit(exitCode);
+  // Initialize
+  await ConsoleManager.register();
 }
 
 export async function runMain(action: Function, args: unknown[] = process.argv.slice(2)): Promise<void> {
@@ -106,15 +79,8 @@ export async function runMain(action: Function, args: unknown[] = process.argv.s
     exitCode = (res instanceof Error) ? (res as { code?: number })['code'] ?? 1 : 1;
   }
 
-  sendResponse(exitCode, res);
+  ExecUtil.execResponse(exitCode, res);
 }
 
-export async function runIfMain(target: Function, filename: string, mainFile: string): Promise<unknown> {
-  mainFile = process.env.TRV_MAIN || mainFile;
-  if (mainFile.startsWith('file:')) {
-    mainFile = url.fileURLToPath(mainFile);
-  }
-  if (filename === mainFile) {
-    return await runMain(target);
-  }
-}
+export const runIfMain = async (target: Function, filename: string, mainFile: string): Promise<unknown> =>
+  (path.forSrc(filename) === path.forSrc(process.env.TRV_MAIN || mainFile)) ? runMain(target) : undefined;

@@ -1,8 +1,6 @@
 import { existsSync } from 'fs';
 
-import { Package, PackageUtil } from '@travetto/manifest';
-import { Pkg } from '@travetto/base';
-import { ModuleIndex, path } from '@travetto/boot';
+import { path, RootIndex, Package, PackageUtil } from '@travetto/manifest';
 
 import { FileUtil, } from './util/file';
 import { DocRunUtil, RunConfig } from './util/run';
@@ -181,7 +179,7 @@ export const node = {
    */
   Mod(name: string, cfg?: { folder: string, displayName: string, description: string }) {
     if (!cfg) {
-      const folder = ModuleIndex.getModule(name)!.source;
+      const folder = RootIndex.getModule(name)!.source;
       const pkg = PackageUtil.readPackage(folder);
       cfg = {
         folder,
@@ -238,9 +236,9 @@ export const node = {
    */
   Header: (mod?: string, install = true) => {
     if (!mod) {
-      mod = (Pkg.main.name === 'doc' ? parentPkg?.name : undefined) ?? Pkg.main.name;
+      mod = (RootIndex.main.name === 'doc' ? parentPkg?.name : undefined) ?? RootIndex.main.name;
     }
-    const pkg = PackageUtil.readPackage(ModuleIndex.getModule(mod)!.source);
+    const pkg = PackageUtil.readPackage(RootIndex.getModule(mod)!.source);
     return $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
   },
 

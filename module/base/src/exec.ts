@@ -1,8 +1,8 @@
 import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import { Readable } from 'stream';
-import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
+import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
 
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 
 /**
  * Result of an execution
@@ -272,5 +272,19 @@ export class ExecUtil {
     } else {
       proc.kill('SIGTERM');
     }
+  }
+
+  /**
+   * Send response across worker/fork/spawn/root
+   */
+  static execResponse(exitCode: number, message: unknown): void {
+    if (parentPort) {
+      parentPort.postMessage(message);
+    } else if (process.send) {
+      process.send(message);
+    } else if (message) {
+      process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${JSON.stringify(message)}\n`);
+    }
+    process.exit(exitCode);
   }
 }

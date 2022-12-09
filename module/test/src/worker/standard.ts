@@ -1,4 +1,4 @@
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, ErrorUtil } from '@travetto/base';
 import { ParentCommChannel, Worker, WorkUtil } from '@travetto/worker';
 
@@ -14,7 +14,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
    * Spawn a child
    */
   return () => WorkUtil.spawnedWorker(
-    () => ExecUtil.fork(ModuleIndex.resolveFileImport('@travetto/test/support/main.test-child.ts')),
+    () => ExecUtil.fork(RootIndex.resolveFileImport('@travetto/test/support/main.test-child.ts')),
     /**
      * Child initialization
      */

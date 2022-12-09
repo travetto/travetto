@@ -1,8 +1,6 @@
 import { setTimeout } from 'timers/promises';
 
-import { ModuleIndex } from './module-index';
-
-const ogExit = process.exit;
+import { RootIndex } from '@travetto/manifest';
 
 export type Closeable = {
   close(cb?: Function): unknown;
@@ -31,6 +29,7 @@ class $ShutdownManager {
   #listeners: Listener[] = [];
   #shutdownCode = -1;
   #unhandled: UnhandledHandler[] = [];
+  #exit = process.exit;
 
   async #getAvailableListeners(exitCode: number): Promise<unknown[]> {
     const promises: Promise<unknown>[] = [];
@@ -69,7 +68,7 @@ class $ShutdownManager {
 
     if (this.#shutdownCode > 0) { // Killed twice
       if (exitCode > 0) { // Handle force kill
-        ogExit(exitCode);
+        this.#exit(exitCode);
       } else {
         return;
       }
@@ -77,7 +76,7 @@ class $ShutdownManager {
       this.#shutdownCode = exitCode;
     }
 
-    const name = Object.values(ModuleIndex.manifest.modules).find(x => x.main)!.name;
+    const name = RootIndex.getModule(RootIndex.manifest.mainModule)!.name;
 
     try {
       // If the err is not an exit code
@@ -103,7 +102,7 @@ class $ShutdownManager {
     }
 
     if (this.#shutdownCode >= 0) {
-      ogExit(this.#shutdownCode);
+      this.#exit(this.#shutdownCode);
     }
   }
 
@@ -115,6 +114,18 @@ class $ShutdownManager {
   }
 
   /**
+   * Execute unhandled behavior
+   */
+  executeUnhandled(err: Error, value?: Promise<unknown>): void {
+    for (const handler of this.#unhandled) {
+      if (handler(err, value)) {
+        return;
+      }
+    }
+    this.execute(1, err);
+  }
+
+  /**
    * Hook into the process to override the shutdown behavior
    */
   register(): void {
@@ -123,9 +134,8 @@ class $ShutdownManager {
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
     process.on('SIGTERM', this.execute.bind(this, 143));
-    process.on('uncaughtException', (err: Error) => this.#unhandled.find(x => !!x(err)));
-    process.on('unhandledRejection', (err: Error, p) => this.#unhandled.find(x => !!x(err, p)));
-    this.#unhandled.push(this.execute.bind(this, 1));
+    process.on('uncaughtException', this.executeAsync.bind(this));
+    process.on('unhandledRejection', this.executeAsync.bind(this));
   }
 
   /**

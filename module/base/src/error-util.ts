@@ -1,4 +1,4 @@
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 
 export type SerializedError = { $?: boolean, message: string, stack?: string, name: string };
 

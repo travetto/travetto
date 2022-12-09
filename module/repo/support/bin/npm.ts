@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { ExecUtil } from '@travetto/base';
-import { IndexedModule, ModuleIndex } from '@travetto/boot';
+import { IndexedModule, RootIndex } from '@travetto/manifest';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease';
 
@@ -46,7 +46,7 @@ export class Npm {
   static async publish(mod: IndexedModule, dryRun?: boolean): Promise<void> {
     const versionTag = mod.version.replace(/^.*-(rc|alpha|beta|next)[.]\d+/, (a, b) => b);
 
-    const root = await ModuleIndex.manifest.workspacePath;
+    const root = await RootIndex.manifest.workspacePath;
 
     await fs.copyFile(`${root}/LICENSE`, `${mod.source}/LICENSE`).catch(() => { });
 

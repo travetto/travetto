@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import { parentPort } from 'worker_threads';
 
-import { path, ModuleIndex } from '@travetto/boot';
+import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
 import { CliModuleUtil, CliUtil } from '@travetto/cli';
 
@@ -66,23 +66,25 @@ export class AppListLoader {
         return list.map(({ target, ...rest }) => rest);
       } else if (!CliModuleUtil.isMonoRepoRoot()) {
         return await ExecUtil.worker<ApplicationConfig[]>(
-          ModuleIndex.resolveFileImport('@travetto/app/support/main.list-build.ts')
+          RootIndex.resolveFileImport('@travetto/app/support/main.list-build.ts')
         ).message;
       } else {
         const configs: ApplicationConfig[] = [];
         await CliUtil.waiting('Collecting', () =>
           CliModuleUtil.runOnModules('all',
             ['trv', 'main', '@travetto/app/support/main.list-build.ts'],
-            (folder, perFolder: ApplicationConfig[]) => {
-              if (perFolder.length && perFolder[0].module !== ModuleIndex.manifest.mainModule) {
-                for (const m of perFolder) {
-                  if (m) {
-                    m.moduleName = `${m.module}:${m.name}`;
+            {
+              onMessage(folder, perFolder: ApplicationConfig[]) {
+                if (perFolder.length && perFolder[0].module !== RootIndex.manifest.mainModule) {
+                  for (const m of perFolder) {
+                    if (m) {
+                      m.moduleName = `${m.module}:${m.name}`;
+                    }
                   }
                 }
-              }
-              configs.push(...perFolder);
-            },
+                configs.push(...perFolder);
+              },
+            }
           )
         );
         return configs;

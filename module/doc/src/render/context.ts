@@ -1,4 +1,4 @@
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 
 import { AllType, AllTypeMap, node as n } from '../nodes';
 import { DocNode, RenderContextShape } from '../types';

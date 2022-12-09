@@ -1,11 +1,10 @@
-import { ModuleIndex } from '@travetto/boot';
-import { PackageUtil } from '@travetto/manifest';
+import { RootIndex, PackageUtil } from '@travetto/manifest';
 
 type DocModMapping = { simpleName: string, name: string, displayName: string, folder: string, description?: string };
 
 export async function main(): Promise<void> {
   const out: DocModMapping[] = [];
-  for (const module of Object.values(ModuleIndex.manifest.modules)) {
+  for (const module of Object.values(RootIndex.manifest.modules)) {
     const pkg = PackageUtil.readPackage(module.source);
     if (!pkg.name.startsWith('@travetto') || !pkg.travetto || !pkg.travetto.displayName) {
       continue;
@@ -19,7 +18,7 @@ export async function main(): Promise<void> {
       simpleName,
       name: module.name,
       displayName: pkg.travetto.displayName,
-      folder: module.source.split(`${ModuleIndex.manifest.workspacePath}/`)[1],
+      folder: module.source.split(`${RootIndex.manifest.workspacePath}/`)[1],
       description: pkg.description
     });
   }

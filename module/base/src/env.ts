@@ -1,4 +1,4 @@
-import { ConsoleManager } from '@travetto/boot';
+import { ConsoleManager } from '@travetto/base';
 
 interface InitConfig {
   env?: string;

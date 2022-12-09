@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-import { ModuleIndex } from '@travetto/boot';
+import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import type { ApplicationConfig } from './types';
@@ -25,7 +25,7 @@ export class AppScanUtil {
   static async scanList(): Promise<ApplicationConfig[]> {
 
     await Promise.all(
-      ModuleIndex.findSrc()
+      RootIndex.findSrc()
         .filter(x => fs.readFileSync(x.output).includes('@Application'))
         .map(x => import(x.output)) // Only load files that are candidates
     );

@@ -1,4 +1,5 @@
-import { ModuleIndex } from './module-index';
+import { path } from './path';
+import { RootIndex } from './root-index';
 
 /**
  * Register class metadata
@@ -23,7 +24,8 @@ export class ClassMetadataUtil {
    * @param `file` Filename
    */
   static initFunctionMeta(fn: Function, file: string): boolean {
-    const source = ModuleIndex.getSourceFile(file);
+    file = path.forSrc(file);
+    const source = RootIndex.getSourceFile(file);
     return this.#writeMeta(fn, { source });
   }
 
@@ -36,8 +38,9 @@ export class ClassMetadataUtil {
    * @param `abstract` Is the class abstract
    */
   static initMeta(cls: Function, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean): boolean {
-    const id = ModuleIndex.getId(file, cls.name);
-    const source = ModuleIndex.getSourceFile(file);
+    file = path.forSrc(file);
+    const id = RootIndex.getId(file, cls.name);
+    const source = RootIndex.getSourceFile(file);
     const meta = { id, hash, methods, abstract, synthetic };
     return this.#writeMeta(cls, { id, source, meta });
   }

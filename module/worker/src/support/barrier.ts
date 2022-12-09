@@ -1,7 +1,6 @@
 import { setTimeout } from 'timers/promises';
 
-import { ShutdownManager } from '@travetto/boot';
-import { TimeSpan, Util } from '@travetto/base';
+import { ShutdownManager, TimeSpan, Util } from '@travetto/base';
 
 import { Timeout } from './timeout';
 

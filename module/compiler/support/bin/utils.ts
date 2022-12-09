@@ -168,6 +168,8 @@ export async function getProjectSources(
 
       if (stat.isDirectory()) {
         folders.push(resolvedInput);
+      } else if (file.endsWith('.d.ts')) {
+        // Do nothing
       } else if (file.endsWith('.ts')) {
         files.push(resolvedInput);
       }
