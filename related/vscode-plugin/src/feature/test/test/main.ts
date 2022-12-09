@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 
-import { path } from '@travetto/boot';
+import { path } from '@travetto/manifest';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
