@@ -1,7 +1,8 @@
+import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 
 import { path } from './path';
-import { ManifestIndex } from './manifest-index';
+import { IndexedModule, ManifestIndex } from './manifest-index';
 import { Package, PackageDigest } from './types';
 import { PackageUtil } from './package';
 
@@ -27,6 +28,7 @@ class $RootIndex extends ManifestIndex {
   }
 
   #config: Package | undefined;
+  #srcCache = new Map();
 
   constructor(output: string = process.env.TRV_OUTPUT ?? process.cwd()) {
     super(output, $RootIndex.resolveManifestJSON(output, process.env.TRV_MANIFEST));
@@ -38,7 +40,11 @@ class $RootIndex extends ManifestIndex {
     }
   }
 
-  get main(): Package {
+  get mainModule(): IndexedModule {
+    return this.getModule(this.mainPackage.name)!;
+  }
+
+  get mainPackage(): Package {
     if (!this.#config) {
       const { output: mainFolder } = this.getModule(this.manifest.mainModule)!;
       this.#config = {
@@ -54,7 +60,24 @@ class $RootIndex extends ManifestIndex {
   }
 
   mainDigest(): PackageDigest {
-    return PackageUtil.digest(this.main);
+    return PackageUtil.digest(this.mainPackage);
+  }
+
+  /**
+  * Get source file from output location
+  * @param outputFile
+  */
+  getSourceFile(file: string): string {
+    if (!this.#srcCache.has(file)) {
+      if (file.startsWith('file:')) {
+        this.#srcCache.set(file, path.toPosix(fileURLToPath(file)));
+      } else {
+        this.#srcCache.set(file, path.toPosix(file));
+      }
+    }
+
+    const outputFile = this.#srcCache.get(file)!;
+    return this.getEntry(outputFile)?.source ?? outputFile;
   }
 }
 

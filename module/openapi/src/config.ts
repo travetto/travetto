@@ -25,7 +25,7 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    const info = RootIndex.main;
+    const info = RootIndex.mainPackage;
     this.contact ??= info.author ?? {};
     this.description ??= info.description;
     this.license ??= { name: info.license! };

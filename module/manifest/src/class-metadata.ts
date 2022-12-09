@@ -1,4 +1,3 @@
-import { path } from './path';
 import { RootIndex } from './root-index';
 
 /**
@@ -24,7 +23,6 @@ export class ClassMetadataUtil {
    * @param `file` Filename
    */
   static initFunctionMeta(fn: Function, file: string): boolean {
-    file = path.forSrc(file);
     const source = RootIndex.getSourceFile(file);
     return this.#writeMeta(fn, { source });
   }
@@ -38,9 +36,8 @@ export class ClassMetadataUtil {
    * @param `abstract` Is the class abstract
    */
   static initMeta(cls: Function, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean): boolean {
-    file = path.forSrc(file);
-    const id = RootIndex.getId(file, cls.name);
     const source = RootIndex.getSourceFile(file);
+    const id = RootIndex.getId(source, cls.name);
     const meta = { id, hash, methods, abstract, synthetic };
     return this.#writeMeta(cls, { id, source, meta });
   }

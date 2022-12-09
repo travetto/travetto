@@ -229,14 +229,6 @@ export class ManifestIndex {
   }
 
   /**
-   * Get source file from output location
-   * @param outputFile
-   */
-  getSourceFile(outputFile: string): string {
-    return this.#outputToEntry.get(outputFile)?.source ?? outputFile;
-  }
-
-  /**
    * Get indexed module from source file
    * @param source
    */

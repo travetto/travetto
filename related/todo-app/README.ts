@@ -1,11 +1,13 @@
 import timers from 'timers/promises';
 
-import { path } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 import { d, lib, mod } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
 
 const ModelType = d.SnippetLink('ModelType', '@travetto/model/src/types/model.ts', /./);
+
+const TodoRoot = d.Ref('Todo App', RootIndex.mainModule.output);
 
 process.env.TRV_LOG_PLAIN = '0';
 
@@ -31,7 +33,7 @@ export const text = async () => {
   const result = d`
 ${d.RawHeader('Getting Started: A Todo App')}
 
-The following tutorial wil walk you through setting up a ${lib.Travetto} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at ${d.Ref('Todo App', path.dirname(__output))}.  Additionally, you can use the ${mod.Scaffold}.
+The following tutorial wil walk you through setting up a ${lib.Travetto} application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at ${TodoRoot}.  Additionally, you can use the ${mod.Scaffold}.
 
 ${d.TableOfContents('Overview')}
 

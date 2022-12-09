@@ -1,6 +1,6 @@
 import { install } from 'source-map-support';
 
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 
 import { ConsoleManager } from '../src/console';
 import { ExecUtil } from '../src/exec';
@@ -83,4 +83,4 @@ export async function runMain(action: Function, args: unknown[] = process.argv.s
 }
 
 export const runIfMain = async (target: Function, filename: string, mainFile: string): Promise<unknown> =>
-  (path.forSrc(filename) === path.forSrc(process.env.TRV_MAIN || mainFile)) ? runMain(target) : undefined;
+  (RootIndex.getSourceFile(filename) === RootIndex.getSourceFile(process.env.TRV_MAIN || mainFile)) ? runMain(target) : undefined;

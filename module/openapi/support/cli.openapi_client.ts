@@ -3,7 +3,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import cp from 'child_process';
 
 import { path } from '@travetto/manifest';
-import { ExecUtil } from '@travetto/base';
+import { ExecUtil, FileResourceProvider } from '@travetto/base';
 import { CliCommand, CliUtil, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 type Options = {
@@ -20,12 +20,12 @@ type Options = {
 export class OpenApiClientCommand extends CliCommand<Options> {
   #presets: Record<string, [string, object] | [string]>;
   name = 'openapi:client';
+  #resources = new FileResourceProvider(['@travetto/openapi']);
 
   async getPresets(): Promise<Record<string, [string, object] | [string]>> {
     if (!this.#presets) {
-      // TODO: Needs to be better
-      const file = path.resolve(path.dirname(__output), 'resources/presets.json');
-      this.#presets = JSON.parse(await fs.readFile(file, 'utf8'));
+      const text = await this.#resources.read('presets.json');
+      this.#presets = JSON.parse(text);
     }
     return this.#presets;
   }

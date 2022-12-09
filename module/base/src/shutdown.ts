@@ -76,7 +76,7 @@ class $ShutdownManager {
       this.#shutdownCode = exitCode;
     }
 
-    const name = RootIndex.getModule(RootIndex.manifest.mainModule)!.name;
+    const name = RootIndex.mainPackage.name;
 
     try {
       // If the err is not an exit code

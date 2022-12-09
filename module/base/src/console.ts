@@ -28,7 +28,7 @@ async function initNpmDebug(mgr: $ConsoleManager): Promise<void> {
       line: 0,
       module: '@npm:debug',
       modulePath: args[0],
-      source: __output,
+      source: RootIndex.mainModule.output,
     }, util.format(...args.slice(1)));
   } catch (err) {
     console.log(err);

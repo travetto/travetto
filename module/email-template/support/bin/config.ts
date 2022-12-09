@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {
@@ -23,7 +23,7 @@ interface ConfigType {
 export class $EditorConfig {
 
   #configFile = path.resolve('resources/email/dev.yml');
-  #defaultConfig = fs.readFile(path.resolve(path.dirname(__output), 'default-dev.yml'), 'utf8');
+  #defaultConfig = fs.readFile(path.resolve(RootIndex.mainModule.source, 'default-dev.yml'), 'utf8');
 
   /**
    *

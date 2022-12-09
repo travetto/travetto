@@ -1,4 +1,3 @@
-import url from 'url';
 import { extname, dirname, resolve, basename, delimiter, join, sep } from 'path';
 
 const posix = (file: string): string => file.replaceAll('\\', '/');
@@ -14,11 +13,5 @@ export const path = {
   dirname: (file: string): string => posix(dirname(file)),
   resolve: (...args: string[]): string => posix(resolve(cwd(), ...args.map(f => posix(f)))),
   join: (root: string, ...args: string[]): string => posix(join(posix(root), ...args.map(f => posix(f)))),
-  toNative: (file: string): string => file.replaceAll('/', sep),
-  forSrc: (file: string): string => {
-    if (file.startsWith('file:')) {
-      file = url.fileURLToPath(file);
-    }
-    return posix(file);
-  }
+  toNative: (file: string): string => file.replaceAll('/', sep)
 };

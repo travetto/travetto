@@ -3,6 +3,7 @@ import { createReadStream } from 'fs';
 import os from 'os';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
+import { RootIndex } from '@travetto/manifest';
 
 import { ExecUtil } from '../src/exec';
 import { StreamUtil } from '../src/stream';
@@ -78,7 +79,9 @@ export class StreamUtilTest {
   async pipe() {
     const { path: echo } = await this.fixture.describe('echo.js');
     const proc = ExecUtil.fork(echo, [], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const returnedStream = await StreamUtil.execPipe(proc, createReadStream(__output));
+    const returnedStream = await StreamUtil.execPipe(proc, createReadStream(
+      RootIndex.getEntry('@travetto/base/test/stream')!.output
+    ));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('ExecUtil.fork(echo'));
   }

@@ -6,7 +6,7 @@ import { CliCommand, CliScmUtil, CliUtil, OptionConfig } from '@travetto/cli';
 import { PackUtil } from './bin/util';
 import { CommonConfig, PackOperation } from './bin/types';
 
-const packName = `pack_${RootIndex.main.name}`
+const packName = `pack_${RootIndex.mainPackage.name}`
   .toLowerCase()
   .replace(/[^a-z]+/g, '_')
   .replace(/_+/g, '_');

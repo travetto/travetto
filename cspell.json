@@ -130,15 +130,9 @@
         "xpack",
         "XPOST",
         "Xunit",
-        "Ⲑinit",
-        "Ⲑlog",
         "Ⲑmeta",
-        "Ⲑoutput",
         "Ⲑsource",
-        "Ⲑsyn",
-        "Ⲑtrv",
-        "ᚕmain",
-        "ᚕtrv"
+        "Ⲑsyn"
     ],
     "ignoreWords": [],
     "import": []

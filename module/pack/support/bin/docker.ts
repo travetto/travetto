@@ -35,7 +35,7 @@ export const Docker: PackOperation<DockerConfig, 'docker'> = {
     return `[image=${cfg.image}, port=${cfg.port}]`;
   },
   defaults: {
-    name: RootIndex.main.name.replace('@', ''),
+    name: RootIndex.mainPackage.name.replace('@', ''),
     builder: dockerFileBuilder,
     port: [],
     tag: ['latest']

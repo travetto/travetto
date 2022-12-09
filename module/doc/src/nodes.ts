@@ -236,7 +236,7 @@ export const node = {
    */
   Header: (mod?: string, install = true) => {
     if (!mod) {
-      mod = (RootIndex.main.name === 'doc' ? parentPkg?.name : undefined) ?? RootIndex.main.name;
+      mod = (RootIndex.mainPackage.name === 'doc' ? parentPkg?.name : undefined) ?? RootIndex.mainPackage.name;
     }
     const pkg = PackageUtil.readPackage(RootIndex.getModule(mod)!.source);
     return $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });

@@ -58,9 +58,9 @@ interface AssertState {
   [AssertⲐ]?: {
     assert: ts.Identifier;
     hasAssertCall?: boolean;
-    assertCheck: ts.PropertyAccessExpression;
-    checkThrow: ts.PropertyAccessExpression;
-    checkThrowAsync: ts.PropertyAccessExpression;
+    assertCheck: ts.Expression;
+    checkThrow: ts.Expression;
+    checkThrowAsync: ts.Expression;
   };
   [IsTestⲐ]?: boolean;
 }
@@ -159,7 +159,7 @@ export class AssertTransformer {
     cmd.args = cmd.args.filter(x => x !== undefined && x !== null);
     const check = state.factory.createCallExpression(state[AssertⲐ]!.assertCheck, undefined, state.factory.createNodeArray([
       state.fromLiteral({
-        file: state.createIdentifier('__output'),
+        file: state.getFilenameIdentifier(),
         line: state.fromLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
         text: state.fromLiteral(firstText),
         operator: state.fromLiteral(cmd.fn)
@@ -184,7 +184,7 @@ export class AssertTransformer {
       undefined,
       state.factory.createNodeArray([
         state.fromLiteral({
-          file: state.createIdentifier('__output'),
+          file: state.getFilenameIdentifier(),
           line: state.fromLiteral(ts.getLineAndCharacterOfPosition(state.source, node.getStart()).line + 1),
           text: state.fromLiteral(`${key} ${firstText}`),
           operator: state.fromLiteral(`${key}`)
