@@ -17,7 +17,7 @@ export class ExecUtilTest {
       cwd: RootIndex.mainModule.output
     });
     const result = await proc.result;
-    assert(result.stdout.includes(RootIndex.mainModule.output));
+    assert(result.stdout.includes('package.json'));
     assert(result.code === 0);
     assert(result.valid);
   }
