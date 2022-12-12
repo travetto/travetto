@@ -77,7 +77,7 @@ export class Serializer {
       out = this.serialize(o.toISOString(), cfg, indentLevel);
     } else if (o instanceof Error) {
       out = `${this.serialize(o.stack, cfg, indentLevel + cfg.indent)}\n`;
-    } else if (typeof o === 'function' || o instanceof RegExp || o instanceof Set || o instanceof Map) {
+    } else if (typeof o === 'function' || o instanceof RegExp) {
       if (Util.hasToJSON(o)) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         out = this.serialize(o.toJSON() as object, cfg, indentLevel);
@@ -86,6 +86,10 @@ export class Serializer {
       } else {
         throw new Error(`Types are not supported: ${typeof o}`);
       }
+    } else if (o instanceof Set) {
+      return this.serialize([...o], config, indentLevel);
+    } else if (o instanceof Map) {
+      return this.serialize(Object.fromEntries(o.entries()), config, indentLevel);
     } else if (Array.isArray(o)) {
       if (o.length) {
         out = o.map(el => `${prefix}-${this.serialize(el, cfg, indentLevel + cfg.indent)}`).join('\n');

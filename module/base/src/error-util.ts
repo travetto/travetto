@@ -1,4 +1,5 @@
 import { path } from '@travetto/manifest';
+import { Util } from './util';
 
 export type SerializedError = { $?: boolean, message: string, stack?: string, name: string };
 
@@ -39,7 +40,7 @@ export class ErrorUtil {
         error[k] = e[k];
       }
       error.name = e.name;
-      if (e instanceof Error) {
+      if (Util.hasToJSON(e)) {
         Object.assign(error, e.toJSON());
       }
       error.message ??= e.message;

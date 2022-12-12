@@ -107,7 +107,9 @@ export class SerializeUtil {
     res.status(status);
     res.statusError = error;
     res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(error.toJSON({ status })));
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const out = Util.hasToJSON(error) ? error.toJSON() as object : { message: error.message };
+    res.send(JSON.stringify({ ...out, status }));
   }
 
   /**

@@ -48,9 +48,8 @@ export class BulkProcessError extends AppError {
   /**
    * Provide full results back, with validation errors
    */
-  override toJSON(extra: Record<string, unknown> = {}): unknown {
+  override toJSON(): unknown {
     return {
-      ...extra,
       at: new Date(),
       message: this.message,
       category: this.category,
