@@ -6,7 +6,7 @@ import {
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
   OptionalId
 } from '@travetto/model';
-import { ShutdownManager, type Class, AppError } from '@travetto/base';
+import { ShutdownManager, type Class, AppError, TypedObject } from '@travetto/base';
 import { SchemaChange, DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -299,7 +299,7 @@ export class ElasticsearchModelService implements
 
     for (let i = 0; i < res.items.length; i++) {
       const item = res.items[i];
-      const [k] = Object.keys<Record<Count | 'create' | 'index', unknown>>(item);
+      const [k] = TypedObject.keys<Record<Count | 'create' | 'index', unknown>>(item);
       const v = item[k]!;
       if (v.error) {
         out.errors.push(v.error);

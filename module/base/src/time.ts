@@ -20,7 +20,7 @@ export type TimeUnit = keyof typeof TIME_UNITS;
 
 export class TimeUtil {
 
-  static #timePattern = new RegExp(`^(-?[0-9.]+)(${Object.keys(TIME_UNITS).join('|')})$`);
+  static #timePattern = new RegExp(`^(?<amount>-?[0-9.]+)(?<unit>${Object.keys(TIME_UNITS).join('|')})$`);
 
   /**
    * Test to see if a string is valid for relative time
@@ -38,11 +38,13 @@ export class TimeUtil {
   static timeToMs(amount: number | TimeSpan, unit?: TimeUnit): number {
     if (typeof amount === 'string') {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      [, amount, unit] = amount.match(this.#timePattern) as [undefined, '1m', 'm'] ?? [undefined, amount, unit];
+      const { groups } = (amount.match(this.#timePattern) as { groups: { amount?: string, unit?: TimeUnit } });
+      const amountStr = groups?.amount ?? `${amount}`;
+      unit = groups?.unit ?? unit ?? 'ms';
       if (!TIME_UNITS[unit]) {
         return NaN;
       }
-      amount = amount.includes('.') ? parseFloat(amount) : parseInt(amount, 10);
+      amount = amountStr.includes('.') ? parseFloat(amountStr) : parseInt(amountStr, 10);
     }
     return amount * TIME_UNITS[unit ?? 'ms'];
   }

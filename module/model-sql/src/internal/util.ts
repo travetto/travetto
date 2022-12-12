@@ -1,4 +1,4 @@
-import { Class, Util } from '@travetto/base';
+import { Class, TypedObject, Util } from '@travetto/base';
 import { SelectClause, SortClause } from '@travetto/model-query';
 import { ModelRegistry, ModelType } from '@travetto/model';
 import { SchemaRegistry, ClassConfig, FieldConfig } from '@travetto/schema';
@@ -46,7 +46,7 @@ export class SQLUtil {
     if (Array.isArray(o)) {
       return o.filter(x => x !== null && x !== undefined).map(x => this.cleanResults(dct, x));
     } else if (!Util.isSimple(o)) {
-      for (const k of Object.keys(o)) {
+      for (const k of TypedObject.keys(o)) {
         if (o[k] === null || o[k] === undefined || k === dct.parentPathField.name || k === dct.pathField.name || k === dct.idxField.name) {
           delete o[k];
         } else {
@@ -228,7 +228,7 @@ export class SQLUtil {
 
     let toGet = new Set<string>();
 
-    for (const [k, v] of Object.entries(select)) {
+    for (const [k, v] of TypedObject.entries(select)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const sk = k as string;
       if (!Util.isPlainObject(select[k]) && localMap[sk]) {

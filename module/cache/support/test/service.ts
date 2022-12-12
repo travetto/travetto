@@ -6,11 +6,13 @@ import { Inject, Injectable } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { ModelSuite } from '@travetto/model/support/test/suite';
 import { Class, TimeUtil } from '@travetto/base';
+import { Schema } from '@travetto/schema';
 
 import { Cache, EvictCache } from '../../src/decorator';
 import { CacheModelⲐ, CacheService } from '../../src/service';
 import { CacheUtil } from '../../src/util';
 
+@Schema()
 class User { }
 
 @Injectable()

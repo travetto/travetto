@@ -2,19 +2,21 @@ import ts from 'typescript';
 
 import {
   TransformerState, OnMethod, OnClass, AfterClass,
-  AfterFunction, CoreUtil, SystemUtil
+  AfterFunction, CoreUtil, SystemUtil, Import
 } from '@travetto/transformer';
 
 const MANIFEST_MOD = '@travetto/manifest';
 const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
 
-const UTIL_MOD = `${MANIFEST_MOD}/src/class-metadata`;
-const UTIL_CLS = 'ClassMetadataUtil';
+const ROOT_IDX_IMPORT = `${MANIFEST_MOD}/src/root-index`;
+const ROOT_IDX_CLS = 'RootIndex';
 
 const methods = Symbol.for(`${MANIFEST_MOD}:methods`);
 const cls = Symbol.for(`${MANIFEST_MOD}:class`);
+const rootIdx = Symbol.for(`${MANIFEST_MOD}:rootIndex`);
 
 interface MetadataInfo {
+  [rootIdx]?: Import;
   [methods]?: {
     [key: string]: { hash: number };
   };
@@ -70,12 +72,13 @@ export class RegisterTransformer {
       return node;
     }
 
-    const ident = state.importDecorator(UTIL_MOD, UTIL_CLS)!;
+    state[rootIdx] ??= state.importFile(ROOT_IDX_IMPORT);
+    const ident = state.createAccess(state[rootIdx].ident, ROOT_IDX_CLS);
 
     const name = node.name?.escapedText.toString() ?? '';
 
     const meta = state.factory.createCallExpression(
-      state.createAccess(ident, 'initMeta'),
+      state.createAccess(ident, 'registerFunction'),
       [],
       [
         state.createIdentifier(name),
@@ -114,9 +117,10 @@ export class RegisterTransformer {
 
     if (node.name && /^[A-Z]/.test(node.name.escapedText.toString())) {
       // If we have a class like function
-      const ident = state.importDecorator(UTIL_MOD, UTIL_CLS)!;
+      state[rootIdx] ??= state.importFile(ROOT_IDX_IMPORT);
+      const ident = state.createAccess(state[rootIdx].ident, ROOT_IDX_CLS);
       const meta = state.factory.createCallExpression(
-        state.createAccess(ident, 'initFunctionMeta'),
+        state.createAccess(ident, 'registerFunction'),
         [],
         [
           state.createIdentifier(node.name),

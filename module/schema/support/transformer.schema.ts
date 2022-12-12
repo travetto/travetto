@@ -7,15 +7,15 @@ import {
 import { SchemaTransformUtil } from './transform-util';
 
 const inSchema = Symbol.for('@travetto/schema:schema');
-const accessors = Symbol.for('@travetto/schema:schema');
+const accessors = Symbol.for('@travetto/schema:accessors');
 
 interface AutoState {
   [inSchema]?: boolean;
   [accessors]?: Set<string>;
 }
 
-const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
-const COMMON_MOD = '@travetto/schema/src/decorator/common';
+const SCHEMA_IMPORT = '@travetto/schema/src/decorator/schema';
+const COMMON_IMPORT = '@travetto/schema/src/decorator/common';
 
 /**
  * Processes `@Schema` to register class as a valid Schema
@@ -41,12 +41,12 @@ export class SchemaTransformer {
 
     const comments = DocUtil.describeDocs(node);
 
-    if (!state.findDecorator(this, node, 'Schema', SCHEMA_MOD)) {
-      modifiers.unshift(state.createDecorator(SCHEMA_MOD, 'Schema'));
+    if (!state.findDecorator(this, node, 'Schema', SCHEMA_IMPORT)) {
+      modifiers.unshift(state.createDecorator(SCHEMA_IMPORT, 'Schema'));
     }
 
     if (comments.description) {
-      modifiers.push(state.createDecorator(COMMON_MOD, 'Describe', state.fromLiteral({
+      modifiers.push(state.createDecorator(COMMON_IMPORT, 'Describe', state.fromLiteral({
         title: comments.description
       })));
     }

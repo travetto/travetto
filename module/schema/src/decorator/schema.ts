@@ -1,7 +1,9 @@
 import { Class } from '@travetto/base';
 
+import { BindUtil } from '../bind-util';
 import { SchemaRegistry } from '../service/registry';
 import { ViewFieldsConfig } from '../service/types';
+import { DeepPartial } from '../types';
 import { ValidatorFn } from '../validate/types';
 
 /**
@@ -11,6 +13,9 @@ import { ValidatorFn } from '../validate/types';
  */
 export function Schema() { // Auto is used during compilation
   return <T, U extends Class<T>>(target: U): U => {
+    target.from ??= function <V>(this: Class<V>, data: DeepPartial<V>, view?: string): V {
+      return BindUtil.bindSchema(this, data, { view });
+    };
     SchemaRegistry.getOrCreatePending(target);
     return target;
   };

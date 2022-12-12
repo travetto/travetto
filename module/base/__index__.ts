@@ -1,5 +1,3 @@
-/// <reference path="./src/global-typings.d.ts" />
-
 export * from './src/console';
 export * from './src/color';
 export * from './src/error';

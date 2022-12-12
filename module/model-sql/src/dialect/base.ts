@@ -1,6 +1,6 @@
 import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
-import { Class, Util, AppError } from '@travetto/base';
+import { Class, Util, AppError, TypedObject } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
@@ -492,7 +492,7 @@ export abstract class SQLDialect implements DialectState {
             }
             case '$lt': case '$gt': case '$gte': case '$lte': {
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const subItems = Object.keys(top as typeof SQL_OPS)
+              const subItems = TypedObject.keys(top as typeof SQL_OPS)
                 .map(ssk => `${sPath} ${SQL_OPS[ssk]} ${resolve(top[ssk])}`);
               items.push(subItems.length > 1 ? `(${subItems.join(` ${SQL_OPS.$and} `)})` : subItems[0]);
               break;
@@ -712,7 +712,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
   getCreateIndexSQL<T extends ModelType>(cls: Class<T>, idx: IndexConfig<T>): string {
     const table = this.namespace(SQLUtil.classToStack(cls));
     const fields: [string, boolean][] = idx.fields.map(x => {
-      const key = Object.keys(x)[0];
+      const key = TypedObject.keys(x)[0];
       const val = x[key];
       if (Util.isPlainObject(val)) {
         throw new Error('Unable to supported nested fields for indices');

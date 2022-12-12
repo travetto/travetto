@@ -1,4 +1,6 @@
 import ts from 'typescript';
+import { TypedObject } from './system';
+
 /**
  * Utilities for dealing with literals
  */
@@ -47,7 +49,7 @@ export class LiteralUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const ov = val as object;
       const pairs: ts.PropertyAssignment[] = [];
-      for (const k of Object.keys(ov)) {
+      for (const k of TypedObject.keys(ov)) {
         if (ov[k] !== undefined) {
           pairs.push(
             factory.createPropertyAssignment(k, this.fromLiteral(factory, ov[k]))

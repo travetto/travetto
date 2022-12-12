@@ -45,7 +45,7 @@ export class DocCommand extends CliCommand<Options> {
   async action(): Promise<void> {
     const docFile = path.resolve(this.cmd.input);
     if (!(await fs.stat(docFile).catch(() => false))) {
-      return ExecUtil.execResponse(1, `${RootIndex.mainPackage.name} does not have ${this.cmd.input}`);
+      return ExecUtil.returnResponse(1, `${RootIndex.mainPackage.name} does not have ${this.cmd.input}`);
     }
 
     if (this.cmd.formats.length === 0) {
@@ -73,9 +73,9 @@ export class DocCommand extends CliCommand<Options> {
     } else {
       try {
         await write();
-        sendResponse(0, `${RootIndex.mainPackage.name} wrote docs for ${this.cmd.input}`);
+        ExecUtil.returnResponse(0, `${RootIndex.mainPackage.name} wrote docs for ${this.cmd.input}`);
       } catch (err) {
-        sendResponse(1, `${err}`);
+        ExecUtil.returnResponse(1, `${err}`);
       }
     }
   }

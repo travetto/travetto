@@ -1,4 +1,5 @@
 import { Env } from './env';
+import { TypedObject } from './types';
 
 type Prim = string | number | boolean | Date;
 
@@ -110,7 +111,7 @@ export class ColorUtil {
       } else {
         const out = keys.map((el, i) => {
           if (typeof el !== 'string') {
-            const subKeys = Object.keys(el);
+            const subKeys = TypedObject.keys(el);
             if (subKeys.length !== 1) {
               throw new Error('Invalid template variable, one and only one key should be specified');
             }

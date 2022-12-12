@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ConcreteClass, Util } from '@travetto/base';
+import { Class, ClassInstance, ConcreteClass, TypedObject, Util } from '@travetto/base';
 
 import { AllViewⲐ } from './internal/types';
 import { SchemaRegistry } from './service/registry';
@@ -36,16 +36,6 @@ export class BindUtil {
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return val as T;
-  }
-
-  /**
-   * Register `from` on the Function prototype
-   */
-  static register(): void {
-    const proto = Object.getPrototypeOf(Function);
-    proto.from = function (data: object | ClassInstance, view?: string): unknown {
-      return BindUtil.bindSchema(this, data, { view });
-    };
   }
 
   /**
@@ -167,7 +157,7 @@ export class BindUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       SchemaRegistry.ensureInstanceTypeField(cls, tgt as T & { type?: string });
 
-      for (const k of Object.keys(tgt)) { // Do not retain undefined fields
+      for (const k of TypedObject.keys(tgt)) { // Do not retain undefined fields
         if (tgt[k] === undefined) {
           delete tgt[k];
         }
@@ -205,7 +195,7 @@ export class BindUtil {
 
       // If no configuration
       if (!conf) {
-        for (const k of Object.keys(data)) {
+        for (const k of TypedObject.keys(data)) {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           obj[k] = data[k as keyof typeof data];
         }

@@ -1,3 +1,4 @@
+import { TypedObject } from '@travetto/base';
 import { Messages } from './messages';
 
 declare global {
@@ -18,7 +19,7 @@ export const CommonRegExp = {
 };
 
 // Rebind regexes
-for (const k of Object.keys(CommonRegExp)) {
+for (const k of TypedObject.keys(CommonRegExp)) {
   CommonRegExp[k].name = `[[:${k}:]]`;
   Messages.set(CommonRegExp[k].name!, Messages.get(k)!);
 }
