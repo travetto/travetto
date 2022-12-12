@@ -1,4 +1,4 @@
-import { TimeSpan, TimeUtil } from '@travetto/base';
+import { MethodDescriptor, TimeSpan, TimeUtil } from '@travetto/base';
 
 import { CacheService } from './service';
 import { CoreCacheConfig, CacheConfig } from './types';

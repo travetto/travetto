@@ -5,18 +5,6 @@ import { RootIndex } from './root-index';
  */
 export class ClassMetadataUtil {
 
-  static #writeMeta(fn: Function, cfg: Record<string, unknown>): boolean {
-    for (const [key, value] of Object.entries(cfg)) {
-      Object.defineProperty(fn, `Ⲑ${key}`, {
-        value,
-        enumerable: false,
-        configurable: false,
-        writable: false
-      });
-    }
-    return true;
-  }
-
   /**
    * Initialize the meta data for a function
    * @param function Function
@@ -24,7 +12,10 @@ export class ClassMetadataUtil {
    */
   static initFunctionMeta(fn: Function, file: string): boolean {
     const source = RootIndex.getSourceFile(file);
-    return this.#writeMeta(fn, { source });
+    const id = RootIndex.getId(source, fn.name);
+    RootIndex.setClassMetadata(id, { id, source });
+    Object.defineProperty(fn, 'Ⲑid', { value: id });
+    return true;
   }
 
   /**
@@ -38,7 +29,8 @@ export class ClassMetadataUtil {
   static initMeta(cls: Function, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean): boolean {
     const source = RootIndex.getSourceFile(file);
     const id = RootIndex.getId(source, cls.name);
-    const meta = { id, hash, methods, abstract, synthetic };
-    return this.#writeMeta(cls, { id, source, meta });
+    RootIndex.setClassMetadata(id, { id, source, hash, methods, abstract, synthetic });
+    Object.defineProperty(cls, 'Ⲑid', { value: id });
+    return true;
   }
 }

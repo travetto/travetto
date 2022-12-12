@@ -191,15 +191,6 @@ export class ManifestIndex {
   }
 
   /**
-   * Get internal id from file name and optionally, class name
-   */
-  getId(filename: string, clsName?: string): string {
-    filename = path.toPosix(filename);
-    const id = this.getEntry(filename)?.id ?? filename;
-    return clsName ? `${id}￮${clsName}` : id;
-  }
-
-  /**
    * Is module installed?
    */
   hasModule(name: string): boolean {

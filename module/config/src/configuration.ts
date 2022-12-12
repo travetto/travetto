@@ -1,5 +1,6 @@
 import { AppError, Class, ClassInstance, Env, Util } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
+import { RootIndex } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ConfigSourceTarget, ConfigTarget } from './internal/types';
@@ -105,7 +106,8 @@ export class Configuration {
       } catch (err) {
         if (err instanceof ValidationResultError) {
           err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
-          err.payload = { class: cls.Ⲑid, file: cls.Ⲑsource, ...(err.payload ?? {}) };
+          const file = RootIndex.getClassMetadata(cls)!.source;
+          err.payload = { class: cls.Ⲑid, file, ...(err.payload ?? {}) };
         }
         throw err;
       }

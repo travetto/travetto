@@ -20,12 +20,13 @@ export type AppDecorator = { description?: string };
  */
 export function Application(name: string, config?: AppDecorator) {
   return <T extends Class<AppClass>>(target: T): void => {
-    const stat = lstatSync(target.Ⲑsource);
+    const src = RootIndex.getClassMetadata(target)!.source;
+    const stat = lstatSync(src);
     const out: Partial<ApplicationConfig> = {
       ...config ?? {},
       target,
       module: RootIndex.manifest.mainModule,
-      filename: target.Ⲑsource,
+      filename: src,
       targetId: target.Ⲑid,
       name: name.replace(/(\s+|[^A-Za-z0-9\-_])/g, '-').replace(/([a-z])([A-Z])/g, (_, l, u) => `${l}-${u.toLowerCase()}`),
       generatedTime: Math.max(stat.mtimeMs, stat.ctimeMs)

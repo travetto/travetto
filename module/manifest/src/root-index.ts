@@ -3,7 +3,7 @@ import { createRequire } from 'module';
 
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { Package, PackageDigest } from './types';
+import { ClassMetadata, Package, PackageDigest } from './types';
 import { PackageUtil } from './package';
 
 class $RootIndex extends ManifestIndex {
@@ -29,6 +29,7 @@ class $RootIndex extends ManifestIndex {
 
   #config: Package | undefined;
   #srcCache = new Map();
+  #metadata = new Map<string, ClassMetadata>();
 
   constructor(output: string = process.env.TRV_OUTPUT ?? process.cwd()) {
     super(output, $RootIndex.resolveManifestJSON(output, process.env.TRV_MANIFEST));
@@ -38,6 +39,15 @@ class $RootIndex extends ManifestIndex {
     for (const { output } of this.findSrc()) {
       await import(output);
     }
+  }
+
+  /**
+   * Get internal id from file name and optionally, class name
+   */
+  getId(filename: string, clsName?: string): string {
+    filename = path.toPosix(filename);
+    const id = this.getEntry(filename)?.id ?? filename;
+    return clsName ? `${id}￮${clsName}` : id;
   }
 
   get mainModule(): IndexedModule {
@@ -78,6 +88,15 @@ class $RootIndex extends ManifestIndex {
 
     const outputFile = this.#srcCache.get(file)!;
     return this.getEntry(outputFile)?.source ?? outputFile;
+  }
+
+  setClassMetadata(clsId: string, metadata: ClassMetadata): void {
+    this.#metadata.set(clsId, metadata);
+  }
+
+  getClassMetadata(clsId: string | Function): ClassMetadata | undefined {
+    const id = clsId === undefined ? '' : typeof clsId === 'string' ? clsId : clsId.Ⲑid;
+    return this.#metadata.get(id);
   }
 }
 

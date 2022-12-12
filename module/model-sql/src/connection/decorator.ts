@@ -1,3 +1,4 @@
+import type { MethodDescriptor } from '@travetto/base';
 import { Connection, TransactionType } from './base';
 
 /**

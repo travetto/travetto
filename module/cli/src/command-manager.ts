@@ -35,16 +35,16 @@ export class CliCommandManager {
   static async loadCommand(
     cmd: string,
     cfg: {
-      filter?: (p: CliCommand) => boolean,
-      failOnMissing?: boolean
+      filter?: (p: CliCommand) => boolean;
+      failOnMissing?: boolean;
     } = {}
   ): Promise<CliCommand | undefined> {
     const command = cmd.replace(/:/g, '_');
     const found = this.getCommandMapping().get(command)!;
     if (!found) {
-      const cfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
-      if (cfg) {
-        const [, pkg, prod] = cfg;
+      const matchedCfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
+      if (matchedCfg) {
+        const [, pkg, prod] = matchedCfg;
         console.error(CliUtil.color`
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
 ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
@@ -78,7 +78,7 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
       [...this.getCommandMapping().keys()]
         .map(k => this.loadCommand(k, {
           filter(cmd: CliCommand) {
-            return cmd.constructor.Ⲑmeta?.abstract !== true && cmd.isActive?.() !== false;
+            return RootIndex.getClassMetadata(cmd.constructor)?.abstract !== true && cmd.isActive?.() !== false;
           }
         }))
     );

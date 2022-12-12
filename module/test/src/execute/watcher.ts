@@ -1,5 +1,6 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
+import { RootIndex } from '@travetto/manifest';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -56,7 +57,7 @@ export class TestWatcher {
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
-          file: cls?.Ⲑsource,
+          file: RootIndex.getClassMetadata(cls)?.source
         });
       }
     });
