@@ -632,7 +632,7 @@ ${this.getLimitSQL(cls, query)}`;
     const parent = stack.length > 1;
     const array = parent && config.array;
 
-    if (config.type && RootIndex.getClassMetadata(config.type)?.synthetic) {
+    if (config.type && RootIndex.getFunctionMetadata(config.type)?.synthetic) {
       throw new AppError(`Cannot create SQL tables for synthetic types, please convert ${SQLUtil.buildPath(stack)} to a concrete class`);
     }
 

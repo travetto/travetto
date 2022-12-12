@@ -13,7 +13,7 @@ export const Links = {
 
 export const ModelQueryTypes = (file: string | Function): AllTypeMap['SnippetLink'][] => {
   if (typeof file !== 'string') {
-    file = RootIndex.getClassMetadata(file)!.source;
+    file = RootIndex.getFunctionMetadata(file)!.source;
   }
   const contents = readFileSync(file, 'utf8');
   const found: AllTypeMap['SnippetLink'][] = [];

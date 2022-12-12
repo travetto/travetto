@@ -78,7 +78,7 @@ ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
       [...this.getCommandMapping().keys()]
         .map(k => this.loadCommand(k, {
           filter(cmd: CliCommand) {
-            return RootIndex.getClassMetadata(cmd.constructor)?.abstract !== true && cmd.isActive?.() !== false;
+            return RootIndex.getFunctionMetadata(cmd.constructor)?.abstract !== true && cmd.isActive?.() !== false;
           }
         }))
     );

@@ -14,7 +14,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
    * Find all valid tests (ignoring abstract)
    */
   getValidClasses(): Class[] {
-    return this.getClasses().filter(c => !RootIndex.getClassMetadata(c)?.abstract);
+    return this.getClasses().filter(c => !RootIndex.getFunctionMetadata(c)?.abstract);
   }
 
   createPending(cls: Class): Partial<SuiteConfig> {
@@ -22,7 +22,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       class: cls,
       module: RootIndex.manifest.mainModule,
       classId: cls.Ⲑid,
-      file: RootIndex.getClassMetadata(cls)!.source,
+      file: RootIndex.getFunctionMetadata(cls)!.source,
       tests: [],
       beforeAll: [],
       beforeEach: [],
@@ -35,7 +35,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
     return {
       class: cls,
       module: RootIndex.manifest.mainModule,
-      file: RootIndex.getClassMetadata(cls)!.source,
+      file: RootIndex.getFunctionMetadata(cls)!.source,
       methodName: fn.name
     };
   }
@@ -91,7 +91,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   getRunParams(file: string, clsName?: string, method?: string): { suites: SuiteConfig[] } | { suite: SuiteConfig, test?: TestConfig } {
     if (clsName && /^\d+$/.test(clsName)) { // If we only have a line number
       const line = parseInt(clsName, 10);
-      const suites = this.getValidClasses().filter(cls => RootIndex.getClassMetadata(cls)!.source === file).map(x => this.get(x)).filter(x => !x.skip);
+      const suites = this.getValidClasses().filter(cls => RootIndex.getFunctionMetadata(cls)!.source === file).map(x => this.get(x)).filter(x => !x.skip);
       const suite = suites.find(x => x.lines && (line >= x.lines.start && line <= x.lines.end));
 
       if (suite) {
@@ -113,7 +113,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
       } else {
         const suites = this.getValidClasses()
           .map(x => this.get(x))
-          .filter(x => !RootIndex.getClassMetadata(x.class)?.abstract);  // Do not run abstract suites
+          .filter(x => !RootIndex.getFunctionMetadata(x.class)?.abstract);  // Do not run abstract suites
         return { suites };
       }
     }

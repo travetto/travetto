@@ -104,7 +104,7 @@ export type PackageDigestField = 'name' | 'main' | 'author' | 'license' | 'versi
 
 export type PackageDigest = Pick<Package, PackageDigestField> & { framework: string };
 
-export type ClassMetadata = {
+export type FunctionMetadata = {
   id: string;
   source: string;
   hash?: number;

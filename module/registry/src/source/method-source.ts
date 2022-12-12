@@ -30,8 +30,8 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
    * On a class being emitted, check methods
    */
   onClassEvent(e: ChangeEvent<Class>): void {
-    const next = RootIndex.getClassMetadata(e.curr!)?.methods ?? {};
-    const prev = RootIndex.getClassMetadata(e.prev!)?.methods ?? {};
+    const next = RootIndex.getFunctionMetadata(e.curr!)?.methods ?? {};
+    const prev = RootIndex.getFunctionMetadata(e.prev!)?.methods ?? {};
 
     /**
      * Go through each method, comparing hashes.  To see added/removed and changed

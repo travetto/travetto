@@ -57,7 +57,7 @@ export class TestWatcher {
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
-          file: RootIndex.getClassMetadata(cls)?.source
+          file: RootIndex.getFunctionMetadata(cls)?.source
         });
       }
     });

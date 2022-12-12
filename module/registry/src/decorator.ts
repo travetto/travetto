@@ -12,7 +12,7 @@ class $PendingRegister {
    * Register class as pending
    */
   add(cls: Class): void {
-    const src = RootIndex.getClassMetadata(cls)!.source;
+    const src = RootIndex.getFunctionMetadata(cls)!.source;
     if (!this.map.has(src)) {
       const sub: Class[] = [];
       this.map.set(src, sub);

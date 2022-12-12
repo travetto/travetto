@@ -197,7 +197,7 @@ export const node = {
    */
   Ref: (title: Content, file: string | Function) => {
     if (typeof file === 'function') {
-      file = RootIndex.getClassMetadata(file)!.source;
+      file = RootIndex.getFunctionMetadata(file)!.source;
     }
     const res = ResolveUtil.resolveRef(title, file);
     return $n('ref', { title: $c(res.title), link: $c(res.file), line: res.line });
@@ -212,7 +212,7 @@ export const node = {
    */
   Code: (title: Content, content: Content | Function, outline = false, language = 'typescript') => {
     if (typeof content === 'function') {
-      content = RootIndex.getClassMetadata(content)!.source;
+      content = RootIndex.getFunctionMetadata(content)!.source;
     }
     const res = ResolveUtil.resolveCode(content, language, outline);
     return $n('code', { title: $c(title), content: $c(res.content), language: res.language, file: $c(res.file) });
@@ -259,7 +259,7 @@ export const node = {
    */
   Snippet: (title: Content, file: string | Function, startPattern: RegExp, endPattern?: RegExp, outline?: boolean) => {
     if (typeof file !== 'string') {
-      file = RootIndex.getClassMetadata(file)!.source;
+      file = RootIndex.getFunctionMetadata(file)!.source;
     }
     const res = ResolveUtil.resolveSnippet(file, startPattern, endPattern, outline);
     return $n('code', {
