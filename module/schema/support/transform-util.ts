@@ -16,7 +16,7 @@ export class SchemaTransformUtil {
       case 'external': return state.getOrImport(type);
       case 'tuple': return state.fromLiteral(type.subTypes.map(x => this.toConcreteType(state, x, node, root)!));
       case 'literal': {
-        if ((type.ctor === Array || type.ctor === Set) && type.typeArguments?.length) {
+        if ((type.ctor === Array) && type.typeArguments?.length) {
           return state.fromLiteral([this.toConcreteType(state, type.typeArguments[0], node, root)]);
         } else if (type.ctor) {
           return state.createIdentifier(type.ctor.name!);
@@ -179,7 +179,7 @@ export class SchemaTransformUtil {
     const out: Record<string, unknown> = {};
 
     while (type?.key === 'literal' && type.typeArguments?.length) {
-      if (type.ctor === Array || type.ctor === Set) {
+      if (type.ctor === Array) {
         out.array = true;
       }
       type = type.typeArguments?.[0] ?? { key: 'literal', ctor: Object }; // We have a promise nested
