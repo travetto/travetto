@@ -20,7 +20,6 @@ function getConstructor<T>(o: T): ConcreteClass<T> {
   return (o as unknown as ClassInstance<T>).constructor;
 }
 
-
 /**
  * Schema registry for listening to changes
  */
@@ -43,15 +42,6 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
         .toLowerCase());
     }
     return this.#typeKeys.get(cls)!;
-  }
-
-  /**
-   * Tie bind util activation to schema registry initialization
-   */
-  async init(): Promise<unknown> {
-    const res = super.init();
-    BindUtil.register();
-    return res;
   }
 
   /**

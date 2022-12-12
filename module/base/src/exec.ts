@@ -275,15 +275,15 @@ export class ExecUtil {
   }
 
   /**
-   * Send response across worker/fork/spawn/root
+   * Run operation and send response across worker/fork/spawn/root
    */
-  static execResponse(exitCode: number, message: unknown): void {
+  static returnResponse(exitCode: number, res?: unknown): never {
     if (parentPort) {
-      parentPort.postMessage(message);
+      parentPort.postMessage(res);
     } else if (process.send) {
-      process.send(message);
-    } else if (message) {
-      process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${JSON.stringify(message)}\n`);
+      process.send(res);
+    } else if (res) {
+      process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${JSON.stringify(res)}\n`);
     }
     process.exit(exitCode);
   }

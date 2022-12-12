@@ -1,4 +1,6 @@
 import { path } from '@travetto/manifest';
+
+import { TypedObject } from './types';
 import { Util } from './util';
 
 export type SerializedError = { $?: boolean, message: string, stack?: string, name: string };
@@ -36,7 +38,7 @@ export class ErrorUtil {
 
     if (e) {
       error = { $: true, name: e.name, message: '' };
-      for (const k of Object.keys<{ name: string }>(e)) {
+      for (const k of TypedObject.keys<{ name: string }>(e)) {
         error[k] = e[k];
       }
       error.name = e.name;
@@ -59,7 +61,7 @@ export class ErrorUtil {
     if (isSerialized(e)) {
       const err = new Error();
 
-      for (const k of Object.keys<{ name: string }>(e)) {
+      for (const k of TypedObject.keys<{ name: string }>(e)) {
         err[k] = e[k];
       }
       err.message = e.message;

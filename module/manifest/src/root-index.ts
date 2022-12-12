@@ -90,10 +90,25 @@ class $RootIndex extends ManifestIndex {
     return this.getEntry(outputFile)?.source ?? outputFile;
   }
 
-  setFunctionMetadata(clsId: string, metadata: FunctionMetadata): void {
-    this.#metadata.set(clsId, metadata);
+  /**
+   * Initialize the meta data for a function/class
+   * @param cls Class
+   * @param `file` Filename
+   * @param `hash` Hash of class contents
+   * @param `methods` Methods and their hashes
+   * @param `abstract` Is the class abstract
+   */
+  registerFunction(cls: Function, file: string, hash?: number, methods?: Record<string, { hash: number }>, abstract?: boolean, synthetic?: boolean): boolean {
+    const source = this.getSourceFile(file);
+    const id = this.getId(source, cls.name);
+    this.#metadata.set(id, { id, source, hash, methods, abstract, synthetic });
+    Object.defineProperty(cls, 'Ⲑid', { value: id });
+    return true;
   }
 
+  /**
+   * Retrieve function metadata by function, or function id
+   */
   getFunctionMetadata(clsId: string | Function): FunctionMetadata | undefined {
     const id = clsId === undefined ? '' : typeof clsId === 'string' ? clsId : clsId.Ⲑid;
     return this.#metadata.get(id);

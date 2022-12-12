@@ -1,6 +1,8 @@
 import { readFileSync } from 'fs';
 import vscode from 'vscode';
 
+import { TypedObject } from '@travetto/base';
+
 import { Decorations } from './decoration';
 import {
   AllState, TestState, ResultState,
@@ -132,7 +134,7 @@ export class DocumentResultsManager {
       for (const assertion of test.assertions) {
         out[assertion.status].push(assertion.decoration);
       }
-      for (const k of Object.keys<Record<StatusUnknown, unknown>>(out)) {
+      for (const k of TypedObject.keys<Record<StatusUnknown, unknown>>(out)) {
         this.setStyle(test.assertStyles[k], out[k]);
       }
     }

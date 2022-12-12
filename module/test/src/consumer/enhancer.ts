@@ -1,4 +1,4 @@
-import { ColorUtil } from '@travetto/base';
+import { ColorUtil, TypedObject } from '@travetto/base';
 
 export const { palette: COLOR_ENHANCER } = ColorUtil.buildColorTemplate({
   assertDescription: ['white'],
@@ -21,6 +21,6 @@ export type TestResultsEnhancer = typeof COLOR_ENHANCER;
  * Dummy enhancer does nothing
  */
 export const DUMMY_ENHANCER: TestResultsEnhancer = [
-  Object.keys(COLOR_ENHANCER)
+  TypedObject.keys(COLOR_ENHANCER)
     .reduce<Partial<TestResultsEnhancer>>((acc, k) => (acc[k] = (x: unknown): string => `${x}`) && acc, {})
 ].filter((x): x is TestResultsEnhancer => !!x)[0];

@@ -112,6 +112,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    * @param param The param config
    * @param index The parameter index
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   registerEndpointInterceptorConfig<T extends RestInterceptor<any>>(target: Class, handler: RouteHandler, interceptorCls: Class<T>, config: Partial<T['config']>): void {
     const endpointConfig = this.getOrCreateEndpointConfig(target, handler);
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
