@@ -414,7 +414,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     let parentClass = config.factory ? config.target : Object.getPrototypeOf(cls);
 
     if (config.factory) {
-      while (RootIndex.getClassMetadata(Object.getPrototypeOf(parentClass))?.abstract) {
+      while (RootIndex.getFunctionMetadata(Object.getPrototypeOf(parentClass))?.abstract) {
         parentClass = Object.getPrototypeOf(parentClass);
       }
       if (!this.targetToClass.has(classId)) {
@@ -444,7 +444,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
       }
     }
 
-    if (RootIndex.getClassMetadata(cls)?.abstract) { // Skip out early, only needed to inherit
+    if (RootIndex.getFunctionMetadata(cls)?.abstract) { // Skip out early, only needed to inherit
       return config;
     }
 
@@ -479,7 +479,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     }
 
     // If targeting self (default @Injectable behavior)
-    if ((classId === targetId || config.factory) && (parentConfig || RootIndex.getClassMetadata(parentClass)?.abstract)) {
+    if ((classId === targetId || config.factory) && (parentConfig || RootIndex.getFunctionMetadata(parentClass)?.abstract)) {
       const parentId = parentClass.Ⲑid;
 
       if (!this.targetToClass.has(parentId)) {
@@ -552,8 +552,6 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
    */
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   async injectFields<T extends { constructor: Class<T> }>(o: T, cls = o.constructor as Class<T>): Promise<void> {
-    console.log!('Injecting fields', this.get(cls).dependencies);
-
     this.verifyInitialized();
     // Compute fields to be auto-wired
     return await this.resolveFieldDependencies(this.get(cls), o);

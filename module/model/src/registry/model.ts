@@ -52,7 +52,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [], autoCreate: true, baseType: RootIndex.getClassMetadata(cls)?.abstract };
+    return { class: cls, indices: [], autoCreate: true, baseType: RootIndex.getFunctionMetadata(cls)?.abstract };
   }
 
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {

@@ -32,7 +32,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
   return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
     SuiteRegistry.registerField(inst.constructor, descriptor.value, {
       ...extra,
-      file: RootIndex.getClassMetadata(inst.constructor)!.source,
+      file: RootIndex.getFunctionMetadata(inst.constructor)!.source,
       description: descriptionString
     });
     return descriptor;

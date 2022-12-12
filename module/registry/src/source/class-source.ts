@@ -26,7 +26,7 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.#classes.set(file, new Map());
       for (const cls of classes) {
-        const src = RootIndex.getClassMetadata(cls)!.source;
+        const src = RootIndex.getFunctionMetadata(cls)!.source;
         this.#classes.get(src)!.set(cls.Ⲑid, cls);
         this.emit({ type: 'added', curr: cls });
       }
@@ -62,8 +62,8 @@ export class ClassSource implements ChangeSource<Class> {
         if (!prev.has(k)) {
           this.emit({ type: 'added', curr: next.get(k)! });
         } else {
-          const prevMeta = RootIndex.getClassMetadata(prev.get(k)?.Ⲑid ?? '');
-          const nextMeta = RootIndex.getClassMetadata(next.get(k)?.Ⲑid ?? '');
+          const prevMeta = RootIndex.getFunctionMetadata(prev.get(k)?.Ⲑid ?? '');
+          const nextMeta = RootIndex.getFunctionMetadata(next.get(k)?.Ⲑid ?? '');
           if (prevMeta?.hash !== nextMeta?.hash) {
             this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
           }

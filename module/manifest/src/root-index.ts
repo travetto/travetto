@@ -3,7 +3,7 @@ import { createRequire } from 'module';
 
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { ClassMetadata, Package, PackageDigest } from './types';
+import { FunctionMetadata, Package, PackageDigest } from './types';
 import { PackageUtil } from './package';
 
 class $RootIndex extends ManifestIndex {
@@ -29,7 +29,7 @@ class $RootIndex extends ManifestIndex {
 
   #config: Package | undefined;
   #srcCache = new Map();
-  #metadata = new Map<string, ClassMetadata>();
+  #metadata = new Map<string, FunctionMetadata>();
 
   constructor(output: string = process.env.TRV_OUTPUT ?? process.cwd()) {
     super(output, $RootIndex.resolveManifestJSON(output, process.env.TRV_MANIFEST));
@@ -90,11 +90,11 @@ class $RootIndex extends ManifestIndex {
     return this.getEntry(outputFile)?.source ?? outputFile;
   }
 
-  setClassMetadata(clsId: string, metadata: ClassMetadata): void {
+  setFunctionMetadata(clsId: string, metadata: FunctionMetadata): void {
     this.#metadata.set(clsId, metadata);
   }
 
-  getClassMetadata(clsId: string | Function): ClassMetadata | undefined {
+  getFunctionMetadata(clsId: string | Function): FunctionMetadata | undefined {
     const id = clsId === undefined ? '' : typeof clsId === 'string' ? clsId : clsId.Ⲑid;
     return this.#metadata.get(id);
   }

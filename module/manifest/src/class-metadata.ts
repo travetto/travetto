@@ -13,7 +13,7 @@ export class ClassMetadataUtil {
   static initFunctionMeta(fn: Function, file: string): boolean {
     const source = RootIndex.getSourceFile(file);
     const id = RootIndex.getId(source, fn.name);
-    RootIndex.setClassMetadata(id, { id, source });
+    RootIndex.setFunctionMetadata(id, { id, source });
     Object.defineProperty(fn, 'Ⲑid', { value: id });
     return true;
   }
@@ -29,7 +29,7 @@ export class ClassMetadataUtil {
   static initMeta(cls: Function, file: string, hash: number, methods: Record<string, { hash: number }>, abstract: boolean, synthetic: boolean): boolean {
     const source = RootIndex.getSourceFile(file);
     const id = RootIndex.getId(source, cls.name);
-    RootIndex.setClassMetadata(id, { id, source, hash, methods, abstract, synthetic });
+    RootIndex.setFunctionMetadata(id, { id, source, hash, methods, abstract, synthetic });
     Object.defineProperty(cls, 'Ⲑid', { value: id });
     return true;
   }

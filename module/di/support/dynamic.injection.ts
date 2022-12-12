@@ -65,7 +65,7 @@ class $DynamicDependencyRegistry {
     const classId = cls.Ⲑid;
 
     if (
-      !RootIndex.getClassMetadata(cls)?.abstract &&
+      !RootIndex.getFunctionMetadata(cls)?.abstract &&
       this.#proxies.has(classId) &&
       this.#proxies.get(classId)!.has(config.qualifier)
     ) {

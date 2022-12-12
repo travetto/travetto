@@ -20,7 +20,7 @@ export type AppDecorator = { description?: string };
  */
 export function Application(name: string, config?: AppDecorator) {
   return <T extends Class<AppClass>>(target: T): void => {
-    const src = RootIndex.getClassMetadata(target)!.source;
+    const src = RootIndex.getFunctionMetadata(target)!.source;
     const stat = lstatSync(src);
     const out: Partial<ApplicationConfig> = {
       ...config ?? {},
