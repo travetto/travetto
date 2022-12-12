@@ -6,15 +6,6 @@ import { ConsoleManager } from '../src/console';
 import { ExecUtil } from '../src/exec';
 import { ShutdownManager } from '../src/shutdown';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const setToJSON = <T>(cons: abstract new (...args: any[]) => T, handler: (val: T, ...args: any[]) => unknown): void => {
-  Object.defineProperty(cons.prototype, 'toJSON', {
-    writable: false,
-    // eslint-disable-next-line object-shorthand, @typescript-eslint/no-explicit-any
-    value: function (this: T, ...args: any[]) { return handler(this, ...args); }
-  });
-};
-
 // Setup everything
 let initialized = false;
 export async function setup(): Promise<void> {
@@ -30,7 +21,7 @@ export async function setup(): Promise<void> {
   // Delete if set
   delete process.env.TRV_MAIN;
 
-  // Remove to prevent __proto__ pollution in JSON
+  // @ts-expect-error -- Lock to prevent __proto__ pollution in JSON
   const objectProto = Object.prototype.__proto__;
   Object.defineProperty(
     Object.prototype, '__proto__',
@@ -41,18 +32,6 @@ export async function setup(): Promise<void> {
       }
     }
   );
-
-  // Enable maps to be serialized as json
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  setToJSON(Map, val => ([...val.entries()] as [string, unknown][])
-    .reduce<Record<string, unknown>>((acc, [k, v]) => { acc[k] = v; return acc; }, {}));
-
-  // Enable sets to be serialized as JSON
-  setToJSON(Set, val => [...val.values()]);
-
-  // Add .toJSON to the default Error as well
-  setToJSON(Error, (err: Error, extra) =>
-    ({ message: err.message, ...extra ?? {}, stack: err.stack }));
 
   // Setup stack traces
   Error.stackTraceLimit = 50; // Deep limit
