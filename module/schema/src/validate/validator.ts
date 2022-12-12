@@ -1,4 +1,4 @@
-import { Class, ClassInstance, Util } from '@travetto/base';
+import { Class, ClassInstance, TypedObject, Util } from '@travetto/base';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
@@ -38,7 +38,7 @@ export class SchemaValidator {
   static #validateSchema<T>(schema: SchemaConfig, o: T, relative: string): ValidationError[] {
     let errors: ValidationError[] = [];
 
-    const fields = Object.keys<SchemaConfig>(schema);
+    const fields = TypedObject.keys<SchemaConfig>(schema);
     for (const field of fields) {
       if (schema[field].access !== 'readonly') { // Do not validate readonly fields
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

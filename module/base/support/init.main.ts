@@ -40,20 +40,15 @@ export async function setup(): Promise<void> {
 }
 
 export async function runMain(action: Function, args: string[]): Promise<void> {
-  let res: unknown | undefined;
-  let exitCode = 0;
-
   try {
     await setup();
-    res = await action(...args);
+    return ExecUtil.returnResponse(0, await action(...args));
   } catch (err) {
-    res = err;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    exitCode = (res instanceof Error) ? (res as { code?: number })['code'] ?? 1 : 1;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions
+    return ExecUtil.returnResponse((err as any)?.code ?? 1, err);
   }
-  return ExecUtil.returnResponse(exitCode, res);
 }
 
-export const runIfMain = async (target: Function, filename: string, mainFile: string): Promise<unknown> =>
+export const runIfMain = (target: Function, filename: string, mainFile: string): unknown =>
   (RootIndex.getSourceFile(filename) === RootIndex.getSourceFile(process.env.TRV_MAIN || mainFile)) ?
     runMain(target, process.argv.slice(2)) : undefined;

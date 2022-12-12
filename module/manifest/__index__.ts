@@ -1,4 +1,4 @@
-/// <reference path="./src/global-declarations.d.ts" />
+/// <reference path="./src/typings.d.ts" />
 
 export * from './src/path';
 export * from './src/module';

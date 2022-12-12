@@ -75,14 +75,16 @@ export class AppListLoader {
             ['trv', 'main', '@travetto/app/support/main.list-build.ts'],
             {
               onMessage(folder, perFolder: ApplicationConfig[]) {
-                if (perFolder.length && perFolder[0].module !== RootIndex.manifest.mainModule) {
-                  for (const m of perFolder) {
-                    if (m) {
-                      m.moduleName = `${m.module}:${m.name}`;
+                if (perFolder.length) {
+                  if (perFolder[0].module !== RootIndex.manifest.mainModule) {
+                    for (const m of perFolder) {
+                      if (m) {
+                        m.moduleName = `${m.module}:${m.name}`;
+                      }
                     }
                   }
+                  configs.push(...perFolder);
                 }
-                configs.push(...perFolder);
               },
             }
           )

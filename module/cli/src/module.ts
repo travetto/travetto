@@ -61,8 +61,7 @@ export class CliModuleUtil {
     config: {
       onMessage?: (folder: string, msg: T) => void;
       workerCount?: number;
-      stdio?: ExecutionOptions['stdio'];
-    } = {}
+    } & Omit<ExecutionOptions, 'cwd'> = {}
   ): Promise<void> {
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
@@ -82,11 +81,10 @@ export class CliModuleUtil {
             this.active = true;
 
             const opts: ExecutionOptions = {
+              stdio: [0, process.env.DEBUG ? 'inherit' : 'pipe', 2, 'ipc'],
+              ...config,
               cwd: folder,
-              stdio: config.stdio ?? [0, process.env.DEBUG ? 'inherit' : 'pipe', 2, 'ipc'],
-              env: {
-                TRV_MANIFEST: ''
-              }
+              env: { ...config?.env, TRV_MANIFEST: '' }
             };
 
             const res = ExecUtil.spawn(cmd, args, opts);

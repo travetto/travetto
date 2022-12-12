@@ -3,13 +3,13 @@ import ts from 'typescript';
 import { ManifestIndex, path } from '@travetto/manifest';
 import { DeclarationUtil } from './util/declaration';
 
-
 /**
  * Specific logic for the transformer
  */
 export class TransformerIndex extends ManifestIndex {
 
   /**
+   * Resolve import name for a given type
    */
   getImportName(type: ts.Type | string, removeExt = false): string {
     const ogSource = typeof type === 'string' ? type : DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile().fileName;

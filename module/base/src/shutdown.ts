@@ -134,8 +134,8 @@ class $ShutdownManager {
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
     process.on('SIGTERM', this.execute.bind(this, 143));
-    process.on('uncaughtException', this.executeAsync.bind(this));
-    process.on('unhandledRejection', this.executeAsync.bind(this));
+    process.on('uncaughtException', this.executeUnhandled.bind(this));
+    process.on('unhandledRejection', this.executeUnhandled.bind(this));
   }
 
   /**
