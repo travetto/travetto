@@ -26,7 +26,8 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.#classes.set(file, new Map());
       for (const cls of classes) {
-        this.#classes.get(cls.Ⲑsource)!.set(cls.Ⲑid, cls);
+        const src = RootIndex.getClassMetadata(cls)!.source;
+        this.#classes.get(src)!.set(cls.Ⲑid, cls);
         this.emit({ type: 'added', curr: cls });
       }
     }
@@ -60,8 +61,12 @@ export class ClassSource implements ChangeSource<Class> {
         this.#classes.get(file)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
           this.emit({ type: 'added', curr: next.get(k)! });
-        } else if (prev.get(k)!.Ⲑmeta?.hash !== next.get(k)!.Ⲑmeta?.hash) {
-          this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
+        } else {
+          const prevMeta = RootIndex.getClassMetadata(prev.get(k)?.Ⲑid ?? '');
+          const nextMeta = RootIndex.getClassMetadata(next.get(k)?.Ⲑid ?? '');
+          if (prevMeta?.hash !== nextMeta?.hash) {
+            this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
+          }
         }
       }
     }

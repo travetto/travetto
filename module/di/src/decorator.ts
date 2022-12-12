@@ -1,4 +1,4 @@
-import { Class, ClassInstance } from '@travetto/base';
+import type { MethodDescriptor, Class, ClassInstance } from '@travetto/base';
 
 import { InjectableFactoryConfig, InjectableConfig, Dependency } from './types';
 import { DependencyRegistry, ResolutionType } from './registry';

@@ -103,3 +103,12 @@ export const PACKAGE_STD_PROFILE = 'std';
 export type PackageDigestField = 'name' | 'main' | 'author' | 'license' | 'version';
 
 export type PackageDigest = Pick<Package, PackageDigestField> & { framework: string };
+
+export type ClassMetadata = {
+  id: string;
+  source: string;
+  hash?: number;
+  methods?: Record<string, { hash: number }>;
+  synthetic?: boolean;
+  abstract?: boolean;
+};

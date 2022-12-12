@@ -144,7 +144,7 @@ class $ShutdownManager {
    * @param handler Handler or Closeable
    * @param final If this should be run an attempt to shutdown or only on the final shutdown
    */
-  onShutdown(src: string | { Ⲑid: string } | { constructor: { Ⲑid: string } }, handler: Function | Closeable, final: boolean = false): void {
+  onShutdown(src: string | Function | { constructor: Function }, handler: Function | Closeable, final: boolean = false): void {
     if ('close' in handler) {
       handler = handler.close.bind(handler);
     }

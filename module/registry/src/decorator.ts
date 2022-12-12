@@ -1,4 +1,5 @@
 import { Class } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 
 /**
  * Register a class as pending
@@ -11,12 +12,13 @@ class $PendingRegister {
    * Register class as pending
    */
   add(cls: Class): void {
-    if (!this.map.has(cls.Ⲑsource)) {
+    const src = RootIndex.getClassMetadata(cls)!.source;
+    if (!this.map.has(src)) {
       const sub: Class[] = [];
-      this.map.set(cls.Ⲑsource, sub);
-      this.ordered.push([cls.Ⲑsource, sub]);
+      this.map.set(src, sub);
+      this.ordered.push([src, sub]);
     }
-    this.map.get(cls.Ⲑsource)!.push(cls);
+    this.map.get(src)!.push(cls);
   }
 
   /**

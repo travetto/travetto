@@ -15,3 +15,6 @@ export interface ConsoleListener {
   setDebug?(val: string | boolean): void;
   onLog<T extends LineContext>(context: LogLevel, ctx: T, args: unknown[]): void;
 }
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export type MethodDescriptor<R = any, V = unknown> = TypedPropertyDescriptor<(this: V, ...params: any[]) => R>;

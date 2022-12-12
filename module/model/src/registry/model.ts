@@ -1,3 +1,4 @@
+import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 import { MetadataRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
@@ -51,7 +52,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [], autoCreate: true, baseType: cls.Ⲑmeta?.abstract };
+    return { class: cls, indices: [], autoCreate: true, baseType: RootIndex.getClassMetadata(cls)?.abstract };
   }
 
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {

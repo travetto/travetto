@@ -1,4 +1,5 @@
 import { RetargettingProxy, Class, ClassInstance } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 
 import type { DependencyRegistry, ResolutionType, Resolved } from '../src/registry';
 import type { ClassTarget, InjectableConfig } from '../src/types';
@@ -64,7 +65,7 @@ class $DynamicDependencyRegistry {
     const classId = cls.Ⲑid;
 
     if (
-      !cls.Ⲑmeta?.abstract &&
+      !RootIndex.getClassMetadata(cls)?.abstract &&
       this.#proxies.has(classId) &&
       this.#proxies.get(classId)!.has(config.qualifier)
     ) {

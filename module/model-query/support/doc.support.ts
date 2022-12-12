@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 
+import { RootIndex } from '@travetto/manifest';
 import { d } from '@travetto/doc';
 import { AllTypeMap } from '@travetto/doc/src/nodes';
 
@@ -12,7 +13,7 @@ export const Links = {
 
 export const ModelQueryTypes = (file: string | Function): AllTypeMap['SnippetLink'][] => {
   if (typeof file !== 'string') {
-    file = file.Ⲑsource;
+    file = RootIndex.getClassMetadata(file)!.source;
   }
   const contents = readFileSync(file, 'utf8');
   const found: AllTypeMap['SnippetLink'][] = [];
