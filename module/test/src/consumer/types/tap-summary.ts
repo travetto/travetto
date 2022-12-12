@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { ColorUtil } from '@travetto/base';
+import { ColorUtil, Util } from '@travetto/base';
 
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
@@ -42,7 +42,7 @@ export class SummaryEmitter implements TestConsumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.#enhancer.failure(err instanceof Error ? `${err.toJSON()}` : `${err}`));
+        this.log(this.#enhancer.failure(Util.hasToJSON(err) ? `${err.toJSON()}` : `${err}`));
       }
     }
 
