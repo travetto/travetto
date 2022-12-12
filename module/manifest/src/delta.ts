@@ -40,17 +40,17 @@ export class ManifestDeltaUtil {
         const [, , rightTs] = right.files[el];
         if (leftTs !== rightTs) {
           const stat = await getStat(el);
-          if (leftTs > this.#getNewest(stat!)) {
+          if (!stat) {
+            out.push([el, 'missing']);
+          } else if (leftTs > this.#getNewest(stat!)) {
             out.push([el, 'changed']);
           }
         } else {
-          try {
-            const stat = await getStat(el);
-            if (this.#getNewest(stat!) < leftTs) {
-              out.push([el, 'dirty']);
-            }
-          } catch {
+          const stat = await getStat(el);
+          if (!stat) {
             out.push([el, 'missing']);
+          } else if (this.#getNewest(stat!) < leftTs) {
+            out.push([el, 'dirty']);
           }
         }
       }

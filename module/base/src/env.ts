@@ -25,6 +25,7 @@ export class Env {
    * @private
    */
   static define({ env, dynamic, debug, set, append }: InitConfig = {}): void {
+    debug ??= process.env.DEBUG;
     process.env.TRV_ENV = env ?? process.env.TRV_ENV ?? process.env.NODE_ENV ?? 'dev';
     const prod = this.isProd();
     dynamic ??= this.isDynamic();

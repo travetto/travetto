@@ -4,13 +4,13 @@ import { path } from './path';
 
 import {
   ManifestModule, ManifestModuleCore, ManifestModuleFile,
-  ManifestModuleFileType, ManifestProfile, ManifestRoot,
+  ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, ManifestRoot,
   PACKAGE_STD_PROFILE
 } from './types';
 
 type ScanTest = ((full: string) => boolean) | { test: (full: string) => boolean };
 export type FindConfig = {
-  folders?: string[];
+  folders?: ManifestModuleFolderType[];
   filter?: ScanTest;
   includeIndex?: boolean;
   profiles?: string[];
@@ -29,7 +29,7 @@ export type IndexedFile = {
 };
 
 export type IndexedModule = ManifestModuleCore & {
-  files: Record<string, IndexedFile[]>;
+  files: Record<ManifestModuleFolderType, IndexedFile[]>;
   workspaceRelative: string;
 };
 
@@ -100,9 +100,10 @@ export class ManifestIndex {
         ...m,
         output: this.#resolveOutput(m.output),
         workspaceRelative: m.source.replace(`${this.#manifest.workspacePath}/`, ''),
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         files: Object.fromEntries(
           Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
-        )
+        ) as Record<ManifestModuleFolderType, IndexedFile[]>
       }));
 
     for (const mod of this.#modules) {
