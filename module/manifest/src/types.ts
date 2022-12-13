@@ -5,7 +5,7 @@ export type ManifestModuleFolderType =
   'test/fixtures' | 'support/fixtures' | 'support/resources' |
   '$other';
 
-export type ManifestProfile = 'std' | 'compile' | 'test' | 'doc';
+export type ManifestProfile = 'compile' | 'test' | 'doc' | 'root';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestProfile];
 export type ManifestModuleCore = {
@@ -98,11 +98,23 @@ export const PACKAGE_DEP_GROUPS = [
   'peerDependencies', 'optionalDependencies',
 ] as const;
 
-export const PACKAGE_STD_PROFILE = 'std';
-
 export type PackageDigestField = 'name' | 'main' | 'author' | 'license' | 'version';
-
 export type PackageDigest = Pick<Package, PackageDigestField> & { framework: string };
+
+type OrProm<T> = T | Promise<T>;
+
+export type PackageRel = 'dev' | 'prod' | 'peer' | 'opt' | 'direct';
+export type PackageVisitReq<T> = { pkg: Package, rel: PackageRel, folder: string, parent?: T };
+export type PackageVisitor<T> = {
+  cache?: Map<string, T>;
+  init?(root: PackageVisitReq<T>): OrProm<undefined | void | PackageVisitReq<T>[]>;
+  valid?(req: PackageVisitReq<T>): boolean;
+  create(req: PackageVisitReq<T>): T | Promise<T>;
+  visit(req: PackageVisitReq<T>, item: T): OrProm<void>;
+  complete?(values: Set<T>): OrProm<Set<T> | undefined>;
+}
+
+export type PackageWorkspaceEntry = { name: string, folder: string };
 
 export type FunctionMetadata = {
   id: string;

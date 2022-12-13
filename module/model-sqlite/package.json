@@ -34,9 +34,6 @@
     "@types/better-sqlite3": "^7.6.2",
     "better-sqlite3": "^7.6.2"
   },
-  "devDependencies": {
-    "@travetto/app": "^3.0.0-rc.5"
-  },
   "travetto": {
     "displayName": "SQLite Model Service"
   },

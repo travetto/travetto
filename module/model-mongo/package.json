@@ -25,7 +25,6 @@
     "directory": "module/model-mongo"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.3",
     "@travetto/config": "^3.0.0-rc.5",
     "@travetto/model": "^3.0.0-rc.5",
     "@travetto/model-query": "^3.0.0-rc.5",

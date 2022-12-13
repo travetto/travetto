@@ -1,12 +1,13 @@
 import fs from 'fs/promises';
 
 import { path } from './path';
-import { Dependency, PackageUtil } from './package';
 import {
   ManifestContext,
   ManifestModule, ManifestModuleFile, ManifestModuleFileType,
-  ManifestModuleFolderType, ManifestProfile, PACKAGE_STD_PROFILE
+  ManifestModuleFolderType, ManifestProfile
 } from './types';
+import { Dependency, ModuleDependencyVisitor } from './dependencies';
+import { PackageUtil } from './package';
 
 const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
   '.js': 'js',
@@ -30,6 +31,44 @@ export class ManifestModuleUtil {
 
   static #getNewest(stat: { mtimeMs: number, ctimeMs: number }): number {
     return Math.max(stat.mtimeMs, stat.ctimeMs);
+  }
+
+  /**
+   * Simple file scanning
+   */
+  static async #scanFolder(folder: string, topFolders = new Set<string>(), topFiles = new Set<string>()): Promise<string[]> {
+    const out: string[] = [];
+    if (!fs.stat(folder).catch(() => false)) {
+      return out;
+    }
+    const stack: [string, number][] = [[folder, 0]];
+    while (stack.length) {
+      const popped = stack.pop();
+      if (!popped) {
+        continue;
+      }
+
+      const [top, depth] = popped;
+
+      // Don't navigate into sub-folders with package.json's
+      if (top !== folder && await fs.stat(`${top}/package.json`).catch(() => false)) {
+        continue;
+      }
+
+      for (const sub of await fs.readdir(top)) {
+        const stat = await fs.stat(`${top}/${sub}`);
+        if (stat.isFile()) {
+          if (!sub.startsWith('.') && (depth > 0 || !topFiles.size || topFiles.has(sub))) {
+            out.push(`${top}/${sub}`);
+          }
+        } else {
+          if (!sub.includes('node_modules') && !sub.startsWith('.') && (depth > 0 || !topFolders.size || topFolders.has(sub))) {
+            stack.push([`${top}/${sub}`, depth + 1]);
+          }
+        }
+      }
+    }
+    return out;
   }
 
   /**
@@ -102,47 +141,9 @@ export class ManifestModuleUtil {
   }
 
   /**
-   * Simple file scanning
-   */
-  static async #scanFolder(folder: string, topFolders = new Set<string>(), topFiles = new Set<string>()): Promise<string[]> {
-    const out: string[] = [];
-    if (!fs.stat(folder).catch(() => false)) {
-      return out;
-    }
-    const stack: [string, number][] = [[folder, 0]];
-    while (stack.length) {
-      const popped = stack.pop();
-      if (!popped) {
-        continue;
-      }
-
-      const [top, depth] = popped;
-
-      // Don't navigate into sub-folders with package.json's
-      if (top !== folder && await fs.stat(`${top}/package.json`).catch(() => false)) {
-        continue;
-      }
-
-      for (const sub of await fs.readdir(top)) {
-        const stat = await fs.stat(`${top}/${sub}`);
-        if (stat.isFile()) {
-          if (!sub.startsWith('.') && (depth > 0 || !topFiles.size || topFiles.has(sub))) {
-            out.push(`${top}/${sub}`);
-          }
-        } else {
-          if (!sub.includes('node_modules') && !sub.startsWith('.') && (depth > 0 || !topFolders.size || topFolders.has(sub))) {
-            stack.push([`${top}/${sub}`, depth + 1]);
-          }
-        }
-      }
-    }
-    return out;
-  }
-
-  /**
    * Convert file (by ext) to a known file type and also retrieve its latest timestamp
    */
-  static async #transformFile(moduleFile: string, full: string): Promise<ManifestModuleFile> {
+  static async transformFile(moduleFile: string, full: string): Promise<ManifestModuleFile> {
     const res: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), this.#getNewest(await fs.stat(full))];
     const profile = this.getFileProfile(moduleFile);
     return profile ? [...res, profile] : res;
@@ -151,19 +152,16 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async #describeModule(root: Dependency, { name, version, folder, profileSet, parentSet, internal }: Dependency): Promise<ManifestModule> {
-    const main = folder === root.folder;
+  static async describeModule({ main, name, version, folder, profileSet, parentSet, internal }: Dependency): Promise<ManifestModule> {
     const local = internal || !folder.includes('node_modules') || main;
-    const treatAsMain = root.mergePatterns.some(x => x.test(name));
-
     const files: ManifestModule['files'] = {};
-    const folderSet = (main || treatAsMain) ? new Set<string>() : new Set(['src', 'bin', 'support']);
-    const fileSet = (main || treatAsMain) ? new Set<string>() : new Set([...INDEX_FILES, 'package.json']);
+    const folderSet = new Set<ManifestModuleFolderType>(main ? [] : ['src', 'bin', 'support']);
+    const fileSet = new Set(main ? [] : [...INDEX_FILES, 'package.json']);
 
     for (const file of await this.#scanFolder(folder, folderSet, fileSet)) {
       // Group by top folder
       const moduleFile = file.replace(`${folder}/`, '');
-      const entry = await this.#transformFile(moduleFile, file);
+      const entry = await this.transformFile(moduleFile, file);
       const key = this.getFolderKey(moduleFile);
       (files[key] ??= []).push(entry);
     }
@@ -174,7 +172,7 @@ export class ManifestModuleUtil {
     }
 
     return {
-      profiles: profileSet?.has(PACKAGE_STD_PROFILE) ? [PACKAGE_STD_PROFILE] : [...profileSet],
+      profiles: profileSet?.has('root') ? ['root'] : [...profileSet],
       parents: [...parentSet].sort(),
       internal,
       name,
@@ -188,41 +186,14 @@ export class ManifestModuleUtil {
   }
 
   /**
-   * Get global dependencies from package.json/travettoRepo/global
-   * @param declared
-   * @returns
-   */
-  static async collectGlobalDependencies(workspace: string, seen: Map<string, Dependency>): Promise<Dependency[]> {
-    const pkg = PackageUtil.readPackage(workspace);
-    const mods = pkg.travettoRepo?.globalModules ?? [];
-    const out: Dependency[] = [];
-    for (const modFolder of mods) {
-      const resolved = path.resolve(workspace, modFolder);
-      out.unshift(...(await PackageUtil.collectDependencies(resolved, { seen }, true)));
-    }
-    return out;
-  }
-
-  /**
    * Produce all modules for a given manifest folder, adding in some given modules when developing framework
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
-    const seen = new Map<string, Dependency>();
-    const declared = await PackageUtil.collectDependencies(ctx.mainPath, { seen });
+    const visitor = new ModuleDependencyVisitor(ctx);
+    const declared = await PackageUtil.visitPackages(ctx.mainPath, visitor);
+    const sorted = [...declared].sort((a, b) => a.name.localeCompare(b.name));
 
-    const allModules = [
-      ...declared,
-      ...(ctx.monoRepo ? await this.collectGlobalDependencies(ctx.workspacePath, seen) : [])
-    ].sort((a, b) => a.name.localeCompare(b.name));
-
-    const out: Record<string, ManifestModule> = {};
-    const main = declared.find(x => x.name === ctx.mainModule)!;
-
-    for (const mod of allModules) {
-      // If we are the workspace root, treat all local modules as "main"
-      const cfg = await this.#describeModule(main, mod);
-      out[cfg.name] = cfg;
-    }
-    return out;
+    const modules = await Promise.all(sorted.map(x => this.describeModule(x)))
+    return Object.fromEntries(modules.map(m => [m.name, m]));
   }
 }

@@ -35,9 +35,6 @@
     "@types/mysql": "^2.15.21",
     "mysql": "^2.18.1"
   },
-  "devDependencies": {
-    "@travetto/app": "^3.0.0-rc.5"
-  },
   "peerDependencies": {
     "@travetto/command": "^3.0.0-rc.3"
   },
