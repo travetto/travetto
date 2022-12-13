@@ -32,9 +32,6 @@
     "@travetto/model": "^3.0.0-rc.5",
     "@travetto/model-query": "^3.0.0-rc.5"
   },
-  "devDependencies": {
-    "@travetto/app": "^3.0.0-rc.5"
-  },
   "peerDependencies": {
     "@travetto/command": "^3.0.0-rc.3"
   },

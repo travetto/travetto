@@ -45,9 +45,10 @@ export class CliCommandManager {
       const matchedCfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
       if (matchedCfg) {
         const [, pkg, prod] = matchedCfg;
-        console.error(CliUtil.color`
+        console.error!(CliUtil.color`
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
-${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}`);
+${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}
+`);
         process.exit(1);
       }
       throw new Error(`Unknown command: ${cmd}`);

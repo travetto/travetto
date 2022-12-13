@@ -11,9 +11,9 @@ export class CliScmUtil {
    */
   static async isRepoRoot(folder: string): Promise<boolean> {
     if (await fs.stat(path.resolve(folder, '.git')).catch(() => { })) {
-      return false;
+      return true;
     }
-    return true;
+    return false;
   }
 
   /**

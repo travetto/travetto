@@ -2,33 +2,57 @@ import { readFileSync } from 'fs';
 import { createRequire } from 'module';
 import { execSync } from 'child_process';
 
-import { ManifestProfile, Package, PackageDigest, PACKAGE_STD_PROFILE } from './types';
+import { Package, PackageDigest, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 import { path } from './path';
-
-export type Dependency = Package['travetto'] & {
-  version: string;
-  name: string;
-  internal?: boolean;
-  folder: string;
-  parentSet: Set<string>;
-  profileSet: Set<ManifestProfile>;
-  isolated?: boolean;
-  mergePatterns: RegExp[];
-};
-
-type CollectState = {
-  profiles: Set<ManifestProfile>;
-  seen: Map<string, Dependency>;
-  parent?: string;
-};
 
 export class PackageUtil {
 
-  static #req = createRequire(`${process.cwd()}/node_modules`);
+  static #req = createRequire(`${path.cwd()}/node_modules`);
   static #framework: Package;
   static #cache: Record<string, Package> = {};
+  static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};
 
   static resolveImport = (library: string): string => this.#req.resolve(library);
+
+  /**
+   * Find package.json folder for a given dependency
+   */
+  static resolvePackageFolder(root: string, name: string, ver: string): string {
+    if (ver.startsWith('file:')) {
+      return path.resolve(root, ver.replace('file:', ''));
+    } else {
+      try {
+        return path.dirname(this.resolveImport(`${name}/package.json`));
+      } catch {
+        try {
+          const root = this.resolveImport(name);
+          return path.join(root.split(name)[0], name);
+        } catch { }
+      }
+    }
+    throw new Error(`Unable to resolve: ${name}`);
+  }
+
+  /**
+   * Extract all dependencies from a package
+   * @returns 
+   */
+  static getAllDependencies<T = unknown>(root: string): PackageVisitReq<T>[] {
+    const pkg = this.readPackage(root);
+    const children: Record<string, PackageVisitReq<T>> = {};
+    for (const [deps, rel] of [
+      [pkg.dependencies, 'prod'],
+      [pkg.devDependencies, 'dev'],
+      [pkg.peerDependencies, 'peer'],
+      [pkg.optionalDependencies, 'opt']
+    ] as const) {
+      for (const [name, version] of Object.entries(deps ?? {})) {
+        const folder = this.resolvePackageFolder(root, name, version);
+        children[`${name}#${version}`] = { folder, rel, pkg: this.readPackage(folder) };
+      }
+    }
+    return Object.values(children).sort((a, b) => a.pkg.name.localeCompare(b.pkg.name));
+  }
 
   /**
    * Read a package.json from a given folder
@@ -41,6 +65,47 @@ export class PackageUtil {
   }
 
   /**
+   * Visit packages with ability to track duplicates
+   */
+  static async visitPackages<T>(
+    root: PackageVisitReq<T> | string,
+    visitor: PackageVisitor<T>
+  ): Promise<Set<T>> {
+
+    const seen = visitor.cache ?? new Map();
+
+    if (typeof root === 'string') {
+      root = { folder: root, rel: 'direct', pkg: this.readPackage(root) };
+    }
+
+    const queue: PackageVisitReq<T>[] = await visitor.init?.(root) ?? [];
+
+    queue.push(root);
+
+    const out = new Set<T>();
+
+    while (queue.length) {
+      const req = queue.pop();
+
+      if (!req || (visitor.valid && !visitor.valid(req))) {
+        continue;
+      }
+
+      const key = req.folder;
+      if (seen.has(key)) {
+        await visitor.visit(req, seen.get(key)!);
+      } else {
+        const dep = await visitor.create(req);
+        out.add(dep);
+        await visitor.visit(req, dep);
+        seen.set(key, dep);
+        queue.push(...this.getAllDependencies<T>(req.folder).map(x => ({ ...x, parent: dep })));
+      }
+    }
+    return (await visitor.complete?.(out)) ?? out;
+  }
+
+  /**
    * Get version of manifest package
    */
   static getFrameworkVersion(): string {
@@ -48,7 +113,7 @@ export class PackageUtil {
   }
 
   /**
-   * Produce simple digest of package
+   * Produce simple digest of    
    */
   static digest(pkg: Package): PackageDigest {
     const { main, name, author, license, version } = pkg;
@@ -58,85 +123,12 @@ export class PackageUtil {
   /**
    * Find workspace values from folder
    */
-  static async resolveWorkspaces(folder: string): Promise<{ name: string, folder: string }[]> {
-    const text = execSync('npm query .workspace', { cwd: folder, encoding: 'utf8' });
-    const res: { location: string, name: string }[] = JSON.parse(text);
-    return res.map(d => ({ folder: d.location, name: d.name }));
-  }
-
-  /**
-   * Find packages for a given folder (package.json), decorating dependencies along the way
-   */
-  static async collectDependencies(
-    folder: string,
-    inState: Partial<CollectState> = {},
-    isModule?: boolean
-  ): Promise<Dependency[]> {
-    const state: CollectState = { seen: new Map(), profiles: new Set(), ...inState };
-
-    const { name, version, dependencies = {}, devDependencies = {}, workspaces, travetto, ['private']: isPrivate } = this.readPackage(folder);
-    isModule ??= (!!travetto || folder === path.cwd());
-
-    // Skip reading if a child and isolated
-    if (inState.parent && travetto?.isolated) {
-      return [];
+  static resolveWorkspaces(folder: string): PackageWorkspaceEntry[] {
+    if (!this.#workspaces[folder]) {
+      const text = execSync('npm query .workspace', { cwd: folder, encoding: 'utf8' });
+      const res: { location: string, name: string }[] = JSON.parse(text);
+      this.#workspaces[folder] = res.map(d => ({ folder: d.location, name: d.name }));
     }
-
-    if (state.seen.has(name)) {
-      const self = state.seen.get(name)!;
-      for (const el of state.profiles) {
-        (self.profileSet ??= new Set()).add(el);
-      }
-      if (state.parent) {
-        (self.parentSet ??= new Set()).add(state.parent);
-      }
-      return [];
-    } else if (!isModule) {
-      return [];
-    }
-
-    const resolvedWorkspaces = workspaces?.length ? (await this.resolveWorkspaces(folder)) : [];
-
-    const profileSet = new Set([...travetto?.profiles ?? [PACKAGE_STD_PROFILE], ...state.profiles]);
-    const mergePatterns = [...travetto?.mergeWith ?? [], ...resolvedWorkspaces?.map(x => x.name) ?? []]
-      .map(x => new RegExp(`^${x.replace(/[*]/g, '.*?')}`));
-
-    const rootDep: Dependency = {
-      name, version, folder,
-      profileSet,
-      internal: isPrivate === true,
-      mergePatterns,
-      parentSet: new Set(state.parent ? [state.parent] : [])
-    };
-    state.seen.set(name, rootDep);
-
-    const out: Dependency[] = [rootDep];
-
-    const searchSpace: (readonly [name: string, version: string, type: 'dep' | 'dev', profileSet: Set<ManifestProfile>, isModule?: boolean])[] = [
-      ...Object.entries(dependencies).map(([k, v]) => [k, v, 'dep', profileSet, undefined] as const),
-      ...Object.entries(devDependencies).map(([k, v]) => [k, v, 'dev', profileSet, undefined] as const)
-    ].sort((a, b) => a[0].localeCompare(b[0]));
-
-    // We have a monorepo, collect local modules, and global-tests as needed
-    if (resolvedWorkspaces) {
-      for (const dep of resolvedWorkspaces) {
-        searchSpace.push([dep.name, '*', 'dep', new Set(), true]);
-      }
-    }
-
-    for (const [el, value, _, profiles, isDepModule] of searchSpace) {
-      let next: string;
-      if (value.startsWith('file:')) {
-        next = path.resolve(folder, value.replace('file:', ''));
-      } else {
-        try {
-          next = path.dirname(this.resolveImport(`${el}/package.json`));
-        } catch {
-          continue;
-        }
-      }
-      out.push(...await this.collectDependencies(next, { seen: state.seen, parent: name, profiles }, isDepModule));
-    }
-    return out;
+    return this.#workspaces[folder];
   }
 }

@@ -4,8 +4,7 @@ import { path } from './path';
 
 import {
   ManifestModule, ManifestModuleCore, ManifestModuleFile,
-  ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, ManifestRoot,
-  PACKAGE_STD_PROFILE
+  ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, ManifestRoot
 } from './types';
 
 type ScanTest = ((full: string) => boolean) | { test: (full: string) => boolean };
@@ -77,7 +76,7 @@ export class ManifestIndex {
   }
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
-    return files.map(([f, type, ts, profile = 'std']) => {
+    return files.map(([f, type, ts, profile = 'root']) => {
       const source = path.join(m.source, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
       const output = this.#resolveOutput(m.output, js);
@@ -148,7 +147,7 @@ export class ManifestIndex {
 
     const checkProfile = config.checkProfile ?? true;
 
-    const activeProfiles = new Set([PACKAGE_STD_PROFILE, ...(config.profiles ?? process.env.TRV_PROFILES?.split(/\s*,\s*/g) ?? [])]);
+    const activeProfiles = new Set(['root', ...(config.profiles ?? process.env.TRV_PROFILES?.split(/\s*,\s*/g) ?? [])]);
 
     if (checkProfile) {
       idx = idx.filter(m => m.profiles.length === 0 || m.profiles.some(p => activeProfiles.has(p)));
