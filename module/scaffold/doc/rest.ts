@@ -8,7 +8,7 @@ import { Todo } from './model';
 
 @Schema()
 class Query {
-  q: any = {};
+  q: object = {};
 }
 
 /**

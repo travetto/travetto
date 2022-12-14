@@ -5,7 +5,7 @@
   },
   "travetto": {
     "isolated": true,
-    "mergeWith": [
+    "globalModules": [
       "@travetto/log"
     ]
   }

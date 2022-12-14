@@ -5,7 +5,8 @@ export type ManifestModuleFolderType =
   'test/fixtures' | 'support/fixtures' | 'support/resources' |
   '$other';
 
-export type ManifestProfile = 'compile' | 'test' | 'doc' | 'root';
+export type ManifestProfile = 'compile' | 'test' | 'doc' | 'build' | 'std';
+export type PackageRel = 'dev' | 'prod' | 'peer' | 'opt' | 'root';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestProfile];
 export type ManifestModuleCore = {
@@ -79,14 +80,10 @@ export type Package = {
     isolated?: boolean;
     displayName?: string;
     profiles?: ManifestProfile[];
+    globalModules?: string[];
     docOutput?: string[];
     docBaseUrl?: string;
-    mergeWith?: string[];
-  };
-  travettoRepo?: {
     outputFolder?: string;
-    globalModules?: string[];
-    docBaseUrl?: string;
   };
   workspaces?: string[];
   private?: boolean;
@@ -103,8 +100,7 @@ export type PackageDigest = Pick<Package, PackageDigestField> & { framework: str
 
 type OrProm<T> = T | Promise<T>;
 
-export type PackageRel = 'dev' | 'prod' | 'peer' | 'opt' | 'direct';
-export type PackageVisitReq<T> = { pkg: Package, rel: PackageRel, folder: string, parent?: T };
+export type PackageVisitReq<T> = { pkg: Package, rel: PackageRel, sourcePath: string, parent?: T };
 export type PackageVisitor<T> = {
   cache?: Map<string, T>;
   init?(root: PackageVisitReq<T>): OrProm<undefined | void | PackageVisitReq<T>[]>;
@@ -112,9 +108,9 @@ export type PackageVisitor<T> = {
   create(req: PackageVisitReq<T>): T | Promise<T>;
   visit(req: PackageVisitReq<T>, item: T): OrProm<void>;
   complete?(values: Set<T>): OrProm<Set<T> | undefined>;
-}
+};
 
-export type PackageWorkspaceEntry = { name: string, folder: string };
+export type PackageWorkspaceEntry = { name: string, sourcePath: string };
 
 export type FunctionMetadata = {
   id: string;

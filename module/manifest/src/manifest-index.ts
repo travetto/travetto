@@ -76,7 +76,7 @@ export class ManifestIndex {
   }
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
-    return files.map(([f, type, ts, profile = 'root']) => {
+    return files.map(([f, type, ts, profile = 'std']) => {
       const source = path.join(m.source, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
       const output = this.#resolveOutput(m.output, js);
@@ -147,7 +147,7 @@ export class ManifestIndex {
 
     const checkProfile = config.checkProfile ?? true;
 
-    const activeProfiles = new Set(['root', ...(config.profiles ?? process.env.TRV_PROFILES?.split(/\s*,\s*/g) ?? [])]);
+    const activeProfiles = new Set(['std', ...(config.profiles ?? process.env.TRV_PROFILES?.split(/\s*,\s*/g) ?? [])]);
 
     if (checkProfile) {
       idx = idx.filter(m => m.profiles.length === 0 || m.profiles.some(p => activeProfiles.has(p)));

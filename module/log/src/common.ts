@@ -32,7 +32,7 @@ export class CommonLogger {
   @Inject()
   config: CommonLoggerConfig;
 
-  postConstruct() {
+  postConstruct(): void {
     this.#formatter = this.config.format === 'line' ?
       new LineFormatter(this.config) :
       new JsonFormatter();
@@ -41,7 +41,7 @@ export class CommonLogger {
       new ConsoleAppender();
   }
 
-  onLog(ev: LogEvent) {
+  onLog(ev: LogEvent): void {
     this.#appender.append(ev.level, this.#formatter.format(ev));
   }
 }

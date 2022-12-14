@@ -16,7 +16,7 @@ export class LogService implements ConsoleListener, AutoCreate {
    */
   #listeners: Logger[] = [];
 
-  async postConstruct() {
+  async postConstruct(): Promise<void> {
     const def = await DependencyRegistry.getInstance(CommonLogger);
     this.#listeners.push(def);
 
@@ -34,6 +34,7 @@ export class LogService implements ConsoleListener, AutoCreate {
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
   onLog(ev: ConsoleEvent): void {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, prefer-const
     let [message, context, ...args] = ev.args as [string, Record<string, unknown>, ...unknown[]];
     if (!Util.isPlainObject(context)) {
       args.unshift(context);

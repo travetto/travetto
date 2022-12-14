@@ -115,7 +115,7 @@ export class RegisterTransformer {
       return node;
     }
 
-    if (node.name && /^[A-Z]/.test(node.name.escapedText.toString())) {
+    if (node.name && ts.isSourceFile(node.parent)) {
       // If we have a class like function
       state[rootIdx] ??= state.importFile(ROOT_IDX_IMPORT);
       const ident = state.createAccess(state[rootIdx].ident, ROOT_IDX_CLS);

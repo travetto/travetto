@@ -52,7 +52,7 @@ class CustomInterceptor implements RestInterceptor<CustomInterceptorConfig> {
   }
 
   intercept(ctx: FilterContext<CustomInterceptorConfig>) {
-    (ctx.res as any).name = ctx.config.name;
+    (ctx.res as unknown as { name: string }).name = ctx.config.name;
   }
 }
 

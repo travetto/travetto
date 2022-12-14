@@ -51,7 +51,7 @@ export class RenderUtil {
     const mf = RootIndex.manifest;
 
     const repoBaseUrl = (mf.monoRepo ?
-      PackageUtil.readPackage(mf.workspacePath).travettoRepo?.docBaseUrl :
+      PackageUtil.readPackage(mf.workspacePath).travetto?.docBaseUrl :
       undefined
     ) ?? mf.mainPath;
 

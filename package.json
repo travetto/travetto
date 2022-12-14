@@ -17,12 +17,11 @@
     "lint": "npx eslint --ext .js --ext .ts .",
     "upgrade-deps": "npm update -S"
   },
-  "travettoRepo": {
+  "travetto": {
     "globalModules": [
       "module/test",
       "module/cli",
       "module/compiler",
-      "module/command",
       "module/doc"
     ],
     "docBaseUrl": "https://github.com/travetto/travetto/tree/main"

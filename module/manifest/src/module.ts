@@ -152,37 +152,31 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async describeModule({ main, name, version, folder, profileSet, parentSet, internal }: Dependency): Promise<ManifestModule> {
-    const local = internal || !folder.includes('node_modules') || main;
+  static async describeModule(dep: Dependency): Promise<ManifestModule> {
+    const { main, mainLike, name, version, sourcePath, profileSet, parentSet, internal } = dep;
+    const local = internal || !sourcePath.includes('node_modules') || mainLike;
     const files: ManifestModule['files'] = {};
-    const folderSet = new Set<ManifestModuleFolderType>(main ? [] : ['src', 'bin', 'support']);
-    const fileSet = new Set(main ? [] : [...INDEX_FILES, 'package.json']);
+    const folderSet = new Set<ManifestModuleFolderType>(mainLike ? [] : ['src', 'bin', 'support']);
+    const fileSet = new Set(mainLike ? [] : [...INDEX_FILES, 'package.json']);
 
-    for (const file of await this.#scanFolder(folder, folderSet, fileSet)) {
+    for (const file of await this.#scanFolder(sourcePath, folderSet, fileSet)) {
       // Group by top folder
-      const moduleFile = file.replace(`${folder}/`, '');
+      const moduleFile = file.replace(`${sourcePath}/`, '');
       const entry = await this.transformFile(moduleFile, file);
       const key = this.getFolderKey(moduleFile);
       (files[key] ??= []).push(entry);
     }
 
     // Refine non-main module
-    if (!main) {
+    if (!mainLike) {
       files.$root = files.$root?.filter(([file, type]) => type !== 'ts');
     }
 
-    return {
-      profiles: profileSet?.has('root') ? ['root'] : [...profileSet],
-      parents: [...parentSet].sort(),
-      internal,
-      name,
-      version,
-      main,
-      local,
-      source: folder,
-      output: `node_modules/${name}`,
-      files
-    };
+    const profiles = [...profileSet].sort();
+    const parents = [...parentSet].sort();
+    const output = `node_modules/${name}`;
+
+    return { main, name, version, local, internal, source: sourcePath, output, files, profiles, parents, };
   }
 
   /**
@@ -193,7 +187,7 @@ export class ManifestModuleUtil {
     const declared = await PackageUtil.visitPackages(ctx.mainPath, visitor);
     const sorted = [...declared].sort((a, b) => a.name.localeCompare(b.name));
 
-    const modules = await Promise.all(sorted.map(x => this.describeModule(x)))
+    const modules = await Promise.all(sorted.map(x => this.describeModule(x)));
     return Object.fromEntries(modules.map(m => [m.name, m]));
   }
 }
