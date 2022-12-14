@@ -153,11 +153,10 @@ export class ManifestModuleUtil {
    * Visit a module and describe files, and metadata
    */
   static async describeModule(dep: ModuleDep): Promise<ManifestModule> {
-    const { main, mainLike, name, version, sourcePath, profileSet, parentSet, internal } = dep;
-    const local = internal || !sourcePath.includes('node_modules') || mainLike;
+    const { main, mainSource, local, name, version, sourcePath, profileSet, parentSet, internal } = dep;
     const files: ManifestModule['files'] = {};
-    const folderSet = new Set<ManifestModuleFolderType>(mainLike ? [] : ['src', 'bin', 'support']);
-    const fileSet = new Set(mainLike ? [] : [...INDEX_FILES, 'package.json']);
+    const folderSet = new Set<ManifestModuleFolderType>(mainSource ? [] : ['src', 'bin', 'support']);
+    const fileSet = new Set(mainSource ? [] : [...INDEX_FILES, 'package.json']);
 
     for (const file of await this.#scanFolder(sourcePath, folderSet, fileSet)) {
       // Group by top folder
@@ -167,8 +166,8 @@ export class ManifestModuleUtil {
       (files[key] ??= []).push(entry);
     }
 
-    // Refine non-main module
-    if (!mainLike) {
+    // Refine non-main source
+    if (!mainSource) {
       files.$root = files.$root?.filter(([file, type]) => type !== 'ts');
     }
 

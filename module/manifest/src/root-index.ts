@@ -11,7 +11,7 @@ class $RootIndex extends ManifestIndex {
    * Load all source modules
    */
   static resolveManifestJSON(root: string, file?: string): string {
-    file = file ?? path.resolve(root, 'manifest.json');
+    file = file || path.resolve(root, 'manifest.json');
 
     // IF not a file
     if (!file.endsWith('.json')) {

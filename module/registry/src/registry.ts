@@ -71,8 +71,6 @@ export abstract class Registry implements ChangeSource<Class> {
       }
 
       await Promise.all(this.#dependents.map(x => x.init()));
-
-      console.debug('Initialized', { id: this.constructor.Ⲑid, uid: this.#uid });
     } finally {
       this.#resolved = true;
     }

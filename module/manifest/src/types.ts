@@ -81,6 +81,7 @@ export type Package = {
     displayName?: string;
     profiles?: ManifestProfile[];
     globalModules?: string[];
+    mainSource?: string[];
     docOutput?: string[];
     docBaseUrl?: string;
     outputFolder?: string;

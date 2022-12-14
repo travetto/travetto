@@ -5,7 +5,7 @@
   },
   "travetto": {
     "isolated": true,
-    "globalModules": [
+    "mainSource": [
       "@travetto/email-template"
     ]
   }
