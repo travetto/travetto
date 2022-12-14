@@ -31,8 +31,8 @@
     "source-map-support": "^0.5.21"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^3.0.0-rc.5",
-    "@parcel/watcher": "^2.0.7"
+    "@parcel/watcher": "^2.0.7",
+    "@travetto/transformer": "^3.0.0-rc.5"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

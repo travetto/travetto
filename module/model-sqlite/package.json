@@ -31,7 +31,7 @@
     "@travetto/model": "^3.0.0-rc.5",
     "@travetto/model-query": "^3.0.0-rc.5",
     "@travetto/model-sql": "^3.0.0-rc.5",
-    "@types/better-sqlite3": "^7.6.2",
+    "@types/better-sqlite3": "^7.6.3",
     "better-sqlite3": "^7.6.2"
   },
   "travetto": {
