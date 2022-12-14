@@ -35,7 +35,7 @@ export class LineFormatter implements Formatter {
   #opts: LineFormatterOpts;
 
   constructor(opts: LineFormatterOpts = {}) {
-    const notPlain = opts.plain !== false;
+    const notPlain = opts.plain !== true;
     this.#opts = {
       colorize: notPlain && ColorUtil.colorize,
       timestamp: notPlain ? opts.timestamp : undefined,
