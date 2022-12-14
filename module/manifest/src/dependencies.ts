@@ -46,7 +46,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
     const { travetto: { globalModules = [] } = {} } = PackageUtil.readPackage(workspacePath);
 
     return [
-      ...globalModules.map(f => path.resolve(workspacePath, f)),
+      ...globalModules.map(f => PackageUtil.resolvePackagePath(rootPath, f, '*')),
       ...workspaces.map(entry => path.resolve(rootPath, entry.sourcePath))
     ].map(sourcePath => ({
       sourcePath,
@@ -80,6 +80,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
    */
   valid(req: PackageVisitReq<Dependency>): boolean {
     return req.sourcePath === path.cwd() || (
+      req.rel !== 'peer' &&
       !!req.pkg.travetto &&
       !req.pkg.travetto?.isolated
     );

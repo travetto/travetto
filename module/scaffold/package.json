@@ -35,7 +35,7 @@
     "mustache": "^4.2.0"
   },
   "devDependencies": {
-    "@types/mustache": "^4.2.1"
+    "@types/mustache": "^4.2.2"
   },
   "travetto": {
     "displayName": "App Scaffold"
