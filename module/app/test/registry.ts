@@ -44,9 +44,9 @@ export class RegistryTest {
 
   @Test()
   async runApp() {
-    await assert.rejects(() => ApplicationRegistry.run('test', []));
-    await assert.rejects(() => ApplicationRegistry.run('test', ['a']));
-    await assert.rejects(() => ApplicationRegistry.run('test', ['20', 'c']));
+    await assert.rejects(() => ApplicationRegistry.run('test', []), /Validation errors/i);
+    await assert.rejects(() => ApplicationRegistry.run('test', ['a']), /Validation errors/i);
+    await assert.rejects(() => ApplicationRegistry.run('test', ['20', 'c']), /Validation errors/i);
     await assert.doesNotReject(() => ApplicationRegistry.run('test', ['20']));
     await assert.doesNotReject(() => ApplicationRegistry.run('test', ['20', 'a']));
   }

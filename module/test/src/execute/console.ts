@@ -1,6 +1,6 @@
 import util from 'util';
 
-import { ConsoleManager, LineContext, LogLevel } from '@travetto/base';
+import { ConsoleEvent, ConsoleManager } from '@travetto/base';
 
 /**
  * Console capturer.  Hooks into the Console manager, and collects the
@@ -15,7 +15,7 @@ export class ConsoleCapture {
     ConsoleManager.set(this);
   }
 
-  static onLog(level: LogLevel, ctx: LineContext, args: unknown[]): void {
+  static onLog({ level, args }: ConsoleEvent): void {
     (this.out[level] = this.out[level] ?? []).push(
       args
         .map((x => typeof x === 'string' ? x : util.inspect(x, false, 4)))
