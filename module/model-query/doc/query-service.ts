@@ -22,7 +22,7 @@ export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacet
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
     return {} as T;
   }
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string; }, view?: string | undefined): Promise<T> {
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string | undefined): Promise<T> {
     return {} as T;
   }
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
@@ -49,7 +49,7 @@ export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacet
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     return 0;
   }
-  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T> | undefined): Promise<{ key: string; count: number; }[]> {
+  async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T> | undefined): Promise<{ key: string, count: number }[]> {
     return [];
   }
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string | undefined, query?: PageableModelQuery<T> | undefined): Promise<T[]> {

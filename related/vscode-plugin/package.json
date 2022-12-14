@@ -42,9 +42,7 @@
   },
   "travetto": {
     "displayName": "Travetto Plugin",
-    "isolated": true
-  },
-  "travettoRepo": {
+    "isolated": true,
     "outputFolder": "out"
   },
   "engines": {

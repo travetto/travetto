@@ -15,6 +15,7 @@
   },
   "files": [
     "README.ts",
+    "__index__.ts",
     "src",
     "support"
   ],
@@ -29,14 +30,10 @@
     "prismjs": "^1.29.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.3",
-    "@travetto/test": "^3.0.0-rc.5"
+    "@travetto/cli": "^3.0.0-rc.3"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
-      "optional": true
-    },
-    "@travetto/test": {
       "optional": true
     }
   },

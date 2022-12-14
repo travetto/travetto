@@ -29,14 +29,6 @@
     "directory": "module/manifest"
   },
   "dependencies": {},
-  "peerDependencies": {
-    "@travetto/transformer": "^3.0.0-rc.5"
-  },
-  "peerDependenciesMeta": {
-    "@travetto/transformer": {
-      "optional": true
-    }
-  },
   "travetto": {
     "displayName": "Manifest"
   },

@@ -14,7 +14,11 @@ import { Todo } from '../model/todo';
 
 @Schema()
 class Query {
-  q: any = {};
+  q: {
+    // {{#modules.auth-rest-context}}
+    userId?: string;
+    // {{/modules.auth-rest-context}}
+  } = {};
 }
 
 /**

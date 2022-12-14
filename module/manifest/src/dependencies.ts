@@ -1,17 +1,15 @@
 import { PackageUtil } from './package';
 import { path } from './path';
-import {
-  ManifestContext, ManifestProfile, PackageRel,
-  PackageVisitor, PackageVisitReq, PackageWorkspaceEntry
-} from './types';
+import { ManifestContext, ManifestProfile, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 
 export type Dependency = {
   version: string;
   name: string;
   main?: boolean;
+  mainLike?: boolean;
   internal?: boolean;
-  folder: string;
-  childSet: Set<string>;
+  sourcePath: string;
+  childSet: Map<string, Set<PackageRel>>;
   parentSet: Set<string>;
   profileSet: Set<ManifestProfile>;
 };
@@ -21,9 +19,9 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
   /**
    * Get main patterns for detecting if a module should be treated as main
    */
-  static getMainPatternList(rootName: string, workspaces: PackageWorkspaceEntry[], mergeWith?: string[]): RegExp[] {
+  static getMainPatternList(rootName: string, workspaces: PackageWorkspaceEntry[], globalModules?: string[]): RegExp[] {
     const groups: Record<string, string[]> = { [rootName]: [] };
-    for (const el of [...workspaces.map(x => x.name), ...mergeWith ?? []]) {
+    for (const el of [...workspaces.map(x => x.name), ...globalModules ?? []]) {
       if (el.includes('/')) {
         const [grp, sub] = el.split('/');
         (groups[`${grp}/`] ??= []).push(sub);
@@ -38,27 +36,22 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
   }
 
   /**
-   * 
-   * @param rootFolder 
-   * @param workspacePath 
-   * @param workspaces 
-   * @param globalModules 
-   * @returns 
+   *
    */
   static getGlobalDeps(
-    rootFolder: string,
+    rootPath: string,
     workspacePath: string,
     workspaces: PackageWorkspaceEntry[]
   ): PackageVisitReq<Dependency>[] {
-    const { travettoRepo: { globalModules = [] } = {} } = PackageUtil.readPackage(workspacePath);
+    const { travetto: { globalModules = [] } = {} } = PackageUtil.readPackage(workspacePath);
 
     return [
       ...globalModules.map(f => path.resolve(workspacePath, f)),
-      ...workspaces.map(entry => path.resolve(rootFolder, entry.folder))
-    ].map(folder => ({
-      folder,
-      pkg: PackageUtil.readPackage(folder),
-      rel: rootFolder === workspacePath ? 'direct' : 'dev' as PackageRel
+      ...workspaces.map(entry => path.resolve(rootPath, entry.sourcePath))
+    ].map(sourcePath => ({
+      sourcePath,
+      pkg: PackageUtil.readPackage(sourcePath),
+      rel: 'dev'
     }));
   }
 
@@ -74,18 +67,21 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
     const pkg = PackageUtil.readPackage(rootFolder);
     const workspaces = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(rootFolder)) : [];
 
-    this.#mainPatterns = ModuleDependencyVisitor.getMainPatternList(pkg.name, workspaces, pkg.travetto?.mergeWith);
-    return this.ctx.monoRepo ? ModuleDependencyVisitor.getGlobalDeps(rootFolder, this.ctx.workspacePath, workspaces) : [];
+    this.#mainPatterns = ModuleDependencyVisitor.getMainPatternList(pkg.name, workspaces, pkg.travetto?.globalModules);
+    return this.ctx.monoRepo ? ModuleDependencyVisitor.getGlobalDeps(
+      rootFolder,
+      this.ctx.workspacePath,
+      workspaces
+    ) : [];
   }
 
   /**
    * Is valid dependency for searching
    */
   valid(req: PackageVisitReq<Dependency>): boolean {
-    return req.folder === path.cwd() || (
-      req.rel !== 'peer' && req.rel !== 'opt' &&
+    return req.sourcePath === path.cwd() || (
       !!req.pkg.travetto &&
-      (req.rel === 'direct' || !req.pkg.travetto?.isolated)
+      !req.pkg.travetto?.isolated
     );
   }
 
@@ -93,16 +89,20 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
    * Create dependency from request
    */
   create(req: PackageVisitReq<Dependency>): Dependency {
-    const { pkg: { name, version, travetto: { profiles = [] } = {}, ...pkg }, folder } = req;
+    const { pkg: { name, version, travetto: { profiles = [] } = {}, ...pkg }, sourcePath: reqPath } = req;
+    const profileSet = new Set<ManifestProfile>([
+      ...profiles ?? []
+    ]);
     return {
       name,
       version,
-      folder,
-      main: this.#mainPatterns.some(x => x.test(name)),
+      sourcePath: reqPath,
+      main: this.ctx.mainPath === req.sourcePath,
+      mainLike: this.#mainPatterns.some(x => x.test(name)),
       internal: pkg.private === true,
       parentSet: new Set([]),
-      childSet: new Set<string>(),
-      profileSet: new Set<ManifestProfile>(profiles)
+      childSet: new Map(),
+      profileSet
     };
   }
 
@@ -113,7 +113,9 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
     const { parent } = req;
     if (parent) {
       dep.parentSet.add(parent.name);
-      parent.childSet.add(dep.name);
+      const set = parent.childSet.get(dep.name) ?? new Set();
+      parent.childSet.set(dep.name, set);
+      set.add(req.rel);
     }
   }
 
@@ -121,18 +123,29 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
    * Propagate profile/relationship information through graph
    */
   complete(deps: Set<Dependency>): Set<Dependency> {
-    const mapping = new Map<string, { parent: Set<string>, child: Set<string>, el: Dependency }>();
+    const mapping = new Map<string, { parent: Set<string>, child: Map<string, Set<PackageRel>>, el: Dependency }>();
     for (const el of deps) {
-      mapping.set(el.name, { parent: new Set(el.parentSet), child: new Set(el.childSet), el });
+      mapping.set(el.name, { parent: new Set(el.parentSet), child: new Map(el.childSet), el });
     }
 
-    mapping.get(this.ctx.mainModule)?.el.profileSet.add('root');
+    const main = mapping.get(this.ctx.mainModule)!;
+
+    // Visit all direct dependencies and mark
+    for (const [name, relSet] of main.child) {
+      const childDep = mapping.get(name)!.el;
+      if (!relSet.has('dev')) {
+        childDep.profileSet.add('std');
+      }
+    }
 
     while (mapping.size > 0) {
       const toProcess = [...mapping.values()].filter(x => x.parent.size === 0);
+      if (!toProcess.length) {
+        throw new Error(`We have reached a cycle for ${[...mapping.keys()]}`);
+      }
       // Propagate
       for (const { el, child } of toProcess) {
-        for (const c of child) {
+        for (const c of child.keys()) {
           const { el: cDep, parent } = mapping.get(c)!;
           parent.delete(el.name); // Remove from child
           for (const prof of el.profileSet) {
@@ -146,6 +159,8 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
       }
     }
 
+    // Color the main folder as std
+    main.el.profileSet.add('std');
     return deps;
   }
 }

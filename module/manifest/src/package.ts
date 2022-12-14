@@ -17,16 +17,16 @@ export class PackageUtil {
   /**
    * Find package.json folder for a given dependency
    */
-  static resolvePackageFolder(root: string, name: string, ver: string): string {
+  static resolvePackagePath(rootPath: string, name: string, ver: string): string {
     if (ver.startsWith('file:')) {
-      return path.resolve(root, ver.replace('file:', ''));
+      return path.resolve(rootPath, ver.replace('file:', ''));
     } else {
       try {
         return path.dirname(this.resolveImport(`${name}/package.json`));
       } catch {
         try {
-          const root = this.resolveImport(name);
-          return path.join(root.split(name)[0], name);
+          const resolved = this.resolveImport(name);
+          return path.join(resolved.split(name)[0], name);
         } catch { }
       }
     }
@@ -35,20 +35,26 @@ export class PackageUtil {
 
   /**
    * Extract all dependencies from a package
-   * @returns 
    */
-  static getAllDependencies<T = unknown>(root: string): PackageVisitReq<T>[] {
-    const pkg = this.readPackage(root);
+  static getAllDependencies<T = unknown>(modulePath: string, rootPath: string): PackageVisitReq<T>[] {
+    const pkg = this.readPackage(modulePath);
     const children: Record<string, PackageVisitReq<T>> = {};
     for (const [deps, rel] of [
       [pkg.dependencies, 'prod'],
-      [pkg.devDependencies, 'dev'],
       [pkg.peerDependencies, 'peer'],
-      [pkg.optionalDependencies, 'opt']
+      [pkg.optionalDependencies, 'opt'],
+      ...(modulePath === rootPath ? [[pkg.devDependencies, 'dev'] as const] : []),
     ] as const) {
       for (const [name, version] of Object.entries(deps ?? {})) {
-        const folder = this.resolvePackageFolder(root, name, version);
-        children[`${name}#${version}`] = { folder, rel, pkg: this.readPackage(folder) };
+        try {
+          const depPath = this.resolvePackagePath(modulePath, name, version);
+          children[`${name}#${version}`] = { sourcePath: depPath, rel, pkg: this.readPackage(depPath) };
+        } catch (err) {
+          if (rel === 'opt' || (rel === 'peer' && !!pkg.peerDependenciesMeta?.[name].optional)) {
+            continue;
+          }
+          throw err;
+        }
       }
     }
     return Object.values(children).sort((a, b) => a.pkg.name.localeCompare(b.pkg.name));
@@ -57,9 +63,9 @@ export class PackageUtil {
   /**
    * Read a package.json from a given folder
    */
-  static readPackage(folder: string): Package {
-    return this.#cache[folder] ??= JSON.parse(readFileSync(
-      folder.endsWith('.json') ? folder : path.resolve(folder, 'package.json'),
+  static readPackage(modulePath: string): Package {
+    return this.#cache[modulePath] ??= JSON.parse(readFileSync(
+      modulePath.endsWith('.json') ? modulePath : path.resolve(modulePath, 'package.json'),
       'utf8'
     ));
   }
@@ -68,19 +74,19 @@ export class PackageUtil {
    * Visit packages with ability to track duplicates
    */
   static async visitPackages<T>(
-    root: PackageVisitReq<T> | string,
+    rootPath: PackageVisitReq<T> | string,
     visitor: PackageVisitor<T>
   ): Promise<Set<T>> {
 
     const seen = visitor.cache ?? new Map();
 
-    if (typeof root === 'string') {
-      root = { folder: root, rel: 'direct', pkg: this.readPackage(root) };
+    if (typeof rootPath === 'string') {
+      rootPath = { sourcePath: rootPath, rel: 'root', pkg: this.readPackage(rootPath) };
     }
 
-    const queue: PackageVisitReq<T>[] = await visitor.init?.(root) ?? [];
+    const queue: PackageVisitReq<T>[] = await visitor.init?.(rootPath) ?? [];
 
-    queue.push(root);
+    queue.push(rootPath);
 
     const out = new Set<T>();
 
@@ -91,7 +97,7 @@ export class PackageUtil {
         continue;
       }
 
-      const key = req.folder;
+      const key = req.sourcePath;
       if (seen.has(key)) {
         await visitor.visit(req, seen.get(key)!);
       } else {
@@ -99,7 +105,8 @@ export class PackageUtil {
         out.add(dep);
         await visitor.visit(req, dep);
         seen.set(key, dep);
-        queue.push(...this.getAllDependencies<T>(req.folder).map(x => ({ ...x, parent: dep })));
+        const children = this.getAllDependencies<T>(req.sourcePath, rootPath.sourcePath);
+        queue.push(...children.map(x => ({ ...x, parent: dep })));
       }
     }
     return (await visitor.complete?.(out)) ?? out;
@@ -113,7 +120,7 @@ export class PackageUtil {
   }
 
   /**
-   * Produce simple digest of    
+   * Produce simple digest of
    */
   static digest(pkg: Package): PackageDigest {
     const { main, name, author, license, version } = pkg;
@@ -121,14 +128,14 @@ export class PackageUtil {
   }
 
   /**
-   * Find workspace values from folder
+   * Find workspace values from rootPath
    */
-  static resolveWorkspaces(folder: string): PackageWorkspaceEntry[] {
-    if (!this.#workspaces[folder]) {
-      const text = execSync('npm query .workspace', { cwd: folder, encoding: 'utf8' });
+  static resolveWorkspaces(rootPath: string): PackageWorkspaceEntry[] {
+    if (!this.#workspaces[rootPath]) {
+      const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8' });
       const res: { location: string, name: string }[] = JSON.parse(text);
-      this.#workspaces[folder] = res.map(d => ({ folder: d.location, name: d.name }));
+      this.#workspaces[rootPath] = res.map(d => ({ sourcePath: d.location, name: d.name }));
     }
-    return this.#workspaces[folder];
+    return this.#workspaces[rootPath];
   }
 }

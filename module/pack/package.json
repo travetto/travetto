@@ -36,7 +36,10 @@
     }
   },
   "travetto": {
-    "displayName": "Pack"
+    "displayName": "Pack",
+    "profiles": [
+      "build"
+    ]
   },
   "publishConfig": {
     "access": "public"

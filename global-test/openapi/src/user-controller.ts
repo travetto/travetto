@@ -15,6 +15,7 @@ export class UserController {
    */
   @Get('/:name')
   async getByName(@Path() name: string): Promise<User> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return undefined as unknown as User;
   }
 
@@ -25,7 +26,7 @@ export class UserController {
    */
   @Get('/age/:age')
   async getByAge(@Path() age: number = 20): Promise<User[]> {
-    return undefined as unknown as User[];
+    return [];
   }
 
   /**
@@ -40,6 +41,7 @@ export class UserController {
   @Post('/')
 
   async createUser(@Body() user: User): Promise<User> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return undefined as unknown as User;
   }
 

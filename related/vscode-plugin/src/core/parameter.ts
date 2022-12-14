@@ -1,8 +1,9 @@
 import vscode from 'vscode';
 
-import { Workspace } from './workspace';
 import { Class } from '@travetto/base';
 import { ApplicationConfig } from '@travetto/app';
+
+import { Workspace } from './workspace';
 
 type ParamConfig = Exclude<ApplicationConfig['params'], undefined>[number];
 
