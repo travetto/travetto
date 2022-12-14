@@ -1,96 +1,40 @@
-import { Env, Util, LogLevel, LineContext, ConsoleListener } from '@travetto/base';
+import { Util, ConsoleListener, ConsoleManager, ConsoleEvent } from '@travetto/base';
+import { AutoCreate, DependencyRegistry, Injectable } from '@travetto/di';
 
-import { Appender, Formatter, LogEvent } from './types';
-import { LineFormatter } from './formatter/line';
-import { JsonFormatter } from './formatter/json';
-import { ConsoleAppender } from './appender/console';
-import { FileAppender } from './appender/file';
-import { LogUtil } from './util';
-
-const DefaultLoggerⲐ = Symbol.for('@travetto/log:default');
+import { LogEvent, Logger } from './types';
+import { LoggerTarget } from './internal/types';
+import { CommonLogger } from './common';
 
 /**
  * Logger service
  */
-class $Logger implements ConsoleListener {
+@Injectable()
+export class LogService implements ConsoleListener, AutoCreate {
 
-  /**
-   * Should we enrich the console by default
-   */
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  readonly #logFormat: 'line' | 'json' = Env.get('TRV_LOG_FORMAT', 'line') as 'line';
-
-  /**
-   * Log file, if needed
-   */
-  readonly #logFile?: string = Env.get('TRV_LOG_FILE');
-
-  /**
-   * Listeners for logging events
-   */
-  #listenerMap = new Map<string | symbol, (ev: LogEvent) => void>();
   /**
    * List of all listeners
    */
-  #listeners: ((ev: LogEvent) => void)[] = [];
+  #listeners: Logger[] = [];
 
-  constructor() {
-    if (!this.#listenerMap.get(DefaultLoggerⲐ)) {
-      // Build default formatter
-      let formatter: Formatter;
-      switch (this.#logFormat) {
-        case 'line': formatter = new LineFormatter(); break;
-        case 'json': formatter = new JsonFormatter(); break;
-      }
-      this.listenDefault(formatter, this.#logFile ? new FileAppender({ file: this.#logFile }) : undefined);
+  async postConstruct() {
+    const def = await DependencyRegistry.getInstance(CommonLogger);
+    this.#listeners.push(def);
+
+    const loggers = DependencyRegistry.getCandidateTypes(LoggerTarget);
+    const instances = await Promise.all(loggers.map(l => DependencyRegistry.getInstance<Logger>(l.class, l.qualifier)));
+    for (const inst of instances) {
+      this.#listeners.push(inst);
     }
-  }
 
-  /**
-   * Add log event listener
-   */
-  listen(key: string | symbol, handler: (ev: LogEvent) => void, idx = -1): void {
-    this.removeListener(key);
-    this.#listenerMap.set(key, handler);
-    if (idx < 0) {
-      this.#listeners.push(handler);
-    } else {
-      this.#listeners.splice(idx, 0, handler);
-    }
-  }
-
-  /**
-   * Set default listener
-   * @param formatter
-   * @param appender Defaults to console appender unless specified
-   */
-  listenDefault(formatter: Formatter, appender?: Appender): void {
-    this.listen(DefaultLoggerⲐ, LogUtil.buildListener(formatter, appender ?? new ConsoleAppender()));
-  }
-
-  /**
-   * Clear all listeners
-   */
-  removeAll(): void {
-    this.#listenerMap.clear();
-    this.#listeners = [];
-  }
-
-  /**
-   * Remove specific listener
-   */
-  removeListener(key: string | symbol): void {
-    const handler = this.#listenerMap.get(key);
-    if (handler) {
-      this.#listenerMap.delete(key);
-      this.#listeners.splice(this.#listeners.indexOf(handler), 1);
-    }
+    // Take over
+    ConsoleManager.set(this, true);
   }
 
   /**
    * Endpoint for listening, endpoint registered with ConsoleManager
    */
-  onLog(level: LogLevel, ctx: LineContext, [message, context, ...args]: [string, Record<string, unknown>, ...unknown[]]): void {
+  onLog(ev: ConsoleEvent): void {
+    let [message, context, ...args] = ev.args as [string, Record<string, unknown>, ...unknown[]];
     if (!Util.isPlainObject(context)) {
       args.unshift(context);
       context = {};
@@ -103,18 +47,14 @@ class $Logger implements ConsoleListener {
 
     // Allow for controlled order of event properties
     const finalEvent: LogEvent = {
-      timestamp: new Date().toISOString(),
-      level,
-      ...ctx,
+      ...ev,
       message: message !== '' ? message : undefined,
       context,
       args: args.filter(x => x !== undefined)
     };
 
     for (const l of this.#listeners) {
-      l(finalEvent);
+      l.onLog(finalEvent);
     }
   }
 }
-
-export const Logger = new $Logger();

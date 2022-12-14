@@ -58,7 +58,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
     ].map(folder => ({
       folder,
       pkg: PackageUtil.readPackage(folder),
-      rel: 'dev' as PackageRel
+      rel: rootFolder === workspacePath ? 'direct' : 'dev' as PackageRel
     }));
   }
 
@@ -82,10 +82,10 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
    * Is valid dependency for searching
    */
   valid(req: PackageVisitReq<Dependency>): boolean {
-    return req.folder === path.cwd() || req.rel === 'direct' || (
+    return req.folder === path.cwd() || (
       req.rel !== 'peer' && req.rel !== 'opt' &&
       !!req.pkg.travetto &&
-      !req.pkg.travetto?.isolated
+      (req.rel === 'direct' || !req.pkg.travetto?.isolated)
     );
   }
 
