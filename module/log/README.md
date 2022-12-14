@@ -8,7 +8,7 @@
 npm install @travetto/log
 ```
 
-This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/boot/src/console.ts) in the [Base](module/base#readme "Environment config and common utilities for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. 
+This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts) in the [Base](module/base#readme "Environment config and common utilities for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. 
 
 ## Logging to External Systems
 By default the logging functionality logs messages directly to the console, relying on the `util.inspect` method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as [JSON](https://www.json.org), which is easily consumable by services like [elasticsearch](https://elastic.co) or [AWS Cloudwatch](https://aws.amazon.com/cloudwatch/) if running as a lambda or in a docker container.  
