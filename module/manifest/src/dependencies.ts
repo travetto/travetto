@@ -6,7 +6,8 @@ export type ModuleDep = {
   version: string;
   name: string;
   main?: boolean;
-  mainLike?: boolean;
+  mainSource?: boolean;
+  local?: boolean;
   internal?: boolean;
   sourcePath: string;
   childSet: Map<string, Set<PackageRel>>;
@@ -22,9 +23,9 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
   /**
    * Get main patterns for detecting if a module should be treated as main
    */
-  static getMainPatternList(rootName: string, workspaces: PackageWorkspaceEntry[], globalModules?: string[]): RegExp[] {
-    const groups: Record<string, string[]> = { [rootName]: [] };
-    for (const el of [...workspaces.map(x => x.name), ...globalModules ?? []]) {
+  static getMainPatterns(mainModule: string, mergeModules: string[]): RegExp[] {
+    const groups: Record<string, string[]> = { [mainModule]: [] };
+    for (const el of mergeModules) {
       if (el.includes('/')) {
         const [grp, sub] = el.split('/');
         (groups[`${grp}/`] ??= []).push(sub);
@@ -69,9 +70,10 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
     const rootFolder = this.ctx.mainPath;
     const pkg = PackageUtil.readPackage(rootFolder);
     const workspaces = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(rootFolder)) : [];
+    const globalModules = pkg.travetto?.globalModules ?? [];
 
-    this.#mainPatterns = ModuleDependencyVisitor.getMainPatternList(pkg.name, workspaces, pkg.travetto?.globalModules);
-    return this.ctx.monoRepo ? ModuleDependencyVisitor.getGlobalDeps(
+    this.#mainPatterns = ModuleDependencyVisitor.getMainPatterns(pkg.name, pkg.travetto?.mainSource ?? []);
+    return this.ctx.monoRepo || globalModules.length ? ModuleDependencyVisitor.getGlobalDeps(
       rootFolder,
       this.ctx.workspacePath,
       workspaces
@@ -93,20 +95,18 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    * Create dependency from request
    */
   create(req: PackageVisitReq<ModuleDep>): ModuleDep {
-    const { pkg: { name, version, travetto: { profiles = [] } = {}, ...pkg }, sourcePath: reqPath } = req;
+    const { pkg: { name, version, travetto: { profiles = [] } = {}, ...pkg }, sourcePath } = req;
     const profileSet = new Set<ManifestProfile>([
       ...profiles ?? []
     ]);
+    const main = name === this.ctx.mainModule;
+    const mainSource = this.#mainPatterns.some(x => x.test(name));
+    const internal = pkg.private === true;
+    const local = internal || mainSource || !sourcePath.includes('node_modules');
+
     return {
-      name,
-      version,
-      sourcePath: reqPath,
-      main: this.ctx.mainPath === req.sourcePath,
-      mainLike: this.#mainPatterns.some(x => x.test(name)),
-      internal: pkg.private === true,
-      parentSet: new Set([]),
-      childSet: new Map(),
-      profileSet
+      name, version, sourcePath, main, mainSource, local, internal,
+      parentSet: new Set([]), childSet: new Map(), profileSet
     };
   }
 

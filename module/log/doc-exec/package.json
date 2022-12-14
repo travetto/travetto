@@ -1,11 +1,13 @@
 {
   "name": "@travetto-doc/log",
   "dependencies": {
-    "@travetto/log": "*"
+    "@travetto/log": "*",
+    "@travetto/compiler": "*",
+    "@travetto/cli": "*"
   },
   "travetto": {
     "isolated": true,
-    "globalModules": [
+    "mainSource": [
       "@travetto/log"
     ]
   }

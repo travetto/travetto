@@ -205,11 +205,11 @@ async function getContext() {
   const workspacePath = path.resolve(await $getWorkspaceRoot());
   const mainPath = toPosix(process.cwd());
 
-  const { name: mainModule, workspaces, travettoRepo } = (await $getPkg(mainPath));
+  const { name: mainModule, workspaces, travetto } = (await $getPkg(mainPath));
   const monoRepo = workspacePath !== mainPath || !!workspaces;
 
   // All relative to workspacePath
-  const manifestFile = monoRepo ? `node_modules/${mainModule}/manifest.json` : 'manifest.json';
+  const manifestFile = `node_modules/${mainModule}/manifest.json`;
 
   return {
     mainModule,
@@ -217,7 +217,7 @@ async function getContext() {
     workspacePath,
     monoRepo,
     manifestFile,
-    outputFolder: travettoRepo?.outputFolder ?? '.trv_output',
+    outputFolder: travetto?.outputFolder ?? '.trv_output',
     compilerFolder: '.trv_compiler'
   };
 }
