@@ -1,19 +1,21 @@
 import assert from 'assert';
 import { Suite, Test } from '@travetto/test';
 
-import { ConsoleManager, log } from '../src/console';
+import { ConsoleEvent } from '../src/types';
+import { ConsoleManager } from '../src/console';
 
 @Suite()
 export class ConsoleManagerTest {
 
   @Test()
   async testConsole() {
-    const logs: { args: unknown[], level: string, ctx: Record<string, unknown> }[] = [];
+    const logs: ConsoleEvent[] = [];
     ConsoleManager.set({
-      onLog: (level, ctx, args) => logs.push({ level, ctx, args })
+      onLog: (ev) => logs.push(ev)
     });
-    log('info', { source: '', line: 0, module: '@travetto/base', modulePath: 'test/console.js' }, 'a', 'b', 'c');
+    console.log('a', 'b', 'c');
     assert(logs.length === 1);
     assert.deepStrictEqual(logs[0].args, ['a', 'b', 'c']);
+    ConsoleManager.clear();
   }
 }
