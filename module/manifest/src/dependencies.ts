@@ -2,7 +2,7 @@ import { PackageUtil } from './package';
 import { path } from './path';
 import { ManifestContext, ManifestProfile, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 
-export type Dependency = {
+export type ModuleDep = {
   version: string;
   name: string;
   main?: boolean;
@@ -14,7 +14,10 @@ export type Dependency = {
   profileSet: Set<ManifestProfile>;
 };
 
-export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
+/**
+ * Used for walking dependencies for collecting modules for the manifest
+ */
+export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
 
   /**
    * Get main patterns for detecting if a module should be treated as main
@@ -42,7 +45,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
     rootPath: string,
     workspacePath: string,
     workspaces: PackageWorkspaceEntry[]
-  ): PackageVisitReq<Dependency>[] {
+  ): PackageVisitReq<ModuleDep>[] {
     const { travetto: { globalModules = [] } = {} } = PackageUtil.readPackage(workspacePath);
 
     return [
@@ -62,7 +65,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
   /**
    * Initialize visitor, and provide global dependencies
    */
-  async init(): Promise<PackageVisitReq<Dependency>[]> {
+  async init(): Promise<PackageVisitReq<ModuleDep>[]> {
     const rootFolder = this.ctx.mainPath;
     const pkg = PackageUtil.readPackage(rootFolder);
     const workspaces = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(rootFolder)) : [];
@@ -78,7 +81,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
   /**
    * Is valid dependency for searching
    */
-  valid(req: PackageVisitReq<Dependency>): boolean {
+  valid(req: PackageVisitReq<ModuleDep>): boolean {
     return req.sourcePath === path.cwd() || (
       req.rel !== 'peer' &&
       !!req.pkg.travetto &&
@@ -89,7 +92,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
   /**
    * Create dependency from request
    */
-  create(req: PackageVisitReq<Dependency>): Dependency {
+  create(req: PackageVisitReq<ModuleDep>): ModuleDep {
     const { pkg: { name, version, travetto: { profiles = [] } = {}, ...pkg }, sourcePath: reqPath } = req;
     const profileSet = new Set<ManifestProfile>([
       ...profiles ?? []
@@ -110,7 +113,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
   /**
    * Visit dependency
    */
-  visit(req: PackageVisitReq<Dependency>, dep: Dependency): void {
+  visit(req: PackageVisitReq<ModuleDep>, dep: ModuleDep): void {
     const { parent } = req;
     if (parent) {
       dep.parentSet.add(parent.name);
@@ -123,8 +126,8 @@ export class ModuleDependencyVisitor implements PackageVisitor<Dependency> {
   /**
    * Propagate profile/relationship information through graph
    */
-  complete(deps: Set<Dependency>): Set<Dependency> {
-    const mapping = new Map<string, { parent: Set<string>, child: Map<string, Set<PackageRel>>, el: Dependency }>();
+  complete(deps: Set<ModuleDep>): Set<ModuleDep> {
+    const mapping = new Map<string, { parent: Set<string>, child: Map<string, Set<PackageRel>>, el: ModuleDep }>();
     for (const el of deps) {
       mapping.set(el.name, { parent: new Set(el.parentSet), child: new Map(el.childSet), el });
     }

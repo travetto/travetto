@@ -111,7 +111,7 @@ export class RegisterTransformer {
    */
   @AfterFunction()
   static registerFunctionMetadata(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
-    if (!this.#valid(state) || !ts.isFunctionDeclaration(node)) {
+    if (!this.#valid(state) || !ts.isFunctionDeclaration(node) || !node.parent) {
       return node;
     }
 

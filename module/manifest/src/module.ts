@@ -6,7 +6,7 @@ import {
   ManifestModule, ManifestModuleFile, ManifestModuleFileType,
   ManifestModuleFolderType, ManifestProfile
 } from './types';
-import { Dependency, ModuleDependencyVisitor } from './dependencies';
+import { ModuleDep, ModuleDependencyVisitor } from './dependencies';
 import { PackageUtil } from './package';
 
 const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
@@ -152,7 +152,7 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async describeModule(dep: Dependency): Promise<ManifestModule> {
+  static async describeModule(dep: ModuleDep): Promise<ManifestModule> {
     const { main, mainLike, name, version, sourcePath, profileSet, parentSet, internal } = dep;
     const local = internal || !sourcePath.includes('node_modules') || mainLike;
     const files: ManifestModule['files'] = {};
