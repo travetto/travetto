@@ -9,11 +9,19 @@ export type Primitive = number | boolean | string | Date | Error;
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
 
-export type LineContext = { source: string, line: number, module: string, modulePath: string, scope?: string };
+export type ConsoleEvent = {
+  timestamp: Date;
+  level: LogLevel;
+  source: string;
+  line: number;
+  module: string;
+  modulePath: string;
+  scope?: string;
+  args: unknown[];
+};
 
 export interface ConsoleListener {
-  setDebug?(val: string | boolean): void;
-  onLog<T extends LineContext>(context: LogLevel, ctx: T, args: unknown[]): void;
+  onLog(ev: ConsoleEvent): void;
 }
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

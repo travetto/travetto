@@ -2,40 +2,50 @@ import assert from 'assert';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { ConsoleManager } from '@travetto/base';
+import { DependencyRegistry, Injectable } from '@travetto/di';
+import { RootRegistry } from '@travetto/registry';
 
-import { Logger } from '../src/service';
-import { LogEvent } from '../src/types';
+import { LogService } from '../src/service';
+import { LogEvent, Logger } from '../src/types';
 import { JsonFormatter } from '../src/formatter/json';
+
+@Injectable()
+class CustomLogger implements Logger {
+
+  values: LogEvent[] = [];
+
+  onLog(ev: LogEvent): void {
+    this.values.push(ev);
+  }
+}
 
 @Suite('Suite')
 class LoggerTest {
 
   @BeforeAll()
-  async init() {
-    Logger.removeAll();
+  init() {
+    return RootRegistry.init();
   }
 
   @Test('Should Log')
   async shouldLog() {
-    const events: LogEvent[] = [];
-
-    Logger.listen('test', e => events.push(e), 0);
-    ConsoleManager.set(Logger);
+    const svc = await DependencyRegistry.getInstance(LogService);
+    ConsoleManager.set(svc);
 
     console.log('Hello', { args: [1, 2, 3] });
 
     ConsoleManager.clear();
-    Logger.removeListener('test');
 
-    assert(events.length === 1);
-    assert(events[0].message === 'Hello');
-    assert.deepStrictEqual(events[0].context, { args: [1, 2, 3] });
+    const logger = await DependencyRegistry.getInstance(CustomLogger);
+    assert(logger.values.length === 1);
+    assert(logger.values[0].message === 'Hello');
+    assert.deepStrictEqual(logger.values[0].context, { args: [1, 2, 3] });
   }
 
   @Test('Formatter')
   async shouldFormat() {
     const formatter = new JsonFormatter({});
-    const now = new Date().toISOString();
-    assert(formatter.format({ level: 'error', timestamp: now } as LogEvent) === `{"level":"error","timestamp":"${now}"}`);
+    const now = new Date();
+    assert(formatter.format({ level: 'error', timestamp: now } as LogEvent) === `{"level":"error","timestamp":"${now.toISOString()}"}`);
   }
 }

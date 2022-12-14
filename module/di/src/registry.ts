@@ -4,6 +4,7 @@ import { RootIndex } from '@travetto/manifest';
 
 import { Dependency, InjectableConfig, ClassTarget, InjectableFactoryConfig } from './types';
 import { InjectionError } from './error';
+import { AutoCreateTarget } from './internal/types';
 
 type TargetId = string;
 type ClassId = string;
@@ -239,6 +240,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
     if (Env.isDynamic()) {
       const { DependencyRegistration } = await import('../support/dynamic.injection.js');
       DependencyRegistration.init(this);
+    }
+    // Allow for auto-creation
+    for (const cfg of await this.getCandidateTypes(AutoCreateTarget)) {
+      await this.getInstance(cfg.class, cfg.qualifier);
     }
   }
 

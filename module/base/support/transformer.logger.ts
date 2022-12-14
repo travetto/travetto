@@ -96,13 +96,13 @@ export class LoggerTransformer {
         state.createAccess(ident, 'log'),
         node.typeArguments,
         [
-          state.factory.createStringLiteral(VALID_LEVELS[level]),
           LiteralUtil.fromLiteral(state.factory, {
+            level: state.factory.createStringLiteral(VALID_LEVELS[level]),
             source: state.getFilenameIdentifier(), // Translated by ConsoleManager
             line: state.source.getLineAndCharacterOfPosition(node.getStart(state.source)).line + 1,
             scope: state.scope?.map(x => x.name).join(':'),
+            args: node.arguments.slice(0)
           }),
-          ...node.arguments.slice(0)
         ]
       );
     } else {

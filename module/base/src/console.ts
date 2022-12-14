@@ -2,17 +2,17 @@ import util from 'util';
 
 import { RootIndex } from '@travetto/manifest';
 
-import type { ConsoleListener, LineContext, LogLevel } from './types';
+import type { ConsoleListener, ConsoleEvent, LogLevel } from './types';
 
 function wrap(target: Console): ConsoleListener {
   return {
-    onLog(level: LogLevel, ctx: LineContext, args: unknown[]): void {
-      return target[level](...args);
+    onLog(ev: ConsoleEvent): void {
+      return target[ev.level](...ev.args);
     }
   };
 }
 
-// TODO: Externalize
+// TODO: Externalize?
 /**
  * Registers handler for `debug` module in npm ecosystem
  * @param mgr
@@ -24,14 +24,12 @@ async function initNpmDebug(mgr: $ConsoleManager): Promise<void> {
       args.unshift(this.namespace);
       args.push(debug.humanize(this.diff));
     };
-    debug.log = (...args: string[]): void => mgr.invoke('debug', {
-      line: 0,
-      module: '@npm:debug',
-      modulePath: args[0],
-      source: RootIndex.mainModule.output,
-    }, util.format(...args.slice(1)));
+    debug.log = (modulePath, ...args: string[]): void => mgr.invoke({
+      level: 'debug', module: '@npm:debug', modulePath,
+      args: [util.format(...args)], line: 0, source: '', timestamp: new Date()
+    });
   } catch (err) {
-    console.log(err);
+    // Do nothing
   }
 }
 
@@ -44,19 +42,19 @@ async function initNpmDebug(mgr: $ConsoleManager): Promise<void> {
 class $ConsoleManager {
 
   /**
-   * Stack of nested appenders
+   * Stack of nested listeners
    */
   #stack: ConsoleListener[] = [];
 
   /**
-   * The current appender
+   * The current listener
    */
-  #appender: ConsoleListener;
+  #listener: ConsoleListener;
 
   /**
    * List of logging filters
    */
-  #filters: Partial<Record<LogLevel, (x: LineContext) => boolean>> = {};
+  #filters: Partial<Record<LogLevel, (x: ConsoleEvent) => boolean>> = {};
 
   get lineWidth(): number {
     return +(process.env.TRV_CONSOLE_WIDTH ?? process.stdout.columns ?? 120);
@@ -66,13 +64,6 @@ class $ConsoleManager {
     this.set(console); // Init to console
     this.setDebugFromEnv();
     await initNpmDebug(this);
-
-    // Attempt to setup logger
-    try {
-      const { Logger } = await import('@travetto/log');
-      this.set(Logger, true); // Make default
-    } catch { }
-
     return this;
   }
 
@@ -80,7 +71,7 @@ class $ConsoleManager {
    * Add exclusion
    * @private
    */
-  filter(level: LogLevel, filter?: boolean | ((ctx: LineContext) => boolean)): void {
+  filter(level: LogLevel, filter?: boolean | ((ctx: ConsoleEvent) => boolean)): void {
     if (filter !== undefined) {
       if (typeof filter === 'boolean') {
         const v = filter;
@@ -117,26 +108,27 @@ class $ConsoleManager {
   /**
    * Handle direct call in lieu of the console.* commands
    */
-  invoke(level: LogLevel, ctx: LineContext, ...args: unknown[]): void {
+  invoke(ev: ConsoleEvent): void {
     // Resolve input to source file
-    const source = RootIndex.getSourceFile(ctx.source);
+    const source = ev.source ? RootIndex.getSourceFile(ev.source) : RootIndex.mainModule.output;
     const mod = RootIndex.getModuleFromSource(source);
-    const outCtx = {
-      ...ctx,
+    const outEv = {
+      ...ev,
+      timestamp: new Date(),
       source,
-      module: ctx.module ?? mod?.name,
-      modulePath: ctx.modulePath ?? (mod ? source.split(`${mod.source}/`)[1] : '')
+      module: ev.module ?? mod?.name,
+      modulePath: ev.modulePath ?? (mod ? source.split(`${mod.source}/`)[1] : '')
     };
 
-    if (this.#filters[level] && !this.#filters[level]!(outCtx)) {
+    if (this.#filters[outEv.level] && !this.#filters[outEv.level]!(outEv)) {
       return; // Do nothing
     } else {
-      return this.#appender.onLog(level, outCtx, args);
+      return this.#listener.onLog(outEv);
     }
   }
 
   /**
-   * Set a new console appender, works as a stack to allow for nesting
+   * Set a new console listener, works as a stack to allow for nesting
    */
   set(cons: ConsoleListener | Console, replace = false): void {
     cons = ('onLog' in cons) ? cons : wrap(cons);
@@ -145,7 +137,7 @@ class $ConsoleManager {
     } else {
       this.#stack[0] = cons;
     }
-    this.#appender = this.#stack[0];
+    this.#listener = this.#stack[0];
   }
 
   /**
@@ -154,7 +146,7 @@ class $ConsoleManager {
   clear(): void {
     if (this.#stack.length > 1) {
       this.#stack.shift();
-      this.#appender = this.#stack[0];
+      this.#listener = this.#stack[0];
     }
   }
 }

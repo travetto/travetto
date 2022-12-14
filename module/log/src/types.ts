@@ -1,27 +1,8 @@
-import { LineContext, LogLevel } from '@travetto/base';
-
-/**
- * Log levels, numerically
- */
-export const LogLevels = {
-  debug: 1,
-  info: 2,
-  warn: 3,
-  error: 4
-};
-
+import { ConsoleEvent, LogLevel } from '@travetto/base';
 /**
  * Logging event
  */
-export interface LogEvent extends LineContext {
-  /**
-   * Time of event, ISO 8601 timestamp
-   */
-  timestamp: string;
-  /**
-   * Log level
-   */
-  level: LogLevel;
+export interface LogEvent extends ConsoleEvent {
   /**
    * Log message
    */
@@ -30,10 +11,6 @@ export interface LogEvent extends LineContext {
    * Log Message context
    */
   context?: Record<string, unknown>;
-  /**
-   * Log arguments
-   */
-  args?: unknown[];
 }
 
 /**
@@ -48,4 +25,11 @@ export interface Appender {
  */
 export interface Formatter {
   format(e: LogEvent): string;
+}
+
+/**
+ * @concrete ./internal/types:LoggerTarget
+ */
+export interface Logger {
+  onLog(ev: LogEvent): void;
 }

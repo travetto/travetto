@@ -78,3 +78,8 @@ export interface InjectableFactoryConfig<T = unknown> extends Core<T> {
    */
   dependencies?: Dependency[];
 }
+
+/**
+ * @concrete ./internal/types:AutoCreateTarget
+ */
+export interface AutoCreate { }
