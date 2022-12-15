@@ -1,8 +1,9 @@
 import { readFileSync } from 'fs';
+import fs from 'fs/promises';
 import { createRequire } from 'module';
 import { execSync } from 'child_process';
 
-import { Package, PackageDigest, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
+import { Package, PackageDigest, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 import { path } from './path';
 
 export class PackageUtil {
@@ -34,6 +35,13 @@ export class PackageUtil {
   }
 
   /**
+   * Build a package visit req
+   */
+  static packageReq<T>(sourcePath: string, rel: PackageRel): PackageVisitReq<T> {
+    return { pkg: this.readPackage(sourcePath), sourcePath, rel };
+  }
+
+  /**
    * Extract all dependencies from a package
    */
   static getAllDependencies<T = unknown>(modulePath: string, rootPath: string): PackageVisitReq<T>[] {
@@ -48,7 +56,7 @@ export class PackageUtil {
       for (const [name, version] of Object.entries(deps ?? {})) {
         try {
           const depPath = this.resolvePackagePath(modulePath, name, version);
-          children[`${name}#${version}`] = { sourcePath: depPath, rel, pkg: this.readPackage(depPath) };
+          children[`${name}#${version}`] = this.packageReq<T>(depPath, rel);
         } catch (err) {
           if (rel === 'opt' || (rel === 'peer' && !!pkg.peerDependenciesMeta?.[name].optional)) {
             continue;
@@ -71,6 +79,13 @@ export class PackageUtil {
   }
 
   /**
+   * Write package
+   */
+  static async writePackage(modulePath: string, pkg: Package): Promise<void> {
+    await fs.writeFile(path.resolve(modulePath, 'package.json'), JSON.stringify(pkg, null, 2), 'utf8');
+  }
+
+  /**
    * Visit packages with ability to track duplicates
    */
   static async visitPackages<T>(
@@ -79,7 +94,7 @@ export class PackageUtil {
   ): Promise<Set<T>> {
 
     const root = typeof rootOrPath === 'string' ?
-      { sourcePath: rootOrPath, rel: 'root', pkg: this.readPackage(rootOrPath) } as const :
+      this.packageReq<T>(rootOrPath, 'root') :
       rootOrPath;
 
     const seen = new Map<string, T>();

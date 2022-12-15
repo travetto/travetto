@@ -91,11 +91,6 @@ export type Package = {
   publishConfig?: { access?: 'restricted' | 'public' };
 };
 
-export const PACKAGE_DEP_GROUPS = [
-  'dependencies', 'devDependencies',
-  'peerDependencies', 'optionalDependencies',
-] as const;
-
 export type PackageDigestField = 'name' | 'main' | 'author' | 'license' | 'version';
 export type PackageDigest = Pick<Package, PackageDigestField> & { framework: string };
 

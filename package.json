@@ -31,8 +31,7 @@
     "module/*",
     "global-test/*",
     "related/overview",
-    "related/todo-app",
-    "related/vscode-plugin"
+    "related/todo-app"
   ],
   "overrides": {
     "compression": {
