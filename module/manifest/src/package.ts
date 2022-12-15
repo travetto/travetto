@@ -16,20 +16,27 @@ export class PackageUtil {
   static resolveImport = (library: string): string => this.#req.resolve(library);
 
   /**
-   * Find package.json folder for a given dependency
+   * Resolve version, if file: url
    */
-  static resolvePackagePath(rootPath: string, name: string, ver: string): string {
+  static resolveVersionPath(rootPath: string, ver: string): string | undefined {
     if (ver.startsWith('file:')) {
       return path.resolve(rootPath, ver.replace('file:', ''));
     } else {
+      return;
+    }
+  }
+
+  /**
+   * Find package.json folder for a given dependency
+   */
+  static resolvePackagePath(name: string): string {
+    try {
+      return path.dirname(this.resolveImport(`${name}/package.json`));
+    } catch {
       try {
-        return path.dirname(this.resolveImport(`${name}/package.json`));
-      } catch {
-        try {
-          const resolved = this.resolveImport(name);
-          return path.join(resolved.split(name)[0], name);
-        } catch { }
-      }
+        const resolved = this.resolveImport(name);
+        return path.join(resolved.split(name)[0], name);
+      } catch { }
     }
     throw new Error(`Unable to resolve: ${name}`);
   }
@@ -55,7 +62,7 @@ export class PackageUtil {
     ] as const) {
       for (const [name, version] of Object.entries(deps ?? {})) {
         try {
-          const depPath = this.resolvePackagePath(modulePath, name, version);
+          const depPath = this.resolveVersionPath(modulePath, version) ?? this.resolvePackagePath(name);
           children[`${name}#${version}`] = this.packageReq<T>(depPath, rel);
         } catch (err) {
           if (rel === 'opt' || (rel === 'peer' && !!pkg.peerDependenciesMeta?.[name].optional)) {

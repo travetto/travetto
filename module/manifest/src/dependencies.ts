@@ -61,7 +61,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
       ...(workspacePkg.travetto?.globalModules ?? []),
       ...(pkg.travetto?.globalModules ?? [])
     ]
-      .map(f => PackageUtil.resolvePackagePath(req.sourcePath, f, '*'));
+      .map(f => PackageUtil.resolvePackagePath(f));
 
     const workspaceModuleDeps = workspaceModules
       .map(entry => path.resolve(req.sourcePath, entry.sourcePath));
