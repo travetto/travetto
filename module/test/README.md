@@ -19,7 +19,7 @@ This module provides unit testing functionality that integrates with the framewo
 
 ## Definition
 
-A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L13) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L19) decorator.  All tests intrinsically support `async`/`await`.
+A test suite is a collection of individual tests.  All test suites are classes with the [@Suite](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/suite.ts#L14) decorator. Tests are defined as methods on the suite class, using the [@Test](https://github.com/travetto/travetto/tree/main/module/test/src/decorator/test.ts#L20) decorator.  All tests intrinsically support `async`/`await`.
 
 A simple example would be:
 
@@ -77,17 +77,15 @@ would translate to:
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
-const ᚕ_ = tslib_1.__importStar(require("@travetto/boot/support/init.helper.js"));
 const Ⲑ_check_1 = tslib_1.__importStar(require("@travetto/test/src/assert/check.js"));
-const Ⲑ_class_metadata_1 = tslib_1.__importStar(require("@travetto/boot/src/class-metadata.js"));
+const Ⲑ_root_index_1 = tslib_1.__importStar(require("@travetto/manifest/src/root-index.js"));
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
-const __output = ᚕ_.trv.out(__filename);
 const assert_1 = tslib_1.__importDefault(require("assert"));
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static Ⲑinit = Ⲑ_class_metadata_1.ClassMetadataUtil.initMeta(SimpleTest, __output, 1887908328, { test: { hash: 102834457 } }, false, false);
+    static Ⲑinit = Ⲑ_root_index_1.RootIndex.registerFunction(SimpleTest, __filename, 1887908328, { test: { hash: 102834457 } }, false, false);
     async test() {
-        Ⲑ_check_1.AssertCheck.check({ file: __output, line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
+        Ⲑ_check_1.AssertCheck.check({ file: __filename, line: 10, text: "{ size: 20, address: { state: 'VA' } }", operator: "deepStrictEqual" }, true, { size: 20, address: { state: 'VA' } }, {});
     }
 };
 tslib_1.__decorate([

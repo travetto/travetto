@@ -8,7 +8,7 @@
 npm install @travetto/rest
 ```
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115) objects). This module is built upon the [Schema](module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) class.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115) objects). This module is built upon the [Schema](module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class.
 
 ## Routes: Controller
 
@@ -306,7 +306,10 @@ And using the pattern established in the [Application](module/app#readme "Applic
 ```bash
 $ trv run custom
 
-Running application { name: 'custom', filename: '@travetto/rest/doc/custom-app.ts' }
+Running application {
+  name: 'custom',
+  filename: '@travetto/rest/doc/custom-app.ts'
+}
 Manifest {
   info: {
     name: '@travetto-doc/rest',
@@ -316,7 +319,13 @@ Manifest {
     version: '0.0.0',
     framework: '3.0.0'
   },
-  env: { name: 'dev', prod: false, dynamic: false, profiles: [], nodeVersion: 'v18.12.1' }
+  env: {
+    name: 'dev',
+    prod: false,
+    dynamic: false,
+    profiles: [],
+    nodeVersion: 'v18.12.1'
+  }
 }
 ```
 )}

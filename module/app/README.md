@@ -149,7 +149,10 @@ To invoke the `simple` application, you need to pass `domain` where port is opti
 ```bash
 $ trv run simple-domain my-domain.biz 4000
 
-Running application { name: 'simple-domain', filename: '@travetto/app/doc/domain.ts' }
+Running application {
+  name: 'simple-domain',
+  filename: '@travetto/app/doc/domain.ts'
+}
 Manifest {
   info: {
     name: '@travetto-doc/app',
@@ -159,7 +162,13 @@ Manifest {
     version: '0.0.0',
     framework: '3.0.0'
   },
-  env: { name: 'dev', prod: false, dynamic: false, profiles: [], nodeVersion: 'v18.12.1' }
+  env: {
+    name: 'dev',
+    prod: false,
+    dynamic: false,
+    profiles: [],
+    nodeVersion: 'v18.12.1'
+  }
 }
 Config { sources: [ 'override.3 - memory://override' ], active: {} }
 Launching { domain: 'my-domain.biz', port: 4000 }

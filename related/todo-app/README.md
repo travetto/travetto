@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/related/todo-app/README.ts and execute "npx trv doc" to rebuild -->
 # Getting Started: A Todo App
 
-The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main/module/todo-app).  Additionally, you can use the [App Scaffold](module/scaffold#readme "App Scaffold for the Travetto framework").
+The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](undefined/module/todo-app).  Additionally, you can use the [App Scaffold](module/scaffold#readme "App Scaffold for the Travetto framework").
 
 ### Overview   
    1. [Prerequisites](#prerequisites})
@@ -323,30 +323,7 @@ First we must start the application:
   },
   env: { name: 'dev', prod: false, dynamic: false, profiles: [], nodeVersion: 'v18.12.1' }
 }
-2022-03-14T04:00:01.510Z debug [@travetto/rest:src/application/rest.ts:92] Sorting interceptors {
-  count: 13,
-  names: [
-    'AcceptsInterceptor',
-    'BodyParseInterceptor',
-    'LoggingInterceptor',
-    'SerializeInterceptor',
-    'CorsInterceptor',
-    'CookiesInterceptor',
-    'GetCacheInterceptor',
-    'AsyncContextInterceptor',
-    'SessionWriteInterceptor',
-    'AuthReadWriteInterceptor',
-    'AuthVerifyInterceptor',
-    'AuthLoginInterceptor',
-    'SessionReadInterceptor',
-    [length]: 13
-  ]
-}
-2022-03-14T04:00:02.450Z debug [@travetto/rest:src/application/rest.ts:139] Registering Controller Instance { id: '@travetto/todo-app:src/ui￮UIController', path: '/ui', endpointCount: 3 }
-2022-03-14T04:00:02.762Z debug [@travetto/rest:src/application/rest.ts:139] Registering Controller Instance { id: '@travetto/todo-app:src/auth￮ApiController', path: '/auth', endpointCount: 3 }
-2022-03-14T04:00:02.947Z debug [@travetto/rest:src/application/rest.ts:139] Registering Controller Instance { id: '@travetto/openapi:src/controller￮OpenApiController', path: '/', endpointCount: 2 }
-2022-03-14T04:00:03.093Z debug [@travetto/rest:src/application/rest.ts:139] Registering Controller Instance { id: '@travetto/todo-app:src/route￮TodoController', path: '/todo', endpointCount: 7 }
-2022-03-14T04:00:04.003Z info  [@travetto/app:src/registry.ts:81] Config {
+2022-03-14T04:00:01.510Z info  [@travetto/app:src/registry.ts:81] Config {
   sources: [ 'application.1 - file://application.yml', 'override.3 - memory://override' ],
   active: {
     ApiHostConfig: {
@@ -364,7 +341,8 @@ First we must start the application:
       version: '0.0.0'
     },
     ApiSpecConfig: { output: './openapi.yml', persist: false, skipRoutes: false, exposeAllSchemas: false },
-    FileModelConfig: { folder: '/tmp/ef061e766c', namespace: '.' },
+    CommonLoggerConfig: { format: 'line', plain: false, timestamp: 'ms' },
+    FileModelConfig: { folder: '/tmp/0a4adb7f62', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
       hosts: [ 'localhost' ],
@@ -408,7 +386,7 @@ First we must start the application:
     }
   }
 }
-2022-03-14T04:00:04.495Z info  [@travetto/rest:src/application/rest.ts:193] Listening { port: 3000 }
+2022-03-14T04:00:02.450Z info  [@travetto/rest:src/application/rest.ts:193] Listening { port: 3000 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:
@@ -434,11 +412,16 @@ export async function main() {
 ```bash
 $ trv main support/main.create-todo.ts
 
-{
-  text: 'New Todo',
-  created: '2022-03-14T04:00:05.066Z',
-  id: '3aed76ee063d13feec2e5e95b45513eb'
-}
+./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65
+        path_1.default.resolve(ctx.workspacePath, ctx.compilerFolder, state.manifest.modules['@travetto/compiler'].output, 'support/main.output'),
+                                                                                                                   ^
+
+TypeError: Cannot read properties of undefined (reading 'output')
+    at compileOutput (./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65:116)
+    at async compile (./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:78:5)
+    at async exec (@travetto/compiler/bin/trv.js:60:28)
+
+Node.js v18.12.1
 ```
 
 **Code: Listing Todos by fetch**
@@ -455,16 +438,14 @@ export async function main() {
 ```bash
 $ trv main support/main.list-todo.ts
 
-[
-  {
-    id: '3aed76ee063d13feec2e5e95b45513eb',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:05.719Z'
-  },
-  {
-    id: '734e307bc66d442ae78291e7104077ba',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:06.119Z'
-  }
-]
+./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65
+        path_1.default.resolve(ctx.workspacePath, ctx.compilerFolder, state.manifest.modules['@travetto/compiler'].output, 'support/main.output'),
+                                                                                                                   ^
+
+TypeError: Cannot read properties of undefined (reading 'output')
+    at compileOutput (./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65:116)
+    at async compile (./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:78:5)
+    at async exec (@travetto/compiler/bin/trv.js:60:28)
+
+Node.js v18.12.1
 ```

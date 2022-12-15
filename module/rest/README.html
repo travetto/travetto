@@ -12,7 +12,7 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest</code></pre>     
       </figure>
 
-The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115">TravettoResponse</a> objects). This module is built upon the <a class="module-link" href="module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38">@Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12">@Schema</a> class.
+The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115">TravettoResponse</a> objects). This module is built upon the <a class="module-link" href="module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38">@Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a> class.
 
 <h2 id="routes-controller">Routes: Controller</h2>
 
@@ -323,7 +323,10 @@ And using the pattern established in the <a class="module-link" href="module/app
       </figcaption>
       <pre><code class="language-bash">$ trv run custom
 
-Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'custom'</span>, filename: <span class="token string">'@travetto/rest/doc/custom-app.ts'</span> <span class="token punctuation">{{'}'}}</span>
+Running application <span class="token punctuation">{{'{'}}</span>
+  name: <span class="token string">'custom'</span>,
+  filename: <span class="token string">'@travetto/rest/doc/custom-app.ts'</span>
+<span class="token punctuation">{{'}'}}</span>
 Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto-doc/rest'</span>,
@@ -333,7 +336,13 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     version: <span class="token string">'0.0.0'</span>,
     framework: <span class="token string">'3.0.0'</span>
   <span class="token punctuation">{{'}'}}</span>,
-  env: <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'dev'</span>, prod: false, dynamic: false, profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>, nodeVersion: <span class="token string">'v18.12.1'</span> <span class="token punctuation">{{'}'}}</span>
+  env: <span class="token punctuation">{{'{'}}</span>
+    name: <span class="token string">'dev'</span>,
+    prod: false,
+    dynamic: false,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
+    nodeVersion: <span class="token string">'v18.12.1'</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>)}
 

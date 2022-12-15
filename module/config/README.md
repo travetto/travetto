@@ -9,7 +9,7 @@ npm install @travetto/config
 ```
 
 The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [YAML](module/yaml#readme "Simple YAML support, provides only clean subset of yaml").  Additionally, the configuration is built upon the [Schema](module/schema#readme "Data type registry for runtime validation, reflection and binding.") module, to enforce type correctness, and allow for validation of configuration as an 
-entrypoint into the application.  Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) classes are [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12)-based classes, all the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) and [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) functionality applies.
+entrypoint into the application.  Given that all [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) classes are [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14)-based classes, all the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) and [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) functionality applies.
 
 ## Resolution
 
@@ -75,7 +75,7 @@ $ node  ./doc/resolve.ts
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under `config.redacted`.
 
 ## Consuming
-The [Configuration](https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L13) service provides injectable access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The [Configuration](https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L14) service provides injectable access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
@@ -129,13 +129,12 @@ By passing in the port via the environment variable, the config will construct p
 $ trv main support/main.dbconfig-run.ts
 
 Config {
-  sources: [ 'application.1 - file://application.yml', 'override.3 - memory://override' ],
+  sources: [
+    'application.1 - file://application.yml',
+    'override.3 - memory://override'
+  ],
   active: {
-    DBConfig: {
-      host: 'localhost',
-      port: 200,
-      creds: creds_7_45Ⲑsyn { user: 'test', password: 'test' }
-    }
+    DBConfig: { host: 'localhost', port: 200, creds: [creds_7_45Ⲑsyn] }
   }
 }
 ```
