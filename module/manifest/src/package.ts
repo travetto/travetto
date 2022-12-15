@@ -74,20 +74,16 @@ export class PackageUtil {
    * Visit packages with ability to track duplicates
    */
   static async visitPackages<T>(
-    rootPath: PackageVisitReq<T> | string,
+    rootOrPath: PackageVisitReq<T> | string,
     visitor: PackageVisitor<T>
   ): Promise<Set<T>> {
 
-    const seen = visitor.cache ?? new Map();
+    const root = typeof rootOrPath === 'string' ?
+      { sourcePath: rootOrPath, rel: 'root', pkg: this.readPackage(rootOrPath) } as const :
+      rootOrPath;
 
-    if (typeof rootPath === 'string') {
-      rootPath = { sourcePath: rootPath, rel: 'root', pkg: this.readPackage(rootPath) };
-    }
-
-    const queue: PackageVisitReq<T>[] = await visitor.init?.(rootPath) ?? [];
-
-    queue.push(rootPath);
-
+    const seen = new Map<string, T>();
+    const queue: PackageVisitReq<T>[] = [...await visitor.init?.(root) ?? [], root];
     const out = new Set<T>();
 
     while (queue.length) {
@@ -105,7 +101,7 @@ export class PackageUtil {
         out.add(dep);
         await visitor.visit(req, dep);
         seen.set(key, dep);
-        const children = this.getAllDependencies<T>(req.sourcePath, rootPath.sourcePath);
+        const children = this.getAllDependencies<T>(req.sourcePath, root.sourcePath);
         queue.push(...children.map(x => ({ ...x, parent: dep })));
       }
     }

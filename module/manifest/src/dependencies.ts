@@ -43,19 +43,19 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    *
    */
   static getGlobalDeps(
-    rootPath: string,
+    rootSourcePath: string,
     workspacePath: string,
     workspaces: PackageWorkspaceEntry[]
   ): PackageVisitReq<ModuleDep>[] {
     const { travetto: { globalModules = [] } = {} } = PackageUtil.readPackage(workspacePath);
 
     return [
-      ...globalModules.map(f => PackageUtil.resolvePackagePath(rootPath, f, '*')),
-      ...workspaces.map(entry => path.resolve(rootPath, entry.sourcePath))
+      ...globalModules.map(f => PackageUtil.resolvePackagePath(rootSourcePath, f, '*')),
+      ...workspaces.map(entry => path.resolve(rootSourcePath, entry.sourcePath))
     ].map(sourcePath => ({
       sourcePath,
       pkg: PackageUtil.readPackage(sourcePath),
-      rel: 'dev'
+      rel: 'global'
     }));
   }
 
@@ -66,15 +66,16 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
   /**
    * Initialize visitor, and provide global dependencies
    */
-  async init(): Promise<PackageVisitReq<ModuleDep>[]> {
+  async init(req: PackageVisitReq<ModuleDep>): Promise<PackageVisitReq<ModuleDep>[]> {
     const rootFolder = this.ctx.mainPath;
     const pkg = PackageUtil.readPackage(rootFolder);
     const workspaces = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(rootFolder)) : [];
     const globalModules = pkg.travetto?.globalModules ?? [];
 
     this.#mainPatterns = ModuleDependencyVisitor.getMainPatterns(pkg.name, pkg.travetto?.mainSource ?? []);
-    return this.ctx.monoRepo || globalModules.length ? ModuleDependencyVisitor.getGlobalDeps(
-      rootFolder,
+
+    return (this.ctx.monoRepo || globalModules.length) ? ModuleDependencyVisitor.getGlobalDeps(
+      req.sourcePath,
       this.ctx.workspacePath,
       workspaces
     ) : [];
@@ -84,10 +85,9 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    * Is valid dependency for searching
    */
   valid(req: PackageVisitReq<ModuleDep>): boolean {
-    return req.sourcePath === path.cwd() || (
+    return req.sourcePath === path.cwd() || req.rel === 'global' || (
       req.rel !== 'peer' &&
-      !!req.pkg.travetto &&
-      !req.pkg.travetto?.isolated
+      !!req.pkg.travetto
     );
   }
 
@@ -100,7 +100,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
       ...profiles ?? []
     ]);
     const main = name === this.ctx.mainModule;
-    const mainSource = this.#mainPatterns.some(x => x.test(name));
+    const mainSource = main || this.#mainPatterns.some(x => x.test(name));
     const internal = pkg.private === true;
     const local = internal || mainSource || !sourcePath.includes('node_modules');
 
@@ -115,7 +115,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    */
   visit(req: PackageVisitReq<ModuleDep>, dep: ModuleDep): void {
     const { parent } = req;
-    if (parent) {
+    if (parent && dep.name !== this.ctx.mainModule) {
       dep.parentSet.add(parent.name);
       const set = parent.childSet.get(dep.name) ?? new Set();
       parent.childSet.set(dep.name, set);
