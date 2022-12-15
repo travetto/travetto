@@ -1,7 +1,9 @@
 {
   "name": "@travetto-doc/worker",
   "dependencies": {
-    "@travetto/worker": "*"
+    "@travetto/worker": "*",
+    "@travetto/compiler": "*",
+    "@travetto/cli": "*"
   },
   "travetto": {
     "isolated": true,

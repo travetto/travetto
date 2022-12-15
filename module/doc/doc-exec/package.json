@@ -1,7 +1,9 @@
 {
   "name": "@travetto-doc/doc",
   "dependencies": {
-    "@travetto/doc": "*"
+    "@travetto/doc": "*",
+    "@travetto/cli": "*",
+    "@travetto/compiler": "*"
   },
   "travetto": {
     "isolated": true,

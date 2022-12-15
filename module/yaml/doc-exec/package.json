@@ -1,7 +1,9 @@
 {
   "name": "@travetto-doc/yaml",
   "dependencies": {
-    "@travetto/yaml": "*"
+    "@travetto/yaml": "*",
+    "@travetto/cli": "*",
+    "@travetto/compiler": "*"
   },
   "travetto": {
     "isolated": true,

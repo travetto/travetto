@@ -1,3 +1,5 @@
+import rl from 'readline';
+
 import { ExecUtil, ExecutionOptions } from '@travetto/base';
 import { IndexedModule, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
@@ -68,6 +70,9 @@ export class CliModuleUtil {
 
     // Run test
     const folders = (await CliModuleUtil.findModules(mode)).map(x => x.workspaceRelative);
+    const maxWidth = Math.max(...folders.map(x => x.length));
+    const labels = Object.fromEntries(folders.map(x => [x, x.padStart(maxWidth, ' ')]));
+
     let id = 1;
     const pool = new WorkPool(async () => {
       const worker: Worker<string> = {
@@ -81,13 +86,16 @@ export class CliModuleUtil {
             this.active = true;
 
             const opts: ExecutionOptions = {
-              stdio: [0, process.env.DEBUG ? 'inherit' : 'pipe', 2, 'ipc'],
+              stdio: [0, process.env.DEBUG ? 'inherit' : 'pipe', 'pipe', 'ipc'],
               ...config,
               cwd: folder,
               env: { ...config?.env, TRV_MANIFEST: '' }
             };
 
             const res = ExecUtil.spawn(cmd, args, opts);
+            const stderr = rl.createInterface(res.process.stderr!);
+            stderr.on('line', line => process.stderr.write(`${labels[folder]}: ${line}\n`));
+
             res.process.on('message', (msg: T) => config.onMessage?.(folder, msg));
             this.destroy = async (): Promise<void> => {
               this.active = false;

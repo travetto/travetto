@@ -6,7 +6,7 @@ export type ManifestModuleFolderType =
   '$other';
 
 export type ManifestProfile = 'compile' | 'test' | 'doc' | 'build' | 'std';
-export type PackageRel = 'dev' | 'prod' | 'peer' | 'opt' | 'root';
+export type PackageRel = 'dev' | 'prod' | 'peer' | 'opt' | 'root' | 'global';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestProfile];
 export type ManifestModuleCore = {
@@ -103,8 +103,7 @@ type OrProm<T> = T | Promise<T>;
 
 export type PackageVisitReq<T> = { pkg: Package, rel: PackageRel, sourcePath: string, parent?: T };
 export type PackageVisitor<T> = {
-  cache?: Map<string, T>;
-  init?(root: PackageVisitReq<T>): OrProm<undefined | void | PackageVisitReq<T>[]>;
+  init?(req: PackageVisitReq<T>): OrProm<undefined | void | PackageVisitReq<T>[]>;
   valid?(req: PackageVisitReq<T>): boolean;
   create(req: PackageVisitReq<T>): T | Promise<T>;
   visit(req: PackageVisitReq<T>, item: T): OrProm<void>;
