@@ -21,6 +21,9 @@ export async function runWorkspace(format: string, workerCount: number): Promise
     'changed',
     ['trv', 'test', '-f', 'exec', '-c', '3'],
     {
+      filter: folder =>
+        ExecUtil.spawn('trv', ['test', '-h'], { stdio: 'ignore', cwd: folder, env: { TRV_MANIFEST: '' } }).result
+          .catchAsResult().then(res => res.code === 0),
       onMessage: (folder, ev: TestEvent) => consumer.onEvent(ev),
       workerCount
     }

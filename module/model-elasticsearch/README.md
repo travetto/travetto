@@ -8,7 +8,7 @@
 npm install @travetto/model-elasticsearch
 ```
 
-This module provides an [elasticsearch](https://elastic.co)-based implementation of the [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, [ElasticsearchModelService](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L44) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development.
+This module provides an [elasticsearch](https://elastic.co)-based implementation of the [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [elasticsearch](https://elastic.co). In development mode, [ElasticsearchModelService](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch/src/service.ts#L43) will also modify the [elasticsearch](https://elastic.co) schema in real time to minimize impact to development.
 
 Supported features:
    

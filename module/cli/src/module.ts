@@ -1,10 +1,20 @@
 import rl from 'readline';
 
-import { ExecUtil, ExecutionOptions } from '@travetto/base';
+import { ColorUtil, Env, ExecUtil, ExecutionOptions, TypedObject } from '@travetto/base';
 import { IndexedModule, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
 
 import { CliScmUtil } from './scm';
+
+const COLORS = TypedObject
+  .keys(ColorUtil.COLORS)
+  .flatMap(k =>
+    TypedObject.keys(ColorUtil.STYLES)
+      .filter(k2 => k2 === 'bold' || (k2 === 'faint' && k !== 'black'))
+      .map(k2 => (v: string): string => ColorUtil.color(k, [k2], v))
+  );
+
+const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
 
 /**
  * Simple utilities for understanding modules for CLI use cases
@@ -61,17 +71,21 @@ export class CliModuleUtil {
     mode: 'all' | 'changed',
     [cmd, ...args]: [string, ...string[]],
     config: {
+      filter?: (folder: string) => boolean | Promise<boolean>;
       onMessage?: (folder: string, msg: T) => void;
       workerCount?: number;
+      prefixOutput?: boolean;
+      showStdout?: boolean;
     } & Omit<ExecutionOptions, 'cwd'> = {}
   ): Promise<void> {
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
+    const prefixOutput = config.prefixOutput ?? true;
+    const showStdout = config.showStdout ?? (Env.isSet('DEBUG') && !Env.isFalse('DEBUG'));
 
-    // Run test
     const folders = (await CliModuleUtil.findModules(mode)).map(x => x.workspaceRelative);
     const maxWidth = Math.max(...folders.map(x => x.length));
-    const labels = Object.fromEntries(folders.map(x => [x, x.padStart(maxWidth, ' ')]));
+    const labels = Object.fromEntries(folders.map((x, i) => [x, colorize(x.padStart(maxWidth, ' '), i)]));
 
     let id = 1;
     const pool = new WorkPool(async () => {
@@ -85,18 +99,39 @@ export class CliModuleUtil {
           try {
             this.active = true;
 
+            if (await config.filter?.(folder) === false) {
+              this.active = false;
+              return;
+            }
+
             const opts: ExecutionOptions = {
-              stdio: [0, process.env.DEBUG ? 'inherit' : 'pipe', 'pipe', 'ipc'],
+              stdio: [
+                0,
+                showStdout ? (prefixOutput ? 'pipe' : 'inherit') : 'ignore',
+                prefixOutput ? 'pipe' : 'inherit',
+                config.onMessage ? 'ipc' : 'ignore'
+              ],
               ...config,
               cwd: folder,
               env: { ...config?.env, TRV_MANIFEST: '' }
             };
 
             const res = ExecUtil.spawn(cmd, args, opts);
-            const stderr = rl.createInterface(res.process.stderr!);
-            stderr.on('line', line => process.stderr.write(`${labels[folder]}: ${line}\n`));
 
-            res.process.on('message', (msg: T) => config.onMessage?.(folder, msg));
+            // Prefix output, if desired
+            if (prefixOutput) {
+              const stderr = rl.createInterface(res.process.stderr!);
+              stderr.on('line', line => process.stderr.write(`${labels[folder]}: ${line}\n`));
+              if (showStdout) {
+                const stdout = rl.createInterface(res.process.stdout!);
+                stdout.on('line', line => process.stdout.write(`${labels[folder]}: ${line}\n`));
+              }
+            }
+
+            if (config.onMessage) {
+              res.process.on('message', config.onMessage.bind(config, folder));
+            }
+
             this.destroy = async (): Promise<void> => {
               this.active = false;
               res.process.kill('SIGTERM');

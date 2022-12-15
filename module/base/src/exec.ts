@@ -283,7 +283,7 @@ export class ExecUtil {
     } else if (process.send) {
       process.send(res);
     } else if (res) {
-      process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${JSON.stringify(res)}\n`);
+      process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${typeof res === 'string' ? res : JSON.stringify(res)}\n`);
     }
     process.exit(exitCode);
   }

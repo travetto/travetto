@@ -12,10 +12,12 @@ Base is the foundation of all [Travetto](https://travetto.dev) applications.  It
 
    
    *  Environment Support
+   *  Condole Management
    *  Standard Error Support
    *  Stream Support
    *  General Utilities
    *  Process Execution
+   *  Shutdown Management
 
 ## Environment Support
 The functionality we support for testing and retrieving environment information:
@@ -41,6 +43,81 @@ The [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/er
    *  `missing` - Resource was not found when requested
    *  `timeout` - Operation did not finish in a timely manner
    *  `unavailable` - Resource was unresponsive
+
+## Console Management
+
+This module provides logging functionality, built upon [console](https://nodejs.org/api/console.html) operations. 
+
+The supported operations are:
+   
+   *  `console.error` which logs at the `ERROR` level
+   *  `console.warn` which logs at the `WARN` level
+   *  `console.info` which logs at the `INFO` level
+   *  `console.debug` which logs at the `DEBUG` level
+   *  `console.log` which logs at the `INFO` level
+
+**Note**: All other console methods are excluded, specifically `trace`, `inspect`, `dir`, `time`/`timeEnd`
+
+## How Logging is Instrumented
+
+All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev).
+
+A sample of the instrumentation would be:
+
+**Code: Sample logging at various levels**
+```typescript
+export function work() {
+  console.debug('Start Work');
+
+  try {
+    1 / 0;
+  } catch (err) {
+    console.error('Divide by zero', { error: err });
+  }
+  console.debug('End Work');
+}
+```
+
+**Code: Sample After Transpilation**
+```javascript
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.work = void 0;
+const tslib_1 = require("tslib");
+const ᚕ_c = tslib_1.__importStar(require("@travetto/base/src/console.js"));
+function work() {
+    ᚕ_c.log({ level: "debug", source: __filename, line: 2, scope: "work", args: ['Start Work'] });
+    try {
+        1 / 0;
+    }
+    catch (err) {
+        ᚕ_c.log({ level: "error", source: __filename, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
+    }
+    ᚕ_c.log({ level: "debug", source: __filename, line: 9, scope: "work", args: ['End Work'] });
+}
+exports.work = work;
+```
+
+### Filtering Debug
+
+The `debug` messages can be filtered using the patterns from the [debug](https://www.npmjs.com/package/debug).  You can specify wild cards to only `DEBUG` specific modules, folders or files.  You can specify multiple, and you can also add negations to exclude specific packages.
+
+**Terminal: Sample environment flags**
+```bash
+# Debug
+$ DEBUG=-@travetto/model npx trv run app
+$ DEBUG=-@travetto/registry npx trv run app
+$ DEBUG=@travetto/rest npx trv run app
+$ DEBUG=@travetto/*,-@travetto/model npx trv run app
+```
+
+Additionally, the logging framework will merge [debug](https://www.npmjs.com/package/debug) into the output stream, and supports the standard usage
+
+**Terminal: Sample environment flags for standard usage**
+```bash
+# Debug
+$ DEBUG=express:*,@travetto/rest npx trv run rest
+```
 
 ## Stream Support
 The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L11) class provides basic stream utilities for use within the framework:
@@ -90,3 +167,21 @@ As you can see, the call returns not only the child process information, but the
    *  `quiet` which suppresses all stdout/stderr output
    *  `stdin` as a string, buffer or stream to provide input to the program you are running;
    *  `timeoutKill` allows for registering functionality to execute when a process is force killed by timeout
+
+## Shutdown Management
+
+Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides `process.exit` to properly handle `SIGKILL` and `SIGINT`, with a default threshold of 3 seconds. In the advent of a `SIGTERM` signal, the code exits immediately without any cleanup.
+
+As a registered shutdown handler, you can do.
+
+**Code: Registering a shutdown handler**
+```typescript
+import { ShutdownManager } from '@travetto/base';
+
+export function registerShutdownHandler() {
+  ShutdownManager.onShutdown('handler-name', async () => {
+    // Do important work, the framework will wait until all async
+    //   operations are completed before finishing shutdown
+  });
+}
+```

@@ -21,9 +21,9 @@ All of the high level configurations can be found in the following structure:
 ```typescript
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
-import { path } from '@travetto/boot';
 import { Config } from '@travetto/config';
-import { Env, Pkg } from '@travetto/base';
+import { path, RootIndex } from '@travetto/manifest';
+import { Env } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 /**
@@ -45,7 +45,7 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    const info = Pkg.main;
+    const info = RootIndex.mainPackage;
     this.contact ??= info.author ?? {};
     this.description ??= info.description;
     this.license ??= { name: info.license! };
@@ -135,7 +135,7 @@ The module provides a command for the [Command Line Interface](module/cli#readme
 ```bash
 $ trv openapi:client --help
 
-{"message":"ENOENT: no such file or directory, open '/home/tim/Code/travetto/.trv_output/node_modules/@travetto/openapi/support/resources/presets.json'","stack":"Error: ENOENT: no such file or directory, open '/home/tim/Code/travetto/.trv_output/node_modules/@travetto/openapi/support/resources/presets.json'"}
+{"message":"Unable to find: presets.json, searched=@travetto/openapi","category":"notfound","type":"AppError","at":"2022-03-14T04:00:00.618Z"}
 ```
 
 This tool relies upon a custom build of [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator), which supports watching.  This allows for fast responsive client generation as the shape of the API changes.

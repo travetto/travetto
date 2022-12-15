@@ -85,9 +85,9 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    * Is valid dependency for searching
    */
   valid(req: PackageVisitReq<ModuleDep>): boolean {
-    return req.sourcePath === path.cwd() || req.rel === 'global' || (
+    return req.sourcePath === path.cwd() || (
       req.rel !== 'peer' &&
-      !!req.pkg.travetto
+      (!!req.pkg.travetto || req.rel === 'global')
     );
   }
 

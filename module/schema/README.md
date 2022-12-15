@@ -15,7 +15,7 @@ provide validation on correctness of input, whether it is a rest request, comman
 This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.
 
 ## Registration
-The registry's schema information is defined by [Typescript](https://typescriptlang.org) AST and only applies to classes registered with the [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) decoration. 
+The registry's schema information is defined by [Typescript](https://typescriptlang.org) AST and only applies to classes registered with the [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) decoration. 
 
 ### Classes
 The module utilizes AST transformations to collect schema information, and facilitate the registration process without user intervention. The class can also be described using providing a:
@@ -98,7 +98,7 @@ And similarly, the `description` will be picked up from the [JSDoc](http://usejs
 At runtime, once a schema is registered, a programmer can utilize this structure to perform specific operations. Specifically binding and validation.
 
 ### Binding
-Binding is a very simple operation, as it takes in a class registered as as [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L12) and a JS object that will be the source of the binding. Given the schema:
+Binding is a very simple operation, as it takes in a class registered as as [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) and a JS object that will be the source of the binding. Given the schema:
 
 **Code: Sub Schemas via Address**
 ```typescript

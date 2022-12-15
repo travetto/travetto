@@ -163,7 +163,10 @@ To invoke the <code class="item input">simple</code> application, you need to pa
       </figcaption>
       <pre><code class="language-bash">$ trv run simple-domain my-domain.biz <span class="token number">4000</span>
 
-Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'simple-domain'</span>, filename: <span class="token string">'@travetto/app/doc/domain.ts'</span> <span class="token punctuation">{{'}'}}</span>
+Running application <span class="token punctuation">{{'{'}}</span>
+  name: <span class="token string">'simple-domain'</span>,
+  filename: <span class="token string">'@travetto/app/doc/domain.ts'</span>
+<span class="token punctuation">{{'}'}}</span>
 Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto-doc/app'</span>,
@@ -173,7 +176,13 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     version: <span class="token string">'0.0.0'</span>,
     framework: <span class="token string">'3.0.0'</span>
   <span class="token punctuation">{{'}'}}</span>,
-  env: <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'dev'</span>, prod: false, dynamic: false, profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>, nodeVersion: <span class="token string">'v18.12.1'</span> <span class="token punctuation">{{'}'}}</span>
+  env: <span class="token punctuation">{{'{'}}</span>
+    name: <span class="token string">'dev'</span>,
+    prod: false,
+    dynamic: false,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
+    nodeVersion: <span class="token string">'v18.12.1'</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 Config <span class="token punctuation">{{'{'}}</span> sources: <span class="token punctuation">[</span> <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>, active: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
 Launching <span class="token punctuation">{{'{'}}</span> domain: <span class="token string">'my-domain.biz'</span>, port: <span class="token number">4000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
