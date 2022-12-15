@@ -8,9 +8,9 @@
 npm install @travetto/auth-rest
 ```
 
-This is a primary integration for the [Authentication](module/auth#readme "Authentication scaffolding for the travetto framework") module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  
+This is a primary integration for the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the travetto framework") module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  
 
-The integration with the [RESTful API](module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module touches multiple levels. Primarily:
+The integration with the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module touches multiple levels. Primarily:
 
    
    *  Security information management

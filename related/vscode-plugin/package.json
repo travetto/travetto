@@ -37,14 +37,21 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.9",
-    "@types/vscode": "^1.73.1",
-    "@travetto/compiler": "*",
-    "@travetto/cli": "*"
+    "@types/vscode": "^1.73.1"
   },
   "travetto": {
     "displayName": "Travetto Plugin",
     "isolated": true,
-    "outputFolder": "out"
+    "outputFolder": "out",
+    "docRoot": "../..",
+    "docBaseUrl": "https://github.com/travetto/travetto/tree/main",
+    "globalModules": [
+      "@travetto/compiler",
+      "@travetto/doc",
+      "@travetto/cli",
+      "@travetto/app",
+      "@travetto/test"
+    ]
   },
   "engines": {
     "vscode": "^1.69.0"

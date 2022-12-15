@@ -8,9 +8,9 @@
 npm install @travetto/app
 ```
 
-The [Base](module/base#readme "Environment config and common utilities for travetto applications.") module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) who's job is to register entry points into the application, along with the associated  metadata. 
+The [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) who's job is to register entry points into the application, along with the associated  metadata. 
 
-With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [Dependency Injection](module/di#readme "Dependency registration/management and injection support."), the [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) is a synonym for [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31), and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
+With the application, the `run` method is the entry point that will be invoked post construction of the class. Building off of the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), the [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) is a synonym for [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31), and inherits all the abilities of dependency injection.  This should allow for setup for any specific application that needs to be run.
 
 For example:
 

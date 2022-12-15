@@ -83,6 +83,7 @@ export type Package = {
     globalModules?: string[];
     mainSource?: string[];
     docOutput?: string[];
+    docRoot?: string;
     docBaseUrl?: string;
     outputFolder?: string;
   };

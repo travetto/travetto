@@ -217,7 +217,7 @@ class SimpleTest {
 
 ## Running Tests
 
-To run the tests you can either call the [Command Line Interface](module/cli#readme "CLI infrastructure for travetto framework") by invoking
+To run the tests you can either call the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") by invoking
 
 **Terminal: Test Help Output**
 ```bash

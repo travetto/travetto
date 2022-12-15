@@ -1,3 +1,5 @@
+import fs from 'fs/promises';
+
 import { RootIndex, PackageUtil } from '@travetto/manifest';
 
 type DocModMapping = { simpleName: string, name: string, displayName: string, folder: string, description?: string };
@@ -6,7 +8,7 @@ export async function main(): Promise<void> {
   const out: DocModMapping[] = [];
   for (const module of Object.values(RootIndex.manifest.modules)) {
     const pkg = PackageUtil.readPackage(module.source);
-    if (!pkg.name.startsWith('@travetto') || !pkg.travetto || !pkg.travetto.displayName) {
+    if (pkg?.travetto?.displayName === undefined) {
       continue;
     }
 
@@ -27,10 +29,10 @@ export async function main(): Promise<void> {
   for (const mod of out.sort((a, b) => a.name.localeCompare(b.name))) {
     text.push(`
   ${mod.simpleName}: {
-    name:'${mod.name}', folder:'${mod.folder}', displayName: '${mod.displayName}',
+    name:'${mod.name}', folder:'${mod.name}', displayName: '${mod.displayName}',
     description: '${mod.description?.replaceAll("'", '\\\'')}'
   }`);
   }
 
-  process.stdout.write(`{\n${text.join(',')}\n}\n`);
+  await fs.writeFile('module/doc/src/mod-mapping.ts', `export const MOD_MAPPING = {\n${text.join(',')}\n};\n`, 'utf8');
 }

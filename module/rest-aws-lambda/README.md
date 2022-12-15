@@ -8,7 +8,7 @@
 npm install @travetto/rest-aws-lambda
 ```
 
-The module provides support basic support with AWS lambdas. When using one of the specific rest modules (e.g. [Express REST Source](module/rest-express#readme "Express provider for the travetto rest module.")), you can install the appropriate lambda-related dependencies installed (e.g. [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md)) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers. 
+The module provides support basic support with AWS lambdas. When using one of the specific rest modules (e.g. [Express REST Source](https://github.com/travetto/travetto/tree/main/module/rest-express#readme "Express provider for the travetto rest module.")), you can install the appropriate lambda-related dependencies installed (e.g. [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md)) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers. 
 
 ## Packaging Lambdas
 

@@ -88,7 +88,7 @@ As referenced above, a <a target="_blank" class="source-link" href="https://gith
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8">Authenticator</a> only requires one method to be defined, and that is <code class="item method">authenticate</code>. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
 <h3 id="example">Example</h3>
-The <a class="module-link" href="module/jwt" title="JSON Web Token implementation">JWT</a> module is a good example of an authenticator. This is a common use case for simple internal auth.
+The <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/jwt" title="JSON Web Token implementation">JWT</a> module is a good example of an authenticator. This is a common use case for simple internal auth.
 
 <h2 id="authorization">Authorization</h2>
 
@@ -110,7 +110,7 @@ Authorizers are generally seen as a secondary step post-authentication. Authenti
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8">Authorizer</a> only requires one method to be defined, and that is <code class="item method">authorizer</code>. This method receives an authenticated principal as an input, and is responsible for converting that to an authorized principal.
 
 <h3 id="example">Example</h3>
-The <a class="module-link" href="module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> extension is a good example of an authenticator. This is a common use case for simple internal auth.
+The <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> extension is a good example of an authenticator. This is a common use case for simple internal auth.
 
 Overall, the structure is simple, but drives home the primary use cases of the framework. The goals are:
 <ul> <li>Be able to identify a user uniquely</li>
@@ -159,7 +159,7 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-<code class="item method">roleMatcher</code> is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from <a class="module-link" href="module/base" title="Environment config and common utilities for travetto applications.">Base</a>'s Util class.  
+<code class="item method">roleMatcher</code> is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/base" title="Environment config and common utilities for travetto applications.">Base</a>'s Util class.  
 
 An example of role checks could be:
 

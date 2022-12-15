@@ -4,7 +4,7 @@
           
         </h1>
 
-The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" href="undefined/module/todo-app">Todo App</a>.  Additionally, you can use the <a class="module-link" href="module/scaffold" title="App Scaffold for the Travetto framework">App Scaffold</a>.
+The following tutorial wil walk you through setting up a <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/todo-app">Todo App</a>.  Additionally, you can use the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/scaffold" title="App Scaffold for the Travetto framework">App Scaffold</a>.
 
 <div class="toc"><div class="inner"><h3 id="overview">Overview</h3><ol> <li><a class="anchor-link" routerLink="." fragment="prerequisites">Prerequisites</a></li>
  <li><a class="anchor-link" routerLink="." fragment="project-initialization">Project Initialization</a></li>
@@ -354,7 +354,7 @@ First we must start the application:
     <span class="token punctuation">{{'}'}}</span>,
     ApiSpecConfig: <span class="token punctuation">{{'{'}}</span> output: <span class="token string">'./openapi.yml'</span>, persist: false, skipRoutes: false, exposeAllSchemas: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
     CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, plain: false, timestamp: <span class="token string">'ms'</span> <span class="token punctuation">{{'}'}}</span>,
-    FileModelConfig: <span class="token punctuation">{{'{'}}</span> folder: <span class="token string">'/tmp/ae03740ebf'</span>, namespace: <span class="token string">'.'</span> <span class="token punctuation">{{'}'}}</span>,
+    FileModelConfig: <span class="token punctuation">{{'{'}}</span> folder: <span class="token string">'/tmp/bee1a5a2ec'</span>, namespace: <span class="token string">'.'</span> <span class="token punctuation">{{'}'}}</span>,
     MemoryModelConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
     MongoModelConfig: <span class="token punctuation">{{'{'}}</span>
       hosts: <span class="token punctuation">[</span> <span class="token string">'localhost'</span> <span class="token punctuation">]</span>,
@@ -428,16 +428,11 @@ next, let's execute <a target="_blank" class="external-link" href="https://www.n
       </figcaption>
       <pre><code class="language-bash">$ trv main support/main.create-todo.ts
 
-./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65
-        path_1.default.resolve<span class="token punctuation">(</span>ctx.workspacePath, ctx.compilerFolder, state.manifest.modules<span class="token punctuation">[</span><span class="token string">'@travetto/compiler'</span><span class="token punctuation">]</span>.output, <span class="token string">'support/main.output'</span><span class="token punctuation">)</span>,
-                                                                                                                   ^
-
-TypeError: Cannot <span class="token builtin class-name">read</span> properties of undefined <span class="token punctuation">(</span>reading <span class="token string">'output'</span><span class="token punctuation">)</span>
-    at compileOutput <span class="token punctuation">(</span>./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65:116<span class="token punctuation">)</span>
-    at async compile <span class="token punctuation">(</span>./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:78:5<span class="token punctuation">)</span>
-    at async <span class="token builtin class-name">exec</span> <span class="token punctuation">(</span>@travetto/compiler/bin/trv.js:60:28<span class="token punctuation">)</span>
-
-Node.js v18.12.1</code></pre>     
+<span class="token punctuation">{{'{'}}</span>
+  text: <span class="token string">'New Todo'</span>,
+  created: <span class="token string">'2022-03-14T04:00:02.762Z'</span>,
+  id: <span class="token string">'22e793aed76ee063d13feec2e5e95b45'</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
       <figure class="code">
@@ -458,14 +453,21 @@ Node.js v18.12.1</code></pre>
       </figcaption>
       <pre><code class="language-bash">$ trv main support/main.list-todo.ts
 
-./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65
-        path_1.default.resolve<span class="token punctuation">(</span>ctx.workspacePath, ctx.compilerFolder, state.manifest.modules<span class="token punctuation">[</span><span class="token string">'@travetto/compiler'</span><span class="token punctuation">]</span>.output, <span class="token string">'support/main.output'</span><span class="token punctuation">)</span>,
-                                                                                                                   ^
-
-TypeError: Cannot <span class="token builtin class-name">read</span> properties of undefined <span class="token punctuation">(</span>reading <span class="token string">'output'</span><span class="token punctuation">)</span>
-    at compileOutput <span class="token punctuation">(</span>./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65:116<span class="token punctuation">)</span>
-    at async compile <span class="token punctuation">(</span>./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:78:5<span class="token punctuation">)</span>
-    at async <span class="token builtin class-name">exec</span> <span class="token punctuation">(</span>@travetto/compiler/bin/trv.js:60:28<span class="token punctuation">)</span>
-
-Node.js v18.12.1</code></pre>     
+<span class="token punctuation">[</span>
+  <span class="token punctuation">{{'{'}}</span>
+    id: <span class="token string">'22e793aed76ee063d13feec2e5e95b45'</span>,
+    text: <span class="token string">'New Todo'</span>,
+    created: <span class="token string">'2022-03-14T04:00:03.086Z'</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  <span class="token punctuation">{{'{'}}</span>
+    id: <span class="token string">'eba6734e307bc66d442ae78291e71040'</span>,
+    text: <span class="token string">'New Todo'</span>,
+    created: <span class="token string">'2022-03-14T04:00:03.190Z'</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  <span class="token punctuation">{{'{'}}</span>
+    id: <span class="token string">'77ba279b4e30fdacfc55b9e3be224403'</span>,
+    text: <span class="token string">'New Todo'</span>,
+    created: <span class="token string">'2022-03-14T04:00:03.383Z'</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">]</span></code></pre>     
       </figure>

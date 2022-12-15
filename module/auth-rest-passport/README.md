@@ -8,7 +8,7 @@
 npm install @travetto/auth-rest-passport
 ```
 
-This is a primary integration for the [Rest Auth](module/auth-rest#readme "Rest authentication integration support for the travetto framework") module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  
+This is a primary integration for the [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the travetto framework") module.  This is another level of scaffolding allowing for compatible authentication frameworks to integrate.  
 
 Within the node ecosystem, the most prevalent auth framework is [passport](http://passportjs.org).  With countless integrations, the desire to leverage as much of it as possible, is extremely high. To that end, this module provides support for [passport](http://passportjs.org) baked in. Registering and configuring a [passport](http://passportjs.org) strategy is fairly straightforward.
 

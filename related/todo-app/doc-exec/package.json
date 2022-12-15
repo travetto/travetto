@@ -1,7 +1,9 @@
 {
   "name": "@travetto-doc/todo-app",
   "dependencies": {
-    "@travetto/todo-app": "*"
+    "@travetto/todo-app": "*",
+    "@travetto/cli": "*",
+    "@travetto/compiler": "*"
   },
   "travetto": {
     "isolated": true,

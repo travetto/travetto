@@ -8,7 +8,7 @@ export function doc(values: TemplateStringsArray, ...keys: (AllType | Function |
       node.Text(values[i] ?? ''),
       typeof el === 'string' ?
         node.Text(el) :
-        typeof el === 'function' ? node.Ref(el.name.replace(/[$]/, ''), el) : el
+        typeof el === 'function' ? node.Ref(el.name, el) : el
     )
   );
 

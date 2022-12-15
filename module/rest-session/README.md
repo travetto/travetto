@@ -8,7 +8,7 @@
 npm install @travetto/rest-session
 ```
 
-This is a module that adds session support to the [RESTful API](module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") framework.  Sessions are represented as:
+This is a module that adds session support to the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") framework.  Sessions are represented as:
 
 **Code: Session Structure**
 ```typescript

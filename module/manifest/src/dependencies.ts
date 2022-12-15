@@ -1,6 +1,6 @@
 import { PackageUtil } from './package';
 import { path } from './path';
-import { ManifestContext, ManifestProfile, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
+import { ManifestContext, ManifestProfile, PackageRel, PackageVisitor, PackageVisitReq } from './types';
 
 export type ModuleDep = {
   version: string;

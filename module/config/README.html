@@ -12,7 +12,7 @@
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/config</code></pre>     
       </figure>
 
-The config module provides support for loading application config on startup. Configuration values support the common <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> constructs as defined in <a class="module-link" href="module/yaml" title="Simple YAML support, provides only clean subset of yaml">YAML</a>.  Additionally, the configuration is built upon the <a class="module-link" href="module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> module, to enforce type correctness, and allow for validation of configuration as an 
+The config module provides support for loading application config on startup. Configuration values support the common <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a> constructs as defined in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/yaml" title="Simple YAML support, provides only clean subset of yaml">YAML</a>.  Additionally, the configuration is built upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> module, to enforce type correctness, and allow for validation of configuration as an 
 entrypoint into the application.  Given that all <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13">@Config</a> classes are <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a>-based classes, all the standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38">@Field</a> functionality applies.
 
 <h2 id="resolution">Resolution</h2>
@@ -76,16 +76,28 @@ At runtime the resolved config would be:
       <figcaption class="terminal">Runtime Resolution
       
       </figcaption>
-      <pre><code class="language-bash">$ <span class="token function">node</span>  ./doc/resolve.ts
+      <pre><code class="language-bash">$ trv main support/main.resolve.ts
 
-/bin/bash: ./doc/resolve.ts: Permission denied</code></pre>     
+Config <span class="token punctuation">{{'{'}}</span>
+  sources: <span class="token punctuation">[</span>
+    <span class="token string">'application.1 - file://application.yml'</span>,
+    <span class="token string">'override.3 - memory://override'</span>
+  <span class="token punctuation">]</span>,
+  active: <span class="token punctuation">{{'{'}}</span>
+    DBConfig: <span class="token punctuation">{{'{'}}</span>
+      host: <span class="token string">'localhost'</span>,
+      port: <span class="token number">2000</span>,
+      creds: creds_7_45Ⲑsyn <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'test'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h2 id="secrets">Secrets</h2>
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under <code class="item input">config.redacted</code>.
 
 <h2 id="consuming">Consuming</h2>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L14">Configuration</a> service provides injectable access to all of the loaded configuration. For simplicity, a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13">@Config</a> allows for classes to automatically be bound with config information on post construction via the <a class="module-link" href="module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module. The decorator will install a <code class="item method">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L14">Configuration</a> service provides injectable access to all of the loaded configuration. For simplicity, a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13">@Config</a> allows for classes to automatically be bound with config information on post construction via the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module. The decorator will install a <code class="item method">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
@@ -150,7 +162,11 @@ Config <span class="token punctuation">{{'{'}}</span>
     <span class="token string">'override.3 - memory://override'</span>
   <span class="token punctuation">]</span>,
   active: <span class="token punctuation">{{'{'}}</span>
-    DBConfig: <span class="token punctuation">{{'{'}}</span> host: <span class="token string">'localhost'</span>, port: <span class="token number">200</span>, creds: <span class="token punctuation">[</span>creds_7_45Ⲑsyn<span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>
+    DBConfig: <span class="token punctuation">{{'{'}}</span>
+      host: <span class="token string">'localhost'</span>,
+      port: <span class="token number">200</span>,
+      creds: creds_7_45Ⲑsyn <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'test'</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
