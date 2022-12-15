@@ -16,7 +16,7 @@ export class PackageUtil {
   static resolveImport = (library: string): string => this.#req.resolve(library);
 
   /**
-   * Resolve version, if file: url
+   * Resolve version path, if file: url
    */
   static resolveVersionPath(rootPath: string, ver: string): string | undefined {
     if (ver.startsWith('file:')) {
@@ -86,6 +86,13 @@ export class PackageUtil {
   }
 
   /**
+   * import a package.json from a given module name
+   */
+  static importPackage(moduleName: string): Package {
+    return this.readPackage(this.resolvePackagePath(moduleName));
+  }
+
+  /**
    * Write package
    */
   static async writePackage(modulePath: string, pkg: Package): Promise<void> {
@@ -134,7 +141,7 @@ export class PackageUtil {
    * Get version of manifest package
    */
   static getFrameworkVersion(): string {
-    return (this.#framework ??= this.readPackage(this.resolveImport('@travetto/manifest/package.json'))).version;
+    return (this.#framework ??= this.importPackage('@travetto/manifest')).version;
   }
 
   /**

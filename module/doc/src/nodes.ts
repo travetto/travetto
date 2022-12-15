@@ -1,16 +1,11 @@
 import { existsSync } from 'fs';
 
-import { path, RootIndex, Package, PackageUtil } from '@travetto/manifest';
+import { path, RootIndex, PackageUtil } from '@travetto/manifest';
 
 import { FileUtil, } from './util/file';
 import { DocRunUtil, RunConfig } from './util/run';
 import { Content, DocNode, TextType } from './types';
 import { ResolveUtil } from './util/resolve';
-
-let parentPkg: Package;
-try {
-  parentPkg = PackageUtil.readPackage(path.resolve('..'));
-} catch { }
 
 function $c(val: string): TextType;
 function $c(val: DocNode | string): DocNode;
@@ -236,7 +231,7 @@ export const node = {
    */
   Header: (mod?: string, install = true) => {
     if (!mod) {
-      mod = (RootIndex.mainPackage.name === 'doc' ? parentPkg?.name : undefined) ?? RootIndex.mainPackage.name;
+      mod = RootIndex.mainPackage.name;
     }
     const pkg = PackageUtil.readPackage(RootIndex.getModule(mod)!.source);
     return $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
