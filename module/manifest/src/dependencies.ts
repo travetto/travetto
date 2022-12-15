@@ -39,26 +39,6 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
       .map(x => new RegExp(`^${x.replace(/[*]/g, '.*?')}$`));
   }
 
-  /**
-   *
-   */
-  static getGlobalDeps(
-    rootSourcePath: string,
-    workspacePath: string,
-    workspaces: PackageWorkspaceEntry[]
-  ): PackageVisitReq<ModuleDep>[] {
-    const { travetto: { globalModules = [] } = {} } = PackageUtil.readPackage(workspacePath);
-
-    return [
-      ...globalModules.map(f => PackageUtil.resolvePackagePath(rootSourcePath, f, '*')),
-      ...workspaces.map(entry => path.resolve(rootSourcePath, entry.sourcePath))
-    ].map(sourcePath => ({
-      sourcePath,
-      pkg: PackageUtil.readPackage(sourcePath),
-      rel: 'global'
-    }));
-  }
-
   constructor(public ctx: ManifestContext) { }
 
   #mainPatterns: RegExp[] = [];
@@ -67,18 +47,29 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    * Initialize visitor, and provide global dependencies
    */
   async init(req: PackageVisitReq<ModuleDep>): Promise<PackageVisitReq<ModuleDep>[]> {
-    const rootFolder = this.ctx.mainPath;
-    const pkg = PackageUtil.readPackage(rootFolder);
-    const workspaces = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(rootFolder)) : [];
-    const globalModules = pkg.travetto?.globalModules ?? [];
+    const pkg = PackageUtil.readPackage(req.sourcePath);
+    const workspacePkg = PackageUtil.readPackage(this.ctx.workspacePath);
+    const workspaceModules = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(req.sourcePath)) : [];
 
-    this.#mainPatterns = ModuleDependencyVisitor.getMainPatterns(pkg.name, pkg.travetto?.mainSource ?? []);
+    this.#mainPatterns = ModuleDependencyVisitor.getMainPatterns(pkg.name, [
+      ...pkg.travetto?.mainSource ?? [],
+      // Add workspace folders, for tests and docs
+      ...workspaceModules.map(x => x.name)
+    ]);
 
-    return (this.ctx.monoRepo || globalModules.length) ? ModuleDependencyVisitor.getGlobalDeps(
-      req.sourcePath,
-      this.ctx.workspacePath,
-      workspaces
-    ) : [];
+    const globals = [
+      ...(workspacePkg.travetto?.globalModules ?? []),
+      ...(pkg.travetto?.globalModules ?? [])
+    ]
+      .map(f => PackageUtil.resolvePackagePath(req.sourcePath, f, '*'));
+
+    const workspaceModuleDeps = workspaceModules
+      .map(entry => path.resolve(req.sourcePath, entry.sourcePath));
+
+    return [
+      ...globals,
+      ...workspaceModuleDeps
+    ].map(s => PackageUtil.packageReq(s, 'global'));
   }
 
   /**
@@ -104,10 +95,12 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
     const internal = pkg.private === true;
     const local = internal || mainSource || !sourcePath.includes('node_modules');
 
-    return {
+    const dep = {
       name, version, sourcePath, main, mainSource, local, internal,
       parentSet: new Set([]), childSet: new Map(), profileSet
     };
+
+    return dep;
   }
 
   /**

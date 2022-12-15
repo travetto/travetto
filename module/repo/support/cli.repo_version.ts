@@ -1,22 +1,30 @@
-import fs from 'fs/promises';
-
-import { CliCommand, CliScmUtil } from '@travetto/cli';
+import { CliCommand, CliScmUtil, OptionConfig } from '@travetto/cli';
 import { CliModuleUtil } from '@travetto/cli/src/module';
-import { Package, PackageUtil, PACKAGE_DEP_GROUPS } from '@travetto/manifest';
+import { Package, PackageUtil } from '@travetto/manifest';
 
 import { Npm, SemverLevel } from './bin/npm';
+
+type VersionOptions = {
+  changed: OptionConfig<boolean>;
+};
 
 /**
 * `npx trv repo:version`
 *
 * Version all all changed dependencies
 */
-export class RepoVersionCommand extends CliCommand {
+export class RepoVersionCommand extends CliCommand<VersionOptions> {
 
   name = 'repo:version';
 
   getArgs(): string {
     return '[level] [prefix?]';
+  }
+
+  getOptions(): VersionOptions {
+    return {
+      changed: this.boolOption({ desc: 'Only version changed modules', def: true })
+    };
   }
 
   async action(level: SemverLevel, prefix?: string): Promise<void> {
@@ -25,34 +33,46 @@ export class RepoVersionCommand extends CliCommand {
       process.exit(1);
     }
 
-    const changed = (await CliModuleUtil.findModules('changed')).filter(x => !x.internal);
-    await Npm.version(changed, level, prefix);
+    const modules = (await CliModuleUtil.findModules(this.cmd.changed ? 'changed' : 'all')).filter(x => !x.internal);
+
+    // Do we have valid changes?
+    if (modules.length) {
+      console.error('No modules available for versioning');
+      process.exit(1);
+    }
+
+    await Npm.version(modules, level, prefix);
 
     const all = await CliModuleUtil.findModules('all');
-    const packages = Object.fromEntries(
-      all.map(x => [x.name, { pkg: PackageUtil.readPackage(x.source), mod: x }])
-    );
+    const packages = Object.fromEntries(all.map(mod => {
+      const pkg = PackageUtil.readPackage(mod.source);
+      const write = (): Promise<void> => PackageUtil.writePackage(mod.source, pkg);
+      return [mod.name, { pkg, mod, write }];
+    }));
 
     const refreshed = new Set<Package>();
 
-    for (const mod of changed) {
+    for (const mod of modules) {
       for (const dep of all) {
-        const { pkg: depPkg } = packages[dep.name];
-        for (const field of PACKAGE_DEP_GROUPS) {
-          if (depPkg[field] && mod.name in depPkg[field]! && /^[*]|(file:.*)$/.test(depPkg[field]![mod.name])) {
-            depPkg[field]![mod.name] = `^${packages[mod.name].pkg.version}`;
-            refreshed.add(depPkg);
+        const { pkg } = packages[dep.name];
+        for (const group of [
+          pkg.dependencies ?? {},
+          pkg.devDependencies ?? {},
+          pkg.optionalDependencies ?? {},
+          pkg.peerDependencies ?? {}
+        ]) {
+          if (mod.name in group && /^[*]|(file:.*)$/.test(group[mod.name])) {
+            group[mod.name] = `^${packages[mod.name].pkg.version}`;
+            refreshed.add(pkg);
           }
         }
       }
     }
 
-    // Do we have valid changes?
-    if (changed.length) {
-      for (const mod of refreshed) {
-        await fs.writeFile(`${packages[mod.name].mod.source}/package.json`, JSON.stringify(mod, null, 2), 'utf8');
-      }
-      console.log!(await CliScmUtil.createCommit(`Publish ${changed.map(x => x.name).join(',')}`));
+    for (const mod of refreshed) {
+      await packages[mod.name].write();
     }
+
+    console.log!(await CliScmUtil.createCommit(`Publish ${modules.map(x => x.name).join(',')}`));
   }
 }
