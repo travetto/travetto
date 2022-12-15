@@ -65,11 +65,11 @@ The image will be extracted out and embedded in the email as a multi part messag
 
 ## Template Development
 
-The module provides [Command Line Interface](module/cli#readme "CLI infrastructure for travetto framework") and [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) support for email template development.
+The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") and [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) support for email template development.
 
 ### CLI Compilation
 
-The module provides [Command Line Interface](module/cli#readme "CLI infrastructure for travetto framework") support for email template compilation also. Running
+The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") support for email template compilation also. Running
 
 **Terminal: Running template compilation**
 ```bash

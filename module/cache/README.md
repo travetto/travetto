@@ -8,7 +8,7 @@
 npm install @travetto/cache
 ```
 
-Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without [Dependency Injection](module/di#readme "Dependency registration/management and injection support.").  The code aims to handle use cases surrounding common/basic usage.
+Provides a foundational structure for integrating caching at the method level.  This allows for easy extension with a variety of providers, and is usable with or without [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.").  The code aims to handle use cases surrounding common/basic usage.
 
 The cache module requires an [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), or you can roll your own.
 
@@ -19,15 +19,15 @@ npm install @travetto/model-{provider}
 
 Currently, the following are packages that provide [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11):
    
-   *  [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") - @travetto/model: [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L51), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)
-   *  [DynamoDB Model Support](module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - @travetto/model-dynamodb
-   *  [Elasticsearch Model Source](module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.") - @travetto/model-elasticsearch
-   *  [MongoDB Model Support](module/model-mongo#readme "Mongo backing for the travetto model module.") - @travetto/model-mongo
-   *  [Redis Model Support](module/model-redis#readme "Redis backing for the travetto model module.") - @travetto/model-redis
-   *  [S3 Model Support](module/model-s3#readme "S3 backing for the travetto model module.") - @travetto/model-s3
-   *  [PostgreSQL Model Service](module/model-postgres#readme "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-postgres
-   *  [MySQL Model Service](module/model-mysql#readme "MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-mysql
-   *  [SQLite Model Service](module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-sqlite
+   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") - @travetto/model: [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L51), [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)
+   *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.") - @travetto/model-dynamodb
+   *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.") - @travetto/model-elasticsearch
+   *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.") - @travetto/model-mongo
+   *  [Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.") - @travetto/model-redis
+   *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.") - @travetto/model-s3
+   *  [PostgreSQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-postgres#readme "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-postgres
+   *  [MySQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-mysql#readme "MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-mysql
+   *  [SQLite Model Service](https://github.com/travetto/travetto/tree/main/module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - @travetto/model-sqlite
 
 ## Decorators
 The caching framework provides method decorators that enables simple use cases.  One of the requirements to use the caching decorators is that the method arguments, and return values need to be serializable into [JSON](https://www.json.org).  Any other data types are not currently supported and would require either manual usage of the caching services directly, or specification of serialization/deserialization routines in the cache config.
@@ -115,7 +115,7 @@ export class UserService {
 
 ## Extending the Cache Service
 
-By design, the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L29) relies solely on the [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L29).  The [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L29) is expecting the model service to be registered using the @travetto/cache:model:
+By design, the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L29) relies solely on the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  Specifically on the [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11).   This combines basic support for CRUD as well as knowledge of how to manage expirable content.  Any model service that honors these contracts is a valid candidate to power the [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L29).  The [CacheService](https://github.com/travetto/travetto/tree/main/module/cache/src/service.ts#L29) is expecting the model service to be registered using the @travetto/cache:model:
 
 **Code: Registering a Custom Model Source**
 ```typescript

@@ -33,7 +33,7 @@ The functionality we support for testing and retrieving environment information:
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 
-While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
+While the framework is 100 % compatible with standard <code class="item input">Error</code> instances, there are cases in which additional functionality is desired. Within the framework we use <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module and HTTP status codes).  
 
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
 <ul> <li><code class="item input">general</code> - General purpose errors</li>
@@ -82,7 +82,7 @@ A sample of the instrumentation would be:
 
       <figure class="code">
       <figcaption class="code">Sample After Transpilation
-      <cite><a target="_blank" href="undefined/module/base/doc/transpile.js">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/doc/transpile.js">Source</a></cite>
       </figcaption>
       <pre><code class="language-javascript"><span class="token string">"use strict"</span><span class="token punctuation">;</span>
 Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> <span class="token string">"__esModule"</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>

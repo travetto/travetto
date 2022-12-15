@@ -8,7 +8,7 @@
 npm install @travetto/model-mysql
 ```
 
-This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") module.  This source allows the [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L38) will also modify the database schema in real time to minimize impact to development.
+This module provides a [MySQL](https://www.mysql.com/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module.  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [SQL](https://en.wikipedia.org/wiki/SQL) databases. In development mode, the [SQLModelService](https://github.com/travetto/travetto/tree/main/module/model-sql/src/service.ts#L38) will also modify the database schema in real time to minimize impact to development.
 
 The schema generated will not generally map to existing tables as it is attempting to produce a document store like experience on top of
 a [SQL](https://en.wikipedia.org/wiki/SQL) database.  Every table generated will have a `path_id` which determines it's location in the document hierarchy as well as sub tables will have a `parent_path_id` to associate records with the parent values.
@@ -23,7 +23,7 @@ Supported features:
    *  [Suggest](https://github.com/travetto/travetto/tree/main/module/model-query/src/service/suggest.ts#L12)
 
     Out of the box, by installing the module, everything should be wired up by default.If you need to customize any aspect of the source 
-    or config, you can override and register it with the [Dependency Injection](module/di#readme "Dependency registration/management and injection support.") module.
+    or config, you can override and register it with the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module.
 
     
 **Code: Wiring up a custom Model Source**
@@ -95,4 +95,4 @@ export class SQLModelConfig<T extends {} = {}> {
 ```
 
   Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the 
-  standard [Configuration](module/config#readme "Configuration support")resolution paths.
+  standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support")resolution paths.

@@ -1,4 +1,4 @@
-import { RootIndex, PackageUtil } from '@travetto/manifest';
+import { RootIndex, PackageUtil, path } from '@travetto/manifest';
 
 import { RenderContext } from './context';
 import { Html } from './html';
@@ -50,13 +50,12 @@ export class RenderUtil {
 
     const mf = RootIndex.manifest;
 
-    const repoBaseUrl = (mf.monoRepo ?
-      PackageUtil.readPackage(mf.workspacePath).travetto?.docBaseUrl :
-      undefined
-    ) ?? mf.mainPath;
+    const pkg = PackageUtil.readPackage(mf.workspacePath);
+    const repoBaseUrl = pkg.travetto?.docBaseUrl ?? mf.mainPath;
 
-    const ctx = new RenderContext(file,
-      mf.workspacePath,
+    const ctx = new RenderContext(
+      file,
+      path.resolve(pkg.travetto?.docRoot ?? mf.workspacePath),
       repoBaseUrl,
       repoBaseUrl.includes('travetto.github') ? repoBaseUrl : manifestPkg.travetto!.docBaseUrl!
     );

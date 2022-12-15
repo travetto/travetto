@@ -82,7 +82,7 @@ export interface Authenticator<T = unknown, P extends Principal = Principal, C =
 The [Authenticator](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authenticator.ts#L8) only requires one method to be defined, and that is `authenticate`. This method receives a generic payload, and a supplemental context as an input. The interface is responsible for converting that to an authenticated principal.
 
 ### Example
-The [JWT](module/jwt#readme "JSON Web Token implementation") module is a good example of an authenticator. This is a common use case for simple internal auth.
+The [JWT](https://github.com/travetto/travetto/tree/main/module/jwt#readme "JSON Web Token implementation") module is a good example of an authenticator. This is a common use case for simple internal auth.
 
 ## Authorization
 
@@ -103,7 +103,7 @@ Authorizers are generally seen as a secondary step post-authentication. Authenti
 The [Authorizer](https://github.com/travetto/travetto/tree/main/module/auth/src/types/authorizer.ts#L8) only requires one method to be defined, and that is `authorizer`. This method receives an authenticated principal as an input, and is responsible for converting that to an authorized principal.
 
 ### Example
-The [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") extension is a good example of an authenticator. This is a common use case for simple internal auth.
+The [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") extension is a good example of an authenticator. This is a common use case for simple internal auth.
 
 Overall, the structure is simple, but drives home the primary use cases of the framework. The goals are:
    
@@ -151,7 +151,7 @@ export class AuthUtil {
 }
 ```
 
-`roleMatcher` is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from [Base](module/base#readme "Environment config and common utilities for travetto applications.")'s Util class.  
+`roleMatcher` is probably the only functionality that needs to be explained.  The function extends the core allow/deny matcher functionality from [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.")'s Util class.  
 
 An example of role checks could be:
 

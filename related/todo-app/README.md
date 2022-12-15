@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/related/todo-app/README.ts and execute "npx trv doc" to rebuild -->
 # Getting Started: A Todo App
 
-The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](undefined/module/todo-app).  Additionally, you can use the [App Scaffold](module/scaffold#readme "App Scaffold for the Travetto framework").
+The following tutorial wil walk you through setting up a [Travetto](https://travetto.dev) application from scratch.  We'll be building a simple todo application. The entire source of the finished project can be found at [Todo App](https://github.com/travetto/travetto/tree/main/module/todo-app).  Additionally, you can use the [App Scaffold](https://github.com/travetto/travetto/tree/main/module/scaffold#readme "App Scaffold for the Travetto framework").
 
 ### Overview   
    1. [Prerequisites](#prerequisites})
@@ -342,7 +342,7 @@ First we must start the application:
     },
     ApiSpecConfig: { output: './openapi.yml', persist: false, skipRoutes: false, exposeAllSchemas: false },
     CommonLoggerConfig: { format: 'line', plain: false, timestamp: 'ms' },
-    FileModelConfig: { folder: '/tmp/ae03740ebf', namespace: '.' },
+    FileModelConfig: { folder: '/tmp/bee1a5a2ec', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
       hosts: [ 'localhost' ],
@@ -412,16 +412,11 @@ export async function main() {
 ```bash
 $ trv main support/main.create-todo.ts
 
-./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65
-        path_1.default.resolve(ctx.workspacePath, ctx.compilerFolder, state.manifest.modules['@travetto/compiler'].output, 'support/main.output'),
-                                                                                                                   ^
-
-TypeError: Cannot read properties of undefined (reading 'output')
-    at compileOutput (./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65:116)
-    at async compile (./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:78:5)
-    at async exec (@travetto/compiler/bin/trv.js:60:28)
-
-Node.js v18.12.1
+{
+  text: 'New Todo',
+  created: '2022-03-14T04:00:02.762Z',
+  id: '22e793aed76ee063d13feec2e5e95b45'
+}
 ```
 
 **Code: Listing Todos by fetch**
@@ -438,14 +433,21 @@ export async function main() {
 ```bash
 $ trv main support/main.list-todo.ts
 
-./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65
-        path_1.default.resolve(ctx.workspacePath, ctx.compilerFolder, state.manifest.modules['@travetto/compiler'].output, 'support/main.output'),
-                                                                                                                   ^
-
-TypeError: Cannot read properties of undefined (reading 'output')
-    at compileOutput (./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:65:116)
-    at async compile (./doc-exec/.trv_compiler/node_modules/__compiler_bootstrap__/support/bin/compiler-bootstrap.js:78:5)
-    at async exec (@travetto/compiler/bin/trv.js:60:28)
-
-Node.js v18.12.1
+[
+  {
+    id: '22e793aed76ee063d13feec2e5e95b45',
+    text: 'New Todo',
+    created: '2022-03-14T04:00:03.086Z'
+  },
+  {
+    id: 'eba6734e307bc66d442ae78291e71040',
+    text: 'New Todo',
+    created: '2022-03-14T04:00:03.190Z'
+  },
+  {
+    id: '77ba279b4e30fdacfc55b9e3be224403',
+    text: 'New Todo',
+    created: '2022-03-14T04:00:03.383Z'
+  }
+]
 ```

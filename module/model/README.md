@@ -8,14 +8,14 @@
 npm install @travetto/model
 ```
 
-This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
+This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
 
 ## Contracts
 
 The module is mainly composed of contracts.  The contracts define the expected interface for various model patterns. The primary contracts are [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9), [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11), [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12), [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11), [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) and [Bulk](https://github.com/travetto/travetto/tree/main/module/model/src/service/bulk.ts#L19).
 
 ### [Basic](https://github.com/travetto/travetto/tree/main/module/model/src/service/basic.ts#L9)
-All [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
+All [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations, must honor the BasicCrud contract to be able to participate in the model ecosystem.  This contract represents the bare minimum for a model service.
 
 **Code: Basic Contract**
 ```typescript
@@ -49,7 +49,7 @@ export interface ModelBasicSupport<C = unknown> {
 ```
 
 ### [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in [Authentication](module/auth#readme "Authentication scaffolding for the travetto framework"), is an example of a module that only needs create, read and delete, and so any implementation of [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") that honors this contract, can be used with the [Authentication](module/auth#readme "Authentication scaffolding for the travetto framework") model extension.
+The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the travetto framework"), is an example of a module that only needs create, read and delete, and so any implementation of [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") that honors this contract, can be used with the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the travetto framework") model extension.
 
 **Code: Crud Contract**
 ```typescript
@@ -92,7 +92,7 @@ export interface ModelCrudSupport extends ModelBasicSupport {
 ```
 
 ### [Indexed](https://github.com/travetto/travetto/tree/main/module/model/src/service/indexed.ts#L12)
-Additionally, an implementation may support the ability for basic indexed queries. This is not the full featured query support of [Data Model Querying](module/model-query#readme "Datastore abstraction for advanced query support."), but
+Additionally, an implementation may support the ability for basic indexed queries. This is not the full featured query support of [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support."), but
 allowing for indexed lookups.  This does not support listing by index, but may be added at a later date.  
 
 **Code: Indexed Contract**
@@ -134,7 +134,7 @@ export interface ModelIndexedSupport extends ModelBasicSupport {
 
 ### [Expiry](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts#L11)
 
-Certain implementations will also provide support for automatic expiry of data at runtime.  This is extremely useful for temporary data as, and is used in the [Caching](module/cache#readme "Caching functionality with decorators for declarative use.") module for expiring data accordingly.
+Certain implementations will also provide support for automatic expiry of data at runtime.  This is extremely useful for temporary data as, and is used in the [Caching](https://github.com/travetto/travetto/tree/main/module/cache#readme "Caching functionality with decorators for declarative use.") module for expiring data accordingly.
 
 **Code: Expiry Contract**
 ```typescript
@@ -150,7 +150,7 @@ export interface ModelExpirySupport extends ModelCrudSupport {
 
 ### [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3)
 
-Some implementations also allow for the ability to read/write binary data as a stream.  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.  This pattern is currently used by [Asset](module/asset#readme "Modular library for storing and retrieving binary assets") for reading and writing asset data.
+Some implementations also allow for the ability to read/write binary data as a stream.  Given that all implementations can store [Base64](https://en.wikipedia.org/wiki/Base64) encoded data, the key differentiator here, is native support for streaming data, as well as being able to store binary data of significant sizes.  This pattern is currently used by [Asset](https://github.com/travetto/travetto/tree/main/module/asset#readme "Modular library for storing and retrieving binary assets") for reading and writing asset data.
 
 **Code: Stream Contract**
 ```typescript
@@ -222,25 +222,25 @@ export interface ModelType {
 }
 ```
 
-All fields are optional, but the `id` and `type` are important as those field types are unable to be changed.  This may make using existing data models impossible if types other than strings are required.  Additionally, the type field, is intended to record the base model type and cannot be remapped. This is important to support polymorphism, not only in [Data Modeling Support](module/model#readme "Datastore abstraction for core operations."), but also in [Schema](module/schema#readme "Data type registry for runtime validation, reflection and binding.").
+All fields are optional, but the `id` and `type` are important as those field types are unable to be changed.  This may make using existing data models impossible if types other than strings are required.  Additionally, the type field, is intended to record the base model type and cannot be remapped. This is important to support polymorphism, not only in [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."), but also in [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.").
 
 ## Implementations
 
 |Service|Basic|CRUD|Indexed|Expiry|Stream|Bulk|
 |-------|-----|----|-------|------|------|----|
-|[DynamoDB Model Support](module/model-dynamodb#readme "DynamoDB backing for the travetto model module.")|X|X|X|X| | |
-|[Elasticsearch Model Source](module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")|X|X|X|X| |X|
-|[Firestore Model Support](module/model-firestore#readme "Firestore backing for the travetto model module.")|X|X|X| | | |
-|[MongoDB Model Support](module/model-mongo#readme "Mongo backing for the travetto model module.")|X|X|X|X|X|X|
-|[Redis Model Support](module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
-|[S3 Model Support](module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
-|[SQL Model Service](module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
+|[DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.")|X|X|X|X| | |
+|[Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")|X|X|X|X| |X|
+|[Firestore Model Support](https://github.com/travetto/travetto/tree/main/module/model-firestore#readme "Firestore backing for the travetto model module.")|X|X|X| | | |
+|[MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")|X|X|X|X|X|X|
+|[Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
+|[S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
+|[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
 |[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)|X|X|X|X|X|X|
 |[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L51)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for
-repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
+repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
 
 **Code: Memory Service**
 ```typescript

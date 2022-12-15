@@ -9,7 +9,7 @@ npm install @travetto/schema
 ```
 
 This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is 
-leveraged in the [Configuration](module/config#readme "Configuration support"), [Application](module/app#readme "Application registration/management and run support."), [RESTful API](module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module."), [OpenAPI Specification](module/openapi#readme "OpenAPI integration support for the travetto framework") and [Data Modeling Support](module/model#readme "Datastore abstraction for core operations.") modules.  The schema is the backbone of all data transfer, as it helps to
+leveraged in the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support"), [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support."), [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module."), [OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the travetto framework") and [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") modules.  The schema is the backbone of all data transfer, as it helps to
 provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file.
 
 This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.
@@ -290,7 +290,7 @@ When working with the schema, the basic types are easily understood, but some of
 To that end, the module supports two concepts:
 
 ### Type Adapters
-This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the [Data Model Querying](module/model-query#readme "Datastore abstraction for advanced query support.") module handles geo data.
+This feature is meant to allow for simple Typescript types to be able to be backed by a proper class.  This is because all of the typescript type information disappears at runtime, and so only concrete types (like classes) remain.  An example of this, can be found with how the [Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") module handles geo data.
 
 **Code: Simple Custom Type**
 ```typescript

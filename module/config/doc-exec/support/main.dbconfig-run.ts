@@ -1,8 +1,12 @@
+import util from 'util';
+
 import { Configuration } from '@travetto/config';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { DBConfig } from '@travetto/config/doc/dbconfig';
 import { Util } from '@travetto/base';
+
+util.inspect.defaultOptions.depth = 5;
 
 export async function main(): Promise<void> {
   await RootRegistry.init();

@@ -45,7 +45,9 @@ ${d.Config('Environment variables', 'doc/resources/env.properties', 'properties'
 
 At runtime the resolved config would be:
 
-${d.Execute('Runtime Resolution', 'doc/resolve.ts')}
+${d.Execute('Runtime Resolution', 'trv', ['main', 'support/main.resolve.ts'], {
+  cwd: './doc-exec'
+})}
 
 ${d.Section('Secrets')}
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under ${d.Input('config.redacted')}.

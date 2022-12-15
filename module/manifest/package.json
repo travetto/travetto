@@ -30,7 +30,8 @@
   },
   "dependencies": {},
   "travetto": {
-    "displayName": "Manifest"
+    "displayName": "Manifest",
+    "docBaseUrl": "https://github.com/travetto/travetto/tree/main"
   },
   "publishConfig": {
     "access": "public"

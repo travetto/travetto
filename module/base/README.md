@@ -31,7 +31,7 @@ The functionality we support for testing and retrieving environment information:
 
 ## Standard Error Support
 
-While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes).  
+While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes).  
 
 The [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
    

@@ -8,9 +8,9 @@
 npm install @travetto/openapi
 ```
 
-In the [RESTful API](module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap.
+In the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module, the controllers and endpoints can be described via decorators, comments, or typings. This only provides the general metadata internally. This is not sufficient to generate a usable API doc, and so this module exists to bridge that gap.
 
-The module is provides an [OpenAPI](https://github.com/OAI/OpenAPI-Specification) v3.x representation of the API metadata provided via the [RESTful API](module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") and [Schema](module/schema#readme "Data type registry for runtime validation, reflection and binding.") modules.
+The module is provides an [OpenAPI](https://github.com/OAI/OpenAPI-Specification) v3.x representation of the API metadata provided via the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") and [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") modules.
 
 ## Configuration
 By installing the dependency, the [OpenAPI](https://github.com/OAI/OpenAPI-Specification) endpoint is automatically generated and exposed at the root of the application as `/openapi.yml` or `/openapi.json` (by default). 
@@ -110,7 +110,7 @@ The framework, when in watch mode, will generate the [OpenAPI](https://github.co
 
 ## CLI - openapi:spec
 
-The module provides a command for the [Command Line Interface](module/cli#readme "CLI infrastructure for travetto framework") to allow scripting file generation.
+The module provides a command for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") to allow scripting file generation.
 
 **Terminal: OpenAPI usage**
 ```bash
@@ -129,7 +129,7 @@ The command will run your application, in non-server mode, to collect all the ro
 
 ## CLI - openapi:client
 
-The module provides a command for the [Command Line Interface](module/cli#readme "CLI infrastructure for travetto framework") to allow client generation from the API structure.
+The module provides a command for the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") to allow client generation from the API structure.
 
 **Terminal: OpenAPI usage**
 ```bash

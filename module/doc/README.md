@@ -129,7 +129,7 @@ $ trv doc -f html --stdout
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto-doc/doc</code></pre>     
       </figure>
 
-Sample documentation for fictional module.  This module fictitiously relies upon <a class="module-link" href="module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> functionality.
+Sample documentation for fictional module.  This module fictitiously relies upon <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cache" title="Caching functionality with decorators for declarative use.">Caching</a> functionality.
 
 <ol> <li>First</li>
  <li>Second</li>
