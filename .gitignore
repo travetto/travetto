@@ -1,23 +1,24 @@
-# Top Level
-.bin/
-
-# Common
-node_modules/
-.trv*
-.app_cache
+# Common Files
 npm-debug.log
 .DS_STORE
 Thumbs.db
-
-# VSCode
+*.tgz
 *.vsix
-out/
-related/*/.vscode
+
+# Node/Framework
+node_modules/
+.trv*
+LICENSE
+!/LICENSE
 
 # OpenAPI
 api-client/
 openapi.yml
 openapi.json
+
+# VSCode
+related/*/out
+related/*/.vscode
 
 # Pack
 dist/
@@ -30,13 +31,7 @@ email-dev-context.json
 # Assets
 **/support/fixtures/logo
 
-# Folder Specific
-module/*/LICENSE
-related/*/LICENSE
-module/*/*.tgz
-
+# Specific
 module/scaffold/**/eslintrc.json
 related/travetto.github.io/src/assets/images/vscode-plugin
 related/travetto.github.io/.angular
-
-eslint/*.js
