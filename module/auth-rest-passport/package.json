@@ -33,6 +33,10 @@
     "@types/passport": "^1.0.11",
     "passport": "^0.6.0"
   },
+  "devDependencies": {
+    "@types/passport-facebook": "^2.1.11",
+    "passport-facebook": "^3.0.0"
+  },
   "travetto": {
     "displayName": "Rest Auth Passport"
   },

@@ -8,7 +8,6 @@
 - Repo
 
 ## Outdated
-- Boot
 - Base
 - Config
 - Log

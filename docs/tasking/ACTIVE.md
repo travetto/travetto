@@ -1,11 +1,13 @@
-Active Development (2.0.0 - RC Ready)
+Active Development (3.0.0 - RC)
 =====================================
-
-Model
---------------
-- [ ] Multiple providers and conflicts on realtime data updating
-- [ ] Realworld example
-
-Tests
---------------
-- [?] Better unit tests
+- Rework vscode plugin:
+   * Fix how we invoke operations
+- Rework pack:
+   * Use manifest for staging files
+   * Integrate with bundler (webpack, vite, etc?)
+- Rewrite docs:
+   * config
+   * base
+- Tests
+   * config
+   * base

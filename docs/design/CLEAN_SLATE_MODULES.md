@@ -134,25 +134,6 @@ Will provide a new multiphase compiler that:
 * `@travetto/test`, test-support has been removed
 * `bin/*` No longer depends on `@travetto/boot`
 
-
-## Pending Items
-- Rework vscode plugin:
-   * Fix how we invoke operations
-- Rework pack:
-   * Use manifest for staging files
-   * Integrate with bundler (webpack, vite, etc?)
-- Rework top-level command to start/stop all services
-   * Cannot rely on module marfing
-- DI factory behavior with interfaces
-- Rewrite docs:
-   * config
-   * base
-   * boot
-- Tests
-   * config
-   * base 
-   * boot   
-
 ## Deprecated
 
 ### Phase 1

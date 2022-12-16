@@ -348,11 +348,17 @@ All "extension" points have been moved to their own modules, removing support fo
 ### Transpilation/Loading Overhaul
 One of the primary goals here is to end up with a `.trv_cache` folder that is directly invokable without the framework. The ideal here is the previous work around a "readonly" mode is replaced in a world where there is only javascript files.  This provides an increased level of security while setting the stage for integrating with existing js bundlers.  This will have ramifications in the pack extension.
 
+### ESM Support
+
+### Filesystem access 
+- Manifest
+- __filename/
+
 ### Logging Overhaul
 
 ### Config Overhaul
 
-### ResourceManager Overhaul
+### Resources Overhaul
 
 ### VS Code extension overhaul
 
@@ -375,6 +381,6 @@ Standardizing rest interceptor patterns for enabling/disabling and ability to pr
 ### Rest + Context
 The Rest framework now treats context as a given, and can be disabled as needed.
 
-### Typescript 4.8+
-The shift to 4.8+ brought some unexpected changes that required rewriting how decorators are managed within the framework.  This also bit the eslint team.  Additionally "refinement" on comparing literal objects is now an error which broke some testing patterns.  There had always been a fallback, so no change was needed, but is pointing to providing a clearer pattern of how to use.
+### Typescript 4.9+
+The shift to 4.9+ brought some unexpected changes that required rewriting how decorators are managed within the framework.  This also bit the eslint team.  Additionally "refinement" on comparing literal objects is now an error which broke some testing patterns.  There had always been a fallback, so no change was needed, but is pointing to providing a clearer pattern of how to use.
 
