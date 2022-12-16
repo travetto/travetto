@@ -26,34 +26,41 @@ async function $getBootstrap(ctx) {
  */
 const compile = (ctx, watch) => $getBootstrap(ctx).then(({ compile: go }) => go(ctx, watch));
 
-/** @param {string} op */
-async function exec(op) {
+/** @param {string[]} args */
+async function exec(args) {
   const { getContext } = require('./transpile');
+  const op = args.find(x => !x.startsWith('-'));
+  /** @type {{clean?: boolean, quiet?: boolean}} */
+  const flags = Object.fromEntries(args.filter(x => x.startsWith('-')).map(x => x.split('-').pop()).map(x => [x, true]));
 
   const ctx = await getContext();
+  const message = flags.quiet ? () => { } : console.log.bind(console);
+
+  // Clean if needed
+  if (op === 'clean' || flags.clean) {
+    const fs = require('fs/promises');
+    await Promise.all([ctx.outputFolder, ctx.compilerFolder].map(folder =>
+      fs.rm(`${ctx.workspacePath}/${folder}`, { force: true, recursive: true })));
+    message(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
+  }
+
   switch (op) {
-    case 'clean': {
-      const fs = require('fs/promises');
-      await fs.rm(`${ctx.workspacePath}/${ctx.outputFolder}`, { force: true, recursive: true });
-      await fs.rm(`${ctx.workspacePath}/${ctx.compilerFolder}`, { force: true, recursive: true });
-      console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
-      return process.exit(0);
-    }
+    case 'clean': return process.exit(0);
     case 'manifest': {
       const { writeManifest, buildManifest } = await $getBootstrap(ctx);
       const manifest = (await buildManifest(ctx)).manifest;
       await writeManifest(ctx, manifest);
       const output = `${ctx.workspacePath}/${ctx.outputFolder}/${ctx.manifestFile}`;
-      console.log(`Wrote manifest ${output}`);
+      message(`Wrote manifest ${output}`);
       return process.exit(0);
     }
     case 'watch':
-      console.log(`Watching ${ctx.workspacePath} for changes...`);
+      message(`Watching ${ctx.workspacePath} for changes...`);
       await compile(ctx, true);
       return;
     case 'build':
       await compile(ctx);
-      console.log(`Built to ${ctx.workspacePath}/${ctx.outputFolder}`);
+      message(`Built to ${ctx.workspacePath}/${ctx.outputFolder}`);
       return process.exit(0);
     default: {
       const path = require('path/posix');
@@ -68,4 +75,4 @@ async function exec(op) {
   }
 }
 
-exec(process.argv[2]);
+exec(process.argv.slice(2));

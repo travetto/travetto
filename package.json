@@ -11,10 +11,10 @@
   "name": "@travetto/mono-repo",
   "license": "MIT",
   "scripts": {
-    "prestart": "npm ci --legacy-peer-deps",
-    "start": "trv build",
+    "prestart": "npm ci",
+    "start": "trv build --clean ",
     "test": "trv test",
-    "lint": "trv build; npx eslint --ext .js --ext .ts .",
+    "lint": "npx eslint --ext .js,.ts .",
     "upgrade-deps": "npm update -S"
   },
   "travetto": {

@@ -79,7 +79,7 @@ export class ManifestDeltaUtil {
         continue;
       }
       for (const [name, type, date] of m.files?.[key] ?? []) {
-        if (type === 'ts' || type === 'js' || type === 'json' || type === 'package-json') {
+        if (type === 'ts' || type === 'js' || type === 'package-json') {
           out[name] = [name, type, date];
         }
       }
