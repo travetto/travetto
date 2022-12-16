@@ -11,10 +11,6 @@
   "plugins": [
     "@typescript-eslint"
   ],
-  "globals": {
-    "$argv": "readonly",
-    "$exec": "readonly"
-  },
   "ignorePatterns": [
     "node_modules/",
     "dist/",
@@ -334,6 +330,14 @@
     ]
   },
   "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/explicit-function-return-type": "warn"
+      }
+    },
     {
       "files": [
         "doc/README.ts"

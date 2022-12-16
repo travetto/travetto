@@ -1,0 +1,37 @@
+{
+  "name": "@travetto/eslint-plugin",
+  "version": "3.0.0-rc.0",
+  "description": "ES Linting Rules",
+  "keywords": [
+    "eslint",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "main": "src/main.ts",
+  "files": [
+    "support",
+    "src"
+  ],
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "related/eslint-plugin"
+  },
+  "dependencies": {
+    "@travetto/manifest": "^3.0.0-rc.3",
+    "@types/eslint": "^8.4.10",
+    "@typescript-eslint/eslint-plugin": "^5.46.1",
+    "@typescript-eslint/parser": "^5.46.1",
+    "eslint": "^8.29.0",
+    "eslint-plugin-unused-imports": "^2.0.0"
+  },
+  "travetto": {
+    "displayName": "ES Linting Rules"
+  },
+  "private": true
+}

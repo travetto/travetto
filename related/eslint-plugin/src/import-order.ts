@@ -48,7 +48,10 @@ export const ImportOrder = {
           } else if (initType === 'TSAsExpression') { // tslint support
             call = decl.init.expression;
           }
-          if (call?.type === 'CallExpression' && call.callee.type === 'Identifier' && call.callee.name === 'require' && call.arguments[0].type === 'Literal') {
+          if (
+            call?.type === 'CallExpression' && call.callee.type === 'Identifier' &&
+            call.callee.name === 'require' && call.arguments[0].type === 'Literal'
+          ) {
             const arg1 = call.arguments[0];
             if (arg1.value && typeof arg1.value === 'string') {
               from = arg1.value;

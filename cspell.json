@@ -27,6 +27,7 @@
         "DATETIME",
         "dbconfig",
         "deserialize",
+        "estree",
         "expirable",
         "extends",
         "fastify",

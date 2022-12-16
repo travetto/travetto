@@ -12,9 +12,9 @@
   "license": "MIT",
   "scripts": {
     "prestart": "npm ci --legacy-peer-deps",
-    "start": "npx tsc -p eslint/tsconfig.json",
-    "test": "trv repo:test",
-    "lint": "npx eslint --ext .js --ext .ts .",
+    "start": "trv build",
+    "test": "trv test",
+    "lint": "trv build; npx eslint --ext .js --ext .ts .",
     "upgrade-deps": "npm update -S"
   },
   "travetto": {
@@ -31,7 +31,8 @@
     "module/*",
     "global-test/*",
     "related/overview",
-    "related/todo-app"
+    "related/todo-app",
+    "related/eslint-plugin"
   ],
   "overrides": {
     "compression": {
@@ -54,11 +55,6 @@
     "@parcel/watcher": "^2.0.7",
     "@travetto/repo": "^3.0.0-rc.3",
     "@types/debug": "^4.1.7",
-    "@types/eslint": "^8.4.10",
-    "@typescript-eslint/eslint-plugin": "^5.46.1",
-    "@typescript-eslint/parser": "^5.46.1",
-    "debug": "^4.3.4",
-    "eslint": "^8.29.0",
-    "eslint-plugin-unused-imports": "^2.0.0"
+    "debug": "^4.3.4"
   }
 }
