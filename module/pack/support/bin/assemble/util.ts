@@ -18,7 +18,7 @@ export class AssembleUtil {
       f.endsWith('.js.map') || (f.endsWith('.js') && !!RootIndex.getEntry(f))
     )) {
       if (file.endsWith('.js.map')) {
-        await fs.unlink(file);
+        await fs.unlink(file).catch(() => { });
       } else {
         const content = (await fs.readFile(file, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
         await fs.writeFile(file, content);
@@ -60,7 +60,7 @@ export class AssembleUtil {
 
   static async copyModule(workspace: string, module: IndexedModule): Promise<void> {
     const toCopy: Promise<void>[] = [];
-    for (const key of TypedObject.keys(module.files)) {
+    for (const [key, files] of TypedObject.entries(module.files)) {
       switch (key) {
         case '$index':
         case '$root':
@@ -68,12 +68,14 @@ export class AssembleUtil {
         case 'src':
         case 'support':
         case 'bin': {
-          for (const file of module.files[key]) {
+          for (const file of files) {
             const targetPartial = file.output.split(RootIndex.manifest.outputFolder)[1];
-            const target = path.resolve(workspace, targetPartial);
+            const target = path.join(workspace, targetPartial);
+            const src = (file.type === 'ts' || file.type === 'js' || file.type === 'package-json') ? file.output : file.source;
+
             toCopy.push(
               fs.mkdir(path.dirname(target), { recursive: true }).then(() =>
-                fs.copyFile(file.output, path.resolve(workspace, target))
+                fs.copyFile(src, target)
               )
             );
           }
@@ -95,11 +97,13 @@ export class AssembleUtil {
         !req.pkg.name.startsWith('@types/'),
       create: req => ({ pkg: req.pkg, src: req.sourcePath }),
     });
+    await fs.mkdir(path.resolve(workspace, 'node_modules'), { recursive: true });
     for (const { pkg, src } of pkgs) {
       if (RootIndex.hasModule(pkg.name)) {
         await this.copyModule(workspace, RootIndex.getModule(pkg.name)!);
       } else {
-        await PackUtil.copyRecursive(src, path.resolve(workspace, 'node_modules', src));
+        const folder = path.dirname(path.resolve(workspace, 'node_modules', src.replace(/^.*?node_modules\//, '')));
+        await PackUtil.copyRecursive(src, folder);
       }
     }
   }

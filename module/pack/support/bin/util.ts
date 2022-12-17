@@ -1,10 +1,10 @@
 import fs from 'fs/promises';
-import cp from 'child_process';
 
 import glob from 'picomatch';
 
 import { path, RootIndex } from '@travetto/manifest';
 import { CliUtil } from '@travetto/cli';
+import { ExecUtil } from '@travetto/base';
 
 import { CommonConfig, PackOperation } from './types';
 
@@ -172,21 +172,13 @@ export class PackUtil {
    * @param ignore Should errors be ignored
    */
   static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
-    try {
-      await new Promise<void>((res, rej) => {
-        const [cmd, args] = process.platform === 'win32' ?
-          ['xcopy', ['/y', '/h', '/s', src.replaceAll('/', '\\'), dest.replaceAll('/', '\\')]] :
-          ['cp', ['-r', '-p', src, dest]];
+    const [cmd, args] = process.platform === 'win32' ?
+      ['xcopy', ['/y', '/h', '/s', path.toNative(src), path.toNative(dest)]] :
+      ['cp', ['-r', '-p', src, dest]];
 
-        const proc = cp.spawn([cmd, ...args].join(' '), {});
-        proc
-          .on('error', err => rej(err))
-          .on('exit', (code: number) => code > 0 ? rej(new Error('Failed to copy')) : res());
-      });
-    } catch (err) {
-      if (!ignore) {
-        throw err;
-      }
+    const res = await ExecUtil.spawn(cmd, args).result.catchAsResult();
+    if (res.code && !ignore) {
+      throw new Error(`Failed to copy ${src} to ${dest}`);
     }
   }
 }
