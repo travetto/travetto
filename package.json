@@ -14,7 +14,7 @@
     "prestart": "npm ci",
     "start": "trv build --clean ",
     "test": "trv test",
-    "lint": "npx eslint --ext .js,.ts .",
+    "lint": "trv lint",
     "upgrade-deps": "npm update -S"
   },
   "travetto": {
