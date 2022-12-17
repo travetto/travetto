@@ -1,12 +1,9 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/manifest';
-import { ExecUtil, FileResourceProvider } from '@travetto/base';
+import { IndexedModule, Package, PackageUtil, path, RootIndex } from '@travetto/manifest';
+import { FileResourceProvider, TypedObject } from '@travetto/base';
 
-import { DependenciesUtil, DepType } from './dependencies';
 import { PackUtil } from '../util';
-
-const MODULE_DIRS = ['src', 'bin', 'support', 'resources', 'index.ts', 'package.json', 'tsconfig.trv.json'];
 
 /**
  * Utils for assembling
@@ -16,39 +13,15 @@ export class AssembleUtil {
   /**
    * Minimize cached source files, by removing source mapping info
    */
-  static async cleanCache(cache: string): Promise<void> {
-    for (const el of await fs.readdir(cache)) {
-      if (el.endsWith('.ts') || el.endsWith('.js')) {
-        const content = (await fs.readFile(`${cache}/${el}`, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
-        await fs.writeFile(`${cache}/${el}`, content);
-      }
-    }
-  }
-
-  /**
-   * Truncate all app source files, and framework source files
-   */
-  static async purgeSource(folders: string[]): Promise<void> {
-    // TODO: Remove
-    for (const _ of folders) {
-    }
-  }
-
-  /**
-   * Copy a module
-   */
-  static async copyModule(root: string, target: string): Promise<void> {
-    for (const f of MODULE_DIRS) {
-      const sourceFile = path.resolve(root, f);
-      const targetFile = path.resolve(target, f);
-      const found = await fs.stat(sourceFile).catch(() => { });
-      if (found) {
-        if (found.isFile()) {
-          await fs.copyFile(sourceFile, targetFile);
-        } else {
-          await fs.mkdir(targetFile, { recursive: true });
-          await PackUtil.copyRecursive(`${sourceFile}/*`, targetFile);
-        }
+  static async cleanSourceMaps(folder: string): Promise<void> {
+    for (const file of await new FileResourceProvider([folder]).query(f =>
+      f.endsWith('.js.map') || (f.endsWith('.js') && !!RootIndex.getEntry(f))
+    )) {
+      if (file.endsWith('.js.map')) {
+        await fs.unlink(file);
+      } else {
+        const content = (await fs.readFile(file, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
+        await fs.writeFile(file, content);
       }
     }
   }
@@ -63,39 +36,6 @@ export class AssembleUtil {
         await fs.unlink(el);
       } catch { }
     }
-  }
-
-  /**
-   * Copy over all prod dependencies
-   */
-  static async copyDependencies(workspace: string, types: DepType[] = ['prod', 'opt', 'peer']): Promise<void> {
-
-    for (const el of await DependenciesUtil.resolveDependencies({ types })) {
-      const sub = el.file.replace(/.*?node_modules/, 'node_modules');
-
-      const tgt = path.resolve(workspace, sub);
-      await fs.mkdir(path.dirname(tgt), { recursive: true });
-
-      if (el.dep.startsWith('@travetto')) {
-        await this.copyModule(el.file, tgt);
-      } else {
-        if (!(await fs.stat(tgt).catch(() => { }))) {
-          await PackUtil.copyRecursive(el.file, tgt);
-        }
-      }
-    }
-  }
-
-  /**
-   * Compile workspace
-   */
-  static async buildWorkspace(root: string, cacheDir: string): Promise<void> {
-    await ExecUtil.spawn('node', ['./node_modules/@travetto/cli/bin/trv.js', 'build'],
-      {
-        cwd: root, isolatedEnv: true,
-        env: { TRV_ENV: 'prod', TRV_COMPILED: '0' },
-        stdio: ['pipe', 'pipe', 2]
-      }).result;
   }
 
   /**
@@ -114,6 +54,52 @@ export class AssembleUtil {
           await fs.mkdir(path.dirname(dest), { recursive: true });
           await PackUtil.copyRecursive(src, dest);
         }
+      }
+    }
+  }
+
+  static async copyModule(workspace: string, module: IndexedModule): Promise<void> {
+    const toCopy: Promise<void>[] = [];
+    for (const key of TypedObject.keys(module.files)) {
+      switch (key) {
+        case '$index':
+        case '$root':
+        case '$package':
+        case 'src':
+        case 'support':
+        case 'bin': {
+          for (const file of module.files[key]) {
+            const targetPartial = file.output.split(RootIndex.manifest.outputFolder)[1];
+            const target = path.resolve(workspace, targetPartial);
+            toCopy.push(
+              fs.mkdir(path.dirname(target), { recursive: true }).then(() =>
+                fs.copyFile(file.output, path.resolve(workspace, target))
+              )
+            );
+          }
+          break;
+        }
+        case 'resources': break;
+      }
+    }
+    await Promise.all(toCopy);
+  }
+
+  /**
+   * Copy over all prod dependencies
+   */
+  static async copyProdDependencies(workspace: string): Promise<void> {
+    const pkgs = await PackageUtil.visitPackages<{ pkg: Package, src: string }>(RootIndex.mainModule.source, {
+      valid: req =>
+        (req.rel === 'prod' || req.rel === 'opt' || req.rel === 'root') &&
+        !req.pkg.name.startsWith('@types/'),
+      create: req => ({ pkg: req.pkg, src: req.sourcePath }),
+    });
+    for (const { pkg, src } of pkgs) {
+      if (RootIndex.hasModule(pkg.name)) {
+        await this.copyModule(workspace, RootIndex.getModule(pkg.name)!);
+      } else {
+        await PackUtil.copyRecursive(src, path.resolve(workspace, 'node_modules', src));
       }
     }
   }

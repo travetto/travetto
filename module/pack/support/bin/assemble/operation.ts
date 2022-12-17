@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { CliUtil } from '@travetto/cli';
 
 import { PackUtil } from '../util';
@@ -10,10 +10,8 @@ import { AssembleUtil } from './util';
 export interface AssembleConfig extends CommonConfig {
   keepSource: boolean;
   readonly: boolean;
-  cacheDir: string;
   add: Record<string, string>[];
   exclude: string[];
-  excludeCompile: string[];
   env: Record<string, string | undefined>;
 }
 
@@ -24,7 +22,7 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
   key: 'assemble',
   title: 'Assembling',
   context(cfg: AssembleConfig) {
-    return `[readonly=${cfg.readonly},cache=${cfg.cacheDir},source=${cfg.keepSource}]`;
+    return `[readonly=${cfg.readonly},source=${cfg.keepSource}]`;
   },
   overrides: {
     keepSource: CliUtil.toBool(process.env.PACK_ASSEMBLE_KEEP_SOURCE),
@@ -34,10 +32,8 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
     return {
       keepSource: src.keepSource ?? dest.keepSource,
       readonly: src.readonly ?? dest.readonly,
-      cacheDir: src.cacheDir ?? dest.cacheDir,
       add: [...(src.add ?? []), ...(dest.add ?? [])],
       exclude: [...(src.exclude ?? []), ...(dest.exclude ?? [])],
-      excludeCompile: [...(src.excludeCompile ?? []), ...(dest.excludeCompile ?? [])],
       env: { ...(src.env ?? {}), ...(dest.env ?? {}) },
     };
   },
@@ -47,27 +43,26 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
   /**
    * Assemble the project into a workspace directory, optimized for space and runtime
    */
-  async * exec({ workspace, cacheDir, add, exclude, excludeCompile, env, keepSource, readonly }: AssembleConfig) {
-    const fullCacheDir = path.resolve(workspace!, cacheDir);
+  async * exec({ workspace, add, exclude, env, keepSource }: AssembleConfig) {
     const ws = path.resolve(workspace!);
-    yield 'Cleaning Workspace'; await fs.rm(ws, { recursive: true, force: true }).then(() => { });
-    yield 'Copying Dependencies'; await AssembleUtil.copyDependencies(ws);
-    yield 'Copying App Content'; await AssembleUtil.copyModule(path.cwd(), ws);
-    yield 'Excluding Pre-Compile Files'; await AssembleUtil.excludeFiles(ws, excludeCompile);
-    yield 'Building'; await AssembleUtil.buildWorkspace(ws, cacheDir);
-    yield 'Excluding Post-Compile Files'; await AssembleUtil.excludeFiles(ws, exclude);
+    yield 'Cleaning Workspace'; {
+      await fs.rm(ws, { recursive: true, force: true }).catch(() => { });
+      await fs.mkdir(ws);
+    }
+    yield 'Create package.json'; {
+      await fs.writeFile(path.resolve(ws, 'package.json'), JSON.stringify({
+        name: '@entry/main',
+        version: RootIndex.mainPackage.version,
+        dependencies: { [RootIndex.mainPackage.name]: '*', }
+      }, null, 2), 'utf8');
+    }
+    yield 'Copying Prod Dependencies'; await AssembleUtil.copyProdDependencies(ws);
+    yield 'Excluding Files'; await AssembleUtil.excludeFiles(ws, exclude);
     yield 'Copying Added Content'; await AssembleUtil.copyAddedContent(ws, add);
     yield 'Removing Empty Folders'; await PackUtil.removeEmptyFolders(ws);
-    yield 'Writing Env.js'; await PackUtil.writeEnvJs(ws, {
-      ...env,
-      TRV_CACHE: `\${process.cwd()}/${cacheDir}`,
-      ...(readonly ? { TRV_COMPILED: '1' } : {})
-    });
 
     if (!keepSource) {
-      yield 'Clean Boot'; await AssembleUtil.cleanBoot(ws);
-      yield 'Remove Source Maps'; await AssembleUtil.cleanCache(fullCacheDir);
-      yield 'Emptying .ts Files'; await AssembleUtil.purgeSource([`${ws}/node_modules/@travetto`, `${ws}/src`]);
+      yield 'Remove Source Maps'; await AssembleUtil.cleanSourceMaps(ws);
     }
 
     yield CliUtil.color`${{ success: 'Successfully' }} assembled project at ${{ path: workspace }}`;
