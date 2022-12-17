@@ -48,7 +48,9 @@ export class Npm {
 
     const root = await RootIndex.manifest.workspacePath;
 
-    await fs.copyFile(`${root}/LICENSE`, `${mod.source}/LICENSE`).catch(() => { });
+    if (root !== mod.source) {
+      await fs.copyFile(`${root}/LICENSE`, `${mod.source}/LICENSE`).catch(() => { });
+    }
 
     const { result } = ExecUtil.spawn('npm', [
       'publish',

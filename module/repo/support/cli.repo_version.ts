@@ -29,7 +29,7 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
 
   async action(level: SemverLevel, prefix?: string): Promise<void> {
     if (await CliScmUtil.isWorkspaceDirty()) {
-      console.error('Cannot update versions with uncommitted changes');
+      console.error!('Cannot update versions with uncommitted changes');
       process.exit(1);
     }
 
@@ -37,7 +37,7 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
 
     // Do we have valid changes?
     if (modules.length) {
-      console.error('No modules available for versioning');
+      console.error!('No modules available for versioning');
       process.exit(1);
     }
 
@@ -61,7 +61,7 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
           pkg.optionalDependencies ?? {},
           pkg.peerDependencies ?? {}
         ]) {
-          if (mod.name in group && /^[*]|(file:.*)$/.test(group[mod.name])) {
+          if (mod.name in group && !/^[*]|(file:.*)$/.test(group[mod.name])) {
             group[mod.name] = `^${packages[mod.name].pkg.version}`;
             refreshed.add(pkg);
           }
