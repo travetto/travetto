@@ -101,8 +101,8 @@ export type PackageVisitReq<T> = { pkg: Package, rel: PackageRel, sourcePath: st
 export type PackageVisitor<T> = {
   init?(req: PackageVisitReq<T>): OrProm<undefined | void | PackageVisitReq<T>[]>;
   valid?(req: PackageVisitReq<T>): boolean;
-  create(req: PackageVisitReq<T>): T | Promise<T>;
-  visit(req: PackageVisitReq<T>, item: T): OrProm<void>;
+  create(req: PackageVisitReq<T>): OrProm<T>;
+  visit?(req: PackageVisitReq<T>, item: T): OrProm<void>;
   complete?(values: Set<T>): OrProm<Set<T> | undefined>;
 };
 

@@ -124,11 +124,11 @@ export class PackageUtil {
 
       const key = req.sourcePath;
       if (seen.has(key)) {
-        await visitor.visit(req, seen.get(key)!);
+        await visitor.visit?.(req, seen.get(key)!);
       } else {
         const dep = await visitor.create(req);
         out.add(dep);
-        await visitor.visit(req, dep);
+        await visitor.visit?.(req, dep);
         seen.set(key, dep);
         const children = this.getAllDependencies<T>(req.sourcePath, root.sourcePath);
         queue.push(...children.map(x => ({ ...x, parent: dep })));

@@ -2,9 +2,6 @@
   "ignorePatterns": [
     "module/scaffold/templates"
   ],
-  "extends": [
-    "plugin:@travetto/all"
-  ],
   "plugins": [
     "unused-imports"
   ],

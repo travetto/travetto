@@ -6,7 +6,8 @@
   "parser": "@typescript-eslint/parser",
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@travetto/all"
   ],
   "plugins": [
     "@typescript-eslint"
@@ -14,7 +15,6 @@
   "ignorePatterns": [
     "node_modules/",
     "dist/",
-    "api-client/",
     "out/",
     "*.d.ts"
   ],
