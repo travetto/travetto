@@ -1,0 +1,10 @@
+{
+  "overrides": [
+    {
+      "files": "**/*.ts",
+      "rules": {
+        "no-restricted-imports": 0
+      }
+    }
+  ]
+}

@@ -8,19 +8,19 @@ export class UIController {
 
   @Get('/')
   @Produces('text/html')
-  getHomepage() {
+  getHomepage(): ReadableStream {
     return this.resources.readStream('/ui/index.html');
   }
 
   @Get(/[.]js$/)
   @Produces('application/javascript')
-  getJs(req: Request) {
+  getJs(req: Request): ReadableStream {
     return this.resources.readStream(req.url);
   }
 
   @Get(/[.]css$/)
   @Produces('text/css')
-  getCss(req: Request) {
+  getCss(req: Request): ReadableStream {
     return this.resources.readStream(req.url);
   }
 }

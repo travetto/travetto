@@ -16,19 +16,19 @@ export class ApiController {
 
   @Post('/login')
   @Authenticate(BasicAuthⲐ)
-  async getAll() {
+  async getAll(): Promise<Redirect> {
     return new Redirect('/auth/self', 301);
   }
 
   @Get('/self')
   @Authenticated()
-  async getSelf(user: Principal) {
+  async getSelf(user: Principal): Promise<Principal> {
     return user;
   }
 
   @Get('/logout')
   @Unauthenticated()
-  async logout(req: Request) {
+  async logout(req: Request): Promise<Redirect> {
     await this.svc.logout(req);
     return new Redirect('/auth/self', 301);
   }

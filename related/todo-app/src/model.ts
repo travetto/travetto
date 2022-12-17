@@ -15,7 +15,7 @@ export class Todo {
     this.#color = c;
   }
 
-  get color() {
+  get color(): string | undefined {
     return this.#color;
   }
 }

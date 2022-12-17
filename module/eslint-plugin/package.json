@@ -13,14 +13,14 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "main": "src/main.ts",
+  "main": "support/main.ts",
   "files": [
-    "support",
-    "src"
+    "bin",
+    "support"
   ],
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "related/eslint-plugin"
+    "directory": "module/eslint-plugin"
   },
   "dependencies": {
     "@travetto/manifest": "^3.0.0-rc.3",
@@ -33,5 +33,7 @@
   "travetto": {
     "displayName": "ES Linting Rules"
   },
-  "private": true
+  "publishConfig": {
+    "access": "public"
+  }
 }

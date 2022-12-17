@@ -10,7 +10,8 @@
     "plugin:@travetto/all"
   ],
   "plugins": [
-    "@typescript-eslint"
+    "@typescript-eslint",
+    "unused-imports"
   ],
   "ignorePatterns": [
     "node_modules/",
@@ -19,6 +20,7 @@
     "*.d.ts"
   ],
   "rules": {
+    "unused-imports/no-unused-imports": "error",
     "@typescript-eslint/array-type": "error",
     "@typescript-eslint/explicit-function-return-type": [
       "off"
@@ -340,12 +342,27 @@
     },
     {
       "files": [
-        "doc/README.ts"
+        "**/{README.ts,doc/**}"
       ],
       "rules": {
         "max-len": "off",
         "@typescript-eslint/quotes": "warn",
-        "@typescript-eslint/indent": "off"
+        "@typescript-eslint/indent": "off",
+        "@typescript-eslint/consistent-type-assertions": 0,
+        "@typescript-eslint/explicit-function-return-type": 0
+      }
+    },
+    {
+      "files": "**/support/transform*",
+      "rules": {
+        "no-restricted-imports": 0
+      }
+    },
+    {
+      "files": "**/{test,support/test}/**/*.ts",
+      "rules": {
+        "@typescript-eslint/consistent-type-assertions": 0,
+        "@typescript-eslint/explicit-function-return-type": 0
       }
     }
   ]

@@ -18,7 +18,7 @@ export class TodoController {
    * Get all todos
    */
   @Get('/')
-  async getAll(search: TodoSearch) {
+  async getAll(search: TodoSearch): Promise<Todo[]> {
     return await this._svc.getAll(search);
   }
 
@@ -26,7 +26,7 @@ export class TodoController {
    * Delete all todos
    */
   @Delete('/')
-  async deleteAllCompleted() {
+  async deleteAllCompleted(): Promise<void> {
     await this._svc.deleteAllCompleted();
   }
 
@@ -35,7 +35,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Get('/:id')
-  async getById(id: string) {
+  async getById(id: string): Promise<Todo> {
     return this._svc.get(id);
   }
 
@@ -43,7 +43,7 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(todo: Todo) {
+  async create(todo: Todo): Promise<Todo> {
     return await this._svc.add(todo);
   }
 
@@ -53,7 +53,7 @@ export class TodoController {
    * @param todo Todo to update
    */
   @Put('/:id')
-  async update(id: string, todo: Todo) {
+  async update(id: string, todo: Todo): Promise<Todo> {
     todo.id = id;
     return await this._svc.update(todo);
   }
@@ -64,7 +64,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Put('/:id/complete')
-  async complete(id: string, completed: boolean = true) {
+  async complete(id: string, completed: boolean = true): Promise<Todo> {
     return await this._svc.complete(id, completed);
   }
 
@@ -73,7 +73,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Delete('/:id')
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     console.log('Hello');
     await this._svc.remove(id);
   }
