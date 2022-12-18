@@ -104,13 +104,6 @@ export class PackUtil {
   }
 
   /**
-   * Delete all empty folders
-   */
-  static async removeEmptyFolders(root: string): Promise<void> {
-    // Remove
-  }
-
-  /**
    * Run operation with logging
    */
   static async runOperation<T extends CommonConfig>(op: PackOperation<T, string>, cfg: T, indent = 0): Promise<void> {

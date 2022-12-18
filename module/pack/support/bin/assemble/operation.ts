@@ -53,7 +53,7 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
     yield 'Copying Prod Dependencies'; await AssembleUtil.copyProdDependencies(ws, keepSource);
     yield 'Excluding Files'; await AssembleUtil.excludeFiles(ws, exclude);
     yield 'Copying Added Content'; await AssembleUtil.copyAddedContent(ws, add);
-    yield 'Removing Empty Folders'; await PackUtil.removeEmptyFolders(ws);
+    yield 'Removing Empty Folders'; await AssembleUtil.removeEmptyFolders(ws);
     yield CliUtil.color`${{ success: 'Successfully' }} assembled project at ${{ path: workspace }}`;
   }
 };

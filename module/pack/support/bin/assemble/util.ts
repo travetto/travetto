@@ -129,4 +129,11 @@ export class AssembleUtil {
       await fs.copyFile(file, path.resolve(workspace, path.basename(file)));
     }
   }
+
+  /**
+   * Delete all empty folders
+   */
+  static async removeEmptyFolders(root: string): Promise<void> {
+    // Remove
+  }
 }
