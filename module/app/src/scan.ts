@@ -26,7 +26,7 @@ export class AppScanUtil {
 
     await Promise.all(
       RootIndex.findSrc()
-        .filter(x => fs.readFileSync(x.output).includes('@Application'))
+        .filter(x => fs.readFileSync(x.output, 'utf8').includes('@Application'))
         .map(x => import(x.output)) // Only load files that are candidates
     );
 

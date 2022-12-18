@@ -25,7 +25,7 @@ WORKDIR /app
 COPY . .
 ${Object.entries(env).map(([k, v]) => `ENV ${k} "${v}"`).join('\n')}
 ${(port ?? []).map(x => `EXPOSE ${x}`).join('\n')}
-CMD ["node", "./node_modules/@travetto/cli/bin/trv", "run", "${app}"]
+CMD ["node", "./trv", "run", "${app}"]
 `;
 
 export const Docker: PackOperation<DockerConfig, 'docker'> = {
@@ -36,6 +36,7 @@ export const Docker: PackOperation<DockerConfig, 'docker'> = {
   },
   defaults: {
     name: RootIndex.mainPackage.name.replace('@', ''),
+    image: 'node:18-alpine3.16',
     builder: dockerFileBuilder,
     port: [],
     tag: ['latest']

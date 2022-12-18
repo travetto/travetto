@@ -116,6 +116,9 @@ export class AssembleUtil {
       }
     }
 
+    manifest.manifestFile = 'manifest.json';
+    manifest.mainPath = RootIndex.manifest.modules[RootIndex.mainPackage.name].output;
+
     await fs.writeFile(path.resolve(workspace, 'manifest.json'), JSON.stringify(manifest), 'utf8');
 
     const output = path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder);
