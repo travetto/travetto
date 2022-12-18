@@ -72,7 +72,7 @@ export class RestApplication<T = unknown>  {
     } else if (req.path === '/' && this.config.defaultMessage) {
       return this.info;
     } else {
-      throw new AppError('Resource not found', 'notfound');
+      throw new AppError('Resource not found', 'notfound', { path: req.path });
     }
   }
 

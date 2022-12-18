@@ -11,22 +11,6 @@ import { PackUtil } from '../util';
 export class AssembleUtil {
 
   /**
-   * Minimize cached source files, by removing source mapping info
-   */
-  static async cleanSourceMaps(folder: string): Promise<void> {
-    for (const file of await new FileResourceProvider([folder]).query(f =>
-      f.endsWith('.js.map') || (f.endsWith('.js') && !!RootIndex.getEntry(f))
-    )) {
-      if (file.endsWith('.js.map')) {
-        await fs.unlink(file).catch(() => { });
-      } else {
-        const content = (await fs.readFile(file, 'utf8')).replace(/\/\/# sourceMap.*/g, '');
-        await fs.writeFile(file, content);
-      }
-    }
-  }
-
-  /**
    * Purge workspace using file rules
    */
   static async excludeFiles(root: string, files: string[]): Promise<void> {
@@ -58,7 +42,7 @@ export class AssembleUtil {
     }
   }
 
-  static async copyModule(workspace: string, module: IndexedModule): Promise<void> {
+  static async copyModule(workspace: string, module: IndexedModule, keepSource?: boolean): Promise<void> {
     const toCopy: Promise<void>[] = [];
     for (const [key, files] of TypedObject.entries(module.files)) {
       switch (key) {
@@ -67,21 +51,27 @@ export class AssembleUtil {
         case '$package':
         case 'src':
         case 'support':
+        case 'resources':
         case 'bin': {
           for (const file of files) {
             const targetPartial = file.output.split(RootIndex.manifest.outputFolder)[1];
             const target = path.join(workspace, targetPartial);
-            const src = (file.type === 'ts' || file.type === 'js' || file.type === 'package-json') ? file.output : file.source;
+            const src = await fs.stat(file.output).then(() => file.output, () => file.source);
+            toCopy.push((async (): Promise<void> => {
+              await fs.mkdir(path.dirname(target), { recursive: true });
+              await fs.copyFile(src, target);
 
-            toCopy.push(
-              fs.mkdir(path.dirname(target), { recursive: true }).then(() =>
-                fs.copyFile(src, target)
-              )
-            );
+              if (file.type === 'ts' || file.type === 'js') {
+                if (keepSource) {
+                  await fs.copyFile(`${src}.map`, `${target}.map`).catch(() => { });
+                } else {
+                  await fs.writeFile(target, (await fs.readFile(target, 'utf8')).replace(/\/\/# sourceMap.*/g, ''));
+                }
+              }
+            })());
           }
           break;
         }
-        case 'resources': break;
       }
     }
     await Promise.all(toCopy);
@@ -90,7 +80,7 @@ export class AssembleUtil {
   /**
    * Copy over all prod dependencies
    */
-  static async copyProdDependencies(workspace: string): Promise<void> {
+  static async copyProdDependencies(workspace: string, keepSource?: boolean): Promise<void> {
     const pkgs = await PackageUtil.visitPackages<{ pkg: Package, src: string }>(RootIndex.mainModule.source, {
       valid: req =>
         (req.rel === 'prod' || req.rel === 'opt' || req.rel === 'root') &&
@@ -100,11 +90,40 @@ export class AssembleUtil {
     await fs.mkdir(path.resolve(workspace, 'node_modules'), { recursive: true });
     for (const { pkg, src } of pkgs) {
       if (RootIndex.hasModule(pkg.name)) {
-        await this.copyModule(workspace, RootIndex.getModule(pkg.name)!);
+        await this.copyModule(workspace, RootIndex.getModule(pkg.name)!, keepSource);
       } else {
         const folder = path.dirname(path.resolve(workspace, 'node_modules', src.replace(/^.*?node_modules\//, '')));
         await PackUtil.copyRecursive(src, folder);
       }
+    }
+  }
+
+  /**
+   * Copy over entry point
+   */
+  static async copyEntryPoint(workspace: string): Promise<void> {
+    // Faux-package.json
+    await fs.writeFile(path.resolve(workspace, 'package.json'), JSON.stringify({
+      name: '@entry/main',
+      version: RootIndex.mainPackage.version,
+      dependencies: { [RootIndex.mainPackage.name]: '*', }
+    }, null, 2), 'utf8');
+
+    const manifest = structuredClone(RootIndex.manifest);
+    for (const [name, mod] of TypedObject.entries(manifest.modules)) {
+      if (!mod.profiles.includes('std')) {
+        delete manifest.modules[name];
+      }
+    }
+
+    await fs.writeFile(path.resolve(workspace, 'manifest.json'), JSON.stringify(manifest), 'utf8');
+
+    const output = path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder);
+    for (const file of [
+      path.resolve(output, 'trv'), // Entry points
+      path.resolve(output, 'trv.cmd')
+    ]) {
+      await fs.copyFile(file, path.resolve(workspace, path.basename(file)));
     }
   }
 }

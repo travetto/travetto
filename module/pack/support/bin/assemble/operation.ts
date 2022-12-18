@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { path } from '@travetto/manifest';
 import { CliUtil } from '@travetto/cli';
 
 import { PackUtil } from '../util';
@@ -49,22 +49,11 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
       await fs.rm(ws, { recursive: true, force: true }).catch(() => { });
       await fs.mkdir(ws);
     }
-    yield 'Create package.json'; {
-      await fs.writeFile(path.resolve(ws, 'package.json'), JSON.stringify({
-        name: '@entry/main',
-        version: RootIndex.mainPackage.version,
-        dependencies: { [RootIndex.mainPackage.name]: '*', }
-      }, null, 2), 'utf8');
-    }
-    yield 'Copying Prod Dependencies'; await AssembleUtil.copyProdDependencies(ws);
+    yield 'Create Entrypoint'; await AssembleUtil.copyEntryPoint(ws);
+    yield 'Copying Prod Dependencies'; await AssembleUtil.copyProdDependencies(ws, keepSource);
     yield 'Excluding Files'; await AssembleUtil.excludeFiles(ws, exclude);
     yield 'Copying Added Content'; await AssembleUtil.copyAddedContent(ws, add);
     yield 'Removing Empty Folders'; await PackUtil.removeEmptyFolders(ws);
-
-    if (!keepSource) {
-      yield 'Remove Source Maps'; await AssembleUtil.cleanSourceMaps(ws);
-    }
-
     yield CliUtil.color`${{ success: 'Successfully' }} assembled project at ${{ path: workspace }}`;
   }
 };
