@@ -43,7 +43,7 @@ COPY --from=build /app /app
 EXPOSE ${this.cmd.port}
 WORKDIR  /app
 ENV NODE_OPTIONS "--no-deprecation"
-CMD ["node", "./trv", "run", "${this.cmd.app}"]
+CMD ["./trv", "run", "${this.cmd.app}"]
 `;
 
     if (this.cmd.output === '-' || this.cmd.output === '/dev/stdout' || !this.cmd.output) {

@@ -25,7 +25,7 @@ WORKDIR /app
 COPY . .
 ${Object.entries(env).map(([k, v]) => `ENV ${k} "${v}"`).join('\n')}
 ${(port ?? []).map(x => `EXPOSE ${x}`).join('\n')}
-CMD ["node", "./trv", "run", "${app}"]
+CMD ["./trv", "run", "${app}"]
 `;
 
 export const Docker: PackOperation<DockerConfig, 'docker'> = {
