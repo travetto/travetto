@@ -45,16 +45,21 @@ class $ShutdownManager {
       const { name, handler } = listener;
 
       try {
-        console.debug('Starting', { name });
+        if (name) {
+          console.debug('Starting', { name });
+        }
         const res = handler();
         if (isPromise(res)) {
           // If a promise, queue for handling
           promises.push(res);
-          res
-            .then(() => console.debug('Completed', { name }))
-            .catch((err: unknown) => console.error('Failed', { error: err, name }));
+          if (name) {
+            res.then(() => console.debug('Completed', { name }));
+          }
+          res.catch((err: unknown) => console.error('Failed', { error: err, name }));
         } else {
-          console.debug('Completed', { name });
+          if (name) {
+            console.debug('Completed', { name });
+          }
         }
       } catch (err) {
         console.error('Failed', { name, error: err });
@@ -144,11 +149,11 @@ class $ShutdownManager {
    * @param handler Handler or Closeable
    * @param final If this should be run an attempt to shutdown or only on the final shutdown
    */
-  onShutdown(src: string | Function | { constructor: Function }, handler: Function | Closeable, final: boolean = false): void {
+  onShutdown(src: undefined | string | Function | { constructor: Function }, handler: Function | Closeable, final: boolean = false): void {
     if ('close' in handler) {
       handler = handler.close.bind(handler);
     }
-    const name = typeof src === 'string' ? src : ('Ⲑid' in src ? src.Ⲑid : src.constructor.Ⲑid);
+    const name = typeof src === 'undefined' ? '' : (typeof src === 'string' ? src : ('Ⲑid' in src ? src.Ⲑid : src.constructor.Ⲑid));
     this.#listeners.push({ name, handler, final });
   }
 

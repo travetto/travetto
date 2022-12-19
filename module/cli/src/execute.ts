@@ -50,7 +50,7 @@ export class ExecutionManager {
    * @param args
    */
   static async run(args: string[]): Promise<void> {
-    ShutdownManager.onShutdown(this.constructor, () => CliUtil.reset());
+    ShutdownManager.onShutdown('', () => CliUtil.reset());
 
     const width = ConsoleManager.lineWidth;
     commander
