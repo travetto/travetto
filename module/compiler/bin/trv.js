@@ -37,7 +37,7 @@ async function exec(args) {
   const message = flags.quiet ? () => { } : console.log.bind(console);
 
   // Clean if needed
-  if (op === 'clean' || flags.clean) {
+  if (op === 'clean' || (op && flags.clean)) {
     const fs = require('fs/promises');
     await Promise.all([ctx.outputFolder, ctx.compilerFolder].map(folder =>
       fs.rm(`${ctx.workspacePath}/${folder}`, { force: true, recursive: true })));
@@ -66,6 +66,7 @@ async function exec(args) {
       const path = require('path/posix');
       const { manifest } = await compile(ctx);
       const out = path.join(ctx.workspacePath, ctx.outputFolder);
+      // TODO: Externalize somehow?
       const cliMain = path.join(out, manifest.modules['@travetto/cli'].output, 'support', 'main.cli.js');
       process.env.TRV_MANIFEST = ctx.mainModule;
       process.env.TRV_OUTPUT = out;

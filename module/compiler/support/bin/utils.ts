@@ -2,9 +2,7 @@ import fs from 'fs/promises';
 
 import cp from 'child_process';
 import path from 'path';
-import readline from 'readline';
-import timers from 'timers/promises';
-import { Writable } from 'stream';
+import rl from 'readline';
 import { type Stats } from 'fs';
 import { createRequire } from 'module';
 
@@ -24,66 +22,18 @@ export const IS_DEBUG = /\b([*]|build)\b/.test(process.env.DEBUG ?? '');
 const resolveImport = (lib: string): string => req.resolve(lib);
 const recentStat = (stat: Stats): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 
-/**
- * Rewrite command line text
- */
-const rewriteLine = async (stream: Writable, text: string, clear = false): Promise<boolean> =>
-  new Promise(r => readline.cursorTo(stream, 0, undefined, () => {
-    if (clear) {
-      readline.clearLine(stream, 0);
-    }
-    if (text) {
-      stream.write(text);
-      readline.moveCursor(stream, 1, 0);
-    }
-    r(true);
-  }));
-
-/**
- * Waiting indicator
- */
-async function waiting<T>(message: string, worker: () => Promise<T>): Promise<T | undefined> {
-  const waitState = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
-  const delay = 100;
-  const writeLine = rewriteLine.bind(undefined, process.stdout);
-
-  const work = worker();
-
-  if (!process.stdout.isTTY) {
-    return work; // Dip early
-  }
-
-  process.stdout.write('\x1B[?25l');
-
-  let i = -1;
+async function waiting(message: string, op: () => Promise<boolean>): Promise<boolean> {
+  const run = op();
   let done = false;
-  let value: T | undefined;
-  let capturedError;
-  const final = work
-    .then(res => value = res)
-    .catch(err => capturedError = err)
-    .finally(() => done = true);
-
-  if (delay) {
-    await Promise.race([timers.setTimeout(delay), final]);
-  }
-
+  run.finally(() => done = true);
+  process.stdout.write(message);
   while (!done) {
-    await writeLine(`${waitState[i = (i + 1) % waitState.length]} ${message}`);
-    await timers.setTimeout(50);
+    await new Promise(r => setTimeout(r, 1000));
+    process.stdout.write('.');
   }
-
-  if (i >= 0) {
-    await writeLine('', true);
-  }
-
-  process.stdout.write('\x1B[?25h');
-
-  if (capturedError) {
-    throw capturedError;
-  } else {
-    return value;
-  }
+  rl.moveCursor(process.stdout, -1000, 0);
+  rl.clearLine(process.stdout, 1);
+  return await run;
 }
 
 /**
