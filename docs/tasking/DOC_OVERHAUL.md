@@ -6,6 +6,7 @@
 - Auth Rest Session
 - Auth Rest Context
 - Repo
+- Eslint
 
 ## Outdated
 - Base
