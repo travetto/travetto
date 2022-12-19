@@ -75,6 +75,7 @@
         "picomatch",
         "pngquant",
         "precompiler",
+        "preid",
         "prismjs",
         "promisify",
         "proxied",

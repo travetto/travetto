@@ -95,8 +95,13 @@ export class PackageUtil {
   /**
    * Write package
    */
-  static async writePackage(modulePath: string, pkg: Package): Promise<void> {
-    await fs.writeFile(path.resolve(modulePath, 'package.json'), JSON.stringify(pkg, null, 2), 'utf8');
+  static async writePackageIfChanged(modulePath: string, pkg: Package): Promise<void> {
+    const final = JSON.stringify(pkg, null, 2);
+    const target = path.resolve(modulePath, 'package.json');
+    const current = await fs.readFile(target, 'utf8').catch(() => '');
+    if (final !== current) {
+      await fs.writeFile(target, final, 'utf8');
+    }
   }
 
   /**
@@ -162,5 +167,35 @@ export class PackageUtil {
       this.#workspaces[rootPath] = res.map(d => ({ sourcePath: d.location, name: d.name }));
     }
     return this.#workspaces[rootPath];
+  }
+
+  /**
+   * Sync versions across a series of folders
+   */
+  static async syncVersions(folders: string[], versionMapping: Record<string, string> = {}): Promise<void> {
+    const packages = folders.map(folder => {
+      const pkg = this.readPackage(folder);
+      versionMapping[pkg.name] = `^${pkg.version}`;
+      return { folder, pkg };
+    });
+
+    for (const { pkg } of packages) {
+      for (const group of [
+        pkg.dependencies ?? {},
+        pkg.devDependencies ?? {},
+        pkg.optionalDependencies ?? {},
+        pkg.peerDependencies ?? {}
+      ]) {
+        for (const [mod, ver] of Object.entries(versionMapping)) {
+          if (mod in group && !/^[*]|(file:.*)$/.test(group[mod])) {
+            group[mod] = ver;
+          }
+        }
+      }
+    }
+
+    for (const { folder, pkg } of packages) {
+      await this.writePackageIfChanged(folder, pkg);
+    }
   }
 }

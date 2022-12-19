@@ -1,7 +1,5 @@
-import fs from 'fs/promises';
-
 import { ExecUtil } from '@travetto/base';
-import { IndexedModule, RootIndex } from '@travetto/manifest';
+import { IndexedModule } from '@travetto/manifest';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease';
 
@@ -11,54 +9,36 @@ export class Npm {
    * Is a module already published
    */
   static async isPublished(mod: IndexedModule): Promise<boolean> {
-    const proc = ExecUtil.spawn('npm', ['show', `${mod.name}@${mod.version}`, 'version', '--json'], { cwd: mod.source });
+    const { result } = ExecUtil.spawn('npm', ['show', `${mod.name}@${mod.version}`, 'version', '--json'], { cwd: mod.source });
 
-    return proc.result
-      .catchAsResult!()
-      .then(res => {
-        if (!res.valid && !res.stderr.includes('E404')) {
-          throw new Error(res.stderr);
-        }
-        const item = res.stdout ? JSON.parse(res.stdout) : [];
-        const found = Array.isArray(item) ? item.pop() : item;
-        return !!found;
-      });
+    const res = await result.catchAsResult();
+    if (!res.valid && !res.stderr.includes('E404')) {
+      throw new Error(res.stderr);
+    }
+    const item = res.stdout ? JSON.parse(res.stdout) : [];
+    const found = Array.isArray(item) ? item.pop() : item;
+    return !!found;
   }
 
   /**
    * Setting the version
    */
   static async version(modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
-    const run = ExecUtil.spawn('npm', [
-      'version',
-      level,
-      ...(preid ? ['--preid', preid] : []),
-      ...modules.flatMap(m => ['-w', m.workspaceRelative])
-    ], {
-      stdio: [0, 1, 2]
-    });
-    await run.result;
+    const mods = modules.flatMap(m => ['-w', m.workspaceRelative]);
+    await ExecUtil.spawn('npm',
+      ['version', level, ...(preid ? ['--preid', preid] : []), ...mods],
+      { stdio: 'inherit' }
+    ).result;
   }
 
   /**
    * Publish a module
    */
   static async publish(mod: IndexedModule, dryRun?: boolean): Promise<void> {
-    const versionTag = mod.version.replace(/^.*-(rc|alpha|beta|next)[.]\d+/, (a, b) => b);
-
-    const root = await RootIndex.manifest.workspacePath;
-
-    if (root !== mod.source) {
-      await fs.copyFile(`${root}/LICENSE`, `${mod.source}/LICENSE`).catch(() => { });
-    }
-
-    const { result } = ExecUtil.spawn('npm', [
-      'publish',
-      ...(dryRun ? ['--dry-run'] : []),
-      '--tag', versionTag || 'latest',
-      '--access', 'public'
-    ], { cwd: mod.source, stdio: [0, 1, 2] });
-
-    await result;
+    const versionTag = mod.version.replace(/^.*-(rc|alpha|beta|next)[.]\d+/, (a, b) => b) || 'latest';
+    await ExecUtil.spawn('npm',
+      ['publish', ...(dryRun ? ['--dry-run'] : []), '--tag', versionTag, '--access', 'public'],
+      { cwd: mod.source, stdio: 'inherit' }
+    ).result;
   }
 }

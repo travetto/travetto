@@ -1,7 +1,7 @@
 import rl from 'readline';
 
 import { ColorUtil, Env, ExecUtil, ExecutionOptions, TypedObject } from '@travetto/base';
-import { IndexedModule, RootIndex } from '@travetto/manifest';
+import { IndexedModule, PackageUtil, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
 
 import { CliScmUtil } from './scm';
@@ -62,6 +62,13 @@ export class CliModuleUtil {
       await this.findChangedModulesRecursive() :
       [...RootIndex.getModuleList('all')].map(x => RootIndex.getModule(x)!)
     ).filter(x => x.source !== RootIndex.manifest.workspacePath);
+  }
+
+  /**
+   * Synchronize all workspace modules to have the correct versions from the current packages
+   */
+  static async synchronizeModuleVersions(): Promise<void> {
+    await PackageUtil.syncVersions((await this.findModules('all')).map(x => x.source));
   }
 
   /**

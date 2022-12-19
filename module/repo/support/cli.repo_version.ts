@@ -1,6 +1,5 @@
 import { CliCommand, CliScmUtil, OptionConfig } from '@travetto/cli';
 import { CliModuleUtil } from '@travetto/cli/src/module';
-import { Package, PackageUtil } from '@travetto/manifest';
 
 import { Npm, SemverLevel } from './bin/npm';
 
@@ -43,35 +42,7 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
 
     await Npm.version(modules, level, prefix);
 
-    const all = await CliModuleUtil.findModules('all');
-    const packages = Object.fromEntries(all.map(mod => {
-      const pkg = PackageUtil.readPackage(mod.source);
-      const write = (): Promise<void> => PackageUtil.writePackage(mod.source, pkg);
-      return [mod.name, { pkg, mod, write }];
-    }));
-
-    const refreshed = new Set<Package>();
-
-    for (const mod of modules) {
-      for (const dep of all) {
-        const { pkg } = packages[dep.name];
-        for (const group of [
-          pkg.dependencies ?? {},
-          pkg.devDependencies ?? {},
-          pkg.optionalDependencies ?? {},
-          pkg.peerDependencies ?? {}
-        ]) {
-          if (mod.name in group && !/^[*]|(file:.*)$/.test(group[mod.name])) {
-            group[mod.name] = `^${packages[mod.name].pkg.version}`;
-            refreshed.add(pkg);
-          }
-        }
-      }
-    }
-
-    for (const mod of refreshed) {
-      await packages[mod.name].write();
-    }
+    await CliModuleUtil.synchronizeModuleVersions();
 
     console.log!(await CliScmUtil.createCommit(`Publish ${modules.map(x => x.name).join(',')}`));
   }
