@@ -98,9 +98,9 @@ export class PackageUtil {
   static async writePackageIfChanged(modulePath: string, pkg: Package): Promise<void> {
     const final = JSON.stringify(pkg, null, 2);
     const target = path.resolve(modulePath, 'package.json');
-    const current = await fs.readFile(target, 'utf8').catch(() => '');
+    const current = (await fs.readFile(target, 'utf8').catch(() => '')).trim();
     if (final !== current) {
-      await fs.writeFile(target, final, 'utf8');
+      await fs.writeFile(target, `${final}\n`, 'utf8');
     }
   }
 

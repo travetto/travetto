@@ -23,8 +23,8 @@
     "directory": "module/log"
   },
   "dependencies": {
-    "@travetto/config": "^3.0.0-rc.3",
-    "@travetto/di": "^3.0.0-rc.3"
+    "@travetto/config": "^3.0.0-rc.5",
+    "@travetto/di": "^3.0.0-rc.5"
   },
   "travetto": {
     "displayName": "Logging"
