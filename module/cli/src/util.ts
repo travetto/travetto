@@ -145,6 +145,13 @@ export class CliUtil {
   }
 
   /**
+   * Reset all changes
+   */
+  static reset(): void {
+    this.#enableCursor();
+  }
+
+  /**
    * Provides an updatable table where you define the row/col count at the beginning, and
    *  then are able to update rows on demand.
    */

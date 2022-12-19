@@ -1,11 +1,12 @@
 import { program as commander } from 'commander';
 
 import { RootIndex, PackageUtil, path } from '@travetto/manifest';
-import { ConsoleManager } from '@travetto/base';
+import { ConsoleManager, ShutdownManager } from '@travetto/base';
 import { runMain } from '@travetto/base/support/init.main';
 
 import { CliCommandManager } from './command-manager';
 import { HelpUtil } from './help';
+import { CliUtil } from './util';
 
 /**
  * Execution manager
@@ -49,6 +50,8 @@ export class ExecutionManager {
    * @param args
    */
   static async run(args: string[]): Promise<void> {
+    ShutdownManager.onShutdown(this.constructor, () => CliUtil.reset());
+
     const width = ConsoleManager.lineWidth;
     commander
       .version(PackageUtil.getFrameworkVersion())
