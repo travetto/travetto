@@ -2,29 +2,13 @@ import timers from 'timers/promises';
 import readline from 'readline';
 import { Writable } from 'stream';
 
-import { ColorUtil } from '@travetto/base';
+import { GlobalColorSupport } from '@travetto/base';
 
 type Table = {
   init(...header: string[]): Promise<void>;
   update(row: number, output: string): Promise<void>;
   finish(): Promise<void>;
 };
-
-// Common color support
-const { palette: colorPalette, template: color } = ColorUtil.buildColorTemplate({
-  input: ['yellow'],
-  output: ['magenta'],
-  path: ['cyan'],
-  success: ['green', 'bold'],
-  failure: ['red', 'bold'],
-  param: ['green'],
-  type: ['cyan'],
-  description: ['white', 'faint', 'bold'],
-  title: ['white', 'bold'],
-  identifier: ['blue', 'bold'],
-  subtitle: ['white'],
-  subsubtitle: ['white', 'faint']
-});
 
 /**
  * Common CLI Utilities
@@ -33,8 +17,20 @@ export class CliUtil {
 
   static #waitState = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
-  static color = color;
-  static colorPalette = colorPalette;
+  static color = GlobalColorSupport.template({
+    input: 'yellow',
+    output: 'pink',
+    path: 'cyan',
+    success: 'green',
+    failure: 'red',
+    param: 'lightGreen',
+    type: 'cyan',
+    description: 'white',
+    title: 'brightWhite',
+    identifier: 'skyBlue',
+    subtitle: 'lightGray',
+    subsubtitle: 'darkGray'
+  });
 
   static #disableCursor(): void {
     process.stdout.write('\x1B[?25l');

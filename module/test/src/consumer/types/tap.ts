@@ -1,13 +1,13 @@
 import { Writable } from 'stream';
 
 import { path } from '@travetto/manifest';
-import { ConsoleManager, ColorUtil, ErrorUtil, Util } from '@travetto/base';
+import { ConsoleManager, ErrorUtil, Util } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
-import { TestResultsEnhancer, COLOR_ENHANCER, DUMMY_ENHANCER } from '../enhancer';
+import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 
 /**
   * TAP Format consumer
@@ -20,7 +20,7 @@ export class TapEmitter implements TestConsumer {
 
   constructor(
     stream: Writable = process.stdout,
-    enhancer: TestResultsEnhancer = ColorUtil.colorize ? COLOR_ENHANCER : DUMMY_ENHANCER
+    enhancer: TestResultsEnhancer = CONSOLE_ENHANCER
   ) {
     this.#stream = stream;
     this.#enhancer = enhancer;

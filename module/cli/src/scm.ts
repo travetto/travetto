@@ -9,11 +9,8 @@ export class CliScmUtil {
    * @param folder
    * @returns
    */
-  static async isRepoRoot(folder: string): Promise<boolean> {
-    if (await fs.stat(path.resolve(folder, '.git')).catch(() => { })) {
-      return true;
-    }
-    return false;
+  static isRepoRoot(folder: string): Promise<boolean> {
+    return fs.stat(path.resolve(folder, '.git')).then(() => true, () => false);
   }
 
   /**
@@ -38,8 +35,8 @@ export class CliScmUtil {
   static async findLastRelease(): Promise<string> {
     const root = await RootIndex.manifest;
     const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: root.workspacePath });
-    return (await result)
-      .stdout.split(/\n/)
+    return (await result).stdout
+      .split(/\n/)
       .find(x => /Publish /.test(x))!
       .split(/\s+/)[0]!;
   }
@@ -50,12 +47,11 @@ export class CliScmUtil {
    * @returns
    */
   static async findChangedModulesSince(hash: string): Promise<IndexedModule[]> {
-    const root = await RootIndex.manifest;
-
-    const result = await ExecUtil.spawn('git', ['diff', '--name-only', `HEAD..${hash}`], { cwd: root.workspacePath }).result;
+    const ws = RootIndex.manifest.workspacePath;
+    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `HEAD..${hash}`], { cwd: ws }).result;
     const out = new Set<IndexedModule>();
-    for (const line of result.stdout.split(/\n/g)) {
-      const mod = RootIndex.getFromSource(path.resolve(root.workspacePath, line));
+    for (const line of res.stdout.split(/\n/g)) {
+      const mod = RootIndex.getFromSource(path.resolve(ws, line));
       if (mod) {
         out.add(RootIndex.getModule(mod.module)!);
       }
@@ -66,13 +62,8 @@ export class CliScmUtil {
   /**
    * Create a commit
    */
-  static async createCommit(message: string): Promise<string> {
-    const { result } = ExecUtil.spawn('git', ['commit', '.', '-m', message]);
-    const res = await result;
-    if (!res.valid) {
-      throw new Error(res.stderr);
-    }
-    return res.stdout;
+  static createCommit(message: string): Promise<string> {
+    return ExecUtil.spawn('git', ['commit', '.', '-m', message]).result.then(r => r.stdout);
   }
 
   /**

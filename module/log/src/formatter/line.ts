@@ -1,20 +1,20 @@
 import util from 'util';
 
-import { ColorUtil } from '@travetto/base';
+import { GlobalColorSupport } from '@travetto/base';
 
 import { LogEvent, Formatter } from '../types';
 
 /**
  * Level coloring
  */
-export const STYLES = {
-  info: ColorUtil.makeColorer('white'),
-  debug: ColorUtil.makeColorer('yellow'),
-  warn: ColorUtil.makeColorer('magenta'),
-  error: ColorUtil.makeColorer('cyan', 'inverse'),
-  timestamp: ColorUtil.makeColorer('white', 'bold'),
-  location: ColorUtil.makeColorer('blue')
-};
+export const STYLES = GlobalColorSupport.palette({
+  info: 'skyBlue',
+  debug: 'brightYellow',
+  warn: 'brightMagenta',
+  error: { text: 'brightCyan', styles: ['inverse'] },
+  timestamp: 'white',
+  location: { text: 'brightGreen' }
+});
 
 /**
  * Line formatting options
@@ -37,7 +37,7 @@ export class LineFormatter implements Formatter {
   constructor(opts: LineFormatterOpts = {}) {
     const notPlain = opts.plain !== true;
     this.#opts = {
-      colorize: notPlain && ColorUtil.colorize,
+      colorize: notPlain,
       timestamp: notPlain ? opts.timestamp : undefined,
       align: true, level: notPlain, location: notPlain,
       ...opts

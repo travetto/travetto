@@ -1,11 +1,11 @@
 import { Writable } from 'stream';
 
-import { ColorUtil, Util } from '@travetto/base';
+import { Util } from '@travetto/base';
 
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
 
-import { TestResultsEnhancer, COLOR_ENHANCER, DUMMY_ENHANCER } from '../enhancer';
+import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 import { TestEvent } from '../../model/event';
 
 /**
@@ -19,7 +19,7 @@ export class SummaryEmitter implements TestConsumer {
 
   constructor(
     stream: Writable = process.stdout,
-    enhancer: TestResultsEnhancer = ColorUtil.colorize ? COLOR_ENHANCER : DUMMY_ENHANCER
+    enhancer: TestResultsEnhancer = CONSOLE_ENHANCER
   ) {
     this.#stream = stream;
     this.#enhancer = enhancer;

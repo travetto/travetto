@@ -1,26 +1,18 @@
-import { ColorUtil, TypedObject } from '@travetto/base';
+import { GlobalColorSupport } from '@travetto/base';
 
-export const { palette: COLOR_ENHANCER } = ColorUtil.buildColorTemplate({
-  assertDescription: ['white'],
-  testDescription: ['white', 'faint', 'bold'],
-  success: ['green', 'faint', 'bold'],
-  failure: ['red', 'faint', 'bold'],
-  assertNumber: ['blue', 'bold'],
-  testNumber: ['blue', 'bold'],
-  assertFile: ['cyan'],
-  assertLine: ['yellow'],
-  objectInspect: ['magenta'],
-  suiteName: ['yellow', 'faint', 'bold'],
-  testName: ['cyan', 'bold'],
-  total: ['white', 'bold']
+export const CONSOLE_ENHANCER = GlobalColorSupport.palette({
+  assertDescription: 'lightGray',
+  testDescription: 'white',
+  success: 'green',
+  failure: 'red',
+  assertNumber: 'brightBlue',
+  testNumber: 'brightBlue',
+  assertFile: 'lightGreen',
+  assertLine: 'lightYellow',
+  objectInspect: 'magenta',
+  suiteName: 'yellow',
+  testName: 'cyan',
+  total: 'white'
 });
 
-export type TestResultsEnhancer = typeof COLOR_ENHANCER;
-
-/**
- * Dummy enhancer does nothing
- */
-export const DUMMY_ENHANCER: TestResultsEnhancer = [
-  TypedObject.keys(COLOR_ENHANCER)
-    .reduce<Partial<TestResultsEnhancer>>((acc, k) => (acc[k] = (x: unknown): string => `${x}`) && acc, {})
-].filter((x): x is TestResultsEnhancer => !!x)[0];
+export type TestResultsEnhancer = typeof CONSOLE_ENHANCER;

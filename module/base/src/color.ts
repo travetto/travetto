@@ -1,147 +1,62 @@
-import { Env } from './env';
 import { TypedObject } from './types';
 
-type Prim = string | number | boolean | Date;
-
-type TemplateType<T> = (values: TemplateStringsArray, ...keys: (Partial<Record<keyof T, Prim>> | string)[]) => string;
-
-type ColorPalette<T> = Record<keyof T, (text: Prim) => string>;
-
-type Color = keyof (typeof ColorUtil)['COLORS'];
-type Style = keyof (typeof ColorUtil)['STYLES'];
+import { COLOR_NAMES } from './color-support/names';
+import { ColorUtil, ColorLevel, StyleInput, ColorPalette, TemplateType, Prim, ColorFn, NamedColor, NamedColorInput } from './color-support/util';
 
 /**
- * Utilities for dealing with coloring console text
+ * Color support with ability to create templates/palettes with named colors
  */
-export class ColorUtil {
-  static #colorize: boolean;
+export class ColorSupport<T extends Record<string, NamedColorInput>> {
 
-  /**
-   * Set colorization directly
-   * @private
-   */
-  static set colorize(val: boolean) {
-    this.#colorize = val;
+  #level: ColorLevel;
+  #colors: Record<keyof T, NamedColor>;
+
+  constructor(colors: T, level?: ColorLevel) {
+    this.#level = level ?? ColorUtil.detectLevel();
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    this.#colors = TypedObject.fromEntries(
+      TypedObject.entries(colors).map(([k, v]) => [k, ColorUtil.makeNamedColor(v)])
+    ) as Record<keyof T, NamedColor>;
   }
 
   /**
-   * Get colorization status
+   * Get all colors
    */
-  static get colorize(): boolean {
-    if (this.#colorize === undefined) {
-      this.#colorize = Env.isTrue('FORCE_COLOR') || (!Env.isTrue('NO_COLOR') && process.stdout.isTTY);
-    }
-    return this.#colorize;
+  getColors(): Record<Exclude<keyof T, number | symbol>, NamedColor> {
+    return this.#colors;
   }
 
   /**
-   * Types of text styles
+   * Make a simple primitive colorer
    */
-  static STYLES = {
-    // styles
-    bold: [1, 22],
-    faint: [2, 22],
-    italic: [3, 23],
-    underline: [4, 24],
-    inverse: [7, 27],
-  };
-
-  /**
-   * Types of color
-   */
-  static COLORS = {
-    // grayscale
-    white: [37, 39],
-    black: [90, 39],
-    // colors
-    blue: [34, 39],
-    cyan: [36, 39],
-    green: [32, 39],
-    magenta: [35, 39],
-    red: [31, 39],
-    yellow: [33, 39]
-  };
-
-  /**
-   * Simple function for colorizing text
-   *
-   * Taken from masylum's fork (https://github.com/masylum/log4js-node)
-   *
-   * @param textColor Text color
-   * @param styles Text styles to apply
-   * @param value The value to color
-   */
-  static color(textColor: Color, styles: Style[], value: Prim): string {
-    if (value === undefined || value === null) {
-      return '';
-    }
-    if (this.colorize) {
-      for (const style of [this.COLORS[textColor], ...styles.map(s => this.STYLES[s])]) {
-        value = `\x1b[${style[0]}m${value}\x1b[${style[1]}m`;
-      }
-    }
-    return `${value}`;
+  colorer(col: StyleInput<Exclude<keyof T, number | symbol>>): ColorFn {
+    const levels = ColorUtil.makeColorer(this.#colors, col);
+    return (v: Prim): string => levels[this.#level](v);
   }
 
   /**
-   * Produce a factory to color text with a specific style
-   *
-   * @param textColor Text color
-   * @param styles Text styles to apply
+   * Creates a color palette based on input style
    */
-  static makeColorer(textColor: Color, ...styles: Style[]): (text: Prim) => string {
-    return this.color.bind(this, textColor, styles);
-  }
-
-  /**
-   * Creates a string interpolator for a given palette
-   *
-   * @param palette The list of supported keys for the string template
-   */
-  static makeTemplate<T>(palette: ColorPalette<T>): TemplateType<T> {
-    /**
-     * @example
-     * ```
-     * color`${{title: 'Main Title'}} is ${{subtitle: 'Sub Title}}`
-     * ```
-     */
-    return (values: TemplateStringsArray, ...keys: (Partial<Record<keyof T, Prim>> | string)[]) => {
-      if (keys.length === 0) {
-        return values[0];
-      } else {
-        const out = keys.map((el, i) => {
-          if (typeof el !== 'string') {
-            const subKeys = TypedObject.keys(el);
-            if (subKeys.length !== 1) {
-              throw new Error('Invalid template variable, one and only one key should be specified');
-            }
-            const k = subKeys[0];
-            el = palette[k](el[k]!)!;
-          }
-          return `${values[i] ?? ''}${el ?? ''}`;
-        });
-        if (values.length > keys.length) {
-          out.push(values[values.length - 1]);
-        }
-        return out.join('');
-      }
-    };
-  }
-
-  /**
-   * Builds a color template function, along with the corresponding palette
-   * @param input List of terms and their styles
-   */
-  static buildColorTemplate<T extends Record<string, [Color, ...Style[]]>>(input: T): { palette: ColorPalette<T>, template: TemplateType<T> } {
+  palette<P extends Record<string, StyleInput<Exclude<keyof T, number | symbol>>>>(input: P): ColorPalette<P> {
     // Common color support
-    // @ts-expect-error
-    const palette: ColorPalette<T> = Object.fromEntries(
-      Object.entries<[Color, ...Style[]]>(input)
-        .map(([k, [col, ...styles]]) => [k, this.makeColorer(col, ...styles)] as const)
-    );
+    const out: Partial<ColorPalette<P>> = {};
+    for (const [k, col] of TypedObject.entries(input)) {
+      out[k] = this.colorer(col);
+    }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return out as ColorPalette<P>;
+  }
 
-    const template = ColorUtil.makeTemplate(palette);
-
-    return { template, palette };
+  /**
+   * Convenience method to creates a color template function based on input style
+   */
+  template<P extends Record<string, StyleInput<Exclude<keyof T, number | symbol>>>>(input: P): TemplateType<P> {
+    return ColorUtil.makeTemplate(this.palette(input));
   }
 }
+
+/**
+ * Centralized color state that, by default, all console output is tied to
+ */
+export const GlobalColorSupport = new ColorSupport(COLOR_NAMES);

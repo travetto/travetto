@@ -1,18 +1,14 @@
 import rl from 'readline';
 
-import { ColorUtil, Env, ExecUtil, ExecutionOptions, TypedObject } from '@travetto/base';
+import { Env, ExecUtil, ExecutionOptions, GlobalColorSupport, TypedObject } from '@travetto/base';
 import { IndexedModule, PackageUtil, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
 
 import { CliScmUtil } from './scm';
 
-const COLORS = TypedObject
-  .keys(ColorUtil.COLORS)
-  .flatMap(k =>
-    TypedObject.keys(ColorUtil.STYLES)
-      .filter(k2 => k2 === 'bold' || (k2 === 'faint' && k !== 'black'))
-      .map(k2 => (v: string): string => ColorUtil.color(k, [k2], v))
-  );
+const COLORS = TypedObject.entries(GlobalColorSupport.getColors())
+  .filter(([, v]) => v.parts.l > .45 && v.parts.s > .8)
+  .map(([k]) => GlobalColorSupport.colorer(k));
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
 
