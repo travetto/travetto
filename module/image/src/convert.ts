@@ -57,25 +57,20 @@ export class ImageConverter {
   /**
    * Resize image using imagemagick
    */
-  static resize(image: Readable, options: ImageOptions): Promise<Readable>;
-  static resize(image: Buffer, options: ImageOptions): Promise<Buffer>;
-  static async resize(image: ImageType, options: ImageOptions): Promise<Readable | Buffer> {
+  static async resize<T extends ImageType>(image: T, options: ImageOptions): Promise<T> {
     const state = await this.CONVERTER.exec(
       'gm', 'convert', '-resize', `${options.w ?? ''}x${options.h ?? ''}`,
       '-auto-orient',
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
       '-', '-');
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return await StreamUtil.execPipe(state, image as Buffer);
+    return await StreamUtil.execPipe(state, image);
   }
 
   /**
    * Optimize png using pngquant
    */
-  static optimize(format: 'png' | 'jpeg', image: Readable): Promise<Readable>;
-  static optimize(format: 'png' | 'jpeg', image: Buffer): Promise<Buffer>;
-  static async optimize(format: 'png' | 'jpeg', image: ImageType): Promise<Readable | Buffer> {
+  static async optimize<T extends ImageType>(format: 'png' | 'jpeg', image: T): Promise<T> {
     let stream;
     switch (format) {
       case 'png': {
@@ -88,7 +83,6 @@ export class ImageConverter {
         break;
       }
     }
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return await StreamUtil.execPipe(stream, image as Buffer);
+    return await StreamUtil.execPipe(stream, image);
   }
 }

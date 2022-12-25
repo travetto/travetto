@@ -118,9 +118,7 @@ export class StreamUtil {
    * @param state The execution state to pipe
    * @param input The data to input into the process
    */
-  static execPipe(state: ExecutionState, input: Buffer): Promise<Buffer>;
-  static execPipe(state: ExecutionState, input: string | Readable): Promise<Readable>;
-  static async execPipe(state: ExecutionState, input: Buffer | Readable | string): Promise<Buffer | Readable> {
+  static async execPipe<T extends Buffer | Readable>(state: ExecutionState, input: T): Promise<T> {
     const { process: proc, result: prom } = state;
 
     (await this.toStream(input)).pipe(proc.stdin!);
@@ -128,9 +126,11 @@ export class StreamUtil {
     if (input instanceof Buffer) { // If passing buffers
       const buf = this.toBuffer(proc.stdout!);
       await prom;
-      return buf;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return buf as Promise<T>;
     } else {
-      return this.waitForCompletion(proc.stdout!, () => prom);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return this.waitForCompletion(proc.stdout!, () => prom) as Promise<T>;
     }
   }
 }
