@@ -73,11 +73,11 @@ export class LineFormatter implements Formatter {
 
     if (opts.level) {
       let level: string = ev.level;
-      if (opts.colorize) {
-        level = STYLES[ev.level](ev.level);
-      }
       if (opts.align) {
-        level += ' '.repeat(5 - ev.level.length);
+        level = level.padEnd(5, ' ');
+      }
+      if (opts.colorize) {
+        level = STYLES[ev.level](level);
       }
       out.push(level);
     }

@@ -49,7 +49,7 @@ export class AppRunCommand extends CliCommand<Options> {
 
   envInit(): void {
     Env.define({
-      debug: '0',
+      debug: process.env.DEBUG || '0',
       env: this.cmd.env,
       append: { TRV_PROFILES: this.cmd.profile }
     });
