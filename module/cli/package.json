@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.3",
+    "@travetto/terminal-color": "^3.0.0-rc.3",
     "@travetto/worker": "^3.0.0-rc.3",
     "commander": "^9.4.1"
   },

@@ -2,7 +2,7 @@ import timers from 'timers/promises';
 import readline from 'readline';
 import { Writable } from 'stream';
 
-import { GlobalColorSupport } from '@travetto/base';
+import { ColorSupport } from '@travetto/terminal-color';
 
 type Table = {
   init(...header: string[]): Promise<void>;
@@ -17,17 +17,17 @@ export class CliUtil {
 
   static #waitState = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
-  static color = GlobalColorSupport.template({
+  static color = ColorSupport.template({
     input: 'yellow',
     output: 'pink',
     path: 'cyan',
     success: 'green',
     failure: 'red',
-    param: 'lightGreen',
-    type: 'cyan',
+    param: 'oliveDrab',
+    type: 'teal',
     description: 'white',
     title: 'brightWhite',
-    identifier: 'skyBlue',
+    identifier: 'dodgerBlue',
     subtitle: 'lightGray',
     subsubtitle: 'darkGray'
   });

@@ -1,6 +1,6 @@
-import { GlobalColorSupport } from '@travetto/base';
+import { ColorSupport } from '@travetto/terminal-color';
 
-export const CONSOLE_ENHANCER = GlobalColorSupport.palette({
+export const CONSOLE_ENHANCER = ColorSupport.palette({
   assertDescription: 'lightGray',
   testDescription: 'white',
   success: 'green',

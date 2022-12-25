@@ -5,6 +5,7 @@
 - Auth JWT
 - Auth Rest Session
 - Auth Rest Context
+- Terminal Color
 - Repo
 - Eslint
 

@@ -16,7 +16,7 @@ Base is the foundation of all ${lib.Travetto} applications.  It is intended to b
 
 ${d.List(
   'Environment Support',
-  'Condole Management',
+  'Console Management',
   'Standard Error Support',
   'Stream Support',
   'General Utilities',

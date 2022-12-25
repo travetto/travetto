@@ -1,19 +1,19 @@
 import util from 'util';
 
-import { GlobalColorSupport } from '@travetto/base';
+import { ColorSupport } from '@travetto/terminal-color';
 
 import { LogEvent, Formatter } from '../types';
 
 /**
  * Level coloring
  */
-export const STYLES = GlobalColorSupport.palette({
-  info: 'skyBlue',
+export const STYLES = ColorSupport.palette({
+  info: 'dodgerBlue',
   debug: 'brightYellow',
   warn: 'brightMagenta',
-  error: { text: 'brightCyan', styles: ['inverse'] },
+  error: { text: 'brightCyan', inverse: true },
   timestamp: 'white',
-  location: { text: 'brightGreen' }
+  location: 'brightGreen'
 });
 
 /**

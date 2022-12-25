@@ -1,5 +1,4 @@
 export * from './src/console';
-export * from './src/color';
 export * from './src/error';
 export * from './src/error-util';
 export * from './src/exec';

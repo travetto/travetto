@@ -1,11 +1,11 @@
 {
-  "name": "@travetto/log",
-  "version": "3.0.0-rc.5",
-  "description": "Logging framework that integrates at the console.log level.",
+  "name": "@travetto/terminal-color",
+  "version": "3.0.0-rc.3",
+  "description": "General terminal color support",
   "keywords": [
-    "typescript",
+    "terminal-color",
     "travetto",
-    "logging"
+    "typescript"
   ],
   "homepage": "https://travetto.io",
   "license": "MIT",
@@ -20,16 +20,15 @@
   "main": "__index__.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/log"
+    "directory": "module/terminal-color"
   },
   "dependencies": {
-    "@travetto/config": "^3.0.0-rc.5",
-    "@travetto/terminal-color": "^3.0.0-rc.3",
-    "@travetto/di": "^3.0.0-rc.5"
+    "@travetto/base": "^3.0.0-rc.3"
   },
   "travetto": {
-    "displayName": "Logging"
+    "displayName": "Terminal Color"
   },
+  "private": false,
   "publishConfig": {
     "access": "public"
   }

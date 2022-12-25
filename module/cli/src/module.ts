@@ -1,14 +1,16 @@
 import rl from 'readline';
 
-import { Env, ExecUtil, ExecutionOptions, GlobalColorSupport, TypedObject } from '@travetto/base';
+import { ColorDefineUtil, ColorSupport, NAMED } from '@travetto/terminal-color';
+import { Env, ExecUtil, ExecutionOptions, TypedObject } from '@travetto/base';
 import { IndexedModule, PackageUtil, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
 
 import { CliScmUtil } from './scm';
 
-const COLORS = TypedObject.entries(GlobalColorSupport.getColors())
-  .filter(([, v]) => v.parts.l > .45 && v.parts.s > .8)
-  .map(([k]) => GlobalColorSupport.colorer(k));
+const COLORS = TypedObject.keys(NAMED)
+  .map(k => [k, ColorDefineUtil.defineColor(k).hsl] as const)
+  .filter(([, [, s, l]]) => l > .5 && l < .8 && s > .8)
+  .map(([k]) => ColorSupport.colorer(k));
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
 
