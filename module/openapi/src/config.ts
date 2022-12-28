@@ -2,7 +2,7 @@ import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/mode
 
 import { Config } from '@travetto/config';
 import { path, RootIndex } from '@travetto/manifest';
-import { Env } from '@travetto/base';
+import { GlobalEnv } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 
@@ -61,7 +61,7 @@ export class ApiSpecConfig {
   /**
    * Should file be generated at runtime
    */
-  persist: boolean = Env.isDynamic();
+  persist?: boolean;
   /**
    * Skip emitting all routes
    */
@@ -75,6 +75,8 @@ export class ApiSpecConfig {
     this.output = path.toPosix(this.output);
     if (!this.output || this.output === '-') {
       this.persist = false;
+    } else {
+      this.persist ??= GlobalEnv.dynamic;
     }
     if (this.persist) {
       if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder

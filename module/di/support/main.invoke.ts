@@ -1,10 +1,8 @@
 import { RootRegistry } from '@travetto/registry';
-import { Env } from '@travetto/base';
 
 import { DependencyRegistry } from '../src/registry';
 
 export async function main(...[mod, cls, method, qualifier]: (string | undefined)[]): Promise<unknown> {
-  Env.define();
   await RootRegistry.init();
 
   const tgt = (await import(mod!))[cls!];

@@ -54,7 +54,7 @@ export class DocRunUtil {
         cwd: path.toPosix(config.cwd ?? path.cwd()),
         shell: '/bin/bash',
         env: {
-          ...Env.getAll(),
+          ...Env.export(/^(TRV_*|NODE_*|*COLOR*|DEBUG)$/),
           DEBUG: '0',
           ...(config.module ? { TRV_MANIFEST: config.module } : {}),
           ...(config.env ?? {})

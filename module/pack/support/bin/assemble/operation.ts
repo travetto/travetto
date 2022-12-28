@@ -2,11 +2,11 @@ import fs from 'fs/promises';
 
 import { path } from '@travetto/manifest';
 import { CliUtil } from '@travetto/cli';
+import { Env } from '@travetto/base';
 
 import { PackUtil } from '../util';
 import { CommonConfig, PackOperation } from '../types';
 import { AssembleUtil } from './util';
-
 export interface AssembleConfig extends CommonConfig {
   keepSource: boolean;
   readonly: boolean;
@@ -25,8 +25,8 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
     return `[readonly=${cfg.readonly},source=${cfg.keepSource}]`;
   },
   overrides: {
-    keepSource: CliUtil.toBool(process.env.PACK_ASSEMBLE_KEEP_SOURCE),
-    readonly: CliUtil.toBool(process.env.PACK_ASSEMBLE_READONLY)
+    keepSource: Env.getBoolean('PACK_ASSEMBLE_KEEP_SOURCE'),
+    readonly: Env.getBoolean('PACK_ASSEMBLE_READONLY')
   },
   extend(src: Partial<AssembleConfig>, dest: Partial<AssembleConfig>): Partial<AssembleConfig> {
     return {

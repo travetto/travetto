@@ -231,7 +231,7 @@ class DataBinding {
   }
 
   @Test()
-  async validateRealworld() {
+  async validateRealWorld() {
     assert.deepStrictEqual(BindUtil.expandPaths({
       'children[0].age': 20
     }), {

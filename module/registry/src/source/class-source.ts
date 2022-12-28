@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
 import { RootIndex } from '@travetto/manifest';
-import { Class, Env } from '@travetto/base';
+import { Class, GlobalEnv } from '@travetto/base';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 import { PendingRegister } from '../decorator';
@@ -97,7 +97,7 @@ export class ClassSource implements ChangeSource<Class> {
    * Initialize
    */
   async init(): Promise<void> {
-    if (Env.isDynamic()) {
+    if (GlobalEnv.dynamic) {
       const { DynamicClassSource } = await import('../../support/dynamic.class-source.js');
       await DynamicClassSource.init(this);
     }

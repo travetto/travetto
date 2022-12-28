@@ -5,6 +5,7 @@ import { path, RootIndex } from '@travetto/manifest';
 import { ConsoleManager } from '../src/console';
 import { ExecUtil } from '../src/exec';
 import { ShutdownManager } from '../src/shutdown';
+import { defineGlobalEnv, GlobalEnv } from '../src/global-env';
 
 // Setup everything
 let initialized = false;
@@ -17,9 +18,6 @@ export async function setup(): Promise<void> {
 
   // Read .env setup
   try { await import(path.resolve('.env')); } catch { }
-
-  // Delete if set
-  delete process.env.TRV_MAIN;
 
   // @ts-expect-error -- Lock to prevent __proto__ pollution in JSON
   const objectProto = Object.prototype.__proto__;
@@ -34,6 +32,8 @@ export async function setup(): Promise<void> {
 
   // Register shutdown handler
   ShutdownManager.register();
+
+  defineGlobalEnv({ main: undefined });
 
   // Initialize
   await ConsoleManager.register();
@@ -50,5 +50,5 @@ export async function runMain(action: Function, args: string[]): Promise<void> {
 }
 
 export const runIfMain = (target: Function, filename: string, mainFile: string): unknown =>
-  (RootIndex.getSourceFile(filename) === RootIndex.getSourceFile(process.env.TRV_MAIN || mainFile)) ?
+  (RootIndex.getSourceFile(filename) === RootIndex.getSourceFile(GlobalEnv.main ?? mainFile)) ?
     runMain(target, process.argv.slice(2)) : undefined;

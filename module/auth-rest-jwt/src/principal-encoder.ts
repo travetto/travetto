@@ -1,6 +1,6 @@
 import { Principal } from '@travetto/auth';
 import { PrincipalEncoder } from '@travetto/auth-rest';
-import { AppError, Env, TimeUtil } from '@travetto/base';
+import { AppError, GlobalEnv, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';
@@ -9,13 +9,16 @@ import { JWTUtil, Payload } from '@travetto/jwt';
 @Config('rest.auth.jwt')
 export class RestJWTConfig {
   header = 'Authorization';
-  signingKey = 'dummy';
+  signingKey?: string;
   headerPrefix = 'Bearer ';
   defaultAge = TimeUtil.timeToMs('1y');
 
   postConstruct(): void {
-    if (Env.isProd() && this.signingKey === 'dummy') {
-      throw new AppError('The default signing key is not valid for production use, please specify a config value at rest.jwt.signingKey');
+    if (!this.signingKey) {
+      if (GlobalEnv.prod) {
+        throw new AppError('The default signing key is not valid for production use, please specify a config value at rest.jwt.signingKey');
+      }
+      this.signingKey = 'dummy';
     }
   }
 }

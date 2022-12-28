@@ -139,11 +139,11 @@ export class Util {
         return res;
       }
       case Boolean: {
-        const res = /^(true|yes|1|on)$/i.test(`${input}`);
-        if (strict && !/^(false|no|off|0|true|yes|on|1)$/i.test(`${input}`)) {
+        const match = `${input}`.match(/^((?<TRUE>true|yes|1|on)|false|no|off|0)$/i);
+        if (strict && !match) {
           throw new Error(`Invalid boolean value: ${input}`);
         }
-        return res;
+        return !!match?.groups?.TRUE;
       }
       case RegExp: {
         if (typeof input === 'string') {

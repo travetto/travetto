@@ -1,5 +1,5 @@
 import { RootIndex } from '@travetto/manifest';
-import { Env, ExecUtil } from '@travetto/base';
+import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 
 type Options = {
@@ -18,8 +18,8 @@ export class LintCommand extends CliCommand<Options> {
     };
   }
 
-  async envInit(): Promise<void> {
-    Env.define({ debug: '0' });
+  envInit(): GlobalEnvConfig {
+    return { debug: false };
   }
 
   async action(): Promise<void> {

@@ -1,6 +1,6 @@
-import { Env } from '@travetto/base';
+import { AppError, GlobalEnv } from '@travetto/base';
 import { Config } from '@travetto/config';
-import { Required, Secret } from '@travetto/schema';
+import { Secret } from '@travetto/schema';
 
 /**
  * Rest session config
@@ -30,9 +30,8 @@ export class SessionConfig {
   /**
    * Secret for signing the session
    */
-  @Required(Env.isProd())
   @Secret()
-  secret: string;
+  secret?: string;
   /**
    * Signature key name
    */
@@ -41,4 +40,10 @@ export class SessionConfig {
    * Location for auth
    */
   transport: 'cookie' | 'header' = 'cookie';
+
+  postConstruct(): void {
+    if (!this.secret && GlobalEnv.prod) {
+      throw new AppError('Session secret is a required value for production', 'permissions');
+    }
+  }
 }

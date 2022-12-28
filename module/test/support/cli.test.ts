@@ -2,11 +2,11 @@ import { readFileSync } from 'fs';
 import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
+import { GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 
 import type { RunState } from '../src/execute/types';
-import { envInit } from './bin/env';
 
 const modes = ['single', 'standard'] as const;
 
@@ -41,8 +41,8 @@ export class TestCommand extends CliCommand<Options> {
     };
   }
 
-  envInit(): void {
-    envInit();
+  envInit(): GlobalEnvConfig {
+    return { test: true };
   }
 
   getArgs(): string {

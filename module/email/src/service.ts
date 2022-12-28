@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { GlobalEnv } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { MessageOptions, SentMessage } from './types';
@@ -49,7 +49,7 @@ export class MailService {
    */
   async sendCompiled<S extends SentMessage = SentMessage>(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<S> {
     // Bypass cache if in dynamic mode
-    if (Env.isDynamic() || !this.#compiled.has(key)) {
+    if (GlobalEnv.dynamic || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         this.#resources.read(`${key}.compiled.html`),
         this.#resources.read(`${key}.compiled.text`).catch(() => ''),

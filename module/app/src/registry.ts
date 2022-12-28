@@ -1,5 +1,5 @@
 import { RootIndex } from '@travetto/manifest';
-import { ShutdownManager, Class, ConcreteClass, Env } from '@travetto/base';
+import { ShutdownManager, Class, ConcreteClass, GlobalEnv } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
 import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
 import { Configuration } from '@travetto/config';
@@ -66,7 +66,7 @@ class $ApplicationRegistry {
     // Show manifest
     console.log('Manifest', {
       info: RootIndex.mainDigest(),
-      env: Env.digest()
+      env: GlobalEnv
     });
 
     // Get instance of app class

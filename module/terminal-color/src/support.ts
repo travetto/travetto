@@ -11,13 +11,13 @@ type ColorPalette<T> = Record<keyof T, ColorFn>;
  */
 export class TerminalColorSupport {
 
-  #level: ColorLevel = TerminalColorUtil.detectLevel();
+  #level: ColorLevel = TerminalColorUtil.detectColorLevel();
 
   /**
    * Set level
    */
   setLevel(level: ColorLevel | 'auto'): this {
-    this.#level = level === 'auto' ? TerminalColorUtil.detectLevel() : level;
+    this.#level = level === 'auto' ? TerminalColorUtil.detectColorLevel() : level;
     return this;
   }
 

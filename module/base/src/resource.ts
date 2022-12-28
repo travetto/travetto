@@ -5,7 +5,7 @@ import fs from 'fs/promises';
 import { path, RootIndex } from '@travetto/manifest';
 
 import { AppError } from './error';
-import { Env } from './env';
+import { GlobalEnv } from './global-env';
 
 export type ResourceDescription = { size: number, path: string };
 
@@ -141,7 +141,7 @@ export class FileResourceProvider implements ResourceProvider {
  * Simple file resource provider that relies on trv_resources
  */
 export class CommonFileResourceProvider extends FileResourceProvider {
-  constructor(paths: string[] = [...Env.getList('TRV_RESOURCES'), path.resolve('resources')]) {
+  constructor(paths: string[] = [...GlobalEnv.resourcePaths, path.resolve('resources')]) {
     super(paths);
   }
 }

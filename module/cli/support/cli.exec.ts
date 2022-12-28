@@ -1,7 +1,7 @@
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
-import { Env } from '@travetto/base';
+import { GlobalEnvConfig } from '@travetto/base';
 
 type Options = {
   changed: OptionConfig<boolean>;
@@ -33,10 +33,8 @@ export class RepoExecCommand extends CliCommand<Options> {
     return '[command] [...args]';
   }
 
-  async envInit(): Promise<void> {
-    Env.define({
-      debug: '0',
-    });
+  envInit(): GlobalEnvConfig {
+    return { debug: false };
   }
 
   async action(): Promise<void> {

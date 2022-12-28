@@ -56,8 +56,6 @@ export class RestConfig {
 
       this.bindAddress = useIPv4 ? '0.0.0.0' : '::';
     }
-    if (this.baseUrl === undefined) {
-      this.baseUrl = `http${this.ssl?.active ? 's' : ''}://${this.hostname}${[80, 443].includes(this.port) ? '' : `:${this.port}`}`;
-    }
+    this.baseUrl ??= `http${this.ssl?.active ? 's' : ''}://${this.hostname}${[80, 443].includes(this.port) ? '' : `:${this.port}`}`;
   }
 }

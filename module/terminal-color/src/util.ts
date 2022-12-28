@@ -16,25 +16,9 @@ export type Style =
 export class TerminalColorUtil {
 
   /**
-   * Build ANSI compatible color codes by level
-   */
-  static getColorCodes(inp: RGBInput, key: 'text' | 'background'): [number[], number[]][] {
-    const spec = ColorDefineUtil.defineColor(inp);
-    const bg = key === 'background';
-    const { idx16, idx16bg, idx256, rgb } = spec;
-    const [open, close] = bg ? [48, 49] : [38, 39];
-    return [
-      [[], []],
-      [[bg ? idx16bg : idx16], [close]],
-      [[open, 5, idx256], [close]],
-      [[open, 2, ...rgb], [close]]
-    ];
-  }
-
-  /**
    * Detect color level
    */
-  static detectLevel(): ColorLevel {
+  static detectColorLevel(): ColorLevel {
     const force: string = Env.get('FORCE_COLOR', '').toLowerCase();
     switch (force) {
       case 'on': case 'yes': case 'true': case '1': return 1;
@@ -50,6 +34,22 @@ export class TerminalColorUtil {
     } else {
       return 0;
     }
+  }
+
+  /**
+   * Build ANSI compatible color codes by level
+   */
+  static getColorCodes(inp: RGBInput, key: 'text' | 'background'): [number[], number[]][] {
+    const spec = ColorDefineUtil.defineColor(inp);
+    const bg = key === 'background';
+    const { idx16, idx16bg, idx256, rgb } = spec;
+    const [open, close] = bg ? [48, 49] : [38, 39];
+    return [
+      [[], []],
+      [[bg ? idx16bg : idx16], [close]],
+      [[open, 5, idx256], [close]],
+      [[open, 2, ...rgb], [close]]
+    ];
   }
 
   /**

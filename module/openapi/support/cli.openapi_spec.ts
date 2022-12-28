@@ -1,6 +1,6 @@
 import { CliCommand, OptionConfig } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
-import { Env, ExecUtil } from '@travetto/base';
+import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 
 type Options = {
   output: OptionConfig<string>;
@@ -16,11 +16,11 @@ export class OpenApiSpecCommand extends CliCommand<Options> {
     return { output: this.option({ desc: 'Output files', def: './openapi.yml' }) };
   }
 
-  envInit(): void {
-    Env.define({
-      debug: '0',
+  envInit(): GlobalEnvConfig {
+    return {
+      debug: false,
       set: { API_SPEC_OUTPUT: this.cmd.output }
-    });
+    };
   }
 
   async action(): Promise<void> {

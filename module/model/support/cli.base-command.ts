@@ -1,5 +1,4 @@
 import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
-import { Env } from '@travetto/base';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
 import { ModelCandidateUtil } from './bin/candidate';
@@ -18,10 +17,6 @@ export abstract class BaseModelCommand extends CliCommand<Options> {
   op: keyof ModelStorageSupport;
 
   resolve = ModelCandidateUtil.resolve.bind(ModelCandidateUtil);
-
-  envInit(): void {
-    Env.define();
-  }
 
   getArgs(): string {
     return '[provider] [models...]';

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { ExecUtil } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { CliUtil } from '@travetto/cli';
 
 import { CommonConfig, PackOperation } from './types';
@@ -42,13 +42,13 @@ export const Docker: PackOperation<DockerConfig, 'docker'> = {
     tag: ['latest']
   },
   overrides: {
-    image: process.env.PACK_DOCKER_IMAGE || undefined,
-    name: process.env.PACK_DOCKER_NAME || undefined,
-    app: process.env.PACK_DOCKER_APP || undefined,
-    port: process.env.PACK_DOCKER_PORT ? [process.env.PACK_DOCKER_PORT] : undefined,
-    registry: process.env.PACK_DOCKER_REGISTRY || undefined,
-    push: CliUtil.toBool(process.env.PACK_DOCKER_PUSH),
-    tag: process.env.PACK_DOCKER_TAG ? [process.env.PACK_DOCKER_TAG] : undefined
+    image: Env.get('PACK_DOCKER_IMAGE') || undefined,
+    name: Env.get('PACK_DOCKER_NAME') || undefined,
+    app: Env.get('PACK_DOCKER_APP') || undefined,
+    registry: Env.get('PACK_DOCKER_REGISTRY') || undefined,
+    push: Env.getBoolean('PACK_DOCKER_PUSH'),
+    port: Env.getList('PACK_DOCKER_PORT'),
+    tag: Env.getList('PACK_DOCKER_TAG')
   },
   extend(src: Partial<DockerConfig>, dest: Partial<DockerConfig>): Partial<DockerConfig> {
     return {

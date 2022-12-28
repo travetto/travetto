@@ -1,9 +1,8 @@
 import fs from 'fs/promises';
 
-import { ConsoleManager } from '@travetto/base';
+import { ConsoleManager, defineGlobalEnv } from '@travetto/base';
 import { path } from '@travetto/manifest';
 
-import { envInit } from './bin/env';
 import { TestChildWorker } from '../src/worker/child';
 
 export async function customLogs(): Promise<void> {
@@ -17,17 +16,17 @@ export async function customLogs(): Promise<void> {
     });
 
     ConsoleManager.set({
-      onLog: (level, ctx, args: unknown[]) => c[level](process.pid, ctx, ...args)
+      onLog: (ev) => c[ev.level](process.pid, ...ev.args)
     });
   } else {
-    ConsoleManager.set({ onLog: (level, ctx, args: unknown[]) => { } });
+    ConsoleManager.set({ onLog: () => { } });
   }
 }
 
 export async function main(): Promise<void> {
-  envInit();
+  defineGlobalEnv({ test: true });
+  ConsoleManager.setDebugFromEnv();
 
   await customLogs();
-
   return new TestChildWorker().activate();
 }

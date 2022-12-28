@@ -40,33 +40,6 @@ export class CliUtil {
     process.stdout.write('\x1B[?25h');
   }
 
-  static isBoolean(x: string): boolean {
-    return /^(1|0|yes|no|on|off|auto|true|false)$/i.test(x);
-  }
-
-  static toBool(x: string | boolean, def: boolean): boolean;
-  static toBool(x?: string | boolean, def?: boolean): boolean | undefined;
-  static toBool(x?: string | boolean, def?: boolean): boolean | undefined {
-    return x === undefined ? def :
-      (typeof x === 'boolean' ? x :
-        (this.isBoolean(x) ? /^(1|yes|on|true)$/i.test(x) :
-          def));
-  }
-
-  static toInt(l: number | undefined, u: number | undefined, v: string, d: number): number {
-    let n = +v;
-    if (l === undefined && u === undefined) {
-      return n;
-    }
-    if (l !== undefined && n < l) {
-      n = d;
-    }
-    if (u !== undefined && n > u) {
-      n = d;
-    }
-    return n;
-  }
-
   /**
    * Rewrite a single line in the stream
    * @param stream The stream to write

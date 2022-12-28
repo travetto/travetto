@@ -20,7 +20,7 @@ export class OverrideConfigSource implements ConfigSource {
       const { ns, fields = {} } = SchemaRegistry.getMetadata<ConfigOverrides>(cls, CONFIG_OVERRIDES) ?? {};
       for (const [key, value] of Object.entries(fields)) {
         const val = value();
-        if (val) {
+        if (val !== undefined && val !== '') {
           out[`${ns}.${key}`] = val;
         }
       }

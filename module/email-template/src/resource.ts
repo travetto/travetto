@@ -1,5 +1,5 @@
 import { path } from '@travetto/manifest';
-import { Env } from '@travetto/base';
+import { GlobalEnv } from '@travetto/base';
 import { EmailResource } from '@travetto/email';
 
 /**
@@ -13,7 +13,7 @@ export class EmailTemplateResource extends EmailResource {
   constructor(paths: string[] = ['@travetto/email-template']) {
     super([
       ...paths,
-      ...Env.getList('TRV_RESOURCES'),
+      ...GlobalEnv.resourcePaths,
       path.resolve('resources')
     ]);
   }

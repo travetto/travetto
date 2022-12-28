@@ -3,7 +3,6 @@ import assert from 'assert';
 import { Test, Suite } from '@travetto/test';
 
 import { TerminalColorSupport } from '../src/support';
-import { TerminalColorUtil } from '../src/util';
 
 @Suite()
 export class ColorUtilTest {
@@ -20,8 +19,6 @@ export class ColorUtilTest {
   @Test()
   async noColor() {
     process.env.NO_COLOR = '1';
-    assert(TerminalColorUtil.detectLevel() === 0);
-
     const tpl = new TerminalColorSupport().template({
       basic: { text: 'red', underline: true }
     });

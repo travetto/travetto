@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ConcreteClass, TypedObject, Util } from '@travetto/base';
+import { Class, ConcreteClass, TypedObject, Util } from '@travetto/base';
 
 import { AllViewⲐ } from './internal/types';
 import { SchemaRegistry } from './service/registry';
@@ -165,18 +165,6 @@ export class BindUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return this.bindSchemaToObject(cls, tgt, data as object, cfg);
     }
-  }
-
-  /**
-   * Export a given instance to a plain object for external usage
-   *
-   * @param data The class instance to copy from
-   * @param cfg The bind configuration
-   * @returns
-   */
-  static exportSchema<T = unknown>(data: ClassInstance, cfg: BindConfig): T {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.bindSchemaToObject(data.constructor, {} as typeof data, data, cfg);
   }
 
   /**

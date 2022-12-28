@@ -1,4 +1,4 @@
-import { AppError, CommonFileResourceProvider, Env } from '@travetto/base';
+import { AppError, CommonFileResourceProvider, GlobalEnv } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 
@@ -69,7 +69,7 @@ export class RestSslConfig {
       return;
     }
     if (!this.keys) {
-      if (Env.isProd()) {
+      if (GlobalEnv.prod) {
         throw new AppError('Cannot use test keys in production', 'permissions');
       }
       return RestSslConfig.generateSslKeyPair();

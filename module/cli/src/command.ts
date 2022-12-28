@@ -2,8 +2,8 @@ import { appendFile, mkdir } from 'fs/promises';
 import type * as commander from 'commander';
 
 import { path } from '@travetto/manifest';
+import { ConsoleManager, defineGlobalEnv, GlobalEnvConfig, Util } from '@travetto/base';
 
-import { CliUtil } from './util';
 import { HelpUtil } from './help';
 
 type OptionPrimitive = string | number | boolean;
@@ -31,6 +31,12 @@ type AllOptionConfig<K extends OptionPrimitive = OptionPrimitive> = OptionConfig
 export type OptionMap<T = any> = { [key in keyof T]: T[key] extends OptionPrimitive ? AllOptionConfig<T[key]> : never };
 
 type Shape<M extends OptionMap> = { [k in keyof M]: Exclude<M[k]['def'], undefined> };
+
+function clamp(v: number, l?: number, u?: number): number | undefined {
+  if (l !== undefined && v < l) { return; }
+  if (u !== undefined && v > u) { return; }
+  return v;
+}
 
 /**
  * Base command
@@ -60,7 +66,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   /**
    * Setup environment before command runs
    */
-  envInit?(): Promise<void> | void;
+  envInit?(): Promise<GlobalEnvConfig> | GlobalEnvConfig;
   /**
    * Get Options for commander
    */
@@ -129,9 +135,8 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   boolOption(cfg: OptionConfig<boolean>): OptionConfig<boolean> {
     return {
       type: Boolean,
-      combine: (val, curr): boolean =>
-        // TODO: This needs to be resolved?
-        CliUtil.toBool(val)!,
+      // TODO: This needs to be resolved?
+      combine: (val, curr): boolean => Util.coerceType(val, Boolean, false) ?? curr,
       completion: true,
       ...cfg
     };
@@ -143,7 +148,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   intOption({ lower, upper, ...cfg }: OptionConfig<number> & { lower?: number, upper?: number }): OptionConfig<number> {
     return {
       type: Number,
-      combine: CliUtil.toInt.bind(CliUtil, lower, upper),
+      combine: (val, curr): number => clamp(Util.coerceType(val, Number, false), lower, upper) ?? curr,
       ...cfg
     };
   }
@@ -228,7 +233,10 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
    * Runs the action at execution time
    */
   async runAction(...args: unknown[]): Promise<void> {
-    await this.envInit?.();
+    if (this.envInit) {
+      defineGlobalEnv(await this.envInit());
+      ConsoleManager.setDebugFromEnv();
+    }
 
     if (process.env.TRV_CLI_JSON_IPC && this.jsonIpc) {
       const data = await this.jsonIpc(...args);

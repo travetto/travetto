@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { path } from '@travetto/manifest';
-import { Env, WatchUtil, ExecUtil } from '@travetto/base';
+import { WatchUtil, ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { RenderUtil } from '../src/render/util';
@@ -30,16 +30,16 @@ export class DocCommand extends CliCommand<Options> {
     };
   }
 
-  async envInit(): Promise<void> {
-    Env.define({
-      debug: '0',
+  envInit(): GlobalEnvConfig {
+    return {
+      debug: false,
       set: {
-        TRV_CONSOLE_WIDTH: '140',
+        TRV_CONSOLE_WIDTH: 140,
         TRV_CLI_JSON_IPC: '',
-        NO_COLOR: '1',
-        TRV_LOG_PLAIN: '1'
+        NO_COLOR: true,
+        TRV_LOG_PLAIN: true
       }
-    });
+    };
   }
 
   async action(): Promise<void> {

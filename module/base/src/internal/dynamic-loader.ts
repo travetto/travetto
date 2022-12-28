@@ -1,7 +1,7 @@
 import { Module as Mod } from 'module';
 
 import { path } from '@travetto/manifest';
-import { Env } from '../env';
+import { GlobalEnv } from '../global-env';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
 export const Module: NodeModule = Mod as unknown as NodeModule;
@@ -71,7 +71,7 @@ export class $DynamicLoader {
       err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
     }
 
-    if (Env.isDynamic() && !filename.startsWith('test/')) {
+    if (GlobalEnv.dynamic && !filename.startsWith('test/')) {
       console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
       return this.getErrorModuleSource(err.message);
     }

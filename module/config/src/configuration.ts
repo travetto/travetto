@@ -1,4 +1,4 @@
-import { AppError, Class, ClassInstance, Env, Util } from '@travetto/base';
+import { AppError, Class, ClassInstance, GlobalEnv, Util } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootIndex } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
@@ -24,7 +24,7 @@ export class Configuration {
   }
 
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
-  #profiles: string[] = ['application', ...Env.getProfiles(), 'override'];
+  #profiles: string[] = ['application', ...GlobalEnv.profiles, 'override'];
   #sources: string[] = [];
 
   /**
@@ -86,7 +86,9 @@ export class Configuration {
     );
     const out: Record<string, ConfigData> = {};
     for (const [el, inst] of configs) {
-      const data = BindUtil.exportSchema<ConfigData>(inst, { filterField: f => !f.secret, filterValue: v => v !== undefined });
+      const data = BindUtil.bindSchemaToObject<ConfigData>(
+        inst.constructor, {}, inst, { filterField: f => !f.secret, filterValue: v => v !== undefined }
+      );
       out[el.class.name] = data;
     }
     return { sources: this.#sources, active: out };

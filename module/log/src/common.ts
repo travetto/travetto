@@ -1,3 +1,4 @@
+import { GlobalEnv } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 
@@ -22,6 +23,12 @@ export class CommonLoggerConfig {
 
   @EnvVar('TRV_LOG_TIME')
   timestamp: 's' | 'ms' | false = 'ms';
+
+  postConstruct(): void {
+    if (GlobalEnv.test) {
+      this.timestamp = false;
+    }
+  }
 }
 
 @Injectable()

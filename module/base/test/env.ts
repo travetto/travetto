@@ -60,15 +60,12 @@ export class EnvTest {
     process.env.names = '  a  b   c  d e';
 
     assert.deepStrictEqual(Env.getList('names'), ['a', 'b', 'c', 'd', 'e']);
-  }
 
-  @Test()
-  verifyGetMap() {
-    process.env.mapped = 'a=1,b=2,c=3,d=';
-    assert.deepStrictEqual(Env.getEntries('mapped'), [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
+    process.env.names = '';
+    assert.deepStrictEqual(Env.getList('names'), undefined);
 
-    process.env.mapped = 'a#1,b#2,c#3,d#';
-    assert.deepStrictEqual(Env.getEntries('mapped', '#'), [['a', '1'], ['b', '2'], ['c', '3'], ['d', undefined]]);
+    delete process.env.names;
+    assert.deepStrictEqual(Env.getList('names'), undefined);
   }
 
   @Test()
@@ -83,7 +80,7 @@ export class EnvTest {
   }
 
   @Test()
-  verifyBoolean() {
+  verifyTrueFalse() {
     for (const val of ['yes', '1', 'TRUE', 'On']) {
       process.env.found = val;
 
@@ -103,33 +100,28 @@ export class EnvTest {
   }
 
   @Test()
-  verifyValueOrFalse() {
-    delete process.env.color;
-    assert(Env.isValueOrFalse('color', ['red', 'green', 'blue'] as const, 'red') === 'red');
-    assert(Env.isValueOrFalse('color', ['red', 'green', 'blue'] as const) === false);
-    process.env.color = '0';
-    assert(Env.isValueOrFalse('color', ['red', 'green', 'blue'] as const, 'red') === false);
-    process.env.color = 'green';
-    assert(Env.isValueOrFalse('color', ['red', 'green', 'blue'] as const) === 'green');
-    process.env.COLOR2 = 'blue';
-    assert(Env.isValueOrFalse('color2', ['red', 'green', 'blue'] as const) === 'blue');
-    process.env.COLOR3 = 'gray';
-    assert(Env.isValueOrFalse('color3', ['red', 'green', 'blue'] as const) === false);
-    assert(Env.isValueOrFalse('color3', ['red', 'green', 'blue'] as const, 'green') === 'green');
-  }
-
-  @Test()
-  verifyGetBoolean() {
+  verifyIsBoolean() {
+    delete process.env.BOOL;
     assert(Env.getBoolean('bool') === undefined);
-    process.env.BOOL = '0';
-    assert(Env.getBoolean('bool') === false);
-    process.env.BOOL = 'off';
-    assert(Env.getBoolean('bool') === false);
+
     process.env.BOOL = '';
     assert(Env.getBoolean('bool') === undefined);
+
     process.env.BOOL = '*';
-    assert(Env.getBoolean('bool') === true);
-    process.env.BOOL = '1';
-    assert(Env.getBoolean('bool') === true);
+    assert(Env.getBoolean('bool') === false);
+
+    for (const el of ['0', 'off', 'false']) {
+      process.env.BOOL = el;
+      assert(Env.getBoolean('bool') === false);
+      assert(Env.getBoolean('bool', false) === true);
+      assert(Env.getBoolean('bool', true) === false);
+    }
+
+    for (const el of ['1', 'on', 'true']) {
+      process.env.BOOL = el;
+      assert(Env.getBoolean('bool') === true);
+      assert(Env.getBoolean('bool', false) === false);
+      assert(Env.getBoolean('bool', true) === true);
+    }
   }
 }

@@ -1,5 +1,5 @@
 import { CliUtil, CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
-import { Env, ErrorUtil } from '@travetto/base';
+import { GlobalEnvConfig, ErrorUtil } from '@travetto/base';
 
 import { AppListLoader } from './bin/list';
 import { AppRunUtil } from './bin/run';
@@ -47,12 +47,12 @@ export class AppRunCommand extends CliCommand<Options> {
     return '[application] [args...]';
   }
 
-  envInit(): void {
-    Env.define({
-      debug: process.env.DEBUG || '0',
-      env: this.cmd.env,
-      append: { TRV_PROFILES: this.cmd.profile }
-    });
+  envInit(): GlobalEnvConfig {
+    return {
+      debug: process.env.DEBUG || false,
+      envName: this.cmd.env,
+      profiles: this.cmd.profile
+    };
   }
 
   /**
