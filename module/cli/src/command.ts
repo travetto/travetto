@@ -2,7 +2,7 @@ import { appendFile, mkdir } from 'fs/promises';
 import type * as commander from 'commander';
 
 import { path } from '@travetto/manifest';
-import { ConsoleManager, defineGlobalEnv, GlobalEnvConfig, Util } from '@travetto/base';
+import { ConsoleManager, defineGlobalEnv, GlobalEnvConfig, ObjectUtil } from '@travetto/base';
 
 import { HelpUtil } from './help';
 
@@ -136,7 +136,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
     return {
       type: Boolean,
       // TODO: This needs to be resolved?
-      combine: (val, curr): boolean => Util.coerceType(val, Boolean, false) ?? curr,
+      combine: (val, curr): boolean => ObjectUtil.coerceType(val, Boolean, false) ?? curr,
       completion: true,
       ...cfg
     };
@@ -148,7 +148,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   intOption({ lower, upper, ...cfg }: OptionConfig<number> & { lower?: number, upper?: number }): OptionConfig<number> {
     return {
       type: Number,
-      combine: (val, curr): number => clamp(Util.coerceType(val, Number, false), lower, upper) ?? curr,
+      combine: (val, curr): number => clamp(ObjectUtil.coerceType(val, Number, false), lower, upper) ?? curr,
       ...cfg
     };
   }

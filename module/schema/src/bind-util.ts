@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, TypedObject, Util } from '@travetto/base';
+import { Class, ConcreteClass, TypedObject, ObjectUtil } from '@travetto/base';
 
 import { AllViewⲐ } from './internal/types';
 import { SchemaRegistry } from './service/registry';
@@ -24,7 +24,7 @@ export class BindUtil {
     if (conf.type?.bindSchema) {
       val = conf.type.bindSchema(val);
     } else {
-      val = Util.coerceType(val, conf.type, false);
+      val = ObjectUtil.coerceType(val, conf.type, false);
 
       if (conf.type === Number && conf.precision && typeof val === 'number') {
         if (conf.precision[1]) { // Supports decimal
@@ -49,7 +49,7 @@ export class BindUtil {
     const out: Record<string, unknown> = {};
     for (const k of Object.keys(obj)) {
       const objK = obj[k];
-      const val = Util.isPlainObject(objK) ? this.expandPaths(objK) : objK;
+      const val = ObjectUtil.isPlainObject(objK) ? this.expandPaths(objK) : objK;
       const parts = k.split('.');
       const last = parts.pop()!;
       let sub = out;
@@ -76,8 +76,8 @@ export class BindUtil {
       }
 
       if (last.indexOf('[') < 0) {
-        if (sub[last] && Util.isPlainObject(val)) {
-          sub[last] = Util.deepAssign(sub[last], val, 'coerce');
+        if (sub[last] && ObjectUtil.isPlainObject(val)) {
+          sub[last] = ObjectUtil.deepAssign(sub[last], val, 'coerce');
         } else {
           sub[last] = val;
         }
@@ -94,8 +94,8 @@ export class BindUtil {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             key = sub.length as number;
           }
-          if (sub[key] && Util.isPlainObject(val) && Util.isPlainObject(sub[key])) {
-            sub[key] = Util.deepAssign(sub[key], val, 'coerce');
+          if (sub[key] && ObjectUtil.isPlainObject(val) && ObjectUtil.isPlainObject(sub[key])) {
+            sub[key] = ObjectUtil.deepAssign(sub[key], val, 'coerce');
           } else {
             sub[key] = val;
           }
@@ -114,13 +114,13 @@ export class BindUtil {
     const out: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
-      if (Util.isPlainObject(value)) {
+      if (ObjectUtil.isPlainObject(value)) {
         Object.assign(out, this.flattenPaths(value, `${pre}.`)
         );
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
           const v = value[i];
-          if (Util.isPlainObject(v)) {
+          if (ObjectUtil.isPlainObject(v)) {
             Object.assign(out, this.flattenPaths(v, `${pre}[${i}].`));
           } else {
             out[`${pre}[${i}]`] = v;
@@ -178,7 +178,7 @@ export class BindUtil {
     const view = cfg.view ?? AllViewⲐ; // Does not convey
     delete cfg.view;
 
-    if (!!data && !Util.isPrimitive(data)) {
+    if (!!data && !ObjectUtil.isPrimitive(data)) {
       const conf = SchemaRegistry.get(cons);
 
       // If no configuration
@@ -273,13 +273,13 @@ export class BindUtil {
       if (complex) {
         val = valArr.map(x => this.bindSchema(field.type, x, { view: field.view }));
       } else {
-        val = valArr.map(x => Util.coerceType(x, field.type, false));
+        val = valArr.map(x => ObjectUtil.coerceType(x, field.type, false));
       }
     } else {
       if (complex) {
         val = this.bindSchema(field.type, val, { view: field.view });
       } else {
-        val = Util.coerceType(val, field.type, false);
+        val = ObjectUtil.coerceType(val, field.type, false);
       }
     }
     return val;

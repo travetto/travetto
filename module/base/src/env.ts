@@ -50,7 +50,7 @@ export class Env {
   static getBoolean(k: string, isValue?: boolean): boolean | undefined {
     const val = this.get(k);
     if (val === undefined || val === '') {
-      return undefined;
+      return isValue ? false : undefined;
     }
     const match = val.match(/^((?<TRUE>true|yes|1|on)|false|no|off|0)$/i);
     return isValue === undefined ? !!match?.groups?.TRUE : !!match?.groups?.TRUE === isValue;

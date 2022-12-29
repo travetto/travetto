@@ -4,7 +4,7 @@ import cp from 'child_process';
 
 import { path } from '@travetto/manifest';
 import { ExecUtil, FileResourceProvider } from '@travetto/base';
-import { CliCommand, CliUtil, OptionConfig, ListOptionConfig } from '@travetto/cli';
+import { CliCommand, cliTpl, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 type Options = {
   extendedHelp: OptionConfig<boolean>;
@@ -70,15 +70,15 @@ export class OpenApiClientCommand extends CliCommand<Options> {
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([k, [cmd, v]]) => [`@travetto/${k}`.padEnd(presetLen + 5), [cmd, this.presetMap(v)]] as const);
 
-    const presetText = CliUtil.color`
+    const presetText = cliTpl`
 ${{ subtitle: 'Available Presets' }}
 ----------------------------------
-${presetEntries.map(([k, [cmd, param]]) => CliUtil.color`* ${{ input: k }} -- ${{ identifier: cmd }} ${{ param }}`).join('\n')}`;
+${presetEntries.map(([k, [cmd, param]]) => cliTpl`* ${{ input: k }} -- ${{ identifier: cmd }} ${{ param }}`).join('\n')}`;
 
-    const formatText = CliUtil.color`
+    const formatText = cliTpl`
 ${{ subtitle: 'Available Formats' }}
 ----------------------------------
-${this.getListOfFormats().map(x => CliUtil.color`* ${{ input: x }}`).join('\n')} `;
+${this.getListOfFormats().map(x => cliTpl`* ${{ input: x }}`).join('\n')} `;
 
     return this.cmd.extendedHelp ? `${presetText}\n${formatText}` : presetText;
   }

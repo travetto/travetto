@@ -1,6 +1,6 @@
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 
-import { Class, Util } from '@travetto/base';
+import { Class, ObjectUtil } from '@travetto/base';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
@@ -36,7 +36,7 @@ export class ElasticsearchQueryUtil {
     for (const key of keys) {
       const subPath = `${path}${key}`;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      if (Util.isPlainObject(sub[key]) && !Object.keys(sub[key] as Record<string, unknown>)[0].startsWith('$')) {
+      if (ObjectUtil.isPlainObject(sub[key]) && !Object.keys(sub[key] as Record<string, unknown>)[0].startsWith('$')) {
         Object.assign(out, this.extractSimple(sub[key], `${subPath}.`));
       } else {
         out[subPath] = sub[key];
@@ -98,7 +98,7 @@ export class ElasticsearchQueryUtil {
         ((key === 'id' && !path) ? '_id' : `${path}${key}`) :
         `${path}${key}`;
 
-      if (Util.isPlainObject(top)) {
+      if (ObjectUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
           const inner = this.extractWhereTermQuery(declaredType, top, config, `${sPath}.`);
@@ -163,7 +163,7 @@ export class ElasticsearchQueryUtil {
             }
             case '$regex': {
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const pattern = Util.toRegex(v as string);
+              const pattern = ObjectUtil.toRegex(v as string);
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
                   `${sPath}.text_cs` :

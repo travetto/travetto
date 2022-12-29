@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 
-import { Util } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
@@ -42,7 +42,7 @@ export class SummaryEmitter implements TestConsumer {
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
-        this.log(this.#enhancer.failure(Util.hasToJSON(err) ? `${err.toJSON()}` : `${err}`));
+        this.log(this.#enhancer.failure(ObjectUtil.hasToJSON(err) ? `${err.toJSON()}` : `${err}`));
       }
     }
 

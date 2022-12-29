@@ -1,7 +1,7 @@
 import util from 'util';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { Class, ClassInstance, Util } from '@travetto/base';
+import { Class, ClassInstance, ObjectUtil } from '@travetto/base';
 
 import { TestConfig, Assertion, TestResult } from '../model/test';
 import { SuiteConfig } from '../model/suite';
@@ -22,14 +22,14 @@ export class AssertUtil {
     if (isCleanable(val)) {
       return val.toClean();
     } else if (val === null || val === undefined
-      || (!(val instanceof RegExp) && Util.isPrimitive(val))
-      || Util.isPlainObject(val) || Array.isArray(val)
+      || (!(val instanceof RegExp) && ObjectUtil.isPrimitive(val))
+      || ObjectUtil.isPlainObject(val) || Array.isArray(val)
     ) {
       return JSON.stringify(val);
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const subV = val as (Class | ClassInstance);
-      if (subV.Ⲑid || !subV.constructor || (!subV.constructor.Ⲑid && Util.isFunction(subV))) { // If a function, show name
+      if (subV.Ⲑid || !subV.constructor || (!subV.constructor.Ⲑid && ObjectUtil.isFunction(subV))) { // If a function, show name
         return subV.name;
       } else { // Else inspect
         return util.inspect(val, false, 1).replace(/\n/g, ' ');

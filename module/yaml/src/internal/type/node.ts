@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 import { SimpleType } from './common';
 
 export interface Node<T extends SimpleType = SimpleType> {
@@ -18,7 +18,7 @@ export class NumberNode implements Node<number> {
   value: number;
 
   constructor(token: string) {
-    this.value = Util.coerceType(token, Number, true);
+    this.value = ObjectUtil.coerceType(token, Number, true);
   }
 }
 
@@ -26,7 +26,7 @@ export class BooleanNode implements Node<boolean> {
   value: boolean;
 
   constructor(token: string) {
-    this.value = Util.coerceType(token, Boolean, true);
+    this.value = ObjectUtil.coerceType(token, Boolean, true);
   }
 }
 

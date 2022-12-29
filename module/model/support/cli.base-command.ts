@@ -1,4 +1,4 @@
-import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
+import { CliCommand, cliTpl, OptionConfig } from '@travetto/cli';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
 import { ModelCandidateUtil } from './bin/candidate';
@@ -27,12 +27,12 @@ export abstract class BaseModelCommand extends CliCommand<Options> {
   }
 
   async usage({ providers, models }: { providers: string[], models: string[] }, err = ''): Promise<void> {
-    await this.showHelp(err, CliUtil.color`   
+    await this.showHelp(err, cliTpl`   
 ${{ title: 'Providers' }}:
-${providers.map(p => CliUtil.color`  * ${{ type: p }}`).join('\n')}
+${providers.map(p => cliTpl`  * ${{ type: p }}`).join('\n')}
 
 ${{ title: 'Models' }}:
-${models.map(p => CliUtil.color`  * ${{ param: p }}`).join('\n')}
+${models.map(p => cliTpl`  * ${{ param: p }}`).join('\n')}
 `);
   }
 
@@ -42,11 +42,11 @@ ${models.map(p => CliUtil.color`  * ${{ param: p }}`).join('\n')}
       return await this.usage(candidates);
     } else {
       if (!candidates.providers.includes(provider)) {
-        await this.usage(candidates, CliUtil.color`${{ param: provider }} is not a valid provider`);
+        await this.usage(candidates, cliTpl`${{ param: provider }} is not a valid provider`);
       }
       const badModel = models.find(x => x !== '*' && !candidates.models.includes(x));
       if (badModel) {
-        await this.usage(candidates, CliUtil.color`${{ param: badModel }} is not a valid model`);
+        await this.usage(candidates, cliTpl`${{ param: badModel }} is not a valid model`);
       }
     }
   }

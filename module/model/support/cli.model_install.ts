@@ -1,4 +1,4 @@
-import { CliUtil } from '@travetto/cli';
+import { cliTpl } from '@travetto/cli';
 import { ConsoleManager } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 
@@ -20,7 +20,7 @@ export class ModelInstallCommand extends BaseModelCommand {
       await this.validate(provider, models);
       const resolved = await this.resolve(provider, models);
       await ModelInstallUtil.run(resolved.provider, resolved.models);
-      console.log(CliUtil.color`${{ success: 'Successfully' }} installed ${{ param: models.length.toString() }} model(s)`);
+      console.log(cliTpl`${{ success: 'Successfully' }} installed ${{ param: models.length.toString() }} model(s)`);
     } catch (err) {
       console.error((err && err instanceof Error) ? err.message : err);
     }

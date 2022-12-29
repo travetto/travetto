@@ -3,7 +3,7 @@ import {
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
   NotFoundError, ModelRegistry, ExistsError, OptionalId
 } from '@travetto/model';
-import { Util, Class } from '@travetto/base';
+import { ObjectUtil, Class } from '@travetto/base';
 import { SchemaChange } from '@travetto/schema';
 import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
@@ -315,7 +315,7 @@ export class SQLModelService implements
 
     const results = await this.#exec<{ key: string, count: number }>(q.join('\n'));
     return results.records.map(x => {
-      x.count = Util.coerceType(x.count, Number);
+      x.count = ObjectUtil.coerceType(x.count, Number);
       return x;
     });
   }

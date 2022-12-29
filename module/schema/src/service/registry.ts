@@ -1,4 +1,4 @@
-import { Class, AppError, Util, ClassInstance, ConcreteClass } from '@travetto/base';
+import { Class, AppError, ObjectUtil, ClassInstance, ConcreteClass } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
@@ -8,7 +8,7 @@ import { AllViewⲐ } from '../internal/types';
 
 function hasType<T>(o: unknown): o is { type: Class<T> | string } {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !Util.isPrimitive(o) && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
+  return !!o && !ObjectUtil.isPrimitive(o) && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
 }
 
 function isWithType<T>(o: T, cfg: ClassConfig | undefined): o is T & { type?: string } {

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { path } from '@travetto/manifest';
-import { CliUtil } from '@travetto/cli';
+import { cliTpl } from '@travetto/cli';
 import { Env } from '@travetto/base';
 
 import { PackUtil } from '../util';
@@ -54,6 +54,6 @@ export const Assemble: PackOperation<AssembleConfig, 'assemble'> = {
     yield 'Excluding Files'; await AssembleUtil.excludeFiles(ws, exclude);
     yield 'Copying Added Content'; await AssembleUtil.copyAddedContent(ws, add);
     yield 'Removing Empty Folders'; await AssembleUtil.removeEmptyFolders(ws);
-    yield CliUtil.color`${{ success: 'Successfully' }} assembled project at ${{ path: workspace }}`;
+    yield cliTpl`${{ success: 'Successfully' }} assembled project at ${{ path: workspace }}`;
   }
 };

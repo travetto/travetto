@@ -1,4 +1,4 @@
-import { Class, Util } from '@travetto/base';
+import { Class, ObjectUtil } from '@travetto/base';
 
 import { Registry } from '../registry';
 import { ChangeEvent } from '../types';
@@ -142,7 +142,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    */
   register(cls: Class, pConfig: Partial<C> = {}): void {
     const conf = this.getOrCreatePending(cls);
-    Util.deepAssign(conf, pConfig);
+    ObjectUtil.deepAssign(conf, pConfig);
   }
 
   /**
@@ -150,7 +150,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    */
   registerField(cls: Class, field: F, pConfig: Partial<M>): void {
     const conf = this.getOrCreatePendingField(cls, field);
-    Util.deepAssign(conf, pConfig);
+    ObjectUtil.deepAssign(conf, pConfig);
   }
 
   /**

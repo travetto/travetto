@@ -3,7 +3,8 @@ import { parentPort } from 'worker_threads';
 
 import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
-import { CliModuleUtil, CliUtil } from '@travetto/cli';
+import { CliModuleUtil } from '@travetto/cli';
+import { GlobalTerminal } from '@travetto/terminal';
 
 import { AppScanUtil } from '../../src/scan';
 import type { ApplicationConfig } from '../../src/types';
@@ -65,12 +66,12 @@ export class AppListLoader {
         const list = await AppScanUtil.scanList();
         return list.map(({ target, ...rest }) => rest);
       } else if (!CliModuleUtil.isMonoRepoRoot()) {
-        return await ExecUtil.worker<ApplicationConfig[]>(
+        return await (ExecUtil.worker<ApplicationConfig[]>(
           RootIndex.resolveFileImport('@travetto/app/support/main.list-build.ts')
-        ).message;
+        ).message);
       } else {
         const configs: ApplicationConfig[] = [];
-        await CliUtil.waiting('Collecting', () =>
+        await GlobalTerminal.waiting('Collecting', () =>
           CliModuleUtil.runOnModules('all',
             ['trv', 'main', '@travetto/app/support/main.list-build.ts'],
             {

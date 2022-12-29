@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-import { Util } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 import { CoreCacheConfig } from './types';
 
 /**
@@ -15,7 +15,7 @@ export class CacheUtil {
    */
   static toSafeJSON(value: unknown, all = false): string {
     const replacer = all ?
-      ((key: string, val: unknown): unknown => (val && val instanceof RegExp) ? val.source : (Util.isFunction(val) ? val.toString() : val)) :
+      ((key: string, val: unknown): unknown => (val && val instanceof RegExp) ? val.source : (ObjectUtil.isFunction(val) ? val.toString() : val)) :
       undefined;
 
     return Buffer.from(JSON.stringify(value, replacer)).toString('base64');

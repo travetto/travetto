@@ -1,10 +1,9 @@
 import { RootIndex } from '@travetto/manifest';
-import { CliUtil } from '@travetto/cli';
 
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
 
-export type StreamingResult = Partial<Record<keyof typeof CliUtil['colorPalette'], string | number>>;
+export type StreamingResult = Partial<Record<string, string | number>>;
 export type StreamingStatus = AsyncIterable<StreamingResult>;
 
 export type Service = {

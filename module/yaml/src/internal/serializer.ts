@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 
 type SerializableType = (Error & { stack: SerializableType }) | RegExp | Function | Set<unknown> | Map<string, unknown> | number | boolean | null | string | object;
 type SerializeConfig = {
@@ -78,7 +78,7 @@ export class Serializer {
     } else if (o instanceof Error) {
       out = `${this.serialize(o.stack, cfg, indentLevel + cfg.indent)}\n`;
     } else if (typeof o === 'function' || o instanceof RegExp) {
-      if (Util.hasToJSON(o)) {
+      if (ObjectUtil.hasToJSON(o)) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         out = this.serialize(o.toJSON() as object, cfg, indentLevel);
       } else if (o instanceof Function) {

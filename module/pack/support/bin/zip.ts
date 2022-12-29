@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 
 import { path } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
-import { CliUtil } from '@travetto/cli';
+import { cliTpl } from '@travetto/cli';
 
 import { CommonConfig, PackOperation } from './types';
 import { PackUtil } from './util';
@@ -46,6 +46,6 @@ export const Zip: PackOperation<ZipConfig, 'zip'> = {
       await ExecUtil.spawn('zip', ['-r', zipFile, '.'], { cwd: ws }).result;
     }
 
-    yield CliUtil.color`${{ success: 'Successfully' }} archived project to ${{ path: zipFile.replace(path.cwd(), '.') }}`;
+    yield cliTpl`${{ success: 'Successfully' }} archived project to ${{ path: zipFile.replace(path.cwd(), '.') }}`;
   }
 };

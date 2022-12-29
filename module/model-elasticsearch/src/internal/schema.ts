@@ -1,4 +1,4 @@
-import { Class, Util } from '@travetto/base';
+import { Class, ObjectUtil } from '@travetto/base';
 import { ModelRegistry } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { SchemaRegistry } from '@travetto/schema';
@@ -53,7 +53,7 @@ export class ElasticsearchSchemaUtil {
       const prop = arr ? `${path}[${x}]` : `${path}${path ? '.' : ''}${x}`;
       if (o[x] === undefined || o[x] === null) {
         ops.push(`ctx._source.${path}${path ? '.' : ''}remove("${x}")`);
-      } else if (Util.isPrimitive(o[x]) || Array.isArray(o[x])) {
+      } else if (ObjectUtil.isPrimitive(o[x]) || Array.isArray(o[x])) {
         const param = prop.toLowerCase().replace(/[^a-z0-9_$]/g, '_');
         ops.push(`ctx._source.${prop} = params.${param}`);
         out.params[param] = o[x];
@@ -85,7 +85,7 @@ export class ElasticsearchSchemaUtil {
   static generateAllSourceSchema(cls: Class, config?: EsSchemaConfig): SchemaType {
     const allTypes = ModelRegistry.getClassesByBaseType(cls);
     return allTypes.reduce<SchemaType>((acc, schemaCls) => {
-      Util.deepAssign(acc, this.generateSingleSourceSchema(schemaCls, config));
+      ObjectUtil.deepAssign(acc, this.generateSingleSourceSchema(schemaCls, config));
       return acc;
     }, { properties: {}, dynamic: false });
   }
@@ -145,7 +145,7 @@ export class ElasticsearchSchemaUtil {
             }
           };
           if (config && config.caseSensitive) {
-            Util.deepAssign(text, {
+            ObjectUtil.deepAssign(text, {
               fields: {
                 ['text_cs']: { type: 'text', analyzer: 'whitespace' }
               }

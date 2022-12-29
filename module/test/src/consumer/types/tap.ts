@@ -1,7 +1,7 @@
 import { Writable } from 'stream';
 
 import { path } from '@travetto/manifest';
-import { ConsoleManager, ErrorUtil, Util } from '@travetto/base';
+import { ConsoleManager, ErrorUtil, ObjectUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 import { TestEvent } from '../../model/event';
@@ -103,7 +103,7 @@ export class TapEmitter implements TestConsumer {
       if (test.status === 'failed') {
         if (test.error?.stack && !test.error.stack.includes('AssertionError')) {
           const err = ErrorUtil.deserializeError(test.error);
-          this.logMeta({ error: Util.hasToJSON(err) ? err.toJSON() : err });
+          this.logMeta({ error: ObjectUtil.hasToJSON(err) ? err.toJSON() : err });
         }
       }
 
@@ -128,7 +128,7 @@ export class TapEmitter implements TestConsumer {
       this.log('---\n');
       for (const err of summary.errors) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        this.log(this.#enhancer.failure(Util.hasToJSON(err) ? err.toJSON() as string : `${err}`));
+        this.log(this.#enhancer.failure(ObjectUtil.hasToJSON(err) ? err.toJSON() as string : `${err}`));
       }
     }
 

@@ -1,4 +1,5 @@
-import { CliCommand, CliUtil } from '@travetto/cli';
+import { CliCommand, cliTpl } from '@travetto/cli';
+import { GlobalTerminal } from '@travetto/terminal';
 
 import { ServiceUtil } from './bin/service';
 
@@ -24,19 +25,19 @@ export class CliServiceCommand extends CliCommand<{}> {
     }
 
     if (!mode) {
-      const list = all.map(x => CliUtil.color` * ${{ identifier: x.name }}@${{ type: x.version }}`);
+      const list = all.map(x => cliTpl` * ${{ identifier: x.name }}@${{ type: x.version }}`);
       await this.showHelp(undefined,
-        CliUtil.color`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${list.join('\n')}`);
+        cliTpl`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${list.join('\n')}`);
     }
 
     const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
     const maxVersion = Math.max(...all.map(x => x.version.length), 'Version'.length) + 3;
 
-    const table = CliUtil.table(all.length);
+    const table = GlobalTerminal.table(all.length);
 
     await table.init(
       '',
-      CliUtil.color`   ${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
+      cliTpl`   ${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
       '-'.repeat(maxName + maxVersion + 20)
     );
 
@@ -54,7 +55,7 @@ export class CliServiceCommand extends CliCommand<{}> {
           const svc = all[i];
           await table.update(
             i,
-            CliUtil.color` * ${{ identifier: svc.name.padEnd(maxName) }} ${{ type: svc.version.padStart(maxVersion - 3).padEnd(maxVersion) }} ${status}`
+            cliTpl` * ${{ identifier: svc.name.padEnd(maxName) }} ${{ type: svc.version.padStart(maxVersion - 3).padEnd(maxVersion) }} ${status}`
           );
         }
       });

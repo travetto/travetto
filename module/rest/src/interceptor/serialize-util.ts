@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 
-import { StreamUtil, ErrorCategory, AppError, Util } from '@travetto/base';
+import { StreamUtil, ErrorCategory, AppError, ObjectUtil } from '@travetto/base';
 
 import { SendStreamⲐ, NodeEntityⲐ, HeadersAddedⲐ } from '../internal/symbol';
 import { Renderable } from '../response/renderable';
@@ -24,7 +24,7 @@ const categoryToCode: Record<ErrorCategory, number> = {
  */
 export class SerializeUtil {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  static isRenderable = (o: unknown): o is Renderable => !!o && !Util.isPrimitive(o) && 'render' in (o as object);
+  static isRenderable = (o: unknown): o is Renderable => !!o && !ObjectUtil.isPrimitive(o) && 'render' in (o as object);
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   static isStream = (o: unknown): o is Readable => !!o && 'pipe' in (o as object) && 'on' in (o as object);
 
@@ -63,7 +63,7 @@ export class SerializeUtil {
    * Standard json
    */
   static serializeJSON(req: Request, res: Response, output: unknown): void {
-    const payload = Util.hasToJSON(output) ? output.toJSON() : output;
+    const payload = ObjectUtil.hasToJSON(output) ? output.toJSON() : output;
     this.setContentTypeIfUndefined(res, 'application/json');
     res.send(JSON.stringify(payload, undefined, 'pretty' in req.query ? 2 : 0));
   }
@@ -108,7 +108,7 @@ export class SerializeUtil {
     res.statusError = error;
     res.setHeader('Content-Type', 'application/json');
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const out = Util.hasToJSON(error) ? error.toJSON() as object : { message: error.message };
+    const out = ObjectUtil.hasToJSON(error) ? error.toJSON() as object : { message: error.message };
     res.send(JSON.stringify({ ...out, status }));
   }
 

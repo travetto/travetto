@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { ColorDefineUtil } from '../src/define';
+import { ColorDefineUtil } from '../src/color-define';
 
 @Suite()
 export class ColorDefineTest {

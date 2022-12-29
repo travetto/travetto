@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { Util } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { Schema } from '@travetto/schema';
 import { Suite, Test, BeforeAll } from '@travetto/test';
@@ -55,11 +55,11 @@ type MustType = {
 };
 
 function isBool(o: unknown): o is { bool: { must: [MustType], ['must_not']: unknown, ['should_not']: unknown } } {
-  return Util.isPlainObject(o) && 'bool' in o;
+  return ObjectUtil.isPlainObject(o) && 'bool' in o;
 }
 
 function isRegexp(o: unknown): o is { regexp: { name: string } } {
-  return Util.isPlainObject(o) && 'regexp' in o;
+  return ObjectUtil.isPlainObject(o) && 'regexp' in o;
 }
 
 

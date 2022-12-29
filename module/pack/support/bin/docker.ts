@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/base';
-import { CliUtil } from '@travetto/cli';
+import { cliTpl } from '@travetto/cli';
 
 import { CommonConfig, PackOperation } from './types';
 import { PackUtil } from './util';
@@ -92,6 +92,6 @@ export const Docker: PackOperation<DockerConfig, 'docker'> = {
       await ExecUtil.spawn('docker', ['image', 'push', ...tags]).result;
     }
 
-    yield CliUtil.color`${{ success: 'Successfully' }} containerized project`;
+    yield cliTpl`${{ success: 'Successfully' }} containerized project`;
   }
 };

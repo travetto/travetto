@@ -1,10 +1,10 @@
 import { d, mod, lib } from '@travetto/doc';
-import { ExecUtil, AppError, StreamUtil, Util } from '@travetto/base';
+import { ExecUtil, AppError, StreamUtil, ObjectUtil } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.Ref('ConsoleManager', 'src/console.ts');
 
-const UtilLink = d.Ref(Util.name, 'src/util.ts');
+const ObjectUtilLink = d.Ref(ObjectUtil.name, 'src/object-util.ts');
 const AppErrorLink = d.Ref(AppError.name, 'src/error.ts');
 const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
 const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
@@ -19,7 +19,7 @@ ${d.List(
   'Console Management',
   'Standard Error Support',
   'Stream Support',
-  'General Utilities',
+  'Object Utilities',
   'Process Execution',
   'Shutdown Management'
 )}
@@ -109,8 +109,8 @@ ${d.List(
   d`${d.Method('waitForCompletion(src: Readable, finish:()=>Promise<any>)')} will ensure the stream remains open until the promise finish produces is satisfied.`,
 )}
 
-${d.Section('General Utilities')}
-Simple functions for providing a minimal facsimile to ${lib.Lodash}, but without all the weight. Currently ${UtilLink} includes:
+${d.Section('Object Utilities')}
+Simple functions for providing a minimal facsimile to ${lib.Lodash}, but without all the weight. Currently ${ObjectUtilLink} includes:
 
 ${d.List(
   d`${d.Method('isPrimitive(el)')} determines if ${d.Input('el')} is a ${d.Input('string')}, ${d.Input('boolean')}, ${d.Input('number')} or ${d.Input('RegExp')}`,

@@ -1,4 +1,4 @@
-import { CliUtil, CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
+import { cliTpl, CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 import { GlobalEnvConfig, ErrorUtil } from '@travetto/base';
 
 import { AppListLoader } from './bin/list';
@@ -29,7 +29,7 @@ export class AppRunCommand extends CliCommand<Options> {
   async help(): Promise<string> {
     return [
       '',
-      CliUtil.color`${{ title: 'Available Applications:' }}`,
+      cliTpl`${{ title: 'Available Applications:' }}`,
       '',
       HelpUtil.generateAppHelpList(await this.#loader.getList()),
       ''
@@ -75,9 +75,9 @@ export class AppRunCommand extends CliCommand<Options> {
           if (!err || !(err instanceof Error)) {
             throw err;
           }
-          console.error(CliUtil.color`${{ failure: 'Failed to run' }} ${{ title: selected.name }}, ${err.message.replace(/via=.*$/, '')}`);
+          console.error(cliTpl`${{ failure: 'Failed to run' }} ${{ title: selected.name }}, ${err.message.replace(/via=.*$/, '')}`);
           if (hasChildren(err)) {
-            console.error(err.errors.map((x: { message: string }) => CliUtil.color`● ${{ output: x.message }}`).join('\n'));
+            console.error(err.errors.map((x: { message: string }) => cliTpl`● ${{ output: x.message }}`).join('\n'));
           } else {
             const stack = ErrorUtil.cleanStack(err);
             if (!stack.includes(err.message)) {

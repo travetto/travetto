@@ -1,6 +1,6 @@
 import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
-import { Class, Util, AppError, TypedObject } from '@travetto/base';
+import { Class, ObjectUtil, AppError, TypedObject } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
@@ -188,7 +188,7 @@ export abstract class SQLDialect implements DialectState {
       return 'NULL';
     } else if (conf.type === String) {
       if (value instanceof RegExp) {
-        const src = Util.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
+        const src = ObjectUtil.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
         return this.quote(src);
       } else {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -426,7 +426,7 @@ export abstract class SQLDialect implements DialectState {
       }
       const sPath = this.resolveName(sStack);
 
-      if (Util.isPlainObject(top)) {
+      if (ObjectUtil.isPlainObject(top)) {
         const subKey = Object.keys(top)[0];
         if (!subKey.startsWith('$')) {
           const inner = this.getWhereFieldSQL(sStack, top);
@@ -458,7 +458,7 @@ export abstract class SQLDialect implements DialectState {
             }
             case '$regex': {
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const re = Util.toRegex(v as string);
+              const re = ObjectUtil.toRegex(v as string);
               const src = re.source;
               const ins = re.flags && re.flags.includes('i');
 
@@ -714,7 +714,7 @@ CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
     const fields: [string, boolean][] = idx.fields.map(x => {
       const key = TypedObject.keys(x)[0];
       const val = x[key];
-      if (Util.isPlainObject(val)) {
+      if (ObjectUtil.isPlainObject(val)) {
         throw new Error('Unable to supported nested fields for indices');
       }
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

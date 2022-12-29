@@ -1,4 +1,4 @@
-import { Util } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 
 export class PointImpl {
   static validateSchema(input: unknown): 'type' | undefined {
@@ -8,8 +8,8 @@ export class PointImpl {
   static bindSchema(input: unknown): [number, number] | undefined {
     if (Array.isArray(input) && input.length === 2) {
       return [
-        Util.coerceType(input[0], Number, false),
-        Util.coerceType(input[1], Number, false)
+        ObjectUtil.coerceType(input[0], Number, false),
+        ObjectUtil.coerceType(input[1], Number, false)
       ];
     }
   }

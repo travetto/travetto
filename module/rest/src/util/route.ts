@@ -1,4 +1,4 @@
-import { Class, Util } from '@travetto/base';
+import { Class, ObjectUtil } from '@travetto/base';
 
 import { Request, Filter, RouteConfig, FilterContext, FilterNext, FilterReturn, RequestResponseHandler } from '../types';
 import { EndpointConfig, ControllerConfig } from '../registry/types';
@@ -47,7 +47,7 @@ export class RouteUtil {
       const out = it({ req: ctx.req, res: ctx.res, config: cfg }, chainedNext);
       if (it.length === 2) {
         return out;
-      } else if (Util.isPromise(out)) {
+      } else if (ObjectUtil.isPromise(out)) {
         return out.then(chainedNext);
       } else {
         return chainedNext();

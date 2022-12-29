@@ -2,14 +2,14 @@ import assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 
-import { TerminalColorSupport } from '../src/support';
+import { TerminalSupport } from '../src/support';
 
 @Suite()
 export class ColorUtilTest {
 
   @Test()
   async colorize() {
-    const output = new TerminalColorSupport().setLevel(1).colorer({ text: 'red', underline: true })('apple');
+    const output = new TerminalSupport().setColorLevel(1).colorer({ text: 'red', underline: true })('apple');
     assert(output !== 'apple');
     assert(/apple/.test(output));
     assert(output.includes('\x1b[24;39m'));
@@ -19,7 +19,7 @@ export class ColorUtilTest {
   @Test()
   async noColor() {
     process.env.NO_COLOR = '1';
-    const tpl = new TerminalColorSupport().template({
+    const tpl = new TerminalSupport().template({
       basic: { text: 'red', underline: true }
     });
 
@@ -30,7 +30,7 @@ export class ColorUtilTest {
 
   @Test()
   async template() {
-    const sup = new TerminalColorSupport().setLevel(1);
+    const sup = new TerminalSupport().setColorLevel(1);
     const tpl = sup.template({
       name: '#0000ff',
       age: 'black'
@@ -42,13 +42,13 @@ export class ColorUtilTest {
     assert(output.includes('\x1b[30m'));
     assert(output.includes('\x1b[94m'));
 
-    sup.setLevel(2);
+    sup.setColorLevel(2);
     const output2 = tpl`My name is ${{ name: 'Bob' }} and I'm ${{ age: 20 }} years old`;
     assert(output2.includes('\x1b[38;5;21m'));
     assert(output2.includes('\x1b[39m'));
     assert(!output2.includes('\x1b[94m'));
 
-    sup.setLevel(3);
+    sup.setColorLevel(3);
     const output3 = tpl`My name is ${{ name: 'Bob' }} and I'm ${{ age: 20 }} years old`;
     assert(output3.includes('\x1b[38;2;0;0;0m'));
     assert(output3.includes('\x1b[39m'));
@@ -57,7 +57,7 @@ export class ColorUtilTest {
 
   @Test({ shouldThrow: 'Invalid template' })
   badTemplate() {
-    const tpl = new TerminalColorSupport().setLevel(1).template({
+    const tpl = new TerminalSupport().setColorLevel(1).template({
       name: 'blue',
       age: 'black'
     });

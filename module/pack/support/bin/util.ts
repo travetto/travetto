@@ -3,8 +3,9 @@ import fs from 'fs/promises';
 import glob from 'picomatch';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { CliUtil } from '@travetto/cli';
+import { cliTpl } from '@travetto/cli';
 import { ExecUtil } from '@travetto/base';
+import { TerminalUtil } from '@travetto/terminal';
 
 import { CommonConfig, PackOperation } from './types';
 
@@ -109,16 +110,16 @@ export class PackUtil {
   static async runOperation<T extends CommonConfig>(op: PackOperation<T, string>, cfg: T, indent = 0): Promise<void> {
     const spacer = ' '.repeat(indent);
     const ctx = await op.context(cfg);
-    const title = CliUtil.color`${{ title: op.title }} ${ctx}`;
-    const width = Math.max(title.replace(/\x1b\[\d+m/g, '').length, 50); // eslint-disable-line
+    const title = cliTpl`${{ title: op.title }} ${ctx}`;
+    const width = Math.max(TerminalUtil.removeAnsiSequences(title).length, 50); // eslint-disable-line
 
     let i = 0;
     function stdout(msg?: string): void {
       if (i++ > 0) {
-        process.stdout.write(CliUtil.color`${spacer}${{ param: 'done' }}\n`);
+        process.stdout.write(cliTpl`${spacer}${{ param: 'done' }}\n`);
       }
       if (msg) {
-        process.stdout.write(CliUtil.color`${spacer}${{ output: '᳁' }} ${{ path: msg.padEnd(width - 15) }} ... `);
+        process.stdout.write(cliTpl`${spacer}${{ output: '᳁' }} ${{ path: msg.padEnd(width - 15) }} ... `);
       }
     }
 

@@ -1,10 +1,10 @@
-import { NAMED } from './names';
+import { NAMED_COLORS } from './named-colors';
 
 type I = number;
 export type RGB = [r: I, g: I, b: I] | (readonly [r: I, g: I, b: I]);
 type HSL = [h: I, s: I, l: I];
 export type DefinedColor = { rgb: RGB, hsl: HSL, idx16: I, idx16bg: I, idx256: I };
-export type RGBInput = I | keyof (typeof NAMED) | `#${string}`;
+export type RGBInput = I | keyof (typeof NAMED_COLORS) | `#${string}`;
 
 const _rgb = (r: I, g: I = r, b: I = g): RGB => [r, g, b];
 
@@ -35,7 +35,7 @@ const ANSI256_GRAY_MAPPING = [
 const STEPS_256 = [0, 95, 135, 175, 215, 255];
 
 const ANSI256_TO_RGB: RGB[] = [
-  ...STD_PRE.flatMap(p => STD_COLORS.map(c => NAMED[`${p}${c}`]).map(toRgbArray)),
+  ...STD_PRE.flatMap(p => STD_COLORS.map(c => NAMED_COLORS[`${p}${c}`]).map(toRgbArray)),
   ...STEPS_256.flatMap(r => STEPS_256.flatMap(g => STEPS_256.map(b => _rgb(r, g, b)))),
   ...new Array(24).fill(0).map((_, i) => _rgb(i * 10 + 8)) // Grays
 ];
@@ -135,9 +135,9 @@ export class ColorDefineUtil {
           const { rh, gh, bh } = res.groups!;
           return [parseInt(rh, 16), parseInt(gh, 16), parseInt(bh, 16)];
         }
-      } else if (val in NAMED) {
+      } else if (val in NAMED_COLORS) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        return this.toRgb(NAMED[val as keyof typeof NAMED]);
+        return this.toRgb(NAMED_COLORS[val as keyof typeof NAMED_COLORS]);
       }
       throw new Error(`Unknown color format: ${val}`);
     } else if (typeof val === 'number') {
@@ -160,5 +160,20 @@ export class ColorDefineUtil {
       this.CACHE.set(val, { rgb, idx16, idx16bg, idx256, hsl });
     }
     return this.CACHE.get(val)!;
+  }
+
+  /**
+   * Build ANSI compatible color codes by level
+   */
+  static getColorCodes(inp: RGBInput, bg: boolean): [number[], number[]][] {
+    const spec = this.defineColor(inp);
+    const { idx16, idx16bg, idx256, rgb } = spec;
+    const [open, close] = bg ? [48, 49] : [38, 39];
+    return [
+      [[], []],
+      [[bg ? idx16bg : idx16], [close]],
+      [[open, 5, idx256], [close]],
+      [[open, 2, ...rgb], [close]]
+    ];
   }
 }

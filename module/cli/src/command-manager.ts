@@ -1,6 +1,6 @@
 import { RootIndex } from '@travetto/manifest';
 
-import { CliUtil } from './util';
+import { cliTpl } from './color';
 import { CliCommand } from './command';
 
 const COMMAND_PACKAGE = [
@@ -45,7 +45,7 @@ export class CliCommandManager {
       const matchedCfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
       if (matchedCfg) {
         const [, pkg, prod] = matchedCfg;
-        console.error!(CliUtil.color`
+        console.error!(cliTpl`
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
 ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}
 `);

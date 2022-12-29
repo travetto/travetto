@@ -1,5 +1,4 @@
 import { install } from 'source-map-support';
-
 import { path, RootIndex } from '@travetto/manifest';
 
 import { ConsoleManager } from '../src/console';
@@ -50,5 +49,6 @@ export async function runMain(action: Function, args: string[]): Promise<void> {
 }
 
 export const runIfMain = (target: Function, filename: string, mainFile: string): unknown =>
-  (RootIndex.getSourceFile(filename) === RootIndex.getSourceFile(GlobalEnv.main ?? mainFile)) ?
+  (RootIndex.getSourceFile(filename) === RootIndex.getSourceFile(GlobalEnv.main || mainFile)) ?
     runMain(target, process.argv.slice(2)) : undefined;
+

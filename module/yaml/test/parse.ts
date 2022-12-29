@@ -1,7 +1,7 @@
 
 import assert from 'assert';
 
-import { Util } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';
 
 import { SimpleObject } from '../src/internal/type/common';
@@ -209,7 +209,7 @@ config:
   redacted:
     - panda.user
 panda.user: bob`) as SimpleObject;
-    assert(Util.isPlainObject(output.config));
+    assert(ObjectUtil.isPlainObject(output.config));
     assert.deepStrictEqual(output.config.redacted, ['panda.user']);
   }
 

@@ -1,9 +1,10 @@
 {
-  "name": "@travetto/terminal-color",
+  "name": "@travetto/terminal",
   "version": "3.0.0-rc.3",
-  "description": "General terminal color support",
+  "description": "General terminal support",
   "keywords": [
-    "terminal-color",
+    "terminal",
+    "ansi256",
     "travetto",
     "typescript"
   ],
@@ -20,13 +21,13 @@
   "main": "__index__.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/terminal-color"
+    "directory": "module/terminal"
   },
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.3"
   },
   "travetto": {
-    "displayName": "Terminal Color"
+    "displayName": "Terminal"
   },
   "private": false,
   "publishConfig": {

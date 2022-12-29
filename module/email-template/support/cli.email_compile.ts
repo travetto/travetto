@@ -2,7 +2,7 @@ import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngine } from '@travetto/email/src/template';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
-import { CliCommand, CliUtil, OptionConfig } from '@travetto/cli';
+import { CliCommand, cliTpl, OptionConfig } from '@travetto/cli';
 
 import { EmailTemplateCompiler } from '../src/compiler';
 import { EmailTemplateResource } from '../src/resource';
@@ -32,7 +32,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
     const compiler = new EmailTemplateCompiler(resources);
 
     const all = await compiler.compileAll(true);
-    console!.log(CliUtil.color`Successfully compiled ${{ param: `${all.length}` }} templates`);
+    console!.log(cliTpl`Successfully compiled ${{ param: `${all.length}` }} templates`);
 
     if (this.cmd.watch) {
       try {

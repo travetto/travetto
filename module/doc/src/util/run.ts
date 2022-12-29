@@ -2,6 +2,7 @@ import { spawnSync } from 'child_process';
 
 import { path } from '@travetto/manifest';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
+import { TerminalUtil } from '@travetto/terminal';
 
 export type RunConfig = {
   filter?: (line: string) => boolean;
@@ -54,7 +55,7 @@ export class DocRunUtil {
         cwd: path.toPosix(config.cwd ?? path.cwd()),
         shell: '/bin/bash',
         env: {
-          ...Env.export(/^(TRV_*|NODE_*|*COLOR*|DEBUG)$/),
+          ...Env.export(/^(TRV_.*|NODE_.*|.*COLOR.*|DEBUG)$/),
           DEBUG: '0',
           ...(config.module ? { TRV_MANIFEST: config.module } : {}),
           ...(config.env ?? {})
@@ -67,9 +68,7 @@ export class DocRunUtil {
    * Clean run output
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
-    text = text.trim()
-      // eslint-disable-next-line no-control-regex
-      .replace(/\x1b\[[?]?[0-9]{1,2}[a-z]/gi, '')
+    text = TerminalUtil.removeAnsiSequences(text.trim())
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@travetto/')
       .replace(new RegExp(path.cwd(), 'g'), '.')
       .replace(/([.]trv_cache)[_A-Za-z0-9]+/g, (_, b) => b)

@@ -1,5 +1,6 @@
 import { path } from '@travetto/manifest';
-import { CliUtil } from '@travetto/cli';
+import { cliTpl } from '@travetto/cli';
+import { TerminalUtil } from '@travetto/terminal';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -12,7 +13,7 @@ export class HelpUtil {
     let usage = app.moduleName ?? app.name;
 
     if (app.params) {
-      usage = CliUtil.color`${{ identifier: usage }} ${app.params.map(p => {
+      usage = cliTpl`${{ identifier: usage }} ${app.params.map(p => {
         let type = p.type.toLowerCase();
         if (p.enum) {
           type = p.enum.values.map(x => `${x}`).join('|');
@@ -20,9 +21,9 @@ export class HelpUtil {
         return !p.required ?
           (p.default !== undefined ?
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            CliUtil.color`[${{ param: p.name }}:${{ type }}=${{ input: p.default as string }}]` :
-            CliUtil.color`[${{ param: p.name }}:${{ type }}]`
-          ) : CliUtil.color`${{ param: p.name }}:${{ type }}`;
+            cliTpl`[${{ param: p.name }}:${{ type }}=${{ input: p.default as string }}]` :
+            cliTpl`[${{ param: p.name }}:${{ type }}]`
+          ) : cliTpl`${{ param: p.name }}:${{ type }}`;
       }).join(' ')}`;
     }
 
@@ -35,7 +36,7 @@ export class HelpUtil {
   static generateAppHelpList(configs: ApplicationConfig[] | undefined): string {
     const choices = [];
     if (!configs || !configs.length) {
-      return CliUtil.color`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
+      return cliTpl`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
     }
     const cwdPrefix = `${path.cwd()}/`;
     for (const conf of configs) {
@@ -43,12 +44,12 @@ export class HelpUtil {
 
       const usage = this.getAppUsage(conf);
 
-      lines.push(CliUtil.color`${{ identifier: conf.moduleName ?? conf.name }} ${{ subtitle: conf.description }}`);
-      lines.push(CliUtil.color`${{ subsubtitle: 'usage' }}: ${usage}`);
-      lines.push(CliUtil.color`${{ subsubtitle: 'file' }}:  ${{ path: conf.filename.replace(cwdPrefix, '') }}`);
+      lines.push(cliTpl`${{ identifier: conf.moduleName ?? conf.name }} ${{ subtitle: conf.description }}`);
+      lines.push(cliTpl`${{ subsubtitle: 'usage' }}: ${usage}`);
+      lines.push(cliTpl`${{ subsubtitle: 'file' }}:  ${{ path: conf.filename.replace(cwdPrefix, '') }}`);
 
       // eslint-disable-next-line no-control-regex
-      const len = lines.reduce((acc, v) => Math.max(acc, v.replace(/\x1b\[\d+m/g, '').length), 0);
+      const len = lines.reduce((acc, v) => Math.max(acc, TerminalUtil.removeAnsiSequences(v).length), 0);
       lines.splice(1, 0, '-'.repeat(len));
 
       choices.push(lines.join('\n     '));

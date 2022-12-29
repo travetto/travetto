@@ -1,6 +1,6 @@
 import passport from 'passport';
 
-import { Util } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 import { Request } from '@travetto/rest';
 
 import { LoginContext } from '@travetto/auth-rest';
@@ -20,7 +20,7 @@ export class PassportUtil {
    * @param state The passport auth config state
    */
   static createLoginContext(req: Request, { state }: PassportAuthOptions): Partial<passport.AuthenticateOptions> {
-    const stateRec = Util.isFunction(state) ? state.call(null, req) : (state ?? {});
+    const stateRec = ObjectUtil.isFunction(state) ? state.call(null, req) : (state ?? {});
     const json = JSON.stringify({ referer: req.header('referer'), ...stateRec });
 
     return {

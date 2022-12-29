@@ -1,4 +1,4 @@
-import { AppError, Class, ClassInstance, GlobalEnv, Util } from '@travetto/base';
+import { AppError, Class, ClassInstance, GlobalEnv, ObjectUtil } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootIndex } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
@@ -65,7 +65,7 @@ export class Configuration {
     this.#sources = sorted.map(x => `${x.profile}.${x.priority} - ${x.source}`);
 
     for (const { config: element } of sorted) {
-      Util.deepAssign(this.#storage, BindUtil.expandPaths(element), 'coerce');
+      ObjectUtil.deepAssign(this.#storage, BindUtil.expandPaths(element), 'coerce');
     }
   }
 

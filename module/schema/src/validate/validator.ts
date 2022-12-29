@@ -1,4 +1,4 @@
-import { Class, ClassInstance, TypedObject, Util } from '@travetto/base';
+import { Class, ClassInstance, TypedObject, ObjectUtil } from '@travetto/base';
 
 import { FieldConfig, SchemaConfig } from '../service/types';
 import { SchemaRegistry } from '../service/registry';
@@ -236,7 +236,7 @@ export class SchemaValidator {
    */
   static async validate<T>(cls: Class<T>, o: T, view?: string): Promise<T> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    if (!Util.isPlainObject(o) && !(o instanceof cls || cls.Ⲑid === (o as ClassInstance<T>).constructor.Ⲑid)) {
+    if (!ObjectUtil.isPlainObject(o) && !(o instanceof cls || cls.Ⲑid === (o as ClassInstance<T>).constructor.Ⲑid)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       throw new TypeMismatchError(cls.name, (o as ClassInstance).constructor.name);
     }

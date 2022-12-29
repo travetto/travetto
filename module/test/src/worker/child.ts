@@ -48,6 +48,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     if (event.type === Events.INIT) { // On request to init, start initialization
       await this.#exec(() => this.onInitCommand(), Events.INIT_COMPLETE);
     } else if (event.type === Events.RUN) { // On request to run, start running
+      console.log!(process.stdout.isTTY && process.stdout.getColorDepth());
       await this.#exec(() => this.onRunCommand(event), Events.RUN_COMPLETE);
     }
 

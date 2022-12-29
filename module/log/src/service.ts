@@ -1,4 +1,4 @@
-import { Util, ConsoleListener, ConsoleManager, ConsoleEvent } from '@travetto/base';
+import { ObjectUtil, ConsoleListener, ConsoleManager, ConsoleEvent } from '@travetto/base';
 import { AutoCreate, DependencyRegistry, Injectable } from '@travetto/di';
 
 import { LogEvent, Logger } from './types';
@@ -36,7 +36,7 @@ export class LogService implements ConsoleListener, AutoCreate {
   onLog(ev: ConsoleEvent): void {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, prefer-const
     let [message, context, ...args] = ev.args as [string, Record<string, unknown>, ...unknown[]];
-    if (!Util.isPlainObject(context)) {
+    if (!ObjectUtil.isPlainObject(context)) {
       args.unshift(context);
       context = {};
     }

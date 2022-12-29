@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { RootIndex } from '@travetto/manifest';
-import { Util, AppError, ClassInstance, Class } from '@travetto/base';
+import { ObjectUtil, AppError, ClassInstance, Class } from '@travetto/base';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
 import { AssertCapture, CaptureAssert } from './capture';
@@ -193,7 +193,7 @@ export class AssertCheck {
     shouldThrow: ThrowableError | undefined,
     assertion: CaptureAssert
   ): void {
-    if (Util.isPrimitive(err)) {
+    if (ObjectUtil.isPrimitive(err)) {
       err = new Error(`${err}`);
     }
     if (!(err instanceof Error)) {
@@ -232,7 +232,7 @@ export class AssertCheck {
     try {
       action();
       if (!positive) {
-        if (!Util.isPrimitive(shouldThrow)) {
+        if (!ObjectUtil.isPrimitive(shouldThrow)) {
           shouldThrow = shouldThrow?.name;
         }
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'}`));
@@ -270,7 +270,7 @@ export class AssertCheck {
         await action();
       }
       if (!positive) {
-        if (!Util.isPrimitive(shouldThrow)) {
+        if (!ObjectUtil.isPrimitive(shouldThrow)) {
           shouldThrow = shouldThrow?.name;
         }
         throw (missed = new AppError(`No error thrown, but expected ${shouldThrow ?? 'an error'} `));

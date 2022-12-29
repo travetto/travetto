@@ -24,7 +24,7 @@
   },
   "dependencies": {
     "@travetto/config": "^3.0.0-rc.5",
-    "@travetto/terminal-color": "^3.0.0-rc.3",
+    "@travetto/terminal": "^3.0.0-rc.3",
     "@travetto/di": "^3.0.0-rc.5"
   },
   "travetto": {

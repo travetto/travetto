@@ -1,6 +1,6 @@
 import * as mongo from 'mongodb';
 
-import { Class, Util } from '@travetto/base';
+import { Class, ObjectUtil } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField } from '@travetto/model';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
@@ -117,7 +117,7 @@ export class MongoUtil {
       return this.uuid(v);
     } else if (Array.isArray(v)) {
       return v.map(x => this.replaceId(x));
-    } else if (Util.isPlainObject(v)) {
+    } else if (ObjectUtil.isPlainObject(v)) {
       const out: Record<string, mongo.Binary> = {};
       for (const [k, el] of Object.entries(v)) {
         const found = this.replaceId(el);
@@ -147,7 +147,7 @@ export class MongoUtil {
       if (subpath === 'id') { // Handle ids directly
         out._id = this.replaceId(v);
       } else {
-        const isPlain = v && Util.isPlainObject(v);
+        const isPlain = v && ObjectUtil.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';
         if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.Ⲑid) {
           Object.assign(out, this.extractSimple(v, `${subpath}.`));
@@ -158,7 +158,7 @@ export class MongoUtil {
             }
           } else if (firstKey === '$regex') {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            v.$regex = Util.toRegex(v.$regex as string | RegExp);
+            v.$regex = ObjectUtil.toRegex(v.$regex as string | RegExp);
           } else if (firstKey && '$near' in v) {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             const dist = v.$maxDistance as number;
