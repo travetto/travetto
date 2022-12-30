@@ -65,7 +65,7 @@ export class ExecutionManager {
         mainFile = path.join(RootIndex.manifest.mainModule, mainFile);
         mainFile = RootIndex.resolveFileImport(mainFile);
       }
-      await runMain((await import(mainFile)).main, process.argv.slice(3));
+      await runMain((await import(mainFile)).main, process.argv.slice(4));
     } else if (cmd && !cmd.startsWith('-')) {
       await this.runCommand(args);
     } else {

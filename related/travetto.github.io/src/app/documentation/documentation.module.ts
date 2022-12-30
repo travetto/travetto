@@ -40,7 +40,6 @@ import { JwtComponent } from './gen/jwt/jwt.component';
 import { SharedModule } from '../shared/shared.module';
 import { WorkerComponent } from './gen/worker/worker.component';
 import { RestSessionComponent } from './gen/rest-session/rest-session.component';
-import { BootComponent } from './gen/boot/boot.component';
 import { ModelSqlComponent } from './gen/model-sql/model-sql.component';
 import { AppComponent } from './gen/app/app.component';
 import { OpenapiComponent } from './gen/openapi/openapi.component';
@@ -65,9 +64,14 @@ import { RestFastifyLambdaComponent } from './gen/rest-fastify-lambda/rest-fasti
 import { RestKoaLambdaComponent } from './gen/rest-koa-lambda/rest-koa-lambda.component';
 import { RestAwsLambdaComponent } from './gen/rest-aws-lambda/rest-aws-lambda.component';
 import { EmailNodemailerComponent } from './gen/email-nodemailer/email-nodemailer.component';
-import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.component';
 import { AuthRestContextComponent } from './gen/auth-rest-context/auth-rest-context.component';
 import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component';
+import { TerminalComponent } from './gen/terminal/terminal.component';
+import { ManifestComponent } from './gen/manifest/manifest.component';
+import { AuthJwtComponent } from './gen/auth-jwt/auth-jwt.component';
+import { EslintPluginComponent } from './gen/eslint-plugin/eslint-plugin.component';
+import { RepoComponent } from './gen/repo/repo.component';
+import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.component';
 
 @NgModule({
   imports: [
@@ -119,7 +123,6 @@ import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component'
     JwtComponent,
     WorkerComponent,
     RestSessionComponent,
-    BootComponent,
     ModelSqlComponent,
     AppComponent,
     OpenapiComponent,
@@ -146,9 +149,14 @@ import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component'
     RestKoaLambdaComponent,
     RestAwsLambdaComponent,
     EmailNodemailerComponent,
-    AuthRestJwtComponent,
     AuthRestContextComponent,
-    SchemaFakerComponent
+    SchemaFakerComponent,
+    TerminalComponent,
+    ManifestComponent,
+    AuthJwtComponent,
+    EslintPluginComponent,
+    RepoComponent,
+    AuthRestJwtComponent
   ]
 })
 export class DocumentationModule { }

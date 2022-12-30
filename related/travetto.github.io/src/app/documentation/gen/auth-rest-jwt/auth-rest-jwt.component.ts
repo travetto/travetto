@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-auth-rest-jwt',
   templateUrl: './auth-rest-jwt.component.html',
-  styleUrls: []
+  styleUrls: ['./auth-rest-jwt.component.scss']
 })
 export class AuthRestJwtComponent implements OnInit {
 
