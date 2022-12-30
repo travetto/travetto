@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.3",
-    "@travetto/terminal": "^3.0.0-rc.3",
     "@travetto/registry": "^3.0.0-rc.5",
+    "@travetto/terminal": "^3.0.0-rc.3",
     "@travetto/worker": "^3.0.0-rc.3",
     "@travetto/yaml": "^3.0.0-rc.3"
   },

@@ -24,8 +24,8 @@
   },
   "dependencies": {
     "@travetto/config": "^3.0.0-rc.5",
-    "@travetto/terminal": "^3.0.0-rc.3",
-    "@travetto/di": "^3.0.0-rc.5"
+    "@travetto/di": "^3.0.0-rc.5",
+    "@travetto/terminal": "^3.0.0-rc.3"
   },
   "travetto": {
     "displayName": "Logging"
