@@ -1,5 +1,4 @@
 export const MOD_MAPPING = {
-
   App: {
     name:'@travetto/app', folder:'@travetto/app', displayName: 'Application',
     description: 'Application registration/management and run support.'
@@ -87,6 +86,10 @@ export const MOD_MAPPING = {
   EmailTemplate: {
     name:'@travetto/email-template', folder:'@travetto/email-template', displayName: 'Email Templating',
     description: 'Email templating module'
+  },
+  EslintPlugin: {
+    name:'@travetto/eslint-plugin', folder:'@travetto/eslint-plugin', displayName: 'ES Linting Rules',
+    description: 'ES Linting Rules'
   },
   Image: {
     name:'@travetto/image', folder:'@travetto/image', displayName: 'Image',
@@ -227,6 +230,10 @@ export const MOD_MAPPING = {
   SchemaFaker: {
     name:'@travetto/schema-faker', folder:'@travetto/schema-faker', displayName: 'Schema Faker',
     description: 'Data generation for schema-registered objects.'
+  },
+  Terminal: {
+    name:'@travetto/terminal', folder:'@travetto/terminal', displayName: 'Terminal',
+    description: 'General terminal support'
   },
   Test: {
     name:'@travetto/test', folder:'@travetto/test', displayName: 'Testing',

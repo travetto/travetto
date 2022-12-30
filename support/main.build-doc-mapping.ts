@@ -34,5 +34,5 @@ export async function main(): Promise<void> {
   }`);
   }
 
-  await fs.writeFile('module/doc/src/mod-mapping.ts', `export const MOD_MAPPING = {\n${text.join(',')}\n};\n`, 'utf8');
+  await fs.writeFile('module/doc/src/mod-mapping.ts', `export const MOD_MAPPING = {${text.join(',')}\n};\n`, 'utf8');
 }
