@@ -60,7 +60,7 @@ ${context.cleanText(recurse(c.content))}
       case 'header':
         return `# ${recurse(c.title)}\n${c.description ? `## ${recurse(c.description)}\n` : ''}${'install' in c ? recurse(n.Install(c.package, c.package)) : ''}\n`;
       case 'text':
-        return c.content;
+        return c.content.replace(/&nbsp;/g, ' ');
     }
   }
 };

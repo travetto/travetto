@@ -7,7 +7,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { LandingComponent } from './landing/landing.component';
-import { GuideComponent } from './guide/guide.component';
+import { GuideComponent } from './documentation/gen/todo-app/todo-app.component';
 import { DocumentationModule } from './documentation/documentation.module';
 import { BlogComponent } from './blog/blog.component';
 import { SharedModule } from './shared/shared.module';

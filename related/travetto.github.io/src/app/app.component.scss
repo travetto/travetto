@@ -79,13 +79,13 @@ footer {
   color: #eee;
 
   div {
-    margin-top: $FOOTER-HEIGHT/4;
+    margin-top: calc($FOOTER-HEIGHT/4);
   }
 
   .copyright {
     padding-left: 1em;
-    line-height: $FOOTER-HEIGHT/2;
-    height: $FOOTER-HEIGHT/2;
+    line-height: calc($FOOTER-HEIGHT/2);
+    height: calc($FOOTER-HEIGHT/2);
   }
 
   .spacer {
@@ -94,8 +94,8 @@ footer {
 
   .social {
     >* {
-      line-height: $FOOTER-HEIGHT/2;
-      height: $FOOTER-HEIGHT/2;
+      line-height: calc($FOOTER-HEIGHT/2);
+      height: calc($FOOTER-HEIGHT/2);
       display: inline-block;
       margin-right: .5em;
     }
@@ -106,7 +106,7 @@ footer {
         vertical-align: middle;
       }
 
-      width: $FOOTER-HEIGHT/2;
+      width: calc($FOOTER-HEIGHT/2);
     }
   }
 }

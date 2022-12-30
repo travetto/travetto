@@ -13,7 +13,7 @@ This module provides logging functionality, building upon [ConsoleManager](https
 ## Logging to External Systems
 By default the logging functionality logs messages directly to the console, relying on the `util.inspect` method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as [JSON](https://www.json.org), which is easily consumable by services like [elasticsearch](https://elastic.co) or [AWS Cloudwatch](https://aws.amazon.com/cloudwatch/) if running as a lambda or in a docker container.  
 
-The main caveat that comes with this, is that not all objects can be converted to JSON (specifically circular dependencies, and unsupported types).  That end, the framework recommends logging with the following format, `message: string` `context: Record<string, Primitive>`.  Here context can be recursive, but the general idea is to only pass in known data structures that will not break the [JSON](https://www.json.org) production.
+The main caveat that comes with this, is that not all objects can be converted to JSON (specifically circular dependencies, and unsupported types).  That end, the framework recommends logging with the following format, `message: string`   `context: Record<string, Primitive>`.  Here context can be recursive, but the general idea is to only pass in known data structures that will not break the [JSON](https://www.json.org) production.
 
 ## Sample Output
 
@@ -40,6 +40,8 @@ $ trv main support/main.output.ts
 
 2022-03-14T04:00:00.618Z info  [@travetto/log:doc/output.ts:2] Hello World
 2022-03-14T04:00:00.837Z info  [@travetto/log:doc/output.ts:4] Woah! {
+  a: { b: { c: { d: 10 } } }
+}
 2022-03-14T04:00:01.510Z info  [@travetto/log:doc/output.ts:6] Woah!
 2022-03-14T04:00:02.450Z debug [@travetto/log:doc/output.ts:8] Test
 ```

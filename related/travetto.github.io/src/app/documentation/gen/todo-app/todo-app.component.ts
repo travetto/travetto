@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-guide',
-  templateUrl: './guide.component.html',
-  styleUrls: ['./guide.component.scss']
+  templateUrl: './todo-app.component.html',
+  styleUrls: ['./todo-app.component.scss']
 })
 export class GuideComponent {
   constructor() { }

@@ -27,9 +27,10 @@
   grid-template-columns: auto repeat(6, 1fr) auto auto;
   grid-template-rows: 6;
 
-  .cli           { grid-column: 1; @extend .vertical;    @extend .group-external; }
-  .vscode-plugin { grid-column: 8; @extend .vertical;    @extend .group-external; }
-  .scaffold      { grid-column: 9; @extend .vertical;    @extend .group-external; }
+  .cli           { grid-column:  1; @extend .vertical;    @extend .group-external; }
+  .vscode-plugin { grid-column:  8; @extend .vertical;    @extend .group-external; }
+  .scaffold      { grid-column:  9; @extend .vertical;    @extend .group-external; }
+  .eslint-plugin { grid-column: 10; @extend .vertical;    @extend .group-external; }
   
   .app           { grid-row: 1;    @extend .full;        @extend .group-common;   }
   .asset         { grid-row: 2;    @extend .left-third;  @extend .group-lib;      }
@@ -37,7 +38,7 @@
   .email         { grid-row: 2;    @extend .right-third; @extend .group-lib;      }
   .model         { grid-row: 3;    @extend .left-half;   @extend .group-core;     }
   .rest          { grid-row: 3;    @extend .right-half;  @extend .group-core;     }
-  .core          { grid-row: 4;    @extend .full;        @extend .group-core;     }
-  .registry      { grid-row: 5;    @extend .full;        @extend .group-system;   }  
-  .base          { grid-row: 6;    @extend .full;        @extend .group-system;   }  
+  .core          { grid-row: 4;    @extend .full;        @extend .group-core;     }  
+  .base          { grid-row: 5;    @extend .full;        @extend .group-system;   }  
+  .compiler      { grid-row: 6;    @extend .full;        @extend .group-system;   }  
 }

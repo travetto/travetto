@@ -4,8 +4,7 @@ import { ExecUtil, FileResourceProvider } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
-const page = (f: string): string =>
-  path.resolve('related/travetto.github.io/src', f);
+const page = (f: string): string => path.resolve('related/travetto.github.io/src', f);
 
 const copyPluginImages = async (): Promise<void> => {
   console.log('Copying Plugin images');
@@ -17,13 +16,6 @@ const copyPluginImages = async (): Promise<void> => {
     await fs.copyFile(file, target);
   }
 };
-
-const htmlPage = (mod: string): string =>
-  page(({
-    overview: 'app/documentation/overview/overview.component.html',
-    'todo-app': 'app/guide/guide.component.html',
-    'vscode-plugin': 'app/documentation/vscode-plugin/vscode-plugin.component.html'
-  })[mod] ?? `app/documentation/gen/${mod}/${mod}.component.html`);
 
 export async function main(target?: string): Promise<void> {
   const root = RootIndex.manifest.workspacePath;
@@ -51,7 +43,7 @@ export async function main(target?: string): Promise<void> {
     if (mod.source.endsWith('vscode-plugin')) {
       await copyPluginImages();
     }
-    const modName = mod.name.split('@travetto/')[1];
+    const modName = mod.name.split('/')[1];
     try {
       let html = await fs.readFile(path.resolve(mod.source, 'README.html'), 'utf8');
 
@@ -60,16 +52,13 @@ export async function main(target?: string): Promise<void> {
         .replace(/^src="images\//g, `src="/assets/images/${modName}/`)
         .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`);
 
-      if (modName === 'overview') {
-        html = html
-          .replace(/<h1>([\n\r]|.)* /m, t => `<div class="documentation">\n${t}\n</div>\n`);
-      } else if (modName === 'todo-app') {
+      if (modName === 'todo-app') {
         html = html
           .replace(/(<h1>(?:[\n\r]|.)*)(\s*<div class="toc">(?:[\r\n]|.)*?<\/div>(?:[\r\n]|.)*?<\/div>\s*)((?:[\r\n]|.)*)/m,
             (_, h, toc, text) => `${toc.trim()}\n<div class="documentation">\n${h}\n${text}\n</div>\n`);
       }
 
-      await fs.writeFile(htmlPage(modName), html, 'utf8');
+      await fs.writeFile(page(`app/documentation/gen/${modName}/${modName}.component.html`), html, 'utf8');
     } catch (err) {
       if (err instanceof Error) {
         console.error(`${mod.name}: ${err.message}`);

@@ -5,8 +5,8 @@ import { RouterModule } from '@angular/router';
 import { DocumentationComponent } from './documentation.component';
 
 import { PAGES } from './pages';
-import { OverviewComponent } from './overview/overview.component';
-import { VSCodePluginComponent } from './vscode-plugin/vscode-plugin.component';
+import { OverviewComponent } from './gen/overview/overview.component';
+import { VSCodePluginComponent } from './gen/vscode-plugin/vscode-plugin.component';
 import { AssetComponent } from './gen/asset/asset.component';
 import { AssetRestComponent } from './gen/asset-rest/asset-rest.component';
 import { AuthComponent } from './gen/auth/auth.component';
@@ -44,7 +44,6 @@ import { ModelSqlComponent } from './gen/model-sql/model-sql.component';
 import { AppComponent } from './gen/app/app.component';
 import { OpenapiComponent } from './gen/openapi/openapi.component';
 import { CommandComponent } from './gen/command/command.component';
-import { WatchComponent } from './gen/watch/watch.component';
 import { PackComponent } from './gen/pack/pack.component';
 import { ModelDynamodbComponent } from './gen/model-dynamodb/model-dynamodb.component';
 import { ModelRedisComponent } from './gen/model-redis/model-redis.component';
@@ -127,7 +126,6 @@ import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.componen
     AppComponent,
     OpenapiComponent,
     CommandComponent,
-    WatchComponent,
     ImageComponent,
     TransformerComponent,
     PackComponent,

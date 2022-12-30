@@ -1,5 +1,5 @@
 import { CliComponent } from './gen/cli/cli.component';
-import { VSCodePluginComponent } from './vscode-plugin/vscode-plugin.component';
+import { VSCodePluginComponent } from './gen/vscode-plugin/vscode-plugin.component';
 import { ScaffoldComponent } from './gen/scaffold/scaffold.component';
 import { ConfigComponent } from './gen/config/config.component';
 import { AppComponent } from './gen/app/app.component';
@@ -19,7 +19,6 @@ import { RestSessionComponent } from './gen/rest-session/rest-session.component'
 import { RestExpressComponent } from './gen/rest-express/rest-express.component';
 import { RestKoaComponent } from './gen/rest-koa/rest-koa.component';
 import { RestFastifyComponent } from './gen/rest-fastify/rest-fastify.component';
-import { BootComponent } from './gen/boot/boot.component';
 import { BaseComponent } from './gen/base/base.component';
 import { CompilerComponent } from './gen/compiler/compiler.component';
 import { ContextComponent } from './gen/context/context.component';
@@ -28,7 +27,6 @@ import { LogComponent } from './gen/log/log.component';
 import { CacheComponent } from './gen/cache/cache.component';
 import { CommandComponent } from './gen/command/command.component';
 import { WorkerComponent } from './gen/worker/worker.component';
-import { WatchComponent } from './gen/watch/watch.component';
 import { AssetRestComponent } from './gen/asset-rest/asset-rest.component';
 import { AuthRestComponent } from './gen/auth-rest/auth-rest.component';
 import { JwtComponent } from './gen/jwt/jwt.component';
@@ -55,6 +53,9 @@ import { RestFastifyLambdaComponent } from './gen/rest-fastify-lambda/rest-fasti
 import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.component';
 import { AuthRestContextComponent } from './gen/auth-rest-context/auth-rest-context.component';
 import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component';
+import { ManifestComponent } from './gen/manifest/manifest.component';
+import { TerminalComponent } from './gen/terminal/terminal.component';
+import { EslintPluginComponent } from './gen/eslint-plugin/eslint-plugin.component';
 
 export const PAGES = [
   {
@@ -123,27 +124,28 @@ export const PAGES = [
       { path: 'schema', title: 'Schema', component: SchemaComponent },
       { path: 'schema-faker', title: 'Schema Faker', component: SchemaFakerComponent },
       { path: 'test', title: 'Test', component: TestComponent },
+      { path: 'worker', title: 'Worker', component: WorkerComponent },
+      { path: 'yaml', title: 'YAML Parser', component: YamlComponent },
+    ]
+  },
+  { path: 'cli', title: 'CLI Support', component: CliComponent },
+  {
+    path: 'base', title: 'Base', component: BaseComponent, subs: [
+      { path: 'terminal', title: 'Terminal', component: TerminalComponent },
+      { path: 'registry', title: 'Registry', component: RegistryComponent }
     ]
   },
   {
-    path: 'registry', title: 'Registry', component: RegistryComponent, subs: [
-      { path: 'compiler', title: 'Compiler', component: CompilerComponent },
+    path: 'compiler', title: 'Compiler', component: CompilerComponent, subs: [
       { path: 'transformer', title: 'Transformer', component: TransformerComponent },
-      { path: 'watch', title: 'Watch', component: WatchComponent }
+      { path: 'manifest', title: 'Manifest', component: ManifestComponent }
     ]
   },
   {
     path: 'tools', title: 'Tooling', subs: [
       { path: 'vscode-plugin', title: 'VS Code Plugin', component: VSCodePluginComponent },
       { path: 'scaffold', title: 'App Scaffold', component: ScaffoldComponent },
+      { path: 'eslint-plugin', title: 'ESLint Support', component: EslintPluginComponent },
     ]
   },
-  { path: 'cli', title: 'CLI Support', component: CliComponent },
-  {
-    path: 'base', title: 'Base', component: BaseComponent, subs: [
-      { path: 'boot', title: 'Boot', component: BootComponent },
-      { path: 'worker', title: 'Worker', component: WorkerComponent },
-      { path: 'yaml', title: 'YAML Parser', component: YamlComponent },
-    ]
-  }
 ];

@@ -351,7 +351,7 @@ First we must start the application:
     },
     ApiSpecConfig: { output: './openapi.yml', persist: false, skipRoutes: false, exposeAllSchemas: false },
     CommonLoggerConfig: { format: 'line', plain: false, timestamp: 'ms' },
-    FileModelConfig: { folder: '/tmp/433536e34a', namespace: '.' },
+    FileModelConfig: { folder: '/tmp/03e3deacc0', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
       hosts: [ 'localhost' ],
