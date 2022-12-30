@@ -66,7 +66,7 @@ class $ApplicationRegistry {
     // Show manifest
     console.log('Manifest', {
       info: RootIndex.mainDigest(),
-      env: GlobalEnv
+      env: GlobalEnv.toJSON()
     });
 
     // Get instance of app class

@@ -272,7 +272,7 @@ Options:
 Available Applications:
 
    ● custom 
-     ------------------------------------------------------------
+     ------------------------------------------------------------------
      usage: custom 
      file:  @travetto/rest/doc/custom-app.ts
 
@@ -320,10 +320,13 @@ Manifest {
     framework: '3.0.0'
   },
   env: {
-    name: 'dev',
+    envName: 'dev',
+    debug: '0',
     prod: false,
+    test: false,
     dynamic: false,
     profiles: [],
+    resourcePaths: [],
     nodeVersion: 'v18.12.1'
   }
 }

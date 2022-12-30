@@ -29,7 +29,7 @@ All of the high level configurations can be found in the following structure:
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> path<span class="token punctuation">,</span> RootIndex <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/manifest'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> GlobalEnv <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Required <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
@@ -87,7 +87,7 @@ All of the high level configurations can be found in the following structure:
   <span class="token comment">/**
    * Should file be generated at runtime
    */</span>
-  persist<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> Env<span class="token punctuation">.</span><span class="token function">isDynamic</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  persist<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Skip emitting all routes
    */</span>
@@ -101,6 +101,8 @@ All of the high level configurations can be found in the following structure:
     <span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">=</span> path<span class="token punctuation">.</span><span class="token function">toPosix</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>output<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">||</span> <span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">===</span> <span class="token string">'-'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>persist <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>persist <span class="token operator">??=</span> GlobalEnv<span class="token punctuation">.</span>dynamic<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>persist<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">[.](json|ya?ml)$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>output<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token comment">// Assume a folder</span>

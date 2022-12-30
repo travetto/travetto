@@ -55,7 +55,7 @@ export class DocRunUtil {
         cwd: path.toPosix(config.cwd ?? path.cwd()),
         shell: '/bin/bash',
         env: {
-          ...Env.export(/^(TRV_.*|NODE_.*|.*COLOR.*|DEBUG)$/),
+          ...Env.export(/^(TRV_.*|NODE_.*|.*COLOR.*|PATH)$/),
           DEBUG: '0',
           ...(config.module ? { TRV_MANIFEST: config.module } : {}),
           ...(config.env ?? {})
@@ -69,6 +69,7 @@ export class DocRunUtil {
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
     text = TerminalUtil.removeAnsiSequences(text.trim())
+      .replace(/^\[\d\] Compiling[.]+/, '') // Compiling message, remove
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@travetto/')
       .replace(new RegExp(path.cwd(), 'g'), '.')
       .replace(/([.]trv_cache)[_A-Za-z0-9]+/g, (_, b) => b)
@@ -111,7 +112,7 @@ export class DocRunUtil {
       if (res.error) {
         throw res.error;
       }
-      final = res.stdout.toString() || res.stderr.toString();
+      final = TerminalUtil.removeAnsiSequences(res.stdout.toString()).trim() || TerminalUtil.removeAnsiSequences(res.stderr).toString();
     } catch (err) {
       if (err instanceof Error) {
         console.log('Found!', cmd, args, '\n', err);

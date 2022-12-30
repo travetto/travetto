@@ -66,7 +66,7 @@ export class Todo {
     this.#color = c;
   }
 
-  get color() {
+  get color(): string | undefined {
     return this.#color;
   }
 }
@@ -105,33 +105,33 @@ export class TodoService {
   @Inject()
   private modelService: MongoModelService;
 
-  async add(todo: Todo) {
+  async add(todo: Todo): Promise<Todo> {
     todo.created = new Date();
     const saved = await this.modelService.create(Todo, todo);
     return saved;
   }
 
-  async update(todo: Todo) {
+  async update(todo: Todo): Promise<Todo> {
     return await this.modelService.updatePartial(Todo, todo);
   }
 
-  async get(id: string) {
+  async get(id: string): Promise<Todo> {
     return this.modelService.get(Todo, id);
   }
 
-  async getAll(search: TodoSearch) {
+  async getAll(search: TodoSearch): Promise<Todo[]> {
     return this.modelService.query(Todo, { where: { text: { $regex: search.q ?? '.*' } }, ...search, sort: [{ created: -1 }] });
   }
 
-  async deleteAllCompleted() {
+  async deleteAllCompleted(): Promise<number> {
     return this.modelService.deleteByQuery(Todo, { where: { completed: true } });
   }
 
-  async complete(id: string, completed = true) {
+  async complete(id: string, completed = true): Promise<Todo> {
     return this.modelService.updatePartial(Todo, Todo.from({ id, completed }));
   }
 
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     return this.modelService.delete(Todo, id);
   }
 }
@@ -244,7 +244,7 @@ export class TodoController {
    * Get all todos
    */
   @Get('/')
-  async getAll(search: TodoSearch) {
+  async getAll(search: TodoSearch): Promise<Todo[]> {
     return await this._svc.getAll(search);
   }
 
@@ -252,7 +252,7 @@ export class TodoController {
    * Delete all todos
    */
   @Delete('/')
-  async deleteAllCompleted() {
+  async deleteAllCompleted(): Promise<void> {
     await this._svc.deleteAllCompleted();
   }
 
@@ -261,7 +261,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Get('/:id')
-  async getById(id: string) {
+  async getById(id: string): Promise<Todo> {
     return this._svc.get(id);
   }
 
@@ -269,7 +269,7 @@ export class TodoController {
    * Create a todo
    */
   @Post('/')
-  async create(todo: Todo) {
+  async create(todo: Todo): Promise<Todo> {
     return await this._svc.add(todo);
   }
 
@@ -279,7 +279,7 @@ export class TodoController {
    * @param todo Todo to update
    */
   @Put('/:id')
-  async update(id: string, todo: Todo) {
+  async update(id: string, todo: Todo): Promise<Todo> {
     todo.id = id;
     return await this._svc.update(todo);
   }
@@ -289,7 +289,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Put('/:id/complete')
-  async complete(id: string, completed: boolean = true) {
+  async complete(id: string, completed: boolean = true): Promise<Todo> {
     return await this._svc.complete(id, completed);
   }
 
@@ -298,7 +298,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Delete('/:id')
-  async remove(id: string) {
+  async remove(id: string): Promise<void> {
     console.log('Hello');
     await this._svc.remove(id);
   }
@@ -321,7 +321,16 @@ First we must start the application:
     version: '0.0.0',
     framework: '3.0.0'
   },
-  env: { name: 'dev', prod: false, dynamic: false, profiles: [], nodeVersion: 'v18.12.1' }
+  env: {
+    envName: 'dev',
+    debug: '0',
+    prod: false,
+    test: false,
+    dynamic: false,
+    profiles: [],
+    resourcePaths: [],
+    nodeVersion: 'v18.12.1'
+  }
 }
 2022-03-14T04:00:01.510Z info  [@travetto/app:src/registry.ts:81] Config {
   sources: [ 'application.1 - file://application.yml', 'override.3 - memory://override' ],
@@ -342,7 +351,7 @@ First we must start the application:
     },
     ApiSpecConfig: { output: './openapi.yml', persist: false, skipRoutes: false, exposeAllSchemas: false },
     CommonLoggerConfig: { format: 'line', plain: false, timestamp: 'ms' },
-    FileModelConfig: { folder: '/tmp/bee1a5a2ec', namespace: '.' },
+    FileModelConfig: { folder: '/tmp/759978d9f6', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
       hosts: [ 'localhost' ],
@@ -438,16 +447,6 @@ $ trv main support/main.list-todo.ts
     id: '22e793aed76ee063d13feec2e5e95b45',
     text: 'New Todo',
     created: '2022-03-14T04:00:03.086Z'
-  },
-  {
-    id: 'eba6734e307bc66d442ae78291e71040',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:03.190Z'
-  },
-  {
-    id: '77ba279b4e30fdacfc55b9e3be224403',
-    text: 'New Todo',
-    created: '2022-03-14T04:00:03.383Z'
   }
 ]
 ```

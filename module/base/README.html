@@ -15,10 +15,10 @@
 Base is the foundation of all <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
 <ul> <li>Environment Support</li>
- <li>Condole Management</li>
+ <li>Console Management</li>
  <li>Standard Error Support</li>
  <li>Stream Support</li>
- <li>General Utilities</li>
+ <li>Object Utilities</li>
  <li>Process Execution</li>
  <li>Shutdown Management</li></ul>
 
@@ -135,8 +135,8 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
  <li><code class="item method">writeToFile(src: Readable, out: string):Promise&lt;void&gt;</code> will stream a readable into a file path, and wait for completion.</li>
  <li><code class="item method">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li></ul>
 
-<h2 id="general-utilities">General Utilities</h2>
-Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L16">Util</a> includes:
+<h2 id="object-utilities">Object Utilities</h2>
+Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/object-util.ts#L12">ObjectUtil</a> includes:
 
 <ul> <li><code class="item method">isPrimitive(el)</code> determines if <code class="item input">el</code> is a <code class="item input">string</code>, <code class="item input">boolean</code>, <code class="item input">number</code> or <code class="item input">RegExp</code></li>
  <li><code class="item method">isPlainObject(obj)</code> determines if the obj is a simple object</li>

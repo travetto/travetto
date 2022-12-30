@@ -136,7 +136,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
     return {
       type: Boolean,
       // TODO: This needs to be resolved?
-      combine: (val, curr): boolean => ObjectUtil.coerceType(val, Boolean, false) ?? curr,
+      combine: (val, curr): boolean => ObjectUtil.coerceType(val, Boolean, false) ?? true,
       completion: true,
       ...cfg
     };

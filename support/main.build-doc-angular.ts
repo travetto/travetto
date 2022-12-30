@@ -42,7 +42,7 @@ export async function main(target?: string): Promise<void> {
     .filter(x => !target || x.source === path.resolve(root, target))
     .filter(x => (x.files.doc ?? []).some(f => f.source.endsWith('README.ts')));
 
-  const modSrc = new Set(mods.map(x => x.source));
+  const modSrc = new Set(mods.map(x => x.workspaceRelative));
 
   // Build out docs
   await CliModuleUtil.runOnModules('all', ['trv', 'doc'], { filter: folder => modSrc.has(folder) });
@@ -52,23 +52,28 @@ export async function main(target?: string): Promise<void> {
       await copyPluginImages();
     }
     const modName = mod.name.split('@travetto/')[1];
+    try {
+      let html = await fs.readFile(path.resolve(mod.source, 'README.html'), 'utf8');
 
-    let html = await fs.readFile(path.resolve(mod.source, 'README.html'), 'utf8');
-
-    html = html
-      .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
-      .replace(/^src="images\//g, `src="/assets/images/${modName}/`)
-      .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`);
-
-    if (modName === 'overview') {
       html = html
-        .replace(/<h1>([\n\r]|.)* /m, t => `<div class="documentation">\n${t}\n</div>\n`);
-    } else if (modName === 'todo-app') {
-      html = html
-        .replace(/(<h1>(?:[\n\r]|.)*)(\s*<div class="toc">(?:[\r\n]|.)*?<\/div>(?:[\r\n]|.)*?<\/div>\s*)((?:[\r\n]|.)*)/m,
-          (_, h, toc, text) => `${toc.trim()}\n<div class="documentation">\n${h}\n${text}\n</div>\n`);
+        .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
+        .replace(/^src="images\//g, `src="/assets/images/${modName}/`)
+        .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`);
+
+      if (modName === 'overview') {
+        html = html
+          .replace(/<h1>([\n\r]|.)* /m, t => `<div class="documentation">\n${t}\n</div>\n`);
+      } else if (modName === 'todo-app') {
+        html = html
+          .replace(/(<h1>(?:[\n\r]|.)*)(\s*<div class="toc">(?:[\r\n]|.)*?<\/div>(?:[\r\n]|.)*?<\/div>\s*)((?:[\r\n]|.)*)/m,
+            (_, h, toc, text) => `${toc.trim()}\n<div class="documentation">\n${h}\n${text}\n</div>\n`);
+      }
+
+      await fs.writeFile(htmlPage(modName), html, 'utf8');
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(`${mod.name}: ${err.message}`);
+      }
     }
-
-    await fs.writeFile(htmlPage(modName), html, 'utf8');
   }
 }

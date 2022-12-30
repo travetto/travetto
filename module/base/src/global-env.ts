@@ -34,7 +34,18 @@ export const GlobalEnv = {
   get main(): string | undefined { return Env.get('TRV_MAIN'); },
 
   /** Is test */
-  get test(): boolean { return this.profiles.includes('test'); }
+  get test(): boolean { return this.profiles.includes('test'); },
+
+  /** Get node version */
+  get nodeVersion(): string { return process.version; },
+
+  toJSON(): Record<string, unknown> {
+    return {
+      envName: this.envName, debug: this.debug, prod: this.prod, test: this.test,
+      dynamic: this.dynamic, profiles: this.profiles, resourcePaths: this.resourcePaths,
+      nodeVersion: this.nodeVersion
+    };
+  }
 } as const;
 
 export type GlobalEnvConfig = {

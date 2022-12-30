@@ -8,4 +8,4 @@
 npm install @travetto/auth-rest-jwt
 ```
 
-The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L27) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.  This token does not own a session, but allows for encoding the auth state into JWT constructs.
+The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L30) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.  This token does not own a session, but allows for encoding the auth state into JWT constructs.

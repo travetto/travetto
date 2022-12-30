@@ -86,12 +86,12 @@ Options:
 Available Applications:
 
    ● complex
-     --------------------------------------------------------
+     -------------------------------------------------------------
      usage: complex domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  @travetto/app/doc/complex.ts
 
    ● simple
-     -------------------------------------------------------
+     -------------------------------------------------------------
      usage: simple domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  @travetto/app/doc/simple.ts
 
@@ -101,12 +101,12 @@ Available Applications:
      file:  @travetto/app/doc/entry-simple.ts
 
    ● simple-domain
-     -------------------------------------------------------
+     -------------------------------------------------------------
      usage: simple-domain domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  @travetto/app/doc/domain.ts
 
    ● test-ep-test
-     ---------------------------------------------------------
+     -------------------------------------------------------------
      usage: test-ep-test <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
      file:  @travetto/app/doc/entry.ts</code></pre>     
       </figure>
@@ -129,12 +129,12 @@ Options:
 Available Applications:
 
    ● complex
-     --------------------------------------------------------
+     -------------------------------------------------------------
      usage: complex domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  @travetto/app/doc/complex.ts
 
    ● simple
-     -------------------------------------------------------
+     -------------------------------------------------------------
      usage: simple domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  @travetto/app/doc/simple.ts
 
@@ -144,12 +144,12 @@ Available Applications:
      file:  @travetto/app/doc/entry-simple.ts
 
    ● simple-domain
-     -------------------------------------------------------
+     -------------------------------------------------------------
      usage: simple-domain domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  @travetto/app/doc/domain.ts
 
    ● test-ep-test
-     ---------------------------------------------------------
+     -------------------------------------------------------------
      usage: test-ep-test <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
      file:  @travetto/app/doc/entry.ts</code></pre>     
       </figure>
@@ -177,10 +177,13 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     framework: <span class="token string">'3.0.0'</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
-    name: <span class="token string">'dev'</span>,
+    envName: <span class="token string">'dev'</span>,
+    debug: <span class="token string">'0'</span>,
     prod: false,
+    test: false,
     dynamic: false,
     profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
+    resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
     nodeVersion: <span class="token string">'v18.12.1'</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
