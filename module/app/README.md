@@ -76,27 +76,30 @@ Options:
 Available Applications:
 
    ● complex 
-     -------------------------------------------------------------
      usage: complex domain:string [port:number=3000]
      file:  @travetto/app/doc/complex.ts
 
+     —————————————————————————————————————————————————————————————
+
    ● simple 
-     -------------------------------------------------------------
      usage: simple domain:string [port:number=3000]
      file:  @travetto/app/doc/simple.ts
 
+     —————————————————————————————————————————————————————————————
+
    ● simple-app 
-     -------------------------------------------------------------
      usage: simple-app 
      file:  @travetto/app/doc/entry-simple.ts
 
+     —————————————————————————————————————————————————————————————
+
    ● simple-domain 
-     -------------------------------------------------------------
      usage: simple-domain domain:string [port:number=3000]
      file:  @travetto/app/doc/domain.ts
 
+     —————————————————————————————————————————————————————————————
+
    ● test-ep-test 
-     -------------------------------------------------------------
      usage: test-ep-test [age:number=5] [format:html|pdf=html]
      file:  @travetto/app/doc/entry.ts
 ```
@@ -117,27 +120,30 @@ Options:
 Available Applications:
 
    ● complex 
-     -------------------------------------------------------------
      usage: complex domain:string [port:number=3000]
      file:  @travetto/app/doc/complex.ts
 
+     —————————————————————————————————————————————————————————————
+
    ● simple 
-     -------------------------------------------------------------
      usage: simple domain:string [port:number=3000]
      file:  @travetto/app/doc/simple.ts
 
+     —————————————————————————————————————————————————————————————
+
    ● simple-app 
-     -------------------------------------------------------------
      usage: simple-app 
      file:  @travetto/app/doc/entry-simple.ts
 
+     —————————————————————————————————————————————————————————————
+
    ● simple-domain 
-     -------------------------------------------------------------
      usage: simple-domain domain:string [port:number=3000]
      file:  @travetto/app/doc/domain.ts
 
+     —————————————————————————————————————————————————————————————
+
    ● test-ep-test 
-     -------------------------------------------------------------
      usage: test-ep-test [age:number=5] [format:html|pdf=html]
      file:  @travetto/app/doc/entry.ts
 ```

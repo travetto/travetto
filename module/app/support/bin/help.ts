@@ -44,7 +44,7 @@ export class HelpUtil {
 
       const usage = this.getAppUsage(conf);
 
-      lines.push(cliTpl`${{ identifier: conf.moduleName ?? conf.name }} ${{ title: conf.description }}`);
+      lines.push(cliTpl`${{ param: conf.moduleName ?? conf.name }} ${{ title: conf.description }}`);
       lines.push(cliTpl`${{ subtitle: 'usage' }}: ${usage}`);
       lines.push(cliTpl`${{ subtitle: 'file' }}:  ${{ path: conf.filename.replace(cwdPrefix, '') }}`);
       choices.push(lines.map((x, i) => `   ${i === 0 ? '●' : ' '} ${x}`));
@@ -52,7 +52,7 @@ export class HelpUtil {
 
     const allLines = choices.flat();
     const len = allLines.reduce((acc, v) => Math.max(acc, TerminalUtil.removeAnsiSequences(v).length), 0);
-    const div = cliTpl`${{ subsubtitle: '     '.padEnd(len, '-') }}`;
-    return choices.map(x => [x[0], div, ...x.slice(1)].join('\n')).join('\n\n');
+    const div = cliTpl`${{ subsubtitle: '     '.padEnd(len, '—') }}`;
+    return choices.map(x => x.join('\n')).join(`\n\n${div}\n\n`);
   }
 }

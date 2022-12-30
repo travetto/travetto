@@ -272,12 +272,12 @@ Options:
 Available Applications:
 
    ● custom 
-     ------------------------------------------------------------------
      usage: custom 
      file:  @travetto/rest/doc/custom-app.ts
 
+     ——————————————————————————————————————————————————————————————————
+
    ● rest Default rest application entrypoint
-     ------------------------------------------------------------------
      usage: rest 
      file:  @travetto/rest/src/application/rest.ts
 ```
