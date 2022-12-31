@@ -41,7 +41,9 @@ async function exec(args) {
     const fs = require('fs/promises');
     await Promise.all([ctx.outputFolder, ctx.compilerFolder].map(folder =>
       fs.rm(`${ctx.workspacePath}/${folder}`, { force: true, recursive: true })));
-    message(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
+    if (op === 'clean') {
+      message(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
+    }
   }
 
   switch (op) {

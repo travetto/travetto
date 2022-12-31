@@ -1,9 +1,10 @@
 import path from 'path';
 import fs from 'fs/promises';
+import cp from 'child_process';
 
 import type { ManifestState, ManifestContext, ManifestRoot } from '@travetto/manifest';
 
-import { log, spawn, compileIfStale, getProjectSources, addNodePath, importManifest, IS_DEBUG } from './utils';
+import { log, compileIfStale, getProjectSources, addNodePath, importManifest } from './utils';
 
 let manifestTemp;
 
@@ -61,17 +62,13 @@ function shouldRebuildCompiler({ delta }: ManifestState): { total: boolean, tran
  *  Step 2
  */
 async function buildCompiler(state: ManifestState, ctx: ManifestContext): Promise<void> {
-  await compileIfStale(
-    ctx,
-    '[2] Compiler Bootstrapping',
-    await getProjectSources(ctx, '@travetto/compiler'),
-  );
-
-  await compileIfStale(
-    ctx,
-    '[2] Compiler Bootstrapping',
-    await getProjectSources(ctx, '@travetto/transformer'),
-  );
+  for (const mod of ['@travetto/terminal', '@travetto/transformer', '@travetto/compiler']) {
+    await compileIfStale(
+      ctx,
+      '[2] Compiler Support',
+      await getProjectSources(ctx, mod),
+    );
+  }
 
   const changed = shouldRebuildCompiler(state);
 
@@ -119,14 +116,12 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
     (manifestTemp ??= await ManifestUtil.writeState(state)),
     `${!!watch}`
   ];
-  await spawn('[3] Compiling', process.argv0, {
-    args,
-    cwd: path.resolve(
-      ctx.workspacePath,
-      ctx.compilerFolder,
-    ),
-    showWaitingMessage: !watch && !IS_DEBUG
-  });
+
+  // Blocking call
+  const res = cp.spawnSync(process.argv0, args, { cwd: path.resolve(ctx.workspacePath, ctx.compilerFolder), stdio: 'inherit', encoding: 'utf8' });
+  if (res.status) {
+    throw new Error(res.stderr);
+  }
 }
 
 export async function compile(ctx: ManifestContext, watch?: boolean): Promise<ManifestState> {

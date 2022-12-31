@@ -3,7 +3,6 @@ import util from 'util';
 import { RootIndex } from '@travetto/manifest';
 
 import type { ConsoleListener, ConsoleEvent, LogLevel } from './types';
-import { Env } from './env';
 
 function wrap(target: Console): ConsoleListener {
   return {
@@ -56,10 +55,6 @@ class $ConsoleManager {
    * List of logging filters
    */
   #filters: Partial<Record<LogLevel, (x: ConsoleEvent) => boolean>> = {};
-
-  get lineWidth(): number {
-    return Env.getInt('TRV_CONSOLE_WIDTH', process.stdout.columns ?? 120);
-  }
 
   async register(): Promise<this> {
     this.set(console); // Init to console

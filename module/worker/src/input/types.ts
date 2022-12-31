@@ -10,4 +10,8 @@ export interface WorkSet<X> {
    * Get next item
    */
   next(): X | Promise<X>;
+  /**
+   * Total size of work set
+   */
+  size?: number;
 }

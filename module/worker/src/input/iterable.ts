@@ -13,6 +13,7 @@ export class IterableWorkSet<X> implements WorkSet<X> {
   #src: Itr<X>;
   #ondeck?: X;
   #done = false;
+  #size?: number;
 
   constructor(src: Iterable<X> | AsyncIterable<X> | (() => Generator<X>) | (() => AsyncGenerator<X>) | Itr<X>) {
     if ('next' in src) {
@@ -25,6 +26,11 @@ export class IterableWorkSet<X> implements WorkSet<X> {
       } else {
         this.#src = src();
       }
+    }
+    if (Array.isArray(src)) {
+      this.#size = src.length;
+    } else if (src instanceof Set) {
+      this.#size = src.size;
     }
   }
 
@@ -56,5 +62,12 @@ export class IterableWorkSet<X> implements WorkSet<X> {
     const out = this.#ondeck!;
     this.#ondeck = undefined;
     return out;
+  }
+
+  /**
+   * Get size, if defined
+   */
+  get size(): number | undefined {
+    return this.#size;
   }
 }

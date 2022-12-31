@@ -111,7 +111,11 @@ export class CompilerUtil {
    * @param filename The name of the file
    * @param diagnostics The diagnostic errors
    */
-  static buildTranspileError(filename: string, diagnostics: readonly ts.Diagnostic[]): Error {
+  static buildTranspileError(filename: string, diagnostics: Error | readonly ts.Diagnostic[]): Error {
+    if (diagnostics instanceof Error) {
+      return diagnostics;
+    }
+
     const errors: string[] = diagnostics.slice(0, 5).map(diag => {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const message = ts.flattenDiagnosticMessageText(diag.messageText, '\n');

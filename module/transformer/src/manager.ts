@@ -39,17 +39,6 @@ export class TransformerManager {
   constructor(transformers: NodeTransformer<TransformerState>[], index: TransformerIndex) {
     this.#transformers = transformers;
     this.#index = index;
-
-    console.debug('Transformers', {
-      order: transformers.map(x => {
-        const flags = [
-          ...(x.target ? [] : ['all']),
-          ...(x.before ? ['before'] : []),
-          ...(x.after ? ['after'] : [])
-        ];
-        return { type: x.type, key: x.key, flags: flags.join(' ') };
-      })
-    });
   }
 
   /**

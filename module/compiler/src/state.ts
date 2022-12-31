@@ -112,7 +112,6 @@ export class CompilerState {
           }
         }
       }
-      console.log('Changed files', changes);
       return files;
     } else {
       return [...this.#inputFiles];

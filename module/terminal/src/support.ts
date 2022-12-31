@@ -1,12 +1,10 @@
 import tty from 'tty';
 
-import { TypedObject, TemplateType, TemplatePrim, Util } from '@travetto/base';
+import { TerminalUtil, ColorLevel, StyleInput, TerminalTable, TerminalProgressInput, TerminalProgressConfig } from './util';
 
-import { TerminalUtil, ColorLevel, Style, TerminalTable } from './util';
-import { RGBInput } from './color-define';
-
-type ColorPaletteInput = Record<string, Style | RGBInput>;
-type ColorFn = (text: TemplatePrim) => string;
+type Prim = string | number | boolean | Date | RegExp;
+type ColorPaletteInput = Record<string, StyleInput>;
+type ColorFn = (text: Prim) => string;
 type ColorPalette<T> = Record<keyof T, ColorFn>;
 
 /**
@@ -33,9 +31,9 @@ export class TerminalSupport {
   /**
    * Make a simple primitive colorer
    */
-  colorer(col: Style | RGBInput): (prim: TemplatePrim) => string {
+  colorer(col: StyleInput): (prim: Prim) => string {
     const levelPairs = TerminalUtil.getStyledLevels(col);
-    return (v: TemplatePrim): string => {
+    return (v: Prim): string => {
       const [prefix, suffix] = levelPairs[this.#colorLevel];
       return (v === undefined || v === null) ? '' : `${prefix}${v}${suffix}`;
     };
@@ -47,7 +45,8 @@ export class TerminalSupport {
   palette<P extends ColorPaletteInput>(input: P): ColorPalette<P> {
     // Common color support
     const out: Partial<ColorPalette<P>> = {};
-    for (const [k, col] of TypedObject.entries(input)) {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    for (const [k, col] of Object.entries(input) as [keyof P, StyleInput][]) {
       out[k] = this.colorer(col);
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -57,9 +56,9 @@ export class TerminalSupport {
   /**
    * Convenience method to creates a color template function based on input styles
    */
-  template<P extends ColorPaletteInput>(input: P): TemplateType<P> {
+  templateFunction<P extends ColorPaletteInput>(input: P): (key: keyof P, val: Prim) => string {
     const pal = this.palette(input);
-    return Util.makeTemplate<P>((k, val) => pal[k](val));
+    return (key: keyof P, val: Prim) => pal[key](val);
   }
 
   /**
@@ -90,6 +89,13 @@ export class TerminalSupport {
    */
   table(rows: number): TerminalTable {
     return TerminalUtil.makeTable(this.#stream, rows, { hideCursor: true });
+  }
+
+  /**
+   * Track progress on an async operation
+   */
+  async trackProgress(source: TerminalProgressInput, cfg: TerminalProgressConfig = {}): Promise<void> {
+    return TerminalUtil.trackProgress(this.#stream, source, cfg);
   }
 }
 

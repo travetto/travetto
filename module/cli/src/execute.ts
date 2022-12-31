@@ -1,8 +1,8 @@
 import { program as commander } from 'commander';
 
 import { RootIndex, PackageUtil, path } from '@travetto/manifest';
-import { ConsoleManager, ShutdownManager } from '@travetto/base';
-import { GlobalTerminal } from '@travetto/terminal';
+import { ShutdownManager } from '@travetto/base';
+import { GlobalTerminal, TerminalUtil } from '@travetto/terminal';
 import { runMain } from '@travetto/base/support/init.main';
 
 import { CliCommandManager } from './command-manager';
@@ -52,7 +52,7 @@ export class ExecutionManager {
   static async run(args: string[]): Promise<void> {
     ShutdownManager.onShutdown('', () => GlobalTerminal.enableCursor());
 
-    const width = ConsoleManager.lineWidth;
+    const width = TerminalUtil.lineWidth;
     commander
       .version(PackageUtil.getFrameworkVersion())
       .configureOutput({ getOutHelpWidth: () => width, getErrHelpWidth: () => width });

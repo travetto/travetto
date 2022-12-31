@@ -4,7 +4,6 @@ import { parentPort } from 'worker_threads';
 import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
-import { GlobalTerminal } from '@travetto/terminal';
 
 import { AppScanUtil } from '../../src/scan';
 import type { ApplicationConfig } from '../../src/types';
@@ -71,24 +70,24 @@ export class AppListLoader {
         ).message);
       } else {
         const configs: ApplicationConfig[] = [];
-        await GlobalTerminal.waiting('Collecting', () =>
-          CliModuleUtil.runOnModules('all',
-            ['trv', 'main', '@travetto/app/support/main.list-build.ts'],
-            {
-              onMessage(folder, perFolder: ApplicationConfig[]) {
-                if (perFolder.length) {
-                  if (perFolder[0].module !== RootIndex.manifest.mainModule) {
-                    for (const m of perFolder) {
-                      if (m) {
-                        m.moduleName = `${m.module}:${m.name}`;
-                      }
+        await CliModuleUtil.runOnModules('all',
+          ['trv', 'main', '@travetto/app/support/main.list-build.ts'],
+          {
+            showProgress: true,
+            showStdout: false,
+            onMessage(folder, perFolder: ApplicationConfig[]) {
+              if (perFolder.length) {
+                if (perFolder[0].module !== RootIndex.manifest.mainModule) {
+                  for (const m of perFolder) {
+                    if (m) {
+                      m.moduleName = `${m.module}:${m.name}`;
                     }
                   }
-                  configs.push(...perFolder);
                 }
-              },
-            }
-          )
+                configs.push(...perFolder);
+              }
+            },
+          }
         );
         return configs;
       }

@@ -1,6 +1,7 @@
+import { Util } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
 
-export const cliTpl = GlobalTerminal.template({
+const tplFn = GlobalTerminal.templateFunction({
   input: 'oliveDrab',
   output: 'pink',
   path: 'teal',
@@ -14,3 +15,5 @@ export const cliTpl = GlobalTerminal.template({
   subtitle: 'lightGray',
   subsubtitle: 'darkGray'
 });
+
+export const cliTpl = Util.makeTemplate(tplFn);

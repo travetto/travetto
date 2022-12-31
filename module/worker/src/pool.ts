@@ -1,9 +1,11 @@
 import os from 'os';
 import gp from 'generic-pool';
 
-import { ShutdownManager, TimeUtil } from '@travetto/base';
+import { GlobalEnv, ShutdownManager, TimeUtil } from '@travetto/base';
+import { TerminalProgressEvent } from '@travetto/terminal';
 
 import { WorkSet } from './input/types';
+import { ManualAsyncIterator } from '../src/input/async-iterator';
 
 /**
  * Worker definition
@@ -43,6 +45,11 @@ export class WorkPool<X, T extends Worker<X>> {
   #createErrors = 0;
 
   /**
+   * Are we tracing
+   */
+  #trace: boolean;
+
+  /**
    *
    * @param getWorker Produces a new worker for the pool
    * @param opts Pool options
@@ -63,6 +70,8 @@ export class WorkPool<X, T extends Worker<X>> {
     }, args);
 
     ShutdownManager.onShutdown(`worker.pool.${this.constructor.name}`, () => this.shutdown());
+
+    this.#trace = !!GlobalEnv.debug?.includes('@travetto/worker');
   }
 
   /**
@@ -95,7 +104,9 @@ export class WorkPool<X, T extends Worker<X>> {
    * Destroy the worker
    */
   async destroy(worker: T): Promise<void> {
-    console.debug('Destroying', { pid: process.pid, worker: worker.id });
+    if (this.#trace) {
+      console.debug('Destroying', { pid: process.pid, worker: worker.id });
+    }
     return worker.destroy();
   }
 
@@ -103,14 +114,14 @@ export class WorkPool<X, T extends Worker<X>> {
    * Free worker on completion
    */
   async release(worker: T): Promise<void> {
-    console.debug('Releasing', { pid: process.pid, worker: worker.id });
+    if (this.#trace) {
+      console.debug('Releasing', { pid: process.pid, worker: worker.id });
+    }
     try {
       if (worker.active) {
-        if (worker.release) {
-          try {
-            await worker.release();
-          } catch { }
-        }
+        try {
+          await worker.release?.();
+        } catch { }
         await this.#pool.release(worker);
       } else {
         await this.#pool.destroy(worker);
@@ -121,17 +132,21 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Process a given input source
    */
-  async process(src: WorkSet<X>): Promise<void> {
+  async process(src: WorkSet<X>, onComplete?: (val: X, i: number, total?: number) => (void | Promise<void>)): Promise<void> {
     const pending = new Set<Promise<unknown>>();
+    let count = 0;
 
     while (await src.hasNext()) {
       const worker = (await this.#pool.acquire())!;
-      console.debug('Acquired', { pid: process.pid, worker: worker.id });
+      if (this.#trace) {
+        console.debug('Acquired', { pid: process.pid, worker: worker.id });
+      }
       const nextInput = await src.next();
 
       const completion = worker.execute(nextInput)
         .catch(err => this.#errors.push(err)) // Catch error
-        .finally(() => this.release(worker));
+        .finally(() => this.release(worker))
+        .finally(() => onComplete?.(nextInput, count += 1, src.size));
 
       completion.finally(() => pending.delete(completion));
 
@@ -142,6 +157,24 @@ export class WorkPool<X, T extends Worker<X>> {
 
     if (this.#errors.length) {
       throw this.#errors[0];
+    }
+  }
+
+  /**
+   * Process a given input source as an iterator
+   */
+  async * iterateProcess(src: WorkSet<X>): AsyncIterable<TerminalProgressEvent> {
+    const itr = new ManualAsyncIterator<TerminalProgressEvent>();
+    const res = this.process(src, (val, i, total) => itr.add({ i, total, status: val !== undefined ? `${val}` : '' }));
+    res.finally(() => itr.close());
+    for (; ;) {
+      const { value, done } = await itr.next();
+      if (value) {
+        yield value;
+      }
+      if (done) {
+        break;
+      }
     }
   }
 

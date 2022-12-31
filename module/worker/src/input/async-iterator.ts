@@ -8,12 +8,14 @@ export class ManualAsyncIterator<X> implements AsyncIterator<X> {
   #queue: X[] = [];
   #done = false;
   #ready = Util.resolvablePromise();
+  #size: number;
 
   /**
    * Initial set of items
    */
   constructor(initial: Iterable<X> = []) {
     this.#queue.push(...initial);
+    this.#size = this.#queue.length;
   }
 
   /**
@@ -38,6 +40,7 @@ export class ManualAsyncIterator<X> implements AsyncIterator<X> {
     } else {
       this.#queue.unshift(...item);
     }
+    this.#size += item.length;
     this.#ready.resolve();
   }
 
@@ -47,5 +50,12 @@ export class ManualAsyncIterator<X> implements AsyncIterator<X> {
   close(): void {
     this.#done = true;
     this.#ready.resolve();
+  }
+
+  /**
+   * Get size, will change as items are added
+   */
+  get size(): number {
+    return this.#size;
   }
 }

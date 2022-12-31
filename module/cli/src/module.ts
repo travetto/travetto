@@ -78,6 +78,7 @@ export class CliModuleUtil {
     config: {
       filter?: (folder: string) => boolean | Promise<boolean>;
       onMessage?: (folder: string, msg: T) => void;
+      showProgress?: boolean;
       workerCount?: number;
       prefixOutput?: boolean;
       showStdout?: boolean;
@@ -150,7 +151,14 @@ export class CliModuleUtil {
       return worker;
     }, { max: workerCount, min: workerCount });
 
-    const work = new IterableWorkSet(folders);
-    await pool.process(work);
+    const work = pool.iterateProcess(new IterableWorkSet(folders));
+
+    if (config.showProgress) {
+      await GlobalTerminal.trackProgress(work, { message: ['Completed', cmd, ...args].join(' '), showBar: true });
+    } else {
+      for await (const _ of work) {
+        // Ensure its all consumed
+      }
+    }
   }
 }

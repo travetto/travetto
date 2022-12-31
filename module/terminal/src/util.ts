@@ -2,7 +2,6 @@ import tty from 'tty';
 import timers from 'timers/promises';
 import readline from 'readline';
 
-import { TypedObject, ObjectUtil } from '@travetto/base';
 import { ColorDefineUtil, RGBInput } from './color-define';
 
 export type ColorLevel = 0 | 1 | 2 | 3;
@@ -15,6 +14,12 @@ export type TerminalTable = {
   update(row: number, output: string): Promise<void>;
   finish(): Promise<void>;
 };
+
+export type TerminalProgressConfig = { message?: string, showBar?: boolean };
+export type TerminalProgressEvent = { i: number, total?: number, status?: string };
+export type TerminalProgressInput = AsyncIterator<TerminalProgressEvent> | AsyncIterable<TerminalProgressEvent>;
+
+export type StyleInput = Style | RGBInput;
 
 const COLOR_LEVEL_MAP = { 1: 0, 4: 1, 8: 2, 24: 3 } as const;
 
@@ -29,12 +34,25 @@ const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
  */
 export class TerminalUtil {
 
+  static get lineWidth(): number {
+    return (process.env.TRV_CONSOLE_WIDTH ? +process.env.TRV_CONSOLE_WIDTH : undefined) ?? process.stdout.columns ?? 120;
+  }
+
+  static isInteractiveTTY(stream: tty.WriteStream): boolean {
+    return stream.isTTY && !/^(true|yes|on|1)$/.test(process.env.TRV_QUIET ?? '');
+  }
+
+
   static disableCursor(stream: tty.WriteStream): void {
-    stream.write('\x1B[?25l');
+    if (this.isInteractiveTTY(stream)) {
+      stream.write('\x1B[?25l');
+    }
   }
 
   static enableCursor(stream: tty.WriteStream): void {
-    stream.write('\x1B[?25h');
+    if (this.isInteractiveTTY(stream)) {
+      stream.write('\x1B[?25h');
+    }
   }
 
   static removeAnsiSequences(output: string): string {
@@ -44,14 +62,14 @@ export class TerminalUtil {
 
   static getStreamColorLevel(stream: tty.WriteStream): ColorLevel {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return stream.isTTY ? COLOR_LEVEL_MAP[stream.getColorDepth() as 1 | 4 | 8 | 24] : 0;
+    return this.isInteractiveTTY(stream) ? COLOR_LEVEL_MAP[stream.getColorDepth() as 1 | 4 | 8 | 24] : 0;
   }
 
   /**
    * Get styled levels, 0-3
    */
-  static getStyledLevels(inp: Style | RGBInput): [string, string][] {
-    const cfg = ObjectUtil.isPlainObject(inp) ? inp : { text: inp };
+  static getStyledLevels(inp: StyleInput): [string, string][] {
+    const cfg = (typeof inp !== 'object') ? { text: inp } : inp;
     const levelPairs: [string, string][] = [['', '']];
     const text = cfg.text ? ColorDefineUtil.getColorCodes(cfg.text, false) : undefined;
     const bg = cfg.background ? ColorDefineUtil.getColorCodes(cfg.background, true) : undefined;
@@ -59,7 +77,8 @@ export class TerminalUtil {
     for (const level of [1, 2, 3]) {
       const prefix: number[] = [];
       const suffix: number[] = [];
-      for (const key of TypedObject.keys(cfg)) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      for (const key of Object.keys(cfg) as (keyof typeof cfg)[]) {
         if (!cfg[key]) {
           continue;
         }
@@ -78,15 +97,28 @@ export class TerminalUtil {
   }
 
   /**
+   * Move cursor
+   */
+  static async moveCursor(stream: tty.WriteStream, dx: number, dy: number): Promise<void> {
+    if (!this.isInteractiveTTY(stream)) {
+      return;
+    }
+    await new Promise<void>(r => readline.moveCursor(stream, dx, dy, r));
+  }
+
+  /**
    * Rewrite a single line in the stream
    * @param stream The stream to write
    * @param text Text, if desired
    * @param clear Should the entire line be cleared?
    */
   static async rewriteLine(stream: tty.WriteStream, text?: string, clear = false): Promise<void> {
+    if (!this.isInteractiveTTY(stream)) {
+      return;
+    }
     await new Promise<void>(r => readline.cursorTo(stream, 0, undefined, r));
     if (clear) {
-      await new Promise<void>(r => readline.clearLine(stream, 0, r));
+      await new Promise<void>(r => readline.clearLine(stream, 1, r));
     }
     if (text) {
       stream.write(text);
@@ -101,6 +133,9 @@ export class TerminalUtil {
    * @param clear Should the entire line be cleared?
    */
   static async rewriteChar(stream: tty.WriteStream, pos: number, text: string): Promise<void> {
+    if (this.isInteractiveTTY(stream)) {
+      return;
+    }
     await new Promise<void>(r => readline.cursorTo(stream, pos, undefined, r));
     stream.write(text);
   }
@@ -116,7 +151,7 @@ export class TerminalUtil {
   ): Promise<T> {
     const { delay, completion } = { delay: 1000, ...config };
 
-    if (!ObjectUtil.isPromise(work)) {
+    if (work && typeof work === 'function') {
       work = work();
     }
 
@@ -128,38 +163,34 @@ export class TerminalUtil {
       .catch(err => capturedError = err)
       .finally(() => done = true);
 
-    if (stream.isTTY) {
-      let i = -1;
+    let i = -1;
 
-      if (config.hideCursor) {
-        this.disableCursor(stream);
-      }
+    if (config.hideCursor) {
+      this.disableCursor(stream);
+    }
 
-      if (delay) {
-        await Promise.race([timers.setTimeout(delay), final]);
-      }
+    if (delay) {
+      await Promise.race([timers.setTimeout(delay), final]);
+    }
 
+    if (this.isInteractiveTTY(stream)) {
       stream.write(`X ${message}`);
+    }
 
-      const states = config.waitingStates ?? STD_WAIT_STATES;
+    const states = config.waitingStates ?? STD_WAIT_STATES;
 
-      while (!done) {
-        await this.rewriteChar(stream, 0, states[i = (i + 1) % states.length]);
-        await timers.setTimeout(50);
-      }
+    while (!done) {
+      await this.rewriteChar(stream, 0, states[i % states.length]);
+      await timers.setTimeout(50);
+      i += 1;
+    }
 
-      if (i >= 0) {
-        await this.rewriteLine(stream, completion ? `${message} ${completion}\n` : '', true);
-      }
+    if (i >= 0) {
+      await this.rewriteLine(stream, completion ? `${message} ${completion}\n` : '', true);
+    }
 
-      if (config.hideCursor) {
-        this.enableCursor(stream);
-      }
-    } else {
-      await final;
-      if (!capturedError && completion) {
-        stream.write(`${message} ${completion}\n`);
-      }
+    if (config.hideCursor) {
+      this.enableCursor(stream);
     }
 
     if (capturedError) {
@@ -177,54 +208,84 @@ export class TerminalUtil {
 
     let cursorRow = 0;
     const responses: string[] = [];
-
-    async function init(...header: string[]): Promise<void> {
-      for (const line of header) {
-        stream.write(`${line}\n`);
-      }
-      stream.write(`${'\n'.repeat(rows)}\n`);
-      cursorRow = rows + 1;
-    }
-
     const counts = new Array(rows).fill(0);
+    const interactive = this.isInteractiveTTY(stream);
 
-    if (stream.isTTY) {
-      return {
-        async init(...header: string[]): Promise<void> {
-          if (config.hideCursor) {
-            TerminalUtil.disableCursor(stream);
-          }
-          await init(...header);
-        },
-        async update(row, output): Promise<void> {
-          if (counts[row] > 0) {
-            await timers.setTimeout(500);
-          }
-          counts[row] += 1;
-          readline.moveCursor(stream, 0, row - cursorRow);
-          readline.clearLine(stream, 1);
-          cursorRow = row + 1;
-          stream.write(`${output}\n`);
-        },
-        async finish(): Promise<void> {
-          readline.moveCursor(stream, 0, rows - cursorRow + 1);
-          if (config.hideCursor) {
-            TerminalUtil.enableCursor(stream);
-          }
+    return {
+      async init(...header: string[]): Promise<void> {
+        if (config.hideCursor) {
+          TerminalUtil.disableCursor(stream);
         }
-      };
-    } else {
-      return {
-        init,
-        async update(row, output): Promise<void> {
-          responses[row] = output;
-        },
-        async finish(): Promise<void> {
+        for (const line of header) {
+          stream.write(`${line}\n`);
+        }
+        if (interactive) {
+          stream.write(`${'\n'.repeat(rows)}\n`);
+        }
+        cursorRow = rows + 1;
+      },
+      async update(row, output): Promise<void> {
+        if (counts[row] > 0) {
+          await timers.setTimeout(500);
+        }
+        counts[row] += 1;
+        await TerminalUtil.moveCursor(stream, 0, row - cursorRow);
+        await TerminalUtil.rewriteLine(stream, output, true);
+        cursorRow = row;
+        responses[row] = output;
+      },
+      async finish(): Promise<void> {
+        await TerminalUtil.moveCursor(stream, 0, rows - cursorRow + 1);
+        await TerminalUtil.rewriteLine(stream, '', true);
+        if (config.hideCursor) {
+          TerminalUtil.enableCursor(stream);
+        }
+        if (!interactive) {
           for (const response of responses) {
             stream.write(`${response}\n`);
           }
+          stream.write('\n');
         }
-      };
+      }
+    };
+  }
+
+  static async trackProgress(stream: tty.WriteStream, source: TerminalProgressInput, cfg: TerminalProgressConfig = {}): Promise<void> {
+    if (Symbol.asyncIterator in source) {
+      source = source[Symbol.asyncIterator]();
+    }
+    const invert = this.getStyledLevels({ background: 'white', text: 'dodgerBlue' });
+    const interactive = this.isInteractiveTTY(stream);
+    let last: number = -1;
+    try {
+      this.disableCursor(stream);
+      for (; ;) {
+        const res = await source.next();
+        if (interactive && res.value) {
+          const { i, total, status } = res.value;
+          if (i > last) {
+            last = i;
+            if (total) {
+              const line = [cfg.message, `${i}/${total}`, status].filter(x => !!x).join(' ');
+              if (cfg.showBar) {
+                const full = line.padEnd(this.lineWidth, ' ');
+                const pct = Math.trunc(full.length * (i / total));
+                await this.rewriteLine(stream, `${invert[1][0]}${full.substring(0, pct)}${invert[1][1]}${full.substring(pct)}`, true);
+              } else {
+                await this.rewriteLine(stream, line, true);
+              }
+            } else {
+              await this.rewriteLine(stream, [cfg.message, i, status].filter(x => !!x).join(' '), true);
+            }
+          }
+        }
+        if (res.done) {
+          break;
+        }
+      }
+    } finally {
+      await this.rewriteLine(stream, '', true);
+      this.enableCursor(stream);
     }
   }
 }

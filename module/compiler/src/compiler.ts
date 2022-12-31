@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { ManifestState } from '@travetto/manifest';
+import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -12,8 +13,8 @@ export type TransformerProvider = {
   get(): ts.CustomTransformers | undefined;
 };
 
-type EmitErrorHandler = (file: string, errors: Error | readonly ts.Diagnostic[]) => void;
-type Emitter = (file: string, newProgram?: boolean, onError?: EmitErrorHandler) => void;
+type EmitError = Error | readonly ts.Diagnostic[];
+type Emitter = (file: string, newProgram?: boolean) => EmitError | undefined;
 
 /**
  * Compilation support
@@ -53,9 +54,15 @@ export class Compiler {
    */
   async #watchLocalModules(emit: Emitter): Promise<() => Promise<void>> {
     const folders = this.state.modules.filter(x => x.local).map(x => x.source);
+    const emitWithError = (file: string): void => {
+      const err = emit(file, true);
+      if (err) {
+        console.error(CompilerUtil.buildTranspileError(file, err));
+      }
+    };
     const watcher = this.state.getWatcher({
-      create: (inputFile) => emit(inputFile, true),
-      update: (inputFile) => emit(inputFile, true),
+      create: (inputFile) => emitWithError(inputFile),
+      update: (inputFile) => emitWithError(inputFile),
       delete: (outputFile) => fs.unlink(outputFile)
     });
     return CompilerUtil.fileWatcher(folders, watcher);
@@ -72,7 +79,6 @@ export class Compiler {
       this.#state.manifest.outputFolder,
       file
     );
-    console.debug('Writing', outFile);
     await fs.mkdir(path.dirname(outFile), { recursive: true });
     await fs.writeFile(outFile, contents, { encoding: 'utf8', mode });
   }
@@ -102,15 +108,7 @@ export class Compiler {
     );
     const host = this.state.getCompilerHost(options);
 
-    const emit = (file: string, needsNewProgram = program === undefined, onError?: EmitErrorHandler): void => {
-      console.log('Emitting file',
-        file
-          .replace(/[.]ts$/, '.js')
-          .replace(
-            this.#state.manifest.compilerFolder,
-            this.#state.manifest.outputFolder
-          )
-      );
+    const emit = (file: string, needsNewProgram = program === undefined): EmitError | undefined => {
       if (needsNewProgram) {
         program = ts.createProgram({ rootNames: this.#state.getAllFiles(), host, options, oldProgram: program });
         transformers.init(program.getTypeChecker());
@@ -120,16 +118,12 @@ export class Compiler {
           program.getSourceFile(file)!, host.writeFile, undefined, false, transformers.get()
         );
 
-        if (result.diagnostics && result.diagnostics.length) {
-          if (onError) {
-            onError(file, result.diagnostics);
-          } else {
-            throw CompilerUtil.buildTranspileError(file, result.diagnostics);
-          }
+        if (result.diagnostics?.length) {
+          return result.diagnostics;
         }
       } catch (err) {
-        if (onError && (err instanceof Error)) {
-          onError(file, err);
+        if (err instanceof Error) {
+          return err;
         } else {
           throw err;
         }
@@ -144,24 +138,41 @@ export class Compiler {
    */
   async run(watch?: boolean): Promise<void> {
     await this.outputInit();
-    const emit = await this.getCompiler();
+    const emitter = await this.getCompiler();
+    let failed = false;
+    const files = this.state.getDirtyFiles();
+    const manifest = this.#state.manifest;
 
-    // Emit dirty files
-    const errs: Parameters<EmitErrorHandler>[] = [];
-    for (const file of this.state.getDirtyFiles()) {
-      emit(file, undefined, (f, val) => errs.push([f, val]));
+    async function* emitDirty(): AsyncIterable<TerminalProgressEvent> {
+      let i = 0;
+      const total = files.length;
+      for (const file of files) {
+        const err = emitter(file);
+        if (err) {
+          failed = true;
+          console.error(CompilerUtil.buildTranspileError(file, err));
+        }
+
+        const finalFile = file
+          .replace(/[.]ts$/, '.js')
+          .replace(
+            manifest.compilerFolder,
+            manifest.outputFolder
+          );
+
+        yield { i, total, status: finalFile };
+        i += 1;
+      }
     }
 
-    if (errs.length) {
-      for (const [file, diags] of errs) {
-        const err = diags instanceof Error ? diags : CompilerUtil.buildTranspileError(file, diags);
-        console.error(err);
-      }
+    await GlobalTerminal.trackProgress(emitDirty(), { showBar: true, message: 'Compiling:' });
+
+    if (failed) {
       process.exit(-1);
     }
 
     if (watch) {
-      await this.#watchLocalModules(emit);
+      await this.#watchLocalModules(emitter);
       await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24));
     }
   }

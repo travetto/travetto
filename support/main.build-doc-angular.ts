@@ -37,7 +37,11 @@ export async function main(target?: string): Promise<void> {
   const modSrc = new Set(mods.map(x => x.workspaceRelative));
 
   // Build out docs
-  await CliModuleUtil.runOnModules('all', ['trv', 'doc'], { filter: folder => modSrc.has(folder) });
+  await CliModuleUtil.runOnModules('all', ['trv', 'doc'], {
+    showProgress: true,
+    showStdout: false,
+    filter: folder => modSrc.has(folder)
+  });
 
   for (const mod of mods) {
     if (mod.source.endsWith('vscode-plugin')) {

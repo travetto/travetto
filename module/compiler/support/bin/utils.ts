@@ -1,8 +1,6 @@
 import fs from 'fs/promises';
 
-import cp from 'child_process';
 import path from 'path';
-import rl from 'readline';
 import { type Stats } from 'fs';
 import { createRequire } from 'module';
 
@@ -13,7 +11,6 @@ import { transpileFile, writePackageJson } from '../../bin/transpile';
 const req = createRequire(`${process.cwd()}/node_modules`);
 
 type ModFile = { input: string, output: string, stale: boolean };
-type SpawnCfg = { args?: string[], cwd?: string, failOnError?: boolean, env?: Record<string, string>, showWaitingMessage?: boolean };
 
 const SOURCE_SEED = ['package.json', 'index.ts', '__index__.ts', 'src', 'support'];
 
@@ -21,67 +18,6 @@ export const IS_DEBUG = /\b([*]|build)\b/.test(process.env.DEBUG ?? '');
 
 const resolveImport = (lib: string): string => req.resolve(lib);
 const recentStat = (stat: Stats): number => Math.max(stat.ctimeMs, stat.mtimeMs);
-
-async function waiting(message: string, op: () => Promise<boolean>): Promise<boolean> {
-  const run = op();
-  let done = false;
-  run.finally(() => done = true);
-  process.stdout.write(message);
-  while (!done) {
-    await new Promise(r => setTimeout(r, 1000));
-    process.stdout.write('.');
-  }
-  rl.moveCursor(process.stdout, -1000, 0);
-  rl.clearLine(process.stdout, 1);
-  return await run;
-}
-
-/**
- * Allows for triggering a subprocess that can be watched, and provides consistent logging support
- */
-export async function spawn(
-  action: string, cmd: string,
-  { args = [], cwd, failOnError = true, env = {}, showWaitingMessage = true }: SpawnCfg
-): Promise<boolean | undefined> {
-  const stdout = IS_DEBUG ? 1 : 'pipe';
-  const stderr = IS_DEBUG ? 2 : 'pipe';
-  const proc = cp.spawn(cmd, args, { cwd, stdio: ['pipe', stdout, stderr], env: { ...process.env, ...env } });
-  const stderrOutput: Buffer[] = [];
-  const stdoutOutput: Buffer[] = [];
-
-  const work = (): Promise<boolean> => new Promise((res, rej) => {
-    if (stderr === 'pipe' && proc.stderr) {
-      proc.stderr.on('data', d => stderrOutput.push(d));
-    }
-    if (stdout === 'pipe' && proc.stdout) {
-      proc.stdout.on('data', d => stdoutOutput.push(d));
-    }
-    proc
-      .on('exit', code => (code && code > 0) ? rej() : res(true))
-      .on('error', rej);
-  });
-
-  try {
-    let res;
-    if (showWaitingMessage) {
-      res = await waiting(`${action}...`, work);
-    } else {
-      res = await work();
-    }
-    if (!res) {
-      throw new Error();
-    }
-  } catch (err) {
-    const text = Buffer.concat(stderrOutput).toString('utf8');
-    console.error(text);
-
-    if (failOnError) {
-      throw err;
-    } else {
-      return;
-    }
-  }
-}
 
 /**
  * Common logging support
