@@ -1,22 +1,20 @@
+import { ObjectUtil } from './object';
 import { Class, ClassInstance } from './types';
-
-const AsyncGeneratorFunction = Object.getPrototypeOf(async function* () { });
-const GeneratorFunction = Object.getPrototypeOf(function* () { });
-const AsyncFunction = Object.getPrototypeOf(async function () { });
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
 /**
- * Common utilities for object detection/manipulation
+ * Utilities for data conversion and binding
  */
-export class ObjectUtil {
+export class DataUtil {
+
   static #deepAssignRaw(a: unknown, b: unknown, mode: 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): unknown {
     const isEmptyA = a === undefined || a === null;
     const isEmptyB = b === undefined || b === null;
     const isArrA = Array.isArray(a);
     const isArrB = Array.isArray(b);
-    const isSimpA = !isEmptyA && this.isSimple(a);
-    const isSimpB = !isEmptyB && this.isSimple(b);
+    const isSimpA = !isEmptyA && ObjectUtil.isSimple(a);
+    const isSimpB = !isEmptyB && ObjectUtil.isSimple(b);
 
     let ret: unknown;
 
@@ -71,14 +69,6 @@ export class ObjectUtil {
     }
     return ret;
   }
-
-  /**
-   * Has to JSON
-   * @param o Object to check
-   */
-  static hasToJSON = (o: unknown): o is { toJSON(): unknown } =>
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    !!o && 'toJSON' in (o as object);
 
   /**
    * Create regex from string, including flags
@@ -159,7 +149,7 @@ export class ObjectUtil {
         }
       }
       case Object: {
-        if (!strict || this.isPlainObject(input)) {
+        if (!strict || ObjectUtil.isPlainObject(input)) {
           return input;
         } else {
           throw new Error('Invalid object type');
@@ -177,69 +167,7 @@ export class ObjectUtil {
    */
   static shallowClone<T = unknown>(a: T): T {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (Array.isArray(a) ? a.slice(0) : (this.isSimple(a) ? a : { ...(a as {}) })) as T;
-  }
-
-  /**
-   * Is a value of primitive type
-   * @param el Value to check
-   */
-  static isPrimitive(el: unknown): el is (string | boolean | number | RegExp) {
-    const type = typeof el;
-    return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp || el instanceof Date);
-  }
-
-  /**
-   * Is a value a plain JS object, created using {}
-   * @param obj Object to check
-   */
-  static isPlainObject(obj: unknown): obj is Record<string, unknown> {
-    return typeof obj === 'object' // separate from primitives
-      && obj !== undefined
-      && obj !== null         // is obvious
-      && obj.constructor === Object // separate instances (Array, DOM, ...)
-      && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
-  }
-
-  /**
-   * Is a value a function
-   * @param o Object to check
-   */
-  static isFunction(o: unknown): o is Function {
-    const proto = o && Object.getPrototypeOf(o);
-    return proto && (proto === Function.prototype || proto === AsyncFunction || proto === AsyncGeneratorFunction || proto === GeneratorFunction);
-  }
-
-  /**
-   * Is a value a class
-   * @param o Object to check
-   */
-  static isClass(o: unknown): o is Class {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return !!(o as object) && !!(o as { prototype: unknown }).prototype &&
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      (o as { prototype: { constructor: unknown } }).prototype.constructor !== Object.getPrototypeOf(Function);
-  }
-
-  /**
-   * Is simple, as a primitive, function or class
-   */
-  static isSimple(a: unknown): a is Function | Class | string | number | RegExp | Date {
-    return this.isPrimitive(a) || this.isFunction(a) || this.isClass(a);
-  }
-
-  /**
-   * Is an error object
-   */
-  static isError(a: unknown): a is Error {
-    return !!a && (a instanceof Error || (typeof a === 'object' && 'message' in a && 'stack' in a));
-  }
-
-  /**
-   * Is a promise object
-   */
-  static isPromise(a: unknown): a is Promise<unknown> {
-    return !!a && (a instanceof Promise || (typeof a === 'object') && 'then' in a);
+    return (Array.isArray(a) ? a.slice(0) : (ObjectUtil.isSimple(a) ? a : { ...(a as {}) })) as T;
   }
 
   /**
@@ -249,7 +177,7 @@ export class ObjectUtil {
    * @param mode How the assignment should be handled
    */
   static deepAssign<T, U>(a: T, b: U, mode: | 'replace' | 'loose' | 'strict' | 'coerce' = 'loose'): T & U {
-    if (!a || this.isSimple(a)) {
+    if (!a || ObjectUtil.isSimple(a)) {
       throw new Error(`Cannot merge onto a simple value, ${a}`);
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

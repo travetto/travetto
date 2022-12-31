@@ -1,4 +1,5 @@
 export * from './src/console';
+export * from './src/data';
 export * from './src/error';
 export * from './src/error-util';
 export * from './src/exec';
@@ -10,6 +11,6 @@ export * from './src/shutdown';
 export * from './src/stream';
 export * from './src/time';
 export * from './src/types';
-export * from './src/object-util';
+export * from './src/object';
 export * from './src/util';
 export * from './src/watch';

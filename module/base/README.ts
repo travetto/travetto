@@ -1,10 +1,12 @@
 import { d, mod, lib } from '@travetto/doc';
-import { ExecUtil, AppError, StreamUtil, ObjectUtil } from '@travetto/base';
+import { ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.Ref('ConsoleManager', 'src/console.ts');
 
-const ObjectUtilLink = d.Ref(ObjectUtil.name, 'src/object-util.ts');
+const ObjectUtilLink = d.Ref(ObjectUtil.name, 'src/object.ts');
+const UtilLink = d.Ref(Util.name, 'src/util.ts');
+const DataUtilLink = d.Ref(DataUtil.name, 'src/data.ts');
 const AppErrorLink = d.Ref(AppError.name, 'src/error.ts');
 const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
 const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
@@ -20,6 +22,8 @@ ${d.List(
   'Standard Error Support',
   'Stream Support',
   'Object Utilities',
+  'Data Utilities',
+  'Common Utilities',
   'Process Execution',
   'Shutdown Management'
 )}
@@ -118,15 +122,26 @@ ${d.List(
   d`${d.Method('isFunction(o)')} determines if ${d.Input('o')} is a simple ${d.Input('Function')}`,
   d`${d.Method('isClass(o)')} determines if ${d.Input('o')} is a class constructor`,
   d`${d.Method('isSimple(a)')} determines if ${d.Input('a')} is a simple value`,
+)}
+
+${d.Section('Data Utilities')}
+Data utilities for binding values, and type conversion. Currently ${DataUtilLink} includes:
+
+${d.List(
   d`${d.Method('deepAssign(a, b, mode ?)')} which allows for deep assignment of ${d.Input('b')} onto ${d.Input('a')}, the ${d.Input('mode')} determines how aggressive the assignment is, and how flexible it is.  ${d.Input('mode')} can have any of the following values: ${d.List(
     d`${d.Input('loose')}, which is the default is the most lenient. It will not error out, and overwrites will always happen`,
     d`${d.Input('coerce')}, will attempt to force values from ${d.Input('b')} to fit the types of ${d.Input('a')}, and if it can't it will error out`,
     d`${d.Input('strict')}, will error out if the types do not match`,
   )}`,
+)}
+
+${d.Section('Common Utilities')}
+Common utilities used throughout the framework. Currently ${UtilLink} includes:
+
+${d.List(
   d`${d.Method('uuid(len: number)')} generates a simple uuid for use within the application.`,
   d`${d.Method('allowDenyMatcher(rules[])')} builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.`
 )}
-
 
 ${d.Section('Process Execution')}
 Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.

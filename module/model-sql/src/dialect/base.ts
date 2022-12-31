@@ -1,6 +1,6 @@
 import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry, FieldConfig, Schema } from '@travetto/schema';
-import { Class, ObjectUtil, AppError, TypedObject } from '@travetto/base';
+import { Class, ObjectUtil, AppError, TypedObject, DataUtil } from '@travetto/base';
 import { SelectClause, Query, SortClause, WhereClause, RetainFields } from '@travetto/model-query';
 import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
@@ -188,7 +188,7 @@ export abstract class SQLDialect implements DialectState {
       return 'NULL';
     } else if (conf.type === String) {
       if (value instanceof RegExp) {
-        const src = ObjectUtil.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
+        const src = DataUtil.toRegex(value).source.replace(/\\b/g, this.regexWordBoundary);
         return this.quote(src);
       } else {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -458,7 +458,7 @@ export abstract class SQLDialect implements DialectState {
             }
             case '$regex': {
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const re = ObjectUtil.toRegex(v as string);
+              const re = DataUtil.toRegex(v as string);
               const src = re.source;
               const ins = re.flags && re.flags.includes('i');
 

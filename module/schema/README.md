@@ -294,7 +294,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
 
 **Code: Simple Custom Type**
 ```typescript
-import { ObjectUtil } from '@travetto/base';
+import { DataUtil } from '@travetto/base';
 
 /**
  * @concrete .:PointImpl
@@ -311,7 +311,7 @@ export class PointImpl {
 
   static bindSchema(input: unknown): [number, number] | typeof INVALID | undefined {
     if (Array.isArray(input) && input.length === 2) {
-      return input.map(x => ObjectUtil.coerceType(x, Number, false)) as [number, number];
+      return input.map(x => DataUtil.coerceType(x, Number, false)) as [number, number];
     } else {
       return INVALID;
     }

@@ -1,7 +1,7 @@
 import { path } from '@travetto/manifest';
 
 import { TypedObject } from './types';
-import { ObjectUtil } from './object-util';
+import { ObjectUtil } from './object';
 
 export type SerializedError = { $?: boolean, message: string, stack?: string, name: string };
 

@@ -1,6 +1,6 @@
 import * as mongo from 'mongodb';
 
-import { Class, ObjectUtil } from '@travetto/base';
+import { Class, DataUtil, ObjectUtil } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField } from '@travetto/model';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
@@ -158,7 +158,7 @@ export class MongoUtil {
             }
           } else if (firstKey === '$regex') {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            v.$regex = ObjectUtil.toRegex(v.$regex as string | RegExp);
+            v.$regex = DataUtil.toRegex(v.$regex as string | RegExp);
           } else if (firstKey && '$near' in v) {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             const dist = v.$maxDistance as number;

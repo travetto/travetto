@@ -1,4 +1,4 @@
-import { Class, ObjectUtil } from '@travetto/base';
+import { Class, DataUtil, ObjectUtil } from '@travetto/base';
 import { ModelRegistry } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { SchemaRegistry } from '@travetto/schema';
@@ -85,7 +85,7 @@ export class ElasticsearchSchemaUtil {
   static generateAllSourceSchema(cls: Class, config?: EsSchemaConfig): SchemaType {
     const allTypes = ModelRegistry.getClassesByBaseType(cls);
     return allTypes.reduce<SchemaType>((acc, schemaCls) => {
-      ObjectUtil.deepAssign(acc, this.generateSingleSourceSchema(schemaCls, config));
+      DataUtil.deepAssign(acc, this.generateSingleSourceSchema(schemaCls, config));
       return acc;
     }, { properties: {}, dynamic: false });
   }
@@ -145,7 +145,7 @@ export class ElasticsearchSchemaUtil {
             }
           };
           if (config && config.caseSensitive) {
-            ObjectUtil.deepAssign(text, {
+            DataUtil.deepAssign(text, {
               fields: {
                 ['text_cs']: { type: 'text', analyzer: 'whitespace' }
               }

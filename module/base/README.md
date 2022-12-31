@@ -16,6 +16,8 @@ Base is the foundation of all [Travetto](https://travetto.dev) applications.  It
    *  Standard Error Support
    *  Stream Support
    *  Object Utilities
+   *  Data Utilities
+   *  Common Utilities
    *  Process Execution
    *  Shutdown Management
 
@@ -129,7 +131,7 @@ The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/
    *  `waitForCompletion(src: Readable, finish:()=>Promise<any>)` will ensure the stream remains open until the promise finish produces is satisfied.
 
 ## Object Utilities
-Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [ObjectUtil](https://github.com/travetto/travetto/tree/main/module/base/src/object-util.ts#L12) includes:
+Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [ObjectUtil](https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L10) includes:
 
    
    *  `isPrimitive(el)` determines if `el` is a `string`, `boolean`, `number` or `RegExp`
@@ -137,10 +139,20 @@ Simple functions for providing a minimal facsimile to [lodash](https://lodash.co
    *  `isFunction(o)` determines if `o` is a simple `Function`
    *  `isClass(o)` determines if `o` is a class constructor
    *  `isSimple(a)` determines if `a` is a simple value
+
+## Data Utilities
+Data utilities for binding values, and type conversion. Currently [DataUtil](https://github.com/travetto/travetto/tree/main/module/base/src/data.ts#L9) includes:
+
+   
    *  `deepAssign(a, b, mode ?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is.  `mode` can have any of the following values:    
       *  `loose`, which is the default is the most lenient. It will not error out, and overwrites will always happen
       *  `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
       *  `strict`, will error out if the types do not match
+
+## Common Utilities
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L12) includes:
+
+   
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
 

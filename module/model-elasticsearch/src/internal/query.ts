@@ -1,6 +1,6 @@
 import { Search } from '@elastic/elasticsearch/api/requestParams';
 
-import { Class, ObjectUtil } from '@travetto/base';
+import { Class, DataUtil, ObjectUtil } from '@travetto/base';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
@@ -163,7 +163,7 @@ export class ElasticsearchQueryUtil {
             }
             case '$regex': {
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const pattern = ObjectUtil.toRegex(v as string);
+              const pattern = DataUtil.toRegex(v as string);
               if (pattern.source.startsWith('\\b') && pattern.source.endsWith('.*')) {
                 const textField = !pattern.flags.includes('i') && config && config.caseSensitive ?
                   `${sPath}.text_cs` :

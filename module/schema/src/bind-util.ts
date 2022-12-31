@@ -1,4 +1,4 @@
-import { Class, ConcreteClass, TypedObject, ObjectUtil } from '@travetto/base';
+import { Class, ConcreteClass, TypedObject, ObjectUtil, DataUtil } from '@travetto/base';
 
 import { AllViewⲐ } from './internal/types';
 import { SchemaRegistry } from './service/registry';
@@ -24,7 +24,7 @@ export class BindUtil {
     if (conf.type?.bindSchema) {
       val = conf.type.bindSchema(val);
     } else {
-      val = ObjectUtil.coerceType(val, conf.type, false);
+      val = DataUtil.coerceType(val, conf.type, false);
 
       if (conf.type === Number && conf.precision && typeof val === 'number') {
         if (conf.precision[1]) { // Supports decimal
@@ -77,7 +77,7 @@ export class BindUtil {
 
       if (last.indexOf('[') < 0) {
         if (sub[last] && ObjectUtil.isPlainObject(val)) {
-          sub[last] = ObjectUtil.deepAssign(sub[last], val, 'coerce');
+          sub[last] = DataUtil.deepAssign(sub[last], val, 'coerce');
         } else {
           sub[last] = val;
         }
@@ -95,7 +95,7 @@ export class BindUtil {
             key = sub.length as number;
           }
           if (sub[key] && ObjectUtil.isPlainObject(val) && ObjectUtil.isPlainObject(sub[key])) {
-            sub[key] = ObjectUtil.deepAssign(sub[key], val, 'coerce');
+            sub[key] = DataUtil.deepAssign(sub[key], val, 'coerce');
           } else {
             sub[key] = val;
           }
@@ -273,13 +273,13 @@ export class BindUtil {
       if (complex) {
         val = valArr.map(x => this.bindSchema(field.type, x, { view: field.view }));
       } else {
-        val = valArr.map(x => ObjectUtil.coerceType(x, field.type, false));
+        val = valArr.map(x => DataUtil.coerceType(x, field.type, false));
       }
     } else {
       if (complex) {
         val = this.bindSchema(field.type, val, { view: field.view });
       } else {
-        val = ObjectUtil.coerceType(val, field.type, false);
+        val = DataUtil.coerceType(val, field.type, false);
       }
     }
     return val;
