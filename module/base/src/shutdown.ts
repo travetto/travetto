@@ -150,12 +150,13 @@ class $ShutdownManager {
    * @param handler Handler or Closeable
    * @param final If this should be run an attempt to shutdown or only on the final shutdown
    */
-  onShutdown(src: undefined | string | Function | { constructor: Function }, handler: Function | Closeable, final: boolean = false): void {
+  onShutdown(src: undefined | string | Function | { constructor: Function }, handler: Function | Closeable, final: boolean = false): () => void {
     if ('close' in handler) {
       handler = handler.close.bind(handler);
     }
     const name = typeof src === 'undefined' ? '' : (typeof src === 'string' ? src : ('Ⲑid' in src ? src.Ⲑid : src.constructor.Ⲑid));
     this.#listeners.push({ name, handler, final });
+    return () => this.#listeners.splice(this.#listeners.findIndex(e => e.handler === handler), 1);
   }
 
   /**

@@ -1,6 +1,7 @@
+import tty from 'tty';
 import rl from 'readline';
 
-import { ColorDefineUtil, GlobalTerminal, NAMED_COLORS } from '@travetto/terminal';
+import { ColorDefineUtil, GlobalOutput, NAMED_COLORS, TerminalOutput } from '@travetto/terminal';
 import { Env, ExecUtil, ExecutionOptions, TypedObject } from '@travetto/base';
 import { IndexedModule, PackageUtil, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
@@ -10,7 +11,7 @@ import { CliScmUtil } from './scm';
 const COLORS = TypedObject.keys(NAMED_COLORS)
   .map(k => [k, ColorDefineUtil.defineColor(k).hsl] as const)
   .filter(([, [, s, l]]) => l > .5 && l < .8 && s > .8)
-  .map(([k]) => GlobalTerminal.colorer(k));
+  .map(([k]) => GlobalOutput.colorer(k));
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
 
@@ -78,16 +79,19 @@ export class CliModuleUtil {
     config: {
       filter?: (folder: string) => boolean | Promise<boolean>;
       onMessage?: (folder: string, msg: T) => void;
-      showProgress?: boolean;
+      showProgress?: boolean | tty.WriteStream;
       workerCount?: number;
       prefixOutput?: boolean;
+      progressBar?: 'bottom' | 'top' | 'inline';
       showStdout?: boolean;
+      showStderr?: boolean;
     } & Omit<ExecutionOptions, 'cwd'> = {}
   ): Promise<void> {
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
     const prefixOutput = config.prefixOutput ?? true;
     const showStdout = config.showStdout ?? (Env.isSet('DEBUG') && !Env.isFalse('DEBUG'));
+    const showStderr = config.showStderr ?? true;
 
     const folders = (await CliModuleUtil.findModules(mode)).map(x => x.workspaceRelative);
     const maxWidth = Math.max(...folders.map(x => x.length));
@@ -114,7 +118,7 @@ export class CliModuleUtil {
               stdio: [
                 0,
                 showStdout ? (prefixOutput ? 'pipe' : 'inherit') : 'ignore',
-                prefixOutput ? 'pipe' : 'inherit',
+                showStderr ? (prefixOutput ? 'pipe' : 'inherit') : 'ignore',
                 config.onMessage ? 'ipc' : 'ignore'
               ],
               ...config,
@@ -126,8 +130,10 @@ export class CliModuleUtil {
 
             // Prefix output, if desired
             if (prefixOutput) {
-              const stderr = rl.createInterface(res.process.stderr!);
-              stderr.on('line', line => process.stderr.write(`${labels[folder]}: ${line}\n`));
+              if (showStderr) {
+                const stderr = rl.createInterface(res.process.stderr!);
+                stderr.on('line', line => process.stderr.write(`${labels[folder]}: ${line}\n`));
+              }
               if (showStdout) {
                 const stdout = rl.createInterface(res.process.stdout!);
                 stdout.on('line', line => process.stdout.write(`${labels[folder]}: ${line}\n`));
@@ -154,7 +160,9 @@ export class CliModuleUtil {
     const work = pool.iterateProcess(new IterableWorkSet(folders));
 
     if (config.showProgress) {
-      await GlobalTerminal.trackProgress(work, { message: ['Completed', cmd, ...args].join(' '), showBar: true });
+      const cfg = { message: ['Running', '[', cmd, ...args, ']'].join(' '), showBar: config.progressBar ?? 'bottom' } as const;
+      const stream = new TerminalOutput(config.showProgress === true ? process.stderr : config.showProgress);
+      await stream.trackProgress(work, ev => ({ ...ev, status: ev.value !== undefined ? `${ev.value}` : '' }), cfg);
     } else {
       for await (const _ of work) {
         // Ensure its all consumed

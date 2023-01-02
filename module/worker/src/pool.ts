@@ -2,7 +2,6 @@ import os from 'os';
 import gp from 'generic-pool';
 
 import { GlobalEnv, ShutdownManager, TimeUtil } from '@travetto/base';
-import { TerminalProgressEvent } from '@travetto/terminal';
 
 import { WorkSet } from './input/types';
 import { ManualAsyncIterator } from '../src/input/async-iterator';
@@ -18,6 +17,13 @@ export interface Worker<X> {
   destroy(): Promise<void>;
   release?(): unknown;
 }
+
+type WorkPoolProcessConfig<X> = {
+  shutdownOnComplete?: boolean;
+  onComplete?: (ev: WorkCompletionEvent<X>) => (void | Promise<void>);
+};
+
+type WorkCompletionEvent<X> = { idx: number, total?: number, value: X };
 
 /**
  * Work pool support
@@ -50,6 +56,11 @@ export class WorkPool<X, T extends Worker<X>> {
   #trace: boolean;
 
   /**
+   * Cleanup for shutdown
+   */
+  #shutdownCleanup?: () => void;
+
+  /**
    *
    * @param getWorker Produces a new worker for the pool
    * @param opts Pool options
@@ -69,7 +80,10 @@ export class WorkPool<X, T extends Worker<X>> {
       validate: async (x: T) => x.active
     }, args);
 
-    ShutdownManager.onShutdown(`worker.pool.${this.constructor.name}`, () => this.shutdown());
+    this.#shutdownCleanup = ShutdownManager.onShutdown(`worker.pool.${this.constructor.name}`, () => {
+      this.#shutdownCleanup = undefined;
+      this.shutdown();
+    });
 
     this.#trace = !!GlobalEnv.debug?.includes('@travetto/worker');
   }
@@ -132,9 +146,14 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Process a given input source
    */
-  async process(src: WorkSet<X>, onComplete?: (val: X, i: number, total?: number) => (void | Promise<void>)): Promise<void> {
+  async process(src: WorkSet<X>, cfg: WorkPoolProcessConfig<X> = {}): Promise<void> {
     const pending = new Set<Promise<unknown>>();
     let count = 0;
+
+    if (src.size && cfg.onComplete) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      cfg.onComplete({ value: undefined as X, idx: 0, total: src.size });
+    }
 
     while (await src.hasNext()) {
       const worker = (await this.#pool.acquire())!;
@@ -146,42 +165,42 @@ export class WorkPool<X, T extends Worker<X>> {
       const completion = worker.execute(nextInput)
         .catch(err => this.#errors.push(err)) // Catch error
         .finally(() => this.release(worker))
-        .finally(() => onComplete?.(nextInput, count += 1, src.size));
+        .finally(() => cfg.onComplete?.({ value: nextInput, idx: count += 1, total: src.size }));
 
       completion.finally(() => pending.delete(completion));
 
       pending.add(completion);
     }
 
-    await Promise.all(Array.from(pending));
+    try {
+      await Promise.all(Array.from(pending));
 
-    if (this.#errors.length) {
-      throw this.#errors[0];
+      if (this.#errors.length) {
+        throw this.#errors[0];
+      }
+    } finally {
+      if (cfg.shutdownOnComplete !== false) {
+        await this.shutdown();
+      }
     }
   }
 
   /**
-   * Process a given input source as an iterator
+   * Process a given input source as an async iterable, emitting on completion
    */
-  async * iterateProcess(src: WorkSet<X>): AsyncIterable<TerminalProgressEvent> {
-    const itr = new ManualAsyncIterator<TerminalProgressEvent>();
-    const res = this.process(src, (val, i, total) => itr.add({ i, total, status: val !== undefined ? `${val}` : '' }));
+  iterateProcess(src: WorkSet<X>, shutdownOnComplete?: boolean): AsyncIterable<WorkCompletionEvent<X>> {
+    const itr = new ManualAsyncIterator<WorkCompletionEvent<X>>();
+    const res = this.process(src, { onComplete: ev => itr.add(ev), shutdownOnComplete });
     res.finally(() => itr.close());
-    for (; ;) {
-      const { value, done } = await itr.next();
-      if (value) {
-        yield value;
-      }
-      if (done) {
-        break;
-      }
-    }
+    return itr;
   }
 
   /**
    * Shutdown pool
    */
   async shutdown(): Promise<void> {
+    this.#shutdownCleanup?.();
+
     while (this.#pendingAcquires) {
       await TimeUtil.wait(10);
     }

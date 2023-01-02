@@ -1,31 +1,19 @@
 import tty from 'tty';
 import timers from 'timers/promises';
-import readline from 'readline';
 
-import { ColorDefineUtil, RGBInput } from './color-define';
+import { ColorDefineUtil, RGB, RGBInput } from './color-define';
 
-export type ColorLevel = 0 | 1 | 2 | 3;
-
-export type Style =
+type Style =
   { text?: RGBInput, background?: RGBInput, italic?: boolean, underline?: boolean, inverse?: boolean, blink?: boolean };
 
-export type TerminalTable = {
-  init(...header: string[]): Promise<void>;
-  update(row: number, output: string): Promise<void>;
-  finish(): Promise<void>;
-};
-
-export type TerminalProgressConfig = { message?: string, showBar?: boolean };
-export type TerminalProgressEvent = { i: number, total?: number, status?: string };
-export type TerminalProgressInput = AsyncIterator<TerminalProgressEvent> | AsyncIterable<TerminalProgressEvent>;
-
 export type StyleInput = Style | RGBInput;
-
+export type TerminalTableEvent = { idx: number, text: string, done?: boolean };
+export type TerminalProgressEvent = { idx: number, total?: number, status?: string };
+export type TerminalOpConfig = { showCursor?: boolean, interactive?: boolean };
+export type TerminalWaitingConfig = TerminalOpConfig & { completion?: string, delay?: number, waitingStates?: string[], rate?: number };
 const COLOR_LEVEL_MAP = { 1: 0, 4: 1, 8: 2, 24: 3 } as const;
-
-type TerminalOpConfig = {
-  hideCursor?: boolean;
-};
+type ColorBits = keyof (typeof COLOR_LEVEL_MAP);
+export type ColorLevel = 0 | 1 | 2 | 3;
 
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
@@ -34,35 +22,24 @@ const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
  */
 export class TerminalUtil {
 
-  static get lineWidth(): number {
-    return (process.env.TRV_CONSOLE_WIDTH ? +process.env.TRV_CONSOLE_WIDTH : undefined) ?? process.stdout.columns ?? 120;
-  }
-
-  static isInteractiveTTY(stream: tty.WriteStream): boolean {
-    return stream.isTTY && !/^(true|yes|on|1)$/.test(process.env.TRV_QUIET ?? '');
-  }
-
-
-  static disableCursor(stream: tty.WriteStream): void {
-    if (this.isInteractiveTTY(stream)) {
-      stream.write('\x1B[?25l');
-    }
-  }
-
-  static enableCursor(stream: tty.WriteStream): void {
-    if (this.isInteractiveTTY(stream)) {
-      stream.write('\x1B[?25h');
-    }
-  }
-
   static removeAnsiSequences(output: string): string {
     // eslint-disable-next-line no-control-regex
     return output.replace(/(\x1b|\x1B)\[[?]?[0-9;]+[A-Za-z]/g, '');
   }
 
-  static getStreamColorLevel(stream: tty.WriteStream): ColorLevel {
+  /**
+   * Detect color level from tty information
+   */
+  static detectColorLevel(stream: tty.WriteStream): ColorLevel {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.isInteractiveTTY(stream) ? COLOR_LEVEL_MAP[stream.getColorDepth() as 1 | 4 | 8 | 24] : 0;
+    return stream.isTTY ? COLOR_LEVEL_MAP[stream.getColorDepth() as ColorBits] : 0;
+  }
+
+  /**
+   * Detect if stream should be considered interactive
+   */
+  static detectInteractive(stream: tty.WriteStream): boolean {
+    return (stream.isTTY && !/^(true|yes|on|1)$/i.test(process.env.TRV_QUIET ?? ''));
   }
 
   /**
@@ -96,196 +73,129 @@ export class TerminalUtil {
     return levelPairs;
   }
 
-  /**
-   * Move cursor
-   */
-  static async moveCursor(stream: tty.WriteStream, dx: number, dy: number): Promise<void> {
-    if (!this.isInteractiveTTY(stream)) {
-      return;
-    }
-    await new Promise<void>(r => readline.moveCursor(stream, dx, dy, r));
+  static async queryCursorPosition(input: tty.ReadStream, stream: tty.WriteStream): Promise<{ x: number, y: number }> {
+    const prom = new Promise<{ x: number, y: number }>(res =>
+      input.once('readable', () => {
+        const buf: Buffer = input.read();
+        const { groups = {} } = buf.toString('utf8').match(/(?<r>\d*);(?<c>\d*)/)!;
+        res({ x: +(groups.c || 1), y: +(groups.r ?? 1) });
+      })
+    );
+
+    input.setRawMode(true);
+    stream.write('\x1b[6n');
+    return prom.finally(() => input.setRawMode(false));
   }
 
-  /**
-   * Rewrite a single line in the stream
-   * @param stream The stream to write
-   * @param text Text, if desired
-   * @param clear Should the entire line be cleared?
-   */
-  static async rewriteLine(stream: tty.WriteStream, text?: string, clear = false): Promise<void> {
-    if (!this.isInteractiveTTY(stream)) {
-      return;
-    }
-    await new Promise<void>(r => readline.cursorTo(stream, 0, undefined, r));
-    if (clear) {
-      await new Promise<void>(r => readline.clearLine(stream, 1, r));
-    }
-    if (text) {
-      stream.write(text);
-      await new Promise<void>(r => readline.moveCursor(stream, 1, 0, r));
-    }
-  }
-
-  /**
-   * Rewrite a single line in the stream
-   * @param stream The stream to write
-   * @param text Text, if desired
-   * @param clear Should the entire line be cleared?
-   */
-  static async rewriteChar(stream: tty.WriteStream, pos: number, text: string): Promise<void> {
-    if (this.isInteractiveTTY(stream)) {
-      return;
-    }
-    await new Promise<void>(r => readline.cursorTo(stream, pos, undefined, r));
-    stream.write(text);
-  }
-
-  /**
-   * Waiting message with a callback to end
-   *
-   * @param message Message to share
-   * @param delay Delay duration
-   */
-  static async waiting<T>(stream: tty.WriteStream, message: string, work: Promise<T> | (() => Promise<T>),
-    config: TerminalOpConfig & { completion?: string, delay?: number, waitingStates?: string[] } = {}
-  ): Promise<T> {
-    const { delay, completion } = { delay: 1000, ...config };
-
-    if (work && typeof work === 'function') {
-      work = work();
-    }
-
-    let done = false;
-    let value: T | undefined;
-    let capturedError: Error | undefined;
-    const final = work
-      .then(res => value = res)
-      .catch(err => capturedError = err)
-      .finally(() => done = true);
-
-    let i = -1;
-
-    if (config.hideCursor) {
-      this.disableCursor(stream);
-    }
-
-    if (delay) {
-      await Promise.race([timers.setTimeout(delay), final]);
-    }
-
-    if (this.isInteractiveTTY(stream)) {
-      stream.write(`X ${message}`);
-    }
-
-    const states = config.waitingStates ?? STD_WAIT_STATES;
-
-    while (!done) {
-      await this.rewriteChar(stream, 0, states[i % states.length]);
-      await timers.setTimeout(50);
-      i += 1;
-    }
-
-    if (i >= 0) {
-      await this.rewriteLine(stream, completion ? `${message} ${completion}\n` : '', true);
-    }
-
-    if (config.hideCursor) {
-      this.enableCursor(stream);
-    }
-
-    if (capturedError) {
-      throw capturedError;
-    } else {
-      return value!;
-    }
-  }
-
-  /**
-   * Provides an updatable table where you define the row/col count at the beginning, and
-   *  then are able to update rows on demand.
-   */
-  static makeTable(stream: tty.WriteStream, rows: number, config: TerminalOpConfig = {}): TerminalTable {
-
-    let cursorRow = 0;
-    const responses: string[] = [];
-    const counts = new Array(rows).fill(0);
-    const interactive = this.isInteractiveTTY(stream);
-
-    return {
-      async init(...header: string[]): Promise<void> {
-        if (config.hideCursor) {
-          TerminalUtil.disableCursor(stream);
-        }
-        for (const line of header) {
-          stream.write(`${line}\n`);
-        }
-        if (interactive) {
-          stream.write(`${'\n'.repeat(rows)}\n`);
-        }
-        cursorRow = rows + 1;
-      },
-      async update(row, output): Promise<void> {
-        if (counts[row] > 0) {
-          await timers.setTimeout(500);
-        }
-        counts[row] += 1;
-        await TerminalUtil.moveCursor(stream, 0, row - cursorRow);
-        await TerminalUtil.rewriteLine(stream, output, true);
-        cursorRow = row;
-        responses[row] = output;
-      },
-      async finish(): Promise<void> {
-        await TerminalUtil.moveCursor(stream, 0, rows - cursorRow + 1);
-        await TerminalUtil.rewriteLine(stream, '', true);
-        if (config.hideCursor) {
-          TerminalUtil.enableCursor(stream);
-        }
-        if (!interactive) {
-          for (const response of responses) {
-            stream.write(`${response}\n`);
-          }
-          stream.write('\n');
-        }
-      }
-    };
-  }
-
-  static async trackProgress(stream: tty.WriteStream, source: TerminalProgressInput, cfg: TerminalProgressConfig = {}): Promise<void> {
-    if (Symbol.asyncIterator in source) {
-      source = source[Symbol.asyncIterator]();
-    }
-    const invert = this.getStyledLevels({ background: 'white', text: 'dodgerBlue' });
-    const interactive = this.isInteractiveTTY(stream);
-    let last: number = -1;
+  static async queryTerminalColor(input: tty.ReadStream, stream: tty.WriteStream, field: 'text' | 'background'): Promise<RGB> {
     try {
-      this.disableCursor(stream);
-      for (; ;) {
-        const res = await source.next();
-        if (interactive && res.value) {
-          const { i, total, status } = res.value;
-          if (i > last) {
-            last = i;
-            if (total) {
-              const line = [cfg.message, `${i}/${total}`, status].filter(x => !!x).join(' ');
-              if (cfg.showBar) {
-                const full = line.padEnd(this.lineWidth, ' ');
-                const pct = Math.trunc(full.length * (i / total));
-                await this.rewriteLine(stream, `${invert[1][0]}${full.substring(0, pct)}${invert[1][1]}${full.substring(pct)}`, true);
-              } else {
-                await this.rewriteLine(stream, line, true);
-              }
-            } else {
-              await this.rewriteLine(stream, [cfg.message, i, status].filter(x => !!x).join(' '), true);
-            }
-          }
-        }
-        if (res.done) {
-          break;
+      const prom = new Promise<RGB>(res =>
+        input.once('readable', () => {
+          const buf: Buffer = input.read();
+          const m = buf.toString('utf8').match(/(?<r>[0-9a-f]+)[/](?<g>[0-9a-f]+)[/](?<b>[0-9a-f]+)[/]?(?<a>[0-9a-f]+)?/i)!;
+          const groups = m.groups ?? {};
+          const width = groups.r.length;
+          const [rh, gh, bh] = [groups.r, groups.g, groups.b].map(x => Math.trunc(parseInt(x, 16) / (16 ** (width - 2))));
+          res([rh, gh, bh]);
+        })
+      );
+      input.setRawMode(true);
+      const code = field === 'text' ? 10 : 11;
+      stream.write(`\x1b]${code};?\x1b\\`);
+      return await prom;
+    } catch (err) {
+      const color = process.env.COLORFGBG;
+      if (color) {
+        const [fg, bg] = color.split(';');
+        return ColorDefineUtil.rgbFromAnsi256(
+          +(field === 'text' ? fg : bg)
+        );
+      }
+      throw err;
+    } finally {
+      input.setRawMode(false);
+    }
+  }
+
+  /**
+   * Builds out a waiting indicator
+   * @param message
+   */
+  static async waitingIndicator(
+    message: string,
+    until: () => boolean,
+    render: (text: string, idx: number) => Promise<void>,
+    config: TerminalWaitingConfig = {}
+  ): Promise<void> {
+    await timers.setTimeout(config.delay ?? 1000);
+    if (config.interactive) {
+      let i = 0;
+      const rate = config.rate ?? 50;
+      const states = config.waitingStates ?? STD_WAIT_STATES;
+      while (!until()) {
+        const ch = states[i % states.length];
+        await render(i === 0 ? `${ch} ${message}` : ch, i);
+        await timers.setTimeout(rate);
+        i += 1;
+      }
+    } else {
+      await render(`${message}...`, 0);
+    }
+  }
+
+  /**
+   * Write lines, and track when list of lines grows
+   */
+  static async trackLinesWithGrowth<T>(
+    source: AsyncIterable<T>,
+    resolve: (val: T) => TerminalTableEvent,
+    render: (ev: TerminalTableEvent) => Promise<void>,
+    grow: (delta: number, total: number) => Promise<void>
+  ): Promise<number> {
+    let maxRow: number = 0;
+
+    for await (const val of source) {
+      const ev = resolve(val);
+      const dr = ev.idx - maxRow;
+      if (dr > 0) {
+        await grow(dr, ev.idx + 1);
+        maxRow = ev.idx;
+      }
+      await render(ev);
+    }
+
+    return maxRow;
+  }
+
+  /**
+  * Track progress of an asynchronous iterator, allowing the showing of a progress bar if the stream produces i and total
+  * @param stream
+  * @param source
+  */
+  static async trackProgress<T>(
+    source: AsyncIterable<T>,
+    resolve: (val: T) => TerminalProgressEvent,
+    layout: (idx: string, total?: string, status?: string) => string,
+    render: (left: string, right?: string) => Promise<void>
+  ): Promise<void> {
+    let last: number = -1;
+    for await (const v of source) {
+      if (!v) {
+        continue;
+      }
+      const { idx: i, total, status } = resolve(v);
+      if (i > last) {
+        last = i;
+        if (total) {
+          const ts = `${total}`;
+          const ip = `${i}`.padStart(ts.length);
+          const line = layout(ip, ts, status);
+          const pct = Math.trunc(line.length * (i / total));
+          await render(line.substring(0, pct), line.substring(pct));
+        } else {
+          await render(layout(`${i}`, undefined, status));
         }
       }
-    } finally {
-      await this.rewriteLine(stream, '', true);
-      this.enableCursor(stream);
     }
   }
 }

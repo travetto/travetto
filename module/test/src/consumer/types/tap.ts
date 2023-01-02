@@ -1,7 +1,7 @@
 import { Writable } from 'stream';
 
 import { path } from '@travetto/manifest';
-import { TerminalUtil } from '@travetto/terminal';
+import { GlobalOutput } from '@travetto/terminal';
 import { ErrorUtil, ObjectUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
@@ -42,7 +42,7 @@ export class TapEmitter implements TestConsumer {
    * Output supplemental data (e.g. logs)
    */
   logMeta(obj: Record<string, unknown>): void {
-    const lineLength = TerminalUtil.lineWidth - 5;
+    const lineLength = GlobalOutput.width - 5;
     let body = YamlUtil.serialize(obj, { wordwrap: lineLength });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);

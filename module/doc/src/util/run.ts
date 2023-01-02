@@ -69,7 +69,7 @@ export class DocRunUtil {
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
     text = TerminalUtil.removeAnsiSequences(text.trim())
-      .replace(/^\[\d\] Compiling[.]+/, '') // Compiling message, remove
+      .replace(/^(.{1,4})?Compiling[.]+/, '') // Compiling message, remove
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@travetto/')
       .replace(new RegExp(path.cwd(), 'g'), '.')
       .replace(/([.]trv_cache)[_A-Za-z0-9]+/g, (_, b) => b)

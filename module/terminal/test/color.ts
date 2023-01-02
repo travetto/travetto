@@ -1,15 +1,17 @@
 import assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
+import { Util } from '@travetto/base';
 
-import { TerminalSupport } from '../src/support';
+import { TerminalOutput } from '../src/output';
+import { TerminalUtil } from '../__index__';
 
 @Suite()
 export class ColorUtilTest {
 
   @Test()
   async colorize() {
-    const output = new TerminalSupport().setColorLevel(1).colorer({ text: 'red', underline: true })('apple');
+    const output = new TerminalOutput(process.stdout).setColorLevel(1).colorer({ text: 'red', underline: true })('apple');
     assert(output !== 'apple');
     assert(/apple/.test(output));
     assert(output.includes('\x1b[24;39m'));
@@ -19,9 +21,15 @@ export class ColorUtilTest {
   @Test()
   async noColor() {
     process.env.NO_COLOR = '1';
-    const tpl = new TerminalSupport().template({
+    delete process.env.FORCE_COLOR;
+
+    assert(TerminalUtil.detectColorLevel(process.stdout) === 0);
+
+    const tplFn = new TerminalOutput(process.stdout).templateFunction({
       basic: { text: 'red', underline: true }
     });
+
+    const tpl = Util.makeTemplate(tplFn);
 
     const output = tpl`${{ basic: 'apple' }}`;
     assert(output === 'apple');
@@ -30,11 +38,13 @@ export class ColorUtilTest {
 
   @Test()
   async template() {
-    const sup = new TerminalSupport().setColorLevel(1);
-    const tpl = sup.template({
+    const sup = new TerminalOutput(process.stdout).setColorLevel(1);
+    const tplFn = sup.templateFunction({
       name: '#0000ff',
       age: 'black'
     });
+
+    const tpl = Util.makeTemplate(tplFn);
 
     const output = tpl`My name is ${{ name: 'Bob' }} and I'm ${{ age: 20 }} years old`;
     assert(/My name is.*Bob.*and I'm.*20.*years old/.test(output));
@@ -57,10 +67,12 @@ export class ColorUtilTest {
 
   @Test({ shouldThrow: 'Invalid template' })
   badTemplate() {
-    const tpl = new TerminalSupport().setColorLevel(1).template({
+    const tplFn = new TerminalOutput(process.stdout).setColorLevel(1).templateFunction({
       name: 'blue',
       age: 'black'
     });
+
+    const tpl = Util.makeTemplate(tplFn);
 
     tpl`My name is ${{ name: 'Bob', age: 20 }}`;
   }

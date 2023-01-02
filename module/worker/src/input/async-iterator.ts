@@ -3,7 +3,7 @@ import { Util } from '@travetto/base';
 /**
  * Manual async iterator.  Items are added manually, and consumed asynchronously
  */
-export class ManualAsyncIterator<X> implements AsyncIterator<X> {
+export class ManualAsyncIterator<X> implements AsyncIterator<X>, AsyncIterable<X> {
 
   #queue: X[] = [];
   #done = false;
@@ -16,6 +16,11 @@ export class ManualAsyncIterator<X> implements AsyncIterator<X> {
   constructor(initial: Iterable<X> = []) {
     this.#queue.push(...initial);
     this.#size = this.#queue.length;
+  }
+
+  // Allow for iteration
+  [Symbol.asyncIterator](): AsyncIterator<X> {
+    return this;
   }
 
   /**

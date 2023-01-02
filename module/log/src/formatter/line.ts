@@ -1,13 +1,13 @@
 import util from 'util';
 
-import { GlobalTerminal } from '@travetto/terminal';
+import { GlobalOutput } from '@travetto/terminal';
 
 import { LogEvent, Formatter } from '../types';
 
 /**
  * Level coloring
  */
-export const STYLES = GlobalTerminal.palette({
+export const STYLES = GlobalOutput.palette({
   info: 'dodgerBlue',
   debug: 'brightYellow',
   warn: 'brightMagenta',

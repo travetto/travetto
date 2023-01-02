@@ -1,10 +1,14 @@
 import { RootIndex } from '@travetto/manifest';
+import { Util } from '@travetto/base';
+import { cliTpl } from '@travetto/cli';
 
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
 
-export type StreamingResult = Partial<Record<string, string | number>>;
-export type StreamingStatus = AsyncIterable<StreamingResult>;
+export type ServiceAction = 'start' | 'stop' | 'status' | 'restart';
+export type ServiceStatus = 'started' | 'stopped' | 'starting' | 'stopping' | 'initializing' | 'failed';
+export type ServiceEvent = { statusText: string, status: ServiceStatus };
+export type ServicesEvent = ServiceEvent & { svc: Service, idx: number };
 
 export type Service = {
   name: string;
@@ -20,6 +24,10 @@ export type Service = {
   require?: string;
 };
 
+function event(status: ServiceStatus, statusText: Record<string, string | number>): ServiceEvent {
+  return { status, statusText: cliTpl`${statusText}` };
+}
+
 /**
  * Utils for starting up in place services, primarily for development
  */
@@ -28,16 +36,17 @@ export class ServiceUtil {
   /**
    * Determine if service is running
    */
-  static async * isRunning(svc: Service, mode: 'running' | 'startup', timeout = 100): StreamingStatus {
+  static async * isRunning(svc: Service, mode: 'running' | 'startup', timeout = 100): AsyncIterable<ServiceEvent> {
     const port = svc.ports ? +Object.keys(svc.ports)[0] : (svc.port ?? 0);
     if (port > 0) {
       const checkPort = CommandUtil.waitForPort(port, timeout).then(x => true, x => false);
       if (mode === 'startup') {
-        yield { input: `Waiting for port ${port}...` };
+        yield event('initializing', { input: `Waiting for port ${port}...` });
+
         let res = await checkPort;
         if (res && svc.ready) {
           try {
-            yield { input: `Waiting for url ${svc.ready.url}...` };
+            yield event('initializing', { input: `Waiting for url ${svc.ready.url}...` });
             const body = await CommandUtil.waitForHttp(svc.ready.url, timeout);
             res = svc.ready.test ? svc.ready.test(body) : res;
           } catch {
@@ -63,29 +72,29 @@ export class ServiceUtil {
   /**
    * Stop a service
    */
-  static async * stop(svc: Service): StreamingStatus {
+  static async * stop(svc: Service): AsyncIterable<ServiceEvent> {
     const running = yield* this.isRunning(svc, 'running');
     if (running) {
       const pid = await this.getContainerId(svc);
       if (pid) {
-        yield { subtitle: 'Stopping' };
+        yield event('stopping', { subtitle: 'Stopping' });
         await CommandUtil.killContainerById(pid);
-        yield { success: 'Stopped' };
+        yield event('stopped', { success: 'Stopped' });
       } else {
-        yield { failure: 'Unable to kill, not started by this script' };
+        yield event('failed', { failure: 'Unable to kill, not started by this script' });
       }
     } else {
-      yield { subsubtitle: 'Skipping, already stopped' };
+      yield event('stopped', { subsubtitle: 'Skipping, already stopped' });
     }
   }
 
   /**
    * Start a service
    */
-  static async * start(svc: Service): StreamingStatus {
+  static async * start(svc: Service): AsyncIterable<ServiceEvent> {
     const preRun = yield* this.isRunning(svc, 'running');
     if (!preRun) {
-      yield { subtitle: 'Starting' };
+      yield event('starting', { subtitle: 'Starting' });
       try {
         const container = new DockerContainer(svc.image)
           .setInteractive(true)
@@ -114,15 +123,15 @@ export class ServiceUtil {
         const out = (await promise).stdout;
         const running = yield* this.isRunning(svc, 'startup', 15000);
         if (!running) {
-          yield { failure: 'Failed to start service correctly' };
+          yield event('failed', { failure: 'Failed to start service correctly' });
         } else {
-          yield { success: `Started ${out.substring(0, 12)}` };
+          yield event('started', { success: `Started ${out.substring(0, 12)}` });
         }
       } catch {
-        yield { failure: 'Failed to run docker' };
+        yield event('failed', { failure: 'Failed to run docker' });
       }
     } else {
-      yield { subsubtitle: 'Skipping, already running' };
+      yield event('started', { subsubtitle: 'Skipping, already running' });
     }
   }
 
@@ -130,7 +139,7 @@ export class ServiceUtil {
    * Restart service
    * @param svc
    */
-  static async * restart(svc: Service): StreamingStatus {
+  static async * restart(svc: Service): AsyncIterable<ServiceEvent> {
     if (await this.isRunning(svc, 'running')) {
       yield* this.stop(svc);
     }
@@ -140,12 +149,12 @@ export class ServiceUtil {
   /**
    * Get status of a service
    */
-  static async * status(svc: Service): StreamingStatus {
+  static async * status(svc: Service): AsyncIterable<ServiceEvent> {
     if (!await this.isRunning(svc, 'running')) {
-      yield { subsubtitle: 'Not running' };
+      yield event('stopped', { subsubtitle: 'Not running' });
     } else {
       const pid = await this.getContainerId(svc);
-      yield (pid ? { success: `Running ${pid}` } : { subsubtitle: 'Running, but not managed' });
+      yield event('started', (pid ? { success: `Running ${pid}` } : { subsubtitle: 'Running, but not managed' }));
     }
   }
 
@@ -163,5 +172,33 @@ export class ServiceUtil {
         x.version = `${x.version}`;
         return x;
       });
+  }
+
+  /**
+   * Trigger services
+   */
+  static async * triggerServices(action: ServiceAction, services: Service[]): AsyncIterable<ServicesEvent> {
+    const active = new Set<number>();
+    const updates: ServicesEvent[] = [];
+    let signal = Util.resolvablePromise();
+
+    const drain = async (idx: number): Promise<void> => {
+      active.add(idx);
+      const svc = services[idx];
+      for await (const ev of await this[action](svc)) {
+        updates.push({ ...ev, svc, idx });
+        signal.resolve();
+      }
+      active.delete(idx);
+    };
+
+    for (let i = 0; i < services.length; i += 1) {
+      drain(i);
+    }
+
+    while (active.size) {
+      await (signal = Util.resolvablePromise());
+      yield* updates.splice(0, updates.length);
+    }
   }
 }

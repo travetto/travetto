@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { ManifestState } from '@travetto/manifest';
-import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
+import { GlobalOutput, TerminalProgressEvent } from '@travetto/terminal';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -15,6 +15,7 @@ export type TransformerProvider = {
 
 type EmitError = Error | readonly ts.Diagnostic[];
 type Emitter = (file: string, newProgram?: boolean) => EmitError | undefined;
+type EmitEvent = { file: string, i: number, total: number, err?: EmitError };
 
 /**
  * Compilation support
@@ -134,38 +135,41 @@ export class Compiler {
   }
 
   /**
+   * Emit all files as a stream
+   */
+  async * emit(files: string[], emitter: Emitter): AsyncIterable<EmitEvent> {
+    let i = 0;
+    const manifest = this.#state.manifest;
+    for (const file of files) {
+      const err = emitter(file);
+      const outputFile = file
+        .replace(/[.]ts$/, '.js')
+        .replace(manifest.compilerFolder, manifest.outputFolder);
+      yield { file: outputFile, i: i += 1, err, total: files.length };
+    }
+  }
+
+  /**
    * Run the compiler
    */
   async run(watch?: boolean): Promise<void> {
     await this.outputInit();
     const emitter = await this.getCompiler();
     let failed = false;
-    const files = this.state.getDirtyFiles();
-    const manifest = this.#state.manifest;
 
-    async function* emitDirty(): AsyncIterable<TerminalProgressEvent> {
-      let i = 0;
-      const total = files.length;
-      for (const file of files) {
-        const err = emitter(file);
-        if (err) {
-          failed = true;
-          console.error(CompilerUtil.buildTranspileError(file, err));
-        }
-
-        const finalFile = file
-          .replace(/[.]ts$/, '.js')
-          .replace(
-            manifest.compilerFolder,
-            manifest.outputFolder
-          );
-
-        yield { i, total, status: finalFile };
-        i += 1;
+    const resolveEmittedFile = ({ file, total, i, err }: EmitEvent): TerminalProgressEvent => {
+      if (err) {
+        failed = true;
+        console.error(CompilerUtil.buildTranspileError(file, err));
       }
-    }
+      return { idx: i, total, status: file };
+    };
 
-    await GlobalTerminal.trackProgress(emitDirty(), { showBar: true, message: 'Compiling:' });
+    await GlobalOutput.trackProgress(
+      this.emit(this.state.getDirtyFiles(), emitter),
+      resolveEmittedFile,
+      { showBar: 'inline', message: 'Compiling' }
+    );
 
     if (failed) {
       process.exit(-1);

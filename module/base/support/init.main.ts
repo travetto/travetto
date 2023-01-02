@@ -1,4 +1,5 @@
 import { install } from 'source-map-support';
+
 import { path, RootIndex } from '@travetto/manifest';
 
 import { ConsoleManager } from '../src/console';
@@ -36,6 +37,12 @@ export async function setup(): Promise<void> {
 
   // Initialize
   await ConsoleManager.register();
+
+  // This could live in @travetto/terminal, but orchestrating is complicated
+  if (process.stdout.isTTY) {
+    // Ensure cursor comes back, on exit
+    ShutdownManager.onShutdown('', () => process.stdout.write('\x1B[?25h'));
+  }
 }
 
 export async function runMain(action: Function, args: string[]): Promise<void> {

@@ -99,6 +99,13 @@ export class ColorDefineUtil {
   }
 
   /**
+   * ANSI 256 into RGB
+   */
+  static rgbFromAnsi256(val: number): RGB {
+    return ANSI256_TO_RGB[val];
+  }
+
+  /**
    * Converts [R,G,B] to [H,S,L]
    */
   static hsl([r, g, b]: RGB): HSL {
