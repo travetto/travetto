@@ -92,7 +92,7 @@ The module provides the ability to start/stop/restart services as <a target="_bl
       </figcaption>
       <pre><code class="language-bash">$ trv <span class="token function">service</span> <span class="token parameter variable">--help</span>
 
-Usage:  <span class="token function">service</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>start<span class="token operator">|</span>stop<span class="token operator">|</span>restart<span class="token operator">|</span>status<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">..</span>.services<span class="token punctuation">]</span>
+Usage:  <span class="token function">service</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>start<span class="token operator">|</span>stop<span class="token operator">|</span>status<span class="token operator">|</span>restart<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token punctuation">..</span>.services<span class="token punctuation">]</span>
 
 Options:
   -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
@@ -105,16 +105,15 @@ A sample of all services available to the entire framework:
       
       </figcaption>
       <pre><code class="language-bash">Service          Version    Status
-----------------------------------------------
-
- * dynamodb          <span class="token number">1.15</span>.0    Running 93af422e793a
- * elasticsearch     <span class="token number">7.17</span>.0    Running ed76ee063d13
- * firestore         latest    Running feec2e5e95b4
- * mongodb              <span class="token number">4.4</span>    Running 5513eba6734e
- * mysql                <span class="token number">5.6</span>    Running 307bc66d442a
- * postgresql          <span class="token number">12.2</span>    Running e78291e71040
- * redis                  <span class="token number">5</span>    Running 77ba279b4e30
- * s3                latest    Running fdacfc55b9e3</code></pre>     
+-------------------------------------------------
+dynamodb          <span class="token number">1.15</span>.0    Running 93af422e793a
+elasticsearch     <span class="token number">7.17</span>.0    Running ed76ee063d13
+firestore         latest    Running feec2e5e95b4
+mongodb              <span class="token number">4.4</span>    Running 5513eba6734e
+mysql                <span class="token number">5.6</span>    Running 307bc66d442a
+postgresql          <span class="token number">12.2</span>    Running e78291e71040
+redis                  <span class="token number">5</span>    Running 77ba279b4e30
+s3                latest    Running fdacfc55b9e3</code></pre>     
       </figure>
 
 <h3 id="defining-new-services">Defining new Services</h3>

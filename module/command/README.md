@@ -83,7 +83,7 @@ The module provides the ability to start/stop/restart services as [docker](https
 ```bash
 $ trv service --help
 
-Usage:  service [options] [start|stop|restart|status] [...services]
+Usage:  service [options] [start|stop|status|restart] [...services]
 
 Options:
   -h, --help  display help for command
@@ -94,16 +94,15 @@ A sample of all services available to the entire framework:
 **Terminal: All Services**
 ```bash
 Service          Version    Status
-----------------------------------------------
-
- * dynamodb          1.15.0    Running 93af422e793a
- * elasticsearch     7.17.0    Running ed76ee063d13
- * firestore         latest    Running feec2e5e95b4
- * mongodb              4.4    Running 5513eba6734e
- * mysql                5.6    Running 307bc66d442a
- * postgresql          12.2    Running e78291e71040
- * redis                  5    Running 77ba279b4e30
- * s3                latest    Running fdacfc55b9e3
+-------------------------------------------------
+dynamodb          1.15.0    Running 93af422e793a
+elasticsearch     7.17.0    Running ed76ee063d13
+firestore         latest    Running feec2e5e95b4
+mongodb              4.4    Running 5513eba6734e
+mysql                5.6    Running 307bc66d442a
+postgresql          12.2    Running e78291e71040
+redis                  5    Running 77ba279b4e30
+s3                latest    Running fdacfc55b9e3
 ```
 
 ### Defining new Services

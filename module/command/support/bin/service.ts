@@ -5,7 +5,8 @@ import { cliTpl } from '@travetto/cli';
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
 
-export type ServiceAction = 'start' | 'stop' | 'status' | 'restart';
+export const SERVICE_ACTIONS = ['start', 'stop', 'status', 'restart'] as const;
+export type ServiceAction = (typeof SERVICE_ACTIONS)[number];
 export type ServiceStatus = 'started' | 'stopped' | 'starting' | 'stopping' | 'initializing' | 'failed';
 export type ServiceEvent = { statusText: string, status: ServiceStatus };
 export type ServicesEvent = ServiceEvent & { svc: Service, idx: number };

@@ -18,7 +18,7 @@ type RunState = {
 };
 
 class DocState {
-  baseline = new Date(`${new Date().getFullYear()}-03-14T00:00:00.000`).getTime();
+  baseline = new Date('2029-03-14T00:00:00.000').getTime();
   _s = 37;
   ids: Record<string, string> = {};
 
