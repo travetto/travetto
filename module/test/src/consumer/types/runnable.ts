@@ -27,11 +27,9 @@ export class RunnableTestConsumer implements TestConsumer {
     }
   }
 
-  onStart(): void {
+  async onStart(files: string[]): Promise<void> {
     for (const c of this.#consumers) {
-      if (c.onStart) {
-        c.onStart();
-      }
+      await c.onStart?.(files);
     }
   }
 
@@ -44,19 +42,17 @@ export class RunnableTestConsumer implements TestConsumer {
     }
   }
 
-  summarize(): TestResultsSummarizer | undefined {
+  async summarize(): Promise<TestResultsSummarizer | undefined> {
     if (this.#results) {
       for (const c of this.#consumers) {
-        if (c.onSummary) {
-          c.onSummary(this.#results.summary);
-        }
+        await c.onSummary?.(this.#results.summary);
       }
       return this.#results;
     }
   }
 
-  summarizeAsBoolean(): boolean {
-    const result = this.summarize();
+  async summarizeAsBoolean(): Promise<boolean> {
+    const result = await this.summarize();
     if (result) {
       return result.summary.failed <= 0;
     } else {

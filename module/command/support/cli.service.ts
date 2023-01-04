@@ -1,5 +1,5 @@
 import { CliCommand, cliTpl } from '@travetto/cli';
-import { GlobalOutput } from '@travetto/terminal';
+import { GlobalTerminal } from '@travetto/terminal';
 
 import { ServiceAction, ServiceUtil, SERVICE_ACTIONS } from './bin/service';
 
@@ -34,7 +34,7 @@ export class CliServiceCommand extends CliCommand<{}> {
     const maxVersion = Math.max(...all.map(x => x.version.length), 'Version'.length) + 3;
     const maxStatus = 20;
 
-    await GlobalOutput.makeList(
+    await GlobalTerminal.makeList(
       ServiceUtil.triggerServices(action, all),
       ({ svc, statusText, status, idx }) => ({
         idx,

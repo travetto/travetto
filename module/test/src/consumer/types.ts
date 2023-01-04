@@ -26,7 +26,7 @@ export interface TestConsumer {
   /**
    * Listen for start of the test run
    */
-  onStart?(): void;
+  onStart?(files: string[]): Promise<void> | void;
   /**
    * Handle individual tests events
    */
@@ -34,5 +34,5 @@ export interface TestConsumer {
   /**
    * Summarize all results
    */
-  onSummary?(summary: SuitesSummary): void;
+  onSummary?(summary: SuitesSummary): Promise<void> | void;
 }

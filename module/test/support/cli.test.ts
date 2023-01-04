@@ -83,7 +83,6 @@ export class TestCommand extends CliCommand<Options> {
   }
 
   async action(regexes: string[]): Promise<void> {
-    // If we are in a mono-repo, at root
     const { runTests } = await import('./bin/run.js');
 
     const [first] = regexes;

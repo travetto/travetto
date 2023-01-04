@@ -1,7 +1,7 @@
 import tty from 'tty';
 import rl from 'readline';
 
-import { ColorDefineUtil, GlobalOutput, NAMED_COLORS, TerminalOutput } from '@travetto/terminal';
+import { ColorDefineUtil, NAMED_COLORS, Terminal, ColorOutputUtil } from '@travetto/terminal';
 import { Env, ExecUtil, ExecutionOptions, TypedObject } from '@travetto/base';
 import { IndexedModule, PackageUtil, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
@@ -11,7 +11,7 @@ import { CliScmUtil } from './scm';
 const COLORS = TypedObject.keys(NAMED_COLORS)
   .map(k => [k, ColorDefineUtil.defineColor(k).hsl] as const)
   .filter(([, [, s, l]]) => l > .5 && l < .8 && s > .8)
-  .map(([k]) => GlobalOutput.colorer(k));
+  .map(([k]) => ColorOutputUtil.colorer(k));
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
 
@@ -82,7 +82,7 @@ export class CliModuleUtil {
       showProgress?: boolean | tty.WriteStream;
       workerCount?: number;
       prefixOutput?: boolean;
-      progressBar?: 'bottom' | 'top' | 'inline';
+      progressPosition?: 'bottom' | 'top' | 'inline';
       showStdout?: boolean;
       showStderr?: boolean;
     } & Omit<ExecutionOptions, 'cwd'> = {}
@@ -160,9 +160,10 @@ export class CliModuleUtil {
     const work = pool.iterateProcess(new IterableWorkSet(folders));
 
     if (config.showProgress) {
-      const cfg = { message: ['Running', '[', cmd, ...args, ']'].join(' '), showBar: config.progressBar ?? 'bottom' } as const;
-      const stream = new TerminalOutput(config.showProgress === true ? process.stderr : config.showProgress);
-      await stream.trackProgress(work, ev => ({ ...ev, status: ev.value !== undefined ? `${ev.value}` : '' }), cfg);
+      const message = ['Running', '[', cmd, ...args, ']'].join(' ');
+      const cfg = { position: config.progressPosition ?? 'bottom' } as const;
+      const stream = new Terminal(config.showProgress === true ? process.stderr : config.showProgress);
+      await stream.trackProgress(message, work, ev => ({ ...ev, status: ev.value !== undefined ? `${ev.value}` : '' }), cfg);
     } else {
       for await (const _ of work) {
         // Ensure its all consumed

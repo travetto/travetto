@@ -40,7 +40,7 @@ export async function main(target?: string): Promise<void> {
   await CliModuleUtil.runOnModules('all', ['trv', 'doc'], {
     showProgress: true,
     showStdout: false,
-    progressBar: 'inline',
+    progressPosition: 'inline',
     filter: folder => modSrc.has(folder)
   });
 

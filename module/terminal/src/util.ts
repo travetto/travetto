@@ -1,21 +1,15 @@
 import tty from 'tty';
-import timers from 'timers/promises';
 
-import { ColorDefineUtil, RGB, RGBInput } from './color-define';
+import { ColorDefineUtil, RGB } from './color-define';
+import { TerminalStream } from './stream';
 
-type Style =
-  { text?: RGBInput, background?: RGBInput, italic?: boolean, underline?: boolean, inverse?: boolean, blink?: boolean };
+type PositionedWriter = {
+  init(): Promise<void>;
+  writeLine(text: string, clear?: boolean): Promise<void>;
+  close(): Promise<void>;
+};
 
-export type StyleInput = Style | RGBInput;
-export type TerminalTableEvent = { idx: number, text: string, done?: boolean };
-export type TerminalProgressEvent = { idx: number, total?: number, status?: string };
-export type TerminalOpConfig = { showCursor?: boolean, interactive?: boolean };
-export type TerminalWaitingConfig = TerminalOpConfig & { completion?: string, delay?: number, waitingStates?: string[], rate?: number };
-const COLOR_LEVEL_MAP = { 1: 0, 4: 1, 8: 2, 24: 3 } as const;
-type ColorBits = keyof (typeof COLOR_LEVEL_MAP);
-export type ColorLevel = 0 | 1 | 2 | 3;
-
-const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
+export type TerminalInteractive = { showCursor?: boolean, interactive?: boolean };
 
 /**
  * Terminal utilities
@@ -28,52 +22,16 @@ export class TerminalUtil {
   }
 
   /**
-   * Detect color level from tty information
+   * Build escape sequence
    */
-  static detectColorLevel(stream: tty.WriteStream): ColorLevel {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return stream.isTTY ? COLOR_LEVEL_MAP[stream.getColorDepth() as ColorBits] : 0;
+  static styleText(codes: (string | number)[]): string {
+    return `\x1b[${codes.join(';')}m`;
   }
 
   /**
-   * Detect if stream should be considered interactive
+   * Query cursor position
    */
-  static detectInteractive(stream: tty.WriteStream): boolean {
-    return (stream.isTTY && !/^(true|yes|on|1)$/i.test(process.env.TRV_QUIET ?? ''));
-  }
-
-  /**
-   * Get styled levels, 0-3
-   */
-  static getStyledLevels(inp: StyleInput): [string, string][] {
-    const cfg = (typeof inp !== 'object') ? { text: inp } : inp;
-    const levelPairs: [string, string][] = [['', '']];
-    const text = cfg.text ? ColorDefineUtil.getColorCodes(cfg.text, false) : undefined;
-    const bg = cfg.background ? ColorDefineUtil.getColorCodes(cfg.background, true) : undefined;
-
-    for (const level of [1, 2, 3]) {
-      const prefix: number[] = [];
-      const suffix: number[] = [];
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      for (const key of Object.keys(cfg) as (keyof typeof cfg)[]) {
-        if (!cfg[key]) {
-          continue;
-        }
-        switch (key) {
-          case 'inverse': prefix.push(7); suffix.push(27); break;
-          case 'underline': prefix.push(4); suffix.push(24); break;
-          case 'italic': prefix.push(3); suffix.push(23); break;
-          case 'blink': prefix.push(5); suffix.push(25); break;
-          case 'text': prefix.push(...text![level][0]); suffix.push(...text![level][1]); break;
-          case 'background': prefix.push(...bg![level][0]); suffix.push(...bg![level][1]); break;
-        }
-      }
-      levelPairs[level] = [`\x1b[${prefix.join(';')}m`, `\x1b[${suffix.reverse().join(';')}m`];
-    }
-    return levelPairs;
-  }
-
-  static async queryCursorPosition(input: tty.ReadStream, stream: tty.WriteStream): Promise<{ x: number, y: number }> {
+  static async queryCursorPosition(input: tty.ReadStream, stream: TerminalStream): Promise<{ x: number, y: number }> {
     const prom = new Promise<{ x: number, y: number }>(res =>
       input.once('readable', () => {
         const buf: Buffer = input.read();
@@ -87,7 +45,10 @@ export class TerminalUtil {
     return prom.finally(() => input.setRawMode(false));
   }
 
-  static async queryTerminalColor(input: tty.ReadStream, stream: tty.WriteStream, field: 'text' | 'background'): Promise<RGB> {
+  /**
+   * Query terminal color, somewhat spotty, uses terminal querying and falls back to COLORFGBG env var
+   */
+  static async queryTerminalColor(input: tty.ReadStream, stream: TerminalStream, field: 'text' | 'background'): Promise<RGB> {
     try {
       const prom = new Promise<RGB>(res =>
         input.once('readable', () => {
@@ -118,84 +79,84 @@ export class TerminalUtil {
   }
 
   /**
-   * Builds out a waiting indicator
-   * @param message
+   * Run operation, and restore position afterwards
    */
-  static async waitingIndicator(
-    message: string,
-    until: () => boolean,
-    render: (text: string, idx: number) => Promise<void>,
-    config: TerminalWaitingConfig = {}
-  ): Promise<void> {
-    await timers.setTimeout(config.delay ?? 1000);
-    if (config.interactive) {
-      let i = 0;
-      const rate = config.rate ?? 50;
-      const states = config.waitingStates ?? STD_WAIT_STATES;
-      while (!until()) {
-        const ch = states[i % states.length];
-        await render(i === 0 ? `${ch} ${message}` : ch, i);
-        await timers.setTimeout(rate);
-        i += 1;
+  static async withRestore<T>(stream: TerminalStream, op: () => Promise<T>): Promise<T> {
+    try {
+      await stream.write('\x1b7');
+      return await op();
+    } finally {
+      await stream.write('\x1b8');
+    }
+  }
+
+  /**
+   * Show/hide cursor for stream
+   */
+  static async withDisabledCursor<T>(stream: TerminalStream, cfg: TerminalInteractive, op: () => Promise<T>): Promise<T> {
+    if (cfg.interactive && stream.interactive && !cfg.showCursor) {
+      try {
+        await stream.write('\x1B[?25l');
+        return await op();
+      } finally {
+        await stream.write('\x1B[?25h');
       }
     } else {
-      await render(`${message}...`, 0);
+      return op();
+    }
+  }
+
+  static async * mapIterable<T, U>(source: AsyncIterable<T>, fn: (val: T) => U): AsyncIterable<U> {
+    for await (const el of source) {
+      if (el !== undefined) {
+        yield fn(el);
+      }
     }
   }
 
   /**
-   * Write lines, and track when list of lines grows
+   * Allows for writing at top, bottom, or current position while new text is added
    */
-  static async trackLinesWithGrowth<T>(
-    source: AsyncIterable<T>,
-    resolve: (val: T) => TerminalTableEvent,
-    render: (ev: TerminalTableEvent) => Promise<void>,
-    grow: (delta: number, total: number) => Promise<void>
-  ): Promise<number> {
-    let maxRow: number = 0;
+  static positionedWriter(
+    stream: TerminalStream,
+    pos: 'top' | 'bottom' | 'inline',
+  ): PositionedWriter {
+    const height = stream.rows;
 
-    for await (const val of source) {
-      const ev = resolve(val);
-      const dr = ev.idx - maxRow;
-      if (dr > 0) {
-        await grow(dr, ev.idx + 1);
-        maxRow = ev.idx;
+    let og = { y: 0 };
+
+    const init = async (): Promise<void> => {
+      if (pos === 'bottom') {
+        await stream.write(`\x1b[1;${height - 1}r`);
+      } else if (pos === 'top') {
+        await stream.write(`\x1b[2;${height}r`);
+      } else {
+        og = await TerminalUtil.queryCursorPosition(process.stdin, stream);
+        await stream.write('\n'); // Move past line
       }
-      await render(ev);
-    }
+    };
 
-    return maxRow;
+    const withPosition = (op: () => Promise<void>): Promise<void> => TerminalUtil.withRestore(stream, async () => {
+      switch (pos) {
+        case 'bottom': await stream.toRow(height - 1); break;
+        case 'top': await stream.toRow(0); break;
+        case 'inline': await stream.toRow(og.y); break;
+      }
+      await op();
+    });
+
+    const writeLine = (text: string): Promise<void> => withPosition(() => stream.write(text));
+
+    const close = async (): Promise<void> => {
+      await withPosition(() => stream.clear());
+
+      switch (pos) {
+        case 'bottom':
+        case 'top': await TerminalUtil.withRestore(stream, () => stream.write('\x1b[r')); break;
+      }
+    };
+
+    return { init, writeLine, close };
   }
 
-  /**
-  * Track progress of an asynchronous iterator, allowing the showing of a progress bar if the stream produces i and total
-  * @param stream
-  * @param source
-  */
-  static async trackProgress<T>(
-    source: AsyncIterable<T>,
-    resolve: (val: T) => TerminalProgressEvent,
-    layout: (idx: string, total?: string, status?: string) => string,
-    render: (left: string, right?: string) => Promise<void>
-  ): Promise<void> {
-    let last: number = -1;
-    for await (const v of source) {
-      if (!v) {
-        continue;
-      }
-      const { idx: i, total, status } = resolve(v);
-      if (i > last) {
-        last = i;
-        if (total) {
-          const ts = `${total}`;
-          const ip = `${i}`.padStart(ts.length);
-          const line = layout(ip, ts, status);
-          const pct = Math.trunc(line.length * (i / total));
-          await render(line.substring(0, pct), line.substring(pct));
-        } else {
-          await render(layout(`${i}`, undefined, status));
-        }
-      }
-    }
-  }
 }

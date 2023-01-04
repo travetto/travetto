@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { ManifestState } from '@travetto/manifest';
-import { GlobalOutput, TerminalProgressEvent } from '@travetto/terminal';
+import { GlobalTerminal } from '@travetto/terminal';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -87,7 +87,7 @@ export class Compiler {
   async outputInit(): Promise<void> {
     // Write manifest
     await this.writeRawFile(this.#state.manifest.manifestFile, JSON.stringify(this.state.manifest));
-
+    // TODO: This needs to be isolated, just like in the bootstrap
     await this.writeRawFile('trv', '#!/bin/sh\nnode node_modules/@travetto/cli/support/main.cli.js $@\n', '755');
     await this.writeRawFile('trv.cmd', 'node node_modules/@travetto/cli/support/main.cli.js %*\n', '755');
   }
@@ -157,7 +157,7 @@ export class Compiler {
     const emitter = await this.getCompiler();
     let failed = false;
 
-    const resolveEmittedFile = ({ file, total, i, err }: EmitEvent): TerminalProgressEvent => {
+    const resolveEmittedFile = ({ file, total, i, err }: EmitEvent): { idx: number, total: number, status: string } => {
       if (err) {
         failed = true;
         console.error(CompilerUtil.buildTranspileError(file, err));
@@ -165,10 +165,11 @@ export class Compiler {
       return { idx: i, total, status: file };
     };
 
-    await GlobalOutput.trackProgress(
+    await GlobalTerminal.trackProgress(
+      'Compiling',
       this.emit(this.state.getDirtyFiles(), emitter),
       resolveEmittedFile,
-      { showBar: 'inline', message: 'Compiling' }
+      { position: 'bottom' }
     );
 
     if (failed) {

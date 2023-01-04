@@ -42,12 +42,8 @@ export class Runner {
       max: this.#state.concurrency
     });
 
-    consumer.onStart();
-
-    await pool
-      .process(new IterableWorkSet(files))
-      .finally(() => pool.shutdown());
-
+    await consumer.onStart(files);
+    await pool.process(new IterableWorkSet(files));
     return consumer.summarizeAsBoolean();
   }
 
@@ -56,12 +52,11 @@ export class Runner {
    */
   async runSingle(): Promise<boolean> {
     const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
-    consumer.onStart();
 
     const [file, ...args] = this.#state.args;
 
+    await consumer.onStart([file]);
     await TestExecutor.execute(consumer, file, ...args);
-
     return consumer.summarizeAsBoolean();
   }
 

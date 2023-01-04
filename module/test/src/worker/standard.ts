@@ -1,10 +1,12 @@
 import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, ErrorUtil } from '@travetto/base';
-import { ParentCommChannel, Worker, WorkUtil } from '@travetto/worker';
+import { ParentCommChannel, Worker } from '@travetto/worker';
 
-import { Events, RunEvent } from './types';
+import { Events } from './types';
 import { TestConsumer } from '../consumer/types';
 import { TestEvent } from '../model/event';
+
+let i = 0;
 
 /**
  *  Produce a handler for the child worker
@@ -13,15 +15,26 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
   /**
    * Spawn a child
    */
-  return () => WorkUtil.spawnedWorker(
-    () => ExecUtil.fork(RootIndex.resolveFileImport('@travetto/test/support/main.test-child.ts')),
-    /**
-     * Child initialization
-     */
-    async (channel: ParentCommChannel<TestEvent>): Promise<void> => {
+  return () => ({
+    id: i += 1,
+    active: true,
+    async destroy(): Promise<void> { },
+    async execute(file: string): Promise<void> {
+      const { module } = RootIndex.getFromSource(file)!;
+      const cwd = RootIndex.getModule(module)!.source;
+
+      const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
+        ExecUtil.fork(RootIndex.resolveFileImport('@travetto/test/support/main.test-child.ts'), [], {
+          cwd,
+          env: { TRV_MANIFEST: module },
+          stdio: [0, 'ignore', 2, 'ipc']
+        })
+      );
+
       await channel.once(Events.READY); // Wait for the child to be ready
       await channel.send(Events.INIT); // Initialize
       await channel.once(Events.INIT_COMPLETE); // Wait for complete
+
       channel.on('*', async ev => {
         try {
           await consumer.onEvent(ev);  // Connect the consumer with the event stream from the child
@@ -29,26 +42,22 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
           // Do nothing
         }
       });
-    },
-    /**
-     * Send child command to run tests
-     */
-    async (channel: ParentCommChannel<TestEvent & { error?: Error }>, event: string | RunEvent): Promise<void> => {
+
       // Listen for child to complete
       const complete = channel.once(Events.RUN_COMPLETE);
       // Start test
-      event = typeof event === 'string' ? { file: event } : event;
-      channel.send(Events.RUN, event);
+      channel.send(Events.RUN, { file });
 
       // Wait for complete
       const { error } = await complete;
 
       // Kill on complete
-      channel.destroy();
+      await channel.destroy();
 
       // If we received an error, throw it
       if (error) {
         throw ErrorUtil.deserializeError(error);
       }
-    });
+    },
+  });
 }

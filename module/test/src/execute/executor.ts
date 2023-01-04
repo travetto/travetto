@@ -249,10 +249,10 @@ export class TestExecutor {
 
     file = path.resolve(file);
 
-    const module = RootIndex.getFromSource(file)?.import ?? file;
+    const module = RootIndex.getFromSource(file)!;
 
     try {
-      await import(module);
+      await import(module?.import);
     } catch (err) {
       if (!(err instanceof Error)) {
         throw err;

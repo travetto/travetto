@@ -1,17 +1,50 @@
+import tty from 'tty';
 import assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
 import { Util } from '@travetto/base';
 
-import { TerminalOutput } from '../src/output';
-import { TerminalUtil } from '../__index__';
+import { ColorOutputUtil } from '../src/color-output';
 
 @Suite()
-export class ColorUtilTest {
+export class ColorOutputUtilTest {
+
+  @Test()
+  async verifyForceColor() {
+    const stream = new tty.WriteStream(1);
+
+    process.env.NO_COLOR = '1';
+    delete process.env.FORCE_COLOR;
+    assert(ColorOutputUtil.detectColorLevel(stream) === 0);
+    delete process.env.NO_COLOR;
+
+    for (const el of [0, 1, 2, 3]) {
+      process.env.FORCE_COLOR = `${el}`;
+      assert(ColorOutputUtil.detectColorLevel(stream) === el);
+    }
+
+    process.env.FORCE_COLOR = 'true';
+    assert(ColorOutputUtil.detectColorLevel(stream) === 1);
+  }
+
+  @Test()
+  async verifyNoColor() {
+    process.env.COLORTERM = 'truecolor';
+    delete process.env.NO_COLOR;
+    delete process.env.NODE_DISABLE_COLORS;
+    delete process.env.FORCE_COLOR;
+
+    const stream = new tty.WriteStream(1);
+    assert(ColorOutputUtil.detectColorLevel(stream) > 0);
+    process.env.NO_COLOR = '1';
+    assert(ColorOutputUtil.detectColorLevel(stream) === 0);
+  }
+
 
   @Test()
   async colorize() {
-    const output = new TerminalOutput(process.stdout).setColorLevel(1).colorer({ text: 'red', underline: true })('apple');
+    ColorOutputUtil.colorLevel = 1;
+    const output = ColorOutputUtil.colorer({ text: 'red', underline: true })('apple');
     assert(output !== 'apple');
     assert(/apple/.test(output));
     assert(output.includes('\x1b[24;39m'));
@@ -23,9 +56,11 @@ export class ColorUtilTest {
     process.env.NO_COLOR = '1';
     delete process.env.FORCE_COLOR;
 
-    assert(TerminalUtil.detectColorLevel(process.stdout) === 0);
+    ColorOutputUtil.colorLevel = undefined;
+    assert(ColorOutputUtil.detectColorLevel(process.stdout) === 0);
+    assert(ColorOutputUtil.colorLevel === 0);
 
-    const tplFn = new TerminalOutput(process.stdout).templateFunction({
+    const tplFn = ColorOutputUtil.templateFunction({
       basic: { text: 'red', underline: true }
     });
 
@@ -38,8 +73,8 @@ export class ColorUtilTest {
 
   @Test()
   async template() {
-    const sup = new TerminalOutput(process.stdout).setColorLevel(1);
-    const tplFn = sup.templateFunction({
+    ColorOutputUtil.colorLevel = 1;
+    const tplFn = ColorOutputUtil.templateFunction({
       name: '#0000ff',
       age: 'black'
     });
@@ -52,13 +87,13 @@ export class ColorUtilTest {
     assert(output.includes('\x1b[30m'));
     assert(output.includes('\x1b[94m'));
 
-    sup.setColorLevel(2);
+    ColorOutputUtil.colorLevel = 2;
     const output2 = tpl`My name is ${{ name: 'Bob' }} and I'm ${{ age: 20 }} years old`;
     assert(output2.includes('\x1b[38;5;21m'));
     assert(output2.includes('\x1b[39m'));
     assert(!output2.includes('\x1b[94m'));
 
-    sup.setColorLevel(3);
+    ColorOutputUtil.colorLevel = 3;
     const output3 = tpl`My name is ${{ name: 'Bob' }} and I'm ${{ age: 20 }} years old`;
     assert(output3.includes('\x1b[38;2;0;0;0m'));
     assert(output3.includes('\x1b[39m'));
@@ -67,7 +102,8 @@ export class ColorUtilTest {
 
   @Test({ shouldThrow: 'Invalid template' })
   badTemplate() {
-    const tplFn = new TerminalOutput(process.stdout).setColorLevel(1).templateFunction({
+    ColorOutputUtil.colorLevel = 1;
+    const tplFn = ColorOutputUtil.templateFunction({
       name: 'blue',
       age: 'black'
     });

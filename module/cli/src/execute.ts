@@ -1,7 +1,7 @@
 import { program as commander } from 'commander';
 
 import { RootIndex, PackageUtil, path } from '@travetto/manifest';
-import { GlobalOutput } from '@travetto/terminal';
+import { GlobalTerminal } from '@travetto/terminal';
 import { runMain } from '@travetto/base/support/init.main';
 
 import { CliCommandManager } from './command-manager';
@@ -49,7 +49,7 @@ export class ExecutionManager {
    * @param args
    */
   static async run(args: string[]): Promise<void> {
-    const width = GlobalOutput.width;
+    const width = GlobalTerminal.stream.columns;
     commander
       .version(PackageUtil.getFrameworkVersion())
       .configureOutput({ getOutHelpWidth: () => width, getErrHelpWidth: () => width });
