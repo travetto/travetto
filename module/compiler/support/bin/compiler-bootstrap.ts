@@ -6,18 +6,28 @@ import type { ManifestState, ManifestContext, ManifestRoot } from '@travetto/man
 
 import { log, compileIfStale, getProjectSources, addNodePath, importManifest } from './utils';
 
+const PRECOMPILE_MODS = [
+  '@travetto/terminal',
+  '@travetto/manifest',
+  '@travetto/transformer',
+  '@travetto/compiler'
+];
+
 let manifestTemp;
+
+/**
+ * Step 0
+ */
+export async function precompile(ctx: ManifestContext): Promise<void> {
+  for (const mod of PRECOMPILE_MODS) {
+    await compileIfStale(ctx, `[0] Compiling ${mod}`, await getProjectSources(ctx, mod),);
+  }
+}
 
 /**
  *  Step 1
  */
 export async function buildManifest(ctx: ManifestContext): Promise<ManifestState> {
-  await compileIfStale(
-    ctx,
-    '[1] Manifest Bootstrapping',
-    await getProjectSources(ctx, '@travetto/manifest'),
-  );
-
   log('[1] Manifest Generation');
   const { ManifestUtil } = await importManifest(ctx);
   return ManifestUtil.produceState(ctx);
@@ -26,11 +36,7 @@ export async function buildManifest(ctx: ManifestContext): Promise<ManifestState
 export async function writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
   // Write manifest in the scenario we are in mono-repo state where everything pre-existed
   await fs.writeFile(
-    path.resolve(
-      ctx.workspacePath,
-      ctx.outputFolder,
-      ctx.manifestFile
-    ),
+    path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile),
     JSON.stringify(manifest)
   );
 }
@@ -62,14 +68,6 @@ function shouldRebuildCompiler({ delta }: ManifestState): { total: boolean, tran
  *  Step 2
  */
 async function buildCompiler(state: ManifestState, ctx: ManifestContext): Promise<void> {
-  for (const mod of ['@travetto/terminal', '@travetto/transformer', '@travetto/compiler']) {
-    await compileIfStale(
-      ctx,
-      '[2] Compiler Support',
-      await getProjectSources(ctx, mod),
-    );
-  }
-
   const changed = shouldRebuildCompiler(state);
 
   if (changed.transformers.length) {
@@ -125,6 +123,7 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
 }
 
 export async function compile(ctx: ManifestContext, watch?: boolean): Promise<ManifestState> {
+  await precompile(ctx); // Step 0
   const state = await buildManifest(ctx); // Step 1
   await buildCompiler(state, ctx); // Step 2
   await compileOutput(state, ctx, watch); // Step 3

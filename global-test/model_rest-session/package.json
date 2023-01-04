@@ -14,5 +14,6 @@
     "@travetto/rest-session": "*",
     "@travetto/rest-express": "*"
   },
+  "travetto": {},
   "private": true
 }

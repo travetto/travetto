@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
 import { GlobalEnvConfig } from '@travetto/base';
-import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
+import { CliCommand, OptionConfig } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 
 import type { RunState } from '../src/execute/types';
@@ -84,27 +84,22 @@ export class TestCommand extends CliCommand<Options> {
 
   async action(regexes: string[]): Promise<void> {
     // If we are in a mono-repo, at root
-    if (CliModuleUtil.isMonoRepoRoot()) {
-      const { runWorkspace } = await import('./bin/run-workspace.js');
-      await runWorkspace(this.cmd.format, +this.cmd.concurrency);
-    } else {
-      const { runTests } = await import('./bin/run.js');
+    const { runTests } = await import('./bin/run.js');
 
-      const [first] = regexes;
+    const [first] = regexes;
 
-      const state: RunState = {
-        args: regexes,
-        mode: this.cmd.mode,
-        concurrency: +this.cmd.concurrency,
-        format: this.cmd.format
-      };
+    const state: RunState = {
+      args: regexes,
+      mode: this.cmd.mode,
+      concurrency: +this.cmd.concurrency,
+      format: this.cmd.format
+    };
 
-      switch (state.mode) {
-        case 'single': await this.onSingle(state, first); break;
-        case 'standard': await this.onStandard(state, first); break;
-      }
-
-      await runTests(state);
+    switch (state.mode) {
+      case 'single': await this.onSingle(state, first); break;
+      case 'standard': await this.onStandard(state, first); break;
     }
+
+    await runTests(state);
   }
 }

@@ -10,5 +10,6 @@
     "@travetto/rest-fastify-lambda": "*",
     "@travetto/asset-rest": "*"
   },
+  "travetto": {},
   "private": true
 }

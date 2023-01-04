@@ -1,5 +1,6 @@
 {
   "name": "@travetto-test/transformer",
   "version": "0.0.0",
+  "travetto": {},
   "private": true
 }

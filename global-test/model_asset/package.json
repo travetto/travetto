@@ -6,5 +6,6 @@
     "@travetto/model-s3": "*",
     "@travetto/asset": "*"
   },
+  "travetto": {},
   "private": true
 }

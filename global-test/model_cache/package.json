@@ -13,5 +13,6 @@
     "@travetto/model-sqlite": "*",
     "@travetto/cache": "*"
   },
+  "travetto": {},
   "private": true
 }
