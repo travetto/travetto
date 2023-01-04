@@ -26,7 +26,7 @@ declare namespace Transpile {
   /**
    * Get Context for building
    */
-  function getContext(op?: CompileCommand): Promise<ManifestContext>;
+  function getContext(folder?: string): Promise<ManifestContext>;
 }
 
 export = Transpile;

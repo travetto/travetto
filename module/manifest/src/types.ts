@@ -42,7 +42,7 @@ export type ManifestRoot = ManifestContext & {
 
 export type ManifestDeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
 export type ManifestDeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
-export type ManifestDeltaEvent = [string, ManifestDeltaEventType];
+export type ManifestDeltaEvent = { file: string, type: ManifestDeltaEventType, module: string };
 export type ManifestDelta = Record<string, ManifestDeltaEvent[]>;
 export type ManifestState = {
   manifest: ManifestRoot;

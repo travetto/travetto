@@ -5,6 +5,7 @@ import cp from 'child_process';
 import type { ManifestState, ManifestContext, ManifestRoot } from '@travetto/manifest';
 
 import { log, compileIfStale, getProjectSources, addNodePath, importManifest } from './utils';
+import { getContext } from '../../bin/transpile';
 
 const PRECOMPILE_MODS = [
   '@travetto/terminal',
@@ -44,7 +45,7 @@ export async function writeManifest(ctx: ManifestContext, manifest: ManifestRoot
 function shouldRebuildCompiler({ delta }: ManifestState): { total: boolean, transformers: [string, string][] } {
   // Did enough things change to re-stage and build the compiler
   const transformersChanged = Object.entries(delta)
-    .flatMap(([mod, files]) => files.map(([file]) => [mod, file]))
+    .flatMap(([mod, files]) => files.map(x => [mod, x.file]))
     .filter((ev): ev is [string, string] => ev[1].startsWith('support/transform'));
   const transformerChanged = (delta['@travetto/transformer'] ?? []);
   const compilerChanged = delta['@travetto/compiler'] ?? [];
@@ -92,10 +93,10 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
   let changes = Object.values(state.delta).flat();
 
   // Remove files that should go away
-  await Promise.all(changes.filter(x => x[1] === 'removed')
-    .map(([f]) => fs.unlink(path.resolve(ctx.workspacePath, ctx.outputFolder, f)).catch(() => { })));
+  await Promise.all(changes.filter(x => x.type === 'removed')
+    .map(x => fs.unlink(path.resolve(ctx.workspacePath, ctx.outputFolder, x.file)).catch(() => { })));
 
-  changes = changes.filter(x => x[1] !== 'removed');
+  changes = changes.filter(x => x.type !== 'removed');
 
   if (changes.length === 0 && !watch) {
     log('[3] Output Ready');
@@ -119,6 +120,15 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
   const res = cp.spawnSync(process.argv0, args, { cwd: path.resolve(ctx.workspacePath, ctx.compilerFolder), stdio: 'inherit', encoding: 'utf8' });
   if (res.status) {
     throw new Error(res.stderr);
+  }
+
+  if (ctx.monoRepo) {
+    // Write out all changed manifests
+    for (const module of new Set(changes.map(x => x.module))) {
+      const subCtx = await getContext(state.manifest.modules[module].source);
+      const sub = await buildManifest(subCtx);
+      await writeManifest(subCtx, sub.manifest);
+    }
   }
 }
 

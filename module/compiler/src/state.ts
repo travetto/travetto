@@ -99,16 +99,12 @@ export class CompilerState {
   getDirtyFiles(): string[] {
     if (this.#delta && Object.keys(this.#delta).length) { // If we have any changes
       const files: string[] = [];
-      const sources: string[] = [];
-      const changes: unknown[] = [];
-      for (const [modName, subs] of Object.entries(this.#delta)) {
+      for (const [modName, events] of Object.entries(this.#delta)) {
         const mod = this.#manifest.modules[modName];
-        for (const [file, event] of subs) {
-          const type = ManifestModuleUtil.getFileType(file);
-          if (validFile(type)) {
+        for (const { file } of events) {
+          const fileType = ManifestModuleUtil.getFileType(file);
+          if (validFile(fileType)) {
             files.push(path.resolve(mod.output, file));
-            sources.push(path.resolve(mod.source, file));
-            changes.push([file, event]);
           }
         }
       }

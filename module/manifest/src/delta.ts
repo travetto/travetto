@@ -25,8 +25,10 @@ export class ManifestDeltaUtil {
     const getStat = (f: string): Promise<Stats | void> =>
       fs.stat(`${outputFolder}/${left.output}/${f.replace(/[.]ts$/, '.js')}`).catch(() => { });
 
-    for (const el of Object.keys(left.files)) {
+    const add = (file: string, type: ManifestDeltaEvent['type']): unknown =>
+      out.push({ file, module: left.name, type });
 
+    for (const el of Object.keys(left.files)) {
       if (!(el in right.files)) {
         const [, , leftTs] = left.files[el];
         const stat = await getStat(el);
@@ -34,23 +36,23 @@ export class ManifestDeltaUtil {
           // If file pre-exists manifest, be cool
           continue;
         }
-        out.push([el, 'added']);
+        add(el, 'added');
       } else {
         const [, , leftTs] = left.files[el];
         const [, , rightTs] = right.files[el];
         if (leftTs !== rightTs) {
           const stat = await getStat(el);
           if (!stat) {
-            out.push([el, 'missing']);
+            add(el, 'missing');
           } else if (leftTs > this.#getNewest(stat!)) {
-            out.push([el, 'changed']);
+            add(el, 'changed');
           }
         } else {
           const stat = await getStat(el);
           if (!stat) {
-            out.push([el, 'missing']);
+            add(el, 'missing');
           } else if (this.#getNewest(stat!) < leftTs) {
-            out.push([el, 'dirty']);
+            add(el, 'dirty');
           }
         }
       }
@@ -59,7 +61,7 @@ export class ManifestDeltaUtil {
       if (!(el in left.files)) {
         const stat = await getStat(el);
         if (stat) {
-          out.push([el, 'removed']);
+          add(el, 'removed');
         }
       }
     }

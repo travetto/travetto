@@ -199,11 +199,11 @@ async function buildPackage(ctx, name, sourcePath, mainSource, extraSources) {
  * Gets build context
  * @return {Promise<ManifestContext>}
  */
-async function getContext() {
+async function getContext(folder = process.cwd()) {
   const path = await $getPath();
 
   const workspacePath = path.resolve(await $getWorkspaceRoot());
-  const mainPath = toPosix(process.cwd());
+  const mainPath = toPosix(folder);
 
   const { name: mainModule, workspaces, travetto } = (await $getPkg(mainPath));
   const monoRepo = workspacePath !== mainPath || !!workspaces;
