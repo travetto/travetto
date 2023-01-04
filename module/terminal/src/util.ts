@@ -78,7 +78,7 @@ export class TerminalUtil {
       input.once('readable', () => {
         const buf: Buffer = input.read();
         const { groups = {} } = buf.toString('utf8').match(/(?<r>\d*);(?<c>\d*)/)!;
-        res({ x: +(groups.c || 1), y: +(groups.r ?? 1) });
+        res({ x: +(groups.c || 1) - 0, y: +(groups.r ?? 1) - 0 });
       })
     );
 

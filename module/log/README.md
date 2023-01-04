@@ -38,10 +38,10 @@ The corresponding output would be
 ```bash
 $ trv main support/main.output.ts
 
-2022-03-14T04:00:00.618Z info  [@travetto/log:doc/output.ts:2] Hello World
-2022-03-14T04:00:00.837Z info  [@travetto/log:doc/output.ts:4] Woah! {
+2023-03-14T04:00:00.618Z info  [@travetto/log:doc/output.ts:2] Hello World
+2023-03-14T04:00:00.837Z info  [@travetto/log:doc/output.ts:4] Woah! {
   a: { b: { c: { d: 10 } } }
 }
-2022-03-14T04:00:01.510Z info  [@travetto/log:doc/output.ts:6] Woah!
-2022-03-14T04:00:02.450Z debug [@travetto/log:doc/output.ts:8] Test
+2023-03-14T04:00:01.510Z info  [@travetto/log:doc/output.ts:6] Woah!
+2023-03-14T04:00:02.450Z debug [@travetto/log:doc/output.ts:8] Test
 ```

@@ -9,7 +9,7 @@ type ColorFn = (text: Prim) => string;
 type ColorPalette<T> = Record<keyof T, ColorFn>;
 
 type TerminalProgressConfig = TerminalOpConfig & { message?: string, showBar?: 'bottom' | 'top' | 'inline' };
-type TerminalTableConfig = TerminalOpConfig & { header?: string[] };
+type TerminalTableConfig = TerminalOpConfig & { header?: string[], forceNonInteractiveOrder?: boolean };
 
 /**
  * An enhanced tty write stream
@@ -174,7 +174,7 @@ export class TerminalOutput {
    * Consumes a stream, of events, tied to specific list indices, and updates in place
    */
   async makeList<T>(source: AsyncIterable<T>, resolve: (val: T) => TerminalTableEvent, config: TerminalTableConfig = {}): Promise<void> {
-    const { interactive = this.#interactive } = config;
+    const { interactive = this.#interactive, forceNonInteractiveOrder: forceOrder } = config;
 
     await this.#writeLines(config.header ?? []);
 
@@ -183,6 +183,8 @@ export class TerminalOutput {
         await this.showCursor(false);
       }
     }
+
+    const statuses: string[] = [];
 
     const size = await TerminalUtil.trackLinesWithGrowth(
       source,
@@ -193,7 +195,11 @@ export class TerminalOutput {
           await this.#rewriteLine(text, true);
           await this.#readline.moveCursor(0, -idx).commit();
         } else if (done) {
-          await this.#writeLine(text);
+          if (!forceOrder) {
+            await this.#writeLine(text);
+          } else {
+            statuses[idx] = text;
+          }
         }
       },
       async (dr: number, total: number) => {
@@ -209,6 +215,8 @@ export class TerminalOutput {
       }
       await this.#readline.moveCursor(0, size).commit();
       await this.#write('\n');
+    } else if (forceOrder) {
+      await this.#writeLines(statuses);
     }
 
     await this.#writeLine();
@@ -221,19 +229,23 @@ export class TerminalOutput {
     const { interactive = this.#interactive, showCursor, message, showBar } = config;
 
     if (interactive) {
+      let og = { y: 0 };
       if (showBar === 'bottom') {
         await this.#write(`\x1b[1;${this.#stream.rows - 1}r`);
       } else if (showBar === 'top') {
         await this.#write(`\x1b[2;${this.#stream.rows}r`);
+      } else {
+        og = await TerminalUtil.queryCursorPosition(process.stdin, this.#stream);
+        await this.#writeLine(); // Move past line
       }
 
       const color = config.showBar ? this.colorer({ background: 'green', text: 'white' }) : (v: string): string => v;
 
       const drawStatus = (text: string, clear = false): Promise<void> => this.#restoreWhenDone(async () => {
-        if (config.showBar === 'bottom') {
-          await this.#readline.cursorTo(0, this.#stream.rows - 1).commit();
-        } else if (config.showBar === 'top') {
-          await this.#readline.cursorTo(0, 0).commit();
+        switch (showBar) {
+          case 'bottom': await this.#readline.cursorTo(0, this.#stream.rows - 1).commit(); break;
+          case 'top': await this.#readline.cursorTo(0, 0).commit(); break;
+          case 'inline': await this.#readline.cursorTo(0, og.y).commit(); break;
         }
         await this.#rewriteLine(text, clear);
       });
@@ -252,10 +264,12 @@ export class TerminalOutput {
         if (!showCursor) {
           await this.showCursor(true);
         }
-        if (showBar === 'top' || showBar === 'bottom') {
-          await this.#write('\x1b[r');
-          if (showBar === 'bottom') {
+        switch (showBar) {
+          case 'top': await this.#write('\x1b[r'); break;
+          case 'bottom': {
+            await this.#write('\x1b[r');
             await this.#readline.cursorTo(0, this.#stream.rows - 1).commit();
+            break;
           }
         }
       }

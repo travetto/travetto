@@ -27,7 +27,7 @@ export async function main(target?: string): Promise<void> {
   // Restart services
   if (!target || target === 'todo-app') {
     console.log!('Restarting Services');
-    await (ExecUtil.spawn('trv', ['service', 'restart'], { stdio: [0, 1, 2] }).result);
+    await (ExecUtil.spawn('trv', ['service', 'restart'], { stdio: 'inherit' }).result);
   }
 
   const mods = (await CliModuleUtil.findModules('all'))
@@ -40,6 +40,7 @@ export async function main(target?: string): Promise<void> {
   await CliModuleUtil.runOnModules('all', ['trv', 'doc'], {
     showProgress: true,
     showStdout: false,
+    progressBar: 'inline',
     filter: folder => modSrc.has(folder)
   });
 
