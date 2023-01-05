@@ -1,26 +1,10 @@
 import assert from 'assert';
 
-import { Test, Suite, AfterEach, BeforeEach } from '@travetto/test';
+import { Test, Suite } from '@travetto/test';
 import { Env } from '../src/env';
 
 @Suite()
 export class EnvTest {
-
-  #env?: NodeJS.ProcessEnv;
-
-  @BeforeEach()
-  copy() {
-    this.#env = process.env;
-    process.env = {};
-  }
-
-  @AfterEach()
-  restore() {
-    if (this.#env) {
-      process.env = this.#env;
-      this.#env = undefined;
-    }
-  }
 
   @Test()
   verifyGet() {

@@ -27,7 +27,7 @@ export class TestExecutor {
    *
    * This method should never throw under any circumstances.
    */
-  static #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
+  static async #executeTestMethod(test: TestConfig): Promise<Error | undefined> {
     const suite = SuiteRegistry.get(test.class);
     const promCleanup = Util.resolvablePromise();
 
@@ -35,11 +35,15 @@ export class TestExecutor {
     const barrier = new Barrier(test.timeout || TEST_TIMEOUT, true)
       .add(promCleanup, true) // If not timeout or unhandled, ensure all promises are cleaned up
       .add(async () => {
+        const env = process.env;
+
         try {
           PromiseCapture.start(); // Listen for all promises to detect any unfinished, only start once method is invoked
+          process.env = { ...env }; // Created an isolated environment
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           await (suite.instance as Record<string, Function>)[test.methodName](); // Run
         } finally {
+          process.env = env; // Restore
           PromiseCapture.stop().then(() => timers.setTimeout(1).then(promCleanup.resolve), promCleanup.reject);
         }
       });
@@ -134,6 +138,7 @@ export class TestExecutor {
 
     // Run method and get result
     let error = await this.#executeTestMethod(test);
+
     if (error) {
       if (error instanceof ExecutionError) { // Errors that are not expected
         AssertCheck.checkUnhandled(test, error);
