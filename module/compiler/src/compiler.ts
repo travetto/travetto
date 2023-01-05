@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import { ManifestState } from '@travetto/manifest';
-import { GlobalTerminal } from '@travetto/terminal';
+import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -157,12 +157,12 @@ export class Compiler {
     const emitter = await this.getCompiler();
     let failed = false;
 
-    const resolveEmittedFile = ({ file, total, i, err }: EmitEvent): { idx: number, total: number, status: string } => {
+    const resolveEmittedFile = ({ file, total, i, err }: EmitEvent): TerminalProgressEvent => {
       if (err) {
         failed = true;
         console.error(CompilerUtil.buildTranspileError(file, err));
       }
-      return { idx: i, total, status: file };
+      return { idx: i, total, text: file };
     };
 
     await GlobalTerminal.trackProgress(

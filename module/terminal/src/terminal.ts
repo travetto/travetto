@@ -1,86 +1,102 @@
 import tty from 'tty';
 
-import { TerminalStream } from './stream';
-import { TerminalUtil } from './util';
-import { TerminalOperation, TerminalTableEvent, TerminalProgressEvent, TerminalProgressConfig, TerminalTableConfig } from './operation';
-import { ColorOutputUtil } from './color-output';
+import { IterableUtil } from './iterable';
+import { TerminalProgressConfig, TerminalProgressEvent, TerminalTableConfig, TerminalTableEvent, TerminalWaitingConfig, TermState } from './types';
+import { TerminalOperation } from './operation';
+import { TerminalWriter } from './writer';
 
 /**
  * An enhanced tty write stream
  */
-export class Terminal {
+export class Terminal implements TermState {
 
-  #stream: TerminalStream;
+  #output: tty.WriteStream;
+  #input: tty.ReadStream;
+  #interactive: boolean;
+  #width?: number;
 
-  constructor(stream: TerminalStream | tty.WriteStream) {
-    this.#stream = stream instanceof TerminalStream ? stream : new TerminalStream(stream);
+  constructor(output: tty.WriteStream, input: tty.ReadStream = process.stdin, interactive?: boolean, width?: number) {
+    this.#output = output;
+    this.#input = input;
+    this.#interactive = interactive ?? (output.isTTY && !/^(true|yes|on|1)$/i.test(process.env.TRV_QUIET ?? ''));
+    this.#width = width;
   }
 
-  get stream(): TerminalStream {
-    return this.#stream;
+  get output(): tty.WriteStream {
+    return this.#output;
   }
 
-  async lines(...lines: string[]): Promise<void> {
-    return this.#stream.writeLines(lines);
+  get input(): tty.ReadStream {
+    return this.#input;
+  }
+
+  get interactive(): boolean {
+    return this.#interactive;
+  }
+
+  get width(): number {
+    return this.#width ?? (this.#output.isTTY ? this.#output.columns : 120);
+  }
+
+  get height(): number {
+    return (this.#output.isTTY ? this.#output.rows : 120);
+  }
+
+  writer(): TerminalWriter {
+    return TerminalWriter.for(this);
+  }
+
+  writeLines(...text: string[]): Promise<void> {
+    return this.writer().writeLines(text).commit();
   }
 
   /**
    * Waiting message with a callback to end
    */
-  async withWaiting<T>(message: string, work: Promise<T> | (() => Promise<T>), config: TerminalProgressConfig = {}): Promise<T> {
+  async withWaiting<T>(message: string, work: Promise<T> | (() => Promise<T>), config: TerminalWaitingConfig = {}): Promise<T> {
     const res = (typeof work === 'function' ? work() : work);
-    if (config.interactive) {
-      const indicator = TerminalOperation.waitingIndicator(message);
-
-      const live = TerminalOperation.streamToLine(
-        this.#stream,
-        indicator.stream,
-        ev => ev.message,
-        { initialDelay: 1000, cycleDelay: 50, ...config, position: 'inline' }
-      );
-
-      try {
-        return await res;
-      } finally {
-        await indicator.finish();
-        await live;
-      }
-    } else {
-      this.#stream.writeLine(`${message}...`);
+    if (!this.interactive) {
+      await this.writeLines(`${message}...`);
       return res;
     }
+    return res.finally(TerminalOperation.streamWaiting(this, message, config));
   }
 
   /**
    * Consumes a stream, of events, tied to specific list indices, and updates in place
    */
   async makeList<T>(source: AsyncIterable<T>, resolve: (val: T) => TerminalTableEvent, config: TerminalTableConfig = {}): Promise<void> {
-    return TerminalOperation.makeList(this.#stream, TerminalUtil.mapIterable(source, resolve), config);
+    const resolved = IterableUtil.map(source, resolve);
+
+    await this.writeLines(...(config.header ?? []));
+
+    if (!this.interactive) {
+      const isDone = IterableUtil.filter(resolved, ev => !!ev.done);
+      if (config.forceNonInteractiveOrder) {
+        await this.writeLines(...(await IterableUtil.drain(isDone)).map(x => x.text), '');
+      } else {
+        await IterableUtil.drain(IterableUtil.map(isDone, ev => this.writeLines(ev.text)));
+        await this.writeLines('');
+      }
+      return;
+    }
+
+    await TerminalOperation.streamList(this, resolved);
   }
 
   /**
    * Track progress of an asynchronous iterator, allowing the showing of a progress bar if the stream produces idx and total
    */
-  async trackProgress<T>(
-    message: string, source: AsyncIterable<T>,
-    resolve: (val: T) => TerminalProgressEvent,
-    config: TerminalProgressConfig = {}
+  async trackProgress<T, V extends TerminalProgressEvent>(
+    message: string, source: AsyncIterable<T>, resolve: (val: T) => V, config?: TerminalProgressConfig
   ): Promise<void> {
-    const interactive = config.interactive ?? this.#stream.interactive;
-    const color = ColorOutputUtil.colorer({ background: 'green', text: 'white' });
-
-    if (!interactive) {
-      this.#stream.writeLine(`${message}...`);
+    if (!this.interactive) {
+      await this.writeLines(`${message}...`);
+      await IterableUtil.drain(source);
+      return;
     }
-
-    return TerminalOperation.streamToLine(
-      this.#stream,
-      TerminalUtil.mapIterable(source, resolve),
-      ({ total, idx, status }): string => {
-        const line = [message, total ? `${idx}/${total}` : `${idx}`, status].filter(x => !!x).join(' ');
-        return TerminalOperation.stylePercentage(line, idx, total, this.#stream.columns, color);
-      },
-      config);
+    const render = config?.renderer ?? TerminalOperation.buildProgressBar(this, { background: 'green', text: 'white' }, message);
+    return TerminalOperation.streamToPosition(this, IterableUtil.map(source, resolve, render), config?.position);
   }
 }
 

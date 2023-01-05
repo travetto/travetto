@@ -47,6 +47,7 @@ export class CliServiceCommand extends CliCommand<{}> {
           cliTpl`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
           ''.padEnd(maxName + maxVersion + maxStatus + 3, '-')
         ],
+        size: all.length,
         forceNonInteractiveOrder: !process.stdout.isTTY
       });
   }

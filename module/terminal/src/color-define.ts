@@ -1,7 +1,7 @@
 import { NAMED_COLORS } from './named-colors';
+import { RGB } from './types';
 
 type I = number;
-export type RGB = [r: I, g: I, b: I] | (readonly [r: I, g: I, b: I]);
 type HSL = [h: I, s: I, l: I];
 export type DefinedColor = { rgb: RGB, hsl: HSL, idx16: I, idx16bg: I, idx256: I };
 export type RGBInput = I | keyof (typeof NAMED_COLORS) | `#${string}`;

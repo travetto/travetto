@@ -33,7 +33,7 @@ export class StreamedEmitter implements TestConsumer {
   }
 
   protected log(message: string): void {
-    this.#terminal.lines(message);
+    this.#terminal.writeLines(message);
   }
 
   async onStart(files: string[]): Promise<void> {
@@ -56,8 +56,6 @@ export class StreamedEmitter implements TestConsumer {
       total,
       status: `${res.classId}#${res.methodName}`,
     }), { position: 'bottom' });
-
-    this.#terminal.lines('');
   }
 
   onEvent(ev: TestEvent): void {
@@ -65,17 +63,17 @@ export class StreamedEmitter implements TestConsumer {
       const { test } = ev;
       this.#results.add(test);
       if (test.status === 'failed') {
-        this.#terminal.lines(`Test ${test.classId}:${test.methodName}`);
+        const lines: string[] = [];
+        lines.push(`Test ${test.classId}:${test.methodName}`);
         for (const assert of (test.assertions ?? [])) {
+          lines.push(`${assert.classId}:${assert.line} => ${assert.text}`);
           if (assert.error) {
-            this.#terminal.lines(
-              `${assert.classId}:${assert.line} => ${assert.text}`,
-              assert.error.stack ?? ''
-            );
+            lines.push(assert.error.stack ?? '');
           } else {
-            this.#terminal.lines(`${assert.classId}:${assert.line} => ${assert.text}`, '');
+            lines.push('');
           }
         }
+        this.#terminal.writeLines(...lines);
       }
     }
   }

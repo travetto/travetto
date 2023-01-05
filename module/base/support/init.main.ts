@@ -7,6 +7,8 @@ import { ExecUtil } from '../src/exec';
 import { ShutdownManager } from '../src/shutdown';
 import { defineGlobalEnv, GlobalEnv } from '../src/global-env';
 
+const RESET_CODE = ['?25h', 's', 'r', 'u'].map(c => `\x1b[${c}`).join('');
+
 // Setup everything
 let initialized = false;
 export async function setup(): Promise<void> {
@@ -41,7 +43,7 @@ export async function setup(): Promise<void> {
   // This could live in @travetto/terminal, but orchestrating is complicated
   if (process.stdout.isTTY) {
     // Ensure cursor comes back, on exit
-    ShutdownManager.onShutdown('', () => process.stdout.write('\x1B[?25h'));
+    ShutdownManager.onShutdown('', () => process.stdout.write(RESET_CODE));
   }
 }
 

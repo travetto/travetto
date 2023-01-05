@@ -49,7 +49,7 @@ export class ExecutionManager {
    * @param args
    */
   static async run(args: string[]): Promise<void> {
-    const width = GlobalTerminal.stream.columns;
+    const width = GlobalTerminal.width;
     commander
       .version(PackageUtil.getFrameworkVersion())
       .configureOutput({ getOutHelpWidth: () => width, getErrHelpWidth: () => width });

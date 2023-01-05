@@ -1,12 +1,12 @@
 import tty from 'tty';
 
 import { ColorDefineUtil, RGBInput } from './color-define';
-import { TerminalUtil } from './util';
+import { ANSICodes } from './codes';
 
 type Style =
   { text?: RGBInput, background?: RGBInput, italic?: boolean, underline?: boolean, inverse?: boolean, blink?: boolean };
 
-type StyleInput = Style | RGBInput;
+export type StyleInput = Style | RGBInput;
 type Prim = string | number | boolean | Date | RegExp;
 type ColorPaletteInput = Record<string, StyleInput>;
 type ColorFn = (text: Prim) => string;
@@ -58,8 +58,8 @@ export class ColorOutputUtil {
         }
       }
       levelPairs[level] = [
-        TerminalUtil.styleText(prefix),
-        TerminalUtil.styleText(suffix.reverse())
+        ANSICodes.STYLE(prefix),
+        ANSICodes.STYLE(suffix.reverse())
       ];
     }
     return levelPairs;
