@@ -118,7 +118,7 @@ export class Terminal implements TermState {
   async trackProgress<T, V extends TerminalProgressEvent>(
     message: string, source: AsyncIterable<T>, resolve: MapFn<T, V>, config?: TerminalProgressConfig
   ): Promise<void> {
-    const render = TerminalOperation.buildProgressBar(this, config?.style ?? { inverse: true }, message);
+    const render = TerminalOperation.buildProgressBar(this, config?.style ?? { background: 'limeGreen', text: 'black' }, message);
     return this.streamToPosition(source, async (v, i) => render(await resolve(v, i)), { position: config?.position, staticMessage: message });
   }
 }

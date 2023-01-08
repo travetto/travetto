@@ -80,7 +80,7 @@ export class TerminalOperation {
     const color = ColorOutputUtil.colorer(style);
     return ({ total, idx, text }): string => {
       const line = [prefix, total ? `${idx}/${total}` : `${idx}`, text].filter(x => !!x).join(' ');
-      const full = line.padEnd(term.width);
+      const full = ` ${line}`.padEnd(term.width);
       const pct = total === undefined ? 0 : (idx / total);
       const mid = Math.trunc(pct * term.width);
       const [l, r] = [full.substring(0, mid), full.substring(mid)];

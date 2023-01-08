@@ -158,7 +158,7 @@ export class CliModuleUtil {
       const message = ['Running', '[', cmd, ...args, ']'].join(' ');
       const cfg = { position: config.progressPosition ?? 'bottom' } as const;
       const stream = new Terminal(config.showProgress === true ? process.stderr : config.showProgress);
-      await stream.trackProgress(message, work, ev => ({ ...ev, status: ev.value !== undefined ? `${ev.value}` : '' }), cfg);
+      await stream.trackProgress(message, work, ev => ({ ...ev, text: ev.value !== undefined ? `${ev.value}` : '' }), cfg);
     } else {
       for await (const _ of work) {
         // Ensure its all consumed
