@@ -14,7 +14,7 @@ export class AppListLoader {
 
   #cacheConfig: string;
 
-  constructor(cacheConfig: string = path.resolve('.trv-app-cache.json')) {
+  constructor(cacheConfig: string = path.resolve(RootIndex.mainModule.output, 'trv-app-cache.json')) {
     this.#cacheConfig = cacheConfig;
   }
 
