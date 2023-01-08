@@ -20,8 +20,8 @@ export class AppRunUtil {
       app = (await new AppListLoader().findByName(app))!;
     }
 
-    if (app.module) {
-      RootIndex.reinitForModule(app.module); // Reinit with app
+    if (app.module !== RootIndex.mainModule.name) { // Mono-repo support
+      RootIndex.reinitForModule(app.module); // Reinit with specified module
     }
 
     if (!Env.isTrue('DEBUG')) {

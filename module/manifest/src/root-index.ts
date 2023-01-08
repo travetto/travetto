@@ -44,6 +44,7 @@ class $RootIndex extends ManifestIndex {
    */
   reinitForModule(module: string): void {
     this.init(this.root, $RootIndex.resolveManifestJSON(this.root, module));
+    this.#config = undefined;
   }
 
   /**
