@@ -57,10 +57,14 @@ export class AppScanUtil {
     if (!RootIndex.isMonoRepoRoot()) {
       return items;
     }
-    return items.flatMap(item => {
+    const final: ApplicationConfig[] = [];
+    for (const item of items) {
       const mod = RootIndex.getModuleFromSource(item.filename);
-      return (mod?.local || mod?.main) ? [...RootIndex.getDependentModules(mod)]
-        .map(dep => ({ ...item, module: dep.name, moduleName: `${dep.name}:${item.name}` })) : undefined;
-    }).filter((x): x is Exclude<typeof x, undefined> => !!x);
+      if (!(mod?.local || mod?.main)) { continue; }
+      for (const dep of RootIndex.getDependentModules(mod)) {
+        final.push(({ ...item, module: dep.name, moduleName: `${dep.name}:${item.name}` }));
+      }
+    }
+    return final;
   }
 }

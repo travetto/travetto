@@ -61,9 +61,8 @@ export class AppListLoader {
   async buildList(): Promise<ApplicationConfig[]> {
     try {
       if (parentPort) { // If top level, recurse
-        const list = await AppScanUtil.scanList();
-        const items = list.map(({ target, ...rest }) => rest);
-        return AppScanUtil.expandByDependents(items);
+        return AppScanUtil.expandByDependents(await AppScanUtil.scanList())
+          .map(({ target, ...rest }) => rest);
       } else {
         return await (ExecUtil.worker<ApplicationConfig[]>(
           RootIndex.resolveFileImport('@travetto/app/support/main.list-build.ts')
