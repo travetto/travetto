@@ -17,6 +17,10 @@ export interface RunState {
    */
   mode?: 'single' | 'watch' | 'standard';
   /**
+   * Show progress to stderr
+   */
+  showProgress?: boolean;
+  /**
    * Number of test suites to run concurrently, when mode is not single
    */
   concurrency: number;

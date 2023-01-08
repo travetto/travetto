@@ -21,5 +21,4 @@ export type TerminalTableEvent = { idx: number, text: string, done?: boolean };
 export type TerminalTableConfig = { header?: string[], forceNonInteractiveOrder?: boolean };
 export type TerminalProgressEvent = { idx: number, total?: number, text?: string };
 export type TerminalProgressRender = (ev: TerminalProgressEvent) => string;
-export type TerminalProgressConfig = { position?: TermLinePosition, renderer?: TerminalProgressRender };
 export type TerminalWaitingConfig = { position?: TermLinePosition } & DelayedConfig;

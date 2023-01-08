@@ -1,7 +1,5 @@
-import { Writable } from 'stream';
-
 import { path } from '@travetto/manifest';
-import { GlobalTerminal } from '@travetto/terminal';
+import { GlobalTerminal, Terminal } from '@travetto/terminal';
 import { ErrorUtil, ObjectUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
@@ -16,19 +14,19 @@ import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 @Consumable('tap')
 export class TapEmitter implements TestConsumer {
   #count = 0;
-  #stream: Writable;
   #enhancer: TestResultsEnhancer;
+  #terminal: Terminal;
 
   constructor(
-    stream: Writable = process.stdout,
+    terminal = new Terminal(process.stdout),
     enhancer: TestResultsEnhancer = CONSOLE_ENHANCER
   ) {
-    this.#stream = stream;
+    this.#terminal = terminal;
     this.#enhancer = enhancer;
   }
 
-  protected log(message: string): void {
-    this.#stream.write(`${message}\n`);
+  log(message: string): void {
+    this.#terminal.writeLines(message);
   }
 
   /**
@@ -42,7 +40,7 @@ export class TapEmitter implements TestConsumer {
    * Output supplemental data (e.g. logs)
    */
   logMeta(obj: Record<string, unknown>): void {
-    const lineLength = GlobalTerminal.columns - 5;
+    const lineLength = GlobalTerminal.width - 5;
     let body = YamlUtil.serialize(obj, { wordwrap: lineLength });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);

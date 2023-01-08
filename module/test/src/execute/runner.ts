@@ -55,7 +55,7 @@ export class Runner {
 
     const [file, ...args] = this.#state.args;
 
-    await consumer.onStart([file]);
+    await consumer.onStart([path.resolve(file)]);
     await TestExecutor.execute(consumer, file, ...args);
     return consumer.summarizeAsBoolean();
   }

@@ -1,9 +1,20 @@
 import tty from 'tty';
 
-import { IterableUtil } from './iterable';
-import { TerminalProgressConfig, TerminalProgressEvent, TerminalTableConfig, TerminalTableEvent, TerminalWaitingConfig, TermState } from './types';
+import { IterableUtil, MapFn } from './iterable';
+import { TerminalProgressEvent, TerminalTableConfig, TerminalTableEvent, TerminalWaitingConfig, TermLinePosition, TermState } from './types';
 import { TerminalOperation } from './operation';
 import { TerminalWriter } from './writer';
+import { StyleInput } from './color-output';
+
+type TerminalProgressConfig = {
+  position?: TermLinePosition;
+  style?: StyleInput;
+};
+
+type TerminalStreamPositionConfig = {
+  position?: TermLinePosition;
+  staticMessage?: string;
+};
 
 /**
  * An enhanced tty write stream
@@ -46,8 +57,11 @@ export class Terminal implements TermState {
     return TerminalWriter.for(this);
   }
 
-  writeLines(...text: string[]): Promise<void> {
-    return this.writer().writeLines(text).commit();
+  async writeLines(...text: string[]): Promise<void> {
+    if (text.length === 0 && text[0].includes('\n')) {
+      text = text[0].split(/\n/);
+    }
+    return this.writer().writeLines(text, true).commit();
   }
 
   /**
@@ -65,7 +79,7 @@ export class Terminal implements TermState {
   /**
    * Consumes a stream, of events, tied to specific list indices, and updates in place
    */
-  async makeList<T>(source: AsyncIterable<T>, resolve: (val: T) => TerminalTableEvent, config: TerminalTableConfig = {}): Promise<void> {
+  async streamList<T>(source: AsyncIterable<T>, resolve: MapFn<T, TerminalTableEvent>, config: TerminalTableConfig = {}): Promise<void> {
     const resolved = IterableUtil.map(source, resolve);
 
     await this.writeLines(...(config.header ?? []));
@@ -85,18 +99,27 @@ export class Terminal implements TermState {
   }
 
   /**
-   * Track progress of an asynchronous iterator, allowing the showing of a progress bar if the stream produces idx and total
+   * Streams an iterable to a specific location, with support for non-interactive ttys
    */
-  async trackProgress<T, V extends TerminalProgressEvent>(
-    message: string, source: AsyncIterable<T>, resolve: (val: T) => V, config?: TerminalProgressConfig
-  ): Promise<void> {
+  async streamToPosition<T>(source: AsyncIterable<T>, resolve: MapFn<T, string>, config?: TerminalStreamPositionConfig): Promise<void> {
     if (!this.interactive) {
-      await this.writeLines(`${message}...`);
+      if (config?.staticMessage) {
+        await this.writeLines(config.staticMessage);
+      }
       await IterableUtil.drain(source);
       return;
     }
-    const render = config?.renderer ?? TerminalOperation.buildProgressBar(this, { background: 'green', text: 'white' }, message);
-    return TerminalOperation.streamToPosition(this, IterableUtil.map(source, resolve, render), config?.position);
+    return TerminalOperation.streamToPosition(this, IterableUtil.map(source, resolve), config?.position);
+  }
+
+  /**
+   * Track progress of an asynchronous iterator, allowing the showing of a progress bar if the stream produces idx and total
+   */
+  async trackProgress<T, V extends TerminalProgressEvent>(
+    message: string, source: AsyncIterable<T>, resolve: MapFn<T, V>, config?: TerminalProgressConfig
+  ): Promise<void> {
+    const render = TerminalOperation.buildProgressBar(this, config?.style ?? { inverse: true }, message);
+    return this.streamToPosition(source, async (v, i) => render(await resolve(v, i)), { position: config?.position, staticMessage: message });
   }
 }
 

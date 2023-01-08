@@ -1,6 +1,6 @@
 import { IterableUtil } from './iterable';
 import { TerminalWriter } from './writer';
-import { TermCoord, TerminalProgressRender, TerminalWaitingConfig, TermLinePosition, TermState } from './types';
+import { Indexed, TermCoord, TerminalProgressRender, TerminalWaitingConfig, TermLinePosition, TermState } from './types';
 import { TerminalUtil } from './util';
 import { ColorOutputUtil, StyleInput } from './color-output';
 
@@ -45,7 +45,7 @@ export class TerminalOperation {
   /**
    * Consumes a stream, of events, tied to specific list indices, and updates in place
    */
-  static async streamList(term: TermState, source: AsyncIterable<{ idx: number, text: string }>): Promise<void> {
+  static async streamList(term: TermState, source: AsyncIterable<Indexed & { text: string }>): Promise<void> {
     let max = 0;
     try {
       await TerminalWriter.for(term).hideCursor().commit();

@@ -86,7 +86,7 @@ class $ShutdownManager {
 
     try {
       // If the err is not an exit code
-      if (exitErr && typeof exitErr !== 'number') {
+      if (exitErr && typeof exitErr !== 'number' && exitErr !== 'SIGTERM' && exitErr !== 'SIGKILL') {
         console.warn('Error on shutdown', { package: name, error: exitErr });
       }
 

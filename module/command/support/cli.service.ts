@@ -34,7 +34,7 @@ export class CliServiceCommand extends CliCommand<{}> {
     const maxVersion = Math.max(...all.map(x => x.version.length), 'Version'.length) + 3;
     const maxStatus = 20;
 
-    await GlobalTerminal.makeList(
+    await GlobalTerminal.streamList(
       ServiceUtil.triggerServices(action, all),
       ({ svc, statusText, status, idx }) => ({
         idx,

@@ -96,9 +96,12 @@ export class TerminalWriter {
   }
 
   /** Write multiple lines */
-  writeLines(lines: (string | undefined)[]): this {
+  writeLines(lines: (string | undefined)[], clear = false): this {
     lines = lines.filter(x => x !== undefined);
     if (lines.length > 0) {
+      if (clear) {
+        lines = lines.map(x => `${ANSICodes.ERASE_LINE(2)}${x}`); // Erase all
+      }
       lines.push('');
     }
     return lines.length ? this.write(lines.join('\n')) : this;

@@ -3,7 +3,7 @@ import { DelayedConfig, Indexed } from './types';
 
 export type StoppableIterable<T> = { stream: AsyncIterable<T>, stop: () => void };
 
-type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
+export type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
 
 const isIdx = (x: unknown): x is Indexed => (x !== undefined && x !== null) && typeof x === 'object' && 'idx' in x;
 
