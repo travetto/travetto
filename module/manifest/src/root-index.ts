@@ -147,6 +147,10 @@ let index: $RootIndex | undefined;
 
 try {
   index = new $RootIndex();
-} catch { }
+} catch (err) {
+  if (process.env.TRV_THROW_ROOT_INDEX_ERR) {
+    throw err;
+  }
+}
 
 export const RootIndex: $RootIndex = index!;

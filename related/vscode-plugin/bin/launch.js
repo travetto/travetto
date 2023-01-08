@@ -6,11 +6,14 @@ async function activate(context) {
   process.chdir(vscode.workspace.workspaceFolders[0].uri.fsPath);
 
   const { getContext } = await import('@travetto/compiler/bin/transpile');
-  const ctx = await getContext('watch');
+  const ctx = await getContext();
 
   const out = `${ctx.workspacePath}/${ctx.outputFolder}`;
   process.env.TRV_OUTPUT = out;
-  process.env.TRV_MANIFEST = `${out}/${ctx.manifestFile}`;
+  process.env.TRV_MANIFEST = ctx.mainModule;
+  process.env.TRV_THROW_ROOT_INDEX_ERR = '1';
+
+  await import('@travetto/manifest');
 
   const { setup } = await import('@travetto/base/support/init.main');
   setup();

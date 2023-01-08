@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.9",
-    "@types/vscode": "^1.73.1"
+    "@types/vscode": "^1.74.0"
   },
   "travetto": {
     "displayName": "Travetto Plugin",
