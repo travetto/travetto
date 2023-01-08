@@ -351,7 +351,7 @@ First we must start the application:
     },
     ApiSpecConfig: { output: './openapi.yml', persist: false, skipRoutes: false, exposeAllSchemas: false },
     CommonLoggerConfig: { format: 'line', plain: false, timestamp: 'ms' },
-    FileModelConfig: { folder: '/tmp/cefcae1f75', namespace: '.' },
+    FileModelConfig: { folder: '/tmp/trv_file__travetto_todo_app', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
       hosts: [ 'localhost' ],

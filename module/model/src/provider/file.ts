@@ -1,9 +1,11 @@
 import fs from 'fs/promises';
 import { createReadStream } from 'fs';
+
 import os from 'os';
+
 import { Readable } from 'stream';
 
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { StreamUtil, Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -36,9 +38,7 @@ export class FileModelConfig {
   cullRate?: number | TimeSpan;
 
   async postConstruct(): Promise<void> {
-    if (!this.folder) {
-      this.folder = path.resolve(os.tmpdir(), ModelUtil.uuid().substring(0, 10));
-    }
+    this.folder ??= path.resolve(os.tmpdir(), `trv_file_${RootIndex.mainModule.name.replace(/[^a-z]/g, '_')}`);
   }
 }
 
@@ -66,8 +66,6 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   /**
    * The root location for all activity
-   *
-   * @param folder
    */
   constructor(public readonly config: FileModelConfig) { }
 
@@ -82,9 +80,8 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       resolved = path.resolve(resolved, `${id}${suffix}`);
       dir = path.dirname(resolved);
     }
-    if (!await exists(dir)) {
-      await fs.mkdir(dir, { recursive: true });
-    }
+
+    await fs.mkdir(dir, { recursive: true });
     return resolved;
   }
 
