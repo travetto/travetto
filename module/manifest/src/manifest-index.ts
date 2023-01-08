@@ -48,15 +48,7 @@ export class ManifestIndex {
   #importToEntry = new Map<string, IndexedFile>();
 
   constructor(root: string, manifest: string | ManifestRoot) {
-    this.#root = root;
-    if (typeof manifest === 'string') {
-      this.#manifestFile = manifest;
-      this.#manifest = JSON.parse(fs.readFileSync(this.#manifestFile, 'utf8'));
-    } else {
-      this.#manifest = manifest;
-      this.#manifestFile = path.resolve(this.#root, manifest.manifestFile);
-    }
-    this.#index();
+    this.init(root, manifest);
   }
 
   #resolveOutput(...parts: string[]): string {
@@ -73,6 +65,13 @@ export class ManifestIndex {
 
   get manifestFile(): string {
     return this.#manifestFile;
+  }
+
+  init(root: string, manifestInput: string | ManifestRoot): void {
+    this.#root = root;
+    this.#manifestFile = typeof manifestInput === 'string' ? manifestInput : manifestInput.manifestFile;
+    this.#manifest = typeof manifestInput === 'string' ? JSON.parse(fs.readFileSync(this.#manifestFile, 'utf8')) : manifestInput;
+    this.#index();
   }
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
@@ -94,6 +93,10 @@ export class ManifestIndex {
    * Get index of all source files
    */
   #index(): void {
+    this.#outputToEntry.clear();
+    this.#importToEntry.clear();
+    this.#sourceToEntry.clear();
+
     this.#modules = Object.values(this.manifest.modules)
       .map(m => ({
         ...m,
@@ -269,9 +272,9 @@ export class ManifestIndex {
   /**
    * Get all modules (transitively) that depend on this module
    */
-  getDependentModules(root: IndexedModule): IndexedModule[] {
+  getDependentModules(root: IndexedModule): Set<IndexedModule> {
     const seen = new Set<string>();
-    const out: IndexedModule[] = [];
+    const out = new Set<IndexedModule>();
     const toProcess = [root.name];
     while (toProcess.length) {
       const next = toProcess.shift()!;
@@ -280,7 +283,7 @@ export class ManifestIndex {
       }
       const mod = this.getModule(next)!;
       toProcess.push(...mod.parents);
-      out.push(mod);
+      out.add(mod);
     }
     return out;
   }

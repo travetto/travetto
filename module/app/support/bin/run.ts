@@ -1,7 +1,6 @@
 import { RootRegistry } from '@travetto/registry';
 import { RootIndex } from '@travetto/manifest';
-import { Env, ExecUtil, ConsoleManager } from '@travetto/base';
-import { CliModuleUtil } from '@travetto/cli';
+import { Env, ConsoleManager } from '@travetto/base';
 
 import { ApplicationRegistry } from '../../src/registry';
 import type { ApplicationConfig } from '../../src/types';
@@ -21,17 +20,8 @@ export class AppRunUtil {
       app = (await new AppListLoader().findByName(app))!;
     }
 
-    if (CliModuleUtil.isMonoRepoRoot() && app.moduleName) {
-      await ExecUtil.spawn(
-        'trv',
-        ['run', app.name, ...sub],
-        {
-          cwd: RootIndex.getModule(app.module)!.source,
-          env: { TRV_MANIFEST: '' },
-          stdio: 'inherit'
-        }
-      ).result;
-      return;
+    if (app.module) {
+      RootIndex.reinitForModule(app.module); // Reinit with app
     }
 
     if (!Env.isTrue('DEBUG')) {
@@ -43,9 +33,6 @@ export class AppRunUtil {
     if (!Env.isTrue('DEBUG')) {
       ConsoleManager.setDebugFromEnv();
     }
-
-    // Convert to full app
-    app = typeof app === 'string' ? ApplicationRegistry.getByName(app)! : app;
 
     // Run
     return await ApplicationRegistry.run(app.name, sub);

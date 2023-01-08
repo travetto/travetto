@@ -3,7 +3,6 @@ import { parentPort } from 'worker_threads';
 
 import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
-import { CliModuleUtil } from '@travetto/cli';
 
 import { AppScanUtil } from '../../src/scan';
 import type { ApplicationConfig } from '../../src/types';
@@ -63,33 +62,12 @@ export class AppListLoader {
     try {
       if (parentPort) { // If top level, recurse
         const list = await AppScanUtil.scanList();
-        return list.map(({ target, ...rest }) => rest);
-      } else if (!CliModuleUtil.isMonoRepoRoot()) {
+        const items = list.map(({ target, ...rest }) => rest);
+        return AppScanUtil.expandByDependents(items);
+      } else {
         return await (ExecUtil.worker<ApplicationConfig[]>(
           RootIndex.resolveFileImport('@travetto/app/support/main.list-build.ts')
         ).message);
-      } else {
-        const configs: ApplicationConfig[] = [];
-        await CliModuleUtil.runOnModules('all',
-          ['trv', 'main', '@travetto/app/support/main.list-build.ts'],
-          {
-            showProgress: true,
-            showStdout: false,
-            onMessage(folder, perFolder: ApplicationConfig[]) {
-              if (perFolder.length) {
-                if (perFolder[0].module !== RootIndex.manifest.mainModule) {
-                  for (const m of perFolder) {
-                    if (m) {
-                      m.moduleName = `${m.module}:${m.name}`;
-                    }
-                  }
-                }
-                configs.push(...perFolder);
-              }
-            },
-          }
-        );
-        return configs;
       }
     } catch (err) {
       return [];

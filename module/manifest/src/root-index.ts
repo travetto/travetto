@@ -6,6 +6,9 @@ import { IndexedModule, ManifestIndex } from './manifest-index';
 import { FunctionMetadata, Package, PackageDigest } from './types';
 import { PackageUtil } from './package';
 
+/**
+ * Extended manifest index geared for application execution
+ */
 class $RootIndex extends ManifestIndex {
   /**
    * Load all source modules
@@ -35,6 +38,24 @@ class $RootIndex extends ManifestIndex {
     super(output, $RootIndex.resolveManifestJSON(output, process.env.TRV_MANIFEST));
   }
 
+  /**
+   * **WARNING**: This is a destructive operation, and should only be called before loading any code
+   * @private
+   */
+  reinitForModule(module: string): void {
+    this.init(this.root, $RootIndex.resolveManifestJSON(this.root, module));
+  }
+
+  /**
+   * Determines if the manifest root is the root for a monorepo
+   */
+  isMonoRepoRoot(): boolean {
+    return !!this.manifest.monoRepo && this.manifest.workspacePath === this.manifest.mainPath;
+  }
+
+  /**
+   * Asynchronously load all source files from manifest
+   */
   async loadSource(): Promise<void> {
     for (const { output } of this.findSrc()) {
       await import(output);
@@ -50,10 +71,16 @@ class $RootIndex extends ManifestIndex {
     return clsName ? `${id}￮${clsName}` : id;
   }
 
+  /**
+   * Get main module for manifest
+   */
   get mainModule(): IndexedModule {
     return this.getModule(this.mainPackage.name)!;
   }
 
+  /**
+   * Get main package for manifest
+   */
   get mainPackage(): Package {
     if (!this.#config) {
       const { output: mainFolder } = this.getModule(this.manifest.mainModule)!;

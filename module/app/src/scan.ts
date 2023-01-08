@@ -47,4 +47,20 @@ export class AppScanUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return config as ApplicationConfig[];
   }
+
+  /**
+   * Expand application configurations by dependent modules
+   * @param items
+   * @returns
+   */
+  static expandByDependents(items: ApplicationConfig[]): ApplicationConfig[] {
+    if (!RootIndex.isMonoRepoRoot()) {
+      return items;
+    }
+    return items.flatMap(item => {
+      const mod = RootIndex.getModuleFromSource(item.filename);
+      return (mod?.local || mod?.main) ? [...RootIndex.getDependentModules(mod)]
+        .map(dep => ({ ...item, module: dep.name, moduleName: `${dep.name}:${item.name}` })) : undefined;
+    }).filter((x): x is Exclude<typeof x, undefined> => !!x);
+  }
 }

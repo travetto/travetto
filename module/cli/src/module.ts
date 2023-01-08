@@ -20,11 +20,6 @@ const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.lengt
  */
 export class CliModuleUtil {
 
-  static isMonoRepoRoot(): boolean {
-    return !!RootIndex.manifest.monoRepo &&
-      RootIndex.manifest.workspacePath === RootIndex.manifest.mainPath;
-  }
-
   /**
    * Find modules that changed, and the dependent modules
    * @param hash
