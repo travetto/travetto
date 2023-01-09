@@ -19,6 +19,7 @@ openapi.json
 # VSCode
 related/*/out
 related/*/.vscode
+!related/vscode-plugin/.vscode
 
 # Pack
 dist/

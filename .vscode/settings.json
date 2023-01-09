@@ -4,6 +4,7 @@
     "direnv"
   ],
   "files.exclude": {
-    "**/.trv_compiler/**": true
+    "**/.trv_compiler/**": true,
+    "**/.trv_output/**": true
   },
 }
