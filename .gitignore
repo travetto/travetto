@@ -34,5 +34,3 @@ email-dev-context.json
 
 # Specific
 module/scaffold/**/eslintrc.json
-related/travetto.github.io/src/assets/images/vscode-plugin
-related/travetto.github.io/.angular

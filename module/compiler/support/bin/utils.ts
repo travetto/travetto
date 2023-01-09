@@ -12,7 +12,7 @@ const req = createRequire(`${process.cwd()}/node_modules`);
 
 type ModFile = { input: string, output: string, stale: boolean };
 
-const SOURCE_SEED = ['package.json', 'index.ts', '__index__.ts', 'src', 'support'];
+const SOURCE_SEED = ['package.json', 'index.ts', '__index__.ts', 'src', 'support', 'bin'];
 
 export const IS_DEBUG = /\b([*]|build)\b/.test(process.env.DEBUG ?? '');
 
@@ -36,8 +36,8 @@ export async function getProjectSources(
     process.cwd() :
     path.dirname(resolveImport(`${module}/package.json`));
 
-  const folders = seed.filter(x => !/[.](ts|js|json)$/.test(x)).map(x => path.resolve(inputFolder, x));
-  const files = seed.filter(x => /[.](ts|js|json)$/.test(x)).map(x => path.resolve(inputFolder, x));
+  const folders = seed.filter(x => !/[.]/.test(x)).map(x => path.resolve(inputFolder, x));
+  const files = seed.filter(x => /[.]/.test(x)).map(x => path.resolve(inputFolder, x));
 
   while (folders.length) {
     const sub = folders.pop();
@@ -56,7 +56,7 @@ export async function getProjectSources(
         folders.push(resolvedInput);
       } else if (file.endsWith('.d.ts')) {
         // Do nothing
-      } else if (file.endsWith('.ts')) {
+      } else if (file.endsWith('.ts') || file.endsWith('.js')) {
         files.push(resolvedInput);
       }
     }

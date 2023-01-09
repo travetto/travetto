@@ -114,6 +114,12 @@ export class CompilerState {
     }
   }
 
+  getDirtyModules(): string[] {
+    return [...Object.entries(this.#delta)]
+      .filter(x => x[1].length > 0)
+      .map(([mod]) => mod);
+  }
+
   getAllFiles(): string[] {
     return [...this.#inputFiles];
   }

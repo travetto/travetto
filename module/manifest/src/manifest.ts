@@ -24,6 +24,15 @@ export class ManifestUtil {
   }
 
   /**
+   * Generate manifest for a given context, and persist
+   * @param ctx 
+   */
+  static async createAndWriteManifest(ctx: ManifestContext): Promise<void> {
+    const { manifest } = await this.produceState(ctx);
+    await this.writeManifest(ctx, manifest);
+  }
+
+  /**
    * Read manifest from a folder
    */
   static async readManifest(ctx: ManifestContext): Promise<ManifestRoot> {
@@ -67,5 +76,27 @@ export class ManifestUtil {
       oldManifest
     );
     return { manifest, delta };
+  }
+
+  /**
+   * Resolves a module file, from a context and manifest
+   */
+  static resolveFile(ctx: ManifestContext, manifest: ManifestRoot, module: string, file: string): string {
+    return path.resolve(
+      ctx.workspacePath,
+      ctx.compilerFolder,
+      manifest.modules[module].output,
+      file
+    );
+  }
+
+  /**
+   * Write manifest for a given context
+   */
+  static async writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
+    // Write manifest in the scenario we are in mono-repo state where everything pre-existed
+    const file = path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile);
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.writeFile(file, JSON.stringify(manifest));
   }
 }

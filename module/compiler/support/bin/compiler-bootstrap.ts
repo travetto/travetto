@@ -5,7 +5,6 @@ import cp from 'child_process';
 import type { ManifestState, ManifestContext, ManifestRoot } from '@travetto/manifest';
 
 import { log, compileIfStale, getProjectSources, addNodePath, importManifest } from './utils';
-import { getContext } from '../../bin/transpile';
 
 const PRECOMPILE_MODS = [
   '@travetto/terminal',
@@ -25,6 +24,11 @@ export async function precompile(ctx: ManifestContext): Promise<void> {
   }
 }
 
+export async function writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
+  const { ManifestUtil } = await importManifest(ctx);
+  return ManifestUtil.writeManifest(ctx, manifest);
+}
+
 /**
  *  Step 1
  */
@@ -32,13 +36,6 @@ export async function buildManifest(ctx: ManifestContext): Promise<ManifestState
   log('[1] Manifest Generation');
   const { ManifestUtil } = await importManifest(ctx);
   return ManifestUtil.produceState(ctx);
-}
-
-export async function writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
-  // Write manifest in the scenario we are in mono-repo state where everything pre-existed
-  const file = path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile);
-  await fs.mkdir(path.dirname(file), { recursive: true });
-  await fs.writeFile(file, JSON.stringify(manifest));
 }
 
 function shouldRebuildCompiler({ delta }: ManifestState): { total: boolean, transformers: [string, string][] } {
@@ -97,37 +94,24 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
 
   changes = changes.filter(x => x.type !== 'removed');
 
-  if (changes.length === 0 && !watch) {
-    log('[3] Output Ready');
-    return await writeManifest(ctx, state.manifest);
-  }
-
   const { ManifestUtil } = await importManifest(ctx);
-  log('[3] Changed Sources', changes);
-  const args = [
-    path.resolve(
-      ctx.workspacePath,
-      ctx.compilerFolder,
-      state.manifest.modules['@travetto/compiler'].output,
-      'support/main.output'
-    ),
-    (manifestTemp ??= await ManifestUtil.writeState(state)),
-    `${!!watch}`
-  ];
+  const resolve = ManifestUtil.resolveFile.bind(null, ctx, state.manifest, '@travetto/compiler');
 
-  if (ctx.monoRepo) {
-    // Write out all changed manifests
-    for (const module of new Set(changes.map(x => x.module))) {
-      const subCtx = await getContext(state.manifest.modules[module].source);
-      const sub = await buildManifest(subCtx);
-      await writeManifest(subCtx, sub.manifest);
+  manifestTemp ??= await ManifestUtil.writeState(state);
+  const cwd = path.resolve(ctx.workspacePath, ctx.compilerFolder);
+
+  if (changes.length || watch) {
+    log('[3] Changed Sources', changes);
+
+    // Blocking call
+    const res = cp.spawnSync(process.argv0,
+      [resolve('support/main.output'), manifestTemp, !!watch],
+      { cwd, stdio: 'inherit', encoding: 'utf8' }
+    );
+
+    if (res.status) {
+      throw new Error(res.stderr);
     }
-  }
-
-  // Blocking call
-  const res = cp.spawnSync(process.argv0, args, { cwd: path.resolve(ctx.workspacePath, ctx.compilerFolder), stdio: 'inherit', encoding: 'utf8' });
-  if (res.status) {
-    throw new Error(res.stderr);
   }
 }
 

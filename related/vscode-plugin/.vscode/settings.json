@@ -1,3 +1,16 @@
 {
-  "typescript.tsdk": "../../node_modules/typescript/lib"
+  "typescript.tsdk": "../../node_modules/typescript/lib",
+  "files.exclude": {
+    "**/.trv_compiler/**": true,
+    "**/.trv_output/**": true,
+    "**/.angular/**": true,
+  },
+  "files.watcherExclude": {
+    "**/.git/*/**": true,
+    "**/node_modules/*/**": true,
+    "**/.angular/**": true,
+    "**/.trv_compiler/**": true,
+    "**/.trv_output/**": true,
+    "../travetto.github.io/node_modules": true,
+  }
 }

@@ -166,7 +166,7 @@ export class CompilerUtil {
     const projTsconfig = path.resolve('tsconfig.json');
     // Fallback to base tsconfig if not found in local folder
     const config = (await fs.stat(projTsconfig).catch(() => false)) ? projTsconfig : bootTsConfig;
-    const base = await CompilerUtil.readTsConfigOptions(config);
+    const base = await this.readTsConfigOptions(config);
 
     const { type } = PackageUtil.readPackage(workspace);
 

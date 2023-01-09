@@ -2,7 +2,7 @@ import ts from 'typescript';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { ManifestState } from '@travetto/manifest';
+import { ManifestState, ManifestUtil } from '@travetto/manifest';
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
 
 import { CompilerUtil } from './util';
@@ -175,6 +175,20 @@ export class Compiler {
 
     if (failed) {
       process.exit(-1);
+    }
+
+    // Update manifests
+    await ManifestUtil.writeManifest(this.#state.manifest, this.#state.manifest);
+
+    if (this.#state.manifest.monoRepo) {
+      // Write out all changed manifests
+      const { getContext } = await import('@travetto/compiler/bin/transpile');
+      for (const module of this.#state.getDirtyModules()) {
+        if (module !== this.#state.manifest.mainModule) {
+          const subCtx = await getContext(this.#state.manifest.modules[module].source);
+          await ManifestUtil.createAndWriteManifest(subCtx);
+        }
+      }
     }
 
     if (watch) {
