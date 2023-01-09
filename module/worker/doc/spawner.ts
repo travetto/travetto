@@ -3,7 +3,7 @@ import { WorkPool, WorkUtil, IterableWorkSet } from '@travetto/worker';
 
 export async function main(): Promise<void> {
   const pool = new WorkPool(() =>
-    WorkUtil.spawnedWorker<{ data: string }, string>(
+    WorkUtil.spawnedWorker<{ data: string }, number>(
       () => ExecUtil.spawn('trv', ['main', 'support/main.spawned.ts']),
       ch => ch.once('ready'), // Wait for child to indicate it is ready
       async (channel, inp) => {
@@ -13,12 +13,12 @@ export async function main(): Promise<void> {
         const { data } = await res; // Get answer
         console.log('Request complete', { input: inp, output: data });
 
-        if (!(inp + inp === data)) {
+        if (!(`${inp + inp}` === data)) {
           // Ensure the answer is double the input
           throw new Error('Did not get the double');
         }
       }
     )
   );
-  await pool.process(new IterableWorkSet([1, 2, 3, 4, 5])).then(x => pool.shutdown());
+  await pool.process(new IterableWorkSet([1, 2, 3, 4, 5]));
 }

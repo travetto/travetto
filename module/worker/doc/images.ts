@@ -25,7 +25,7 @@ class ImageProcessor implements Worker<string> {
   }
 }
 
-export class ImageCompressor extends WorkPool<string, ImageProcessor> {
+export class ImageCompressor extends WorkPool<string> {
 
   pendingImages = new ManualAsyncIterator<string>();
 

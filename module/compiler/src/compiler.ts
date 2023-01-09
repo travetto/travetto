@@ -162,14 +162,13 @@ export class Compiler {
         failed = true;
         console.error(CompilerUtil.buildTranspileError(file, err));
       }
-      return { idx: i, total, text: file };
+      return { idx: i, total, text: `Compiling [%idx/%total] -- ${file}` };
     };
 
     await GlobalTerminal.trackProgress(
-      'Compiling',
       this.emit(this.state.getDirtyFiles(), emitter),
       resolveEmittedFile,
-      { position: 'bottom' }
+      { position: 'bottom', staticMessage: 'Compiling...' }
     );
 
     if (failed) {

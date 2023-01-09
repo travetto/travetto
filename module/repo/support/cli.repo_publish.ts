@@ -21,14 +21,16 @@ export class RepoPublishCommand extends CliCommand<Options> {
   }
 
   async action(...args: unknown[]): Promise<void> {
-    const withPublished = (await CliModuleUtil.findModules('all'))
-      .filter(mod => !mod.internal)
-      .map(mod => Npm.isPublished(mod).then(published => [mod, published] as const));
+    const published = await CliModuleUtil.runOnModules('all', mod => Npm.isPublished(mod), {
+      progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`
+    });
 
-    for (const [mod, published] of await Promise.all(withPublished)) {
-      if (!published) {
-        await Npm.publish(mod, this.cmd.dryRun);
+    await CliModuleUtil.runOnModules(
+      'all', mod => Npm.publish(mod, this.cmd.dryRun),
+      {
+        progressMessage: (mod) => `Published [%idx/%total] -- ${mod?.name}`,
+        filter: mod => published.get(mod) === false
       }
-    }
+    );
   }
 }

@@ -98,13 +98,14 @@ export class TerminalWriter {
   /** Write multiple lines */
   writeLines(lines: (string | undefined)[], clear = false): this {
     lines = lines.filter(x => x !== undefined);
-    if (lines.length > 0) {
+    let text = lines.join('\n');
+    if (text.length > 0) {
+      text = `${text}\n`;
       if (clear) {
-        lines = lines.map(x => `${ANSICodes.ERASE_LINE(2)}${x}`); // Erase all
+        text = text.replaceAll('\n', `${ANSICodes.ERASE_LINE(0)}\n`);
       }
-      lines.push('');
     }
-    return lines.length ? this.write(lines.join('\n')) : this;
+    return this.write(text);
   }
 
   /** Show cursor */

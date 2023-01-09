@@ -28,14 +28,14 @@ type WorkCompletionEvent<X> = { idx: number, total?: number, value: X };
 /**
  * Work pool support
  */
-export class WorkPool<X, T extends Worker<X>> {
+export class WorkPool<X> {
 
   static DEFAULT_SIZE = Math.min(os.cpus().length - 1, 4);
 
   /**
    * Generic-pool pool
    */
-  #pool: gp.Pool<T>;
+  #pool: gp.Pool<Worker<X>>;
   /**
    * Number of acquisitions in process
    */
@@ -65,7 +65,7 @@ export class WorkPool<X, T extends Worker<X>> {
    * @param getWorker Produces a new worker for the pool
    * @param opts Pool options
    */
-  constructor(getWorker: () => Promise<T> | T, opts?: gp.Options) {
+  constructor(getWorker: () => Promise<Worker<X>> | Worker<X>, opts?: gp.Options) {
     const args = {
       max: WorkPool.DEFAULT_SIZE,
       min: 1,
@@ -77,7 +77,7 @@ export class WorkPool<X, T extends Worker<X>> {
     this.#pool = gp.createPool({
       create: () => this.#createAndTrack(getWorker, args),
       destroy: x => this.destroy(x),
-      validate: async (x: T) => x.active
+      validate: async (x: Worker<X>) => x.active
     }, args);
 
     this.#shutdownCleanup = ShutdownManager.onShutdown(`worker.pool.${this.constructor.name}`, () => {
@@ -91,7 +91,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Creates and tracks new worker
    */
-  async #createAndTrack(getWorker: () => Promise<T> | T, opts: gp.Options): Promise<T> {
+  async #createAndTrack(getWorker: () => Promise<Worker<X>> | Worker<X>, opts: gp.Options): Promise<Worker<X>> {
     try {
       this.#pendingAcquires += 1;
       const res = await getWorker();
@@ -117,7 +117,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Destroy the worker
    */
-  async destroy(worker: T): Promise<void> {
+  async destroy(worker: Worker<X>): Promise<void> {
     if (this.#trace) {
       console.debug('Destroying', { pid: process.pid, worker: worker.id });
     }
@@ -127,7 +127,7 @@ export class WorkPool<X, T extends Worker<X>> {
   /**
    * Free worker on completion
    */
-  async release(worker: T): Promise<void> {
+  async release(worker: Worker<X>): Promise<void> {
     if (this.#trace) {
       console.debug('Releasing', { pid: process.pid, worker: worker.id });
     }

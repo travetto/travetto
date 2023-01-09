@@ -6,14 +6,13 @@ import { TerminalOperation } from './operation';
 import { TerminalWriter } from './writer';
 import { StyleInput } from './color-output';
 
-type TerminalProgressConfig = {
-  position?: TermLinePosition;
-  style?: StyleInput;
-};
-
 type TerminalStreamPositionConfig = {
   position?: TermLinePosition;
   staticMessage?: string;
+};
+
+type TerminalProgressConfig = TerminalStreamPositionConfig & {
+  style?: StyleInput;
 };
 
 /**
@@ -58,10 +57,7 @@ export class Terminal implements TermState {
   }
 
   async writeLines(...text: string[]): Promise<void> {
-    if (text.length === 0 && text[0].includes('\n')) {
-      text = text[0].split(/\n/);
-    }
-    return this.writer().writeLines(text, true).commit();
+    return this.writer().writeLines(text, this.interactive).commit();
   }
 
   /**
@@ -116,10 +112,10 @@ export class Terminal implements TermState {
    * Track progress of an asynchronous iterator, allowing the showing of a progress bar if the stream produces idx and total
    */
   async trackProgress<T, V extends TerminalProgressEvent>(
-    message: string, source: AsyncIterable<T>, resolve: MapFn<T, V>, config?: TerminalProgressConfig
+    source: AsyncIterable<T>, resolve: MapFn<T, V>, config?: TerminalProgressConfig
   ): Promise<void> {
-    const render = TerminalOperation.buildProgressBar(this, config?.style ?? { background: 'limeGreen', text: 'black' }, message);
-    return this.streamToPosition(source, async (v, i) => render(await resolve(v, i)), { position: config?.position, staticMessage: message });
+    const render = TerminalOperation.buildProgressBar(this, config?.style ?? { background: 'limeGreen', text: 'black' });
+    return this.streamToPosition(source, async (v, i) => render(await resolve(v, i)), config);
   }
 }
 

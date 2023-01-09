@@ -76,10 +76,12 @@ export class TerminalOperation {
   /**
    * Build progress par formatter for terminal progress events
    */
-  static buildProgressBar(term: TermState, style: StyleInput, prefix?: string): TerminalProgressRender {
+  static buildProgressBar(term: TermState, style: StyleInput): TerminalProgressRender {
     const color = ColorOutputUtil.colorer(style);
     return ({ total, idx, text }): string => {
-      const line = [prefix, total ? `${idx}/${total}` : `${idx}`, text].filter(x => !!x).join(' ');
+      const totalStr = `${total ?? ''}`;
+      const idxStr = `${idx}`.padStart(totalStr.length);
+      const line = text ? text.replace(/%idx/, idxStr).replace(/%total/, totalStr) : total ? `${idxStr}/${totalStr}` : idxStr;
       const full = ` ${line}`.padEnd(term.width);
       const pct = total === undefined ? 0 : (idx / total);
       const mid = Math.trunc(pct * term.width);

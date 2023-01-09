@@ -30,18 +30,15 @@ export async function main(target?: string): Promise<void> {
     await (ExecUtil.spawn('trv', ['service', 'restart'], { stdio: 'inherit' }).result);
   }
 
-  const mods = (await CliModuleUtil.findModules('all'))
+  const mods = new Set((await CliModuleUtil.findModules('all'))
     .filter(x => !target || x.source === path.resolve(root, target))
-    .filter(x => (x.files.doc ?? []).some(f => f.source.endsWith('README.ts')));
-
-  const modSrc = new Set(mods.map(x => x.workspaceRelative));
+    .filter(x => (x.files.doc ?? []).some(f => f.source.endsWith('README.ts'))));
 
   // Build out docs
-  await CliModuleUtil.runOnModules('all', ['trv', 'doc'], {
-    showProgress: true,
+  await CliModuleUtil.execOnModules('all', ['trv', 'doc'], {
     showStdout: false,
     progressPosition: 'inline',
-    filter: folder => modSrc.has(folder)
+    filter: mod => mods.has(mod)
   });
 
   for (const mod of mods) {

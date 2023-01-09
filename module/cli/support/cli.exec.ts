@@ -38,7 +38,7 @@ export class RepoExecCommand extends CliCommand<Options> {
   }
 
   async action(): Promise<void> {
-    await CliModuleUtil.runOnModules(
+    await CliModuleUtil.execOnModules(
       this.cmd.changed ? 'changed' : 'all',
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       this.args as [string, ...string[]],

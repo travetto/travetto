@@ -4,7 +4,6 @@ import { RootIndex } from '@travetto/manifest';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
-import { RunEvent } from '../worker/types';
 import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
 
@@ -21,7 +20,7 @@ export class TestWatcher {
   static async watch(format: string): Promise<void> {
     console.debug('Listening for changes');
 
-    const itr = new ManualAsyncIterator<RunEvent>();
+    const itr = new ManualAsyncIterator<string>();
     const src = new IterableWorkSet(itr);
 
     await SuiteRegistry.init();
@@ -46,11 +45,7 @@ export class TestWatcher {
       const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
       if (e.type !== 'removing') {
         if (conf) {
-          itr.add({
-            method: conf.methodName,
-            file: conf.file,
-            class: conf.class.name
-          }, true); // Shift to front
+          itr.add(`${conf.file}#${conf.class.name}#${conf.methodName}`, true); // Shift to front
         }
       } else if (process.send) {
         process.send({
@@ -63,8 +58,6 @@ export class TestWatcher {
     });
 
     await RootRegistry.init();
-
-    await pool.process(src)
-      .finally(() => pool.shutdown());
+    await pool.process(src);
   }
 }

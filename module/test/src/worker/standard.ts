@@ -2,11 +2,20 @@ import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, ErrorUtil } from '@travetto/base';
 import { ParentCommChannel, Worker } from '@travetto/worker';
 
-import { Events } from './types';
+import { Events, RunEvent } from './types';
 import { TestConsumer } from '../consumer/types';
 import { TestEvent } from '../model/event';
 
 let i = 0;
+
+function buildEvent(ev: string): RunEvent {
+  if (ev.includes('#')) {
+    const [file, cls, method] = ev.split('#');
+    return { file, class: cls, method };
+  } else {
+    return { file: ev };
+  }
+}
 
 /**
  *  Produce a handler for the child worker
@@ -20,7 +29,9 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
     active: true,
     async destroy(): Promise<void> { },
     async execute(file: string): Promise<void> {
-      const { module } = RootIndex.getFromSource(file)!;
+      const event = buildEvent(file);
+
+      const { module } = RootIndex.getFromSource(event.file!)!;
       const cwd = RootIndex.getModule(module)!.source;
 
       const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
@@ -46,7 +57,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
       // Listen for child to complete
       const complete = channel.once(Events.RUN_COMPLETE);
       // Start test
-      channel.send(Events.RUN, { file });
+      channel.send(Events.RUN, event);
 
       // Wait for complete
       const { error } = await complete;
