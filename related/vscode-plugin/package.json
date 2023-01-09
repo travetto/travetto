@@ -76,11 +76,6 @@
   "contributes": {
     "commands": [
       {
-        "command": "travetto.boot.clean:run",
-        "title": "Clean",
-        "category": "Travetto"
-      },
-      {
         "command": "travetto.test.test:rerun",
         "title": "Re-Run Tests",
         "category": "Travetto"
@@ -194,10 +189,6 @@
         }
       ],
       "commandPalette": [
-        {
-          "command": "travetto.boot.clean:run",
-          "when": "travetto.boot"
-        },
         {
           "command": "travetto.test.test:line",
           "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorIsOpen"

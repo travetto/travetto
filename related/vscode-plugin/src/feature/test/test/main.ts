@@ -12,7 +12,7 @@ import { TestEvent } from './types';
 /**
  * Test Runner Feature
  */
-@Activatible('test', 'test')
+@Activatible('@travetto/test', 'test')
 class TestRunnerFeature extends BaseFeature {
 
   #server: ProcessServer;
@@ -24,7 +24,7 @@ class TestRunnerFeature extends BaseFeature {
     command?: string
   ) {
     super(module, command);
-    this.#server = new ProcessServer(Workspace.mainPath(this.module, 'test-watch'), ['exec'], {});
+    this.#server = new ProcessServer('npx', ['trv', 'main', `${this.module}/support/main.test-watch`, 'exec'], {});
 
     this.#server
       .on('start', () => {
@@ -56,12 +56,14 @@ class TestRunnerFeature extends BaseFeature {
       Workspace.addBreakpoint(editor, line);
     }
 
-    await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig(
-      'Debug Travetto',
-      Workspace.binPath(this.module, 'test-direct'),
-      [file.replace(path.toNative(`${Workspace.path}/`), ''), `${line}`],
-      { TRV_TEST_DELAY: '2s' }
-    ));
+    await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
+      useCli: true,
+      name: 'Debug Travetto',
+      main: 'main',
+      args: [`${this.module}/support/main.test-direct`, file.replace(path.toNative(`${Workspace.path}/`), ''), `${line}`],
+      cliModule: Workspace.workspaceIndex.getFromSource(file)?.module,
+      env: { TRV_TEST_DELAY: '2s' }
+    }));
   }
 
   /**

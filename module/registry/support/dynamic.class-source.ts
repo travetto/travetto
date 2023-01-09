@@ -37,8 +37,6 @@ class $DynamicClassSource {
 
     DynamicLoader.init();
 
-    console.log('Watching for', folders);
-
     await WatchUtil.buildWatcher(folders, async ({ type, path: file }) => {
       switch (type) {
         case 'create': {

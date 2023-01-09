@@ -73,7 +73,7 @@ export class WorkspaceResultsManager {
     }
 
     if (file) {
-      return Workspace.resolve(file);
+      return file;
     }
   }
 

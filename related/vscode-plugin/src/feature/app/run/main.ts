@@ -1,4 +1,5 @@
 import vscode from 'vscode';
+import { ExecUtil } from '@travetto/base';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
@@ -9,11 +10,12 @@ import { TargetEvent } from '../../../core/types';
 
 import { AppChoice } from './types';
 import { AppSelectorUtil } from './util';
+import { appendFile } from 'fs';
 
 /**
  * App run feature
  */
-@Activatible('app', 'run')
+@Activatible('@travetto/app', 'run')
 export class AppRunFeature extends BaseFeature {
 
   #storage = new ActionStorage<AppChoice>('app.run', Workspace.path);
@@ -31,8 +33,8 @@ export class AppRunFeature extends BaseFeature {
    * Get list of applications
    */
   async getAppList(): Promise<AppChoice[]> {
-    await Workspace.buildCode();
-    const choices = await Workspace.runMain<AppChoice[]>(Workspace.mainPath(this.module, 'list-get'), [], { format: 'json' });
+    const proc = ExecUtil.spawn('npx', ['trv', 'main', `${this.module}/support/main.list-get`]);
+    const choices: AppChoice[] = JSON.parse((await proc.result).stdout);
     return choices.map(x => {
       x.inputs ??= [];
       return x;
@@ -74,14 +76,13 @@ export class AppRunFeature extends BaseFeature {
   getLaunchConfig(choice: AppChoice): ReturnType<(typeof Workspace)['generateLaunchConfig']> {
     const args = choice.inputs.map(x => `${x}`.replace(Workspace.path, '.')).join(', ');
 
-    const config = Workspace.generateLaunchConfig(
-      `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
-      Workspace.binPath(this.module, 'run'),
-      [choice.name, ...choice.inputs],
-      { TRV_DYNAMIC: '1' }
-    );
-
-    return config;
+    return Workspace.generateLaunchConfig({
+      name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
+      useCli: true,
+      main: 'run',
+      args: [choice.name, ...choice.inputs],
+      cliModule: choice.module,
+    });
   }
 
   /**

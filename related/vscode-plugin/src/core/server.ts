@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import type { ExecutionOptions, ExecutionState } from '@travetto/base';
+import { ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { Workspace } from './workspace';
 
 type EventType = 'start' | 'stop' | 'pre-start' | 'pre-stop' | 'restart';
@@ -38,7 +38,7 @@ export class ProcessServer {
     if (!this.running) {
       console.log('Starting', { path: this.#path, args: this.#args });
       this.#emit('pre-start');
-      this.#state = Workspace.runMain(this.#path, this.#args, { ...this.#opts, format: 'raw' });
+      this.#state = ExecUtil.spawn(this.#path, this.#args, { ...this.#opts, cwd: Workspace.path });
 
       this.#state.process.stdout?.pipe(process.stdout);
       this.#state.process.stderr?.pipe(process.stderr);

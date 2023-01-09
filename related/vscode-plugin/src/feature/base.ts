@@ -1,6 +1,7 @@
 import vscode from 'vscode';
 
 import { ActivationTarget } from '../core/types';
+import { Workspace } from '../core/workspace';
 
 /**
  * Base feature structure
@@ -19,7 +20,7 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   get commandBase(): string {
-    return `travetto.${this.module}.${this.command}`;
+    return `${this.module.replace('@', '').replace(/[/]/g, '.')}.${this.command}`;
   }
 
   commandName(task: string): string {
@@ -27,6 +28,11 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   register(task: string, handler: () => unknown): void {
+    console.log('Registering command', this.commandName(task));
     vscode.commands.registerCommand(this.commandName(task), handler);
+  }
+
+  resolveImport(rel: string): string {
+    return Workspace.workspaceIndex.resolveFileImport(`${this.module}/${rel}`);
   }
 }

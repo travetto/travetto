@@ -3,7 +3,6 @@ import vscode from 'vscode';
 
 import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
-import { Workspace } from '../../../core/workspace';
 
 import { BaseFeature } from '../../base';
 
@@ -12,7 +11,7 @@ type Content = { html: string, text: string, subject: string };
 /**
  * Email Template Feature
  */
-@Activatible('email-template', 'develop')
+@Activatible('@travetto/email-template', 'develop')
 export class EmailTemplateFeature extends BaseFeature {
 
   static isTemplate(f?: string): boolean {
@@ -34,7 +33,7 @@ export class EmailTemplateFeature extends BaseFeature {
   ) {
     super(module, command);
 
-    this.#server = new ProcessServer(Workspace.mainPath(this.module, 'editor'));
+    this.#server = new ProcessServer('npx', ['trv', 'main', `${this.module}/support/main.editor`]);
 
     this.#server.on('start', () => {
       this.#server.onMessage('changed', (type, msg) => this.#emitter.emit('render', msg));

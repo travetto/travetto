@@ -14,7 +14,7 @@ interface Link extends vscode.TerminalLink {
 /**
  * Logging workspace
  */
-@Activatible('log', true)
+@Activatible('@travetto/log', true)
 export class LogFeature extends BaseFeature {
 
   /**
@@ -44,7 +44,7 @@ export class LogFeature extends BaseFeature {
         if (!path.endsWith('.ts')) {
           path = `${path}.ts`;
         }
-        const file = Workspace.resolve(`${mod}/${path}`);
+        const file = Workspace.workspaceIndex.resolveFileImport(`${mod}/${path}`);
 
         const type = suffix.includes(':') ? 'File' : 'Class';
 

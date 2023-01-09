@@ -10,9 +10,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   if (!vscode.workspace.workspaceFolders?.[0]) {
     return;
   }
+  const root = __dirname.replace(/node_modules.*/, '');
+
   const extManifest = new ManifestIndex(
-    context.extensionPath,
-    path.resolve(context.extensionPath, 'node_modules', 'vscode-plugin', 'manifest.json')
+    root,
+    path.resolve(root, 'node_modules', 'travetto-plugin', 'manifest.json')
   );
 
   await Workspace.init(context, extManifest, RootIndex);

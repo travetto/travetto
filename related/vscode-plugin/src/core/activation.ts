@@ -29,12 +29,12 @@ class $ActivationManager {
   async init(): Promise<void> {
     for (const entry of [...this.#registry.values()]) {
       const { module, command, cls } = entry;
-      if (command === true || (await Workspace.isInstalled(`@travetto/${module}`))) {
-        entry.instance = new cls(module, command === true ? undefined : command);
-        vscode.commands.executeCommand('setContext', `travetto.${module}`, true);
+      if (command === true || (await Workspace.isInstalled(`${module}`))) {
+        const inst = entry.instance = new cls(module, command === true ? undefined : command);
+        vscode.commands.executeCommand('setContext', inst.commandBase, true);
         if (typeof command === 'string') {
           this.#commandRegistry.get(command)!.instance = entry.instance;
-          vscode.commands.executeCommand('setContext', `travetto.${module}.${command}`, true);
+          vscode.commands.executeCommand('setContext', `${inst.commandBase}.${command}`, true);
         }
       }
     }

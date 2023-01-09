@@ -11,7 +11,17 @@ export type TargetEvent<T = unknown> = {
 export interface ActivationTarget {
   module: string;
   command?: string;
+  commandBase: string;
   activate?(ctx: vscode.ExtensionContext): void | Promise<void>;
   deactivate?(): void | Promise<void>;
   onEvent?(event: TargetEvent): void | Promise<void>;
 }
+
+export type LaunchConfig = {
+  useCli?: boolean;
+  cliModule?: string;
+  name: string;
+  main: string;
+  args?: string[];
+  env?: Record<string, string>;
+};

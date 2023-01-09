@@ -1,6 +1,7 @@
 import vscode from 'vscode';
 
 import { ManifestIndex } from '@travetto/manifest';
+import { CliLaunchConfig, LaunchConfig } from './types';
 
 /**
  * Standard set of workspace utilities
@@ -85,7 +86,17 @@ export class Workspace {
    * Generate execution launch config
    * @param config
    */
-  static generateLaunchConfig(name: string, main: string, args: string[] = [], env: Record<string, string> = {}): vscode.DebugConfiguration {
+  static generateLaunchConfig(config: LaunchConfig): vscode.DebugConfiguration {
+    if (config.useCli) {
+      config.args = [config.main, ...config.args ?? []];
+      config.main = this.workspaceIndex.resolveFileImport('@travetto/compiler/bin/trv');
+      Object.assign(config.env ??= {}, {
+        TRV_MANIFEST: config.cliModule ?? '',
+        TRV_DYNAMIC: '1',
+        TRV_OUTPUT: [Workspace.path, Workspace.workspaceIndex.manifest.outputFolder].join('/'),
+      });
+    }
+
     return {
       type: 'node',
       request: 'launch',
@@ -95,6 +106,9 @@ export class Workspace {
       sourceMaps: true,
       runtimeArgs: [
         '--nolazy'
+      ],
+      outFiles: [
+        ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', '*.js'].join('/')
       ],
       resolveSourceMapLocations: [
         '!**/node_modules/typescript/**',
@@ -111,11 +125,11 @@ export class Workspace {
       ],
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
-      name,
+      name: config.name,
       program: this.workspaceIndex.manifest.workspacePath,
       // eslint-disable-next-line no-template-curly-in-string
-      args: [main.replace(this.path, '${workspaceFolder}'), ...args].map(x => `${x}`),
-      env: { FORCE_COLOR: 'true', ...env }
+      args: [config.main.replace(this.path, '${workspaceFolder}'), ...config.args ?? []].map(x => `${x}`),
+      env: { FORCE_COLOR: 'true', ...config.env }
     } as const;
   }
 
