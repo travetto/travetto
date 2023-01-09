@@ -51,10 +51,10 @@
     }
   },
   "devDependencies": {
-    "@parcel/watcher": "2.0.7",
+    "@parcel/watcher": "^2.1.0",
     "@travetto/repo": "^3.0.0-rc.3",
-    "@types/vscode": "^1.74.0",
     "@types/debug": "^4.1.7",
+    "@types/vscode": "^1.74.0",
     "debug": "^4.3.4"
   }
 }

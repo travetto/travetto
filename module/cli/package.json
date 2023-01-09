@@ -29,7 +29,7 @@
     "@travetto/base": "^3.0.0-rc.3",
     "@travetto/terminal": "^3.0.0-rc.3",
     "@travetto/worker": "^3.0.0-rc.3",
-    "commander": "^9.4.1"
+    "commander": "^9.5.0"
   },
   "travetto": {
     "displayName": "Command Line Interface"
