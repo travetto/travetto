@@ -80,6 +80,8 @@ async function $getOpts(ctx) {
     const { options } = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(loc, ts.sys.readFile), ts.sys, ctx.workspacePath
     );
+    options.inlineSourceMap = true;
+    options.sourceMap = false;
     try {
       const { type } = await $getPkg(ctx.workspacePath);
       if (type) {

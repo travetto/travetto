@@ -36,10 +36,9 @@ export async function buildManifest(ctx: ManifestContext): Promise<ManifestState
 
 export async function writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
   // Write manifest in the scenario we are in mono-repo state where everything pre-existed
-  await fs.writeFile(
-    path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile),
-    JSON.stringify(manifest)
-  );
+  const file = path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile);
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, JSON.stringify(manifest));
 }
 
 function shouldRebuildCompiler({ delta }: ManifestState): { total: boolean, transformers: [string, string][] } {
@@ -116,12 +115,6 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
     `${!!watch}`
   ];
 
-  // Blocking call
-  const res = cp.spawnSync(process.argv0, args, { cwd: path.resolve(ctx.workspacePath, ctx.compilerFolder), stdio: 'inherit', encoding: 'utf8' });
-  if (res.status) {
-    throw new Error(res.stderr);
-  }
-
   if (ctx.monoRepo) {
     // Write out all changed manifests
     for (const module of new Set(changes.map(x => x.module))) {
@@ -129,6 +122,12 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
       const sub = await buildManifest(subCtx);
       await writeManifest(subCtx, sub.manifest);
     }
+  }
+
+  // Blocking call
+  const res = cp.spawnSync(process.argv0, args, { cwd: path.resolve(ctx.workspacePath, ctx.compilerFolder), stdio: 'inherit', encoding: 'utf8' });
+  if (res.status) {
+    throw new Error(res.stderr);
   }
 }
 

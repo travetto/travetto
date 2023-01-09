@@ -144,17 +144,17 @@ export class CompilerUtil {
     onEvent: (ev: FileWatchEvent, folder: string) => void
   ): Promise<() => Promise<void>> {
     const watcher = await import('@parcel/watcher');
-    const subs: ReturnType<(typeof watcher)['subscribe']>[] = [];
+    const subs: (() => Promise<void>)[] = [];
     for (const folder of folders) {
-      const sub = watcher.subscribe(folder, (err, events) => {
+      const sub = await watcher.subscribe(folder, (err, events) => {
         for (const ev of events) {
           onEvent(ev, folder);
         }
       }, { ignore: ['node_modules', ...readdirSync(folder).filter(x => x.startsWith('.') && x.length > 2)] });
-      subs.push(sub);
+      subs.push(() => sub.unsubscribe());
     }
     const readiedSubs = await Promise.all(subs);
-    return () => Promise.all(readiedSubs.map(s => s.unsubscribe())).then(() => { });
+    return () => Promise.all(readiedSubs.map(s => s())).then(() => { });
   }
 
   /**

@@ -59,6 +59,8 @@ export class Compiler {
       const err = emit(file, true);
       if (err) {
         console.error(CompilerUtil.buildTranspileError(file, err));
+      } else {
+        console.error('Compiled', file);
       }
     };
     const watcher = this.state.getWatcher({
