@@ -162,7 +162,7 @@ export class PackageUtil {
    */
   static resolveWorkspaces(rootPath: string): PackageWorkspaceEntry[] {
     if (!this.#workspaces[rootPath]) {
-      const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8' });
+      const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8', env: {} });
       const res: { location: string, name: string }[] = JSON.parse(text);
       this.#workspaces[rootPath] = res.map(d => ({ sourcePath: d.location, name: d.name }));
     }
