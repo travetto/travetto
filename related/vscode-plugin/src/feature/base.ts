@@ -19,12 +19,13 @@ export abstract class BaseFeature implements ActivationTarget {
     this.command = command!;
   }
 
-  get commandBase(): string {
-    return `${this.module.replace('@', '').replace(/[/]/g, '.')}.${this.command}`;
+  get moduleBase(): string {
+    return this.module.replace('@', '').replace(/[/]/g, '.');
   }
 
   commandName(task: string): string {
-    return `${this.commandBase}:${task}`;
+    const prefix = [this.moduleBase, this.command].filter(x => !!x).join('.')
+    return `${prefix}:${task}`;
   }
 
   register(task: string, handler: () => unknown): void {

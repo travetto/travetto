@@ -13,12 +13,12 @@ export class ProcessServer {
   #emitter = new EventEmitter();
   #respawn = true;
   #state: ExecutionState;
-  #path: string;
+  #command: string;
   #args: string[];
   #opts: ExecutionOptions;
 
-  constructor(path: string, args: string[] = [], opts: ExecutionOptions = {}) {
-    this.#path = path;
+  constructor(cliCommand: string, args: string[] = [], opts: ExecutionOptions = {}) {
+    this.#command = cliCommand;
     this.#args = args;
     this.#opts = opts;
     process.on('SIGINT', this.stop.bind(this));
@@ -36,9 +36,9 @@ export class ProcessServer {
 
   start(): void {
     if (!this.running) {
-      console.log('Starting', { path: this.#path, args: this.#args });
+      console.log('Starting', { path: this.#command, args: this.#args });
       this.#emit('pre-start');
-      this.#state = ExecUtil.spawn(this.#path, this.#args, { ...this.#opts, cwd: Workspace.path });
+      this.#state = Workspace.spawnCli(this.#command, this.#args, { ...this.#opts });
 
       this.#state.process.stdout?.pipe(process.stdout);
       this.#state.process.stderr?.pipe(process.stderr);
@@ -65,7 +65,7 @@ export class ProcessServer {
 
   stop(): void {
     if (this.running) {
-      console.log('Stopping', { path: this.#path, args: this.#args });
+      console.log('Stopping', { command: this.#command, args: this.#args });
       this.#respawn = false;
       this.#emit('pre-stop');
       this.#state.process.kill();

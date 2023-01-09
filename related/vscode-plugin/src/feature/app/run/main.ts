@@ -1,5 +1,4 @@
 import vscode from 'vscode';
-import { ExecUtil } from '@travetto/base';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
@@ -10,7 +9,6 @@ import { TargetEvent } from '../../../core/types';
 
 import { AppChoice } from './types';
 import { AppSelectorUtil } from './util';
-import { appendFile } from 'fs';
 
 /**
  * App run feature
@@ -33,12 +31,9 @@ export class AppRunFeature extends BaseFeature {
    * Get list of applications
    */
   async getAppList(): Promise<AppChoice[]> {
-    const proc = ExecUtil.spawn('npx', ['trv', 'main', `${this.module}/support/main.list-get`]);
+    const proc = Workspace.spawnCli('main', [`${this.module}/support/main.list-get`]);
     const choices: AppChoice[] = JSON.parse((await proc.result).stdout);
-    return choices.map(x => {
-      x.inputs ??= [];
-      return x;
-    });
+    return choices.map(x => ({ ...x, inputs: x.inputs ?? [] }));
   }
 
   /**
@@ -80,7 +75,7 @@ export class AppRunFeature extends BaseFeature {
       name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
       useCli: true,
       main: 'run',
-      args: [choice.name, ...choice.inputs],
+      args: [choice.moduleName ?? choice.name, ...choice.inputs],
       cliModule: choice.module,
     });
   }
@@ -155,7 +150,7 @@ export class AppRunFeature extends BaseFeature {
         command: {
           command: this.commandName('new'),
           title: 'Debug Application',
-          arguments: [app.name, app.codeStart]
+          arguments: [app.moduleName ?? app.name, app.codeStart]
         }
       }));
   }
@@ -167,7 +162,7 @@ export class AppRunFeature extends BaseFeature {
     this.register('new', (name?: string, line?: number) =>
       this.#runner('Run New Application', async () => {
         const list = await this.getAppList();
-        return name ? list.find(x => x.name === name) : list;
+        return name ? list.find(x => x.moduleName === name || x.name === name) : list;
       }, line)()
     );
     this.register('recent', this.#runner('Run Recent Application', () => this.getValidRecent(10)));
@@ -177,7 +172,7 @@ export class AppRunFeature extends BaseFeature {
 
   async onEvent(ev: TargetEvent<{ name: string, args: string[] }>): Promise<void> {
     const { name, args } = ev.data;
-    const app = (await this.getAppList()).find(a => a.name === name);
+    const app = (await this.getAppList()).find(a => a.moduleName === name || a.name === name);
 
     if (app) {
       await this.runApplication(name, { ...app, inputs: args });

@@ -1,7 +1,9 @@
 import vscode from 'vscode';
 
-import { ManifestIndex } from '@travetto/manifest';
-import { CliLaunchConfig, LaunchConfig } from './types';
+import { ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
+import { ManifestIndex, path } from '@travetto/manifest';
+
+import { LaunchConfig } from './types';
 
 /**
  * Standard set of workspace utilities
@@ -89,31 +91,27 @@ export class Workspace {
   static generateLaunchConfig(config: LaunchConfig): vscode.DebugConfiguration {
     if (config.useCli) {
       config.args = [config.main, ...config.args ?? []];
-      config.main = this.workspaceIndex.resolveFileImport('@travetto/compiler/bin/trv');
+      config.main = path.resolve(this.path, 'node_modules', '@travetto/compiler/bin/trv');
       Object.assign(config.env ??= {}, {
         TRV_MANIFEST: config.cliModule ?? '',
-        TRV_DYNAMIC: '1',
         TRV_OUTPUT: [Workspace.path, Workspace.workspaceIndex.manifest.outputFolder].join('/'),
       });
     }
 
-    return {
+    /* eslint-disable no-template-curly-in-string */
+    const res: vscode.DebugConfiguration = {
       type: 'node',
       request: 'launch',
       protocol: 'inspector',
-      // eslint-disable-next-line no-template-curly-in-string
       cwd: '${workspaceFolder}',
       sourceMaps: true,
-      runtimeArgs: [
-        '--nolazy'
-      ],
       outFiles: [
-        ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', '*.js'].join('/')
+        ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', '*.js'].join('/'),
+        ['${workspaceFolder}', this.workspaceIndex.manifest.compilerFolder, '**', '*.js'].join('/')
       ],
       resolveSourceMapLocations: [
         '!**/node_modules/typescript/**',
       ],
-      breakOnLoadStrategy: 'regex',
       skipFiles: [
         '<node_internals>/**',
         'node:internals/**',
@@ -123,14 +121,17 @@ export class Workspace {
         '**/@travetto/**/internal/*',
         '**/tslib/**/*'
       ],
+      trace: true,
+      pauseForSourceMap: true,
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
       name: config.name,
-      program: this.workspaceIndex.manifest.workspacePath,
-      // eslint-disable-next-line no-template-curly-in-string
-      args: [config.main.replace(this.path, '${workspaceFolder}'), ...config.args ?? []].map(x => `${x}`),
-      env: { FORCE_COLOR: 'true', ...config.env }
-    } as const;
+      program: config.main.replace(this.path, '${workspaceFolder}'),
+      args: (config.args ?? []).map(x => `${x}`),
+      env: { FORCE_COLOR: '3', ...config.env }
+    };
+    /* eslint-enable no-template-curly-in-string */
+    return res;
   }
 
   /**
@@ -172,5 +173,21 @@ export class Workspace {
       vscode.debug.removeBreakpoints([breakpoint]);
       remove.dispose();
     });
+  }
+
+  static spawnCli(command: string, args?: string[], opts?: ExecutionOptions & { cliModule?: string }): ExecutionState {
+    return ExecUtil.spawn(
+      'npx',
+      ['trv', command, ...args ?? []],
+      {
+        cwd: this.path,
+        ...opts,
+        env: {
+          ...opts?.env,
+          TRV_MANIFEST: opts?.cliModule ?? Workspace.workspaceIndex.manifest.mainModule,
+          TRV_OUTPUT: [Workspace.path, Workspace.workspaceIndex.manifest.outputFolder].join('/'),
+        }
+      }
+    )
   }
 }

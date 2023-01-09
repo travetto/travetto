@@ -12,9 +12,15 @@
       "name": "Launch Extension",
       "runtimeExecutable": "${execPath}",
       "outFiles": [
-        "${workspaceFolder}/out/node_modules/**/*.js",
+        "${workspaceFolder}/out/**/*.js",
       ],
-      "trace": true,
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "resolveSourceMapLocations": [
+        "!${workspaceFolder}/node_modules/**",
+      ],
+      "pauseForSourceMap": true,
       "sourceMaps": true,
       "request": "launch",
       "type": "extensionHost"

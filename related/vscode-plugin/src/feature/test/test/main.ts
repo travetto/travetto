@@ -24,7 +24,7 @@ class TestRunnerFeature extends BaseFeature {
     command?: string
   ) {
     super(module, command);
-    this.#server = new ProcessServer('npx', ['trv', 'main', `${this.module}/support/main.test-watch`, 'exec'], {});
+    this.#server = new ProcessServer('main', [`${this.module}/support/main.test-watch`, 'exec']);
 
     this.#server
       .on('start', () => {
@@ -61,8 +61,7 @@ class TestRunnerFeature extends BaseFeature {
       name: 'Debug Travetto',
       main: 'main',
       args: [`${this.module}/support/main.test-direct`, file.replace(path.toNative(`${Workspace.path}/`), ''), `${line}`],
-      cliModule: Workspace.workspaceIndex.getFromSource(file)?.module,
-      env: { TRV_TEST_DELAY: '2s' }
+      cliModule: Workspace.workspaceIndex.getFromSource(file)?.module
     }));
   }
 

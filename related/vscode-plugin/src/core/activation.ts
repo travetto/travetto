@@ -31,10 +31,10 @@ class $ActivationManager {
       const { module, command, cls } = entry;
       if (command === true || (await Workspace.isInstalled(`${module}`))) {
         const inst = entry.instance = new cls(module, command === true ? undefined : command);
-        vscode.commands.executeCommand('setContext', inst.commandBase, true);
+        await vscode.commands.executeCommand('setContext', inst.moduleBase, true);
         if (typeof command === 'string') {
           this.#commandRegistry.get(command)!.instance = entry.instance;
-          vscode.commands.executeCommand('setContext', `${inst.commandBase}.${command}`, true);
+          await vscode.commands.executeCommand('setContext', `${inst.moduleBase}.${command}`, true);
         }
       }
     }
