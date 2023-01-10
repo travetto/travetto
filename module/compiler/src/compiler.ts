@@ -2,7 +2,7 @@ import ts from 'typescript';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { ManifestState, ManifestUtil } from '@travetto/manifest';
+import { ManifestState } from '@travetto/manifest';
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
 
 import { CompilerUtil } from './util';
@@ -60,7 +60,7 @@ export class Compiler {
       if (err) {
         console.error(CompilerUtil.buildTranspileError(file, err));
       } else {
-        console.error('Compiled', file);
+        console.error('Compiled', file.split('node_modules/')[1]);
       }
     };
     const watcher = this.state.getWatcher({
@@ -164,30 +164,22 @@ export class Compiler {
         failed = true;
         console.error(CompilerUtil.buildTranspileError(file, err));
       }
-      return { idx: i, total, text: `Compiling [%idx/%total] -- ${file}` };
+      return { idx: i, total, text: `Compiling [%idx/%total] -- ${file.split('node_modules/')[1]}` };
     };
 
-    await GlobalTerminal.trackProgress(
-      this.emit(this.state.getDirtyFiles(), emitter),
-      resolveEmittedFile,
-      { position: 'bottom', staticMessage: 'Compiling...' }
-    );
-
-    if (failed) {
-      process.exit(-1);
+    let files = this.state.getDirtyFiles();
+    if (!watch && !files.length) {
+      files = this.state.getAllFiles();
     }
 
-    // Update manifests
-    await ManifestUtil.writeManifest(this.#state.manifest, this.#state.manifest);
-
-    if (this.#state.manifest.monoRepo) {
-      // Write out all changed manifests
-      const { getContext } = await import('@travetto/compiler/bin/transpile');
-      for (const module of this.#state.getDirtyModules()) {
-        if (module !== this.#state.manifest.mainModule) {
-          const subCtx = await getContext(this.#state.manifest.modules[module].source);
-          await ManifestUtil.createAndWriteManifest(subCtx);
-        }
+    if (files.length) {
+      await GlobalTerminal.trackProgress(
+        this.emit(files, emitter),
+        resolveEmittedFile,
+        { position: 'bottom', staticMessage: 'Compiling...' }
+      );
+      if (failed) {
+        process.exit(-1);
       }
     }
 

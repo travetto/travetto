@@ -108,6 +108,10 @@ export abstract class Registry implements ChangeSource<Class> {
     return this.#initialized;
   }
 
+  parent<T extends ChangeSource<Class>>(type: Class<T>): T | undefined {
+    return this.#parents.find((dep: unknown): dep is T => dep instanceof type);
+  }
+
   /**
    * When an installation event occurs
    */

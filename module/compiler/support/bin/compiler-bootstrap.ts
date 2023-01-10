@@ -29,6 +29,19 @@ export async function writeManifest(ctx: ManifestContext, manifest: ManifestRoot
   return ManifestUtil.writeManifest(ctx, manifest);
 }
 
+async function rewriteManifests(ctx: ManifestContext, state: ManifestState): Promise<void> {
+  const { ManifestUtil } = await importManifest(ctx);
+
+  // Write out all changed manifests
+  const { getContext } = await import('../../bin/transpile');
+
+  const dirtyModules = [...Object.entries(state.delta)].filter(x => x[1].length > 0).map(([mod]) => mod);
+  for (const module of dirtyModules) {
+    const subCtx = await getContext(state.manifest.modules[module].source);
+    await ManifestUtil.createAndWriteManifest(subCtx);
+  }
+}
+
 /**
  *  Step 1
  */
@@ -100,18 +113,31 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
   manifestTemp ??= await ManifestUtil.writeState(state);
   const cwd = path.resolve(ctx.workspacePath, ctx.compilerFolder);
 
-  if (changes.length || watch) {
+  if (changes.length) {
     log('[3] Changed Sources', changes);
 
-    // Blocking call
+    // Blocking call, compile only
     const res = cp.spawnSync(process.argv0,
-      [resolve('support/main.output'), manifestTemp, !!watch],
+      [resolve('support/main.output'), manifestTemp],
       { cwd, stdio: 'inherit', encoding: 'utf8' }
     );
 
     if (res.status) {
       throw new Error(res.stderr);
     }
+
+    await rewriteManifests(ctx, state);
+  }
+
+  if (watch) {
+    // Rewrite state with updated manifest
+    const newState = await ManifestUtil.produceState(ctx);
+    manifestTemp = await ManifestUtil.writeState(newState);
+
+    // Run with watching
+    cp.spawnSync(process.argv0,
+      [resolve('support/main.output'), manifestTemp, 'true'], { cwd, stdio: 'inherit' }
+    );
   }
 }
 

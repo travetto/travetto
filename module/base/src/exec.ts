@@ -146,12 +146,8 @@ export class ExecUtil {
       };
 
       if (!options.rawOutput) {
-        if (proc.stdout) {
-          proc.stdout!.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
-        }
-        if (proc.stderr) {
-          proc.stderr!.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
-        }
+        proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
+        proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
       }
 
       proc.on('error', (err: Error) =>

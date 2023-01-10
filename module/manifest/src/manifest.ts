@@ -25,10 +25,9 @@ export class ManifestUtil {
 
   /**
    * Generate manifest for a given context, and persist
-   * @param ctx 
    */
   static async createAndWriteManifest(ctx: ManifestContext): Promise<void> {
-    const { manifest } = await this.produceState(ctx);
+    const manifest = await this.buildManifest(ctx);
     await this.writeManifest(ctx, manifest);
   }
 

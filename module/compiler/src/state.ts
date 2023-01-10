@@ -110,14 +110,8 @@ export class CompilerState {
       }
       return files;
     } else {
-      return [...this.#inputFiles];
+      return [];
     }
-  }
-
-  getDirtyModules(): string[] {
-    return [...Object.entries(this.#delta)]
-      .filter(x => x[1].length > 0)
-      .map(([mod]) => mod);
   }
 
   getAllFiles(): string[] {

@@ -58,6 +58,7 @@
         "maxlength",
         "MEDIUMINT",
         "metadata",
+        "Metadated",
         "millis",
         "mkdir",
         "mtlynch",
@@ -133,6 +134,7 @@
         "xpack",
         "XPOST",
         "Xunit",
+        "Ⲑhash",
         "Ⲑinit",
         "Ⲑsyn"
     ],

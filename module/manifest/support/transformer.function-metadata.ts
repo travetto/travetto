@@ -13,6 +13,7 @@ const ROOT_IDX_CLS = 'RootIndex';
 
 const methods = Symbol.for(`${MANIFEST_MOD}:methods`);
 const cls = Symbol.for(`${MANIFEST_MOD}:class`);
+const fn = Symbol.for(`${MANIFEST_MOD}:function`);
 const rootIdx = Symbol.for(`${MANIFEST_MOD}:rootIndex`);
 
 interface MetadataInfo {
@@ -21,6 +22,7 @@ interface MetadataInfo {
     [key: string]: { hash: number };
   };
   [cls]?: number;
+  [fn]?: number;
 }
 
 /**
@@ -111,11 +113,11 @@ export class RegisterTransformer {
    */
   @AfterFunction()
   static registerFunctionMetadata(state: TransformerState & MetadataInfo, node: ts.FunctionDeclaration | ts.FunctionExpression): typeof node {
-    if (!this.#valid(state) || !ts.isFunctionDeclaration(node) || !node.parent) {
+    if (!this.#valid(state)) {
       return node;
     }
 
-    if (node.name && ts.isSourceFile(node.parent)) {
+    if (ts.isFunctionDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
       // If we have a class like function
       state[rootIdx] ??= state.importFile(ROOT_IDX_IMPORT);
       const ident = state.createAccess(state[rootIdx].ident, ROOT_IDX_CLS);
@@ -125,11 +127,10 @@ export class RegisterTransformer {
         [
           state.createIdentifier(node.name),
           state.getFilenameIdentifier(),
+          state.fromLiteral(SystemUtil.naiveHash(node.getText())),
         ]
       );
-      state.addStatements([
-        state.factory.createExpressionStatement(meta)
-      ]);
+      state.addStatements([state.factory.createExpressionStatement(meta)]);
     }
     return node;
   }

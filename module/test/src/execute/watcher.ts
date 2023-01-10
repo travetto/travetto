@@ -1,4 +1,4 @@
-import { RootRegistry, MethodSource } from '@travetto/registry';
+import { RootRegistry, MethodSource, ClassSource } from '@travetto/registry';
 import { WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
 
@@ -17,7 +17,7 @@ export class TestWatcher {
   /**
    * Start watching all test files
    */
-  static async watch(format: string): Promise<void> {
+  static async watch(format: string, runAllOnStart = true): Promise<void> {
     console.debug('Listening for changes');
 
     const itr = new ManualAsyncIterator<string>();
@@ -35,7 +35,7 @@ export class TestWatcher {
 
     new MethodSource(RootRegistry).on(e => {
       const [cls, method] = (e.prev ?? e.curr ?? []);
-      if (!cls) {
+      if (!cls || RootIndex.getFunctionMetadata(cls)?.abstract) {
         return;
       }
       if (!method) {
@@ -45,10 +45,11 @@ export class TestWatcher {
       const conf = SuiteRegistry.getByClassAndMethod(cls, method)!;
       if (e.type !== 'removing') {
         if (conf) {
-          itr.add(`${conf.file}#${conf.class.name}#${conf.methodName}`, true); // Shift to front
+          const key = `${conf.file}#${conf.class.name}#${conf.methodName}`;
+          itr.add(key, true); // Shift to front
         }
-      } else if (process.send) {
-        process.send({
+      } else {
+        process.send?.({
           type: 'removeTest',
           method: method?.name,
           classId: cls?.Ⲑid,
@@ -58,6 +59,19 @@ export class TestWatcher {
     });
 
     await RootRegistry.init();
+
+    process.send?.({ type: 'watch-init' });
+
+    if (runAllOnStart) {
+      // Load all tests
+      for (const test of await RootIndex.findTest({})) {
+        await import(test.import);
+      }
+
+      // Trigger after all imports
+      RootRegistry.parent(ClassSource)!.processFiles(true);
+    }
+
     await pool.process(src);
   }
 }

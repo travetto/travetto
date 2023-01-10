@@ -6,6 +6,9 @@ import { IndexedModule, ManifestIndex } from './manifest-index';
 import { FunctionMetadata, Package, PackageDigest } from './types';
 import { PackageUtil } from './package';
 
+const METADATA = Symbol.for('@travetto/manifest:metadata');
+type Metadated = { [METADATA]: FunctionMetadata };
+
 /**
  * Extended manifest index geared for application execution
  */
@@ -126,12 +129,22 @@ class $RootIndex extends ManifestIndex {
    * @param `methods` Methods and their hashes
    * @param `abstract` Is the class abstract
    */
-  registerFunction(cls: Function, file: string, hash?: number, methods?: Record<string, { hash: number }>, abstract?: boolean, synthetic?: boolean): boolean {
+  registerFunction(cls: Function, file: string, hash: number, methods?: Record<string, { hash: number }>, abstract?: boolean, synthetic?: boolean): boolean {
     const source = this.getSourceFile(file);
     const id = this.getId(source, cls.name);
-    this.#metadata.set(id, { id, source, hash, methods, abstract, synthetic });
     Object.defineProperty(cls, 'Ⲑid', { value: id });
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    (cls as unknown as Metadated)[METADATA] = { id, source, hash, methods, abstract, synthetic };
+    this.#metadata.set(id, { id, source, hash, methods, abstract, synthetic });
     return true;
+  }
+
+  /**
+   * Retrieve function metadata by function, or function id
+   */
+  getFunctionMetadataFromClass(cls: Function | undefined): FunctionMetadata | undefined {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return (cls as unknown as Metadated)?.[METADATA];
   }
 
   /**

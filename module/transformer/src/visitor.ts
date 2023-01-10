@@ -23,7 +23,7 @@ export class VisitorFactory<S extends State = State> {
       return 'class';
     } else if (ts.isParameter(node)) {
       return 'parameter';
-    } else if (ts.isFunctionDeclaration(node) || (ts.isFunctionExpression(node) && !ts.isArrowFunction(node))) {
+    } else if ((ts.isFunctionDeclaration(node) && node.body) || (ts.isFunctionExpression(node) && !ts.isArrowFunction(node))) {
       return 'function';
     } else if (ts.isGetAccessor(node)) {
       return 'getter';
@@ -89,7 +89,7 @@ export class VisitorFactory<S extends State = State> {
         const changed = state.added.size;
         let statements: ts.NodeArray<ts.Statement> | ts.Statement[] = ret.statements;
         while (state.added.size) {
-          for (const [k, all] of [...state.added]) {
+          for (const [k, all] of [...state.added].sort(([idxA], [idxB]) => idxB - idxA)) {
             const idx = k === -1 ? state.added.size : k;
             statements = [
               ...statements.slice(0, idx),

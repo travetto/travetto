@@ -1,6 +1,5 @@
 import { Module as Mod } from 'module';
 
-import { path } from '@travetto/manifest';
 import { GlobalEnv } from '../global-env';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -32,51 +31,11 @@ declare global {
 export class $DynamicLoader {
 
   /**
-   * Build error module source
-   * @param message Error message to show
-   * @param isModule Is the error a module that should have been loaded
-   * @param base The base set of properties to support
+   * Build error module module
    */
-  static getErrorModuleSource(message: string, isModule?: string | boolean, base?: Record<string, string | boolean>): string {
-    const f = ([k, v]: string[]): string => `${k}: (t,k) => ${v}`;
-    const e = '{ throw new Error(msg); }';
-    const map: { [P in keyof ProxyHandler<object>]?: string } = {
-      getOwnPropertyDescriptor: base ? '({})' : e,
-      get: base ? `{ const v = values[keys.indexOf(k)]; if (!v) ${e} else return v; }` : e,
-      has: base ? 'keys.includes(k)' : e
-    };
-    return [
-      (typeof isModule === 'string') ? `console.debug(\`${isModule}\`);` : '',
-      base ? `let keys = ['${Object.keys(base).join("','")}']` : '',
-      base ? `let values = ['${Object.values(base).join("','")}']` : '',
-      `let msg = \`${message}\`;`,
-      "Object.defineProperty(exports, 'Ⲑtrv', { value: true })",
-      `module.exports = new Proxy({}, { ${Object.entries(map).map(([k, v]) => f([k, v!])).join(',')}});`
-    ].join('\n');
-  }
-
-  /**
-   * Process error response
-   * @param phase The load/compile phase to care about
-   * @param tsf The typescript filename
-   * @param err The error produced
-   * @param filename The relative filename
-   */
-  static handlePhaseError(phase: 'load' | 'compile', tsf: string, err: Error, filename?: string): string {
-    filename ??= tsf.replace(path.cwd(), '.');
-
-    if (phase === 'compile' &&
-      (err.message.startsWith('Cannot find module') || err.message.startsWith('Unable to load'))
-    ) {
-      err = new Error(`${err.message} ${err.message.includes('from') ? `[via ${filename}]` : `from ${filename}`}`);
-    }
-
-    if (GlobalEnv.dynamic && !filename.startsWith('test/')) {
-      console.trace(`Unable to ${phase} ${filename}: stubbing out with error proxy.`, err.message);
-      return this.getErrorModuleSource(err.message);
-    }
-
-    throw err;
+  static getErrorModule(message: string): unknown {
+    const e = (): never => { throw new Error(message); };
+    return new Proxy({}, { getOwnPropertyDescriptor: e, get: e, has: e });
   }
 
   #moduleLoad = Module._load.bind(Module);
@@ -98,7 +57,11 @@ export class $DynamicLoader {
         throw err;
       }
       const name = Module._resolveFilename!(request, parent);
-      mod = Module._compile!($DynamicLoader.handlePhaseError('load', name, err), name);
+      if (!GlobalEnv.dynamic || name.startsWith('test/')) {
+        throw err;
+      }
+      console.debug(`Unable to load ${name}: stubbing out with error proxy.`, err.message);
+      return $DynamicLoader.getErrorModule(err.message);
     }
 
     if (this.#loadHandlers.length) {

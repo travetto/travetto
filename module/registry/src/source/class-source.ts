@@ -62,8 +62,8 @@ export class ClassSource implements ChangeSource<Class> {
         if (!prev.has(k)) {
           this.emit({ type: 'added', curr: next.get(k)! });
         } else {
-          const prevMeta = RootIndex.getFunctionMetadata(prev.get(k)?.Ⲑid ?? '');
-          const nextMeta = RootIndex.getFunctionMetadata(next.get(k)?.Ⲑid ?? '');
+          const prevMeta = RootIndex.getFunctionMetadataFromClass(prev.get(k));
+          const nextMeta = RootIndex.getFunctionMetadataFromClass(next.get(k));
           if (prevMeta?.hash !== nextMeta?.hash) {
             this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
           }
