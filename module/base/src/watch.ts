@@ -1,24 +1,25 @@
 import { readdirSync } from 'fs';
-import type * as watcher from '@parcel/watcher';
 
 import { ShutdownManager } from '@travetto/base';
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 
-async function getWatcher(): Promise<typeof watcher> {
-  try {
-    return await import('@parcel/watcher');
-  } catch (err) {
-    console.error('@parcel/watcher must be installed to use watching functionality');
-    throw err;
-  }
-}
 
-export type FileWatchEvent = { type: 'create' | 'update' | 'delete', path: string };
+export type FileWatchEvent = { action: 'create' | 'update' | 'delete', file: string };
 
 /**
  * Allow for simple watching of files
  */
 export class WatchUtil {
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  static async #getWatcher() {
+    try {
+      return await import('@parcel/watcher');
+    } catch (err) {
+      console.error('@parcel/watcher must be installed to use watching functionality');
+      throw err;
+    }
+  }
+
   /**
    * Leverages @parcel/watcher to watch a series of folders
    * @param folders
@@ -29,12 +30,13 @@ export class WatchUtil {
     onEvent: (ev: FileWatchEvent, folder: string) => void,
     filter?: (ev: FileWatchEvent) => boolean
   ): Promise<() => Promise<void>> {
-    const lib = await getWatcher();
+    const lib = await this.#getWatcher();
     const subs = await Promise.all(folders.map(folder =>
       lib.subscribe(folder, (err, events) => {
         for (const ev of events) {
-          if (!filter || filter(ev)) {
-            onEvent(ev, folder);
+          const finalEv = { action: ev.type, file: ev.path };
+          if (!filter || filter(finalEv)) {
+            onEvent(finalEv, folder);
           }
         }
       }, {
@@ -54,7 +56,16 @@ export class WatchUtil {
     return remove;
   }
 
+  /**
+   * Watch compiled output in .js files
+   */
+  static async buildOutputWatcher(onEvent: (ev: FileWatchEvent, folder: string) => void): Promise<() => Promise<void>> {
+    const localMods = RootIndex.getLocalModules();
+    const folders = localMods.map(x => x.output);
+    return this.buildWatcher(folders, onEvent, ev => ev.file.endsWith('.js'));
+  }
+
   static async watchFile(source: string, onChange: () => void): Promise<() => Promise<void>> {
-    return this.buildWatcher([path.dirname(source)], onChange, ev => ev.type === 'update' && ev.path === source);
+    return this.buildWatcher([path.dirname(source)], onChange, ev => ev.action === 'update' && ev.file === source);
   }
 }

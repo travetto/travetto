@@ -66,7 +66,7 @@ export class Compiler {
     const watcher = this.state.getWatcher({
       create: (inputFile) => emitWithError(inputFile),
       update: (inputFile) => emitWithError(inputFile),
-      delete: (outputFile) => fs.unlink(outputFile)
+      delete: (outputFile) => fs.unlink(outputFile).catch(() => { })
     });
     return CompilerUtil.fileWatcher(folders, watcher);
   }

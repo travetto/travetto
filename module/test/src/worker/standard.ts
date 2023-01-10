@@ -31,7 +31,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
     async execute(file: string): Promise<void> {
       const event = buildEvent(file);
 
-      const { module } = RootIndex.getFromSource(event.file!)!;
+      const { module } = RootIndex.getEntry(event.file!)!;
       const cwd = RootIndex.getModule(module)!.source;
 
       const channel = new ParentCommChannel<TestEvent & { error?: Error }>(

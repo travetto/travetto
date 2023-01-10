@@ -1,8 +1,10 @@
+import os from 'os';
 import assert from 'assert';
 import fs from 'fs/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { StreamUtil } from '@travetto/base';
+import { path } from '@travetto/manifest';
 
 import { ImageConverter } from '../src/convert';
 
@@ -62,7 +64,10 @@ class ImageConverterTest {
       optimize: true
     });
 
-    await StreamUtil.writeToFile(out, 'temp.jpg');
-    await fs.unlink('temp.jpg');
+    const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
+    await StreamUtil.writeToFile(out, outFile);
+    assert.ok(await fs.stat(outFile).then(() => true, () => false));
+    await fs.unlink(outFile);
+    assert(await fs.stat(outFile).then(() => false, () => true));
   }
 }

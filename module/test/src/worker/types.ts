@@ -6,7 +6,6 @@ export type RunEvent = {
   error?: unknown;
   class?: string;
   method?: string;
-  mode?: 'extension' | 'standard';
 };
 
 /**

@@ -59,8 +59,8 @@ export class TemplateManager {
    * Watch compilation
    */
   async watchCompile(cb?: (file: string) => void): Promise<void> {
-    await WatchUtil.buildWatcher(this.resources.getAllPaths(), async ({ type, path: file }) => {
-      if (type !== 'update') {
+    await WatchUtil.buildWatcher(this.resources.getAllPaths(), async ({ action, file }) => {
+      if (action !== 'update') {
         return;
       }
       if (/[.]compiled[.]/.test(file) ||

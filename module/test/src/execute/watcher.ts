@@ -1,11 +1,18 @@
-import { RootRegistry, MethodSource, ClassSource } from '@travetto/registry';
+import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
+import { ObjectUtil } from '@travetto/base';
+import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
 import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
+import { RunEvent } from '../worker/types';
+
+function isRunEvent(ev: unknown): ev is RunEvent {
+  return ObjectUtil.isPlainObject(ev) && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
+}
 
 /**
  * Test Watcher.
@@ -62,14 +69,23 @@ export class TestWatcher {
 
     process.send?.({ type: 'watch-init' });
 
-    if (runAllOnStart) {
-      // Load all tests
-      for (const test of await RootIndex.findTest({})) {
-        await import(test.import);
+    process.on('message', ev => {
+      if (isRunEvent(ev)) {
+        itr.add([ev.file, ev.class, ev.method].filter(x => !!x).join('#'), true);
       }
+    });
 
-      // Trigger after all imports
-      RootRegistry.parent(ClassSource)!.processFiles(true);
+    // Re-run all tests on file change
+    DynamicFileLoader.onLoadEvent(ev => {
+      if (ev.action === 'update') {
+        itr.add(ev.file);
+      }
+    });
+
+    if (runAllOnStart) {
+      for (const test of await RootIndex.findTest({})) {
+        itr.add(test.source);
+      }
     }
 
     await pool.process(src);

@@ -1,7 +1,8 @@
 import { EventEmitter } from 'events';
 
 import { RootIndex } from '@travetto/manifest';
-import { Class, GlobalEnv } from '@travetto/base';
+import { Class, FileWatchEvent, GlobalEnv } from '@travetto/base';
+import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 import { PendingRegister } from '../decorator';
@@ -36,7 +37,7 @@ export class ClassSource implements ChangeSource<Class> {
   /**
    * Listen for a single file, and process all the classes within
    */
-  async #handleFileChanges(file: string, classes: Class[] = []): Promise<void> {
+  #handleFileChanges(file: string, classes: Class[] = []): void {
     const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
 
     let prev = new Map<string, Class>();
@@ -73,14 +74,14 @@ export class ClassSource implements ChangeSource<Class> {
   }
 
   /**
-   * Flush all pending classes
+   * Handle when a file watch event happens
    */
-  processFiles(flush = false): void {
+  async onLoadEvent(ev: FileWatchEvent): Promise<void> {
     console.debug('Pending changes', { changes: PendingRegister.ordered.map(([, x]) => x.map(y => y.Ⲑid)) });
     for (const [file, classes] of PendingRegister.flush()) {
       this.#handleFileChanges(file, classes);
     }
-    if (flush) {
+    if (ev.action === 'create') {
       this.#flush();
     }
   }
@@ -98,8 +99,8 @@ export class ClassSource implements ChangeSource<Class> {
    */
   async init(): Promise<void> {
     if (GlobalEnv.dynamic) {
-      const { DynamicClassSource } = await import('../../support/dynamic.class-source.js');
-      await DynamicClassSource.init(this);
+      DynamicFileLoader.onLoadEvent(ev => this.onLoadEvent(ev));
+      await DynamicFileLoader.init();
     }
 
     // Ensure everything is loaded
