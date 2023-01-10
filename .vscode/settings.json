@@ -6,13 +6,16 @@
   "files.exclude": {
     "**/.trv_compiler/**": true,
     "**/.trv_output/**": true,
+    "**/node_modules/**": true,
+    ".git/**": true,
   },
   "files.watcherExclude": {
-    "**/.git/**": true,
+    ".git/**": true,
     "**/node_modules/**": true,
-    "**/.angular/**": true,
     "**/.trv_compiler/**": true,
     "**/.trv_output/**": true,
-    "related/travetto.github.io/node_modules": true,
+    "related/vscode-plugin/out/**": true,
+    "related/travetto.github.io/.angular/**": true,
+    "related/travetto.github.io/node_modules/**": true,
   }
 }

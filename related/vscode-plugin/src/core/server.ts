@@ -1,6 +1,7 @@
+import readline from 'readline';
 import { EventEmitter } from 'events';
 
-import { ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
+import { ExecutionOptions, ExecutionState } from '@travetto/base';
 import { Workspace } from './workspace';
 
 type EventType = 'start' | 'stop' | 'pre-start' | 'pre-stop' | 'restart';
@@ -38,10 +39,17 @@ export class ProcessServer {
     if (!this.running) {
       console.log('Starting', { path: this.#command, args: this.#args });
       this.#emit('pre-start');
-      this.#state = Workspace.spawnCli(this.#command, this.#args, { ...this.#opts });
+      this.#state = Workspace.spawnCli(this.#command, this.#args, { ...this.#opts, env: { DEBUG: '*' } });
 
-      this.#state.process.stdout?.pipe(process.stdout);
-      this.#state.process.stderr?.pipe(process.stderr);
+      const prefix = [this.#command, ...this.#args].join(' ');
+      if (this.#state.process.stdout) {
+        const rl = readline.createInterface(this.#state.process.stdout);
+        rl.on('line', line => console.log(prefix, line));
+      }
+      if (this.#state.process.stderr) {
+        const rl = readline.createInterface(this.#state.process.stderr);
+        rl.on('line', line => console.error(prefix, line));
+      }
 
       this.#state.result.finally(() => {
         if (this.#respawn) {

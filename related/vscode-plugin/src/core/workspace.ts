@@ -105,24 +105,29 @@ export class Workspace {
       protocol: 'inspector',
       cwd: '${workspaceFolder}',
       sourceMaps: true,
+      pauseForSourceMap: true,
       outFiles: [
         ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', '*.js'].join('/'),
         ['${workspaceFolder}', this.workspaceIndex.manifest.compilerFolder, '**', '*.js'].join('/')
       ],
       resolveSourceMapLocations: [
-        '!**/node_modules/typescript/**',
+        ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**'].join('/'),
+        ['${workspaceFolder}', this.workspaceIndex.manifest.compilerFolder, '**'].join('/')
       ],
+      runtimeSourcemapPausePatterns: [
+        ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', '*.js'].join('/'),
+      ],
+      restart: true,
+      stopOnEntry: true,
       skipFiles: [
         '<node_internals>/**',
         'node:internals/**',
         'internal/**',
         '**/@travetto/context/**/*',
         '**/@travetto/rest/src/util/route.ts',
-        '**/@travetto/**/internal/*',
         '**/tslib/**/*'
       ],
       trace: true,
-      pauseForSourceMap: true,
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
       name: config.name,
@@ -177,8 +182,8 @@ export class Workspace {
 
   static spawnCli(command: string, args?: string[], opts?: ExecutionOptions & { cliModule?: string }): ExecutionState {
     return ExecUtil.spawn(
-      'npx',
-      ['trv', command, ...args ?? []],
+      'node',
+      [path.resolve(this.path, 'node_modules', '@travetto/compiler/bin/trv'), command, ...args ?? []],
       {
         cwd: this.path,
         ...opts,

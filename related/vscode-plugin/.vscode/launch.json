@@ -13,12 +13,14 @@
       "runtimeExecutable": "${execPath}",
       "outFiles": [
         "${workspaceFolder}/out/**/*.js",
+        "${workspaceFolder}/.trv_compiler/**/*.js",
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/out/**/*.js",
+        "${workspaceFolder}/.trv_compiler/**/*.js",
       ],
       "skipFiles": [
         "<node_internals>/**"
-      ],
-      "resolveSourceMapLocations": [
-        "!${workspaceFolder}/node_modules/**",
       ],
       "pauseForSourceMap": true,
       "sourceMaps": true,
