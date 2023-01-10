@@ -113,16 +113,21 @@ export class $DynamicLoader {
     this.#initialized = true;
   }
 
+  isLoaded(file: string): string | undefined {
+    const native = file.replace(/[\\\/]+/g, process.platform === 'win32' ? '\\' : '/');
+    return native in require.cache ? native : undefined;
+  }
+
   /**
    * Remove file from require.cache, and possible the file system
    */
   async unload(filename: string, unlink = false): Promise<true | undefined> {
-    const native = filename.replace(/[\\\/]+/g, process.platform === 'win32' ? '\\' : '/');
     for (const el of this.#unloadHandlers) {
       el(filename, unlink);
     }
-    if (native in require.cache) {
-      delete require.cache[native]; // Remove require cached element
+    const loadedFile = this.isLoaded(filename);
+    if (loadedFile) {
+      delete require.cache[loadedFile]; // Remove require cached element
       return true;
     }
   }
