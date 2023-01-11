@@ -33,11 +33,13 @@ export interface RestInterceptor<C = unknown> {
    * Config for interceptor
    */
   config?: C;
+
   /**
    * This interceptor must run after these
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   after?: Class<RestInterceptor<any>>[];
+
   /**
    * This interceptor must run before these
    */

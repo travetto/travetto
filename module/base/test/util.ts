@@ -49,15 +49,13 @@ export class UtilTest {
       }
     ] as const;
 
-    const order = Util.ordered(items);
-    const ordered = order.map(x => x.key);
-    assert.deepStrictEqual(ordered, ['first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
+    const ordered = Util.ordered(items);
+    assert.deepStrictEqual(ordered.map(x => x.key), ['first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
 
-    const order2 = Util.ordered([
+    const ordered2 = Util.ordered([
       { key: 'tenth', before: ['second'] },
       ...items
     ]);
-    const ordered2 = order2.map(x => x.key);
-    assert.deepStrictEqual(ordered2, ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
+    assert.deepStrictEqual(ordered2.map(x => x.key), ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
   }
 }

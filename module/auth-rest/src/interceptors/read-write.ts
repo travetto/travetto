@@ -1,3 +1,4 @@
+import { Class } from '@travetto/base';
 import { RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterReturn, FilterNext } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Principal } from '@travetto/auth';
@@ -17,11 +18,21 @@ export class RestAuthConfig extends ManagedInterceptorConfig { }
 @Injectable()
 export class AuthReadWriteInterceptor implements RestInterceptor {
 
+  after: Class<RestInterceptor>[] = [];
+
   @Inject()
   encoder: PrincipalEncoder;
 
   @Inject()
   config: RestAuthConfig;
+
+  async postConstruct(): Promise<void> {
+    try {
+      const { SessionWriteInterceptor } = await import('@travetto/rest-session');
+      this.after.push(SessionWriteInterceptor);
+    } catch { }
+  }
+
 
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
     const { req } = ctx;

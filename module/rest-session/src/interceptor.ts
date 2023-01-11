@@ -53,20 +53,12 @@ export class SessionReadInterceptor implements RestInterceptor {
 export class SessionWriteInterceptor implements RestInterceptor {
 
   after = [CookiesInterceptor];
-  before: Class<RestInterceptor>[] = [];
 
   @Inject()
   service: SessionService;
 
   @Inject()
   config: RestSessionConfig;
-
-  async postConstruct(): Promise<void> {
-    try {
-      const { AuthReadWriteInterceptor } = await import('@travetto/auth-rest');
-      this.before.push(AuthReadWriteInterceptor);
-    } catch { }
-  }
 
   async intercept({ req, res }: FilterContext, next: FilterNext): Promise<FilterReturn> {
     try {

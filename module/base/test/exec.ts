@@ -35,8 +35,10 @@ export class ExecUtilTest {
 
   @Test()
   async fork() {
-    const proc = ExecUtil.fork((await this.fixture.describe('test.js')).path);
+    const proc = ExecUtil.fork((await this.fixture.describe('echo.js')).path);
+    proc.process.stdin?.write('Hello Worldy');
+    proc.process.stdin?.end();
     const result = await proc.result;
-    assert(result.stdout === 'Hello World\n');
+    assert(result.stdout === 'Hello Worldy');
   }
 }

@@ -5,6 +5,8 @@ export type TemplatePrim = string | number | boolean | Date | RegExp;
 export type TemplateType<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
 
 type PromiseResolver<T> = { resolve: (v: T) => void, reject: (err?: unknown) => void };
+type List<T> = T[] | readonly T[];
+type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
 
 /**
  * Grab bag of common utilities
@@ -64,54 +66,52 @@ export class Util {
     }
   }
 
+  static buildEdgeMap<T, U extends OrderedState<T>>(items: List<U>): Map<T, Set<T>> {
+    const edgeMap = new Map(items.map(x => [x.key, new Set(x.after ?? [])]));
+
+    // Build out edge map
+    for (const input of items) {
+      for (const bf of input.before ?? []) {
+        if (edgeMap.has(bf)) {
+          edgeMap.get(bf)!.add(input.key);
+        }
+      }
+      const afterSet = edgeMap.get(input.key)!;
+      for (const el of input.after ?? []) {
+        afterSet.add(el);
+      }
+    }
+    return edgeMap;
+  }
+
   /**
    * Produces a satisfied ordering for a list of orderable elements
    */
-  static ordered<T,
-    U extends { after?: T[] | readonly T[], before?: T[] | readonly T[], key: T },
-    V extends { after: Set<T>, key: T, target: U }
-  >(items: U[] | readonly U[]): U[] {
-
-    // Turn items into a map by .key value, pointing to a mapping of type V
-    const allMap = new Map<T, V>(items.map((x: U): [T, V] => [
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      x.key, { key: x.key, target: x, after: new Set(x.after || []) } as V
-    ]));
-
-    const all = new Set<V>(allMap.values());
-
-    // Loop through all new items of type V, converting before into after
-    for (const item of all) {
-      const before = item.target.before || [];
-      for (const bf of before) {
-        if (allMap.has(bf)) {
-          allMap.get(bf)!.after.add(item.key);
-        }
-      }
-      item.after = new Set(Array.from(item.after).filter(x => allMap.has(x)));
-    }
+  static ordered<T, U extends OrderedState<T>>(items: List<U>): U[] {
+    const edgeMap = this.buildEdgeMap<T, U>(items);
 
     // Loop through all items again
-    const out: U[] = [];
-    while (all.size > 0) {
+    const keys: T[] = [];
+    while (edgeMap.size > 0) {
 
       // Find node with no dependencies
-      const next = [...all].find(x => x.after.size === 0);
-      if (!next) {
-        throw new Error(`Unsatisfiable dependency: ${[...all].map(x => x.target)}`);
+      const key = [...edgeMap].find(([, after]) => after.size === 0)?.[0];
+      if (!key) {
+        throw new Error(`Unsatisfiable dependency: ${edgeMap.keys()}`);
       }
 
       // Store, and remove
-      out.push(next.target);
-      all.delete(next);
+      keys.push(key);
+      edgeMap.delete(key);
 
       // Remove node from all other elements in `all`
-      for (const rem of all) {
-        rem.after.delete(next.key);
+      for (const [, rem] of edgeMap) {
+        rem.delete(key);
       }
     }
 
-    return out;
+    const inputMap = new Map(items.map(x => [x.key, x]));
+    return keys.map(k => inputMap.get(k)!);
   }
 
   /**

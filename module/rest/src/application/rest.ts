@@ -86,7 +86,8 @@ export class RestApplication<T = unknown>  {
       instances.push(await DependencyRegistry.getInstance<RestInterceptor>(op.target, op.qualifier));
     }
 
-    const ordered = instances.map(x => ({ key: x.constructor, before: x.before, after: x.after, target: x }));
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const ordered = instances.map(x => ({ key: x.constructor as Class, before: x.before, after: x.after, target: x }));
     const sorted = Util.ordered(ordered).map(x => x.target);
 
     console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });
