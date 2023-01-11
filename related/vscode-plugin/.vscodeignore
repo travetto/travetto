@@ -16,4 +16,3 @@ node_modules/**/*.html
 images/*.gif
 .eslintignore
 DOCS.js
-.trv.app.run.json

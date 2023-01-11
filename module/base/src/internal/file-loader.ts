@@ -1,3 +1,5 @@
+import timers from 'timers/promises';
+
 import { RootIndex } from '@travetto/manifest';
 
 import { ObjectUtil } from '../object';
@@ -29,6 +31,9 @@ class $DynamicFileLoader {
   async dispatch(ev: FileWatchEvent): Promise<void> {
     if (ev.action !== 'create') {
       await this.#loader.unload(ev.file);
+    }
+    if (ev.action === 'update') {
+      await timers.setTimeout(100);
     }
     if (ev.action !== 'delete') {
       await this.#loader.load(ev.file);

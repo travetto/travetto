@@ -3,7 +3,9 @@ import rl from 'readline';
 import { ExtensionContext } from 'vscode';
 
 import { path } from '@travetto/manifest';
+
 import { TargetEvent } from './types';
+import { Workspace } from './workspace';
 
 export class IpcSupport {
 
@@ -44,6 +46,7 @@ export class IpcSupport {
   }
 
   #ensureFile(): void {
+    fs.mkdirSync(path.dirname(this.#file), { recursive: true });
     if (fs.existsSync(this.#file)) {
       fs.unlinkSync(this.#file);
     }
@@ -70,7 +73,11 @@ export class IpcSupport {
   }
 
   activate(ctx: ExtensionContext): void {
-    this.#file = path.resolve(`.trv_ipc_vscode_${process.ppid}.ndjson`);
+    this.#file = path.resolve(
+      Workspace.path,
+      Workspace.workspaceIndex.manifest.outputFolder,
+      `.trv_ipc_vscode_${process.ppid}.ndjson`
+    );
     this.#ensureFile();
 
     ctx.environmentVariableCollection.replace('TRV_CLI_JSON_IPC', this.#file);
