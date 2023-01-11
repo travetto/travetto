@@ -12,7 +12,7 @@
   "license": "MIT",
   "scripts": {
     "prestart": "npm ci",
-    "start": "trv build --clean ",
+    "start": "trv watch --clean ",
     "test": "trv test",
     "lint": "trv lint",
     "upgrade-deps": "npm update -S"

@@ -59,6 +59,6 @@ export class TodoTest {
 
     await this.svc.remove(saved.id);
 
-    await assert.rejects(() => this.svc.get(saved.id), /Todo.*not found/);
+    await assert.rejects(() => this.svc.get(saved.id), /Todo with id .* not found/);
   }
 }

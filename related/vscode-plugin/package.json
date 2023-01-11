@@ -29,7 +29,8 @@
   },
   "scripts": {
     "vscode:prepublish": "cp ../../LICENSE . && npx trv build",
-    "package": "vsce package"
+    "package": "vsce package",
+    "watch": "npx trv watch --clean"
   },
   "dependencies": {
     "source-map-support": "^0.5.21",

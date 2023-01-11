@@ -23,7 +23,8 @@ export class ObjectUtil {
    */
   static isPrimitive(el: unknown): el is (string | boolean | number | RegExp) {
     const type = typeof el;
-    return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' || el instanceof RegExp || el instanceof Date);
+    return el !== null && el !== undefined && (type === 'string' || type === 'boolean' || type === 'number' ||
+      el instanceof RegExp || el instanceof Date || el instanceof String || el instanceof Number || el instanceof Boolean);
   }
 
   /**
@@ -55,7 +56,8 @@ export class ObjectUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return !!(o as object) && !!(o as { prototype: unknown }).prototype &&
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      (o as { prototype: { constructor: unknown } }).prototype.constructor !== Object.getPrototypeOf(Function);
+      (o as { prototype: { constructor: unknown } }).prototype.constructor !== Object.getPrototypeOf(Function) &&
+      o !== Function;
   }
 
   /**
