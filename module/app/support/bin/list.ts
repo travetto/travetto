@@ -78,7 +78,7 @@ export class AppListLoader {
    * @param name
    */
   async findByName(name: string): Promise<ApplicationConfig | undefined> {
-    return (await this.getList())?.find(x => x.moduleName ? x.moduleName === name : x.name === name);
+    return (await this.getList())?.find(x => x.globalName === name || x.name === name);
   }
 
   /**

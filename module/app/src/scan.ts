@@ -1,9 +1,10 @@
 import fs from 'fs';
 
+import { Class } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
-import type { ApplicationConfig } from './types';
+import type { ApplicationParam, ApplicationConfig } from './types';
 import { ApplicationRegistry } from './registry';
 
 /**
@@ -20,6 +21,18 @@ export class AppScanUtil {
   }
 
   /**
+   * Get choice params for a given class
+   */
+  static getParams(target: Class<unknown>): ApplicationParam[] {
+    const fields = SchemaRegistry.getMethodSchema(target!, 'run');
+    return fields.map(({ owner, type, match, ...param }) => ({
+      ...param,
+      ...(match ? { match: { re: match.re.source } } : {}),
+      type: type.name,
+    }));
+  }
+
+  /**
    * Scan source code for apps
    */
   static async scanList(): Promise<ApplicationConfig[]> {
@@ -33,19 +46,7 @@ export class AppScanUtil {
     // Get applications
     const res = await ApplicationRegistry.getAll();
     await SchemaRegistry.init();
-    const resolved = this.sortList(res);
-    const config = resolved
-      .map(({ target, ...app }) => ({
-        ...app,
-        params: SchemaRegistry.getMethodSchema(target!, 'run')
-          .map(({ owner, type, match, ...x }) => ({
-            ...x,
-            ...(match ? { match: { re: match.re.source } } : {}),
-            type: type.name,
-          }))
-      }));
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return config as ApplicationConfig[];
+    return this.sortList(res).map(({ target, ...app }) => ({ ...app, params: this.getParams(target!) }));
   }
 
   /**
@@ -62,7 +63,7 @@ export class AppScanUtil {
       const mod = RootIndex.getModuleFromSource(item.filename);
       if (!(mod?.local || mod?.main)) { continue; }
       for (const dep of RootIndex.getDependentModules(mod)) {
-        final.push(({ ...item, module: dep.name, moduleName: `${dep.name}:${item.name}` }));
+        final.push(({ ...item, module: dep.name, globalName: dep.name === RootIndex.mainModule.name ? item.name : `${dep.name}:${item.name}` }));
       }
     }
     return final;

@@ -47,7 +47,7 @@ export class AppSelectorUtil {
     const detail = choice.key ? undefined : this.buildAppDetail(choice);
 
     return {
-      label: `${choice.key ? '' : '$(gear) '}${choice.moduleName ?? choice.name}`,
+      label: `${choice.key ? '' : '$(gear) '}${choice.globalName}`,
       detail,
       description: params,
       target: choice

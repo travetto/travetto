@@ -74,7 +74,7 @@ export class AppRunFeature extends BaseFeature {
       name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
       useCli: true,
       main: 'run',
-      args: [choice.moduleName ?? choice.name, ...choice.inputs],
+      args: [choice.globalName, ...choice.inputs],
       cliModule: choice.module,
     });
   }
@@ -149,7 +149,7 @@ export class AppRunFeature extends BaseFeature {
         command: {
           command: this.commandName('new'),
           title: 'Debug Application',
-          arguments: [app.moduleName ?? app.name, app.codeStart]
+          arguments: [app.globalName, app.codeStart]
         }
       }));
   }
@@ -161,7 +161,7 @@ export class AppRunFeature extends BaseFeature {
     this.register('new', (name?: string, line?: number) =>
       this.#runner('Run New Application', async () => {
         const list = await this.getAppList();
-        return name ? list.find(x => x.moduleName === name || x.name === name) : list;
+        return name ? list.find(x => x.globalName === name || x.name === name) : list;
       }, line)()
     );
     this.register('recent', this.#runner('Run Recent Application', () => this.getValidRecent(10)));
@@ -171,7 +171,7 @@ export class AppRunFeature extends BaseFeature {
 
   async onEvent(ev: TargetEvent<{ name: string, args: string[] }>): Promise<void> {
     const { name, args } = ev.data;
-    const app = (await this.getAppList()).find(a => a.moduleName === name || a.name === name);
+    const app = (await this.getAppList()).find(a => a.globalName === name || a.name === name);
 
     if (app) {
       await this.runApplication(name, { ...app, inputs: args });

@@ -10,7 +10,7 @@ export class HelpUtil {
    * Convert single ApplicationConfig into a stylized entry
    */
   static getAppUsage(app: ApplicationConfig): string {
-    let usage = app.moduleName ?? app.name;
+    let usage = app.globalName;
 
     if (app.params) {
       usage = cliTpl`${{ identifier: usage }} ${app.params.map(p => {
@@ -44,7 +44,7 @@ export class HelpUtil {
 
       const usage = this.getAppUsage(conf);
 
-      lines.push(cliTpl`${{ param: conf.moduleName ?? conf.name }} ${{ title: conf.description }}`);
+      lines.push(cliTpl`${{ param: conf.globalName }} ${{ title: conf.description }}`);
       lines.push(cliTpl`${{ subtitle: 'usage' }}: ${usage}`);
       lines.push(cliTpl`${{ subtitle: 'file' }}:  ${{ path: conf.filename.replace(cwdPrefix, '') }}`);
       choices.push(lines.map((x, i) => `   ${i === 0 ? '●' : ' '} ${x}`));

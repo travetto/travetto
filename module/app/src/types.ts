@@ -10,18 +10,20 @@ export type AppClass = {
   run(...args: unknown[]): OrProm<Waitable | Closeable | void | undefined>;
 };
 
+export type ApplicationParam = (Omit<FieldConfig, 'type' | 'match'> & { type: string, match?: { re: string } });
+
 /**
  * The application's configuration
  */
 export interface ApplicationConfig<T extends AppClass = AppClass> {
   name: string; // App name
-  moduleName?: string; // Module + name
+  globalName: string; // Global name, for resolving in monorepos
   module: string;
   filename: string; // Location of file for app
   description?: string;
   start: number; // Start of app
   codeStart: number; // The start of the code
-  params?: (Omit<FieldConfig, 'type'> & { type: string })[]; // List of params
+  params?: ApplicationParam[]; // List of params
   targetId: string; // The class id
   target?: Class<T>; // The actual class of the app
   generatedTime?: number;

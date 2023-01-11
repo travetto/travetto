@@ -242,7 +242,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
       const data = await this.jsonIpc(...args);
       if (data !== undefined) {
         const payload = JSON.stringify({ type: this.name, data });
-        await mkdir(path.dirname(process.env.TRV_CLI_JSON_IPC));
+        await mkdir(path.dirname(process.env.TRV_CLI_JSON_IPC), { recursive: true });
         await appendFile(process.env.TRV_CLI_JSON_IPC, `${payload}\n`);
         return;
       }
