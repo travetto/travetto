@@ -1,9 +1,12 @@
 import vscode from 'vscode';
+import { WorkerOptions } from 'worker_threads';
 
-import { ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
+import { ExecUtil, ExecutionOptions, ExecutionState, WorkerResult } from '@travetto/base';
 import { ManifestIndex, path } from '@travetto/manifest';
 
 import { LaunchConfig } from './types';
+
+type EnvDict = Record<string, string | undefined>;
 
 /**
  * Standard set of workspace utilities
@@ -20,6 +23,18 @@ export class Workspace {
    */
   static get path(): string {
     return this.workspaceIndex.manifest.workspacePath;
+  }
+
+  static get #cliFile(): string {
+    return path.resolve(this.path, 'node_modules', '@travetto/compiler/bin/trv');
+  }
+
+  static #buildEnv(base?: EnvDict, cliModule?: string): EnvDict {
+    return {
+      ...base,
+      TRV_MANIFEST: cliModule ?? Workspace.workspaceIndex.manifest.mainModule,
+      TRV_OUTPUT: [Workspace.path, Workspace.workspaceIndex.manifest.outputFolder].join('/'),
+    };
   }
 
   /**
@@ -106,18 +121,18 @@ export class Workspace {
       cwd: '${workspaceFolder}',
       sourceMaps: true,
       pauseForSourceMap: true,
+      runtimeArgs: [],
       outFiles: [
         ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', '*.js'].join('/'),
         ['${workspaceFolder}', this.workspaceIndex.manifest.compilerFolder, '**', '*.js'].join('/')
       ],
       resolveSourceMapLocations: [
         ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**'].join('/'),
-        ['${workspaceFolder}', this.workspaceIndex.manifest.compilerFolder, '**'].join('/')
+        ['${workspaceFolder}', this.workspaceIndex.manifest.compilerFolder, '**'].join('/'),
       ],
       runtimeSourcemapPausePatterns: [
-        ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', '*.js'].join('/'),
+        ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', 'test', '**', '*.js'].join('/'),
       ],
-      restart: true,
       stopOnEntry: true,
       skipFiles: [
         '<node_internals>/**',
@@ -182,17 +197,15 @@ export class Workspace {
 
   static spawnCli(command: string, args?: string[], opts?: ExecutionOptions & { cliModule?: string }): ExecutionState {
     return ExecUtil.spawn(
-      'node',
-      [path.resolve(this.path, 'node_modules', '@travetto/compiler/bin/trv'), command, ...args ?? []],
-      {
-        cwd: this.path,
-        ...opts,
-        env: {
-          ...opts?.env,
-          TRV_MANIFEST: opts?.cliModule ?? Workspace.workspaceIndex.manifest.mainModule,
-          TRV_OUTPUT: [Workspace.path, Workspace.workspaceIndex.manifest.outputFolder].join('/'),
-        }
-      }
-    )
+      'node', [this.#cliFile, command, ...args ?? []],
+      { cwd: this.path, ...opts, env: this.#buildEnv(opts?.env, opts?.cliModule) }
+    );
+  }
+
+  static workerCli<T>(command: string, args?: string[], opts?: WorkerOptions & { env?: EnvDict, cliModule?: string }): WorkerResult<T> {
+    return ExecUtil.worker<T>(
+      this.#cliFile, [command, ...args ?? []],
+      { ...opts, env: this.#buildEnv(opts?.env, opts?.cliModule) }
+    );
   }
 }

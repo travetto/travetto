@@ -6,6 +6,7 @@ import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
 import { BaseFeature } from '../../base';
+
 import { WorkspaceResultsManager } from './workspace';
 import { TestEvent } from './types';
 
@@ -24,7 +25,7 @@ class TestRunnerFeature extends BaseFeature {
     command?: string
   ) {
     super(module, command);
-    this.#server = new ProcessServer('main', [`${this.module}/support/main.test-watch`, 'exec']);
+    this.#server = new ProcessServer('main', [`${this.module}/support/main.test-watch`, 'exec', 'false']);
 
     this.#server
       .on('start', () => {
@@ -83,6 +84,27 @@ class TestRunnerFeature extends BaseFeature {
       }));
   }
 
+  async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
+    if (editor) {
+      if (editor.document.fileName.includes('/test/')) {
+        this.#consumer.trackEditor(editor);
+        if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
+          this.#server.sendMessage('run-test', { file: editor.document.fileName });
+        }
+      }
+    }
+  }
+
+  async onOpenTextDocument(doc: vscode.TextDocument): Promise<void> {
+    if (doc.fileName.includes('/test/')) {
+      this.#consumer.trackEditor(doc);
+    }
+  }
+
+  async onCloseTextDocument(doc: vscode.TextDocument): Promise<void> {
+    this.#consumer.untrackEditor(doc);
+  }
+
   /**
    * On feature activate
    */
@@ -91,9 +113,9 @@ class TestRunnerFeature extends BaseFeature {
     this.register('reload', () => this.#server.restart());
     this.register('rerun', () => this.#consumer.trackEditor(vscode.window.activeTextEditor));
 
-    vscode.workspace.onDidOpenTextDocument(x => this.#consumer.trackEditor(x), null, context.subscriptions);
-    vscode.workspace.onDidCloseTextDocument(x => this.#consumer.untrackEditor(x), null, context.subscriptions);
-    vscode.window.onDidChangeActiveTextEditor(x => this.#consumer.trackEditor(x), null, context.subscriptions);
+    vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
+    vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);
+    vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);
 
     Workspace.sleep(1000).then(() => {
       vscode.window.visibleTextEditors.forEach(x => this.#consumer.trackEditor(x));
@@ -104,7 +126,7 @@ class TestRunnerFeature extends BaseFeature {
       pattern: {
         baseUri: Workspace.uri,
         base: Workspace.path,
-        pattern: 'test/**'
+        pattern: '**/test/**'
       }
     }, {
       provideCodeLenses: this.buildCodeLenses.bind(this),

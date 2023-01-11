@@ -31,9 +31,8 @@ export class AppRunFeature extends BaseFeature {
    * Get list of applications
    */
   async getAppList(): Promise<AppChoice[]> {
-    const proc = Workspace.spawnCli('main', [`${this.module}/support/main.list-get`]);
-    const choices: AppChoice[] = JSON.parse((await proc.result).stdout);
-    return choices.map(x => ({ ...x, inputs: x.inputs ?? [] }));
+    const res = Workspace.workerCli<AppChoice[]>('main', [`${this.module}/support/main.list-get`]);
+    return (await res.message).map(x => ({ ...x, inputs: x.inputs ?? [] }));
   }
 
   /**
