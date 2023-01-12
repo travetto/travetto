@@ -7,9 +7,11 @@ import { BaseFeature } from '../../base';
 
 interface Link extends vscode.TerminalLink {
   file: string;
-  line?: number;
+  line?: number | string;
   cls?: string;
 }
+
+const FILE_CLASS_REGEX = /([a-z_\-\/@]+):((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|￮[$_a-z0-9]+)/gi;
 
 /**
  * Logging workspace
@@ -38,26 +40,21 @@ export class LogFeature extends BaseFeature {
   async provideTerminalLinks(context: vscode.TerminalLinkContext): Promise<Link[]> {
     const out: Link[] = [];
 
-    context.line
-      // Log reference
-      .replace(/([^:]+):(?:src|support|bin|test|doc)\/([a-z\/.\-]+)(:\d+|￮[$A-Z][a-zA-Z0-9]+)/g, (_, mod, path, suffix) => {
-        if (!path.endsWith('.ts')) {
-          path = `${path}.ts`;
-        }
-        const file = Workspace.workspaceIndex.resolveFileImport(`${mod}/${path}`);
-
+    for (const match of context.line.matchAll(FILE_CLASS_REGEX)) {
+      const [full, mod, path, suffix] = match;
+      const entry = Workspace.workspaceIndex.getFromImport(`${mod}/${path.replace(/[.]ts$/, '')}`);
+      if (entry) {
         const type = suffix.includes(':') ? 'File' : 'Class';
-
         out.push({
-          startIndex: context.line.indexOf(_),
-          length: _.length,
+          startIndex: context.line.indexOf(full),
+          length: full.length,
           tooltip: `Travetto ${type}: ${mod}/${path}${suffix}`,
-          file,
+          file: entry.source,
           line: type === 'File' ? suffix.split(':')[1] : undefined,
           cls: type === 'Class' ? suffix.split('￮')[1] : undefined
         });
-        return '';
-      });
+      }
+    }
 
     return out;
   }

@@ -238,12 +238,12 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
       ConsoleManager.setDebugFromEnv();
     }
 
-    if (process.env.TRV_CLI_JSON_IPC && this.jsonIpc) {
+    if (process.env.TRV_CLI_IPC && this.jsonIpc) {
       const data = await this.jsonIpc(...args);
       if (data !== undefined) {
         const payload = JSON.stringify({ type: this.name, data });
-        await mkdir(path.dirname(process.env.TRV_CLI_JSON_IPC), { recursive: true });
-        await appendFile(process.env.TRV_CLI_JSON_IPC, `${payload}\n`);
+        await mkdir(path.dirname(process.env.TRV_CLI_IPC), { recursive: true });
+        await appendFile(process.env.TRV_CLI_IPC, `${payload}\n`);
         return;
       }
     }

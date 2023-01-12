@@ -35,8 +35,8 @@ export class DocCommand extends CliCommand<Options> {
       debug: false,
       set: {
         TRV_CONSOLE_WIDTH: 140,
-        TRV_CLI_JSON_IPC: '',
-        NO_COLOR: true,
+        TRV_CLI_IPC: '',
+        FORCE_COLOR: 0,
         TRV_LOG_PLAIN: true
       }
     };

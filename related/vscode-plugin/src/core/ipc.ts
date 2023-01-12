@@ -80,7 +80,7 @@ export class IpcSupport {
     );
     this.#ensureFile();
 
-    ctx.environmentVariableCollection.replace('TRV_CLI_JSON_IPC', this.#file);
+    ctx.environmentVariableCollection.replace('TRV_CLI_IPC', this.#file);
     this.#activate();
   }
 
