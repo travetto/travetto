@@ -45,6 +45,12 @@ export async function setup(): Promise<void> {
     // Ensure cursor comes back, on exit
     ShutdownManager.onShutdown('', () => process.stdout.write(RESET_CODE));
   }
+
+  try {
+    const { TerminalUtil, COLOR_INIT } = await import('@travetto/terminal');
+    await COLOR_INIT;
+    ShutdownManager.onShutdown('', () => TerminalUtil.drainReading());
+  } catch { }
 }
 
 export async function runMain(action: Function, args: string[]): Promise<void> {

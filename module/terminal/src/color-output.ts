@@ -95,4 +95,4 @@ export class ColorOutputUtil {
 }
 
 // Cannot wait/block in commonjs, should fire instantly
-TerminalUtil.getColorState().then(state => ColorOutputUtil.state = state);
+export const COLOR_INIT = TerminalUtil.getColorState().then(state => ColorOutputUtil.state = state);

@@ -14,16 +14,19 @@ type ColorBits = keyof (typeof COLOR_LEVEL_MAP);
  */
 export class TerminalUtil {
 
-  static removeAnsiSequences(output: string): string {
-    return output.replace(ANSI_CODE_REGEX, '');
+  static #readQueue: { term: TermState, query: string, callback: (res: Buffer) => void }[] = [];
+  static #reading: Promise<void> | undefined;
+
+  static async #startReading(): Promise<void> {
+    while (this.#readQueue.length > 0) {
+      const { term, query, callback } = this.#readQueue.shift()!;
+      await this.#readInput(term, query).then(callback);
+    }
+    this.#reading = undefined;
   }
 
-  /**
-   * Read input given term state
-   */
-  static async readInput({ input, output }: TermState, query: string): Promise<Buffer> {
+  static async #readInput({ input, output }: TermState, query: string): Promise<Buffer> {
     try {
-      console.trace!('Reading input', input.isRaw, ANSICodes.DEBUG(query));
       input.setRawMode(true);
       // Send data, but do not wait on it
       output.write(query);
@@ -31,10 +34,27 @@ export class TerminalUtil {
       const val: Buffer | string = input.read();
       return typeof val === 'string' ? Buffer.from(val, 'utf8') : val;
     } finally {
-      console.log!('Resolved input', input.isRaw, ANSICodes.DEBUG(query));
       input.setRawMode(false);
     }
   }
+
+  /**
+   * Read input given term state
+   */
+  static readInput(term: TermState, query: string): Promise<Buffer> {
+    const promise = new Promise<Buffer>(callback => this.#readQueue.push({ term, query, callback }));
+    this.#reading ??= this.#startReading();
+    return promise;
+  }
+
+  static drainReading(): Promise<void> | undefined {
+    return this.#reading;
+  }
+
+  static removeAnsiSequences(output: string): string {
+    return output.replace(ANSI_CODE_REGEX, '');
+  }
+
 
   /** Parse xterm color response */
   static parseColorResponse(response: Buffer): RGB | undefined {
@@ -52,7 +72,7 @@ export class TerminalUtil {
    * Executes xterm query against the term
    */
   static oscQuery(term: TermState, field: TermColorField): Promise<RGB | undefined>;
-  static oscQuery(term: TermState, field: OSCQueryField): Promise<Buffer | RGB | undefined> {
+  static async oscQuery(term: TermState, field: OSCQueryField): Promise<Buffer | RGB | undefined> {
     const res = this.readInput(term, ANSICodes.OSC_QUERY(field));
     if (field === 'foregroundColor' || field === 'backgroundColor') {
       return res.then(v => this.parseColorResponse(v));
@@ -64,7 +84,7 @@ export class TerminalUtil {
    * Executes a device status report query against the term
    */
   static deviceStatusReport(term: TermState, field: 'cursorPosition'): Promise<TermCoord>;
-  static deviceStatusReport(term: TermState, field: DeviceStatusField): Promise<Buffer | TermCoord> {
+  static async deviceStatusReport(term: TermState, field: DeviceStatusField): Promise<Buffer | TermCoord> {
     const res = this.readInput(term, ANSICodes.DEVICE_STATUS_REPORT(field));
     if (field === 'cursorPosition') {
       return res.then(v => this.parseCursorPosition(v));
