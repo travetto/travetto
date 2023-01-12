@@ -37,7 +37,16 @@ export class ManifestUtil {
   static async readManifest(ctx: ManifestContext): Promise<ManifestRoot> {
     const file = path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile);
     if (await fs.stat(file).catch(() => false)) {
-      return JSON.parse(await fs.readFile(file, 'utf8'));
+      try {
+        return JSON.parse(await fs.readFile(file, 'utf8'));
+      } catch (err) {
+        await fs.unlink(file).catch(() => { });
+        const final = new Error(`Corrupted manifest ${ctx.manifestFile}: file has been removed, retry`);
+        if (err instanceof Error) {
+          final.stack = [final.message, ...(err.stack ?? '').split('\n').slice(1)].join('\n');
+        }
+        throw final;
+      }
     } else {
       return {
         modules: {},
