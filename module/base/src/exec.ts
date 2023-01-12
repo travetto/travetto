@@ -276,10 +276,11 @@ export class ExecUtil {
   static returnResponse(exitCode: number, res?: unknown): never {
     if (parentPort) {
       parentPort.postMessage(res);
-    } else if (process.send) {
-      process.send(res);
-    } else if (res) {
-      process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${typeof res === 'string' ? res : JSON.stringify(res)}\n`);
+    } else {
+      process.send?.(res);
+      if (res) {
+        process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${typeof res === 'string' ? res : JSON.stringify(res)}\n`);
+      }
     }
     process.exit(exitCode);
   }
