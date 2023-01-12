@@ -1,8 +1,13 @@
 import type { MailTemplateEngine } from '@travetto/email';
-import { WatchUtil, TimeUtil, TypedObject } from '@travetto/base';
+import { WatchUtil, TimeUtil, TypedObject, FileWatchEvent } from '@travetto/base';
 
 import { EmailTemplateCompiler, Compilation } from '../../src/compiler';
 import { EmailTemplateResource } from '../../src/resource';
+
+const VALID_TEMPLATE_CHANGE = ({ action, file }: FileWatchEvent): boolean =>
+  action !== 'delete' &&
+  /[.](html|scss|css|png|jpe?g|gif|ya?ml)$/.test(file) &&
+  !/[.]compiled[.]/.test(file);
 
 /**
  *
@@ -59,33 +64,23 @@ export class TemplateManager {
    * Watch compilation
    */
   async watchCompile(cb?: (file: string) => void): Promise<void> {
+    console.log('Watching', this.resources.getAllPaths());
     await WatchUtil.buildWatcher(this.resources.getAllPaths(), async ({ action, file }) => {
-      if (action !== 'update') {
-        return;
-      }
-      if (/[.]compiled[.]/.test(file) ||
-        !/[.](html|scss|css|png|jpe?g|gif|ya?ml)$/.test(file)
-      ) {
-        return;
-      }
-
       try {
-        console.log('Contents changed', { file });
+        console.log(`Contents ${action}`, { file });
         if (this.resources.isTemplateFile(file)) {
           await this.compiler.compile(file.replace(/^.*\/resources\//g, ''), true);
           cb?.(file);
         } else {
           await this.compiler.compileAll(true);
-          if (cb) {
-            for (const el of await this.resources.findAllTemplates()) {
-              cb(el.path);
-            }
+          for (const el of await this.resources.findAllTemplates()) {
+            cb?.(el.path);
           }
         }
       } catch (err) {
         console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
       }
-    });
+    }, VALID_TEMPLATE_CHANGE);
     await TimeUtil.wait('1d');
   }
 }

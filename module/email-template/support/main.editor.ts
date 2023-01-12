@@ -1,3 +1,5 @@
+import { defineGlobalEnv } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
@@ -13,6 +15,12 @@ import { TemplateManager } from './bin/template';
  * Entry point for template editing
  */
 export async function main(): Promise<void> {
+  defineGlobalEnv({
+    resourcePaths: [
+      `${RootIndex.getModule('@travetto/email-template')!.source}/resources`
+    ]
+  });
+
   await RootRegistry.init();
 
   const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);

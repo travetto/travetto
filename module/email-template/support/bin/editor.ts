@@ -92,8 +92,6 @@ export class EditorState {
    * Initialize context, and listeners
    */
   async init(): Promise<void> {
-    this.#template.watchCompile(f => this.renderFile(f));
-
     process.on('message', (msg: InboundMessage) => {
       switch (msg.type) {
         case 'configure': this.#onConfigure(msg); break;
@@ -101,5 +99,6 @@ export class EditorState {
         case 'send': this.#onSend(msg); break;
       }
     });
+    await this.#template.watchCompile(f => this.renderFile(f));
   }
 }

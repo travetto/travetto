@@ -74,7 +74,7 @@ export class EmailTemplateResource extends EmailResource {
         if (src.includes('://')) { // No urls
           continue;
         }
-        const relative = path.resolve(baseRel, src);
+        const relative = `${baseRel}/${src}`;
         await this.describe(relative);
         const token = `@@${id += 1}@@`;
         tokens.set(token, relative);

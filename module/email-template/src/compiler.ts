@@ -15,7 +15,7 @@ import { EmailTemplateResource } from './resource';
 
 export type Compilation = { html: string, text: string, subject: string };
 
-const req = createRequire(path.cwd());
+const req = createRequire(path.resolve('node_modules'));
 
 /**
  * Utilities for templating

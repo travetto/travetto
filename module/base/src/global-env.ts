@@ -55,6 +55,7 @@ export type GlobalEnvConfig = {
 
 export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
   const { set = {} } = cfg;
+  const resources = [...cfg.resourcePaths ?? [], ...GlobalEnv.resourcePaths];
   const test = cfg.test ?? GlobalEnv.test;
   let debug = cfg.debug ?? GlobalEnv.debug;
   const env = cfg.envName ?? GlobalEnv.envName;
@@ -77,4 +78,5 @@ export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
   process.env.TRV_DYNAMIC = `${cfg.dynamic ?? GlobalEnv.dynamic}`;
   process.env.DEBUG = `${debug}`;
   process.env.TRV_PROFILES = [...profiles].sort().join(',');
+  process.env.TRV_RESOURCES = resources.join(',');
 }
