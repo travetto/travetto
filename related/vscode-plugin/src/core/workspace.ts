@@ -4,9 +4,7 @@ import { WorkerOptions } from 'worker_threads';
 import { ExecUtil, ExecutionOptions, ExecutionState, WorkerResult } from '@travetto/base';
 import { ManifestIndex, path } from '@travetto/manifest';
 
-import { LaunchConfig } from './types';
-
-type EnvDict = Record<string, string | undefined>;
+import { EnvDict, LaunchConfig } from './types';
 
 /**
  * Standard set of workspace utilities
@@ -29,8 +27,15 @@ export class Workspace {
     return path.resolve(this.path, 'node_modules', '@travetto/compiler/bin/trv');
   }
 
-  static #buildEnv(base?: EnvDict, cliModule?: string): EnvDict {
+  static #buildEnv(debug: boolean, base?: EnvDict, cliModule?: string): EnvDict {
     return {
+      ...(debug ? {
+        TRV_DYNAMIC: '1',
+        FORCE_COLOR: '2',
+        COLORFGBG: this.isDarkTheme() ? '15;0' : '0;15',
+      } : {
+        TRV_QUIET: '1'
+      }),
       ...base,
       TRV_MANIFEST: cliModule ?? Workspace.workspaceIndex.manifest.mainModule,
       TRV_OUTPUT: [Workspace.path, Workspace.workspaceIndex.manifest.outputFolder].join('/'),
@@ -111,10 +116,6 @@ export class Workspace {
     if (config.useCli) {
       config.args = [config.main, ...config.args ?? []];
       config.main = path.resolve(this.path, 'node_modules', '@travetto/compiler/bin/trv');
-      Object.assign(config.env ??= {}, {
-        TRV_MANIFEST: config.cliModule ?? '',
-        TRV_OUTPUT: [Workspace.path, Workspace.workspaceIndex.manifest.outputFolder].join('/'),
-      });
     }
 
     /* eslint-disable no-template-curly-in-string */
@@ -142,8 +143,12 @@ export class Workspace {
         '<node_internals>/**',
         'node:internals/**',
         'internal/**',
-        '**/@travetto/context/**/*',
-        '**/@travetto/rest/src/util/route.ts',
+        '**/@travetto/base/src/console.js',
+        '**/@travetto/log/src/service.js',
+        '**/@travetto/log/src/common.js',
+        '**/@travetto/log/src/appender/console.js',
+        '**/@travetto/context/src/service.js',
+        '**/@travetto/rest/src/util/route.js',
         '**/tslib/**/*'
       ],
       trace: true,
@@ -152,7 +157,7 @@ export class Workspace {
       name: config.name,
       program: config.main.replace(this.path, '${workspaceFolder}'),
       args: (config.args ?? []).map(x => `${x}`),
-      env: { COLORFGBG: this.isDarkTheme() ? '15:0' : '0:15', FORCE_COLOR: '1', ...config.env, TRV_DYNAMIC: 1 }
+      env: this.#buildEnv(true, config.env ?? {}, config.cliModule)
     };
     /* eslint-enable no-template-curly-in-string */
     return res;
@@ -202,14 +207,14 @@ export class Workspace {
   static spawnCli(command: string, args?: string[], opts?: ExecutionOptions & { cliModule?: string }): ExecutionState {
     return ExecUtil.spawn(
       'node', [this.#cliFile, command, ...args ?? []],
-      { cwd: this.path, ...opts, env: this.#buildEnv(opts?.env, opts?.cliModule) }
+      { cwd: this.path, ...opts, env: this.#buildEnv(false, opts?.env, opts?.cliModule) }
     );
   }
 
   static workerCli<T>(command: string, args?: string[], opts?: WorkerOptions & { env?: EnvDict, cliModule?: string }): WorkerResult<T> {
     return ExecUtil.worker<T>(
       this.#cliFile, [command, ...args ?? []],
-      { ...opts, env: this.#buildEnv(opts?.env, opts?.cliModule) }
+      { ...opts, env: this.#buildEnv(false, opts?.env, opts?.cliModule) }
     );
   }
 }

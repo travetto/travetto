@@ -17,11 +17,13 @@ export interface ActivationTarget {
   onEvent?(event: TargetEvent): void | Promise<void>;
 }
 
+export type EnvDict = Record<string, string | undefined>;
+
 export type LaunchConfig = {
   useCli?: boolean;
   cliModule?: string;
   name: string;
   main: string;
   args?: string[];
-  env?: Record<string, string>;
+  env?: EnvDict;
 };
