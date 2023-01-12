@@ -12,7 +12,9 @@ import { EnvDict, LaunchConfig } from './types';
  */
 export class Workspace {
 
-  static #baseEnv: EnvDict = {};
+  static #baseEnv: EnvDict = {
+    DEBUG: ''
+  };
 
   static readonly context: vscode.ExtensionContext;
   static readonly folder: vscode.WorkspaceFolder;
@@ -180,7 +182,7 @@ export class Workspace {
         '**/@travetto/log/src/appender/console.js',
         '**/@travetto/context/src/service.js',
         '**/@travetto/rest/src/util/route.js',
-        '**/tslib/**/*'
+        '**/tslib/**'
       ],
       trace: true,
       console: 'internalConsole',

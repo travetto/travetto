@@ -19,8 +19,8 @@ export class ColorOutputUtil {
 
   static #state: TermColorState = { level: 0, scheme: 'dark' };
 
-  static set state(state: TermColorState) {
-    this.#state = state;
+  static set state(state: Partial<TermColorState>) {
+    this.#state = { scheme: 'dark', level: 0, ...state };
   }
 
   /**

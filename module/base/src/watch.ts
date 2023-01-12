@@ -1,4 +1,4 @@
-import { readdirSync } from 'fs';
+import fs from 'fs/promises';
 
 import { ShutdownManager } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
@@ -31,24 +31,23 @@ export class WatchUtil {
     filter?: (ev: FileWatchEvent) => boolean
   ): Promise<() => Promise<void>> {
     const lib = await this.#getWatcher();
-    const subs = await Promise.all(folders.map(folder =>
-      lib.subscribe(folder, (err, events) => {
-        for (const ev of events) {
-          const finalEv = { action: ev.type, file: ev.path };
-          if (!filter || filter(finalEv)) {
-            onEvent(finalEv, folder);
+    const subs = await Promise.all(folders.map(async folder => {
+      if (await fs.stat(folder).then(() => true, () => false)) {
+        const ignore = (await fs.readdir(folder)).filter(x => x.startsWith('.') && x.length > 2);
+        return lib.subscribe(folder, (err, events) => {
+          for (const ev of events) {
+            const finalEv = { action: ev.type, file: ev.path };
+            if (!filter || filter(finalEv)) {
+              onEvent(finalEv, folder);
+            }
           }
-        }
-      }, {
-        ignore: [
-          ...readdirSync(folder).filter(x => x.startsWith('.') && x.length > 2)
-        ]
-      })
-    ));
+        }, { ignore });
+      }
+    }));
 
     // Allow for multiple calls
     let finalProm: Promise<void> | undefined;
-    const remove = (): Promise<void> => finalProm ??= Promise.all(subs.map(x => x.unsubscribe())).then(() => { });
+    const remove = (): Promise<void> => finalProm ??= Promise.all(subs.map(x => x?.unsubscribe())).then(() => { });
 
     // Remove on shut down
     ShutdownManager.onShutdown(this.constructor, remove);

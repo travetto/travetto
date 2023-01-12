@@ -20,7 +20,11 @@
         "${workspaceFolder}/.trv_compiler/**/*.js",
       ],
       "skipFiles": [
-        "<node_internals>/**"
+        "<node_internals>/**",
+        "node:internals/**",
+        "**/vs/*/api/**",
+        "**/@travetto/base/src/console.js",
+        "**/tslib/**"
       ],
       "pauseForSourceMap": true,
       "sourceMaps": true,

@@ -175,7 +175,7 @@ export class Compiler {
     if (files.length) {
       await GlobalTerminal.trackProgress(this.emit(files, emitter), resolveEmittedFile, { position: 'bottom' });
       if (failed) {
-        process.exit(-1);
+        process.exit(1);
       }
     }
 

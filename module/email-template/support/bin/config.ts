@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { path } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {
@@ -23,7 +23,21 @@ interface ConfigType {
 export class $EditorConfig {
 
   #configFile = path.resolve('resources/email/dev.yml');
-  #defaultConfig = fs.readFile(path.resolve(RootIndex.mainModule.source, 'default-dev.yml'), 'utf8');
+  #defaultConfig = {
+    sender: {
+      port: 587,
+      host: 'smtp.host.email',
+      auth: {
+        user: 'email@blah.com',
+        pass: 'password'
+      },
+      from: 'from-email@gmail.com',
+      to: 'my-email@gmail.com',
+      context: {
+        key: 'value'
+      }
+    }
+  };
 
   /**
    *
@@ -48,15 +62,15 @@ export class $EditorConfig {
     return conf.sender ?? {};
   }
 
-  getDefaultConfig(): Promise<string> {
-    return this.#defaultConfig;
+  getDefaultConfig(): string {
+    return YamlUtil.serialize(this.#defaultConfig);
   }
 
   async ensureConfig(): Promise<string> {
     const file = this.#configFile;
     if (!(await fs.stat(file).catch(() => { }))) {
       await fs.mkdir(path.dirname(file), { recursive: true });
-      await fs.writeFile(file, await this.#defaultConfig, { encoding: 'utf8' });
+      await fs.writeFile(file, this.getDefaultConfig(), { encoding: 'utf8' });
     }
     return file;
   }

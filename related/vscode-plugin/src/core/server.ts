@@ -39,7 +39,7 @@ export class ProcessServer {
     if (!this.running) {
       console.log('Starting', { path: this.#command, args: this.#args });
       this.#emit('pre-start');
-      this.#state = Workspace.spawnCli(this.#command, this.#args, { ...this.#opts, env: { DEBUG: '*' } });
+      this.#state = Workspace.spawnCli(this.#command, this.#args, { ...this.#opts });
 
       const prefix = [this.#command, ...this.#args].join(' ');
       if (this.#state.process.stdout) {

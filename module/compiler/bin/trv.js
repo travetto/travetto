@@ -47,14 +47,14 @@ async function exec(args) {
   }
 
   switch (op) {
-    case 'clean': return process.exit(0);
+    case 'clean': break;
     case 'manifest': {
       const { writeManifest, buildManifest } = await $getBootstrap(ctx);
       const manifest = (await buildManifest(ctx)).manifest;
       await writeManifest(ctx, manifest);
       const output = `${ctx.workspacePath}/${ctx.outputFolder}/${ctx.manifestFile}`;
       message(`Wrote manifest ${output}`);
-      return process.exit(0);
+      break;
     }
     case 'watch':
       message(`Watching ${ctx.workspacePath} for changes...`);
@@ -63,7 +63,7 @@ async function exec(args) {
     case 'build':
       await compile(ctx);
       message(`Built to ${ctx.workspacePath}/${ctx.outputFolder}`);
-      return process.exit(0);
+      break;
     default: {
       const path = require('path/posix');
       const { manifest } = await compile(ctx);

@@ -2,6 +2,9 @@ const ESC = '\x1b[';
 const OSC = '\x1b]';
 const ST = '\x1b\\';
 
+// eslint-disable-next-line no-control-regex
+export const ANSI_CODE_REGEX = /(\x1b|\x1B)[\[\]][?]?[0-9;]+[A-Za-z]/g;
+
 export const OSC_QUERY_FIELDS = {
   backgroundColor: 11,
   foregroundColor: 10
@@ -16,6 +19,7 @@ export const DEVICE_STATUS_FIELDS = {
 export type DeviceStatusField = keyof (typeof DEVICE_STATUS_FIELDS);
 
 export const ANSICodes = {
+  DEBUG: (text: string): string => text.replaceAll(ESC, '<ESC>').replaceAll(OSC, '<OSC>').replaceAll('\n', '<NL>').replaceAll(ST, '<ST>'),
   CURSOR_DY: (row: number): string => `${ESC}${Math.abs(row)}${row < 0 ? 'A' : 'B'}`,
   CURSOR_DX: (col: number): string => `${ESC}${Math.abs(col)}${col < 0 ? 'D' : 'C'}`,
   COLUMN_SET: (col: number): string => `${ESC}${col}G`,

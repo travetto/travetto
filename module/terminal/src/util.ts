@@ -1,5 +1,5 @@
 import { ColorLevel, RGB, TermBackgroundScheme, TermColorField, TermColorState, TermCoord, TermState } from './types';
-import { ANSICodes, DeviceStatusField, OSCQueryField } from './codes';
+import { ANSICodes, ANSI_CODE_REGEX, DeviceStatusField, OSCQueryField } from './codes';
 import { ColorDefineUtil } from './color-define';
 
 const to256 = (x: string): number => Math.trunc(parseInt(x, 16) / (16 ** (x.length - 2)));
@@ -15,24 +15,25 @@ type ColorBits = keyof (typeof COLOR_LEVEL_MAP);
 export class TerminalUtil {
 
   static removeAnsiSequences(output: string): string {
-    // eslint-disable-next-line no-control-regex
-    return output.replace(/(\x1b|\x1B)\[[?]?[0-9;]+[A-Za-z]/g, '');
-  }
-
-  static debugSequences(output: string): string {
-    return output.replaceAll('\x1b[', '<ESC>').replaceAll('\x1b]', '<OSC>').replaceAll('\n', '<NL>');
+    return output.replace(ANSI_CODE_REGEX, '');
   }
 
   /**
    * Read input given term state
    */
-  static readInput({ input, output }: TermState, query: string): Promise<Buffer> {
-    input.setRawMode(true);
-    // Send data, but do not wait on it
-    output.write(query);
-    return new Promise<Buffer | string>(res => input.once('readable', () => res(input.read())))
-      .finally(() => input.setRawMode(false))
-      .then(x => typeof x === 'string' ? Buffer.from(x, 'utf8') : x);
+  static async readInput({ input, output }: TermState, query: string): Promise<Buffer> {
+    try {
+      console.trace!('Reading input', input.isRaw, ANSICodes.DEBUG(query));
+      input.setRawMode(true);
+      // Send data, but do not wait on it
+      output.write(query);
+      await new Promise(res => input.once('readable', res));
+      const val: Buffer | string = input.read();
+      return typeof val === 'string' ? Buffer.from(val, 'utf8') : val;
+    } finally {
+      console.log!('Resolved input', input.isRaw, ANSICodes.DEBUG(query));
+      input.setRawMode(false);
+    }
   }
 
   /** Parse xterm color response */
@@ -121,11 +122,11 @@ export class TerminalUtil {
   /**
    * Generate a color state object
    */
-  static async getColorState(level?: ColorLevel, scheme?: TermBackgroundScheme): Promise<TermColorState> {
+  static async getColorState(level?: ColorLevel, scheme?: TermBackgroundScheme): Promise<Partial<TermColorState>> {
     // Try to detect background color, async nature means there will be a delay
     const term = { height: 0, input: process.stdin, output: process.stdout, width: 0, interactive: process.stdout.isTTY };
     level ??= await this.detectColorLevel(term);
-    scheme ??= await this.getBackgroundScheme(term) ?? 'dark';
+    scheme ??= (level > 0 ? await this.getBackgroundScheme(term) : undefined);
     return { level, scheme };
   }
 }
