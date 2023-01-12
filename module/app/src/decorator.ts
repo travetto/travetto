@@ -23,6 +23,7 @@ export function Application(name: string, config?: AppDecorator) {
     const src = RootIndex.getFunctionMetadata(target)!.source;
     const stat = lstatSync(src, { throwIfNoEntry: false }) ?? { mtimeMs: 0, ctimeMs: 0 };
     const out: Partial<ApplicationConfig> = {
+      params: [],
       ...config ?? {},
       target,
       module: RootIndex.manifest.mainModule,

@@ -1,3 +1,4 @@
+import timers from 'timers/promises';
 import vscode from 'vscode';
 import { WorkerOptions } from 'worker_threads';
 
@@ -10,6 +11,8 @@ import { EnvDict, LaunchConfig } from './types';
  * Standard set of workspace utilities
  */
 export class Workspace {
+
+  static #baseEnv: EnvDict = {};
 
   static readonly context: vscode.ExtensionContext;
   static readonly folder: vscode.WorkspaceFolder;
@@ -29,13 +32,8 @@ export class Workspace {
 
   static #buildEnv(debug: boolean, base?: EnvDict, cliModule?: string): EnvDict {
     return {
-      ...(debug ? {
-        TRV_DYNAMIC: '1',
-        FORCE_COLOR: '2',
-        COLORFGBG: this.isDarkTheme() ? '15;0' : '0;15',
-      } : {
-        TRV_QUIET: '1'
-      }),
+      ...this.#baseEnv,
+      ...(debug ? { TRV_DYNAMIC: '1', } : { TRV_QUIET: '1' }),
       ...base,
       TRV_MANIFEST: cliModule ?? Workspace.workspaceIndex.manifest.mainModule,
       TRV_OUTPUT: [Workspace.path, Workspace.workspaceIndex.manifest.outputFolder].join('/'),
@@ -50,11 +48,40 @@ export class Workspace {
   }
 
   /**
-   * Read default environment data for executions
-   * @param extra Additional env vars to add
+   * Read theme using webview panel
    */
-  static getDefaultEnv(extra: Record<string, string> = {}): Record<string, string> {
-    return { FORCE_COLOR: 'true', ...extra };
+  static async getColorTheme(): Promise<{ light: boolean, highContrast: boolean }> {
+    const subs: { dispose(): unknown }[] = [];
+    const panel = vscode.window.createWebviewPanel('theme-detector', '',
+      { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside, },
+      { enableScripts: true, localResourceRoots: [], },
+    );
+    subs.push(panel);
+
+    const reading = new Promise<string>(res => subs.push(panel.webview.onDidReceiveMessage(res, undefined)));
+    panel.webview.html = '<body onload="acquireVsCodeApi().postMessage(document.body.className)">';
+    const final = await Promise.race([reading, timers.setTimeout(1000).then(x => undefined)]);
+    for (const sub of subs) {
+      sub.dispose();
+    }
+
+    return {
+      light: (!!final && /vscode[^ ]*-light/.test(final)),
+      highContrast: /vscode-high-contrast/.test(final ?? '')
+    };
+  }
+
+  /**
+   * Update general data for theme
+   */
+  static async writeTheme(): Promise<void> {
+    const theme = await this.getColorTheme();
+    const color = theme.light ? '0;15' : '15;0';
+    const depth = theme?.highContrast ? '1' : '3';
+    this.#baseEnv.COLORFGBG = color;
+    this.context.environmentVariableCollection.replace('COLORFGBG', color);
+    this.#baseEnv.FORCE_COLOR = depth;
+    this.context.environmentVariableCollection.replace('FORCE_COLOR', depth);
   }
 
   /**
@@ -73,11 +100,19 @@ export class Workspace {
     // @ts-expect-error
     this.workspaceIndex = workspaceIndex;
 
+    await this.writeTheme();
+
+    // Update config on change
+    context.subscriptions.push(
+      vscode.window.onDidChangeActiveColorTheme(() => this.writeTheme())
+    );
+
     for (const ext of this.extensionIndex.findSrc({
       filter: f => /.*\/feature.*?\/main[.]/.test(f)
     })) {
       await import(ext.output);
     }
+
   }
 
   /**
@@ -102,10 +137,6 @@ export class Workspace {
    */
   static async isInstalled(module: string): Promise<boolean> {
     return this.workspaceIndex.hasModule(module);
-  }
-
-  static isDarkTheme(): boolean {
-    return false;
   }
 
   /**

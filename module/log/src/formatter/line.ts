@@ -8,12 +8,12 @@ import { LogEvent, Formatter } from '../types';
  * Level coloring
  */
 export const STYLES = ColorOutputUtil.palette({
-  info: ['yellow', 'mediumSeaGreen'],
-  debug: ['lightGray', 'brightYellow'],
+  info: ['yellow', 'goldenrod'],
+  debug: ['lightGray', '#555555'],
   warn: ['darkOrange', 'brightMagenta'],
   error: ['darkRed', { text: 'brightCyan', inverse: true }],
   timestamp: ['white', 'black'],
-  location: ['brightGreen', 'purple']
+  location: ['lightBlue', 'purple']
 });
 
 /**

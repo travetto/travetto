@@ -23,7 +23,7 @@ export interface ApplicationConfig<T extends AppClass = AppClass> {
   description?: string;
   start: number; // Start of app
   codeStart: number; // The start of the code
-  params?: ApplicationParam[]; // List of params
+  params: ApplicationParam[]; // List of params
   targetId: string; // The class id
   target?: Class<T>; // The actual class of the app
   generatedTime?: number;
