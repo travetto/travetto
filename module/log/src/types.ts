@@ -1,4 +1,4 @@
-import { ConsoleEvent, LogLevel } from '@travetto/base';
+import { ConsoleEvent } from '@travetto/base';
 /**
  * Logging event
  */
@@ -17,7 +17,7 @@ export interface LogEvent extends ConsoleEvent {
  * Output appender for the logger
  */
 export interface Appender {
-  append(level: LogLevel, msg: string): void;
+  append(ev: LogEvent, formatted: string): void;
 }
 
 /**

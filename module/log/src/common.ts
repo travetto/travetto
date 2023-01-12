@@ -49,6 +49,6 @@ export class CommonLogger {
   }
 
   onLog(ev: LogEvent): void {
-    this.#appender.append(ev.level, this.#formatter.format(ev));
+    this.#appender.append(ev, this.#formatter.format(ev));
   }
 }

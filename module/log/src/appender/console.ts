@@ -1,11 +1,10 @@
-import { LogLevel } from '@travetto/base';
-import { Appender } from '../types';
+import { Appender, LogEvent } from '../types';
 
 /**
  * Console.output
  */
 export class ConsoleAppender implements Appender {
-  append(level: LogLevel, message: string): void {
-    console![level](message);
+  append(ev: LogEvent, formatted: string): void {
+    console![ev.level](formatted);
   }
 }
