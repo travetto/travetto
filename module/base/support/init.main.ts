@@ -32,13 +32,13 @@ export async function setup(): Promise<void> {
   Error.stackTraceLimit = 50; // Deep limit
   install(); // Register source maps
 
-  // Register shutdown handler
-  ShutdownManager.register();
-
   defineGlobalEnv({ main: undefined });
 
   // Initialize
   await ConsoleManager.register();
+
+  // Register shutdown handler
+  ShutdownManager.register();
 
   // This could live in @travetto/terminal, but orchestrating is complicated
   if (process.stdout.isTTY) {
@@ -56,10 +56,10 @@ export async function setup(): Promise<void> {
 export async function runMain(action: Function, args: string[]): Promise<void> {
   try {
     await setup();
-    return ExecUtil.returnResponse(0, await action(...args));
+    ExecUtil.returnResponse(0, await action(...args));
   } catch (err) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions
-    return ExecUtil.returnResponse((err as any)?.code ?? 1, err);
+    ExecUtil.returnResponse((err as any)?.code ?? 1, err);
   }
 }
 

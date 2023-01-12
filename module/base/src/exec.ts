@@ -232,7 +232,6 @@ export class ExecUtil {
             const msg = Buffer.concat(stderr).toString();
             if (!options.minimal) {
               console.warn(msg);
-              process.exit(c);
             } else {
               rej(msg);
             }
@@ -273,7 +272,7 @@ export class ExecUtil {
   /**
    * Run operation and send response across worker/fork/spawn/root
    */
-  static returnResponse(exitCode: number, res?: unknown): never {
+  static returnResponse(exitCode: number, res?: unknown): void {
     if (parentPort) {
       parentPort.postMessage(res);
     } else {
@@ -282,6 +281,6 @@ export class ExecUtil {
         process[exitCode === 0 ? 'stdout' : 'stderr'].write(`${typeof res === 'string' ? res : JSON.stringify(res)}\n`);
       }
     }
-    process.exit(exitCode);
+    process.exitCode = exitCode;
   }
 }
