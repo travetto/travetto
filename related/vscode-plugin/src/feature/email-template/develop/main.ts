@@ -42,7 +42,7 @@ export class EmailTemplateFeature extends BaseFeature {
 
   getPanel(): vscode.WebviewPanel {
     if (!this.#panel) {
-      this.#panel = vscode.window.createWebviewPanel(`${this.commandBase}.content`, 'Email Preview', {
+      this.#panel = vscode.window.createWebviewPanel(`${this.moduleBase}.${this.command}.content`, 'Email Preview', {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true
       });

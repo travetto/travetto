@@ -16,7 +16,7 @@ import { AppSelectorUtil } from './util';
 @Activatible('@travetto/app', 'run')
 export class AppRunFeature extends BaseFeature {
 
-  #storage = new ActionStorage<AppChoice>('app.run', Workspace.path);
+  #storage: ActionStorage<AppChoice>;
 
   #runner(title: string, choices: () => Promise<AppChoice[] | AppChoice | undefined>, line?: number) {
     return async (): Promise<void> => {
@@ -31,7 +31,7 @@ export class AppRunFeature extends BaseFeature {
    * Get list of applications
    */
   async getAppList(): Promise<AppChoice[]> {
-    const res = Workspace.workerCli<AppChoice[]>('main', [`${this.module}/support/main.list-build`]);
+    const res = Workspace.workerCli<AppChoice[]>('main', [`${this.module}/support/main.list-get`]);
     return (await res.message).map(x => ({ ...x, inputs: x.inputs ?? [] }));
   }
 
@@ -157,7 +157,9 @@ export class AppRunFeature extends BaseFeature {
   /**
    * Register command handlers
    */
-  activate(): void {
+  activate(context: vscode.ExtensionContext): void {
+    this.#storage = new ActionStorage<AppChoice>('app.run', context);
+
     this.register('new', (name?: string, line?: number) =>
       this.#runner('Run New Application', async () => {
         const list = await this.getAppList();

@@ -1,6 +1,4 @@
-import fs from 'fs/promises';
-
-import { path } from '@travetto/manifest';
+import vscode from 'vscode';
 
 type TimeEntry<T> = { key: string, data: T, time: number };
 
@@ -13,29 +11,13 @@ export class ActionStorage<T> {
    * Local storage
    */
   #storage: Record<string, TimeEntry<T>> = {};
+  #context: vscode.ExtensionContext;
+  #scope: string;
 
-  constructor(public scope: string, public root: string) {
-    this.init();
-  }
-
-  /**
-   * Load configuration
-   */
-  get resolved(): string {
-    return path.resolve(this.root, `.trv.${this.scope}.json`);
-  }
-
-  /**
-   * Initialize
-   */
-  async init(): Promise<void> {
-    try {
-      await fs.mkdir(this.root, { recursive: true });
-
-      this.#storage = JSON.parse(await fs.readFile(this.resolved, 'utf8'));
-    } catch {
-      await this.persist();
-    }
+  constructor(scope: string, context: vscode.ExtensionContext) {
+    this.#context = context;
+    this.#scope = scope;
+    this.init(); // Kick off
   }
 
   reset(): Promise<void> {
@@ -43,8 +25,13 @@ export class ActionStorage<T> {
     return this.persist();
   }
 
+  async init(): Promise<void> {
+    const val = await this.#context.workspaceState.get<Record<string, TimeEntry<T>>>(`${this.#scope}.storage`);
+    this.#storage = val ?? {};
+  }
+
   async persist(): Promise<void> {
-    await fs.writeFile(this.resolved, JSON.stringify(this.#storage), 'utf8');
+    await this.#context.workspaceState.update(`${this.#scope}.storage`, this.#storage);
   }
 
   /**
