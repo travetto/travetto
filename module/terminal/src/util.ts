@@ -99,7 +99,7 @@ export class TerminalUtil {
     const disable = process.env.NO_COLOR ?? process.env.NODE_DISABLE_COLORS;
     if (force !== undefined) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return /^\d+$/.test(force) ? parseInt(force, 10) as ColorLevel : 1;
+      return Math.max(Math.min(/^\d+$/.test(force) ? parseInt(force, 10) : 1, 3), 0) as ColorLevel;
     } else if (disable !== undefined && /^(1|true|yes|on)/i.test(disable)) {
       return 0;
     }
@@ -111,7 +111,7 @@ export class TerminalUtil {
    * Determines if background color is dark
    */
   static async getBackgroundScheme(term: TermState): Promise<TermBackgroundScheme | undefined> {
-    const bgColor = await TerminalUtil.oscQuery(term, 'backgroundColor') ?? this.readColorFgBgEnvVar()?.bg;
+    const bgColor = (term.interactive ? await TerminalUtil.oscQuery(term, 'backgroundColor') : undefined) ?? this.readColorFgBgEnvVar()?.bg;
     if (bgColor) {
       const [r, g, b] = bgColor;
       return (r + g + b) / 3 < 128 ? 'dark' : 'light';
@@ -123,7 +123,7 @@ export class TerminalUtil {
    */
   static async getColorState(level?: ColorLevel, scheme?: TermBackgroundScheme): Promise<TermColorState> {
     // Try to detect background color, async nature means there will be a delay
-    const term = { height: 0, input: process.stdin, output: process.stdout, width: 0, interactive: false };
+    const term = { height: 0, input: process.stdin, output: process.stdout, width: 0, interactive: process.stdout.isTTY };
     level ??= await this.detectColorLevel(term);
     scheme ??= await this.getBackgroundScheme(term) ?? 'dark';
     return { level, scheme };
