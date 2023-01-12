@@ -31,5 +31,5 @@ export const ANSICodes = {
   POSITION_RESTORE: (): string => `${ESC}u`,
   POSITION_SAVE: (): string => `${ESC}s`,
   DEVICE_STATUS_REPORT: (code: DeviceStatusField): string => `${ESC}${DEVICE_STATUS_FIELDS[code]}n`,
-  OSC_QUERY: (code: OSCQueryField): string => `${OSC}${OSC_QUERY_FIELDS[code]}?${ST}`,
+  OSC_QUERY: (code: OSCQueryField): string => `${OSC}${OSC_QUERY_FIELDS[code]};?${ST}`,
 };

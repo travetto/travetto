@@ -12,7 +12,7 @@ export const STYLES = ColorOutputUtil.palette({
   debug: 'brightYellow',
   warn: 'brightMagenta',
   error: { text: 'brightCyan', inverse: true },
-  timestamp: 'white',
+  timestamp: ['white', 'black'],
   location: 'brightGreen'
 });
 

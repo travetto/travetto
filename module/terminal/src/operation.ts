@@ -1,6 +1,6 @@
 import { IterableUtil } from './iterable';
 import { TerminalWriter } from './writer';
-import { Indexed, TermCoord, TerminalProgressRender, TerminalWaitingConfig, TermLinePosition, TermState } from './types';
+import { Indexed, TerminalProgressRender, TerminalWaitingConfig, TermLinePosition, TermState } from './types';
 import { TerminalUtil } from './util';
 import { ColorOutputUtil, StyleInput } from './color-output';
 
@@ -9,18 +9,11 @@ const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 export class TerminalOperation {
 
   /**
-  * Query cursor position
-  */
-  static async getCursorPosition(term: TermState): Promise<TermCoord> {
-    return TerminalUtil.deviceStatusReport(term, 'cursorPosition');
-  }
-
-  /**
    * Allows for writing at top, bottom, or current position while new text is added
    */
   static async streamToPosition(term: TermState, source: AsyncIterable<string>, pos: TermLinePosition = 'inline'): Promise<void> {
     const writePos = pos === 'inline' ?
-      { ...await this.getCursorPosition(term), x: 0 } :
+      { ...await TerminalUtil.getCursorPosition(term), x: 0 } :
       { x: 0, y: pos === 'top' ? 0 : -1 };
 
     try {
@@ -37,7 +30,7 @@ export class TerminalOperation {
       }
       await TerminalWriter.for(term).setPosition(writePos).clearLine().commit(true);
     } finally {
-      const finalCursor = await this.getCursorPosition(term);
+      const finalCursor = await TerminalUtil.getCursorPosition(term);
       await TerminalWriter.for(term).scrollRangeClear().setPosition(finalCursor).showCursor().commit();
     }
   }

@@ -99,6 +99,10 @@ export class Workspace {
     return this.workspaceIndex.hasModule(module);
   }
 
+  static isDarkTheme(): boolean {
+    return false;
+  }
+
   /**
    * Generate execution launch config
    * @param config
@@ -148,7 +152,7 @@ export class Workspace {
       name: config.name,
       program: config.main.replace(this.path, '${workspaceFolder}'),
       args: (config.args ?? []).map(x => `${x}`),
-      env: { FORCE_COLOR: '3', ...config.env, TRV_DYNAMIC: 1 }
+      env: { COLORFGBG: this.isDarkTheme() ? '15:0' : '0:15', FORCE_COLOR: '1', ...config.env, TRV_DYNAMIC: 1 }
     };
     /* eslint-enable no-template-curly-in-string */
     return res;

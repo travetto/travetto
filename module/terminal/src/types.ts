@@ -22,3 +22,11 @@ export type TerminalTableConfig = { header?: string[], forceNonInteractiveOrder?
 export type TerminalProgressEvent = { idx: number, total?: number, text?: string };
 export type TerminalProgressRender = (ev: TerminalProgressEvent) => string;
 export type TerminalWaitingConfig = { position?: TermLinePosition } & DelayedConfig;
+
+export type ColorLevel = 0 | 1 | 2 | 3;
+export type TermBackgroundScheme = 'dark' | 'light';
+
+export type TermColorState = {
+  level: ColorLevel;
+  scheme: TermBackgroundScheme;
+};

@@ -1,40 +1,32 @@
-import tty from 'tty';
-
 import { ColorDefineUtil, RGBInput } from './color-define';
 import { ANSICodes } from './codes';
+import { TermColorState } from './types';
+import { TerminalUtil } from './util';
 
 type Style =
   { text?: RGBInput, background?: RGBInput, italic?: boolean, underline?: boolean, inverse?: boolean, blink?: boolean };
 
 export type StyleInput = Style | RGBInput;
 type Prim = string | number | boolean | Date | RegExp;
-type ColorPaletteInput = Record<string, StyleInput>;
+type ColorPaletteInput = Record<string, StyleInput | [StyleInput, StyleInput]>;
 type ColorFn = (text: Prim) => string;
 type ColorPalette<T> = Record<keyof T, ColorFn>;
-
-const COLOR_LEVEL_MAP = { 1: 0, 4: 1, 8: 2, 24: 3 } as const;
-type ColorBits = keyof (typeof COLOR_LEVEL_MAP);
-export type ColorLevel = (typeof COLOR_LEVEL_MAP)[ColorBits];
 
 /**
  * Utils for colorizing output
  */
 export class ColorOutputUtil {
 
-  static #level: ColorLevel | undefined;
+  static #state: TermColorState = { level: 0, scheme: 'dark' };
 
-  static set colorLevel(level: ColorLevel | undefined) {
-    this.#level = level;
-  }
-
-  static get colorLevel(): ColorLevel {
-    return this.#level ??= this.detectColorLevel(process.stdout);
+  static set state(state: TermColorState) {
+    this.#state = state;
   }
 
   /**
    * Get styled levels, 0-3
    */
-  static getStyledLevels(inp: StyleInput): [string, string][] {
+  static getStyledLevels(inp: Style | RGBInput): [string, string][] {
     const cfg = (typeof inp !== 'object') ? { text: inp } : inp;
     const levelPairs: [string, string][] = [['', '']];
     const text = cfg.text ? ColorDefineUtil.getColorCodes(cfg.text, false) : undefined;
@@ -65,22 +57,16 @@ export class ColorOutputUtil {
     return levelPairs;
   }
 
-
-  /**
-   * Detect color level from tty information
-   */
-  static detectColorLevel(stream: tty.WriteStream): ColorLevel {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return stream.isTTY ? COLOR_LEVEL_MAP[stream.getColorDepth() as ColorBits] : 0;
-  }
-
   /**
    * Make a simple primitive colorer
    */
-  static colorer(col: StyleInput): ColorFn {
-    const levelPairs = this.getStyledLevels(col);
+  static colorer(style: StyleInput | [light: StyleInput, dark: StyleInput]): ColorFn {
+    const schemes = {
+      light: this.getStyledLevels(Array.isArray(style) ? style[1] ?? style[0] : style),
+      dark: this.getStyledLevels(Array.isArray(style) ? style[0] : style),
+    };
     return (v: Prim): string => {
-      const [prefix, suffix] = levelPairs[this.colorLevel];
+      const [prefix, suffix] = schemes[this.#state.scheme][this.#state.level];
       return (v === undefined || v === null) ? '' : `${prefix}${v}${suffix}`;
     };
   }
@@ -107,3 +93,6 @@ export class ColorOutputUtil {
     return (key: keyof P, val: Prim) => pal[key](val);
   }
 }
+
+// Cannot wait/block in commonjs, should fire instantly
+TerminalUtil.getColorState().then(state => ColorOutputUtil.state = state);
