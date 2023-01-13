@@ -58,8 +58,8 @@ export async function runMain(action: Function, args: string[]): Promise<void> {
     await setup();
     ExecUtil.returnResponse(0, await action(...args));
   } catch (err) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/consistent-type-assertions
-    ExecUtil.returnResponse((err as any)?.code ?? 1, err);
+    const code = err instanceof Error && 'code' in err && typeof err.code === 'number' ? err.code : undefined;
+    ExecUtil.returnResponse(code ?? 1, err);
   }
 }
 

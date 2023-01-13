@@ -6,6 +6,8 @@ import { EmailResource } from '@travetto/email';
  * Resource management for email templating
  */
 export class EmailTemplateResource extends EmailResource {
+  static PATH_PREFIX = /.*\/resources\/email\//;
+
   ext = /[.]email[.]html$/;
 
   moduleFolder = 'support/resources/email';
@@ -28,11 +30,11 @@ export class EmailTemplateResource extends EmailResource {
   /**
    * Grab list of all available templates
    */
-  async findAllTemplates(): Promise<{ path: string, key: string }[]> {
+  async findAllTemplates(): Promise<{ rel: string, key: string }[]> {
     return Promise.all((await this.query(f => this.ext.test(f)))
       .sort()
       .map(async pth => ({
-        path: (await this.describe(pth)).path,
+        rel: (await this.describe(pth)).path.replace(EmailTemplateResource.PATH_PREFIX, ''),
         key: pth.replace(this.ext, '')
       })));
   }

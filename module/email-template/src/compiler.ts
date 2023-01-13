@@ -101,7 +101,7 @@ export class EmailTemplateCompiler {
    */
   async compileAll(persist = false): Promise<Compilation[]> {
     const keys = await this.resources.findAllTemplates();
-    return Promise.all(keys.map(({ path: tpl }) => this.compile(tpl, persist)));
+    return Promise.all(keys.map(({ rel }) => this.compile(rel, persist)));
   }
 
   /**

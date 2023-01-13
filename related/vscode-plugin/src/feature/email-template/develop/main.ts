@@ -37,6 +37,7 @@ export class EmailTemplateFeature extends BaseFeature {
 
     this.#server.on('start', () => {
       this.#server.onMessage('changed', (type, msg) => this.#emitter.emit('render', msg));
+      this.#server.onMessage('changed-failed', (ev, msg) => console.log(ev, msg));
     });
   }
 
@@ -61,10 +62,11 @@ export class EmailTemplateFeature extends BaseFeature {
       return;
     }
     if (file !== this.#activeFile || force) {
+      file = file?.replace(/.*\/resources\/email\//, '');
       this.#activeFile = file;
       this.setActiveContent(undefined);
       if (file) {
-        this.#server.sendMessage('redraw', { file });
+        this.#server.sendMessage('redraw', { file: this.#activeFile });
       }
     }
   }

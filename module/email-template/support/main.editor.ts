@@ -17,7 +17,7 @@ import { TemplateManager } from './bin/template';
 export async function main(): Promise<void> {
   defineGlobalEnv({
     resourcePaths: [
-      `${RootIndex.getModule('@travetto/email-template')!.source}/resources`
+      `${RootIndex.getModule('@travetto/email-template')!.source}/resources/email`
     ]
   });
 

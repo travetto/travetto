@@ -67,14 +67,15 @@ export class TemplateManager {
     console.log('Watching', this.resources.getAllPaths());
     await WatchUtil.buildWatcher(this.resources.getAllPaths(), async ({ action, file }) => {
       try {
-        console.log(`Contents ${action}`, { file });
-        if (this.resources.isTemplateFile(file)) {
-          await this.compiler.compile(file.replace(/^.*\/resources\//g, ''), true);
-          cb?.(file);
+        const rel = file.replace(EmailTemplateResource.PATH_PREFIX, '');
+        console.log(`Contents ${action}`, { file, rel });
+        if (this.resources.isTemplateFile(rel)) {
+          await this.compiler.compile(rel, true);
+          cb?.(rel);
         } else {
           await this.compiler.compileAll(true);
           for (const el of await this.resources.findAllTemplates()) {
-            cb?.(el.path);
+            cb?.(el.rel);
           }
         }
       } catch (err) {

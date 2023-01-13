@@ -2,6 +2,8 @@ import { TemplateManager } from './template';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
 
+import { EmailTemplateResource } from '../../src/resource';
+
 type InboundMessage =
   { type: 'configure' } |
   { type: 'redraw', file: string } |
@@ -62,6 +64,7 @@ export class EditorState {
   async #onRedraw(msg: InboundMessage & { type: 'redraw' }): Promise<void> {
     try {
       await this.#template.compiler.compile(msg.file, true);
+      await this.renderFile(msg.file);
     } catch (err) {
       if (err && err instanceof Error) {
         this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
@@ -69,7 +72,6 @@ export class EditorState {
         console.error(err);
       }
     }
-    await this.renderFile(msg.file);
   }
 
   async #onSend(msg: InboundMessage & { type: 'send' }): Promise<void> {
@@ -93,6 +95,9 @@ export class EditorState {
    */
   async init(): Promise<void> {
     process.on('message', (msg: InboundMessage) => {
+      if ('file' in msg) {
+        msg.file = msg.file.replace(EmailTemplateResource.PATH_PREFIX, '');
+      }
       switch (msg.type) {
         case 'configure': this.#onConfigure(msg); break;
         case 'redraw': this.#onRedraw(msg); break;
