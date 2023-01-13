@@ -11,7 +11,7 @@ type InboundMessage =
 
 type OutboundMessage =
   { type: 'configured', file: string } |
-  { type: 'sent', to: string, file: string } |
+  { type: 'sent', to: string, file: string, url?: string | false } |
   { type: 'changed', file: string, content: Record<'html' | 'subject' | 'text', string> } |
   { type: 'sent-failed', message: string, stack: Error['stack'], to: string, file: string } |
   { type: 'changed-failed', message: string, stack: Error['stack'], file: string };
@@ -78,9 +78,10 @@ export class EditorState {
     const cfg = await EditorConfig.get();
     const to = msg.to || cfg.to;
     const from = msg.from || cfg.from;
+    const key = msg.file.replace(EmailTemplateResource.EXT, '');
     try {
-      await this.#sender.sendEmail(msg.file, from, to, await EditorConfig.getContext());
-      this.response({ type: 'sent', to, file: msg.file });
+      const url = await this.#sender.sendEmail(key, from, to, await EditorConfig.getContext());
+      this.response({ type: 'sent', to, file: msg.file, ...url });
     } catch (err) {
       if (err && err instanceof Error) {
         this.response({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });

@@ -7,8 +7,8 @@ import { EmailResource } from '@travetto/email';
  */
 export class EmailTemplateResource extends EmailResource {
   static PATH_PREFIX = /.*\/resources\/email\//;
-
-  ext = /[.]email[.]html$/;
+  static EXT = /[.]email[.]html$/;
+  ext = EmailTemplateResource.EXT;
 
   moduleFolder = 'support/resources/email';
 

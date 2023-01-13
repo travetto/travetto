@@ -24,19 +24,19 @@ export class $EditorConfig {
 
   #configFile = path.resolve('resources/email/dev.yml');
   #defaultConfig = {
+    to: 'my-email@gmail.com',
+    from: 'from-email@gmail.com',
+    context: {
+      key: 'value'
+    },
     sender: {
       port: 587,
-      host: 'smtp.host.email',
+      host: 'smtp.ethereal.email',
       auth: {
         user: 'email@blah.com',
         pass: 'password'
       },
-      from: 'from-email@gmail.com',
-      to: 'my-email@gmail.com',
-      context: {
-        key: 'value'
-      }
-    }
+    },
   };
 
   /**
