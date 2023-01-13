@@ -156,6 +156,10 @@ export interface FieldConfig extends DescribableConfig {
    * Is this field secret, defaults to no, can be used to hide field when exporting values
    */
   secret?: boolean;
+  /**
+   * Is this field a getter or setter
+   */
+  accessor?: string;
 }
 
 export type ViewFieldsConfig<T> = { with: Extract<(keyof T), string>[] } | { without: Extract<(keyof T), string>[] };

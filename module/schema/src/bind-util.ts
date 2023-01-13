@@ -249,6 +249,13 @@ export class BindUtil {
 
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           obj[schemaFieldName as keyof typeof obj] = v as (typeof obj)[keyof typeof obj];
+
+          if (field.accessor) {
+            Object.defineProperty(obj, schemaFieldName, {
+              ...SchemaRegistry.getAccessorDescriptor(cons, schemaFieldName),
+              enumerable: true
+            });
+          }
         }
       }
     }

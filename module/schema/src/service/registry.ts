@@ -25,6 +25,7 @@ function getConstructor<T>(o: T): ConcreteClass<T> {
  */
 class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
+  #accessorDescriptors = new Map<Class, Map<string, PropertyDescriptor>>();
   #subTypes = new Map<Class, Map<string, Class>>();
   #typeKeys = new Map<Class, string>();
   #pendingViews = new Map<Class, Map<string, ViewFieldsConfig<unknown>>>();
@@ -87,6 +88,24 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (isWithType(o, this.get(cls)) && !o.type) {  // Do we have a type field defined
       o.type = this.#computeSubTypeName(cls); // Assign if missing
     }
+  }
+
+  /**
+   * Provides the prototype-derived descriptor for a property
+   */
+  getAccessorDescriptor(cls: Class, field: string): PropertyDescriptor {
+    if (!this.#accessorDescriptors.has(cls)) {
+      this.#accessorDescriptors.set(cls, new Map());
+    }
+    const map = this.#accessorDescriptors.get(cls)!;
+    if (!map.has(field)) {
+      let proto = cls.prototype;
+      while (proto && !Object.hasOwn(proto, field)) {
+        proto = proto.prototype;
+      }
+      map.set(field, Object.getOwnPropertyDescriptor(proto, field)!);
+    }
+    return map.get(field)!;
   }
 
   /**
@@ -404,6 +423,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       this.#subTypes.clear();
       this.#typeKeys.delete(cls);
       this.#methodSchemas.delete(cls);
+      this.#accessorDescriptors.delete(cls);
 
       // Recompute subtype mappings
       for (const el of this.entries.keys()) {

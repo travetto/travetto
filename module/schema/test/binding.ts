@@ -264,4 +264,16 @@ class DataBinding {
     assert(acc.area === 'green');
     assert(acc.age === 5);
   }
+
+  @Test('Validate serialize accessors')
+  async validateAccessorSerialization() {
+    const acc = Accessors.from({
+      age: 20,
+      area: 'green'
+    });
+
+    const cloned = JSON.parse(JSON.stringify(acc));
+    assert(cloned.age === undefined);
+    assert(cloned.area === 'green');
+  }
 }

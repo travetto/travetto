@@ -81,7 +81,7 @@ export class SchemaTransformUtil {
     if (!ts.isGetAccessorDeclaration(node) && !ts.isSetAccessorDeclaration(node)) {
       // eslint-disable-next-line no-bitwise
       if ((ts.getCombinedModifierFlags(node) & ts.ModifierFlags.Readonly) > 0) {
-        attrs.push(state.factory.createPropertyAssignment('mode', state.fromLiteral('readonly')));
+        attrs.push(state.factory.createPropertyAssignment('access', state.fromLiteral('readonly')));
       } else if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
         attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
       }
@@ -90,11 +90,12 @@ export class SchemaTransformUtil {
       }
     } else {
       const acc = DeclarationUtil.getAccessorPair(node);
+      attrs.push(state.factory.createPropertyAssignment('accessor', state.fromLiteral(true)));
       if (!acc.setter) {
         attrs.push(state.factory.createPropertyAssignment('access', state.fromLiteral('readonly')));
       }
       if (!acc.getter) {
-        attrs.push(state.factory.createPropertyAssignment('mode', state.fromLiteral('writeonly')));
+        attrs.push(state.factory.createPropertyAssignment('access', state.fromLiteral('writeonly')));
       } else if (!typeExpr.undefinable) {
         attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
       }
