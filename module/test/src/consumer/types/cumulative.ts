@@ -34,7 +34,11 @@ export class CumulativeSummaryConsumer implements TestConsumer {
       const SuiteCls = SuiteRegistry.getClasses().find(x =>
         x.Ⲑid === test.classId
       )!;
-      return this.computeTotal(SuiteCls);
+      if (SuiteCls) {
+        return this.computeTotal(SuiteCls);
+      } else {
+        return this.removeClass(test.classId);
+      }
     } else {
       return this.removeClass(test.classId);
     }
