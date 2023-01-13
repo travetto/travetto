@@ -61,10 +61,6 @@ export class AppSelectorUtil {
    */
   static async resolveApp(title: string, choices: AppChoice[]): Promise<AppChoice | undefined> {
     const items = choices
-      .map(x => {
-        x.params ??= [];
-        return x;
-      })
       .map(x => this.buildQuickPickItem(x))
       .filter((x): x is PickItem => !!x);
 
@@ -77,10 +73,8 @@ export class AppSelectorUtil {
    * @param choice
    */
   static async resolveParameters(choice: AppChoice): Promise<string[] | undefined> {
-    const all = choice.params ?? [];
+    const all = choice.params;
     const selected: string[] = [];
-
-    choice.inputs ??= [];
 
     for (let i = 0; i < all.length; i++) {
       const param = all[i]!;

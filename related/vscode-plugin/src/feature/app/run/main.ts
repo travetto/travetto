@@ -33,7 +33,8 @@ export class AppRunFeature extends BaseFeature {
   async getAppList(): Promise<AppChoice[]> {
     const res = Workspace.spawnCli('main', [`${this.module}/support/main.list-get`], { stdio: [0, 'pipe', 'pipe', 'ignore'] });
     const data = await res.result;
-    return JSON.parse(data.stdout);
+    const choices: AppChoice[] = JSON.parse(data.stdout);
+    return choices.map(c => ({ ...c, inputs: [] }));
   }
 
   /**
@@ -177,7 +178,7 @@ export class AppRunFeature extends BaseFeature {
     const app = (await this.getAppList()).find(a => a.globalName === name || a.name === name);
 
     if (app) {
-      await this.runApplication(name, { ...app, inputs: args });
+      await this.runApplication(name, { ...app, inputs: args ?? [] });
     }
   }
 }

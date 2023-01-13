@@ -177,6 +177,7 @@ export class Workspace {
         'node:internals/**',
         'internal/**',
         '**/@travetto/base/src/console.js',
+        '**/@travetto/base/src/proxy.js',
         '**/@travetto/log/src/service.js',
         '**/@travetto/log/src/common.js',
         '**/@travetto/log/src/appender/console.js',
