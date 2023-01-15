@@ -134,4 +134,13 @@ export class TerminalWriter {
   scrollY(y: number): this {
     return this.write(ANSICodes.SCROLL_WINDOW(y));
   }
+
+  /** Reset */
+  reset(): this {
+    return this
+      .write(ANSICodes.POSITION_SAVE())
+      .write(ANSICodes.SHOW_CURSOR())
+      .write(ANSICodes.SCROLL_RANGE_CLEAR())
+      .write(ANSICodes.POSITION_RESTORE());
+  }
 }

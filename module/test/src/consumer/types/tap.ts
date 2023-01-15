@@ -18,7 +18,7 @@ export class TapEmitter implements TestConsumer {
   #terminal: Terminal;
 
   constructor(
-    terminal = new Terminal(process.stdout),
+    terminal = new Terminal({ output: process.stdout }),
     enhancer: TestResultsEnhancer = CONSOLE_ENHANCER
   ) {
     this.#terminal = terminal;

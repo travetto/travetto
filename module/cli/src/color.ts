@@ -1,7 +1,7 @@
 import { Util } from '@travetto/base';
-import { ColorOutputUtil } from '@travetto/terminal';
+import { GlobalTerminal } from '@travetto/terminal';
 
-const tplFn = ColorOutputUtil.templateFunction({
+const tplFn = GlobalTerminal.templateFunction({
   input: 'oliveDrab',
   output: 'pink',
   path: 'teal',

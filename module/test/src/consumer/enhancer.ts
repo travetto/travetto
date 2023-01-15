@@ -1,6 +1,6 @@
-import { ColorOutputUtil } from '@travetto/terminal';
+import { GlobalTerminal } from '@travetto/terminal';
 
-export const CONSOLE_ENHANCER = ColorOutputUtil.palette({
+export const CONSOLE_ENHANCER = GlobalTerminal.palette({
   assertDescription: 'lightGray',
   testDescription: 'white',
   success: 'green',

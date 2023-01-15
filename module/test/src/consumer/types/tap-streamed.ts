@@ -1,4 +1,4 @@
-import { ColorOutputUtil, StyleInput, Terminal } from '@travetto/terminal';
+import { GlobalTerminal, TermStyleInput, Terminal } from '@travetto/terminal';
 import { ManualAsyncIterator } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
 
@@ -18,11 +18,11 @@ export class TapStreamedEmitter implements TestConsumer {
 
   static makeProgressBar(term: Terminal, total: number): (t: TestResult, idx: number) => string {
     let failed = 0;
-    const palette: StyleInput[] = [
+    const palette: TermStyleInput[] = [
       { text: 'white', background: 'darkGreen' },
       { text: 'white', background: 'darkRed' }
     ];
-    const styles = palette.map(s => ColorOutputUtil.colorer(s));
+    const styles = palette.map(s => GlobalTerminal.colorer(s));
 
     return (t: TestResult, idx: number): string => {
       if (t.status === 'failed') {
@@ -44,7 +44,7 @@ export class TapStreamedEmitter implements TestConsumer {
   #progress: Promise<unknown> | undefined;
   #consumer: TapEmitter;
 
-  constructor(terminal: Terminal = new Terminal(process.stderr)) {
+  constructor(terminal: Terminal = new Terminal({ output: process.stderr })) {
     this.#terminal = terminal;
     this.#consumer = new TapEmitter(this.#terminal);
   }

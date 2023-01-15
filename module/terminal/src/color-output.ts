@@ -1,32 +1,25 @@
 import { ColorDefineUtil, RGBInput } from './color-define';
 import { ANSICodes } from './codes';
-import { TermColorState } from './types';
-import { TerminalUtil } from './util';
+import { TermState } from './types';
 
-type Style =
+export type TermStyle =
   { text?: RGBInput, background?: RGBInput, italic?: boolean, underline?: boolean, inverse?: boolean, blink?: boolean };
 
-export type StyleInput = Style | RGBInput;
-type Prim = string | number | boolean | Date | RegExp;
-type ColorPaletteInput = Record<string, StyleInput | [StyleInput, StyleInput]>;
-type ColorFn = (text: Prim) => string;
-type ColorPalette<T> = Record<keyof T, ColorFn>;
+export type TermStyleInput = TermStyle | RGBInput;
+export type Prim = string | number | boolean | Date | RegExp;
+export type TermColorPaletteInput = Record<string, TermStyleInput | [TermStyleInput, TermStyleInput]>;
+export type TermColorFn = (text: Prim) => string;
+export type TermColorPalette<T> = Record<keyof T, TermColorFn>;
 
 /**
  * Utils for colorizing output
  */
 export class ColorOutputUtil {
 
-  static #state: TermColorState = { level: 0, scheme: 'dark' };
-
-  static set state(state: Partial<TermColorState>) {
-    this.#state = { scheme: 'dark', level: 0, ...state };
-  }
-
   /**
    * Get styled levels, 0-3
    */
-  static getStyledLevels(inp: Style | RGBInput): [string, string][] {
+  static getStyledLevels(inp: TermStyle | RGBInput): [string, string][] {
     const cfg = (typeof inp !== 'object') ? { text: inp } : inp;
     const levelPairs: [string, string][] = [['', '']];
     const text = cfg.text ? ColorDefineUtil.getColorCodes(cfg.text, false) : undefined;
@@ -60,13 +53,13 @@ export class ColorOutputUtil {
   /**
    * Make a simple primitive colorer
    */
-  static colorer(style: StyleInput | [light: StyleInput, dark: StyleInput]): ColorFn {
+  static colorer(term: TermState, style: TermStyleInput | [light: TermStyleInput, dark: TermStyleInput]): TermColorFn {
     const schemes = {
       light: this.getStyledLevels(Array.isArray(style) ? style[1] ?? style[0] : style),
       dark: this.getStyledLevels(Array.isArray(style) ? style[0] : style),
     };
     return (v: Prim): string => {
-      const [prefix, suffix] = schemes[this.#state.scheme][this.#state.level];
+      const [prefix, suffix] = schemes[term.backgroundScheme][term.colorLevel];
       return (v === undefined || v === null) ? '' : `${prefix}${v}${suffix}`;
     };
   }
@@ -74,25 +67,22 @@ export class ColorOutputUtil {
   /**
    * Creates a color palette based on input styles
    */
-  static palette<P extends ColorPaletteInput>(input: P): ColorPalette<P> {
+  static palette<P extends TermColorPaletteInput>(term: TermState, input: P): TermColorPalette<P> {
     // Common color support
-    const out: Partial<ColorPalette<P>> = {};
+    const out: Partial<TermColorPalette<P>> = {};
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    for (const [k, col] of Object.entries(input) as [keyof P, StyleInput][]) {
-      out[k] = this.colorer(col);
+    for (const [k, col] of Object.entries(input) as [keyof P, TermStyleInput][]) {
+      out[k] = this.colorer(term, col);
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return out as ColorPalette<P>;
+    return out as TermColorPalette<P>;
   }
 
   /**
    * Convenience method to creates a color template function based on input styles
    */
-  static templateFunction<P extends ColorPaletteInput>(input: P): (key: keyof P, val: Prim) => string {
-    const pal = this.palette(input);
+  static templateFunction<P extends TermColorPaletteInput>(term: TermState, input: P): (key: keyof P, val: Prim) => string {
+    const pal = this.palette(term, input);
     return (key: keyof P, val: Prim) => pal[key](val);
   }
 }
-
-// Cannot wait/block in commonjs, should fire instantly
-export const COLOR_INIT = TerminalUtil.getColorState().then(state => ColorOutputUtil.state = state);

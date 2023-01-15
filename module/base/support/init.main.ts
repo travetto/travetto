@@ -47,9 +47,9 @@ export async function setup(): Promise<void> {
   }
 
   try {
-    const { TerminalUtil, COLOR_INIT } = await import('@travetto/terminal');
-    await COLOR_INIT;
-    ShutdownManager.onShutdown('', () => TerminalUtil.drainReading());
+    const { GlobalTerminal } = await import('@travetto/terminal');
+    await GlobalTerminal.init();
+    ShutdownManager.onShutdown('', () => GlobalTerminal.reset());
   } catch { }
 }
 

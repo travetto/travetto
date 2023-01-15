@@ -1,7 +1,7 @@
 import tty from 'tty';
 import rl from 'readline';
 
-import { ColorDefineUtil, NAMED_COLORS, Terminal, ColorOutputUtil, TermLinePosition } from '@travetto/terminal';
+import { ColorDefineUtil, NAMED_COLORS, Terminal, GlobalTerminal, TermLinePosition } from '@travetto/terminal';
 import { Env, ExecUtil, ExecutionOptions, ExecutionResult, ExecutionState, TypedObject } from '@travetto/base';
 import { IndexedModule, PackageUtil, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
@@ -21,7 +21,7 @@ type ModuleRunConfig<T> = {
 const COLORS = TypedObject.keys(NAMED_COLORS)
   .map(k => [k, ColorDefineUtil.defineColor(k).hsl] as const)
   .filter(([, [, s, l]]) => l > .5 && l < .8 && s > .8)
-  .map(([k]) => ColorOutputUtil.colorer(k));
+  .map(([k]) => GlobalTerminal.colorer(k));
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
 
@@ -124,7 +124,7 @@ export class CliModuleUtil {
 
     if (config.progressMessage && config.progressStream !== false) {
       const cfg = { position: config.progressPosition ?? 'bottom' } as const;
-      const stream = new Terminal(config.progressStream ?? process.stderr);
+      const stream = new Terminal({ output: config.progressStream ?? process.stderr });
       await stream.trackProgress(work, ev => ({ ...ev, text: config.progressMessage!(ev.value) }), cfg);
     } else {
       for await (const _ of work) {
@@ -159,8 +159,8 @@ export class CliModuleUtil {
 
     const processes = new Map<IndexedModule, ExecutionState>();
 
-    const stdoutTerm = new Terminal(process.stdout);
-    const stderrTerm = new Terminal(process.stderr);
+    const stdoutTerm = new Terminal({ output: process.stdout });
+    const stderrTerm = new Terminal({ output: process.stderr });
 
     await this.runOnModules(mode, mod => {
       const opts: ExecutionOptions = {

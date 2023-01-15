@@ -1,10 +1,15 @@
 import tty from 'tty';
 
 import { IterableUtil, MapFn } from './iterable';
-import { TerminalProgressEvent, TerminalTableConfig, TerminalTableEvent, TerminalWaitingConfig, TermLinePosition, TermState } from './types';
+import {
+  TermColorLevel, TermBackgroundScheme, TerminalProgressEvent, TerminalTableConfig,
+  TerminalTableEvent, TerminalWaitingConfig, TermLinePosition, TermState
+} from './types';
 import { TerminalOperation } from './operation';
+import { TerminalQuerier } from './query';
 import { TerminalWriter } from './writer';
-import { StyleInput } from './color-output';
+import { ColorOutputUtil, TermStyleInput } from './color-output';
+import { TerminalUtil } from './util';
 
 type TerminalStreamPositionConfig = {
   position?: TermLinePosition;
@@ -12,7 +17,7 @@ type TerminalStreamPositionConfig = {
 };
 
 type TerminalProgressConfig = TerminalStreamPositionConfig & {
-  style?: StyleInput;
+  style?: TermStyleInput;
 };
 
 /**
@@ -20,16 +25,23 @@ type TerminalProgressConfig = TerminalStreamPositionConfig & {
  */
 export class Terminal implements TermState {
 
+  #init: Promise<void>;
   #output: tty.WriteStream;
   #input: tty.ReadStream;
   #interactive: boolean;
   #width?: number;
+  #backgroundScheme?: TermBackgroundScheme;
+  #colorLevel?: TermColorLevel;
+  #query: TerminalQuerier;
 
-  constructor(output: tty.WriteStream, input: tty.ReadStream = process.stdin, interactive?: boolean, width?: number) {
-    this.#output = output;
-    this.#input = input;
-    this.#interactive = interactive ?? (output.isTTY && !/^(true|yes|on|1)$/i.test(process.env.TRV_QUIET ?? ''));
-    this.#width = width;
+  constructor(config: Partial<TermState>) {
+    this.#output = config.output ?? process.stdout;
+    this.#input = config.input ?? process.stdin;
+    this.#interactive = config.interactive ?? (this.#output.isTTY && !/^(true|yes|on|1)$/i.test(process.env.TRV_QUIET ?? ''));
+    this.#width = config.width;
+    this.#colorLevel = config.colorLevel;
+    this.#backgroundScheme = config.backgroundScheme;
+    this.#query = new TerminalQuerier(this.#input, this.#output);
   }
 
   get output(): tty.WriteStream {
@@ -52,12 +64,42 @@ export class Terminal implements TermState {
     return (this.#output.isTTY ? this.#output.rows : 120);
   }
 
+  get colorLevel(): TermColorLevel {
+    return this.#colorLevel ?? 0;
+  }
+
+  get backgroundScheme(): TermBackgroundScheme {
+    return this.#backgroundScheme ?? 'dark';
+  }
+
   writer(): TerminalWriter {
     return TerminalWriter.for(this);
   }
 
   async writeLines(...text: string[]): Promise<void> {
     return this.writer().writeLines(text, this.interactive).commit();
+  }
+
+  async init(): Promise<void> {
+    if (!this.#init) {
+      this.#init = (async (): Promise<void> => {
+        const level = await TerminalUtil.detectColorLevel(this);
+        const bg = await TerminalUtil.detectBackgroundScheme(this);
+        this.#colorLevel ??= level;
+        this.#backgroundScheme ??= bg;
+        return;
+      })();
+    }
+    return this.#init;
+  }
+
+  async reset(): Promise<void> {
+    await this.#query.close();
+    return this.writer().reset().commit();
+  }
+
+  query(query: string): Promise<Buffer> {
+    return this.#query.runQuery(query);
   }
 
   /**
@@ -117,6 +159,19 @@ export class Terminal implements TermState {
     const render = TerminalOperation.buildProgressBar(this, config?.style ?? { background: 'limeGreen', text: 'black' });
     return this.streamToPosition(source, async (v, i) => render(await resolve(v, i)), config);
   }
-}
 
-export const GlobalTerminal = new Terminal(process.stdout);
+  /* eslint-disable @typescript-eslint/member-ordering */
+  /** Creates a colorer function */
+  colorer = ColorOutputUtil.colorer.bind(ColorOutputUtil, this);
+
+  /** Creates a color palette based on input styles */
+  palette = ColorOutputUtil.palette.bind(ColorOutputUtil, this);
+
+  /** Convenience method to creates a color template function based on input styles */
+  templateFunction = ColorOutputUtil.templateFunction.bind(ColorOutputUtil, this);
+  /* eslint-enable @typescript-eslint/member-ordering */
+}
+export const GlobalTerminal = new Terminal({ output: process.stdout });
+
+// Trigger
+GlobalTerminal.init();
