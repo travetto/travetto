@@ -97,7 +97,7 @@ export class Util {
       // Find node with no dependencies
       const key = [...edgeMap].find(([, after]) => after.size === 0)?.[0];
       if (!key) {
-        throw new Error(`Unsatisfiable dependency: ${edgeMap.keys()}`);
+        throw new Error(`Unsatisfiable dependency: ${[...edgeMap.keys()]}`);
       }
 
       // Store, and remove

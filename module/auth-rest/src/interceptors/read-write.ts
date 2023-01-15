@@ -26,14 +26,6 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   @Inject()
   config: RestAuthConfig;
 
-  async postConstruct(): Promise<void> {
-    try {
-      const { SessionWriteInterceptor } = await import('@travetto/rest-session');
-      this.after.push(SessionWriteInterceptor);
-    } catch { }
-  }
-
-
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
     const { req } = ctx;
     let og: Principal | undefined;

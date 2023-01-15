@@ -1,6 +1,7 @@
 import { Class } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Injectable, Inject } from '@travetto/di';
+import { RootIndex } from '@travetto/manifest';
 import { CookiesInterceptor, RestInterceptor, ManagedInterceptorConfig, FilterContext, FilterNext, FilterReturn } from '@travetto/rest';
 
 import { SessionService, SessionⲐ } from './service';
@@ -29,10 +30,10 @@ export class SessionReadInterceptor implements RestInterceptor {
   config: RestSessionConfig;
 
   async postConstruct(): Promise<void> {
-    try {
+    if (RootIndex.hasModule('@travetto/auth-rest')) {
       const { AuthReadWriteInterceptor } = await import('@travetto/auth-rest');
       this.after.push(AuthReadWriteInterceptor);
-    } catch { }
+    }
   }
 
   async intercept({ req }: FilterContext, next: FilterNext): Promise<unknown> {
@@ -54,11 +55,20 @@ export class SessionWriteInterceptor implements RestInterceptor {
 
   after = [CookiesInterceptor];
 
+  before: Class<RestInterceptor>[] = [];
+
   @Inject()
   service: SessionService;
 
   @Inject()
   config: RestSessionConfig;
+
+  async postConstruct(): Promise<void> {
+    if (RootIndex.hasModule('@travetto/auth-rest')) {
+      const { AuthReadWriteInterceptor } = await import('@travetto/auth-rest');
+      this.before.push(AuthReadWriteInterceptor);
+    }
+  }
 
   async intercept({ req, res }: FilterContext, next: FilterNext): Promise<FilterReturn> {
     try {
