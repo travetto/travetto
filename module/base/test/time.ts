@@ -32,4 +32,22 @@ class TimeSuite {
     process.env.MAX_AGE = '5mh';
     assert(TimeUtil.getEnvTime('max_age', '1s') === 1000);
   }
+
+  @Test()
+  verifyPrettyDelta() {
+    assert(TimeUtil.prettyDelta(1000, 's') === '1s');
+    assert(TimeUtil.prettyDelta(1000) === '1000ms');
+    assert(TimeUtil.prettyDelta(1000 * 10) === '10s');
+
+    assert(TimeUtil.prettyDelta(1000 * 10 + 300) === '10s 300ms');
+
+    assert(TimeUtil.prettyDelta(1000 * 60 * 10 + 300) === '10m');
+    assert(TimeUtil.prettyDelta(1000 * 60 * 10 + 3 * 1000) === '10m 3s');
+
+    assert(TimeUtil.prettyDelta(1000 * 60 * 60 * 10 + 3 * 1000) === '10h');
+    assert(TimeUtil.prettyDelta(1000 * 60 * 60 * 10 + 3 * 1000 * 60) === '10h 3m');
+
+    assert(TimeUtil.prettyDelta(1000 * 60 * 1.5) === '1m 30s');
+    assert(TimeUtil.prettyDelta(1000 * 60 * 1.2) === '72s');
+  }
 }

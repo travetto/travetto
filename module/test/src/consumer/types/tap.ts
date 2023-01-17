@@ -1,6 +1,6 @@
 import { path } from '@travetto/manifest';
 import { GlobalTerminal, Terminal } from '@travetto/terminal';
-import { ErrorUtil, ObjectUtil } from '@travetto/base';
+import { ErrorUtil, ObjectUtil, TimeUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 import { TestEvent } from '../../model/event';
@@ -142,7 +142,7 @@ export class TapEmitter implements TestConsumer {
       `${this.#enhancer.total(summary.failed)}`,
       'skipped',
       this.#enhancer.total(summary.skipped),
-      `# (Total Test Time: ${summary.duration}ms, Total Run Time: ${Date.now() - this.#start}ms)`
+      `# (Total Test Time: ${TimeUtil.prettyDelta(summary.duration)}, Total Run Time: ${TimeUtil.prettyDelta(Date.now() - this.#start)})`
     ].join(' '));
   }
 }

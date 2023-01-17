@@ -50,7 +50,7 @@ export class ColorOutputUtil {
       color = ColorDefineUtil.rgbFromAnsi256(+bg);
     }
     if (color) {
-      const hex = `#${color.map(x => x.toString(16)).join('')}` as const;
+      const hex = `#${color.map(x => x.toString(16).padStart(2, '0')).join('')}` as const;
       return ColorDefineUtil.defineColor(hex).scheme;
     }
   }

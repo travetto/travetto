@@ -15,6 +15,8 @@ const TIME_UNITS = {
   ms: 1
 };
 
+const ORDER = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'] as const;
+
 export type TimeSpan = `${number}${keyof typeof TIME_UNITS}`;
 export type TimeUnit = keyof typeof TIME_UNITS;
 
@@ -81,5 +83,41 @@ export class TimeUtil {
       }
     }
     return ms ?? (def ? this.timeToMs(def) : NaN);
+  }
+
+  /**
+   * Pretty print a delta, with auto-detection of largest unit
+   */
+  static prettyDelta(delta: number, unit?: TimeUnit): string {
+    if (delta === 0) {
+      return `0${unit ?? 'ms'}`;
+    } else if (delta < 0) {
+      return `-${this.prettyDelta(-delta, unit)}`;
+    }
+
+    let idx: number = 0;
+    if (!unit) {
+      let i = 0;
+      while (delta > TIME_UNITS[ORDER[i]]) {
+        i += 1;
+      }
+      idx = i - 1;
+    } else {
+      idx = ORDER.indexOf(unit);
+    }
+    const majorUnit = TIME_UNITS[ORDER[idx]];
+    const minorUnit = TIME_UNITS[ORDER[idx - 1]];
+    const value = delta / majorUnit;
+    const major = Math.trunc(value);
+    if (unit === undefined && value < 1.25 && idx > 0) {
+      return this.prettyDelta(delta, ORDER[idx - 1]);
+    }
+    const sub = value - major;
+    const out: (string | number)[] = [major, ORDER[idx]];
+    if (idx > 0 && sub > .01) {
+      const minor = Math.trunc(sub * (majorUnit / minorUnit));
+      out.push(' ', minor, ORDER[idx - 1]);
+    }
+    return out.join('');
   }
 }
