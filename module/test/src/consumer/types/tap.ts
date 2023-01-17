@@ -16,6 +16,7 @@ export class TapEmitter implements TestConsumer {
   #count = 0;
   #enhancer: TestResultsEnhancer;
   #terminal: Terminal;
+  #start: number;
 
   constructor(
     terminal = new Terminal({ output: process.stdout }),
@@ -33,6 +34,7 @@ export class TapEmitter implements TestConsumer {
    * Preamble
    */
   onStart(): void {
+    this.#start = Date.now();
     this.log(this.#enhancer.suiteName('TAP version 13')!);
   }
 
@@ -140,7 +142,7 @@ export class TapEmitter implements TestConsumer {
       `${this.#enhancer.total(summary.failed)}`,
       'skipped',
       this.#enhancer.total(summary.skipped),
-      `# (Total Time: ${summary.duration}ms)`
+      `# (Total Test Time: ${summary.duration}ms, Total Run Time: ${Date.now() - this.#start}ms)`
     ].join(' '));
   }
 }

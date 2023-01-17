@@ -1,4 +1,5 @@
 import assert from 'assert';
+import timers from 'timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { Text, TypeMismatchError } from '@travetto/schema';
@@ -162,6 +163,8 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     await assert.rejects(
       () => service.update(Engineer, Doctor.from({ ...doc }) as unknown as Engineer),
       (e: Error) => (e instanceof NotFoundError || e instanceof SubTypeNotSupportedError || e instanceof TypeMismatchError) ? undefined : e);
+
+    await timers.setTimeout(15);
 
     try {
       const res = await service.upsert(Doctor, Doctor.from({

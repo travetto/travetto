@@ -50,6 +50,8 @@ export class TapStreamedEmitter implements TestConsumer {
   }
 
   async onStart(files: string[]): Promise<void> {
+    this.#consumer.onStart();
+
     // Load all tests
     for (const file of files) {
       await import(RootIndex.getFromSource(file)!.import);
