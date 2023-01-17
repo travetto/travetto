@@ -2,14 +2,13 @@ import tty from 'tty';
 
 import { IterableUtil, MapFn } from './iterable';
 import {
-  TermColorLevel, TermBackgroundScheme, TerminalProgressEvent, TerminalTableConfig,
-  TerminalTableEvent, TerminalWaitingConfig, TermLinePosition, TermState
+  TermColorLevel, TermColorScheme, TerminalProgressEvent, TerminalTableConfig,
+  TerminalTableEvent, TerminalWaitingConfig, TermLinePosition, TermState, TermCoord
 } from './types';
 import { TerminalOperation } from './operation';
 import { TerminalQuerier } from './query';
 import { TerminalWriter } from './writer';
 import { ColorOutputUtil, TermStyleInput } from './color-output';
-import { TerminalUtil } from './util';
 
 type TerminalStreamPositionConfig = {
   position?: TermLinePosition;
@@ -30,7 +29,7 @@ export class Terminal implements TermState {
   #input: tty.ReadStream;
   #interactive: boolean;
   #width?: number;
-  #backgroundScheme?: TermBackgroundScheme;
+  #backgroundScheme?: TermColorScheme;
   #colorLevel?: TermColorLevel;
   #query: TerminalQuerier;
 
@@ -41,7 +40,7 @@ export class Terminal implements TermState {
     this.#width = config.width;
     this.#colorLevel = config.colorLevel;
     this.#backgroundScheme = config.backgroundScheme;
-    this.#query = new TerminalQuerier(this.#input, this.#output);
+    this.#query = TerminalQuerier.for(this.#input, this.#output);
   }
 
   get output(): tty.WriteStream {
@@ -68,7 +67,7 @@ export class Terminal implements TermState {
     return this.#colorLevel ?? 0;
   }
 
-  get backgroundScheme(): TermBackgroundScheme {
+  get backgroundScheme(): TermColorScheme {
     return this.#backgroundScheme ?? 'dark';
   }
 
@@ -83,11 +82,10 @@ export class Terminal implements TermState {
   async init(): Promise<void> {
     if (!this.#init) {
       this.#init = (async (): Promise<void> => {
-        const level = await TerminalUtil.detectColorLevel(this);
-        const bg = await TerminalUtil.detectBackgroundScheme(this);
-        this.#colorLevel ??= level;
-        this.#backgroundScheme ??= bg;
-        return;
+        this.#colorLevel ??= await ColorOutputUtil.readTermColorLevel(this.#output);
+        this.#backgroundScheme ??= await ColorOutputUtil.readBackgroundScheme(
+          () => this.interactive ? this.#query.backgroundColor() : undefined
+        );
       })();
     }
     return this.#init;
@@ -98,8 +96,8 @@ export class Terminal implements TermState {
     return this.writer().reset().commit();
   }
 
-  query(query: string): Promise<Buffer> {
-    return this.#query.runQuery(query);
+  getCursorPosition(): Promise<TermCoord> {
+    return this.#query.cursorPosition();
   }
 
   /**

@@ -7,8 +7,6 @@ import { ExecUtil } from '../src/exec';
 import { ShutdownManager } from '../src/shutdown';
 import { defineGlobalEnv, GlobalEnv } from '../src/global-env';
 
-const RESET_CODE = ['?25h', 's', 'r', 'u'].map(c => `\x1b[${c}`).join('');
-
 // Setup everything
 let initialized = false;
 export async function setup(): Promise<void> {
@@ -40,17 +38,11 @@ export async function setup(): Promise<void> {
   // Register shutdown handler
   ShutdownManager.register();
 
-  // This could live in @travetto/terminal, but orchestrating is complicated
-  if (process.stdout.isTTY) {
-    // Ensure cursor comes back, on exit
-    ShutdownManager.onShutdown('', () => process.stdout.write(RESET_CODE));
-  }
-
-  try {
+  if (RootIndex.hasModule('@travetto/terminal')) {
     const { GlobalTerminal } = await import('@travetto/terminal');
     await GlobalTerminal.init();
     ShutdownManager.onShutdown('', () => GlobalTerminal.reset());
-  } catch { }
+  }
 }
 
 export async function runMain(action: Function, args: string[]): Promise<void> {

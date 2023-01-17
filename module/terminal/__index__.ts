@@ -7,5 +7,4 @@ export * from './src/operation';
 export * from './src/query';
 export * from './src/terminal';
 export * from './src/types';
-export * from './src/util';
 export * from './src/writer';

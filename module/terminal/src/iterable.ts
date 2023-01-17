@@ -62,4 +62,39 @@ export class IterableUtil {
     }
     return items;
   }
+
+  static simpleQueue(): {
+    close: () => Promise<void>;
+    add: <T>(item: () => Promise<T>) => Promise<T>;
+    running: Promise<void>;
+  } {
+    let done = false;
+    let fire: () => void;
+    let next = new Promise<void>(r => fire = r);
+
+    const queue: Function[] = [];
+    async function run(): Promise<void> {
+      while (!done) {
+        if (!queue.length) {
+          await next;
+          next = new Promise(r => fire = r);
+        }
+        await queue.shift()?.();
+      }
+    }
+    const running = run();
+    return {
+      running,
+      close: (): Promise<void> => {
+        done = true;
+        fire();
+        return running;
+      },
+      add: <T>(fn: () => Promise<T>): Promise<T> => {
+        const prom = new Promise<T>(r => queue.push(() => fn().then(r)));
+        fire();
+        return prom;
+      }
+    };
+  }
 }

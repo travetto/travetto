@@ -16,7 +16,7 @@ export type TerminalProgressRender = (ev: TerminalProgressEvent) => string;
 export type TerminalWaitingConfig = { position?: TermLinePosition } & DelayedConfig;
 
 export type TermColorLevel = 0 | 1 | 2 | 3;
-export type TermBackgroundScheme = 'dark' | 'light';
+export type TermColorScheme = 'dark' | 'light';
 
 export type TermState = {
   interactive: boolean;
@@ -25,6 +25,8 @@ export type TermState = {
   input: tty.ReadStream;
   output: tty.WriteStream;
   colorLevel: TermColorLevel;
-  backgroundScheme: TermBackgroundScheme;
-  query: (query: string) => Promise<Buffer>;
+  backgroundScheme: TermColorScheme;
+  getCursorPosition(): Promise<TermCoord>;
 };
+
+export type TermQuery<T> = { query: () => string, response: (inp: Buffer) => T };

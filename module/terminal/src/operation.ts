@@ -2,7 +2,6 @@ import { IterableUtil } from './iterable';
 import { TerminalWriter } from './writer';
 import { Indexed, TerminalProgressRender, TerminalWaitingConfig, TermLinePosition, TermState } from './types';
 import { ColorOutputUtil, TermStyleInput } from './color-output';
-import { TerminalUtil } from './util';
 
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
@@ -13,7 +12,7 @@ export class TerminalOperation {
    */
   static async streamToPosition(term: TermState, source: AsyncIterable<string>, pos: TermLinePosition = 'inline'): Promise<void> {
     const writePos = pos === 'inline' ?
-      { ...await TerminalUtil.getCursorPosition(term), x: 0 } :
+      { ...await term.getCursorPosition(), x: 0 } :
       { x: 0, y: pos === 'top' ? 0 : -1 };
 
     try {
@@ -30,7 +29,7 @@ export class TerminalOperation {
       }
       await TerminalWriter.for(term).setPosition(writePos).clearLine().commit(true);
     } finally {
-      const finalCursor = await TerminalUtil.getCursorPosition(term);
+      const finalCursor = await term.getCursorPosition();
       await TerminalWriter.for(term).scrollRangeClear().setPosition(finalCursor).showCursor().commit();
     }
   }

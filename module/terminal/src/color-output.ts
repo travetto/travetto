@@ -1,6 +1,8 @@
+import tty from 'tty';
+
 import { ColorDefineUtil, RGBInput } from './color-define';
 import { ANSICodes } from './codes';
-import { TermState } from './types';
+import { TermColorScheme, TermColorLevel, TermState, RGB } from './types';
 
 export type TermStyle =
   { text?: RGBInput, background?: RGBInput, italic?: boolean, underline?: boolean, inverse?: boolean, blink?: boolean };
@@ -11,10 +13,47 @@ export type TermColorPaletteInput = Record<string, TermStyleInput | [TermStyleIn
 export type TermColorFn = (text: Prim) => string;
 export type TermColorPalette<T> = Record<keyof T, TermColorFn>;
 
+const COLOR_LEVEL_MAP = { 1: 0, 4: 1, 8: 2, 24: 3 } as const;
+type ColorBits = keyof (typeof COLOR_LEVEL_MAP);
+
 /**
  * Utils for colorizing output
  */
 export class ColorOutputUtil {
+
+  /**
+   * Detect color level from tty information
+   */
+  static async readTermColorLevel(stream: tty.WriteStream): Promise<TermColorLevel> {
+    const force = process.env.FORCE_COLOR;
+    const disable = process.env.NO_COLOR ?? process.env.NODE_DISABLE_COLORS;
+    if (force !== undefined) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return Math.max(Math.min(/^\d+$/.test(force) ? parseInt(force, 10) : 1, 3), 0) as TermColorLevel;
+    } else if (disable !== undefined && /^(1|true|yes|on)/i.test(disable)) {
+      return 0;
+    }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return stream.isTTY ? COLOR_LEVEL_MAP[stream.getColorDepth() as ColorBits] : 0;
+  }
+
+  /**
+   * Read foreground/background color if env var is set
+   */
+  static async readBackgroundScheme(
+    query: () => Promise<RGB | undefined> | RGB | undefined,
+    env: string | undefined = process.env.COLORFGBG
+  ): Promise<TermColorScheme | undefined> {
+    let color = await query();
+    if (!color && env) {
+      const [bg] = env.split(';');
+      color = ColorDefineUtil.rgbFromAnsi256(+bg);
+    }
+    if (color) {
+      const hex = `#${color.map(x => x.toString(16)).join('')}` as const;
+      return ColorDefineUtil.defineColor(hex).scheme;
+    }
+  }
 
   /**
    * Get styled levels, 0-3

@@ -89,4 +89,28 @@ export class ColorOutputUtilTest {
 
     tpl`My name is ${{ name: 'Bob', age: 20 }}`;
   }
+
+  @Test()
+  async verifyForceColor() {
+    const output = new tty.WriteStream(2);
+
+    for (const el of [0, 1, 2, 3]) {
+      process.env.FORCE_COLOR = `${el}`;
+      assert(await ColorOutputUtil.readTermColorLevel(output) === el);
+    }
+
+    process.env.FORCE_COLOR = 'true';
+    assert(await ColorOutputUtil.readTermColorLevel(output) === 1);
+  }
+
+  @Test()
+  async verifyNoColor() {
+    process.env.COLORTERM = 'truecolor';
+
+    const output = new tty.WriteStream(2);
+
+    assert(await ColorOutputUtil.readTermColorLevel(output) > 0);
+    process.env.NO_COLOR = '1';
+    assert(await ColorOutputUtil.readTermColorLevel(output) === 0);
+  }
 }
