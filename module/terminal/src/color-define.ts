@@ -1,9 +1,9 @@
 import { NAMED_COLORS } from './named-colors';
-import { RGB } from './types';
+import { RGB, TermColorScheme } from './types';
 
 type I = number;
 type HSL = [h: I, s: I, l: I];
-export type DefinedColor = { rgb: RGB, hsl: HSL, idx16: I, idx16bg: I, idx256: I };
+export type DefinedColor = { rgb: RGB, hsl: HSL, idx16: I, idx16bg: I, idx256: I, scheme: TermColorScheme };
 export type RGBInput = I | keyof (typeof NAMED_COLORS) | `#${string}`;
 
 const _rgb = (r: I, g: I = r, b: I = g): RGB => [r, g, b];
@@ -155,6 +155,14 @@ export class ColorDefineUtil {
   }
 
   /**
+   * Determine if a color is light or dark
+   */
+  static getScheme(color: RGB): TermColorScheme {
+    const [r, g, b] = color;
+    return (r + g + b) / 3 < 128 ? 'dark' : 'light';
+  }
+
+  /**
    * Define a color and all its parts
    */
   static defineColor(val: RGBInput): DefinedColor {
@@ -164,7 +172,8 @@ export class ColorDefineUtil {
       const idx256 = this.ansi256FromRgb(rgb);
       const hsl = this.hsl(rgb);
       const idx16bg = ANSI16_TO_BG.get(idx16)!;
-      this.CACHE.set(val, { rgb, idx16, idx16bg, idx256, hsl });
+      const scheme = this.getScheme(rgb);
+      this.CACHE.set(val, { rgb, idx16, idx16bg, idx256, hsl, scheme });
     }
     return this.CACHE.get(val)!;
   }
