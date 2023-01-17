@@ -2,7 +2,7 @@ import { spawnSync } from 'child_process';
 
 import { path } from '@travetto/manifest';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
-import { TerminalUtil } from '@travetto/terminal';
+import { stripAnsiCodes } from '@travetto/terminal';
 
 export type RunConfig = {
   filter?: (line: string) => boolean;
@@ -68,7 +68,7 @@ export class DocRunUtil {
    * Clean run output
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
-    text = TerminalUtil.removeAnsiSequences(text.trim())
+    text = stripAnsiCodes(text.trim())
       .replace(/^(.{1,4})?Compiling[.]*/, '') // Compiling message, remove
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@travetto/')
       .replace(new RegExp(path.cwd(), 'g'), '.')
@@ -112,7 +112,7 @@ export class DocRunUtil {
       if (res.error) {
         throw res.error;
       }
-      final = TerminalUtil.removeAnsiSequences(res.stdout.toString()).trim() || TerminalUtil.removeAnsiSequences(res.stderr).toString();
+      final = stripAnsiCodes(res.stdout.toString()).trim() || stripAnsiCodes(res.stderr.toString()).trim();
     } catch (err) {
       if (err instanceof Error) {
         console.log('Found!', cmd, args, '\n', err);

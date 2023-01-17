@@ -1,6 +1,6 @@
 import { path } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
-import { TerminalUtil } from '@travetto/terminal';
+import { stripAnsiCodes } from '@travetto/terminal';
 
 import type { ApplicationConfig } from '../../src/types';
 
@@ -51,7 +51,7 @@ export class HelpUtil {
     }
 
     const allLines = choices.flat();
-    const len = allLines.reduce((acc, v) => Math.max(acc, TerminalUtil.removeAnsiSequences(v).length), 0);
+    const len = allLines.reduce((acc, v) => Math.max(acc, stripAnsiCodes(v).length), 0);
     const div = cliTpl`${{ subsubtitle: '     '.padEnd(len, '—') }}`;
     return choices.map(x => x.join('\n')).join(`\n\n${div}\n\n`);
   }

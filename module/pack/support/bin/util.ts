@@ -5,7 +5,7 @@ import glob from 'picomatch';
 import { path, RootIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
 import { ExecUtil } from '@travetto/base';
-import { TerminalUtil } from '@travetto/terminal';
+import { stripAnsiCodes } from '@travetto/terminal';
 
 import { CommonConfig, PackOperation } from './types';
 
@@ -111,7 +111,7 @@ export class PackUtil {
     const spacer = ' '.repeat(indent);
     const ctx = await op.context(cfg);
     const title = cliTpl`${{ title: op.title }} ${ctx}`;
-    const width = Math.max(TerminalUtil.removeAnsiSequences(title).length, 50); // eslint-disable-line
+    const width = Math.max(stripAnsiCodes(title).length, 50); // eslint-disable-line
 
     let i = 0;
     function stdout(msg?: string): void {
