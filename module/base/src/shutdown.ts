@@ -183,6 +183,11 @@ class $ShutdownManager {
       this.#unhandled.splice(index, 1);
     }
   }
+
+  exit(codeOrError: number | Error & { code?: number }): Promise<void> {
+    const code = typeof codeOrError === 'number' ? codeOrError : (codeOrError?.code ?? 1);
+    return this.executeAsync(code);
+  }
 }
 
 export const ShutdownManager = new $ShutdownManager();

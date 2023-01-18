@@ -21,12 +21,12 @@ export class CliServiceCommand extends CliCommand<{}> {
       .sort((a, b) => a.name.localeCompare(b.name));
 
     if (!all.length) {
-      this.showHelp('', '\nNo services found\n');
+      return this.showHelp('', '\nNo services found\n');
     }
 
     if (!action) {
       const list = all.map(x => cliTpl` * ${{ identifier: x.name }}@${{ type: x.version }}`);
-      await this.showHelp(undefined,
+      return this.showHelp(undefined,
         cliTpl`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${list.join('\n')}`);
     }
 

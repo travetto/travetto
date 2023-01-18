@@ -77,8 +77,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
         if (choice) {
           yield* this.#resolveFeatures([choice], true);
         } else {
-          console.error('Invalid choice', feat);
-          process.exit(1);
+          throw new Error(`Invalid choice: ${feat}`);
         }
       }
 
@@ -93,7 +92,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
       if (err instanceof Error) {
         console.error('Failed to provide correct input', err.message);
       }
-      process.exit(1);
+      return this.exit(1);
     }
 
     const ctx = new Context(
@@ -112,7 +111,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
       if (err instanceof Error) {
         console.error('Failed to provide correct input', err.message);
       }
-      process.exit(1);
+      return this.exit(1);
     }
 
     await ctx.templateResolvedFiles();

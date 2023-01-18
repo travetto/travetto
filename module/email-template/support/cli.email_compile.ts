@@ -40,7 +40,7 @@ export class EmailCompileCommand extends CliCommand<Options> {
         await template.watchCompile();
         await new Promise(r => process.on('exit', r));
       } catch {
-        process.exit(1);
+        return this.exit(1);
       }
     }
   }

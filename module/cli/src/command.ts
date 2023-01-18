@@ -2,7 +2,7 @@ import { appendFile, mkdir } from 'fs/promises';
 import type * as commander from 'commander';
 
 import { path } from '@travetto/manifest';
-import { ConsoleManager, DataUtil, defineGlobalEnv, GlobalEnvConfig } from '@travetto/base';
+import { ConsoleManager, DataUtil, defineGlobalEnv, GlobalEnvConfig, ShutdownManager } from '@travetto/base';
 
 import { HelpUtil } from './help';
 
@@ -167,14 +167,21 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
     return this.#cmd.args;
   }
 
+  exit(code = 0): Promise<void> {
+    return ShutdownManager.exit(code);
+  }
+
   /**
    * Render help with additional message or extra text
    */
-  async showHelp(err?: string | Error, extra?: string): Promise<never> {
+  async showHelp(err?: string | Error, extra?: string, exitOnError = true): Promise<void> {
     if (err && typeof err !== 'string') {
       err = err.message;
     }
     HelpUtil.showHelp(this.#cmd, err, extra || (await this.help?.()) || '');
+    if (exitOnError) {
+      return this.exit(err ? 1 : 0);
+    }
   }
 
   /**

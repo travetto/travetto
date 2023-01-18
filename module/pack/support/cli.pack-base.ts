@@ -43,17 +43,7 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
     return { workspace: this.option({ desc: 'Working directory' }) } as const;
   }
 
-  async resolveConfigs(): Promise<C> {
-    const list = (await PackUtil.modeList());
-    if (!this.args[0]) {
-      this.showHelp('Missing config mode');
-    }
-    const cfg = list.find(c => c.name === this.args[0]);
-    if (!cfg) {
-      this.showHelp(`Unknown config mode: ${this.args[0]}`);
-    }
-    const def = list.find(c => c.name === 'default');
-
+  async resolveConfigs(cfg: Partial<CommonConfig>, def?: Partial<CommonConfig>): Promise<C> {
     const configs = [
       { workspace: path.resolve(os.tmpdir(), packName) },
       def,
@@ -86,7 +76,19 @@ export abstract class BasePackCommand<V extends BaseOptions, C extends CommonCon
   }
 
   async action(): Promise<void> {
-    const resolved = await this.resolveConfigs();
+    if (!this.args[0]) {
+      return this.showHelp('Missing config mode');
+    }
+
+    const list = (await PackUtil.modeList());
+    const cfg = list.find(c => c.name === this.args[0]);
+    if (!cfg) {
+      return this.showHelp(`Unknown config mode: ${this.args[0]}`);
+    }
+
+    const def = list.find(c => c.name === 'default');
+
+    const resolved = await this.resolveConfigs(cfg, def);
     if (await CliScmUtil.isRepoRoot(resolved.workspace)) {
       throw new Error('Refusing to use workspace with a .git directory');
     }

@@ -185,13 +185,12 @@ export class HelpUtil {
    * @param failure
    * @param extra
    */
-  static showHelp(command: commander.Command, failure?: string, extra?: string): never {
+  static showHelp(command: commander.Command, failure?: string, extra?: string): void {
     if (failure) {
       console!.error(cliTpl`${{ failure }}\n`);
     }
     console![failure ? 'error' : 'log'](
       HelpUtil.getHelpText(command.helpInformation(), extra)
     );
-    process.exit(failure ? 1 : 0);
   }
 }

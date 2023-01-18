@@ -65,7 +65,7 @@ export class AppRunCommand extends CliCommand<Options> {
 
       // If app not found
       if (!selected) {
-        return await this.showHelp(app ? `${app} is an unknown application` : '');
+        return this.showHelp(app ? `${app} is an unknown application` : '');
       } else {
 
         // Run otherwise
@@ -85,14 +85,14 @@ export class AppRunCommand extends CliCommand<Options> {
             }
             console.error(stack);
           }
-          process.exit(1);
+          return this.exit(1);
         }
       }
     } catch (outerErr) {
       if (!outerErr || !(outerErr instanceof Error)) {
         throw outerErr;
       }
-      await this.showHelp(outerErr, `\nUsage: ${HelpUtil.getAppUsage((await this.#loader.findByName(app))!)}`);
+      return this.showHelp(outerErr, `\nUsage: ${HelpUtil.getAppUsage((await this.#loader.findByName(app))!)}`);
     }
   }
 

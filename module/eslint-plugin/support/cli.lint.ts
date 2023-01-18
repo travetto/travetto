@@ -30,6 +30,6 @@ export class LintCommand extends CliCommand<Options> {
       stdio: 'inherit'
     }).result.catchAsResult();
 
-    process.exit(res.code);
+    return this.exit(res.code);
   }
 }

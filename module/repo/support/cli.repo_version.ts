@@ -29,7 +29,7 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
   async action(level: SemverLevel, prefix?: string): Promise<void> {
     if (await CliScmUtil.isWorkspaceDirty()) {
       console.error!('Cannot update versions with uncommitted changes');
-      process.exit(1);
+      return this.exit(1);
     }
 
     const modules = (await CliModuleUtil.findModules(this.cmd.changed ? 'changed' : 'all')).filter(x => !x.internal);
@@ -37,7 +37,7 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
     // Do we have valid changes?
     if (modules.length) {
       console.error!('No modules available for versioning');
-      process.exit(1);
+      return this.exit(1);
     }
 
     await Npm.version(modules, level, prefix);

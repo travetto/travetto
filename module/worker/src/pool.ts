@@ -106,7 +106,7 @@ export class WorkPool<X> {
     } catch (err) {
       if (this.#createErrors++ > opts.max!) { // If error count is bigger than pool size, we broke
         console.error('Failed in creating pool', { error: err });
-        process.exit(1);
+        await ShutdownManager.exit(1);
       }
       throw err;
     } finally {

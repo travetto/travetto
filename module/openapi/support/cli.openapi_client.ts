@@ -89,7 +89,7 @@ ${this.getListOfFormats().map(x => cliTpl`* ${{ input: x }}`).join('\n')} `;
 
   async action(format: string): Promise<void> {
     if (!format) {
-      this.showHelp(new Error('Format is required'));
+      return this.showHelp(new Error('Format is required'));
     }
 
     // Ensure its there
@@ -125,6 +125,6 @@ ${this.getListOfFormats().map(x => cliTpl`* ${{ input: x }}`).join('\n')} `;
     ];
 
     const { result } = ExecUtil.spawn('docker', args, { stdio: [0, 1, 2] });
-    await result.catch(err => process.exit(1));
+    await result.catch(err => this.exit(1));
   }
 }

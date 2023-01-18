@@ -16,7 +16,10 @@ export class ModelExportCommand extends BaseModelCommand {
       ConsoleManager.setDebug(false);
       await RootRegistry.init();
 
-      await this.validate(provider, models);
+      if (!await this.validate(provider, models)) {
+        return this.exit(1);
+      }
+
       const resolved = await this.resolve(provider, models);
       await ModelExportUtil.run(resolved.provider, resolved.models);
     } catch (err) {

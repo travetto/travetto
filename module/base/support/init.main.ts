@@ -48,10 +48,11 @@ export async function setup(): Promise<void> {
 export async function runMain(action: Function, args: string[]): Promise<void> {
   try {
     await setup();
-    ExecUtil.returnResponse(0, await action(...args));
+    ExecUtil.returnResponse(await action(...args));
+    return ShutdownManager.exit(0);
   } catch (err) {
-    const code = err instanceof Error && 'code' in err && typeof err.code === 'number' ? err.code : undefined;
-    ExecUtil.returnResponse(code ?? 1, err);
+    ExecUtil.returnResponse(err, true);
+    return ShutdownManager.exit(err instanceof Error ? err : 1);
   }
 }
 

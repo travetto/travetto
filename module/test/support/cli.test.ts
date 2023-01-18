@@ -13,7 +13,7 @@ const modes = ['single', 'standard'] as const;
 type Options = {
   format: OptionConfig<string>;
   concurrency: OptionConfig<number>;
-  mode: OptionConfig<'single' | 'standard'>;
+  mode: OptionConfig<(typeof modes)[number]>;
 };
 
 /**
@@ -49,54 +49,26 @@ export class TestCommand extends CliCommand<Options> {
     return '[regexes...]';
   }
 
-  async isFile(file: string, errorIfNot?: string): Promise<true | undefined> {
-    try {
-      const stat = await fs.stat(path.resolve(file)).catch(() => { });
-      const res = stat?.isFile();
-      if (res) {
-        return true;
-      }
-    } catch { }
-
-    if (errorIfNot) {
-      await this.showHelp(errorIfNot);
-    }
-  }
-
-  async onSingle(state: Partial<RunState>, file: string): Promise<void> {
-    await this.isFile(file, 'You must specify a proper test file to run in single mode');
-    state.mode = 'single';
-  }
-
-  async onStandard(state: Partial<RunState>, first: string): Promise<void> {
-    const isFile = await this.isFile(first);
-
-    if (!first) {
-      state.args = ['test/.*'];
-    } else if (isFile) { // If is a single file
-      if (/test\//.test(first)) {
-        await this.onSingle(state, first);
-      } else {
-        await this.showHelp('Only files in the test/ folder are permitted to be run');
-      }
-    }
-  }
-
   async action(regexes: string[]): Promise<void> {
     const { runTests } = await import('./bin/run.js');
 
     const [first] = regexes;
 
+    const isFile = await fs.stat(path.resolve(first ?? '')).then(x => x.isFile(), () => false);
+
     const state: RunState = {
-      args: regexes,
-      mode: this.cmd.mode,
-      concurrency: +this.cmd.concurrency,
+      args: !first ? ['test/.*'] : regexes,
+      mode: isFile && regexes.length === 1 ? 'single' : this.cmd.mode,
+      concurrency: this.cmd.concurrency,
       format: this.cmd.format
     };
 
-    switch (state.mode) {
-      case 'single': await this.onSingle(state, first); break;
-      case 'standard': await this.onStandard(state, first); break;
+    if (state.mode === 'single') {
+      if (!isFile) {
+        return this.showHelp('You must specify a proper test file to run in single mode');
+      } else if (!/test\//.test(first)) {
+        return this.showHelp('Only files in the test/ folder are permitted to be run');
+      }
     }
 
     await runTests(state);

@@ -1,3 +1,4 @@
+import { ShutdownManager } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 import { cliTpl } from './color';
@@ -49,7 +50,7 @@ export class CliCommandManager {
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
 ${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}
 `);
-        process.exit(1);
+        await ShutdownManager.exit(1);
       }
       throw new Error(`Unknown command: ${cmd}`);
     }
