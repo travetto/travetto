@@ -6,7 +6,6 @@ export const config: AllConfigPartial = {
   name: 'default',
   assemble: {
     active: true,
-    cacheDir: 'cache',
     keepSource: true,
     readonly: true,
     env: {
@@ -15,11 +14,6 @@ export const config: AllConfigPartial = {
     add: [
       { [mod('@travetto/cli/bin/trv.js')]: mod('.bin/trv') },
       { [mod('lodash/lodash.min.js')]: mod('lodash/lodash.js') },
-    ],
-    excludeCompile: [
-      mod('@travetto/*/doc/'),
-      mod('@travetto/*/e2e/'),
-      mod('@travetto/*/test/'),
     ],
     exclude: [
       'bower.json',
