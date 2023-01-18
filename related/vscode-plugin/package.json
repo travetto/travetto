@@ -66,7 +66,6 @@
   ],
   "activationEvents": [
     "workspaceContains:node_modules/@travetto",
-    "onView:travetto.email-template.content",
     "onView:travetto.email-template.context"
   ],
   "icon": "images/logo.png",
