@@ -71,11 +71,16 @@ export class TerminalOperation {
   static buildProgressBar(term: TermState, style: TermStyleInput): TerminalProgressRender {
     const color = ColorOutputUtil.colorer(term, style);
     return ({ total, idx, text }): string => {
+      text ||= total ? '%idx/%total' : '%idx';
+
       const totalStr = `${total ?? ''}`;
       const idxStr = `${idx}`.padStart(totalStr.length);
-      const line = text ? text.replace(/%idx/, idxStr).replace(/%total/, totalStr) : total ? `${idxStr}/${totalStr}` : idxStr;
-      const full = ` ${line}`.padEnd(term.width);
       const pct = total === undefined ? 0 : (idx / total);
+      const line = text
+        .replace(/%idx/, idxStr)
+        .replace(/%total/, totalStr)
+        .replace(/%pct/, `${Math.trunc(pct * 100)}`);
+      const full = ` ${line}`.padEnd(term.width);
       const mid = Math.trunc(pct * term.width);
       const [l, r] = [full.substring(0, mid), full.substring(mid)];
       return `${color(l)}${r}`;

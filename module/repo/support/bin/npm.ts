@@ -15,9 +15,9 @@ export class Npm {
     if (!res.valid && !res.stderr.includes('E404')) {
       throw new Error(res.stderr);
     }
-    const item = res.stdout ? JSON.parse(res.stdout) : [];
+    const item: (string[] | string) = res.stdout ? JSON.parse(res.stdout) : [];
     const found = Array.isArray(item) ? item.pop() : item;
-    return !!found;
+    return !!found && found === mod.version;
   }
 
   /**
