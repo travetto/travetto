@@ -23,9 +23,7 @@ export class PoolExecTest {
       }
     });
 
-    const launcher = await this.fixtures
-      .queryFirst(file => file.endsWith('simple.child.mjs'))
-      .then(rel => this.fixtures.describe(rel!));
+    const launcher = await this.fixtures.describe('/simple.child.mjs');
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<{ data: string }, string>(

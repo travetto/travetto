@@ -1,10 +1,10 @@
 import { Controller, Get, Produces, Request } from '@travetto/rest';
-import { CommonFileResourceProvider } from '@travetto/base';
+import { FileResourceProvider } from '@travetto/base';
 
 @Controller('/ui')
 export class UIController {
 
-  resources = new CommonFileResourceProvider();
+  resources = new FileResourceProvider({ includeCommon: true });
 
   @Get('/')
   @Produces('text/html')

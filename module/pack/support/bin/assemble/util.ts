@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { IndexedModule, Package, PackageUtil, path, RootIndex } from '@travetto/manifest';
-import { FileResourceProvider, TypedObject } from '@travetto/base';
+import { FileQueryProvider, TypedObject } from '@travetto/base';
 
 import { PackUtil } from '../util';
 
@@ -14,8 +14,8 @@ export class AssembleUtil {
    * Purge workspace using file rules
    */
   static async excludeFiles(root: string, files: string[]): Promise<void> {
-    const checker = PackUtil.excludeChecker(files, root);
-    for (const el of await new FileResourceProvider([root]).query(checker, true)) {
+    const filter = PackUtil.excludeChecker(files, root);
+    for await (const el of FileQueryProvider.query({ paths: [root], filter, hidden: true })) {
       try {
         await fs.unlink(el);
       } catch { }

@@ -25,9 +25,10 @@ export class ExecUtilTest {
   @Test()
   async spawnBad() {
     const proc = ExecUtil.spawn('ls', ['xxxx'], {
-      cwd: RootIndex.mainModule.output
+      cwd: RootIndex.mainModule.output,
+      catchAsResult: true
     });
-    const result = await proc.result.catchAsResult!();
+    const result = await proc.result;
     assert(result.stderr.includes('xxxx'));
     assert(result.code > 0);
     assert(!result.valid);
@@ -35,7 +36,7 @@ export class ExecUtilTest {
 
   @Test()
   async fork() {
-    const proc = ExecUtil.fork((await this.fixture.describe('echo.js')).path);
+    const proc = ExecUtil.fork((await this.fixture.describe('echo.js')).path, [], { outputMode: 'binary' });
     proc.process.stdin?.write('Hello Worldy');
     proc.process.stdin?.end();
     const result = await proc.result;

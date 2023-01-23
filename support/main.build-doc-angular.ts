@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { ExecUtil, FileResourceProvider } from '@travetto/base';
+import { ExecUtil, FileQueryProvider } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -8,9 +8,10 @@ const page = (f: string): string => path.resolve('related/travetto.github.io/src
 
 const copyPluginImages = async (): Promise<void> => {
   console.log('Copying Plugin images');
-  const provider = new FileResourceProvider(['related/vscode-plugin/images']);
-
-  for (const file of await provider.query(f => /[.](gif|jpe?g|png)/i.test(f))) {
+  for await (const file of FileQueryProvider.query({
+    paths: ['related/vscode-plugin/images'],
+    filter: f => /[.](gif|jpe?g|png)/i.test(f)
+  })) {
     const target = page(`assets/images/vscode-plugin${file.split('vscode-plugin/images')[1]}`);
     await fs.mkdir(path.dirname(target), { recursive: true });
     await fs.copyFile(file, target);

@@ -1,5 +1,5 @@
-import { CommonFileResourceProvider } from '@travetto/base';
-import { DependencyRegistry, Injectable } from '@travetto/di';
+import { FileQueryProvider } from '@travetto/base';
+import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 
 import { ConfigParserTarget } from '../internal/types';
 import { ConfigParser } from '../parser/types';
@@ -8,13 +8,21 @@ import { ConfigSource, ConfigValue } from './types';
 /**
  * File-base config source, builds on common file resource provider
  */
-@Injectable()
-export class FileConfigSource extends CommonFileResourceProvider implements ConfigSource {
+export class FileConfigSource extends FileQueryProvider implements ConfigSource {
+
+  @InjectableFactory()
+  static getInstance(): ConfigSource {
+    return new FileConfigSource();
+  }
 
   depth = 1;
   extMatch: RegExp;
   parsers: Record<string, ConfigParser>;
   priority = 1;
+
+  constructor(paths: string[] = []) {
+    super({ includeCommon: true, paths });
+  }
 
   async postConstruct(): Promise<void> {
     const parserClasses = await DependencyRegistry.getCandidateTypes(ConfigParserTarget);
@@ -34,7 +42,7 @@ export class FileConfigSource extends CommonFileResourceProvider implements Conf
   async getValues(profiles: string[]): Promise<ConfigValue[]> {
     const out: ConfigValue[] = [];
 
-    for (const file of await this.query(f => this.extMatch.test(f))) {
+    for await (const file of this.query(f => this.extMatch.test(f))) {
       const ext = file.split('.')[1];
       const profile = file.replace(`.${ext}`, '');
       if (!profiles.includes(profile) || !this.parsers[ext]) {

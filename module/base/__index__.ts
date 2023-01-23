@@ -7,6 +7,7 @@ export * from './src/env';
 export * from './src/global-env';
 export * from './src/proxy';
 export * from './src/resource';
+export * from './src/resource-query';
 export * from './src/shutdown';
 export * from './src/stream';
 export * from './src/time';

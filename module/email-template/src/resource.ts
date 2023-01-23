@@ -1,23 +1,15 @@
-import { path } from '@travetto/manifest';
-import { GlobalEnv } from '@travetto/base';
-import { EmailResource } from '@travetto/email';
+import { FileQueryProvider } from '@travetto/base';
 
 /**
  * Resource management for email templating
  */
-export class EmailTemplateResource extends EmailResource {
+export class EmailTemplateResource extends FileQueryProvider {
   static PATH_PREFIX = /.*\/resources\/email\//;
   static EXT = /[.]email[.]html$/;
   ext = EmailTemplateResource.EXT;
 
-  moduleFolder = 'support/resources/email';
-
   constructor(paths: string[] = ['@travetto/email-template']) {
-    super([
-      ...paths,
-      ...GlobalEnv.resourcePaths,
-      path.resolve('resources')
-    ]);
+    super({ paths, includeCommon: true, moduleFolder: 'support/resources/email' });
   }
 
   /**
@@ -31,12 +23,15 @@ export class EmailTemplateResource extends EmailResource {
    * Grab list of all available templates
    */
   async findAllTemplates(): Promise<{ rel: string, key: string }[]> {
-    return Promise.all((await this.query(f => this.ext.test(f)))
-      .sort()
-      .map(async pth => ({
-        rel: (await this.describe(pth)).path.replace(EmailTemplateResource.PATH_PREFIX, ''),
-        key: pth.replace(this.ext, '')
-      })));
+    const all: { rel: string, key: string }[] = [];
+    for await (const entry of this.query(f => this.ext.test(f))) {
+      const { path } = await this.describe(entry);
+      all.push({
+        rel: path.replace(EmailTemplateResource.PATH_PREFIX, ''),
+        key: entry.replace(this.ext, '')
+      });
+    }
+    return all.sort((a, b) => a.rel.localeCompare(b.rel));
   }
 
   /**

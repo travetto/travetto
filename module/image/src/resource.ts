@@ -1,24 +1,22 @@
 import fs from 'fs/promises';
 import { Readable } from 'stream';
-import { mkdirSync } from 'fs';
 
 import { path } from '@travetto/manifest';
-import { CommonFileResourceProvider, Env, StreamUtil } from '@travetto/base';
+import { Env, FileResourceProvider, StreamUtil } from '@travetto/base';
 
 import { ImageConverter } from './convert';
 
 /**
  * Resource provider for images that allows for real-time optimization
  */
-export class ImageOptimizingResourceProvider extends CommonFileResourceProvider {
+export class ImageOptimizingResourceProvider extends FileResourceProvider {
 
   #cacheRoot: string;
 
   constructor(paths?: string[], cacheRoot?: string) {
-    super(paths);
+    super({ paths, includeCommon: true });
 
     this.#cacheRoot = cacheRoot ?? path.resolve(Env.get('TRV_IMAGE_CACHE', '.trv_images'));
-    mkdirSync(this.#cacheRoot, { recursive: true });
   }
 
   async #openFile(pth: string): Promise<fs.FileHandle> {
@@ -31,7 +29,7 @@ export class ImageOptimizingResourceProvider extends CommonFileResourceProvider 
   async readOptimized(rel: string): Promise<Buffer> {
     const { path: pth } = await this.describe(rel);
     const cachedOutput = path.resolve(this.#cacheRoot, rel);
-    await fs.mkdir(path.dirname(cachedOutput));
+    await fs.mkdir(path.dirname(cachedOutput), { recursive: true });
 
     const handle = await this.#openFile(cachedOutput);
     const exists = !!(await handle.stat().catch(() => false));

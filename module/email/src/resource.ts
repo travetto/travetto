@@ -1,7 +1,7 @@
-import { CommonFileResourceProvider } from '@travetto/base';
+import { FileResourceProvider } from '@travetto/base';
 import { InjectableFactory } from '@travetto/di';
 
-export class EmailResource extends CommonFileResourceProvider {
+export class EmailResource extends FileResourceProvider {
 
   @InjectableFactory()
   static getResources(): EmailResource {
@@ -9,6 +9,6 @@ export class EmailResource extends CommonFileResourceProvider {
   }
 
   constructor(paths?: string[]) {
-    super(paths);
+    super({ paths, includeCommon: true });
   }
 }

@@ -1,6 +1,6 @@
 import * as mongo from 'mongodb';
 
-import { CommonFileResourceProvider, TimeSpan } from '@travetto/base';
+import { FileResourceProvider, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -59,7 +59,7 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
-    const resources = new CommonFileResourceProvider();
+    const resources = new FileResourceProvider({ includeCommon: true });
     const resolve = (file: string): Promise<string> => resources.describe(file).then(({ path }) => path, () => file);
 
     const opts = this.options;

@@ -1,5 +1,4 @@
 import { Readable } from 'stream';
-import { createReadStream } from 'fs';
 import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
@@ -8,6 +7,13 @@ import { AppError } from './error';
 import { GlobalEnv } from './global-env';
 
 export type ResourceDescription = { size: number, path: string };
+
+export interface FileResourceConfig {
+  paths?: string[];
+  mainFolder?: string;
+  moduleFolder?: string;
+  includeCommon?: boolean;
+}
 
 /**
  * Primary contract for resource handling
@@ -38,44 +44,37 @@ export interface ResourceProvider {
  * Simple file-based resource provider
  */
 export class FileResourceProvider implements ResourceProvider {
-  #paths: string[];
-  #rawPaths: string[];
 
-  moduleFolder?: string;
-  mainFolder?: string;
-  maxDepth = 1000;
-
-  constructor(paths: string[]) {
-    this.#rawPaths = paths;
-  }
-
-  #getModulePath(mod: string, rel?: string): string {
-    return path.resolve(RootIndex.getModule(mod)!.source, rel ?? '');
-  }
-
-  #getPaths(): string[] {
+  static resolvePaths(cfgOrPaths: FileResourceConfig | string[]): string[] {
     const main = RootIndex.manifest.mainModule;
-    return this.#paths ??= this.#rawPaths.map(pth => {
+    const cfg = Array.isArray(cfgOrPaths) ? { paths: cfgOrPaths } : cfgOrPaths;
+    const paths = cfg.paths ?? [];
+    if (cfg.includeCommon) {
+      paths.unshift(...GlobalEnv.resourcePaths, path.resolve('resources'));
+    }
+    return paths.map(pth => {
       const [base, sub] = pth.replace(/^@$/, main).replace(/^@#/, `${main}#`).split('#');
-
+      const rel = sub ?? (base !== main ? cfg.moduleFolder : undefined) ?? cfg.mainFolder;
       return RootIndex.hasModule(base) ?
-        this.#getModulePath(base, sub ?? (base !== main ? this.moduleFolder : undefined) ?? this.mainFolder) :
-        path.resolve(base, sub ?? this.mainFolder ?? '');
+        path.resolve(RootIndex.getModule(base)!.source, rel ?? '') :
+        path.resolve(base, sub ?? cfg.mainFolder ?? '');
     });
   }
 
+  #paths: string[];
+
+  constructor(cfg: FileResourceConfig | string[]) {
+    this.#paths = FileResourceProvider.resolvePaths(cfg);
+  }
+
   async #getPath(file: string): Promise<string> {
-    for (const sub of this.#getPaths()) {
+    for (const sub of this.#paths) {
       const resolved = path.join(sub, file);
       if (await fs.stat(resolved).catch(() => false)) {
         return resolved;
       }
     }
-    throw new AppError(`Unable to find: ${file}, searched=${this.#getPaths().join(',')}`, 'notfound');
-  }
-
-  getAllPaths(): string[] {
-    return this.#getPaths().slice(0);
+    throw new AppError(`Unable to find: ${file}, searched=${this.#paths.join(',')}`, 'notfound');
   }
 
   async describe(file: string): Promise<ResourceDescription> {
@@ -93,55 +92,7 @@ export class FileResourceProvider implements ResourceProvider {
 
   async readStream(file: string, binary = true): Promise<Readable> {
     file = await this.#getPath(file);
-    return createReadStream(file, binary ? undefined : 'utf8');
-  }
-
-  /**
-   * Query using a simple predicate, looking for files recursively
-   */
-  async query(filter: (file: string) => boolean, hidden = false, maxDepth = this.maxDepth): Promise<string[]> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const search = [...this.#getPaths().map(x => [x, x, 0] as [string, string, number])];
-    const seen = new Set();
-    const out: string[] = [];
-    while (search.length) {
-      const [folder, root, depth] = search.shift()!;
-      for (const sub of await fs.readdir(folder).catch(() => [])) {
-        if (sub === '.' || sub === '..' || (!hidden && sub.startsWith('.'))) {
-          continue;
-        }
-        const resolved = path.resolve(folder, sub);
-        const stats = await fs.stat(resolved);
-        if (stats.isDirectory()) {
-          if (depth + 1 < maxDepth) {
-            search.push([resolved, root, depth + 1]);
-          }
-        } else {
-          const rel = resolved.replace(`${root}/`, '');
-          if (!seen.has(rel) && filter(rel)) {
-            out.push(rel);
-            seen.add(rel);
-          }
-        }
-      }
-    }
-    return out;
-  }
-
-  /**
-   * Query for first matching
-  */
-  async queryFirst(filter: (file: string) => boolean, hidden = false, maxDepth = this.maxDepth): Promise<string | undefined> {
-    const [res] = await this.query(filter, hidden, maxDepth);
-    return res;
-  }
-}
-
-/**
- * Simple file resource provider that relies on trv_resources
- */
-export class CommonFileResourceProvider extends FileResourceProvider {
-  constructor(paths: string[] = [...GlobalEnv.resourcePaths, path.resolve('resources')]) {
-    super(paths);
+    const handle = await fs.open(file);
+    return handle.createReadStream({ encoding: binary ? undefined : 'utf8' });
   }
 }
