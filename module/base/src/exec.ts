@@ -1,3 +1,4 @@
+import rl from 'readline';
 import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import { Readable } from 'stream';
 import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
@@ -68,9 +69,17 @@ export interface ExecutionOptions extends SpawnOptions {
    */
   timeout?: number;
   /**
-   * Whether or not to collect stdin/stdout, defaults to false
+   * Whether or not to collect stdin/stdout, defaults to 'text'
    */
-  rawOutput?: boolean;
+  outputMode?: 'raw' | 'binary' | 'text';
+  /**
+   * On stderr line
+   */
+  onStdErrorLine?: (line: string) => void;
+  /**
+   * On stdout line
+   */
+  onStdOutLine?: (line: string) => void;
   /**
    * The stdin source for the execution
    */
@@ -144,9 +153,27 @@ export class ExecUtil {
         }
       };
 
-      if (!options.rawOutput) {
-        proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
-        proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
+      switch (options.outputMode) {
+        case 'binary': {
+          proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
+          proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
+          break;
+        }
+        case 'text':
+        default: {
+          if (proc.stdout) {
+            rl.createInterface(proc.stdout).on('line', line => {
+              options.onStdOutLine?.(line);
+              return stdout.push(Buffer.from(line), Buffer.from('\n'));
+            });
+          }
+          if (proc.stderr) {
+            rl.createInterface(proc.stderr).on('line', line => {
+              options.onStdErrorLine?.(line);
+              stderr.push(Buffer.from(line), Buffer.from('\n'));
+            });
+          }
+        }
       }
 
       proc.on('error', (err: Error) =>
