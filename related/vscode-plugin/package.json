@@ -18,9 +18,7 @@
   },
   "files": [
     "bin",
-    "src",
-    "README.md",
-    "CHANGELOG.md"
+    "src"
   ],
   "main": "./out/node_modules/travetto-plugin/bin/launch",
   "repository": {

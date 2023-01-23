@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/manifest';
+import { PackageUtil, path, RootIndex } from '@travetto/manifest';
 import { WatchUtil, ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
@@ -8,8 +8,7 @@ import { RenderUtil } from '../src/render/util';
 
 type Options = {
   input: OptionConfig<string>;
-  outputBase: OptionConfig<string>;
-  formats: ListOptionConfig<string>;
+  outputs: ListOptionConfig<string>;
   watch: OptionConfig<boolean>;
   stdout: OptionConfig<boolean>;
 };
@@ -22,9 +21,8 @@ export class DocCommand extends CliCommand<Options> {
 
   getOptions(): Options {
     return {
-      input: this.option({ desc: 'Input File', def: 'README.ts' }),
-      outputBase: this.option({ desc: 'Output Base', def: '' }),
-      formats: this.listOption({ desc: 'Formats', def: [] }),
+      input: this.option({ desc: 'Input File', def: 'DOC.ts' }),
+      outputs: this.listOption({ desc: 'Outputs', def: [] }),
       watch: this.boolOption({ desc: 'Watch' }),
       stdout: this.boolOption({ desc: 'Write to stdout', def: false })
     };
@@ -49,11 +47,12 @@ export class DocCommand extends CliCommand<Options> {
       return this.exit(1);
     }
 
-    if (this.cmd.formats.length === 0) {
-      this.cmd.formats.push('md', 'html');
+    if (this.cmd.outputs.length === 0) {
+      const workspacePkg = PackageUtil.readPackage(RootIndex.manifest.workspacePath);
+      this.cmd.outputs = workspacePkg.travetto?.docOutputs ?? ['README.md'];
     }
-    const outputBase = this.cmd.outputBase || path.basename(this.cmd.input).replace(/[.]ts$/, '');
-    const outputs = this.cmd.formats.map(fmt => [fmt, path.resolve(`${outputBase}.${fmt}`)]);
+
+    const outputs = this.cmd.outputs.map(output => [path.extname(output).substring(1), path.resolve(output)]);
 
     // If specifying output
     const write = async (): Promise<void> => {

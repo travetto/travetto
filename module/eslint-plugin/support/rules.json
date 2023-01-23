@@ -342,7 +342,7 @@
     },
     {
       "files": [
-        "**/{README.ts,doc/**}"
+        "**/{DOC.ts,doc/**}"
       ],
       "rules": {
         "max-len": "off",

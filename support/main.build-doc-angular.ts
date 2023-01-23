@@ -32,7 +32,7 @@ export async function main(target?: string): Promise<void> {
 
   const mods = new Set((await CliModuleUtil.findModules('all'))
     .filter(x => !target || x.source === path.resolve(root, target))
-    .filter(x => (x.files.doc ?? []).some(f => f.source.endsWith('README.ts'))));
+    .filter(x => (x.files.doc ?? []).some(f => f.source.endsWith('DOC.ts'))));
 
   // Build out docs
   await CliModuleUtil.execOnModules('all',
@@ -50,7 +50,7 @@ export async function main(target?: string): Promise<void> {
     }
     const modName = mod.name.split('/')[1];
     try {
-      let html = await fs.readFile(path.resolve(mod.source, 'README.html'), 'utf8');
+      let html = await fs.readFile(path.resolve(mod.source, 'DOC.html'), 'utf8');
 
       html = html
         .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)

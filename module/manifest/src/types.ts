@@ -85,6 +85,7 @@ export type Package = {
     docOutput?: string[];
     docRoot?: string;
     docBaseUrl?: string;
+    docOutputs?: string[];
     outputFolder?: string;
   };
   workspaces?: string[];

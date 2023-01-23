@@ -25,7 +25,11 @@
       "@travetto/doc",
       "@travetto/command"
     ],
-    "docBaseUrl": "https://github.com/travetto/travetto/tree/main"
+    "docBaseUrl": "https://github.com/travetto/travetto/tree/main",
+    "docOutputs": [
+      "README.md",
+      "DOC.html"
+    ]
   },
   "workspaces": [
     "module/*",

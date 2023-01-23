@@ -99,7 +99,7 @@ export class ManifestModuleUtil {
       return 'compile';
     } else if (moduleFile.startsWith('support/test/') || moduleFile.startsWith('test/')) {
       return 'test';
-    } else if (moduleFile.startsWith('doc/') || moduleFile === 'README.ts') {
+    } else if (moduleFile.startsWith('doc/') || moduleFile === 'DOC.ts') {
       return 'doc';
     } else {
       return;
@@ -129,7 +129,7 @@ export class ManifestModuleUtil {
         case 'support': return key;
         default: return '$other';
       }
-    } else if (moduleFile === 'README.ts') {
+    } else if (moduleFile === 'DOC.ts') {
       return 'doc';
     } else if (INDEX_FILES.has(moduleFile)) {
       return '$index';
