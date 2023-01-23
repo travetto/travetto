@@ -78,7 +78,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
   valid(req: PackageVisitReq<ModuleDep>): boolean {
     return req.sourcePath === path.cwd() || (
       req.rel !== 'peer' &&
-      (!!req.pkg.travetto || req.rel === 'global')
+      (!!req.pkg.travetto || req.pkg.private === true || !req.sourcePath.includes('node_modules') || req.rel === 'global')
     );
   }
 
