@@ -24,12 +24,12 @@ export class RepoPublishCommand extends CliCommand<Options> {
     const published = await CliModuleUtil.execOnModules('all', (mod, opts) => Npm.isPublished(mod, opts), {
       filter: mod => !!mod.local && !mod.internal,
       progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
-      showStderr: true,
+      showStderr: false,
       transformResult: Npm.validatePublishedResult,
     });
 
     if (this.cmd.dryRun) {
-      console.log('Published state', [...published.entries()]);
+      console.log('Unpublished modules', [...published.entries()].filter(x => !x[1]).map(([mod]) => mod.workspaceRelative));
     }
 
     await CliModuleUtil.execOnModules(
