@@ -27,8 +27,9 @@ export class LintCommand extends CliCommand<Options> {
 
     const res = await ExecUtil.spawn('npx', ['eslint', '--ext', '.js,.ts', ...mods.map(x => x.source)], {
       cwd: RootIndex.manifest.workspacePath,
-      stdio: 'inherit'
-    }).result.catchAsResult();
+      stdio: 'inherit',
+      catchAsResult: true
+    }).result;
 
     return this.exit(res.code);
   }

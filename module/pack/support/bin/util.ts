@@ -170,7 +170,7 @@ export class PackUtil {
       ['xcopy', ['/y', '/h', '/s', path.toNative(src), path.toNative(dest)]] :
       ['cp', ['-r', '-p', src, dest]];
 
-    const res = await ExecUtil.spawn(cmd, args).result.catchAsResult();
+    const res = await ExecUtil.spawn(cmd, args, { catchAsResult: true }).result;
     if (res.code && !ignore) {
       throw new Error(`Failed to copy ${src} to ${dest}`);
     }

@@ -19,7 +19,7 @@ export class CliScmUtil {
    */
   static async getAuthor(): Promise<{ name?: string, email: string }> {
     const [name, email] = await Promise.all([
-      await ExecUtil.spawn('git', ['config', 'user.name']).result.catchAsResult(),
+      await ExecUtil.spawn('git', ['config', 'user.name'], { catchAsResult: true }).result,
       await ExecUtil.spawn('git', ['config', 'user.email']).result,
     ]);
     return {
@@ -70,8 +70,8 @@ export class CliScmUtil {
    * Verify if workspace is dirty
    */
   static async isWorkspaceDirty(): Promise<boolean> {
-    const res1 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code']).result.catchAsResult();
-    const res2 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code', '--cached']).result.catchAsResult();
+    const res1 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code'], { catchAsResult: true }).result;
+    const res2 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code', '--cached'], { catchAsResult: true }).result;
     return !res1.valid || !res2.valid;
   }
 }

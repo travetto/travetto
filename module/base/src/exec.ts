@@ -44,22 +44,21 @@ export interface WorkerResult<T> {
 }
 
 /**
- * A result that supports catching as part of the promise resolution
- */
-export type CatchableResult = Promise<ExecutionResult> & { catchAsResult(): Promise<ExecutionResult> };
-
-/**
  * Execution State
  */
-export interface ExecutionState<T extends Promise<ExecutionResult> = Promise<ExecutionResult>> {
+export interface ExecutionState {
   process: ChildProcess;
-  result: T;
+  result: Promise<ExecutionResult>;
 }
 
 /**
  * Options for running executions
  */
 export interface ExecutionOptions extends SpawnOptions {
+  /**
+   * Should an error be caught and returned as a result
+   */
+  catchAsResult?: boolean;
   /**
    * Should the environment be isolated, or inherit from process.env
    */
@@ -113,7 +112,7 @@ export class ExecUtil {
    * @param options The options to use to enhance the process
    * @param cmd The command being run
    */
-  static enhanceProcess(proc: ChildProcess, options: ExecutionOptions, cmd: string): CatchableResult {
+  static enhanceProcess(proc: ChildProcess, options: ExecutionOptions, cmd: string): Promise<ExecutionResult> {
     const timeout = options.timeout;
 
     const res = new Promise<ExecutionResult>((resolve, reject) => {
@@ -163,11 +162,8 @@ export class ExecUtil {
         }, timeout);
       }
     });
-    Object.assign(res, {
-      catchAsResult: (): Promise<ExecutionResult> => res.catch((err: ErrorWithMeta) => err.meta!)
-    });
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return res as CatchableResult;
+
+    return options.catchAsResult ? res.catch((err: ErrorWithMeta) => err.meta!) : res;
   }
 
   /**
@@ -176,7 +172,7 @@ export class ExecUtil {
    * @param args The command line arguments to pass
    * @param options The enhancement options
    */
-  static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
+  static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
     const proc = spawn(cmd, args, this.getOpts(options));
     const result = this.enhanceProcess(proc, options, `${cmd} ${args.join(' ')}`);
     return { process: proc, result };
@@ -189,7 +185,7 @@ export class ExecUtil {
    * @param args The command line arguments to pass
    * @param options The enhancement options
    */
-  static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState<CatchableResult> {
+  static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
     // Always register for the fork
     const opts = this.getOpts(options);
     const spawnArgs = [path.resolve(file), ...args];
