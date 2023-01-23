@@ -1,7 +1,7 @@
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
-import { GlobalEnvConfig } from '@travetto/base';
+import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 
 type Options = {
   changed: OptionConfig<boolean>;
@@ -41,8 +41,9 @@ export class RepoExecCommand extends CliCommand<Options> {
     await CliModuleUtil.execOnModules(
       this.cmd.changed ? 'changed' : 'all',
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      this.args as [string, ...string[]],
+      (mod, opts) => ExecUtil.spawn(this.args[0], this.args.slice(1), opts),
       {
+        progressMessage: mod => `Running '${this.args.join(' ')}' [%idx/%total] ${mod?.workspaceRelative ?? ''}`,
         showStdout: this.cmd.showStdout,
         prefixOutput: this.cmd.prefixOutput,
         workerCount: this.cmd.workers,

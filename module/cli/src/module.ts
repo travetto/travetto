@@ -1,21 +1,19 @@
-import tty from 'tty';
-import rl from 'readline';
-
 import { ColorDefineUtil, NAMED_COLORS, Terminal, GlobalTerminal, TermLinePosition } from '@travetto/terminal';
-import { Env, ExecUtil, ExecutionOptions, ExecutionResult, ExecutionState, TypedObject } from '@travetto/base';
+import { Env, ExecutionOptions, ExecutionResult, ExecutionState, TypedObject } from '@travetto/base';
 import { IndexedModule, PackageUtil, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
 
 import { CliScmUtil } from './scm';
 
-type ModuleRunConfig<T> = {
+type ModuleRunConfig<T = ExecutionResult> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
   filter?: (mod: IndexedModule) => boolean | Promise<boolean>;
-  onComplete?: (mod: IndexedModule, res: T) => void;
-  destroy?: (mod: IndexedModule) => void;
-  progressStream?: tty.WriteStream | false;
+  transformResult?: (mod: IndexedModule, result: ExecutionResult) => T;
   workerCount?: number;
   progressPosition?: TermLinePosition;
+  prefixOutput?: boolean;
+  showStdout?: boolean;
+  showStderr?: boolean;
 };
 
 const COLORS = TypedObject.keys(NAMED_COLORS)
@@ -29,6 +27,45 @@ const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.lengt
  * Simple utilities for understanding modules for CLI use cases
  */
 export class CliModuleUtil {
+
+  /**
+   * Generate execution options for running on modules
+   */
+  static #buildExecutionOptions<T = ExecutionState>(
+    mod: IndexedModule,
+    config: ModuleRunConfig<T>,
+    prefixes: Record<string, string>,
+    stdoutTerm: Terminal,
+    stderrTerm: Terminal
+  ): ExecutionOptions {
+    const folder = mod.workspaceRelative;
+    const opts: ExecutionOptions = {
+      stdio: ['ignore', 'pipe', 'pipe', 'ignore'],
+      outputMode: 'text',
+      catchAsResult: true,
+      cwd: folder,
+      env: { TRV_MANIFEST: '' },
+    };
+
+    if (config.showStdout) {
+      opts.onStdOutLine = (line: string): unknown => stdoutTerm.writeLines(`${prefixes[folder] ?? ''}${line}`);
+    }
+    if (config.showStderr) {
+      opts.onStdErrorLine = (line: string): unknown => stderrTerm.writeLines(`${prefixes[folder] ?? ''}${line}`);
+    }
+    return opts;
+  }
+
+  /**
+   * Build equal sized prefix labels for outputting
+   * @param mods
+   * @returns
+   */
+  static #buildPrefixes(mods: IndexedModule[]): Record<string, string> {
+    const folders = mods.map(x => x.workspaceRelative);
+    const maxWidth = Math.max(...folders.map(x => x.length));
+    return Object.fromEntries(folders.map((x, i) => [x, colorize(x.padStart(maxWidth, ' ').padEnd(maxWidth + 1), i)]));
+  }
 
   /**
    * Find modules that changed, and the dependent modules
@@ -78,42 +115,54 @@ export class CliModuleUtil {
   /**
    * Run on all modules
    */
-  static async runOnModules<T>(
+  static async execOnModules<T = ExecutionResult>(
     mode: 'all' | 'changed',
-    operation: (mod: IndexedModule) => Promise<T>,
+    operation: (mod: IndexedModule, options: ExecutionOptions) => ExecutionState,
     config: ModuleRunConfig<T> = {}
   ): Promise<Map<IndexedModule, T>> {
+
+    config.showStdout = config.showStdout ?? (Env.isSet('DEBUG') && !Env.isFalse('DEBUG'));
+    config.showStderr = config.showStderr ?? true;
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;
 
     const mods = await CliModuleUtil.findModules(mode);
     const results = new Map<IndexedModule, T>();
+    const processes = new Map<IndexedModule, ExecutionState>();
+
+    const prefixes = config.prefixOutput !== false ? this.#buildPrefixes(mods) : {};
+    const stdoutTerm = await Terminal.for({ output: process.stdout });
+    const stderrTerm = await Terminal.for({ output: process.stderr });
 
     let id = 1;
     const pool = new WorkPool(async () => {
-      const worker: Worker<IndexedModule> = {
+      const worker: Worker<IndexedModule> & { mod?: IndexedModule } = {
         id: id += 1,
+        mod: undefined,
         active: false,
         async destroy() {
           this.active = false;
+          processes.get(this.mod!)?.process.kill('SIGKILL');
         },
         async execute(mod: IndexedModule) {
           try {
+            this.mod = mod;
             this.active = true;
-            this.destroy = async (): Promise<void> => {
-              this.active = false;
-              config?.destroy?.(mod);
-            };
 
             if (await config.filter?.(mod) === false) {
               this.active = false;
             } else {
-              const output = await operation(mod);
+              const opts = CliModuleUtil.#buildExecutionOptions(mod, config, prefixes, stdoutTerm, stderrTerm);
+
+              const result = await operation(mod, opts).result;
+
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+              const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;
               results.set(mod, output);
-              await config.onComplete?.(mod, output);
             }
           } finally {
             this.active = false;
+            delete this.mod;
           }
         },
       };
@@ -122,10 +171,9 @@ export class CliModuleUtil {
 
     const work = pool.iterateProcess(new IterableWorkSet(mods));
 
-    if (config.progressMessage && config.progressStream !== false) {
+    if (config.progressMessage) {
       const cfg = { position: config.progressPosition ?? 'bottom' } as const;
-      const stream = new Terminal({ output: config.progressStream ?? process.stderr });
-      await stream.trackProgress(work, ev => ({ ...ev, text: config.progressMessage!(ev.value) }), cfg);
+      await stdoutTerm.trackProgress(work, ev => ({ ...ev, text: config.progressMessage!(ev.value) }), cfg);
     } else {
       for await (const _ of work) {
         // Ensure its all consumed
@@ -133,72 +181,5 @@ export class CliModuleUtil {
     }
 
     return results;
-  }
-
-  /**
-   * Run on all modules
-   */
-  static async execOnModules<T>(
-    mode: 'all' | 'changed',
-    [cmd, ...args]: [string, ...string[]],
-    config: ModuleRunConfig<ExecutionResult> & {
-      prefixOutput?: boolean;
-      showStdout?: boolean;
-      showStderr?: boolean;
-      onMessage?: (module: IndexedModule, msg: T) => void;
-    } & Omit<ExecutionOptions, 'cwd'> = {}
-  ): Promise<void> {
-
-    const prefixOutput = config.prefixOutput ?? true;
-    const showStdout = config.showStdout ?? (Env.isSet('DEBUG') && !Env.isFalse('DEBUG'));
-    const showStderr = config.showStderr ?? true;
-    const mods = await CliModuleUtil.findModules(mode);
-    const folders = mods.map(x => x.workspaceRelative);
-    const maxWidth = Math.max(...folders.map(x => x.length));
-    const labels = Object.fromEntries(folders.map((x, i) => [x, colorize(x.padStart(maxWidth, ' '), i)]));
-
-    const processes = new Map<IndexedModule, ExecutionState>();
-
-    const stdoutTerm = new Terminal({ output: process.stdout });
-    const stderrTerm = new Terminal({ output: process.stderr });
-
-    await this.runOnModules(mode, mod => {
-      const opts: ExecutionOptions = {
-        stdio: [
-          0,
-          showStdout ? (prefixOutput ? 'pipe' : 'inherit') : 'ignore',
-          showStderr ? (prefixOutput ? 'pipe' : 'inherit') : 'ignore',
-          config.onMessage ? 'ipc' : 'ignore'
-        ],
-        ...config,
-        cwd: mod.workspaceRelative,
-        env: { ...config?.env, TRV_MANIFEST: '' }
-      };
-
-      const res = ExecUtil.spawn(cmd, args, opts);
-      processes.set(mod, res);
-
-      // Prefix output, if desired
-      if (prefixOutput) {
-        const folder = mod.workspaceRelative;
-        if (showStderr) {
-          const stderr = rl.createInterface(res.process.stderr!);
-          stderr.on('line', line => stderrTerm.writeLines(`${labels[folder]}: ${line}`));
-        }
-        if (showStdout) {
-          const stdout = rl.createInterface(res.process.stdout!);
-          stdout.on('line', line => stdoutTerm.writeLines(`${labels[folder]}: ${line}`));
-        }
-      }
-
-      if (config.onMessage) {
-        res.process.on('message', config.onMessage.bind(config, mod));
-      }
-      return res.result.catchAsResult();
-    }, {
-      ...config,
-      progressMessage: mod => `Running ${cmd} ${args.join(' ')} [%idx/%total] ${mod?.workspaceRelative ?? ''}`,
-      destroy: mod => processes.get(mod)?.process.kill('SIGKILL')
-    });
   }
 }

@@ -1,4 +1,4 @@
-import { ExecUtil } from '@travetto/base';
+import { ExecUtil, ExecutionOptions, ExecutionState, ExecutionResult } from '@travetto/base';
 import { IndexedModule } from '@travetto/manifest';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease';
@@ -8,14 +8,18 @@ export class Npm {
   /**
    * Is a module already published
    */
-  static async isPublished(mod: IndexedModule): Promise<boolean> {
-    const { result } = ExecUtil.spawn('npm', ['show', `${mod.name}@${mod.version}`, 'version', '--json'], { cwd: mod.source });
+  static isPublished(mod: IndexedModule, opts: ExecutionOptions): ExecutionState {
+    return ExecUtil.spawn('npm', ['show', `${mod.name}@${mod.version}`, 'version', '--json'], opts);
+  }
 
-    const res = await result.catchAsResult();
-    if (!res.valid && !res.stderr.includes('E404')) {
-      throw new Error(res.stderr);
+  /**
+   * Validate published result
+   */
+  static validatePublishedResult(mod: IndexedModule, result: ExecutionResult): boolean {
+    if (!result.valid && !result.stderr.includes('E404')) {
+      throw new Error(result.stderr);
     }
-    const item: (string[] | string) = res.stdout ? JSON.parse(res.stdout) : [];
+    const item: (string[] | string) = result.stdout ? JSON.parse(result.stdout) : [];
     const found = Array.isArray(item) ? item.pop() : item;
     return !!found && found === mod.version;
   }
@@ -34,11 +38,11 @@ export class Npm {
   /**
    * Publish a module
    */
-  static async publish(mod: IndexedModule, dryRun?: boolean): Promise<void> {
+  static publish(mod: IndexedModule, dryRun: boolean | undefined, opts: ExecutionOptions): ExecutionState {
     const versionTag = mod.version.replace(/^.*-(rc|alpha|beta|next)[.]\d+/, (a, b) => b) || 'latest';
-    await ExecUtil.spawn('npm',
+    return ExecUtil.spawn('npm',
       ['publish', ...(dryRun ? ['--dry-run'] : []), '--tag', versionTag, '--access', 'public'],
-      { cwd: mod.source, stdio: 'inherit' }
-    ).result;
+      opts
+    );
   }
 }

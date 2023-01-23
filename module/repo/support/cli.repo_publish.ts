@@ -21,14 +21,22 @@ export class RepoPublishCommand extends CliCommand<Options> {
   }
 
   async action(...args: unknown[]): Promise<void> {
-    const published = await CliModuleUtil.runOnModules('all', mod => Npm.isPublished(mod), {
-      progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`
+    const published = await CliModuleUtil.execOnModules('all', (mod, opts) => Npm.isPublished(mod, opts), {
+      filter: mod => !!mod.local && !mod.internal,
+      progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
+      showStderr: true,
+      transformResult: Npm.validatePublishedResult,
     });
 
-    await CliModuleUtil.runOnModules(
-      'all', mod => Npm.publish(mod, this.cmd.dryRun),
+    if (this.cmd.dryRun) {
+      console.log('Published state', [...published.entries()]);
+    }
+
+    await CliModuleUtil.execOnModules(
+      'all', (mod, opts) => Npm.publish(mod, this.cmd.dryRun, opts),
       {
         progressMessage: (mod) => `Published [%idx/%total] -- ${mod?.name}`,
+        showStdout: false,
         filter: mod => published.get(mod) === false
       }
     );
