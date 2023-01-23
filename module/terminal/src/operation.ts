@@ -11,14 +11,20 @@ export class TerminalOperation {
    * Allows for writing at top, bottom, or current position while new text is added
    */
   static async streamToPosition(term: TermState, source: AsyncIterable<string>, pos: TermLinePosition = 'inline'): Promise<void> {
+    const curPos = { ...await term.getCursorPosition() };
     const writePos = pos === 'inline' ?
-      { ...await term.getCursorPosition(), x: 0 } :
+      { ...curPos, x: 0 } :
       { x: 0, y: pos === 'top' ? 0 : -1 };
 
     try {
       const batch = TerminalWriter.for(term).hideCursor();
       if (pos !== 'inline') {
-        batch.storePosition().scrollRange(pos === 'top' ? { start: 1 } : { end: -1 }).restorePosition();
+        batch.storePosition().scrollRange(pos === 'top' ? { start: 2 } : { end: -2 }).restorePosition();
+        if (pos === 'top' && curPos.y === 0) {
+          batch.changePosition({ y: 1 }).write('');
+        } else if (pos === 'bottom' && curPos.y === term.height - 1) {
+          batch.changePosition({ y: -1 }).write('\n');
+        }
       } else {
         batch.write('\n'); // Move past line
       }

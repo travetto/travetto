@@ -24,6 +24,12 @@ type TerminalProgressConfig = TerminalStreamPositionConfig & {
  */
 export class Terminal implements TermState {
 
+  static async for(config: Partial<TermState>): Promise<Terminal> {
+    const term = new Terminal(config);
+    await term.init();
+    return term;
+  }
+
   #init: Promise<void>;
   #output: tty.WriteStream;
   #input: tty.ReadStream;

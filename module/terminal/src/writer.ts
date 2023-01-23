@@ -100,10 +100,10 @@ export class TerminalWriter {
     lines = lines.filter(x => x !== undefined);
     let text = lines.join('\n');
     if (text.length > 0) {
-      text = `${text}\n`;
       if (clear) {
         text = text.replaceAll('\n', `${ANSICodes.ERASE_LINE(0)}\n`);
       }
+      text = `${text}\n`;
     }
     return this.write(text);
   }
