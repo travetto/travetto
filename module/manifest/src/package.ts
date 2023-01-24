@@ -79,7 +79,10 @@ export class PackageUtil {
   /**
    * Read a package.json from a given folder
    */
-  static readPackage(modulePath: string): Package {
+  static readPackage(modulePath: string, forceRead = false): Package {
+    if (forceRead) {
+      delete this.#cache[modulePath];
+    }
     return this.#cache[modulePath] ??= JSON.parse(readFileSync(
       modulePath.endsWith('.json') ? modulePath : path.resolve(modulePath, 'package.json'),
       'utf8'
@@ -175,7 +178,7 @@ export class PackageUtil {
    */
   static async syncVersions(folders: string[], versionMapping: Record<string, string> = {}): Promise<void> {
     const packages = folders.map(folder => {
-      const pkg = this.readPackage(folder);
+      const pkg = this.readPackage(folder, true);
       versionMapping[pkg.name] = `^${pkg.version}`;
       return { folder, pkg };
     });
