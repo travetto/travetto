@@ -60,9 +60,13 @@ export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
   let debug = cfg.debug ?? GlobalEnv.debug;
   const env = cfg.envName ?? GlobalEnv.envName;
   const profiles = new Set([GlobalEnv.profiles, ...(cfg.profiles ?? [])]);
+  const isProd = /^prod/i.test(env);
+
   if (test) {
     profiles.add(TEST);
     debug = false;
+  } else {
+    profiles.add(isProd ? PROD : DEV);
   }
 
   if ('main' in cfg) {
@@ -74,7 +78,7 @@ export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
   }
 
   process.env.TRV_ENV = env;
-  process.env.NODE_ENV = /^prod/i.test(env) ? 'production' : 'development';
+  process.env.NODE_ENV = isProd ? 'production' : 'development';
   process.env.TRV_DYNAMIC = `${cfg.dynamic ?? GlobalEnv.dynamic}`;
   process.env.DEBUG = `${debug}`;
   process.env.TRV_PROFILES = [...profiles].sort().join(',');
