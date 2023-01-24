@@ -56,13 +56,13 @@ export class AppScanUtil {
    */
   static expandByDependents(items: ApplicationConfig[]): ApplicationConfig[] {
     if (!RootIndex.isMonoRepoRoot()) {
-      return items;
+      return items.map(x => ({ ...x, globalName: x.name }));
     }
     const final: ApplicationConfig[] = [];
     for (const item of items) {
-      const mod = RootIndex.getModuleFromSource(item.filename);
-      if (!(mod?.local || mod?.main)) { continue; }
+      const mod = RootIndex.getModuleFromSource(item.filename)!;
       for (const dep of RootIndex.getDependentModules(mod)) {
+        if (!(dep?.local || dep?.main)) { continue; }
         final.push(({ ...item, module: dep.name, globalName: dep.name === RootIndex.mainModule.name ? item.name : `${dep.name}:${item.name}` }));
       }
     }
