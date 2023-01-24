@@ -1,6 +1,6 @@
 {
   "name": "@travetto/command",
-  "version": "3.0.0-rc.6",
+  "version": "3.0.0-rc.7",
   "description": "Support for executing complex commands at runtime.",
   "keywords": [
     "command",
@@ -25,10 +25,10 @@
     "directory": "module/command"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.6"
+    "@travetto/base": "^3.0.0-rc.7"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.6"
+    "@travetto/cli": "^3.0.0-rc.7"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
