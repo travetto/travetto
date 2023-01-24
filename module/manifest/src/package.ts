@@ -54,11 +54,12 @@ export class PackageUtil {
   static getAllDependencies<T = unknown>(modulePath: string, rootPath: string): PackageVisitReq<T>[] {
     const pkg = this.readPackage(modulePath);
     const children: Record<string, PackageVisitReq<T>> = {};
+    const local = modulePath === rootPath && !modulePath.includes('node_modules');
     for (const [deps, rel] of [
       [pkg.dependencies, 'prod'],
       [pkg.peerDependencies, 'peer'],
       [pkg.optionalDependencies, 'opt'],
-      ...(modulePath === rootPath ? [[pkg.devDependencies, 'dev'] as const] : []),
+      ...(local ? [[pkg.devDependencies, 'dev'] as const] : []),
     ] as const) {
       for (const [name, version] of Object.entries(deps ?? {})) {
         try {
