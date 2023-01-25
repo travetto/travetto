@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 
 import { Class } from '@travetto/base';
-import { ApplicationConfig } from '@travetto/app';
+import type { ApplicationConfig } from '@travetto/app';
 
 import { Workspace } from './workspace';
 
