@@ -99,7 +99,10 @@ export class Terminal implements TermState {
 
   async reset(): Promise<void> {
     await this.#query.close();
-    return this.writer().reset().commit();
+    if (this.interactive) {
+      await this.writer().reset().commit();
+    }
+    return;
   }
 
   getCursorPosition(): Promise<TermCoord> {

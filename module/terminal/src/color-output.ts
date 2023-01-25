@@ -46,7 +46,7 @@ export class ColorOutputUtil {
   ): Promise<TermColorScheme | undefined> {
     let color = await query();
     if (!color && env) {
-      const [bg] = env.split(';');
+      const [, bg] = env.split(';');
       color = ColorDefineUtil.rgbFromAnsi256(+bg);
     }
     if (color) {
