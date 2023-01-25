@@ -1,6 +1,6 @@
 {
   "name": "@travetto/schema-faker",
-  "version": "3.0.0-rc.9",
+  "version": "3.0.0-rc.10",
   "description": "Data generation for schema-registered objects.",
   "keywords": [
     "faker",
@@ -25,7 +25,7 @@
     "directory": "module/schema-faker"
   },
   "dependencies": {
-    "@travetto/schema": "^3.0.0-rc.9",
+    "@travetto/schema": "^3.0.0-rc.10",
     "@types/faker": "^5.5.9",
     "faker": "^5.5.3"
   },

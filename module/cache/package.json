@@ -1,6 +1,6 @@
 {
   "name": "@travetto/cache",
-  "version": "3.0.0-rc.9",
+  "version": "3.0.0-rc.10",
   "description": "Caching functionality with decorators for declarative use.",
   "keywords": [
     "typescript",
@@ -25,11 +25,11 @@
     "directory": "module/cache"
   },
   "dependencies": {
-    "@travetto/di": "^3.0.0-rc.9",
-    "@travetto/model": "^3.0.0-rc.9"
+    "@travetto/di": "^3.0.0-rc.10",
+    "@travetto/model": "^3.0.0-rc.10"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.9",
+    "@travetto/test": "^3.0.0-rc.10",
     "@travetto/transformer": "^3.0.0-rc.9"
   },
   "peerDependenciesMeta": {

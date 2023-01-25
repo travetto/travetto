@@ -1,6 +1,6 @@
 {
   "name": "@travetto/registry",
-  "version": "3.0.0-rc.9",
+  "version": "3.0.0-rc.10",
   "description": "Patterns and utilities for handling registration of metadata and functionality for run-time use",
   "keywords": [
     "ast-transformations",
