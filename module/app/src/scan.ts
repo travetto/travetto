@@ -56,7 +56,7 @@ export class AppScanUtil {
    */
   static expandByDependents(items: ApplicationConfig[]): ApplicationConfig[] {
     if (!RootIndex.isMonoRepoRoot()) {
-      return items.map(x => ({ ...x, globalName: x.name }));
+      return items;
     }
     const final: ApplicationConfig[] = [];
     for (const item of items) {
