@@ -1,5 +1,3 @@
-import { install } from 'source-map-support';
-
 import { path, RootIndex } from '@travetto/manifest';
 
 import { ConsoleManager } from '../src/console';
@@ -28,7 +26,7 @@ export async function setup(): Promise<void> {
 
   // Setup stack traces
   Error.stackTraceLimit = 50; // Deep limit
-  install(); // Register source maps
+  try { (await import('source-map-support')).install(); } catch { } // Register source maps
 
   defineGlobalEnv({ main: undefined });
 
@@ -59,4 +57,3 @@ export async function runMain(action: Function, args: string[]): Promise<void> {
 export const runIfMain = (target: Function, filename: string, mainFile: string): unknown =>
   (RootIndex.getSourceFile(filename) === RootIndex.getSourceFile(GlobalEnv.main || mainFile)) ?
     runMain(target, process.argv.slice(2)) : undefined;
-
