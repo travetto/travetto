@@ -71,6 +71,7 @@ By passing in the port via the environment variable, the config will construct p
 
 ${d.Execute('Resolved database config', 'trv', ['main', 'support/main.dbconfig-run.ts'], {
   env: { DATABASE_PORT: '200' },
-  cwd: './doc-exec'
+  cwd: './doc-exec',
+  formatCommand: (cmd, args) => `DATABASE_PORT=200 ${cmd} ${args.join(' ')}`
 })}
 `;

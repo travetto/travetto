@@ -90,8 +90,7 @@ Config <span class="token punctuation">{{'{'}}</span>
       creds: creds_7_45Ⲑsyn <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'test'</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h2 id="secrets">Secrets</h2>
@@ -128,7 +127,23 @@ Using the above config files, you'll notice that the port is not specified (its 
       </figcaption>
       <pre><code class="language-bash">$ trv main support/main.dbconfig-run.ts
 
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+<span class="token punctuation">{{'{'}}</span>
+  message: <span class="token string">'Failed to construct @travetto/config:doc/dbconfig￮DBConfig as validation errors have occurred'</span>,
+  category: <span class="token string">'data'</span>,
+  type: <span class="token string">'ValidationResultError'</span>,
+  at: <span class="token number">2029</span>-03-14T04:00:00.618Z,
+  class: <span class="token string">'@travetto/config:doc/dbconfig￮DBConfig'</span>,
+  file: <span class="token string">'@travetto/config/doc/dbconfig.ts'</span>,
+  errors: <span class="token punctuation">[</span>
+    <span class="token punctuation">{{'{'}}</span>
+      kind: <span class="token string">'required'</span>,
+      value: undefined,
+      message: <span class="token string">'port is required'</span>,
+      path: <span class="token string">'port'</span>,
+      type: undefined
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 What you see, is that the configuration structure must be honored and the application will fail to start if the constraints do not hold true.  This helps to ensure that the configuration, as input to the system, is verified and correct.
@@ -139,7 +154,7 @@ By passing in the port via the environment variable, the config will construct p
       <figcaption class="terminal">Resolved database config
       
       </figcaption>
-      <pre><code class="language-bash">$ trv main support/main.dbconfig-run.ts
+      <pre><code class="language-bash">$ <span class="token assign-left variable">DATABASE_PORT</span><span class="token operator">=</span><span class="token number">200</span> trv main support/main.dbconfig-run.ts
 
 Config <span class="token punctuation">{{'{'}}</span>
   sources: <span class="token punctuation">[</span>
@@ -153,6 +168,5 @@ Config <span class="token punctuation">{{'{'}}</span>
       creds: creds_7_45Ⲑsyn <span class="token punctuation">{{'{'}}</span> user: <span class="token string">'test'</span>, password: <span class="token string">'test'</span> <span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>

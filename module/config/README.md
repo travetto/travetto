@@ -81,7 +81,6 @@ Config {
     }
   }
 }
-[s[r[u
 ```
 
 ## Secrets
@@ -114,7 +113,23 @@ Using the above config files, you'll notice that the port is not specified (its 
 ```bash
 $ trv main support/main.dbconfig-run.ts
 
-[s[r[u
+{
+  message: 'Failed to construct @travetto/config:doc/dbconfig￮DBConfig as validation errors have occurred',
+  category: 'data',
+  type: 'ValidationResultError',
+  at: 2029-03-14T04:00:00.618Z,
+  class: '@travetto/config:doc/dbconfig￮DBConfig',
+  file: '@travetto/config/doc/dbconfig.ts',
+  errors: [
+    {
+      kind: 'required',
+      value: undefined,
+      message: 'port is required',
+      path: 'port',
+      type: undefined
+    }
+  ]
+}
 ```
 
 What you see, is that the configuration structure must be honored and the application will fail to start if the constraints do not hold true.  This helps to ensure that the configuration, as input to the system, is verified and correct.
@@ -123,7 +138,7 @@ By passing in the port via the environment variable, the config will construct p
 
 **Terminal: Resolved database config**
 ```bash
-$ trv main support/main.dbconfig-run.ts
+$ DATABASE_PORT=200 trv main support/main.dbconfig-run.ts
 
 Config {
   sources: [
@@ -138,5 +153,4 @@ Config {
     }
   }
 }
-[s[r[u
 ```

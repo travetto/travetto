@@ -19,6 +19,8 @@ const $n = <T extends string, U extends Record<string, unknown>>(t: T, values: U
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   ({ _type: t, ...values } as { _type: T } & U);
 
+type FormattedCommand = { formatCommand?(cmd: string, args: string[]): string };
+
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 
 /**
@@ -157,7 +159,7 @@ export const node = {
    * @param args
    * @param cfg
    */
-  Execute: (title: Content, cmd: string, args: string[] = [], cfg: RunConfig = {}) => {
+  Execute: (title: Content, cmd: string, args: string[] = [], cfg: RunConfig & FormattedCommand = {}) => {
     if (cmd !== 'trv') {
       cmd = FileUtil.resolveFile(cmd).replace(path.cwd(), '.');
     }
@@ -165,7 +167,9 @@ export const node = {
     const script = DocRunUtil.run(cmd, args, cfg);
     const prefix = !/.*\/doc\/.*[.]ts$/.test(cmd) ? '$' : '$ node ';
 
-    return node.Terminal(title, `${prefix} ${cmd} ${args.join(' ')}\n\n${script}`);
+    const commandDisplay = cfg.formatCommand?.(cmd, args) ?? `${cmd} ${args.join(' ')}`;
+
+    return node.Terminal(title, `${prefix} ${commandDisplay}\n\n${script}`);
   },
 
   /**
