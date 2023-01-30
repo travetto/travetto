@@ -48,7 +48,7 @@ export class Init {
 ```typescript
 import * as mongo from 'mongodb';
 
-import { CommonFileResourceProvider, TimeSpan } from '@travetto/base';
+import { FileResourceProvider, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -107,7 +107,7 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
-    const resources = new CommonFileResourceProvider();
+    const resources = new FileResourceProvider({ includeCommon: true });
     const resolve = (file: string): Promise<string> => resources.describe(file).then(({ path }) => path, () => file);
 
     const opts = this.options;
@@ -149,4 +149,4 @@ export class MongoModelConfig {
   standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support")resolution paths. 
   
 
-The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L40) path or just a standard file path.
+The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46) path or just a standard file path.

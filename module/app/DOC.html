@@ -111,9 +111,7 @@ Available Applications:
 
    ●
      usage:  <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
-     file:  @travetto/app/doc/entry.ts
-
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+     file:  @travetto/app/doc/entry.ts</code></pre>     
       </figure>
 
 Running without specifying an application <code class="item command">trv run</code>, will display all the available apps, and would look like:
@@ -124,7 +122,8 @@ Running without specifying an application <code class="item command">trv run</co
       </figcaption>
       <pre><code class="language-bash">$ trv run
 
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+Failed to run complex, Validation errors have occurred
+● domain is required</code></pre>     
       </figure>
 
 To invoke the <code class="item input">simple</code> application, you need to pass <code class="item input">domain</code> where port is optional with a default.
@@ -155,14 +154,13 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     prod: false,
     test: false,
     dynamic: false,
-    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span> <span class="token string">'dev'</span> <span class="token punctuation">]</span>,
     resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    nodeVersion: <span class="token string">'v18.12.1'</span>
+    nodeVersion: <span class="token string">'v18.13.0'</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 Config <span class="token punctuation">{{'{'}}</span> sources: <span class="token punctuation">[</span> <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>, active: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
-Launching <span class="token punctuation">{{'{'}}</span> domain: <span class="token string">'my-domain.biz'</span>, port: <span class="token number">4000</span> <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+Launching <span class="token punctuation">{{'{'}}</span> domain: <span class="token string">'my-domain.biz'</span>, port: <span class="token number">4000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h2 id="type-checking">Type Checking</h2>
@@ -175,7 +173,8 @@ The parameters to <code class="item method">run</code> will be type checked, to 
       </figcaption>
       <pre><code class="language-bash">$ trv run simple-domain my-domain.biz orange
 
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+Failed to run simple-domain, Validation errors have occurred
+● port is not a valid number</code></pre>     
       </figure>
 
 The types are inferred from the <code class="item method">.run()</code> method parameters, but can be overridden in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21">@Application</a> 

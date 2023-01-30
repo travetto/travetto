@@ -169,5 +169,4 @@ Request complete { input: 2, output: 4 }
 Request complete { input: 3, output: 6 }
 Request complete { input: 4, output: 8 }
 Request complete { input: 5, output: 10 }
-[s[r[u
 ```

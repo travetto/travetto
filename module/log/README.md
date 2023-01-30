@@ -44,5 +44,4 @@ $ trv main support/main.output.ts
 }
 2029-03-14T04:00:01.510Z info  [@travetto/log:doc/output.ts:6] Woah!
 2029-03-14T04:00:02.450Z debug [@travetto/log:doc/output.ts:8] Test
-[s[r[u
 ```

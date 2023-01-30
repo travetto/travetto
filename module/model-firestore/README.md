@@ -39,7 +39,7 @@ export class Init {
   
 **Code: Structure of FirestoreModelConfig**
 ```typescript
-import { CommonFileResourceProvider } from '@travetto/base';
+import { FileResourceProvider } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('model.firestore')
@@ -62,7 +62,7 @@ export class FirestoreModelConfig {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
     if (this.credentialsFile && !this.credentials) {
-      const resources = new CommonFileResourceProvider();
+      const resources = new FileResourceProvider({ includeCommon: true });
       this.credentials = JSON.parse(await resources.read(this.credentialsFile));
     }
   }

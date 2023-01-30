@@ -48,15 +48,15 @@ export class NginxServer {
 
 ## Command Service
 
-While docker containers provide a high level of flexibility, performance can be an issue.  [CommandService](https://github.com/travetto/travetto/tree/main/module/command/src/command.ts#L11) is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
+While docker containers provide a high level of flexibility, performance can be an issue.  [CommandOperation](https://github.com/travetto/travetto/tree/main/module/command/src/command.ts#L11) is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
 
 **Code: Command Service example, using pngquant**
 ```typescript
 import { createWriteStream, createReadStream } from 'fs';
-import { CommandService } from '@travetto/command';
+import { CommandOperation } from '@travetto/command';
 
 export class ImageCompressor {
-  converter = new CommandService({
+  converter = new CommandOperation({
     containerImage: 'agregad/pngquant',
     localCheck: ['pngquant', ['-h']]
   });
@@ -87,8 +87,6 @@ Usage:  service [options] [start|stop|status|restart] [...services]
 
 Options:
   -h, --help  display help for command
-
-[s[r[u
 ```
 
 A sample of all services available to the entire framework:
@@ -105,8 +103,6 @@ mysql                5.6    Running 307bc66d442a
 postgresql          12.2    Running e78291e71040
 redis                  5    Running 77ba279b4e30
 s3                latest    Running fdacfc55b9e3
-
-[s[r[u
 ```
 
 ### Defining new Services
@@ -116,11 +112,11 @@ The services are defined as plain typescript files within the framework and can 
 **Code: Sample Service Definition**
 ```typescript
 import { Env } from '@travetto/base';
-import type { Service } from '@travetto/command/support/bin/service';
+import type { CommandService } from '@travetto/command';
 
 const version = Env.get('MONGO_VERSION', '4.4');
 
-export const service: Service = {
+export const service: CommandService = {
   name: 'mongodb',
   version,
   port: 27017,

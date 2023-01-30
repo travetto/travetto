@@ -102,8 +102,6 @@ Available Applications:
    ●  
      usage:  [age:number=5] [format:html|pdf=html]
      file:  @travetto/app/doc/entry.ts
-
-[s[r[u
 ```
 
 Running without specifying an application `trv run`, will display all the available apps, and would look like:
@@ -112,7 +110,8 @@ Running without specifying an application `trv run`, will display all the availa
 ```bash
 $ trv run
 
-[s[r[u
+Failed to run complex, Validation errors have occurred
+● domain is required
 ```
 
 To invoke the `simple` application, you need to pass `domain` where port is optional with a default.
@@ -141,14 +140,13 @@ Manifest {
     prod: false,
     test: false,
     dynamic: false,
-    profiles: [],
+    profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.12.1'
+    nodeVersion: 'v18.13.0'
   }
 }
 Config { sources: [ 'override.3 - memory://override' ], active: {} }
 Launching { domain: 'my-domain.biz', port: 4000 }
-[s[r[u
 ```
 
 ## Type Checking
@@ -159,7 +157,8 @@ The parameters to `run` will be type checked, to ensure proper evaluation.
 ```bash
 $ trv run simple-domain my-domain.biz orange
 
-[s[r[u
+Failed to run simple-domain, Validation errors have occurred
+● port is not a valid number
 ```
 
 The types are inferred from the `.run()` method parameters, but can be overridden in the [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) 

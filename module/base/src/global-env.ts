@@ -59,7 +59,7 @@ export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
   const test = cfg.test ?? GlobalEnv.test;
   let debug = cfg.debug ?? GlobalEnv.debug;
   const env = cfg.envName ?? GlobalEnv.envName;
-  const profiles = new Set([GlobalEnv.profiles, ...(cfg.profiles ?? [])]);
+  const profiles = new Set([...GlobalEnv.profiles, ...(cfg.profiles ?? [])]);
   const isProd = /^prod/i.test(env);
 
   if (test) {

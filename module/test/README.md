@@ -230,8 +230,6 @@ Options:
   -c, --concurrency <concurrency>  Number of tests to run concurrently (default: 4)
   -m, --mode <mode>                Test run mode (default: "standard")
   -h, --help                       display help for command
-
-[s[r[u
 ```
 
 The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.

@@ -24,7 +24,7 @@ export async function customLogs(): Promise<void> {
 }
 
 export async function main(): Promise<void> {
-  defineGlobalEnv({ test: true });
+  defineGlobalEnv({ test: true, set: { FORCE_COLOR: 0 } });
   ConsoleManager.setDebugFromEnv();
 
   await customLogs();

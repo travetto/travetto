@@ -147,7 +147,6 @@ Person {
   age: 19,
   address: Address { street1: '1234 Fun', street2: 'Unit 20' }
 }
-[s[r[u
 ```
 
 **Note**: Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.
@@ -203,7 +202,25 @@ would produce an exception similar to following structure
 ```bash
 $ trv main support/main.person-invalid-output.ts
 
-[s[r[u
+Validation Failed {
+  "message": "Validation errors have occurred",
+  "category": "data",
+  "type": "ValidationResultError",
+  "at": "2029-03-14T04:00:00.618Z",
+  "errors": [
+    {
+      "kind": "type",
+      "message": "age is not a valid number",
+      "path": "age",
+      "type": "number"
+    },
+    {
+      "kind": "required",
+      "message": "address.street2 is required",
+      "path": "address.street2"
+    }
+  ]
+}
 ```
 
 ### Custom Validators
@@ -326,5 +343,18 @@ All that happens now, is the type is exported, and the class above is able to pr
 ```bash
 $ trv main support/main.custom-type-output.ts
 
-[s[r[u
+Validation Failed {
+  "message": "Validation errors have occurred",
+  "category": "data",
+  "type": "ValidationResultError",
+  "at": "2029-03-14T04:00:00.837Z",
+  "errors": [
+    {
+      "kind": "type",
+      "message": "point is not a valid PointImpl",
+      "path": "point",
+      "type": "PointImpl"
+    }
+  ]
+}
 ```

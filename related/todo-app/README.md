@@ -327,9 +327,9 @@ First we must start the application:
     prod: false,
     test: false,
     dynamic: false,
-    profiles: [],
+    profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.12.1'
+    nodeVersion: 'v18.13.0'
   }
 }
 2029-03-14T04:00:01.510Z info  [@travetto/app:src/registry.ts:81] Config {
@@ -426,7 +426,6 @@ $ trv main support/main.create-todo.ts
   created: '2029-03-14T04:00:02.762Z',
   id: '22e793aed76ee063d13feec2e5e95b45'
 }
-[s[r[u
 ```
 
 **Code: Listing Todos by fetch**
@@ -450,5 +449,4 @@ $ trv main support/main.list-todo.ts
     created: '2029-03-14T04:00:03.086Z'
   }
 ]
-[s[r[u
 ```

@@ -27,8 +27,6 @@ Options:
 Commands:
   echo [options] [args...]
   help [command]            display help for command
-
-[s[r[u
 ```
 
 This will show all the available options/choices that are exposed given the currently installed modules.
@@ -77,8 +75,6 @@ Usage:  echo [options] [args...]
 Options:
   -u, --uppercase  Upper case (default: false)
   -h, --help       display help for command
-
-[s[r[u
 ```
 
 And actually using it:
@@ -88,5 +84,4 @@ And actually using it:
 $ trv echo -u bOb rOb DRoP
 
 [ 'BOB', 'ROB', 'DROP' ]
-[s[r[u
 ```

@@ -57,7 +57,6 @@ $ trv main support/main.parse.ts
     }
   }
 }
-[s[r[u
 ```
 
 **Code: Simple YAML Serialization**
@@ -101,5 +100,4 @@ fields:
   sub3:
     k: 5
     v: 20
-[s[r[u
 ```

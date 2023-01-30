@@ -157,8 +157,7 @@ Person <span class="token punctuation">{{'{'}}</span>
   name: <span class="token string">'Test'</span>,
   age: <span class="token number">19</span>,
   address: Address <span class="token punctuation">{{'{'}}</span> street1: <span class="token string">'1234 Fun'</span>, street2: <span class="token string">'Unit 20'</span> <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <p class="note"><strong>Note</strong> Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.</p>
@@ -220,7 +219,25 @@ would produce an exception similar to following structure
       </figcaption>
       <pre><code class="language-bash">$ trv main support/main.person-invalid-output.ts
 
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+Validation Failed <span class="token punctuation">{{'{'}}</span>
+  <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"Validation errors have occurred"</span>,
+  <span class="token string">"category"</span><span class="token builtin class-name">:</span> <span class="token string">"data"</span>,
+  <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"ValidationResultError"</span>,
+  <span class="token string">"at"</span><span class="token builtin class-name">:</span> <span class="token string">"2029-03-14T04:00:00.618Z"</span>,
+  <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{{'{'}}</span>
+      <span class="token string">"kind"</span><span class="token builtin class-name">:</span> <span class="token string">"type"</span>,
+      <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"age is not a valid number"</span>,
+      <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token string">"age"</span>,
+      <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"number"</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    <span class="token punctuation">{{'{'}}</span>
+      <span class="token string">"kind"</span><span class="token builtin class-name">:</span> <span class="token string">"required"</span>,
+      <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"address.street2 is required"</span>,
+      <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token string">"address.street2"</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h3 id="custom-validators">Custom Validators</h3>
@@ -352,5 +369,18 @@ All that happens now, is the type is exported, and the class above is able to pr
       </figcaption>
       <pre><code class="language-bash">$ trv main support/main.custom-type-output.ts
 
-<span class="token punctuation">[</span>s<span class="token punctuation">[</span>r<span class="token punctuation">[</span>u</code></pre>     
+Validation Failed <span class="token punctuation">{{'{'}}</span>
+  <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"Validation errors have occurred"</span>,
+  <span class="token string">"category"</span><span class="token builtin class-name">:</span> <span class="token string">"data"</span>,
+  <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"ValidationResultError"</span>,
+  <span class="token string">"at"</span><span class="token builtin class-name">:</span> <span class="token string">"2029-03-14T04:00:00.837Z"</span>,
+  <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{{'{'}}</span>
+      <span class="token string">"kind"</span><span class="token builtin class-name">:</span> <span class="token string">"type"</span>,
+      <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"point is not a valid PointImpl"</span>,
+      <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token string">"point"</span>,
+      <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"PointImpl"</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>

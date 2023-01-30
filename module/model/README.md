@@ -388,8 +388,6 @@ Usage:  model:export [options] [provider] [models...]
 Options:
   -e, --env <env>  Application environment
   -h, --help       display help for command
-
-[s[r[u
 ```
 
 ## CLI - model:install
@@ -405,6 +403,4 @@ Usage:  model:install [options] [provider] [models...]
 Options:
   -e, --env <env>  Application environment
   -h, --help       display help for command
-
-[s[r[u
 ```

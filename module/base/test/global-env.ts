@@ -13,4 +13,17 @@ export class GlobalEnvTest {
     assert(process.env.TRV_ENV === 'prod');
     assert(GlobalEnv.prod);
   }
+
+  @Test()
+  testMultipleDefine() {
+    process.env.TRV_PROFILES = '';
+    defineGlobalEnv({ envName: 'dev' });
+    assert.deepStrictEqual(GlobalEnv.profiles, ['dev']);
+
+    process.env.TRV_PROFILES = 'dev,dev';
+
+    defineGlobalEnv({ envName: 'dev', profiles: ['dev'] });
+    assert.deepStrictEqual(GlobalEnv.profiles, ['dev']);
+
+  }
 }
