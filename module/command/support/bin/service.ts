@@ -4,8 +4,9 @@ import { cliTpl } from '@travetto/cli';
 
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
+import { CommandService } from '../../src/types';
 
-import { Service, ServiceAction, ServiceEvent, ServiceRunningMode, ServicesEvent, ServiceStatus } from './types';
+import { ServiceAction, ServiceEvent, ServiceRunningMode, ServicesEvent, ServiceStatus } from './types';
 
 function event(status: ServiceStatus, statusText: Record<string, string | number>): ServiceEvent {
   return { status, statusText: cliTpl`${statusText}` };
@@ -19,7 +20,7 @@ export class ServiceUtil {
   /**
    * Determine if service is running
    */
-  static async * isRunning(svc: Service, mode: ServiceRunningMode, timeout = 100): AsyncIterable<ServiceEvent> {
+  static async * isRunning(svc: CommandService, mode: ServiceRunningMode, timeout = 100): AsyncIterable<ServiceEvent> {
     const port = svc.ports ? +Object.keys(svc.ports)[0] : (svc.port ?? 0);
     if (port > 0) {
       const checkPort = CommandUtil.waitForPort(port, timeout).then(() => true, () => false);
@@ -48,14 +49,14 @@ export class ServiceUtil {
   /**
    * Get container id from docker
    */
-  static async getContainerId(svc: Service): Promise<string> {
+  static async getContainerId(svc: CommandService): Promise<string> {
     return CommandUtil.findContainerByLabel(`trv-${svc.name}`);
   }
 
   /**
    * Stop a service
    */
-  static async * stop(svc: Service): AsyncIterable<ServiceEvent> {
+  static async * stop(svc: CommandService): AsyncIterable<ServiceEvent> {
     const running = yield* this.isRunning(svc, 'running');
     if (running) {
       const pid = await this.getContainerId(svc);
@@ -74,7 +75,7 @@ export class ServiceUtil {
   /**
    * Start a service
    */
-  static async * start(svc: Service): AsyncIterable<ServiceEvent> {
+  static async * start(svc: CommandService): AsyncIterable<ServiceEvent> {
     const preRun = yield* this.isRunning(svc, 'running');
     if (!preRun) {
       yield event('starting', { subtitle: 'Starting' });
@@ -104,7 +105,7 @@ export class ServiceUtil {
         const promise = await container.setUnref(false).run(svc.args ?? []);
 
         const out = (await promise).stdout;
-        const running = yield* this.isRunning(svc, 'startup', 15000);
+        const running = yield* this.isRunning(svc, 'startup', svc.startupTimeout ?? 5000);
         if (!running) {
           yield event('failed', { failure: 'Failed to start service correctly' });
         } else {
@@ -122,7 +123,7 @@ export class ServiceUtil {
    * Restart service
    * @param svc
    */
-  static async * restart(svc: Service): AsyncIterable<ServiceEvent> {
+  static async * restart(svc: CommandService): AsyncIterable<ServiceEvent> {
     const running = yield* this.isRunning(svc, 'running');
     if (running) {
       yield* this.stop(svc);
@@ -133,7 +134,7 @@ export class ServiceUtil {
   /**
    * Get status of a service
    */
-  static async * status(svc: Service): AsyncIterable<ServiceEvent> {
+  static async * status(svc: CommandService): AsyncIterable<ServiceEvent> {
     const running = yield* this.isRunning(svc, 'running');
     if (!running) {
       yield event('stopped', { subsubtitle: 'Not running' });
@@ -146,11 +147,11 @@ export class ServiceUtil {
   /**
    * Find all services
    */
-  static async findAll(): Promise<Service[]> {
+  static async findAll(): Promise<CommandService[]> {
     return (await Promise.all(
       RootIndex.findSupport({ filter: x => /\/service[.]/.test(x) })
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        .map(async x => (await import(x.output)).service as Service)
+        .map(async x => (await import(x.output)).service as CommandService)
     ))
       .filter(x => !!x);
   }
@@ -158,7 +159,7 @@ export class ServiceUtil {
   /**
    * Trigger services
    */
-  static async * triggerServices(action: ServiceAction, services: Service[]): AsyncIterable<ServicesEvent> {
+  static async * triggerServices(action: ServiceAction, services: CommandService[]): AsyncIterable<ServicesEvent> {
     const active = new Set<number>();
     const updates: ServicesEvent[] = [];
     let signal = Util.resolvablePromise();

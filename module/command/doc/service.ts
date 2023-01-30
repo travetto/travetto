@@ -1,8 +1,8 @@
 import { createWriteStream, createReadStream } from 'fs';
-import { CommandService } from '@travetto/command';
+import { CommandOperation } from '@travetto/command';
 
 export class ImageCompressor {
-  converter = new CommandService({
+  converter = new CommandOperation({
     containerImage: 'agregad/pngquant',
     localCheck: ['pngquant', ['-h']]
   });

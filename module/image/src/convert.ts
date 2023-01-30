@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 
 
-import { CommandService } from '@travetto/command';
+import { CommandOperation } from '@travetto/command';
 import { StreamUtil } from '@travetto/base';
 
 /**
@@ -33,7 +33,7 @@ export class ImageConverter {
   /**
    * Resize/conversion util
    */
-  static CONVERTER = new CommandService({
+  static CONVERTER = new CommandOperation({
     containerImage: ' jameskyburz/graphicsmagick-alpine:v1.0.0',
     localCheck: ['gm', ['-version']]
   });
@@ -41,7 +41,7 @@ export class ImageConverter {
   /**
    * Compressor
    */
-  static PNG_COMPRESSOR = new CommandService({
+  static PNG_COMPRESSOR = new CommandOperation({
     containerImage: 'agregad/pngquant',
     localCheck: ['pngquant', ['-h']]
   });
@@ -49,7 +49,7 @@ export class ImageConverter {
   /**
    * Compressor
    */
-  static JPEG_COMPRESSOR = new CommandService({
+  static JPEG_COMPRESSOR = new CommandOperation({
     containerImage: 'shomatan/jpegoptim:1.4.4',
     localCheck: ['jpegoptim', ['-h']]
   });

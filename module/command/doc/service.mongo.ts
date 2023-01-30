@@ -1,9 +1,9 @@
 import { Env } from '@travetto/base';
-import type { Service } from '@travetto/command/support/bin/service';
+import type { CommandService } from '@travetto/command';
 
 const version = Env.get('MONGO_VERSION', '4.4');
 
-export const service: Service = {
+export const service: CommandService = {
   name: 'mongodb',
   version,
   port: 27017,

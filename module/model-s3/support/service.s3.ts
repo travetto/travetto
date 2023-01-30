@@ -1,7 +1,7 @@
 import { mkdirSync } from 'fs';
 import os from 'os';
 
-import type { Service } from '@travetto/command/support/bin/service';
+import type { CommandService } from '@travetto/command';
 
 const temp = `${os.tmpdir()}/local-stack`;
 try {
@@ -10,7 +10,7 @@ try {
 
 const version = 'latest';
 
-export const service: Service = {
+export const service: CommandService = {
   name: 's3',
   version,
   privileged: true,

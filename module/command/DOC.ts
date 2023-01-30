@@ -2,7 +2,7 @@ import { RootIndex } from '@travetto/manifest';
 import { d, lib } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 
-import { CommandService } from '@travetto/command/src/command';
+import { CommandOperation } from '@travetto/command/src/command';
 
 export const text = () => d`
 ${d.Header()}
@@ -21,7 +21,7 @@ ${d.Code('Launching nginx and wait for connect', 'doc/docker.ts')}
 
 ${d.Section('Command Service')}
 
-While docker containers provide a high level of flexibility, performance can be an issue.  ${CommandService} is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
+While docker containers provide a high level of flexibility, performance can be an issue.  ${CommandOperation} is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
 
 ${d.Code('Command Service example, using pngquant', 'doc/service.ts')}
 

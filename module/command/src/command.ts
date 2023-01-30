@@ -8,7 +8,7 @@ import { CommandConfig } from './types';
  * program or operation that can be provided via a pre-installed binary or by using
  * a docker container.
  */
-export class CommandService {
+export class CommandOperation {
 
   static #hasDocker: boolean;
 
@@ -47,7 +47,7 @@ export class CommandService {
       ExecUtil.spawn(...localCheck).result.then(x => x.valid, () => false) :
       localCheck());
 
-    const useContainer = this.config.allowDocker && !useLocal && (await CommandService.dockerAvailable());
+    const useContainer = this.config.allowDocker && !useLocal && (await CommandOperation.dockerAvailable());
 
     if (useContainer) {
       return new DockerContainer(this.config.containerImage)

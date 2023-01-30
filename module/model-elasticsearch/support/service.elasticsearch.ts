@@ -1,11 +1,11 @@
-import type { Service } from '@travetto/command/support/bin/service';
+import type { CommandService } from '@travetto/command';
 import { getVersion } from '../src/internal/version';
 
 const version = getVersion();
 
 const port = 9200;
 
-export const service: Service = {
+export const service: CommandService = {
   name: 'elasticsearch',
   version,
   port,
@@ -19,5 +19,6 @@ export const service: Service = {
     ES_JAVA_OPTS: '-Xms256m -Xmx256m'
   },
   ready: { url: `http://localhost:${port}/_cluster/health`, test: b => b.includes('"status":"green"') },
-  image: `docker.elastic.co/elasticsearch/elasticsearch:${version}`
+  image: `docker.elastic.co/elasticsearch/elasticsearch:${version}`,
+  startupTimeout: 15000
 };
