@@ -10,7 +10,6 @@ type Options = {
   input: OptionConfig<string>;
   outputs: ListOptionConfig<string>;
   watch: OptionConfig<boolean>;
-  stdout: OptionConfig<boolean>;
 };
 
 /**
@@ -23,8 +22,7 @@ export class DocCommand extends CliCommand<Options> {
     return {
       input: this.option({ desc: 'Input File', def: 'DOC.ts' }),
       outputs: this.listOption({ desc: 'Outputs', def: [] }),
-      watch: this.boolOption({ desc: 'Watch' }),
-      stdout: this.boolOption({ desc: 'Write to stdout', def: false })
+      watch: this.boolOption({ desc: 'Watch' })
     };
   }
 
@@ -52,18 +50,18 @@ export class DocCommand extends CliCommand<Options> {
       this.cmd.outputs = workspacePkg.travetto?.docOutputs ?? ['README.md'];
     }
 
-    const outputs = this.cmd.outputs.map(output => [path.extname(output).substring(1), path.resolve(output)]);
+    const outputs = this.cmd.outputs.map(output => output.includes('.') ? [path.extname(output).substring(1), path.resolve(output)] : [output, null] as const);
 
     // If specifying output
     const write = async (): Promise<void> => {
       RenderUtil.purge(docFile);
       for (const [fmt, out] of outputs) {
-        const finalName = path.resolve(out);
         const result = await RenderUtil.render(docFile, fmt);
-        if (this.cmd.stdout) {
-          process.stdout.write(result);
-        } else {
+        if (out) {
+          const finalName = path.resolve(out);
           await fs.writeFile(finalName, result, 'utf8');
+        } else {
+          process.stdout.write(result);
         }
       }
     };

@@ -65,7 +65,7 @@ ${d.Execute('CLI Doc Help', 'trv', ['doc', '--help'], {
 
 By default, running the command will output the ${lib.Markdown} content directly to the terminal.
 
-${d.Execute('Sample CLI Output', 'trv', ['doc', '-f', 'html', '--stdout'], {
+${d.Execute('Sample CLI Output', 'trv', ['doc', '-o', 'html'], {
   cwd: './doc-exec'
 })}
 `;
