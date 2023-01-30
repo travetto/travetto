@@ -1,7 +1,8 @@
 import { CliCommand, cliTpl } from '@travetto/cli';
 import { GlobalTerminal } from '@travetto/terminal';
 
-import { ServiceAction, ServiceUtil, SERVICE_ACTIONS } from './bin/service';
+import { ServiceUtil } from './bin/service';
+import { ServiceAction, SERVICE_ACTIONS } from './bin/types';
 
 /**
  * `npx trv service`
@@ -31,14 +32,14 @@ export class CliServiceCommand extends CliCommand<{}> {
     }
 
     const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
-    const maxVersion = Math.max(...all.map(x => x.version.length), 'Version'.length) + 3;
+    const maxVersion = Math.max(...all.map(x => `${x.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;
 
     await GlobalTerminal.streamList(
       ServiceUtil.triggerServices(action, all),
       ({ svc, statusText, status, idx }) => ({
         idx,
-        text: cliTpl`${{ identifier: svc.name.padEnd(maxName) }} ${{ type: svc.version.padStart(maxVersion - 3).padEnd(maxVersion) }} ${statusText}`,
+        text: cliTpl`${{ identifier: svc.name.padEnd(maxName) }} ${{ type: `${svc.version}`.padStart(maxVersion - 3).padEnd(maxVersion) }} ${statusText}`,
         done: status === 'started'
       }),
       {

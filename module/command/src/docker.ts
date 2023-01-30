@@ -4,7 +4,7 @@ import { rmSync } from 'fs';
 
 
 import { path } from '@travetto/manifest';
-import { Env, ShutdownManager, ExecUtil, ExecutionState, ExecutionResult } from '@travetto/base';
+import { Env, ShutdownManager, ExecUtil, ExecutionState, ExecutionResult, DataUtil } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container
@@ -141,8 +141,8 @@ export class DockerContainer {
   /**
    * Expose a port
    */
-  exposePort(port: number, internalPort = port): this {
-    this.#ports.set(port, internalPort);
+  exposePort(port: number | string, internalPort: string | number = port): this {
+    this.#ports.set(DataUtil.coerceType(port, Number), DataUtil.coerceType(internalPort, Number));
     return this;
   }
 

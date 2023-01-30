@@ -5,25 +5,7 @@ import { cliTpl } from '@travetto/cli';
 import { CommandUtil } from '../../src/util';
 import { DockerContainer } from '../../src/docker';
 
-export const SERVICE_ACTIONS = ['start', 'stop', 'status', 'restart'] as const;
-export type ServiceAction = (typeof SERVICE_ACTIONS)[number];
-export type ServiceStatus = 'started' | 'stopped' | 'starting' | 'stopping' | 'initializing' | 'failed';
-export type ServiceEvent = { statusText: string, status: ServiceStatus };
-export type ServicesEvent = ServiceEvent & { svc: Service, idx: number };
-
-export type Service = {
-  name: string;
-  version: string;
-  port?: number;
-  ports?: Record<number, number>;
-  privileged?: boolean;
-  image: string;
-  args?: string[];
-  ready?: { url: string, test?(body: string): boolean };
-  volumes?: Record<string, string>;
-  env?: Record<string, string>;
-  require?: string;
-};
+import { Service, ServiceAction, ServiceEvent, ServiceRunningMode, ServicesEvent, ServiceStatus } from './types';
 
 function event(status: ServiceStatus, statusText: Record<string, string | number>): ServiceEvent {
   return { status, statusText: cliTpl`${statusText}` };
@@ -37,10 +19,10 @@ export class ServiceUtil {
   /**
    * Determine if service is running
    */
-  static async * isRunning(svc: Service, mode: 'running' | 'startup', timeout = 100): AsyncIterable<ServiceEvent> {
+  static async * isRunning(svc: Service, mode: ServiceRunningMode, timeout = 100): AsyncIterable<ServiceEvent> {
     const port = svc.ports ? +Object.keys(svc.ports)[0] : (svc.port ?? 0);
     if (port > 0) {
-      const checkPort = CommandUtil.waitForPort(port, timeout).then(x => true, x => false);
+      const checkPort = CommandUtil.waitForPort(port, timeout).then(() => true, () => false);
       if (mode === 'startup') {
         yield event('initializing', { input: `Waiting for port ${port}...` });
 
@@ -107,7 +89,7 @@ export class ServiceUtil {
 
         if (svc.ports) {
           for (const [pub, pri] of Object.entries(svc.ports)) {
-            container.exposePort(+pub, +pri);
+            container.exposePort(pub, pri);
           }
         } else if (svc.port) {
           container.exposePort(svc.port);
@@ -170,11 +152,7 @@ export class ServiceUtil {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         .map(async x => (await import(x.output)).service as Service)
     ))
-      .filter(x => !!x)
-      .map(x => {
-        x.version = `${x.version}`;
-        return x;
-      });
+      .filter(x => !!x);
   }
 
   /**
