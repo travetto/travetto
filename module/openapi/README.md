@@ -123,8 +123,6 @@ Usage:  openapi:spec [options]
 Options:
   -o, --output <output>  Output files (default: "./openapi.yml")
   -h, --help             display help for command
-
-[s[r[u
 ```
 
 The command will run your application, in non-server mode, to collect all the routes and model information, to produce the `openapi.yml`.  Once produced, the code will store the output in the specified location.
@@ -139,7 +137,26 @@ The module provides a command for the [Command Line Interface](https://github.co
 ```bash
 $ trv openapi:client --help
 
-[s[r[u
+Usage:  openapi:client [options] [format-or-preset]
+
+Options:
+  -x, --extended-help                                  Show Extended Help
+  -a, --additional-properties <additional-properties>  Additional Properties (default: [])
+  -i, --input <input>                                  Input file (default:
+                                                       "@travetto/openapi/openapi.yml")
+  -o, --output <output>                                Output folder (default:
+                                                       "@travetto/openapi/api-client")
+  -d, --docker-image <docker-image>                    Docker Image to use (default:
+                                                       "arcsine/openapi-generator:latest")
+  -w, --watch                                          Watch for file changes
+  -h, --help                                           display help for command
+
+Available Presets
+----------------------------------
+* @travetto/angular10 -- typescript-angular supportsES6=true,ngVersion=10.0
+* @travetto/angular11 -- typescript-angular supportsES6=true,ngVersion=11.0
+* @travetto/angular12 -- typescript-angular supportsES6=true,ngVersion=11.0
+* @travetto/fetch -- typescript-fetch
 ```
 
 This tool relies upon a custom build of [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator), which supports watching.  This allows for fast responsive client generation as the shape of the API changes.

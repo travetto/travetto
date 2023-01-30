@@ -20,7 +20,7 @@ type Options = {
 export class OpenApiClientCommand extends CliCommand<Options> {
   #presets: Record<string, [string, object] | [string]>;
   name = 'openapi:client';
-  #resources = new FileResourceProvider(['@travetto/openapi']);
+  #resources = new FileResourceProvider(['@travetto/openapi#support/resources']);
 
   async getPresets(): Promise<Record<string, [string, object] | [string]>> {
     if (!this.#presets) {
