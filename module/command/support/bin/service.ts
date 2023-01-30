@@ -141,7 +141,8 @@ export class ServiceUtil {
    * @param svc
    */
   static async * restart(svc: Service): AsyncIterable<ServiceEvent> {
-    if (await this.isRunning(svc, 'running')) {
+    const running = yield* this.isRunning(svc, 'running');
+    if (running) {
       yield* this.stop(svc);
     }
     yield* this.start(svc);
@@ -151,7 +152,8 @@ export class ServiceUtil {
    * Get status of a service
    */
   static async * status(svc: Service): AsyncIterable<ServiceEvent> {
-    if (!await this.isRunning(svc, 'running')) {
+    const running = yield* this.isRunning(svc, 'running');
+    if (!running) {
       yield event('stopped', { subsubtitle: 'Not running' });
     } else {
       const pid = await this.getContainerId(svc);
