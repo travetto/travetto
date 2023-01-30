@@ -25,5 +25,9 @@ export class GlobalEnvTest {
     defineGlobalEnv({ envName: 'dev', profiles: ['dev'] });
     assert.deepStrictEqual(GlobalEnv.profiles, ['dev']);
 
+    process.env.TRV_PROFILES = 'test,test1,test,test2';
+
+    defineGlobalEnv({ profiles: ['dev'] });
+    assert.deepStrictEqual(GlobalEnv.profiles, ['dev', 'test', 'test1', 'test2']);
   }
 }
