@@ -1,8 +1,6 @@
 import fs from 'fs/promises';
-import { parentPort } from 'worker_threads';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { ExecUtil } from '@travetto/base';
 
 import { AppScanUtil } from '../../src/scan';
 import type { ApplicationConfig } from '../../src/types';
@@ -58,16 +56,10 @@ export class AppListLoader {
   /**
    * Compile code, and look for `@Application` annotations
    */
-  async buildList(): Promise<ApplicationConfig[]> {
+  async #buildList(): Promise<ApplicationConfig[]> {
     try {
-      if (parentPort) { // If top level, recurse
-        return AppScanUtil.expandByDependents(await AppScanUtil.scanList())
-          .map(({ target, ...rest }) => rest);
-      } else {
-        return await (ExecUtil.worker<ApplicationConfig[]>(
-          RootIndex.resolveFileImport('@travetto/app/support/main.list-build.ts')
-        ).message);
-      }
+      return AppScanUtil.expandByDependents(await AppScanUtil.scanList())
+        .map(({ target, ...rest }) => rest);
     } catch (err) {
       return [];
     }
@@ -87,7 +79,7 @@ export class AppListLoader {
   async getList(): Promise<ApplicationConfig[] | undefined> {
     let items: ApplicationConfig[] | undefined;
     if (!(items = await this.#readList())) { // no list
-      items = await this.buildList();
+      items = await this.#buildList();
       if (items) {
         await this.#storeList(items);
       }
