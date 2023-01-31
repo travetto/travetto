@@ -141,7 +141,7 @@ The final template will render as:
 
 **Terminal: Final Output, with styling removed**
 ```bash
-$ trv main @travetto/email-template/doc/render.ts
+$ trv main doc/render.ts
 
 <!DOCTYPE html><html>
 

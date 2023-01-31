@@ -66,13 +66,10 @@ At runtime the resolved config would be:
 
 **Terminal: Runtime Resolution**
 ```bash
-$ trv main @travetto/config/doc/resolve.ts
+$ trv main doc/resolve.ts
 
 Config {
-  sources: [
-    'application.1 - file://application.yml',
-    'override.3 - memory://override'
-  ],
+  sources: [ 'doc.1 - file://doc.yml', 'override.3 - memory://override' ],
   active: {
     DBConfig: {
       host: 'localhost',
@@ -111,7 +108,7 @@ Using the above config files, you'll notice that the port is not specified (its 
 
 **Terminal: Resolved database config**
 ```bash
-$ trv main @travetto/config/doc/dbconfig-run.ts
+$ trv main doc/dbconfig-run.ts
 
 {
   message: 'Failed to construct @travetto/config:doc/dbconfig￮DBConfig as validation errors have occurred',
@@ -138,13 +135,10 @@ By passing in the port via the environment variable, the config will construct p
 
 **Terminal: Resolved database config**
 ```bash
-$ DATABASE_PORT=200 trv main @travetto/config/doc/dbconfig-run.ts
+$ DATABASE_PORT=200 trv main doc/dbconfig-run.ts
 
 Config {
-  sources: [
-    'application.1 - file://application.yml',
-    'override.3 - memory://override'
-  ],
+  sources: [ 'doc.1 - file://doc.yml', 'override.3 - memory://override' ],
   active: {
     DBConfig: {
       host: 'localhost',

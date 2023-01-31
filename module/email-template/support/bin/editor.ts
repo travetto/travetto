@@ -1,8 +1,16 @@
+import { defineGlobalEnv } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
+import { RootRegistry } from '@travetto/registry';
+import { DependencyRegistry } from '@travetto/di';
+import { MailTemplateEngine } from '@travetto/email';
+import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
+
 import { TemplateManager } from './template';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
 
 import { EmailTemplateResource } from '../../src/resource';
+import { EmailTemplateCompiler } from '../../src/compiler';
 
 type InboundMessage =
   { type: 'configure' } |
@@ -20,6 +28,16 @@ type OutboundMessage =
  * Utils for interacting with editors
  */
 export class EditorState {
+
+  static async init(): Promise<EditorState> {
+    const editor = new EditorState(new TemplateManager(
+      await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget),
+      new EmailTemplateCompiler(new EmailTemplateResource())
+    ));
+    await editor.init();
+    return editor;
+  }
+
   #lastFile = '';
   #sender: EditorSendService;
   #template: TemplateManager;
@@ -107,4 +125,13 @@ export class EditorState {
     });
     await this.#template.watchCompile(f => this.renderFile(f));
   }
+}
+
+export async function main(): Promise<void> {
+  defineGlobalEnv({
+    resourcePaths: [`${RootIndex.getModule('@travetto/email-template')!.source}/resources/email`]
+  });
+
+  await RootRegistry.init();
+  await EditorState.init();
 }

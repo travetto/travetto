@@ -1,8 +1,10 @@
+import fs from 'fs/promises';
 import { program as commander } from 'commander';
 
-import { RootIndex, PackageUtil, path } from '@travetto/manifest';
+import { PackageUtil, path, RootIndex } from '@travetto/manifest';
 import { GlobalTerminal } from '@travetto/terminal';
-import { runMain } from '@travetto/base/support/init.main';
+import { ExecUtil, ShutdownManager } from '@travetto/base';
+import { init } from '@travetto/base/support/init';
 
 import { CliCommandManager } from './command-manager';
 import { HelpUtil } from './help';
@@ -15,9 +17,7 @@ export class ExecutionManager {
   /**
    * Run command
    */
-  static async runCommand(args: string[]): Promise<void> {
-    const cmd = args[2];
-
+  static async runCommand(cmd: string, args: string[]): Promise<void> {
     let command;
 
     try {
@@ -32,7 +32,7 @@ export class ExecutionManager {
       if (args.includes('-h') || args.includes('--help')) {
         return command.showHelp();
       } else {
-        await commander.parseAsync(args);
+        await commander.parseAsync([process.argv[0], process.argv[1], cmd, ...args]);
       }
     } catch (err) {
       if (!(err instanceof Error)) {
@@ -45,26 +45,44 @@ export class ExecutionManager {
   }
 
   /**
+   * Run file expecting a main method
+   */
+  static async runMain(file: string, args: string[]): Promise<void> {
+    try {
+      // If referenced file exists
+      if (await (fs.stat(path.resolve(file)).then(() => true, () => false))) {
+        file = path.join(RootIndex.manifest.mainModule, file);
+      }
+
+      file = RootIndex.resolveFileImport(file);
+      const mod = await import(file);
+
+      ExecUtil.returnResponse(await mod.main(...args));
+      return ShutdownManager.exit(0);
+    } catch (err) {
+      ExecUtil.returnResponse(err, true);
+      return ShutdownManager.exit(err instanceof Error ? err : 1);
+    }
+  }
+
+  /**
    * Execute the command line
    * @param args
    */
-  static async run(args: string[]): Promise<void> {
+  static async run(argv: string[]): Promise<void> {
+    await init();
+
     const width = GlobalTerminal.width;
     commander
       .version(PackageUtil.getFrameworkVersion())
       .configureOutput({ getOutHelpWidth: () => width, getErrHelpWidth: () => width });
 
-    const cmd = args[2];
-
+    const [, , cmd, ...args] = argv;
     if (cmd === 'main') {
-      let mainFile = RootIndex.resolveFileImport(process.argv[3])!;
-      if (!mainFile.startsWith('/')) {
-        mainFile = path.join(RootIndex.manifest.mainModule, mainFile);
-        mainFile = RootIndex.resolveFileImport(mainFile);
-      }
-      await runMain((await import(mainFile)).main, process.argv.slice(4));
+      const [file, ...rest] = args;
+      await this.runMain(file, rest);
     } else if (cmd && !cmd.startsWith('-')) {
-      await this.runCommand(args);
+      await this.runCommand(cmd, args);
     } else {
       // Load all commands
       await CliCommandManager.loadAllCommands(x => x.setup(commander));

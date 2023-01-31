@@ -52,13 +52,20 @@ export class FileResourceProvider implements ResourceProvider {
     if (cfg.includeCommon) {
       paths.unshift(...GlobalEnv.resourcePaths, path.resolve('resources'));
     }
+    const found = new Set();
     return paths.map(pth => {
       const [base, sub] = pth.replace(/^@$/, main).replace(/^@#/, `${main}#`).split('#');
       const rel = sub ?? (base !== main ? cfg.moduleFolder : undefined) ?? cfg.mainFolder;
-      return RootIndex.hasModule(base) ?
+      const value = RootIndex.hasModule(base) ?
         path.resolve(RootIndex.getModule(base)!.source, rel ?? '') :
         path.resolve(base, sub ?? cfg.mainFolder ?? '');
-    });
+      if (found.has(value)) {
+        return undefined;
+      } else {
+        found.add(value);
+        return value;
+      }
+    }).filter((x): x is string => !!x);
   }
 
   #paths: string[];

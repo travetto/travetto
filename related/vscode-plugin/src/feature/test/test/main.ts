@@ -25,7 +25,7 @@ class TestRunnerFeature extends BaseFeature {
     command?: string
   ) {
     super(module, command);
-    this.#server = new ProcessServer('main', [`${this.module}/support/main.test-watch`, 'exec', 'false']);
+    this.#server = new ProcessServer('main', [`${this.module}/src/execute/watcher`, 'exec', 'false']);
 
     this.#server
       .on('start', () => {
@@ -61,7 +61,7 @@ class TestRunnerFeature extends BaseFeature {
       useCli: true,
       name: 'Debug Travetto',
       main: 'main',
-      args: [`${this.module}/support/main.test-direct`, file.replace(path.toNative(`${Workspace.path}/`), ''), `${line}`],
+      args: [`${this.module}/support/bin/direct`, file.replace(path.toNative(`${Workspace.path}/`), ''), `${line}`],
       cliModule: Workspace.workspaceIndex.getFromSource(file)?.module
     }));
   }

@@ -76,13 +76,10 @@ At runtime the resolved config would be:
       <figcaption class="terminal">Runtime Resolution
       
       </figcaption>
-      <pre><code class="language-bash">$ trv main @travetto/config/doc/resolve.ts
+      <pre><code class="language-bash">$ trv main doc/resolve.ts
 
 Config <span class="token punctuation">{{'{'}}</span>
-  sources: <span class="token punctuation">[</span>
-    <span class="token string">'application.1 - file://application.yml'</span>,
-    <span class="token string">'override.3 - memory://override'</span>
-  <span class="token punctuation">]</span>,
+  sources: <span class="token punctuation">[</span> <span class="token string">'doc.1 - file://doc.yml'</span>, <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,
   active: <span class="token punctuation">{{'{'}}</span>
     DBConfig: <span class="token punctuation">{{'{'}}</span>
       host: <span class="token string">'localhost'</span>,
@@ -125,7 +122,7 @@ Using the above config files, you'll notice that the port is not specified (its 
       <figcaption class="terminal">Resolved database config
       
       </figcaption>
-      <pre><code class="language-bash">$ trv main @travetto/config/doc/dbconfig-run.ts
+      <pre><code class="language-bash">$ trv main doc/dbconfig-run.ts
 
 <span class="token punctuation">{{'{'}}</span>
   message: <span class="token string">'Failed to construct @travetto/config:doc/dbconfig￮DBConfig as validation errors have occurred'</span>,
@@ -154,13 +151,10 @@ By passing in the port via the environment variable, the config will construct p
       <figcaption class="terminal">Resolved database config
       
       </figcaption>
-      <pre><code class="language-bash">$ <span class="token assign-left variable">DATABASE_PORT</span><span class="token operator">=</span><span class="token number">200</span> trv main @travetto/config/doc/dbconfig-run.ts
+      <pre><code class="language-bash">$ <span class="token assign-left variable">DATABASE_PORT</span><span class="token operator">=</span><span class="token number">200</span> trv main doc/dbconfig-run.ts
 
 Config <span class="token punctuation">{{'{'}}</span>
-  sources: <span class="token punctuation">[</span>
-    <span class="token string">'application.1 - file://application.yml'</span>,
-    <span class="token string">'override.3 - memory://override'</span>
-  <span class="token punctuation">]</span>,
+  sources: <span class="token punctuation">[</span> <span class="token string">'doc.1 - file://doc.yml'</span>, <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,
   active: <span class="token punctuation">{{'{'}}</span>
     DBConfig: <span class="token punctuation">{{'{'}}</span>
       host: <span class="token string">'localhost'</span>,

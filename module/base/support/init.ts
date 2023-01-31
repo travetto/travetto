@@ -1,13 +1,11 @@
 import { path, RootIndex } from '@travetto/manifest';
 
 import { ConsoleManager } from '../src/console';
-import { ExecUtil } from '../src/exec';
 import { ShutdownManager } from '../src/shutdown';
-import { defineGlobalEnv, GlobalEnv } from '../src/global-env';
 
 // Setup everything
 let initialized = false;
-export async function setup(): Promise<void> {
+export async function init(): Promise<void> {
   if (initialized) {
     return;
   }
@@ -28,8 +26,6 @@ export async function setup(): Promise<void> {
   Error.stackTraceLimit = 50; // Deep limit
   try { (await import('source-map-support')).install(); } catch { } // Register source maps
 
-  defineGlobalEnv({ main: undefined });
-
   // Initialize
   await ConsoleManager.register();
 
@@ -42,18 +38,3 @@ export async function setup(): Promise<void> {
     ShutdownManager.onShutdown('', () => GlobalTerminal.reset());
   }
 }
-
-export async function runMain(action: Function, args: string[]): Promise<void> {
-  try {
-    await setup();
-    ExecUtil.returnResponse(await action(...args));
-    return ShutdownManager.exit(0);
-  } catch (err) {
-    ExecUtil.returnResponse(err, true);
-    return ShutdownManager.exit(err instanceof Error ? err : 1);
-  }
-}
-
-export const runIfMain = (target: Function, filename: string, mainFile: string): unknown =>
-  (RootIndex.getSourceFile(filename) === RootIndex.getSourceFile(GlobalEnv.main || mainFile)) ?
-    runMain(target, process.argv.slice(2)) : undefined;

@@ -38,7 +38,5 @@ ${d.Code('Spawning Pool', 'doc/spawner.ts')}
 
 ${d.Code('Spawned Worker', 'doc/spawned.ts')}
 
-${d.Execute('Output', 'trv', ['main', '@travetto/worker/doc/spawner.ts'], {
-  cwd: './doc-exec'
-})}
+${d.Execute('Output', 'trv', ['main', 'doc/spawner.ts'])}
 `;

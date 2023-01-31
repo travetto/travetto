@@ -26,7 +26,7 @@
     "directory": "related/vscode-plugin"
   },
   "scripts": {
-    "vscode:prepublish": "npx trv main support/main.prepublish",
+    "vscode:prepublish": "npx trv main ./support/prepublish.ts",
     "package": "vsce package",
     "start": "npx trv watch --clean"
   },

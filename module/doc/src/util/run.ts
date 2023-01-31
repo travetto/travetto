@@ -8,6 +8,7 @@ export type RunConfig = {
   filter?: (line: string) => boolean;
   module?: string;
   env?: Record<string, string>;
+  profiles?: string[];
   cwd?: string;
 };
 
@@ -57,6 +58,7 @@ export class DocRunUtil {
         env: {
           ...Env.export(/^(TRV_.*|NODE_.*|.*COLOR.*|PATH)$/),
           DEBUG: '0',
+          ...(config.profiles ? { TRV_PROFILES: config.profiles.join(' ') } : {}),
           ...(config.module ? { TRV_MANIFEST: config.module } : {}),
           ...(config.env ?? {})
         }

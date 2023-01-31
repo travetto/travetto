@@ -18,7 +18,7 @@ Module Structure
 ## Library (node_modules/@travetto/{x})
 * bin/ - Pure JS files for execution
 * support/ -
-  - bin/ support for main/cli operations
+  - bin/ support for cli operations
   - phase.* Phase support 
   - transform.* AST transformer support
   - main.* Main entry points

@@ -38,3 +38,5 @@ export class AppRunUtil {
     return await ApplicationRegistry.run(app.name, sub);
   }
 }
+
+export const main = AppRunUtil.run;

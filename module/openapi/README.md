@@ -21,7 +21,7 @@ All of the high level configurations can be found in the following structure:
 ```typescript
 import { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
 
-import { Config } from '@travetto/config';
+import { Config, EnvVar } from '@travetto/config';
 import { path, RootIndex } from '@travetto/manifest';
 import { GlobalEnv } from '@travetto/base';
 import { Required } from '@travetto/schema';
@@ -77,10 +77,12 @@ export class ApiSpecConfig {
   /**
    * Where to output file to
    */
+  @EnvVar('TRV_OPENAPI_OUTPUT')
   output: string = 'openapi.yml';
   /**
    * Should file be generated at runtime
    */
+  @EnvVar('TRV_OPENAPI_PERSIST')
   persist?: boolean;
   /**
    * Skip emitting all routes

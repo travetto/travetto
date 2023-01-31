@@ -85,32 +85,32 @@ Options:
 
 Available Applications:
 
-   ●
-     usage:  domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
+   ● complex
+     usage: complex domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  @travetto/app/doc/complex.ts
 
      —————————————————————————————————————————————————————————————
 
-   ●
-     usage:  domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
+   ● simple
+     usage: simple domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  @travetto/app/doc/simple.ts
 
      —————————————————————————————————————————————————————————————
 
-   ●
-     usage:
+   ● simple-app
+     usage: simple-app
      file:  @travetto/app/doc/entry-simple.ts
 
      —————————————————————————————————————————————————————————————
 
-   ●
-     usage:  domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
+   ● simple-domain
+     usage: simple-domain domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
      file:  @travetto/app/doc/domain.ts
 
      —————————————————————————————————————————————————————————————
 
-   ●
-     usage:  <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
+   ● test-ep-test
+     usage: test-ep-test <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
      file:  @travetto/app/doc/entry.ts</code></pre>     
       </figure>
 
@@ -122,8 +122,42 @@ Running without specifying an application <code class="item command">trv run</co
       </figcaption>
       <pre><code class="language-bash">$ trv run
 
-Failed to run complex, Validation errors have occurred
-● domain is required</code></pre>     
+Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+
+Options:
+  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>env<span class="token operator">></span>          Application environment
+  -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>profile<span class="token operator">></span>  Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Available Applications:
+
+   ● complex
+     usage: complex domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
+     file:  @travetto/app/doc/complex.ts
+
+     —————————————————————————————————————————————————————————————
+
+   ● simple
+     usage: simple domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
+     file:  @travetto/app/doc/simple.ts
+
+     —————————————————————————————————————————————————————————————
+
+   ● simple-app
+     usage: simple-app
+     file:  @travetto/app/doc/entry-simple.ts
+
+     —————————————————————————————————————————————————————————————
+
+   ● simple-domain
+     usage: simple-domain domain:string <span class="token punctuation">[</span>port:number<span class="token operator">=</span><span class="token number">3000</span><span class="token punctuation">]</span>
+     file:  @travetto/app/doc/domain.ts
+
+     —————————————————————————————————————————————————————————————
+
+   ● test-ep-test
+     usage: test-ep-test <span class="token punctuation">[</span>age:number<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span>format:html<span class="token operator">|</span><span class="token assign-left variable">pdf</span><span class="token operator">=</span>html<span class="token punctuation">]</span>
+     file:  @travetto/app/doc/entry.ts</code></pre>     
       </figure>
 
 To invoke the <code class="item input">simple</code> application, you need to pass <code class="item input">domain</code> where port is optional with a default.

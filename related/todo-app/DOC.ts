@@ -117,11 +117,11 @@ next, let's execute ${lib.Fetch} requests to interact with the new api:
 
 ${d.Code('Creating Todo by fetch', 'doc/create-todo.ts')}
 
-${d.Execute('Create Output', 'trv', ['main', '@travetto/todo-app/doc/create-todo.ts'], { env: { TRV_LOG_PLAIN: '1' }, cwd: './doc-exec' })}
+${d.Execute('Create Output', 'trv', ['main', 'doc/create-todo.ts'], { env: { TRV_LOG_PLAIN: '1' } })}
 
 ${d.Code('Listing Todos by fetch', 'doc/list-todo.ts')}
 
-${d.Execute('Listing Output', 'trv', ['main', '@travetto/todo-app/doc/list-todo.ts'], { env: { TRV_LOG_PLAIN: '1' }, cwd: './doc-exec' })}
+${d.Execute('Listing Output', 'trv', ['main', 'doc/list-todo.ts'], { env: { TRV_LOG_PLAIN: '1' } })}
 `;
 
   // Wrap it up

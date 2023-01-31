@@ -99,3 +99,10 @@ export class AppListLoader {
     return items;
   }
 }
+
+/**
+ * Entry point when run directly
+ */
+export async function main(): Promise<ApplicationConfig[]> {
+  return (await new AppListLoader().getList()) ?? [];
+}

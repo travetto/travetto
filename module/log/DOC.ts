@@ -20,8 +20,7 @@ ${d.Code('Various log levels', 'doc/output.ts')}
 
 The corresponding output would be
 
-${d.Execute('Logging output', 'trv', ['main', '@travetto/log/doc/output-run.ts'], {
-  cwd: './doc-exec',
+${d.Execute('Logging output', 'trv', ['main', 'doc/output-run.ts'], {
   env: {
     DEBUG: '-*,@travetto/log',
     TRV_LOG_PLAIN: '0'

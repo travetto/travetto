@@ -230,7 +230,6 @@ export class ExecUtil {
   static worker<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
     const env = {
       ...process.env,
-      TRV_MAIN: '',
       ...((options.env !== SHARE_ENV ? options.env : {}) || {}),
     };
     const worker = new Worker(path.resolve(file), {

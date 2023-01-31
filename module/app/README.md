@@ -75,32 +75,32 @@ Options:
 
 Available Applications:
 
-   ●  
-     usage:  domain:string [port:number=3000]
+   ● complex 
+     usage: complex domain:string [port:number=3000]
      file:  @travetto/app/doc/complex.ts
 
      —————————————————————————————————————————————————————————————
 
-   ●  
-     usage:  domain:string [port:number=3000]
+   ● simple 
+     usage: simple domain:string [port:number=3000]
      file:  @travetto/app/doc/simple.ts
 
      —————————————————————————————————————————————————————————————
 
-   ●  
-     usage:  
+   ● simple-app 
+     usage: simple-app 
      file:  @travetto/app/doc/entry-simple.ts
 
      —————————————————————————————————————————————————————————————
 
-   ●  
-     usage:  domain:string [port:number=3000]
+   ● simple-domain 
+     usage: simple-domain domain:string [port:number=3000]
      file:  @travetto/app/doc/domain.ts
 
      —————————————————————————————————————————————————————————————
 
-   ●  
-     usage:  [age:number=5] [format:html|pdf=html]
+   ● test-ep-test 
+     usage: test-ep-test [age:number=5] [format:html|pdf=html]
      file:  @travetto/app/doc/entry.ts
 ```
 
@@ -110,8 +110,42 @@ Running without specifying an application `trv run`, will display all the availa
 ```bash
 $ trv run
 
-Failed to run complex, Validation errors have occurred
-● domain is required
+Usage: trv run [options] [application] [args...]
+
+Options:
+  -e, --env <env>          Application environment
+  -p, --profile <profile>  Additional application profiles (default: [])
+  -h, --help               display help for command
+
+Available Applications:
+
+   ● complex 
+     usage: complex domain:string [port:number=3000]
+     file:  @travetto/app/doc/complex.ts
+
+     —————————————————————————————————————————————————————————————
+
+   ● simple 
+     usage: simple domain:string [port:number=3000]
+     file:  @travetto/app/doc/simple.ts
+
+     —————————————————————————————————————————————————————————————
+
+   ● simple-app 
+     usage: simple-app 
+     file:  @travetto/app/doc/entry-simple.ts
+
+     —————————————————————————————————————————————————————————————
+
+   ● simple-domain 
+     usage: simple-domain domain:string [port:number=3000]
+     file:  @travetto/app/doc/domain.ts
+
+     —————————————————————————————————————————————————————————————
+
+   ● test-ep-test 
+     usage: test-ep-test [age:number=5] [format:html|pdf=html]
+     file:  @travetto/app/doc/entry.ts
 ```
 
 To invoke the `simple` application, you need to pass `domain` where port is optional with a default.

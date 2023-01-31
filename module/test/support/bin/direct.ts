@@ -1,5 +1,5 @@
 import { ConsoleManager, defineGlobalEnv } from '@travetto/base';
-import { runTests } from './bin/run';
+import { runTests } from './run';
 
 // Direct entry point
 export function main(...args: string[]): Promise<void> {

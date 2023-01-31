@@ -419,7 +419,7 @@ export async function main() {
 
 **Terminal: Create Output**
 ```bash
-$ trv main @travetto/todo-app/doc/create-todo.ts
+$ trv main doc/create-todo.ts
 
 {
   text: 'New Todo',
@@ -440,7 +440,7 @@ export async function main() {
 
 **Terminal: Listing Output**
 ```bash
-$ trv main @travetto/todo-app/doc/list-todo.ts
+$ trv main doc/list-todo.ts
 
 [
   {

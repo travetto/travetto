@@ -59,7 +59,7 @@
         - `compiler://manifest`
         - `source://project`,
         - `source://modules`
-      Action: node `compiler://@travetto/transformer/support/main.compiler`
+      Action: node `compiler://@travetto/transformer/support/bin/compiler`
       Output: 
         - `output://manifest`
         - `output://**`

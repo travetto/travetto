@@ -69,10 +69,10 @@ async function exec(args) {
       const { manifest } = await compile(ctx);
       const out = path.join(ctx.workspacePath, ctx.outputFolder);
       // TODO: Externalize somehow?
-      const cliMain = path.join(out, manifest.modules['@travetto/cli'].output, 'support', 'main.cli.js');
+      const cliMain = path.join(out, manifest.modules['@travetto/cli'].output, 'support', 'cli.js');
       process.env.TRV_MANIFEST = ctx.mainModule;
       process.env.TRV_OUTPUT = out;
-      await import(process.env.TRV_MAIN = cliMain);
+      await import(cliMain);
       return;
     }
   }

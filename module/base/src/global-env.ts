@@ -30,9 +30,6 @@ export const GlobalEnv = {
   /** Get list of resource paths */
   get resourcePaths(): string[] { return Env.getList('TRV_RESOURCES', []); },
 
-  /** Get main value */
-  get main(): string | undefined { return Env.get('TRV_MAIN'); },
-
   /** Is test */
   get test(): boolean { return this.profiles.includes('test'); },
 
@@ -67,10 +64,6 @@ export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
     debug = false;
   } else {
     profiles.add(isProd ? PROD : DEV);
-  }
-
-  if ('main' in cfg) {
-    set.TRV_MAIN = cfg.main;
   }
 
   for (const [k, v] of Object.entries(set)) {

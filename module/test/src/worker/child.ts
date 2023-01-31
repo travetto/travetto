@@ -1,4 +1,7 @@
-import { ErrorUtil, TimeUtil } from '@travetto/base';
+import fs from 'fs/promises';
+
+import { path } from '@travetto/manifest';
+import { ConsoleManager, defineGlobalEnv, ErrorUtil, TimeUtil } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
 import { RunnerUtil } from '../execute/util';
@@ -28,6 +31,16 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    * Start the worker
    */
   async activate(): Promise<void> {
+    if (/\b@travetto[/]test\b/.test(process.env.DEBUG ?? '')) {
+      const handle = await fs.open(path.resolve(`.trv-test-worker.${process.pid}.log`), 'a');
+      const stdout = handle.createWriteStream();
+
+      const c = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });
+      ConsoleManager.set({ onLog: (ev) => c[ev.level](process.pid, ...ev.args) });
+    } else {
+      ConsoleManager.set({ onLog: () => { } });
+    }
+
     RunnerUtil.registerCleanup('worker');
 
     // Listen for inbound requests
@@ -75,4 +88,10 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       concurrency: 1
     }).run();
   }
+}
+
+export async function main(): Promise<void> {
+  defineGlobalEnv({ test: true, set: { FORCE_COLOR: 0 } });
+  ConsoleManager.setDebugFromEnv();
+  await new TestChildWorker().activate();
 }

@@ -36,7 +36,7 @@ The corresponding output would be
 
 **Terminal: Logging output**
 ```bash
-$ trv main @travetto/log/doc/output-run.ts
+$ trv main doc/output-run.ts
 
 2029-03-14T04:00:00.618Z info  [@travetto/log:doc/output.ts:2] Hello World
 2029-03-14T04:00:00.837Z info  [@travetto/log:doc/output.ts:4] Woah! {

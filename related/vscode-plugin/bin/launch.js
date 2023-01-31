@@ -5,7 +5,7 @@ async function activate(context) {
   const vscode = await import('vscode');
   process.chdir(vscode.workspace.workspaceFolders[0].uri.fsPath);
 
-  const { getContext } = await import('@travetto/compiler/bin/transpile');
+  const { getContext } = await import('@travetto/compiler/bin/transpile.js');
   const ctx = await getContext();
 
   const out = `${ctx.workspacePath}/${ctx.outputFolder}`;
@@ -15,8 +15,8 @@ async function activate(context) {
 
   await import('@travetto/manifest');
 
-  const { setup } = await import('@travetto/base/support/init.main');
-  setup();
+  const { init } = await import('@travetto/base/support/init.js');
+  init();
 
   const ext = await import('../src/extension.js');
   await ext.activate(context);

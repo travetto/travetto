@@ -3,6 +3,8 @@ import { Class, ExecUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
 import { ModelRegistry } from '@travetto/model';
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
+import { RootRegistry } from '@travetto/registry';
+
 import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/common';
 
 import type { ModelStorageSupport } from '../../src/service/storage';
@@ -14,6 +16,10 @@ type CandidateNames = { providers: string[], models: string[] };
  * Utilities for finding candidates for model operations
  */
 export class ModelCandidateUtil {
+
+  static async export(op: keyof ModelStorageSupport): Promise<{ models: string[], providers: string[] }> {
+    return { models: await this.getModelNames(), providers: await this.getProviderNames(op) };
+  }
 
   /**
    * Get all models
@@ -64,8 +70,10 @@ export class ModelCandidateUtil {
    * @returns
    */
   static async getCandidates(op: keyof ModelStorageSupport): Promise<CandidateNames> {
-    const main = RootIndex.resolveFileImport('@travetto/model/support/main.candidate.ts');
-    return GlobalTerminal.withWaiting('Resolving', ExecUtil.worker<CandidateNames>(main, [op]).message);
+    return GlobalTerminal.withWaiting('Resolving', ExecUtil.worker<CandidateNames>(
+      RootIndex.resolveFileImport('@travetto/cli/support/cli.ts'),
+      ['main', '@travetto/model/support/bin/candidate.ts', op]
+    ).message);
   }
 
   /**
@@ -80,4 +88,12 @@ export class ModelCandidateUtil {
       models: await this.#getModels(models)
     };
   }
+}
+
+/**
+ * Handles direct invocation
+ */
+export async function main(op: keyof ModelStorageSupport): Promise<{ models: string[], providers: string[] }> {
+  await RootRegistry.init();
+  return await ModelCandidateUtil.export(op);
 }

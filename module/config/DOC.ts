@@ -45,9 +45,7 @@ ${d.Config('Environment variables', 'doc/resources/env.properties', 'properties'
 
 At runtime the resolved config would be:
 
-${d.Execute('Runtime Resolution', 'trv', ['main', '@travetto/config/doc/resolve.ts'], {
-  cwd: './doc-exec'
-})}
+${d.Execute('Runtime Resolution', 'trv', ['main', 'doc/resolve.ts'], { profiles: ['doc'] })}
 
 ${d.Section('Secrets')}
 By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under ${d.Input('config.redacted')}.
@@ -61,17 +59,15 @@ ${d.Code('Database config object', 'doc/dbconfig.ts')}
 
 Using the above config files, you'll notice that the port is not specified (its only specified in the environment variables).  This means when the application attempts to start up, it will fail if the port is not specified via an environment variable:
 
-${d.Execute('Resolved database config', 'trv', ['main', '@travetto/config/doc/dbconfig-run.ts'], {
-  cwd: './doc-exec'
-})}
+${d.Execute('Resolved database config', 'trv', ['main', 'doc/dbconfig-run.ts'], { profiles: ['doc'] })}
 
 What you see, is that the configuration structure must be honored and the application will fail to start if the constraints do not hold true.  This helps to ensure that the configuration, as input to the system, is verified and correct.
 
 By passing in the port via the environment variable, the config will construct properly, and the application will startup correctly:
 
-${d.Execute('Resolved database config', 'trv', ['main', '@travetto/config/doc/dbconfig-run.ts'], {
+${d.Execute('Resolved database config', 'trv', ['main', 'doc/dbconfig-run.ts'], {
   env: { DATABASE_PORT: '200' },
-  cwd: './doc-exec',
+  profiles: ['doc'],
   formatCommand: (cmd, args) => `DATABASE_PORT=200 ${cmd} ${args.join(' ')}`
 })}
 `;

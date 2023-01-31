@@ -35,7 +35,7 @@ export function main(): void {
 
 **Terminal: Simple YAML Parsing**
 ```bash
-$ trv main @travetto/yaml/doc/parse.ts
+$ trv main doc/parse.ts
 
 {
   "name": "Source",
@@ -84,7 +84,7 @@ export function main(): void {
 
 **Terminal: Simple YAML Serialization**
 ```bash
-$ trv main @travetto/yaml/doc/serialize.ts
+$ trv main doc/serialize.ts
 
 name: Source
 age: 20

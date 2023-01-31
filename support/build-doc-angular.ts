@@ -35,15 +35,20 @@ export async function main(target?: string): Promise<void> {
     .filter(x => !target || x.source === path.resolve(root, target))
     .filter(x => (x.files.doc ?? []).some(f => f.source.endsWith('DOC.ts'))));
 
-  // Build out docs
-  await CliModuleUtil.execOnModules('all',
-    (mod, opts) => ExecUtil.spawn('trv', ['doc'], opts),
-    {
-      showStdout: false,
-      progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.workspaceRelative ?? ''}`,
-      progressPosition: 'inline',
-      filter: mod => mods.has(mod)
-    });
+  if (mods.size > 1) {
+    // Build out docs
+    await CliModuleUtil.execOnModules('all',
+      (mod, opts) => ExecUtil.spawn('trv', ['doc'], opts),
+      {
+        showStdout: false,
+        progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.workspaceRelative ?? ''}`,
+        progressPosition: 'inline',
+        filter: mod => mods.has(mod)
+      });
+  } else {
+    const opts = { env: { TRV_MANIFEST: '' }, cwd: [...mods][0].source, stdio: 'inherit' } as const;
+    await ExecUtil.spawn('trv', ['doc'], opts).result;
+  }
 
   for (const mod of mods) {
     if (mod.source.endsWith('vscode-plugin')) {

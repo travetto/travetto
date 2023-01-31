@@ -106,8 +106,7 @@ ${d.Code('resources/email/footer.html', 'doc/email/footer.html')}
 
 The final template will render as:
 
-${d.Execute('Final Output, with styling removed', 'trv', ['main', '@travetto/email-template/doc/render.ts'], {
-  cwd: './doc-exec',
+${d.Execute('Final Output, with styling removed', 'trv', ['main', 'doc/render.ts'], {
   env: {
     TRV_RESOURCES: `${path.resolve('doc')}`
   }

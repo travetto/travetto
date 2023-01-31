@@ -35,11 +35,15 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
       const cwd = RootIndex.getModule(module)!.source;
 
       const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
-        ExecUtil.fork(RootIndex.resolveFileImport('@travetto/test/support/main.test-child.ts'), [], {
-          cwd,
-          env: { TRV_MANIFEST: module },
-          stdio: [0, 'ignore', 2, 'ipc']
-        })
+        ExecUtil.fork(
+          RootIndex.resolveFileImport('@travetto/cli/support/cli.ts'),
+          ['main', '@travetto/test/src/worker/child.ts'],
+          {
+            cwd,
+            env: { TRV_MANIFEST: module },
+            stdio: [0, 'ignore', 2, 'ipc']
+          }
+        )
       );
 
       await channel.once(Events.READY); // Wait for the child to be ready

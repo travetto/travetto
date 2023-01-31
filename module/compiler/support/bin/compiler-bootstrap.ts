@@ -118,7 +118,7 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
 
     // Blocking call, compile only
     const res = cp.spawnSync(process.argv0,
-      [resolve('support/main.output'), manifestTemp],
+      [resolve('support/compile'), manifestTemp],
       { cwd, stdio: 'inherit', encoding: 'utf8' }
     );
 
@@ -136,7 +136,7 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
 
     // Run with watching
     cp.spawnSync(process.argv0,
-      [resolve('support/main.output'), manifestTemp, 'true'], { cwd, stdio: 'inherit' }
+      [resolve('support/compile'), manifestTemp, 'true'], { cwd, stdio: 'inherit' }
     );
   }
 }

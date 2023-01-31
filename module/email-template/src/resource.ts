@@ -8,8 +8,8 @@ export class EmailTemplateResource extends FileQueryProvider {
   static EXT = /[.]email[.]html$/;
   ext = EmailTemplateResource.EXT;
 
-  constructor(paths: string[] = ['@travetto/email-template']) {
-    super({ paths, includeCommon: true, moduleFolder: 'support/resources/email' });
+  constructor(paths: string[] = ['@travetto/email-template#support/resources/email']) {
+    super({ paths, includeCommon: true, mainFolder: 'email' });
   }
 
   /**
