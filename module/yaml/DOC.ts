@@ -9,8 +9,8 @@ In the desire to provide a minimal footprint, the framework provides a minimal $
 ${d.Ref(YamlUtil.name, 'src/util.ts')} is the main access point for this module, and will expose two method, ${d.Method('parse')} and ${d.Method('serialize')}.
 
 ${d.Code('Simple YAML Parsing', 'doc/parse.ts')}
-${d.Execute('Simple YAML Parsing', 'trv', ['main', 'support/main.parse.ts'], { cwd: './doc-exec' })}
+${d.Execute('Simple YAML Parsing', 'trv', ['main', '@travetto/yaml/doc/parse.ts'], { cwd: './doc-exec' })}
 
 ${d.Code('Simple YAML Serialization', 'doc/serialize.ts')}
-${d.Execute('Simple YAML Serialization', 'trv', ['main', 'support/main.serialize.ts'], { cwd: './doc-exec' })}
+${d.Execute('Simple YAML Serialization', 'trv', ['main', '@travetto/yaml/doc/serialize.ts'], { cwd: './doc-exec' })}
 `;

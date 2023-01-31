@@ -1,1 +1,0 @@
-export * from '@travetto/worker/doc/spawner';

@@ -66,7 +66,7 @@ At runtime the resolved config would be:
 
 **Terminal: Runtime Resolution**
 ```bash
-$ trv main support/main.resolve.ts
+$ trv main @travetto/config/doc/resolve.ts
 
 Config {
   sources: [
@@ -111,7 +111,7 @@ Using the above config files, you'll notice that the port is not specified (its 
 
 **Terminal: Resolved database config**
 ```bash
-$ trv main support/main.dbconfig-run.ts
+$ trv main @travetto/config/doc/dbconfig-run.ts
 
 {
   message: 'Failed to construct @travetto/config:doc/dbconfig￮DBConfig as validation errors have occurred',
@@ -138,7 +138,7 @@ By passing in the port via the environment variable, the config will construct p
 
 **Terminal: Resolved database config**
 ```bash
-$ DATABASE_PORT=200 trv main support/main.dbconfig-run.ts
+$ DATABASE_PORT=200 trv main @travetto/config/doc/dbconfig-run.ts
 
 Config {
   sources: [

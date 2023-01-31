@@ -1,1 +1,0 @@
-export * from '@travetto/todo-app/doc/list-todo';

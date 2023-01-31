@@ -162,7 +162,7 @@ export async function main(): Promise<void> {
 
 **Terminal: Output**
 ```bash
-$ trv main ./support/main.spawner.ts
+$ trv main @travetto/worker/doc/spawner.ts
 
 Request complete { input: 1, output: 2 }
 Request complete { input: 2, output: 4 }

@@ -140,7 +140,7 @@ and the output would be a `Person` instance with the following structure
 
 **Terminal: Sample data output after binding**
 ```bash
-$ trv main support/main.person-output.ts
+$ trv main @travetto/schema/doc/person-output.ts
 
 Person {
   name: 'Test',
@@ -200,7 +200,7 @@ would produce an exception similar to following structure
 
 **Terminal: Sample error output**
 ```bash
-$ trv main support/main.person-invalid-output.ts
+$ trv main @travetto/schema/doc/person-invalid-output.ts
 
 Validation Failed {
   "message": "Validation errors have occurred",
@@ -341,7 +341,7 @@ All that happens now, is the type is exported, and the class above is able to pr
 
 **Terminal: Custom Type Validation**
 ```bash
-$ trv main support/main.custom-type-output.ts
+$ trv main @travetto/schema/doc/custom-type-output.ts
 
 Validation Failed {
   "message": "Validation errors have occurred",

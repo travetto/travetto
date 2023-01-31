@@ -90,9 +90,7 @@ ${d.Code('Binding from JSON to Schema', 'doc/person-binding.ts')}
 
 and the output would be a ${d.Input('Person')} instance with the following structure
 
-${d.Execute('Sample data output after binding', 'trv', ['main', 'support/main.person-output.ts'], {
-  cwd: './doc-exec'
-})}
+${d.Execute('Sample data output after binding', 'trv', ['main', '@travetto/schema/doc/person-output.ts'], { cwd: './doc-exec' })}
 
 ${d.Note("Binding will attempt to convert/coerce types as much as possible to honor the pattern of Javascript and it's dynamic nature.")}
 
@@ -108,9 +106,7 @@ ${d.Code('Read Person, and validate', 'doc/person-binding-invalid.ts')}
 
 would produce an exception similar to following structure
 
-${d.Execute('Sample error output', 'trv', ['main', 'support/main.person-invalid-output.ts'], {
-  cwd: './doc-exec'
-})}
+${d.Execute('Sample error output', 'trv', ['main', '@travetto/schema/doc/person-invalid-output.ts'], { cwd: './doc-exec' })}
 
 ${d.SubSection('Custom Validators')}
 
@@ -144,7 +140,5 @@ ${d.Code('Simple Custom Type Usage', 'doc/custom-type-usage.ts')}
 
 All that happens now, is the type is exported, and the class above is able to properly handle point as an ${d.Input('[x, y]')} tuple.  All standard binding and validation patterns are supported, and type enforcement will work as expected.
 
-${d.Execute('Custom Type Validation', 'trv', ['main', 'support/main.custom-type-output.ts'], {
-  cwd: './doc-exec'
-})}
+${d.Execute('Custom Type Validation', 'trv', ['main', '@travetto/schema/doc/custom-type-output.ts'], { cwd: './doc-exec' })}
 `;

@@ -45,7 +45,7 @@ ${d.Config('Environment variables', 'doc/resources/env.properties', 'properties'
 
 At runtime the resolved config would be:
 
-${d.Execute('Runtime Resolution', 'trv', ['main', 'support/main.resolve.ts'], {
+${d.Execute('Runtime Resolution', 'trv', ['main', '@travetto/config/doc/resolve.ts'], {
   cwd: './doc-exec'
 })}
 
@@ -61,7 +61,7 @@ ${d.Code('Database config object', 'doc/dbconfig.ts')}
 
 Using the above config files, you'll notice that the port is not specified (its only specified in the environment variables).  This means when the application attempts to start up, it will fail if the port is not specified via an environment variable:
 
-${d.Execute('Resolved database config', 'trv', ['main', 'support/main.dbconfig-run.ts'], {
+${d.Execute('Resolved database config', 'trv', ['main', '@travetto/config/doc/dbconfig-run.ts'], {
   cwd: './doc-exec'
 })}
 
@@ -69,7 +69,7 @@ What you see, is that the configuration structure must be honored and the applic
 
 By passing in the port via the environment variable, the config will construct properly, and the application will startup correctly:
 
-${d.Execute('Resolved database config', 'trv', ['main', 'support/main.dbconfig-run.ts'], {
+${d.Execute('Resolved database config', 'trv', ['main', '@travetto/config/doc/dbconfig-run.ts'], {
   env: { DATABASE_PORT: '200' },
   cwd: './doc-exec',
   formatCommand: (cmd, args) => `DATABASE_PORT=200 ${cmd} ${args.join(' ')}`
