@@ -64,21 +64,14 @@ async function $getWorkspaceRoot() {
 /**
  * Returns the compiler options
  * @param {ManifestContext} ctx
- * @returns
  */
-async function $getOpts(ctx) {
+async function getCompilerOptions(ctx) {
   if (!(ctx.workspacePath in _opts)) {
-    const path = await $getPath();
-    const fs = await $getFs();
     const ts = await $getTs();
-    const mod = await $getModule();
-    const req = mod.createRequire(`${ctx.workspacePath}/node_modules`);
+    const path = await $getPath();
 
-    const framework = req.resolve('@travetto/compiler/tsconfig.trv.json');
-    const self = path.resolve(ctx.workspacePath, 'tsconfig.json');
-    const loc = (await fs.stat(self).catch(() => false)) ? self : framework;
     const { options } = ts.parseJsonSourceFileConfigFileContent(
-      ts.readJsonConfigFile(loc, ts.sys.readFile), ts.sys, ctx.workspacePath
+      ts.readJsonConfigFile(path.resolve(ctx.workspacePath, ctx.tsconfigFile), ts.sys.readFile), ts.sys, ctx.workspacePath
     );
     options.inlineSourceMap = true;
     options.sourceMap = false;
@@ -102,7 +95,7 @@ async function $getOpts(ctx) {
  * @param {(pkg:Pkg) => Pkg} transform
  */
 async function writePackageJson(ctx, inputFile, outputFile, transform) {
-  const opts = await $getOpts(ctx);
+  const opts = await getCompilerOptions(ctx);
   const ts = await $getTs();
   const isEsm = opts.module !== ts.ModuleKind.CommonJS;
   let pkg = await $getPkg(inputFile);
@@ -124,7 +117,7 @@ async function transpileFile(ctx, inputFile, outputFile) {
   const ts = await $getTs();
   const fs = await $getFs();
 
-  const opts = await $getOpts(ctx);
+  const opts = await getCompilerOptions(ctx);
   const content = ts.transpile(await fs.readFile(inputFile, 'utf8'), opts, inputFile)
     .replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
     .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
@@ -142,7 +135,7 @@ async function writeJsFile(ctx, inputFile, outputFile) {
   const ts = await $getTs();
   const fs = await $getFs();
 
-  const opts = await $getOpts(ctx);
+  const opts = await getCompilerOptions(ctx);
   const isEsm = opts.module !== ts.ModuleKind.CommonJS;
 
   let content = await fs.readFile(inputFile, 'utf8');
@@ -213,6 +206,14 @@ async function getContext(folder = process.cwd()) {
   // All relative to workspacePath
   const manifestFile = `node_modules/${mainModule}/manifest.json`;
 
+  // Detect the desired tsconfig file
+  const mod = await $getModule();
+  const fs = await $getFs();
+  const req = mod.createRequire(`${workspacePath}/node_modules`);
+  const framework = req.resolve('@travetto/compiler/tsconfig.trv.json');
+  const self = path.resolve(workspacePath, 'tsconfig.json');
+  const tsconfigFile = ((await fs.stat(self).catch(() => false)) ? self : framework).replace(`${workspacePath}/`, '');
+
   return {
     mainModule,
     mainPath,
@@ -220,8 +221,9 @@ async function getContext(folder = process.cwd()) {
     monoRepo,
     manifestFile,
     outputFolder: travetto?.outputFolder ?? '.trv_output',
-    compilerFolder: '.trv_compiler'
+    compilerFolder: '.trv_compiler',
+    tsconfigFile
   };
 }
 
-module.exports = { transpileFile, writePackageJson, writeJsFile, buildPackage, getContext };
+module.exports = { transpileFile, writePackageJson, writeJsFile, buildPackage, getCompilerOptions, getContext };

@@ -13,7 +13,7 @@ const PRECOMPILE_MODS = [
   '@travetto/compiler'
 ];
 
-let manifestTemp;
+let manifestTemp: string | undefined;
 
 /**
  * Step 0
@@ -96,6 +96,16 @@ async function buildCompiler(state: ManifestState, ctx: ManifestContext): Promis
 }
 
 /**
+ * Spawn compiler and wait for response
+ */
+function spawnCompile(ctx: ManifestContext, manifestLoc: string, watch?: boolean): cp.SpawnSyncReturns<string> {
+  const cwd = path.resolve(ctx.workspacePath, ctx.compilerFolder);
+  const src = path.resolve(cwd, 'node_modules', '@travetto/compiler/support/compile');
+  const args = [src, manifestLoc, ...(watch ? ['true'] : [])];
+  return cp.spawnSync(process.argv0, args, { cwd, stdio: 'inherit', encoding: 'utf8' });
+}
+
+/**
  *  Step 4
  */
 async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?: boolean): Promise<void> {
@@ -108,19 +118,14 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
   changes = changes.filter(x => x.type !== 'removed');
 
   const { ManifestUtil } = await importManifest(ctx);
-  const resolve = ManifestUtil.resolveFile.bind(null, ctx, state.manifest, '@travetto/compiler');
 
   manifestTemp ??= await ManifestUtil.writeState(state);
-  const cwd = path.resolve(ctx.workspacePath, ctx.compilerFolder);
 
   if (changes.length) {
     log('[3] Changed Sources', changes);
 
     // Blocking call, compile only
-    const res = cp.spawnSync(process.argv0,
-      [resolve('support/compile'), manifestTemp],
-      { cwd, stdio: 'inherit', encoding: 'utf8' }
-    );
+    const res = spawnCompile(ctx, manifestTemp);
 
     if (res.status) {
       throw new Error(res.stderr);
@@ -135,9 +140,7 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
     manifestTemp = await ManifestUtil.writeState(newState);
 
     // Run with watching
-    cp.spawnSync(process.argv0,
-      [resolve('support/compile'), manifestTemp, 'true'], { cwd, stdio: 'inherit' }
-    );
+    spawnCompile(ctx, manifestTemp, true);
   }
 }
 

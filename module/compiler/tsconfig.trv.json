@@ -17,6 +17,7 @@
     "inlineSourceMap": false,
     "removeComments": true,
     "importHelpers": true,
+    "noEmitHelpers": true,
     "outDir": "build/"
   },
 }

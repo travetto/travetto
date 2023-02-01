@@ -1,8 +1,8 @@
 import ts from 'typescript';
-import fs from 'fs/promises';
 import { readdirSync } from 'fs';
 
-import { ManifestModule, ManifestRoot, Package, PackageUtil, path } from '@travetto/manifest';
+import { path, ManifestContext, ManifestModule, ManifestRoot, Package } from '@travetto/manifest';
+import { getCompilerOptions } from '../bin/transpile';
 
 type InputToSource = (inputFile: string) => ({ source: string, module: ManifestModule } | undefined);
 export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
@@ -93,20 +93,6 @@ export class CompilerUtil {
   }
 
   /**
-   * Read the given tsconfig.json values for the project
-   * @param path
-   * @returns
-   */
-  static async readTsConfigOptions(file: string): Promise<ts.CompilerOptions> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const { options } = ts.parseJsonSourceFileConfigFileContent(
-      ts.readJsonConfigFile(file, ts.sys.readFile), ts.sys, nativeCwd
-    );
-    options.target = ts.ScriptTarget.ESNext;
-    return options;
-  }
-
-  /**
    * Build transpilation error
    * @param filename The name of the file
    * @param diagnostics The diagnostic errors
@@ -160,31 +146,16 @@ export class CompilerUtil {
   /**
    * Get loaded compiler options
    */
-  static async getCompilerOptions(outputFolder: string, bootTsConfig: string, workspace: string): Promise<ts.CompilerOptions> {
-    const opts: Partial<ts.CompilerOptions> = {};
-    const rootDir = nativeCwd;
-    const projTsconfig = path.resolve('tsconfig.json');
-    // Fallback to base tsconfig if not found in local folder
-    const config = (await fs.stat(projTsconfig).catch(() => false)) ? projTsconfig : bootTsConfig;
-    const base = await this.readTsConfigOptions(config);
-
-    const { type } = PackageUtil.readPackage(workspace);
-
-    if (type !== undefined) {
-      base.module = `${type}`.toLowerCase() === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
-    }
-
+  static async getCompilerOptions(ctx: ManifestContext): Promise<ts.CompilerOptions> {
     return {
-      ...base,
+      ...await getCompilerOptions(ctx),
       resolveJsonModule: true,
       allowJs: true,
-      outDir: outputFolder,
-      sourceRoot: rootDir,
-      ...opts,
-      rootDir,
+      outDir: path.resolve(ctx.workspacePath, ctx.outputFolder),
+      sourceRoot: nativeCwd,
+      rootDir: nativeCwd,
     };
   }
-
 
   /**
    * Naive hashing

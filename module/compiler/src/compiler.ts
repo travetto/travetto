@@ -22,13 +22,11 @@ type EmitEvent = { file: string, i: number, total: number, err?: EmitError };
  */
 export class Compiler {
 
-  #bootTsconfig: string;
   #state: CompilerState;
   #transformers: string[];
 
   init(manifestState: ManifestState): this {
     this.#state = new CompilerState(manifestState);
-    this.#bootTsconfig = this.#state.resolveModuleFile('@travetto/compiler', 'tsconfig.trv.json');
 
     this.#transformers = this.state.modules.flatMap(
       x => (x.files.support ?? [])
@@ -101,14 +99,7 @@ export class Compiler {
     let program: ts.Program;
 
     const transformers = await this.createTransformerProvider();
-    const options = await CompilerUtil.getCompilerOptions(
-      path.resolve(
-        this.#state.manifest.workspacePath,
-        this.#state.manifest.outputFolder,
-      ),
-      this.#bootTsconfig,
-      this.#state.manifest.workspacePath
-    );
+    const options = await CompilerUtil.getCompilerOptions(this.#state.manifest);
     const host = this.state.getCompilerHost(options);
 
     const emit = async (file: string, needsNewProgram = program === undefined): Promise<EmitError | undefined> => {

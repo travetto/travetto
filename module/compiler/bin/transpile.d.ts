@@ -24,6 +24,11 @@ declare namespace Transpile {
   function buildPackage(ctx: ManifestContext, name: string, sourcePath: string, mainSource: string, extraSource: string[]): Promise<string>;
 
   /**
+   * Build an entire package
+   */
+  function getCompilerOptions(ctx: ManifestContext): Promise<{}>;
+
+  /**
    * Get Context for building
    */
   function getContext(folder?: string): Promise<ManifestContext>;

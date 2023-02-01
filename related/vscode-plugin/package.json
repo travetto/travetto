@@ -42,7 +42,6 @@
     "docRoot": "../..",
     "docBaseUrl": "https://github.com/travetto/travetto/tree/main",
     "globalModules": [
-      "@travetto/compiler",
       "@travetto/doc",
       "@travetto/cli"
     ]
