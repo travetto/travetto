@@ -115,6 +115,7 @@ export class ManifestIndex {
           this.#sourceToEntry.set(entry.source, entry);
           this.#importToEntry.set(entry.import, entry);
           this.#importToEntry.set(entry.import.replace(/[.]js$/, ''), entry);
+          this.#importToEntry.set(entry.import.replace(/[.]js$/, '.ts'), entry);
         }
       }
     }
@@ -218,7 +219,6 @@ export class ManifestIndex {
    * Resolve import
    */
   resolveFileImport(name: string): string {
-    name = !name.endsWith('.d.ts') ? name.replace(/[.]ts$/, '.js') : name;
     return this.#importToEntry.get(name)?.output ?? name;
   }
 

@@ -73,8 +73,6 @@ async function getCompilerOptions(ctx) {
     const { options } = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(path.resolve(ctx.workspacePath, ctx.tsconfigFile), ts.sys.readFile), ts.sys, ctx.workspacePath
     );
-    options.inlineSourceMap = true;
-    options.sourceMap = false;
     try {
       const { type } = await $getPkg(ctx.workspacePath);
       if (type) {

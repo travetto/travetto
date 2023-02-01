@@ -25,7 +25,7 @@ export class TransformerManager {
 
     for (const file of transformerFiles) { // Exclude based on blacklist
       const entry = idx.getEntry(file)!;
-      transformers.push(...getAllTransformers(await import(file), entry.module));
+      transformers.push(...getAllTransformers(await import(entry.import), entry.module));
     }
 
     // Prepare a new visitor factory with a given type checker

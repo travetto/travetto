@@ -61,8 +61,8 @@ class $RootIndex extends ManifestIndex {
    * Asynchronously load all source files from manifest
    */
   async loadSource(): Promise<void> {
-    for (const { output } of this.findSrc()) {
-      await import(output);
+    for (const { import: imp } of this.findSrc()) {
+      await import(imp);
     }
   }
 

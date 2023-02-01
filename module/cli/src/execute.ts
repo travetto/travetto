@@ -54,9 +54,12 @@ export class ExecutionManager {
         file = path.join(RootIndex.manifest.mainModule, file);
       }
 
-      file = RootIndex.resolveFileImport(file);
-      const mod = await import(file);
+      const imp = RootIndex.getFromImport(file)?.import;
+      if (!imp) {
+        throw new Error(`Unknown file: ${file}`);
+      }
 
+      const mod = await import(imp);
       await ShutdownManager.exitWithResponse(await mod.main(...args));
     } catch (err) {
       await ShutdownManager.exitWithResponse(err, true);

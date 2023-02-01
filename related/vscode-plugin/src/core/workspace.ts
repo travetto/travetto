@@ -112,9 +112,8 @@ export class Workspace {
     for (const ext of this.extensionIndex.findSrc({
       filter: f => /.*\/feature.*?\/main[.]/.test(f)
     })) {
-      await import(ext.output);
+      await import(ext.import);
     }
-
   }
 
   /**

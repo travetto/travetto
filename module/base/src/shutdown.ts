@@ -199,8 +199,9 @@ class $ShutdownManager {
   exitWithResponse(res: unknown, failure = false): Promise<void> {
     parentPort?.postMessage(res);
     process.send?.(res);
-    if (!parentPort && res !== undefined) {
-      process[!failure ? 'stdout' : 'stderr'].write(`${typeof res === 'string' ? res : JSON.stringify(res)}\n`);
+    if (res !== undefined) {
+      const msg = typeof res === 'string' ? res : (res instanceof Error ? res.stack : JSON.stringify(res));
+      process[!failure ? 'stdout' : 'stderr'].write(`${msg}\n`);
     }
     return this.exit(!failure ? 0 : (res && res instanceof Error ? res : 1));
   }

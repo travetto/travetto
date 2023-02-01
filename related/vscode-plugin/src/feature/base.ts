@@ -1,7 +1,6 @@
 import vscode from 'vscode';
 
 import { ActivationTarget } from '../core/types';
-import { Workspace } from '../core/workspace';
 
 /**
  * Base feature structure
@@ -24,16 +23,12 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   commandName(task: string): string {
-    const prefix = [this.moduleBase, this.command].filter(x => !!x).join('.')
+    const prefix = [this.moduleBase, this.command].filter(x => !!x).join('.');
     return `${prefix}:${task}`;
   }
 
   register(task: string, handler: () => unknown): void {
     console.log('Registering command', this.commandName(task));
     vscode.commands.registerCommand(this.commandName(task), handler);
-  }
-
-  resolveImport(rel: string): string {
-    return Workspace.workspaceIndex.resolveFileImport(`${this.module}/${rel}`);
   }
 }

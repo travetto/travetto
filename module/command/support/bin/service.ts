@@ -151,7 +151,7 @@ export class ServiceUtil {
     return (await Promise.all(
       RootIndex.findSupport({ filter: x => /\/service[.]/.test(x) })
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        .map(async x => (await import(x.output)).service as CommandService)
+        .map(async x => (await import(x.import)).service as CommandService)
     ))
       .filter(x => !!x);
   }

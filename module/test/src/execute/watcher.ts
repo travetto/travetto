@@ -84,7 +84,7 @@ export class TestWatcher {
 
     if (runAllOnStart) {
       for (const test of await RootIndex.findTest({})) {
-        await import(test.output);
+        await import(test.import);
         itr.add(test.source);
       }
     }

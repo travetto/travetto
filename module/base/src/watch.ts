@@ -1,7 +1,8 @@
 import fs from 'fs/promises';
 
-import { ShutdownManager } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
+
+import { ShutdownManager } from './shutdown';
 
 
 export type FileWatchEvent = { action: 'create' | 'update' | 'delete', file: string };
