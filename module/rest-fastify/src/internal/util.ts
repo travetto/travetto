@@ -48,7 +48,8 @@ export class FastifyServerUtil {
         }
       },
       send(data): void {
-        if ((reply.getHeader('Content-Type') ?? '').includes('json') && typeof data === 'string') {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        if (((reply.getHeader('Content-Type') ?? '') as string).includes('json') && typeof data === 'string') {
           data = Buffer.from(data);
         }
         reply.send(data);

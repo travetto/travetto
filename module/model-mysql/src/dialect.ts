@@ -16,17 +16,11 @@ import { MySQLConnection } from './connection';
 export class MySQLDialect extends SQLDialect {
 
   conn: MySQLConnection;
-  tablePostfix = "COLLATE='utf8mb4_unicode_ci' ENGINE=InnoDB";
+  tablePostfix = 'COLLATE=utf8mb4_bin ENGINE=InnoDB';
 
   constructor(context: AsyncContext, public config: SQLModelConfig) {
     super(config.namespace);
     this.conn = new MySQLConnection(context, config);
-
-    // Customer operators
-    Object.assign(this.SQL_OPS, {
-      $regex: 'REGEXP BINARY',
-      $iregex: 'REGEXP'
-    });
 
     // Custom types
     Object.assign(this.COLUMN_TYPES, {
@@ -35,7 +29,6 @@ export class MySQLDialect extends SQLDialect {
     });
 
     // Word boundary
-    this.regexWordBoundary = '([[:<:]]|[[:>:]])';
     // Field maxlength
     this.idField.minlength = this.idField.maxlength = { n: this.KEY_LEN };
 
@@ -44,6 +37,25 @@ export class MySQLDialect extends SQLDialect {
      */
     if (/^5[.][56]/.test(this.config.version)) {
       this.DEFAULT_STRING_LEN = 191; // Mysql limitation with utf8 and keys
+    } else {
+      this.DEFAULT_STRING_LEN = 3072 / 4 - 1;
+    }
+
+    if (/^5[.].*/.test(this.config.version)) {
+      // Customer operators
+      Object.assign(this.SQL_OPS, {
+        $regex: 'REGEXP BINARY',
+        $iregex: 'REGEXP'
+      });
+
+      this.regexWordBoundary = '([[:<:]]|[[:>:]])';
+    } else {
+      // Customer operators
+      Object.assign(this.SQL_OPS, {
+        $regex: 'REGEXP',
+      });
+      // Double escape
+      this.regexWordBoundary = '\\\\b';
     }
   }
 

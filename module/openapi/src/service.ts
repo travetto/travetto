@@ -1,5 +1,5 @@
 import fs from 'fs/promises';
-import { OpenAPIObject } from 'openapi3-ts';
+import type { OpenAPIObject } from 'openapi3-ts';
 
 import { path } from '@travetto/manifest';
 import { Injectable, Inject } from '@travetto/di';

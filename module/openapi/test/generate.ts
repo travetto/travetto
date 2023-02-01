@@ -284,7 +284,7 @@ export class GenerateSuite {
     assert(config.paths['/test/download'].get.responses['200']);
     assert.deepStrictEqual(config.paths['/test/download'].get.responses['200'], {
       content: {
-        'application/octet-stream': { type: 'string', format: 'binary' }
+        'application/octet-stream': { schema: { type: 'string', format: 'binary' } }
       },
       description: ''
     });

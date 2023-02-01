@@ -29,9 +29,9 @@ npm install @travetto/model-sqlite
 
 The current SQL client support stands at:
    
-   *  [MySQL](https://www.mysql.com/) - 5.6 and 5.7
-   *  [Postgres](https://postgresql.org) - 11+
-   *  [SQLite](https://www.sqlite.org/) - (bettersqlite 7.6+)
+   *  [MySQL](https://www.mysql.com/) - 8.6+
+   *  [Postgres](https://postgresql.org) - 14+
+   *  [SQLite](https://www.sqlite.org/) - (bettersqlite 8.0+)
    *  `SQL Server` - Currently unsupported
    *  `Oracle` - Currently unsupported
 

@@ -336,16 +336,16 @@ First we must start the application:
   sources: [ 'application.1 - file://application.yml', 'override.3 - memory://override' ],
   active: {
     ApiHostConfig: {
-      servers: [ ServerObject_1856065672_49_163Ⲑsyn { url: 'http://localhost:3000' } ],
+      servers: [ ServerObject_1856065672_50_163Ⲑsyn { url: 'http://localhost:3000' } ],
       openapi: '3.0.1'
     },
     ApiInfoConfig: {
-      contact: ContactObject_1856065672_40_123Ⲑsyn {
+      contact: ContactObject_1856065672_41_123Ⲑsyn {
         name: 'Travetto Framework',
         email: 'travetto.framework@gmail.com'
       },
       description: '',
-      license: LicenseObject_1856065672_45_102Ⲑsyn { name: 'ISC' },
+      license: LicenseObject_1856065672_46_102Ⲑsyn { name: 'ISC' },
       title: '@travetto/todo-app',
       version: '0.0.0'
     },

@@ -1,7 +1,7 @@
 import { Env } from '@travetto/base';
 import type { CommandService } from '@travetto/command';
 
-const version = Env.get('MYSQL_VERSION', '5.6');
+const version = Env.get('MYSQL_VERSION', '8.0');
 
 export const service: CommandService = {
   name: 'mysql',

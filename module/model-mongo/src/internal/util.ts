@@ -49,7 +49,7 @@ export class MongoUtil {
     } else if (id instanceof mongo.ObjectId) {
       return id.toHexString();
     } else {
-      return id.buffer.toString('hex');
+      return Buffer.from(id.buffer).toString('hex');
     }
   }
 

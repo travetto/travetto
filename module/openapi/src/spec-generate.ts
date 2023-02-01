@@ -85,8 +85,7 @@ export class SpecGenerator {
             ...this.#getType(sub)
           } : this.#getType(sub),
           required: !!(rootField?.required?.active && sub.required?.active),
-          in: location,
-          extract: undefined
+          in: location
         });
       }
     }
@@ -245,7 +244,7 @@ export class SpecGenerator {
     } else if (body.type === Readable || body.type === Buffer) {
       return {
         content: {
-          [mime ?? 'application/octet-stream']: { type: 'string', format: 'binary' }
+          [mime ?? 'application/octet-stream']: { schema: { type: 'string', format: 'binary' } }
         },
         description: ''
       };

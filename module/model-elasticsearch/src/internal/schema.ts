@@ -4,10 +4,7 @@ import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
-
-import { service } from '../../support/service.elasticsearch';
-
-const { version: VERSION } = service;
+import { getVersion } from './version';
 
 type FieldType = {
   type?: string;
@@ -34,7 +31,7 @@ type UpdateScript = {
  */
 export class ElasticsearchSchemaUtil {
 
-  static MAJOR_VER = parseInt(VERSION.split('.')[0], 10);
+  static MAJOR_VER = parseInt(getVersion().split('.')[0], 10);
 
   /**
    * Build the update script for a given object

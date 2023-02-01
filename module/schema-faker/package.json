@@ -26,8 +26,7 @@
   },
   "dependencies": {
     "@travetto/schema": "^3.0.0-rc.10",
-    "@types/faker": "^5.5.9",
-    "faker": "^5.5.3"
+    "@faker-js/faker": "^7.6.0"
   },
   "travetto": {
     "displayName": "Schema Faker"

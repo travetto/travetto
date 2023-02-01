@@ -15,9 +15,9 @@ ${d.Install('Specific SQL Client: mysql', '@travetto/model-sqlite')}
 
 The current SQL client support stands at:
 ${d.List(
-  d`${lib.MySQL} - 5.6 and 5.7`,
-  d`${lib.Postgres} - 11+`,
-  d`${lib.SQLite} - (bettersqlite 7.6+)`,
+  d`${lib.MySQL} - 8.6+`,
+  d`${lib.Postgres} - 14+`,
+  d`${lib.SQLite} - (bettersqlite 8.0+)`,
   d`${d.Input('SQL Server')} - Currently unsupported`,
   d`${d.Input('Oracle')} - Currently unsupported`,
 )}

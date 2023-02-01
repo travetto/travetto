@@ -55,7 +55,6 @@
     }
   },
   "devDependencies": {
-    "@parcel/watcher": "^2.1.0",
     "@travetto/repo": "^3.0.0-rc.8",
     "@types/debug": "^4.1.7",
     "@types/vscode": "^1.74.0",

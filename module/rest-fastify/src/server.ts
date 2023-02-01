@@ -86,7 +86,7 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
   }
 
   async listen(): Promise<ServerHandle> {
-    await this.raw.listen(this.config.port, this.config.bindAddress);
+    await this.raw.listen({ port: this.config.port, host: this.config.bindAddress });
     this.listening = true;
     return {
       on: this.raw.server.on.bind(this.raw),

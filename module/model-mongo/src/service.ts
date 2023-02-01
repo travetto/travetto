@@ -439,7 +439,7 @@ export class MongoModelService implements
     const where = this.getWhere(
       cls,
       ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }) as WhereClause<T>
-    ) as mongo.Filter<T>;
+    ) as mongo.Filter<Document>;
 
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);
 

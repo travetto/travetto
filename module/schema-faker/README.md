@@ -34,7 +34,7 @@ static #namesToType = {
       [/^(image|img).*url$/, faker.image.imageUrl],
       [/^url$/, faker.internet.url],
       [/^email(addr(ress)?)?$/, faker.internet.email],
-      [/^(tele)?phone(num|number)?$/, faker.phone.phoneNumber],
+      [/^(tele)?phone(num|number)?$/, faker.phone.number],
       [/^((postal|zip)code)|zip$/, faker.address.zipCode],
       [/f(irst)?name/, faker.name.firstName],
       [/l(ast)?name/, faker.name.lastName],
@@ -52,7 +52,7 @@ static #namesToType = {
       [/^lat(itude)?$/, faker.address.latitude],
       [/(profile).*(image|img)/, faker.image.avatar],
       [/(image|img)/, faker.image.image],
-      [/^company(name)?$/, faker.company.companyName],
+      [/^company(name)?$/, faker.company.name],
       [/(desc|description)$/, faker.lorem.sentences.bind(null, 10)]
     ]),
     date: new Map([

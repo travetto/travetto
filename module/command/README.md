@@ -95,13 +95,13 @@ A sample of all services available to the entire framework:
 ```bash
 Service          Version    Status
 -------------------------------------------------
-dynamodb          1.15.0    Running 93af422e793a
+dynamodb          1.20.0    Running 93af422e793a
 elasticsearch     7.17.0    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
-mongodb              4.4    Running 5513eba6734e
-mysql                5.6    Running 307bc66d442a
-postgresql          12.2    Running e78291e71040
-redis                  5    Running 77ba279b4e30
+mongodb              6.0    Running 5513eba6734e
+mysql                8.0    Running 307bc66d442a
+postgresql          14.6    Running e78291e71040
+redis                  7    Running 77ba279b4e30
 s3                latest    Running fdacfc55b9e3
 ```
 

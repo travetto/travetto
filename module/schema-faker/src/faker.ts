@@ -1,4 +1,4 @@
-import faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 import { Class } from '@travetto/base';
 import { BindUtil, SchemaRegistry, FieldConfig, CommonRegExp } from '@travetto/schema';
@@ -13,7 +13,7 @@ export class SchemaFaker {
   static #stringToReType = new Map([
     [CommonRegExp.email, faker.internet.email],
     [CommonRegExp.url, faker.internet.url],
-    [CommonRegExp.telephone, faker.phone.phoneNumber],
+    [CommonRegExp.telephone, faker.phone.number],
     [CommonRegExp.postalCode, faker.address.zipCode]
   ]);
 
@@ -25,7 +25,7 @@ export class SchemaFaker {
       [/^(image|img).*url$/, faker.image.imageUrl],
       [/^url$/, faker.internet.url],
       [/^email(addr(ress)?)?$/, faker.internet.email],
-      [/^(tele)?phone(num|number)?$/, faker.phone.phoneNumber],
+      [/^(tele)?phone(num|number)?$/, faker.phone.number],
       [/^((postal|zip)code)|zip$/, faker.address.zipCode],
       [/f(irst)?name/, faker.name.firstName],
       [/l(ast)?name/, faker.name.lastName],
@@ -43,7 +43,7 @@ export class SchemaFaker {
       [/^lat(itude)?$/, faker.address.latitude],
       [/(profile).*(image|img)/, faker.image.avatar],
       [/(image|img)/, faker.image.image],
-      [/^company(name)?$/, faker.company.companyName],
+      [/^company(name)?$/, faker.company.name],
       [/(desc|description)$/, faker.lorem.sentences.bind(null, 10)]
     ]),
     date: new Map([
@@ -164,7 +164,7 @@ export class SchemaFaker {
     if (!subArray && cfg.array) {
       return this.#array(cfg);
     } else if (cfg.enum) {
-      return faker.random.arrayElement(cfg.enum.values);
+      return faker.helpers.arrayElement(cfg.enum.values);
     } else {
 
       const typ = cfg.type;
