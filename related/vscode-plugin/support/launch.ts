@@ -1,9 +1,7 @@
-/**
- * @param {import('vscode').ExtensionContext} context
- */
-async function activate(context) {
-  const vscode = await import('vscode');
-  process.chdir(vscode.workspace.workspaceFolders[0].uri.fsPath);
+import vscode from 'vscode';
+
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
+  process.chdir(vscode.workspace.workspaceFolders![0].uri.fsPath);
 
   const { getContext } = await import('@travetto/compiler/bin/transpile.js');
   const ctx = await getContext();
@@ -22,9 +20,7 @@ async function activate(context) {
   await ext.activate(context);
 }
 
-async function deactivate() {
+export async function deactivate(): Promise<void> {
   const ext = await import('../src/extension.js');
   await ext.deactivate();
 }
-
-module.exports = { activate, deactivate };

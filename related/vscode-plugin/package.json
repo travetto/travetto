@@ -20,7 +20,7 @@
     "bin",
     "src"
   ],
-  "main": "./out/node_modules/travetto-plugin/bin/launch",
+  "main": "./out/node_modules/travetto-plugin/support/launch.js",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "related/vscode-plugin"

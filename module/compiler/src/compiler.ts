@@ -14,7 +14,7 @@ export type TransformerProvider = {
 };
 
 type EmitError = Error | readonly ts.Diagnostic[];
-type Emitter = (file: string, newProgram?: boolean) => EmitError | undefined;
+type Emitter = (file: string, newProgram?: boolean) => Promise<EmitError | undefined>;
 type EmitEvent = { file: string, i: number, total: number, err?: EmitError };
 
 /**
@@ -55,8 +55,8 @@ export class Compiler {
    */
   async #watchLocalModules(emit: Emitter): Promise<() => Promise<void>> {
     const folders = this.state.modules.filter(x => x.local).map(x => x.source);
-    const emitWithError = (file: string): void => {
-      const err = emit(file, true);
+    const emitWithError = async (file: string): Promise<void> => {
+      const err = await emit(file, true);
       if (err) {
         console.error(CompilerUtil.buildTranspileError(file, err));
       } else {
@@ -64,8 +64,8 @@ export class Compiler {
       }
     };
     const watcher = this.state.getWatcher({
-      create: (inputFile) => emitWithError(inputFile),
-      update: (inputFile) => emitWithError(inputFile),
+      create: emitWithError,
+      update: emitWithError,
       delete: (outputFile) => fs.unlink(outputFile).catch(() => { })
     });
     return CompilerUtil.fileWatcher(folders, watcher);
@@ -111,12 +111,13 @@ export class Compiler {
     );
     const host = this.state.getCompilerHost(options);
 
-    const emit = (file: string, needsNewProgram = program === undefined): EmitError | undefined => {
-      if (needsNewProgram) {
-        program = ts.createProgram({ rootNames: this.#state.getAllFiles(), host, options, oldProgram: program });
-        transformers.init(program.getTypeChecker());
-      }
+    const emit = async (file: string, needsNewProgram = program === undefined): Promise<EmitError | undefined> => {
       try {
+        if (needsNewProgram) {
+          program = ts.createProgram({ rootNames: this.#state.getAllFiles(), host, options, oldProgram: program });
+          transformers.init(program.getTypeChecker());
+        }
+
         const result = program.emit(
           program.getSourceFile(file)!, host.writeFile, undefined, false, transformers.get()
         );
@@ -143,7 +144,7 @@ export class Compiler {
     let i = 0;
     const manifest = this.#state.manifest;
     for (const file of files) {
-      const err = emitter(file);
+      const err = await emitter(file);
       const outputFile = file
         .replace(/[.]ts$/, '.js')
         .replace(manifest.compilerFolder, manifest.outputFolder);

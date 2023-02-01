@@ -2,6 +2,7 @@ import assert from 'assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
+
 import { ReadonlyUser } from './models/readonly';
 
 @Suite('Readonly')

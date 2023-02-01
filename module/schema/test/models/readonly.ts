@@ -6,5 +6,5 @@ export class ReadonlyUser {
 
   readonly profile: {
     readonly age: number;
-  }
+  };
 }
