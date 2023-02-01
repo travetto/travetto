@@ -3,7 +3,7 @@ import { program as commander } from 'commander';
 
 import { PackageUtil, path, RootIndex } from '@travetto/manifest';
 import { GlobalTerminal } from '@travetto/terminal';
-import { ExecUtil, ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/base';
 import { init } from '@travetto/base/support/init';
 
 import { CliCommandManager } from './command-manager';
@@ -57,11 +57,9 @@ export class ExecutionManager {
       file = RootIndex.resolveFileImport(file);
       const mod = await import(file);
 
-      ExecUtil.returnResponse(await mod.main(...args));
-      return ShutdownManager.exit(0);
+      await ShutdownManager.exitWithResponse(await mod.main(...args));
     } catch (err) {
-      ExecUtil.returnResponse(err, true);
-      return ShutdownManager.exit(err instanceof Error ? err : 1);
+      await ShutdownManager.exitWithResponse(err, true);
     }
   }
 

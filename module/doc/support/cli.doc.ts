@@ -41,7 +41,7 @@ export class DocCommand extends CliCommand<Options> {
   async action(): Promise<void> {
     const docFile = path.resolve(this.cmd.input);
     if (!(await fs.stat(docFile).catch(() => false))) {
-      ExecUtil.returnResponse(`The input ${this.cmd.input} does not exist`, true);
+      console.error(`The input ${this.cmd.input} does not exist`);
       return this.exit(1);
     }
 
@@ -71,11 +71,10 @@ export class DocCommand extends CliCommand<Options> {
     } else {
       try {
         await write();
-        ExecUtil.returnResponse(`Wrote docs for ${this.cmd.input}`);
-        return this.exit(0);
+        console.log(`Wrote docs for ${this.cmd.input}`);
       } catch (err) {
-        ExecUtil.returnResponse(`${err}`, true);
-        return this.exit(1);
+        console.error(err);
+        this.exit(1);
       }
     }
   }

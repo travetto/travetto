@@ -1,7 +1,7 @@
 import rl from 'readline';
 import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import { Readable } from 'stream';
-import { SHARE_ENV, Worker, WorkerOptions, parentPort } from 'worker_threads';
+import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 
 import { path } from '@travetto/manifest';
 
@@ -288,20 +288,6 @@ export class ExecUtil {
       proc.kill();
     } else {
       proc.kill('SIGTERM');
-    }
-  }
-
-  /**
-   * Run operation and send response across worker/fork/spawn/root
-   */
-  static returnResponse(res?: unknown, failure = false): void {
-    if (parentPort) {
-      parentPort.postMessage(res);
-    } else {
-      process.send?.(res);
-      if (res) {
-        process[!failure ? 'stdout' : 'stderr'].write(`${typeof res === 'string' ? res : JSON.stringify(res)}\n`);
-      }
     }
   }
 }

@@ -1,4 +1,5 @@
 import { setTimeout } from 'timers/promises';
+import { parentPort } from 'worker_threads';
 
 import { RootIndex } from '@travetto/manifest';
 import { Env } from './env';
@@ -184,9 +185,24 @@ class $ShutdownManager {
     }
   }
 
+  /**
+   * Trigger exit based on a code or a passed in error
+   */
   exit(codeOrError: number | Error & { code?: number }): Promise<void> {
     const code = typeof codeOrError === 'number' ? codeOrError : (codeOrError?.code ?? 1);
     return this.executeAsync(code);
+  }
+
+  /**
+   * Trigger shutdown, and return response as requested
+   */
+  exitWithResponse(res: unknown, failure = false): Promise<void> {
+    parentPort?.postMessage(res);
+    process.send?.(res);
+    if (!parentPort && res !== undefined) {
+      process[!failure ? 'stdout' : 'stderr'].write(`${typeof res === 'string' ? res : JSON.stringify(res)}\n`);
+    }
+    return this.exit(!failure ? 0 : (res && res instanceof Error ? res : 1));
   }
 }
 

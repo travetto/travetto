@@ -42,7 +42,7 @@ export async function main(target?: string): Promise<void> {
       {
         showStdout: false,
         progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.workspaceRelative ?? ''}`,
-        progressPosition: 'inline',
+        progressPosition: 'bottom',
         filter: mod => mods.has(mod)
       });
   } else {
