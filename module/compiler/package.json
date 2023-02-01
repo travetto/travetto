@@ -29,10 +29,10 @@
     "directory": "module/compiler"
   },
   "dependencies": {
+    "@parcel/watcher": "^2.1.0",
     "@travetto/manifest": "^3.0.0-rc.6",
     "@travetto/terminal": "^3.0.0-rc.5",
-    "@travetto/transformer": "^3.0.0-rc.9",
-    "@parcel/watcher": "^2.1.0"
+    "@travetto/transformer": "^3.0.0-rc.9"
   },
   "peerDependencies": {
     "@travetto/cli": "^3.0.0-rc.8"

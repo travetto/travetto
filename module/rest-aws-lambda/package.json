@@ -26,11 +26,11 @@
   },
   "dependencies": {
     "@travetto/rest": "^3.0.0-rc.11",
-    "@types/aws-lambda": "^8.10.109"
+    "@types/aws-lambda": "^8.10.110"
   },
   "devDependencies": {
     "@types/node-fetch": "^2.6.2",
-    "node-fetch": "^2.6.7"
+    "node-fetch": "^2.6.9"
   },
   "peerDependencies": {
     "@travetto/test": "^3.0.0-rc.11"

@@ -33,7 +33,7 @@
     "@travetto/model-query": "^3.0.0-rc.10",
     "@travetto/model-sql": "^3.0.0-rc.10",
     "@types/pg": "^8.6.6",
-    "pg": "^8.8.0"
+    "pg": "^8.9.0"
   },
   "peerDependencies": {
     "@travetto/command": "^3.0.0-rc.7"
