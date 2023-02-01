@@ -8,7 +8,7 @@ import {
 import { TerminalOperation } from './operation';
 import { TerminalQuerier } from './query';
 import { TerminalWriter } from './writer';
-import { ColorOutputUtil, TermStyleInput } from './color-output';
+import { ColorOutputUtil, Prim, TermColorFn, TermColorPalette, TermColorPaletteInput, TermStyleInput } from './color-output';
 
 type TerminalStreamPositionConfig = {
   position?: TermLinePosition;
@@ -167,17 +167,22 @@ export class Terminal implements TermState {
     return this.streamToPosition(source, async (v, i) => render(await resolve(v, i)), config);
   }
 
-  /* eslint-disable @typescript-eslint/member-ordering */
   /** Creates a colorer function */
-  colorer = ColorOutputUtil.colorer.bind(ColorOutputUtil, this);
+  colorer(style: TermStyleInput | [light: TermStyleInput, dark: TermStyleInput]): TermColorFn {
+    return ColorOutputUtil.colorer(this, style);
+  }
 
   /** Creates a color palette based on input styles */
-  palette = ColorOutputUtil.palette.bind(ColorOutputUtil, this);
+  palette<P extends TermColorPaletteInput>(input: P): TermColorPalette<P> {
+    return ColorOutputUtil.palette(this, input);
+  }
 
   /** Convenience method to creates a color template function based on input styles */
-  templateFunction = ColorOutputUtil.templateFunction.bind(ColorOutputUtil, this);
-  /* eslint-enable @typescript-eslint/member-ordering */
+  templateFunction<P extends TermColorPaletteInput>(input: P): (key: keyof P, val: Prim) => string {
+    return ColorOutputUtil.templateFunction(this, input);
+  }
 }
+
 export const GlobalTerminal = new Terminal({ output: process.stdout });
 
 // Trigger
