@@ -19,8 +19,6 @@ const $getFs = $imp.bind(null, 'fs/promises');
 const $getPath = $imp.bind(null, 'path');
 /** @type {() => ({createRequire:(folder:string) => ({ resolve: (file:string)=>string})})} */
 const $getModule = $imp.bind(null, 'module');
-/** @param {string} x */
-const toPosix = x => x.replace(/\\/g, '/');
 
 /**
  * Returns the package.json
@@ -37,28 +35,22 @@ async function $getPkg(inputFolder) {
 }
 
 /**
- * Get workspace root
+ * Gets tsconfig file location
+ * @param {ManifestContext} ctx
  * @return {Promise<string>}
  */
-async function $getWorkspaceRoot() {
-  const path = await $getPath();
-  const fs = await $getFs();
-  let folder = process.cwd();
-  let prevFolder = '';
-  while (folder !== prevFolder) {
-    try {
-      const pkg = await $getPkg(folder);
-      if (!!pkg.workspaces || !!pkg.travetto?.isolated) {
-        return folder;
-      }
-    } catch { }
-    if (await fs.stat(path.resolve(folder, '.git')).catch(() => { })) {
-      break;
-    }
-    prevFolder = folder;
-    folder = path.dirname(folder);
+async function $getTsconfigFile(ctx) {
+  const path = $getPath();
+  const fs = $getFs();
+
+  let tsconfig = path.resolve(ctx.workspacePath, 'tsconfig.json');
+
+  if (!await fs.stat(tsconfig).then(_ => true, _ => false)) {
+    const mod = await $getModule();
+    const req = mod.createRequire(`${ctx.workspacePath}/node_modules`);
+    tsconfig = req.resolve('@travetto/compiler/tsconfig.trv.json');
   }
-  return process.cwd();
+  return tsconfig;
 }
 
 /**
@@ -68,10 +60,11 @@ async function $getWorkspaceRoot() {
 async function getCompilerOptions(ctx) {
   if (!(ctx.workspacePath in _opts)) {
     const ts = await $getTs();
-    const path = await $getPath();
+
+    const tsconfig = await $getTsconfigFile(ctx);
 
     const { options } = ts.parseJsonSourceFileConfigFileContent(
-      ts.readJsonConfigFile(path.resolve(ctx.workspacePath, ctx.tsconfigFile), ts.sys.readFile), ts.sys, ctx.workspacePath
+      ts.readJsonConfigFile(tsconfig, ts.sys.readFile), ts.sys, ctx.workspacePath
     );
     try {
       const { type } = await $getPkg(ctx.workspacePath);
@@ -188,40 +181,4 @@ async function buildPackage(ctx, name, sourcePath, mainSource, extraSources) {
   return path.resolve(outputPath, main);
 }
 
-/**
- * Gets build context
- * @return {Promise<ManifestContext>}
- */
-async function getContext(folder = process.cwd()) {
-  const path = await $getPath();
-
-  const workspacePath = path.resolve(await $getWorkspaceRoot());
-  const mainPath = toPosix(folder);
-
-  const { name: mainModule, workspaces, travetto } = (await $getPkg(mainPath));
-  const monoRepo = workspacePath !== mainPath || !!workspaces;
-
-  // All relative to workspacePath
-  const manifestFile = `node_modules/${mainModule}/manifest.json`;
-
-  // Detect the desired tsconfig file
-  const mod = await $getModule();
-  const fs = await $getFs();
-  const req = mod.createRequire(`${workspacePath}/node_modules`);
-  const framework = req.resolve('@travetto/compiler/tsconfig.trv.json');
-  const self = path.resolve(workspacePath, 'tsconfig.json');
-  const tsconfigFile = ((await fs.stat(self).catch(() => false)) ? self : framework).replace(`${workspacePath}/`, '');
-
-  return {
-    mainModule,
-    mainPath,
-    workspacePath,
-    monoRepo,
-    manifestFile,
-    outputFolder: travetto?.outputFolder ?? '.trv_output',
-    compilerFolder: '.trv_compiler',
-    tsconfigFile
-  };
-}
-
-module.exports = { transpileFile, writePackageJson, writeJsFile, buildPackage, getCompilerOptions, getContext };
+module.exports = { transpileFile, writePackageJson, writeJsFile, buildPackage, getCompilerOptions };

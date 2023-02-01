@@ -33,11 +33,9 @@ async function rewriteManifests(ctx: ManifestContext, state: ManifestState): Pro
   const { ManifestUtil } = await importManifest(ctx);
 
   // Write out all changed manifests
-  const { getContext } = await import('../../bin/transpile');
-
   const dirtyModules = [...Object.entries(state.delta)].filter(x => x[1].length > 0).map(([mod]) => mod);
   for (const module of dirtyModules) {
-    const subCtx = await getContext(state.manifest.modules[module].source);
+    const subCtx = await ManifestUtil.buildContext(state.manifest.modules[module].source);
     await ManifestUtil.createAndWriteManifest(subCtx);
   }
 }

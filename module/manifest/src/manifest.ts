@@ -13,6 +13,15 @@ import { ManifestDeltaUtil } from './delta';
 export class ManifestUtil {
 
   /**
+   * Build a manifest context
+   * @param folder
+   */
+  static async buildContext(folder?: string): Promise<ManifestContext> {
+    const { getManifestContext } = await import('../bin/context');
+    return getManifestContext(folder);
+  }
+
+  /**
    * Produce manifest in memory
    */
   static async buildManifest(ctx: ManifestContext): Promise<ManifestRoot> {

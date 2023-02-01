@@ -32,7 +32,6 @@ export type ManifestContext = {
   workspacePath: string;
   outputFolder: string;
   compilerFolder: string;
-  tsconfigFile: string;
   monoRepo?: boolean;
 };
 

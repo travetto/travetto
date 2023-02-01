@@ -3,8 +3,8 @@ import vscode from 'vscode';
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   process.chdir(vscode.workspace.workspaceFolders![0].uri.fsPath);
 
-  const { getContext } = await import('@travetto/compiler/bin/transpile.js');
-  const ctx = await getContext();
+  const { getManifestContext } = await import('@travetto/manifest/bin/context.js');
+  const ctx = await getManifestContext();
 
   const out = `${ctx.workspacePath}/${ctx.outputFolder}`;
   process.env.TRV_OUTPUT = out;

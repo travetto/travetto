@@ -28,12 +28,12 @@ const compile = (ctx, watch) => $getBootstrap(ctx).then(({ compile: go }) => go(
 
 /** @param {string[]} args */
 async function exec(args) {
-  const { getContext } = require('./transpile');
+  const { getManifestContext } = require('@travetto/manifest/bin/context');
   const op = args.find(x => !x.startsWith('-'));
   /** @type {{clean?: boolean, quiet?: boolean}} */
   const flags = Object.fromEntries(args.filter(x => x.startsWith('-')).map(x => x.split('-').pop()).map(x => [x, true]));
 
-  const ctx = await getContext();
+  const ctx = await getManifestContext();
   const message = flags.quiet ? () => { } : console.log.bind(console);
 
   // Clean if needed
