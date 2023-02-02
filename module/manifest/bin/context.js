@@ -5,14 +5,15 @@
  * @typedef {import('../src/types').ManifestContext} ManifestContext
  */
 
-function $imp(mod) {
-  try { return require(mod); } catch { return import(mod).then(x => x.default); }
+function $getFs() {
+  try { return require('fs/promises'); }
+  catch { return import('fs/promises'); }
+}
+function $getPath() {
+  try { return require('path'); }
+  catch { return import('path'); }
 }
 
-/** @type {() => import('fs/promises')} */
-const $getFs = $imp.bind(null, 'fs/promises');
-/** @type {() => import('path')} */
-const $getPath = $imp.bind(null, 'path');
 /** @param {string} x */
 const toPosix = x => x.replace(/\\/g, '/');
 

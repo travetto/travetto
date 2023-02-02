@@ -12,12 +12,11 @@
       "name": "Launch Extension",
       "runtimeExecutable": "${execPath}",
       "outFiles": [
-        "${workspaceFolder}/out/**/*.js",
-        "${workspaceFolder}/.trv_compiler/**/*.js",
+        "${workspaceFolder}/dist/**/*.js"
       ],
       "resolveSourceMapLocations": [
-        "${workspaceFolder}/out/**/*.js",
-        "${workspaceFolder}/.trv_compiler/**/*.js",
+        "${workspaceFolder}/dist/**/*.js",
+        "${workspaceFolder}/out/**/*.js"
       ],
       "skipFiles": [
         "<node_internals>/**",

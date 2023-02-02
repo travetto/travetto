@@ -1,10 +1,14 @@
 import vscode from 'vscode';
 
-export async function activate(context: vscode.ExtensionContext): Promise<void> {
-  process.chdir(vscode.workspace.workspaceFolders![0].uri.fsPath);
-
+/**
+ * @param {vscode.ExtensionContext} context
+ * @returns {Promise<void>}
+ */
+async function activate(context) {
   const { getManifestContext } = await import('@travetto/manifest/bin/context.js');
-  const ctx = await getManifestContext();
+  const ctx = await getManifestContext(
+    vscode.workspace.workspaceFolders[0].uri.fsPath
+  );
 
   const out = `${ctx.workspacePath}/${ctx.outputFolder}`;
   process.env.TRV_OUTPUT = out;
@@ -20,7 +24,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   await ext.activate(context);
 }
 
-export async function deactivate(): Promise<void> {
+/**
+ * @returns {Promise<void>}
+ */
+async function deactivate() {
   const ext = await import('../src/extension.js');
   await ext.deactivate();
 }
+
+module.exports = { activate, deactivate };
