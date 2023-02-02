@@ -35,6 +35,7 @@ export class TransformerState implements State {
   #resolver: TypeResolver;
   #imports: ImportManager;
   #index: TransformerIndex;
+  #fileIdent: ts.Identifier;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
   #options: ts.CompilerOptions;
@@ -279,9 +280,16 @@ export class TransformerState implements State {
    * Get filename identifier, regardless of module system
    */
   getFilenameIdentifier(): ts.Expression {
-    return this.isEsmOutput() ?
-      this.createAccess('import', 'meta', 'url') :
-      this.createIdentifier('__filename');
+    if (this.#fileIdent === undefined) {
+      this.#fileIdent = this.createIdentifier('ᚕfile');
+      const decl = this.factory.createVariableDeclaration(this.#fileIdent, undefined, undefined,
+        this.fromLiteral(this.#index.getImportName(this.source.fileName) ?? this.source.fileName)
+      );
+      this.addStatements([
+        this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([decl]))
+      ], 0);
+    }
+    return this.#fileIdent;
   }
 
   /**

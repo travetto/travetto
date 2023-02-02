@@ -1,6 +1,6 @@
-import { Closeable, Class } from '@travetto/base';
+import type { Closeable, Class } from '@travetto/base';
 
-import { RestInterceptor } from './interceptor/types';
+import type { RestInterceptor } from './interceptor/types';
 
 export type HeaderMap = Record<string, (string | (() => string))>;
 

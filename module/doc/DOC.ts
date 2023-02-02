@@ -8,7 +8,7 @@ import { lib } from './src/lib';
 type Feature = { text: string, name: string };
 
 function getNodes(): ReturnType<(typeof d)['List']> {
-  const lines = readFileSync(RootIndex.getSourceFile(RootIndex.resolveFileImport('@travetto/doc/src/nodes.ts')), 'utf8').split(/\n/g);
+  const lines = readFileSync(RootIndex.getSourceFile('@travetto/doc/src/nodes.ts'), 'utf8').split(/\n/g);
   let feature: Partial<Feature> | undefined;
   const features: Feature[] = [];
   for (const line of lines) {

@@ -1,4 +1,3 @@
-import { fileURLToPath } from 'url';
 import { createRequire } from 'module';
 
 import { path } from './path';
@@ -34,7 +33,6 @@ class $RootIndex extends ManifestIndex {
   }
 
   #config: Package | undefined;
-  #srcCache = new Map();
   #metadata = new Map<string, FunctionMetadata>();
 
   constructor(output: string = process.env.TRV_OUTPUT ?? process.cwd()) {
@@ -105,20 +103,11 @@ class $RootIndex extends ManifestIndex {
   }
 
   /**
-  * Get source file from output location
+  * Get source file from import location
   * @param outputFile
   */
-  getSourceFile(file: string): string {
-    if (!this.#srcCache.has(file)) {
-      if (file.startsWith('file:')) {
-        this.#srcCache.set(file, path.toPosix(fileURLToPath(file)));
-      } else {
-        this.#srcCache.set(file, path.toPosix(file));
-      }
-    }
-
-    const outputFile = this.#srcCache.get(file)!;
-    return this.getEntry(outputFile)?.source ?? outputFile;
+  getSourceFile(importFile: string): string {
+    return this.getFromImport(importFile)?.source ?? importFile;
   }
 
   /**
@@ -129,8 +118,8 @@ class $RootIndex extends ManifestIndex {
    * @param `methods` Methods and their hashes
    * @param `abstract` Is the class abstract
    */
-  registerFunction(cls: Function, file: string, hash: number, methods?: Record<string, { hash: number }>, abstract?: boolean, synthetic?: boolean): boolean {
-    const source = this.getSourceFile(file);
+  registerFunction(cls: Function, fileOrImport: string, hash: number, methods?: Record<string, { hash: number }>, abstract?: boolean, synthetic?: boolean): boolean {
+    const source = this.getSourceFile(fileOrImport);
     const id = this.getId(source, cls.name);
     Object.defineProperty(cls, 'Ⲑid', { value: id });
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

@@ -26,8 +26,7 @@ export class FileUtil {
     let resolved = path.resolve(file);
     if (!existsSync(resolved)) {
       if (file.endsWith('.ts')) {
-        resolved = RootIndex.resolveFileImport(file);
-        resolved = RootIndex.getSourceFile(resolved);
+        resolved = RootIndex.getSourceFile(file);
       }
       if (!existsSync(resolved)) {
         throw new Error(`Unknown file to resolve: ${file}`);
