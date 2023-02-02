@@ -74,7 +74,6 @@ function travettoPlugin(out: string, modules: ManifestModule[]): Plugin {
         )
       }));
 
-      // TODO: This needs to be isolated, just like in the bootstrap
       await writeRawFile('trv', '#!/bin/sh\nnode node_modules/@travetto/cli/support/cli.js $@\n', '755');
       await writeRawFile('trv.cmd', 'node node_modules/@travetto/cli/support/cli.js %*\n', '755');
     }

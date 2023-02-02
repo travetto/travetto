@@ -74,19 +74,15 @@ export class Compiler {
     return TransformerManager.create(this.#transformers, this.state.manifest);
   }
 
-  async writeRawFile(file: string, contents: string, mode?: string): Promise<void> {
-    const outFile = path.resolve(
+  async writeManifest(): Promise<void> {
+    const manifest = path.resolve(
       this.#state.manifest.workspacePath,
       this.#state.manifest.outputFolder,
-      file
+      this.#state.manifest.manifestFile
     );
-    await fs.mkdir(path.dirname(outFile), { recursive: true });
-    await fs.writeFile(outFile, contents, { encoding: 'utf8', mode });
-  }
-
-  async outputInit(): Promise<void> {
     // Write manifest
-    await this.writeRawFile(this.#state.manifest.manifestFile, JSON.stringify(this.state.manifest));
+    await fs.mkdir(path.dirname(manifest), { recursive: true });
+    await fs.writeFile(manifest, JSON.stringify(this.state.manifest), 'utf8');
   }
 
   /**
@@ -144,7 +140,7 @@ export class Compiler {
    * Run the compiler
    */
   async run(watch?: boolean): Promise<void> {
-    await this.outputInit();
+    await this.writeManifest();
     const emitter = await this.getCompiler();
     let failed = false;
 
