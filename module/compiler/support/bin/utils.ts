@@ -6,7 +6,7 @@ import { createRequire } from 'module';
 
 import type { ManifestContext, ManifestUtil } from '@travetto/manifest';
 
-import { transpileFile, writePackageJson } from '../../bin/transpile';
+import { writeFile } from '../../bin/transpile';
 
 const req = createRequire(`${process.cwd()}/node_modules`);
 
@@ -85,11 +85,7 @@ export async function compileIfStale(ctx: ManifestContext, prefix: string, files
     if (files.some(f => f.stale)) {
       log(`${prefix} Starting`);
       for (const file of files.filter(x => x.stale)) {
-        if (file.input.endsWith('package.json')) {
-          await writePackageJson(ctx, file.input, file.output);
-        } else {
-          await transpileFile(ctx, file.input, file.output);
-        }
+        await writeFile(ctx, file.input, file.output);
       }
     } else {
       log(`${prefix} Skipped`);

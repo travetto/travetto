@@ -79,106 +79,44 @@ async function getCompilerOptions(ctx) {
 }
 
 /**
- * Writes a package json file
- * @param {ManifestContext} ctx
- * @param {string} inputFile
- * @param {string} outputFile
- * @param {(pkg:Pkg) => Pkg} transform
- */
-async function writePackageJson(ctx, inputFile, outputFile, transform) {
-  const opts = await getCompilerOptions(ctx);
-  const ts = await $getTs();
-  const isEsm = opts.module !== ts.ModuleKind.CommonJS;
-  let pkg = await $getPkg(inputFile);
-  pkg = transform?.(pkg) ?? pkg;
-  pkg.main = pkg.main?.replace(/[.]ts$/, '.js');
-  pkg.type = isEsm ? 'module' : 'commonjs';
-  pkg.files = pkg.files?.map(x => x.replace('.ts', '.js'));
-
-  ts.sys.writeFile(outputFile, JSON.stringify(pkg, null, 2));
-}
-
-/**
- * Transpiles a file
+ * Output a file, support for ts, js, and package.json
  * @param {ManifestContext} ctx
  * @param {string} inputFile
  * @param {string} outputFile
  */
-async function transpileFile(ctx, inputFile, outputFile) {
-  const ts = await $getTs();
+async function writeFile(ctx, inputFile, outputFile) {
   const fs = await $getFs();
-
-  const opts = await getCompilerOptions(ctx);
-  const content = ts.transpile(await fs.readFile(inputFile, 'utf8'), opts, inputFile)
-    .replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
-    .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
-
-  ts.sys.writeFile(outputFile, content);
-}
-
-/**
- * Writes a js file
- * @param {ManifestContext} ctx
- * @param {string} inputFile
- * @param {string} outputFile
- */
-async function writeJsFile(ctx, inputFile, outputFile) {
-  const ts = await $getTs();
-  const fs = await $getFs();
-
-  const opts = await getCompilerOptions(ctx);
-  const isEsm = opts.module !== ts.ModuleKind.CommonJS;
-
-  let content = await fs.readFile(inputFile, 'utf8');
-  if (isEsm) {
-    content = content
-      .replace(/^(?:async )?function [^$]/mg, a => `export ${a}`)
-      .replace(/^module.exports.*/mg, '');
-  }
-
-  await fs.writeFile(outputFile, content, 'utf8');
-}
-
-/**
- * Write an entire package
- * @param {ManifestContext} ctx
- * @param {string} name
- * @param {string} sourcePath
- * @param {string} mainSource
- * @param {string[]} extraSources
- */
-async function buildPackage(ctx, name, sourcePath, mainSource, extraSources) {
   const path = await $getPath();
-  const fs = await $getFs();
+  const ts = await $getTs();
+  const opts = await getCompilerOptions(ctx);
+  const isEsm = opts.module !== ts.ModuleKind.CommonJS;
 
-  const files = [mainSource, ...extraSources].map(x => ({ src: x, out: x.replace(/[.]ts$/, '.js') }));
-  const main = files[0].out;
-  const outputPath = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', name);
+  await fs.mkdir(path.dirname(outputFile), { recursive: true });
 
-  for (const { src, out } of files) {
-    const inputFile = path.resolve(sourcePath, src);
-    const outputFile = path.resolve(outputPath, out);
+  let content;
 
-    const [outStat, inStat] = await Promise.all([
-      fs.stat(outputFile).catch(() => undefined),
-      fs.stat(inputFile)
-    ]);
-
-    if (!outStat || (outStat.mtimeMs < inStat.mtimeMs)) {
-      await fs.mkdir(path.dirname(outputFile), { recursive: true });
-
-      if (inputFile.endsWith('.ts')) {
-        await transpileFile(ctx, inputFile, outputFile);
-      } else if (inputFile.endsWith('.js')) {
-        await writeJsFile(ctx, inputFile, outputFile);
-      } else if (inputFile.endsWith('.json')) {
-        await writePackageJson(ctx, inputFile, outputFile,
-          (pkg) => ({ ...pkg, files: files.map(x => x.out), name, main }));
-      }
+  if (inputFile.endsWith('.ts')) {
+    content = ts.transpile(await fs.readFile(inputFile, 'utf8'), opts, inputFile)
+      // Rewrite import/exports
+      .replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
+      .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
+  } else if (inputFile.endsWith('.js')) {
+    content = await fs.readFile(inputFile, 'utf8');
+    if (isEsm) {
+      content = content
+        .replace(/^(?:async )?function [^$]/mg, a => `export ${a}`)
+        .replace(/^module.exports.*/mg, '');
     }
+  } else if (inputFile.endsWith('package.json')) {
+    const pkg = await $getPkg(inputFile);
+    const main = pkg.main?.replace(/[.]ts$/, '.js');
+    const type = isEsm ? 'module' : 'commonjs';
+    const files = pkg.files?.map(x => x.replace('.ts', '.js'));
+    content = JSON.stringify({ ...pkg, main, type, files }, null, 2);
   }
-
-  return path.resolve(outputPath, main);
+  if (content) {
+    ts.sys.writeFile(outputFile, content);
+  }
 }
 
-module.exports = { transpileFile, writePackageJson, writeJsFile, buildPackage, getCompilerOptions };
+module.exports = { getCompilerOptions, writeFile };

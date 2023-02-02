@@ -87,9 +87,6 @@ export class Compiler {
   async outputInit(): Promise<void> {
     // Write manifest
     await this.writeRawFile(this.#state.manifest.manifestFile, JSON.stringify(this.state.manifest));
-    // TODO: This needs to be isolated, just like in the bootstrap
-    await this.writeRawFile('trv', '#!/bin/sh\nnode node_modules/@travetto/cli/support/cli.js $@\n', '755');
-    await this.writeRawFile('trv.cmd', 'node node_modules/@travetto/cli/support/cli.js %*\n', '755');
   }
 
   /**

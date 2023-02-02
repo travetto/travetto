@@ -32,7 +32,9 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.9",
-    "@types/vscode": "^1.74.0",
+    "@types/vscode": "^1.74.0"
+  },
+  "dependencies": {
     "@travetto/base": "^3.0.0-rc.4"
   },
   "travetto": {

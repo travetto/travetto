@@ -25,7 +25,5 @@ export async function main(): Promise<void> {
     }
   }
 
-  await fs.mkdir(path.resolve(out, 'node_modules/@travetto/compiler/bin'), { recursive: true });
-  await fs.copyFile(path.resolve(workspace, 'module/compiler/bin/transpile.js'), path.resolve(out, 'node_modules/@travetto/compiler/bin/transpile.js'));
   await fs.writeFile(path.resolve(RootIndex.mainModule.output, 'manifest.json'), JSON.stringify(RootIndex.manifest));
 }

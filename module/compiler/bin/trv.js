@@ -2,22 +2,57 @@
 
 // @ts-check
 
+/** @typedef {import('@travetto/manifest').ManifestContext} ManifestContext */
+
+function $imp(mod) {
+  try { return require(mod); } catch { return import(mod).then(x => x.default); }
+}
+
+/** @type {() => import('fs/promises')} */
+const $getFs = $imp.bind(null, 'fs/promises');
+/** @type {() => import('path')} */
+const $getPath = $imp.bind(null, 'path');
+/** @type {() => import('path/posix')} */
+const $getPathPosix = $imp.bind(null, 'path/posix');
+
 /**
- * @param {import('@travetto/manifest').ManifestContext} ctx
+ * Get bootstrap
+ * @param {ManifestContext} ctx
  * @return {Promise<import('../support/bin/compiler-bootstrap')>}
  */
 async function $getBootstrap(ctx) {
-  const path = require('path');
-  const { buildPackage } = require('./transpile');
+  const path = await $getPath();
+  const fs = await $getFs();
+  /** @type {import('./transpile')} */
+  const { writeFile } = await $imp('./transpile');
 
-  const root = path.resolve(__dirname, '..');
+  const name = '__compiler_bootstrap__';
+  const files = ['support/bin/compiler-bootstrap.ts', 'support/bin/utils.ts', 'bin/transpile.js']
+    .map(x => ({ src: x, out: x.replace(/[.]ts$/, '.js') }));
 
-  const loc = await buildPackage(
-    ctx, '__compiler_bootstrap__', root, 'support/bin/compiler-bootstrap.ts',
-    ['support/bin/utils.ts', 'bin/transpile.js', 'package.json']
-  );
+  const main = files[0].out;
+  const outputPath = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', name);
 
-  try { return require(loc); } catch { return import(loc); }
+  for (const { src, out } of files) {
+    const inputFile = path.resolve(__dirname, '..', src);
+    const outputFile = path.resolve(outputPath, out);
+
+    const [outStat, inStat] = await Promise.all([
+      fs.stat(outputFile).catch(() => undefined),
+      fs.stat(inputFile)
+    ]);
+
+    if (!outStat || (outStat.mtimeMs < inStat.mtimeMs)) {
+      await writeFile(ctx, inputFile, outputFile);
+    }
+  }
+
+  const pkg = path.resolve(outputPath, 'package.json');
+  if (!await fs.stat(path.resolve(outputPath, 'package.json')).then(_ => true, _ => false)) {
+    await fs.writeFile(pkg, JSON.stringify({ name, main }), 'utf8');
+  }
+
+  return $imp(path.resolve(outputPath, main));
 }
 
 /**
@@ -28,17 +63,17 @@ const compile = (ctx, watch) => $getBootstrap(ctx).then(({ compile: go }) => go(
 
 /** @param {string[]} args */
 async function exec(args) {
-  const { getManifestContext } = require('@travetto/manifest/bin/context');
   const op = args.find(x => !x.startsWith('-'));
   /** @type {{clean?: boolean, quiet?: boolean}} */
   const flags = Object.fromEntries(args.filter(x => x.startsWith('-')).map(x => x.split('-').pop()).map(x => [x, true]));
 
+  const { getManifestContext } = require('@travetto/manifest/bin/context');
   const ctx = await getManifestContext();
   const message = flags.quiet ? () => { } : console.log.bind(console);
 
   // Clean if needed
   if (op === 'clean' || (op && flags.clean)) {
-    const fs = require('fs/promises');
+    const fs = await $getFs();
     await Promise.all([ctx.outputFolder, ctx.compilerFolder].map(folder =>
       fs.rm(`${ctx.workspacePath}/${folder}`, { force: true, recursive: true })));
     if (op === 'clean') {
@@ -65,7 +100,7 @@ async function exec(args) {
       message(`Built to ${ctx.workspacePath}/${ctx.outputFolder}`);
       break;
     default: {
-      const path = require('path/posix');
+      const path = await $getPathPosix();
       const { manifest } = await compile(ctx);
       const out = path.join(ctx.workspacePath, ctx.outputFolder);
       // TODO: Externalize somehow?
