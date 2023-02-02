@@ -13,6 +13,7 @@ import { StreamUtil, Class, AppError } from '@travetto/base';
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
+import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { S3ModelConfig } from './config';
@@ -152,6 +153,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async postConstruct(): Promise<void> {
     this.client = new s3.S3(this.config.config);
+    ModelStorageUtil.registerModelChangeListener(this);
   }
 
   async head<T extends ModelType>(cls: Class<T>, id: string): Promise<boolean> {

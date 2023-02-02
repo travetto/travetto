@@ -76,6 +76,13 @@ function travettoPlugin(out: string, modules: ManifestModule[]): Plugin {
 
       await writeRawFile('trv', '#!/bin/sh\nnode node_modules/@travetto/cli/support/cli.js $@\n', '755');
       await writeRawFile('trv.cmd', 'node node_modules/@travetto/cli/support/cli.js %*\n', '755');
+
+      const resources = main.files.resources ?? [];
+      for (const [el] of resources) {
+        const dest = path.resolve(out, el);
+        await fs.mkdir(path.dirname(dest), { recursive: true });
+        await fs.copyFile(path.resolve(main.source, el), dest);
+      }
     }
   };
   return plugin;
@@ -90,7 +97,10 @@ function buildConfig(): RollupOptions {
     // use glob in the input
     input: ['node_modules/@travetto/cli/support/cli.js'],
     output: {
-      intro: 'function __importStar(obj) { return require("tslib").__importStar(obj); }',
+      intro: [
+        'globalThis.crypto = require("crypto");',
+        'function __importStar(obj) { return require("tslib").__importStar(obj); }'
+      ].join('\n'),
       format: 'commonjs',
       sourcemap: true,
       sourcemapExcludeSources: true,
