@@ -7,18 +7,26 @@ const _opts = {};
  * @typedef {import('@travetto/manifest').ManifestContext} ManifestContext
  */
 
-function $imp(mod) {
-  try { return require(mod); } catch { return import(mod).then(x => x.default); }
+function $getTs() {
+  try { return require('typescript'); }
+  catch { return import('typescript').then(x => x.default); }
 }
-
-/** @type {() => import('typescript')} */
-const $getTs = $imp.bind(null, 'typescript');
-/** @type {() => import('fs/promises')} */
-const $getFs = $imp.bind(null, 'fs/promises');
-/** @type {() => import('path')} */
-const $getPath = $imp.bind(null, 'path');
-/** @type {() => ({createRequire:(folder:string) => ({ resolve: (file:string)=>string})})} */
-const $getModule = $imp.bind(null, 'module');
+function $getFs() {
+  try { return require('fs/promises'); }
+  catch { return import('fs/promises').then(x => x.default); }
+}
+function $getPath() {
+  try { return require('path'); }
+  catch { return import('path').then(x => x.default); }
+}
+/**
+ * @returns {{createRequire:(folder:string) => ({ resolve: (file:string)=>string})}}
+ */
+function $getModule() {
+  try { return require('module'); }
+  // @ts-expect-error
+  catch { return import('module').then(x => x.default); }
+}
 
 /**
  * Returns the package.json
@@ -40,8 +48,8 @@ async function $getPkg(inputFolder) {
  * @return {Promise<string>}
  */
 async function $getTsconfigFile(ctx) {
-  const path = $getPath();
-  const fs = $getFs();
+  const path = await $getPath();
+  const fs = await $getFs();
 
   let tsconfig = path.resolve(ctx.workspacePath, 'tsconfig.json');
 
