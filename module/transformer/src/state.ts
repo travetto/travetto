@@ -281,13 +281,13 @@ export class TransformerState implements State {
    */
   getFilenameIdentifier(): ts.Expression {
     if (this.#fileIdent === undefined) {
-      this.#fileIdent = this.createIdentifier('ᚕfile');
+      this.#fileIdent = this.createIdentifier('ᚕf');
       const decl = this.factory.createVariableDeclaration(this.#fileIdent, undefined, undefined,
         this.fromLiteral(this.#index.getImportName(this.source.fileName) ?? this.source.fileName)
       );
       this.addStatements([
         this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([decl]))
-      ], 0);
+      ], -1);
     }
     return this.#fileIdent;
   }
