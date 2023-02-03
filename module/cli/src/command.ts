@@ -135,8 +135,8 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   boolOption(cfg: OptionConfig<boolean>): OptionConfig<boolean> {
     return {
       type: Boolean,
-      // TODO: This needs to be resolved?
-      combine: (val, curr): boolean => DataUtil.coerceType(val, Boolean, false) ?? true,
+      combine: (val, curr): boolean =>
+        (val !== undefined ? DataUtil.coerceType(val, Boolean, false) : undefined) ?? curr,
       completion: true,
       ...cfg
     };
@@ -222,8 +222,10 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
     }
     for (const cfg of await this.finalizeOptions()) {
       let key = `${cfg.short ? `-${cfg.short}, ` : ''}--${cfg.name}`;
-      if (cfg.type !== Boolean || cfg.def) {
+      if (cfg.type !== Boolean) {
         key = `${key} <${cfg.name}>`;
+      } else if (cfg.type === Boolean) {
+        key = `${key} [${cfg.name}]`;
       }
       cmd = cfg.combine ?
         // @ts-expect-error

@@ -1,95 +1,11 @@
 import fs from 'fs/promises';
 
-import glob from 'picomatch';
-
-import { path, RootIndex } from '@travetto/manifest';
-import { cliTpl } from '@travetto/cli';
+import { path } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
-import { stripAnsiCodes } from '@travetto/terminal';
 
-import { CommonConfig, PackOperation } from './types';
+import { ActiveShellCommand } from './shell';
 
-/**
- * Shared packing utils
- */
 export class PackUtil {
-
-  static #modes: Partial<CommonConfig>[];
-
-  /**
-   * Build configuration object for an operation with a set of configs
-   */
-  static buildConfig<T extends CommonConfig>(
-    op: { defaults?: Partial<T>, overrides?: Partial<T>, extend?(src: Partial<T>, dest: Partial<T>): Partial<T> },
-    configs: Partial<T>[]
-  ): T {
-    const inputs = [
-      op.defaults! ?? {},
-      ...configs,
-      op.overrides! ?? {}
-    ].filter(x => Object.keys(x).length > 0);
-
-    const res = inputs.reduce((out: Partial<T>, config: Partial<T>): Partial<T> => {
-      const final = {
-        active: config.active ?? out.active,
-        workspace: config.workspace ?? out.workspace,
-        preProcess: [...(config.preProcess! ?? []), ...(out.preProcess ?? [])],
-        postProcess: [...(config.postProcess! ?? []), ...(out.postProcess ?? [])],
-        ...op.extend?.(config, out)
-      };
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return final as Partial<T>;
-    }, {});
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return res as T;
-  }
-
-  /**
-   * Find pack modes with associated metadata
-   */
-  static async modeList(): Promise<Partial<CommonConfig>[]> {
-    if (!this.#modes) {
-      this.#modes = await Promise.all(
-        RootIndex.findSupport({ filter: f => /\/pack[.].*[.]/.test(f) })
-          .map(async (x) => {
-            const req: Partial<CommonConfig> = (await import(x.import)).config;
-            req.file = x.import.replace(/^node_modules\//, '');
-            return req;
-          })
-      );
-    }
-    return this.#modes;
-  }
-
-
-  /**
-   * Build file include/exclude lists/checker
-   */
-  static excludeChecker(files: string[], base: string): (file: string) => boolean {
-    const all = files.map(x => {
-      const negate = x.startsWith('!') || x.startsWith('^');
-      x = negate ? x.substring(1) : x;
-      x = x.replace(/^[.][/]/g, `${base}/`);
-      const match: (f: string) => boolean = glob(x, { nocase: true, dot: true, basename: true, contains: true, cwd: base });
-      Object.defineProperty(match, 'source', { value: x });
-      return [match, negate] as const;
-    });
-
-    return (f: string): boolean => {
-      let exclude = undefined;
-      f = path.resolve(base, f);
-      for (const [match, n] of all) {
-        if ((n || exclude === undefined) && match(f)) {
-          if (n) { // Fast exit if negating
-            return false;
-          }
-          exclude = match;
-        }
-      }
-      return !!exclude;
-    };
-  }
-
   /**
    * Update .env.js with new env data
    */
@@ -105,71 +21,13 @@ export class PackUtil {
   }
 
   /**
-   * Run operation with logging
-   */
-  static async runOperation<T extends CommonConfig>(op: PackOperation<T, string>, cfg: T, indent = 0): Promise<void> {
-    const spacer = ' '.repeat(indent);
-    const ctx = await op.context(cfg);
-    const title = cliTpl`${{ title: op.title }} ${ctx}`;
-    const width = Math.max(stripAnsiCodes(title).length, 50); // eslint-disable-line
-
-    let i = 0;
-    function stdout(msg?: string): void {
-      if (i++ > 0) {
-        process.stdout.write(cliTpl`${spacer}${{ param: 'done' }}\n`);
-      }
-      if (msg) {
-        process.stdout.write(cliTpl`${spacer}${{ output: '᳁' }} ${{ path: msg.padEnd(width - 15) }} ... `);
-      }
-    }
-
-    async function runPhase(phase: 'preProcess' | 'postProcess'): Promise<void> {
-      for (const el of cfg[phase] ?? []) {
-        const [name, fn] = Object.entries(el)[0];
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        await stdout(name as string);
-        await fn(cfg);
-      }
-    }
-
-    let message: string | undefined;
-
-    process.stdout.write(`${spacer}${title}\n`);
-    process.stdout.write(`${spacer}${'-'.repeat(width)}\n`);
-
-    await runPhase('preProcess');
-
-    for await (const msg of op.exec(cfg)) {
-      if (msg.includes('Success')) { // We are done
-        message = msg;
-        break;
-      } else {
-        stdout(msg);
-      }
-    }
-
-    await runPhase('postProcess');
-
-    // Wrap up
-    stdout();
-
-    if (message !== undefined) {
-      process.stdout.write(`${spacer}${'-'.repeat(width)}\n`);
-      process.stdout.write(`${spacer}${message}\n`);
-    }
-  }
-
-  /**
    * Remove directory, determine if errors should be ignored
    * @param src The folder to copy
    * @param dest The folder to copy to
    * @param ignore Should errors be ignored
    */
   static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
-    const [cmd, args] = process.platform === 'win32' ?
-      ['xcopy', ['/y', '/h', '/s', path.toNative(src), path.toNative(dest)]] :
-      ['cp', ['-r', '-p', src, dest]];
-
+    const [cmd, ...args] = ActiveShellCommand.copyRecursive(src, dest);
     const res = await ExecUtil.spawn(cmd, args, { catchAsResult: true }).result;
     if (res.code && !ignore) {
       throw new Error(`Failed to copy ${src} to ${dest}`);

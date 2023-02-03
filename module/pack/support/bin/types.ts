@@ -1,19 +1,36 @@
-export type CommonConfig = {
-  name?: string;
-  file?: string;
+export type PackConfig = {
   workspace: string;
-  active?: boolean;
-  postProcess?: { [key: string]: (<T extends CommonConfig>(cfg: T) => Promise<void>) }[];
-  preProcess?: { [key: string]: (<T extends CommonConfig>(cfg: T) => Promise<void>) }[];
+  output: string;
+  clean: boolean;
+  ejectFile: string;
+  module: string;
+
+  // Bundle
+  entryPoint: string;
+  entryCommand: string;
+  minify: boolean;
+  sourcemap: boolean;
+  includeSources: boolean;
+
+  // Docker
+  dockerImage: string;
+  dockerName: string;
+  dockerTag: string[];
+  dockerPort: string[];
+  dockerPush: boolean;
+  dockerRegistry: string;
 };
 
-export type PackOperation<T extends CommonConfig, K extends string> = {
-  key: K;
-  title: string;
-  defaults?: Partial<T>;
-  overrides?: Partial<T>;
-  extend?(src: Partial<T>, dest: Partial<T>): Partial<T>;
-  context(cfg: T): Promise<string> | string;
-  exec(cfg: T): AsyncGenerator<string>;
-  buildConfig(configs: Partial<T>[]): T;
+export type ShellCommandImpl = {
+  createScript(file: string, text: string, mode: string): string[][];
+  scriptOpen(): string[];
+  callCommandWithAllArgs(cmd: string, ...args: string[]): string[];
+  copy(src: string, dest: string): string[];
+  copyRecursive(src: string, dest: string): string[];
+  rmRecursive(dest: string): string[];
+  mkdir(dest: string): string[];
+  export(key: string, value: string): string[];
+  chdir(dest: string): string[];
+  comment(message: string): string[];
+  zip(output: string): string[];
 };
