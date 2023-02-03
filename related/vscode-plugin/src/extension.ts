@@ -1,7 +1,7 @@
 import path from 'path';
 import vscode from 'vscode';
 
-import { RootIndex, ManifestIndex } from '@travetto/manifest';
+import { RootIndex, ManifestIndex, MANIFEST_FILE } from '@travetto/manifest';
 
 import { ActivationManager } from './core/activation';
 import { Workspace } from './core/workspace';
@@ -14,7 +14,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 
   const extManifest = new ManifestIndex(
     root,
-    path.resolve(root, 'node_modules', 'travetto-plugin', 'manifest.json')
+    path.resolve(root, 'node_modules', 'travetto-plugin', MANIFEST_FILE)
   );
 
   await Workspace.init(context, extManifest, RootIndex);

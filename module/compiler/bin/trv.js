@@ -84,10 +84,8 @@ async function exec(args) {
   switch (op) {
     case 'clean': break;
     case 'manifest': {
-      const { writeManifest, buildManifest } = await $getBootstrap(ctx);
-      const manifest = (await buildManifest(ctx)).manifest;
-      await writeManifest(ctx, manifest);
-      const output = `${ctx.workspacePath}/${ctx.outputFolder}/${ctx.manifestFile}`;
+      const { buildAndWriteManifest } = await $getBootstrap(ctx);
+      const output = await buildAndWriteManifest(ctx);
       message(`Wrote manifest ${output}`);
       break;
     }

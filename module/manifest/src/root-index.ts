@@ -2,7 +2,7 @@ import { createRequire } from 'module';
 
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, Package, PackageDigest } from './types';
+import { FunctionMetadata, MANIFEST_FILE, Package, PackageDigest } from './types';
 import { PackageUtil } from './package';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
@@ -16,17 +16,17 @@ class $RootIndex extends ManifestIndex {
    * Load all source modules
    */
   static resolveManifestJSON(root: string, file?: string): string {
-    file = file || path.resolve(root, 'manifest.json');
+    file = file || path.resolve(root, MANIFEST_FILE);
 
     // IF not a file
     if (!file.endsWith('.json')) {
       try {
         // Try to resolve
         const req = createRequire(path.resolve(root, 'node_modules'));
-        file = req.resolve(`${file}/manifest.json`);
+        file = req.resolve(`${file}/${MANIFEST_FILE}`);
       } catch {
         // Fallback to assumed node_modules pattern
-        file = `${root}/node_modules/${file}/manifest.json`;
+        file = `${root}/node_modules/${file}/${MANIFEST_FILE}`;
       }
     }
     return file;

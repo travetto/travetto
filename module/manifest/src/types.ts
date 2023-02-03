@@ -26,8 +26,8 @@ export type ManifestModule = ManifestModuleCore & {
 };
 
 export type ManifestContext = {
-  manifestFile: string;
   mainModule: string;
+  mainOutputFolder: string;
   mainPath: string;
   workspacePath: string;
   outputFolder: string;
@@ -117,3 +117,6 @@ export type FunctionMetadata = {
   synthetic?: boolean;
   abstract?: boolean;
 };
+
+export const MANIFEST_FILE = 'manifest.json';
+export const MANIFEST_STATE_FILE = 'manifest-state.json';

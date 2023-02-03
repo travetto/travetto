@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { IndexedModule, Package, PackageUtil, path, RootIndex } from '@travetto/manifest';
+import { IndexedModule, MANIFEST_FILE, Package, PackageUtil, path, RootIndex } from '@travetto/manifest';
 import { FileQueryProvider, TypedObject } from '@travetto/base';
 
 import { PackUtil } from '../util';
@@ -116,10 +116,9 @@ export class AssembleUtil {
       }
     }
 
-    manifest.manifestFile = 'manifest.json';
     manifest.mainPath = RootIndex.manifest.modules[RootIndex.mainPackage.name].output;
 
-    await fs.writeFile(path.resolve(workspace, 'manifest.json'), JSON.stringify(manifest), 'utf8');
+    await fs.writeFile(path.resolve(workspace, MANIFEST_FILE), JSON.stringify(manifest), 'utf8');
 
     const output = path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder);
     for (const file of [

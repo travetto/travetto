@@ -2,7 +2,7 @@ import ts from 'typescript';
 import fs from 'fs/promises';
 import path from 'path';
 
-import { ManifestState } from '@travetto/manifest';
+import { ManifestState, ManifestUtil } from '@travetto/manifest';
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
 
 import { CompilerUtil } from './util';
@@ -74,17 +74,6 @@ export class Compiler {
     return TransformerManager.create(this.#transformers, this.state.manifest);
   }
 
-  async writeManifest(): Promise<void> {
-    const manifest = path.resolve(
-      this.#state.manifest.workspacePath,
-      this.#state.manifest.outputFolder,
-      this.#state.manifest.manifestFile
-    );
-    // Write manifest
-    await fs.mkdir(path.dirname(manifest), { recursive: true });
-    await fs.writeFile(manifest, JSON.stringify(this.state.manifest), 'utf8');
-  }
-
   /**
    * Compile in a single pass, only emitting dirty files
    */
@@ -140,7 +129,7 @@ export class Compiler {
    * Run the compiler
    */
   async run(watch?: boolean): Promise<void> {
-    await this.writeManifest();
+    await ManifestUtil.writeManifest(this.#state.manifest, this.#state.manifest);
     const emitter = await this.getCompiler();
     let failed = false;
 

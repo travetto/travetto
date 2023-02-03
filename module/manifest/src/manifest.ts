@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import os from 'os';
 
 import { path } from './path';
-import { ManifestContext, ManifestRoot, ManifestState } from './types';
+import { ManifestContext, ManifestRoot, ManifestState, MANIFEST_FILE, MANIFEST_STATE_FILE } from './types';
 
 import { ManifestModuleUtil } from './module';
 import { ManifestDeltaUtil } from './delta';
@@ -11,6 +11,15 @@ import { ManifestDeltaUtil } from './delta';
  * Manifest utils
  */
 export class ManifestUtil {
+
+  static async writeJsonWithBuffer(ctx: ManifestContext, filename: string, obj: object): Promise<string> {
+    const file = path.resolve(ctx.workspacePath, ctx.mainOutputFolder, filename);
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    const temp = path.resolve(os.tmpdir(), `${file.replace(/[\/\\: ]/g, '_')}.${Date.now()}`);
+    await fs.writeFile(temp, JSON.stringify(obj), 'utf8');
+    await fs.copyFile(temp, file);
+    return file;
+  }
 
   /**
    * Build a manifest context
@@ -44,13 +53,13 @@ export class ManifestUtil {
    * Read manifest from a folder
    */
   static async readManifest(ctx: ManifestContext): Promise<ManifestRoot> {
-    const file = path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile);
+    const file = path.resolve(ctx.workspacePath, ctx.mainOutputFolder, MANIFEST_FILE);
     if (await fs.stat(file).catch(() => false)) {
       try {
         return JSON.parse(await fs.readFile(file, 'utf8'));
       } catch (err) {
         await fs.unlink(file).catch(() => { });
-        const final = new Error(`Corrupted manifest ${ctx.manifestFile}: file has been removed, retry`);
+        const final = new Error(`Corrupted manifest ${ctx.mainOutputFolder}/${MANIFEST_FILE}: file has been removed, retry`);
         if (err instanceof Error) {
           final.stack = [final.message, ...(err.stack ?? '').split('\n').slice(1)].join('\n');
         }
@@ -70,15 +79,6 @@ export class ManifestUtil {
    */
   static async readState(file: string): Promise<ManifestState> {
     return JSON.parse(await fs.readFile(file, 'utf8'));
-  }
-
-  /**
-   * Persist state to disk in a temp file, return said temp file
-   */
-  static async writeState(state: ManifestState, file?: string): Promise<string> {
-    const manifestTemp = file ?? path.resolve(os.tmpdir(), `manifest-state.${Date.now()}${Math.random()}.json`);
-    await fs.writeFile(manifestTemp, JSON.stringify(state), 'utf8');
-    return manifestTemp;
   }
 
   /**
@@ -108,12 +108,16 @@ export class ManifestUtil {
   }
 
   /**
-   * Write manifest for a given context
+   * Persist state to disk in a temp file, return said temp file
    */
-  static async writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
-    // Write manifest in the scenario we are in mono-repo state where everything pre-existed
-    const file = path.resolve(ctx.workspacePath, ctx.outputFolder, ctx.manifestFile);
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.writeFile(file, JSON.stringify(manifest));
+  static writeState(ctx: ManifestContext, state: ManifestState): Promise<string> {
+    return ManifestUtil.writeJsonWithBuffer(ctx, `${MANIFEST_STATE_FILE}.${Date.now()}${Math.random()}`, state);
+  }
+
+  /**
+   * Write manifest for a given context, return location
+   */
+  static writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<string> {
+    return ManifestUtil.writeJsonWithBuffer(ctx, MANIFEST_FILE, manifest);
   }
 }

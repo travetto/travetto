@@ -4,7 +4,7 @@ import { path } from './path';
 
 import {
   ManifestModule, ManifestModuleCore, ManifestModuleFile,
-  ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, ManifestRoot
+  ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, ManifestRoot, MANIFEST_FILE
 } from './types';
 
 type ScanTest = ((full: string) => boolean) | { test: (full: string) => boolean };
@@ -69,7 +69,12 @@ export class ManifestIndex {
 
   init(root: string, manifestInput: string | ManifestRoot): void {
     this.#root = root;
-    this.#manifestFile = typeof manifestInput === 'string' ? manifestInput : manifestInput.manifestFile;
+    if (typeof manifestInput === 'string') {
+      this.#manifestFile = manifestInput;
+    } else {
+      const { workspacePath, mainOutputFolder } = manifestInput;
+      this.#manifestFile = path.resolve(workspacePath, mainOutputFolder, MANIFEST_FILE);
+    }
     this.#manifest = typeof manifestInput === 'string' ? JSON.parse(fs.readFileSync(this.#manifestFile, 'utf8')) : manifestInput;
     this.#index();
   }

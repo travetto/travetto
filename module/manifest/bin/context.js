@@ -69,17 +69,15 @@ async function getManifestContext(folder = process.cwd()) {
 
   const { name: mainModule, workspaces, travetto } = (await $getPkg(mainPath));
   const monoRepo = workspacePath !== mainPath || !!workspaces;
-
-  // All relative to workspacePath
-  const manifestFile = `node_modules/${mainModule}/manifest.json`;
+  const outputFolder = travetto?.outputFolder ?? '.trv_output';
 
   return {
     mainModule,
+    mainOutputFolder: `${outputFolder}/node_modules/${mainModule}`,
     mainPath,
     workspacePath,
     monoRepo,
-    manifestFile,
-    outputFolder: travetto?.outputFolder ?? '.trv_output',
+    outputFolder,
     compilerFolder: '.trv_compiler'
   };
 }

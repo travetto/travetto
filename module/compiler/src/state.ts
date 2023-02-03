@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import { mkdirSync, readFileSync, writeFile } from 'fs';
+import { mkdirSync, readFileSync } from 'fs';
 
 import {
   path,
@@ -165,16 +165,6 @@ export class CompilerState {
           }
         }
       }
-
-      // Update manifest on every change
-      writeFile(
-        path.resolve(
-          this.#manifest.workspacePath,
-          this.#manifest.outputFolder,
-          this.#manifest.manifestFile
-        ),
-        JSON.stringify(this.#manifest),
-        () => { });
     };
   }
 

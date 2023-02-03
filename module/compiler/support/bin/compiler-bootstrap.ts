@@ -2,7 +2,7 @@ import path from 'path';
 import fs from 'fs/promises';
 import cp from 'child_process';
 
-import type { ManifestState, ManifestContext, ManifestRoot } from '@travetto/manifest';
+import type { ManifestState, ManifestContext } from '@travetto/manifest';
 
 import { log, compileIfStale, getProjectSources, addNodePath, importManifest } from './utils';
 
@@ -24,8 +24,9 @@ export async function precompile(ctx: ManifestContext): Promise<void> {
   }
 }
 
-export async function writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<void> {
+export async function buildAndWriteManifest(ctx: ManifestContext): Promise<string> {
   const { ManifestUtil } = await importManifest(ctx);
+  const manifest = await ManifestUtil.buildManifest(ctx);
   return ManifestUtil.writeManifest(ctx, manifest);
 }
 
@@ -43,7 +44,7 @@ async function rewriteManifests(ctx: ManifestContext, state: ManifestState): Pro
 /**
  *  Step 1
  */
-export async function buildManifest(ctx: ManifestContext): Promise<ManifestState> {
+async function buildManifestState(ctx: ManifestContext): Promise<ManifestState> {
   log('[1] Manifest Generation');
   const { ManifestUtil } = await importManifest(ctx);
   return ManifestUtil.produceState(ctx);
@@ -79,7 +80,7 @@ async function buildCompiler(state: ManifestState, ctx: ManifestContext): Promis
   const changed = shouldRebuildCompiler(state);
 
   if (changed.transformers.length) {
-    state = await buildManifest(ctx);
+    state = await buildManifestState(ctx);
     let x = 0;
     for (const [mod, file] of changed.transformers) {
       await compileIfStale(
@@ -117,7 +118,7 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
 
   const { ManifestUtil } = await importManifest(ctx);
 
-  manifestTemp ??= await ManifestUtil.writeState(state);
+  manifestTemp ??= await ManifestUtil.writeState(ctx, state);
 
   if (changes.length) {
     log('[3] Changed Sources', changes);
@@ -135,7 +136,7 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
   if (watch) {
     // Rewrite state with updated manifest
     const newState = await ManifestUtil.produceState(ctx);
-    manifestTemp = await ManifestUtil.writeState(newState);
+    manifestTemp = await ManifestUtil.writeState(ctx, newState);
 
     // Run with watching
     spawnCompile(ctx, manifestTemp, true);
@@ -144,7 +145,7 @@ async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?:
 
 export async function compile(ctx: ManifestContext, watch?: boolean): Promise<ManifestState> {
   await precompile(ctx); // Step 0
-  const state = await buildManifest(ctx); // Step 1
+  const state = await buildManifestState(ctx); // Step 1
   await buildCompiler(state, ctx); // Step 2
   await compileOutput(state, ctx, watch); // Step 3
   await addNodePath(path.resolve(ctx.workspacePath, ctx.outputFolder));

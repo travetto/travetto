@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { MANIFEST_FILE, path, RootIndex } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
 
 const folder = RootIndex.mainModule.source;
@@ -25,5 +25,5 @@ export async function main(): Promise<void> {
     }
   }
 
-  await fs.writeFile(path.resolve(RootIndex.mainModule.output, 'manifest.json'), JSON.stringify(RootIndex.manifest));
+  await fs.writeFile(path.resolve(RootIndex.mainModule.output, MANIFEST_FILE), JSON.stringify(RootIndex.manifest));
 }

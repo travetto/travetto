@@ -11,7 +11,7 @@ import jsonImport from '@rollup/plugin-json';
 import sourceMaps from 'rollup-plugin-sourcemaps';
 import type { Plugin, RollupOptions } from 'rollup';
 
-import { type ManifestModule, RootIndex } from '@travetto/manifest';
+import { type ManifestModule, RootIndex, MANIFEST_FILE } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
 
 function getExportingModules(): ManifestModule[] {
@@ -65,7 +65,7 @@ function travettoPlugin(out: string, modules: ManifestModule[]): Plugin {
         }
       }
       const main = RootIndex.manifest.modules[RootIndex.manifest.mainModule];
-      await fs.writeFile(path.resolve(out, main.output, 'manifest.json'), JSON.stringify({
+      await fs.writeFile(path.resolve(out, main.output, MANIFEST_FILE), JSON.stringify({
         ...RootIndex.manifest,
         outputFolder: path.dirname(out),
         modules: Object.fromEntries(
