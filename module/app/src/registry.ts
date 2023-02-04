@@ -1,7 +1,7 @@
 import { RootIndex } from '@travetto/manifest';
 import { ShutdownManager, Class, ConcreteClass, GlobalEnv } from '@travetto/base';
 import { DependencyRegistry, InjectionError } from '@travetto/di';
-import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { BindUtil, SchemaValidator } from '@travetto/schema';
 import { Configuration } from '@travetto/config';
 
 import { AppClass, ApplicationConfig } from './types';
@@ -41,7 +41,7 @@ class $ApplicationRegistry {
   prepareParams(name: string, args: string[]): unknown[] {
     const config = this.#applications.get(name)!;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cleaned = SchemaRegistry.coerceMethodParams(config.target! as Class, 'run', args);
+    const cleaned = BindUtil.coerceMethodParams(config.target! as Class, 'run', args);
     SchemaValidator.validateMethod(config.target!, 'run', cleaned);
     return cleaned;
   }

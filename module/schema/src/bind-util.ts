@@ -306,4 +306,15 @@ export class BindUtil {
     }
     return params;
   }
+
+  /**
+   * Coerce method parameters when possible
+   * @param cls
+   * @param method
+   * @param params
+   * @returns
+   */
+  static coerceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = false): unknown[] {
+    return this.coerceFields(SchemaRegistry.getMethodSchema(cls, method), params, applyDefaults);
+  }
 }

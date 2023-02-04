@@ -3,7 +3,6 @@ import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry'
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
 import { SchemaChangeListener } from './changes';
-import { BindUtil } from '../bind-util';
 import { AllViewⲐ } from '../internal/types';
 
 function hasType<T>(o: unknown): o is { type: Class<T> | string } {
@@ -242,17 +241,6 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       cache.set(method, out);
     }
     return cache.get(method)! ?? [];
-  }
-
-  /**
-   * Coerce method parameters when possible
-   * @param cls
-   * @param method
-   * @param params
-   * @returns
-   */
-  coerceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = false): unknown[] {
-    return BindUtil.coerceFields(this.getMethodSchema(cls, method), params, applyDefaults);
   }
 
   /**

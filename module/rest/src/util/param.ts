@@ -1,5 +1,5 @@
 import { Class, AppError } from '@travetto/base';
-import { SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { EndpointConfig } from '../registry/types';
 import { ParamConfig, Request, Response } from '../types';
@@ -77,7 +77,7 @@ class $ParamExtractor {
     const method = route.handlerName;
     const routed = route.params.map(c => (c.extract ?? this.defaultExtractors[c.location])(c, req, res));
 
-    const params = SchemaRegistry.coerceMethodParams(cls, method, routed, true);
+    const params = BindUtil.coerceMethodParams(cls, method, routed, true);
 
     try {
       SchemaValidator.validateMethod(cls, method, params);
