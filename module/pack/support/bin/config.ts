@@ -1,6 +1,5 @@
 import type { OutputOptions, InputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
-import type commonjsRequire from '@rollup/plugin-commonjs';
 
 import { Env } from '@travetto/base';
 import { ManifestModule, path, RootIndex } from '@travetto/manifest';
@@ -51,16 +50,11 @@ export function getInput(): InputOptions['input'] {
   return [Env.get('BUNDLE_ENTRY')!];
 }
 
-export function getCommonJsConfig(): Parameters<typeof commonjsRequire>[0] {
-  const files = [...RootIndex.getModuleList('all')]
+export function getFiles(): string[] {
+  return [...RootIndex.getModuleList('all')]
     .map(x => RootIndex.manifest.modules[x])
     .filter(m => m.profiles.includes('std'))
     .flatMap(getFilesFromModule);
-
-  return {
-    dynamicRequireRoot: RootIndex.manifest.workspacePath,
-    dynamicRequireTargets: files
-  };
 }
 
 export function getTerserConfig(): Parameters<typeof terser>[0] {
