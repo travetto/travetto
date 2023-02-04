@@ -7,14 +7,16 @@ import type { RollupOptions } from 'rollup';
 
 import { RootIndex } from '@travetto/manifest';
 
-import { getInput, getOutput, getTerserConfig, getFiles } from './config';
+import { getEntry, getOutput, getTerserConfig, getFiles } from './config';
 import { travettoImportPlugin } from './rollup-esm-dynamic-import';
 
 export default function buildConfig(): RollupOptions {
   const output = getOutput();
+  const entry = getEntry();
   const files = getFiles();
+
   return {
-    input: getInput(),
+    input: [entry],
     output,
     plugins: [
       jsonImport(),
@@ -22,7 +24,7 @@ export default function buildConfig(): RollupOptions {
         dynamicRequireRoot: RootIndex.manifest.workspacePath,
         dynamicRequireTargets: (output.format === 'commonjs' ? files : [])
       }),
-      ...(output.format === 'module' ? [travettoImportPlugin(files)] : []),
+      ...(output.format === 'module' ? [travettoImportPlugin(entry, files)] : []),
       nodeResolve({ preferBuiltins: true }),
       ...(output.sourcemap !== 'hidden' && output.sourcemap !== false ? [sourceMaps({})] : []),
       ...(output.compact ? [terser(getTerserConfig())] : [])

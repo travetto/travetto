@@ -46,8 +46,8 @@ export function getOutput(): OutputOptions {
   return { intro: INTRO[format], format, sourcemap, sourcemapExcludeSources: !sources, compact, dir };
 }
 
-export function getInput(): InputOptions['input'] {
-  return [Env.get('BUNDLE_ENTRY')!];
+export function getEntry(): string {
+  return Env.get('BUNDLE_ENTRY')!;
 }
 
 export function getFiles(): string[] {

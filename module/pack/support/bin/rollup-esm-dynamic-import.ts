@@ -2,13 +2,35 @@ import { AcornNode, Plugin } from 'rollup';
 import { walk } from 'estree-walker';
 import MagicString from 'magic-string';
 
-export function travettoImportPlugin(files: string[]): Plugin {
+const BRAND = '__travettoImportRuntime__';
+const ERROR_STATE = 'new Promise(res => setImmediate(res)).then(() => { throw new Error("Unknown variable dynamic import: " + path); })';
+
+const DYNAMIC_IMPORT = (imports: string[]): string => `
+function ${BRAND}(path) { 
+  switch (path) {
+    ${imports.map(p => `  case '${p}': return import('${p}');`).join('\n')}
+    default: return ${ERROR_STATE}
+  } 
+}
+globalThis.${BRAND} = ${BRAND}`;
+
+export function travettoImportPlugin(entry: string, files: string[]): Plugin {
+  const imports = files
+    .map(x => x.split('node_modules/').pop()!)
+    .flatMap(x => x.endsWith('__index__.js') ? [
+      x, x.replace(/\/__index__.*$/, '')
+    ] : [x]);
+
   const out: Plugin = {
     name: 'travetto-import',
     transform(code, id) {
       const parsed = this.parse(code);
 
       let ms: MagicString | undefined;
+
+      if (id.includes(entry)) {
+        (ms ??= new MagicString(code).append(DYNAMIC_IMPORT(imports)));
+      }
 
       walk(parsed, {
         enter: (node) => {
@@ -24,33 +46,7 @@ export function travettoImportPlugin(files: string[]): Plugin {
             return;
           }
 
-          // create magic string if it wasn't created already
-          if (!ms) {
-            ms = new MagicString(code);
-            const imports = files
-              .map(x => x.split('node_modules/').pop()!)
-              .flatMap(x => x.endsWith('__index__.js') ? [
-                x, x.replace('/__index__', '')
-              ] : [x]);
-            ms.prepend(
-              `function __travettoImportRuntime__(path) {
-    switch (path) {
-  ${imports.map((p) => `    case '${p}': return import('${p}');`).join('\n')}
-  ${`    default: return new Promise(function(resolve, reject) {
-        (typeof queueMicrotask === 'function' ? queueMicrotask : setTimeout)(
-          reject.bind(null, new Error("Unknown variable dynamic import: " + path))
-        );
-      })\n`}   }
-   }\n\n`
-            );
-          }
-          // call the runtime function instead of doing a dynamic import, the import specifier will
-          // be evaluated at runtime and the correct import will be returned by the injected function
-          ms.overwrite(
-            impNode.start,
-            impNode.start + 6,
-            '__travettoImportRuntime__'
-          );
+          (ms ??= new MagicString(code)).overwrite(impNode.start, impNode.start + 6, BRAND);
         }
       });
 
@@ -64,5 +60,6 @@ export function travettoImportPlugin(files: string[]): Plugin {
       }
     }
   };
+
   return out;
 }
