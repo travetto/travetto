@@ -1,12 +1,13 @@
 import os from 'os';
-import fs from 'fs/promises';
 
 import { ListOptionConfig, OptionConfig, CliCommand } from '@travetto/cli';
-import { path, RootIndex } from '@travetto/manifest';
+import { PackageUtil, path, RootIndex } from '@travetto/manifest';
 
-import { PackConfig } from './bin/types';
+import { PackConfig, PackFormat } from './bin/types';
 import { PackOperation } from './bin/operation';
+import { PackUtil } from './bin/util';
 
+const MODULE_FORMATS = ['module', 'commonjs'] as const;
 const OUTPUT_FORMATS = ['bare', 'zip', 'docker'] as const;
 
 type Options = {
@@ -14,6 +15,7 @@ type Options = {
   output: OptionConfig<string>;
   clean: OptionConfig<boolean>;
   ejectFile: OptionConfig<string>;
+  format: OptionConfig<PackFormat>;
 
   // Bundle
   entryPoint: OptionConfig<string>;
@@ -44,10 +46,16 @@ export class PackCommand extends CliCommand<Options> {
   }
 
   getOptions(): Options {
+
+    const format =
+      PackageUtil.readPackage(RootIndex.mainModule.source).type ??
+      PackageUtil.readPackage(RootIndex.manifest.workspacePath).type ?? 'commonjs';
+
     return {
       workspace: this.option({ short: 'w', desc: 'Workspace for building' }),
       clean: this.boolOption({ short: 'c', desc: 'Clean workspace', def: true }),
       output: this.option({ short: 'o', desc: 'Output Location' }),
+      format: this.choiceOption({ short: 'f', desc: 'Output Format', choices: MODULE_FORMATS, def: format }),
 
       entryPoint: this.option({ short: 'e', desc: 'Entry point', def: 'node_modules/@travetto/cli/support/cli.js' }),
       entryCommand: this.option({ short: 'ec', desc: 'Entry command' }),
@@ -99,11 +107,11 @@ export class PackCommand extends CliCommand<Options> {
     }
 
     ops.push(
-      PackOperation.bundle,
-      PackOperation.setupScripts,
+      PackOperation.writeEnv,
       PackOperation.copyResources,
       PackOperation.primeAppCache,
-      PackOperation.writeManifest
+      PackOperation.writeManifest,
+      PackOperation.bundle,
     );
 
     switch (action) {
@@ -127,15 +135,7 @@ export class PackCommand extends CliCommand<Options> {
 
     // Eject to file
     if (this.cmd.ejectFile) {
-      output.push('', '');
-      output.unshift('#!/bin/sh');
-      const ejectContent = output.join('\n');
-      if (this.cmd.ejectFile === '-') {
-        console.log!(ejectContent);
-      } else {
-        await fs.mkdir(path.dirname(this.cmd.ejectFile), { recursive: true });
-        await fs.writeFile(this.cmd.ejectFile, ejectContent, 'utf8');
-      }
+      await PackUtil.writeEjectOutput(this.cmd.workspace, module, output, this.cmd.ejectFile);
     }
   }
 }

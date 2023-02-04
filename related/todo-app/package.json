@@ -5,7 +5,6 @@
     "travetto",
     "typescript"
   ],
-  "type": "commonjs",
   "homepage": "https://travetto.io",
   "license": "ISC",
   "author": {

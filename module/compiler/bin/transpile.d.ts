@@ -1,4 +1,4 @@
-import type { ManifestContext } from '@travetto/manifest';
+import type { ManifestContext, Package } from '@travetto/manifest';
 
 declare namespace Transpile {
   /**
@@ -9,7 +9,9 @@ declare namespace Transpile {
   /**
    * Build an entire package
    */
-  function getCompilerOptions(ctx: ManifestContext): Promise<{}>;
+  function getCompilerOptions(ctx: ManifestContext): Promise<{
+    moduleType: Exclude<Package['type'], undefined>
+  }>;
 }
 
 export = Transpile;

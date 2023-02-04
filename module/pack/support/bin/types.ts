@@ -1,9 +1,14 @@
+import { Package } from '@travetto/manifest';
+
+export type PackFormat = Exclude<Package['type'], undefined>;
+
 export type PackConfig = {
   workspace: string;
   output: string;
   clean: boolean;
   ejectFile: string;
   module: string;
+  format: PackFormat;
 
   // Bundle
   entryPoint: string;
@@ -22,7 +27,8 @@ export type PackConfig = {
 };
 
 export type ShellCommandImpl = {
-  createScript(file: string, text: string, mode: string): string[][];
+  var(name: string): string;
+  createScript(file: string, text: string[], mode?: string): string[][];
   scriptOpen(): string[];
   callCommandWithAllArgs(cmd: string, ...args: string[]): string[];
   copy(src: string, dest: string): string[];

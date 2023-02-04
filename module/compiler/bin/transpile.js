@@ -19,9 +19,7 @@ function $getPath() {
   try { return require('path'); }
   catch { return import('path').then(x => x.default); }
 }
-/**
- * @returns {{createRequire:(folder:string) => ({ resolve: (file:string)=>string})}}
- */
+/** @returns {{createRequire:(folder:string) => ({ resolve: (file:string)=>string})}} */
 function $getModule() {
   try { return require('module'); }
   // @ts-expect-error
@@ -75,10 +73,9 @@ async function getCompilerOptions(ctx) {
       ts.readJsonConfigFile(tsconfig, ts.sys.readFile), ts.sys, ctx.workspacePath
     );
     try {
-      const { type } = await $getPkg(ctx.workspacePath);
-      if (type) {
-        options.module = type.toLowerCase() === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
-      }
+      const { type = 'commonjs' } = await $getPkg(ctx.workspacePath);
+      options.moduleType = type.toLowerCase();
+      options.module = type.toLowerCase() === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
     } catch { }
 
     _opts[ctx.workspacePath] = options;

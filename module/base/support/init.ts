@@ -1,4 +1,4 @@
-import { path, RootIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 import { ConsoleManager } from '../src/console';
 import { ShutdownManager } from '../src/shutdown';
@@ -11,9 +11,6 @@ export async function init(): Promise<void> {
   }
 
   initialized = true;
-
-  // Read .env setup
-  try { await import(path.resolve('.env')); } catch { }
 
   // @ts-expect-error -- Lock to prevent __proto__ pollution in JSON
   const objectProto = Object.prototype.__proto__;

@@ -5,7 +5,7 @@ import { ExecUtil } from '@travetto/base';
 
 import { PackConfig } from './types';
 import { PackUtil } from './util';
-import { ActiveShellCommand, ShellCommands } from './shell';
+import { ActiveShellCommand } from './shell';
 
 async function writeRawFile(file: string, contents: string, mode?: string): Promise<void> {
   await fs.writeFile(file, contents, { encoding: 'utf8', mode });
@@ -26,12 +26,14 @@ export class PackOperation {
       if (cfg.output) {
         yield ActiveShellCommand.rmRecursive(cfg.output);
       }
+      yield ActiveShellCommand.mkdir(cfg.workspace);
     } else {
       yield [title];
       await fs.rm(cfg.workspace, { recursive: true, force: true });
       if (cfg.output) {
         await fs.rm(cfg.output, { recursive: true, force: true });
       }
+      await fs.mkdir(cfg.workspace, { recursive: true });
     }
   }
 
@@ -47,7 +49,7 @@ export class PackOperation {
       ['BUNDLE_SOURCEMAP', cfg.sourcemap],
       ['BUNDLE_SOURCES', cfg.includeSources],
       ['BUNDLE_OUTPUT', cfg.workspace],
-      ['BUNDLE_ESM', false],
+      ['BUNDLE_FORMAT', cfg.format],
       ['TRV_MANIFEST', cfg.module]
     ] as const)
       .filter(x => x[1] === false || x[1])
@@ -69,34 +71,25 @@ export class PackOperation {
     }
   }
 
-  static async * setupScripts(cfg: PackConfig): AsyncIterable<string[]> {
-    const entryScripts = ([
-      [ShellCommands.posix, cfg.entryCommand],
-      [ShellCommands.win32, `${cfg.entryCommand}.cmd`]
-    ] as const).map(([cmd, file]) => ({
-      file,
-      text: [
-        cmd.scriptOpen(),
-        cmd.export('TRV_CLI_IPC', ''),
-        cmd.export('TRV_MANIFEST', cfg.module),
-        cmd.callCommandWithAllArgs('node', cfg.entryPoint),
-      ].map(x => x.join(' ')).join('\n'),
-      mode: '755'
-    }));
-
-    const title = 'Creating Scripts';
+  static async * writeEnv(cfg: PackConfig): AsyncIterable<string[]> {
+    const title = 'Writing .env.js';
+    const env = {
+      TRV_MANIFEST: cfg.module,
+      TRV_CLI_IPC: ''
+    };
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
-      yield ActiveShellCommand.chdir(cfg.workspace);
-      yield* entryScripts.flatMap(script =>
-        ActiveShellCommand.createScript(script.file, script.text, script.mode));
+      yield* ActiveShellCommand.createScript(
+        path.resolve(cfg.workspace, '.env.js'),
+        PackUtil.buildEnvJS(env)
+      );
     } else {
       yield [title];
-
-      for (const { file, text, mode } of entryScripts) {
-        await writeRawFile(path.resolve(cfg.workspace, file), text, mode);
-      }
+      await writeRawFile(
+        path.resolve(cfg.workspace, '.env.js'),
+        PackUtil.buildEnvJS(env).join('\n')
+      );
     }
   }
 
@@ -111,7 +104,7 @@ export class PackOperation {
       RootIndex.manifest.modules[RootIndex.mainModule.name],
       RootIndex.manifest.modules['@travetto/manifest']
     ].map(mod => ({
-      src: path.resolve(mod.output, 'package.json'),
+      src: path.resolve(RootIndex.manifest.outputFolder, mod.output, 'package.json'),
       dest: path.resolve(cfg.workspace, mod.output, 'package.json'),
       destFolder: path.resolve(cfg.workspace, mod.output)
     }));
@@ -120,13 +113,12 @@ export class PackOperation {
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
-      yield ActiveShellCommand.chdir(cfg.workspace);
       yield* copyFiles.flatMap(mod => [
-        ActiveShellCommand.mkdir(path.dirname(mod.dest.replace(cfg.workspace, '.'))),
-        ActiveShellCommand.copy(mod.src, mod.dest.replace(cfg.workspace, '.'))
+        ActiveShellCommand.mkdir(path.dirname(mod.dest)),
+        ActiveShellCommand.copy(mod.src, mod.dest)
       ]);
       if (resources.count) {
-        yield ActiveShellCommand.copyRecursive(resources.src, 'resources');
+        yield ActiveShellCommand.copyRecursive(resources.src, path.resolve(cfg.workspace, 'resources'));
       }
     } else {
       yield [title];
@@ -155,7 +147,6 @@ export class PackOperation {
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
-      yield ActiveShellCommand.chdir(path.cwd());
       yield ActiveShellCommand.mkdir(path.dirname(appCache));
       yield ['DEBUG=0', `TRV_MANIFEST=${cfg.module}`, ...appCacheCmd, '>', appCache];
     } else {
@@ -177,7 +168,6 @@ export class PackOperation {
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
-      yield ActiveShellCommand.chdir(process.cwd());
       yield [...Object.entries(env).map(([k, v]) => `${k}=${v}`), ...cmd];
     } else {
       yield [title];

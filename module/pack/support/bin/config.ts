@@ -5,8 +5,12 @@ import type commonjsRequire from '@rollup/plugin-commonjs';
 import { Env } from '@travetto/base';
 import { ManifestModule, path, RootIndex } from '@travetto/manifest';
 
-const INTRO = `
+import { PackFormat } from './types';
+
+const INTRO = {
+  commonjs: `
 globalThis.crypto = require("crypto");
+try { require('./.env')} catch {}
 
 function __importStar(mod) { 
   if (mod && mod.__esModule) return mod;
@@ -14,7 +18,13 @@ function __importStar(mod) {
   if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
   result["default"] = mod;
   return result;
-}`;
+}
+`,
+  module: `
+globalThis.crypto = await import("crypto");
+try {await import('./.env')} catch {}
+`
+};
 
 function getFilesFromModule(m: ManifestModule): string[] {
   return [
@@ -29,13 +39,12 @@ function getFilesFromModule(m: ManifestModule): string[] {
 }
 
 export function getOutput(): OutputOptions {
-  const esm = Env.getBoolean('BUNDLE_ESM') ?? false;
-  const format = esm ? 'esm' : 'commonjs';
   const sourcemap = Env.getBoolean('BUNDLE_SOURCEMAP') ?? false;
   const sources = Env.getBoolean('BUNDLE_SOURCES') ?? false;
   const compact = Env.getBoolean('BUNDLE_COMPRESS') ?? true;
+  const format: PackFormat = Env.get('BUNDLE_FORMAT', 'commonjs');
   const dir = Env.get('BUNDLE_OUTPUT')!;
-  return { intro: INTRO, format, sourcemap, sourcemapExcludeSources: !sources, compact, dir };
+  return { intro: INTRO[format], format, sourcemap, sourcemapExcludeSources: !sources, compact, dir };
 }
 
 export function getInput(): InputOptions['input'] {

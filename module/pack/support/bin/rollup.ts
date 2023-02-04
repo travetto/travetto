@@ -2,7 +2,6 @@ import commonjsRequire from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import jsonImport from '@rollup/plugin-json';
-
 import sourceMaps from 'rollup-plugin-sourcemaps';
 import type { RollupOptions } from 'rollup';
 
@@ -15,7 +14,9 @@ export default function buildConfig(): RollupOptions {
     output,
     plugins: [
       jsonImport(),
-      commonjsRequire(getCommonJsConfig()),
+      commonjsRequire({
+        ...getCommonJsConfig(),
+      }),
       nodeResolve({ preferBuiltins: true }),
       ...(output.sourcemap !== 'hidden' && output.sourcemap !== false ? [sourceMaps({})] : []),
       ...(output.compact ? [terser(getTerserConfig())] : [])

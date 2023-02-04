@@ -1,23 +1,19 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
 
 import { ActiveShellCommand } from './shell';
 
 export class PackUtil {
   /**
-   * Update .env.js with new env data
+   * Generate env.js
    */
-  static async writeEnvJs(workspace: string, env: Record<string, string | undefined>): Promise<void> {
-    const out = path.resolve(workspace, '.env.js');
-    let src = '';
-    if (!!(await fs.stat(out).catch(() => { }))) {
-      src = await fs.readFile(out, 'utf8');
-    }
-    const lines = Object.entries(env).map(([k, v]) => v ? `process.env['${k}'] = \`${v.replace(/`/g, '\\`')}\`;` : '');
-    const content = `${src}\n${lines.join('\n')}`;
-    await fs.writeFile(out, content, { encoding: 'utf8' });
+  static buildEnvJS(env: Record<string, string | number | boolean | undefined>): string[] {
+    const entries = Object.entries(env)
+      .filter(([k, v]) => (v !== undefined))
+      .map(([k, v]) => [k, `${v}`]);
+    return entries.map(([k, v]) => `process.env.${k} = '${v}';`);
   }
 
   /**
@@ -31,6 +27,37 @@ export class PackUtil {
     const res = await ExecUtil.spawn(cmd, args, { catchAsResult: true }).result;
     if (res.code && !ignore) {
       throw new Error(`Failed to copy ${src} to ${dest}`);
+    }
+  }
+
+  /**
+   * Finalize eject output
+   */
+  static async writeEjectOutput(
+    workspace: string,
+    module: string,
+    output: string[],
+    file: string
+  ): Promise<void> {
+    const vars = {
+      DIST: workspace,
+      TRV_OUT: path.resolve(path.cwd(), RootIndex.manifest.outputFolder),
+      ROOT: path.cwd(),
+      MOD: module
+    };
+
+    const content = [
+      ActiveShellCommand.scriptOpen(),
+      ...Object.entries(vars).map(([k, v]) => ActiveShellCommand.export(k, v).join(' ')),
+      Object.entries(vars).reduce((text, [k, v]) => text.replaceAll(v, ActiveShellCommand.var(k)), output.join('\n')),
+      '', ''
+    ].join('\n');
+
+    if (file === '-' || file === '/dev/stdout') {
+      console.log!(content);
+    } else {
+      await fs.mkdir(path.dirname(file), { recursive: true });
+      await fs.writeFile(file, content, 'utf8');
     }
   }
 }

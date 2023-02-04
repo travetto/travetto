@@ -26,7 +26,7 @@ export class ManifestUtil {
    * @param folder
    */
   static async buildContext(folder?: string): Promise<ManifestContext> {
-    const { getManifestContext } = await import('../bin/context');
+    const { getManifestContext } = await import('../bin/context.js');
     return getManifestContext(folder);
   }
 

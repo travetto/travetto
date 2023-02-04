@@ -4,16 +4,22 @@
 
 /** @typedef {import('@travetto/manifest').ManifestContext} ManifestContext */
 
-function $imp(mod) {
-  try { return require(mod); } catch { return import(mod).then(x => x.default); }
-}
-
-/** @type {() => import('fs/promises')} */
-const $getFs = $imp.bind(null, 'fs/promises');
-/** @type {() => import('path')} */
-const $getPath = $imp.bind(null, 'path');
-/** @type {() => import('path/posix')} */
-const $getPathPosix = $imp.bind(null, 'path/posix');
+const $getTranspile = () => {
+  try { return require('./transpile'); }
+  catch { return import('./transpile').then(x => x.default); }
+};
+const $getFs = () => {
+  try { return require('fs/promises'); }
+  catch { return import('fs/promises').then(x => x.default); }
+};
+const $getPath = () => {
+  try { return require('path'); }
+  catch { return import('path').then(x => x.default); }
+};
+const $getPathPosix = () => {
+  try { return require('path/posix'); }
+  catch { return import('path/posix').then(x => x.default); }
+};
 
 /**
  * Get bootstrap
@@ -24,7 +30,7 @@ async function $getBootstrap(ctx) {
   const path = await $getPath();
   const fs = await $getFs();
   /** @type {import('./transpile')} */
-  const { writeFile } = await $imp('./transpile');
+  const { writeFile, getCompilerOptions } = await $getTranspile();
 
   const name = '__compiler_bootstrap__';
   const files = ['support/bin/compiler-bootstrap.ts', 'support/bin/utils.ts', 'bin/transpile.js']
@@ -32,6 +38,8 @@ async function $getBootstrap(ctx) {
 
   const main = files[0].out;
   const outputPath = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', name);
+
+  const opts = await getCompilerOptions(ctx);
 
   for (const { src, out } of files) {
     const inputFile = path.resolve(__dirname, '..', src);
@@ -49,10 +57,17 @@ async function $getBootstrap(ctx) {
 
   const pkg = path.resolve(outputPath, 'package.json');
   if (!await fs.stat(path.resolve(outputPath, 'package.json')).then(_ => true, _ => false)) {
-    await fs.writeFile(pkg, JSON.stringify({ name, main }), 'utf8');
+    await fs.writeFile(pkg, JSON.stringify({ name, main, type: opts.moduleType }), 'utf8');
   }
 
-  return $imp(path.resolve(outputPath, main));
+  const file = path.resolve(outputPath, main);
+  try {
+    // @ts-ignore
+    const res = await import(file);
+    return res;
+  } catch {
+    return require(file);
+  }
 }
 
 /**
