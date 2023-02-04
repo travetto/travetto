@@ -155,18 +155,33 @@ export class PackOperation {
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
-      yield ActiveShellCommand.chdir(RootIndex.mainModule.source);
+      yield ActiveShellCommand.chdir(path.cwd());
       yield ActiveShellCommand.mkdir(path.dirname(appCache));
-      yield ['DEBUG=0', ...appCacheCmd, '>', appCache];
+      yield ['DEBUG=0', `TRV_MANIFEST=${cfg.module}`, ...appCacheCmd, '>', appCache];
     } else {
       yield [title];
       const out = await ExecUtil.spawn(
         appCacheCmd[0], appCacheCmd.slice(1),
-        { cwd: RootIndex.mainModule.source, env: { DEBUG: '0' } }
+        { env: { DEBUG: '0', TRV_MANIFEST: cfg.module } }
       ).result;
 
       await fs.mkdir(path.dirname(appCache), { recursive: true });
       await fs.writeFile(appCache, out.stdout, 'utf8');
+    }
+  }
+
+  static async * writeManifest(cfg: PackConfig): AsyncIterable<string[]> {
+    const title = 'Writing Manifest';
+    const cmd = ['npx', 'trv', 'manifest'];
+    const env = { NODE_ENV: 'prod', TRV_MANIFEST: cfg.module, TRV_OUTPUT_FOLDER: cfg.workspace };
+
+    if (cfg.ejectFile) {
+      yield ActiveShellCommand.comment(title);
+      yield ActiveShellCommand.chdir(process.cwd());
+      yield [...Object.entries(env).map(([k, v]) => `${k}=${v}`), ...cmd];
+    } else {
+      yield [title];
+      await ExecUtil.spawn(cmd[0], cmd.slice(1), { env }).result;
     }
   }
 

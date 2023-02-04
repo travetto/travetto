@@ -185,8 +185,13 @@ export class ManifestModuleUtil {
     const visitor = new ModuleDependencyVisitor(ctx);
     const declared = await PackageUtil.visitPackages(ctx.mainPath, visitor);
     const sorted = [...declared].sort((a, b) => a.name.localeCompare(b.name));
+    let modules = await Promise.all(sorted.map(x => this.describeModule(x)));
 
-    const modules = await Promise.all(sorted.map(x => this.describeModule(x)));
+    // If in prod mode, only include std modules
+    if (/^prod/i.test(process.env.NODE_ENV ?? '')) {
+      modules = modules.filter(x => x.profiles.includes('std'));
+    }
+
     return Object.fromEntries(modules.map(m => [m.name, m]));
   }
 }

@@ -13,6 +13,14 @@ function $getPath() {
   try { return require('path'); }
   catch { return import('path'); }
 }
+/**
+ * @returns {{createRequire:(folder:string) => ({ resolve: (file:string)=>string})}}
+ */
+function $getModule() {
+  try { return require('module'); }
+  // @ts-expect-error
+  catch { return import('module').then(x => x.default); }
+}
 
 /** @param {string} x */
 const toPosix = x => x.replace(/\\/g, '/');
@@ -61,15 +69,27 @@ async function $getWorkspaceRoot() {
  * Gets build context
  * @return {Promise<ManifestContext>}
  */
-async function getManifestContext(folder = process.cwd()) {
+async function getManifestContext(folder) {
   const path = await $getPath();
+  const fs = await $getFs();
+
+  folder ??= process.env.TRV_MANIFEST ?? process.cwd();
 
   const workspacePath = path.resolve(await $getWorkspaceRoot());
-  const mainPath = toPosix(folder);
+  let mainPath = toPosix(folder);
+
+  // If not a folder, try to treat as package
+  if (!await fs.stat(path.resolve(mainPath)).catch(() => false)) {
+    const mod = await $getModule();
+    const req = mod.createRequire(`${workspacePath}/node_modules`);
+    try {
+      mainPath = path.dirname(req.resolve(`${folder}/package.json`));
+    } catch { }
+  }
 
   const { name: mainModule, workspaces, travetto } = (await $getPkg(mainPath));
   const monoRepo = workspacePath !== mainPath || !!workspaces;
-  const outputFolder = travetto?.outputFolder ?? '.trv_output';
+  const outputFolder = process.env.TRV_OUTPUT_FOLDER ?? travetto?.outputFolder ?? '.trv_output';
 
   return {
     mainModule,

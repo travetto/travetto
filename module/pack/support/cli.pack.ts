@@ -103,6 +103,7 @@ export class PackCommand extends CliCommand<Options> {
       PackOperation.setupScripts,
       PackOperation.copyResources,
       PackOperation.primeAppCache,
+      PackOperation.writeManifest
     );
 
     switch (action) {

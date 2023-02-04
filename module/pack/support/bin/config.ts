@@ -1,20 +1,11 @@
 import type { OutputOptions, InputOptions } from 'rollup';
+import type terser from '@rollup/plugin-terser';
+import type commonjsRequire from '@rollup/plugin-commonjs';
 
 import { Env } from '@travetto/base';
 import { ManifestModule, path, RootIndex } from '@travetto/manifest';
 
-export type AssembleConfig = {
-  dir: string;
-  entryFile: string;
-  modules: ManifestModule[];
-};
-
-export function getAssembleConfig(): { config: AssembleConfig, output: OutputOptions, input: InputOptions['input'], files: string[] } {
-  const modules = [...RootIndex.getModuleList('all')]
-    .map(x => RootIndex.manifest.modules[x])
-    .filter(m => m.profiles.includes('std'));
-
-  const intro = `
+const INTRO = `
 globalThis.crypto = require("crypto");
 
 function __importStar(mod) { 
@@ -25,7 +16,8 @@ function __importStar(mod) {
   return result;
 }`;
 
-  const files = modules.flatMap(m => [
+function getFilesFromModule(m: ManifestModule): string[] {
+  return [
     ...m.files.$index ?? [],
     ...m.files.src ?? [],
     ...m.files.bin ?? [],
@@ -33,22 +25,45 @@ function __importStar(mod) {
       .filter(f => !/support\/(test|transform|doc|pack)/.test(f[0]))
   ]
     .filter(([, t]) => t === 'ts' || t === 'js' || t === 'json')
-    .map(([f]) => path.resolve(m.output, f.replace(/[.]ts$/, '.js'))));
+    .map(([f]) => path.resolve(m.output, f.replace(/[.]ts$/, '.js')));
+}
 
+export function getOutput(): OutputOptions {
   const esm = Env.getBoolean('BUNDLE_ESM') ?? false;
   const format = esm ? 'esm' : 'commonjs';
   const sourcemap = Env.getBoolean('BUNDLE_SOURCEMAP') ?? false;
   const sources = Env.getBoolean('BUNDLE_SOURCES') ?? false;
   const compact = Env.getBoolean('BUNDLE_COMPRESS') ?? true;
   const dir = Env.get('BUNDLE_OUTPUT')!;
-  const entryFile = Env.get('BUNDLE_ENTRY')!;
+  return { intro: INTRO, format, sourcemap, sourcemapExcludeSources: !sources, compact, dir };
+}
 
-  const output: OutputOptions = { intro, format, sourcemap, sourcemapExcludeSources: !sources, compact, dir };
+export function getInput(): InputOptions['input'] {
+  return [Env.get('BUNDLE_ENTRY')!];
+}
+
+export function getCommonJsConfig(): Parameters<typeof commonjsRequire>[0] {
+  const files = [...RootIndex.getModuleList('all')]
+    .map(x => RootIndex.manifest.modules[x])
+    .filter(m => m.profiles.includes('std'))
+    .flatMap(getFilesFromModule);
 
   return {
-    files,
-    output,
-    config: { modules, entryFile, dir },
-    input: [entryFile],
+    dynamicRequireRoot: RootIndex.manifest.workspacePath,
+    dynamicRequireTargets: files
+  };
+}
+
+export function getTerserConfig(): Parameters<typeof terser>[0] {
+  return {
+    mangle: true,
+    keep_classnames: true,
+    keep_fnames: true,
+    ecma: 2020,
+    compress: {},
+    output: {
+      shebang: false,
+      comments: false,
+    }
   };
 }

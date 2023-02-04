@@ -1,5 +1,3 @@
-// @ts-expect-error
-import multipleInput from 'rollup-plugin-multi-input';
 import commonjsRequire from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
@@ -8,40 +6,19 @@ import jsonImport from '@rollup/plugin-json';
 import sourceMaps from 'rollup-plugin-sourcemaps';
 import type { RollupOptions } from 'rollup';
 
-import { RootIndex } from '@travetto/manifest';
+import { getInput, getOutput, getTerserConfig, getCommonJsConfig } from './config';
 
-import { travettoPlugin } from './plugin';
-import { getAssembleConfig } from './config';
-
-const TERSER_CONFIG: Parameters<typeof terser>[0] = {
-  mangle: true,
-  keep_classnames: true,
-  keep_fnames: true,
-  ecma: 2020,
-  compress: {},
-  output: {
-    shebang: false,
-    comments: false,
-  }
-};
-
-function buildConfig(): RollupOptions {
-  const { config, input, output, files } = getAssembleConfig();
-
+export default function buildConfig(): RollupOptions {
+  const output = getOutput();
   return {
-    input, output, plugins: [
-      travettoPlugin(config),
-      multipleInput(),
+    input: getInput(),
+    output,
+    plugins: [
       jsonImport(),
-      commonjsRequire({
-        dynamicRequireRoot: RootIndex.manifest.workspacePath,
-        dynamicRequireTargets: files
-      }),
+      commonjsRequire(getCommonJsConfig()),
       nodeResolve({ preferBuiltins: true }),
       ...(output.sourcemap !== 'hidden' && output.sourcemap !== false ? [sourceMaps({})] : []),
-      ...(output.compact ? [terser(TERSER_CONFIG)] : [])
+      ...(output.compact ? [terser(getTerserConfig())] : [])
     ]
   };
 }
-
-export default buildConfig();
