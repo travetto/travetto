@@ -1,4 +1,5 @@
-import mongo from 'mongodb';
+// Wildcard import needed here due to packaging issues
+import * as mongo from 'mongodb';
 import { Readable } from 'stream';
 
 import {

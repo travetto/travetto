@@ -1,4 +1,4 @@
-import mongo from 'mongodb';
+import * as mongo from 'mongodb';
 
 import { Class, DataUtil, ObjectUtil } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';

@@ -58,7 +58,7 @@ export class ImportManager {
     }
 
     const fileOrImport = this.#getImportFile(spec);
-    if (!(fileOrImport && (fileOrImport.startsWith('.') || this.#index.getFromImport(fileOrImport)))) {
+    if (!fileOrImport || !(fileOrImport.startsWith('.') || this.#index.getFromImport(fileOrImport))) {
       return clause;
     }
 
