@@ -1,5 +1,5 @@
 import { appendFile, mkdir } from 'fs/promises';
-import type * as commander from 'commander';
+import type commander from 'commander';
 
 import { path } from '@travetto/manifest';
 import { ConsoleManager, DataUtil, defineGlobalEnv, GlobalEnvConfig, ShutdownManager } from '@travetto/base';

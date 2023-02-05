@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+import type vscode from 'vscode';
 
 export type TargetEvent<T = unknown> = {
   type: string;

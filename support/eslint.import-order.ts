@@ -1,4 +1,4 @@
-import type * as eslint from 'eslint';
+import type eslint from 'eslint';
 import { BaseExpression, Expression } from 'estree';
 
 const groupTypeMap = {

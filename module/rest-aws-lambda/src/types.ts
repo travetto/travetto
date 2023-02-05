@@ -1,4 +1,4 @@
-import type * as lambda from 'aws-lambda';
+import type lambda from 'aws-lambda';
 
 export type LambdaAPIGatewayProxyEvent = lambda.APIGatewayProxyEvent;
 export type LambdaAPIGatewayProxyResult = lambda.APIGatewayProxyResult;

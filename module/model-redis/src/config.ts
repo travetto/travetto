@@ -1,4 +1,4 @@
-import * as redis from 'redis';
+import type redis from 'redis';
 
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';

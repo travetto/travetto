@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/consistent-type-assertions */
-import * as mongo from 'mongodb';
+import mongo from 'mongodb';
 import { Readable } from 'stream';
 
 import {
@@ -194,6 +193,7 @@ export class MongoModelService implements
     if (!result.insertedId) {
       throw new ExistsError(cls, cleaned.id);
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     delete (cleaned as { _id?: unknown })._id;
     return cleaned;
   }
@@ -245,9 +245,11 @@ export class MongoModelService implements
       .entries(items)
       .reduce<Record<string, unknown>>((acc, [k, v]) => {
         if (v === null || v === undefined) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const o = (acc.$unset ??= {}) as Record<string, unknown>;
           o[k] = v;
         } else {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const o = (acc.$set ??= {}) as Record<string, unknown>;
           o[k] = v;
         }
@@ -347,6 +349,7 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         bulk.insert(MongoUtil.preInsertId(op.insert as T));
       } else if (op.upsert) {
         bulk.find({ _id: MongoUtil.uuid(op.upsert.id!) }).upsert().updateOne({ $set: op.upsert });
@@ -361,9 +364,11 @@ export class MongoModelService implements
 
     for (const op of operations) {
       if (op.insert) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         MongoUtil.postLoadId(op.insert as T);
       }
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectId }[]) {
       out.insertedIds.set(index, MongoUtil.idToString(_id));
     }
@@ -379,6 +384,7 @@ export class MongoModelService implements
       out.errors = res.getWriteErrors();
       for (const err of out.errors) {
         const op = operations[err.index];
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const k = Object.keys(op)[0] as keyof BulkResponse['counts'];
         out.counts[k] -= 1;
       }
@@ -400,6 +406,7 @@ export class MongoModelService implements
     const result = await store.findOne(
       this.getWhere(
         cls,
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         ModelIndexedUtil.projectIndex(cls, idx, body) as WhereClause<T>
       )
     );
@@ -415,6 +422,7 @@ export class MongoModelService implements
     const result = await store.deleteOne(
       this.getWhere(
         cls,
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         ModelIndexedUtil.projectIndex(cls, idx, body) as WhereClause<T>
       )
     );
@@ -436,14 +444,17 @@ export class MongoModelService implements
       throw new AppError('Cannot list on unique indices', 'data');
     }
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const where = this.getWhere(
       cls,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }) as WhereClause<T>
     ) as mongo.Filter<Document>;
 
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);
 
     for await (const el of cursor) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       yield (await MongoUtil.postLoadId(await ModelCrudUtil.load(cls, el))) as T;
     }
   }
@@ -505,9 +516,11 @@ export class MongoModelService implements
     const items = MongoUtil.extractSimple(data);
     const final = Object.entries(items).reduce<Record<string, unknown>>((acc, [k, v]) => {
       if (v === null || v === undefined) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const o = (acc.$unset = acc.$unset ?? {}) as Record<string, unknown>;
         o[k] = v;
       } else {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const o = (acc.$set = acc.$set ?? {}) as Record<string, unknown>;
         o[k] = v;
       }
@@ -524,6 +537,7 @@ export class MongoModelService implements
     const col = await this.getStore(cls);
     const pipeline: object[] = [{
       $group: {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         _id: `$${field as string}`,
         count: {
           $sum: 1
@@ -539,6 +553,7 @@ export class MongoModelService implements
 
     pipeline.unshift({ $match: q });
 
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const result = (await col.aggregate(pipeline).toArray()) as { _id: mongo.ObjectId, count: number }[];
 
     return result.map(val => ({

@@ -1,4 +1,4 @@
-import type * as commander from 'commander';
+import type commander from 'commander';
 
 import { cliTpl } from './color';
 

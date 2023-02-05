@@ -1,4 +1,4 @@
-import * as mongo from 'mongodb';
+import mongo from 'mongodb';
 
 import { FileResourceProvider, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';

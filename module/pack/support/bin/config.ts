@@ -47,7 +47,6 @@ export function getOutput(): OutputOptions {
     intro: INTRO[format],
     format, sourcemap, sourcemapExcludeSources: !sources,
     compact, dir, inlineDynamicImports: format !== 'commonjs',
-    sourcemapPathTransform: (src: string, map: string): string => path.resolve(src)
   };
 }
 
