@@ -221,16 +221,18 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
       cmd = cmd.arguments(this.getArgs?.());
     }
     for (const cfg of await this.finalizeOptions()) {
-      let key = `${cfg.short ? `-${cfg.short}, ` : ''}--${cfg.name}`;
-      if (cfg.type !== Boolean) {
-        key = `${key} <${cfg.name}>`;
-      } else if (cfg.type === Boolean) {
-        key = `${key} [${cfg.name}]`;
-      }
-      cmd = cfg.combine ?
+      const pre = cfg.short ? `-${cfg.short}, ` : '';
+      if (cfg.type === Boolean) {
+        if (cfg.def) {
+          cmd.option(`${pre}--no-${cfg.name}`, `Disables: ${cfg.desc}`);
+        } else {
+          cmd.option(`${pre}--${cfg.name}`, cfg.desc);
+        }
+      } else {
+        const key = `${pre}--${cfg.name} <${cfg.name}>`;
         // @ts-expect-error
-        cmd.option(key, cfg.desc, cfg.combine, cfg.def) :
-        cmd.option(key, cfg.desc, (cur, acc) => cur, cfg.def);
+        cmd = cmd.option(key, cfg.desc, cfg.combine ?? ((cur, acc) => cur), cfg.def);
+      }
     }
 
     cmd = cmd.action(this.runAction.bind(this));

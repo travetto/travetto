@@ -84,9 +84,9 @@ export class Env {
   /**
    * Filters out process.env
    */
-  static export(filter: RegExp): Record<string, string | undefined> {
+  static export(filter: RegExp, exclude?: RegExp): Record<string, string | undefined> {
     return Object.fromEntries(Object.entries(process.env)
-      .filter(([k]) => filter.test(k))
+      .filter(([k]) => filter.test(k) && (!exclude || !(exclude?.test(k))))
       .sort((a, b) => a[0].localeCompare(b[0]))
     );
   }

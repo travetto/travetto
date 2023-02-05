@@ -44,9 +44,9 @@ export class ManifestUtil {
   /**
    * Generate manifest for a given context, and persist
    */
-  static async createAndWriteManifest(ctx: ManifestContext): Promise<void> {
+  static async createAndWriteManifest(ctx: ManifestContext): Promise<string> {
     const manifest = await this.buildManifest(ctx);
-    await this.writeManifest(ctx, manifest);
+    return this.writeManifest(ctx, manifest);
   }
 
   /**

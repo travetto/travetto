@@ -99,8 +99,8 @@ async function exec(args) {
   switch (op) {
     case 'clean': break;
     case 'manifest': {
-      const { buildAndWriteManifest } = await $getBootstrap(ctx);
-      const output = await buildAndWriteManifest(ctx);
+      const { createAndWriteManifest } = await $getBootstrap(ctx);
+      const output = await createAndWriteManifest(ctx);
       message(`Wrote manifest ${output}`);
       break;
     }

@@ -24,10 +24,9 @@ export async function precompile(ctx: ManifestContext): Promise<void> {
   }
 }
 
-export async function buildAndWriteManifest(ctx: ManifestContext): Promise<string> {
+export async function createAndWriteManifest(ctx: ManifestContext): Promise<string> {
   const { ManifestUtil } = await importManifest(ctx);
-  const manifest = await ManifestUtil.buildManifest(ctx);
-  return ManifestUtil.writeManifest(ctx, manifest);
+  return ManifestUtil.createAndWriteManifest(ctx);
 }
 
 async function rewriteManifests(ctx: ManifestContext, state: ManifestState): Promise<void> {
@@ -37,7 +36,7 @@ async function rewriteManifests(ctx: ManifestContext, state: ManifestState): Pro
   const dirtyModules = [...Object.entries(state.delta)].filter(x => x[1].length > 0).map(([mod]) => mod);
   for (const module of dirtyModules) {
     const subCtx = await ManifestUtil.buildContext(state.manifest.modules[module].source);
-    await ManifestUtil.createAndWriteManifest(subCtx);
+    await createAndWriteManifest(subCtx);
   }
 }
 

@@ -73,7 +73,7 @@ async function getManifestContext(folder) {
   const path = await $getPath();
   const fs = await $getFs();
 
-  folder ??= process.env.TRV_MANIFEST ?? process.cwd();
+  folder ??= (process.env.TRV_MANIFEST || process.cwd());
 
   const workspacePath = path.resolve(await $getWorkspaceRoot());
   let mainPath = toPosix(folder);

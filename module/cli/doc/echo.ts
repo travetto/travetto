@@ -9,7 +9,7 @@ export class CliEchoCommand extends CliCommand {
   name = 'echo';
 
   getOptions() {
-    return { uppercase: this.boolOption({ desc: 'Upper case', def: false }) };
+    return { uppercase: this.boolOption({ desc: 'Upper case' }) };
   }
 
   getArgs() {

@@ -59,7 +59,7 @@ export class PackCommand extends CliCommand<Options> {
 
       entryPoint: this.option({ short: 'e', desc: 'Entry point', def: 'node_modules/@travetto/cli/support/cli.js' }),
       entryCommand: this.option({ short: 'ec', desc: 'Entry command' }),
-      minify: this.boolOption({ short: 'm', desc: 'Minify output' }),
+      minify: this.boolOption({ short: 'm', desc: 'Minify output', def: true }),
       sourcemap: this.boolOption({ short: 'sm', desc: 'Bundle source maps' }),
       includeSources: this.boolOption({ short: 'is', desc: 'Include source with source maps' }),
       ejectFile: this.option({ short: 'x', desc: 'Eject commands to file' }),
