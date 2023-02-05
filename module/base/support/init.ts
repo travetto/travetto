@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { RootIndex } from '@travetto/manifest';
 
 import { ConsoleManager } from '../src/console';
@@ -21,7 +22,18 @@ export async function init(): Promise<void> {
 
   // Setup stack traces
   Error.stackTraceLimit = 50; // Deep limit
-  try { (await import('source-map-support')).install(); } catch { } // Register source maps
+  try {
+    (await import('source-map-support')).install({
+      // Handles bug in source-map-support and ESM bundling
+      retrieveFile(file) {
+        file = file.trim().replace(/file:\/\/([a-z]:)/, (_, d) => d).replace(/file:\/\//, '/');
+        if (fs.existsSync(file)) {
+          return fs.readFileSync(file, 'utf8');
+        }
+        return null;
+      }
+    });
+  } catch { } // Register source maps
 
   // Initialize
   await ConsoleManager.register();

@@ -110,14 +110,16 @@ export class ManifestUtil {
   /**
    * Persist state to disk in a temp file, return said temp file
    */
-  static writeState(ctx: ManifestContext, state: ManifestState): Promise<string> {
-    return ManifestUtil.writeJsonWithBuffer(ctx, `${MANIFEST_STATE_FILE}.${Date.now()}${Math.random()}`, state);
+  static async writeState(ctx: ManifestContext, state: ManifestState): Promise<string> {
+    const temp = path.resolve(os.tmpdir(), `${MANIFEST_STATE_FILE}.${Date.now()}.${Math.random()}`);
+    await fs.writeFile(temp, JSON.stringify(state), 'utf8');
+    return temp;
   }
 
   /**
    * Write manifest for a given context, return location
    */
   static writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<string> {
-    return ManifestUtil.writeJsonWithBuffer(ctx, MANIFEST_FILE, manifest);
+    return this.writeJsonWithBuffer(ctx, MANIFEST_FILE, manifest);
   }
 }

@@ -8,19 +8,19 @@ import { PackFormat } from './types';
 
 const INTRO = {
   commonjs: `
-globalThis.crypto = require("crypto");
+globalThis.crypto = require('crypto');
 try { require('./.env.js')} catch {}
 
 function __importStar(mod) { 
   if (mod && mod.__esModule) return mod;
   var result = {};
   if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-  result["default"] = mod;
+  result['default'] = mod;
   return result;
 }
 `,
   module: `
-globalThis.crypto = await import("crypto");
+globalThis.crypto = await import('crypto');
 try {await import('./.env.js')} catch {}
 `
 };
@@ -38,15 +38,21 @@ function getFilesFromModule(m: ManifestModule): string[] {
 }
 
 export function getOutput(): OutputOptions {
-  const sourcemap = Env.getBoolean('BUNDLE_SOURCEMAP') ?? false;
-  const sources = Env.getBoolean('BUNDLE_SOURCES') ?? false;
-  const compact = Env.getBoolean('BUNDLE_COMPRESS') ?? true;
   const format: PackFormat = Env.get('BUNDLE_FORMAT', 'commonjs');
-  const dir = Env.get('BUNDLE_OUTPUT')!;
   return {
+    format,
     intro: INTRO[format],
-    format, sourcemap, sourcemapExcludeSources: !sources,
-    compact, dir, inlineDynamicImports: format !== 'commonjs',
+    sourcemap:
+      Env.getBoolean('BUNDLE_SOURCEMAP') ?? false,
+    sourcemapExcludeSources:
+      !(Env.getBoolean('BUNDLE_SOURCES') ?? false),
+    compact:
+      Env.getBoolean('BUNDLE_COMPRESS') ?? true,
+    dir:
+      Env.get('BUNDLE_OUTPUT')!,
+    ...(format === 'commonjs' ? {} : {
+      inlineDynamicImports: true
+    }),
   };
 }
 
