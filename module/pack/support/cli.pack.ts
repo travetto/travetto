@@ -108,6 +108,7 @@ export class PackCommand extends CliCommand<Options> {
 
     ops.push(
       PackOperation.writeEnv,
+      PackOperation.writePackageJson,
       PackOperation.copyResources,
       PackOperation.primeAppCache,
       PackOperation.writeManifest,

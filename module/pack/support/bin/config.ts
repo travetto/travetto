@@ -1,4 +1,4 @@
-import type { OutputOptions, InputOptions } from 'rollup';
+import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
 import { Env } from '@travetto/base';
@@ -9,7 +9,7 @@ import { PackFormat } from './types';
 const INTRO = {
   commonjs: `
 globalThis.crypto = require("crypto");
-try { require('./.env')} catch {}
+try { require('./.env.js')} catch {}
 
 function __importStar(mod) { 
   if (mod && mod.__esModule) return mod;
@@ -21,7 +21,7 @@ function __importStar(mod) {
 `,
   module: `
 globalThis.crypto = await import("crypto");
-try {await import('./.env')} catch {}
+try {await import('./.env.js')} catch {}
 `
 };
 
@@ -43,7 +43,12 @@ export function getOutput(): OutputOptions {
   const compact = Env.getBoolean('BUNDLE_COMPRESS') ?? true;
   const format: PackFormat = Env.get('BUNDLE_FORMAT', 'commonjs');
   const dir = Env.get('BUNDLE_OUTPUT')!;
-  return { intro: INTRO[format], format, sourcemap, sourcemapExcludeSources: !sources, compact, dir };
+  return {
+    intro: INTRO[format],
+    format, sourcemap, sourcemapExcludeSources: !sources,
+    compact, dir, inlineDynamicImports: format !== 'commonjs',
+    sourcemapPathTransform: (src: string, map: string): string => path.resolve(src)
+  };
 }
 
 export function getEntry(): string {

@@ -18,6 +18,7 @@ export default function buildConfig(): RollupOptions {
   return {
     input: [entry],
     output,
+    external: ['node-forge', '@parcel/watcher'],
     plugins: [
       jsonImport(),
       commonjsRequire({

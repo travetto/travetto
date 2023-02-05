@@ -1,4 +1,4 @@
-import type * as https from 'https';
+import https from 'https';
 import koa from 'koa';
 import kCompress from 'koa-compress';
 import kRouter from 'koa-router';
@@ -91,7 +91,7 @@ export class KoaRestServer implements RestServer<koa> {
   async listen(): Promise<ServerHandle> {
     let raw: https.Server | koa = this.raw;
     if (this.config.ssl?.active) {
-      raw = (await import('https'))
+      raw = https
         .createServer((await this.config.ssl?.getKeys())!, this.raw.callback())
         .listen(this.config.port, this.config.bindAddress);
     }

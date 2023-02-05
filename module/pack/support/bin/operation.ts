@@ -71,6 +71,25 @@ export class PackOperation {
     }
   }
 
+  static async * writePackageJson(cfg: PackConfig): AsyncIterable<string[]> {
+    const title = 'Writing package.json';
+    const pkg = { type: cfg.format };
+
+    if (cfg.ejectFile) {
+      yield ActiveShellCommand.comment(title);
+      yield* ActiveShellCommand.createScript(
+        path.resolve(cfg.workspace, 'package.json'),
+        [JSON.stringify(pkg)]
+      );
+    } else {
+      yield [title];
+      await writeRawFile(
+        path.resolve(cfg.workspace, 'package.json'),
+        JSON.stringify(pkg, null, 2)
+      );
+    }
+  }
+
   static async * writeEnv(cfg: PackConfig): AsyncIterable<string[]> {
     const title = 'Writing .env.js';
     const env = {

@@ -47,7 +47,7 @@ export class AssetUtil {
    * Detect file type from location on disk
    */
   static async detectFileType(filePath: string): Promise<{ ext: string, mime: string } | undefined> {
-    const fileType = (await import('file-type')).default;
+    const { default: fileType } = await import('file-type');
     const buffer = await this.readChunk(filePath, 4100);
     return fileType.fromBuffer(buffer);
   }

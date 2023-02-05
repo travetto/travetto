@@ -1,4 +1,4 @@
-import type * as https from 'https';
+import https from 'https';
 import express from 'express';
 import compression from 'compression';
 
@@ -108,7 +108,7 @@ export class ExpressRestServer implements RestServer<express.Application> {
     let raw: express.Application | https.Server = this.raw;
     if (this.config.ssl?.active) {
       const keys = await this.config.ssl?.getKeys();
-      raw = (await import('https')).createServer(keys!, this.raw);
+      raw = https.createServer(keys!, this.raw);
     }
     this.listening = true;
     return raw.listen(this.config.port, this.config.bindAddress!);

@@ -2,14 +2,13 @@ import { AcornNode, Plugin } from 'rollup';
 import { walk } from 'estree-walker';
 import MagicString from 'magic-string';
 
-const BRAND = '__travettoImportRuntime__';
-const ERROR_STATE = 'new Promise(res => setImmediate(res)).then(() => { throw new Error("Unknown variable dynamic import: " + path); })';
+const BRAND = '__imp';
 
 const DYNAMIC_IMPORT = (imports: string[]): string => `
 function ${BRAND}(path) { 
   switch (path) {
     ${imports.map(p => `  case '${p}': return import('${p}');`).join('\n')}
-    default: return ${ERROR_STATE}
+    default: return import(path); // Fall back for built-ins
   } 
 }
 globalThis.${BRAND} = ${BRAND}`;
@@ -17,9 +16,7 @@ globalThis.${BRAND} = ${BRAND}`;
 export function travettoImportPlugin(entry: string, files: string[]): Plugin {
   const imports = files
     .map(x => x.split('node_modules/').pop()!)
-    .flatMap(x => x.endsWith('__index__.js') ? [
-      x, x.replace(/\/__index__.*$/, '')
-    ] : [x]);
+    .flatMap(x => x.endsWith('__index__.js') ? [x.replace('__index__.js', ''), x] : [x]);
 
   const out: Plugin = {
     name: 'travetto-import',
@@ -34,18 +31,11 @@ export function travettoImportPlugin(entry: string, files: string[]): Plugin {
 
       walk(parsed, {
         enter: (node) => {
-          if (node.type !== 'ImportExpression') {
-            return;
-          }
-
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const impNode = node as AcornNode;
-
-          const expr = code.substring(impNode.start, impNode.end);
-          if ((/^['"]/.test(expr))) {
+          const impNode = node as AcornNode & { source?: { type: string } };
+          if (impNode.type !== 'ImportExpression' || impNode.source?.type === 'Literal') {
             return;
           }
-
           (ms ??= new MagicString(code)).overwrite(impNode.start, impNode.start + 6, BRAND);
         }
       });
