@@ -40,7 +40,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
           ['main', '@travetto/test/src/worker/child.ts'],
           {
             cwd,
-            env: { TRV_MANIFEST: module },
+            env: { TRV_MANIFEST: RootIndex.getModule(module)!.output },
             stdio: [0, 'ignore', 2, 'ipc']
           }
         )

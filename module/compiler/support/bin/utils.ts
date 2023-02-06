@@ -7,6 +7,7 @@ import { createRequire } from 'module';
 import type { ManifestContext, ManifestUtil } from '@travetto/manifest';
 
 import { writeFile } from '../../bin/transpile';
+import { ManifestDelta } from './delta';
 
 const req = createRequire(`${process.cwd()}/node_modules`);
 
@@ -18,6 +19,13 @@ export const IS_DEBUG = /\b([*]|build)\b/.test(process.env.DEBUG ?? '');
 
 const resolveImport = (lib: string): string => req.resolve(lib);
 const recentStat = (stat: Stats): number => Math.max(stat.ctimeMs, stat.mtimeMs);
+
+type DetectedChanges = {
+  total: number;
+  transformers: [string, string][];
+  compiler: string[];
+  transformer: string[];
+};
 
 /**
  * Common logging support
@@ -110,3 +118,23 @@ export async function addNodePath(folder: string): Promise<void> {
  */
 export const importManifest = (ctx: ManifestContext): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
   import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto', 'manifest', '__index__.js'));
+
+
+export async function shouldRebuildCompiler(delta: ManifestDelta): Promise<DetectedChanges> {
+  const result: DetectedChanges = { total: 0, transformers: [], compiler: [], transformer: [] };
+  const GLOBAL = new Set(['@travetto/compiler', '@travetto/compiler']);
+
+  for (const files of Object.values(delta)) {
+    for (const { file, module } of files ?? []) {
+      if (GLOBAL.has(module) || file.includes('support/transform')) {
+        result.total += 1;
+        switch (module) {
+          case '@travetto/compiler': result.compiler.push(file); break;
+          case '@travetto/transformer': result.transformer.push(file); break;
+          default: result.transformers.push([module, file]); break;
+        }
+      }
+    }
+  }
+  return result;
+}

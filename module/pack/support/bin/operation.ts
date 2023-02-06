@@ -93,7 +93,7 @@ export class PackOperation {
   static async * writeEnv(cfg: PackConfig): AsyncIterable<string[]> {
     const title = 'Writing .env.js';
     const env = {
-      TRV_MANIFEST: cfg.module,
+      TRV_MANIFEST: `node_modules/${cfg.module}`,
       TRV_CLI_IPC: ''
     };
 
@@ -161,7 +161,7 @@ export class PackOperation {
     }
 
     const appCacheCmd = ['npx', 'trv', 'main', '@travetto/app/support/bin/list'];
-    const appCache = path.resolve(cfg.workspace, RootIndex.manifest.modules[RootIndex.mainModule.name].output, 'trv-app-cache.json');
+    const appCache = path.resolve(cfg.workspace, RootIndex.manifest.mainOutputFolder, 'trv-app-cache.json');
     const title = 'Generating App Cache';
 
     if (cfg.ejectFile) {
@@ -182,8 +182,8 @@ export class PackOperation {
 
   static async * writeManifest(cfg: PackConfig): AsyncIterable<string[]> {
     const title = 'Writing Manifest';
-    const cmd = ['npx', 'trv', 'manifest'];
-    const env = { NODE_ENV: 'prod', TRV_MANIFEST: cfg.module, TRV_OUTPUT_FOLDER: cfg.workspace };
+    const cmd = ['npx', 'trv', 'manifest', `${cfg.workspace}/node_modules/${cfg.module}`, 'prod'];
+    const env = { TRV_MODULE: cfg.module };
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);

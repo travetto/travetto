@@ -57,7 +57,7 @@ export class DeclarationUtil {
    * Resolve the `ts.ObjectFlags`
    */
   static getObjectFlags(type: ts.Type): ts.ObjectFlags {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, no-bitwise
     return (ts as unknown as { getObjectFlags(t: ts.Type): ts.ObjectFlags }).getObjectFlags(type) & ~(ts.NodeFlags.ThisNodeOrAnySubNodesHasError);
   }
 

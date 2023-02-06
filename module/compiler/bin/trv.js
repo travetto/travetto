@@ -29,11 +29,10 @@ const $getPathPosix = () => {
 async function $getBootstrap(ctx) {
   const path = await $getPath();
   const fs = await $getFs();
-  /** @type {import('./transpile')} */
   const { writeFile, getCompilerOptions } = await $getTranspile();
 
   const name = '__compiler_bootstrap__';
-  const files = ['support/bin/compiler-bootstrap.ts', 'support/bin/utils.ts', 'bin/transpile.js']
+  const files = ['support/bin/compiler-bootstrap.ts', 'support/bin/utils.ts', 'support/bin/delta.ts', 'bin/transpile.js']
     .map(x => ({ src: x, out: x.replace(/[.]ts$/, '.js') }));
 
   const main = files[0].out;
@@ -61,13 +60,9 @@ async function $getBootstrap(ctx) {
   }
 
   const file = path.resolve(outputPath, main);
-  try {
-    // @ts-ignore
-    const res = await import(file);
-    return res;
-  } catch {
-    return require(file);
-  }
+
+  try { return await import(file); }
+  catch { return require(file); }
 }
 
 /**
@@ -89,8 +84,8 @@ async function exec(args) {
   // Clean if needed
   if (op === 'clean' || (op && flags.clean)) {
     const fs = await $getFs();
-    await Promise.all([ctx.outputFolder, ctx.compilerFolder].map(folder =>
-      fs.rm(`${ctx.workspacePath}/${folder}`, { force: true, recursive: true })));
+    await fs.rm(`${ctx.workspacePath}/${ctx.outputFolder}`, { force: true, recursive: true });
+    await fs.rm(`${ctx.workspacePath}/${ctx.compilerFolder}`, { force: true, recursive: true });
     if (op === 'clean') {
       message(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
     }
@@ -100,7 +95,7 @@ async function exec(args) {
     case 'clean': break;
     case 'manifest': {
       const { createAndWriteManifest } = await $getBootstrap(ctx);
-      const output = await createAndWriteManifest(ctx);
+      const output = await createAndWriteManifest(ctx, args[0], args[1]);
       message(`Wrote manifest ${output}`);
       break;
     }
@@ -114,12 +109,12 @@ async function exec(args) {
       break;
     default: {
       const path = await $getPathPosix();
-      const { manifest } = await compile(ctx);
+      await compile(ctx);
       const out = path.join(ctx.workspacePath, ctx.outputFolder);
       // TODO: Externalize somehow?
-      const cliMain = path.join(out, manifest.modules['@travetto/cli'].output, 'support', 'cli.js');
-      process.env.TRV_MANIFEST = ctx.mainModule;
-      process.env.TRV_OUTPUT = out;
+      const cliMain = path.join(out, 'node_modules/@travetto/cli/support/cli.js');
+      process.env.TRV_THROW_ROOT_INDEX_ERR = '1';
+      process.env.TRV_MANIFEST = path.resolve(ctx.workspacePath, ctx.mainOutputFolder);
       await import(cliMain);
       return;
     }

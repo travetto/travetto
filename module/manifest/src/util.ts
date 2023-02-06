@@ -1,11 +1,12 @@
+import { readFileSync } from 'fs';
 import fs from 'fs/promises';
 import os from 'os';
 
 import { path } from './path';
-import { ManifestContext, ManifestRoot, ManifestState, MANIFEST_FILE, MANIFEST_STATE_FILE } from './types';
-
+import { ManifestContext, ManifestRoot } from './types';
 import { ManifestModuleUtil } from './module';
-import { ManifestDeltaUtil } from './delta';
+
+export const MANIFEST_FILE = 'manifest.json';
 
 /**
  * Manifest utils
@@ -42,11 +43,23 @@ export class ManifestUtil {
   }
 
   /**
-   * Generate manifest for a given context, and persist
+   * Read manifest, synchronously
+   *
+   * @param file
+   * @returns
    */
-  static async createAndWriteManifest(ctx: ManifestContext): Promise<string> {
-    const manifest = await this.buildManifest(ctx);
-    return this.writeManifest(ctx, manifest);
+  static readManifestSync(file: string | ManifestRoot): { manifest: ManifestRoot, file: string } {
+    if (typeof file === 'string') {
+      file = path.resolve(file);
+      if (!file.endsWith('.json')) {
+        file = path.resolve(file, MANIFEST_FILE);
+      }
+    } else {
+      const { workspacePath, mainOutputFolder } = file;
+      file = path.resolve(workspacePath, mainOutputFolder, MANIFEST_FILE);
+    }
+    const manifest = typeof file === 'string' ? JSON.parse(readFileSync(file, 'utf8')) : file;
+    return { manifest, file };
   }
 
   /**
@@ -75,27 +88,6 @@ export class ManifestUtil {
   }
 
   /**
-   * Load state from disk
-   */
-  static async readState(file: string): Promise<ManifestState> {
-    return JSON.parse(await fs.readFile(file, 'utf8'));
-  }
-
-  /**
-   * Generate the manifest and delta as a single output
-   */
-  static async produceState(ctx: ManifestContext): Promise<ManifestState> {
-    const manifest = await this.buildManifest(ctx);
-    const oldManifest = await this.readManifest(ctx);
-    const delta = await ManifestDeltaUtil.produceDelta(
-      path.resolve(manifest.workspacePath, ctx.outputFolder),
-      manifest,
-      oldManifest
-    );
-    return { manifest, delta };
-  }
-
-  /**
    * Resolves a module file, from a context and manifest
    */
   static resolveFile(ctx: ManifestContext, manifest: ManifestRoot, module: string, file: string): string {
@@ -105,15 +97,6 @@ export class ManifestUtil {
       manifest.modules[module].output,
       file
     );
-  }
-
-  /**
-   * Persist state to disk in a temp file, return said temp file
-   */
-  static async writeState(ctx: ManifestContext, state: ManifestState): Promise<string> {
-    const temp = path.resolve(os.tmpdir(), `${MANIFEST_STATE_FILE}.${Date.now()}.${Math.random()}`);
-    await fs.writeFile(temp, JSON.stringify(state), 'utf8');
-    return temp;
   }
 
   /**

@@ -1,8 +1,6 @@
-import { createRequire } from 'module';
-
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, MANIFEST_FILE, Package, PackageDigest } from './types';
+import { FunctionMetadata, Package, PackageDigest } from './types';
 import { PackageUtil } from './package';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
@@ -12,39 +10,16 @@ type Metadated = { [METADATA]: FunctionMetadata };
  * Extended manifest index geared for application execution
  */
 class $RootIndex extends ManifestIndex {
-  /**
-   * Load all source modules
-   */
-  static resolveManifestJSON(root: string, file?: string): string {
-    file = file || path.resolve(root, MANIFEST_FILE);
-
-    // IF not a file
-    if (!file.endsWith('.json')) {
-      try {
-        // Try to resolve
-        const req = createRequire(path.resolve(root, 'node_modules'));
-        file = req.resolve(`${file}/${MANIFEST_FILE}`);
-      } catch {
-        // Fallback to assumed node_modules pattern
-        file = `${root}/node_modules/${file}/${MANIFEST_FILE}`;
-      }
-    }
-    return file;
-  }
 
   #config: Package | undefined;
   #metadata = new Map<string, FunctionMetadata>();
-
-  constructor(output: string = process.env.TRV_OUTPUT ?? process.cwd()) {
-    super(output, $RootIndex.resolveManifestJSON(output, process.env.TRV_MANIFEST));
-  }
 
   /**
    * **WARNING**: This is a destructive operation, and should only be called before loading any code
    * @private
    */
   reinitForModule(module: string): void {
-    this.init(this.root, $RootIndex.resolveManifestJSON(this.root, module));
+    this.init(`${this.root}/node_modules/${module}`);
     this.#config = undefined;
   }
 
@@ -148,7 +123,7 @@ class $RootIndex extends ManifestIndex {
 let index: $RootIndex | undefined;
 
 try {
-  index = new $RootIndex();
+  index = new $RootIndex(process.env.TRV_MANIFEST!);
 } catch (err) {
   if (process.env.TRV_THROW_ROOT_INDEX_ERR) {
     throw err;

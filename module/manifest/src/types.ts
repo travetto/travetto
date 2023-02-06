@@ -40,15 +40,6 @@ export type ManifestRoot = ManifestContext & {
   modules: Record<string, ManifestModule>;
 };
 
-export type ManifestDeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
-export type ManifestDeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
-export type ManifestDeltaEvent = { file: string, type: ManifestDeltaEventType, module: string };
-export type ManifestDelta = Record<string, ManifestDeltaEvent[]>;
-export type ManifestState = {
-  manifest: ManifestRoot;
-  delta: ManifestDelta;
-};
-
 export type Package = {
   name: string;
   type?: 'module' | 'commonjs';
@@ -117,6 +108,3 @@ export type FunctionMetadata = {
   synthetic?: boolean;
   abstract?: boolean;
 };
-
-export const MANIFEST_FILE = 'manifest.json';
-export const MANIFEST_STATE_FILE = 'manifest-state.json';

@@ -22,9 +22,6 @@ function $getModule() {
   catch { return import('module').then(x => x.default); }
 }
 
-/** @param {string} x */
-const toPosix = x => x.replace(/\\/g, '/');
-
 /**
  * Returns the package.json
  * @param {string} inputFolder
@@ -39,20 +36,27 @@ async function $getPkg(inputFolder) {
   return JSON.parse(await fs.readFile(inputFolder, 'utf8'));
 }
 
+const WS_ROOT = {};
+
 /**
  * Get workspace root
  * @return {Promise<string>}
  */
 async function $getWorkspaceRoot() {
+  const base = process.cwd();
+  if (base in WS_ROOT) {
+    return WS_ROOT[base];
+  }
+
   const path = await $getPath();
   const fs = await $getFs();
-  let folder = process.cwd();
+  let folder = base;
   let prevFolder = '';
   while (folder !== prevFolder) {
     try {
       const pkg = await $getPkg(folder);
       if (!!pkg.workspaces || !!pkg.travetto?.isolated) {
-        return folder;
+        return (WS_ROOT[base] = folder);
       }
     } catch { }
     if (await fs.stat(path.resolve(folder, '.git')).catch(() => { })) {
@@ -61,35 +65,32 @@ async function $getWorkspaceRoot() {
     prevFolder = folder;
     folder = path.dirname(folder);
   }
-  return process.cwd();
+  return WS_ROOT[base] = base;
 }
 
 
 /**
  * Gets build context
+ * @param {string} [folder]
  * @return {Promise<ManifestContext>}
  */
 async function getManifestContext(folder) {
   const path = await $getPath();
-  const fs = await $getFs();
-
-  folder ??= (process.env.TRV_MANIFEST || process.cwd());
-
   const workspacePath = path.resolve(await $getWorkspaceRoot());
-  let mainPath = toPosix(folder);
 
-  // If not a folder, try to treat as package
-  if (!await fs.stat(path.resolve(mainPath)).catch(() => false)) {
+  // If manifest specified via env var, and is a package name
+  if (!folder && process.env.TRV_MODULE) {
     const mod = await $getModule();
     const req = mod.createRequire(`${workspacePath}/node_modules`);
     try {
-      mainPath = path.dirname(req.resolve(`${folder}/package.json`));
+      folder = path.dirname(req.resolve(`${process.env.TRV_MODULE}/package.json`));
     } catch { }
   }
 
+  const mainPath = path.resolve(folder ?? '.');
   const { name: mainModule, workspaces, travetto } = (await $getPkg(mainPath));
   const monoRepo = workspacePath !== mainPath || !!workspaces;
-  const outputFolder = process.env.TRV_OUTPUT_FOLDER ?? travetto?.outputFolder ?? '.trv_output';
+  const outputFolder = travetto?.outputFolder ?? '.trv_output';
 
   return {
     mainModule,

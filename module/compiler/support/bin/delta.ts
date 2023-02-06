@@ -1,12 +1,17 @@
 import { type Stats } from 'fs';
 import fs from 'fs/promises';
+
 import {
-  ManifestDelta, ManifestDeltaEvent, ManifestDeltaModule,
-  ManifestModule, ManifestModuleFile, ManifestModuleFolderType,
-  ManifestRoot
-} from './types';
+  ManifestModule, ManifestModuleCore, ManifestModuleFile, ManifestModuleFileType, ManifestModuleFolderType, ManifestRoot
+} from '@travetto/manifest';
+
+export type ManifestDeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
+export type ManifestDeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
+export type ManifestDeltaEvent = { file: string, type: ManifestDeltaEventType, module: string };
+export type ManifestDelta = Record<string, ManifestDeltaEvent[]>;
 
 const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package', 'doc']);
+const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
 
 /**
  * Produce delta for the manifest
@@ -20,7 +25,7 @@ export class ManifestDeltaUtil {
   /**
    * Produce delta between two manifest modules, relative to an output folder
    */
-  static async #deltaModules(outputFolder: string, left: ManifestDeltaModule, right: ManifestDeltaModule): Promise<ManifestDeltaEvent[]> {
+  static async #deltaModules(outputFolder: string, left: ManifestDeltaModule): Promise<ManifestDeltaEvent[]> {
     const out: ManifestDeltaEvent[] = [];
     const getStat = (f: string): Promise<Stats | void> =>
       fs.stat(`${outputFolder}/${left.output}/${f.replace(/[.]ts$/, '.js')}`).catch(() => { });
@@ -29,39 +34,14 @@ export class ManifestDeltaUtil {
       out.push({ file, module: left.name, type });
 
     for (const el of Object.keys(left.files)) {
-      if (!(el in right.files)) {
-        const [, , leftTs] = left.files[el];
-        const stat = await getStat(el);
-        if (stat && leftTs < this.#getNewest(stat)) {
-          // If file pre-exists manifest, be cool
-          continue;
-        }
+      const [, , leftTs] = left.files[el];
+      const stat = await getStat(el);
+      if (!stat) {
         add(el, 'added');
       } else {
-        const [, , leftTs] = left.files[el];
-        const [, , rightTs] = right.files[el];
-        if (leftTs !== rightTs) {
-          const stat = await getStat(el);
-          if (!stat) {
-            add(el, 'missing');
-          } else if (leftTs > this.#getNewest(stat!)) {
-            add(el, 'changed');
-          }
-        } else {
-          const stat = await getStat(el);
-          if (!stat) {
-            add(el, 'missing');
-          } else if (this.#getNewest(stat!) < leftTs) {
-            add(el, 'dirty');
-          }
-        }
-      }
-    }
-    for (const el of Object.keys(right.files)) {
-      if (!(el in left.files)) {
-        const stat = await getStat(el);
-        if (stat) {
-          add(el, 'removed');
+        const rightTs = this.#getNewest(stat);
+        if (leftTs > rightTs) {
+          add(el, 'changed');
         }
       }
     }
@@ -81,7 +61,7 @@ export class ManifestDeltaUtil {
         continue;
       }
       for (const [name, type, date] of m.files?.[key] ?? []) {
-        if (type === 'ts' || type === 'js' || type === 'package-json') {
+        if (VALID_SOURCE_TYPE.has(type)) {
           out[name] = [name, type, date];
         }
       }
@@ -90,23 +70,18 @@ export class ManifestDeltaUtil {
   }
 
   /**
-   * Produce delta between ttwo manifest roots, relative to a single output folder
+   * Produce delta between manifest and the target output
    */
-  static async produceDelta(outputFolder: string, left: ManifestRoot, right: ManifestRoot): Promise<ManifestDelta> {
+  static async produceDelta(outputFolder: string, root: ManifestRoot): Promise<ManifestDelta> {
     const deltaLeft = Object.fromEntries(
-      Object.values(left.modules)
-        .map(m => [m.name, { ...m, files: this.#flattenModuleFiles(m) }])
-    );
-
-    const deltaRight = Object.fromEntries(
-      Object.values(right.modules)
+      Object.values(root.modules)
         .map(m => [m.name, { ...m, files: this.#flattenModuleFiles(m) }])
     );
 
     const out: Record<string, ManifestDeltaEvent[]> = {};
 
     for (const [name, lMod] of Object.entries(deltaLeft)) {
-      out[name] = await this.#deltaModules(outputFolder, lMod, deltaRight[name] ?? { files: {}, name });
+      out[name] = await this.#deltaModules(outputFolder, lMod);
     }
 
     return out;

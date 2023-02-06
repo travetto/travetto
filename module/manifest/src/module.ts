@@ -29,6 +29,8 @@ const INDEX_FILES = new Set([
 
 export class ManifestModuleUtil {
 
+  static #scanCache: Record<string, string[]> = {};
+
   static #getNewest(stat: { mtimeMs: number, ctimeMs: number }): number {
     return Math.max(stat.mtimeMs, stat.ctimeMs);
   }
@@ -36,8 +38,15 @@ export class ManifestModuleUtil {
   /**
    * Simple file scanning
    */
-  static async #scanFolder(folder: string, topFolders = new Set<string>(), topFiles = new Set<string>()): Promise<string[]> {
+  static async #scanFolder(folder: string, mainSource = false): Promise<string[]> {
+    if (!mainSource && folder in this.#scanCache) {
+      return this.#scanCache[folder];
+    }
+
+    const topFolders = new Set(mainSource ? [] : ['src', 'bin', 'support']);
+    const topFiles = new Set(mainSource ? [] : [...INDEX_FILES, 'package.json']);
     const out: string[] = [];
+
     if (!fs.stat(folder).catch(() => false)) {
       return out;
     }
@@ -68,6 +77,11 @@ export class ManifestModuleUtil {
         }
       }
     }
+
+    if (!mainSource) {
+      this.#scanCache[folder] = out;
+    }
+
     return out;
   }
 
@@ -154,11 +168,10 @@ export class ManifestModuleUtil {
    */
   static async describeModule(dep: ModuleDep): Promise<ManifestModule> {
     const { main, mainSource, local, name, version, sourcePath, profileSet, parentSet, internal } = dep;
-    const files: ManifestModule['files'] = {};
-    const folderSet = new Set<ManifestModuleFolderType>(mainSource ? [] : ['src', 'bin', 'support']);
-    const fileSet = new Set(mainSource ? [] : [...INDEX_FILES, 'package.json']);
 
-    for (const file of await this.#scanFolder(sourcePath, folderSet, fileSet)) {
+    const files: ManifestModule['files'] = {};
+
+    for (const file of await this.#scanFolder(sourcePath, mainSource)) {
       // Group by top folder
       const moduleFile = file.replace(`${sourcePath}/`, '');
       const entry = await this.transformFile(moduleFile, file);
@@ -175,7 +188,8 @@ export class ManifestModuleUtil {
     const parents = [...parentSet].sort();
     const output = `node_modules/${name}`;
 
-    return { main, name, version, local, internal, source: sourcePath, output, files, profiles, parents, };
+    const res = { main, name, version, local, internal, source: sourcePath, output, files, profiles, parents, };
+    return res;
   }
 
   /**
@@ -185,13 +199,7 @@ export class ManifestModuleUtil {
     const visitor = new ModuleDependencyVisitor(ctx);
     const declared = await PackageUtil.visitPackages(ctx.mainPath, visitor);
     const sorted = [...declared].sort((a, b) => a.name.localeCompare(b.name));
-    let modules = await Promise.all(sorted.map(x => this.describeModule(x)));
-
-    // If in prod mode, only include std modules
-    if (/^prod/i.test(process.env.NODE_ENV ?? '')) {
-      modules = modules.filter(x => x.profiles.includes('std'));
-    }
-
+    const modules = await Promise.all(sorted.map(x => this.describeModule(x)));
     return Object.fromEntries(modules.map(m => [m.name, m]));
   }
 }

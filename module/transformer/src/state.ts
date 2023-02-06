@@ -293,15 +293,6 @@ export class TransformerState implements State {
   }
 
   /**
-   * Get the entry file identifier, supports both ESM and commonjs
-   */
-  getEntryFileIdentifier(): ts.Expression {
-    return this.isEsmOutput() ?
-      this.createAccess('process', 'argv', 1) :
-      this.createAccess('require', 'main', 'filename');
-  }
-
-  /**
    * Find decorator, relative to registered key
    * @param state
    * @param node

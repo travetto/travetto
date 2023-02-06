@@ -1,10 +1,11 @@
-import path from 'path';
 import fs from 'fs/promises';
+import path from 'path';
 import cp from 'child_process';
 
-import type { ManifestState, ManifestContext } from '@travetto/manifest';
+import type { ManifestRoot, ManifestContext } from '@travetto/manifest';
 
-import { log, compileIfStale, getProjectSources, addNodePath, importManifest } from './utils';
+import { log, compileIfStale, getProjectSources, addNodePath, importManifest, shouldRebuildCompiler } from './utils';
+import { ManifestDelta, ManifestDeltaUtil } from './delta';
 
 const PRECOMPILE_MODS = [
   '@travetto/terminal',
@@ -12,8 +13,6 @@ const PRECOMPILE_MODS = [
   '@travetto/transformer',
   '@travetto/compiler'
 ];
-
-let manifestTemp: string | undefined;
 
 /**
  * Step 0
@@ -24,62 +23,52 @@ export async function precompile(ctx: ManifestContext): Promise<void> {
   }
 }
 
-export async function createAndWriteManifest(ctx: ManifestContext): Promise<string> {
+export async function createAndWriteManifest(ctx: ManifestContext, output: string, env: string = 'dev'): Promise<void> {
   const { ManifestUtil } = await importManifest(ctx);
-  return ManifestUtil.createAndWriteManifest(ctx);
-}
+  const manifest = await ManifestUtil.buildManifest(ctx);
 
-async function rewriteManifests(ctx: ManifestContext, state: ManifestState): Promise<void> {
-  const { ManifestUtil } = await importManifest(ctx);
-
-  // Write out all changed manifests
-  const dirtyModules = [...Object.entries(state.delta)].filter(x => x[1].length > 0).map(([mod]) => mod);
-  for (const module of dirtyModules) {
-    const subCtx = await ManifestUtil.buildContext(state.manifest.modules[module].source);
-    await createAndWriteManifest(subCtx);
+  // If in prod mode, only include std modules
+  if (/^prod/i.test(env)) {
+    manifest.modules = Object.fromEntries(
+      Object.values(manifest.modules)
+        .filter(x => x.profiles.includes('std'))
+        .map(m => [m.name, m])
+    );
   }
+  await fs.writeFile(output, JSON.stringify(manifest));
 }
 
 /**
  *  Step 1
  */
-async function buildManifestState(ctx: ManifestContext): Promise<ManifestState> {
+async function buildManifest(ctx: ManifestContext): Promise<ManifestRoot> {
   log('[1] Manifest Generation');
   const { ManifestUtil } = await importManifest(ctx);
-  return ManifestUtil.produceState(ctx);
-}
-
-function shouldRebuildCompiler({ delta }: ManifestState): { total: boolean, transformers: [string, string][] } {
-  // Did enough things change to re-stage and build the compiler
-  const transformersChanged = Object.entries(delta)
-    .flatMap(([mod, files]) => files.map(x => [mod, x.file]))
-    .filter((ev): ev is [string, string] => ev[1].startsWith('support/transform'));
-  const transformerChanged = (delta['@travetto/transformer'] ?? []);
-  const compilerChanged = delta['@travetto/compiler'] ?? [];
-
-  const changed = transformerChanged.length || transformersChanged.length || compilerChanged.length;
-  if (changed) {
-    if (compilerChanged.length) {
-      log('[2] Compiler source changed @travetto/compiler', compilerChanged);
-    }
-    if (transformerChanged.length) {
-      log('[2] Compiler source changed @travetto/transformer', transformerChanged);
-    }
-    if (transformersChanged.length) {
-      log('[2] Compiler source changed */support/transform', transformersChanged);
-    }
-  }
-  return { total: changed > 0, transformers: transformersChanged };
+  const manifest = await ManifestUtil.buildManifest(ctx);
+  const loc = await ManifestUtil.writeManifest(ctx, manifest);
+  log('[1] Manifest Generated', loc);
+  return manifest;
 }
 
 /**
  *  Step 2
  */
-async function buildCompiler(state: ManifestState, ctx: ManifestContext): Promise<void> {
-  const changed = shouldRebuildCompiler(state);
+async function buildCompiler(ctx: ManifestContext, delta: ManifestDelta): Promise<void> {
+  const changed = await shouldRebuildCompiler(delta);
+
+  if (changed.total) {
+    if (changed.compiler.length) {
+      log('[2] Compiler source changed @travetto/compiler', changed.compiler);
+    }
+    if (changed.transformer.length) {
+      log('[2] Compiler source changed @travetto/transformer', changed.transformer);
+    }
+    if (changed.transformers.length) {
+      log('[2] Compiler source changed */support/transform', changed.transformers);
+    }
+  }
 
   if (changed.transformers.length) {
-    state = await buildManifestState(ctx);
     let x = 0;
     for (const [mod, file] of changed.transformers) {
       await compileIfStale(
@@ -90,63 +79,62 @@ async function buildCompiler(state: ManifestState, ctx: ManifestContext): Promis
     }
   }
 
+  // Clean output if compiler changed
+  if (changed.total) {
+    await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { recursive: true, force: true });
+    // Re-write manifest
+    await buildManifest(ctx);
+  }
+
   log('[2] Compiler Ready');
 }
 
 /**
- * Spawn compiler and wait for response
+ *  Step 3
  */
-function spawnCompile(ctx: ManifestContext, manifestLoc: string, watch?: boolean): cp.SpawnSyncReturns<string> {
-  const cwd = path.resolve(ctx.workspacePath, ctx.compilerFolder);
-  const src = path.resolve(cwd, 'node_modules', '@travetto/compiler/support/compile');
-  const args = [src, manifestLoc, ...(watch ? ['true'] : [])];
-  return cp.spawnSync(process.argv0, args, { cwd, stdio: 'inherit', encoding: 'utf8' });
-}
+async function compileOutput(ctx: ManifestContext, manifest: ManifestRoot, delta: ManifestDelta, watch?: boolean): Promise<void> {
+  log('[3] Compiling');
 
-/**
- *  Step 4
- */
-async function compileOutput(state: ManifestState, ctx: ManifestContext, watch?: boolean): Promise<void> {
-  let changes = Object.values(state.delta).flat();
+  const changed = Object.values(delta).some(x => x.length > 0);
 
-  // Remove files that should go away
-  await Promise.all(changes.filter(x => x.type === 'removed')
-    .map(x => fs.unlink(path.resolve(ctx.workspacePath, ctx.outputFolder, x.file)).catch(() => { })));
+  // Update all manifests
+  if (changed && ctx.monoRepo && ctx.workspacePath === ctx.mainPath) {
+    for (const mod of Object.keys(manifest.modules)) {
+      if (mod !== ctx.mainModule && manifest.modules[mod].local) {
+        const { ManifestUtil } = await importManifest(ctx);
+        const subCtx = await ManifestUtil.buildContext(manifest.modules[mod].source);
+        const subManifest = await ManifestUtil.buildManifest(subCtx);
+        await ManifestUtil.writeManifest(subCtx, subManifest);
+      }
+    }
+    log('[3] Rewrote monorepo manifests');
+  }
 
-  changes = changes.filter(x => x.type !== 'removed');
-
-  const { ManifestUtil } = await importManifest(ctx);
-
-  manifestTemp ??= await ManifestUtil.writeState(ctx, state);
-
-  if (changes.length) {
-    log('[3] Changed Sources', changes);
-
-    // Blocking call, compile only
-    const res = spawnCompile(ctx, manifestTemp);
-
+  // Blocking call, compile only
+  if (changed || watch) {
+    const cwd = path.resolve(ctx.workspacePath, ctx.compilerFolder);
+    const src = path.resolve(cwd, 'node_modules', '@travetto/compiler/support/compile');
+    const args = [src, ...(watch ? ['true'] : [])];
+    const res = cp.spawnSync(process.argv0, args, {
+      env: { TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.mainOutputFolder), TRV_THROW_ROOT_INDEX_ERR: '1' },
+      cwd,
+      stdio: 'inherit',
+      encoding: 'utf8'
+    });
     if (res.status) {
       throw new Error(res.stderr);
     }
-
-    await rewriteManifests(ctx, state);
   }
-
-  if (watch) {
-    // Rewrite state with updated manifest
-    const newState = await ManifestUtil.produceState(ctx);
-    manifestTemp = await ManifestUtil.writeState(ctx, newState);
-
-    // Run with watching
-    spawnCompile(ctx, manifestTemp, true);
-  }
+  log('[3] Compiled', path.resolve(ctx.workspacePath, ctx.mainOutputFolder));
 }
 
-export async function compile(ctx: ManifestContext, watch?: boolean): Promise<ManifestState> {
+export async function compile(ctx: ManifestContext, watch?: boolean): Promise<ManifestRoot> {
   await precompile(ctx); // Step 0
-  const state = await buildManifestState(ctx); // Step 1
-  await buildCompiler(state, ctx); // Step 2
-  await compileOutput(state, ctx, watch); // Step 3
-  await addNodePath(path.resolve(ctx.workspacePath, ctx.outputFolder));
-  return state;
+  const manifest = await buildManifest(ctx); // Step 1
+  const output = path.resolve(ctx.workspacePath, ctx.outputFolder);
+  const delta = await ManifestDeltaUtil.produceDelta(output, manifest);
+  await buildCompiler(ctx, delta); // Step 2
+  await compileOutput(ctx, manifest, delta, watch); // Step 3
+  await addNodePath(output);
+  return manifest;
 }

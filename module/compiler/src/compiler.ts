@@ -1,12 +1,12 @@
 import ts from 'typescript';
 import fs from 'fs/promises';
-import path from 'path';
 
-import { ManifestState, ManifestUtil } from '@travetto/manifest';
+import { ManifestRoot } from '@travetto/manifest';
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
+import { ManifestDelta } from './types';
 
 export type TransformerProvider = {
   init(checker: ts.TypeChecker): void;
@@ -23,25 +23,9 @@ type EmitEvent = { file: string, i: number, total: number, err?: EmitError };
 export class Compiler {
 
   #state: CompilerState;
-  #transformers: string[];
 
-  init(manifestState: ManifestState): this {
-    this.#state = new CompilerState(manifestState);
-
-    this.#transformers = this.state.modules.flatMap(
-      x => (x.files.support ?? [])
-        .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
-        .map(([f]) =>
-          path.resolve(
-            this.#state.manifest.workspacePath,
-            this.#state.manifest.compilerFolder,
-            x.output,
-            f.replace(/[.][tj]s$/, '.js')
-          )
-        )
-    );
-
-    return this;
+  constructor(root: ManifestRoot, delta: ManifestDelta) {
+    this.#state = new CompilerState(root, delta);
   }
 
   get state(): CompilerState {
@@ -71,7 +55,7 @@ export class Compiler {
 
   async createTransformerProvider(): Promise<TransformerProvider> {
     const { TransformerManager } = await import('@travetto/transformer');
-    return TransformerManager.create(this.#transformers, this.state.manifest);
+    return TransformerManager.create(this.state.transformers, this.state.manifest);
   }
 
   /**
@@ -129,7 +113,6 @@ export class Compiler {
    * Run the compiler
    */
   async run(watch?: boolean): Promise<void> {
-    await ManifestUtil.writeManifest(this.#state.manifest, this.#state.manifest);
     const emitter = await this.getCompiler();
     let failed = false;
 

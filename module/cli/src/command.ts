@@ -231,7 +231,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
       } else {
         const key = `${pre}--${cfg.name} <${cfg.name}>`;
         // @ts-expect-error
-        cmd = cmd.option(key, cfg.desc, cfg.combine ?? ((cur, acc) => cur), cfg.def);
+        cmd = cmd.option(key, cfg.desc, cfg.combine ?? ((cur, acc): unknown => cur), cfg.def);
       }
     }
 

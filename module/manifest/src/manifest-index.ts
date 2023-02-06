@@ -1,11 +1,11 @@
-import fs from 'fs';
-
 import { path } from './path';
 
 import {
   ManifestModule, ManifestModuleCore, ManifestModuleFile,
-  ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, ManifestRoot, MANIFEST_FILE
+  ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, ManifestRoot
 } from './types';
+
+import { ManifestUtil } from './util';
 
 type ScanTest = ((full: string) => boolean) | { test: (full: string) => boolean };
 export type FindConfig = {
@@ -47,8 +47,8 @@ export class ManifestIndex {
   #sourceToEntry = new Map<string, IndexedFile>();
   #importToEntry = new Map<string, IndexedFile>();
 
-  constructor(root: string, manifest: string | ManifestRoot) {
-    this.init(root, manifest);
+  constructor(manifest: string | ManifestRoot, root?: string) {
+    this.init(manifest, root);
   }
 
   #resolveOutput(...parts: string[]): string {
@@ -67,15 +67,11 @@ export class ManifestIndex {
     return this.#manifestFile;
   }
 
-  init(root: string, manifestInput: string | ManifestRoot): void {
-    this.#root = root;
-    if (typeof manifestInput === 'string') {
-      this.#manifestFile = manifestInput;
-    } else {
-      const { workspacePath, mainOutputFolder } = manifestInput;
-      this.#manifestFile = path.resolve(workspacePath, mainOutputFolder, MANIFEST_FILE);
-    }
-    this.#manifest = typeof manifestInput === 'string' ? JSON.parse(fs.readFileSync(this.#manifestFile, 'utf8')) : manifestInput;
+  init(manifestInput: string | ManifestRoot, root?: string): void {
+    const { manifest, file } = ManifestUtil.readManifestSync(manifestInput);
+    this.#manifest = manifest;
+    this.#manifestFile = file;
+    this.#root = root ?? path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
     this.#index();
   }
 

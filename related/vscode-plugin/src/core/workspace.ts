@@ -37,8 +37,7 @@ export class Workspace {
       ...this.#baseEnv,
       ...(debug ? { TRV_DYNAMIC: '1', } : { TRV_QUIET: '1' }),
       ...base,
-      TRV_MANIFEST: cliModule ?? Workspace.workspaceIndex.manifest.mainModule,
-      TRV_OUTPUT: [Workspace.path, Workspace.workspaceIndex.manifest.outputFolder].join('/'),
+      TRV_MODULE: cliModule ?? Workspace.workspaceIndex.manifest.mainModule
     };
   }
 

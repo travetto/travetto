@@ -1,11 +1,22 @@
-import { readFileSync } from 'fs';
 import { install } from 'source-map-support';
 
-import { ManifestState } from '@travetto/manifest';
+import { ManifestIndex, path } from '@travetto/manifest';
 
-import { Compiler } from '../src/compiler';
+import { ManifestDeltaUtil } from './bin/delta';
 
 install();
-const [manifestState, watch] = process.argv.slice(2);
-const state: ManifestState = JSON.parse(readFileSync(manifestState, 'utf8'));
-new Compiler().init(state).run(watch === 'true');
+
+const idx = new ManifestIndex(process.env.TRV_MANIFEST!);
+
+ManifestDeltaUtil.produceDelta(
+  path.resolve(idx.manifest.workspacePath, idx.manifest.outputFolder),
+  idx.manifest
+).then(async delta => {
+  const totalChanged = Object.values(delta).reduce((acc, l) => acc + l.length, 0);
+  const watch = process.argv[2] === 'true';
+
+  if (watch || totalChanged) {
+    const { Compiler } = await import('../src/compiler.js');
+    return new Compiler(idx.manifest, delta).run(watch);
+  }
+});

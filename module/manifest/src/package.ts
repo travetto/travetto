@@ -164,11 +164,17 @@ export class PackageUtil {
   /**
    * Find workspace values from rootPath
    */
-  static resolveWorkspaces(rootPath: string): PackageWorkspaceEntry[] {
+  static async resolveWorkspaces(rootPath: string): Promise<PackageWorkspaceEntry[]> {
     if (!this.#workspaces[rootPath]) {
-      const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8', env: {} });
-      const res: { location: string, name: string }[] = JSON.parse(text);
-      this.#workspaces[rootPath] = res.map(d => ({ sourcePath: d.location, name: d.name }));
+      const cache = path.resolve('.trv_workspace.json');
+      try {
+        return JSON.parse(await fs.readFile(cache, 'utf8'));
+      } catch {
+        const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8', env: {} });
+        const res: { location: string, name: string }[] = JSON.parse(text);
+        const out = this.#workspaces[rootPath] = res.map(d => ({ sourcePath: d.location, name: d.name }));
+        await fs.writeFile(cache, JSON.stringify(out), 'utf8');
+      }
     }
     return this.#workspaces[rootPath];
   }

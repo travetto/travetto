@@ -1,13 +1,10 @@
 import ts from 'typescript';
 import { mkdirSync, readFileSync } from 'fs';
 
-import {
-  path,
-  ManifestModuleUtil, ManifestDelta, ManifestModule,
-  ManifestModuleFileType, ManifestRoot, ManifestState
-} from '@travetto/manifest';
+import { path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot } from '@travetto/manifest';
 
 import { CompilerUtil, FileWatchEvent } from './util';
+import { ManifestDelta } from './types';
 
 const validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
 
@@ -25,10 +22,11 @@ export class CompilerState {
   #sourceHashes = new Map<string, number>();
 
   #manifest: ManifestRoot;
-  #delta: ManifestDelta;
   #modules: ManifestModule[];
+  #delta: ManifestDelta;
+  #transformers: string[];
 
-  constructor({ manifest, delta }: ManifestState) {
+  constructor(manifest: ManifestRoot, delta: ManifestDelta) {
     this.#manifest = manifest;
     this.#delta = delta;
     this.#modules = Object.values(this.#manifest.modules);
@@ -46,7 +44,18 @@ export class CompilerState {
         .map(([f]) => this.registerInput(x, f))
     ));
 
-    return this;
+    this.#transformers = this.#modules.flatMap(
+      x => (x.files.support ?? [])
+        .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
+        .map(([f]) =>
+          path.resolve(
+            this.manifest.workspacePath,
+            this.manifest.compilerFolder,
+            x.output,
+            f.replace(/[.][tj]s$/, '.js')
+          )
+        )
+    );
   }
 
   registerInput(module: ManifestModule, moduleFile: string): string {
@@ -94,6 +103,10 @@ export class CompilerState {
 
   get modules(): ManifestModule[] {
     return this.#modules;
+  }
+
+  get transformers(): string[] {
+    return this.#transformers;
   }
 
   getDirtyFiles(): string[] {

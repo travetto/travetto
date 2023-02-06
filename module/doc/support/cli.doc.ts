@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { PackageUtil, path, RootIndex } from '@travetto/manifest';
-import { WatchUtil, ExecUtil, GlobalEnvConfig } from '@travetto/base';
+import { WatchUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { RenderUtil } from '../src/render/util';
