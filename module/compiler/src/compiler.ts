@@ -1,12 +1,11 @@
 import ts from 'typescript';
 import fs from 'fs/promises';
 
-import { ManifestRoot } from '@travetto/manifest';
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
+import { RootIndex } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
-import { ManifestDelta } from './types';
 
 export type TransformerProvider = {
   init(checker: ts.TypeChecker): void;
@@ -23,9 +22,13 @@ type EmitEvent = { file: string, i: number, total: number, err?: EmitError };
 export class Compiler {
 
   #state: CompilerState;
+  #dirtyFiles: string[];
 
-  constructor(root: ManifestRoot, delta: ManifestDelta) {
-    this.#state = new CompilerState(root, delta);
+  constructor(dirtyFiles: string[]) {
+    this.#state = new CompilerState(RootIndex.manifest);
+    this.#dirtyFiles = dirtyFiles[0] === '*' ?
+      this.#state.getAllFiles() :
+      dirtyFiles.map(f => this.#state.resolveInput(f));
   }
 
   get state(): CompilerState {
@@ -55,7 +58,7 @@ export class Compiler {
 
   async createTransformerProvider(): Promise<TransformerProvider> {
     const { TransformerManager } = await import('@travetto/transformer');
-    return TransformerManager.create(this.state.transformers, this.state.manifest);
+    return TransformerManager.create(this.state.transformers);
   }
 
   /**
@@ -65,7 +68,7 @@ export class Compiler {
     let program: ts.Program;
 
     const transformers = await this.createTransformerProvider();
-    const options = await CompilerUtil.getCompilerOptions(this.#state.manifest);
+    const options = await CompilerUtil.getCompilerOptions(RootIndex.manifest);
     const host = this.state.getCompilerHost(options);
 
     const emit = async (file: string, needsNewProgram = program === undefined): Promise<EmitError | undefined> => {
@@ -99,13 +102,10 @@ export class Compiler {
    */
   async * emit(files: string[], emitter: Emitter): AsyncIterable<EmitEvent> {
     let i = 0;
-    const manifest = this.#state.manifest;
     for (const file of files) {
       const err = await emitter(file);
-      const outputFile = file
-        .replace(/[.]ts$/, '.js')
-        .replace(manifest.compilerFolder, manifest.outputFolder);
-      yield { file: outputFile, i: i += 1, err, total: files.length };
+      const imp = file.replace(/.*node_modules\//, '');
+      yield { file: imp, i: i += 1, err, total: files.length };
     }
   }
 
@@ -121,16 +121,11 @@ export class Compiler {
         failed = true;
         console.error(CompilerUtil.buildTranspileError(file, err));
       }
-      return { idx: i, total, text: `Compiling [%idx/%total] -- ${file.split('node_modules/')[1]}` };
+      return { idx: i, total, text: `Compiling [%idx/%total] -- ${file}` };
     };
 
-    let files = this.state.getDirtyFiles();
-    if (!watch && !files.length) {
-      files = this.state.getAllFiles();
-    }
-
-    if (files.length) {
-      await GlobalTerminal.trackProgress(this.emit(files, emitter), resolveEmittedFile, { position: 'bottom' });
+    if (this.#dirtyFiles.length) {
+      await GlobalTerminal.trackProgress(this.emit(this.#dirtyFiles, emitter), resolveEmittedFile, { position: 'bottom' });
       if (failed) {
         process.exit(1);
       }

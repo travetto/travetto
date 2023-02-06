@@ -8,7 +8,7 @@ import { path } from './path';
 
 export class PackageUtil {
 
-  static #req = createRequire(`${path.cwd()}/node_modules`);
+  static #req = createRequire(path.resolve('node_modules'));
   static #framework: Package;
   static #cache: Record<string, Package> = {};
   static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};

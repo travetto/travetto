@@ -7,7 +7,6 @@ import { createRequire } from 'module';
 import type { ManifestContext, ManifestUtil } from '@travetto/manifest';
 
 import { writeFile } from '../../bin/transpile';
-import { ManifestDelta } from './delta';
 
 const req = createRequire(`${process.cwd()}/node_modules`);
 
@@ -17,15 +16,7 @@ const SOURCE_SEED = ['package.json', 'index.ts', '__index__.ts', 'src', 'support
 
 export const IS_DEBUG = /\b([*]|build)\b/.test(process.env.DEBUG ?? '');
 
-const resolveImport = (lib: string): string => req.resolve(lib);
 const recentStat = (stat: Stats): number => Math.max(stat.ctimeMs, stat.mtimeMs);
-
-type DetectedChanges = {
-  total: number;
-  transformers: [string, string][];
-  compiler: string[];
-  transformer: string[];
-};
 
 /**
  * Common logging support
@@ -42,7 +33,7 @@ export async function getProjectSources(
 ): Promise<ModFile[]> {
   const inputFolder = (ctx.mainModule === module) ?
     process.cwd() :
-    path.dirname(resolveImport(`${module}/package.json`));
+    path.dirname(req.resolve(`${module}/package.json`));
 
   const folders = seed.filter(x => !/[.]/.test(x)).map(x => path.resolve(inputFolder, x));
   const files = seed.filter(x => /[.]/.test(x)).map(x => path.resolve(inputFolder, x));
@@ -106,8 +97,9 @@ export async function compileIfStale(ctx: ManifestContext, prefix: string, files
 /**
  * Add node path at runtime
  */
-export async function addNodePath(folder: string): Promise<void> {
-  process.env.NODE_PATH = [`${folder}/node_modules`, process.env.NODE_PATH].join(path.delimiter);
+export async function addNodePath(ctx: ManifestContext): Promise<void> {
+  const folder = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules');
+  process.env.NODE_PATH = [folder, process.env.NODE_PATH ?? ''].join(path.delimiter);
   const { Module } = await import('module');
   // @ts-expect-error
   Module._initPaths();
@@ -116,25 +108,5 @@ export async function addNodePath(folder: string): Promise<void> {
 /**
  * Import the manifest utils once compiled
  */
-export const importManifest = (ctx: ManifestContext): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
-  import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto', 'manifest', '__index__.js'));
-
-
-export async function shouldRebuildCompiler(delta: ManifestDelta): Promise<DetectedChanges> {
-  const result: DetectedChanges = { total: 0, transformers: [], compiler: [], transformer: [] };
-  const GLOBAL = new Set(['@travetto/compiler', '@travetto/compiler']);
-
-  for (const files of Object.values(delta)) {
-    for (const { file, module } of files ?? []) {
-      if (GLOBAL.has(module) || file.includes('support/transform')) {
-        result.total += 1;
-        switch (module) {
-          case '@travetto/compiler': result.compiler.push(file); break;
-          case '@travetto/transformer': result.transformer.push(file); break;
-          default: result.transformers.push([module, file]); break;
-        }
-      }
-    }
-  }
-  return result;
-}
+export const importManifestUtil = (ctx: ManifestContext): Promise<{ ManifestUtil: typeof ManifestUtil }> =>
+  import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto', 'manifest', 'src', 'util.js'));

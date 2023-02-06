@@ -4,18 +4,15 @@ import type { AnyType, Checker } from './types';
 import { TypeCategorize, TypeBuilder } from './builder';
 import { VisitCache } from './cache';
 import { DocUtil } from '../util/doc';
-import { TransformerIndex } from '../manifest-index';
 
 /**
  * Type resolver
  */
 export class TypeResolver implements Checker {
   #tsChecker: ts.TypeChecker;
-  #index: TransformerIndex;
 
-  constructor(tsChecker: ts.TypeChecker, idx: TransformerIndex) {
+  constructor(tsChecker: ts.TypeChecker) {
     this.#tsChecker = tsChecker;
-    this.#index = idx;
   }
 
   /**
@@ -24,10 +21,6 @@ export class TypeResolver implements Checker {
    */
   getChecker(): ts.TypeChecker {
     return this.#tsChecker;
-  }
-
-  getIndex(): TransformerIndex {
-    return this.#index;
   }
 
   /**
@@ -80,7 +73,7 @@ export class TypeResolver implements Checker {
         throw new Error('Object structure too nested');
       }
 
-      const { category, type } = TypeCategorize(this.#tsChecker, resType, this.#index);
+      const { category, type } = TypeCategorize(this.#tsChecker, resType);
       const { build, finalize } = TypeBuilder[category];
 
       let result = build(this, type, alias);

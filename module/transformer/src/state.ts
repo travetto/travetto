@@ -34,7 +34,6 @@ export class TransformerState implements State {
 
   #resolver: TypeResolver;
   #imports: ImportManager;
-  #index: TransformerIndex;
   #fileIdent: ts.Identifier;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
@@ -43,12 +42,11 @@ export class TransformerState implements State {
   importName: string;
   file: string;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, index: TransformerIndex, options: ts.CompilerOptions) {
-    this.#index = index;
-    this.#imports = new ImportManager(source, factory, index);
-    this.#resolver = new TypeResolver(checker, index);
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, options: ts.CompilerOptions) {
+    this.#imports = new ImportManager(source, factory);
+    this.#resolver = new TypeResolver(checker);
     this.file = path.toPosix(this.source.fileName);
-    this.importName = this.#index.getImportName(this.file, true);
+    this.importName = TransformerIndex.getImportName(this.file, true);
     this.#options = options;
   }
 
@@ -97,7 +95,7 @@ export class TransformerState implements State {
     const resolved = this.resolveType(node);
     if (resolved.key !== 'external') {
       const file = node.getSourceFile().fileName;
-      const src = this.#index.getImportName(file);
+      const src = TransformerIndex.getImportName(file);
       throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${src}`);
     }
     return resolved;
@@ -164,8 +162,8 @@ export class TransformerState implements State {
       this.#resolver.getType(ident)
     );
     const src = decl?.getSourceFile().fileName;
-    const mod = src ? this.#index.getImportName(src, true) : undefined;
-    const file = this.#index.getFromImport(mod ?? '')?.output;
+    const mod = src ? TransformerIndex.getImportName(src, true) : undefined;
+    const file = TransformerIndex.getFromImport(mod ?? '')?.output;
     const targets = DocUtil.readAugments(this.#resolver.getType(ident));
     const module = file ? mod : undefined;
     const name = ident ?
@@ -283,7 +281,7 @@ export class TransformerState implements State {
     if (this.#fileIdent === undefined) {
       this.#fileIdent = this.createIdentifier('ᚕf');
       const decl = this.factory.createVariableDeclaration(this.#fileIdent, undefined, undefined,
-        this.fromLiteral(this.#index.getImportName(this.source.fileName) ?? this.source.fileName)
+        this.fromLiteral(TransformerIndex.getImportName(this.source.fileName) ?? this.source.fileName)
       );
       this.addStatements([
         this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([decl]))

@@ -1,7 +1,7 @@
 /* eslint-disable no-bitwise */
 import ts from 'typescript';
 
-import { ManifestIndex, path } from '@travetto/manifest';
+import { path } from '@travetto/manifest';
 
 import { DocUtil } from '../util/doc';
 import { CoreUtil } from '../util/core';
@@ -10,6 +10,8 @@ import { LiteralUtil } from '../util/literal';
 
 import { Type, AnyType, UnionType, Checker } from './types';
 import { CoerceUtil } from './coerce';
+
+import { TransformerIndex } from '../manifest-index';
 
 /**
  * List of global types that can be parameterized
@@ -38,7 +40,7 @@ type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape
 /**
  * Type categorizer, input for builder
  */
-export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type, index: ManifestIndex): { category: Category, type: ts.Type } {
+export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { category: Category, type: ts.Type } {
   const flags = type.getFlags();
   const objectFlags = DeclarationUtil.getObjectFlags(type) ?? 0;
 
@@ -68,7 +70,7 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type, index: Ma
     const sourceFile = source.fileName;
     if (sourceFile?.includes('@types/node/globals') || sourceFile?.includes('typescript/lib')) {
       return { category: 'literal', type };
-    } else if (sourceFile?.endsWith('.d.ts') && !index.getFromSource(sourceFile)) {
+    } else if (sourceFile?.endsWith('.d.ts') && !TransformerIndex.isKnown(sourceFile)) {
       return { category: 'unknown', type };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };
@@ -145,7 +147,7 @@ export const TypeBuilder: {
   external: {
     build: (checker, type) => {
       const name = CoreUtil.getSymbol(type)?.getName();
-      const importName = checker.getIndex().getImportName(type);
+      const importName = TransformerIndex.getImportName(type);
       const tsTypeArguments = checker.getAllTypeArguments(type);
       return { key: 'external', name, importName, tsTypeArguments };
     }
@@ -180,7 +182,7 @@ export const TypeBuilder: {
     build: (checker, type, alias?) => {
       const tsFieldTypes: Record<string, ts.Type> = {};
       const name = CoreUtil.getSymbol(alias ?? type)?.getName();
-      const importName = checker.getIndex().getImportName(type);
+      const importName = TransformerIndex.getImportName(type);
       const tsTypeArguments = checker.getAllTypeArguments(type);
       for (const member of checker.getPropertiesOfType(type)) {
         const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
@@ -215,10 +217,10 @@ export const TypeBuilder: {
             ?.getSourceFile().fileName ?? '';
 
           if (importName === '.') {
-            importName = checker.getIndex().getImportName(rawSourceFile);
+            importName = TransformerIndex.getImportName(rawSourceFile);
           } else {
             const base = path.dirname(rawSourceFile);
-            importName = checker.getIndex().getImportName(path.resolve(base, importName));
+            importName = TransformerIndex.getImportName(path.resolve(base, importName));
           }
         }
         return { key: 'external', name, importName };

@@ -1,7 +1,5 @@
 import type ts from 'typescript';
 
-import { TransformerIndex } from '../manifest-index';
-
 /**
  * Base type for a simplistic type structure
  */
@@ -158,5 +156,4 @@ export interface Checker {
   getPropertiesOfType(type: ts.Type): ts.Symbol[];
   getTypeAsString(type: ts.Type): string | undefined;
   getType(node: ts.Node): ts.Type;
-  getIndex(): TransformerIndex;
 }

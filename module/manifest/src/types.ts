@@ -3,7 +3,7 @@ export type ManifestModuleFolderType =
   '$root' | '$index' | '$package' |
   'src' | 'bin' | 'support' | 'resources' | 'test' | 'doc' |
   'test/fixtures' | 'support/fixtures' | 'support/resources' |
-  '$other';
+  '$other' | '$transformer';
 
 export type ManifestProfile = 'compile' | 'test' | 'doc' | 'build' | 'std';
 export type PackageRel = 'dev' | 'prod' | 'peer' | 'opt' | 'root' | 'global';

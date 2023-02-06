@@ -38,9 +38,13 @@ export class ManifestModuleUtil {
   /**
    * Simple file scanning
    */
-  static async #scanFolder(folder: string, mainSource = false): Promise<string[]> {
+  static async scanFolder(folder: string, mainSource = false): Promise<string[]> {
     if (!mainSource && folder in this.#scanCache) {
       return this.#scanCache[folder];
+    }
+
+    if (!await fs.stat(folder).catch(() => false)) {
+      return [];
     }
 
     const topFolders = new Set(mainSource ? [] : ['src', 'bin', 'support']);
@@ -132,6 +136,8 @@ export class ManifestModuleUtil {
         return 'support/fixtures';
       } else if (moduleFile.startsWith('support/resources/')) {
         return 'support/resources';
+      } else if (moduleFile.startsWith('support/transform')) {
+        return '$transformer';
       }
       const key = moduleFile.substring(0, folderLocation);
       switch (key) {
@@ -171,7 +177,7 @@ export class ManifestModuleUtil {
 
     const files: ManifestModule['files'] = {};
 
-    for (const file of await this.#scanFolder(sourcePath, mainSource)) {
+    for (const file of await this.scanFolder(sourcePath, mainSource)) {
       // Group by top folder
       const moduleFile = file.replace(`${sourcePath}/`, '');
       const entry = await this.transformFile(moduleFile, file);

@@ -22,12 +22,10 @@ export class ImportManager {
   #idx: Record<string, number> = {};
   #ids = new Map<string, string>();
   #importName: string;
-  #index: TransformerIndex;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, index: TransformerIndex) {
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory) {
     this.#imports = ImportUtil.collectImports(source);
-    this.#index = index;
-    this.#importName = index.getImportName(source.fileName);
+    this.#importName = TransformerIndex.getImportName(source.fileName);
   }
 
   #getImportFile(spec?: ts.Expression): string | undefined {
@@ -40,7 +38,7 @@ export class ImportManager {
     const fileOrImport = this.#getImportFile(spec);
     if (
       fileOrImport &&
-      (fileOrImport.startsWith('.') || this.#index.getFromImport(fileOrImport)) &&
+      (fileOrImport.startsWith('.') || TransformerIndex.isKnown(fileOrImport)) &&
       !/[.]([mc]?js|ts|json)$/.test(fileOrImport)
     ) {
       return LiteralUtil.fromLiteral(this.factory, `${fileOrImport}.js`);
@@ -58,7 +56,7 @@ export class ImportManager {
     }
 
     const fileOrImport = this.#getImportFile(spec);
-    if (!fileOrImport || !(fileOrImport.startsWith('.') || this.#index.getFromImport(fileOrImport))) {
+    if (!fileOrImport || !fileOrImport.startsWith('.') || !TransformerIndex.isKnown(fileOrImport)) {
       return clause;
     }
 
@@ -106,7 +104,7 @@ export class ImportManager {
    * Import a file if needed, and record it's identifier
    */
   importFile(file: string, name?: string): Import {
-    file = this.#index.getImportName(file);
+    file = TransformerIndex.getImportName(file);
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {

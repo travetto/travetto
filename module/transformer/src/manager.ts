@@ -1,12 +1,11 @@
 import ts from 'typescript';
 
-import { path, ManifestRoot } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
 import { TransformerState } from './state';
 import { getAllTransformers } from './register';
-import { TransformerIndex } from './manifest-index';
 
 /**
  * Manages the typescript transformers
@@ -19,26 +18,23 @@ export class TransformerManager {
    * @param manifest
    * @returns
    */
-  static async create(transformerFiles: string[], manifest: ManifestRoot): Promise<TransformerManager> {
+  static async create(transformerFiles: string[]): Promise<TransformerManager> {
     const transformers: NodeTransformer<TransformerState>[] = [];
-    const idx = new TransformerIndex(manifest, path.cwd());
 
     for (const file of transformerFiles) { // Exclude based on blacklist
-      const entry = idx.getEntry(file)!;
+      const entry = RootIndex.getEntry(file)!;
       transformers.push(...getAllTransformers(await import(entry.import), entry.module));
     }
 
     // Prepare a new visitor factory with a given type checker
-    return new TransformerManager(transformers, idx);
+    return new TransformerManager(transformers);
   }
 
   #cached: ts.CustomTransformers | undefined;
   #transformers: NodeTransformer<TransformerState>[];
-  #index: TransformerIndex;
 
-  constructor(transformers: NodeTransformer<TransformerState>[], index: TransformerIndex) {
+  constructor(transformers: NodeTransformer<TransformerState>[]) {
     this.#transformers = transformers;
-    this.#index = index;
   }
 
   /**
@@ -47,7 +43,7 @@ export class TransformerManager {
    */
   init(checker: ts.TypeChecker): void {
     const visitor = new VisitorFactory(
-      (ctx, src) => new TransformerState(src, ctx.factory, checker, this.#index, ctx.getCompilerOptions()),
+      (ctx, src) => new TransformerState(src, ctx.factory, checker, ctx.getCompilerOptions()),
       this.#transformers
     );
 

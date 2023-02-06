@@ -4,7 +4,6 @@ import { mkdirSync, readFileSync } from 'fs';
 import { path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot } from '@travetto/manifest';
 
 import { CompilerUtil, FileWatchEvent } from './util';
-import { ManifestDelta } from './types';
 
 const validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
 
@@ -23,12 +22,10 @@ export class CompilerState {
 
   #manifest: ManifestRoot;
   #modules: ManifestModule[];
-  #delta: ManifestDelta;
   #transformers: string[];
 
-  constructor(manifest: ManifestRoot, delta: ManifestDelta) {
+  constructor(manifest: ManifestRoot) {
     this.#manifest = manifest;
-    this.#delta = delta;
     this.#modules = Object.values(this.#manifest.modules);
     this.#inputFiles = new Set(this.#modules.flatMap(
       x => [
@@ -45,24 +42,21 @@ export class CompilerState {
     ));
 
     this.#transformers = this.#modules.flatMap(
-      x => (x.files.support ?? [])
-        .filter(([f, type]) => type === 'ts' && f.startsWith('support/transformer.'))
-        .map(([f]) =>
-          path.resolve(
-            this.manifest.workspacePath,
-            this.manifest.compilerFolder,
-            x.output,
-            f.replace(/[.][tj]s$/, '.js')
-          )
-        )
+      x => (x.files.$transformer ?? []).map(([f]) =>
+        path.resolve(x.source, f)
+      )
     );
+  }
+
+  resolveInput(file: string): string {
+    return this.#sourceInputOutput.get(file)!.input;
   }
 
   registerInput(module: ManifestModule, moduleFile: string): string {
     const relativeInput = `${module.output}/${moduleFile}`;
     const sourceFile = `${module.source}/${moduleFile}`;
     const sourceFolder = path.dirname(sourceFile);
-    const inputFile = path.resolve(relativeInput);
+    const inputFile = path.resolve(this.#manifest.workspacePath, relativeInput);
     const inputFolder = path.dirname(inputFile);
     const fileType = ManifestModuleUtil.getFileType(moduleFile);
     const outputFile = fileType === 'typings' ?
@@ -70,7 +64,7 @@ export class CompilerState {
       path.resolve(
         this.#manifest.workspacePath,
         this.#manifest.outputFolder,
-        (fileType === 'ts' ? relativeInput.replace(/[.]ts$/, '.js') : relativeInput)
+        CompilerUtil.inputToOutput(relativeInput)
       );
 
     this.#inputToSource.set(inputFile, sourceFile);
@@ -97,34 +91,12 @@ export class CompilerState {
     this.#sourceContents.delete(inputFile);
   }
 
-  get manifest(): ManifestRoot {
-    return this.#manifest;
-  }
-
   get modules(): ManifestModule[] {
     return this.#modules;
   }
 
   get transformers(): string[] {
     return this.#transformers;
-  }
-
-  getDirtyFiles(): string[] {
-    if (this.#delta && Object.keys(this.#delta).length) { // If we have any changes
-      const files: string[] = [];
-      for (const [modName, events] of Object.entries(this.#delta)) {
-        const mod = this.#manifest.modules[modName];
-        for (const { file } of events) {
-          const fileType = ManifestModuleUtil.getFileType(file);
-          if (validFile(fileType)) {
-            files.push(path.resolve(mod.output, file));
-          }
-        }
-      }
-      return files;
-    } else {
-      return [];
-    }
   }
 
   getAllFiles(): string[] {
@@ -207,7 +179,7 @@ export class CompilerState {
       ): void => {
         mkdirSync(path.dirname(outputFile), { recursive: true });
         if (outputFile.endsWith('package.json')) {
-          text = CompilerUtil.rewritePackageJSON(this.manifest, text, options);
+          text = CompilerUtil.rewritePackageJSON(this.#manifest, text, options);
         } else if (!options.inlineSourceMap && options.sourceMap && outputFile.endsWith('.map')) {
           text = CompilerUtil.rewriteSourceMap(text, f => this.#relativeInputToSource.get(f));
         } else if (options.inlineSourceMap && CompilerUtil.isSourceMapUrlPosData(data)) {

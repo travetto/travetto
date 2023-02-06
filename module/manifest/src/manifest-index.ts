@@ -47,8 +47,8 @@ export class ManifestIndex {
   #sourceToEntry = new Map<string, IndexedFile>();
   #importToEntry = new Map<string, IndexedFile>();
 
-  constructor(manifest: string | ManifestRoot, root?: string) {
-    this.init(manifest, root);
+  constructor(manifest: string | ManifestRoot) {
+    this.init(manifest);
   }
 
   #resolveOutput(...parts: string[]): string {
@@ -67,11 +67,11 @@ export class ManifestIndex {
     return this.#manifestFile;
   }
 
-  init(manifestInput: string | ManifestRoot, root?: string): void {
+  init(manifestInput: string | ManifestRoot): void {
     const { manifest, file } = ManifestUtil.readManifestSync(manifestInput);
     this.#manifest = manifest;
     this.#manifestFile = file;
-    this.#root = root ?? path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
+    this.#root = path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
     this.#index();
   }
 

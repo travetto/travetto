@@ -1,17 +1,16 @@
 import ts from 'typescript';
 
-import { ManifestIndex, path } from '@travetto/manifest';
+import { RootIndex, IndexedFile, path } from '@travetto/manifest';
 import { DeclarationUtil } from './util/declaration';
 
 /**
  * Specific logic for the transformer
  */
-export class TransformerIndex extends ManifestIndex {
-
+export class TransformerIndex {
   /**
    * Resolve import name for a given type
    */
-  getImportName(type: ts.Type | string, removeExt = false): string {
+  static getImportName(type: ts.Type | string, removeExt = false): string {
     const ogSource = typeof type === 'string' ? type : DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile().fileName;
     let sourceFile = path.toPosix(ogSource);
 
@@ -20,10 +19,18 @@ export class TransformerIndex extends ManifestIndex {
     }
 
     const imp =
-      this.getEntry(/[.]ts$/.test(sourceFile) ? sourceFile : `${sourceFile}.js`)?.import ??
-      this.getFromImport(sourceFile.replace(/^.*node_modules\//, '').replace(/[.]ts$/, ''))?.import ??
+      RootIndex.getEntry(/[.]ts$/.test(sourceFile) ? sourceFile : `${sourceFile}.js`)?.import ??
+      RootIndex.getFromImport(sourceFile.replace(/^.*node_modules\//, '').replace(/[.]ts$/, ''))?.import ??
       ogSource;
 
     return removeExt ? imp.replace(/[.]js$/, '') : imp;
+  }
+
+  static isKnown(fileOrImport: string): boolean {
+    return RootIndex.getFromSource(fileOrImport) !== undefined ?? RootIndex.getFromImport(fileOrImport) !== undefined;
+  }
+
+  static getFromImport(imp: string): IndexedFile | undefined {
+    return RootIndex.getFromImport(imp);
   }
 }

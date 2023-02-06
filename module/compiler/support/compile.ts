@@ -1,22 +1,11 @@
 import { install } from 'source-map-support';
-
-import { ManifestIndex, path } from '@travetto/manifest';
-
-import { ManifestDeltaUtil } from './bin/delta';
+import fs from 'fs';
 
 install();
 
-const idx = new ManifestIndex(process.env.TRV_MANIFEST!);
+const dirtyFiles = fs.readFileSync(process.argv[2], 'utf8').split(/\n/).filter(x => !!x);
+const watch = process.argv[2] === 'true';
 
-ManifestDeltaUtil.produceDelta(
-  path.resolve(idx.manifest.workspacePath, idx.manifest.outputFolder),
-  idx.manifest
-).then(async delta => {
-  const totalChanged = Object.values(delta).reduce((acc, l) => acc + l.length, 0);
-  const watch = process.argv[2] === 'true';
-
-  if (watch || totalChanged) {
-    const { Compiler } = await import('../src/compiler.js');
-    return new Compiler(idx.manifest, delta).run(watch);
-  }
-});
+if (watch || dirtyFiles.length) {
+  import('../src/compiler.js').then(c => new c.Compiler(dirtyFiles).run(watch));
+}

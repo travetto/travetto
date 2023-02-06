@@ -1,22 +1,28 @@
-import { type Stats } from 'fs';
 import fs from 'fs/promises';
+import path from 'path';
 
-import {
-  ManifestModule, ManifestModuleCore, ManifestModuleFile, ManifestModuleFileType, ManifestModuleFolderType, ManifestRoot
+import type {
+  ManifestContext, ManifestModule, ManifestModuleCore, ManifestModuleFile,
+  ManifestModuleFileType, ManifestModuleFolderType, ManifestRoot, ManifestModuleUtil as ModUtil
 } from '@travetto/manifest';
 
-export type ManifestDeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
-export type ManifestDeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
-export type ManifestDeltaEvent = { file: string, type: ManifestDeltaEventType, module: string };
-export type ManifestDelta = Record<string, ManifestDeltaEvent[]>;
+type DeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
+type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
+export type DeltaEvent = { file: string, type: DeltaEventType, module: string };
 
 const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package', 'doc']);
 const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
 
 /**
+ * Import the manifest utils once compiled
+ */
+const importManifestModuleUtil = (ctx: ManifestContext): Promise<{ ManifestModuleUtil: typeof ModUtil }> =>
+  import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto', 'manifest', 'src', 'module.js'));
+
+/**
  * Produce delta for the manifest
  */
-export class ManifestDeltaUtil {
+export class CompilerDeltaUtil {
 
   static #getNewest(stat: { mtimeMs: number, ctimeMs: number }): number {
     return Math.max(stat.mtimeMs, stat.ctimeMs);
@@ -25,17 +31,25 @@ export class ManifestDeltaUtil {
   /**
    * Produce delta between two manifest modules, relative to an output folder
    */
-  static async #deltaModules(outputFolder: string, left: ManifestDeltaModule): Promise<ManifestDeltaEvent[]> {
-    const out: ManifestDeltaEvent[] = [];
-    const getStat = (f: string): Promise<Stats | void> =>
-      fs.stat(`${outputFolder}/${left.output}/${f.replace(/[.]ts$/, '.js')}`).catch(() => { });
+  static async #deltaModules(ctx: ManifestContext, outputFolder: string, left: DeltaModule): Promise<DeltaEvent[]> {
+    const out: DeltaEvent[] = [];
+    const { ManifestModuleUtil } = await importManifestModuleUtil(ctx);
 
-    const add = (file: string, type: ManifestDeltaEvent['type']): unknown =>
+    const add = (file: string, type: DeltaEvent['type']): unknown =>
       out.push({ file, module: left.name, type });
 
+    const root = `${ctx.workspacePath}/${ctx.outputFolder}/${left.output}`;
+    const right = new Set(
+      (await ManifestModuleUtil.scanFolder(root, left.main))
+        .map(x => x.replace(`${root}/`, '').replace(/[.]js$/, '.ts'))
+        .filter(x => (x.endsWith('.ts') || x.endsWith('.json')))
+    );
+
     for (const el of Object.keys(left.files)) {
+      const output = `${outputFolder}/${left.output}/${el.replace(/[.]ts$/, '.js')}`;
       const [, , leftTs] = left.files[el];
-      const stat = await getStat(el);
+      const stat = await fs.stat(output).catch(() => { });
+      right.delete(el);
       if (!stat) {
         add(el, 'added');
       } else {
@@ -44,6 +58,10 @@ export class ManifestDeltaUtil {
           add(el, 'changed');
         }
       }
+    }
+    // Deleted
+    for (const el of right) {
+      add(el, 'removed');
     }
     return out;
   }
@@ -70,18 +88,19 @@ export class ManifestDeltaUtil {
   }
 
   /**
-   * Produce delta between manifest and the target output
+   * Produce delta between manifest root and the output folder
    */
-  static async produceDelta(outputFolder: string, root: ManifestRoot): Promise<ManifestDelta> {
+  static async produceDelta(ctx: ManifestContext, manifest: ManifestRoot): Promise<DeltaEvent[]> {
     const deltaLeft = Object.fromEntries(
-      Object.values(root.modules)
+      Object.values(manifest.modules)
         .map(m => [m.name, { ...m, files: this.#flattenModuleFiles(m) }])
     );
 
-    const out: Record<string, ManifestDeltaEvent[]> = {};
+    const out: DeltaEvent[] = [];
+    const outputFolder = path.resolve(ctx.workspacePath, ctx.outputFolder);
 
-    for (const [name, lMod] of Object.entries(deltaLeft)) {
-      out[name] = await this.#deltaModules(outputFolder, lMod);
+    for (const lMod of Object.values(deltaLeft)) {
+      out.push(...await this.#deltaModules(manifest, outputFolder, lMod));
     }
 
     return out;

@@ -14,6 +14,10 @@ const nativeCwd = process.cwd();
  */
 export class CompilerUtil {
 
+  static inputToOutput(file: string): string {
+    return file.replace(/[.][tj]s$/, '.js');
+  }
+
   /**
    * Determines if write callback data has sourcemap information
    * @param data
@@ -74,10 +78,10 @@ export class CompilerUtil {
   static rewritePackageJSON(manifest: ManifestRoot, text: string, opts: ts.CompilerOptions): string {
     const pkg: Package = JSON.parse(text);
     if (pkg.files) {
-      pkg.files = pkg.files.map(x => x.replace(/[.]ts$/, '.js'));
+      pkg.files = pkg.files.map(x => this.inputToOutput(x));
     }
     if (pkg.main) {
-      pkg.main = pkg.main.replace(/[.]ts$/, '.js');
+      pkg.main = this.inputToOutput(pkg.main);
     }
     pkg.type = opts.module !== ts.ModuleKind.CommonJS ? 'module' : 'commonjs';
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {

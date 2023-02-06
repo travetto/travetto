@@ -88,18 +88,6 @@ export class ManifestUtil {
   }
 
   /**
-   * Resolves a module file, from a context and manifest
-   */
-  static resolveFile(ctx: ManifestContext, manifest: ManifestRoot, module: string, file: string): string {
-    return path.resolve(
-      ctx.workspacePath,
-      ctx.compilerFolder,
-      manifest.modules[module].output,
-      file
-    );
-  }
-
-  /**
    * Write manifest for a given context, return location
    */
   static writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<string> {
