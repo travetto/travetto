@@ -76,7 +76,7 @@ export class AppRunFeature extends BaseFeature {
       name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
       useCli: true,
       main: 'run',
-      args: [choice.globalName, ...choice.inputs],
+      args: [choice.name, ...choice.inputs],
       cliModule: choice.module,
     });
   }

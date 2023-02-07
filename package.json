@@ -33,8 +33,7 @@
   "workspaces": [
     "module/*",
     "global-test/*",
-    "related/overview",
-    "related/todo-app"
+    "related/*"
   ],
   "overrides": {
     "compression": {

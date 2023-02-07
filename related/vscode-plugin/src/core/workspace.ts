@@ -37,6 +37,7 @@ export class Workspace {
       ...this.#baseEnv,
       ...(debug ? { TRV_DYNAMIC: '1', } : { TRV_QUIET: '1' }),
       ...base,
+      TRV_MANIFEST: '',
       TRV_MODULE: cliModule ?? Workspace.workspaceIndex.manifest.mainModule
     };
   }
@@ -160,11 +161,9 @@ export class Workspace {
       runtimeArgs: [],
       outFiles: [
         ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', '*.js'].join('/'),
-        ['${workspaceFolder}', this.workspaceIndex.manifest.compilerFolder, '**', '*.js'].join('/')
       ],
       resolveSourceMapLocations: [
         ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**'].join('/'),
-        ['${workspaceFolder}', this.workspaceIndex.manifest.compilerFolder, '**'].join('/'),
       ],
       runtimeSourcemapPausePatterns: [
         ['${workspaceFolder}', this.workspaceIndex.manifest.outputFolder, '**', 'test', '**', '*.js'].join('/'),
