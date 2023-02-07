@@ -74,7 +74,7 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
   /**
     * Get args
     */
-  getArgs?(): string;
+  getArgs?(): string | undefined;
   /**
    * Initialization code for adding options
    */
@@ -217,8 +217,9 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
     if (this.init) {
       cmd = await this.init?.(cmd);
     }
-    if (this.getArgs) {
-      cmd = cmd.arguments(this.getArgs?.());
+    const args = this.getArgs?.();
+    if (args) {
+      cmd = cmd.arguments(args);
     }
     for (const cfg of await this.finalizeOptions()) {
       const pre = cfg.short ? `-${cfg.short}, ` : '';

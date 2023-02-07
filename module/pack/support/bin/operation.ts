@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
 
-import { PackConfig } from './types';
+import { CommonPackConfig } from './types';
 import { PackUtil } from './util';
 import { ActiveShellCommand } from './shell';
 
@@ -13,7 +13,7 @@ async function writeRawFile(file: string, contents: string, mode?: string): Prom
 
 export class PackOperation {
 
-  static async * clean(cfg: PackConfig): AsyncIterable<string[]> {
+  static async * clean(cfg: CommonPackConfig): AsyncIterable<string[]> {
     if (!cfg.clean) {
       return;
     }
@@ -28,7 +28,7 @@ export class PackOperation {
       }
       yield ActiveShellCommand.mkdir(cfg.workspace);
     } else {
-      yield [title];
+      yield [`${title}: ${cfg.workspace}`];
       await fs.rm(cfg.workspace, { recursive: true, force: true });
       if (cfg.output) {
         await fs.rm(cfg.output, { recursive: true, force: true });
@@ -37,7 +37,7 @@ export class PackOperation {
     }
   }
 
-  static async * bundle(cfg: PackConfig): AsyncIterable<string[]> {
+  static async * bundle(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const cwd = path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder);
 
     const bundleCommand = ['npx', 'rollup', '-c', 'node_modules/@travetto/pack/support/bin/rollup.js'];
@@ -65,19 +65,20 @@ export class PackOperation {
       );
       yield ActiveShellCommand.chdir(cwd);
       yield bundleCommand;
+      yield ActiveShellCommand.chdir(path.cwd());
     } else {
       yield [title];
       await ExecUtil.spawn(bundleCommand[0], bundleCommand.slice(1), { cwd, env, stdio: ['ignore', 'ignore', 'pipe'] }).result;
     }
   }
 
-  static async * writePackageJson(cfg: PackConfig): AsyncIterable<string[]> {
+  static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const title = 'Writing package.json';
     const pkg = { type: cfg.format };
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
-      yield* ActiveShellCommand.createScript(
+      yield* ActiveShellCommand.createFile(
         path.resolve(cfg.workspace, 'package.json'),
         [JSON.stringify(pkg)]
       );
@@ -90,7 +91,7 @@ export class PackOperation {
     }
   }
 
-  static async * writeEnv(cfg: PackConfig): AsyncIterable<string[]> {
+  static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const title = 'Writing .env.js';
     const env = {
       TRV_MANIFEST: `node_modules/${cfg.module}`,
@@ -99,7 +100,7 @@ export class PackOperation {
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
-      yield* ActiveShellCommand.createScript(
+      yield* ActiveShellCommand.createFile(
         path.resolve(cfg.workspace, '.env.js'),
         PackUtil.buildEnvJS(env)
       );
@@ -112,7 +113,7 @@ export class PackOperation {
     }
   }
 
-  static async * copyResources(cfg: PackConfig): AsyncIterable<string[]> {
+  static async * copyResources(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const resources = {
       count: RootIndex.mainModule.files.resources?.length ?? 0,
       src: path.resolve(RootIndex.mainModule.source, 'resources'),
@@ -123,7 +124,7 @@ export class PackOperation {
       RootIndex.manifest.modules[RootIndex.mainModule.name],
       RootIndex.manifest.modules['@travetto/manifest']
     ].map(mod => ({
-      src: path.resolve(RootIndex.manifest.outputFolder, mod.output, 'package.json'),
+      src: path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder, mod.output, 'package.json'),
       dest: path.resolve(cfg.workspace, mod.output, 'package.json'),
       destFolder: path.resolve(cfg.workspace, mod.output)
     }));
@@ -154,14 +155,14 @@ export class PackOperation {
     }
   }
 
-  static async * primeAppCache(cfg: PackConfig): AsyncIterable<string[]> {
+  static async * primeAppCache(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const isCli = cfg.entryCommand === 'cli' || cfg.entryCommand === 'trv';
     if (!isCli || !RootIndex.hasModule('@travetto/app')) {
       return;
     }
 
     const appCacheCmd = ['npx', 'trv', 'main', '@travetto/app/support/bin/list'];
-    const appCache = path.resolve(cfg.workspace, RootIndex.manifest.mainOutputFolder, 'trv-app-cache.json');
+    const appCache = path.resolve(cfg.workspace, RootIndex.mainModule.output, 'trv-app-cache.json');
     const title = 'Generating App Cache';
 
     if (cfg.ejectFile) {
@@ -180,7 +181,7 @@ export class PackOperation {
     }
   }
 
-  static async * writeManifest(cfg: PackConfig): AsyncIterable<string[]> {
+  static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const title = 'Writing Manifest';
     const cmd = ['npx', 'trv', 'manifest', path.resolve(cfg.workspace, 'node_modules', cfg.module), 'prod'];
     const env = { TRV_MODULE: cfg.module };
@@ -194,54 +195,18 @@ export class PackOperation {
     }
   }
 
-  static async * compress(cfg: PackConfig): AsyncIterable<string[]> {
+  static async * compress(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const title = 'Compressing';
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
       yield ActiveShellCommand.chdir(cfg.workspace);
       yield ActiveShellCommand.zip(cfg.output);
+      yield ActiveShellCommand.chdir(path.cwd());
     } else {
-      yield [title];
+      yield [`${title}: ${cfg.output}`];
       const [cmd, ...args] = ActiveShellCommand.zip(cfg.output);
       await ExecUtil.spawn(cmd, args, { cwd: cfg.workspace }).result;
     }
-  }
-
-  /**
-   * Dockerize workspace with flags
-   */
-  static async* docker(cfg: PackConfig): AsyncIterable<string[]> {
-    // const ws = path.resolve(workspace);
-
-    // yield 'Building Dockerfile';
-
-
-    // const dockerFileBuilder = ({ image, port, app = 'rest', env }: DockerConfig): string => `
-    // FROM ${image}
-    // WORKDIR /app
-    // COPY . .
-    // ${Object.entries(env).map(([k, v]) => `ENV ${k} "${v}"`).join('\n')}
-    // ${(port ?? []).map(x => `EXPOSE ${x}`).join('\n')}
-    // CMD ["./trv", "run", "${app}"]
-    // `;
-
-    // await fs.writeFile(path.resolve(ws, 'Dockerfile'), builder!(cfg), { encoding: 'utf8' });
-
-    // yield 'Pulling Base Image';
-    // await ExecUtil.spawn('docker', ['pull', image]).result;
-
-    // yield 'Building Docker Container';
-    // const tags = tag.map(x => registry ? `${registry}/${name}:${x}` : `${name}:${x}`);
-    // const args = ['build', ...tags.flatMap(x => ['-t', x]), '.'];
-
-    // await ExecUtil.spawn('docker', args, { cwd: ws, stdio: [0, 'pipe', 2] }).result;
-
-    // if (push) {
-    //   yield 'Pushing Tags';
-    //   await ExecUtil.spawn('docker', ['image', 'push', ...tags]).result;
-    // }
-
-    // yield cliTpl`${{ success: 'Successfully' }} containerized project`;
   }
 }

@@ -7,7 +7,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     var: (name: string) => `%${name}%`,
     scriptOpen: () => [],
     callCommandWithAllArgs: (cmd, ...args) => [cmd, ...args, '%*'],
-    createScript: (file, text) => [
+    createFile: (file, text) => [
       ['@echo', 'off'],
       ...text.map((line, i) =>
         ['echo', `"${line.replaceAll('"', '\\"')}"`, i === 0 ? '>' : '>>', file]
@@ -26,7 +26,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     var: (name: string) => `$${name}`,
     scriptOpen: () => ['#!/bin/sh'],
     callCommandWithAllArgs: (cmd, ...args) => [cmd, ...args, '$@'],
-    createScript: (file, text, mode) => [
+    createFile: (file, text, mode) => [
       ...text.map((line, i) =>
         ['echo', `"${line.replaceAll('"', '\\"')}"`, i === 0 ? '>' : '>>', file]),
       ...(mode ? [['chmod', mode, file]] : [])

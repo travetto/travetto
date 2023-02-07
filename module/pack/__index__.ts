@@ -1,1 +1,1 @@
-export type { PackConfig } from './support/bin/types';
+export type { CommonPackConfig } from './support/bin/types';

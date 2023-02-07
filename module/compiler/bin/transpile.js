@@ -76,8 +76,8 @@ async function getCompilerOptions(ctx) {
 
     options.allowJs = true;
     options.resolveJsonModule = true;
-    options.sourceRoot = process.cwd();
-    options.rootDir = process.cwd();
+    options.sourceRoot = ctx.workspacePath;
+    options.rootDir = ctx.workspacePath;
     options.outDir = path.resolve(ctx.workspacePath, ctx.outputFolder);
 
     try {
