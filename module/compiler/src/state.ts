@@ -1,9 +1,9 @@
 import ts from 'typescript';
 import { mkdirSync, readFileSync } from 'fs';
 
-import { path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot } from '@travetto/manifest';
+import { path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot, ManifestWatchEvent } from '@travetto/manifest';
 
-import { CompilerUtil, FileWatchEvent } from './util';
+import { CompilerUtil } from './util';
 
 const validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
 
@@ -112,12 +112,12 @@ export class CompilerState {
     create: (inputFile: string) => void;
     update: (inputFile: string) => void;
     delete: (outputFile: string) => void;
-  }): (ev: FileWatchEvent, folder: string) => void {
+  }): (ev: ManifestWatchEvent, folder: string) => void {
     const mods = Object.fromEntries(this.modules.map(x => [x.source, x]));
-    return ({ path: sourceFile, type }: FileWatchEvent, folder: string): void => {
+    return ({ file: sourceFile, action }: ManifestWatchEvent, folder: string): void => {
       const mod = mods[folder];
       const moduleFile = sourceFile.replace(`${mod.source}/`, '');
-      switch (type) {
+      switch (action) {
         case 'create': {
           const fileType = ManifestModuleUtil.getFileType(moduleFile);
           if (validFile(fileType)) {

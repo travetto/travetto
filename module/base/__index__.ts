@@ -14,4 +14,3 @@ export * from './src/time';
 export * from './src/types';
 export * from './src/object';
 export * from './src/util';
-export * from './src/watch';

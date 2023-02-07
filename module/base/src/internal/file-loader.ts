@@ -1,23 +1,23 @@
 import timers from 'timers/promises';
 
-import { RootIndex } from '@travetto/manifest';
+import { RootIndex, ManifestWatchEvent, ManifestWatcher } from '@travetto/manifest';
 
 import { ObjectUtil } from '../object';
-import { FileWatchEvent, WatchUtil } from '../watch';
 import { ShutdownManager } from '../shutdown';
 
-type WatchHandler = (ev: FileWatchEvent) => (void | Promise<void>);
-type ManualWatchEvent = { type: 'trigger-watch' } & FileWatchEvent;
+type WatchHandler = (ev: ManifestWatchEvent) => (void | Promise<void>);
+type ManualWatchEvent = { trigger?: boolean } & ManifestWatchEvent;
 interface ModuleLoader {
   init?(): Promise<void>;
   load(file: string): Promise<void>;
   unload(file: string): Promise<void>;
 }
 
-function isEvent(ev: unknown): ev is ManualWatchEvent {
+function isTriggerEvent(ev: unknown): ev is ManualWatchEvent {
   return ObjectUtil.isPlainObject(ev) &&
-    'type' in ev && typeof ev.type === 'string' && ev.type === 'trigger-watch' &&
-    'action' in ev && 'file' in ev;
+    ('action' in ev && typeof ev.action === 'string') &&
+    ('file' in ev && typeof ev.file === 'string') &&
+    ('trigger' in ev && typeof ev.trigger === 'boolean');
 }
 
 /**
@@ -28,7 +28,7 @@ class $DynamicFileLoader {
   #loader: ModuleLoader;
   #initialized = false;
 
-  async dispatch(ev: FileWatchEvent): Promise<void> {
+  async dispatch(ev: ManifestWatchEvent): Promise<void> {
     if (ev.action !== 'create') {
       await this.#loader.unload(ev.file);
     }
@@ -62,7 +62,7 @@ class $DynamicFileLoader {
     await this.#loader.init?.();
 
     process.on('message', async ev => {
-      if (isEvent(ev)) {
+      if (isTriggerEvent(ev)) {
         const found = RootIndex.getFromSource(ev.file);
         if (found) {
           this.dispatch({ action: ev.action, file: found.output });
@@ -77,7 +77,7 @@ class $DynamicFileLoader {
       }
     }, 0);
 
-    await WatchUtil.buildOutputWatcher(ev => this.dispatch(ev));
+    await ManifestWatcher.watchOutput(ev => this.dispatch(ev));
   }
 }
 

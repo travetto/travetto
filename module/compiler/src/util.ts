@@ -1,5 +1,4 @@
 import ts from 'typescript';
-import { readdirSync } from 'fs';
 
 import { ManifestModule, ManifestRoot, Package } from '@travetto/manifest';
 
@@ -13,6 +12,11 @@ const nativeCwd = process.cwd();
  */
 export class CompilerUtil {
 
+  /**
+   * Map input file to output format, generally converting ts extensions to js
+   * @param file
+   * @returns
+   */
   static inputToOutput(file: string): string {
     return file.replace(/[.][tj]s$/, '.js');
   }
@@ -120,30 +124,6 @@ export class CompilerUtil {
       errors.push(`${diagnostics.length - 5} more ...`);
     }
     return new Error(`Transpiling ${filename.replace(nativeCwd, '.')} failed: \n${errors.join('\n')}`);
-  }
-
-  /**
-   * Allows for watching of explicit folders
-   *
-   * @param onEvent
-   * @returns
-   */
-  static async fileWatcher(
-    folders: string[],
-    onEvent: (ev: FileWatchEvent, folder: string) => void
-  ): Promise<() => Promise<void>> {
-    const watcher = await import('@parcel/watcher');
-    const subs: (() => Promise<void>)[] = [];
-    for (const folder of folders) {
-      const sub = await watcher.subscribe(folder, (err, events) => {
-        for (const ev of events) {
-          onEvent(ev, folder);
-        }
-      }, { ignore: ['node_modules', ...readdirSync(folder).filter(x => x.startsWith('.') && x.length > 2)] });
-      subs.push(() => sub.unsubscribe());
-    }
-    const readiedSubs = await Promise.all(subs);
-    return () => Promise.all(readiedSubs.map(s => s())).then(() => { });
   }
 
   /**

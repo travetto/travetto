@@ -2,7 +2,7 @@ import ts from 'typescript';
 import fs from 'fs/promises';
 
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
-import { path, RootIndex } from '@travetto/manifest';
+import { RootIndex, ManifestWatcher } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -40,13 +40,6 @@ export class Compiler {
    * Watches local modules
    */
   async #watchLocalModules(emit: Emitter): Promise<() => Promise<void>> {
-    const folders = this.state.modules
-      .filter(x => x.local)
-      .flatMap(x =>
-        (!RootIndex.manifest.monoRepo || x.source !== RootIndex.manifest.workspacePath) ?
-          [x.source] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(x.source, y))
-      );
-
     const emitWithError = async (file: string): Promise<void> => {
       const err = await emit(file, true);
       if (err) {
@@ -60,7 +53,7 @@ export class Compiler {
       update: emitWithError,
       delete: (outputFile) => fs.unlink(outputFile).catch(() => { })
     });
-    return CompilerUtil.fileWatcher(folders, watcher);
+    return ManifestWatcher.watchInput(watcher);
   }
 
   async createTransformerProvider(): Promise<TransformerProvider> {

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
-import { PackageUtil, path, RootIndex } from '@travetto/manifest';
-import { WatchUtil, GlobalEnvConfig } from '@travetto/base';
+import { ManifestWatcher, PackageUtil, path, RootIndex } from '@travetto/manifest';
+import { GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { RenderUtil } from '../src/render/util';
@@ -67,7 +67,7 @@ export class DocCommand extends CliCommand<Options> {
     };
 
     if (this.cmd.watch) {
-      await WatchUtil.watchFile(docFile, write);
+      await ManifestWatcher.watchInputFile(docFile, write);
     } else {
       try {
         await write();

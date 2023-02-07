@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/manifest';
+import { ManifestWatcher, ManifestWatchEvent, path } from '@travetto/manifest';
 
 import { FileResourceConfig, FileResourceProvider } from './resource';
 
@@ -53,5 +53,18 @@ export class FileQueryProvider extends FileResourceProvider {
         }
       }
     }
+  }
+
+  /**
+   * Watch resource files
+   * @param onEvent
+   * @param filter
+   */
+  watchFiles(
+    onEvent: (ev: ManifestWatchEvent) => void,
+    filter?: (ev: ManifestWatchEvent) => boolean
+  ): Promise<() => Promise<void>> {
+    console.log('Watching', this.getAllPaths());
+    return ManifestWatcher.buildWatcher(this.getAllPaths(), onEvent, { filter });
   }
 }
