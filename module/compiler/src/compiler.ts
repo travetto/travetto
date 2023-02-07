@@ -2,10 +2,11 @@ import ts from 'typescript';
 import fs from 'fs/promises';
 
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
-import { RootIndex } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
+import { getCompilerOptions } from '../bin/transpile';
 
 export type TransformerProvider = {
   init(checker: ts.TypeChecker): void;
@@ -39,7 +40,13 @@ export class Compiler {
    * Watches local modules
    */
   async #watchLocalModules(emit: Emitter): Promise<() => Promise<void>> {
-    const folders = this.state.modules.filter(x => x.local).map(x => x.source);
+    const folders = this.state.modules
+      .filter(x => x.local)
+      .flatMap(x =>
+        (!RootIndex.manifest.monoRepo || x.source !== RootIndex.manifest.workspacePath) ?
+          [x.source] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(x.source, y))
+      );
+
     const emitWithError = async (file: string): Promise<void> => {
       const err = await emit(file, true);
       if (err) {
@@ -68,7 +75,7 @@ export class Compiler {
     let program: ts.Program;
 
     const transformers = await this.createTransformerProvider();
-    const options = await CompilerUtil.getCompilerOptions(RootIndex.manifest);
+    const options = await getCompilerOptions(RootIndex.manifest);
     const host = this.state.getCompilerHost(options);
 
     const emit = async (file: string, needsNewProgram = program === undefined): Promise<EmitError | undefined> => {

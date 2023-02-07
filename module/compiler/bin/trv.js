@@ -95,7 +95,7 @@ async function exec(args) {
     case 'clean': break;
     case 'manifest': {
       const { createAndWriteManifest } = await $getBootstrap(ctx);
-      const output = await createAndWriteManifest(ctx, args[0], args[1]);
+      const output = await createAndWriteManifest(ctx, args[1], args[2]);
       message(`Wrote manifest ${output}`);
       break;
     }

@@ -42,8 +42,7 @@ const WS_ROOT = {};
  * Get workspace root
  * @return {Promise<string>}
  */
-async function $getWorkspaceRoot() {
-  const base = process.cwd();
+async function $getWorkspaceRoot(base = process.cwd()) {
   if (base in WS_ROOT) {
     return WS_ROOT[base];
   }
@@ -76,7 +75,7 @@ async function $getWorkspaceRoot() {
  */
 async function getManifestContext(folder) {
   const path = await $getPath();
-  const workspacePath = path.resolve(await $getWorkspaceRoot());
+  const workspacePath = path.resolve(await $getWorkspaceRoot(folder));
 
   // If manifest specified via env var, and is a package name
   if (!folder && process.env.TRV_MODULE) {

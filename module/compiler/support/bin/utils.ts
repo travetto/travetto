@@ -99,10 +99,12 @@ export async function compileIfStale(ctx: ManifestContext, prefix: string, files
  */
 export async function addNodePath(ctx: ManifestContext): Promise<void> {
   const folder = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules');
-  process.env.NODE_PATH = [folder, process.env.NODE_PATH ?? ''].join(path.delimiter);
+  const og = process.env.NODE_PATH;
+  process.env.NODE_PATH = [folder, og].join(path.delimiter);
   const { Module } = await import('module');
   // @ts-expect-error
   Module._initPaths();
+  process.env.NODE_PATH = og; // Restore
 }
 
 /**

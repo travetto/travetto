@@ -56,10 +56,11 @@ export class DocRunUtil {
         cwd: path.toPosix(config.cwd ?? path.cwd()),
         shell: '/bin/bash',
         env: {
-          ...Env.export(/^(TRV_.*|NODE_.*|.*COLOR.*|PATH)$/, /^(TRV_MANIFEST|LS_COLORS)$/),
+          ...Env.export(/^(TRV_.*|NODE_.*|.*COLOR.*|PATH)$/),
           DEBUG: '0',
+          TRV_MANIFEST: '',
           ...(config.profiles ? { TRV_PROFILES: config.profiles.join(' ') } : {}),
-          ...(config.module ? { TRV_MANIFEST: config.module } : {}),
+          ...(config.module ? { TRV_MODULE: config.module } : {}),
           ...(config.env ?? {})
         }
       }

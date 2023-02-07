@@ -66,12 +66,20 @@ async function $getTsconfigFile(ctx) {
 async function getCompilerOptions(ctx) {
   if (!(ctx.workspacePath in _opts)) {
     const ts = await $getTs();
+    const path = await $getPath();
 
     const tsconfig = await $getTsconfigFile(ctx);
 
     const { options } = ts.parseJsonSourceFileConfigFileContent(
       ts.readJsonConfigFile(tsconfig, ts.sys.readFile), ts.sys, ctx.workspacePath
     );
+
+    options.allowJs = true;
+    options.resolveJsonModule = true;
+    options.sourceRoot = process.cwd();
+    options.rootDir = process.cwd();
+    options.outDir = path.resolve(ctx.workspacePath, ctx.outputFolder);
+
     try {
       const { type = 'commonjs' } = await $getPkg(ctx.workspacePath);
       options.moduleType = type.toLowerCase();

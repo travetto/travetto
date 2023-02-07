@@ -26,7 +26,7 @@
     "directory": "related/vscode-plugin"
   },
   "scripts": {
-    "vscode:prepublish": "npx trv pack -e bin/launch.js",
+    "vscode:prepublish": "npx trv pack -sm -e travetto-plugin/bin/launch.js -w dist",
     "package": "vsce package",
     "start": "npx trv watch --clean"
   },

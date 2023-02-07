@@ -15,8 +15,7 @@
         "${workspaceFolder}/dist/**/*.js"
       ],
       "resolveSourceMapLocations": [
-        "${workspaceFolder}/dist/**/*.js",
-        "${workspaceFolder}/out/**/*.js"
+        "${workspaceFolder}/dist/**/*.js"
       ],
       "skipFiles": [
         "<node_internals>/**",

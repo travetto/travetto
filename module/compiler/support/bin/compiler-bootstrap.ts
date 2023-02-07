@@ -33,7 +33,7 @@ export async function precompile(ctx: ManifestContext): Promise<string[]> {
   return out;
 }
 
-export async function createAndWriteManifest(ctx: ManifestContext, output: string, env: string = 'dev'): Promise<void> {
+export async function createAndWriteManifest(ctx: ManifestContext, output: string, env: string = 'dev'): Promise<string> {
   const { ManifestUtil } = await importManifestUtil(ctx);
   const manifest = await ManifestUtil.buildManifest(ctx);
 
@@ -45,7 +45,13 @@ export async function createAndWriteManifest(ctx: ManifestContext, output: strin
         .map(m => [m.name, m])
     );
   }
+  if (!output.endsWith('.json')) {
+    output = path.resolve(output, 'manifest.json');
+  }
+
+  await fs.mkdir(path.dirname(output), { recursive: true });
   await fs.writeFile(output, JSON.stringify(manifest));
+  return output;
 }
 
 /**
@@ -117,15 +123,15 @@ async function finalizeCompiler(ctx: ManifestContext, manifest: ManifestRoot, so
 /**
  *  Step 4
  */
-async function compileOutput(ctx: ManifestContext, manifest: ManifestRoot, delta: DeltaEvent[], watch?: boolean): Promise<void> {
+async function compileOutput(ctx: ManifestContext, manifest: ManifestRoot, delta: DeltaEvent[], watch: boolean = false): Promise<void> {
 
-  log('[4] Compiling');
+  log('[4] Compiling', `watch=${watch}`);
   const changed = delta.filter(x => x.type === 'added' || x.type === 'changed');
 
   // Blocking call, compile only
   if (changed.length || watch) {
     const compiler = path.resolve(ctx.workspacePath, ctx.compilerFolder);
-    const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/compile');
+    const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/compiler-entry.js');
     const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${Date.now()}.${Math.random()}.json`);
 
     const changedFiles = changed.map(ev =>
@@ -133,7 +139,7 @@ async function compileOutput(ctx: ManifestContext, manifest: ManifestRoot, delta
     );
 
     await fs.writeFile(deltaFile, changedFiles.join('\n'), 'utf8');
-    const args = [main, deltaFile, ...(watch ? ['true'] : [])];
+    const args = [main, deltaFile, `${watch}`];
     const res = cp.spawnSync(process.argv0, args, {
       env: {
         ...process.env,

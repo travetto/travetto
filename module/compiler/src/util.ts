@@ -1,8 +1,7 @@
 import ts from 'typescript';
 import { readdirSync } from 'fs';
 
-import { path, ManifestContext, ManifestModule, ManifestRoot, Package } from '@travetto/manifest';
-import { getCompilerOptions } from '../bin/transpile';
+import { ManifestModule, ManifestRoot, Package } from '@travetto/manifest';
 
 type InputToSource = (inputFile: string) => ({ source: string, module: ManifestModule } | undefined);
 export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
@@ -145,20 +144,6 @@ export class CompilerUtil {
     }
     const readiedSubs = await Promise.all(subs);
     return () => Promise.all(readiedSubs.map(s => s())).then(() => { });
-  }
-
-  /**
-   * Get loaded compiler options
-   */
-  static async getCompilerOptions(ctx: ManifestContext): Promise<ts.CompilerOptions> {
-    return {
-      ...await getCompilerOptions(ctx),
-      resolveJsonModule: true,
-      allowJs: true,
-      outDir: path.resolve(ctx.workspacePath, ctx.outputFolder),
-      sourceRoot: nativeCwd,
-      rootDir: nativeCwd,
-    };
   }
 
   /**

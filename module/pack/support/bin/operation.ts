@@ -50,7 +50,7 @@ export class PackOperation {
       ['BUNDLE_SOURCES', cfg.includeSources],
       ['BUNDLE_OUTPUT', cfg.workspace],
       ['BUNDLE_FORMAT', cfg.format],
-      ['TRV_MANIFEST', cfg.module]
+      ['TRV_MANIFEST', RootIndex.getModule(cfg.module)!.output]
     ] as const)
       .filter(x => x[1] === false || x[1])
       .map(x => [x[0], `${x[1]}`])
@@ -156,7 +156,7 @@ export class PackOperation {
 
   static async * primeAppCache(cfg: PackConfig): AsyncIterable<string[]> {
     const isCli = cfg.entryCommand === 'cli' || cfg.entryCommand === 'trv';
-    if (!isCli) {
+    if (!isCli || !RootIndex.hasModule('@travetto/app')) {
       return;
     }
 
@@ -167,12 +167,12 @@ export class PackOperation {
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
       yield ActiveShellCommand.mkdir(path.dirname(appCache));
-      yield ['DEBUG=0', `TRV_MANIFEST=${cfg.module}`, ...appCacheCmd, '>', appCache];
+      yield ['DEBUG=0', `TRV_MODULE=${cfg.module}`, ...appCacheCmd, '>', appCache];
     } else {
       yield [title];
       const out = await ExecUtil.spawn(
         appCacheCmd[0], appCacheCmd.slice(1),
-        { env: { DEBUG: '0', TRV_MANIFEST: cfg.module } }
+        { env: { DEBUG: '0', TRV_MODULE: cfg.module } }
       ).result;
 
       await fs.mkdir(path.dirname(appCache), { recursive: true });
@@ -182,7 +182,7 @@ export class PackOperation {
 
   static async * writeManifest(cfg: PackConfig): AsyncIterable<string[]> {
     const title = 'Writing Manifest';
-    const cmd = ['npx', 'trv', 'manifest', `${cfg.workspace}/node_modules/${cfg.module}`, 'prod'];
+    const cmd = ['npx', 'trv', 'manifest', path.resolve(cfg.workspace, 'node_modules', cfg.module), 'prod'];
     const env = { TRV_MODULE: cfg.module };
 
     if (cfg.ejectFile) {
@@ -190,7 +190,7 @@ export class PackOperation {
       yield [...Object.entries(env).map(([k, v]) => `${k}=${v}`), ...cmd];
     } else {
       yield [title];
-      await ExecUtil.spawn(cmd[0], cmd.slice(1), { env }).result;
+      await ExecUtil.spawn(cmd[0], cmd.slice(1), { env, stdio: 'inherit' }).result;
     }
   }
 
