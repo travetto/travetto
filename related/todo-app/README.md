@@ -329,11 +329,15 @@ First we must start the application:
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.13.0'
+    nodeVersion: 'v18.14.0'
   }
 }
 2029-03-14T04:00:01.510Z info  [@travetto/app:src/registry.ts:81] Config {
-  sources: [ 'application.1 - file://application.yml', 'override.3 - memory://override' ],
+  sources: [
+    'application.1 - file://application.yml',
+    'dev.1 - file://dev.yml',
+    'override.3 - memory://override'
+  ],
   active: {
     ApiHostConfig: {
       servers: [ ServerObject_1856065672_50_163Ⲑsyn { url: 'http://localhost:3000' } ],

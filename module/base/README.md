@@ -87,15 +87,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.work = void 0;
 const tslib_1 = require("tslib");
 const ᚕ_c = tslib_1.__importStar(require("@travetto/base/src/console.js"));
+var ᚕf = "@travetto/base/doc/transpile.js";
 function work() {
-    ᚕ_c.log({ level: "debug", source: __filename, line: 2, scope: "work", args: ['Start Work'] });
+    ᚕ_c.log({ level: "debug", source: ᚕf, line: 2, scope: "work", args: ['Start Work'] });
     try {
         1 / 0;
     }
     catch (err) {
-        ᚕ_c.log({ level: "error", source: __filename, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
+        ᚕ_c.log({ level: "error", source: ᚕf, line: 7, scope: "work", args: ['Divide by zero', { error: err }] });
     }
-    ᚕ_c.log({ level: "debug", source: __filename, line: 9, scope: "work", args: ['End Work'] });
+    ᚕ_c.log({ level: "debug", source: ᚕf, line: 9, scope: "work", args: ['End Work'] });
 }
 exports.work = work;
 ```

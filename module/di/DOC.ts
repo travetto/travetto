@@ -1,6 +1,4 @@
 import { d, lib, mod } from '@travetto/doc';
-import { Config } from '@travetto/config';
-
 import { Injectable, InjectableFactory, Inject } from '@travetto/di';
 import { DependencyRegistry } from '@travetto/di/src/registry';
 
@@ -31,7 +29,7 @@ ${d.Code(d`Example ${InjectableFactory.name}`, 'doc/injectable-factory.ts')}
 
 Given the ${d.Input('static')} method ${d.Input('initService')}, the function will be provided as a valid candidate for ${d.Input('CoolService')}.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
 
-${d.Note(d`Other modules are able to provide aliases to ${Injectable} that also provide additional functionality.  For example, the ${Config} or the ${mod.Rest} module @Controller decorator registers the associated class as an injectable element.`)}
+${d.Note(d`Other modules are able to provide aliases to ${Injectable} that also provide additional functionality.  For example, the ${mod.Config} module @Config or the ${mod.Rest} module @Controller decorator registers the associated class as an injectable element.`)}
 
 
 ${d.Section('Injection')}

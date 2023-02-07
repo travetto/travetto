@@ -262,30 +262,24 @@ npm install @travetto/app
 ```bash
 $ trv run
 
-Running application {
-  name: 'custom',
-  filename: '@travetto/rest/doc/custom-app.ts'
-}
-Manifest {
-  info: {
-    name: '@travetto-doc/rest',
-    main: undefined,
-    author: undefined,
-    license: undefined,
-    version: '0.0.0',
-    framework: '3.0.0'
-  },
-  env: {
-    envName: 'dev',
-    debug: '0',
-    prod: false,
-    test: false,
-    dynamic: false,
-    profiles: [ 'dev' ],
-    resourcePaths: [],
-    nodeVersion: 'v18.13.0'
-  }
-}
+Usage: trv run [options] [application] [args...]
+
+Options:
+  -e, --env <env>          Application environment
+  -p, --profile <profile>  Additional application profiles (default: [])
+  -h, --help               display help for command
+
+Available Applications:
+
+   ● custom 
+     usage: custom 
+     file:  @travetto/rest/doc/custom-app.ts
+
+     ——————————————————————————————————————————————————————————————————
+
+   ● rest Default rest application entrypoint
+     usage: rest 
+     file:  @travetto/rest/src/application/rest.ts
 ```
 
 ### Creating a Custom App
@@ -333,7 +327,7 @@ Manifest {
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.13.0'
+    nodeVersion: 'v18.14.0'
   }
 }
 ```

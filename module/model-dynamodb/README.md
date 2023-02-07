@@ -39,7 +39,7 @@ export class Init {
   
 **Code: Structure of DynamoDBModelConfig**
 ```typescript
-import type * as dynamodb from '@aws-sdk/client-dynamodb';
+import type dynamodb from '@aws-sdk/client-dynamodb';
 
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';

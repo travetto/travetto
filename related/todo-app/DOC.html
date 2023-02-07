@@ -341,11 +341,15 @@ First we must start the application:
     dynamic: false,
     profiles: <span class="token punctuation">[</span> <span class="token string">'dev'</span> <span class="token punctuation">]</span>,
     resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    nodeVersion: <span class="token string">'v18.13.0'</span>
+    nodeVersion: <span class="token string">'v18.14.0'</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 <span class="token number">2029</span>-03-14T04:00:01.510Z info  <span class="token punctuation">[</span>@travetto/app:src/registry.ts:81<span class="token punctuation">]</span> Config <span class="token punctuation">{{'{'}}</span>
-  sources: <span class="token punctuation">[</span> <span class="token string">'application.1 - file://application.yml'</span>, <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,
+  sources: <span class="token punctuation">[</span>
+    <span class="token string">'application.1 - file://application.yml'</span>,
+    <span class="token string">'dev.1 - file://dev.yml'</span>,
+    <span class="token string">'override.3 - memory://override'</span>
+  <span class="token punctuation">]</span>,
   active: <span class="token punctuation">{{'{'}}</span>
     ApiHostConfig: <span class="token punctuation">{{'{'}}</span>
       servers: <span class="token punctuation">[</span> ServerObject_1856065672_50_163Ⲑsyn <span class="token punctuation">{{'{'}}</span> url: <span class="token string">'http://localhost:3000'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,

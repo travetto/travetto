@@ -176,7 +176,7 @@ Manifest {
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.13.0'
+    nodeVersion: 'v18.14.0'
   }
 }
 Config { sources: [ 'override.3 - memory://override' ], active: {} }

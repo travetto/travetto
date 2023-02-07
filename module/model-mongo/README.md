@@ -46,7 +46,7 @@ export class Init {
   
 **Code: Structure of MongoModelConfig**
 ```typescript
-import * as mongo from 'mongodb';
+import type mongo from 'mongodb';
 
 import { FileResourceProvider, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';

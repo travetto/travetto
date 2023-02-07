@@ -56,7 +56,7 @@ Extending the <code class="item input">cli</code> is fairly straightforward.  It
   name <span class="token operator">=</span> <span class="token string">'echo'</span><span class="token punctuation">;</span>
 
   <span class="token function">getOptions</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> uppercase<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">boolOption</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> desc<span class="token operator">:</span> <span class="token string">'Upper case'</span><span class="token punctuation">,</span> def<span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> uppercase<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">boolOption</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> desc<span class="token operator">:</span> <span class="token string">'Upper case'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token function">getArgs</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -83,7 +83,7 @@ With the corresponding output:
 Usage:  <span class="token builtin class-name">echo</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -u, <span class="token parameter variable">--uppercase</span>  Upper <span class="token keyword">case</span> <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -u, <span class="token parameter variable">--uppercase</span>  Upper <span class="token keyword">case</span>
   -h, <span class="token parameter variable">--help</span>       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
