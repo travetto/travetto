@@ -43,7 +43,7 @@ export class TransformerManager {
    */
   init(checker: ts.TypeChecker): void {
     const visitor = new VisitorFactory(
-      (ctx, src) => new TransformerState(src, ctx.factory, checker, ctx.getCompilerOptions()),
+      (ctx, src) => new TransformerState(src, ctx.factory, checker),
       this.#transformers
     );
 

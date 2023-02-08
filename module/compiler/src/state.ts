@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import { path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot, ManifestWatchEvent } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
-import { getCompilerOptions } from '../bin/transpile';
+import { TranspileUtil } from '../support/transpile';
 
 const validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
 
@@ -52,7 +52,7 @@ export class CompilerState {
 
   async getCompilerOptions(): Promise<ts.CompilerOptions> {
     return {
-      ...await getCompilerOptions(this.#manifest),
+      ...await TranspileUtil.getCompilerOptions(this.#manifest),
       outDir: this.#manifest.workspacePath, // Force to root
     };
   }

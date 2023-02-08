@@ -33,7 +33,8 @@
   "workspaces": [
     "module/*",
     "global-test/*",
-    "related/*"
+    "related/*",
+    "!related/travetto.github.io/"
   ],
   "overrides": {
     "compression": {

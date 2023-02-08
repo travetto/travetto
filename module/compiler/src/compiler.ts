@@ -1,3 +1,4 @@
+import { install } from 'source-map-support';
 import ts from 'typescript';
 import fs from 'fs/promises';
 
@@ -21,6 +22,16 @@ type EmitEvent = { file: string, i: number, total: number, err?: EmitError };
  * Compilation support
  */
 export class Compiler {
+
+  /**
+   * Run compiler as a main entry point
+   */
+  static async main(): Promise<void> {
+    const [dirty, watch] = process.argv.slice(2);
+    install();
+    const dirtyFiles = (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
+    return new Compiler(dirtyFiles).run(watch === 'true');
+  }
 
   #state: CompilerState;
   #dirtyFiles: string[];

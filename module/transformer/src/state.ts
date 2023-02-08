@@ -37,24 +37,15 @@ export class TransformerState implements State {
   #fileIdent: ts.Identifier;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
-  #options: ts.CompilerOptions;
   added = new Map<number, ts.Statement[]>();
   importName: string;
   file: string;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, options: ts.CompilerOptions) {
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker) {
     this.#imports = new ImportManager(source, factory);
     this.#resolver = new TypeResolver(checker);
     this.file = path.toPosix(this.source.fileName);
     this.importName = TransformerIndex.getImportName(this.file, true);
-    this.#options = options;
-  }
-
-  /**
-   * Are we building ESM Output?
-   */
-  isEsmOutput(): boolean {
-    return this.#options.module !== ts.ModuleKind.CommonJS;
   }
 
   /**

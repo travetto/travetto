@@ -33,6 +33,7 @@ export type ManifestContext = {
   outputFolder: string;
   compilerFolder: string;
   monoRepo?: boolean;
+  moduleType: 'module' | 'commonjs';
 };
 
 export type ManifestRoot = ManifestContext & {

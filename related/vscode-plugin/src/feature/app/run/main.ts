@@ -137,7 +137,7 @@ export class AppRunFeature extends BaseFeature {
    * @param doc
    */
   async buildCodeLenses(doc: vscode.TextDocument): Promise<vscode.CodeLens[] | undefined> {
-    const hasApp = ' '.repeat(doc.lineCount).split('').some((x, i) => /@Application/.test(doc.lineAt(i).text));
+    const hasApp = ' '.repeat(doc.lineCount).split('').some((x, i) => doc.lineAt(i).text.includes(`${'@'}Application`));
 
     if (!hasApp) {
       return;

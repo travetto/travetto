@@ -3,8 +3,10 @@ import path from 'path';
 
 import {
   ManifestContext, ManifestModule, ManifestModuleCore, ManifestModuleFile,
-  ManifestModuleFileType, ManifestModuleFolderType, ManifestRoot, ManifestModuleUtil
-} from '@travetto/manifest';
+  ManifestModuleFileType, ManifestModuleFolderType, ManifestRoot
+} from './types';
+
+import { ManifestModuleUtil } from './module';
 
 type DeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
 type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
@@ -16,7 +18,7 @@ const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-
 /**
  * Produce delta for the manifest
  */
-export class CompilerDeltaUtil {
+export class ManifestDeltaUtil {
 
   static #getNewest(stat: { mtimeMs: number, ctimeMs: number }): number {
     return Math.max(stat.mtimeMs, stat.ctimeMs);

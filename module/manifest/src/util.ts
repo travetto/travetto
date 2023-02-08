@@ -93,4 +93,13 @@ export class ManifestUtil {
   static writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<string> {
     return this.writeJsonWithBuffer(ctx, MANIFEST_FILE, manifest);
   }
+
+  /**
+   * Rewrite manifest for a given folder
+   */
+  static async rewriteManifest(source: string): Promise<void> {
+    const subCtx = await this.buildContext(source);
+    const subManifest = await this.buildManifest(subCtx);
+    await this.writeManifest(subCtx, subManifest);
+  }
 }

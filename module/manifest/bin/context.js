@@ -87,7 +87,10 @@ async function getManifestContext(folder) {
   const monoRepo = workspacePath !== mainPath || !!workspaces;
   const outputFolder = travetto?.outputFolder ?? '.trv_output';
 
+  const moduleType = (await $getPkg(workspacePath)).type ?? 'commonjs';
+
   return {
+    moduleType,
     mainModule,
     mainOutputFolder: `${outputFolder}/node_modules/${mainModule}`,
     mainPath,
