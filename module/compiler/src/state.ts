@@ -1,9 +1,10 @@
 import ts from 'typescript';
-import { mkdirSync, readFileSync } from 'fs';
+import { readFileSync } from 'fs';
 
 import { path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot, ManifestWatchEvent } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
+import { getCompilerOptions } from '../bin/transpile';
 
 const validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
 
@@ -12,6 +13,7 @@ export class CompilerState {
   #inputFiles: Set<string>;
   #relativeInputToSource = new Map<string, { source: string, module: ManifestModule }>();
   #inputToSource = new Map<string, string>();
+  #resolvedOutput = new Map<string, string>();
   #inputToOutput = new Map<string, string | undefined>();
   #inputDirectoryToSource = new Map<string, string>();
   #sourceInputOutput = new Map<string, { input: string, output?: string, relativeInput: string, module: ManifestModule }>();
@@ -48,6 +50,13 @@ export class CompilerState {
     );
   }
 
+  async getCompilerOptions(): Promise<ts.CompilerOptions> {
+    return {
+      ...await getCompilerOptions(this.#manifest),
+      outDir: this.#manifest.workspacePath, // Force to root
+    };
+  }
+
   resolveInput(file: string): string {
     return this.#sourceInputOutput.get(file)!.input;
   }
@@ -56,7 +65,7 @@ export class CompilerState {
     const relativeInput = `${module.output}/${moduleFile}`;
     const sourceFile = `${module.source}/${moduleFile}`;
     const sourceFolder = path.dirname(sourceFile);
-    const inputFile = path.resolve(this.#manifest.workspacePath, relativeInput);
+    const inputFile = path.resolve(this.#manifest.workspacePath, '##', relativeInput); // Ensure input is isolated
     const inputFolder = path.dirname(inputFile);
     const fileType = ManifestModuleUtil.getFileType(moduleFile);
     const outputFile = fileType === 'typings' ?
@@ -72,6 +81,13 @@ export class CompilerState {
     this.#inputToOutput.set(inputFile, outputFile);
     this.#inputDirectoryToSource.set(inputFolder, sourceFolder);
     this.#relativeInputToSource.set(relativeInput, { source: sourceFile, module });
+
+    // Rewrite fauxOutput to final output form
+    const fauxOutputFile = CompilerUtil.inputToOutput(inputFile);
+    if (fauxOutputFile) {
+      this.#resolvedOutput.set(fauxOutputFile, outputFile!);
+      this.#resolvedOutput.set(`${fauxOutputFile}.map`, `${outputFile!}.map`);
+    }
 
     return inputFile;
   }
@@ -177,7 +193,6 @@ export class CompilerState {
         sourceFiles?: readonly ts.SourceFile[],
         data?: ts.WriteFileCallbackData
       ): void => {
-        mkdirSync(path.dirname(outputFile), { recursive: true });
         if (outputFile.endsWith('package.json')) {
           text = CompilerUtil.rewritePackageJSON(this.#manifest, text, options);
         } else if (!options.inlineSourceMap && options.sourceMap && outputFile.endsWith('.map')) {
@@ -185,6 +200,7 @@ export class CompilerState {
         } else if (options.inlineSourceMap && CompilerUtil.isSourceMapUrlPosData(data)) {
           text = CompilerUtil.rewriteInlineSourceMap(text, f => this.#relativeInputToSource.get(f), data);
         }
+        outputFile = this.#resolvedOutput.get(outputFile) ?? outputFile;
         ts.sys.writeFile(outputFile, text, bom);
       },
       getSourceFile: (inputFile: string, language: ts.ScriptTarget, __onErr?: unknown): ts.SourceFile => {

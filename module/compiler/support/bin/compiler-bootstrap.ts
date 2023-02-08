@@ -125,8 +125,8 @@ async function finalizeCompiler(ctx: ManifestContext, manifest: ManifestRoot, so
  */
 async function compileOutput(ctx: ManifestContext, manifest: ManifestRoot, delta: DeltaEvent[], watch: boolean = false): Promise<void> {
 
-  log('[4] Compiling', `watch=${watch}`);
   const changed = delta.filter(x => x.type === 'added' || x.type === 'changed');
+  log('[4] Compiling', `watch=${watch}`, `changed=${changed.length}`);
 
   // Blocking call, compile only
   if (changed.length || watch) {

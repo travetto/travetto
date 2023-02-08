@@ -6,7 +6,6 @@ import { RootIndex, ManifestWatcher } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
-import { getCompilerOptions } from '../bin/transpile';
 
 export type TransformerProvider = {
   init(checker: ts.TypeChecker): void;
@@ -68,7 +67,7 @@ export class Compiler {
     let program: ts.Program;
 
     const transformers = await this.createTransformerProvider();
-    const options = await getCompilerOptions(RootIndex.manifest);
+    const options = await this.state.getCompilerOptions();
     const host = this.state.getCompilerHost(options);
 
     const emit = async (file: string, needsNewProgram = program === undefined): Promise<EmitError | undefined> => {
@@ -77,13 +76,18 @@ export class Compiler {
           program = ts.createProgram({ rootNames: this.#state.getAllFiles(), host, options, oldProgram: program });
           transformers.init(program.getTypeChecker());
         }
+        if (file.endsWith('.json')) {
+          host.writeFile(file, host.readFile(file)!, false);
+        } else if (file.endsWith('.js')) {
+          host.writeFile(file, ts.transpile(host.readFile(file)!, options), false);
+        } else {
+          const result = program.emit(
+            program.getSourceFile(file)!, host.writeFile, undefined, false, transformers.get()
+          );
 
-        const result = program.emit(
-          program.getSourceFile(file)!, host.writeFile, undefined, false, transformers.get()
-        );
-
-        if (result.diagnostics?.length) {
-          return result.diagnostics;
+          if (result.diagnostics?.length) {
+            return result.diagnostics;
+          }
         }
       } catch (err) {
         if (err instanceof Error) {
