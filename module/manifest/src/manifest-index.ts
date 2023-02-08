@@ -47,7 +47,7 @@ export class ManifestIndex {
   #sourceToEntry = new Map<string, IndexedFile>();
   #importToEntry = new Map<string, IndexedFile>();
 
-  constructor(manifest: string | ManifestRoot) {
+  constructor(manifest: string) {
     this.init(manifest);
   }
 
@@ -67,7 +67,7 @@ export class ManifestIndex {
     return this.#manifestFile;
   }
 
-  init(manifestInput: string | ManifestRoot): void {
+  init(manifestInput: string): void {
     const { manifest, file } = ManifestUtil.readManifestSync(manifestInput);
     this.#manifest = manifest;
     this.#manifestFile = file;

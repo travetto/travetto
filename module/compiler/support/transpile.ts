@@ -44,7 +44,7 @@ export class TranspileUtil {
       options.resolveJsonModule = true;
       options.sourceRoot = ctx.workspacePath;
       options.rootDir = ctx.workspacePath;
-      options.outDir = path.resolve(ctx.workspacePath, ctx.outputFolder);
+      options.outDir = path.resolve(ctx.workspacePath);
 
       try {
         options.module = ctx.moduleType === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
@@ -100,7 +100,7 @@ export class TranspileUtil {
 
         if (stat.isDirectory()) {
           folders.push(resolvedInput);
-        } else if (file.endsWith('.d.ts') || /compiler\/support\/(launcher|transpile)/.test(file)) { // Skip self
+        } else if (file.endsWith('.d.ts')) {
           // Do nothing
         } else if (file.endsWith('.ts') || file.endsWith('.js')) {
           files.push(resolvedInput);
@@ -134,12 +134,10 @@ export class TranspileUtil {
     const changedFiles = changed[0].file === '*' ? ['*'] : changed.map(ev => path.resolve(manifest.modules[ev.module].source, ev.file));
 
     await this.writeTextFile(deltaFile, changedFiles.join('\n'));
-    const args = [main, deltaFile, `${watch}`];
-    const mainOutput = path.resolve(ctx.workspacePath, ctx.mainOutputFolder);
-    const res = cp.spawnSync(process.argv0, args, {
+    const res = cp.spawnSync(process.argv0, [main, deltaFile, `${watch}`], {
       env: {
         ...process.env,
-        TRV_MANIFEST: mainOutput,
+        TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.mainOutputFolder),
         TRV_THROW_ROOT_INDEX_ERR: '1',
       },
       stdio: 'inherit',

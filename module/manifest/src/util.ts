@@ -48,43 +48,18 @@ export class ManifestUtil {
    * @param file
    * @returns
    */
-  static readManifestSync(file: string | ManifestRoot): { manifest: ManifestRoot, file: string } {
-    if (typeof file === 'string') {
-      file = path.resolve(file);
-      if (!file.endsWith('.json')) {
-        file = path.resolve(file, MANIFEST_FILE);
-      }
-    } else {
-      const { workspacePath, mainOutputFolder } = file;
-      file = path.resolve(workspacePath, mainOutputFolder, MANIFEST_FILE);
+  static readManifestSync(file: string): { manifest: ManifestRoot, file: string } {
+    file = path.resolve(file);
+    if (!file.endsWith('.json')) {
+      file = path.resolve(file, MANIFEST_FILE);
     }
-    const manifest = typeof file === 'string' ? JSON.parse(readFileSync(file, 'utf8')) : file;
+    const manifest: ManifestRoot = JSON.parse(readFileSync(file, 'utf8'));
+    if (!manifest.outputFolder) {
+      manifest.outputFolder = path.cwd();
+      manifest.workspacePath = path.cwd();
+      manifest.mainOutputFolder = path.resolve(manifest.outputFolder, 'node_modules', manifest.mainModule);
+    }
     return { manifest, file };
-  }
-
-  /**
-   * Read manifest from a folder
-   */
-  static async readManifest(ctx: ManifestContext): Promise<ManifestRoot> {
-    const file = path.resolve(ctx.workspacePath, ctx.mainOutputFolder, MANIFEST_FILE);
-    if (await fs.stat(file).catch(() => false)) {
-      try {
-        return JSON.parse(await fs.readFile(file, 'utf8'));
-      } catch (err) {
-        await fs.unlink(file).catch(() => { });
-        const final = new Error(`Corrupted manifest ${ctx.mainOutputFolder}/${MANIFEST_FILE}: file has been removed, retry`);
-        if (err instanceof Error) {
-          final.stack = [final.message, ...(err.stack ?? '').split('\n').slice(1)].join('\n');
-        }
-        throw final;
-      }
-    } else {
-      return {
-        modules: {},
-        generated: Date.now(),
-        ...ctx,
-      };
-    }
   }
 
   /**

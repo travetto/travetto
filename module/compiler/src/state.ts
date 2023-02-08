@@ -11,12 +11,11 @@ const validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || ty
 export class CompilerState {
 
   #inputFiles: Set<string>;
-  #relativeInputToSource = new Map<string, { source: string, module: ManifestModule }>();
   #inputToSource = new Map<string, string>();
-  #resolvedOutput = new Map<string, string>();
+  #stagedOutputToOutput = new Map<string, string>();
   #inputToOutput = new Map<string, string | undefined>();
   #inputDirectoryToSource = new Map<string, string>();
-  #sourceInputOutput = new Map<string, { input: string, output?: string, relativeInput: string, module: ManifestModule }>();
+  #sourceInputOutput = new Map<string, { source: string, input: string, stagedOutput?: string, output?: string, module: ManifestModule }>();
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, ts.SourceFile>();
@@ -76,17 +75,17 @@ export class CompilerState {
         CompilerUtil.inputToOutput(relativeInput)
       );
 
+    // Rewrite stagedOutput to final output form
+    const stagedOutputFile = CompilerUtil.inputToOutput(inputFile);
+
     this.#inputToSource.set(inputFile, sourceFile);
-    this.#sourceInputOutput.set(sourceFile, { input: inputFile, output: outputFile, relativeInput, module });
+    this.#sourceInputOutput.set(sourceFile, { source: sourceFile, input: inputFile, stagedOutput: stagedOutputFile, output: outputFile, module });
     this.#inputToOutput.set(inputFile, outputFile);
     this.#inputDirectoryToSource.set(inputFolder, sourceFolder);
-    this.#relativeInputToSource.set(relativeInput, { source: sourceFile, module });
 
-    // Rewrite fauxOutput to final output form
-    const fauxOutputFile = CompilerUtil.inputToOutput(inputFile);
-    if (fauxOutputFile) {
-      this.#resolvedOutput.set(fauxOutputFile, outputFile!);
-      this.#resolvedOutput.set(`${fauxOutputFile}.map`, `${outputFile!}.map`);
+    if (stagedOutputFile) {
+      this.#stagedOutputToOutput.set(stagedOutputFile, outputFile!);
+      this.#stagedOutputToOutput.set(`${stagedOutputFile}.map`, `${outputFile!}.map`);
     }
 
     return inputFile;
@@ -94,11 +93,11 @@ export class CompilerState {
 
   removeInput(inputFile: string): void {
     const source = this.#inputToSource.get(inputFile)!;
-    const { relativeInput } = this.#sourceInputOutput.get(source)!;
+    const { stagedOutput } = this.#sourceInputOutput.get(source)!;
+    this.#stagedOutputToOutput.delete(stagedOutput!);
     this.#sourceInputOutput.delete(source);
     this.#inputToSource.delete(inputFile);
     this.#inputToOutput.delete(inputFile);
-    this.#relativeInputToSource.delete(relativeInput);
     this.#inputFiles.delete(inputFile);
   }
 
@@ -196,11 +195,11 @@ export class CompilerState {
         if (outputFile.endsWith('package.json')) {
           text = CompilerUtil.rewritePackageJSON(this.#manifest, text, options);
         } else if (!options.inlineSourceMap && options.sourceMap && outputFile.endsWith('.map')) {
-          text = CompilerUtil.rewriteSourceMap(text, f => this.#relativeInputToSource.get(f));
+          text = CompilerUtil.rewriteSourceMap(text, f => this.#sourceInputOutput.get(this.#inputToSource.get(f)!));
         } else if (options.inlineSourceMap && CompilerUtil.isSourceMapUrlPosData(data)) {
-          text = CompilerUtil.rewriteInlineSourceMap(text, f => this.#relativeInputToSource.get(f), data);
+          text = CompilerUtil.rewriteInlineSourceMap(text, f => this.#sourceInputOutput.get(this.#inputToSource.get(f)!), data);
         }
-        outputFile = this.#resolvedOutput.get(outputFile) ?? outputFile;
+        outputFile = this.#stagedOutputToOutput.get(outputFile) ?? outputFile;
         ts.sys.writeFile(outputFile, text, bom);
       },
       getSourceFile: (inputFile: string, language: ts.ScriptTarget, __onErr?: unknown): ts.SourceFile => {

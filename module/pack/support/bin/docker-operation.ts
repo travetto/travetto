@@ -17,15 +17,13 @@ export class DockerPackOperation {
    */
   static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
     const title = 'Generating Docker File';
-
     const content = `
 FROM ${cfg.dockerImage}
 WORKDIR /app
 COPY . .
 ${(cfg.dockerPort ?? []).map(x => `EXPOSE ${x}`).join('\n')}
-CMD ["node", "${cfg.entryCommand}"]
+ENTRYPOINT ["node", "${cfg.entryCommand}"]
 `;
-
     const dockerFile = path.resolve(cfg.workspace, 'Dockerfile');
 
     if (cfg.ejectFile) {

@@ -162,22 +162,20 @@ export class PackOperation {
     }
 
     const appCacheCmd = ['npx', 'trv', 'main', '@travetto/app/support/bin/list'];
-    const appCache = path.resolve(cfg.workspace, RootIndex.mainModule.output, 'trv-app-cache.json');
+    const appCache = path.resolve(cfg.workspace, RootIndex.manifest.modules[RootIndex.mainModule.name].output, 'trv-app-cache.json');
     const title = 'Generating App Cache';
+    const env = { DEBUG: '0', TRV_MODULE: cfg.module };
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
       yield ActiveShellCommand.mkdir(path.dirname(appCache));
-      yield ['DEBUG=0', `TRV_MODULE=${cfg.module}`, ...appCacheCmd, '>', appCache];
+      yield [...Object.entries(env).map(x => `${x[0]}=${x[1]}`), ...appCacheCmd, '>', appCache];
     } else {
       yield [title];
-      const out = await ExecUtil.spawn(
-        appCacheCmd[0], appCacheCmd.slice(1),
-        { env: { DEBUG: '0', TRV_MODULE: cfg.module } }
-      ).result;
+      const { stdout } = await ExecUtil.spawn(appCacheCmd[0], appCacheCmd.slice(1), { env }).result;
 
       await fs.mkdir(path.dirname(appCache), { recursive: true });
-      await fs.writeFile(appCache, out.stdout, 'utf8');
+      await fs.writeFile(appCache, stdout, 'utf8');
     }
   }
 

@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestModule, ManifestRoot, Package } from '@travetto/manifest';
+import { ManifestModule, ManifestRoot, Package, path } from '@travetto/manifest';
 
 type InputToSource = (inputFile: string) => ({ source: string, module: ManifestModule } | undefined);
 export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
@@ -36,7 +36,7 @@ export class CompilerUtil {
    */
   static rewriteSourceMap(text: string, inputToSource: InputToSource): string {
     const data: { sourceRoot: string, sources: string[] } = JSON.parse(text);
-    const [src] = data.sources;
+    const src = path.resolve(data.sourceRoot, data.sources[0]);
 
     const { source: file, module } = inputToSource(src) ?? {};
     if (file && module) {

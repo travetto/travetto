@@ -102,7 +102,7 @@ export async function compile(ctx: ManifestContext, watch = false): Promise<void
     } else {
       const res = await ManifestDeltaUtil.produceDelta(ctx, manifest);
       yield 'Generated';
-      return res.filter(x => !(x.module === '@travetto/compiler' && x.file.includes('support/'))); // Exclude self
+      return res;
     }
   });
 
@@ -130,9 +130,9 @@ export async function compile(ctx: ManifestContext, watch = false): Promise<void
 
   await runAction('compile', async function* () {
     const changed = delta.filter(x => x.type === 'added' || x.type === 'changed');
-    yield `Started watch=${watch} changed=${changed}`;
+    yield `Started watch=${watch} changed=${changed.map(x => `${x.module}/${x.file}`)}`;
     if (changed.length || watch) {
-      await TranspileUtil.runCompiler(ctx, manifest, delta, watch);
+      await TranspileUtil.runCompiler(ctx, manifest, changed, watch);
       yield 'Finished';
     } else {
       yield 'Skipped';
@@ -144,8 +144,8 @@ export async function compile(ctx: ManifestContext, watch = false): Promise<void
  * Clean output
  */
 export async function clean(ctx: ManifestContext): Promise<void> {
-  await fs.rm(`${ctx.workspacePath}/${ctx.outputFolder}`, { force: true, recursive: true });
-  await fs.rm(`${ctx.workspacePath}/${ctx.compilerFolder}`, { force: true, recursive: true });
+  await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { force: true, recursive: true });
+  await fs.rm(path.resolve(ctx.workspacePath, ctx.compilerFolder), { force: true, recursive: true });
 }
 
 /**
@@ -162,6 +162,7 @@ export async function exportManifest(ctx: ManifestContext, output?: string, env 
         .filter(x => x.profiles.includes('std'))
         .map(m => [m.name, m])
     );
+    manifest.outputFolder = '';
   }
   if (output) {
     if (!output.endsWith('.json')) {
