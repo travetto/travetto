@@ -42,7 +42,7 @@ export class ManifestIndex {
   #modules: IndexedModule[];
   #modulesByName: Record<string, IndexedModule> = {};
   #modulesByFolder: Record<string, IndexedModule> = {};
-  #root: string;
+  #outputRoot: string;
   #outputToEntry = new Map<string, IndexedFile>();
   #sourceToEntry = new Map<string, IndexedFile>();
   #importToEntry = new Map<string, IndexedFile>();
@@ -52,15 +52,15 @@ export class ManifestIndex {
   }
 
   #resolveOutput(...parts: string[]): string {
-    return path.resolve(this.#root, ...parts);
+    return path.resolve(this.#outputRoot, ...parts);
   }
 
   get manifest(): ManifestRoot {
     return this.#manifest;
   }
 
-  get root(): string {
-    return this.#root;
+  get outputRoot(): string {
+    return this.#outputRoot;
   }
 
   get manifestFile(): string {
@@ -71,7 +71,7 @@ export class ManifestIndex {
     const { manifest, file } = ManifestUtil.readManifestSync(manifestInput);
     this.#manifest = manifest;
     this.#manifestFile = file;
-    this.#root = path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
+    this.#outputRoot = path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
     this.#index();
   }
 

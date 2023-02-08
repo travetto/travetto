@@ -74,8 +74,7 @@ export class IpcSupport {
 
   activate(ctx: ExtensionContext): void {
     this.#file = path.resolve(
-      Workspace.path,
-      Workspace.workspaceIndex.manifest.outputFolder,
+      Workspace.workspaceIndex.outputRoot,
       `.trv_ipc_vscode_${process.ppid}.ndjson`
     );
     this.#ensureFile();

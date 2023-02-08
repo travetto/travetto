@@ -162,7 +162,9 @@ export async function exportManifest(ctx: ManifestContext, output?: string, env 
         .filter(x => x.profiles.includes('std'))
         .map(m => [m.name, m])
     );
+    // Mark output folder/workspace path as portable
     manifest.outputFolder = '';
+    manifest.workspacePath = '';
   }
   if (output) {
     if (!output.endsWith('.json')) {

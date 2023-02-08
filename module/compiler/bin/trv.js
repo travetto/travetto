@@ -105,16 +105,16 @@ const exec = async () => {
       const { Module } = await $getModule();
 
       // Rewriting node_path
-      const folder = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules');
+      const out = path.join(ctx.workspacePath, ctx.outputFolder);
+      const nodeOut = path.resolve(out, 'node_modules');
       const og = process.env.NODE_PATH;
-      process.env.NODE_PATH = [folder, og].join(path.delimiter);
+      process.env.NODE_PATH = [nodeOut, og].join(path.delimiter);
       // @ts-expect-error
       Module._initPaths();
       process.env.NODE_PATH = og; // Restore
 
-      const out = path.join(ctx.workspacePath, ctx.outputFolder);
       process.env.TRV_THROW_ROOT_INDEX_ERR = '1';
-      process.env.TRV_MANIFEST = path.resolve(ctx.workspacePath, ctx.mainOutputFolder);
+      process.env.TRV_MANIFEST = path.resolve(nodeOut, ctx.mainModule);
 
       // TODO: Externalize somehow?
       const cliMain = path.join(out, 'node_modules/@travetto/cli/support/cli.js');

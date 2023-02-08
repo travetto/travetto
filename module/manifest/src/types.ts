@@ -27,7 +27,6 @@ export type ManifestModule = ManifestModuleCore & {
 
 export type ManifestContext = {
   mainModule: string;
-  mainOutputFolder: string;
   mainPath: string;
   workspacePath: string;
   outputFolder: string;

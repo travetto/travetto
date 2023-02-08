@@ -38,7 +38,7 @@ export class PackOperation {
   }
 
   static async * bundle(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const cwd = path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder);
+    const cwd = RootIndex.outputRoot;
 
     const bundleCommand = ['npx', 'rollup', '-c', 'node_modules/@travetto/pack/support/bin/rollup.js'];
 
@@ -124,7 +124,7 @@ export class PackOperation {
       RootIndex.manifest.modules[RootIndex.mainModule.name],
       RootIndex.manifest.modules['@travetto/manifest']
     ].map(mod => ({
-      src: path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder, mod.output, 'package.json'),
+      src: path.resolve(RootIndex.outputRoot, mod.output, 'package.json'),
       dest: path.resolve(cfg.workspace, mod.output, 'package.json'),
       destFolder: path.resolve(cfg.workspace, mod.output)
     }));

@@ -14,7 +14,7 @@ export const MANIFEST_FILE = 'manifest.json';
 export class ManifestUtil {
 
   static async writeJsonWithBuffer(ctx: ManifestContext, filename: string, obj: object): Promise<string> {
-    const file = path.resolve(ctx.workspacePath, ctx.mainOutputFolder, filename);
+    const file = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule, filename);
     await fs.mkdir(path.dirname(file), { recursive: true });
     const temp = path.resolve(os.tmpdir(), `${file.replace(/[\/\\: ]/g, '_')}.${Date.now()}`);
     await fs.writeFile(temp, JSON.stringify(obj), 'utf8');
@@ -57,7 +57,6 @@ export class ManifestUtil {
     if (!manifest.outputFolder) {
       manifest.outputFolder = path.cwd();
       manifest.workspacePath = path.cwd();
-      manifest.mainOutputFolder = path.resolve(manifest.outputFolder, 'node_modules', manifest.mainModule);
     }
     return { manifest, file };
   }

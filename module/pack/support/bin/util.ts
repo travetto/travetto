@@ -41,7 +41,7 @@ export class PackUtil {
   ): Promise<void> {
     const vars = {
       DIST: workspace,
-      TRV_OUT: path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder),
+      TRV_OUT: RootIndex.outputRoot,
       ROOT: path.cwd(),
       MOD: module
     };

@@ -13,7 +13,7 @@ const og = Module._resolveFilename.bind(Module);
 // Hack Node module system to recognize all local plugins.
 Module._resolveFilename = (r, ...args): string =>
   (r.includes('eslint') && !!(RootIndex.getEntry(r) || RootIndex.getModule(r)) && !r.startsWith(RootIndex.manifest.workspacePath)) ?
-    require.resolve(path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder, 'node_modules', r)) :
+    require.resolve(path.resolve(RootIndex.outputRoot, 'node_modules', r)) :
     og(r, ...args);
 
 const readConfig = (file: string, module?: string): ESLint.ConfigData =>

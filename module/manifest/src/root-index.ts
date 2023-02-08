@@ -19,7 +19,7 @@ class $RootIndex extends ManifestIndex {
    * @private
    */
   reinitForModule(module: string): void {
-    this.init(`${this.root}/node_modules/${module}`);
+    this.init(`${this.outputRoot}/node_modules/${module}`);
     this.#config = undefined;
   }
 

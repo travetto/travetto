@@ -12,7 +12,7 @@ async function activate(context) {
     vscode.workspace.workspaceFolders[0].uri.fsPath
   );
 
-  process.env.TRV_MANIFEST = path.resolve(ctx.workspacePath, ctx.mainOutputFolder);
+  process.env.TRV_MANIFEST = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule);
   process.env.TRV_THROW_ROOT_INDEX_ERR = '1';
 
   await import('@travetto/manifest');

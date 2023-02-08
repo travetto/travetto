@@ -137,7 +137,7 @@ export class TranspileUtil {
     const res = cp.spawnSync(process.argv0, [main, deltaFile, `${watch}`], {
       env: {
         ...process.env,
-        TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.mainOutputFolder),
+        TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
         TRV_THROW_ROOT_INDEX_ERR: '1',
       },
       stdio: 'inherit',
