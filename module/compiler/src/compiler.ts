@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
 import { RootIndex, ManifestWatcher } from '@travetto/manifest';
+import { TransformerManager } from '@travetto/transformer';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -56,7 +57,6 @@ export class Compiler {
   }
 
   async createTransformerProvider(): Promise<TransformerProvider> {
-    const { TransformerManager } = await import('@travetto/transformer');
     return TransformerManager.create(this.state.transformers);
   }
 

@@ -166,6 +166,7 @@ export class PackageUtil {
    */
   static async resolveWorkspaces(ctx: ManifestContext, rootPath: string): Promise<PackageWorkspaceEntry[]> {
     if (!this.#workspaces[rootPath]) {
+      await fs.mkdir(path.resolve(ctx.workspacePath, ctx.outputFolder), { recursive: true });
       const cache = path.resolve(ctx.workspacePath, ctx.outputFolder, 'workspaces.json');
       try {
         return JSON.parse(await fs.readFile(cache, 'utf8'));

@@ -3,38 +3,13 @@ import fs from 'fs/promises';
 import path from 'path';
 import cp from 'child_process';
 
-import type { ManifestRoot, ManifestContext } from '@travetto/manifest';
+import { ManifestUtil, ManifestRoot, ManifestContext } from '@travetto/manifest';
 
-import { log, compileIfStale, getProjectSources, addNodePath, importManifestUtil } from './utils';
+import { log, compileIfStale, getModuleSources } from '../../bin/transpile';
 import { CompilerDeltaUtil, DeltaEvent } from './delta';
 
-const PRECOMPILE_MODS = [
-  '@travetto/terminal',
-  '@travetto/manifest',
-  '@travetto/transformer',
-  '@travetto/compiler'
-] as const;
-
-/**
- * Step 0
- */
-export async function precompile(ctx: ManifestContext): Promise<string[]> {
-  const out: string[] = [];
-  for (const mod of PRECOMPILE_MODS) {
-    const files = await getProjectSources(ctx, mod);
-    const changes = files.filter(x => x.stale).map(x => x.input);
-    await compileIfStale(ctx, `[0] Compiling ${mod}`, files);
-    if (changes.length) {
-      out.push(...changes.map(x => `${mod}/${x}`));
-      log(`[0] Compiler source changed ${mod}`, changes);
-    }
-  }
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return out;
-}
 
 export async function createAndWriteManifest(ctx: ManifestContext, output: string, env: string = 'dev'): Promise<string> {
-  const { ManifestUtil } = await importManifestUtil(ctx);
   const manifest = await ManifestUtil.buildManifest(ctx);
 
   // If in prod mode, only include std modules
@@ -59,7 +34,6 @@ export async function createAndWriteManifest(ctx: ManifestContext, output: strin
  */
 async function buildManifest(ctx: ManifestContext): Promise<ManifestRoot> {
   log('[1] Manifest Generation');
-  const { ManifestUtil } = await importManifestUtil(ctx);
   return ManifestUtil.buildManifest(ctx);
 }
 
@@ -72,7 +46,7 @@ async function precompileTransformers(ctx: ManifestContext, manifest: ManifestRo
   for (const mod of Object.values(manifest.modules)) {
     const trans = mod.files.$transformer ?? [];
     if (trans.length) {
-      const files = await getProjectSources(ctx, mod.name, ['package.json', ...trans.map(x => x[0])]);
+      const files = await getModuleSources(ctx, mod.name, ['package.json', ...trans.map(x => x[0])]);
       await compileIfStale(
         ctx,
         `[2] Transformer Compiling ${mod.name}`,
@@ -86,24 +60,37 @@ async function precompileTransformers(ctx: ManifestContext, manifest: ManifestRo
     }
   }
 
+  if (out.length) {
+    await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { recursive: true, force: true });
+    log('[2] Clearing output due to transformer source changes');
+  }
+
   return out;
 }
 
 /**
- *  Step 2
+ * Step 3
  */
-async function finalizeCompiler(ctx: ManifestContext, manifest: ManifestRoot, sourceChanged: boolean, compilerChanged: boolean): Promise<void> {
-  const { ManifestUtil } = await importManifestUtil(ctx);
-
-  // Clean output if compiler changed
-  if (compilerChanged) {
-    log('[3] Clearing output due to compiler changes');
-    await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { recursive: true, force: true });
+async function getDelta(ctx: ManifestContext, manifest: ManifestRoot): Promise<DeltaEvent[]> {
+  const outputExists = await fs.stat(path.resolve(ctx.workspacePath, ctx.outputFolder)).catch(() => { });
+  if (!outputExists) {
+    log('[3] Skipping delta, everything changed');
+    return [{ type: 'changed', file: '*', module: ctx.mainModule } as const];
+  } else {
+    log('[3] Producing delta');
+    const res = await CompilerDeltaUtil.produceDelta(ctx, manifest);
+    log('[3] Produced delta', `changes=${res.length}`);
+    return res;
   }
+}
 
+/**
+ *  Step 4
+ */
+async function finalizeCompiler(ctx: ManifestContext, manifest: ManifestRoot, sourceChanged: boolean): Promise<void> {
   // Write manifest
   await ManifestUtil.writeManifest(ctx, manifest);
-  log('[3] Wrote manifest', ctx.mainModule);
+  log('[4] Wrote manifest', ctx.mainModule);
 
   // Update all manifests
   if (sourceChanged && ctx.monoRepo && ctx.workspacePath === ctx.mainPath) {
@@ -116,17 +103,17 @@ async function finalizeCompiler(ctx: ManifestContext, manifest: ManifestRoot, so
         names.push(mod);
       }
     }
-    log('[3] Rewrote monorepo manifests', names.join(', '));
+    log('[4] Rewrote monorepo manifests', names.join(', '));
   }
 }
 
 /**
- *  Step 4
+ *  Step 5
  */
 async function compileOutput(ctx: ManifestContext, manifest: ManifestRoot, delta: DeltaEvent[], watch: boolean = false): Promise<void> {
 
   const changed = delta.filter(x => x.type === 'added' || x.type === 'changed');
-  log('[4] Compiling', `watch=${watch}`, `changed=${changed.length}`);
+  log('[5] Compiling', `watch=${watch}`, `changed=${changed.length}`);
 
   // Blocking call, compile only
   if (changed.length || watch) {
@@ -153,25 +140,17 @@ async function compileOutput(ctx: ManifestContext, manifest: ManifestRoot, delta
     if (res.status) {
       throw new Error(res.stderr);
     }
-    log('[4] Compiled', path.resolve(ctx.workspacePath, ctx.mainOutputFolder));
+    log('[5] Compiled', path.resolve(ctx.workspacePath, ctx.mainOutputFolder));
   } else {
-    log('[4] Skipped compilation');
+    log('[5] Skipped compilation');
   }
 }
 
 export async function compile(ctx: ManifestContext, watch?: boolean): Promise<ManifestRoot> {
-  const compilerChanges = await precompile(ctx); // Step 0
   const manifest = await buildManifest(ctx); // Step 1
-  const transChanges = await precompileTransformers(ctx, manifest); // Step 2
-
-  const totalChanges = compilerChanges.length + transChanges.length;
-  const delta = totalChanges > 0 ?
-    [{ type: 'changed', file: '*', module: ctx.mainModule } as const] :
-    await CompilerDeltaUtil.produceDelta(ctx, manifest);
-
-  await finalizeCompiler(ctx, manifest, delta.length > 0, totalChanges > 0); // Step 3
-  await compileOutput(ctx, manifest, delta, watch); // Step 4
-
-  await addNodePath(ctx);
+  await precompileTransformers(ctx, manifest); // Step 2
+  const delta = await getDelta(ctx, manifest); // Step 3
+  await finalizeCompiler(ctx, manifest, delta.length > 0); // Step 4
+  await compileOutput(ctx, manifest, delta, watch); // Step 5
   return manifest;
 }

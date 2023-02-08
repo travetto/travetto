@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import type {
+import {
   ManifestContext, ManifestModule, ManifestModuleCore, ManifestModuleFile,
-  ManifestModuleFileType, ManifestModuleFolderType, ManifestRoot, ManifestModuleUtil as ModUtil
+  ManifestModuleFileType, ManifestModuleFolderType, ManifestRoot, ManifestModuleUtil
 } from '@travetto/manifest';
 
 type DeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
@@ -12,12 +12,6 @@ export type DeltaEvent = { file: string, type: DeltaEventType, module: string };
 
 const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package', 'doc']);
 const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
-
-/**
- * Import the manifest utils once compiled
- */
-const importManifestModuleUtil = (ctx: ManifestContext): Promise<{ ManifestModuleUtil: typeof ModUtil }> =>
-  import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto', 'manifest', 'src', 'module.js'));
 
 /**
  * Produce delta for the manifest
@@ -33,7 +27,6 @@ export class CompilerDeltaUtil {
    */
   static async #deltaModules(ctx: ManifestContext, outputFolder: string, left: DeltaModule): Promise<DeltaEvent[]> {
     const out: DeltaEvent[] = [];
-    const { ManifestModuleUtil } = await importManifestModuleUtil(ctx);
 
     const add = (file: string, type: DeltaEvent['type']): unknown =>
       out.push({ file, module: left.name, type });
