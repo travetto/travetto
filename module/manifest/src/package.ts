@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 import { createRequire } from 'module';
 import { execSync } from 'child_process';
 
-import { Package, PackageDigest, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
+import { ManifestContext, Package, PackageDigest, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 import { path } from './path';
 
 export class PackageUtil {
@@ -164,9 +164,9 @@ export class PackageUtil {
   /**
    * Find workspace values from rootPath
    */
-  static async resolveWorkspaces(rootPath: string): Promise<PackageWorkspaceEntry[]> {
+  static async resolveWorkspaces(ctx: ManifestContext, rootPath: string): Promise<PackageWorkspaceEntry[]> {
     if (!this.#workspaces[rootPath]) {
-      const cache = path.resolve('.trv_workspace.json');
+      const cache = path.resolve(ctx.workspacePath, ctx.outputFolder, 'workspaces.json');
       try {
         return JSON.parse(await fs.readFile(cache, 'utf8'));
       } catch {

@@ -49,7 +49,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
   async init(req: PackageVisitReq<ModuleDep>): Promise<PackageVisitReq<ModuleDep>[]> {
     const pkg = PackageUtil.readPackage(req.sourcePath);
     const workspacePkg = PackageUtil.readPackage(this.ctx.workspacePath);
-    const workspaceModules = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(req.sourcePath)) : [];
+    const workspaceModules = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(this.ctx, req.sourcePath)) : [];
 
     this.#mainPatterns = ModuleDependencyVisitor.getMainPatterns(pkg.name, [
       ...pkg.travetto?.mainSource ?? [],

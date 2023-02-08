@@ -13,13 +13,9 @@ function $getPath() {
   try { return require('path'); }
   catch { return import('path'); }
 }
-/**
- * @returns {{createRequire:(folder:string) => ({ resolve: (file:string)=>string})}}
- */
-function $getModule() {
-  try { return require('module'); }
-  // @ts-expect-error
-  catch { return import('module').then(x => x.default); }
+function $getCreateRequire() {
+  try { return require('module').createRequire; }
+  catch { return import('module').then(x => x.Module.createRequire); }
 }
 
 /**
@@ -79,8 +75,8 @@ async function getManifestContext(folder) {
 
   // If manifest specified via env var, and is a package name
   if (!folder && process.env.TRV_MODULE) {
-    const mod = await $getModule();
-    const req = mod.createRequire(`${workspacePath}/node_modules`);
+    const createRequire = await $getCreateRequire();
+    const req = createRequire(`${workspacePath}/node_modules`);
     try {
       folder = path.dirname(req.resolve(`${process.env.TRV_MODULE}/package.json`));
     } catch { }
