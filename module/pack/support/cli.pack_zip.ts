@@ -11,7 +11,7 @@ export class PackZipCommand extends BasePackCommand<CommonPackOptions, CommonPac
 
   getOptions(): CommonPackOptions {
     const opts = this.getCommonOptions();
-    opts.output.def = `${this.getSimpleModuleName()}.zip`;
+    opts.output.def = this.monoRoot ? '<module>.zip' : `${this.getSimpleModuleName()}.zip`;
     return opts;
   }
 

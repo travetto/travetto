@@ -15,7 +15,7 @@ export class PackDockerCommand extends BasePackCommand<DockerPackOptions, Docker
     return {
       ...opts,
       dockerImage: this.option({ short: 'di', desc: 'Docker Image to extend', def: 'node:18-alpine3.16' }),
-      dockerName: this.option({ short: 'dn', desc: 'Docker Image Name', def: this.getSimpleModuleName() }),
+      dockerName: this.option({ short: 'dn', desc: 'Docker Image Name', def: this.monoRoot ? '<module>' : this.getSimpleModuleName() }),
       dockerTag: this.listOption({ short: 'dt', desc: 'Docker Image Tag', def: ['latest'] }),
       dockerPort: this.listOption({ short: 'dp', desc: 'Docker Image Port' }),
       dockerPush: this.boolOption({ short: 'dx', desc: 'Docker Push Tags' }),

@@ -7,9 +7,6 @@ import { CommonPackConfig, CommonPackOptions } from './bin/types';
 import { PackOperation } from './bin/operation';
 import { PackUtil } from './bin/util';
 
-const MODULE_FORMATS = ['module', 'commonjs'] as const;
-
-
 export type PackOperationShape<T extends CommonPackConfig> = ((config: T) => AsyncIterable<string[]>);
 
 export abstract class BasePackCommand<T extends CommonPackOptions, S extends CommonPackConfig> extends CliCommand<{}> {
@@ -19,7 +16,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   }
 
   getArgs(): string | undefined {
-    return this.monoRoot ? '[module]' : undefined;
+    return this.monoRoot ? '<module>' : undefined;
   }
 
   getCommonOptions(): CommonPackOptions {
@@ -31,7 +28,6 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
       workspace: this.option({ short: 'w', desc: 'Workspace for building' }),
       clean: this.boolOption({ short: 'c', desc: 'Clean workspace', def: true }),
       output: this.option({ short: 'o', desc: 'Output Location' }),
-      format: this.choiceOption({ short: 'f', desc: 'Module format', choices: MODULE_FORMATS, def: format }),
 
       entryPoint: this.option({ short: 'e', desc: 'Entry point', def: 'node_modules/@travetto/cli/support/cli.js' }),
       entryCommand: this.option({ short: 'ec', desc: 'Entry command' }),
@@ -72,13 +68,15 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
     return ops;
   }
 
-  getModule(args: string[]): string {
+  getModule(moduleName: string): string {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    let module = this.monoRoot ? args[0] : RootIndex.mainModule.name;
+    let module = this.monoRoot ? moduleName : RootIndex.mainModule.name;
     module = RootIndex.getModuleByFolder(module)?.name ?? module;
 
     // Reinitialize for module
-    RootIndex.reinitForModule(module);
+    if (this.monoRoot) {
+      RootIndex.reinitForModule(module);
+    }
 
     return module;
   }
@@ -86,11 +84,26 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   async buildConfig(): Promise<S> {
     this.cmd.workspace ??= path.resolve(os.tmpdir(), RootIndex.mainModule.source.replace(/[\/\\: ]/g, '_'));
     this.cmd.entryCommand ??= path.basename(this.cmd.entryPoint).replace(/[.][tj]s$/, '');
+    this.cmd.module = RootIndex.mainModule.name;
     return this.cmd;
   }
 
-  async action(...args: string[]): Promise<void> {
+  async action(module: string): Promise<void> {
+    if (!module && this.monoRoot) {
+      this.showHelp(new Error('The module needs to specified when running from a monorepo root'));
+    }
+
+    module = this.getModule(module);
+
     const cfg = await this.buildConfig();
+
+    for (const k in this.cmd) {
+      const v = this.cmd[k];
+      if (typeof v === 'string' && /<module>/.test(v)) {
+        // @ts-expect-error
+        this.cmd[k] = v.replace(/<module>/g, this.getSimpleModuleName());
+      }
+    }
 
     // Resolve all files to absolute paths
     if (this.cmd.output) {
@@ -100,8 +113,6 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
       this.cmd.ejectFile = path.resolve(this.cmd.ejectFile);
     }
     this.cmd.workspace = path.resolve(this.cmd.workspace);
-
-    cfg.module = this.getModule(args);
 
     // Running
     const output: string[] = [];

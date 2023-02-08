@@ -49,7 +49,7 @@ export class PackOperation {
       ['BUNDLE_SOURCEMAP', cfg.sourcemap],
       ['BUNDLE_SOURCES', cfg.includeSources],
       ['BUNDLE_OUTPUT', cfg.workspace],
-      ['BUNDLE_FORMAT', cfg.format],
+      ['BUNDLE_FORMAT', RootIndex.manifest.moduleType],
       ['TRV_MANIFEST', RootIndex.getModule(cfg.module)!.output]
     ] as const)
       .filter(x => x[1] === false || x[1])
@@ -74,7 +74,7 @@ export class PackOperation {
 
   static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const title = 'Writing package.json';
-    const pkg = { type: cfg.format };
+    const pkg = { type: RootIndex.manifest.moduleType };
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);

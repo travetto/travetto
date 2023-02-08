@@ -1,7 +1,4 @@
 import { ListOptionConfig, OptionConfig } from '@travetto/cli';
-import { Package } from '@travetto/manifest';
-
-export type PackFormat = Exclude<Package['type'], undefined>;
 
 export type CommonPackConfig = {
   workspace: string;
@@ -9,7 +6,6 @@ export type CommonPackConfig = {
   clean: boolean;
   ejectFile: string;
   module: string;
-  format: PackFormat;
 
   // Bundle
   entryPoint: string;
@@ -24,7 +20,6 @@ export type CommonPackOptions = {
   output: OptionConfig<string>;
   clean: OptionConfig<boolean>;
   ejectFile: OptionConfig<string>;
-  format: OptionConfig<PackFormat>;
 
   // Bundle
   entryPoint: OptionConfig<string>;
