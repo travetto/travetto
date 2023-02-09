@@ -64,11 +64,11 @@ export class TerminalOperation {
     const indicator = IterableUtil.map(
       stream,
       IterableUtil.DELAY(config),
-      (ch, i) => i === 0 ? `${ch} ${message}` : ch
+      (ch, i) => config.end ? `${message} ${ch}` : (i === 0 ? `${ch} ${message}` : ch)
     );
 
     const final = this.streamToPosition(term, indicator, config.position ?? 'inline');
-    return () => Promise.resolve(() => stop()).then(() => final);
+    return async () => { stop(); return final; };
   }
 
   /**
@@ -91,5 +91,28 @@ export class TerminalOperation {
       const [l, r] = [full.substring(0, mid), full.substring(mid)];
       return `${color(l)}${r}`;
     };
+  }
+
+  /**
+   * Stream lines with a waiting indicator
+   */
+  static async streamLinesWithWaiting(term: TermState, lines: AsyncIterable<string>, cfg: TerminalWaitingConfig = {}): Promise<void> {
+    let writer: (() => Promise<unknown>) | undefined;
+    let line: string | undefined;
+
+    const commitLine = async (): Promise<void> => {
+      await writer?.();
+      if (line) {
+        await TerminalWriter.for(term).restoreOnCommit().changePosition({ y: -1 }).changePosition({ x: 0 }).writeLine(line).commit();
+      }
+    };
+
+    for await (const msg of lines) {
+      await commitLine();
+      line = `${String.fromCharCode(171)} ${msg}`;
+      writer = this.streamWaiting(term, line, cfg);
+    }
+
+    await commitLine();
   }
 }

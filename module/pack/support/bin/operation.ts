@@ -124,7 +124,7 @@ export class PackOperation {
 
     const files = ([['posix', 'sh'], ['win32', 'bat']] as const)
       .map(([type, ext]) => ({
-        fileTitle: cliTpl`${{ title }} ${{ path: `${cfg.entryCommand}.${ext}` }}`,
+        fileTitle: cliTpl`${{ title }} ${{ path: `${cfg.entryCommand}.${ext}` }} args=(${{ param: cfg.entryArguments.join(' ') }})`,
         file: `${cfg.entryCommand}.${ext}`,
         text: [
           ShellCommands[type].scriptOpen(),
@@ -189,7 +189,7 @@ export class PackOperation {
   }
 
   static async * primeAppCache(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const isCli = cfg.entryCommand === 'cli' || cfg.entryCommand === 'trv';
+    const isCli = cfg.entryCommand === 'cli';
     if (!isCli || !RootIndex.hasModule('@travetto/app')) {
       return;
     }
@@ -218,7 +218,7 @@ export class PackOperation {
     const out = path.resolve(cfg.workspace, 'node_modules', cfg.module);
     const cmd = ['npx', 'trv', 'manifest', out, 'prod'];
     const env = { TRV_MODULE: cfg.module };
-    const title = cliTpl`${{ title: 'Writing Manifest' }} ${{ path: out }}`;
+    const title = cliTpl`${{ title: 'Writing Manifest' }} ${{ path: path.join('node_modules', cfg.module) }}`;
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
@@ -241,6 +241,15 @@ export class PackOperation {
       yield [title];
       const [cmd, ...args] = ActiveShellCommand.zip(cfg.output);
       await ExecUtil.spawn(cmd, args, { cwd: cfg.workspace }).result;
+    }
+  }
+
+
+  static async * runOperations<S>(cfg: S, operations: ((config: S) => AsyncIterable<string[]>)[]): AsyncIterable<string> {
+    for (const op of operations) {
+      for await (const msg of op(cfg)) {
+        yield msg.join(' ');
+      }
     }
   }
 }

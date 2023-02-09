@@ -122,6 +122,22 @@ export class Terminal implements TermState {
   }
 
   /**
+   * Stream line output, showing a waiting indicator for each line until the next one occurs
+   *
+   * @param lines
+   * @param config
+   * @returns
+   */
+  async streamLinesWithWaiting(lines: AsyncIterable<string>, config: TerminalWaitingConfig = {}): Promise<void> {
+    if (!this.interactive) {
+      for await (const line of lines) {
+        await this.writeLines(line);
+      }
+    }
+    return TerminalOperation.streamLinesWithWaiting(this, lines, config);
+  }
+
+  /**
    * Consumes a stream, of events, tied to specific list indices, and updates in place
    */
   async streamList<T>(source: AsyncIterable<T>, resolve: MapFn<T, TerminalTableEvent>, config: TerminalTableConfig = {}): Promise<void> {

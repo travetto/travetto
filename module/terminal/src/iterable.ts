@@ -45,14 +45,14 @@ export class IterableUtil {
   }
 
   static cycle<T>(items: T[]): StoppableIterable<T> {
-    let done = true;
+    let done = false;
     async function* buildStream(): AsyncIterable<T> {
       let i = -1;
       while (!done) {
         yield items[(i += 1) % items.length];
       }
     }
-    return { stream: buildStream(), stop: (): void => { done = false; } };
+    return { stream: buildStream(), stop: (): void => { done = true; } };
   }
 
   static async drain<T>(source: AsyncIterable<T>): Promise<T[]> {

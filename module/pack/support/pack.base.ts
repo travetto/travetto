@@ -1,7 +1,9 @@
 import os from 'os';
 
-import { CliCommand } from '@travetto/cli';
+import { CliCommand, cliTpl } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
+import { TimeUtil } from '@travetto/base';
+import { GlobalTerminal } from '@travetto/terminal';
 
 import { CommonPackConfig, CommonPackOptions } from './bin/types';
 import { PackOperation } from './bin/operation';
@@ -16,7 +18,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   }
 
   getArgs(): string | undefined {
-    return this.monoRoot ? '<module>' : undefined;
+    return this.monoRoot ? '<module> [args...]' : '[args...]';
   }
 
   getCommonOptions(): CommonPackOptions {
@@ -27,7 +29,6 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
 
       entryPoint: this.option({ short: 'e', desc: 'Entry point', def: 'node_modules/@travetto/cli/support/cli.js' }),
       entryCommand: this.option({ short: 'ec', desc: 'Entry command' }),
-      entryArguments: this.listOption({ short: 'a', desc: 'Entry arguments' }),
       minify: this.boolOption({ short: 'm', desc: 'Minify output', def: true }),
       sourcemap: this.boolOption({ short: 'sm', desc: 'Bundle source maps' }),
       includeSources: this.boolOption({ short: 'is', desc: 'Include source with source maps' }),
@@ -86,7 +87,8 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
     return this.cmd;
   }
 
-  async action(module: string): Promise<void> {
+  async action(module: string, args: string[]): Promise<void> {
+    const start = Date.now();
     if (!module && this.monoRoot) {
       this.showHelp(new Error('The module needs to specified when running from a monorepo root'));
     }
@@ -94,6 +96,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
     module = this.getModule(module);
 
     const cfg = await this.buildConfig();
+    cfg.entryArguments = args;
 
     for (const k in this.cmd) {
       const v = this.cmd[k];
@@ -112,21 +115,22 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
     }
     this.cmd.workspace = path.resolve(this.cmd.workspace);
 
-    // Running
-    const output: string[] = [];
-    for (const op of this.getOperations()) {
-      for await (const msg of op(cfg)) {
-        if (this.cmd.ejectFile) {
-          output.push(msg.join(' '));
-        } else {
-          console.log(msg.join(' '));
-        }
-      }
-    }
+    const stream = PackOperation.runOperations(cfg, this.getOperations());
 
     // Eject to file
     if (this.cmd.ejectFile) {
+      const output: string[] = [];
+      for await (const line of stream) {
+        output.push(line);
+      }
       await PackUtil.writeEjectOutput(this.cmd.workspace, cfg.module, output, this.cmd.ejectFile);
+    } else {
+      await GlobalTerminal.streamLinesWithWaiting(stream, { initialDelay: 0, cycleDelay: 100, end: true });
+      let msg = cliTpl`${{ success: 'Success' }} (${{ identifier: TimeUtil.prettyDeltaSinceTime(start) }}) ${{ subtitle: 'module' }}=${{ param: this.cmd.module }}`;
+      if (this.cmd.output) {
+        msg = cliTpl`${msg} ${{ subtitle: 'output' }}=${{ path: this.cmd.output }}`;
+      }
+      await GlobalTerminal.writeLines(msg);
     }
   }
 }

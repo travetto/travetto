@@ -25,7 +25,6 @@ export type CommonPackOptions = {
   // Bundle
   entryPoint: OptionConfig<string>;
   entryCommand: OptionConfig<string>;
-  entryArguments: ListOptionConfig<string>;
   minify: OptionConfig<boolean>;
   sourcemap: OptionConfig<boolean>;
   includeSources: OptionConfig<boolean>;

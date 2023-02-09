@@ -86,6 +86,13 @@ export class TimeUtil {
   }
 
   /**
+   * Pretty print a delta between now and `time`, with auto-detection of largest unit
+   */
+  static prettyDeltaSinceTime(time: number, unit?: TimeUnit): string {
+    return this.prettyDelta(Date.now() - time, unit);
+  }
+
+  /**
    * Pretty print a delta, with auto-detection of largest unit
    */
   static prettyDelta(delta: number, unit?: TimeUnit): string {
