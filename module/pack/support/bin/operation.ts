@@ -116,7 +116,7 @@ export class PackOperation {
   static async * copyResources(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const resources = {
       count: RootIndex.mainModule.files.resources?.length ?? 0,
-      src: path.resolve(RootIndex.mainModule.sourceAbsolute, 'resources'),
+      src: path.resolve(RootIndex.mainModule.sourcePath, 'resources'),
       dest: path.resolve(cfg.workspace, 'resources')
     };
 

@@ -102,14 +102,14 @@ export class CliModuleUtil {
     return (mode === 'changed' ?
       await this.findChangedModulesRecursive() :
       [...RootIndex.getModuleList('all')].map(x => RootIndex.getModule(x)!)
-    ).filter(x => x.sourceAbsolute !== RootIndex.manifest.workspacePath);
+    ).filter(x => x.sourcePath !== RootIndex.manifest.workspacePath);
   }
 
   /**
    * Synchronize all workspace modules to have the correct versions from the current packages
    */
   static async synchronizeModuleVersions(): Promise<void> {
-    await PackageUtil.syncVersions((await this.findModules('all')).map(x => x.sourceAbsolute));
+    await PackageUtil.syncVersions((await this.findModules('all')).map(x => x.sourcePath));
   }
 
   /**

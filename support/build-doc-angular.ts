@@ -32,7 +32,7 @@ export async function main(target?: string): Promise<void> {
   }
 
   const mods = new Set((await CliModuleUtil.findModules('all'))
-    .filter(x => !target || x.sourceAbsolute === path.resolve(root, target))
+    .filter(x => !target || x.sourcePath === path.resolve(root, target))
     .filter(x => (x.files.doc ?? []).some(f => f.source.endsWith('DOC.ts'))));
 
   if (mods.size > 1) {
@@ -46,7 +46,7 @@ export async function main(target?: string): Promise<void> {
         filter: mod => mods.has(mod)
       });
   } else {
-    const opts = { env: { TRV_MANIFEST: '' }, cwd: [...mods][0].sourceAbsolute, stdio: 'inherit' } as const;
+    const opts = { env: { TRV_MANIFEST: '' }, cwd: [...mods][0].sourcePath, stdio: 'inherit' } as const;
     await ExecUtil.spawn('trv', ['doc'], opts).result;
   }
 
@@ -56,7 +56,7 @@ export async function main(target?: string): Promise<void> {
     }
     const modName = mod.name.split('/')[1];
     try {
-      let html = await fs.readFile(path.resolve(mod.sourceAbsolute, 'DOC.html'), 'utf8');
+      let html = await fs.readFile(path.resolve(mod.sourcePath, 'DOC.html'), 'utf8');
 
       html = html
         .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)

@@ -25,7 +25,7 @@ export class LintCommand extends CliCommand<Options> {
   async action(): Promise<void> {
     const mods = await CliModuleUtil.findModules(this.cmd.changed ? 'changed' : 'all');
 
-    const res = await ExecUtil.spawn('npx', ['eslint', '--ext', '.js,.ts', ...mods.map(x => x.sourceAbsolute)], {
+    const res = await ExecUtil.spawn('npx', ['eslint', '--ext', '.js,.ts', ...mods.map(x => x.sourcePath)], {
       cwd: RootIndex.manifest.workspacePath,
       stdio: 'inherit',
       catchAsResult: true

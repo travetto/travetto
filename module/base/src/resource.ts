@@ -57,7 +57,7 @@ export class FileResourceProvider implements ResourceProvider {
       const [base, sub] = pth.replace(/^@$/, main).replace(/^@#/, `${main}#`).split('#');
       const rel = sub ?? (base !== main ? cfg.moduleFolder : undefined) ?? cfg.mainFolder;
       const value = RootIndex.hasModule(base) ?
-        path.resolve(RootIndex.getModule(base)!.sourceAbsolute, rel ?? '') :
+        path.resolve(RootIndex.getModule(base)!.sourcePath, rel ?? '') :
         path.resolve(base, sub ?? cfg.mainFolder ?? '');
       if (found.has(value)) {
         return undefined;

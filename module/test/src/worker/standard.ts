@@ -32,7 +32,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
       const event = buildEvent(file);
 
       const { module } = RootIndex.getEntry(event.file!)!;
-      const cwd = RootIndex.getModule(module)!.sourceAbsolute;
+      const cwd = RootIndex.getModule(module)!.sourcePath;
 
       const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
         ExecUtil.fork(

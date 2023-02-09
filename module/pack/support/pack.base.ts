@@ -78,7 +78,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   }
 
   async buildConfig(): Promise<S> {
-    this.cmd.workspace ??= path.resolve(os.tmpdir(), RootIndex.mainModule.sourceAbsolute.replace(/[\/\\: ]/g, '_'));
+    this.cmd.workspace ??= path.resolve(os.tmpdir(), RootIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
     this.cmd.entryCommand ??= path.basename(this.cmd.entryPoint).replace(/[.][tj]s$/, '');
     this.cmd.module = RootIndex.mainModule.name;
     return this.cmd;

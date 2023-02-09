@@ -28,7 +28,7 @@ export type IndexedFile = {
 };
 
 export type IndexedModule = ManifestModuleCore & {
-  sourceAbsolute: string;
+  sourcePath: string;
   files: Record<ManifestModuleFolderType, IndexedFile[]>;
 };
 
@@ -102,8 +102,7 @@ export class ManifestIndex {
       .map(m => ({
         ...m,
         output: this.#resolveOutput(m.output),
-        sourceAbsolute: path.resolve(this.manifest.workspacePath, m.sourceFolder),
-        source: path.resolve(this.manifest.workspacePath, m.sourceFolder),
+        sourcePath: path.resolve(this.manifest.workspacePath, m.sourceFolder),
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         files: Object.fromEntries(
           Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
