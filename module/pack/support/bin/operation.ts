@@ -68,7 +68,7 @@ export class PackOperation {
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
       yield [title];
-      await ExecUtil.spawn(bundleCommand[0], bundleCommand.slice(1), { cwd, env, stdio: ['ignore', 'ignore', 'pipe'] }).result;
+      await ExecUtil.spawn(bundleCommand[0], bundleCommand.slice(1), { cwd, env, stdio: ['inherit', 'pipe', 'pipe'] }).result;
     }
   }
 

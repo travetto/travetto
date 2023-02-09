@@ -34,7 +34,8 @@
     "module/*",
     "global-test/*",
     "related/*",
-    "!related/travetto.github.io/"
+    "!related/travetto.github.io/",
+    "!related/vscode-plugin/"
   ],
   "overrides": {
     "compression": {

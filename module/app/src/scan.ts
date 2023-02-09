@@ -60,7 +60,7 @@ export class AppScanUtil {
     }
     const final: ApplicationConfig[] = [];
     for (const item of items) {
-      const mod = RootIndex.getModuleFromSource(item.filename)!;
+      const mod = RootIndex.getModuleFromImport(item.import)!;
       for (const dep of RootIndex.getDependentModules(mod)) {
         if (!(dep?.local || dep?.main)) { continue; }
         final.push(({ ...item, module: dep.name, globalName: dep.name === RootIndex.mainModule.name ? item.name : `${dep.name}:${item.name}` }));

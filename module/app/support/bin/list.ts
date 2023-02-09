@@ -40,7 +40,8 @@ export class AppListLoader {
   async #verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
     try {
       for (const el of items) {
-        const elStat = (await fs.lstat(el.filename).catch(() => { delete el.generatedTime; }));
+        const file = RootIndex.getFromImport(el.import)!.source;
+        const elStat = (await fs.lstat(file).catch(() => { delete el.generatedTime; }));
         // invalidate cache if changed
         if (elStat && (!el.generatedTime || Math.max(elStat.mtimeMs, elStat.ctimeMs) > el.generatedTime)) {
           throw new Error('Expired entry, data is stale');

@@ -2,9 +2,7 @@ import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
 import { Env } from '@travetto/base';
-import { ManifestModule, path, RootIndex } from '@travetto/manifest';
-
-import { PackFormat } from './types';
+import { ManifestModule, Package, path, RootIndex } from '@travetto/manifest';
 
 const INTRO = {
   commonjs: `
@@ -38,18 +36,19 @@ function getFilesFromModule(m: ManifestModule): string[] {
 }
 
 export function getOutput(): OutputOptions {
-  const format: PackFormat = Env.get('BUNDLE_FORMAT', 'commonjs');
+  const format: Package['type'] = Env.get('BUNDLE_FORMAT', 'commonjs');
   return {
     format,
     intro: INTRO[format],
+    sourcemapPathTransform: (src, map): string =>
+      path.resolve(path.dirname(map), src).replace(`${RootIndex.manifest.workspacePath}/`, ''),
     sourcemap:
       Env.getBoolean('BUNDLE_SOURCEMAP') ?? false,
     sourcemapExcludeSources:
       !(Env.getBoolean('BUNDLE_SOURCES') ?? false),
     compact:
       Env.getBoolean('BUNDLE_COMPRESS') ?? true,
-    dir:
-      Env.get('BUNDLE_OUTPUT')!,
+    dir: Env.get('BUNDLE_OUTPUT')!,
     ...(format === 'commonjs' ? {} : {
       inlineDynamicImports: true
     }),

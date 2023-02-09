@@ -119,7 +119,7 @@ export class AppRunFeature extends BaseFeature {
       }
 
       if (line) {
-        const editor = vscode.window.visibleTextEditors.find(x => x.document.fileName === choice.filename);
+        const editor = vscode.window.visibleTextEditors.find(x => Workspace.workspaceIndex.getFromSource(x.document.fileName)?.import === choice.import);
         if (editor) {
           Workspace.addBreakpoint(editor, line);
           await Workspace.sleep(100);
@@ -144,7 +144,7 @@ export class AppRunFeature extends BaseFeature {
     }
 
     return (await this.getAppList())
-      .filter(x => x.filename === doc.fileName)
+      .filter(x => x.import === Workspace.workspaceIndex.getFromSource(doc.fileName)?.import)
       .map(app => ({
         range: doc.lineAt(app.start - 1).range,
         isResolved: true,

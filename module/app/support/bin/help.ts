@@ -1,4 +1,3 @@
-import { path } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
 import { stripAnsiCodes } from '@travetto/terminal';
 
@@ -38,7 +37,6 @@ export class HelpUtil {
     if (!configs || !configs.length) {
       return cliTpl`\nNo applications defined, use ${{ type: '@Application' }} to registry entry points`;
     }
-    const cwdPrefix = `${path.cwd()}/`;
     for (const conf of configs) {
       const lines = [];
 
@@ -46,7 +44,7 @@ export class HelpUtil {
 
       lines.push(cliTpl`${{ param: conf.globalName }} ${{ title: conf.description }}`);
       lines.push(cliTpl`${{ subtitle: 'usage' }}: ${usage}`);
-      lines.push(cliTpl`${{ subtitle: 'file' }}:  ${{ path: conf.filename.replace(cwdPrefix, '') }}`);
+      lines.push(cliTpl`${{ subtitle: 'import' }}:  ${{ path: conf.import }}`);
       choices.push(lines.map((x, i) => `   ${i === 0 ? '●' : ' '} ${x}`));
     }
 

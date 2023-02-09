@@ -60,7 +60,7 @@ class $ApplicationRegistry {
 
     console.log('Running application', {
       name: config.name,
-      filename: config.filename
+      import: config.import
     });
 
     // Show manifest

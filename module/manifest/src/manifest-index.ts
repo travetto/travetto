@@ -249,6 +249,14 @@ export class ManifestIndex {
   }
 
   /**
+   * Get module from import name
+   * @param importName
+   */
+  getModuleFromImport(importName: string): IndexedModule | undefined {
+    const name = this.getFromImport(importName)?.module;
+    return name ? this.getModule(name) : undefined;
+  }
+  /**
    * Build module list from an expression list (e.g. `@travetto/app,-@travetto/log)
    */
   getModuleList(mode: 'local' | 'all', exprList: string = ''): Set<string> {

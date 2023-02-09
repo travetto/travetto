@@ -29,7 +29,7 @@ export function Application(name: string, config?: AppDecorator) {
       globalName: finalName,
       target,
       module: RootIndex.manifest.mainModule,
-      filename: src,
+      import: RootIndex.getFromSource(src)!.import,
       targetId: target.Ⲑid,
       name: finalName,
       generatedTime: Math.max(stat.mtimeMs, stat.ctimeMs)

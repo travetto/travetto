@@ -19,7 +19,7 @@ export interface ApplicationConfig<T extends AppClass = AppClass> {
   name: string; // App name
   globalName: string; // Global name, for resolving in monorepos
   module: string;
-  filename: string; // Location of file for app
+  import: string; // Import for loading app
   description?: string;
   start: number; // Start of app
   codeStart: number; // The start of the code
