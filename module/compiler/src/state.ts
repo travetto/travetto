@@ -61,7 +61,7 @@ export class CompilerState {
   }
 
   registerInput(module: ManifestModule, moduleFile: string): string {
-    const relativeInput = `${module.output}/${moduleFile}`;
+    const relativeInput = `${module.outputFolder}/${moduleFile}`;
     const sourceFile = path.toPosix(path.resolve(this.#manifest.workspacePath, module.sourceFolder, moduleFile));
     const sourceFolder = path.dirname(sourceFile);
     const inputFile = path.resolve(this.#manifest.workspacePath, '##', relativeInput); // Ensure input is isolated

@@ -33,7 +33,7 @@ export class ManifestDeltaUtil {
     const add = (file: string, type: DeltaEvent['type']): unknown =>
       out.push({ file, module: left.name, type });
 
-    const root = `${ctx.workspacePath}/${ctx.outputFolder}/${left.output}`;
+    const root = `${ctx.workspacePath}/${ctx.outputFolder}/${left.outputFolder}`;
     const right = new Set(
       (await ManifestModuleUtil.scanFolder(root, left.main))
         .map(x => x.replace(`${root}/`, '').replace(/[.]js$/, '.ts'))
@@ -42,7 +42,7 @@ export class ManifestDeltaUtil {
 
     for (const el of Object.keys(left.files)) {
       const elOut = el.replace(/[.]ts$/, '.js');
-      const output = `${outputFolder}/${left.output}/${elOut}`;
+      const output = `${outputFolder}/${left.outputFolder}/${elOut}`;
       const [, , leftTs] = left.files[el];
       const stat = await fs.stat(output).catch(() => { });
       right.delete(el);

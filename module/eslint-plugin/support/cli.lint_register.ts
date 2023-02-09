@@ -9,7 +9,7 @@ export class LintConfigureCommand extends CliCommand {
 
   async action(): Promise<void> {
     const content = [
-      `process.env.TRV_MANIFEST = '${RootIndex.mainModule.output}';`,
+      `process.env.TRV_MANIFEST = '${RootIndex.mainModule.outputFolder}';`,
       `module.exports = require('${RootIndex.resolveFileImport('@travetto/eslint-plugin/support/eslintrc')}').config;`,
       ''
     ];

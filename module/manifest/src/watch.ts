@@ -61,7 +61,7 @@ export class ManifestWatcher {
    */
   static async watchOutput(onEvent: EventListener): Promise<() => Promise<void>> {
     const localMods = RootIndex.getLocalModules();
-    const folders = localMods.map(x => x.output);
+    const folders = localMods.map(x => x.outputPath);
     return this.buildWatcher(folders, onEvent, { filter: ev => ev.file.endsWith('.js') });
   }
 

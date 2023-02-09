@@ -7,7 +7,7 @@ import { Model } from '@travetto/model';
 
 const ModelType = d.SnippetLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 
-const TodoRoot = d.Ref('Todo App', RootIndex.mainModule.output);
+const TodoRoot = d.Ref('Todo App', RootIndex.mainModule.outputPath);
 
 process.env.TRV_LOG_PLAIN = '0';
 

@@ -29,6 +29,7 @@ export type IndexedFile = {
 
 export type IndexedModule = ManifestModuleCore & {
   sourcePath: string;
+  outputPath: string;
   files: Record<ManifestModuleFolderType, IndexedFile[]>;
 };
 
@@ -79,7 +80,7 @@ export class ManifestIndex {
     return files.map(([f, type, ts, profile = 'std']) => {
       const source = path.join(this.#manifest.workspacePath, m.sourceFolder, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
-      const output = this.#resolveOutput(m.output, js);
+      const output = this.#resolveOutput(m.outputFolder, js);
       const modImport = `${m.name}/${js}`;
       let id = modImport.replace(`${m.name}/`, _ => _.replace(/[/]$/, ':'));
       if (type === 'ts' || type === 'js') {
@@ -101,7 +102,8 @@ export class ManifestIndex {
     this.#modules = Object.values(this.manifest.modules)
       .map(m => ({
         ...m,
-        output: this.#resolveOutput(m.output),
+        output: this.#resolveOutput(m.outputFolder),
+        outputPath: this.#resolveOutput(m.outputFolder),
         sourcePath: path.resolve(this.manifest.workspacePath, m.sourceFolder),
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         files: Object.fromEntries(

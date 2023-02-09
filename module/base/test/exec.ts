@@ -14,7 +14,7 @@ export class ExecUtilTest {
   @Test()
   async spawn() {
     const proc = ExecUtil.spawn('ls', ['-lsa'], {
-      cwd: RootIndex.mainModule.output
+      cwd: RootIndex.mainModule.outputPath
     });
     const result = await proc.result;
     assert(result.stdout.includes('package.json'));
@@ -25,7 +25,7 @@ export class ExecUtilTest {
   @Test()
   async spawnBad() {
     const proc = ExecUtil.spawn('ls', ['xxxx'], {
-      cwd: RootIndex.mainModule.output,
+      cwd: RootIndex.mainModule.outputPath,
       catchAsResult: true
     });
     const result = await proc.result;

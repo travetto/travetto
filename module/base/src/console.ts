@@ -106,7 +106,7 @@ class $ConsoleManager {
    */
   invoke(ev: ConsoleEvent): void {
     // Resolve input to source file
-    const source = ev.source ? RootIndex.getSourceFile(ev.source) : RootIndex.mainModule.output;
+    const source = ev.source ? RootIndex.getSourceFile(ev.source) : RootIndex.mainModule.outputPath;
     const mod = RootIndex.getModuleFromSource(source);
     const outEv = {
       ...ev,

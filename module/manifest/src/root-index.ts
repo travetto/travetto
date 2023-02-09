@@ -60,14 +60,14 @@ class $RootIndex extends ManifestIndex {
    */
   get mainPackage(): Package {
     if (!this.#config) {
-      const { output: mainFolder } = this.getModule(this.manifest.mainModule)!;
+      const { outputPath } = this.getModule(this.manifest.mainModule)!;
       this.#config = {
         ...{
           name: 'untitled',
           description: 'A Travetto application',
           version: '0.0.0',
         },
-        ...PackageUtil.readPackage(mainFolder)
+        ...PackageUtil.readPackage(outputPath)
       };
     }
     return this.#config;

@@ -195,7 +195,7 @@ export class ManifestModuleUtil {
     const output = `node_modules/${name}`;
     const sourceFolder = sourcePath.replace(`${ctx.workspacePath}/`, '');
 
-    const res = { main, name, version, local, internal, sourceFolder, output, files, profiles, parents, };
+    const res = { main, name, version, local, internal, sourceFolder, output, outputFolder: output, files, profiles, parents, };
     return res;
   }
 

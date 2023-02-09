@@ -50,7 +50,7 @@ export class PackOperation {
       ['BUNDLE_SOURCES', cfg.includeSources],
       ['BUNDLE_OUTPUT', cfg.workspace],
       ['BUNDLE_FORMAT', RootIndex.manifest.moduleType],
-      ['TRV_MANIFEST', RootIndex.getModule(cfg.module)!.output]
+      ['TRV_MANIFEST', RootIndex.getModule(cfg.module)!.outputPath]
     ] as const)
       .filter(x => x[1] === false || x[1])
       .map(x => [x[0], `${x[1]}`])
@@ -124,9 +124,9 @@ export class PackOperation {
       RootIndex.manifest.modules[RootIndex.mainModule.name],
       RootIndex.manifest.modules['@travetto/manifest']
     ].map(mod => ({
-      src: path.resolve(RootIndex.outputRoot, mod.output, 'package.json'),
-      dest: path.resolve(cfg.workspace, mod.output, 'package.json'),
-      destFolder: path.resolve(cfg.workspace, mod.output)
+      src: path.resolve(RootIndex.outputRoot, mod.outputFolder, 'package.json'),
+      dest: path.resolve(cfg.workspace, mod.outputFolder, 'package.json'),
+      destFolder: path.resolve(cfg.workspace, mod.outputFolder)
     }));
 
     const title = 'Copying over resources';
@@ -162,7 +162,7 @@ export class PackOperation {
     }
 
     const appCacheCmd = ['npx', 'trv', 'main', '@travetto/app/support/bin/list'];
-    const appCache = path.resolve(cfg.workspace, RootIndex.manifest.modules[RootIndex.mainModule.name].output, 'trv-app-cache.json');
+    const appCache = path.resolve(cfg.workspace, RootIndex.manifest.modules[RootIndex.mainModule.name].outputFolder, 'trv-app-cache.json');
     const title = 'Generating App Cache';
     const env = { DEBUG: '0', TRV_MODULE: cfg.module };
 

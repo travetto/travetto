@@ -18,15 +18,15 @@ class RootIndexTests {
     const location = RootIndex.getModule('@travetto/manifest');
     assert(location);
 
-    const { output } = location;
+    const { outputPath } = location;
 
-    const modId = RootIndex.getId(path.resolve(output, 'test', 'root-index.js'));
+    const modId = RootIndex.getId(path.resolve(outputPath, 'test', 'root-index.js'));
     assert(modId === '@travetto/manifest:test/root-index');
 
-    const modId2 = RootIndex.getId(path.resolve(RootIndex.getModule('@travetto/test')!.output, 'src', 'assert', 'util.js'));
+    const modId2 = RootIndex.getId(path.resolve(RootIndex.getModule('@travetto/test')!.outputPath, 'src', 'assert', 'util.js'));
     assert(modId2 === '@travetto/test:src/assert/util');
 
-    const modId3 = RootIndex.getId(path.resolve(output, 'test', 'fixtures', 'simple.ts'));
+    const modId3 = RootIndex.getId(path.resolve(outputPath, 'test', 'fixtures', 'simple.ts'));
     assert(modId3 === '@travetto/manifest:test/fixtures/simple.ts');
   }
 
