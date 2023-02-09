@@ -56,7 +56,7 @@ export class ImportManager {
     }
 
     const fileOrImport = this.#getImportFile(spec);
-    if (!fileOrImport || !fileOrImport.startsWith('.') || !TransformerIndex.isKnown(fileOrImport)) {
+    if (!(fileOrImport && (fileOrImport.startsWith('.') || TransformerIndex.isKnown(fileOrImport)))) {
       return clause;
     }
 

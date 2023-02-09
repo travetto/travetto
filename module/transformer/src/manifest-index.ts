@@ -27,7 +27,7 @@ export class TransformerIndex {
   }
 
   static isKnown(fileOrImport: string): boolean {
-    return RootIndex.getFromSource(fileOrImport) !== undefined ?? RootIndex.getFromImport(fileOrImport) !== undefined;
+    return (RootIndex.getFromSource(fileOrImport) !== undefined) || (RootIndex.getFromImport(fileOrImport) !== undefined);
   }
 
   static getFromImport(imp: string): IndexedFile | undefined {
