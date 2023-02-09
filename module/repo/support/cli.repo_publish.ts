@@ -29,7 +29,7 @@ export class RepoPublishCommand extends CliCommand<Options> {
     });
 
     if (this.cmd.dryRun) {
-      console.log('Unpublished modules', [...published.entries()].filter(x => !x[1]).map(([mod]) => mod.folder));
+      console.log('Unpublished modules', [...published.entries()].filter(x => !x[1]).map(([mod]) => mod.sourceFolder));
     }
 
     await CliModuleUtil.execOnModules(

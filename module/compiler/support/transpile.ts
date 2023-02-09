@@ -137,7 +137,7 @@ export class TranspileUtil {
     const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${Date.now()}.${Math.random()}.json`);
 
     const changedFiles = changed[0].file === '*' ? ['*'] : changed.map(ev =>
-      path.resolve(manifest.workspacePath, manifest.modules[ev.module].folder, ev.file)
+      path.resolve(manifest.workspacePath, manifest.modules[ev.module].sourceFolder, ev.file)
     );
 
     await this.writeTextFile(deltaFile, changedFiles.join('\n'));

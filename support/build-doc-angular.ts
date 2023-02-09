@@ -41,7 +41,7 @@ export async function main(target?: string): Promise<void> {
       (mod, opts) => ExecUtil.spawn('trv', ['doc'], opts),
       {
         showStdout: false,
-        progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.folder ?? ''}`,
+        progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
         progressPosition: 'bottom',
         filter: mod => mods.has(mod)
       });
@@ -51,7 +51,7 @@ export async function main(target?: string): Promise<void> {
   }
 
   for (const mod of mods) {
-    if (mod.folder.endsWith('vscode-plugin')) {
+    if (mod.sourceFolder.endsWith('vscode-plugin')) {
       await copyPluginImages();
     }
     const modName = mod.name.split('/')[1];

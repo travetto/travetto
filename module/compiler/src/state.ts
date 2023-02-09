@@ -44,7 +44,7 @@ export class CompilerState {
 
     this.#transformers = this.#modules.flatMap(
       x => (x.files.$transformer ?? []).map(([f]) =>
-        path.resolve(manifest.workspacePath, x.folder, f)
+        path.resolve(manifest.workspacePath, x.sourceFolder, f)
       )
     );
   }
@@ -62,7 +62,7 @@ export class CompilerState {
 
   registerInput(module: ManifestModule, moduleFile: string): string {
     const relativeInput = `${module.output}/${moduleFile}`;
-    const sourceFile = path.toPosix(path.resolve(this.#manifest.workspacePath, module.folder, moduleFile));
+    const sourceFile = path.toPosix(path.resolve(this.#manifest.workspacePath, module.sourceFolder, moduleFile));
     const sourceFolder = path.dirname(sourceFile);
     const inputFile = path.resolve(this.#manifest.workspacePath, '##', relativeInput); // Ensure input is isolated
     const inputFolder = path.dirname(inputFile);
@@ -124,10 +124,10 @@ export class CompilerState {
     update: (inputFile: string) => void;
     delete: (outputFile: string) => void;
   }): (ev: ManifestWatchEvent, folder: string) => void {
-    const mods = Object.fromEntries(this.modules.map(x => [path.resolve(this.#manifest.workspacePath, x.folder), x]));
+    const mods = Object.fromEntries(this.modules.map(x => [path.resolve(this.#manifest.workspacePath, x.sourceFolder), x]));
     return ({ file: sourceFile, action }: ManifestWatchEvent, folder: string): void => {
       const mod = mods[folder];
-      const moduleFile = sourceFile.includes(mod.folder) ? sourceFile.split(`${mod.folder}/`)[1] : sourceFile;
+      const moduleFile = sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile;
       switch (action) {
         case 'create': {
           const fileType = ManifestModuleUtil.getFileType(moduleFile);

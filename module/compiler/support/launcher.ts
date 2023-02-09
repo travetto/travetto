@@ -121,7 +121,7 @@ export async function compile(ctx: ManifestContext, watch = false): Promise<void
       const names: string[] = [];
       const mods = Object.values(manifest.modules).filter(x => x.local && x.name !== ctx.mainModule);
       for (const mod of mods) {
-        await ManifestUtil.rewriteManifest(path.resolve(ctx.workspacePath, mod.folder));
+        await ManifestUtil.rewriteManifest(path.resolve(ctx.workspacePath, mod.sourceFolder));
         names.push(mod.name);
       }
       yield `Rewrote monorepo manifests ${names.join(', ')}`;

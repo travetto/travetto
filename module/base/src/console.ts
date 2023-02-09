@@ -113,7 +113,7 @@ class $ConsoleManager {
       timestamp: new Date(),
       source,
       module: ev.module ?? mod?.name,
-      modulePath: ev.modulePath ?? (mod ? source.split(`${mod.folder}/`)[1] : '')
+      modulePath: ev.modulePath ?? (mod ? source.split(`${mod.sourceFolder}/`)[1] : '')
     };
 
     if (this.#filters[outEv.level] && !this.#filters[outEv.level]!(outEv)) {

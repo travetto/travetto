@@ -7,7 +7,7 @@ type DocModMapping = { simpleName: string, name: string, displayName: string, fo
 export async function main(): Promise<void> {
   const out: DocModMapping[] = [];
   for (const module of Object.values(RootIndex.manifest.modules)) {
-    const pkg = PackageUtil.readPackage(path.resolve(RootIndex.manifest.workspacePath, module.folder));
+    const pkg = PackageUtil.readPackage(path.resolve(RootIndex.manifest.workspacePath, module.sourceFolder));
     if (pkg?.travetto?.displayName === undefined) {
       continue;
     }
@@ -20,7 +20,7 @@ export async function main(): Promise<void> {
       simpleName,
       name: module.name,
       displayName: pkg.travetto.displayName,
-      folder: module.folder,
+      folder: module.sourceFolder,
       description: pkg.description
     });
   }
