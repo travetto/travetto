@@ -27,7 +27,8 @@ class $RootIndex extends ManifestIndex {
    * Determines if the manifest root is the root for a monorepo
    */
   isMonoRepoRoot(): boolean {
-    return !!this.manifest.monoRepo && this.manifest.workspacePath === this.manifest.mainPath;
+    const mainPath = path.resolve(this.manifest.workspacePath, this.manifest.mainFolder);
+    return !!this.manifest.monoRepo && this.manifest.workspacePath === mainPath;
   }
 
   /**

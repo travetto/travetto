@@ -51,7 +51,8 @@ export class RenderUtil {
     const mf = RootIndex.manifest;
 
     const pkg = PackageUtil.readPackage(mf.workspacePath);
-    const repoBaseUrl = pkg.travetto?.docBaseUrl ?? mf.mainPath;
+    const mainPath = path.resolve(mf.workspacePath, mf.mainFolder);
+    const repoBaseUrl = pkg.travetto?.docBaseUrl ?? mainPath;
 
     const ctx = new RenderContext(
       file,

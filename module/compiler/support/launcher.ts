@@ -117,7 +117,8 @@ export async function compile(ctx: ManifestContext, watch = false): Promise<void
     yield `Wrote manifest ${ctx.mainModule}`;
 
     // Update all manifests
-    if (delta.length && ctx.monoRepo && ctx.workspacePath === ctx.mainPath) {
+    const mainPath = path.resolve(ctx.workspacePath, ctx.mainFolder);
+    if (delta.length && ctx.monoRepo && ctx.workspacePath === mainPath) {
       const names: string[] = [];
       const mods = Object.values(manifest.modules).filter(x => x.local && x.name !== ctx.mainModule);
       for (const mod of mods) {
