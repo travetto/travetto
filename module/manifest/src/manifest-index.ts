@@ -29,7 +29,6 @@ export type IndexedFile = {
 
 export type IndexedModule = ManifestModuleCore & {
   files: Record<ManifestModuleFolderType, IndexedFile[]>;
-  workspaceRelative: string;
 };
 
 /**
@@ -102,7 +101,6 @@ export class ManifestIndex {
       .map(m => ({
         ...m,
         output: this.#resolveOutput(m.output),
-        workspaceRelative: m.source.replace(`${this.#manifest.workspacePath}/`, ''),
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         files: Object.fromEntries(
           Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
@@ -121,7 +119,7 @@ export class ManifestIndex {
       }
     }
     this.#modulesByName = Object.fromEntries(this.#modules.map(x => [x.name, x]));
-    this.#modulesByFolder = Object.fromEntries(this.#modules.map(x => [x.workspaceRelative, x]));
+    this.#modulesByFolder = Object.fromEntries(this.#modules.map(x => [x.folder, x]));
   }
 
   /**

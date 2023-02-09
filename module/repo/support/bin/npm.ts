@@ -28,7 +28,7 @@ export class Npm {
    * Setting the version
    */
   static async version(modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
-    const mods = modules.flatMap(m => ['-w', m.workspaceRelative]);
+    const mods = modules.flatMap(m => ['-w', m.folder]);
     await ExecUtil.spawn('npm',
       ['version', level, ...(preid ? ['--preid', preid] : []), ...mods],
       { stdio: 'inherit' }

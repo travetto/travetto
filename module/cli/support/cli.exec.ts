@@ -43,7 +43,7 @@ export class RepoExecCommand extends CliCommand<Options> {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       (mod, opts) => ExecUtil.spawn(this.args[0], this.args.slice(1), opts),
       {
-        progressMessage: mod => `Running '${this.args.join(' ')}' [%idx/%total] ${mod?.workspaceRelative ?? ''}`,
+        progressMessage: mod => `Running '${this.args.join(' ')}' [%idx/%total] ${mod?.folder ?? ''}`,
         showStdout: this.cmd.showStdout,
         prefixOutput: this.cmd.prefixOutput,
         workerCount: this.cmd.workers,

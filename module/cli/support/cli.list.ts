@@ -29,7 +29,7 @@ export class RepoListCommand extends CliCommand<Options> {
   async action(...args: unknown[]): Promise<void> {
     const mods = await CliModuleUtil.findModules(this.cmd.changed ? 'changed' : 'all');
     if (!this.cmd.graph) {
-      for (const mod of mods.map(x => x.workspaceRelative).sort()) {
+      for (const mod of mods.map(x => x.folder).sort()) {
         console.log!(mod);
       }
     } else {

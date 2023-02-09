@@ -38,7 +38,7 @@ export class CliModuleUtil {
     stdoutTerm: Terminal,
     stderrTerm: Terminal
   ): ExecutionOptions {
-    const folder = mod.workspaceRelative;
+    const folder = mod.folder;
     const opts: ExecutionOptions = {
       stdio: ['ignore', 'pipe', 'pipe', 'ignore'],
       outputMode: 'text',
@@ -62,7 +62,7 @@ export class CliModuleUtil {
    * @returns
    */
   static #buildPrefixes(mods: IndexedModule[]): Record<string, string> {
-    const folders = mods.map(x => x.workspaceRelative);
+    const folders = mods.map(x => x.folder);
     const maxWidth = Math.max(...folders.map(x => x.length));
     return Object.fromEntries(folders.map((x, i) => [x, colorize(x.padStart(maxWidth, ' ').padEnd(maxWidth + 1), i)]));
   }

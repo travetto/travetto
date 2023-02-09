@@ -172,7 +172,7 @@ export class ManifestModuleUtil {
   /**
    * Visit a module and describe files, and metadata
    */
-  static async describeModule(dep: ModuleDep): Promise<ManifestModule> {
+  static async describeModule(ctx: ManifestContext, dep: ModuleDep): Promise<ManifestModule> {
     const { main, mainSource, local, name, version, sourcePath, profileSet, parentSet, internal } = dep;
 
     const files: ManifestModule['files'] = {};
@@ -193,8 +193,9 @@ export class ManifestModuleUtil {
     const profiles = [...profileSet].sort();
     const parents = [...parentSet].sort();
     const output = `node_modules/${name}`;
+    const folder = sourcePath.replace(`${ctx.workspacePath}/`, '');
 
-    const res = { main, name, version, local, internal, source: sourcePath, output, files, profiles, parents, };
+    const res = { main, name, version, local, internal, folder, source: sourcePath, output, files, profiles, parents, };
     return res;
   }
 
@@ -205,7 +206,7 @@ export class ManifestModuleUtil {
     const visitor = new ModuleDependencyVisitor(ctx);
     const declared = await PackageUtil.visitPackages(ctx.mainPath, visitor);
     const sorted = [...declared].sort((a, b) => a.name.localeCompare(b.name));
-    const modules = await Promise.all(sorted.map(x => this.describeModule(x)));
+    const modules = await Promise.all(sorted.map(x => this.describeModule(ctx, x)));
     return Object.fromEntries(modules.map(m => [m.name, m]));
   }
 }

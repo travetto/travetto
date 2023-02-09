@@ -41,7 +41,7 @@ export async function main(target?: string): Promise<void> {
       (mod, opts) => ExecUtil.spawn('trv', ['doc'], opts),
       {
         showStdout: false,
-        progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.workspaceRelative ?? ''}`,
+        progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.folder ?? ''}`,
         progressPosition: 'bottom',
         filter: mod => mods.has(mod)
       });
