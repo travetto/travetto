@@ -68,17 +68,21 @@ function parseArgs(args) {
 }
 const exec = async () => {
   const ctx = await getManifestContext();
-  const { clean, compile, exportManifest } = await $getLauncher(ctx);
   const { op, outputPath, env, ...flags } = parseArgs(process.argv.slice(2));
   const message = flags.quiet ? () => { } : console.log.bind(console);
 
   // Clean if needed
   if (op === 'clean' || (op && flags.clean)) {
-    await clean(ctx);
+    await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { force: true, recursive: true });
+    await fs.rm(path.resolve(ctx.workspacePath, ctx.compilerFolder), { force: true, recursive: true });
+    if (op === 'clean') {
+      return message(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
+    }
   }
 
+  const { compile, exportManifest } = await $getLauncher(ctx);
+
   switch (op) {
-    case 'clean': return message(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
     case 'manifest': {
       const output = await exportManifest(ctx, outputPath ?? '', env);
       if (output) {

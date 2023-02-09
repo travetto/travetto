@@ -141,14 +141,6 @@ export async function compile(ctx: ManifestContext, watch = false): Promise<void
 }
 
 /**
- * Clean output
- */
-export async function clean(ctx: ManifestContext): Promise<void> {
-  await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { force: true, recursive: true });
-  await fs.rm(path.resolve(ctx.workspacePath, ctx.compilerFolder), { force: true, recursive: true });
-}
-
-/**
  * Export manifests
  */
 export async function exportManifest(ctx: ManifestContext, output?: string, env = 'dev'): Promise<string | undefined> {
