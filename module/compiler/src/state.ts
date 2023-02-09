@@ -44,7 +44,7 @@ export class CompilerState {
 
     this.#transformers = this.#modules.flatMap(
       x => (x.files.$transformer ?? []).map(([f]) =>
-        path.resolve(x.source, f)
+        path.resolve(manifest.workspacePath, x.folder, f)
       )
     );
   }
@@ -62,7 +62,7 @@ export class CompilerState {
 
   registerInput(module: ManifestModule, moduleFile: string): string {
     const relativeInput = `${module.output}/${moduleFile}`;
-    const sourceFile = `${module.source}/${moduleFile}`;
+    const sourceFile = path.toPosix(path.resolve(this.#manifest.workspacePath, module.folder, moduleFile));
     const sourceFolder = path.dirname(sourceFile);
     const inputFile = path.resolve(this.#manifest.workspacePath, '##', relativeInput); // Ensure input is isolated
     const inputFolder = path.dirname(inputFile);
@@ -118,20 +118,16 @@ export class CompilerState {
     return [...this.#inputFiles];
   }
 
-  resolveModuleFile(module: string, file: string): string {
-    return `${this.modules.find(m => m.name === module)!.source}/${file}`;
-  }
-
   // Build watcher
   getWatcher(handler: {
     create: (inputFile: string) => void;
     update: (inputFile: string) => void;
     delete: (outputFile: string) => void;
   }): (ev: ManifestWatchEvent, folder: string) => void {
-    const mods = Object.fromEntries(this.modules.map(x => [x.source, x]));
+    const mods = Object.fromEntries(this.modules.map(x => [path.resolve(this.#manifest.workspacePath, x.folder), x]));
     return ({ file: sourceFile, action }: ManifestWatchEvent, folder: string): void => {
       const mod = mods[folder];
-      const moduleFile = sourceFile.replace(`${mod.source}/`, '');
+      const moduleFile = sourceFile.includes(mod.folder) ? sourceFile.split(`${mod.folder}/`)[1] : sourceFile;
       switch (action) {
         case 'create': {
           const fileType = ManifestModuleUtil.getFileType(moduleFile);
@@ -195,9 +191,9 @@ export class CompilerState {
         if (outputFile.endsWith('package.json')) {
           text = CompilerUtil.rewritePackageJSON(this.#manifest, text, options);
         } else if (!options.inlineSourceMap && options.sourceMap && outputFile.endsWith('.map')) {
-          text = CompilerUtil.rewriteSourceMap(text, f => this.#sourceInputOutput.get(this.#inputToSource.get(f)!));
+          text = CompilerUtil.rewriteSourceMap(this.#manifest.workspacePath, text, f => this.#sourceInputOutput.get(this.#inputToSource.get(f)!));
         } else if (options.inlineSourceMap && CompilerUtil.isSourceMapUrlPosData(data)) {
-          text = CompilerUtil.rewriteInlineSourceMap(text, f => this.#sourceInputOutput.get(this.#inputToSource.get(f)!), data);
+          text = CompilerUtil.rewriteInlineSourceMap(this.#manifest.workspacePath, text, f => this.#sourceInputOutput.get(this.#inputToSource.get(f)!), data);
         }
         outputFile = this.#stagedOutputToOutput.get(outputFile) ?? outputFile;
         ts.sys.writeFile(outputFile, text, bom);

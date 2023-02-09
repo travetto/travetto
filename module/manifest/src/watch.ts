@@ -73,8 +73,8 @@ export class ManifestWatcher {
   static async watchInput(onEvent: EventListener): Promise<() => Promise<void>> {
     const folders = RootIndex.getLocalModules()
       .flatMap(x =>
-        (!RootIndex.manifest.monoRepo || x.source !== RootIndex.manifest.workspacePath) ?
-          [x.source] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(x.source, y))
+        (!RootIndex.manifest.monoRepo || x.sourceAbsolute !== RootIndex.manifest.workspacePath) ?
+          [x.sourceAbsolute] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(x.sourceAbsolute, y))
       );
     return this.buildWatcher(folders, onEvent, {
       filter: ev => ev.file.endsWith('.ts'),

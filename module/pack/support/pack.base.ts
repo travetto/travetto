@@ -1,7 +1,7 @@
 import os from 'os';
 
 import { CliCommand } from '@travetto/cli';
-import { PackageUtil, path, RootIndex } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 
 import { CommonPackConfig, CommonPackOptions } from './bin/types';
 import { PackOperation } from './bin/operation';
@@ -20,10 +20,6 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   }
 
   getCommonOptions(): CommonPackOptions {
-    const format =
-      PackageUtil.readPackage(RootIndex.mainModule.source).type ??
-      PackageUtil.readPackage(RootIndex.manifest.workspacePath).type ?? 'commonjs';
-
     return {
       workspace: this.option({ short: 'w', desc: 'Workspace for building' }),
       clean: this.boolOption({ short: 'c', desc: 'Clean workspace', def: true }),
@@ -82,7 +78,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   }
 
   async buildConfig(): Promise<S> {
-    this.cmd.workspace ??= path.resolve(os.tmpdir(), RootIndex.mainModule.source.replace(/[\/\\: ]/g, '_'));
+    this.cmd.workspace ??= path.resolve(os.tmpdir(), RootIndex.mainModule.sourceAbsolute.replace(/[\/\\: ]/g, '_'));
     this.cmd.entryCommand ??= path.basename(this.cmd.entryPoint).replace(/[.][tj]s$/, '');
     this.cmd.module = RootIndex.mainModule.name;
     return this.cmd;

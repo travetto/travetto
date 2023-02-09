@@ -46,7 +46,7 @@ export class RenderUtil {
 
     const { wrap, root } = this.#imported.get(file)!;
 
-    const manifestPkg = PackageUtil.readPackage(RootIndex.getModule('@travetto/manifest')!.source);
+    const manifestPkg = PackageUtil.readPackage(RootIndex.getModule('@travetto/manifest')!.sourceAbsolute);
 
     const mf = RootIndex.manifest;
 

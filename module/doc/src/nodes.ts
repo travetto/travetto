@@ -178,7 +178,7 @@ export const node = {
    */
   Mod(name: string, cfg?: { folder: string, displayName: string, description: string }) {
     if (!cfg) {
-      const folder = RootIndex.getModule(name)!.source;
+      const folder = RootIndex.getModule(name)!.sourceAbsolute;
       const pkg = PackageUtil.readPackage(folder);
       cfg = {
         folder,
@@ -237,7 +237,7 @@ export const node = {
     if (!mod) {
       mod = RootIndex.mainPackage.name;
     }
-    const pkg = PackageUtil.readPackage(RootIndex.getModule(mod)!.source);
+    const pkg = PackageUtil.readPackage(RootIndex.getModule(mod)!.sourceAbsolute);
     return $n('header', { title: $c(pkg.travetto?.displayName ?? pkg.name), description: $c(pkg.description), package: pkg.name, install });
   },
 

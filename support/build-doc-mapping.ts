@@ -1,13 +1,13 @@
 import fs from 'fs/promises';
 
-import { RootIndex, PackageUtil } from '@travetto/manifest';
+import { path, RootIndex, PackageUtil } from '@travetto/manifest';
 
 type DocModMapping = { simpleName: string, name: string, displayName: string, folder: string, description?: string };
 
 export async function main(): Promise<void> {
   const out: DocModMapping[] = [];
   for (const module of Object.values(RootIndex.manifest.modules)) {
-    const pkg = PackageUtil.readPackage(module.source);
+    const pkg = PackageUtil.readPackage(path.resolve(RootIndex.manifest.workspacePath, module.folder));
     if (pkg?.travetto?.displayName === undefined) {
       continue;
     }
@@ -20,7 +20,7 @@ export async function main(): Promise<void> {
       simpleName,
       name: module.name,
       displayName: pkg.travetto.displayName,
-      folder: module.source.split(`${RootIndex.manifest.workspacePath}/`)[1],
+      folder: module.folder,
       description: pkg.description
     });
   }

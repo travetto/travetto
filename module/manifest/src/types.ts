@@ -14,7 +14,6 @@ export type ManifestModuleCore = {
   main?: boolean;
   local?: boolean;
   version: string;
-  source: string;
   folder: string;
   output: string;
   profiles: ManifestProfile[];

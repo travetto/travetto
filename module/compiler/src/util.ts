@@ -1,8 +1,8 @@
 import ts from 'typescript';
 
-import { ManifestModule, ManifestRoot, Package, path } from '@travetto/manifest';
+import { ManifestRoot, Package, path } from '@travetto/manifest';
 
-type InputToSource = (inputFile: string) => ({ source: string, module: ManifestModule } | undefined);
+type InputToSource = (inputFile: string) => ({ source: string } | undefined);
 export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
 
 const nativeCwd = process.cwd();
@@ -34,14 +34,14 @@ export class CompilerUtil {
    * Rewrite's sourcemap locations to real folders
    * @returns
    */
-  static rewriteSourceMap(text: string, inputToSource: InputToSource): string {
+  static rewriteSourceMap(root: string, text: string, inputToSource: InputToSource): string {
     const data: { sourceRoot: string, sources: string[] } = JSON.parse(text);
     const src = path.resolve(data.sourceRoot, data.sources[0]);
 
-    const { source: file, module } = inputToSource(src) ?? {};
-    if (file && module) {
-      data.sourceRoot = module.source;
-      data.sources = [file.replace(`${module.source}/`, '')];
+    const { source: file } = inputToSource(src) ?? {};
+    if (file) {
+      data.sourceRoot = root;
+      data.sources = [file];
       text = JSON.stringify(data);
     }
 
@@ -56,13 +56,14 @@ export class CompilerUtil {
    * @returns
    */
   static rewriteInlineSourceMap(
+    root: string,
     text: string,
     inputToSource: InputToSource,
     { sourceMapUrlPos }: ts.WriteFileCallbackData & { sourceMapUrlPos: number }
   ): string {
     const sourceMapUrl = text.substring(sourceMapUrlPos);
     const [prefix, sourceMapData] = sourceMapUrl.split('base64,');
-    const rewritten = this.rewriteSourceMap(Buffer.from(sourceMapData, 'base64url').toString('utf8'), inputToSource);
+    const rewritten = this.rewriteSourceMap(root, Buffer.from(sourceMapData, 'base64url').toString('utf8'), inputToSource);
     return [
       text.substring(0, sourceMapUrlPos),
       prefix,

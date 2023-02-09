@@ -136,7 +136,9 @@ export class TranspileUtil {
     const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/compiler-entry.js');
     const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${Date.now()}.${Math.random()}.json`);
 
-    const changedFiles = changed[0].file === '*' ? ['*'] : changed.map(ev => path.resolve(manifest.modules[ev.module].source, ev.file));
+    const changedFiles = changed[0].file === '*' ? ['*'] : changed.map(ev =>
+      path.resolve(manifest.workspacePath, manifest.modules[ev.module].folder, ev.file)
+    );
 
     await this.writeTextFile(deltaFile, changedFiles.join('\n'));
     const res = cp.spawnSync(process.argv0, [main, deltaFile, `${watch}`], {

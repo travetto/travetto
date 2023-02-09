@@ -17,6 +17,6 @@ Module._resolveFilename = (r, ...args): string =>
     og(r, ...args);
 
 const readConfig = (file: string, module?: string): ESLint.ConfigData =>
-  JSON.parse(fs.readFileSync(path.resolve(RootIndex.getModule(module ?? RootIndex.mainModule.name)!.source, file), 'utf8'));
+  JSON.parse(fs.readFileSync(path.resolve(RootIndex.getModule(module ?? RootIndex.mainModule.name)!.sourceAbsolute, file), 'utf8'));
 
 export const config = readConfig('support/rules.json', '@travetto/eslint-plugin');
