@@ -1,3 +1,4 @@
+import util from 'util';
 import { install } from 'source-map-support';
 import ts from 'typescript';
 import fs from 'fs/promises';
@@ -8,6 +9,7 @@ import { TransformerManager } from '@travetto/transformer';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
+import type { CompilerLogEvent } from '../support/transpile';
 
 export type TransformerProvider = {
   init(checker: ts.TypeChecker): void;
@@ -17,6 +19,19 @@ export type TransformerProvider = {
 type EmitError = Error | readonly ts.Diagnostic[];
 type Emitter = (file: string, newProgram?: boolean) => Promise<EmitError | undefined>;
 type EmitEvent = { file: string, i: number, total: number, err?: EmitError };
+
+function log(level: 'info' | 'debug', message: string, ...args: unknown[]): void {
+  if (process.send) {
+    const ev: CompilerLogEvent = [level, util.format(message, ...args)];
+    process.send(ev);
+  } else {
+    // eslint-disable-next-line no-console
+    console[level](message, ...args);
+  }
+}
+
+const debug = log.bind(null, 'debug');
+const info = log.bind(null, 'info');
 
 /**
  * Compilation support
@@ -54,9 +69,9 @@ export class Compiler {
     const emitWithError = async (file: string): Promise<void> => {
       const err = await emit(file, true);
       if (err) {
-        console.error(CompilerUtil.buildTranspileError(file, err));
+        info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
       } else {
-        console.error('Compiled', file.split('node_modules/')[1]);
+        info(`Compiled ${file.split('node_modules/')[1]}`);
       }
     };
     const watcher = this.state.getWatcher({
@@ -125,14 +140,19 @@ export class Compiler {
       const imp = file.replace(/.*node_modules\//, '');
       yield { file: imp, i: i += 1, err, total: files.length };
     }
+    debug(`Compiled ${i} files`);
   }
 
   /**
    * Run the compiler
    */
   async run(watch?: boolean): Promise<void> {
+    debug('Compilation started');
+
     const emitter = await this.getCompiler();
     let failed = false;
+
+    debug('Compiler loaded');
 
     const resolveEmittedFile = ({ file, total, i, err }: EmitEvent): TerminalProgressEvent => {
       if (err) {
@@ -145,11 +165,19 @@ export class Compiler {
     if (this.#dirtyFiles.length) {
       await GlobalTerminal.trackProgress(this.emit(this.#dirtyFiles, emitter), resolveEmittedFile, { position: 'bottom' });
       if (failed) {
+        debug('Compilation failed');
         process.exit(1);
+      } else {
+        debug('Compilation succeeded');
       }
     }
 
     if (watch) {
+      if (!this.#dirtyFiles.length) {
+        const resolved = this.state.resolveInput(RootIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile);
+        await emitter(resolved, true);
+      }
+      info('Watch is ready');
       await this.#watchLocalModules(emitter);
       await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24));
     }

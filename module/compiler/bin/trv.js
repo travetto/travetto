@@ -3,7 +3,7 @@
 // @ts-check
 import fs from 'fs/promises';
 import path from 'path';
-import { Module, createRequire } from 'module';
+import { createRequire } from 'module';
 
 import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
@@ -55,66 +55,41 @@ const $getLauncher = async (ctx) => {
 /**
  * Parse arguments
  * @param {string[]} args
- * @returns {{ op?: keyof typeof VALID_OPS, clean?: boolean, quiet?: boolean, outputPath?: string, env?: string }}
+ * @returns {{ op?: keyof typeof VALID_OPS, clean?: boolean, outputPath?: string, env?: string }}
  */
 function parseArgs(args) {
   const op = VALID_OPS[args.find(x => !x.startsWith('-')) ?? ''];
   return {
     op,
-    quiet: args.includes('--quiet') || args.includes('-q'),
     clean: args.includes('--clean') || args.includes('-c'),
     ...(op === 'manifest' ? { outputPath: args[1], env: args[2] } : {})
   };
 }
+
 const exec = async () => {
   const ctx = await getManifestContext();
   const { op, outputPath, env, ...flags } = parseArgs(process.argv.slice(2));
-  const message = flags.quiet ? () => { } : console.log.bind(console);
 
   // Clean if needed
   if (op === 'clean' || (op && flags.clean)) {
-    await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { force: true, recursive: true });
-    await fs.rm(path.resolve(ctx.workspacePath, ctx.compilerFolder), { force: true, recursive: true });
-    if (op === 'clean') {
-      return message(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
+    for (const f of [ctx.outputFolder, ctx.compilerFolder]) {
+      await fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true });
     }
   }
 
-  const { compile, exportManifest } = await $getLauncher(ctx);
+  if (op === 'clean') { // Clean needs to not attempt to compile/load launcher
+    return console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
+  }
+
+  const { compile, launchMain, exportManifest } = await $getLauncher(ctx);
 
   switch (op) {
-    case 'manifest': {
-      const output = await exportManifest(ctx, outputPath ?? '', env);
-      if (output) {
-        message(`Wrote manifest ${output}`);
-      }
-      return;
-    }
+    case 'manifest': return exportManifest(ctx, outputPath ?? '', env);
     case 'watch':
-      message(`Watching ${ctx.workspacePath} for changes...`);
-      return compile(ctx, true);
-    case 'build':
-      await compile(ctx);
-      return message(`Built to ${ctx.workspacePath}/${ctx.outputFolder}`);
-    default: {
-      await compile(ctx);
-
-      // Rewriting node_path
-      const out = path.join(ctx.workspacePath, ctx.outputFolder);
-      const nodeOut = path.resolve(out, 'node_modules');
-      const og = process.env.NODE_PATH;
-      process.env.NODE_PATH = [nodeOut, og].join(path.delimiter);
-      // @ts-expect-error
-      Module._initPaths();
-      process.env.NODE_PATH = og; // Restore
-
-      process.env.TRV_THROW_ROOT_INDEX_ERR = '1';
-      process.env.TRV_MANIFEST = path.resolve(nodeOut, ctx.mainModule);
-
-      // TODO: Externalize somehow?
-      const cliMain = path.join(out, 'node_modules/@travetto/cli/support/cli.js');
-      await import(cliMain);
-    }
+    case 'build': return compile(ctx, op);
+    default:
+      await compile(ctx, op);
+      return launchMain(ctx);
   }
 };
 

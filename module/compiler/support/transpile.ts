@@ -11,11 +11,38 @@ type ModFile = { input: string, output: string, stale: boolean };
 const SRC_REQ = createRequire(path.resolve('node_modules'));
 const recentStat = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 
+export type CompilerLogEvent = [level: 'info' | 'debug', message: string];
+type WithLogger<T> = (log: (...ev: CompilerLogEvent) => void) => Promise<T>;
+type LogConfig = { args?: string[], basic?: boolean };
+const isCompilerLogEvent = (o: unknown): o is CompilerLogEvent => o !== null && o !== undefined && Array.isArray(o);
+
+const IS_DEBUG = /\b([*]|build)\b/.test(process.env.DEBUG ?? '');
+const SCOPE_MAX = 15;
+
 /**
  * Transpile utilities for launching
  */
 export class TranspileUtil {
   static #optCache: Record<string, {}> = {};
+
+  static log(scope: string, args: string[], ...[level, msg]: CompilerLogEvent): void {
+    const message = msg.replaceAll(process.cwd(), '.');
+    const shouldLog = IS_DEBUG || level !== 'debug';
+    shouldLog && console.debug(new Date().toISOString(), `[${scope.padEnd(SCOPE_MAX, ' ')}]`, ...args, message);
+  }
+
+  /**
+   * With logger
+   */
+  static withLogger<T>(scope: string, op: WithLogger<T>): Promise<T>;
+  static withLogger<T>(scope: string, opts: LogConfig, op: WithLogger<T>): Promise<T>;
+  static withLogger<T>(scope: string, opts: LogConfig | WithLogger<T>, op?: WithLogger<T>): Promise<T> {
+    const cfg = { basic: true, ...typeof opts === 'function' ? {} : opts };
+    const go = typeof opts === 'function' ? opts : op!;
+    const log = this.log.bind(null, scope, cfg.args ?? []);
+    cfg.basic && log('debug', 'Started');
+    return go(log).finally(() => cfg.basic && log('debug', 'Completed'));
+  }
 
   /**
    * Write text file, and ensure folder exists
@@ -136,22 +163,25 @@ export class TranspileUtil {
     const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/compiler-entry.js');
     const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${Date.now()}.${Math.random()}.json`);
 
-    const changedFiles = changed[0].file === '*' ? ['*'] : changed.map(ev =>
+    const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev =>
       path.resolve(manifest.workspacePath, manifest.modules[ev.module].sourceFolder, ev.file)
     );
 
     await this.writeTextFile(deltaFile, changedFiles.join('\n'));
-    const res = cp.spawnSync(process.argv0, [main, deltaFile, `${watch}`], {
-      env: {
-        ...process.env,
-        TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
-        TRV_THROW_ROOT_INDEX_ERR: '1',
-      },
-      stdio: 'inherit',
-      encoding: 'utf8'
+
+    await this.withLogger('compiler-exec', async log => {
+      await new Promise((res, rej) =>
+        cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
+          env: {
+            ...process.env,
+            TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
+            TRV_THROW_ROOT_INDEX_ERR: '1',
+          },
+          stdio: [0, 1, 2, 'ipc'],
+        })
+          .on('message', msg => isCompilerLogEvent(msg) && log(...msg))
+          .on('exit', code => (code !== null && code > 0) ? rej() : res(null))
+      );
     });
-    if (res.status) {
-      throw new Error(res.stderr);
-    }
   }
 }
