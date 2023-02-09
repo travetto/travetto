@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { ManifestWatcher, PackageUtil, path, RootIndex } from '@travetto/manifest';
+import { PackageUtil, path, RootIndex, watchFolders } from '@travetto/manifest';
 import { GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
@@ -67,7 +67,9 @@ export class DocCommand extends CliCommand<Options> {
     };
 
     if (this.cmd.watch) {
-      await ManifestWatcher.watchInputFile(docFile, write);
+      await watchFolders([path.dirname(docFile)], write, {
+        filter: ev => ev.action === 'update' && ev.file === docFile
+      });
     } else {
       try {
         await write();

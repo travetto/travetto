@@ -1,12 +1,12 @@
 import timers from 'timers/promises';
 
-import { RootIndex, ManifestWatchEvent, ManifestWatcher } from '@travetto/manifest';
+import { RootIndex, WatchEvent, watchFolders } from '@travetto/manifest';
 
 import { ObjectUtil } from '../object';
 import { ShutdownManager } from '../shutdown';
 
-type WatchHandler = (ev: ManifestWatchEvent) => (void | Promise<void>);
-type ManualWatchEvent = { trigger?: boolean } & ManifestWatchEvent;
+type WatchHandler = (ev: WatchEvent) => (void | Promise<void>);
+type ManualWatchEvent = { trigger?: boolean } & WatchEvent;
 interface ModuleLoader {
   init?(): Promise<void>;
   load(file: string): Promise<void>;
@@ -28,7 +28,7 @@ class $DynamicFileLoader {
   #loader: ModuleLoader;
   #initialized = false;
 
-  async dispatch(ev: ManifestWatchEvent): Promise<void> {
+  async dispatch(ev: WatchEvent): Promise<void> {
     if (ev.action !== 'create') {
       await this.#loader.unload(ev.file);
     }
@@ -77,7 +77,12 @@ class $DynamicFileLoader {
       }
     }, 0);
 
-    await ManifestWatcher.watchOutput(ev => this.dispatch(ev));
+    // Watch all output
+    await watchFolders(
+      RootIndex.getLocalOutputFolders(),
+      ev => this.dispatch(ev),
+      { filter: ev => ev.file.endsWith('.js') }
+    );
   }
 }
 

@@ -1,7 +1,7 @@
 import ts from 'typescript';
 import { readFileSync } from 'fs';
 
-import { path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot, ManifestWatchEvent } from '@travetto/manifest';
+import { path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot, WatchEvent } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { TranspileUtil } from '../support/transpile';
@@ -123,9 +123,9 @@ export class CompilerState {
     create: (inputFile: string) => void;
     update: (inputFile: string) => void;
     delete: (outputFile: string) => void;
-  }): (ev: ManifestWatchEvent, folder: string) => void {
+  }): (ev: WatchEvent, folder: string) => void {
     const mods = Object.fromEntries(this.modules.map(x => [path.resolve(this.#manifest.workspacePath, x.sourceFolder), x]));
-    return ({ file: sourceFile, action }: ManifestWatchEvent, folder: string): void => {
+    return ({ file: sourceFile, action }: WatchEvent, folder: string): void => {
       const mod = mods[folder];
       const moduleFile = sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile;
       switch (action) {

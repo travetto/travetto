@@ -3,7 +3,7 @@ import ts from 'typescript';
 import fs from 'fs/promises';
 
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
-import { RootIndex, ManifestWatcher } from '@travetto/manifest';
+import { RootIndex, watchFolders } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
 import { CompilerUtil } from './util';
@@ -64,7 +64,10 @@ export class Compiler {
       update: emitWithError,
       delete: (outputFile) => fs.unlink(outputFile).catch(() => { })
     });
-    return ManifestWatcher.watchInput(watcher);
+    return watchFolders(RootIndex.getLocalInputFolders(), watcher, {
+      filter: ev => ev.file.endsWith('.ts') || ev.file.endsWith('.js'),
+      ignore: ['node_modules']
+    });
   }
 
   async createTransformerProvider(): Promise<TransformerProvider> {
