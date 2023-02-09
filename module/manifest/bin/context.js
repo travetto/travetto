@@ -4,19 +4,9 @@
  * @typedef {import('../src/types').Package} Pkg
  * @typedef {import('../src/types').ManifestContext} ManifestContext
  */
-
-function $getFs() {
-  try { return require('fs/promises'); }
-  catch { return import('fs/promises'); }
-}
-function $getPath() {
-  try { return require('path'); }
-  catch { return import('path'); }
-}
-function $getCreateRequire() {
-  try { return require('module').createRequire; }
-  catch { return import('module').then(x => x.Module.createRequire); }
-}
+import fs from 'fs/promises';
+import path from 'path';
+import { createRequire } from 'module';
 
 /**
  * Returns the package.json
@@ -24,8 +14,6 @@ function $getCreateRequire() {
  * @returns {Promise<Pkg>}
  */
 async function $getPkg(inputFolder) {
-  const fs = await $getFs();
-  const path = await $getPath();
   if (!inputFolder.endsWith('.json')) {
     inputFolder = path.resolve(inputFolder, 'package.json');
   }
@@ -43,8 +31,6 @@ async function $getWorkspaceRoot(base = process.cwd()) {
     return WS_ROOT[base];
   }
 
-  const path = await $getPath();
-  const fs = await $getFs();
   let folder = base;
   let prevFolder = '';
   while (folder !== prevFolder) {
@@ -69,13 +55,11 @@ async function $getWorkspaceRoot(base = process.cwd()) {
  * @param {string} [folder]
  * @return {Promise<ManifestContext>}
  */
-async function getManifestContext(folder) {
-  const path = await $getPath();
+export async function getManifestContext(folder) {
   const workspacePath = path.resolve(await $getWorkspaceRoot(folder));
 
   // If manifest specified via env var, and is a package name
   if (!folder && process.env.TRV_MODULE) {
-    const createRequire = await $getCreateRequire();
     const req = createRequire(`${workspacePath}/node_modules`);
     try {
       folder = path.dirname(req.resolve(`${process.env.TRV_MODULE}/package.json`));
@@ -99,6 +83,3 @@ async function getManifestContext(folder) {
     compilerFolder: '.trv_compiler'
   };
 }
-
-
-module.exports = { getManifestContext };

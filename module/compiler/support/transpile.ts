@@ -34,7 +34,7 @@ export class TranspileUtil {
         tsconfig = SRC_REQ.resolve('@travetto/compiler/tsconfig.trv.json');
       }
 
-      const ts = await import('typescript');
+      const ts = (await import('typescript')).default;
 
       const { options } = ts.parseJsonSourceFileConfigFileContent(
         ts.readJsonConfigFile(tsconfig, ts.sys.readFile), ts.sys, ctx.workspacePath
@@ -61,9 +61,14 @@ export class TranspileUtil {
   static async transpileFile(ctx: ManifestContext, inputFile: string, outputFile: string): Promise<void> {
     if (inputFile.endsWith('.ts') || inputFile.endsWith('.js')) {
       const compilerOut = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules');
-      const text = (await fs.readFile(inputFile, 'utf8')).replace(/from '@travetto\//g, `from '${compilerOut}/@travetto/`);
-      const ts = await import('typescript');
-      const content = ts.transpile(text, await this.getCompilerOptions(ctx), inputFile);
+      const text = (await fs.readFile(inputFile, 'utf8'))
+        .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) => `from '${compilerOut}/${i}${s.includes('/') ? '' : '/__index__'}'`);
+      const ts = (await import('typescript')).default;
+      let content = ts.transpile(text, await this.getCompilerOptions(ctx), inputFile);
+      if (ctx.moduleType === 'module') {
+        content = content.replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
+          .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
+      }
       await this.writeTextFile(outputFile, content);
     } else if (inputFile.endsWith('package.json')) {
       const pkg: Package = JSON.parse(await fs.readFile(inputFile, 'utf8'));

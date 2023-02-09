@@ -13,7 +13,7 @@ const SCOPE_MAX = SCOPES.reduce((a, v) => Math.max(a, v.length), 0);
 type ScopeType = (typeof SCOPES)[number];
 
 const importManifest = (ctx: ManifestContext): Promise<typeof import('@travetto/manifest')> =>
-  import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/manifest'));
+  import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/manifest/__index__.js'));
 
 const runAction = async <T>(scope: ScopeType, op: () => AsyncGenerator<string, T>, ...args: string[]): Promise<T> => {
   const itr = op();

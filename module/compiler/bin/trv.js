@@ -1,26 +1,11 @@
 #!/usr/bin/env node
 
 // @ts-check
-const $getContext = async () => {
-  try { return require('@travetto/manifest/bin/context'); }
-  catch { return import('@travetto/manifest/bin/context').then(x => x.default); }
-};
-const $getFs = async () => {
-  try { return require('fs/promises'); }
-  catch { return import('fs/promises').then(x => x.default); }
-};
-const $getPath = async () => {
-  try { return require('path'); }
-  catch { return import('path').then(x => x.default); }
-};
-const $getModule = async () => {
-  try { return require('module'); }
-  catch { return import('module').then(x => x.default); }
-};
-const $getTs = async () => {
-  try { return require('typescript'); }
-  catch { return import('typescript'); }
-};
+import fs from 'fs/promises';
+import path from 'path';
+import { Module, createRequire } from 'module';
+
+import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
 const VALID_OPS = { watch: 'watch', build: 'build', clean: 'clean', manifest: 'manifest' };
 
@@ -29,12 +14,10 @@ const VALID_OPS = { watch: 'watch', build: 'build', clean: 'clean', manifest: 'm
  * @return {Promise<import('@travetto/compiler/support/launcher')>}
  */
 const $getLauncher = async (ctx) => {
-  const fs = await $getFs();
-  const path = await $getPath();
-  const compPkg = (await $getModule()).Module.createRequire(path.resolve('node_modules')).resolve('@travetto/compiler/package.json');
+  const compPkg = createRequire(path.resolve('node_modules')).resolve('@travetto/compiler/package.json');
   const files = [];
 
-  for (const file of ['support/launcher.js', 'support/transpile.js']) {
+  for (const file of ['support/launcher.js', 'support/transpile.js', 'package.json']) {
     const target = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/compiler', file);
     const src = compPkg.replace('package.json', file.replace(/[.]js$/, '.ts'));
 
@@ -42,19 +25,31 @@ const $getLauncher = async (ctx) => {
     const srcTime = await fs.stat(src).then(s => Math.max(s.mtimeMs, s.ctimeMs));
     // If stale
     if (srcTime > targetTime) {
-      const ts = await $getTs();
+      const ts = (await import('typescript')).default;
       const module = ctx.moduleType === 'module' ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS;
       await fs.mkdir(path.dirname(target), { recursive: true });
-      await fs.writeFile(target, ts.transpile(await fs.readFile(src, 'utf8'), {
-        target: ts.ScriptTarget.ES2020, module, esModuleInterop: true, allowSyntheticDefaultImports: true
-      }), 'utf8');
+      const text = await fs.readFile(src, 'utf8');
+      if (file.endsWith('.js')) {
+        let content = ts.transpile(text, {
+          target: ts.ScriptTarget.ES2020, module, esModuleInterop: true, allowSyntheticDefaultImports: true
+        });
+        if (ctx.moduleType === 'module') {
+          content = content.replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
+            .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
+        }
+        await fs.writeFile(target, content, 'utf8');
+      } else {
+        const pkg = JSON.parse(text);
+        pkg.type = ctx.moduleType;
+        await fs.writeFile(target, JSON.stringify(pkg, null, 2), 'utf8');
+      }
       // Compile
     }
     files.push(target);
   }
 
   try { return await require(files[0]); }
-  catch { return import(files[0]).then(x => x.default); }
+  catch { return import(files[0]); }
 };
 
 /**
@@ -72,7 +67,6 @@ function parseArgs(args) {
   };
 }
 const exec = async () => {
-  const { getManifestContext } = await $getContext();
   const ctx = await getManifestContext();
   const { clean, compile, exportManifest } = await $getLauncher(ctx);
   const { op, outputPath, env, ...flags } = parseArgs(process.argv.slice(2));
@@ -100,9 +94,6 @@ const exec = async () => {
       return message(`Built to ${ctx.workspacePath}/${ctx.outputFolder}`);
     default: {
       await compile(ctx);
-
-      const path = await $getPath();
-      const { Module } = await $getModule();
 
       // Rewriting node_path
       const out = path.join(ctx.workspacePath, ctx.outputFolder);

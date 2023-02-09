@@ -4,7 +4,6 @@ import { program as commander } from 'commander';
 import { PackageUtil, path, RootIndex } from '@travetto/manifest';
 import { GlobalTerminal } from '@travetto/terminal';
 import { ShutdownManager } from '@travetto/base';
-import { init } from '@travetto/base/support/init';
 
 import { CliCommandManager } from './command-manager';
 import { HelpUtil } from './help';
@@ -71,6 +70,7 @@ export class ExecutionManager {
    * @param args
    */
   static async run(argv: string[]): Promise<void> {
+    const { init } = await import('@travetto/base/support/init.js');
     await init();
 
     const width = GlobalTerminal.width;
