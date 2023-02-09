@@ -102,7 +102,6 @@ export class ManifestIndex {
     this.#modules = Object.values(this.manifest.modules)
       .map(m => ({
         ...m,
-        output: this.#resolveOutput(m.outputFolder),
         outputPath: this.#resolveOutput(m.outputFolder),
         sourcePath: path.resolve(this.manifest.workspacePath, m.sourceFolder),
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
