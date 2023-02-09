@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
 import cp from 'child_process';
 
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil, FileResourceProvider } from '@travetto/base';
 import { CliCommand, cliTpl, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
@@ -35,7 +35,7 @@ export class OpenApiClientCommand extends CliCommand<Options> {
   }
 
   getListOfFormats(): string[] {
-    const formatCache = path.resolve('.trv-openapi-formats.json');
+    const formatCache = path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder, 'trv-openapi-formats.json');
     if (!existsSync(formatCache)) {
       const stdout = cp.execSync(`docker run --rm ${this.cmd.dockerImage} list`, { stdio: ['pipe', 'pipe'], encoding: 'utf8' }).trim();
       const lines = stdout

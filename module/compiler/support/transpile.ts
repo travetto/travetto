@@ -61,19 +61,19 @@ export class TranspileUtil {
   static async transpileFile(ctx: ManifestContext, inputFile: string, outputFile: string): Promise<void> {
     if (inputFile.endsWith('.ts') || inputFile.endsWith('.js')) {
       const compilerOut = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules');
+
       const text = (await fs.readFile(inputFile, 'utf8'))
-        .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) => `from '${compilerOut}/${i}${s.includes('/') ? '' : '/__index__'}'`);
+        .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
+        .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) => `from '${path.resolve(compilerOut, `${i}${s.includes('/') ? '.js' : '/__index__.js'}`)}'`);
+
       const ts = (await import('typescript')).default;
-      let content = ts.transpile(text, await this.getCompilerOptions(ctx), inputFile);
-      if (ctx.moduleType === 'module') {
-        content = content.replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
-          .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
-      }
+      const content = ts.transpile(text, await this.getCompilerOptions(ctx), inputFile);
       await this.writeTextFile(outputFile, content);
     } else if (inputFile.endsWith('package.json')) {
       const pkg: Package = JSON.parse(await fs.readFile(inputFile, 'utf8'));
       const main = pkg.main?.replace(/[.]ts$/, '.js');
       const files = pkg.files?.map(x => x.replace('.ts', '.js'));
+
       const content = JSON.stringify({ ...pkg, main, type: ctx.moduleType, files }, null, 2);
       await this.writeTextFile(outputFile, content);
     }
