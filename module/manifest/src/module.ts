@@ -193,7 +193,7 @@ export class ManifestModuleUtil {
     const profiles = [...profileSet].sort();
     const parents = [...parentSet].sort();
     const outputFolder = `node_modules/${name}`;
-    const sourceFolder = sourcePath.replace(`${ctx.workspacePath}/`, '');
+    const sourceFolder = sourcePath === ctx.workspacePath ? '' : sourcePath.replace(`${ctx.workspacePath}/`, '');
 
     const res = { main, name, version, local, internal, sourceFolder, outputFolder, files, profiles, parents, };
     return res;

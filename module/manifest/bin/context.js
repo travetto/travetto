@@ -76,7 +76,7 @@ export async function getManifestContext(folder) {
   return {
     moduleType,
     mainModule,
-    mainFolder: folder ?? '.',
+    mainFolder: folder ?? '',
     workspacePath,
     monoRepo,
     outputFolder,
