@@ -41,7 +41,7 @@ export class RunnerUtil {
       .filter(f => globs.some(g => g.test(f.import)));
 
     const validFiles = files
-      .map(f => this.isTestFile(f.source).then(valid => ({ file: f.source, valid })));
+      .map(f => this.isTestFile(f.sourceFile).then(valid => ({ file: f.sourceFile, valid })));
 
     return (await Promise.all(validFiles))
       .filter(x => x.valid)

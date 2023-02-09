@@ -33,7 +33,7 @@ export async function main(target?: string): Promise<void> {
 
   const mods = new Set((await CliModuleUtil.findModules('all'))
     .filter(x => !target || x.sourcePath === path.resolve(root, target))
-    .filter(x => (x.files.doc ?? []).some(f => f.source.endsWith('DOC.ts'))));
+    .filter(x => (x.files.doc ?? []).some(f => f.sourceFile.endsWith('DOC.ts'))));
 
   if (mods.size > 1) {
     // Build out docs

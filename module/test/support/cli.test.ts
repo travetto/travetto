@@ -27,7 +27,7 @@ export class TestCommand extends CliCommand<Options> {
     if (!this._types) {
       this._types = RootIndex
         .findSrc({ filter: /consumer\/types\/.*/, profiles: ['test'] })
-        .map(x => readFileSync(`${x.output}`, 'utf8').match(/Consumable.?[(]'([^']+)/)?.[1])
+        .map(x => readFileSync(`${x.outputFile}`, 'utf8').match(/Consumable.?[(]'([^']+)/)?.[1])
         .filter((x?: string): x is string => !!x);
     }
     return this._types;

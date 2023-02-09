@@ -24,7 +24,7 @@ export class CliCommandManager {
    */
   static getCommandMapping(): Map<string, string> {
     const all = new Map<string, string>();
-    for (const { output, import: imp } of RootIndex.findSupport({ filter: /\/cli[.]/, checkProfile: false })) {
+    for (const { outputFile: output, import: imp } of RootIndex.findSupport({ filter: /\/cli[.]/, checkProfile: false })) {
       all.set(output.replace(/^.*\/cli[.](.*?)[.][^.]+$/, (_, f) => f), imp);
     }
     return all;

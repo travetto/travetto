@@ -82,7 +82,7 @@ class $RootIndex extends ManifestIndex {
   * @param outputFile
   */
   getSourceFile(importFile: string): string {
-    return this.getFromImport(importFile)?.source ?? importFile;
+    return this.getFromImport(importFile)?.sourceFile ?? importFile;
   }
 
   /**

@@ -65,7 +65,7 @@ class $DynamicFileLoader {
       if (isTriggerEvent(ev)) {
         const found = RootIndex.getFromSource(ev.file);
         if (found) {
-          this.dispatch({ action: ev.action, file: found.output });
+          this.dispatch({ action: ev.action, file: found.outputFile });
         }
       }
     });

@@ -154,7 +154,7 @@ export class TransformerState implements State {
     );
     const src = decl?.getSourceFile().fileName;
     const mod = src ? TransformerIndex.getImportName(src, true) : undefined;
-    const file = TransformerIndex.getFromImport(mod ?? '')?.output;
+    const file = TransformerIndex.getFromImport(mod ?? '')?.outputFile;
     const targets = DocUtil.readAugments(this.#resolver.getType(ident));
     const module = file ? mod : undefined;
     const name = ident ?

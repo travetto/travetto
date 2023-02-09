@@ -87,7 +87,7 @@ export class ManifestWatcher {
    */
   static async watchInputFile(fileOrImport: string, onChange: () => void): Promise<() => Promise<void>> {
     const entry = RootIndex.getEntry(fileOrImport) ?? RootIndex.getFromImport(fileOrImport);
-    const source = entry!.source;
+    const source = entry!.sourceFile;
     return this.buildWatcher([path.dirname(source)], onChange, {
       filter: ev => ev.action === 'update' && ev.file === source
     });

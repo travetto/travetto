@@ -40,7 +40,7 @@ export class AppListLoader {
   async #verifyList(items: ApplicationConfig[]): Promise<ApplicationConfig[]> {
     try {
       for (const el of items) {
-        const file = RootIndex.getFromImport(el.import)!.source;
+        const file = RootIndex.getFromImport(el.import)!.sourceFile;
         const elStat = (await fs.lstat(file).catch(() => { delete el.generatedTime; }));
         // invalidate cache if changed
         if (elStat && (!el.generatedTime || Math.max(elStat.mtimeMs, elStat.ctimeMs) > el.generatedTime)) {

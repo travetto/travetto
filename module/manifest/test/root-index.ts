@@ -10,7 +10,7 @@ class RootIndexTests {
   @Test()
   testFind() {
     const files = RootIndex.find({});
-    assert(files.some(x => x.output.endsWith('test/root-index.js')));
+    assert(files.some(x => x.outputFile.endsWith('test/root-index.js')));
   }
 
   @Test()

@@ -49,7 +49,7 @@ export class LogFeature extends BaseFeature {
           startIndex: context.line.indexOf(full),
           length: full.length,
           tooltip: `Travetto ${type}: ${mod}/${path}${suffix}`,
-          file: entry.source,
+          file: entry.sourceFile,
           line: type === 'File' ? suffix.split(':')[1] : undefined,
           cls: type === 'Class' ? suffix.split('￮')[1] : undefined
         });

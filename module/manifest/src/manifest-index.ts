@@ -20,9 +20,9 @@ export type IndexedFile = {
   id: string;
   import: string;
   module: string;
-  source: string;
-  output: string;
-  relative: string;
+  sourceFile: string;
+  outputFile: string;
+  relativeFile: string;
   profile: ManifestProfile;
   type: ManifestModuleFileType;
 };
@@ -78,16 +78,16 @@ export class ManifestIndex {
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([f, type, ts, profile = 'std']) => {
-      const source = path.join(this.#manifest.workspacePath, m.sourceFolder, f);
+      const sourceFile = path.join(this.#manifest.workspacePath, m.sourceFolder, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
-      const output = this.#resolveOutput(m.outputFolder, js);
+      const outputFile = this.#resolveOutput(m.outputFolder, js);
       const modImport = `${m.name}/${js}`;
       let id = modImport.replace(`${m.name}/`, _ => _.replace(/[/]$/, ':'));
       if (type === 'ts' || type === 'js') {
         id = id.replace(/[.]js$/, '');
       }
 
-      return { id, type, source, output, import: modImport, profile, relative: f, module: m.name };
+      return { id, type, sourceFile, outputFile, import: modImport, profile, relativeFile: f, module: m.name };
     });
   }
 
@@ -113,8 +113,8 @@ export class ManifestIndex {
     for (const mod of this.#modules) {
       for (const files of Object.values(mod.files ?? {})) {
         for (const entry of files) {
-          this.#outputToEntry.set(entry.output, entry);
-          this.#sourceToEntry.set(entry.source, entry);
+          this.#outputToEntry.set(entry.outputFile, entry);
+          this.#sourceToEntry.set(entry.sourceFile, entry);
           this.#importToEntry.set(entry.import, entry);
           this.#importToEntry.set(entry.import.replace(/[.]js$/, ''), entry);
           this.#importToEntry.set(entry.import.replace(/[.]js$/, '.ts'), entry);
@@ -169,7 +169,7 @@ export class ManifestIndex {
 
     return searchSpace
       .filter(({ type }) => type === 'ts')
-      .filter(({ source }) => filter?.(source) ?? true);
+      .filter(({ sourceFile: source }) => filter?.(source) ?? true);
   }
 
   /**
@@ -221,7 +221,7 @@ export class ManifestIndex {
    * Resolve import
    */
   resolveFileImport(name: string): string {
-    return this.#importToEntry.get(name)?.output ?? name;
+    return this.#importToEntry.get(name)?.outputFile ?? name;
   }
 
   /**
