@@ -49,10 +49,11 @@ export class FileConfigSource extends FileQueryProvider implements ConfigSource 
         continue;
       }
       const content = await this.read(file);
+      const desc = await this.describe(file);
       out.push({
         profile,
         config: await this.parsers[ext].parse(content),
-        source: `file://${file}`,
+        source: `file://${desc.path}`,
         priority: this.priority
       });
     }
