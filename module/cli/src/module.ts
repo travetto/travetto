@@ -44,7 +44,7 @@ export class CliModuleUtil {
       outputMode: 'text',
       catchAsResult: true,
       cwd: folder,
-      env: { TRV_MANIFEST: '' },
+      env: { TRV_MANIFEST: '', TRV_MODULE: mod.name },
     };
 
     if (config.showStdout) {

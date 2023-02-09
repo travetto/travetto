@@ -143,7 +143,7 @@ let index: $RootIndex | undefined;
 try {
   index = new $RootIndex(process.env.TRV_MANIFEST!);
 } catch (err) {
-  if (process.env.TRV_THROW_ROOT_INDEX_ERR) {
+  if (/prod/i.test(process.env.NODE_ENV ?? '')) {
     throw err;
   }
 }

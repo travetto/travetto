@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
 
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { stripAnsiCodes } from '@travetto/terminal';
 
@@ -59,8 +59,9 @@ export class DocRunUtil {
           ...Env.export(/^(TRV_.*|NODE_.*|.*COLOR.*|PATH)$/),
           DEBUG: '0',
           TRV_MANIFEST: '',
+          TRV_BUILD: 'warn',
+          TRV_MODULE: config.module ?? RootIndex.mainModule.name,
           ...(config.profiles ? { TRV_PROFILES: config.profiles.join(' ') } : {}),
-          ...(config.module ? { TRV_MODULE: config.module } : {}),
           ...(config.env ?? {})
         }
       }

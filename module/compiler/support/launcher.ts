@@ -152,10 +152,7 @@ export async function launchMain(ctx: ManifestContext): Promise<void> {
   Module._initPaths();
   process.env.NODE_PATH = og; // Restore
 
-  // Prep env variables
-  process.env.TRV_THROW_ROOT_INDEX_ERR = '1';
   process.env.TRV_MANIFEST = path.resolve(nodeOut, ctx.mainModule);
-
 
   // TODO: Externalize somehow?
   const cliMain = path.join(nodeOut, '@travetto/cli/support/cli.js');

@@ -11,12 +11,12 @@ type ModFile = { input: string, output: string, stale: boolean };
 const SRC_REQ = createRequire(path.resolve('node_modules'));
 const recentStat = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 
-export type CompilerLogEvent = [level: 'info' | 'debug', message: string];
+export type CompilerLogEvent = [level: 'info' | 'debug' | 'warn', message: string];
 type WithLogger<T> = (log: (...ev: CompilerLogEvent) => void) => Promise<T>;
 type LogConfig = { args?: string[], basic?: boolean };
 const isCompilerLogEvent = (o: unknown): o is CompilerLogEvent => o !== null && o !== undefined && Array.isArray(o);
 
-const IS_DEBUG = /\b([*]|build)\b/.test(process.env.DEBUG ?? '');
+const LEVELS = { warn: true, debug: /^debug$/.test(process.env.TRV_BUILD ?? ''), info: !/^warn$/.test(process.env.TRV_BUILD ?? '') };
 const SCOPE_MAX = 15;
 
 /**
@@ -27,8 +27,7 @@ export class TranspileUtil {
 
   static log(scope: string, args: string[], ...[level, msg]: CompilerLogEvent): void {
     const message = msg.replaceAll(process.cwd(), '.');
-    const shouldLog = IS_DEBUG || level !== 'debug';
-    shouldLog && console.debug(new Date().toISOString(), `[${scope.padEnd(SCOPE_MAX, ' ')}]`, ...args, message);
+    LEVELS[level] && console.debug(new Date().toISOString(), `[${scope.padEnd(SCOPE_MAX, ' ')}]`, ...args, message);
   }
 
   /**
@@ -175,7 +174,6 @@ export class TranspileUtil {
           env: {
             ...process.env,
             TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
-            TRV_THROW_ROOT_INDEX_ERR: '1',
           },
           stdio: [0, 1, 2, 'ipc'],
         })
