@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 
 import { path } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
+import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell';
 import { DockerPackConfig } from './types';
@@ -16,16 +17,15 @@ export class DockerPackOperation {
    * Write Docker File
    */
   static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    const title = 'Generating Docker File';
+    const dockerFile = path.resolve(cfg.workspace, 'Dockerfile');
+    const title = cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }}`;
     const content = `
 FROM ${cfg.dockerImage}
 WORKDIR /app
 COPY . .
 ${(cfg.dockerPort ?? []).map(x => `EXPOSE ${x}`).join('\n')}
-ENTRYPOINT ["node", "${cfg.entryCommand}"]
+ENTRYPOINT ["/app/${cfg.entryCommand}.sh"]
 `;
-    const dockerFile = path.resolve(cfg.workspace, 'Dockerfile');
-
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
       yield* ActiveShellCommand.createFile(dockerFile, content.split(/\n/));
@@ -39,7 +39,7 @@ ENTRYPOINT ["node", "${cfg.entryCommand}"]
    * Pull Docker Base Image
    */
   static async* pullDockerBaseImage(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    const title = 'Pulling Docker Base Image';
+    const title = cliTpl`${{ title: 'Pulling Docker Base Image' }} ${{ param: cfg.dockerImage }}`;
 
     const command = ['docker', 'pull', cfg.dockerImage];
 
@@ -56,7 +56,7 @@ ENTRYPOINT ["node", "${cfg.entryCommand}"]
    * Building Docker Container
    */
   static async* buildDockerContainer(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    const title = 'Building Docker Container';
+    const title = cliTpl`${{ title: 'Building Docker Container' }} ${{ param: cfg.dockerTag?.join(',') }}`;
     const cmd = ['docker', 'build', ...DockerPackOperation.getDockerTags(cfg).flatMap(x => ['-t', x]), '.'];
 
     if (cfg.ejectFile) {
@@ -77,9 +77,9 @@ ENTRYPOINT ["node", "${cfg.entryCommand}"]
     if (!cfg.dockerPush) {
       return;
     }
-
-    const title = 'Push Docker Container';
-    const cmd = ['docker', 'image', 'push', ...DockerPackOperation.getDockerTags(cfg)];
+    const tags = DockerPackOperation.getDockerTags(cfg);
+    const title = cliTpl`${{ title: 'Push Container to registry' }} ${{ param: cfg.dockerRegistry }}`;
+    const cmd = ['docker', 'image', 'push', ...tags];
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);

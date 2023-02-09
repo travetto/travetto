@@ -10,6 +10,7 @@ export type CommonPackConfig = {
   // Bundle
   entryPoint: string;
   entryCommand: string;
+  entryArguments: string[];
   minify: boolean;
   sourcemap: boolean;
   includeSources: boolean;
@@ -24,6 +25,7 @@ export type CommonPackOptions = {
   // Bundle
   entryPoint: OptionConfig<string>;
   entryCommand: OptionConfig<string>;
+  entryArguments: ListOptionConfig<string>;
   minify: OptionConfig<boolean>;
   sourcemap: OptionConfig<boolean>;
   includeSources: OptionConfig<boolean>;
@@ -51,6 +53,7 @@ export type ShellCommandImpl = {
   var(name: string): string;
   createFile(file: string, text: string[], mode?: string): string[][];
   scriptOpen(): string[];
+  chdirScript(): string[];
   callCommandWithAllArgs(cmd: string, ...args: string[]): string[];
   copy(src: string, dest: string): string[];
   copyRecursive(src: string, dest: string): string[];

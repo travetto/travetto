@@ -1,16 +1,23 @@
 import { path } from '@travetto/manifest';
+import { stripAnsiCodes } from '@travetto/terminal';
 
 import { ShellCommandImpl } from './types';
+
+const escape = (text: string): string =>
+  text
+    .replaceAll('"', '\\"')
+    .replaceAll('$', '\\$');
 
 export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
   win32: {
     var: (name: string) => `%${name}%`,
     scriptOpen: () => [],
+    chdirScript: () => ['cd', '%~p0'],
     callCommandWithAllArgs: (cmd, ...args) => [cmd, ...args, '%*'],
     createFile: (file, text) => [
       ['@echo', 'off'],
       ...text.map((line, i) =>
-        ['echo', `"${line.replaceAll('"', '\\"')}"`, i === 0 ? '>' : '>>', file]
+        ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]
       )
     ],
     copy: (src, dest) => ['copy', src, dest],
@@ -19,16 +26,17 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     mkdir: (dest) => ['md', dest],
     export: (key, value) => ['set', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
-    comment: (message) => ['\nREM', message, '\n'],
+    comment: (message) => ['\nREM', stripAnsiCodes(message), '\n'],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile]
   },
   posix: {
     var: (name: string) => `$${name}`,
     scriptOpen: () => ['#!/bin/sh'],
+    chdirScript: () => ['cd', '$(dirname "$0")'],
     callCommandWithAllArgs: (cmd, ...args) => [cmd, ...args, '$@'],
     createFile: (file, text, mode) => [
       ...text.map((line, i) =>
-        ['echo', `"${line.replaceAll('"', '\\"')}"`, i === 0 ? '>' : '>>', file]),
+        ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]),
       ...(mode ? [['chmod', mode, file]] : [])
     ],
     copy: (src, dest) => ['cp', src, dest],
@@ -37,7 +45,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     mkdir: (dest) => ['mkdir', '-p', dest],
     export: (key, value) => ['export', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
-    comment: (message) => ['\n#', message, '\n'],
+    comment: (message) => ['\n#', stripAnsiCodes(message), '\n'],
     zip: (outputFile) => ['zip', '-r', outputFile, '.']
   },
 };

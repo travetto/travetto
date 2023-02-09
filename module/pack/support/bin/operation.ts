@@ -2,10 +2,11 @@ import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
+import { cliTpl } from '@travetto/cli';
 
 import { CommonPackConfig } from './types';
 import { PackUtil } from './util';
-import { ActiveShellCommand } from './shell';
+import { ActiveShellCommand, ShellCommands } from './shell';
 
 async function writeRawFile(file: string, contents: string, mode?: string): Promise<void> {
   await fs.writeFile(file, contents, { encoding: 'utf8', mode });
@@ -18,7 +19,7 @@ export class PackOperation {
       return;
     }
 
-    const title = 'Cleaning Output';
+    const title = cliTpl`${{ title: 'Cleaning Output' }} ${{ path: cfg.workspace }}`;
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
@@ -28,7 +29,7 @@ export class PackOperation {
       }
       yield ActiveShellCommand.mkdir(cfg.workspace);
     } else {
-      yield [`${title}: ${cfg.workspace}`];
+      yield [title];
       await fs.rm(cfg.workspace, { recursive: true, force: true });
       if (cfg.output) {
         await fs.rm(cfg.output, { recursive: true, force: true });
@@ -56,7 +57,10 @@ export class PackOperation {
       .map(x => [x[0], `${x[1]}`])
     );
 
-    const title = 'Bundling Output';
+    const props = (['minify', 'sourcemap', 'entryPoint'] as const)
+      .map(k => cliTpl`${{ subtitle: k }}=${{ param: cfg[k] }}`).join(' ');
+
+    const title = cliTpl`${{ title: 'Bundling Output' }} ${props}`;
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
@@ -73,26 +77,28 @@ export class PackOperation {
   }
 
   static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const title = 'Writing package.json';
+    const file = 'package.json';
+    const title = cliTpl`${{ title: 'Writing' }} ${{ path: file }}`;
     const pkg = { type: RootIndex.manifest.moduleType };
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
       yield* ActiveShellCommand.createFile(
-        path.resolve(cfg.workspace, 'package.json'),
+        path.resolve(cfg.workspace, file),
         [JSON.stringify(pkg)]
       );
     } else {
       yield [title];
       await writeRawFile(
-        path.resolve(cfg.workspace, 'package.json'),
+        path.resolve(cfg.workspace, file),
         JSON.stringify(pkg, null, 2)
       );
     }
   }
 
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const title = 'Writing .env.js';
+    const file = '.env.js';
+    const title = cliTpl`${{ title: 'Writing' }} ${{ path: file }}`;
     const env = {
       TRV_MANIFEST: `node_modules/${cfg.module}`,
       TRV_CLI_IPC: ''
@@ -101,15 +107,42 @@ export class PackOperation {
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
       yield* ActiveShellCommand.createFile(
-        path.resolve(cfg.workspace, '.env.js'),
+        path.resolve(cfg.workspace, file),
         PackUtil.buildEnvJS(env)
       );
     } else {
       yield [title];
       await writeRawFile(
-        path.resolve(cfg.workspace, '.env.js'),
+        path.resolve(cfg.workspace, file),
         PackUtil.buildEnvJS(env).join('\n')
       );
+    }
+  }
+
+  static async * writeEntryScript(cfg: CommonPackConfig): AsyncIterable<string[]> {
+    const title = 'Writing entry scripts';
+
+    const files = ([['posix', 'sh'], ['win32', 'bat']] as const)
+      .map(([type, ext]) => ({
+        fileTitle: cliTpl`${{ title }} ${{ path: `${cfg.entryCommand}.${ext}` }}`,
+        file: `${cfg.entryCommand}.${ext}`,
+        text: [
+          ShellCommands[type].scriptOpen(),
+          ShellCommands[type].chdirScript(),
+          ShellCommands[type].callCommandWithAllArgs('node', cfg.entryCommand, ...cfg.entryArguments),
+        ].map(x => x.join(' '))
+      }));
+
+    if (cfg.ejectFile) {
+      for (const { fileTitle, text, file } of files) {
+        yield ActiveShellCommand.comment(fileTitle);
+        yield* ActiveShellCommand.createFile(path.resolve(cfg.workspace, file), text, '755');
+      }
+    } else {
+      for (const { fileTitle, text, file } of files) {
+        yield [fileTitle];
+        await writeRawFile(path.resolve(cfg.workspace, file), text.join('\n'), '755');
+      }
     }
   }
 
@@ -129,7 +162,7 @@ export class PackOperation {
       destFolder: path.resolve(cfg.workspace, mod.outputFolder)
     }));
 
-    const title = 'Copying over resources';
+    const title = cliTpl`${{ title: 'Copying over resources' }}`;
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
@@ -149,7 +182,7 @@ export class PackOperation {
       }
 
       if (resources.count) {
-        await fs.mkdir(resources.dest, { recursive: true });
+        await fs.mkdir(path.dirname(resources.dest), { recursive: true });
         await PackUtil.copyRecursive(resources.src, resources.dest);
       }
     }
@@ -162,9 +195,11 @@ export class PackOperation {
     }
 
     const appCacheCmd = ['npx', 'trv', 'main', '@travetto/app/support/bin/list'];
-    const appCache = path.resolve(cfg.workspace, RootIndex.manifest.modules[RootIndex.mainModule.name].outputFolder, 'trv-app-cache.json');
-    const title = 'Generating App Cache';
+    const sub = path.join(RootIndex.manifest.modules[RootIndex.mainModule.name].outputFolder, 'trv-app-cache.json');
+    const title = cliTpl`${{ title: 'Generating App Cache' }} ${{ path: sub }}`;
     const env = { DEBUG: '0', TRV_MODULE: cfg.module };
+    const appCache = path.resolve(cfg.workspace, sub);
+
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
@@ -180,21 +215,22 @@ export class PackOperation {
   }
 
   static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const title = 'Writing Manifest';
-    const cmd = ['npx', 'trv', 'manifest', path.resolve(cfg.workspace, 'node_modules', cfg.module), 'prod'];
+    const out = path.resolve(cfg.workspace, 'node_modules', cfg.module);
+    const cmd = ['npx', 'trv', 'manifest', out, 'prod'];
     const env = { TRV_MODULE: cfg.module };
+    const title = cliTpl`${{ title: 'Writing Manifest' }} ${{ path: out }}`;
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
       yield [...Object.entries(env).map(([k, v]) => `${k}=${v}`), ...cmd];
     } else {
       yield [title];
-      await ExecUtil.spawn(cmd[0], cmd.slice(1), { env, stdio: 'inherit' }).result;
+      await ExecUtil.spawn(cmd[0], cmd.slice(1), { env, stdio: ['inherit', 'ignore', 'inherit'] }).result;
     }
   }
 
   static async * compress(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const title = 'Compressing';
+    const title = cliTpl`${{ title: 'Compressing' }} ${{ path: cfg.output }}`;
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
@@ -202,7 +238,7 @@ export class PackOperation {
       yield ActiveShellCommand.zip(cfg.output);
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
-      yield [`${title}: ${cfg.output}`];
+      yield [title];
       const [cmd, ...args] = ActiveShellCommand.zip(cfg.output);
       await ExecUtil.spawn(cmd, args, { cwd: cfg.workspace }).result;
     }

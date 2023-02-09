@@ -27,6 +27,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
 
       entryPoint: this.option({ short: 'e', desc: 'Entry point', def: 'node_modules/@travetto/cli/support/cli.js' }),
       entryCommand: this.option({ short: 'ec', desc: 'Entry command' }),
+      entryArguments: this.listOption({ short: 'a', desc: 'Entry arguments' }),
       minify: this.boolOption({ short: 'm', desc: 'Minify output', def: true }),
       sourcemap: this.boolOption({ short: 'sm', desc: 'Bundle source maps' }),
       includeSources: this.boolOption({ short: 'is', desc: 'Include source with source maps' }),
@@ -55,6 +56,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
     ops.push(
       PackOperation.writeEnv,
       PackOperation.writePackageJson,
+      PackOperation.writeEntryScript,
       PackOperation.copyResources,
       PackOperation.primeAppCache,
       PackOperation.writeManifest,

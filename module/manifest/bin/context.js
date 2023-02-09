@@ -72,11 +72,12 @@ export async function getManifestContext(folder) {
   const outputFolder = travetto?.outputFolder ?? '.trv_output';
 
   const moduleType = (await $getPkg(workspacePath)).type ?? 'commonjs';
+  const mainFolder = mainPath === workspacePath ? '' : mainPath.replace(`${workspacePath}/`, '');
 
   return {
     moduleType,
     mainModule,
-    mainFolder: folder ?? '',
+    mainFolder,
     workspacePath,
     monoRepo,
     outputFolder,
