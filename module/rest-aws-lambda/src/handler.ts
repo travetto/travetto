@@ -1,5 +1,6 @@
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
+import { init } from '@travetto/base/support/init';
 
 import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from './types';
 import { AwsLambdaRestApplication, AwsLambdaHandler } from './server';
@@ -7,6 +8,7 @@ import { AwsLambdaRestApplication, AwsLambdaHandler } from './server';
 async function buildApp(): Promise<{
   handle(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): Promise<LambdaAPIGatewayProxyResult>;
 }> {
+  init();
   await RootRegistry.init();
 
   const app = await DependencyRegistry.getInstance(AwsLambdaRestApplication);
