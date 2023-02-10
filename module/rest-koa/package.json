@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-koa",
-  "version": "3.0.0-rc.11",
+  "version": "3.0.0-rc.12",
   "description": "Koa provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -24,7 +24,7 @@
     "directory": "module/rest-koa"
   },
   "dependencies": {
-    "@travetto/rest": "^3.0.0-rc.11",
+    "@travetto/rest": "^3.0.0-rc.12",
     "@types/koa": "^2.13.5",
     "@types/koa-compress": "^4.0.3",
     "@types/koa-router": "^7.4.4",

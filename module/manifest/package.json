@@ -1,6 +1,6 @@
 {
   "name": "@travetto/manifest",
-  "version": "3.0.0-rc.6",
+  "version": "3.0.0-rc.7",
   "description": "Manifest support",
   "keywords": [
     "path",
