@@ -14,7 +14,7 @@ export class LintCommand extends CliCommand<Options> {
 
   getOptions(): Options {
     return {
-      changed: this.boolOption({ desc: 'Only check changed modules', def: true }),
+      changed: this.boolOption({ desc: 'Only check changed modules', def: false }),
     };
   }
 
@@ -25,7 +25,7 @@ export class LintCommand extends CliCommand<Options> {
   async action(): Promise<void> {
     const mods = await CliModuleUtil.findModules(this.cmd.changed ? 'changed' : 'all');
 
-    const res = await ExecUtil.spawn('npx', ['eslint', '--ext', '.js,.ts', ...mods.map(x => x.sourcePath)], {
+    const res = await ExecUtil.spawn('npx', ['eslint', ...mods.map(x => x.sourcePath)], {
       cwd: RootIndex.manifest.workspacePath,
       stdio: 'inherit',
       catchAsResult: true

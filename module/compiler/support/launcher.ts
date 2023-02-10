@@ -1,6 +1,5 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { Module } from 'module';
 
 import type { ManifestContext } from '@travetto/manifest';
 import { TranspileUtil } from './transpile';
@@ -144,14 +143,7 @@ export async function exportManifest(ctx: ManifestContext, output?: string, env 
 }
 
 export async function launchMain(ctx: ManifestContext): Promise<void> {
-  // Rewriting node_path
   const nodeOut = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules');
-  const og = process.env.NODE_PATH;
-  process.env.NODE_PATH = [nodeOut, og].join(path.delimiter);
-  // @ts-expect-error
-  Module._initPaths();
-  process.env.NODE_PATH = og; // Restore
-
   process.env.TRV_MANIFEST = path.resolve(nodeOut, ctx.mainModule);
 
   // TODO: Externalize somehow?

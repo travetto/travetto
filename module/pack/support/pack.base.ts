@@ -99,10 +99,12 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
     cfg.entryArguments = args;
 
     for (const k in this.cmd) {
-      const v = this.cmd[k];
-      if (typeof v === 'string' && /<module>/.test(v)) {
-        // @ts-expect-error
-        this.cmd[k] = v.replace(/<module>/g, this.getSimpleModuleName());
+      if (Object.hasOwn(this.cmd, k)) {
+        const v = this.cmd[k];
+        if (typeof v === 'string' && /<module>/.test(v)) {
+          // @ts-expect-error
+          this.cmd[k] = v.replace(/<module>/g, this.getSimpleModuleName());
+        }
       }
     }
 
