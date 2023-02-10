@@ -1,7 +1,6 @@
 import { d, lib, mod } from '@travetto/doc';
 
 import { Todo } from './doc/model';
-import { TodoController } from './doc/rest';
 
 export const text = () => d`
 ${d.Header(undefined, false)}
@@ -63,7 +62,7 @@ Basic tests are also included for the ${d.Input('model')} to verify that databas
 ${d.Section('Rest + Model')}
 In the case both ${d.Input('rest')} and ${d.Input('model')} features are enabled, the code will produce a controller that exposes the ${Todo} model via restful patterns.
 
-${d.Code('Todo controller', TodoController)}
+${d.Code('Todo controller', './doc/rest.ts')}
 
 ${d.Section('Running')}
 
