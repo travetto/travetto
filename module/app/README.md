@@ -77,31 +77,31 @@ Available Applications:
 
    ● complex 
      usage: complex domain:string [port:number=3000]
-     import:  @travetto/app/doc/complex.js
+     target:  @travetto/app:doc/complex￮Complex
 
      —————————————————————————————————————————————————————————
 
    ● simple 
      usage: simple domain:string [port:number=3000]
-     import:  @travetto/app/doc/simple.js
+     target:  @travetto/app:doc/simple￮SimpleApp
 
      —————————————————————————————————————————————————————————
 
    ● simple-app 
      usage: simple-app 
-     import:  @travetto/app/doc/entry-simple.js
+     target:  @travetto/app:doc/entry-simple￮SimpleApp
 
      —————————————————————————————————————————————————————————
 
    ● simple-domain 
      usage: simple-domain domain:string [port:number=3000]
-     import:  @travetto/app/doc/domain.js
+     target:  @travetto/app:doc/domain￮SimpleApp
 
      —————————————————————————————————————————————————————————
 
    ● test-ep-test 
      usage: test-ep-test [age:number=5] [format:html|pdf=html]
-     import:  @travetto/app/doc/entry.js
+     target:  @travetto/app:doc/entry￮EpTest
 ```
 
 Running without specifying an application `trv run`, will display all the available apps, and would look like:
@@ -121,31 +121,31 @@ Available Applications:
 
    ● complex 
      usage: complex domain:string [port:number=3000]
-     import:  @travetto/app/doc/complex.js
+     target:  @travetto/app:doc/complex￮Complex
 
      —————————————————————————————————————————————————————————
 
    ● simple 
      usage: simple domain:string [port:number=3000]
-     import:  @travetto/app/doc/simple.js
+     target:  @travetto/app:doc/simple￮SimpleApp
 
      —————————————————————————————————————————————————————————
 
    ● simple-app 
      usage: simple-app 
-     import:  @travetto/app/doc/entry-simple.js
+     target:  @travetto/app:doc/entry-simple￮SimpleApp
 
      —————————————————————————————————————————————————————————
 
    ● simple-domain 
      usage: simple-domain domain:string [port:number=3000]
-     import:  @travetto/app/doc/domain.js
+     target:  @travetto/app:doc/domain￮SimpleApp
 
      —————————————————————————————————————————————————————————
 
    ● test-ep-test 
      usage: test-ep-test [age:number=5] [format:html|pdf=html]
-     import:  @travetto/app/doc/entry.js
+     target:  @travetto/app:doc/entry￮EpTest
 ```
 
 To invoke the `simple` application, you need to pass `domain` where port is optional with a default.
@@ -155,7 +155,7 @@ To invoke the `simple` application, you need to pass `domain` where port is opti
 ```bash
 $ trv run simple-domain my-domain.biz 4000
 
-Running application { name: 'simple-domain', import: '@travetto/app/doc/domain.js' }
+Running application { name: 'simple-domain', target: '@travetto/app:doc/domain￮SimpleApp' }
 Manifest {
   info: {
     name: '@travetto-doc/app',

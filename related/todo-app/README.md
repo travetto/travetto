@@ -311,7 +311,7 @@ First we must start the application:
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/app:src/registry.ts:61] Running application { name: 'rest', import: '@travetto/rest/src/application/rest.js' }
+2029-03-14T04:00:00.618Z info  [@travetto/app:src/registry.ts:61] Running application { name: 'rest', target: '@travetto/rest:src/application/rest￮RestApplication' }
 2029-03-14T04:00:00.837Z info  [@travetto/app:src/registry.ts:67] Manifest {
   info: {
     name: '@travetto/todo-app',
