@@ -324,7 +324,7 @@ First we must start the application:
       <figcaption class="terminal">Application Startup
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@travetto/app:src/registry.ts:61<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, filename: <span class="token string">'@travetto/rest/src/application/rest.ts'</span> <span class="token punctuation">{{'}'}}</span>
+      <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@travetto/app:src/registry.ts:61<span class="token punctuation">]</span> Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'rest'</span>, import: <span class="token string">'@travetto/rest/src/application/rest.js'</span> <span class="token punctuation">{{'}'}}</span>
 <span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@travetto/app:src/registry.ts:67<span class="token punctuation">]</span> Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto/todo-app'</span>,
@@ -347,8 +347,8 @@ First we must start the application:
 <span class="token punctuation">{{'}'}}</span>
 <span class="token number">2029</span>-03-14T04:00:01.510Z info  <span class="token punctuation">[</span>@travetto/app:src/registry.ts:81<span class="token punctuation">]</span> Config <span class="token punctuation">{{'{'}}</span>
   sources: <span class="token punctuation">[</span>
-    <span class="token string">'application.1 - file://application.yml'</span>,
-    <span class="token string">'dev.1 - file://dev.yml'</span>,
+    <span class="token string">'application.1 - file://./resources/application.yml'</span>,
+    <span class="token string">'dev.1 - file://./resources/dev.yml'</span>,
     <span class="token string">'override.3 - memory://override'</span>
   <span class="token punctuation">]</span>,
   active: <span class="token punctuation">{{'{'}}</span>

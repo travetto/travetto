@@ -311,7 +311,7 @@ First we must start the application:
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/app:src/registry.ts:61] Running application { name: 'rest', filename: '@travetto/rest/src/application/rest.ts' }
+2029-03-14T04:00:00.618Z info  [@travetto/app:src/registry.ts:61] Running application { name: 'rest', import: '@travetto/rest/src/application/rest.js' }
 2029-03-14T04:00:00.837Z info  [@travetto/app:src/registry.ts:67] Manifest {
   info: {
     name: '@travetto/todo-app',
@@ -334,8 +334,8 @@ First we must start the application:
 }
 2029-03-14T04:00:01.510Z info  [@travetto/app:src/registry.ts:81] Config {
   sources: [
-    'application.1 - file://application.yml',
-    'dev.1 - file://dev.yml',
+    'application.1 - file://./resources/application.yml',
+    'dev.1 - file://./resources/dev.yml',
     'override.3 - memory://override'
   ],
   active: {

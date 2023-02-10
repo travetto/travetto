@@ -273,13 +273,13 @@ Available Applications:
 
    ● custom 
      usage: custom 
-     file:  @travetto/rest/doc/custom-app.ts
+     import:  @travetto/rest/doc/custom-app.js
 
-     ——————————————————————————————————————————————————————————————————
+     ———————————————————————————————————————————————
 
    ● rest Default rest application entrypoint
      usage: rest 
-     file:  @travetto/rest/src/application/rest.ts
+     import:  @travetto/rest/src/application/rest.js
 ```
 
 ### Creating a Custom App
@@ -306,10 +306,7 @@ And using the pattern established in the [Application](https://github.com/travet
 ```bash
 $ trv run custom
 
-Running application {
-  name: 'custom',
-  filename: '@travetto/rest/doc/custom-app.ts'
-}
+Running application { name: 'custom', import: '@travetto/rest/doc/custom-app.js' }
 Manifest {
   info: {
     name: '@travetto-doc/rest',

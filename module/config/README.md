@@ -69,7 +69,10 @@ At runtime the resolved config would be:
 $ trv main doc/resolve.ts
 
 Config {
-  sources: [ 'doc.1 - file://doc.yml', 'override.3 - memory://override' ],
+  sources: [
+    'doc.1 - file:@travetto/config/resources/doc.yml',
+    'override.3 - memory://override'
+  ],
   active: {
     DBConfig: {
       host: 'localhost',
@@ -138,7 +141,10 @@ By passing in the port via the environment variable, the config will construct p
 $ DATABASE_PORT=200 trv main doc/dbconfig-run.ts
 
 Config {
-  sources: [ 'doc.1 - file://doc.yml', 'override.3 - memory://override' ],
+  sources: [
+    'doc.1 - file:@travetto/config/resources/doc.yml',
+    'override.3 - memory://override'
+  ],
   active: {
     DBConfig: {
       host: 'localhost',
