@@ -78,7 +78,7 @@ export class ManifestIndex {
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([f, type, ts, profile = 'std']) => {
-      const sourceFile = path.join(this.#manifest.workspacePath, m.sourceFolder, f);
+      const sourceFile = path.resolve(this.#manifest.workspacePath, m.sourceFolder, f);
       const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
       const outputFile = this.#resolveOutput(m.outputFolder, js);
       const modImport = `${m.name}/${js}`;
