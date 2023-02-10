@@ -63,7 +63,14 @@ export async function getManifestContext(folder) {
     const req = createRequire(`${workspacePath}/node_modules`);
     try {
       folder = path.dirname(req.resolve(`${process.env.TRV_MODULE}/package.json`));
-    } catch { }
+    } catch {
+      const workspacePkg = JSON.parse(await fs.readFile(path.resolve(workspacePath, 'package.json'), 'utf8'));
+      if (workspacePkg.name === process.env.TRV_MODULE) {
+        folder = workspacePath;
+      } else {
+        throw new Error(`Unable to resolve location for ${folder}`);
+      }
+    }
   }
 
   const mainPath = path.resolve(folder ?? '.');
@@ -74,7 +81,7 @@ export async function getManifestContext(folder) {
   const moduleType = (await $getPkg(workspacePath)).type ?? 'commonjs';
   const mainFolder = mainPath === workspacePath ? '' : mainPath.replace(`${workspacePath}/`, '');
 
-  return {
+  const res = {
     moduleType,
     mainModule,
     mainFolder,
@@ -83,4 +90,5 @@ export async function getManifestContext(folder) {
     outputFolder,
     compilerFolder: '.trv_compiler'
   };
+  return res;
 }
