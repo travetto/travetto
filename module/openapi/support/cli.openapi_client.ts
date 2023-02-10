@@ -84,7 +84,7 @@ ${this.getListOfFormats().map(x => cliTpl`* ${{ input: x }}`).join('\n')} `;
   }
 
   getArgs(): string {
-    return '[format-or-preset]';
+    return '<format-or-preset>';
   }
 
   async action(format: string): Promise<void> {

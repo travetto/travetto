@@ -13,7 +13,7 @@ export class CliServiceCommand extends CliCommand<{}> {
   name = 'service';
 
   getArgs(): string {
-    return `[${SERVICE_ACTIONS.join('|')}] [...services]`;
+    return `<${SERVICE_ACTIONS.join('|')}> [...services]`;
   }
 
   async action(action: ServiceAction, services: string[]): Promise<void> {

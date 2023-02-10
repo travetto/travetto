@@ -18,7 +18,7 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
   name = 'repo:version';
 
   getArgs(): string {
-    return '[level] [prefix?]';
+    return '<level> [prefix]';
   }
 
   getOptions(): VersionOptions {

@@ -44,7 +44,7 @@ export class AppRunCommand extends CliCommand<Options> {
   }
 
   getArgs(): string {
-    return '[application] [args...]';
+    return '<application> [args...]';
   }
 
   envInit(): GlobalEnvConfig {

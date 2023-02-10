@@ -30,7 +30,7 @@ export class RepoExecCommand extends CliCommand<Options> {
   }
 
   getArgs(): string {
-    return '[command] [...args]';
+    return '<command> [...args]';
   }
 
   envInit(): GlobalEnvConfig {

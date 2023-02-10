@@ -3,6 +3,7 @@ import type commander from 'commander';
 import { cliTpl } from './color';
 
 const TYPE_PATTERN = /(\[[^\]]+\])/g;
+const REQ_TYPE_PATTERN = /(<[^>]+>)/g;
 const TITLE_PATTERN = /^(\S[^:]+:)/gim;
 
 const OPTIONS_PATTERN = new RegExp([
@@ -32,7 +33,7 @@ const COMMANDS_PATTERN = new RegExp([
   '(?<space>[ ]+)',
   '(?<name>\\S+)',
   '(?<optionsSpace>[ ]+)?',
-  '(?<options>\\[.*\\])?',
+  '(?<options>(?:\\[|<).*(?:\\]|>))?',
   '((?<descriptionSpace>[ ]+)(?<description>[a-z][^\\n\\[]+))?',
   '(?:[ ]+)?',
   '$',
@@ -50,7 +51,7 @@ const USAGE_PATTERN = new RegExp([
   '(?<space>[ ]+)?',
   '(?<name>[^\\[ ]+)?',
   '(?<nameSpace>[ ]+)?',
-  '(?<options>\\[.*\\])?',
+  '(?<options>(?:\\[|<).*(?:\\]|>))?',
   '(?:[ ]+)?',
   '$',
 ].join(''), 'gim');
@@ -135,7 +136,7 @@ export class HelpUtil {
         space,
         cliTpl`${{ param: name }}`,
         optionsSpace,
-        options?.replace(TYPE_PATTERN, input => cliTpl`${{ input }}`),
+        options?.replace(TYPE_PATTERN, input => cliTpl`${{ input }}`).replace(REQ_TYPE_PATTERN, type => cliTpl`${{ type }}`),
         descriptionSpace,
         cliTpl`${{ description }}`
       ]
