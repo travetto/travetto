@@ -1,6 +1,6 @@
 import { spawnSync } from 'child_process';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { path } from '@travetto/manifest';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { stripAnsiCodes } from '@travetto/terminal';
 
@@ -60,7 +60,7 @@ export class DocRunUtil {
           DEBUG: '0',
           TRV_MANIFEST: '',
           TRV_BUILD: 'warn',
-          TRV_MODULE: config.module ?? RootIndex.mainModule.name,
+          TRV_MODULE: config.module ?? '',
           ...(config.profiles ? { TRV_PROFILES: config.profiles.join(' ') } : {}),
           ...(config.env ?? {})
         }
@@ -76,7 +76,6 @@ export class DocRunUtil {
       .replace(/^(.{1,4})?Compiling[.]*/, '') // Compiling message, remove
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@travetto/')
       .replace(new RegExp(path.cwd(), 'g'), '.')
-      .replace(/([.]trv_cache)[_A-Za-z0-9]+/g, (_, b) => b)
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
       .replace(/\b[0-9a-f]{4}[0-9a-f\-]{8,40}\b/ig, this.#docState.getId.bind(this.#docState))
       .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);

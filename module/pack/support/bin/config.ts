@@ -29,7 +29,7 @@ function getFilesFromModule(m: ManifestModule): string[] {
     ...m.files.src ?? [],
     ...m.files.bin ?? [],
     ...(m.files.support ?? [])
-      .filter(f => !/support\/(test|transform|doc|pack)/.test(f[0]))
+      .filter(f => !/support\/(test|doc)/.test(f[0]))
   ]
     .filter(([, t]) => t === 'ts' || t === 'js' || t === 'json')
     .map(([f]) => path.resolve(m.outputFolder, f.replace(/[.]ts$/, '.js')));
