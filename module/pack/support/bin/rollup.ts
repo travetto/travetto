@@ -10,6 +10,8 @@ import { RootIndex } from '@travetto/manifest';
 import { getEntry, getOutput, getTerserConfig, getFiles } from './config';
 import { travettoImportPlugin } from './rollup-esm-dynamic-import';
 
+const NEVER_INCLUDE = new Set(['node-forge', '@parcel/watcher']);
+
 export default function buildConfig(): RollupOptions {
   const output = getOutput();
   const entry = getEntry();
@@ -18,10 +20,10 @@ export default function buildConfig(): RollupOptions {
   return {
     input: [entry],
     output,
-    external: ['node-forge', '@parcel/watcher'],
     plugins: [
       jsonImport(),
       commonjsRequire({
+        ignore: id => NEVER_INCLUDE.has(id),
         dynamicRequireRoot: RootIndex.manifest.workspacePath,
         dynamicRequireTargets: (output.format === 'commonjs' ? files : [])
       }),

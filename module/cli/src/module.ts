@@ -78,6 +78,10 @@ export class CliModuleUtil {
       hash = await CliScmUtil.findLastRelease();
     }
 
+    if (!hash) {
+      return RootIndex.getLocalModules();
+    }
+
     const out = new Map<string, IndexedModule>();
     for (const mod of await CliScmUtil.findChangedModulesSince(hash)) {
       out.set(mod.name, mod);

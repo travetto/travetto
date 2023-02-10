@@ -32,13 +32,12 @@ export class CliScmUtil {
    * Find the last code release
    * @returns
    */
-  static async findLastRelease(): Promise<string> {
+  static async findLastRelease(): Promise<string | undefined> {
     const root = await RootIndex.manifest;
     const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: root.workspacePath });
     return (await result).stdout
       .split(/\n/)
-      .find(x => /Publish /.test(x))!
-      .split(/\s+/)[0]!;
+      .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
   }
 
   /**

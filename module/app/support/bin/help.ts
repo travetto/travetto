@@ -43,8 +43,8 @@ export class HelpUtil {
       const usage = this.getAppUsage(conf);
 
       lines.push(cliTpl`${{ param: conf.globalName }} ${{ title: conf.description }}`);
-      lines.push(cliTpl`${{ subtitle: 'usage' }}: ${usage}`);
-      lines.push(cliTpl`${{ subtitle: 'target' }}:  ${{ path: conf.targetId }}`);
+      lines.push(cliTpl`${{ subtitle: 'usage' }}:  ${usage}`);
+      lines.push(cliTpl`${{ subtitle: 'target' }}: ${{ path: conf.targetId }}`);
       choices.push(lines.map((x, i) => `   ${i === 0 ? '●' : ' '} ${x}`));
     }
 
