@@ -62,7 +62,7 @@ class TestRunnerFeature extends BaseFeature {
       name: 'Debug Travetto',
       main: 'main',
       args: [`${this.module}/support/bin/direct`, file.replace(path.toNative(`${Workspace.path}/`), ''), `${line}`],
-      cliModule: Workspace.workspaceIndex.getFromSource(file)?.module
+      cliModule: file
     }));
   }
 

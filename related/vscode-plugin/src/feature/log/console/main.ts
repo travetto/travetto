@@ -11,7 +11,7 @@ interface Link extends vscode.TerminalLink {
   cls?: string;
 }
 
-const FILE_CLASS_REGEX = /([a-z_\-\/@]+):((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|￮[$_a-z0-9]+)/gi;
+const FILE_CLASS_REGEX = /([a-z_\-\/@]+)[:\/]((?:src|support|bin|test|doc)\/[a-z_0-9\/.\-]+)(:\d+|￮[$_a-z0-9]+)?/gi;
 
 /**
  * Logging workspace
@@ -41,21 +41,21 @@ export class LogFeature extends BaseFeature {
     const out: Link[] = [];
 
     for (const match of context.line.matchAll(FILE_CLASS_REGEX)) {
-      const [full, mod, path, suffix] = match;
-      const entry = Workspace.workspaceIndex.getFromImport(`${mod}/${path.replace(/[.]ts$/, '')}`);
-      if (entry) {
-        const type = suffix.includes(':') ? 'File' : 'Class';
+      const [full, mod, path, suffix = ''] = match;
+      const sourceFile = await Workspace.getSourceFromImport(`${mod}/${path}`);
+      if (sourceFile) {
+        const suffixType = suffix.includes('￮') ? 'class' : suffix.includes(':') ? 'file-numbered' : 'file';
+        const type = suffixType === 'class' ? 'Class' : 'File';
         out.push({
           startIndex: context.line.indexOf(full),
           length: full.length,
           tooltip: `Travetto ${type}: ${mod}/${path}${suffix}`,
-          file: entry.sourceFile,
-          line: type === 'File' ? suffix.split(':')[1] : undefined,
-          cls: type === 'Class' ? suffix.split('￮')[1] : undefined
+          file: sourceFile,
+          line: suffixType === 'file-numbered' ? suffix.split(':')[1] : undefined,
+          cls: suffixType === 'class' ? suffix.split('￮')[1] : undefined
         });
       }
     }
-
     return out;
   }
 

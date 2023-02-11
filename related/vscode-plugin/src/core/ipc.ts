@@ -73,10 +73,7 @@ export class IpcSupport {
   }
 
   activate(ctx: ExtensionContext): void {
-    this.#file = path.resolve(
-      Workspace.workspaceIndex.outputRoot,
-      `.trv_ipc_vscode_${process.ppid}.ndjson`
-    );
+    this.#file = Workspace.resolveOutputFile(`trv_ipc_vscode_${process.ppid}.ndjson`);
     this.#ensureFile();
 
     ctx.environmentVariableCollection.replace('TRV_CLI_IPC', this.#file);

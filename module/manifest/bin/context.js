@@ -23,6 +23,23 @@ async function $getPkg(inputFolder) {
 const WS_ROOT = {};
 
 /**
+ * Get module name from a given file
+ * @param {string} file
+ * @return {Promise<string|void>}
+ */
+async function $getModuleFromFile(file) {
+  let dir = path.dirname(file);
+  let prev;
+  while (dir !== prev && !(await fs.stat(path.resolve(dir, 'package.json')).catch(() => false))) {
+    prev = dir;
+    dir = path.dirname(dir);
+  }
+  try {
+    return (await $getPkg(dir)).name;
+  } catch { }
+}
+
+/**
  * Get workspace root
  * @return {Promise<string>}
  */
@@ -60,6 +77,10 @@ export async function getManifestContext(folder) {
 
   // If manifest specified via env var, and is a package name
   if (!folder && process.env.TRV_MODULE) {
+    // If module is actually a file, try to detect
+    if (/[.](t|j)s$/.test(process.env.TRV_MODULE)) {
+      process.env.TRV_MODULE = await $getModuleFromFile(process.env.TRV_MODULE) ?? process.env.TRV_MODULE;
+    }
     const req = createRequire(`${workspacePath}/node_modules`);
     try {
       folder = path.dirname(req.resolve(`${process.env.TRV_MODULE}/package.json`));

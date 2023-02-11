@@ -96,7 +96,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
     module = this.getModule(module);
 
     const cfg = await this.buildConfig();
-    cfg.entryArguments = args;
+    cfg.entryArguments = Array.isArray(args) ? args : [];
 
     for (const k in this.cmd) {
       if (Object.hasOwn(this.cmd, k)) {

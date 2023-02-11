@@ -34,7 +34,11 @@ export class AppRunFeature extends BaseFeature {
     const res = Workspace.spawnCli('main', [`${this.module}/support/bin/list`], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
     const data = await res.result;
     const choices: AppChoice[] = JSON.parse(data.stdout);
-    return choices.map(c => ({ ...c, inputs: [] }));
+    for (const choice of choices) {
+      choice.inputs = [];
+      choice.file = (await Workspace.getSourceFromImport(choice.import))!;
+    }
+    return choices;
   }
 
   /**
@@ -119,7 +123,7 @@ export class AppRunFeature extends BaseFeature {
       }
 
       if (line) {
-        const editor = vscode.window.visibleTextEditors.find(x => Workspace.workspaceIndex.getFromSource(x.document.fileName)?.import === choice.import);
+        const editor = vscode.window.visibleTextEditors.find(x => x.document.fileName === choice.file);
         if (editor) {
           Workspace.addBreakpoint(editor, line);
           await Workspace.sleep(100);
@@ -144,7 +148,7 @@ export class AppRunFeature extends BaseFeature {
     }
 
     return (await this.getAppList())
-      .filter(x => x.import === Workspace.workspaceIndex.getFromSource(doc.fileName)?.import)
+      .filter(x => x.file === doc.fileName)
       .map(app => ({
         range: doc.lineAt(app.start - 1).range,
         isResolved: true,

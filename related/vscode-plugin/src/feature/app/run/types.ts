@@ -7,4 +7,5 @@ export type AppChoice = ApplicationConfig & {
   inputs: string[];
   time?: number;
   key?: string;
+  file: string;
 };
