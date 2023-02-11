@@ -189,7 +189,7 @@ export class CompilerState {
         data?: ts.WriteFileCallbackData
       ): void => {
         if (outputFile.endsWith('package.json')) {
-          text = CompilerUtil.rewritePackageJSON(this.#manifest, text, options);
+          text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
         } else if (!options.inlineSourceMap && options.sourceMap && outputFile.endsWith('.map')) {
           text = CompilerUtil.rewriteSourceMap(this.#manifest.workspacePath, text, f => this.#sourceInputOutput.get(this.#inputToSource.get(f)!));
         } else if (options.inlineSourceMap && CompilerUtil.isSourceMapUrlPosData(data)) {

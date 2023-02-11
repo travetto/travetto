@@ -79,7 +79,7 @@ export class CompilerUtil {
    * @param text
    * @returns
    */
-  static rewritePackageJSON(manifest: ManifestRoot, text: string, opts: ts.CompilerOptions): string {
+  static rewritePackageJSON(manifest: ManifestRoot, text: string): string {
     const pkg: Package = JSON.parse(text);
     if (pkg.files) {
       pkg.files = pkg.files.map(x => this.inputToOutput(x));
@@ -87,7 +87,7 @@ export class CompilerUtil {
     if (pkg.main) {
       pkg.main = this.inputToOutput(pkg.main);
     }
-    pkg.type = opts.module !== ts.ModuleKind.CommonJS ? 'module' : 'commonjs';
+    pkg.type = manifest.moduleType;
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {
       if (key in pkg) {
         for (const dep of Object.keys(pkg[key] ?? {})) {
