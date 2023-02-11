@@ -77,15 +77,20 @@ export class DockerPackOperation {
     if (!cfg.dockerPush) {
       return;
     }
+    const tags = DockerPackOperation.getDockerTags(cfg);
     const title = cliTpl`${{ title: 'Push Container to registry' }} ${{ param: cfg.dockerRegistry }}`;
-    const cmd = ['docker', 'image', 'push', '-a', cfg.dockerName];
+    const cmd = ['docker', 'image', 'push'];
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
-      yield cmd;
+      for (const tag of tags) {
+        yield [...cmd, tag];
+      }
     } else {
       yield [title];
-      await ExecUtil.spawn(cmd[0], cmd.slice(1), { stdio: [0, 'pipe', 2] }).result;
+      for (const tag of tags) {
+        await ExecUtil.spawn(cmd[0], [...cmd.slice(1), tag], { stdio: [0, 'pipe', 2] }).result;
+      }
     }
   }
 }
