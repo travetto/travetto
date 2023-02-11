@@ -77,9 +77,8 @@ export class DockerPackOperation {
     if (!cfg.dockerPush) {
       return;
     }
-    const tags = DockerPackOperation.getDockerTags(cfg);
     const title = cliTpl`${{ title: 'Push Container to registry' }} ${{ param: cfg.dockerRegistry }}`;
-    const cmd = ['docker', 'image', 'push', ...tags];
+    const cmd = ['docker', 'image', 'push', '-a', cfg.dockerName];
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
