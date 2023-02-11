@@ -1,1 +1,1 @@
-export type { CommonPackConfig } from './support/bin/types';
+export type { CommonPackConfig, DockerPackFactory, DockerPackConfig } from './support/bin/types';

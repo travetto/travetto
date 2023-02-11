@@ -18,8 +18,12 @@ export class DockerPackOperation {
    */
   static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
     const dockerFile = path.resolve(cfg.workspace, 'Dockerfile');
-    const title = cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }}`;
-    const mod: DockerPackFactoryModule = await import(RootIndex.getFromImport(cfg.dockerFactory)!.import);
+    const title = cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: cfg.dockerFactory }}`;
+    const factory = RootIndex.getFromImport(cfg.dockerFactory);
+    if (!factory) {
+      throw new Error(`Unable to resolve docker factory at ${cfg.dockerFactory}`);
+    }
+    const mod: DockerPackFactoryModule = await import(factory.import);
     const content = (await mod.factory(cfg)).trim();
 
     if (cfg.ejectFile) {

@@ -1,3 +1,5 @@
+import { path, RootIndex } from '@travetto/manifest';
+
 import { DockerPackConfig, DockerPackOptions } from './bin/types';
 import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
@@ -22,6 +24,16 @@ export class PackDockerCommand extends BasePackCommand<DockerPackOptions, Docker
       dockerPush: this.boolOption({ short: 'dx', desc: 'Docker Push Tags' }),
       dockerRegistry: this.option({ short: 'dr', desc: 'Docker Registry' })
     };
+  }
+
+  async buildConfig(): Promise<DockerPackConfig> {
+    const cfg = await super.buildConfig();
+    if (cfg.dockerFactory.startsWith('.')) {
+      cfg.dockerFactory = RootIndex.getFromSource(path.resolve(cfg.dockerFactory))?.import ?? cfg.dockerFactory;
+    }
+    cfg.dockerPort ??= [];
+    cfg.dockerTag ??= [];
+    return cfg;
   }
 
   getOperations(): PackOperationShape<DockerPackConfig>[] {
