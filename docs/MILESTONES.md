@@ -352,7 +352,6 @@ One of the primary goals here is to end up with a `.trv_cache` folder that is di
 
 ### Filesystem access 
 - Manifest
-- __filename/
 
 ### Logging Overhaul
 
