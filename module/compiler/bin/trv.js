@@ -11,7 +11,7 @@ const VALID_OPS = { watch: 'watch', build: 'build', clean: 'clean', manifest: 'm
 
 /**
  * @param {import('@travetto/manifest').ManifestContext} ctx
- * @return {Promise<import('@travetto/compiler/support/launcher')>}
+ * @return {Promise<import('@travetto/compiler/support/launcher').launch>}
  */
 const $getLauncher = async (ctx) => {
   const compPkg = createRequire(path.resolve('node_modules')).resolve('@travetto/compiler/package.json');
@@ -48,49 +48,20 @@ const $getLauncher = async (ctx) => {
     files.push(target);
   }
 
-  try { return await require(files[0]); }
-  catch { return import(files[0]); }
+  try { return require(files[0]).launch; }
+  catch { return import(files[0]).then(x => x.launch); }
 };
 
-/**
- * Parse arguments
- * @param {string[]} args
- * @returns {{ op?: keyof typeof VALID_OPS, clean?: boolean, outputPath?: string, env?: string }}
- */
-function parseArgs(args) {
-  const op = VALID_OPS[args.find(x => !x.startsWith('-')) ?? ''];
-  return {
-    op,
-    clean: args.includes('--clean') || args.includes('-c'),
-    ...(op === 'manifest' ? { outputPath: args[1], env: args[2] } : {})
-  };
-}
-
-const exec = async () => {
+(async () => {
   const ctx = await getManifestContext();
-  const { op, outputPath, env, ...flags } = parseArgs(process.argv.slice(2));
+  const [op, args] = [VALID_OPS[process.argv[2]], process.argv.slice(3)];
 
-  // Clean if needed
-  if (op === 'clean' || (op && flags.clean)) {
+  if (op === 'clean') {
     for (const f of [ctx.outputFolder, ctx.compilerFolder]) {
       await fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true });
     }
-  }
-
-  if (op === 'clean') { // Clean needs to not attempt to compile/load launcher
     return console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
   }
 
-  const { compile, launchMain, exportManifest } = await $getLauncher(ctx);
-
-  switch (op) {
-    case 'manifest': return exportManifest(ctx, outputPath ?? '', env);
-    case 'watch':
-    case 'build': return compile(ctx, op);
-    default:
-      await compile(ctx, op);
-      return launchMain(ctx);
-  }
-};
-
-exec();
+  return (await $getLauncher(ctx))(ctx, op, args);
+})();

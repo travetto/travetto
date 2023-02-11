@@ -19,7 +19,7 @@ async function compileIfStale(ctx: ManifestContext, scope: string, mod: string, 
   const out: string[] = [];
 
   try {
-    await TranspileUtil.withLogger(scope, { args: [mod], basic: false }, async log => {
+    await TranspileUtil.withLogger(scope, async log => {
       if (files.some(f => f.stale)) {
         log('debug', 'Starting');
         for (const file of files.filter(x => x.stale)) {
@@ -33,7 +33,7 @@ async function compileIfStale(ctx: ManifestContext, scope: string, mod: string, 
       } else {
         log('debug', 'Skipped');
       }
-    });
+    }, false, [mod]);
   } catch (err) {
     console.error(err);
   }
@@ -43,7 +43,7 @@ async function compileIfStale(ctx: ManifestContext, scope: string, mod: string, 
 /**
  * Run the compiler
  */
-export async function compile(ctx: ManifestContext, op?: 'watch' | 'build'): Promise<void> {
+async function compile(ctx: ManifestContext, op?: 'watch' | 'build'): Promise<void> {
   let changes = 0;
 
   await TranspileUtil.withLogger('precompile', async () => {
@@ -72,8 +72,10 @@ export async function compile(ctx: ManifestContext, op?: 'watch' | 'build'): Pro
   });
 
   if (changes) {
-    await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { recursive: true, force: true });
-    TranspileUtil.log('reset', [], 'info', 'Clearing output due to compiler changes');
+    await TranspileUtil.withLogger('reset', async log => {
+      await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { recursive: true, force: true });
+      log('info', 'Clearing output due to compiler changes');
+    }, false);
   }
 
   // Write manifest
@@ -94,7 +96,7 @@ export async function compile(ctx: ManifestContext, op?: 'watch' | 'build'): Pro
     }
   });
 
-  await TranspileUtil.withLogger('compile', { args: [], basic: false }, async log => {
+  await TranspileUtil.withLogger('compile', async log => {
     const changed = delta.filter(x => x.type === 'added' || x.type === 'changed');
     log('debug', `Started action=${op} changed=${changed.map(x => `${x.module}/${x.file}`)}`);
     if (changed.length || op === 'watch') {
@@ -103,17 +105,13 @@ export async function compile(ctx: ManifestContext, op?: 'watch' | 'build'): Pro
     } else {
       log('debug', 'Skipped');
     }
-  });
-
-  if (op === 'build') {
-    TranspileUtil.log('build', [], 'info', 'Successfully built');
-  }
+  }, false);
 }
 
 /**
  * Export manifests
  */
-export async function exportManifest(ctx: ManifestContext, output?: string, env = 'dev'): Promise<string | undefined> {
+async function exportManifest(ctx: ManifestContext, output?: string, env = 'dev'): Promise<void> {
   const { ManifestUtil } = await importManifest(ctx);
   const manifest = await ManifestUtil.buildManifest(ctx);
 
@@ -135,18 +133,27 @@ export async function exportManifest(ctx: ManifestContext, output?: string, env 
 
     await TranspileUtil.writeTextFile(output, JSON.stringify(manifest));
     TranspileUtil.log('manifest', [], 'info', `Wrote manifest ${output}`);
-    return output;
   } else {
     console.log(JSON.stringify(manifest, null, 2));
-    return;
   }
 }
 
-export async function launchMain(ctx: ManifestContext): Promise<void> {
-  const nodeOut = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules');
-  process.env.TRV_MANIFEST = path.resolve(nodeOut, ctx.mainModule);
-
-  // TODO: Externalize somehow?
-  const cliMain = path.join(nodeOut, '@travetto/cli/support/cli.js');
-  return await import(cliMain);
+/**
+ * Launch
+ */
+export async function launch(ctx: ManifestContext, op?: 'build' | 'watch' | 'manifest', args: (string | undefined)[] = []): Promise<void> {
+  if (op !== 'manifest') {
+    await compile(ctx, op);
+  }
+  switch (op) {
+    case 'manifest': return exportManifest(ctx, ...args);
+    case 'build': return TranspileUtil.log('build', [], 'info', 'Successfully built');
+    case undefined: {
+      // TODO: Externalize somehow?
+      const outputPath = path.resolve(ctx.workspacePath, ctx.outputFolder);
+      process.env.TRV_MANIFEST = path.resolve(outputPath, 'node_modules', ctx.mainModule);
+      const cliMain = path.join(outputPath, 'node_modules', '@travetto/cli/support/cli.js');
+      return import(cliMain);
+    }
+  }
 }

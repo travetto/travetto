@@ -6,25 +6,24 @@ import { createRequire } from 'module';
 
 import { DeltaEvent, ManifestContext, ManifestRoot, Package } from '@travetto/manifest';
 
-type ModFile = { input: string, output: string, stale: boolean };
-
-const SRC_REQ = createRequire(path.resolve('node_modules'));
-const recentStat = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
-
 export type CompilerLogEvent = [level: 'info' | 'debug' | 'warn', message: string];
+type ModFile = { input: string, output: string, stale: boolean };
 type WithLogger<T> = (log: (...ev: CompilerLogEvent) => void) => Promise<T>;
-type LogConfig = { args?: string[], basic?: boolean };
-const isCompilerLogEvent = (o: unknown): o is CompilerLogEvent => o !== null && o !== undefined && Array.isArray(o);
 
+const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};
+const SRC_REQ = createRequire(path.resolve('node_modules'));
 const LEVELS = { warn: true, debug: /^debug$/.test(process.env.TRV_BUILD ?? ''), info: !/^warn$/.test(process.env.TRV_BUILD ?? '') };
 const SCOPE_MAX = 15;
+const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
+const IS_LOG_EV = (o: unknown): o is CompilerLogEvent => o !== null && o !== undefined && Array.isArray(o);
 
 /**
  * Transpile utilities for launching
  */
 export class TranspileUtil {
-  static #optCache: Record<string, {}> = {};
-
+  /**
+   * Log message with filtering by level
+   */
   static log(scope: string, args: string[], ...[level, msg]: CompilerLogEvent): void {
     const message = msg.replaceAll(process.cwd(), '.');
     LEVELS[level] && console.debug(new Date().toISOString(), `[${scope.padEnd(SCOPE_MAX, ' ')}]`, ...args, message);
@@ -33,14 +32,10 @@ export class TranspileUtil {
   /**
    * With logger
    */
-  static withLogger<T>(scope: string, op: WithLogger<T>): Promise<T>;
-  static withLogger<T>(scope: string, opts: LogConfig, op: WithLogger<T>): Promise<T>;
-  static withLogger<T>(scope: string, opts: LogConfig | WithLogger<T>, op?: WithLogger<T>): Promise<T> {
-    const cfg = { basic: true, ...typeof opts === 'function' ? {} : opts };
-    const go = typeof opts === 'function' ? opts : op!;
-    const log = this.log.bind(null, scope, cfg.args ?? []);
-    cfg.basic && log('debug', 'Started');
-    return go(log).finally(() => cfg.basic && log('debug', 'Completed'));
+  static withLogger<T>(scope: string, op: WithLogger<T>, basic = true, args: string[] = []): Promise<T> {
+    const log = this.log.bind(null, scope, args);
+    basic && log('debug', 'Started');
+    return op(log).finally(() => basic && log('debug', 'Completed'));
   }
 
   /**
@@ -53,7 +48,7 @@ export class TranspileUtil {
    * Returns the compiler options
    */
   static async getCompilerOptions(ctx: ManifestContext): Promise<{}> {
-    if (!(ctx.workspacePath in this.#optCache)) {
+    if (!(ctx.workspacePath in OPT_CACHE)) {
       let tsconfig = path.resolve(ctx.workspacePath, 'tsconfig.json');
 
       if (!await fs.stat(tsconfig).then(_ => true, _ => false)) {
@@ -66,19 +61,17 @@ export class TranspileUtil {
         ts.readJsonConfigFile(tsconfig, ts.sys.readFile), ts.sys, ctx.workspacePath
       );
 
-      options.allowJs = true;
-      options.resolveJsonModule = true;
-      options.sourceRoot = ctx.workspacePath;
-      options.rootDir = ctx.workspacePath;
-      options.outDir = path.resolve(ctx.workspacePath);
-
-      try {
-        options.module = ctx.moduleType === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext;
-      } catch { }
-
-      this.#optCache[ctx.workspacePath] = options;
+      OPT_CACHE[ctx.workspacePath] = {
+        ...options,
+        allowJs: true,
+        resolveJsonModule: true,
+        sourceRoot: ctx.workspacePath,
+        rootDir: ctx.workspacePath,
+        outDir: path.resolve(ctx.workspacePath),
+        module: ctx.moduleType === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext,
+      };
     }
-    return this.#optCache[ctx.workspacePath];
+    return OPT_CACHE[ctx.workspacePath];
   }
 
   /**
@@ -143,9 +136,9 @@ export class TranspileUtil {
     const out: ModFile[] = [];
     for (const input of files) {
       const output = input.replace(inputFolder, outputFolder).replace(/[.]ts$/, '.js');
-      const inputTs = await fs.stat(input).then(recentStat, () => 0);
+      const inputTs = await fs.stat(input).then(RECENT_STAT, () => 0);
       if (inputTs) {
-        const outputTs = await fs.stat(output).then(recentStat, () => 0);
+        const outputTs = await fs.stat(output).then(RECENT_STAT, () => 0);
         await fs.mkdir(path.dirname(output), { recursive: true, });
         out.push({ input, output, stale: inputTs > outputTs });
       }
@@ -168,18 +161,16 @@ export class TranspileUtil {
 
     await this.writeTextFile(deltaFile, changedFiles.join('\n'));
 
-    await this.withLogger('compiler-exec', async log => {
-      await new Promise((res, rej) =>
-        cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
-          env: {
-            ...process.env,
-            TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
-          },
-          stdio: [0, 1, 2, 'ipc'],
-        })
-          .on('message', msg => isCompilerLogEvent(msg) && log(...msg))
-          .on('exit', code => (code !== null && code > 0) ? rej() : res(null))
-      );
-    });
+    await this.withLogger('compiler-exec', log => new Promise((res, rej) =>
+      cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
+        env: {
+          ...process.env,
+          TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
+        },
+        stdio: [0, 1, 2, 'ipc'],
+      })
+        .on('message', msg => IS_LOG_EV(msg) && log(...msg))
+        .on('exit', code => (code !== null && code > 0) ? rej() : res(null))
+    )).finally(() => fs.unlink(deltaFile));
   }
 }
