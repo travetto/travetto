@@ -1,11 +1,11 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell';
-import { DockerPackConfig } from './types';
+import { DockerPackConfig, DockerPackFactoryModule } from './types';
 
 export class DockerPackOperation {
 
@@ -19,13 +19,9 @@ export class DockerPackOperation {
   static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
     const dockerFile = path.resolve(cfg.workspace, 'Dockerfile');
     const title = cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }}`;
-    const content = `
-FROM ${cfg.dockerImage}
-WORKDIR /app
-COPY . .
-${(cfg.dockerPort ?? []).map(x => `EXPOSE ${x}`).join('\n')}
-ENTRYPOINT ["/app/${cfg.entryCommand}.sh"]
-`;
+    const mod: DockerPackFactoryModule = await import(RootIndex.getFromImport(cfg.dockerFactory)!.import);
+    const content = (await mod.factory(cfg)).trim();
+
     if (cfg.ejectFile) {
       yield ActiveShellCommand.comment(title);
       yield* ActiveShellCommand.createFile(dockerFile, content.split(/\n/));

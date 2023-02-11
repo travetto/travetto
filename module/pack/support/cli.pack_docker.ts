@@ -14,6 +14,7 @@ export class PackDockerCommand extends BasePackCommand<DockerPackOptions, Docker
     const opts = this.getCommonOptions();
     return {
       ...opts,
+      dockerFactory: this.option({ short: 'df', desc: 'Docker Factory source', def: '@travetto/pack/support/pack.dockerfile' }),
       dockerImage: this.option({ short: 'di', desc: 'Docker Image to extend', def: 'node:18-alpine3.16' }),
       dockerName: this.option({ short: 'dn', desc: 'Docker Image Name', def: this.monoRoot ? '<module>' : this.getSimpleModuleName() }),
       dockerTag: this.listOption({ short: 'dt', desc: 'Docker Image Tag', def: ['latest'] }),

@@ -122,7 +122,7 @@ export class PackOperation {
   static async * writeEntryScript(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const title = 'Writing entry scripts';
 
-    const files = ([['posix', 'sh'], ['win32', 'bat']] as const)
+    const files = ([['posix', 'sh'], ['win32', 'cmd']] as const)
       .map(([type, ext]) => ({
         fileTitle: cliTpl`${{ title }} ${{ path: `${cfg.entryCommand}.${ext}` }} args=(${{ param: cfg.entryArguments.join(' ') }})`,
         file: `${cfg.entryCommand}.${ext}`,

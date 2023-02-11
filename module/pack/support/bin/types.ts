@@ -31,6 +31,7 @@ export type CommonPackOptions = {
 };
 
 export type DockerPackConfig = {
+  dockerFactory: string;
   dockerImage: string;
   dockerName: string;
   dockerTag: string[];
@@ -40,6 +41,7 @@ export type DockerPackConfig = {
 } & CommonPackConfig;
 
 export type DockerPackOptions = {
+  dockerFactory: OptionConfig<string>;
   dockerImage: OptionConfig<string>;
   dockerName: OptionConfig<string>;
   dockerTag: ListOptionConfig<string>;
@@ -63,3 +65,6 @@ export type ShellCommandImpl = {
   comment(message: string): string[];
   zip(output: string): string[];
 };
+
+export type DockerPackFactory = (cfg: DockerPackConfig) => (string | Promise<string>);
+export type DockerPackFactoryModule = { factory: DockerPackFactory };
