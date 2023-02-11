@@ -171,7 +171,7 @@ export class PackageUtil {
       try {
         return JSON.parse(await fs.readFile(cache, 'utf8'));
       } catch {
-        const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8', env: {} });
+        const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8', env: { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH } });
         const res: { location: string, name: string }[] = JSON.parse(text);
         const out = this.#workspaces[rootPath] = res.map(d => ({ sourcePath: d.location, name: d.name }));
         await fs.writeFile(cache, JSON.stringify(out), 'utf8');
