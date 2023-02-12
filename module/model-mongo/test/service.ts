@@ -18,6 +18,13 @@ import { MongoModelService } from '../src/service';
 export class MongoBasicSuite extends ModelBasicSuite {
   serviceClass = MongoModelService;
   configClass = MongoModelConfig;
+
+  @Test()
+  async testId() {
+    const svc = await this.service;
+    const user = await svc.create(UniqueUser, UniqueUser.from({ name: 'bob' }));
+    assert(user.id.length === 32);
+  }
 }
 
 @Suite()
