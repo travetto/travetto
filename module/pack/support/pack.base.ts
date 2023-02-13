@@ -90,7 +90,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   async action(module: string, args: string[]): Promise<void> {
     const start = Date.now();
     if (!module && this.monoRoot) {
-      this.showHelp(new Error('The module needs to specified when running from a monorepo root'));
+      return this.showHelp(new Error('The module needs to specified when running from a monorepo root'));
     }
 
     module = this.getModule(module);

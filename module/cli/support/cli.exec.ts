@@ -37,11 +37,15 @@ export class RepoExecCommand extends CliCommand<Options> {
     return { debug: false };
   }
 
-  async action(): Promise<void> {
+  async action(cmd: string, args: string[]): Promise<void> {
+    if (!cmd) {
+      return this.showHelp(new Error('Command is a required field'));
+    }
+
     await CliModuleUtil.execOnModules(
       this.cmd.changed ? 'changed' : 'all',
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      (mod, opts) => ExecUtil.spawn(this.args[0], this.args.slice(1), opts),
+      (mod, opts) => ExecUtil.spawn(cmd, args, opts),
       {
         progressMessage: mod => `Running '${this.args.join(' ')}' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
         showStdout: this.cmd.showStdout,

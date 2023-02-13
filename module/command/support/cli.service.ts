@@ -17,6 +17,10 @@ export class CliServiceCommand extends CliCommand<{}> {
   }
 
   async action(action: ServiceAction, services: string[]): Promise<void> {
+    if (!action) {
+      return this.showHelp(`Please specify what service action to perform: ${SERVICE_ACTIONS.join(', ')}`);
+    }
+
     const all = (await ServiceUtil.findAll())
       .filter(x => services?.length ? services.includes(x.name) : true)
       .sort((a, b) => a.name.localeCompare(b.name));

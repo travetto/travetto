@@ -221,13 +221,14 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
     if (args) {
       cmd = cmd.arguments(args);
     }
+
     for (const cfg of await this.finalizeOptions()) {
       const pre = cfg.short ? `-${cfg.short}, ` : '';
       if (cfg.type === Boolean) {
         if (cfg.def) {
-          cmd.option(`${pre}--no-${cfg.name}`, `Disables: ${cfg.desc}`);
+          cmd = cmd.option(`${pre}--no-${cfg.name}`, `Disables: ${cfg.desc}`);
         } else {
-          cmd.option(`${pre}--${cfg.name}`, cfg.desc);
+          cmd = cmd.option(`${pre}--${cfg.name}`, cfg.desc);
         }
       } else {
         const key = `${pre}--${cfg.name} <${cfg.name}>`;
@@ -237,6 +238,9 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
     }
 
     cmd = cmd.action(this.runAction.bind(this));
+
+    // @ts-expect-error, Do nothing
+    cmd.missingArgument = (): void => { };
 
     return this.#cmd = cmd;
   }

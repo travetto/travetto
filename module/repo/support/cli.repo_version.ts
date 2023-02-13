@@ -29,9 +29,12 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
   }
 
   async action(level: SemverLevel, prefix?: string): Promise<void> {
+    if (!level) {
+      return this.showHelp(new Error('Please specify a level to continue'));
+    }
+
     if (!this.cmd.force && await CliScmUtil.isWorkspaceDirty()) {
-      console.error!('Cannot update versions with uncommitted changes');
-      return this.exit(1);
+      return this.showHelp(new Error('Cannot update versions with uncommitted changes'));
     }
 
     const allModules = await CliModuleUtil.findModules(this.cmd.changed ? 'changed' : 'all');
