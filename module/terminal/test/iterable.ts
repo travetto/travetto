@@ -1,3 +1,4 @@
+import timers from 'timers/promises';
 import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
@@ -64,5 +65,22 @@ export class IterableUtilSuite {
     assert(values[1] === 'bob = 2');
     assert(values[2] === 'bob = 3');
     assert(values[3] === 'bob = 1');
+  }
+
+  @Test()
+  async verifySimpleQueue() {
+    const q = IterableUtil.simpleQueue();
+    const vals = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20];
+    let total = 0;
+    const written: number[] = [];
+    await Promise.all(vals.map((_, i) =>
+      q.add(async () => {
+        const temp = total;
+        await timers.setTimeout(50);
+        total = temp + 1;
+        written.push(total);
+      })
+    ));
+    assert.deepStrictEqual(written, vals);
   }
 }
