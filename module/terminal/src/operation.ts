@@ -103,16 +103,21 @@ export class TerminalOperation {
     const commitLine = async (): Promise<void> => {
       await writer?.();
       if (line) {
-        await TerminalWriter.for(term).restoreOnCommit().changePosition({ y: -1 }).changePosition({ x: 0 }).writeLine(line).commit();
+        const msg = `${String.fromCharCode(171)} ${line}`;
+        if (cfg.position === 'inline') {
+          await TerminalWriter.for(term).setPosition({ x: 0 }).changePosition({ y: -1 }).writeLine(msg).commit();
+        } else {
+          await TerminalWriter.for(term).writeLine(msg).commit();
+        }
       }
     };
 
-    for await (const msg of lines) {
+    for await (let msg of lines) {
       await commitLine();
-      line = `${String.fromCharCode(171)} ${msg}`;
-      writer = this.streamWaiting(term, line, cfg);
+      msg = msg.replace(/\n$/, '');
+      writer = this.streamWaiting(term, msg, cfg);
+      line = msg;
     }
-
     await commitLine();
   }
 }
