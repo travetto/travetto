@@ -39,7 +39,7 @@ export class RepoExecCommand extends CliCommand<Options> {
 
   async action(cmd: string, args: string[]): Promise<void> {
     if (!cmd) {
-      return this.showHelp(new Error('Command is a required field'));
+      return this.showHelp('Command is a required field');
     }
 
     await CliModuleUtil.execOnModules(

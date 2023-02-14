@@ -89,7 +89,7 @@ ${this.getListOfFormats().map(x => cliTpl`* ${{ input: x }}`).join('\n')} `;
 
   async action(format: string): Promise<void> {
     if (!format) {
-      return this.showHelp(new Error('Format is required'));
+      return this.showHelp('Format is required');
     }
 
     // Ensure its there
