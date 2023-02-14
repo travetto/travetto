@@ -99,11 +99,11 @@ export class ManifestIndex {
     this.#importToEntry.clear();
     this.#sourceToEntry.clear();
 
-    this.#modules = Object.values(this.manifest.modules)
+    this.#modules = Object.values(this.#manifest.modules)
       .map(m => ({
         ...m,
         outputPath: this.#resolveOutput(m.outputFolder),
-        sourcePath: path.resolve(this.manifest.workspacePath, m.sourceFolder),
+        sourcePath: path.resolve(this.#manifest.workspacePath, m.sourceFolder),
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         files: Object.fromEntries(
           Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
@@ -200,7 +200,7 @@ export class ManifestIndex {
    * Is module installed?
    */
   hasModule(name: string): boolean {
-    return name in this.manifest.modules;
+    return name in this.#manifest.modules;
   }
 
   /**
@@ -261,7 +261,7 @@ export class ManifestIndex {
    * Build module list from an expression list (e.g. `@travetto/app,-@travetto/log)
    */
   getModuleList(mode: 'local' | 'all', exprList: string = ''): Set<string> {
-    const allMods = Object.keys(this.manifest.modules);
+    const allMods = Object.keys(this.#manifest.modules);
     const active = new Set<string>(
       mode === 'local' ? this.getLocalModules().map(x => x.name) :
         (mode === 'all' ? allMods : [])

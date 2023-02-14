@@ -6,7 +6,7 @@ import { path } from './path';
 import { ManifestContext, ManifestRoot } from './types';
 import { ManifestModuleUtil } from './module';
 
-export const MANIFEST_FILE = 'manifest.json';
+const MANIFEST_FILE = 'manifest.json';
 
 /**
  * Manifest utils
@@ -45,6 +45,24 @@ export class ManifestUtil {
   }
 
   /**
+   * Produce a production manifest from a given manifest
+   */
+  static createProductionManifest(manifest: ManifestRoot): ManifestRoot {
+    return {
+      ...manifest,
+      // If in prod mode, only include std modules
+      modules: Object.fromEntries(
+        Object.values(manifest.modules)
+          .filter(x => x.profiles.includes('std'))
+          .map(m => [m.name, m])
+      ),
+      // Mark output folder/workspace path as portable
+      outputFolder: '',
+      workspacePath: '',
+    };
+  }
+
+  /**
    * Read manifest, synchronously
    *
    * @param file
@@ -68,6 +86,20 @@ export class ManifestUtil {
    */
   static writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<string> {
     return this.writeJsonWithBuffer(ctx, MANIFEST_FILE, manifest);
+  }
+
+  /**
+   * Write a manifest to a specific file, if no file extension provided, the file is assumed to be a folder
+   */
+  static async writeManifestToFile(location: string, manifest: ManifestRoot): Promise<string> {
+    if (!location.endsWith('.json')) {
+      location = path.resolve(location, MANIFEST_FILE);
+    }
+
+    await fs.mkdir(path.dirname(location));
+    await fs.writeFile(location, JSON.stringify(manifest), 'utf8');
+
+    return location;
   }
 
   /**

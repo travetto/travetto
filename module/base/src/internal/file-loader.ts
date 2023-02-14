@@ -28,14 +28,14 @@ class $DynamicFileLoader {
   #loader: ModuleLoader;
   #initialized = false;
 
-  async dispatch(ev: WatchEvent): Promise<void> {
+  async dispatch(ev: WatchEvent, folder: string): Promise<void> {
     if (ev.action !== 'create') {
       await this.#loader.unload(ev.file);
-    }
-    if (ev.action === 'update') {
-      await timers.setTimeout(100);
+    } else {
+      RootIndex.reinitForModule(RootIndex.mainModule.name);
     }
     if (ev.action !== 'delete') {
+      await timers.setTimeout(100);
       await this.#loader.load(ev.file);
     }
 
@@ -65,7 +65,7 @@ class $DynamicFileLoader {
       if (isTriggerEvent(ev)) {
         const found = RootIndex.getFromSource(ev.file);
         if (found) {
-          this.dispatch({ action: ev.action, file: found.outputFile });
+          this.dispatch({ action: ev.action, file: found.outputFile }, RootIndex.getModule(found.module)!.sourceFolder);
         }
       }
     });
@@ -80,7 +80,7 @@ class $DynamicFileLoader {
     // Watch all output
     await watchFolders(
       RootIndex.getLocalOutputFolders(),
-      ev => this.dispatch(ev),
+      (ev, folder) => this.dispatch(ev, folder),
       { filter: ev => ev.file.endsWith('.js') }
     );
   }

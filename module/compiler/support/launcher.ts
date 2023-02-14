@@ -113,25 +113,14 @@ async function compile(ctx: ManifestContext, op?: 'watch' | 'build'): Promise<vo
  */
 async function exportManifest(ctx: ManifestContext, output?: string, env = 'dev'): Promise<void> {
   const { ManifestUtil } = await importManifest(ctx);
-  const manifest = await ManifestUtil.buildManifest(ctx);
+  let manifest = await ManifestUtil.buildManifest(ctx);
 
   // If in prod mode, only include std modules
   if (/^prod/i.test(env)) {
-    manifest.modules = Object.fromEntries(
-      Object.values(manifest.modules)
-        .filter(x => x.profiles.includes('std'))
-        .map(m => [m.name, m])
-    );
-    // Mark output folder/workspace path as portable
-    manifest.outputFolder = '';
-    manifest.workspacePath = '';
+    manifest = ManifestUtil.createProductionManifest(manifest);
   }
   if (output) {
-    if (!output.endsWith('.json')) {
-      output = path.resolve(output, 'manifest.json');
-    }
-
-    await TranspileUtil.writeTextFile(output, JSON.stringify(manifest));
+    output = await ManifestUtil.writeManifestToFile(output, manifest);
     TranspileUtil.log('manifest', [], 'info', `Wrote manifest ${output}`);
   } else {
     console.log(JSON.stringify(manifest, null, 2));

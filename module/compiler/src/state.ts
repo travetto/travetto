@@ -1,7 +1,11 @@
 import ts from 'typescript';
 import { readFileSync } from 'fs';
 
-import { path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot, WatchEvent } from '@travetto/manifest';
+import { getManifestContext } from '@travetto/manifest/bin/context';
+import {
+  path, ManifestModuleUtil, ManifestModule, ManifestModuleFileType, ManifestRoot,
+  WatchEvent, ManifestUtil, ManifestContext, RootIndex, ManifestModuleFolderType
+} from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { TranspileUtil } from '../support/transpile';
@@ -24,6 +28,9 @@ export class CompilerState {
   #manifest: ManifestRoot;
   #modules: ManifestModule[];
   #transformers: string[];
+
+  #dirtyFiles: { modFolder: string, mod: string, moduleFile?: string, folderKey?: ManifestModuleFolderType, type?: ManifestModuleFileType }[] = [];
+  #manifestContexts = new Map<string, ManifestContext>();
 
   constructor(manifest: ManifestRoot) {
     this.#manifest = manifest;
@@ -118,6 +125,36 @@ export class CompilerState {
     return [...this.#inputFiles];
   }
 
+  async #rebuildManifestsIfNeeded(): Promise<void> {
+    if (!this.#dirtyFiles.length) { return; }
+    const mods = [...new Set(this.#dirtyFiles.map(x => x.modFolder))];
+    const contexts = await Promise.all(mods.map(async folder => {
+      if (!this.#manifestContexts.has(folder)) {
+        const ctx = await getManifestContext(folder);
+        this.#manifestContexts.set(folder, ctx);
+      }
+      return this.#manifestContexts.get(folder)!;
+    }));
+
+    const files = this.#dirtyFiles;
+    this.#dirtyFiles = [];
+
+    for (const ctx of [...contexts, this.#manifest]) {
+      const manifest = await ManifestUtil.buildManifest(ctx);
+      for (const file of files) {
+        if (
+          file.folderKey && file.moduleFile && file.type &&
+          file.mod in manifest.modules && file.folderKey in manifest.modules[file.mod].files
+        ) {
+          manifest.modules[file.mod].files[file.folderKey]!.push([file.moduleFile, file.type, Date.now()]);
+        }
+      }
+      await ManifestUtil.writeManifest(ctx, manifest);
+    }
+    // Reindex
+    RootIndex.init(RootIndex.manifestFile);
+  }
+
   // Build watcher
   getWatcher(handler: {
     create: (inputFile: string) => void;
@@ -125,21 +162,32 @@ export class CompilerState {
     delete: (outputFile: string) => void;
   }): (ev: WatchEvent, folder: string) => void {
     const mods = Object.fromEntries(this.modules.map(x => [path.resolve(this.#manifest.workspacePath, x.sourceFolder), x]));
-    return ({ file: sourceFile, action }: WatchEvent, folder: string): void => {
+    return async ({ file: sourceFile, action }: WatchEvent, folder: string): Promise<void> => {
       const mod = mods[folder];
       const moduleFile = sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile;
       switch (action) {
         case 'create': {
           const fileType = ManifestModuleUtil.getFileType(moduleFile);
+          this.#dirtyFiles.push({
+            mod: mod.name,
+            modFolder: folder,
+            moduleFile,
+            folderKey: ManifestModuleUtil.getFolderKey(sourceFile),
+            type: ManifestModuleUtil.getFileType(sourceFile)
+          });
           if (validFile(fileType)) {
+            await this.#rebuildManifestsIfNeeded();
+
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             const input = this.registerInput(mod, moduleFile);
+            this.#inputFiles.add(input);
             this.#sourceHashes.set(sourceFile, hash);
             handler.create(input);
           }
           break;
         }
         case 'update': {
+          await this.#rebuildManifestsIfNeeded();
           const io = this.#sourceInputOutput.get(sourceFile);
           if (io) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
@@ -156,6 +204,7 @@ export class CompilerState {
           if (io) {
             this.removeInput(io.input);
             if (io.output) {
+              this.#dirtyFiles.push({ mod: mod.name, modFolder: folder });
               handler.delete(io.output);
             }
           }
