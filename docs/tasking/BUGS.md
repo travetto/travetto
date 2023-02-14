@@ -4,4 +4,4 @@
 - [X] Pack output line skipping
 - [ ] VSCode test output duplicated
 - [ ] Watch pattern/behavior
-- [ ] Pack CLI raw input mode stuck
+- [X] Pack CLI raw input mode stuck - Appears to be xterm.js specific
