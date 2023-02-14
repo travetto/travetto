@@ -11,6 +11,17 @@ import { PackUtil } from './bin/util';
 
 export type PackOperationShape<T extends CommonPackConfig> = ((config: T) => AsyncIterable<string[]>);
 
+const BASIC_OP_SET = [
+  PackOperation.clean,
+  PackOperation.writeEnv,
+  PackOperation.writePackageJson,
+  PackOperation.writeEntryScript,
+  PackOperation.copyResources,
+  PackOperation.primeAppCache,
+  PackOperation.writeManifest,
+  PackOperation.bundle,
+];
+
 export abstract class BasePackCommand<T extends CommonPackOptions, S extends CommonPackConfig> extends CliCommand<{}> {
 
   get monoRoot(): boolean {
@@ -48,24 +59,20 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   }
 
   getOperations(): PackOperationShape<S>[] {
-    const ops: ((config: S) => AsyncIterable<string[]>)[] = [];
-
-    if (this.cmd.clean) {
-      ops.push(PackOperation.clean);
-    }
-
-    ops.push(
-      PackOperation.writeEnv,
-      PackOperation.writePackageJson,
-      PackOperation.writeEntryScript,
-      PackOperation.copyResources,
-      PackOperation.primeAppCache,
-      PackOperation.writeManifest,
-      PackOperation.bundle,
-    );
-
-    return ops;
+    return BASIC_OP_SET.slice(0);
   }
+
+  /**
+   * Run all operations
+   */
+  async * runOperations(cfg: S): AsyncIterable<string> {
+    for (const op of this.getOperations()) {
+      for await (const msg of op(cfg)) {
+        yield msg.join(' ');
+      }
+    }
+  }
+
 
   getModule(moduleName: string): string {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -117,7 +124,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
     }
     this.cmd.workspace = path.resolve(this.cmd.workspace);
 
-    const stream = PackOperation.runOperations(cfg, this.getOperations());
+    const stream = this.runOperations(cfg);
 
     // Eject to file
     if (this.cmd.ejectFile) {

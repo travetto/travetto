@@ -14,6 +14,9 @@ async function writeRawFile(file: string, contents: string, mode?: string): Prom
 
 export class PackOperation {
 
+  /**
+   * Clean out pack workspace, removing all content
+   */
   static async * clean(cfg: CommonPackConfig): AsyncIterable<string[]> {
     if (!cfg.clean) {
       return;
@@ -38,6 +41,9 @@ export class PackOperation {
     }
   }
 
+  /**
+   * Invoke bundler (rollup) to produce output in workspace folder
+   */
   static async * bundle(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const cwd = RootIndex.outputRoot;
 
@@ -76,6 +82,9 @@ export class PackOperation {
     }
   }
 
+  /**
+   * Write out package.json, to help define how output .js file should be interpreted
+   */
   static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = 'package.json';
     const title = cliTpl`${{ title: 'Writing' }} ${{ path: file }}`;
@@ -96,6 +105,9 @@ export class PackOperation {
     }
   }
 
+  /**
+   * Define .env.js file to control manifest location
+   */
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = '.env.js';
     const title = cliTpl`${{ title: 'Writing' }} ${{ path: file }}`;
@@ -119,6 +131,9 @@ export class PackOperation {
     }
   }
 
+  /**
+   * Create launcher scripts (.sh, .cmd) to run output
+   */
   static async * writeEntryScript(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const title = 'Writing entry scripts';
 
@@ -146,6 +161,9 @@ export class PackOperation {
     }
   }
 
+  /**
+   * Copy over /resources folder into workspace, will get packaged into final output
+   */
   static async * copyResources(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const resources = {
       count: RootIndex.mainModule.files.resources?.length ?? 0,
@@ -188,9 +206,12 @@ export class PackOperation {
     }
   }
 
+  /**
+   * Generate the trv-app-cache.json for @travetto/app, which is needed for 'running' programs
+   */
   static async * primeAppCache(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const isCli = cfg.entryCommand === 'cli';
-    if (!isCli || !RootIndex.hasModule('@travetto/app')) {
+    const isRun = cfg.entryCommand === 'cli' && cfg.entryArguments.filter(x => !x.startsWith('-'))[0] === 'run';
+    if (!isRun) {
       return;
     }
 
@@ -214,6 +235,9 @@ export class PackOperation {
     }
   }
 
+  /**
+   * Produce the output manifest, only including prod dependencies
+   */
   static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const out = path.resolve(cfg.workspace, 'node_modules', cfg.module);
     const cmd = ['npx', 'trv', 'manifest', out, 'prod'];
@@ -229,6 +253,9 @@ export class PackOperation {
     }
   }
 
+  /**
+   * Generate ZIP file for workspace
+   */
   static async * compress(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const title = cliTpl`${{ title: 'Compressing' }} ${{ path: cfg.output }}`;
 
@@ -241,15 +268,6 @@ export class PackOperation {
       yield [title];
       const [cmd, ...args] = ActiveShellCommand.zip(cfg.output);
       await ExecUtil.spawn(cmd, args, { cwd: cfg.workspace }).result;
-    }
-  }
-
-
-  static async * runOperations<S>(cfg: S, operations: ((config: S) => AsyncIterable<string[]>)[]): AsyncIterable<string> {
-    for (const op of operations) {
-      for await (const msg of op(cfg)) {
-        yield msg.join(' ');
-      }
     }
   }
 }
