@@ -165,22 +165,22 @@
         {
           "command": "travetto.email-template.develop:send",
           "group": "navigation",
-          "when": "travetto.email-template && (editorLangId == travetto-email-inky || !editorId)"
+          "when": "travetto.email-template && editorLangId == travetto-email-inky"
         },
         {
           "command": "travetto.email-template.develop:preview-text",
           "group": "navigation",
-          "when": "travetto.email-template && (editorLangId == travetto-email-inky || !editorId)"
+          "when": "travetto.email-template && editorLangId == travetto-email-inky"
         },
         {
           "command": "travetto.email-template.develop:preview-html",
           "group": "navigation",
-          "when": "travetto.email-template && (editorLangId == travetto-email-inky || !editorId)"
+          "when": "travetto.email-template && editorLangId == travetto-email-inky"
         },
         {
           "command": "travetto.email-template.develop:preview-context",
           "group": "navigation",
-          "when": "travetto.email-template && (editorLangId == travetto-email-inky || !editorId)"
+          "when": "travetto.email-template && editorLangId == travetto-email-inky"
         }
       ],
       "commandPalette": [

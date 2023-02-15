@@ -1,24 +1,26 @@
 import path from 'path';
 import vscode from 'vscode';
 
-import { RootIndex, ManifestIndex } from '@travetto/manifest';
+import { ManifestIndex } from '@travetto/manifest';
+import { getManifestContext } from '@travetto/manifest/bin/context';
 
 import { ActivationManager } from './core/activation';
 import { Workspace } from './core/workspace';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
-  if (!vscode.workspace.workspaceFolders?.[0]) {
+  const [folder] = vscode.workspace.workspaceFolders ?? [];
+  if (!folder) {
     return;
   }
-  const root = __dirname.replace(/node_modules.*/, '');
+  const { name } = context.extension.packageJSON;
+  const extManifest = new ManifestIndex(path.resolve(context.extensionPath, 'node_modules', name));
+  const ctx = await getManifestContext(folder.uri.fsPath);
 
-  const extManifest = new ManifestIndex(path.resolve(root, 'node_modules', 'travetto-plugin'));
-
-  await Workspace.init(context, extManifest, RootIndex);
+  await Workspace.init(context, extManifest, ctx);
   await ActivationManager.init();
   await ActivationManager.activate(context);
 }
 
-export async function deactivate(): Promise<void> {
-  await ActivationManager.deactivate();
+export function deactivate(): Promise<void> {
+  return ActivationManager.deactivate();
 }

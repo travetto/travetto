@@ -1,14 +1,16 @@
 import vscode from 'vscode';
 
-import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
 import { ActionStorage } from '../../../core/storage';
 
 import { BaseFeature } from '../../base';
 import { TargetEvent } from '../../../core/types';
 
-import { AppChoice } from './types';
-import { AppSelectorUtil } from './util';
+import { AppChoice, ResolvedAppChoice } from './types';
+import { AppRunUtil } from './util';
+
+type Recent = { mode: 'recent', count: number };
+type All = { mode: 'all' };
 
 /**
  * App run feature
@@ -18,27 +20,8 @@ export class AppRunFeature extends BaseFeature {
 
   #storage: ActionStorage<AppChoice>;
 
-  #runner(title: string, choices: () => Promise<AppChoice[] | AppChoice | undefined>, line?: number) {
-    return async (): Promise<void> => {
-      const choice = await choices();
-      if (choice) {
-        await this.runApplication(title, choice, line);
-      }
-    };
-  }
-
-  /**
-   * Get list of applications
-   */
-  async getAppList(): Promise<AppChoice[]> {
-    const res = Workspace.spawnCli('main', [`${this.module}/support/bin/list`], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
-    const data = await res.result;
-    const choices: AppChoice[] = JSON.parse(data.stdout);
-    for (const choice of choices) {
-      choice.inputs = [];
-      choice.file = (await Workspace.getSourceFromImport(choice.import))!;
-    }
-    return choices;
+  getAppList(): Promise<AppChoice[]> {
+    return AppRunUtil.getAppList(this.module);
   }
 
   /**
@@ -56,47 +39,17 @@ export class AppRunFeature extends BaseFeature {
   }
 
   /**
-   * Handle application choices
-   * @param title
-   * @param choices
-   */
-  async resolveChoices(title: string, choices: AppChoice[] | AppChoice): Promise<AppChoice | undefined> {
-    const choice = await AppSelectorUtil.resolveChoices(title, choices);
-    if (choice) {
-      const key = `${choice.targetId}#${choice.name}:${choice.inputs.join(',')}`;
-      this.#storage.set(key, { ...choice, time: Date.now(), key });
-      return choice;
-    }
-  }
-
-  /**
-   * Get full launch config
-   * @param choice
-   */
-  getLaunchConfig(choice: AppChoice): ReturnType<(typeof Workspace)['generateLaunchConfig']> {
-    const args = choice.inputs.map(x => `${x}`.replace(Workspace.path, '.')).join(', ');
-
-    return Workspace.generateLaunchConfig({
-      name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
-      useCli: true,
-      main: 'run',
-      args: [choice.name, ...choice.inputs],
-      cliModule: choice.module,
-    });
-  }
-
-  /**
    * Persist config
    */
   async exportLaunchConfig(): Promise<void> {
     try {
-      const choice = await this.resolveChoices('Export Application Launch', await this.getValidRecent(10));
+      const choice = await AppRunUtil.chooseApp('Export Application Launch', await this.getValidRecent(10));
 
       if (!choice) {
         return;
       }
 
-      const config = this.getLaunchConfig(choice);
+      const config = AppRunUtil.getLaunchConfig(choice);
 
       const launchConfig = vscode.workspace.getConfiguration('launch');
       const configurations = launchConfig['configurations'];
@@ -110,29 +63,49 @@ export class AppRunFeature extends BaseFeature {
   }
 
   /**
-   * Run the application with the given choices
+   * Select an application and run it
    * @param title
    * @param apps
    */
-  async runApplication(title: string, apps: AppChoice[] | AppChoice, line?: number): Promise<void> {
+  async selectAndRunApp(title: string, mode: Recent | All): Promise<void> {
     try {
-      const choice = await this.resolveChoices(title, apps);
+      const choices = mode.mode === 'all' ?
+        await this.getAppList() :
+        await this.getValidRecent(mode.count);
 
-      if (!choice) {
-        return;
+      const choice = await AppRunUtil.chooseApp(title, choices);
+
+      if (choice) {
+        this.#storage.set(choice.key!, choice);
+        return AppRunUtil.debugApp(choice);
       }
-
-      if (line) {
-        const editor = vscode.window.visibleTextEditors.find(x => x.document.fileName === choice.file);
-        if (editor) {
-          Workspace.addBreakpoint(editor, line);
-          await Workspace.sleep(100);
-        }
-      }
-
-      await vscode.debug.startDebugging(Workspace.folder, this.getLaunchConfig(choice));
     } catch (err) {
       vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
+    }
+  }
+
+  /**
+   * Debug the application with the given choices
+   * @param title
+   * @param apps
+   */
+  async debugApp(appOrName?: AppChoice | string | Recent, line?: number, inputs?: string[]): Promise<void> {
+    let app: AppChoice | undefined;
+    if (appOrName) {
+      if (typeof appOrName === 'string') {
+        const list = await this.getAppList();
+        app = list.find(x => x.globalName === appOrName || x.name === appOrName);
+      } else if ('name' in appOrName) {
+        app = appOrName;
+      } else {
+        // Get recent
+        app = (await this.getValidRecent(1))[0];
+      }
+    }
+
+    if (app) {
+      const resolved: ResolvedAppChoice = { ...app, inputs: inputs ?? app.inputs ?? [], resolved: true, key: app.key ?? '', time: app.time ?? Date.now() };
+      return AppRunUtil.debugApp(resolved, line);
     }
   }
 
@@ -146,18 +119,21 @@ export class AppRunFeature extends BaseFeature {
     if (!hasApp) {
       return;
     }
-
-    return (await this.getAppList())
-      .filter(x => x.file === doc.fileName)
-      .map(app => ({
-        range: doc.lineAt(app.start - 1).range,
-        isResolved: true,
-        command: {
-          command: this.commandName('new'),
-          title: 'Debug Application',
-          arguments: [app.globalName, app.codeStart]
-        }
-      }));
+    try {
+      return (await this.getAppList())
+        .filter(x => x.file === doc.fileName)
+        .map(app => ({
+          range: doc.lineAt(app.start - 1).range,
+          isResolved: true,
+          command: {
+            command: this.commandName('run'),
+            title: 'Debug Application',
+            arguments: [app.globalName, app.codeStart]
+          }
+        }));
+    } catch (err) {
+      // Ignore
+    }
   }
 
   /**
@@ -166,23 +142,17 @@ export class AppRunFeature extends BaseFeature {
   activate(context: vscode.ExtensionContext): void {
     this.#storage = new ActionStorage<AppChoice>('app.run', context);
 
-    this.register('new', (name?: string, line?: number) =>
-      this.#runner('Run New Application', async () => {
-        const list = await this.getAppList();
-        return name ? list.find(x => x.globalName === name || x.name === name) : list;
-      }, line)()
-    );
-    this.register('recent', this.#runner('Run Recent Application', () => this.getValidRecent(10)));
-    this.register('mostRecent', this.#runner('Run Most Recent Application', () => this.getValidRecent(1).then(([x]) => x)));
-    this.register('export', async () => this.exportLaunchConfig());
+    this.register('new', () => this.selectAndRunApp('Run new application', { mode: 'all' }));
+    this.register('run', (name?: string, line?: number) => this.debugApp(name, line));
+    this.register('recent', () => this.selectAndRunApp('Run Recent Application', { mode: 'recent', count: 10 }));
+    this.register('mostRecent', () => this.debugApp({ mode: 'recent', count: 1 }));
+    this.register('export', () => this.exportLaunchConfig());
   }
 
-  async onEvent(ev: TargetEvent<{ name: string, args: string[] }>): Promise<void> {
-    const { name, args } = ev.data;
-    const app = (await this.getAppList()).find(a => a.globalName === name || a.name === name);
-
-    if (app) {
-      await this.runApplication(name, { ...app, inputs: args ?? [] });
-    }
+  /**
+   * On IPC trigger to run an application
+   */
+  onEvent(ev: TargetEvent<{ name: string, args: string[] }>): Promise<void> {
+    return this.debugApp(ev.data.name, undefined, ev.data.args);
   }
 }

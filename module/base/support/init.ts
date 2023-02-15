@@ -41,7 +41,7 @@ export async function init(): Promise<void> {
   // Register shutdown handler
   ShutdownManager.register();
 
-  if (RootIndex.hasModule('@travetto/terminal')) {
+  if (RootIndex?.hasModule('@travetto/terminal')) {
     const { GlobalTerminal } = await import('@travetto/terminal');
     await GlobalTerminal.init();
     ShutdownManager.onShutdown('', () => GlobalTerminal.reset());

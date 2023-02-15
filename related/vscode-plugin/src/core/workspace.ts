@@ -4,7 +4,7 @@ import { WorkerOptions } from 'worker_threads';
 import module from 'module';
 
 import { ExecUtil, ExecutionOptions, ExecutionState, WorkerResult } from '@travetto/base';
-import { ManifestIndex, path } from '@travetto/manifest';
+import { ManifestContext, ManifestIndex, path } from '@travetto/manifest';
 
 import { EnvDict, LaunchConfig } from './types';
 
@@ -20,7 +20,7 @@ export class Workspace {
   static readonly context: vscode.ExtensionContext;
   static readonly folder: vscode.WorkspaceFolder;
   static #extensionIndex: ManifestIndex;
-  static #workspaceIndex: ManifestIndex;
+  static #manifestContext: ManifestContext;
   static #req: ReturnType<typeof module['createRequire']>;
   static #importToFile = new Map<string, string | undefined>();
 
@@ -28,14 +28,14 @@ export class Workspace {
    * Get workspace path
    */
   static get path(): string {
-    return this.#workspaceIndex.manifest.workspacePath;
+    return this.#manifestContext.workspacePath;
   }
 
   static async getSourceFromImport(imp: string): Promise<string | undefined> {
     if (!this.#importToFile.has(imp)) {
       let file: undefined | string;
-      if (imp.startsWith(this.#workspaceIndex.manifest.mainModule)) {
-        file = path.resolve(this.path, imp.replace(this.#workspaceIndex.manifest.mainModule, '.'));
+      if (imp.startsWith(this.#manifestContext.mainModule)) {
+        file = path.resolve(this.path, imp.replace(this.#manifestContext.mainModule, '.'));
       } else {
         try {
           file = this.#req.resolve(imp);
@@ -51,7 +51,7 @@ export class Workspace {
   }
 
   static resolveOutputFile(file: string): string {
-    return path.resolve(this.#workspaceIndex.outputRoot, file);
+    return path.resolve(this.#manifestContext.workspacePath, this.#manifestContext.outputFolder, file);
   }
 
   static get #cliFile(): string {
@@ -64,7 +64,7 @@ export class Workspace {
       ...(debug ? { TRV_DYNAMIC: '1', } : { TRV_QUIET: '1' }),
       ...base,
       TRV_MANIFEST: '',
-      TRV_MODULE: cliModule ?? this.#workspaceIndex.manifest.mainModule
+      TRV_MODULE: cliModule ?? this.#manifestContext.mainModule
     };
   }
 
@@ -119,12 +119,12 @@ export class Workspace {
   static async init(
     context: vscode.ExtensionContext,
     extensionIndex: ManifestIndex,
-    workspaceIndex: ManifestIndex
+    manifestContext: ManifestContext
   ): Promise<void> {
     // @ts-expect-error
     this.context = context;
     this.#extensionIndex = extensionIndex;
-    this.#workspaceIndex = workspaceIndex;
+    this.#manifestContext = manifestContext;
     this.#req = module.createRequire(path.resolve('node_modules'));
 
     await this.writeTheme();
@@ -159,10 +159,15 @@ export class Workspace {
 
   /**
    * See if module is installed
-   * @param module
+   * @param mod
    */
-  static async isInstalled(module: string): Promise<boolean> {
-    return this.#workspaceIndex.hasModule(module);
+  static async isInstalled(mod: string): Promise<boolean> {
+    try {
+      this.#req.resolve(`${mod}/package.json`);
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**
@@ -185,13 +190,13 @@ export class Workspace {
       pauseForSourceMap: true,
       runtimeArgs: [],
       outFiles: [
-        ['${workspaceFolder}', this.#workspaceIndex.manifest.outputFolder, '**', '*.js'].join('/'),
+        ['${workspaceFolder}', this.#manifestContext.outputFolder, '**', '*.js'].join('/'),
       ],
       resolveSourceMapLocations: [
-        ['${workspaceFolder}', this.#workspaceIndex.manifest.outputFolder, '**'].join('/'),
+        ['${workspaceFolder}', this.#manifestContext.outputFolder, '**'].join('/'),
       ],
       runtimeSourcemapPausePatterns: [
-        ['${workspaceFolder}', this.#workspaceIndex.manifest.outputFolder, '**', 'test', '**', '*.js'].join('/'),
+        ['${workspaceFolder}', this.#manifestContext.outputFolder, '**', 'test', '**', '*.js'].join('/'),
       ],
       stopOnEntry: true,
       skipFiles: [
