@@ -1,6 +1,7 @@
 import util from 'util';
 import { install } from 'source-map-support';
 import ts from 'typescript';
+import timers from 'timers/promises';
 import fs from 'fs/promises';
 
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
@@ -149,6 +150,8 @@ export class Compiler {
   async run(watch?: boolean): Promise<void> {
     debug('Compilation started');
 
+    await this.#state.reserveWorkspace();
+
     const emitter = await this.getCompiler();
     let failed = false;
 
@@ -179,7 +182,17 @@ export class Compiler {
       }
       info('Watch is ready');
       await this.#watchLocalModules(emitter);
-      await new Promise(r => setTimeout(r, 1000 * 60 * 60 * 24));
+      for await (const _ of timers.setInterval(1000)) {
+        if (await this.#state.processOwnsWorkspace()) {
+          info('Workspace changed externally, restarting');
+          if (process.send) {
+            process.send('restart');
+            process.exit(0);
+          } else {
+            process.exit(1);
+          }
+        }
+      }
     }
   }
 }

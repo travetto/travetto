@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 
 import type { ManifestContext } from '@travetto/manifest';
-import { TranspileUtil } from './transpile';
+import { CompileResult, TranspileUtil } from './transpile';
 
 const SOURCE_SEED = ['package.json', 'index.ts', '__index__.ts', 'src', 'support', 'bin'];
 const PRECOMPILE_MODS = ['@travetto/terminal', '@travetto/manifest', '@travetto/transformer', '@travetto/compiler'];
@@ -43,7 +43,7 @@ async function compileIfStale(ctx: ManifestContext, scope: string, mod: string, 
 /**
  * Run the compiler
  */
-async function compile(ctx: ManifestContext, op?: 'watch' | 'build'): Promise<void> {
+async function compile(ctx: ManifestContext, op?: 'watch' | 'build'): Promise<CompileResult> {
   let changes = 0;
 
   await TranspileUtil.withLogger('precompile', async () => {
@@ -96,14 +96,16 @@ async function compile(ctx: ManifestContext, op?: 'watch' | 'build'): Promise<vo
     }
   });
 
-  await TranspileUtil.withLogger('compile', async log => {
+  return await TranspileUtil.withLogger('compile', async log => {
     const changed = delta.filter(x => x.type === 'added' || x.type === 'changed');
     log('debug', `Started action=${op} changed=${changed.map(x => `${x.module}/${x.file}`)}`);
     if (changed.length || op === 'watch') {
-      await TranspileUtil.runCompiler(ctx, manifest, changed, op === 'watch');
+      const res = await TranspileUtil.runCompiler(ctx, manifest, changed, op === 'watch');
       log('debug', 'Finished');
+      return res;
     } else {
       log('debug', 'Skipped');
+      return 'skipped';
     }
   }, false);
 }
@@ -132,7 +134,10 @@ async function exportManifest(ctx: ManifestContext, output?: string, env = 'dev'
  */
 export async function launch(ctx: ManifestContext, op?: 'build' | 'watch' | 'manifest', args: (string | undefined)[] = []): Promise<void> {
   if (op !== 'manifest') {
-    await compile(ctx, op);
+    let action: CompileResult = 'restart';
+    while (action === 'restart') {
+      action = await compile(ctx, op);
+    }
   }
   switch (op) {
     case 'manifest': return exportManifest(ctx, ...args);

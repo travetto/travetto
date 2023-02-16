@@ -1,5 +1,6 @@
 import ts from 'typescript';
 import { readFileSync } from 'fs';
+import fs from 'fs/promises';
 
 import { getManifestContext } from '@travetto/manifest/bin/context';
 import {
@@ -54,6 +55,10 @@ export class CompilerState {
         path.resolve(manifest.workspacePath, x.sourceFolder, f)
       )
     );
+  }
+
+  get compilerPidFile(): string {
+    return path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder, 'compiler.pid');
   }
 
   async getCompilerOptions(): Promise<ts.CompilerOptions> {
@@ -153,6 +158,19 @@ export class CompilerState {
     }
     // Reindex
     RootIndex.init(RootIndex.manifestFile);
+  }
+
+  async reserveWorkspace(): Promise<void> {
+    await fs.writeFile(this.compilerPidFile, `${process.pid}`);
+  }
+
+  async processOwnsWorkspace(): Promise<boolean> {
+    try {
+      const pid = await fs.readFile(this.compilerPidFile);
+      return +pid !== process.pid;
+    } catch {
+      return true;
+    }
   }
 
   // Build watcher

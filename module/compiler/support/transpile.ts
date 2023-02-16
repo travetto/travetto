@@ -9,6 +9,7 @@ import { DeltaEvent, ManifestContext, ManifestRoot, Package } from '@travetto/ma
 export type CompilerLogEvent = [level: 'info' | 'debug' | 'warn', message: string];
 type ModFile = { input: string, output: string, stale: boolean };
 type WithLogger<T> = (log: (...ev: CompilerLogEvent) => void) => Promise<T>;
+export type CompileResult = 'restart' | 'complete' | 'skipped';
 
 const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};
 const SRC_REQ = createRequire(path.resolve('node_modules'));
@@ -150,7 +151,7 @@ export class TranspileUtil {
   /**
    * Run compiler
    */
-  static async runCompiler(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], watch = false): Promise<void> {
+  static async runCompiler(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], watch = false): Promise<CompileResult> {
     const compiler = path.resolve(ctx.workspacePath, ctx.compilerFolder);
     const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/compiler-entry.js');
     const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${Date.now()}.${Math.random()}.json`);
@@ -161,16 +162,23 @@ export class TranspileUtil {
 
     await this.writeTextFile(deltaFile, changedFiles.join('\n'));
 
-    await this.withLogger('compiler-exec', log => new Promise((res, rej) =>
-      cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
+    return this.withLogger('compiler-exec', log => new Promise<CompileResult>((res, rej) => {
+      const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
         env: {
           ...process.env,
           TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
         },
         stdio: [0, 1, 2, 'ipc'],
       })
-        .on('message', msg => IS_LOG_EV(msg) && log(...msg))
-        .on('exit', code => (code !== null && code > 0) ? rej() : res(null))
-    )).finally(() => fs.unlink(deltaFile));
+        .on('message', msg => {
+          if (IS_LOG_EV(msg)) {
+            log(...msg);
+          } else if (msg === 'restart') {
+            proc.kill('SIGKILL');
+            res('restart');
+          }
+        })
+        .on('exit', code => (code !== null && code > 0) ? rej(new Error('Failed during compilation')) : res('complete'));
+    })).finally(() => fs.unlink(deltaFile));
   }
 }
