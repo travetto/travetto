@@ -1,10 +1,15 @@
+import vscode from 'vscode';
 import readline from 'readline';
 import { EventEmitter } from 'events';
 
-import { ExecutionOptions, ExecutionState } from '@travetto/base';
+import { ExecutionOptions, ExecutionResult, ExecutionState } from '@travetto/base';
 import { Workspace } from './workspace';
 
 type EventType = 'start' | 'stop' | 'pre-start' | 'pre-stop' | 'restart';
+type ProcessFailureHandler = (err: Error) => (void | Promise<void>);
+
+const FIVE_MINUTE_WINDOW = 1000 * 60 * 5;
+const MAX_KILL_COUNT = 5;
 
 /**
  * Tracks the logic for running a process as an IPC-based server
@@ -17,8 +22,10 @@ export class ProcessServer {
   #command: string;
   #args: string[];
   #opts: ExecutionOptions;
+  #failureHandler?: ProcessFailureHandler;
+  #killCount: number[] = [];
 
-  constructor(cliCommand: string, args: string[] = [], opts: ExecutionOptions = {}) {
+  constructor(cliCommand: string, args: string[] = [], opts: ExecutionOptions = {}, onFailure?: ProcessFailureHandler) {
     this.#command = cliCommand;
     this.#args = args;
     this.#opts = opts;
@@ -35,30 +42,46 @@ export class ProcessServer {
     return this;
   }
 
+  async #onFailure(result: ExecutionResult) {
+    if (this.#respawn && !result.valid) {
+      const key = Date.now() % (FIVE_MINUTE_WINDOW);
+      this.#killCount[key] += 1;
+      if (this.#killCount[key] < MAX_KILL_COUNT) {
+        this.#emit('restart');
+        this.#start();
+      } else if (this.#failureHandler) {
+        await this.#failureHandler(new Error(`Failed ${MAX_KILL_COUNT} times in 5 minutes, will not retry`))
+        vscode.window.showErrorMessage(`Command ${this.#command} e`);
+      }
+    }
+  }
+
+  #start(): void {
+    console.log('Starting', { path: this.#command, args: this.#args });
+    this.#emit('pre-start');
+    this.#state = Workspace.spawnCli(this.#command, this.#args, { ...this.#opts, catchAsResult: true });
+
+    const prefix = [this.#command, ...this.#args].join(' ');
+    if (this.#state.process.stdout) {
+      readline.createInterface(this.#state.process.stdout)
+        .on('line', line => console.log(prefix, line));
+    }
+    if (this.#state.process.stderr) {
+      readline.createInterface(this.#state.process.stderr)
+        .on('line', line => console.error(prefix, line));
+    }
+
+    this.#state.result.then(val => this.#onFailure(val));
+
+    this.#emit('start');
+  }
+
   start(): void {
-    if (!this.running) {
-      console.log('Starting', { path: this.#command, args: this.#args });
-      this.#emit('pre-start');
-      this.#state = Workspace.spawnCli(this.#command, this.#args, { ...this.#opts });
-
-      const prefix = [this.#command, ...this.#args].join(' ');
-      if (this.#state.process.stdout) {
-        const rl = readline.createInterface(this.#state.process.stdout);
-        rl.on('line', line => console.log(prefix, line));
-      }
-      if (this.#state.process.stderr) {
-        const rl = readline.createInterface(this.#state.process.stderr);
-        rl.on('line', line => console.error(prefix, line));
-      }
-
-      this.#state.result.finally(() => {
-        if (this.#respawn) {
-          this.#emit('restart');
-          this.start();
-        }
-      });
-
-      this.#emit('start');
+    if (this.running) {
+      return;
+    } else {
+      this.#killCount = []; // Clear out on threshold hit
+      this.#start();
     }
   }
 
