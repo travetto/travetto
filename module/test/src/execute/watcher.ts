@@ -67,7 +67,7 @@ export class TestWatcher {
 
     await RootRegistry.init();
 
-    process.send?.({ type: 'watch-init' });
+    process.send?.('ready');
 
     process.on('message', ev => {
       if (isRunEvent(ev)) {

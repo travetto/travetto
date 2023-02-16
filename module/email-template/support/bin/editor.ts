@@ -1,4 +1,4 @@
-import { defineGlobalEnv } from '@travetto/base';
+import { defineGlobalEnv, TimeUtil } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
@@ -35,6 +35,8 @@ export class EditorState {
       new EmailTemplateCompiler(new EmailTemplateResource())
     ));
     await editor.init();
+    process.send?.('ready');
+    await TimeUtil.wait('1d');
     return editor;
   }
 

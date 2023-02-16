@@ -1,5 +1,5 @@
 import type { MailTemplateEngine } from '@travetto/email';
-import { TimeUtil, TypedObject } from '@travetto/base';
+import { TypedObject } from '@travetto/base';
 
 import { EmailTemplateCompiler, Compilation } from '../../src/compiler';
 import { EmailTemplateResource } from '../../src/resource';
@@ -78,6 +78,5 @@ export class TemplateManager {
         console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
       }
     }, ev => ev.action !== 'delete' && VALID_FILE(ev.file));
-    await TimeUtil.wait('1d');
   }
 }
