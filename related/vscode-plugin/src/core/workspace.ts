@@ -54,6 +54,10 @@ export class Workspace {
     return path.resolve(this.#manifestContext.workspacePath, this.#manifestContext.outputFolder, file);
   }
 
+  static resolveExtensionFile(file: string): string {
+    return path.resolve(this.#manifestContext.workspacePath, '.trv_vscode', file);
+  }
+
   static get #cliFile(): string {
     return path.resolve(this.path, 'node_modules', '@travetto/compiler/bin/trv');
   }
