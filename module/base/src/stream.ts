@@ -151,10 +151,12 @@ export class StreamUtil {
 
     let read = 0;
 
-    async function* streamFile(): AsyncIterable<string> {
-      const stat = await fs.stat(file);
-      if (stat!.size <= read) {
-        return;
+    async function* streamFile(): AsyncGenerator<string, boolean> {
+      const stat = await fs.stat(file).catch(() => undefined);
+      if (!stat || stat.size < read) {
+        return false; // Truncated or missing
+      } else if (stat.size === read) {
+        return true; // Unchanged
       }
 
       const stream = await createReadStream(file, { autoClose: true, emitClose: true, encoding: 'utf8', start: read });
@@ -165,6 +167,8 @@ export class StreamUtil {
           yield line.trim();
         }
       }
+
+      return true;
     }
 
     if (ensureEmpty) {
@@ -174,10 +178,10 @@ export class StreamUtil {
     }
 
     for await (const _ of fs.watch(file, { persistent: true })) {
-      if (!(await fs.stat(file).catch(() => false))) {
+      const valid = yield* streamFile();
+      if (!valid) {
         return;
       }
-      yield* streamFile();
     }
   }
 }

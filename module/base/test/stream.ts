@@ -5,7 +5,7 @@ import os from 'os';
 import timers from 'timers/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { path } from '@travetto/manifest';
+import { path as mPath } from '@travetto/manifest';
 
 import { ExecUtil } from '../src/exec';
 import { StreamUtil } from '../src/stream';
@@ -90,12 +90,12 @@ export class StreamUtilTest {
 
   @Test()
   async tailFile() {
-    const file = path.resolve(os.tmpdir(), `test-file.${Date.now()}.${Math.random()}`);
+    const file = mPath.resolve(os.tmpdir(), `test-file.${Date.now()}.${Math.random()}`);
     assert(file);
     const received: number[] = [];
 
     timers.setTimeout(100).then(() => fs.unlink(file));
-    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.mkdir(mPath.dirname(file), { recursive: true });
     for (let i = 0; i < 10; i++) {
       fs.appendFile(file, `${i}\n`);
     }
