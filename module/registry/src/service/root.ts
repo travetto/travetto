@@ -19,6 +19,14 @@ class $RootRegistry extends Registry {
     await super.onEvent(e); // Process event, and
     this.emit(e); // Send to children
   }
+
+  /**
+   * Registers a listener to be notified when a file changes, but no
+   * classes are modified
+   */
+  onNonClassChanges(handler: (file: string) => void): void {
+    this.parent(ClassSource)!.onNonClassChanges(handler);
+  }
 }
 
 export const RootRegistry = new $RootRegistry();

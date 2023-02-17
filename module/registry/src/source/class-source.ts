@@ -51,25 +51,33 @@ export class ClassSource implements ChangeSource<Class> {
       this.#classes.set(file, new Map());
     }
 
+    let changes = 0;
+
     /**
      * Determine delta based on the various classes (if being added, removed or updated)
      */
     for (const k of keys) {
       if (!next.has(k)) {
+        changes += 1;
         this.emit({ type: 'removing', prev: prev.get(k)! });
         this.#classes.get(file)!.delete(k);
       } else {
         this.#classes.get(file)!.set(k, next.get(k)!);
         if (!prev.has(k)) {
+          changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });
         } else {
           const prevMeta = RootIndex.getFunctionMetadataFromClass(prev.get(k));
           const nextMeta = RootIndex.getFunctionMetadataFromClass(next.get(k));
           if (prevMeta?.hash !== nextMeta?.hash) {
+            changes += 1;
             this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
           }
         }
       }
+    }
+    if (!changes) {
+      this.#emitter.emit('unchanged-file', file);
     }
   }
 
@@ -115,5 +123,12 @@ export class ClassSource implements ChangeSource<Class> {
    */
   on(callback: ChangeHandler<Class>): void {
     this.#emitter.on('change', callback);
+  }
+
+  /**
+   * Add callback for when a file is changed, but emits no class changes
+   */
+  onNonClassChanges(callback: (file: string) => void): void {
+    this.#emitter.on('unchanged-file', callback);
   }
 }

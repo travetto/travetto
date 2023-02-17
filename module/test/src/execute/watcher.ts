@@ -2,7 +2,6 @@ import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
 import { ConsoleManager, defineGlobalEnv, ObjectUtil } from '@travetto/base';
-import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -65,6 +64,9 @@ export class TestWatcher {
       }
     });
 
+    // If a file is changed, but doesn't emit classes, re-run whole file
+    RootRegistry.onNonClassChanges(file => itr.add(file));
+
     await RootRegistry.init();
 
     process.send?.('ready');
@@ -72,13 +74,6 @@ export class TestWatcher {
     process.on('message', ev => {
       if (isRunEvent(ev)) {
         itr.add([ev.file, ev.class, ev.method].filter(x => !!x).join('#'), true);
-      }
-    });
-
-    // Re-run all tests on file change
-    DynamicFileLoader.onLoadEvent(ev => {
-      if (ev.action === 'update') {
-        // itr.add(ev.file);
       }
     });
 

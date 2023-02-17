@@ -90,13 +90,11 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
-    if (editor) {
-      if (editor.document.fileName.includes('/test/')) {
-        this.#consumer.trackEditor(editor);
-        if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
-          await this.#server.start();
-          this.#server.sendMessage({ type: 'run-test', file: editor.document.fileName });
-        }
+    if (editor?.document.fileName.includes('/test/')) {
+      this.#consumer.trackEditor(editor);
+      if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
+        await this.#server.start();
+        this.#server.sendMessage({ type: 'run-test', file: editor.document.fileName });
       }
     }
   }
