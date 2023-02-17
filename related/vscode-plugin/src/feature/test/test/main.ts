@@ -25,11 +25,14 @@ class TestRunnerFeature extends BaseFeature {
     command?: string
   ) {
     super(module, command);
-    this.#server = new ProcessServer('main', [`${this.module}/src/execute/watcher`, 'exec', 'false'])
+    this.#server = new ProcessServer(this.log, 'main', [`${this.module}/src/execute/watcher`, 'exec', 'false'])
       .onStart(() => {
         this.#consumer.trackEditor(vscode.window.activeTextEditor);
 
         this.#server.onMessage(['assertion', 'suite', 'test'], ev => {
+          switch (ev.type) {
+            case 'test': this.log.info('Event', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
+          }
           this.#consumer.onEvent(ev);
           this.#codeLensUpdated?.();
         });
@@ -91,9 +94,7 @@ class TestRunnerFeature extends BaseFeature {
       if (editor.document.fileName.includes('/test/')) {
         this.#consumer.trackEditor(editor);
         if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
-          if (!this.#server.running) {
-            await this.#server.start();
-          }
+          await this.#server.start();
           this.#server.sendMessage({ type: 'run-test', file: editor.document.fileName });
         }
       }

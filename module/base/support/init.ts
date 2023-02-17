@@ -6,7 +6,7 @@ import { ShutdownManager } from '../src/shutdown';
 
 // Setup everything
 let initialized = false;
-export async function init(): Promise<void> {
+export async function init(manageShutdown = true): Promise<void> {
   if (initialized) {
     return;
   }
@@ -39,11 +39,17 @@ export async function init(): Promise<void> {
   await ConsoleManager.register();
 
   // Register shutdown handler
-  ShutdownManager.register();
+  if (manageShutdown) {
+    ShutdownManager.register();
+  }
 
   if (RootIndex.hasModule('@travetto/terminal')) {
     const { GlobalTerminal } = await import('@travetto/terminal');
     await GlobalTerminal.init();
-    ShutdownManager.onShutdown('', () => GlobalTerminal.reset());
+    if (manageShutdown) {
+      ShutdownManager.onShutdown('', () => GlobalTerminal.reset());
+    } else {
+      process.on('exit', () => GlobalTerminal.reset());
+    }
   }
 }

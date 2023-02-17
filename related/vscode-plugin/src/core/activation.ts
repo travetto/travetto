@@ -19,7 +19,7 @@ class $ActivationManager {
   #registry = new Set<ActivationConfig>();
   #commandRegistry = new Map<string, ActivationConfig>();
   #ipcSupport = new IpcSupport(e => this.onTargetEvent(e));
-  #log = new Log('Activation Manager');
+  #log = new Log('travetto.vscode.activation');
 
   add(config: ActivationConfig): void {
     this.#registry.add(config);

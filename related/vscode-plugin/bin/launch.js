@@ -6,7 +6,7 @@ import path from 'path';
  */
 async function activate(context) {
   process.env.TRV_MANIFEST = path.resolve(__dirname, '..');
-  (await import('@travetto/base/support/init.js')).init();
+  (await import('@travetto/base/support/init.js')).init(false);
   return (await import('../src/extension.js')).activate(context);
 }
 

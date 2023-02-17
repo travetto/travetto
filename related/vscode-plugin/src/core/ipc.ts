@@ -16,7 +16,7 @@ export class IpcSupport {
 
   #active = true;
   #handler: (response: TargetEvent) => void | Promise<void>;
-  #log = new Log('IpcSupport');
+  #log = new Log('travetto.vscode.ipc');
 
   constructor(handler: (response: TargetEvent) => (void | Promise<void>)) {
     this.#handler = handler;
@@ -50,7 +50,7 @@ export class IpcSupport {
     ctx.environmentVariableCollection.replace('TRV_CLI_IPC', file);
 
     while (this.#active) {
-      this.#log.info('Starting ipc handler', file);
+      this.#log.info('Watching file', file);
       try {
         for await (const line of StreamUtil.streamLines(file, true)) {
           const ev = this.#lineToEvent(line);

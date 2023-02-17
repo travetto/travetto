@@ -7,6 +7,7 @@ import { ExecUtil, ExecutionOptions, ExecutionState, WorkerResult } from '@trave
 import { ManifestContext, ManifestIndex, path } from '@travetto/manifest';
 
 import { EnvDict, LaunchConfig } from './types';
+import { Log } from './log';
 
 /**
  * Standard set of workspace utilities
@@ -23,6 +24,7 @@ export class Workspace {
   static #manifestContext: ManifestContext;
   static #req: ReturnType<typeof module['createRequire']>;
   static #importToFile = new Map<string, string | undefined>();
+  static #log = new Log('travetto.vscode.workspace');
 
   /**
    * Get workspace path
@@ -280,6 +282,18 @@ export class Workspace {
     return ExecUtil.worker<T>(
       this.#cliFile, [command, ...args ?? []],
       { ...opts, env: this.#buildEnv(false, opts?.env, opts?.cliModule) }
+    );
+  }
+
+  static async build(): Promise<void> {
+    await vscode.window.withProgress(
+      { title: 'Building workspace', location: vscode.ProgressLocation.Window },
+      () => this.spawnCli('build', [], {
+        catchAsResult: true, env: { TRV_BUILD: 'warn' },
+        outputMode: 'text-stream',
+        onStdOutLine: line => this.#log.info(line),
+        onStdErrorLine: line => this.#log.error(line)
+      }).result
     );
   }
 }

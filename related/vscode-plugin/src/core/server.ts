@@ -1,4 +1,3 @@
-import vscode from 'vscode';
 import timers from 'timers/promises';
 
 import { ExecutionOptions, ExecutionState } from '@travetto/base';
@@ -30,38 +29,40 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   #killCount: number[] = [];
   #log: Log;
 
-  constructor(cliCommand: string, args: string[] = [], opts: ExecutionOptions = {}) {
+  constructor(log: Log, cliCommand: string, args: string[] = [], opts: ExecutionOptions = {}) {
     this.#command = cliCommand;
     this.#args = args;
     this.#opts = opts;
-    this.#log = new Log(`ProcessServer ${cliCommand} ${args.join(' ')}`.trim());
+    this.#log = log;
     process.on('SIGINT', () => this.stop());
     process.on('exit', () => this.stop());
   }
 
   async #launchServer(command: string, args: string[], opts: ExecutionOptions = {}): Promise<[ExecutionState, Promise<void>]> {
-    await vscode.window.withProgress(
-      { title: 'Building workspace', location: vscode.ProgressLocation.Window },
-      () => Workspace.spawnCli('build', [], { catchAsResult: true }).result
-    );
+    await Workspace.build();
 
     const state = Workspace.spawnCli(command, args, {
-      outputMode: 'text-stream',
+      outputMode: 'text',
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
       ...opts,
       catchAsResult: true,
-      onStdOutLine: line => this.#log.info(line),
-      onStdErrorLine: line => this.#log.error(line)
+      onStdOutLine: line => this.#log.info('stdout', line),
+      onStdErrorLine: line => this.#log.error('stderr', line)
     });
+
+    let ready = false;
 
     const res = Promise.race([
       timers.setTimeout(READY_WAIT_WINDOW).then(() => {
-        state.process.kill('SIGKILL');
-        throw new Error('Timeout');
+        if (!ready) {
+          state.process.kill('SIGKILL');
+          throw new Error('Timeout');
+        }
       }),
       new Promise<void>(resolve => {
         const readyHandler = (msg: unknown): void => {
           if (msg === 'ready') {
+            ready = true;
             resolve();
             state.process.off('message', readyHandler);
           }
@@ -71,6 +72,10 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     ]);
 
     return [state, res];
+  }
+
+  get state(): ExecutionState {
+    return this.#state;
   }
 
   onStart(handler: () => void): this {
@@ -100,7 +105,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       this.#killCount[key] = (this.#killCount[key] ?? 0) + 1;
     }
 
-    this.#log.info('Starting', { path: this.#command, args: this.#args });
+    this.#log.info('Starting', this.#command, ...this.#args);
 
     const [state, ready] = await this.#launchServer(this.#command, this.#args, this.#opts);
     this.#state = state;
@@ -112,7 +117,10 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       }
     });
 
-    this.#state.result.then(result => { this.#respawn && this.start(!result.valid); });
+    this.#state.result.then(result => {
+      this.#log.info('Killed', { respawn: this.#respawn, exitCode: result.code, valid: result.valid });
+      this.#respawn && this.start(!result.valid);
+    });
 
     return ready;
   }
@@ -128,7 +136,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
 
   stop(): void {
     if (this.running) {
-      this.#log.info('Stopping', { command: this.#command, args: this.#args });
+      this.#log.info('Stopping');
       this.#respawn = false;
       this.#state.process.kill();
     }
@@ -142,7 +150,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     if (!this.running) {
       throw new Error('Server is not running');
     }
-
+    this.#log.info('Sending command', cmd);
     this.#state.process.send(cmd);
   }
 

@@ -31,7 +31,7 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   register(task: string, handler: () => unknown): void {
-    this.log.info('Registering command', this.commandName(task));
+    this.log.info('Registering command', task);
     vscode.commands.registerCommand(this.commandName(task), handler);
   }
 }

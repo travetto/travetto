@@ -78,7 +78,7 @@ export class TestWatcher {
     // Re-run all tests on file change
     DynamicFileLoader.onLoadEvent(ev => {
       if (ev.action === 'update') {
-        itr.add(ev.file);
+        // itr.add(ev.file);
       }
     });
 
@@ -95,6 +95,12 @@ export class TestWatcher {
 
 export async function main(format: string = 'tap', runAllOnStart: string = 'true'): Promise<void> {
   defineGlobalEnv({ test: true, dynamic: true });
+  console.log('Starting');
   ConsoleManager.setDebugFromEnv();
-  await TestWatcher.watch(format, runAllOnStart !== 'false');
+  try {
+    await TestWatcher.watch(format, runAllOnStart !== 'false');
+    console.log('Done');
+  } catch (err) {
+    console.error(err);
+  }
 }
