@@ -1,5 +1,9 @@
-import { createWriteStream } from 'fs';
+import fs from 'fs/promises';
+import { createWriteStream, createReadStream } from 'fs';
 import { PassThrough, Readable, Writable } from 'stream';
+import rl from 'readline';
+
+import { path } from '@travetto/manifest';
 
 import type { ExecutionState } from './exec';
 
@@ -131,6 +135,49 @@ export class StreamUtil {
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return this.waitForCompletion(proc.stdout!, () => prom) as Promise<T>;
+    }
+  }
+
+  /**
+   * Stream lines from file, supporting asynchronous processing.  Will run until file is deleted
+   */
+  static async * streamLines(file: string, ensureEmpty = false): AsyncIterable<string> {
+    await fs.mkdir(path.dirname(file), { recursive: true });
+
+    // Ensure file
+    if (!await fs.stat(file).catch(() => false)) {
+      await fs.appendFile(file, '', 'utf8');
+    }
+
+    let read = 0;
+
+    async function* streamFile(): AsyncIterable<string> {
+      const stat = await fs.stat(file);
+      if (stat!.size <= read) {
+        return;
+      }
+
+      const stream = await createReadStream(file, { autoClose: true, emitClose: true, encoding: 'utf8', start: read });
+      const reader = rl.createInterface(stream);
+      for await (const line of reader) {
+        read += line.length;
+        if (line.trim()) {
+          yield line.trim();
+        }
+      }
+    }
+
+    if (ensureEmpty) {
+      await fs.truncate(file);
+    } else {
+      yield* streamFile();
+    }
+
+    for await (const _ of fs.watch(file, { persistent: true })) {
+      if (!(await fs.stat(file).catch(() => false))) {
+        return;
+      }
+      yield* streamFile();
     }
   }
 }

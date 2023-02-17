@@ -1,8 +1,11 @@
 import assert from 'assert';
+import fs from 'fs/promises';
 import { createReadStream } from 'fs';
 import os from 'os';
+import timers from 'timers/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
+import { path } from '@travetto/manifest';
 
 import { ExecUtil } from '../src/exec';
 import { StreamUtil } from '../src/stream';
@@ -83,5 +86,25 @@ export class StreamUtilTest {
     ));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('process.stdin'));
+  }
+
+  @Test()
+  async tailFile() {
+    const file = path.resolve(os.tmpdir(), `test-file.${Date.now()}.${Math.random()}`);
+    assert(file);
+    const received: number[] = [];
+
+    timers.setTimeout(100).then(() => fs.unlink(file));
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    for (let i = 0; i < 10; i++) {
+      fs.appendFile(file, `${i}\n`);
+    }
+
+    for await (const line of StreamUtil.streamLines(file)) {
+      received.push(parseInt(line, 10));
+    }
+
+
+    assert.deepStrictEqual(new Set(received), new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
   }
 }
