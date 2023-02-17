@@ -1,5 +1,6 @@
 import vscode from 'vscode';
 
+import { Log } from '../core/log';
 import { ActivationTarget } from '../core/types';
 
 /**
@@ -9,6 +10,7 @@ export abstract class BaseFeature implements ActivationTarget {
 
   public readonly module: string;
   public readonly command: string;
+  public readonly log: Log;
 
   constructor(
     module?: string,
@@ -16,6 +18,7 @@ export abstract class BaseFeature implements ActivationTarget {
   ) {
     this.module = module!;
     this.command = command!;
+    this.log = new Log([this.moduleBase, this.command].filter(x => !!x).join('.'));
   }
 
   get moduleBase(): string {
@@ -28,7 +31,7 @@ export abstract class BaseFeature implements ActivationTarget {
   }
 
   register(task: string, handler: () => unknown): void {
-    console.log('Registering command', this.commandName(task));
+    this.log.info('Registering command', this.commandName(task));
     vscode.commands.registerCommand(this.commandName(task), handler);
   }
 }

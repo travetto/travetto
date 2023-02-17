@@ -71,7 +71,7 @@ export interface ExecutionOptions extends SpawnOptions {
   /**
    * Whether or not to collect stdin/stdout, defaults to 'text'
    */
-  outputMode?: 'raw' | 'binary' | 'text';
+  outputMode?: 'raw' | 'binary' | 'text' | 'text-stream';
   /**
    * On stderr line
    */
@@ -160,17 +160,22 @@ export class ExecUtil {
           break;
         }
         case 'text':
+        case 'text-stream':
         default: {
           if (proc.stdout) {
             rl.createInterface(proc.stdout).on('line', line => {
               options.onStdOutLine?.(line);
-              return stdout.push(Buffer.from(line), Buffer.from('\n'));
+              if (options.outputMode !== 'text-stream') {
+                stdout.push(Buffer.from(line), Buffer.from('\n'));
+              }
             });
           }
           if (proc.stderr) {
             rl.createInterface(proc.stderr).on('line', line => {
               options.onStdErrorLine?.(line);
-              stderr.push(Buffer.from(line), Buffer.from('\n'));
+              if (options.outputMode !== 'text-stream') {
+                stderr.push(Buffer.from(line), Buffer.from('\n'));
+              }
             });
           }
         }

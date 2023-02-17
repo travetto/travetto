@@ -1,106 +1,136 @@
 import vscode from 'vscode';
-import readline from 'readline';
-import { EventEmitter } from 'events';
+import timers from 'timers/promises';
 
-import { ExecutionOptions, ExecutionResult, ExecutionState } from '@travetto/base';
+import { ExecutionOptions, ExecutionState } from '@travetto/base';
+
 import { Workspace } from './workspace';
+import { Log } from './log';
 
-type EventType = 'start' | 'stop' | 'pre-start' | 'pre-stop' | 'restart';
-type ProcessFailureHandler = (err: Error) => (void | Promise<void>);
-
-const FIVE_MINUTE_WINDOW = 1000 * 60 * 5;
+const READY_WAIT_WINDOW = 1000 * 15;
+const TWO_MINUTE_WINDOW = 1000 * 60 * 2;
+const HOUR_WINDOW = 1000 * 60 * 60;
 const MAX_KILL_COUNT = 5;
 
 /**
  * Tracks the logic for running a process as an IPC-based server
  */
-export class ProcessServer {
+export class ProcessServer<C extends { type: string }, E extends { type: string }> {
 
-  #emitter = new EventEmitter();
+  static getCurrentBucket(): number {
+    return Math.trunc((Date.now() % HOUR_WINDOW) / TWO_MINUTE_WINDOW);
+  }
+
+  #onStart: (() => (void | Promise<void>))[] = [];
+  #onFail: ((err: Error) => (void | Promise<void>))[] = [];
   #respawn = true;
   #state: ExecutionState;
   #command: string;
   #args: string[];
   #opts: ExecutionOptions;
-  #failureHandler?: ProcessFailureHandler;
   #killCount: number[] = [];
+  #log: Log;
 
-  constructor(cliCommand: string, args: string[] = [], opts: ExecutionOptions = {}, onFailure?: ProcessFailureHandler) {
+  constructor(cliCommand: string, args: string[] = [], opts: ExecutionOptions = {}) {
     this.#command = cliCommand;
     this.#args = args;
     this.#opts = opts;
-    process.on('SIGINT', this.stop.bind(this));
-    process.on('exit', this.stop.bind(this));
+    this.#log = new Log(`ProcessServer ${cliCommand} ${args.join(' ')}`.trim());
+    process.on('SIGINT', () => this.stop());
+    process.on('exit', () => this.stop());
   }
 
-  #emit(type: EventType, ...args: unknown[]): void {
-    this.#emitter.emit(type, ...args);
+  async #launchServer(command: string, args: string[], opts: ExecutionOptions = {}): Promise<[ExecutionState, Promise<void>]> {
+    await vscode.window.withProgress(
+      { title: 'Building workspace', location: vscode.ProgressLocation.Window },
+      () => Workspace.spawnCli('build', [], { catchAsResult: true }).result
+    );
+
+    const state = Workspace.spawnCli(command, args, {
+      outputMode: 'text-stream',
+      stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
+      ...opts,
+      catchAsResult: true,
+      onStdOutLine: line => this.#log.info(line),
+      onStdErrorLine: line => this.#log.error(line)
+    });
+
+    const res = Promise.race([
+      timers.setTimeout(READY_WAIT_WINDOW).then(() => {
+        state.process.kill('SIGKILL');
+        throw new Error('Timeout');
+      }),
+      new Promise<void>(resolve => {
+        const readyHandler = (msg: unknown): void => {
+          if (msg === 'ready') {
+            resolve();
+            state.process.off('message', readyHandler);
+          }
+        };
+        state.process.on('message', readyHandler);
+      })
+    ]);
+
+    return [state, res];
   }
 
-  on(type: EventType, handler: (event: unknown) => void): this {
-    this.#emitter.on(type, handler);
+  onStart(handler: () => void): this {
+    this.#onStart.push(handler);
     return this;
   }
 
-  async #onFailure(result: ExecutionResult) {
-    if (this.#respawn && !result.valid) {
-      const key = Date.now() % (FIVE_MINUTE_WINDOW);
-      this.#killCount[key] += 1;
-      if (this.#killCount[key] < MAX_KILL_COUNT) {
-        this.#emit('restart');
-        this.#start();
-      } else if (this.#failureHandler) {
-        await this.#failureHandler(new Error(`Failed ${MAX_KILL_COUNT} times in 5 minutes, will not retry`))
-        vscode.window.showErrorMessage(`Command ${this.#command} e`);
-      }
-    }
+  onFail(handler: (err: Error) => void): this {
+    this.#onFail.push(handler);
+    return this;
   }
 
-  #start(): void {
-    console.log('Starting', { path: this.#command, args: this.#args });
-    this.#emit('pre-start');
-    this.#state = Workspace.spawnCli(this.#command, this.#args, { ...this.#opts, catchAsResult: true });
-
-    const prefix = [this.#command, ...this.#args].join(' ');
-    if (this.#state.process.stdout) {
-      readline.createInterface(this.#state.process.stdout)
-        .on('line', line => console.log(prefix, line));
-    }
-    if (this.#state.process.stderr) {
-      readline.createInterface(this.#state.process.stderr)
-        .on('line', line => console.error(prefix, line));
-    }
-
-    this.#state.result.then(val => this.#onFailure(val));
-
-    this.#emit('start');
-  }
-
-  start(): void {
+  async start(fromFailure?: boolean): Promise<void> {
     if (this.running) {
       return;
-    } else {
-      this.#killCount = []; // Clear out on threshold hit
-      this.#start();
     }
+    const key = ProcessServer.getCurrentBucket();
+    if ((this.#killCount[key] ?? 0) >= MAX_KILL_COUNT) {
+      if (this.#onFail.length) {
+        const err = new Error(`Failed ${MAX_KILL_COUNT} times in 2 minutes, will not retry`);
+        for (const fn of this.#onFail) {
+          await fn(err);
+        }
+      }
+      return; // Give up
+    } else if (fromFailure) {
+      this.#killCount[key] = (this.#killCount[key] ?? 0) + 1;
+    }
+
+    this.#log.info('Starting', { path: this.#command, args: this.#args });
+
+    const [state, ready] = await this.#launchServer(this.#command, this.#args, this.#opts);
+    this.#state = state;
+
+    ready.then(async () => {
+      this.#killCount = [];
+      for (const fn of this.#onStart) {
+        await fn();
+      }
+    });
+
+    this.#state.result.then(result => { this.#respawn && this.start(!result.valid); });
+
+    return ready;
   }
 
   restart(): void {
     if (!this.running) {
       this.start();
     } else {
-      this.#state.process.kill('SIGKILL');
-      // Will auto respawn
+      this.#killCount = []; // Clear out kill count on a forced restart
+      this.#state.process.kill('SIGKILL'); // Will auto respawn
     }
   }
 
   stop(): void {
     if (this.running) {
-      console.log('Stopping', { command: this.#command, args: this.#args });
+      this.#log.info('Stopping', { command: this.#command, args: this.#args });
       this.#respawn = false;
-      this.#emit('pre-stop');
       this.#state.process.kill();
-      this.#emit('stop');
     }
   }
 
@@ -108,26 +138,26 @@ export class ProcessServer {
     return this.#state && this.#state.process && !this.#state.process.killed;
   }
 
-  sendMessage(type: string, payload: Record<string, unknown> = {}): void {
+  sendMessage(cmd: C): void {
     if (!this.running) {
       throw new Error('Server is not running');
     }
 
-    this.#state.process.send({ type, ...payload });
+    this.#state.process.send(cmd);
   }
 
-  onMessage<U = unknown>(types: string | (string | undefined)[], callback: (type: string, payload: U) => void): () => void {
+  onMessage<S extends E['type'], T extends E & { type: S } = E & { type: S }>(types: S | S[], callback: (event: T) => void): () => void {
     if (!this.running) {
       throw new Error('Server is not running');
     }
 
-    types = (Array.isArray(types) ? types : [types]).filter(x => !!x);
+    const typeSet = new Set(Array.isArray(types) ? types : [types]);
 
-    const handler = async (msg: { type: string } & Record<string, unknown>): Promise<void> => {
-      if (types.includes(msg.type) || types.includes('*')) {
+    const handler = async (msg: E): Promise<void> => {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      if (typeSet.has(msg.type as S)) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        callback(msg.type, msg as U);
-
+        callback(msg as unknown as T);
       }
     };
     this.#state.process.on('message', handler);
@@ -135,25 +165,19 @@ export class ProcessServer {
     return this.#state.process.off.bind(this.#state.process, 'message', handler);
   }
 
-  onceMessage<U = unknown>(types: string | (string | undefined)[], callback: (type: string, payload: U) => void): void {
-    const handler = this.onMessage(types, (type: string, payload: U) => {
-      handler();
-      callback(type, payload);
-    });
-  }
-
-  sendMessageAndWaitFor<U>(type: string, payload: Record<string, unknown>, waitType: string, errType?: string): Promise<U> {
-    const prom = new Promise<U>((resolve, reject) => {
-      const remove = this.onMessage([waitType, errType], (resType, msg: U) => {
+  sendMessageAndWaitFor<S extends E['type'], T extends E & { type: S } = E & { type: S }>(cmd: C, waitType: S, errType?: E['type']): Promise<T> {
+    const prom = new Promise<T>((resolve, reject) => {
+      const remove = this.onMessage(errType ? [waitType, errType] : [waitType], (msg: E) => {
         remove();
-        switch (resType) {
-          case waitType: return resolve(msg);
+        switch (msg.type) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          case waitType: return resolve(msg as unknown as T);
           case errType: return reject(msg);
         }
       });
     });
 
-    this.sendMessage(type, payload);
+    this.sendMessage(cmd);
     return prom;
   }
 }

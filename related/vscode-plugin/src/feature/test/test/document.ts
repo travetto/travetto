@@ -77,11 +77,7 @@ export class DocumentResultsManager {
     if (!this.#editors.has(e)) {
       this.#editors.add(e);
       this.#document = e.document;
-      try {
-        this.refresh();
-      } catch (err) {
-        console.error(err);
-      }
+      this.refresh();
     }
   }
 

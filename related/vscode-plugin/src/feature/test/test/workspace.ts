@@ -1,5 +1,6 @@
 import vscode from 'vscode';
 
+import { Log } from '../../../core/log';
 import { Workspace } from '../../../core/workspace';
 
 import { DocumentResultsManager } from './document';
@@ -12,6 +13,8 @@ export class WorkspaceResultsManager {
   #status: vscode.StatusBarItem;
   #results: Map<string, DocumentResultsManager> = new Map();
   #window: typeof vscode.window;
+
+  #log = new Log('Test Results Manager');
 
   constructor(window: typeof vscode.window) {
     this.#window = window;
@@ -86,7 +89,7 @@ export class WorkspaceResultsManager {
     if (file) {
       if (!this.#results.has(file)) {
         const rm = new DocumentResultsManager(file);
-        console.debug('Generating results manager', { file });
+        this.#log.debug('Generating results manager', { file });
         this.#results.set(file, rm);
       }
       return this.#results.get(file)!;
@@ -100,7 +103,7 @@ export class WorkspaceResultsManager {
   onEvent(ev: TestEvent | RemoveEvent | CompleteEvent): void {
     if (ev.type === 'runComplete') {
       if (ev.error) {
-        console.error(ev.error.name, ev.error.stack);
+        this.#log.error(ev.error.name, ev.error.stack);
       }
     } else {
       this.getResults(ev)?.onEvent(ev);
@@ -133,7 +136,15 @@ export class WorkspaceResultsManager {
   trackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
     editor = Workspace.getDocumentEditor(editor);
     if (editor && editor.document) {
-      this.getResults(editor.document)?.addEditor(editor);
+      try {
+        this.getResults(editor.document)?.addEditor(editor);
+      } catch (err) {
+        if (err instanceof Error) {
+          this.#log.error(err.message, err);
+        } else {
+          throw err;
+        }
+      }
     }
   }
 

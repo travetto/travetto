@@ -3,6 +3,7 @@ import vscode from 'vscode';
 import { IpcSupport } from './ipc';
 import { ActivationTarget, TargetEvent } from './types';
 import { Workspace } from './workspace';
+import { Log } from './log';
 
 interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
   new(module: string, command?: string): T;
@@ -18,6 +19,7 @@ class $ActivationManager {
   #registry = new Set<ActivationConfig>();
   #commandRegistry = new Map<string, ActivationConfig>();
   #ipcSupport = new IpcSupport(e => this.onTargetEvent(e));
+  #log = new Log('Activation Manager');
 
   add(config: ActivationConfig): void {
     this.#registry.add(config);
@@ -59,7 +61,7 @@ class $ActivationManager {
       await this.#commandRegistry.get(event.type)?.instance?.onEvent?.(event);
       await vscode.window.activeTerminal?.show();
     } catch (e) {
-      console.error('Unknown error', e);
+      this.#log.error('Unknown error', e);
     }
   }
 }

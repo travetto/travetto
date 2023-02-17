@@ -8,7 +8,7 @@ import { ProcessServer } from '../../../core/server';
 import { BaseFeature } from '../../base';
 
 import { WorkspaceResultsManager } from './workspace';
-import { TestEvent } from './types';
+import { TestCommand, TestEvent } from './types';
 
 /**
  * Test Runner Feature
@@ -16,7 +16,7 @@ import { TestEvent } from './types';
 @Activatible('@travetto/test', 'test')
 class TestRunnerFeature extends BaseFeature {
 
-  #server: ProcessServer;
+  #server: ProcessServer<TestCommand, TestEvent>;
   #consumer = new WorkspaceResultsManager(vscode.window);
   #codeLensUpdated: (e: void) => unknown;
 
@@ -25,17 +25,19 @@ class TestRunnerFeature extends BaseFeature {
     command?: string
   ) {
     super(module, command);
-    this.#server = new ProcessServer('main', [`${this.module}/src/execute/watcher`, 'exec', 'false']);
+    this.#server = new ProcessServer('main', [`${this.module}/src/execute/watcher`, 'exec', 'false'])
+      .onStart(() => {
+        this.#consumer.trackEditor(vscode.window.activeTextEditor);
 
-    this.#server
-      .on('start', () => {
-        this.#server.onMessage('*', (type, ev: TestEvent) => {
+        this.#server.onMessage(['assertion', 'suite', 'test'], ev => {
           this.#consumer.onEvent(ev);
           this.#codeLensUpdated?.();
         });
-
-        this.#server.onceMessage('*', () =>  // Listen for first message
-          this.#consumer.trackEditor(vscode.window.activeTextEditor));
+      })
+      .onFail(async (err) => {
+        if (err.message.includes('will not retry')) {
+          await vscode.window.showErrorMessage(err.message.replace(/^Execution/, 'Test server'));
+        }
       });
   }
 
@@ -89,7 +91,10 @@ class TestRunnerFeature extends BaseFeature {
       if (editor.document.fileName.includes('/test/')) {
         this.#consumer.trackEditor(editor);
         if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
-          this.#server.sendMessage('run-test', { file: editor.document.fileName });
+          if (!this.#server.running) {
+            await this.#server.start();
+          }
+          this.#server.sendMessage({ type: 'run-test', file: editor.document.fileName });
         }
       }
     }
@@ -136,6 +141,6 @@ class TestRunnerFeature extends BaseFeature {
       }
     });
 
-    await this.#server.start();
+    this.#server.start();
   }
 }

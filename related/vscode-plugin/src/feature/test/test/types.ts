@@ -102,3 +102,8 @@ export type CompleteEvent = {
   type: 'runComplete';
   error?: Error;
 };
+
+export type TestCommand = {
+  type: 'run-test';
+  file: string;
+};

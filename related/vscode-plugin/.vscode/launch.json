@@ -12,10 +12,10 @@
       "name": "Launch Extension",
       "runtimeExecutable": "${execPath}",
       "outFiles": [
-        "${workspaceFolder}/dist/**/*.js"
+        "${workspaceFolder}/out/**/*.js"
       ],
       "resolveSourceMapLocations": [
-        "${workspaceFolder}/dist/**/*.js"
+        "${workspaceFolder}/out/**/*.js"
       ],
       "skipFiles": [
         "<node_internals>/**",

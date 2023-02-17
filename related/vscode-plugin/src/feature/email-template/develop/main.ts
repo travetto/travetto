@@ -5,8 +5,7 @@ import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
 
 import { BaseFeature } from '../../base';
-
-type Content = { html: string, text: string, subject: string };
+import { Content, EmailTemplateCommand, EmailTemplateEvent } from './types';
 
 /**
  * Email Template Feature
@@ -18,8 +17,7 @@ export class EmailTemplateFeature extends BaseFeature {
     return /resources\/email\/.*[.]email[.]html$/.test(f ?? '');
   }
 
-  #server: ProcessServer;
-
+  #server: ProcessServer<EmailTemplateCommand, EmailTemplateEvent>;
   #format?: 'text' | 'html';
   #active = new Set<string>();
   #activeFile?: string;
@@ -33,12 +31,16 @@ export class EmailTemplateFeature extends BaseFeature {
   ) {
     super(module, command);
 
-    this.#server = new ProcessServer('main', [`${this.module}/support/bin/editor`]);
-
-    this.#server.on('start', () => {
-      this.#server.onMessage('changed', (type, msg) => this.#emitter.emit('render', msg));
-      this.#server.onMessage('changed-failed', (ev, msg) => console.log(ev, msg));
-    });
+    this.#server = new ProcessServer('main', [`${this.module}/support/bin/editor`])
+      .onStart(() => {
+        this.#server.onMessage('changed', ev => this.#emitter.emit('render', ev));
+        this.#server.onMessage('changed-failed', ev => this.log.info('Email template', ev));
+      })
+      .onFail(async (err) => {
+        if (err.message.includes('will not retry')) {
+          await vscode.window.showErrorMessage(err.message.replace(/^Execution/, 'Email Template Preview'));
+        }
+      });
   }
 
   getPanel(): vscode.WebviewPanel {
@@ -66,7 +68,7 @@ export class EmailTemplateFeature extends BaseFeature {
       this.#activeFile = file;
       this.setActiveContent(undefined);
       if (file) {
-        this.#server.sendMessage('redraw', { file: this.#activeFile });
+        this.#server.sendMessage({ type: 'redraw', file: this.#activeFile });
       }
     }
   }
@@ -117,7 +119,7 @@ export class EmailTemplateFeature extends BaseFeature {
   }
 
   async openPreviewContext(): Promise<void> {
-    const { file } = await this.#server.sendMessageAndWaitFor<{ file: string }>('configure', {}, 'configured');
+    const { file } = await this.#server.sendMessageAndWaitFor({ type: 'configure' }, 'configured');
     const doc = await vscode.workspace.openTextDocument(file);
     await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
   }
@@ -130,7 +132,7 @@ export class EmailTemplateFeature extends BaseFeature {
           cancellable: false,
           title: 'Sending email'
         },
-        () => this.#server.sendMessageAndWaitFor('send', { file: this.#activeFile }, 'sent', 'sent-failed').then(console.log)
+        () => this.#server.sendMessageAndWaitFor({ type: 'send', file: this.#activeFile }, 'sent', 'sent-failed').then(console.log)
           .catch(err => {
             vscode.window.showErrorMessage(err.message);
           })
@@ -146,7 +148,7 @@ export class EmailTemplateFeature extends BaseFeature {
     vscode.workspace.onDidCloseTextDocument(x => this.trackFile(x, false), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.setActiveFile(vscode.window.activeTextEditor?.document.fileName), null, context.subscriptions);
 
-    this.#emitter.on('render', ({ file, content }) => {
+    this.#emitter.on('render', ({ file, content }: EmailTemplateEvent & { type: 'changed' }) => {
       if (file === this.#activeFile) {
         this.setActiveContent(content);
       }
