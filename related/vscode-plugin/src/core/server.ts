@@ -1,5 +1,3 @@
-import timers from 'timers/promises';
-
 import { ExecutionOptions, ExecutionState } from '@travetto/base';
 
 import { Workspace } from './workspace';
@@ -49,44 +47,44 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       onStdErrorLine: line => this.#log.error('stderr', line)
     });
 
-    let ready = false;
-
-    const res = Promise.race([
-      timers.setTimeout(READY_WAIT_WINDOW).then(() => {
-        if (!ready) {
-          state.process.kill('SIGKILL');
-          throw new Error('Timeout');
+    const ready = new Promise<void>((resolve, reject) => {
+      setTimeout(reject, READY_WAIT_WINDOW);
+      const readyHandler = (msg: unknown): void => {
+        if (msg === 'ready') {
+          state.process.off('message', readyHandler);
+          resolve();
         }
-      }),
-      new Promise<void>(resolve => {
-        const readyHandler = (msg: unknown): void => {
-          if (msg === 'ready') {
-            ready = true;
-            resolve();
-            state.process.off('message', readyHandler);
-          }
-        };
-        state.process.on('message', readyHandler);
-      })
-    ]);
+      };
+      state.process.on('message', readyHandler);
+    }).catch(() => {
+      state.process.kill('SIGKILL');
+      throw new Error('Timeout');
+    });
 
-    return [state, res];
+    return [state, ready];
   }
 
-  get state(): ExecutionState | undefined {
-    return this.#state;
-  }
-
+  /**
+   * Listen for when the application starts properly
+   */
   onStart(handler: () => void): this {
     this.#onStart.push(handler);
     return this;
   }
 
+  /**
+   * Listen for failures during the process execution
+   */
   onFail(handler: (err: Error) => void): this {
     this.#onFail.push(handler);
     return this;
   }
 
+  /**
+   * Start server, and indicate if this is continuing from a previous failure
+   * @param fromFailure
+   * @returns
+   */
   async start(fromFailure?: boolean): Promise<void> {
     if (this.#state) {
       this.#log.info('Already started');
@@ -131,6 +129,9 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     return ready;
   }
 
+  /**
+   * Restart server
+   */
   restart(): void {
     if (!this.#state) {
       this.start();
@@ -140,6 +141,9 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     }
   }
 
+  /**
+   * Stop server, and prevent respawn
+   */
   stop(): void {
     if (this.#state) {
       this.#log.info('Stopping');
@@ -149,6 +153,9 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     }
   }
 
+  /**
+   * Send message to process
+   */
   sendMessage(cmd: C): void {
     if (!this.#state) {
       throw new Error('Server is not running');
@@ -157,6 +164,9 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     this.#state.process.send(cmd);
   }
 
+  /**
+   * Listen for message from process
+   */
   onMessage<S extends E['type'], T extends E & { type: S } = E & { type: S }>(types: S | S[], callback: (event: T) => void): () => void {
     if (!this.#state) {
       throw new Error('Server is not running');
@@ -176,6 +186,9 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     return this.#state.process.off.bind(this.#state.process, 'message', handler);
   }
 
+  /**
+   * Send a message to process, and wait for a response, with the ability to wait for an error state
+   */
   sendMessageAndWaitFor<S extends E['type'], T extends E & { type: S } = E & { type: S }>(cmd: C, waitType: S, errType?: E['type']): Promise<T> {
     const prom = new Promise<T>((resolve, reject) => {
       const remove = this.onMessage(errType ? [waitType, errType] : [waitType], (msg: E) => {

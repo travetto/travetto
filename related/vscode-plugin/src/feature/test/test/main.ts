@@ -27,7 +27,10 @@ class TestRunnerFeature extends BaseFeature {
     super(module, command);
     this.#server = new ProcessServer(this.log, 'main', [`${this.module}/src/execute/watcher`, 'exec', 'false'])
       .onStart(() => {
-        this.#consumer.trackEditor(vscode.window.activeTextEditor);
+        // Trigger all visible editors on start
+        for (const editor of vscode.window.visibleTextEditors) {
+          this.onChangedActiveEditor(editor);
+        }
 
         this.#server.onMessage(['assertion', 'suite', 'test'], ev => {
           switch (ev.type) {
@@ -50,8 +53,8 @@ class TestRunnerFeature extends BaseFeature {
   async launchTestDebugger(file?: string, line?: number, breakpoint: boolean = true): Promise<void> {
     const editor = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
     if (editor) {
-      line = line ?? editor.selection.start.line + 1;
-      file = file ?? editor.document.fileName;
+      line ??= editor.selection.start.line + 1;
+      file ??= editor.document.fileName;
     }
 
     if (!file || !line) {
@@ -121,11 +124,7 @@ class TestRunnerFeature extends BaseFeature {
     vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);
 
-    Workspace.sleep(1000).then(() => {
-      vscode.window.visibleTextEditors.forEach(x => this.#consumer.trackEditor(x));
-    });
-
-    vscode.languages.registerCodeLensProvider({
+    context.subscriptions.push(vscode.languages.registerCodeLensProvider({
       language: 'typescript',
       pattern: {
         baseUri: Workspace.uri,
@@ -138,7 +137,7 @@ class TestRunnerFeature extends BaseFeature {
         this.#codeLensUpdated = l;
         return { dispose: (): void => { } };
       }
-    });
+    }));
 
     this.#server.start();
   }
