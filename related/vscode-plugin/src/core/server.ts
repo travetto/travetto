@@ -113,17 +113,23 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     const [state, ready] = await this.#launchServer(this.#command, this.#args, this.#opts);
     this.#state = state;
 
+    this.#log.info('Started', this.#state.process.pid);
+
     ready.then(async () => {
       this.#killCount = [];
+      this.#log.info('Ready', this.#state!.process.pid);
       for (const fn of this.#onStart) {
         await fn();
       }
     });
 
-    this.#state.process.on('exit', () => this.#state = undefined);
+    this.#state.process.on('exit', () => {
+      this.#log.info('Exited', this.#state?.process.pid);
+      this.#state = undefined;
+    });
 
     this.#state.result.then(result => {
-      this.#log.info('Killed', { respawn: this.#respawn, exitCode: result.code, valid: result.valid });
+      this.#log.info('Killed', this.#state?.process.pid, { respawn: this.#respawn, exitCode: result.code, valid: result.valid });
       this.#respawn && this.start(!result.valid);
     });
 
