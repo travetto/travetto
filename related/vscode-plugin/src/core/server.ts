@@ -42,6 +42,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     const state = Workspace.spawnCli(command, args, {
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
       ...opts,
+      env: { FORCE_COLOR: '0', TRV_QUIET: '1', ...opts.env },
       catchAsResult: true,
       onStdOutLine: line => this.#log.info('stdout', line),
       onStdErrorLine: line => this.#log.error('stderr', line)

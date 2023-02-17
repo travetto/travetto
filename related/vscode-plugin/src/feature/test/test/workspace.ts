@@ -13,10 +13,10 @@ export class WorkspaceResultsManager {
   #status: vscode.StatusBarItem;
   #results: Map<string, DocumentResultsManager> = new Map();
   #window: typeof vscode.window;
+  #log: Log;
 
-  #log = new Log('Test Results Manager');
-
-  constructor(window: typeof vscode.window) {
+  constructor(log: Log, window: typeof vscode.window) {
+    this.#log = log;
     this.#window = window;
     this.#status = this.#window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
     this.#status.command = 'workbench.action.showErrorsWarnings';

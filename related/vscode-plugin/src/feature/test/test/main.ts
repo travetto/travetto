@@ -17,14 +17,12 @@ import { TestCommand, TestEvent } from './types';
 class TestRunnerFeature extends BaseFeature {
 
   #server: ProcessServer<TestCommand, TestEvent>;
-  #consumer = new WorkspaceResultsManager(vscode.window);
+  #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (e: void) => unknown;
 
-  constructor(
-    module?: string,
-    command?: string
-  ) {
+  constructor(module?: string, command?: string) {
     super(module, command);
+    this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
     this.#server = new ProcessServer(this.log, 'main', [`${this.module}/src/execute/watcher`, 'exec', 'false'])
       .onStart(() => {
         // Trigger all visible editors on start
@@ -61,6 +59,8 @@ class TestRunnerFeature extends BaseFeature {
       return;
     }
 
+    file = path.toPosix(file);
+
     if (editor && breakpoint) {
       Workspace.addBreakpoint(editor, line);
     }
@@ -69,7 +69,7 @@ class TestRunnerFeature extends BaseFeature {
       useCli: true,
       name: 'Debug Travetto',
       main: 'main',
-      args: [`${this.module}/support/bin/direct`, file.replace(path.toNative(`${Workspace.path}/`), ''), `${line}`],
+      args: [`${this.module}/support/bin/direct`, file.replace(`${Workspace.path}/`, ''), `${line}`],
       cliModule: file
     }));
   }
