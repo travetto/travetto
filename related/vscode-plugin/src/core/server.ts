@@ -22,7 +22,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   #onStart: (() => (void | Promise<void>))[] = [];
   #onFail: ((err: Error) => (void | Promise<void>))[] = [];
   #respawn = true;
-  #state: ExecutionState;
+  #state: ExecutionState | undefined;
   #command: string;
   #args: string[];
   #opts: ExecutionOptions;
@@ -42,7 +42,6 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     await Workspace.build();
 
     const state = Workspace.spawnCli(command, args, {
-      outputMode: 'text',
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
       ...opts,
       catchAsResult: true,
@@ -74,7 +73,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     return [state, res];
   }
 
-  get state(): ExecutionState {
+  get state(): ExecutionState | undefined {
     return this.#state;
   }
 
@@ -89,12 +88,17 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   }
 
   async start(fromFailure?: boolean): Promise<void> {
-    if (this.running) {
+    if (this.#state) {
+      this.#log.info('Already started');
+      return;
+    } else if (!this.#respawn) {
+      this.#log.info('Server should not be respawned, skipping');
       return;
     }
     const key = ProcessServer.getCurrentBucket();
     if ((this.#killCount[key] ?? 0) >= MAX_KILL_COUNT) {
       if (this.#onFail.length) {
+        this.#log.error(`Failed ${MAX_KILL_COUNT} times in 2 minutes, will not retry`);
         const err = new Error(`Failed ${MAX_KILL_COUNT} times in 2 minutes, will not retry`);
         for (const fn of this.#onFail) {
           await fn(err);
@@ -117,6 +121,8 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       }
     });
 
+    this.#state.process.on('exit', () => this.#state = undefined);
+
     this.#state.result.then(result => {
       this.#log.info('Killed', { respawn: this.#respawn, exitCode: result.code, valid: result.valid });
       this.#respawn && this.start(!result.valid);
@@ -126,7 +132,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   }
 
   restart(): void {
-    if (!this.running) {
+    if (!this.#state) {
       this.start();
     } else {
       this.#killCount = []; // Clear out kill count on a forced restart
@@ -135,19 +141,16 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   }
 
   stop(): void {
-    if (this.running) {
+    if (this.#state) {
       this.#log.info('Stopping');
       this.#respawn = false;
       this.#state.process.kill();
+      this.#state = undefined;
     }
   }
 
-  get running(): boolean {
-    return this.#state && this.#state.process && !this.#state.process.killed;
-  }
-
   sendMessage(cmd: C): void {
-    if (!this.running) {
+    if (!this.#state) {
       throw new Error('Server is not running');
     }
     this.#log.info('Sending command', cmd);
@@ -155,7 +158,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   }
 
   onMessage<S extends E['type'], T extends E & { type: S } = E & { type: S }>(types: S | S[], callback: (event: T) => void): () => void {
-    if (!this.running) {
+    if (!this.#state) {
       throw new Error('Server is not running');
     }
 

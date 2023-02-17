@@ -57,7 +57,8 @@ const $getLauncher = async (ctx) => {
   const [op, args] = [VALID_OPS[process.argv[2]], process.argv.slice(3)];
 
   if (op === 'clean') {
-    for (const f of [ctx.outputFolder, ctx.compilerFolder]) {
+    const folders = process.argv.find(x => x === '--all' || x === '-a') ? [ctx.outputFolder, ctx.compilerFolder] : [ctx.outputFolder];
+    for (const f of folders) {
       await fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true });
     }
     return console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);

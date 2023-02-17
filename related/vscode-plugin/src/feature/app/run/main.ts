@@ -21,6 +21,7 @@ export class AppRunFeature extends BaseFeature {
   #storage: ActionStorage<AppChoice>;
 
   getAppList(): Promise<AppChoice[]> {
+    this.log.info('Retrieving application list');
     return AppRunUtil.getAppList(this.module);
   }
 
@@ -77,7 +78,7 @@ export class AppRunFeature extends BaseFeature {
 
       if (choice) {
         this.#storage.set(choice.key!, choice);
-        return AppRunUtil.debugApp(choice);
+        return this.debugApp(choice, choice.inputs);
       }
     } catch (err) {
       vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
@@ -89,7 +90,7 @@ export class AppRunFeature extends BaseFeature {
    * @param title
    * @param apps
    */
-  async debugApp(appOrName?: AppChoice | string | Recent, line?: number, inputs?: string[]): Promise<void> {
+  async debugApp(appOrName?: AppChoice | string | Recent, inputs?: string[], line?: number): Promise<void> {
     let app: AppChoice | undefined;
     if (appOrName) {
       if (typeof appOrName === 'string') {
@@ -104,8 +105,11 @@ export class AppRunFeature extends BaseFeature {
     }
 
     if (app) {
+      this.log.info('Running', app.module, app.targetId, inputs);
       const resolved: ResolvedAppChoice = { ...app, inputs: inputs ?? app.inputs ?? [], resolved: true, key: app.key ?? '', time: app.time ?? Date.now() };
       return AppRunUtil.debugApp(resolved, line);
+    } else {
+      this.log.info('No app selected');
     }
   }
 
@@ -143,7 +147,7 @@ export class AppRunFeature extends BaseFeature {
     this.#storage = new ActionStorage<AppChoice>('app.run', context);
 
     this.register('new', () => this.selectAndRunApp('Run new application', { mode: 'all' }));
-    this.register('run', (name?: string, line?: number) => this.debugApp(name, line));
+    this.register('run', (name?: string, line?: number) => this.debugApp(name, undefined, line));
     this.register('recent', () => this.selectAndRunApp('Run Recent Application', { mode: 'recent', count: 10 }));
     this.register('mostRecent', () => this.debugApp({ mode: 'recent', count: 1 }));
     this.register('export', () => this.exportLaunchConfig());
@@ -153,6 +157,6 @@ export class AppRunFeature extends BaseFeature {
    * On IPC trigger to run an application
    */
   onEvent(ev: TargetEvent<{ name: string, args: string[] }>): Promise<void> {
-    return this.debugApp(ev.data.name, undefined, ev.data.args);
+    return this.debugApp(ev.data.name, ev.data.args);
   }
 }
