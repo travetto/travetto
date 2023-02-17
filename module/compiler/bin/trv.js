@@ -61,7 +61,7 @@ const $getLauncher = async (ctx) => {
     for (const f of folders) {
       await fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true });
     }
-    return console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}, ${ctx.compilerFolder}]`);
+    return console.log(`Cleaned ${ctx.workspacePath}: [${folders.join(', ')}]`);
   }
 
   return (await $getLauncher(ctx))(ctx, op, args);
