@@ -81,7 +81,7 @@ class $DynamicFileLoader {
     await watchFolders(
       RootIndex.getLocalOutputFolders(),
       (ev, folder) => this.dispatch(ev, folder),
-      { filter: ev => ev.file.endsWith('.js') }
+      { filter: ev => ev.file.endsWith('.js'), createMissing: true }
     );
   }
 }

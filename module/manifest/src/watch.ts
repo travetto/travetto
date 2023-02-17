@@ -4,7 +4,7 @@ export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string 
 
 type EventListener = (ev: WatchEvent, folder: string) => void;
 type EventFilter = (ev: WatchEvent) => boolean;
-type WatchConfig = { filter?: EventFilter, ignore?: string[] };
+type WatchConfig = { filter?: EventFilter, ignore?: string[], createMissing?: boolean };
 
 async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
   try {
@@ -23,8 +23,11 @@ async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
  */
 export async function watchFolders(folders: string[], onEvent: EventListener, config: WatchConfig = {}): Promise<() => Promise<void>> {
   const lib = await getWatcher();
+  const createMissing = config.createMissing ?? false;
+
   const subs = await Promise.all(folders.map(async folder => {
-    if (await fs.stat(folder).then(() => true, () => false)) {
+    if (await fs.stat(folder).then(() => true, () => createMissing)) {
+      await fs.mkdir(folder, { recursive: true });
       const ignore = (await fs.readdir(folder)).filter(x => x.startsWith('.') && x.length > 2);
       return lib.subscribe(folder, (err, events) => {
         for (const ev of events) {

@@ -82,7 +82,7 @@
       },
       {
         "command": "travetto.test.test:reload",
-        "title": "Reload Test Server",
+        "title": "Restart Test Server",
         "category": "Travetto"
       },
       {
