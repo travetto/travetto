@@ -179,6 +179,6 @@ export class TranspileUtil {
           }
         })
         .on('exit', code => (code !== null && code > 0) ? rej(new Error('Failed during compilation')) : res('complete'));
-    })).finally(() => fs.unlink(deltaFile));
+    })).finally(() => fs.unlink(deltaFile).catch(() => { }));
   }
 }
