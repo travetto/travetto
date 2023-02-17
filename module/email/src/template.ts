@@ -31,7 +31,7 @@ export class MustacheTemplateEngine implements MailTemplateEngine {
    */
   async resolveNested(template: string): Promise<string> {
     const promises: Promise<string>[] = [];
-    template = template.replace(/[{]{2}>\s+(\S+)([.]html)?\s*[}]{2}/g, (all: string, name: string) => {
+    template = template.replace(/[{]{2,3}>\s+(\S+)([.]html)?\s*[}]{2,3}/g, (all: string, name: string) => {
       promises.push(
         this.resources.read(`${name}.html`) // Ensure html file
           .then(contents => this.resolveNested(contents))

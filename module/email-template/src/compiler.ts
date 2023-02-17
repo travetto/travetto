@@ -113,7 +113,7 @@ export class EmailTemplateCompiler {
     const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
 
     // Wrap with body
-    tpl = (await this.resources.read('/wrapper.html')).replace('<!-- BODY -->', tpl);
+    tpl = (await this.resources.read('/email/wrapper.html')).replace('<!-- BODY -->', tpl);
 
     // Resolve mustache partials
     tpl = await engine.resolveNested(tpl);
@@ -127,7 +127,7 @@ export class EmailTemplateCompiler {
     // Apply styles
     html = await this.inlineCss(html,
       await EmailTemplateCompiler.compileSass(
-        (await this.resources.describe('main.scss')).path,
+        (await this.resources.describe('/email/main.scss')).path,
         [
           path.dirname(req.resolve('foundation-emails/scss/_global.scss')),
           ...this.resources.getAllPaths()

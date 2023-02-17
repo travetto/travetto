@@ -65,6 +65,10 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     return [state, ready];
   }
 
+  get running(): boolean {
+    return this.#state !== undefined && !this.#state.process.killed;
+  }
+
   /**
    * Listen for when the application starts properly
    */
@@ -151,12 +155,15 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   /**
    * Stop server, and prevent respawn
    */
-  stop(): void {
+  stop(allowRespawn = false): void {
     if (this.#state) {
       this.#log.info('Stopping');
       this.#respawn = false;
       this.#state.process.kill();
       this.#state = undefined;
+      if (allowRespawn) {
+        setTimeout(() => this.#respawn = true, 1000);
+      }
     }
   }
 

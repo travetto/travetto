@@ -35,6 +35,14 @@ export class EmailTemplateFeature extends BaseFeature {
       .onStart(() => {
         this.#server.onMessage('changed', ev => this.#emitter.emit('render', ev));
         this.#server.onMessage('changed-failed', ev => this.log.info('Email template', ev));
+
+        for (const el of vscode.window.visibleTextEditors) {
+          this.trackFile(el.document, true);
+        }
+
+        if (vscode.window.activeTextEditor) {
+          this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
+        }
       })
       .onFail(async (err) => {
         if (err.message.includes('will not retry')) {
@@ -64,7 +72,7 @@ export class EmailTemplateFeature extends BaseFeature {
       return;
     }
     if (file !== this.#activeFile || force) {
-      file = file?.replace(/.*\/resources\/email\//, '');
+      file = file?.replace(/.*\/resources\//, '');
       this.#activeFile = file;
       this.setActiveContent(undefined);
       if (file) {
@@ -93,7 +101,7 @@ export class EmailTemplateFeature extends BaseFeature {
     } else {
       this.#active.delete(file.fileName);
       if (this.#active.size === 0) {
-        this.#server.stop();
+        this.#server.stop(true);
       }
     }
   }
@@ -153,14 +161,6 @@ export class EmailTemplateFeature extends BaseFeature {
         this.setActiveContent(content);
       }
     });
-
-    for (const el of vscode.window.visibleTextEditors) {
-      this.trackFile(el.document, true);
-    }
-
-    if (vscode.window.activeTextEditor) {
-      this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
-    }
 
     this.register('preview-html', () => this.openPreview('html'));
     this.register('preview-text', () => this.openPreview('text'));

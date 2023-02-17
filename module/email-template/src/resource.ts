@@ -4,12 +4,12 @@ import { FileQueryProvider } from '@travetto/base';
  * Resource management for email templating
  */
 export class EmailTemplateResource extends FileQueryProvider {
-  static PATH_PREFIX = /.*\/resources\/email\//;
+  static PATH_PREFIX = /.*\/resources\//;
   static EXT = /[.]email[.]html$/;
   ext = EmailTemplateResource.EXT;
 
-  constructor(paths: string[] = ['@travetto/email-template#support/resources/email']) {
-    super({ paths, includeCommon: true, mainFolder: 'email' });
+  constructor(paths: string[] = ['@travetto/email-template#support/resources']) {
+    super({ paths, includeCommon: true });
   }
 
   /**
