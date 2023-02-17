@@ -65,13 +65,17 @@ export class Workspace {
   }
 
   static #buildEnv(debug: boolean, base?: EnvDict, cliModule?: string): EnvDict {
-    return {
+    const res: EnvDict = {
       ...this.#baseEnv,
       ...(debug ? { TRV_DYNAMIC: '1', } : { TRV_QUIET: '1' }),
       ...base,
       TRV_MANIFEST: '',
       TRV_MODULE: cliModule ?? this.#manifestContext.mainModule
     };
+    if (base && 'NO_COLOR' in base) {
+      delete res.FORCE_COLOR;
+    }
+    return res;
   }
 
   /**
@@ -272,9 +276,11 @@ export class Workspace {
   }
 
   static spawnCli(command: string, args?: string[], opts?: ExecutionOptions & { cliModule?: string }): ExecutionState {
+    const env = this.#buildEnv(false, opts?.env, opts?.cliModule);
+    this.#log.debug('Spawning', this.#cliFile, command, { args, env });
     return ExecUtil.spawn(
       'node', [this.#cliFile, command, ...args ?? []],
-      { cwd: this.path, ...opts, env: this.#buildEnv(false, opts?.env, opts?.cliModule) }
+      { cwd: this.path, ...opts, env }
     );
   }
 

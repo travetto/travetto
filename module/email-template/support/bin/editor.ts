@@ -131,7 +131,7 @@ export class EditorState {
 
 export async function main(): Promise<void> {
   defineGlobalEnv({
-    resourcePaths: [`${RootIndex.getModule('@travetto/email-template')!.sourcePath}/resources/email`]
+    resourcePaths: [`${RootIndex.getModule('@travetto/email-template')!.sourcePath}/resources`]
   });
 
   await RootRegistry.init();

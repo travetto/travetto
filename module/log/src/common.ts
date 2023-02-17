@@ -1,6 +1,8 @@
 import { GlobalEnv } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
+import { Ignore } from '@travetto/schema';
+import { GlobalTerminal } from '@travetto/terminal';
 
 import { ConsoleAppender } from './appender/console';
 import { FileAppender } from './appender/file';
@@ -22,12 +24,18 @@ export class CommonLoggerConfig {
   plain?: boolean;
 
   @EnvVar('TRV_LOG_TIME')
-  timestamp: 's' | 'ms' | false = 'ms';
+  time: 's' | 'ms' | string = 'ms';
+
+  @Ignore()
+  get timestamp(): 's' | 'ms' | false {
+    return (this.time ?? 'ms') === 'ms' ? 'ms' : (this.time === 's' ? 's' : false);
+  }
 
   postConstruct(): void {
     if (GlobalEnv.test) {
-      this.timestamp = false;
+      this.time = '';
     }
+    this.plain ??= GlobalTerminal.colorLevel === 0;
   }
 }
 

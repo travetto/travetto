@@ -131,4 +131,14 @@ class DataUtilTests {
 
     assert(DataUtil.shallowClone(test) === test);
   }
+
+  @Test()
+  verifyFalseBooleanOverride() {
+    const data: { showTime: 's' | 'ms' | false } = {
+      showTime: 's'
+    };
+
+    DataUtil.deepAssign(data, { showTime: false }, 'coerce');
+    assert(data.showTime === 'false');
+  }
 }

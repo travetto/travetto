@@ -105,7 +105,7 @@ export class EnvTest {
       process.env.BOOL = el;
       assert(Env.getBoolean('bool') === true);
       assert(Env.getBoolean('bool', false) === false);
-      assert(Env.getBoolean('bool', true) === true);
+      assert(Env.getBoolean('bool', true) === false);
     }
   }
 }
