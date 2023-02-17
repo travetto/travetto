@@ -96,7 +96,7 @@ export class ManifestUtil {
       location = path.resolve(location, MANIFEST_FILE);
     }
 
-    await fs.mkdir(path.dirname(location));
+    await fs.mkdir(path.dirname(location), { recursive: true });
     await fs.writeFile(location, JSON.stringify(manifest), 'utf8');
 
     return location;

@@ -20,14 +20,14 @@
     "bin",
     "src"
   ],
-  "main": "./out/node_modules/travetto-plugin/bin/launch.js",
+  "main": "./dist/launch.js",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "related/vscode-plugin"
   },
   "scripts": {
     "vscode:prepublish": "npx trv pack -sm -e travetto-plugin/bin/launch.js -w dist",
-    "package": "vsce package",
+    "package": "vsce package --no-dependencies",
     "start": "npx trv watch --clean"
   },
   "devDependencies": {

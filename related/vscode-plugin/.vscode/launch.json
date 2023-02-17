@@ -28,6 +28,31 @@
       "sourceMaps": true,
       "request": "launch",
       "type": "extensionHost"
+    },
+    {
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}",
+        "${workspaceFolder}/../.."
+      ],
+      "name": "Launch Extension Compiled",
+      "runtimeExecutable": "${execPath}",
+      "outFiles": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "skipFiles": [
+        "<node_internals>/**",
+        "node:internals/**",
+        "**/vs/*/api/**",
+        "**/@travetto/base/src/console.js",
+        "**/tslib/**"
+      ],
+      "pauseForSourceMap": true,
+      "sourceMaps": true,
+      "request": "launch",
+      "type": "extensionHost"
     }
   ]
 }
