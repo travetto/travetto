@@ -131,7 +131,7 @@ export class CompilerWatcher {
       this.#getWatcher({
         create: emit,
         update: emit,
-        delete: (outputFile) => fs.unlink(outputFile).catch(() => { })
+        delete: (outputFile) => fs.rm(outputFile, { force: true })
       }),
       {
         filter: ev => ev.file.endsWith('.ts') || ev.file.endsWith('.js') || ev.file.endsWith('package.json'),

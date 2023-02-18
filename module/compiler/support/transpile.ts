@@ -182,7 +182,7 @@ export class TranspileUtil {
           .on('exit', code => (code !== null && code > 0) ? rej(new Error('Failed during compilation')) : res('complete'));
       }));
     } finally {
-      await fs.unlink(deltaFile).catch(() => { });
+      await fs.rm(deltaFile, { force: true });
     }
   }
 }
