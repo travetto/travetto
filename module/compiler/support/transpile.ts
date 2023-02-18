@@ -43,7 +43,7 @@ export class TranspileUtil {
    * Write text file, and ensure folder exists
    */
   static writeTextFile = (file: string, content: string): Promise<void> =>
-    fs.mkdir(path.dirname(file), { recursive: true }).then(() => fs.writeFile(file, content));
+    fs.mkdir(path.dirname(file), { recursive: true }).then(() => fs.writeFile(file, content, 'utf8'));
 
   /**
    * Returns the compiler options
@@ -160,25 +160,29 @@ export class TranspileUtil {
       path.resolve(manifest.workspacePath, manifest.modules[ev.module].sourceFolder, ev.file)
     );
 
-    await this.writeTextFile(deltaFile, changedFiles.join('\n'));
+    try {
+      await this.writeTextFile(deltaFile, changedFiles.join('\n'));
 
-    return this.withLogger('compiler-exec', log => new Promise<CompileResult>((res, rej) => {
-      const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
-        env: {
-          ...process.env,
-          TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
-        },
-        stdio: [0, 1, 2, 'ipc'],
-      })
-        .on('message', msg => {
-          if (IS_LOG_EV(msg)) {
-            log(...msg);
-          } else if (msg === 'restart') {
-            proc.kill('SIGKILL');
-            res('restart');
-          }
+      return await this.withLogger('compiler-exec', log => new Promise<CompileResult>((res, rej) => {
+        const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
+          env: {
+            ...process.env,
+            TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
+          },
+          stdio: [0, 1, 2, 'ipc'],
         })
-        .on('exit', code => (code !== null && code > 0) ? rej(new Error('Failed during compilation')) : res('complete'));
-    })).finally(() => fs.unlink(deltaFile).catch(() => { }));
+          .on('message', msg => {
+            if (IS_LOG_EV(msg)) {
+              log(...msg);
+            } else if (msg === 'restart') {
+              proc.kill('SIGKILL');
+              res('restart');
+            }
+          })
+          .on('exit', code => (code !== null && code > 0) ? rej(new Error('Failed during compilation')) : res('complete'));
+      }));
+    } finally {
+      await fs.unlink(deltaFile).catch(() => { });
+    }
   }
 }
