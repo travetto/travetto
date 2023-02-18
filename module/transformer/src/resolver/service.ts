@@ -1,18 +1,23 @@
 import ts from 'typescript';
 
-import type { AnyType, Checker } from './types';
+import { ManifestIndex, path } from '@travetto/manifest';
+
+import type { AnyType, TransformResolver } from './types';
 import { TypeCategorize, TypeBuilder } from './builder';
 import { VisitCache } from './cache';
 import { DocUtil } from '../util/doc';
+import { DeclarationUtil } from '../util/declaration';
 
 /**
- * Type resolver
+ * Implementation of TransformResolver
  */
-export class TypeResolver implements Checker {
+export class SimpleResolver implements TransformResolver {
   #tsChecker: ts.TypeChecker;
+  #manifestIndex: ManifestIndex;
 
-  constructor(tsChecker: ts.TypeChecker) {
+  constructor(tsChecker: ts.TypeChecker, manifestIndex: ManifestIndex) {
     this.#tsChecker = tsChecker;
+    this.#manifestIndex = manifestIndex;
   }
 
   /**
@@ -21,6 +26,33 @@ export class TypeResolver implements Checker {
    */
   getChecker(): ts.TypeChecker {
     return this.#tsChecker;
+  }
+
+  /**
+   * Resolve an import name (e.g. @module/path/file) for a given input or type
+   */
+  getImportName(fileOrType: string | ts.Type, removeExt?: boolean): string {
+    const ogSource = typeof fileOrType === 'string' ? fileOrType : DeclarationUtil.getPrimaryDeclarationNode(fileOrType).getSourceFile().fileName;
+    let sourceFile = path.toPosix(ogSource);
+
+    if (!sourceFile.endsWith('.js') && !sourceFile.endsWith('.ts')) {
+      sourceFile = `${sourceFile}.ts`;
+    }
+
+    const imp =
+      this.#manifestIndex.getEntry(/[.]ts$/.test(sourceFile) ? sourceFile : `${sourceFile}.js`)?.import ??
+      this.#manifestIndex.getFromImport(sourceFile.replace(/^.*node_modules\//, '').replace(/[.]ts$/, ''))?.import ??
+      ogSource;
+
+    return removeExt ? imp.replace(/[.]js$/, '') : imp;
+  }
+
+  /**
+   * Is the file/import known to the index, helpful for determine ownership
+   */
+  isKnownFile(fileOrImport: string): boolean {
+    return (this.#manifestIndex.getFromSource(fileOrImport) !== undefined) ||
+      (this.#manifestIndex.getFromImport(fileOrImport) !== undefined);
   }
 
   /**
@@ -73,7 +105,7 @@ export class TypeResolver implements Checker {
         throw new Error('Object structure too nested');
       }
 
-      const { category, type } = TypeCategorize(this.#tsChecker, resType);
+      const { category, type } = TypeCategorize(this, resType);
       const { build, finalize } = TypeBuilder[category];
 
       let result = build(this, type, alias);

@@ -1,17 +1,17 @@
 import ts from 'typescript';
 import os from 'os';
 
-import { path, ManifestModuleUtil, ManifestModule, ManifestRoot } from '@travetto/manifest';
+import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
+import { TransformerManager } from '@travetto/transformer';
 
 import { CompilerUtil } from './util';
 import { TranspileUtil } from '../support/transpile';
-import { TransformerManager } from '@travetto/transformer';
 import { CompileStateEntry } from './types';
 
 export class CompilerState implements ts.CompilerHost {
 
-  static async get(manifest: ManifestRoot): Promise<CompilerState> {
-    return new CompilerState().init(manifest);
+  static async get(idx: ManifestIndex): Promise<CompilerState> {
+    return new CompilerState().init(idx);
   }
 
   private constructor() { }
@@ -27,13 +27,15 @@ export class CompilerState implements ts.CompilerHost {
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, ts.SourceFile>();
 
+  #manifestIndex: ManifestIndex;
   #manifest: ManifestRoot;
   #modules: ManifestModule[];
   #transformerManager: TransformerManager;
   #compilerOptions: ts.CompilerOptions;
 
-  async init(manifest: ManifestRoot): Promise<this> {
-    this.#manifest = manifest;
+  async init(idx: ManifestIndex): Promise<this> {
+    this.#manifestIndex = idx;
+    this.#manifest = idx.manifest;
     this.#outputPath = path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
     this.#modules = Object.values(this.#manifest.modules);
 
@@ -55,11 +57,7 @@ export class CompilerState implements ts.CompilerHost {
       }
     }
 
-    this.#transformerManager = await TransformerManager.create(this.#modules.flatMap(
-      x => (x.files.$transformer ?? []).map(([f]) =>
-        path.resolve(manifest.workspacePath, x.sourceFolder, f)
-      )
-    ));
+    this.#transformerManager = await TransformerManager.create(this.#manifestIndex);
 
     this.#compilerOptions = {
       ...await TranspileUtil.getCompilerOptions(this.#manifest),
@@ -72,6 +70,18 @@ export class CompilerState implements ts.CompilerHost {
 
   get manifest(): ManifestRoot {
     return this.#manifest;
+  }
+
+  get manifestIndex(): ManifestIndex {
+    return this.#manifestIndex;
+  }
+
+  resolveOutputFile(file: string): string {
+    return path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder, file);
+  }
+
+  getArbitraryInputFile(): string {
+    return this.getBySource(this.#manifestIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile)!.input;
   }
 
   createProgram(oldProgram?: ts.Program): ts.Program {

@@ -4,7 +4,7 @@ import timers from 'timers/promises';
 import fs from 'fs/promises';
 
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
-import { path, RootIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
@@ -31,7 +31,7 @@ export class Compiler {
   #dirtyFiles: string[];
 
   get compilerPidFile(): string {
-    return path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder, 'compiler.pid');
+    return this.#state.resolveOutputFile('compiler.pid');
   }
 
   async reserveWorkspace(): Promise<void> {
@@ -48,7 +48,7 @@ export class Compiler {
   }
 
   async init(dirtyFiles: string[]): Promise<this> {
-    this.#state = await CompilerState.get(RootIndex.manifest);
+    this.#state = await CompilerState.get(RootIndex);
     this.#dirtyFiles = dirtyFiles[0] === '*' ?
       this.#state.getAllFiles() :
       dirtyFiles.map(f => this.#state.getBySource(f)!.input);
@@ -144,7 +144,7 @@ export class Compiler {
 
     if (watch) {
       if (!this.#dirtyFiles.length) {
-        const resolved = this.#state.getBySource(RootIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile)!.input;
+        const resolved = this.#state.getArbitraryInputFile();
         await emitter(resolved, true);
       }
       Log.info('Watch is ready');

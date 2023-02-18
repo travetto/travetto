@@ -1,10 +1,10 @@
 import ts from 'typescript';
 
-import { path } from '@travetto/manifest';
+import { ManifestIndex, path } from '@travetto/manifest';
 
 import { ExternalType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, ModuleNameⲐ } from './types/visitor';
-import { TypeResolver } from './resolver/service';
+import { SimpleResolver } from './resolver/service';
 import { ImportManager } from './importer';
 import { Import } from './types/shared';
 
@@ -14,7 +14,6 @@ import { DeclarationUtil } from './util/declaration';
 import { CoreUtil } from './util/core';
 import { LiteralUtil } from './util/literal';
 import { SystemUtil } from './util/system';
-import { TransformerIndex } from './manifest-index';
 
 function hasOriginal(n: unknown): n is { original: ts.Node } {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -32,28 +31,23 @@ function hasEscapedName(n: unknown): n is { name: { escapedText: string } } {
 export class TransformerState implements State {
   static SYNTHETIC_EXT = 'Ⲑsyn';
 
-  #resolver: TypeResolver;
+  #resolver: SimpleResolver;
   #imports: ImportManager;
   #fileIdent: ts.Identifier;
+  #manifestIndex: ManifestIndex;
   #syntheticIdentifiers = new Map<string, ts.Identifier>();
   #decorators = new Map<string, ts.PropertyAccessExpression>();
   added = new Map<number, ts.Statement[]>();
   importName: string;
   file: string;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker) {
-    this.#imports = new ImportManager(source, factory);
-    this.#resolver = new TypeResolver(checker);
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, checker: ts.TypeChecker, manifestIndex: ManifestIndex) {
+    this.#manifestIndex = manifestIndex;
+    this.#resolver = new SimpleResolver(checker, manifestIndex);
+    this.#imports = new ImportManager(source, factory, this.#resolver);
     this.file = path.toPosix(this.source.fileName);
-    this.importName = TransformerIndex.getImportName(this.file, true);
-  }
 
-  /**
-   * Allow access to resolver
-   * @private
-   */
-  getResolver(): TypeResolver {
-    return this.#resolver;
+    this.importName = this.#resolver.getImportName(this.file, true);
   }
 
   /**
@@ -86,7 +80,7 @@ export class TransformerState implements State {
     const resolved = this.resolveType(node);
     if (resolved.key !== 'external') {
       const file = node.getSourceFile().fileName;
-      const src = TransformerIndex.getImportName(file);
+      const src = this.#resolver.getImportName(file);
       throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${src}`);
     }
     return resolved;
@@ -153,8 +147,8 @@ export class TransformerState implements State {
       this.#resolver.getType(ident)
     );
     const src = decl?.getSourceFile().fileName;
-    const mod = src ? TransformerIndex.getImportName(src, true) : undefined;
-    const file = TransformerIndex.getFromImport(mod ?? '')?.outputFile;
+    const mod = src ? this.#resolver.getImportName(src, true) : undefined;
+    const file = this.#manifestIndex.getFromImport(mod ?? '')?.outputFile;
     const targets = DocUtil.readAugments(this.#resolver.getType(ident));
     const module = file ? mod : undefined;
     const name = ident ?
@@ -218,7 +212,7 @@ export class TransformerState implements State {
    * Finalize the source file for emission
    */
   finalize(ret: ts.SourceFile): ts.SourceFile {
-    ret = this.#imports.finalize(ret, this.#resolver.getChecker());
+    ret = this.#imports.finalize(ret);
     return ret;
   }
 
@@ -272,7 +266,7 @@ export class TransformerState implements State {
     if (this.#fileIdent === undefined) {
       this.#fileIdent = this.createIdentifier('ᚕf');
       const decl = this.factory.createVariableDeclaration(this.#fileIdent, undefined, undefined,
-        this.fromLiteral(TransformerIndex.getImportName(this.source.fileName) ?? this.source.fileName)
+        this.fromLiteral(this.#resolver.getImportName(this.source.fileName) ?? this.source.fileName)
       );
       this.addStatements([
         this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([decl]))
@@ -345,7 +339,7 @@ export class TransformerState implements State {
         (m): m is ts.MethodDeclaration => ts.isMethodDeclaration(m) && ts.isIdentifier(m.name) && m.name.escapedText === method
       );
     } else {
-      const props = this.getResolver().getPropertiesOfType(cls);
+      const props = this.#resolver.getPropertiesOfType(cls);
       for (const prop of props) {
         const decl = prop.declarations?.[0];
         if (decl && prop.escapedName === method && ts.isMethodDeclaration(decl)) {

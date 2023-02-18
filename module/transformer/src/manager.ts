@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { RootIndex } from '@travetto/manifest';
+import { ManifestIndex, path, RootIndex } from '@travetto/manifest';
 
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
@@ -18,7 +18,13 @@ export class TransformerManager {
    * @param manifest
    * @returns
    */
-  static async create(transformerFiles: string[]): Promise<TransformerManager> {
+  static async create(manifestIndex: ManifestIndex): Promise<TransformerManager> {
+    const transformerFiles = Object.values(manifestIndex.manifest.modules).flatMap(
+      x => (x.files.$transformer ?? []).map(([f]) =>
+        path.resolve(manifestIndex.manifest.workspacePath, x.sourceFolder, f)
+      )
+    );
+
     const transformers: NodeTransformer<TransformerState>[] = [];
 
     for (const file of transformerFiles) { // Exclude based on blacklist
@@ -27,14 +33,16 @@ export class TransformerManager {
     }
 
     // Prepare a new visitor factory with a given type checker
-    return new TransformerManager(transformers);
+    return new TransformerManager(manifestIndex, transformers);
   }
 
   #cached: ts.CustomTransformers | undefined;
   #transformers: NodeTransformer<TransformerState>[];
+  #manifestIndex: ManifestIndex;
 
-  constructor(transformers: NodeTransformer<TransformerState>[]) {
+  constructor(manifestIndex: ManifestIndex, transformers: NodeTransformer<TransformerState>[]) {
     this.#transformers = transformers;
+    this.#manifestIndex = manifestIndex;
   }
 
   /**
@@ -43,7 +51,7 @@ export class TransformerManager {
    */
   init(checker: ts.TypeChecker): void {
     const visitor = new VisitorFactory(
-      (ctx, src) => new TransformerState(src, ctx.factory, checker),
+      (ctx, src) => new TransformerState(src, ctx.factory, checker, this.#manifestIndex),
       this.#transformers
     );
 

@@ -8,10 +8,8 @@ import { CoreUtil } from '../util/core';
 import { DeclarationUtil } from '../util/declaration';
 import { LiteralUtil } from '../util/literal';
 
-import { Type, AnyType, UnionType, Checker } from './types';
+import { Type, AnyType, UnionType, TransformResolver } from './types';
 import { CoerceUtil } from './coerce';
-
-import { TransformerIndex } from '../manifest-index';
 
 /**
  * List of global types that can be parameterized
@@ -40,7 +38,7 @@ type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape
 /**
  * Type categorizer, input for builder
  */
-export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { category: Category, type: ts.Type } {
+export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { category: Category, type: ts.Type } {
   const flags = type.getFlags();
   const objectFlags = DeclarationUtil.getObjectFlags(type) ?? 0;
 
@@ -70,7 +68,7 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
     const sourceFile = source.fileName;
     if (sourceFile?.includes('@types/node/globals') || sourceFile?.includes('typescript/lib')) {
       return { category: 'literal', type };
-    } else if (sourceFile?.endsWith('.d.ts') && !TransformerIndex.isKnown(sourceFile)) {
+    } else if (sourceFile?.endsWith('.d.ts') && !resolver.isKnownFile(sourceFile)) {
       return { category: 'unknown', type };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };
@@ -99,26 +97,26 @@ export function TypeCategorize(checker: ts.TypeChecker, type: ts.Type): { catego
  */
 export const TypeBuilder: {
   [K in Category]: {
-    build(checker: Checker, type: ts.Type, alias?: ts.Symbol): AnyType | undefined;
+    build(resolver: TransformResolver, type: ts.Type, alias?: ts.Symbol): AnyType | undefined;
     finalize?(type: Type<K>): AnyType;
   }
 } = {
   unknown: {
-    build: (checker, type) => undefined
+    build: (resolver, type) => undefined
   },
   undefined: {
-    build: (checker, type) => ({ key: 'literal', name: 'undefined', ctor: undefined })
+    build: (resolver, type) => ({ key: 'literal', name: 'undefined', ctor: undefined })
   },
   void: {
-    build: (checker, type) => ({ key: 'literal', name: 'void', ctor: undefined })
+    build: (resolver, type) => ({ key: 'literal', name: 'void', ctor: undefined })
   },
   tuple: {
-    build: (checker, type) => ({ key: 'tuple', tsTupleTypes: checker.getAllTypeArguments(type), subTypes: [] })
+    build: (resolver, type) => ({ key: 'tuple', tsTupleTypes: resolver.getAllTypeArguments(type), subTypes: [] })
   },
   literal: {
-    build: (checker, type) => {
+    build: (resolver, type) => {
       // Handle void/undefined
-      const name = checker.getTypeAsString(type) ?? '';
+      const name = resolver.getTypeAsString(type) ?? '';
       const complexName = CoreUtil.getSymbol(type)?.getName() ?? '';
 
       if (name in GLOBAL_SIMPLE) {
@@ -139,21 +137,21 @@ export const TypeBuilder: {
           key: 'literal',
           name: cons.name,
           ctor: cons,
-          tsTypeArguments: checker.getAllTypeArguments(type)
+          tsTypeArguments: resolver.getAllTypeArguments(type)
         };
       }
     }
   },
   external: {
-    build: (checker, type) => {
+    build: (resolver, type) => {
       const name = CoreUtil.getSymbol(type)?.getName();
-      const importName = TransformerIndex.getImportName(type);
-      const tsTypeArguments = checker.getAllTypeArguments(type);
+      const importName = resolver.getImportName(type);
+      const tsTypeArguments = resolver.getAllTypeArguments(type);
       return { key: 'external', name, importName, tsTypeArguments };
     }
   },
   union: {
-    build: (checker, uType: ts.UnionType) => {
+    build: (resolver, uType: ts.UnionType) => {
       let undefinable = false;
       let nullable = false;
       const remainder = uType.types.filter(ut => {
@@ -179,15 +177,15 @@ export const TypeBuilder: {
     }
   },
   shape: {
-    build: (checker, type, alias?) => {
+    build: (resolver, type, alias?) => {
       const tsFieldTypes: Record<string, ts.Type> = {};
       const name = CoreUtil.getSymbol(alias ?? type)?.getName();
-      const importName = TransformerIndex.getImportName(type);
-      const tsTypeArguments = checker.getAllTypeArguments(type);
-      for (const member of checker.getPropertiesOfType(type)) {
+      const importName = resolver.getImportName(type);
+      const tsTypeArguments = resolver.getAllTypeArguments(type);
+      for (const member of resolver.getPropertiesOfType(type)) {
         const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
         if (DeclarationUtil.isPublic(dec)) { // If public
-          const memberType = checker.getType(dec);
+          const memberType = resolver.getType(dec);
           if (
             !member.getName().includes('@') && // if not a symbol
             !memberType.getCallSignatures().length // if not a function
@@ -200,7 +198,7 @@ export const TypeBuilder: {
     }
   },
   concrete: {
-    build: (checker, type) => {
+    build: (resolver, type) => {
       const [tag] = DocUtil.readDocTag(type, 'concrete');
       if (tag) {
         // eslint-disable-next-line prefer-const
@@ -217,10 +215,10 @@ export const TypeBuilder: {
             ?.getSourceFile().fileName ?? '';
 
           if (importName === '.') {
-            importName = TransformerIndex.getImportName(rawSourceFile);
+            importName = resolver.getImportName(rawSourceFile);
           } else {
             const base = path.dirname(rawSourceFile);
-            importName = TransformerIndex.getImportName(path.resolve(base, importName));
+            importName = resolver.getImportName(path.resolve(base, importName));
           }
         }
         return { key: 'external', name, importName };

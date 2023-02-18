@@ -151,7 +151,9 @@ export type AnyType = TupleType | ShapeType | UnionType | LiteralType | External
 /**
  * Simple interface for checked methods
  */
-export interface Checker {
+export interface TransformResolver {
+  isKnownFile(file: string): boolean;
+  getImportName(fileOrType: string | ts.Type, removeExt?: boolean): string;
   getAllTypeArguments(type: ts.Type): ts.Type[];
   getPropertiesOfType(type: ts.Type): ts.Symbol[];
   getTypeAsString(type: ts.Type): string | undefined;

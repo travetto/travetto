@@ -2,13 +2,12 @@ import ts from 'typescript';
 
 import { PackageUtil, path } from '@travetto/manifest';
 
-import { AnyType, ExternalType } from './resolver/types';
+import { AnyType, TransformResolver, ExternalType } from './resolver/types';
 import { ImportUtil } from './util/import';
 import { CoreUtil } from './util/core';
 import { Import } from './types/shared';
 import { LiteralUtil } from './util/literal';
 import { DeclarationUtil } from './util/declaration';
-import { TransformerIndex } from './manifest-index';
 
 const D_OR_D_TS_EXT_RE = /[.]d([.]ts)?$/;
 
@@ -22,10 +21,12 @@ export class ImportManager {
   #idx: Record<string, number> = {};
   #ids = new Map<string, string>();
   #importName: string;
+  #resolver: TransformResolver;
 
-  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory) {
+  constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, resolver: TransformResolver) {
     this.#imports = ImportUtil.collectImports(source);
-    this.#importName = TransformerIndex.getImportName(source.fileName);
+    this.#resolver = resolver;
+    this.#importName = this.#resolver.getImportName(source.fileName);
   }
 
   #getImportFile(spec?: ts.Expression): string | undefined {
@@ -38,7 +39,7 @@ export class ImportManager {
     const fileOrImport = this.#getImportFile(spec);
     if (
       fileOrImport &&
-      (fileOrImport.startsWith('.') || TransformerIndex.isKnown(fileOrImport)) &&
+      (fileOrImport.startsWith('.') || this.#resolver.isKnownFile(fileOrImport)) &&
       !/[.]([mc]?js|ts|json)$/.test(fileOrImport)
     ) {
       return LiteralUtil.fromLiteral(this.factory, `${fileOrImport}.js`);
@@ -46,17 +47,13 @@ export class ImportManager {
     return spec;
   }
 
-  #rewriteImportClause(
-    spec: ts.Expression | undefined,
-    clause: ts.ImportClause | undefined,
-    checker: ts.TypeChecker
-  ): ts.ImportClause | undefined {
+  #rewriteImportClause(spec: ts.Expression | undefined, clause: ts.ImportClause | undefined): ts.ImportClause | undefined {
     if (!(spec && clause?.namedBindings && ts.isNamedImports(clause.namedBindings))) {
       return clause;
     }
 
     const fileOrImport = this.#getImportFile(spec);
-    if (!(fileOrImport && (fileOrImport.startsWith('.') || TransformerIndex.isKnown(fileOrImport)))) {
+    if (!(fileOrImport && (fileOrImport.startsWith('.') || this.#resolver.isKnownFile(fileOrImport)))) {
       return clause;
     }
 
@@ -65,7 +62,7 @@ export class ImportManager {
     // Remove all type only imports
     for (const el of bindings.elements) {
       if (!el.isTypeOnly) {
-        const type = checker.getTypeAtLocation(el.name);
+        const type = this.#resolver.getType(el.name);
         const objFlags = DeclarationUtil.getObjectFlags(type);
         const typeFlags = type.getFlags();
         if (objFlags || typeFlags !== 1) {
@@ -104,7 +101,7 @@ export class ImportManager {
    * Import a file if needed, and record it's identifier
    */
   importFile(file: string, name?: string): Import {
-    file = TransformerIndex.getImportName(file);
+    file = this.#resolver.getImportName(file);
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {
@@ -176,7 +173,7 @@ export class ImportManager {
     }
   }
 
-  finalizeImportExportExtension(ret: ts.SourceFile, checker: ts.TypeChecker): ts.SourceFile {
+  finalizeImportExportExtension(ret: ts.SourceFile): ts.SourceFile {
     const toAdd: ts.Statement[] = [];
 
     for (const stmt of ret.statements) {
@@ -196,7 +193,7 @@ export class ImportManager {
           toAdd.push(this.factory.updateImportDeclaration(
             stmt,
             stmt.modifiers,
-            this.#rewriteImportClause(stmt.moduleSpecifier, stmt.importClause, checker)!,
+            this.#rewriteImportClause(stmt.moduleSpecifier, stmt.importClause)!,
             this.#rewriteModuleSpecifier(stmt.moduleSpecifier)!,
             stmt.assertClause
           ));
@@ -211,9 +208,9 @@ export class ImportManager {
   /**
    * Reset the imports into the source file
    */
-  finalize(ret: ts.SourceFile, checker: ts.TypeChecker): ts.SourceFile {
+  finalize(ret: ts.SourceFile): ts.SourceFile {
     ret = this.finalizeNewImports(ret) ?? ret;
-    ret = this.finalizeImportExportExtension(ret, checker) ?? ret;
+    ret = this.finalizeImportExportExtension(ret) ?? ret;
     return ret;
   }
 

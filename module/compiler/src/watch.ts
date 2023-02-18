@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import fs from 'fs/promises';
 
 import {
-  ManifestContext, ManifestModuleUtil, ManifestUtil, RootIndex, WatchEvent, ManifestModuleFolderType,
+  ManifestContext, ManifestModuleUtil, ManifestUtil, WatchEvent, ManifestModuleFolderType,
   ManifestModuleFileType, path, ManifestModule, watchFolders, WatchEventListener
 } from '@travetto/manifest';
 import { getManifestContext } from '@travetto/manifest/bin/context';
@@ -54,7 +54,7 @@ export class CompilerWatcher {
       await ManifestUtil.writeManifest(ctx, newManifest);
     }
     // Reindex
-    RootIndex.init(RootIndex.manifestFile);
+    this.#state.manifestIndex.init(this.#state.manifestIndex.manifestFile);
   }
 
   #getModuleMap(): Record<string, ManifestModule> {
@@ -65,9 +65,9 @@ export class CompilerWatcher {
 
   /**
    * Get a watcher for a given compiler state
-   * @param state 
-   * @param handler 
-   * @returns 
+   * @param state
+   * @param handler
+   * @returns
    */
   #getWatcher(handler: CompileWatcherHandler): WatchEventListener {
     const mods = this.#getModuleMap();
@@ -127,7 +127,7 @@ export class CompilerWatcher {
    */
   watchFiles(emit: CompileEmitter): Promise<() => Promise<void>> {
     return watchFolders(
-      RootIndex.getLocalInputFolders(),
+      this.#state.manifestIndex.getLocalInputFolders(),
       this.#getWatcher({
         create: emit,
         update: emit,
