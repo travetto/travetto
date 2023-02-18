@@ -2,7 +2,10 @@ import busboy from 'busboy';
 
 import { Asset } from '@travetto/asset';
 import { Inject, Injectable } from '@travetto/di';
-import { BodyParseInterceptor, FilterContext, FilterReturn, Request, RestInterceptor, SerializeInterceptor, MimeUtil } from '@travetto/rest';
+import {
+  BodyParseInterceptor, FilterContext, FilterReturn, FilterNext, Request,
+  RestInterceptor, SerializeInterceptor, MimeUtil
+} from '@travetto/rest';
 import { NodeEntityⲐ } from '@travetto/rest/src/internal/symbol';
 import { AppError } from '@travetto/base';
 
@@ -32,7 +35,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     const filename = AssetRestUtil.getFileName(req);
     const [asset, cleanup] = await AssetRestUtil.writeToAsset(req.body ?? req[NodeEntityⲐ], filename, config.maxSize);
     try {
-      return [{ file: await this.validateAsset(config, asset) }, config.deleteFiles !== false ? cleanup : ((): void => { })];
+      return [{ file: await this.validateAsset(config, asset) }, config.deleteFiles !== false ? cleanup : (async (): Promise<void> => { })];
     } catch (err) {
       await cleanup();
       throw err;
@@ -76,7 +79,7 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
       await Promise.all(allCleanups.map(x => x()));
       throw err;
     }
-    return [files, (): Promise<unknown> => Promise.all(managedCleanups.map(x => x()))];
+    return [files, async (): Promise<void> => { await Promise.all(managedCleanups.map(x => x())); }];
   }
 
   @Inject()
@@ -106,20 +109,23 @@ export class RestAssetInterceptor implements RestInterceptor<RestAssetConfig> {
     return false;
   }
 
-  async intercept({ req, res, config }: FilterContext<RestAssetConfig>): Promise<FilterReturn> {
-    let cleanup: Function;
-    switch (req.getContentType()?.full) {
-      case 'application/x-www-form-urlencoded':
-      case 'multipart/form-data':
-        [req.files, cleanup] = await RestAssetInterceptor.uploadMultipart(req, config);
-        break;
-      default:
-        [req.files, cleanup] = await RestAssetInterceptor.uploadDirect(req, config);
-        break;
+  async intercept({ req, config }: FilterContext<RestAssetConfig>, next: FilterNext): Promise<FilterReturn> {
+    let cleanup: (() => Promise<void>) | undefined;
+    try {
+      switch (req.getContentType()?.full) {
+        case 'application/x-www-form-urlencoded':
+        case 'multipart/form-data':
+          [req.files, cleanup] = await RestAssetInterceptor.uploadMultipart(req, config);
+          break;
+        default:
+          [req.files, cleanup] = await RestAssetInterceptor.uploadDirect(req, config);
+          break;
+      }
+      return await next();
+    } finally {
+      if (cleanup) {
+        await cleanup();
+      }
     }
-    if (cleanup) {
-      res.on('finish', cleanup);
-    }
-    return;
   }
 }

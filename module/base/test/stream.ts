@@ -90,7 +90,7 @@ export class StreamUtilTest {
 
   @Test()
   async tailFile() {
-    const file = mPath.resolve(os.tmpdir(), `test-file.${Date.now()}.${Math.random()}`);
+    const file = mPath.resolve(os.tmpdir(), `tail-file.${Date.now()}.${Math.random()}`);
     assert(file);
     const received: number[] = [];
 
@@ -104,6 +104,5 @@ export class StreamUtilTest {
     }
 
     assert.deepStrictEqual(new Set(received), new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
-    await fs.unlink(file);
   }
 }
