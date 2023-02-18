@@ -56,7 +56,7 @@ export class Compiler {
     this.#state = new CompilerState(RootIndex.manifest);
     this.#dirtyFiles = dirtyFiles[0] === '*' ?
       this.#state.getAllFiles() :
-      dirtyFiles.map(f => this.#state.resolveInput(f));
+      dirtyFiles.map(f => this.#state.getInputForSource(f));
   }
 
   get state(): CompilerState {
@@ -100,20 +100,19 @@ export class Compiler {
     const options = await this.state.getCompilerOptions();
     const host = this.state.getCompilerHost(options);
 
-    const emit = async (file: string, needsNewProgram = program === undefined): Promise<EmitError | undefined> => {
+    const emit = async (inputFile: string, needsNewProgram = program === undefined): Promise<EmitError | undefined> => {
       try {
         if (needsNewProgram) {
           program = ts.createProgram({ rootNames: this.#state.getAllFiles(), host, options, oldProgram: program });
           transformers.init(program.getTypeChecker());
         }
-        if (file.endsWith('.json')) {
-          host.writeFile(file, host.readFile(file)!, false);
-        } else if (file.endsWith('.js')) {
-          host.writeFile(file, ts.transpile(host.readFile(file)!, options), false);
+        if (inputFile.endsWith('.json')) {
+          host.writeFile(this.#state.getOutputForInput(inputFile), host.readFile(inputFile)!, false);
+        } else if (inputFile.endsWith('.js')) {
+          host.writeFile(this.#state.getOutputForInput(inputFile), ts.transpile(host.readFile(inputFile)!, options), false);
         } else {
-          const result = program.emit(
-            program.getSourceFile(file)!, host.writeFile, undefined, false, transformers.get()
-          );
+          const source = program.getSourceFile(inputFile)!;
+          const result = program.emit(source, host.writeFile, undefined, false, transformers.get());
 
           if (result.diagnostics?.length) {
             return result.diagnostics;
@@ -177,7 +176,7 @@ export class Compiler {
 
     if (watch) {
       if (!this.#dirtyFiles.length) {
-        const resolved = this.state.resolveInput(RootIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile);
+        const resolved = this.state.getInputForSource(RootIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile);
         await emitter(resolved, true);
       }
       info('Watch is ready');

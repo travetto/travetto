@@ -1,6 +1,7 @@
 import ts from 'typescript';
 import { readFileSync } from 'fs';
 import fs from 'fs/promises';
+import os from 'os';
 
 import { getManifestContext } from '@travetto/manifest/bin/context';
 import {
@@ -12,15 +13,17 @@ import { CompilerUtil } from './util';
 import { TranspileUtil } from '../support/transpile';
 
 const validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
+type Entry = { source: string, input: string, relativeInput: string, output?: string, module: ManifestModule };
+
+const FAKE_ROOT = path.resolve(os.tmpdir(), '_');
 
 export class CompilerState {
 
   #inputFiles: Set<string>;
-  #inputToSource = new Map<string, string>();
-  #stagedOutputToOutput = new Map<string, string>();
-  #inputToOutput = new Map<string, string | undefined>();
   #inputDirectoryToSource = new Map<string, string>();
-  #sourceInputOutput = new Map<string, { source: string, input: string, stagedOutput?: string, output?: string, module: ManifestModule }>();
+  #inputToEntry = new Map<string, Entry>();
+  #sourceToEntry = new Map<string, Entry>();
+  #outputToEntry = new Map<string, Entry>();
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, ts.SourceFile>();
@@ -57,59 +60,61 @@ export class CompilerState {
     );
   }
 
+  get outputPath(): string {
+    return path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
+  }
+
   get compilerPidFile(): string {
-    return path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder, 'compiler.pid');
+    return path.resolve(this.outputPath, 'compiler.pid');
   }
 
   async getCompilerOptions(): Promise<ts.CompilerOptions> {
     return {
       ...await TranspileUtil.getCompilerOptions(this.#manifest),
-      outDir: this.#manifest.workspacePath, // Force to root
+      rootDir: FAKE_ROOT,
+      outDir: this.outputPath
     };
   }
 
-  resolveInput(file: string): string {
-    return this.#sourceInputOutput.get(file)!.input;
+  getInputForSource(sourceFile: string): string {
+    return this.#sourceToEntry.get(sourceFile)!.input;
+  }
+
+  getOutputForInput(inputFile: string): string {
+    return this.#inputToEntry.get(inputFile)!.output!;
   }
 
   registerInput(module: ManifestModule, moduleFile: string): string {
     const relativeInput = `${module.outputFolder}/${moduleFile}`;
     const sourceFile = path.toPosix(path.resolve(this.#manifest.workspacePath, module.sourceFolder, moduleFile));
     const sourceFolder = path.dirname(sourceFile);
-    const inputFile = path.resolve(this.#manifest.workspacePath, '##', relativeInput); // Ensure input is isolated
+    const inputFile = path.resolve(FAKE_ROOT, relativeInput); // Ensure input is isolated
     const inputFolder = path.dirname(inputFile);
     const fileType = ManifestModuleUtil.getFileType(moduleFile);
     const outputFile = fileType === 'typings' ?
       undefined :
-      path.resolve(
-        this.#manifest.workspacePath,
-        this.#manifest.outputFolder,
-        CompilerUtil.inputToOutput(relativeInput)
-      );
+      path.resolve(this.outputPath, CompilerUtil.inputToOutput(relativeInput));
 
-    // Rewrite stagedOutput to final output form
-    const stagedOutputFile = CompilerUtil.inputToOutput(inputFile);
+    const entry = { source: sourceFile, input: inputFile, output: outputFile, module, relativeInput };
 
-    this.#inputToSource.set(inputFile, sourceFile);
-    this.#sourceInputOutput.set(sourceFile, { source: sourceFile, input: inputFile, stagedOutput: stagedOutputFile, output: outputFile, module });
-    this.#inputToOutput.set(inputFile, outputFile);
+    this.#inputToEntry.set(inputFile, entry);
+    this.#sourceToEntry.set(sourceFile, entry);
     this.#inputDirectoryToSource.set(inputFolder, sourceFolder);
 
-    if (stagedOutputFile) {
-      this.#stagedOutputToOutput.set(stagedOutputFile, outputFile!);
-      this.#stagedOutputToOutput.set(`${stagedOutputFile}.map`, `${outputFile!}.map`);
+    if (outputFile) {
+      this.#outputToEntry.set(outputFile, entry);
     }
 
     return inputFile;
   }
 
   removeInput(inputFile: string): void {
-    const source = this.#inputToSource.get(inputFile)!;
-    const { stagedOutput } = this.#sourceInputOutput.get(source)!;
-    this.#stagedOutputToOutput.delete(stagedOutput!);
-    this.#sourceInputOutput.delete(source);
-    this.#inputToSource.delete(inputFile);
-    this.#inputToOutput.delete(inputFile);
+    const { output, source } = this.#inputToEntry.get(inputFile)!;
+    if (output) {
+      this.#outputToEntry.delete(output);
+    }
+    this.#sourceToEntry.delete(source);
+    this.#inputToEntry.delete(inputFile);
     this.#inputFiles.delete(inputFile);
   }
 
@@ -206,24 +211,24 @@ export class CompilerState {
         }
         case 'update': {
           await this.#rebuildManifestsIfNeeded();
-          const io = this.#sourceInputOutput.get(sourceFile);
-          if (io) {
+          const entry = this.#sourceToEntry.get(sourceFile);
+          if (entry) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             if (this.#sourceHashes.get(sourceFile) !== hash) {
-              this.resetInputSource(io.input);
+              this.resetInputSource(entry.input);
               this.#sourceHashes.set(sourceFile, hash);
-              handler.update(io.input);
+              handler.update(entry.input);
             }
           }
           break;
         }
         case 'delete': {
-          const io = this.#sourceInputOutput.get(sourceFile);
-          if (io) {
-            this.removeInput(io.input);
-            if (io.output) {
+          const entry = this.#sourceToEntry.get(sourceFile);
+          if (entry) {
+            this.removeInput(entry.input);
+            if (entry.output) {
               this.#dirtyFiles.push({ mod: mod.name, modFolder: folder });
-              handler.delete(io.output);
+              handler.delete(entry.output);
             }
           }
         }
@@ -240,10 +245,10 @@ export class CompilerState {
       getNewLine: (): string => ts.sys.newLine,
       useCaseSensitiveFileNames: (): boolean => ts.sys.useCaseSensitiveFileNames,
       getDefaultLibLocation: (): string => path.dirname(ts.getDefaultLibFilePath(options)),
-      fileExists: (inputFile: string): boolean => this.#inputToSource.has(inputFile) || ts.sys.fileExists(inputFile),
+      fileExists: (inputFile: string): boolean => this.#inputToEntry.has(inputFile) || ts.sys.fileExists(inputFile),
       directoryExists: (inputFolder: string): boolean => this.#inputDirectoryToSource.has(inputFolder) || ts.sys.directoryExists(inputFolder),
       readFile: (inputFile: string): string | undefined => {
-        const res = this.#sourceContents.get(inputFile) ?? ts.sys.readFile(this.#inputToSource.get(inputFile) ?? inputFile);
+        const res = this.#sourceContents.get(inputFile) ?? ts.sys.readFile(this.#inputToEntry.get(inputFile)?.source ?? inputFile);
         this.#sourceContents.set(inputFile, res);
         return res;
       },
@@ -258,11 +263,10 @@ export class CompilerState {
         if (outputFile.endsWith('package.json')) {
           text = CompilerUtil.rewritePackageJSON(this.#manifest, text);
         } else if (!options.inlineSourceMap && options.sourceMap && outputFile.endsWith('.map')) {
-          text = CompilerUtil.rewriteSourceMap(this.#manifest.workspacePath, text, f => this.#sourceInputOutput.get(this.#inputToSource.get(f)!));
+          text = CompilerUtil.rewriteSourceMap(this.#manifest, text, f => this.#outputToEntry.get(f.replace(/[.]map$/, ''))!);
         } else if (options.inlineSourceMap && CompilerUtil.isSourceMapUrlPosData(data)) {
-          text = CompilerUtil.rewriteInlineSourceMap(this.#manifest.workspacePath, text, f => this.#sourceInputOutput.get(this.#inputToSource.get(f)!), data);
+          text = CompilerUtil.rewriteInlineSourceMap(this.#manifest, text, f => this.#outputToEntry.get(f)!, data);
         }
-        outputFile = this.#stagedOutputToOutput.get(outputFile) ?? outputFile;
         ts.sys.writeFile(outputFile, text, bom);
       },
       getSourceFile: (inputFile: string, language: ts.ScriptTarget, __onErr?: unknown): ts.SourceFile => {
