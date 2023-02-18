@@ -23,10 +23,7 @@ export class AssetRestUtil {
     await fs.mkdir(uniqueDir, { recursive: true });
     const uniqueLocal = path.resolve(uniqueDir, path.basename(filename));
 
-    const cleanup = async (): Promise<void> => {
-      try { await fs.unlink(uniqueLocal); } catch { }
-      try { await fs.rmdir(uniqueDir); } catch { }
-    };
+    const cleanup = async (): Promise<void> => fs.rm(uniqueDir, { force: true, recursive: true });
 
     return [uniqueLocal, cleanup];
   }

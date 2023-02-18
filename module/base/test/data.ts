@@ -139,6 +139,7 @@ class DataUtilTests {
     };
 
     DataUtil.deepAssign(data, { showTime: false }, 'coerce');
+    // @ts-expect-error
     assert(data.showTime === 'false');
   }
 }

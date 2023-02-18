@@ -99,12 +99,11 @@ export class StreamUtilTest {
     for (let i = 0; i < 10; i++) {
       fs.appendFile(file, `${i}\n`);
     }
-
     for await (const line of StreamUtil.streamLines(file)) {
       received.push(parseInt(line, 10));
     }
 
-
     assert.deepStrictEqual(new Set(received), new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
+    await fs.unlink(file);
   }
 }
