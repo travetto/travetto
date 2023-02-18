@@ -297,4 +297,22 @@ export class ManifestIndex {
     }
     return out;
   }
+
+  /**
+   * Get local folders that represent the user's controlled input
+   */
+  getLocalInputFolders(): string[] {
+    return this.getLocalModules()
+      .flatMap(x =>
+        (!this.manifest.monoRepo || x.sourcePath !== this.manifest.workspacePath) ?
+          [x.sourcePath] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(x.sourcePath, y))
+      );
+  }
+
+  /**
+   * Get local output folders
+   */
+  getLocalOutputFolders(): string[] {
+    return this.getLocalModules().map(x => x.outputPath);
+  }
 }
