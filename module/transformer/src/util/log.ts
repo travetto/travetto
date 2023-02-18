@@ -36,7 +36,8 @@ export class LogUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const ox = x as object;
       const out: Record<string, unknown> = {};
-      for (const key of Object.keys(ox)) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      for (const key of Object.keys(ox) as (keyof typeof ox)[]) {
         if (Object.getPrototypeOf(ox[key]) === Function.prototype || exclude.has(key) || ox[key] === undefined) {
           continue;
         }

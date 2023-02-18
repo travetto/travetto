@@ -1,38 +1,16 @@
-import util from 'util';
 import { install } from 'source-map-support';
 import ts from 'typescript';
 import timers from 'timers/promises';
 import fs from 'fs/promises';
 
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
-import { RootIndex, watchFolders } from '@travetto/manifest';
-import { TransformerManager } from '@travetto/transformer';
+import { path, RootIndex } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
 import { CompilerState } from './state';
-import type { CompilerLogEvent } from '../support/transpile';
-
-export type TransformerProvider = {
-  init(checker: ts.TypeChecker): void;
-  get(): ts.CustomTransformers | undefined;
-};
-
-type EmitError = Error | readonly ts.Diagnostic[];
-type Emitter = (file: string, newProgram?: boolean) => Promise<EmitError | undefined>;
-type EmitEvent = { file: string, i: number, total: number, err?: EmitError };
-
-function log(level: 'info' | 'debug', message: string, ...args: unknown[]): void {
-  if (process.send) {
-    const ev: CompilerLogEvent = [level, util.format(message, ...args)];
-    process.send(ev);
-  } else {
-    // eslint-disable-next-line no-console
-    console[level](message, ...args);
-  }
-}
-
-const debug = log.bind(null, 'debug');
-const info = log.bind(null, 'info');
+import { CompilerWatcher } from './watch';
+import { Log } from './log';
+import { CompileEmitError, CompileEmitEvent, CompileEmitter } from './types';
 
 /**
  * Compilation support
@@ -46,77 +24,67 @@ export class Compiler {
     const [dirty, watch] = process.argv.slice(2);
     install();
     const dirtyFiles = (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
-    return new Compiler(dirtyFiles).run(watch === 'true');
+    return new Compiler().init(dirtyFiles).then(c => c.run(watch === 'true'));
   }
 
   #state: CompilerState;
   #dirtyFiles: string[];
 
-  constructor(dirtyFiles: string[]) {
-    this.#state = new CompilerState(RootIndex.manifest);
-    this.#dirtyFiles = dirtyFiles[0] === '*' ?
-      this.#state.getAllFiles() :
-      dirtyFiles.map(f => this.#state.getInputForSource(f));
+  get compilerPidFile(): string {
+    return path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder, 'compiler.pid');
   }
 
-  get state(): CompilerState {
-    return this.#state;
+  async reserveWorkspace(): Promise<void> {
+    await fs.writeFile(this.compilerPidFile, `${process.pid}`);
+  }
+
+  async processOwnsWorkspace(): Promise<boolean> {
+    try {
+      const pid = await fs.readFile(this.compilerPidFile);
+      return +pid !== process.pid;
+    } catch {
+      return true;
+    }
+  }
+
+  async init(dirtyFiles: string[]): Promise<this> {
+    this.#state = await CompilerState.get(RootIndex.manifest);
+    this.#dirtyFiles = dirtyFiles[0] === '*' ?
+      this.#state.getAllFiles() :
+      dirtyFiles.map(f => this.#state.getBySource(f)!.input);
+
+    return this;
   }
 
   /**
    * Watches local modules
    */
-  async #watchLocalModules(emit: Emitter): Promise<() => Promise<void>> {
-    const emitWithError = async (file: string): Promise<void> => {
+  #watchLocalModules(emit: CompileEmitter): Promise<() => Promise<void>> {
+    return new CompilerWatcher(this.#state).watchFiles(async file => {
       const err = await emit(file, true);
       if (err) {
-        info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
+        Log.info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
       } else {
-        info(`Compiled ${file.split('node_modules/')[1]}`);
+        Log.info(`Compiled ${file.split('node_modules/')[1]}`);
       }
-    };
-    const watcher = this.state.getWatcher({
-      create: emitWithError,
-      update: emitWithError,
-      delete: (outputFile) => fs.unlink(outputFile).catch(() => { })
+      return err;
     });
-    return watchFolders(RootIndex.getLocalInputFolders(), watcher, {
-      filter: ev => ev.file.endsWith('.ts') || ev.file.endsWith('.js'),
-      ignore: ['node_modules']
-    });
-  }
-
-  async createTransformerProvider(): Promise<TransformerProvider> {
-    return TransformerManager.create(this.state.transformers);
   }
 
   /**
    * Compile in a single pass, only emitting dirty files
    */
-  async getCompiler(): Promise<Emitter> {
+  async getCompiler(): Promise<CompileEmitter> {
     let program: ts.Program;
 
-    const transformers = await this.createTransformerProvider();
-    const options = await this.state.getCompilerOptions();
-    const host = this.state.getCompilerHost(options);
-
-    const emit = async (inputFile: string, needsNewProgram = program === undefined): Promise<EmitError | undefined> => {
+    const emit = async (inputFile: string, needsNewProgram = program === undefined): Promise<CompileEmitError | undefined> => {
       try {
         if (needsNewProgram) {
-          program = ts.createProgram({ rootNames: this.#state.getAllFiles(), host, options, oldProgram: program });
-          transformers.init(program.getTypeChecker());
+          program = this.#state.createProgram(program);
         }
-        if (inputFile.endsWith('.json')) {
-          host.writeFile(this.#state.getOutputForInput(inputFile), host.readFile(inputFile)!, false);
-        } else if (inputFile.endsWith('.js')) {
-          host.writeFile(this.#state.getOutputForInput(inputFile), ts.transpile(host.readFile(inputFile)!, options), false);
-        } else {
-          const source = program.getSourceFile(inputFile)!;
-          const result = program.emit(source, host.writeFile, undefined, false, transformers.get());
-
-          if (result.diagnostics?.length) {
-            return result.diagnostics;
-          }
+        const result = this.#state.writeInputFile(program, inputFile);
+        if (result?.diagnostics?.length) {
+          return result.diagnostics;
         }
       } catch (err) {
         if (err instanceof Error) {
@@ -133,30 +101,30 @@ export class Compiler {
   /**
    * Emit all files as a stream
    */
-  async * emit(files: string[], emitter: Emitter): AsyncIterable<EmitEvent> {
+  async * emit(files: string[], emitter: CompileEmitter): AsyncIterable<CompileEmitEvent> {
     let i = 0;
     for (const file of files) {
       const err = await emitter(file);
       const imp = file.replace(/.*node_modules\//, '');
       yield { file: imp, i: i += 1, err, total: files.length };
     }
-    debug(`Compiled ${i} files`);
+    Log.debug(`Compiled ${i} files`);
   }
 
   /**
    * Run the compiler
    */
   async run(watch?: boolean): Promise<void> {
-    debug('Compilation started');
+    Log.debug('Compilation started');
 
-    await this.#state.reserveWorkspace();
+    await this.reserveWorkspace();
 
     const emitter = await this.getCompiler();
     let failed = false;
 
-    debug('Compiler loaded');
+    Log.debug('Compiler loaded');
 
-    const resolveEmittedFile = ({ file, total, i, err }: EmitEvent): TerminalProgressEvent => {
+    const resolveEmittedFile = ({ file, total, i, err }: CompileEmitEvent): TerminalProgressEvent => {
       if (err) {
         failed = true;
         console.error(CompilerUtil.buildTranspileError(file, err));
@@ -167,23 +135,23 @@ export class Compiler {
     if (this.#dirtyFiles.length) {
       await GlobalTerminal.trackProgress(this.emit(this.#dirtyFiles, emitter), resolveEmittedFile, { position: 'bottom' });
       if (failed) {
-        debug('Compilation failed');
+        Log.debug('Compilation failed');
         process.exit(1);
       } else {
-        debug('Compilation succeeded');
+        Log.debug('Compilation succeeded');
       }
     }
 
     if (watch) {
       if (!this.#dirtyFiles.length) {
-        const resolved = this.state.getInputForSource(RootIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile);
+        const resolved = this.#state.getBySource(RootIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile)!.input;
         await emitter(resolved, true);
       }
-      info('Watch is ready');
+      Log.info('Watch is ready');
       await this.#watchLocalModules(emitter);
       for await (const _ of timers.setInterval(1000)) {
-        if (await this.#state.processOwnsWorkspace()) {
-          info('Workspace changed externally, restarting');
+        if (await this.processOwnsWorkspace()) {
+          Log.info('Workspace changed externally, restarting');
           if (process.send) {
             process.send('restart');
             process.exit(0);

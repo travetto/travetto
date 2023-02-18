@@ -3,7 +3,7 @@ import { path } from './path';
 
 export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
 
-type EventListener = (ev: WatchEvent, folder: string) => void;
+export type WatchEventListener = (ev: WatchEvent, folder: string) => void;
 type EventFilter = (ev: WatchEvent) => boolean;
 type WatchConfig = { filter?: EventFilter, ignore?: string[], createMissing?: boolean };
 
@@ -22,7 +22,7 @@ async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
  * @param onEvent
  * @private
  */
-export async function watchFolders(folders: string[], onEvent: EventListener, config: WatchConfig = {}): Promise<() => Promise<void>> {
+export async function watchFolders(folders: string[], onEvent: WatchEventListener, config: WatchConfig = {}): Promise<() => Promise<void>> {
   const lib = await getWatcher();
   const createMissing = config.createMissing ?? false;
   const validFolders = new Set(folders);

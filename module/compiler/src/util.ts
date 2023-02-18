@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestContext, ManifestRoot, Package, path } from '@travetto/manifest';
+import { ManifestContext, ManifestModuleFileType, ManifestRoot, Package, path } from '@travetto/manifest';
 
 type OutputToSource = (outputFile: string) => ({ source: string } | undefined);
 export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
@@ -11,6 +11,11 @@ const nativeCwd = process.cwd();
  * Standard utilities for compiler
  */
 export class CompilerUtil {
+
+  /**
+   * Determine if this is a manifest file we care about
+   */
+  static validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
 
   /**
    * Map input file to output format, generally converting ts extensions to js
