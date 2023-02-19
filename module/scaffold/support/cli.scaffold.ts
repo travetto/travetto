@@ -95,9 +95,16 @@ export class ScaffoldCommand extends CliCommand<Options> {
       return this.exit(1);
     }
 
-    const ctx = new Context(
-      name, this.cmd.template, path.resolve(this.cmd.dir ?? name)
-    );
+    if (!name && this.cmd.dir) {
+      name = path.basename(this.cmd.dir);
+    } else if (name && !this.cmd.dir) {
+      this.cmd.dir = path.resolve(name);
+    } else if (!name && !this.cmd.dir) {
+      console.error('Either a name or a target directory are required');
+      return this.exit(1);
+    }
+
+    const ctx = new Context(name, this.cmd.template, path.resolve(this.cmd.dir));
 
     if (!this.cmd.force) {
       await ctx.initialize();
@@ -117,6 +124,9 @@ export class ScaffoldCommand extends CliCommand<Options> {
     await ctx.templateResolvedFiles();
 
     await ctx.exec('npm', ['i']);
-    await ctx.exec('npm', ['run', 'build']);
+    await ctx.exec('npx', ['trv', 'build']);
+    if (ctx.devDependencies.includes('@travetto/eslint-plugin')) {
+      await ctx.exec('npx', ['trv', 'lint:configure']);
+    }
   }
 }

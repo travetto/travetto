@@ -4,11 +4,17 @@
     "name": "{{{author.name}}}"
   },
   "dependencies": {
-    // {{#frameworkDependencies}}
+    // {{#dependencies}}
     "{{{.}}}": "^{{{frameworkVersion}}}",
-    // {{/frameworkDependencies}}
+    // {{/dependencies}}
     "@travetto/app": "^{{{frameworkVersion}}}",
-    "@travetto/cli": "^{{{frameworkVersion}}}",
+    "@travetto/cli": "^{{{frameworkVersion}}}"
+  },
+  "devDependencies": {
+    // {{#devDependencies}}
+    "{{{.}}}": "^{{{frameworkVersion}}}",
+    // {{/devDependencies}}
+    "@travetto/compiler": "^{{{frameworkVersion}}}",
     "@travetto/pack": "^{{{frameworkVersion}}}"
   },
   "description": "A Travetto-based project",
@@ -20,10 +26,11 @@
   ],
   "license": "MIT",
   "scripts": {
+    "watch": "npx trv watch",
     "build": "npx trv build",
     "start": "npx trv run rest",
     "test": "npx trv test",
-    "lint": "npx eslint --ext .ts --ext .js ."
+    "lint": "npx trv lint"
   },
   "files": [
     "src",

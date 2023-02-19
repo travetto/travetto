@@ -9,12 +9,6 @@
   "gitignore.txt": {
     "rename": ".gitignore"
   },
-  "eslintrc.js.txt": {
-    "rename": ".eslintrc.js",
-    "requires": [
-      "@travetto/eslint-plugin"
-    ]
-  },
   "resources/application.yml": {},
   "src/model/todo.ts": {
     "requires": [

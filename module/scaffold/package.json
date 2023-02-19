@@ -16,7 +16,8 @@
   },
   "files": [
     "bin",
-    "support"
+    "support",
+    "resources"
   ],
   "repository": {
     "url": "https://github.com/travetto/travetto.git",

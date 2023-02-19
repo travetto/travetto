@@ -9,6 +9,14 @@ import { Feature } from './features';
 type ListingEntry = { requires?: string[], rename?: string };
 type Listing = Record<string, ListingEntry>;
 
+const DEV_DEPS = new Set([
+  '@travetto/test',
+  '@travetto/pack',
+  '@travetto/compiler',
+  '@travetto/transformer',
+  '@travetto/eslint-plugin',
+]);
+
 export class Context {
 
   static #meetsRequirement(modules: string[], desired: string[]): boolean {
@@ -28,7 +36,8 @@ export class Context {
 
   #template: string;
   #targetDir: string;
-  #frameworkDependencies: string[] = [];
+  #dependencies: string[] = [];
+  #devDependencies: string[] = [];
   #peerDependencies: string[] = [];
   #modules: Record<string, boolean>;
 
@@ -41,15 +50,23 @@ export class Context {
     this.#targetDir = path.resolve(targetDir);
   }
 
+  get selfPath(): string {
+    return RootIndex.getModule('@travetto/scaffold')!.sourcePath;
+  }
+
   get modules(): Record<string, boolean> {
     if (!this.#modules) {
-      this.#modules = this.#frameworkDependencies.map(x => x.split('/')).reduce((acc, [, v]) => ({ ...acc, [v]: true }), {});
+      this.#modules = this.#dependencies.map(x => x.split('/')).reduce((acc, [, v]) => ({ ...acc, [v]: true }), {});
     }
     return this.#modules;
   }
 
-  get frameworkDependencies(): string[] {
-    return this.#frameworkDependencies;
+  get dependencies(): string[] {
+    return this.#dependencies;
+  }
+
+  get devDependencies(): string[] {
+    return this.#devDependencies;
   }
 
   get peerDependencies(): string[] {
@@ -61,7 +78,7 @@ export class Context {
   }
 
   source(file?: string): string {
-    return path.resolve('resources', 'templates', this.#template, ...file ? [file] : []);
+    return path.resolve(this.selfPath, 'resources', 'templates', this.#template, ...file ? [file] : []);
   }
 
   destination(file?: string): string {
@@ -74,7 +91,8 @@ export class Context {
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {
     return Object.entries(await this.sourceListing)
-      .filter(([, conf]) => !conf.requires || Context.#meetsRequirement(this.#frameworkDependencies, conf.requires));
+      .filter(([, conf]) => !conf.requires
+        || Context.#meetsRequirement([...this.#dependencies, ...this.#devDependencies], conf.requires));
   }
 
   async initialize(): Promise<void> {
@@ -107,7 +125,11 @@ export class Context {
 
   async addDependency(feat: Feature): Promise<void> {
     if (feat.npm.startsWith('@travetto')) {
-      this.#frameworkDependencies.push(feat.npm);
+      if (DEV_DEPS.has(feat.npm)) {
+        this.#devDependencies.push(feat.npm);
+      } else {
+        this.#dependencies.push(feat.npm);
+      }
     } else {
       this.#peerDependencies.push(feat.npm);
     }
@@ -121,3 +143,4 @@ export class Context {
     return ExecUtil.spawn(cmd, args, { cwd: this.destination(), stdio: [0, 1, 2], isolatedEnv: true }).result;
   }
 }
+
