@@ -22,12 +22,15 @@ async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
  * @param onEvent
  * @private
  */
-export async function watchFolders(folders: string[], onEvent: WatchEventListener, config: WatchConfig = {}): Promise<() => Promise<void>> {
+export async function watchFolders(folders: string[] | [folder: string, targetFolder: string][], onEvent: WatchEventListener, config: WatchConfig = {}): Promise<() => Promise<void>> {
   const lib = await getWatcher();
   const createMissing = config.createMissing ?? false;
-  const validFolders = new Set(folders);
+  const validFolders = new Set(folders.map(x => typeof x === 'string' ? x : x[0]));
 
-  const subs = await Promise.all(folders.map(async folder => {
+  const subs = await Promise.all(folders.map(async value => {
+    const folder = typeof value === 'string' ? value : value[0];
+    const targetFolder = typeof value === 'string' ? value : value[1];
+
     if (await fs.stat(folder).then(() => true, () => createMissing)) {
       await fs.mkdir(folder, { recursive: true });
       const ignore = (await fs.readdir(folder)).filter(x => x.startsWith('.') && x.length > 2);
@@ -38,7 +41,7 @@ export async function watchFolders(folders: string[], onEvent: WatchEventListene
           }
           const finalEv = { action: ev.type, file: ev.path };
           if (!config.filter || config.filter(finalEv)) {
-            onEvent(finalEv, folder);
+            onEvent(finalEv, targetFolder);
           }
         }
       }, { ignore: [...ignore, ...config.ignore ?? []] });

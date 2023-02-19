@@ -301,12 +301,12 @@ export class ManifestIndex {
   /**
    * Get local folders that represent the user's controlled input
    */
-  getLocalInputFolders(): string[] {
-    return this.getLocalModules()
-      .flatMap(x =>
-        (!this.manifest.monoRepo || x.sourcePath !== this.manifest.workspacePath) ?
-          [x.sourcePath] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(x.sourcePath, y))
-      );
+  getLocalInputFolderMapping(): [folder: string, moduleSourceRoot: string][] {
+    return this.getLocalModules().flatMap(x =>
+      ((!this.manifest.monoRepo || x.sourcePath !== this.manifest.workspacePath) ?
+        [x.sourcePath] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(x.sourcePath, y))
+      ).map(f => [f, path.resolve(x.sourceFolder)] as [string, string])
+    );
   }
 
   /**

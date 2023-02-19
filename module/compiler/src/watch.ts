@@ -127,7 +127,7 @@ export class CompilerWatcher {
    */
   watchFiles(emit: CompileEmitter): Promise<() => Promise<void>> {
     return watchFolders(
-      this.#state.manifestIndex.getLocalInputFolders(),
+      this.#state.manifestIndex.getLocalInputFolderMapping(),
       this.#getWatcher({
         create: emit,
         update: emit,
