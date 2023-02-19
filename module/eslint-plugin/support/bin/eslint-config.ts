@@ -1,6 +1,9 @@
 // @ts-expect-error
 import * as unused from 'eslint-plugin-unused-imports';
 import * as tsEslintPlugin from '@typescript-eslint/eslint-plugin';
+import { existsSync, readFileSync } from 'fs';
+
+import { path, RootIndex } from '@travetto/manifest';
 
 import { IGNORES, RULE_COMMON } from './eslint-common';
 import { STD_RULES } from './eslint-std-rules';
@@ -14,6 +17,10 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
       pluginRules[`${name}/${ruleName}`] = rules[ruleName].defaultLevel ?? 'error';
     }
   }
+
+  const overrides = path.resolve(RootIndex.manifest.workspacePath, 'eslint-overrides.json');
+
+  const extra: (typeof STD_RULES)[] = existsSync(overrides) ? JSON.parse(readFileSync(overrides, 'utf8')) : [];
 
   const result = [
     'eslint:recommended',
@@ -68,7 +75,11 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0
       }
-    }
+    },
+    ...extra.map(ex => ({
+      ...RULE_COMMON,
+      ...ex
+    }))
   ] as const;
 
   return result;

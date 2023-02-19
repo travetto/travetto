@@ -22,7 +22,11 @@ async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
  * @param onEvent
  * @private
  */
-export async function watchFolders(folders: string[] | [folder: string, targetFolder: string][], onEvent: WatchEventListener, config: WatchConfig = {}): Promise<() => Promise<void>> {
+export async function watchFolders(
+  folders: string[] | [folder: string, targetFolder: string][],
+  onEvent: WatchEventListener,
+  config: WatchConfig = {}
+): Promise<() => Promise<void>> {
   const lib = await getWatcher();
   const createMissing = config.createMissing ?? false;
   const validFolders = new Set(folders.map(x => typeof x === 'string' ? x : x[0]));

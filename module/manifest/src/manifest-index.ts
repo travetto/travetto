@@ -305,6 +305,7 @@ export class ManifestIndex {
     return this.getLocalModules().flatMap(x =>
       ((!this.manifest.monoRepo || x.sourcePath !== this.manifest.workspacePath) ?
         [x.sourcePath] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(x.sourcePath, y))
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       ).map(f => [f, path.resolve(x.sourceFolder)] as [string, string])
     );
   }
