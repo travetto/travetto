@@ -9,6 +9,8 @@ import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
 const VALID_OPS = { watch: 'watch', build: 'build', clean: 'clean', manifest: 'manifest' };
 
+const COMPILER_FILES = [...['launcher', 'transpile', 'lock', 'log', 'lock-pinger'].map(x => `support/${x}.js`), 'package.json'];
+
 /**
  * @param {import('@travetto/manifest').ManifestContext} ctx
  * @return {Promise<import('@travetto/compiler/support/launcher').launch>}
@@ -17,7 +19,7 @@ const $getLauncher = async (ctx) => {
   const compPkg = createRequire(path.resolve('node_modules')).resolve('@travetto/compiler/package.json');
   const files = [];
 
-  for (const file of ['support/launcher.js', 'support/transpile.js', 'package.json']) {
+  for (const file of COMPILER_FILES) {
     const target = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/compiler', file);
     const src = compPkg.replace('package.json', file.replace(/[.]js$/, '.ts'));
 
@@ -30,13 +32,12 @@ const $getLauncher = async (ctx) => {
       await fs.mkdir(path.dirname(target), { recursive: true });
       const text = await fs.readFile(src, 'utf8');
       if (file.endsWith('.js')) {
-        let content = ts.transpile(text, {
-          target: ts.ScriptTarget.ES2020, module, esModuleInterop: true, allowSyntheticDefaultImports: true
-        });
-        if (ctx.moduleType === 'module') {
-          content = content.replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
-            .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
-        }
+        const content = ts.transpile(
+          text,
+          { target: ts.ScriptTarget.ES2020, module, esModuleInterop: true, allowSyntheticDefaultImports: true }
+        )
+          .replace(/^((?:im|ex)port .*from '[.][^']+)(')/mg, (_, a, b) => `${a}.js${b}`)
+          .replace(/^(import [^\n]*from '[^.][^\n/]+[/][^\n/]+[/][^\n']+)(')/mg, (_, a, b) => `${a}.js${b}`);
         await fs.writeFile(target, content, 'utf8');
       } else {
         const pkg = JSON.parse(text);

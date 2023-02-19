@@ -6,39 +6,19 @@ import { createRequire } from 'module';
 
 import { DeltaEvent, ManifestContext, ManifestRoot, Package } from '@travetto/manifest';
 
-export type CompilerLogEvent = [level: 'info' | 'debug' | 'warn', message: string];
+import { LogUtil } from './log';
+
 type ModFile = { input: string, output: string, stale: boolean };
-type WithLogger<T> = (log: (...ev: CompilerLogEvent) => void) => Promise<T>;
 export type CompileResult = 'restart' | 'complete' | 'skipped';
 
 const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};
 const SRC_REQ = createRequire(path.resolve('node_modules'));
-const LEVELS = { warn: true, debug: /^debug$/.test(process.env.TRV_BUILD ?? ''), info: !/^warn$/.test(process.env.TRV_BUILD ?? '') };
-const SCOPE_MAX = 15;
 const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
-const IS_LOG_EV = (o: unknown): o is CompilerLogEvent => o !== null && o !== undefined && Array.isArray(o);
 
 /**
  * Transpile utilities for launching
  */
 export class TranspileUtil {
-  /**
-   * Log message with filtering by level
-   */
-  static log(scope: string, args: string[], ...[level, msg]: CompilerLogEvent): void {
-    const message = msg.replaceAll(process.cwd(), '.');
-    LEVELS[level] && console.debug(new Date().toISOString(), `[${scope.padEnd(SCOPE_MAX, ' ')}]`, ...args, message);
-  }
-
-  /**
-   * With logger
-   */
-  static withLogger<T>(scope: string, op: WithLogger<T>, basic = true, args: string[] = []): Promise<T> {
-    const log = this.log.bind(null, scope, args);
-    basic && log('debug', 'Started');
-    return op(log).finally(() => basic && log('debug', 'Completed'));
-  }
-
   /**
    * Write text file, and ensure folder exists
    */
@@ -149,9 +129,39 @@ export class TranspileUtil {
   }
 
   /**
+ * Recompile folder if stale
+ */
+  static async compileIfStale(ctx: ManifestContext, scope: string, mod: string, seed: string[]): Promise<string[]> {
+    const files = await this.getModuleSources(ctx, mod, seed);
+    const changes = files.filter(x => x.stale).map(x => x.input);
+    const out: string[] = [];
+
+    try {
+      await LogUtil.withLogger(scope, async log => {
+        if (files.some(f => f.stale)) {
+          log('debug', 'Starting');
+          for (const file of files.filter(x => x.stale)) {
+            await this.transpileFile(ctx, file.input, file.output);
+          }
+          if (changes.length) {
+            out.push(...changes.map(x => `${mod}/${x}`));
+            log('debug', `Source changed: ${changes.join(', ')}`);
+          }
+          log('debug', 'Completed');
+        } else {
+          log('debug', 'Skipped');
+        }
+      }, false, [mod]);
+    } catch (err) {
+      console.error(err);
+    }
+    return out;
+  }
+
+  /**
    * Run compiler
    */
-  static async runCompiler(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], watch = false): Promise<CompileResult> {
+  static async runCompiler(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], watch: boolean, onMessage: (msg: unknown) => void): Promise<CompileResult> {
     const compiler = path.resolve(ctx.workspacePath, ctx.compilerFolder);
     const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/compiler-entry.js');
     const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${Date.now()}.${Math.random()}.json`);
@@ -160,11 +170,13 @@ export class TranspileUtil {
       path.resolve(manifest.workspacePath, manifest.modules[ev.module].sourceFolder, ev.file)
     );
 
+    let proc: cp.ChildProcess | undefined;
+
     try {
       await this.writeTextFile(deltaFile, changedFiles.join('\n'));
 
-      return await this.withLogger('compiler-exec', log => new Promise<CompileResult>((res, rej) => {
-        const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
+      return await LogUtil.withLogger('compiler-exec', log => new Promise<CompileResult>((res, rej) => {
+        proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
           env: {
             ...process.env,
             TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
@@ -172,16 +184,18 @@ export class TranspileUtil {
           stdio: [0, 1, 2, 'ipc'],
         })
           .on('message', msg => {
-            if (IS_LOG_EV(msg)) {
+            if (LogUtil.isLogEvent(msg)) {
               log(...msg);
             } else if (msg === 'restart') {
-              proc.kill('SIGKILL');
-              res('restart');
+              res(msg);
+            } else {
+              onMessage(msg);
             }
           })
           .on('exit', code => (code !== null && code > 0) ? rej(new Error('Failed during compilation')) : res('complete'));
       }));
     } finally {
+      if (proc?.killed === false) { proc.kill('SIGKILL'); }
       await fs.rm(deltaFile, { force: true });
     }
   }

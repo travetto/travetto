@@ -57,7 +57,7 @@ export class Workspace {
   }
 
   static resolveExtensionFile(file: string): string {
-    return path.resolve(this.#manifestContext.workspacePath, '.trv_vscode', file);
+    return path.resolve(this.#manifestContext.workspacePath, this.#manifestContext.toolFolder, file);
   }
 
   static get #cliFile(): string {

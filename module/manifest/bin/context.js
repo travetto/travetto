@@ -109,6 +109,7 @@ export async function getManifestContext(folder) {
     workspacePath,
     monoRepo,
     outputFolder,
+    toolFolder: '.trv_build',
     compilerFolder: '.trv_compiler'
   };
   return res;

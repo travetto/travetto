@@ -1,6 +1,6 @@
 import { install } from 'source-map-support';
-import ts from 'typescript';
 import timers from 'timers/promises';
+import ts from 'typescript';
 import fs from 'fs/promises';
 
 import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
@@ -11,6 +11,8 @@ import { CompilerState } from './state';
 import { CompilerWatcher } from './watch';
 import { Log } from './log';
 import { CompileEmitError, CompileEmitEvent, CompileEmitter } from './types';
+
+const PING_THRESHOLD = 1000;
 
 /**
  * Compilation support
@@ -29,23 +31,6 @@ export class Compiler {
 
   #state: CompilerState;
   #dirtyFiles: string[];
-
-  get compilerPidFile(): string {
-    return this.#state.resolveOutputFile('compiler.pid');
-  }
-
-  async reserveWorkspace(): Promise<void> {
-    await fs.writeFile(this.compilerPidFile, `${process.pid}`);
-  }
-
-  async processOwnsWorkspace(): Promise<boolean> {
-    try {
-      const pid = await fs.readFile(this.compilerPidFile);
-      return +pid !== process.pid;
-    } catch {
-      return true;
-    }
-  }
 
   async init(dirtyFiles: string[]): Promise<this> {
     this.#state = await CompilerState.get(RootIndex);
@@ -117,8 +102,6 @@ export class Compiler {
   async run(watch?: boolean): Promise<void> {
     Log.debug('Compilation started');
 
-    await this.reserveWorkspace();
-
     const emitter = await this.getCompiler();
     let failed = false;
 
@@ -140,24 +123,22 @@ export class Compiler {
       } else {
         Log.debug('Compilation succeeded');
       }
+    } else if (watch) {
+      // Prime compiler before complete
+      const resolved = this.#state.getArbitraryInputFile();
+      await emitter(resolved, true);
     }
 
+    process.send?.('build-complete');
+
     if (watch) {
-      if (!this.#dirtyFiles.length) {
-        const resolved = this.#state.getArbitraryInputFile();
-        await emitter(resolved, true);
-      }
       Log.info('Watch is ready');
       await this.#watchLocalModules(emitter);
-      for await (const _ of timers.setInterval(1000)) {
-        if (await this.processOwnsWorkspace()) {
-          Log.info('Workspace changed externally, restarting');
-          if (process.send) {
-            process.send('restart');
-            process.exit(0);
-          } else {
-            process.exit(1);
-          }
+      for await (const _ of timers.setInterval(PING_THRESHOLD)) {
+        if (!await fs.stat(this.#state.resolveOutputFile('.')).catch(() => false)) { // Output removed
+          process.send?.('restart');
+        } else {
+          process.send?.('ping');
         }
       }
     }

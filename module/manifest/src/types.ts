@@ -30,6 +30,7 @@ export type ManifestContext = {
   mainFolder: string;
   workspacePath: string;
   outputFolder: string;
+  toolFolder: string;
   compilerFolder: string;
   monoRepo?: boolean;
   moduleType: 'module' | 'commonjs';

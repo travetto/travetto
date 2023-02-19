@@ -1,6 +1,6 @@
 import util from 'util';
 
-import type { CompilerLogEvent } from '../support/transpile';
+import type { CompilerLogEvent } from '../support/log';
 
 function log(level: 'info' | 'debug', message: string, ...args: unknown[]): void {
   if (process.send) {
