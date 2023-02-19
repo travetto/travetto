@@ -25,7 +25,9 @@ async function compile(ctx: ManifestContext, op: 'watch' | 'build' | undefined, 
     }
   });
 
-  const { ManifestUtil, ManifestDeltaUtil } = await importManifest(ctx);
+  const { ManifestUtil, ManifestDeltaUtil, PackageUtil } = await importManifest(ctx);
+
+  PackageUtil.clearCache();
 
   const manifest = await LogUtil.withLogger('manifest', async () => ManifestUtil.buildManifest(ctx));
 

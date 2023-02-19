@@ -13,6 +13,14 @@ export class PackageUtil {
   static #cache: Record<string, Package> = {};
   static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};
 
+  /**
+   * Clear out cached package file reads
+   */
+  static clearCache(): void {
+    this.#cache = {};
+    this.#workspaces = {};
+  }
+
   static resolveImport = (library: string): string => this.#req.resolve(library);
 
   /**

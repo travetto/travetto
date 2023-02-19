@@ -12,8 +12,10 @@ const MANIFEST_FILE = 'manifest.json';
  * Manifest utils
  */
 export class ManifestUtil {
-
-  static async writeJsonWithBuffer(ctx: ManifestContext, filename: string, obj: object): Promise<string> {
+  /**
+   * Write file and copy over when ready
+   */
+  static async #writeJsonWithBuffer(ctx: ManifestContext, filename: string, obj: object): Promise<string> {
     const tempName = path.resolve(ctx.workspacePath, ctx.mainFolder, filename).replace(/[\/\\: ]/g, '_');
     const file = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule, filename);
     await fs.mkdir(path.dirname(file), { recursive: true });
@@ -85,7 +87,7 @@ export class ManifestUtil {
    * Write manifest for a given context, return location
    */
   static writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<string> {
-    return this.writeJsonWithBuffer(ctx, MANIFEST_FILE, manifest);
+    return this.#writeJsonWithBuffer(ctx, MANIFEST_FILE, manifest);
   }
 
   /**
