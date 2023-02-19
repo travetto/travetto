@@ -132,11 +132,11 @@ async function exportManifest(ctx: ManifestContext, output?: string, env = 'dev'
 /**
  * Launch
  */
-export async function launch(ctx: ManifestContext, op?: 'build' | 'watch' | 'manifest', args: (string | undefined)[] = []): Promise<void> {
+export async function launch(ctx: ManifestContext, rootCtx: ManifestContext, op?: 'build' | 'watch' | 'manifest', args: (string | undefined)[] = []): Promise<void> {
   if (op !== 'manifest') {
     let action: CompileResult = 'restart';
     while (action === 'restart') {
-      action = await compile(ctx, op);
+      action = await compile(rootCtx, op);
     }
   }
   switch (op) {

@@ -64,5 +64,7 @@ const $getLauncher = async (ctx) => {
     return console.log(`Cleaned ${ctx.workspacePath}: [${folders.join(', ')}]`);
   }
 
-  return (await $getLauncher(ctx))(ctx, op, args);
+  const rootCtx = ctx.monoRepo ? await getManifestContext(ctx.workspacePath) : ctx;
+
+  return (await $getLauncher(ctx))(ctx, rootCtx, op, args);
 })();
