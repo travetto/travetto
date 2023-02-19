@@ -1,6 +1,6 @@
 {
   "name": "@travetto/transformer",
-  "version": "3.0.0-rc.12",
+  "version": "3.0.0-rc.13",
   "description": "Functionality for AST transformations, with transformer registration, and general utils",
   "keywords": [
     "typescript",
@@ -24,7 +24,7 @@
     "directory": "module/transformer"
   },
   "dependencies": {
-    "@travetto/manifest": "^3.0.0-rc.9",
+    "@travetto/manifest": "^3.0.0-rc.10",
     "tslib": "^2.5.0",
     "typescript": "^4.9.5"
   },
