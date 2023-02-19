@@ -1,6 +1,6 @@
 {
   "name": "@travetto/base",
-  "version": "3.0.0-rc.11",
+  "version": "3.0.0-rc.12",
   "description": "Environment config and common utilities for travetto applications.",
   "keywords": [
     "shutdown-helper",
@@ -26,12 +26,12 @@
     "directory": "module/base"
   },
   "dependencies": {
-    "@travetto/manifest": "^3.0.0-rc.10",
+    "@travetto/manifest": "^3.0.0-rc.11",
     "@types/source-map-support": "^0.5.6",
     "source-map-support": "^0.5.21"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^3.0.0-rc.13"
+    "@travetto/transformer": "^3.0.0-rc.14"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

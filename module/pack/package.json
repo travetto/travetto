@@ -1,6 +1,6 @@
 {
   "name": "@travetto/pack",
-  "version": "3.0.0-rc.14",
+  "version": "3.0.0-rc.15",
   "description": "Code packing utilities",
   "keywords": [
     "travetto",
@@ -28,12 +28,12 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-terser": "^0.4.0",
     "@rollup/plugin-node-resolve": "^15.0.1",
-    "@travetto/base": "^3.0.0-rc.11",
+    "@travetto/base": "^3.0.0-rc.12",
     "rollup": "^3.12.1",
     "rollup-plugin-sourcemaps": "^0.6.3"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.12"
+    "@travetto/cli": "^3.0.0-rc.13"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
