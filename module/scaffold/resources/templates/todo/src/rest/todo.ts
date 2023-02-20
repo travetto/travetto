@@ -1,7 +1,7 @@
 import { Controller, Get, Put, Post, Delete } from '@travetto/rest';
 import { NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
-import { ModelQuery, ModelQueryCrudSupport } from '@travetto/model-query';
+import { ModelQuery } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
 // {{#modules.auth-rest}}
 import { Authenticated } from '@travetto/auth-rest';
@@ -9,6 +9,7 @@ import { Authenticated } from '@travetto/auth-rest';
 // {{#modules.auth-rest-context}}
 import { AuthContextService } from '@travetto/auth-rest-context';
 // {{/modules.auth-rest-context}}
+import { $_modelService_$ } from '$_modelImport_$';
 
 import { Todo } from '../model/todo';
 
@@ -31,7 +32,7 @@ class Query {
 export class TodoController {
 
   @Inject()
-  source: ModelQueryCrudSupport;
+  source: $_modelService_$;
 
   // {{#modules.auth-rest-context}}
   @Inject()

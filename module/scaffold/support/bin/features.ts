@@ -53,11 +53,26 @@ export const FEATURES: Feature[] = [
     title: 'Data Modelling',
     package: '@travetto/model',
     choices: [
-      { title: 'Elasticsearch', package: '@travetto/model-elasticsearch' },
-      { title: 'MongoDB', package: '@travetto/model-mongo' },
-      { title: 'MySQL', package: '@travetto/model-mysql' },
-      { title: 'PostgreSQL', package: '@travetto/model-postgres' },
-      { title: 'SQLite', package: '@travetto/model-sqlite' }
+      {
+        title: 'Elasticsearch', package: '@travetto/model-elasticsearch',
+        context: { modelService: 'ElasticsearchModelService', modelConfig: 'ElasticsearchModelConfig', modelImport: '@travetto/model-elasticsearch' }
+      },
+      {
+        title: 'MongoDB', package: '@travetto/model-mongo',
+        context: { modelService: 'MongoModelService', modelConfig: 'MongoModelConfig', modelImport: '@travetto/model-mongo' }
+      },
+      {
+        title: 'MySQL', package: '@travetto/model-mysql',
+        context: { modelService: 'SQLModelService', modelConfig: 'SQLModelConfig', modelImport: '@travetto/model-sql' }
+      },
+      {
+        title: 'PostgreSQL', package: '@travetto/model-postgres',
+        context: { modelService: 'SQLModelService', modelConfig: 'SQLModelConfig', modelImport: '@travetto/model-sql' }
+      },
+      {
+        title: 'SQLite', package: '@travetto/model-sqlite',
+        context: { modelService: 'SQLModelService', modelConfig: 'SQLModelConfig', modelImport: '@travetto/model-sql' }
+      }
     ],
     default: 'MongoDB'
   },

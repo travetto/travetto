@@ -41,12 +41,11 @@ export class Context {
   #dependencies: string[] = [];
   #devDependencies: string[] = [];
   #peerDependencies: string[] = [];
-  #modules: Record<string, boolean>;
+  #featureContexts: Record<string, unknown>[] = [];
 
   packageManager: ManifestContext['packageManager'] = 'npm';
 
   readonly name: string;
-  readonly frameworkVersion = RootIndex.mainDigest().framework.replace(/[.]\d+$/, '.0');
 
   constructor(name: string, template: string, targetDir: string) {
     this.name = name;
@@ -76,29 +75,6 @@ export class Context {
 
   get selfPath(): string {
     return RootIndex.getModule('@travetto/scaffold')!.sourcePath;
-  }
-
-  get modules(): Record<string, boolean> {
-    if (!this.#modules) {
-      this.#modules = this.#dependencies.map(x => x.split('/')).reduce((acc, [, v]) => ({ ...acc, [v]: true }), {});
-    }
-    return this.#modules;
-  }
-
-  get dependencies(): string[] {
-    return this.#dependencies;
-  }
-
-  get devDependencies(): string[] {
-    return this.#devDependencies;
-  }
-
-  get peerDependencies(): string[] {
-    return this.#peerDependencies;
-  }
-
-  get moduleNames(): string[] {
-    return [...Object.keys(this.modules)].filter(x => !x.includes('-'));
   }
 
   source(file?: string): string {
@@ -133,10 +109,32 @@ export class Context {
     }
   }
 
+  templateContext(): Record<string, unknown> {
+    const modules = this.#dependencies.map(x => x.split('/')).reduce((acc, [, v]) => ({ ...acc, [v]: true }), {});
+    const moduleNames = [...Object.keys(modules)].filter(x => !x.includes('-'));
+
+    return Object.assign({
+      frameworkVersion: RootIndex.mainDigest().framework.replace(/[.]\d+$/, '.0'),
+      name: this.name,
+      modules,
+      moduleNames,
+      dependencies: this.#dependencies,
+      devDependencies: this.#devDependencies,
+    }, ...this.#featureContexts);
+  }
+
   async template(file: string, { rename }: ListingEntry): Promise<void> {
     const contents = await fs.readFile(this.source(file), 'utf-8');
     const out = this.destination(rename ?? file);
-    const rendered = mustache.render(contents, this).replace(/^\s*(\/\/|#)\s*\n/gsm, '');
+    const rendered = mustache.render(
+      contents
+        .replaceAll('$_', '{{{')
+        .replaceAll('_$', '}}}'),
+      this.templateContext(),
+    )
+      .replace(/^\s*(\/\/.*@doc-exclude.*)\n/gsm, '')
+      .replace(/^\s*(\/\/|#)\s*\n/gsm, '')
+      .replace(/\s*(\/\/|#)\s*/gsm, '');
     await fs.mkdir(path.dirname(out), { recursive: true });
     await fs.writeFile(out, rendered, 'utf8');
   }
@@ -162,6 +160,9 @@ export class Context {
     if (feat.field) {
       // @ts-expect-error
       this[feat.field] = feat.value!;
+    }
+    if (feat.context) {
+      this.#featureContexts.push(feat.context);
     }
 
     for (const addon of (feat.addons ?? [])) {
@@ -194,7 +195,7 @@ export class Context {
 
     yield cliTpl`${{ type: 'Initial Build' }}`;
     await this.#exec('npx', ['trv', 'build']);
-    if (this.devDependencies.includes('@travetto/eslint')) {
+    if (this.#devDependencies.includes('@travetto/eslint')) {
       yield cliTpl`${{ type: 'ESLint Registration' }}`;
       await this.#exec('npx', ['trv', 'lint:register']);
     }
