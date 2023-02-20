@@ -3,6 +3,7 @@ export type Feature = {
   package?: string;
   field?: string;
   value?: string;
+  required?: boolean;
   version?: string;
   addons?: Feature[];
   choices?: Feature[];
@@ -18,6 +19,7 @@ export const FEATURES: Feature[] = [
       { title: 'NPM', field: 'packageManager', value: 'npm' },
       { title: 'Yarn', field: 'packageManager', value: 'yarn' }
     ],
+    required: true,
     default: 'npm'
   },
   {

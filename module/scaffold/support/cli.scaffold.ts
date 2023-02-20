@@ -59,7 +59,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
 
   async * #resolveFeatures(features: Feature[], chosen = false): AsyncGenerator<Feature> {
     for (const feat of features) {
-      if (!chosen) {
+      if (!chosen && !feat.required) {
         const ans = await enquirer.prompt<{ choice: boolean | string }>([{
           type: 'confirm',
           name: 'choice',
