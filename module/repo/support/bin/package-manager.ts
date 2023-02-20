@@ -20,7 +20,6 @@ export class PackageManager {
       case 'yarn':
         args = ['info', `${mod.name}@${mod.version}`, 'dist.integrity', '--json'];
         break;
-      default: throw new Error(`Unknown package manager: ${ctx.packageManager}`);
     }
     return ExecUtil.spawn(ctx.packageManager, args, opts);
   }
@@ -42,7 +41,6 @@ export class PackageManager {
         const res = JSON.parse(result.stdout);
         return res.data !== undefined;
       }
-      default: throw new Error(`Unknown package manager: ${ctx.packageManager}`);
     }
   }
 
@@ -57,7 +55,6 @@ export class PackageManager {
       case 'yarn':
         args = ['version', level, ...(preid ? ['--preid', preid] : []), ...mods];
         break;
-      default: throw new Error(`Unknown package manager: ${ctx.packageManager}`);
     }
     await ExecUtil.spawn(ctx.packageManager, args, { stdio: 'inherit' }).result;
   }
@@ -72,7 +69,6 @@ export class PackageManager {
       case 'yarn':
         args = ['pack', '--dry-run'];
         break;
-      default: throw new Error(`Unknown package manager: ${ctx.packageManager}`);
     }
     return ExecUtil.spawn(ctx.packageManager, args, opts);
   }
@@ -92,7 +88,6 @@ export class PackageManager {
       case 'yarn':
         args = ['publish', '--tag', versionTag, '--access', 'public'];
         break;
-      default: throw new Error(`Unknown package manager: ${ctx.packageManager}`);
     }
     return ExecUtil.spawn(ctx.packageManager, args, opts);
   }

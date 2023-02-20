@@ -1,5 +1,6 @@
 import { AppError, FileResourceProvider, GlobalEnv } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
+import { RootIndex } from '@travetto/manifest';
 import { Secret } from '@travetto/schema';
 
 @Config('rest.ssl')
@@ -14,7 +15,12 @@ export class RestSslConfig {
     try {
       forge = (await import('node-forge')).default;
     } catch {
-      throw new Error('In order to generate SSL keys, you must install node-forge, "npm i --save-dev node-forge"');
+      let install: string;
+      switch (RootIndex.manifest.packageManager) {
+        case 'npm': install = 'npm i --save-dev node-forge'; break;
+        case 'yarn': install = 'yarn add --dev node-forge'; break;
+      }
+      throw new Error(`In order to generate SSL keys, you must install node-forge, "${install}"`);
     }
 
     const pki = forge.pki;

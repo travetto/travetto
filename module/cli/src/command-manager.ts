@@ -46,9 +46,14 @@ export class CliCommandManager {
       const matchedCfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
       if (matchedCfg) {
         const [, pkg, prod] = matchedCfg;
+        let install: string;
+        switch (RootIndex.manifest.packageManager) {
+          case 'npm': install = `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}`; break;
+          case 'yarn': install = `yarn add ${prod ? '' : '--dev '}@travetto/${pkg}`; break;
+        }
         console.error!(cliTpl`
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
-${{ identifier: `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}` }}
+${{ identifier: install }}
 `);
         await ShutdownManager.exit(1);
       }

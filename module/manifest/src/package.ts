@@ -197,7 +197,6 @@ export class PackageUtil {
               .map(([name, { location }]) => ({ sourcePath: location, name }));
             break;
           }
-          default: throw new Error(`Unknown package manager: ${ctx.packageManager}`);
         }
 
         this.#workspaces[rootPath] = out;
