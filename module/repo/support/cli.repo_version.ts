@@ -1,7 +1,8 @@
 import { CliCommand, CliScmUtil, OptionConfig } from '@travetto/cli';
 import { CliModuleUtil } from '@travetto/cli/src/module';
+import { RootIndex } from '@travetto/manifest';
 
-import { Npm, SemverLevel } from './bin/npm';
+import { PackageManager, SemverLevel } from './bin/package-manager';
 
 type VersionOptions = {
   changed: OptionConfig<boolean>;
@@ -47,7 +48,7 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
       return this.exit(1);
     }
 
-    await Npm.version(modules, level, prefix);
+    await PackageManager.version(RootIndex.manifest, modules, level, prefix);
 
     await CliModuleUtil.synchronizeModuleVersions();
 

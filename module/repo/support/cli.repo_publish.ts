@@ -1,5 +1,7 @@
 import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
-import { Npm } from './bin/npm';
+import { RootIndex } from '@travetto/manifest';
+
+import { PackageManager } from './bin/package-manager';
 
 type Options = {
   dryRun: OptionConfig<boolean>;
@@ -21,11 +23,11 @@ export class RepoPublishCommand extends CliCommand<Options> {
   }
 
   async action(...args: unknown[]): Promise<void> {
-    const published = await CliModuleUtil.execOnModules('all', (mod, opts) => Npm.isPublished(mod, opts), {
+    const published = await CliModuleUtil.execOnModules('all', (mod, opts) => PackageManager.isPublished(RootIndex.manifest, mod, opts), {
       filter: mod => !!mod.local && !mod.internal,
       progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
       showStderr: false,
-      transformResult: Npm.validatePublishedResult,
+      transformResult: (mod, res) => PackageManager.validatePublishedResult(RootIndex.manifest, mod, res),
     });
 
     if (this.cmd.dryRun) {
@@ -33,7 +35,7 @@ export class RepoPublishCommand extends CliCommand<Options> {
     }
 
     await CliModuleUtil.execOnModules(
-      'all', (mod, opts) => Npm.publish(mod, this.cmd.dryRun, opts),
+      'all', (mod, opts) => PackageManager.publish(RootIndex.manifest, mod, this.cmd.dryRun, opts),
       {
         progressMessage: (mod) => `Published [%idx/%total] -- ${mod?.name}`,
         showStdout: false,

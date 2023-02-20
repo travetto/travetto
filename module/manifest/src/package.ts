@@ -179,9 +179,25 @@ export class PackageUtil {
       try {
         return JSON.parse(await fs.readFile(cache, 'utf8'));
       } catch {
-        const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8', env: { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH } });
-        const res: { location: string, name: string }[] = JSON.parse(text);
-        const out = this.#workspaces[rootPath] = res.map(d => ({ sourcePath: d.location, name: d.name }));
+        let out: PackageWorkspaceEntry[];
+        switch (ctx.packageManager) {
+          case 'npm': {
+            const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8', env: { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH } });
+            out = JSON.parse(text)
+              .map((d: { location: string, name: string }) => ({ sourcePath: d.location, name: d.name }));
+            break;
+          }
+          case 'yarn': {
+            const text = execSync('yarn -s workspaces info', { cwd: rootPath, encoding: 'utf8', env: { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH } });
+            out = Object.entries<{ location: string }>(JSON.parse(text))
+              .map(([name, { location }]) => ({ sourcePath: location, name }));
+            break;
+          }
+          default: throw new Error(`Unknown package manager: ${ctx.packageManager}`);
+        }
+
+        this.#workspaces[rootPath] = out;
+
         await fs.writeFile(cache, JSON.stringify(out), 'utf8');
       }
     }

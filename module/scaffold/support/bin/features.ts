@@ -1,6 +1,8 @@
 export type Feature = {
   title?: string;
-  npm: string;
+  package?: string;
+  field?: string;
+  value?: string;
   version?: string;
   addons?: Feature[];
   choices?: Feature[];
@@ -11,41 +13,49 @@ export type Feature = {
 
 export const FEATURES: Feature[] = [
   {
-    title: 'Rest Framework',
-    npm: '@travetto/rest',
+    title: 'Package Manager',
     choices: [
-      { title: 'Express.js', npm: '@travetto/rest-express' },
-      { title: 'Express.js Lambda', npm: '@travetto/rest-express-lambda' },
-      { title: 'KOA', npm: '@travetto/rest-koa' },
-      { title: 'KOA Lambda', npm: '@travetto/rest-koa-lambda' },
-      { title: 'Fastify', npm: '@travetto/rest-fastify' },
-      { title: 'Fastify Lambda', npm: '@travetto/rest-fastify-lambda' },
+      { title: 'NPM', field: 'packageManager', value: 'npm' },
+      { title: 'Yarn', field: 'packageManager', value: 'yarn' }
+    ],
+    default: 'npm'
+  },
+  {
+    title: 'Rest Framework',
+    package: '@travetto/rest',
+    choices: [
+      { title: 'Express.js', package: '@travetto/rest-express' },
+      { title: 'Express.js Lambda', package: '@travetto/rest-express-lambda' },
+      { title: 'KOA', package: '@travetto/rest-koa' },
+      { title: 'KOA Lambda', package: '@travetto/rest-koa-lambda' },
+      { title: 'Fastify', package: '@travetto/rest-fastify' },
+      { title: 'Fastify Lambda', package: '@travetto/rest-fastify-lambda' },
     ],
     addons: [
-      { title: 'OpenAPI', npm: '@travetto/openapi' },
-      { title: 'Logging', npm: '@travetto/log' }
+      { title: 'OpenAPI', package: '@travetto/openapi' },
+      { title: 'Logging', package: '@travetto/log' }
     ],
     default: 'Express.js'
   },
-  { title: 'Test Framework', npm: '@travetto/test' },
-  { title: 'ESLint Support', npm: '@travetto/eslint' },
+  { title: 'Test Framework', package: '@travetto/test' },
+  { title: 'ESLint Support', package: '@travetto/eslint' },
   {
     title: 'Rest Authentication',
-    npm: '@travetto/auth-rest',
+    package: '@travetto/auth-rest',
     addons: [
-      { title: 'Rest Session', npm: '@travetto/rest-session', addons: [{ npm: '@travetto/auth-rest-session' }] },
-      { title: 'Context', npm: '@travetto/auth-rest-session' }
+      { title: 'Rest Session', package: '@travetto/rest-session', addons: [{ package: '@travetto/auth-rest-session' }] },
+      { title: 'Context', package: '@travetto/auth-rest-session' }
     ]
   },
   {
     title: 'Data Modelling',
-    npm: '@travetto/model',
+    package: '@travetto/model',
     choices: [
-      { title: 'Elasticsearch', npm: '@travetto/model-elasticsearch' },
-      { title: 'MongoDB', npm: '@travetto/model-mongo' },
-      { title: 'MySQL', npm: '@travetto/model-mysql' },
-      { title: 'PostgreSQL', npm: '@travetto/model-postgres' },
-      { title: 'SQLite', npm: '@travetto/model-sqlite' }
+      { title: 'Elasticsearch', package: '@travetto/model-elasticsearch' },
+      { title: 'MongoDB', package: '@travetto/model-mongo' },
+      { title: 'MySQL', package: '@travetto/model-mysql' },
+      { title: 'PostgreSQL', package: '@travetto/model-postgres' },
+      { title: 'SQLite', package: '@travetto/model-sqlite' }
     ],
     default: 'MongoDB'
   },

@@ -34,6 +34,7 @@ export type ManifestContext = {
   compilerFolder: string;
   monoRepo?: boolean;
   moduleType: 'module' | 'commonjs';
+  packageManager: 'yarn' | 'npm';
 };
 
 export type ManifestRoot = ManifestContext & {

@@ -101,6 +101,8 @@ export async function getManifestContext(folder) {
 
   const moduleType = (await $getPkg(workspacePath)).type ?? 'commonjs';
   const mainFolder = mainPath === workspacePath ? '' : mainPath.replace(`${workspacePath}/`, '');
+  /** @type {'yarn'|'npm'} */
+  const packageManager = await fs.stat(path.resolve(workspacePath, 'yarn.lock')).then(() => 'yarn', () => 'npm');
 
   const res = {
     moduleType,
@@ -110,7 +112,8 @@ export async function getManifestContext(folder) {
     monoRepo,
     outputFolder,
     toolFolder: '.trv_build',
-    compilerFolder: '.trv_compiler'
+    compilerFolder: '.trv_compiler',
+    packageManager
   };
   return res;
 }

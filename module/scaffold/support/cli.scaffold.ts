@@ -111,8 +111,8 @@ export class ScaffoldCommand extends CliCommand<Options> {
     }
 
     try {
-      for await (const dep of this.#resolveFeatures(FEATURES)) {
-        await ctx.addDependency(dep);
+      for await (const feature of this.#resolveFeatures(FEATURES)) {
+        await ctx.resolveFeature(feature);
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -122,11 +122,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
     }
 
     await ctx.templateResolvedFiles();
-
-    await ctx.exec('npm', ['i']);
-    await ctx.exec('npx', ['trv', 'build']);
-    if (ctx.devDependencies.includes('@travetto/eslint')) {
-      await ctx.exec('npx', ['trv', 'lint:configure']);
-    }
+    await ctx.install();
+    await ctx.initialBuild();
   }
 }

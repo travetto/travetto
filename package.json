@@ -33,9 +33,8 @@
   "workspaces": [
     "module/*",
     "global-test/*",
-    "related/*",
-    "!related/travetto.github.io/",
-    "!related/vscode-plugin/"
+    "related/overview",
+    "related/todo-app"
   ],
   "overrides": {
     "compression": {

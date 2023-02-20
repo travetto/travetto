@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import mustache from 'mustache';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { ManifestContext, path, RootIndex } from '@travetto/manifest';
 import { ExecUtil, ExecutionResult } from '@travetto/base';
 
 import { Feature } from './features';
@@ -41,6 +41,8 @@ export class Context {
   #peerDependencies: string[] = [];
   #modules: Record<string, boolean>;
 
+  packageManager: ManifestContext['packageManager'] = 'npm';
+
   readonly name: string;
   readonly frameworkVersion = RootIndex.mainDigest().framework.replace(/[.]\d+$/, '.0');
 
@@ -48,6 +50,10 @@ export class Context {
     this.name = name;
     this.#template = template;
     this.#targetDir = path.resolve(targetDir);
+  }
+
+  #exec(cmd: string, args: string[]): Promise<ExecutionResult> {
+    return ExecUtil.spawn(cmd, args, { cwd: this.destination(), stdio: [0, 1, 2], isolatedEnv: true }).result;
   }
 
   get selfPath(): string {
@@ -123,24 +129,45 @@ export class Context {
     }
   }
 
-  async addDependency(feat: Feature): Promise<void> {
-    if (feat.npm.startsWith('@travetto')) {
-      if (DEV_DEPS.has(feat.npm)) {
-        this.#devDependencies.push(feat.npm);
+  async resolveFeature(feat: Feature): Promise<void> {
+    if (feat.package) {
+      if (feat.package.startsWith('@travetto')) {
+        if (DEV_DEPS.has(feat.package)) {
+          this.#devDependencies.push(feat.package);
+        } else {
+          this.#dependencies.push(feat.package);
+        }
       } else {
-        this.#dependencies.push(feat.npm);
+        this.#peerDependencies.push(feat.package);
       }
-    } else {
-      this.#peerDependencies.push(feat.npm);
+    }
+    if (feat.field) {
+      // @ts-expect-error
+      this[feat.field] = feat.value!;
     }
 
     for (const addon of (feat.addons ?? [])) {
-      this.addDependency(addon);
+      this.resolveFeature(addon);
     }
   }
 
-  exec(cmd: string, args: string[]): Promise<ExecutionResult> {
-    return ExecUtil.spawn(cmd, args, { cwd: this.destination(), stdio: [0, 1, 2], isolatedEnv: true }).result;
+  async install(): Promise<void> {
+    switch (this.packageManager) {
+      case 'npm':
+        await this.#exec('npm', ['i']);
+        break;
+      case 'yarn':
+        await this.#exec('yarn', []);
+        break;
+      default:
+        throw new Error(`Unknown package manager: ${this.packageManager}`);
+    }
+  }
+
+  async initialBuild(): Promise<void> {
+    await this.#exec('npx', ['trv', 'build']);
+    if (this.devDependencies.includes('@travetto/eslint')) {
+      await this.#exec('npx', ['trv', 'lint:register']);
+    }
   }
 }
-
