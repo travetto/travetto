@@ -30,7 +30,7 @@
   .cli           { grid-column:  1; @extend .vertical;    @extend .group-external; }
   .vscode-plugin { grid-column:  8; @extend .vertical;    @extend .group-external; }
   .scaffold      { grid-column:  9; @extend .vertical;    @extend .group-external; }
-  .eslint-plugin { grid-column: 10; @extend .vertical;    @extend .group-external; }
+  .eslint        { grid-column: 10; @extend .vertical;    @extend .group-external; }
   
   .app           { grid-row: 1;    @extend .full;        @extend .group-common;   }
   .asset         { grid-row: 2;    @extend .left-third;  @extend .group-lib;      }

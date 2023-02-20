@@ -3,7 +3,7 @@ import path from 'path';
 import { RootIndex } from '@travetto/manifest';
 
 export function buildEslintConfig(): string {
-  const rulesImp = RootIndex.resolveFileImport('@travetto/eslint-plugin/support/bin/eslint-config.ts');
+  const rulesImp = RootIndex.resolveFileImport('@travetto/eslint/support/bin/eslint-config.ts');
   const manifestImp = RootIndex.resolveFileImport('@travetto/manifest/__index__.ts');
   const manifestFile = RootIndex.mainModule.outputPath;
 

@@ -68,7 +68,7 @@ import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component'
 import { TerminalComponent } from './gen/terminal/terminal.component';
 import { ManifestComponent } from './gen/manifest/manifest.component';
 import { AuthJwtComponent } from './gen/auth-jwt/auth-jwt.component';
-import { EslintPluginComponent } from './gen/eslint-plugin/eslint-plugin.component';
+import { EslintComponent } from './gen/eslint/eslint.component';
 import { RepoComponent } from './gen/repo/repo.component';
 import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.component';
 
@@ -152,7 +152,7 @@ import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.componen
     TerminalComponent,
     ManifestComponent,
     AuthJwtComponent,
-    EslintPluginComponent,
+    EslintComponent,
     RepoComponent,
     AuthRestJwtComponent
   ]

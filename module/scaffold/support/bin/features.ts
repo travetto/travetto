@@ -28,7 +28,7 @@ export const FEATURES: Feature[] = [
     default: 'Express.js'
   },
   { title: 'Test Framework', npm: '@travetto/test' },
-  { title: 'ESLint Support', npm: '@travetto/eslint-plugin' },
+  { title: 'ESLint Support', npm: '@travetto/eslint' },
   {
     title: 'Rest Authentication',
     npm: '@travetto/auth-rest',

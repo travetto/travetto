@@ -1,7 +1,7 @@
 import type eslint from 'eslint';
 import { BaseExpression, Expression } from 'estree';
 
-import { TrvEslintPlugin } from '@travetto/eslint-plugin/support/bin/types';
+import type { TrvEslintPlugin } from '@travetto/eslint';
 
 const groupTypeMap = {
   node: ['node', 'travetto', 'local'],

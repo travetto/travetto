@@ -125,7 +125,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
 
     await ctx.exec('npm', ['i']);
     await ctx.exec('npx', ['trv', 'build']);
-    if (ctx.devDependencies.includes('@travetto/eslint-plugin')) {
+    if (ctx.devDependencies.includes('@travetto/eslint')) {
       await ctx.exec('npx', ['trv', 'lint:configure']);
     }
   }

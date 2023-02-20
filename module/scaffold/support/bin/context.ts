@@ -14,7 +14,7 @@ const DEV_DEPS = new Set([
   '@travetto/pack',
   '@travetto/compiler',
   '@travetto/transformer',
-  '@travetto/eslint-plugin',
+  '@travetto/eslint',
 ]);
 
 export class Context {

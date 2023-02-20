@@ -55,7 +55,7 @@ import { AuthRestContextComponent } from './gen/auth-rest-context/auth-rest-cont
 import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component';
 import { ManifestComponent } from './gen/manifest/manifest.component';
 import { TerminalComponent } from './gen/terminal/terminal.component';
-import { EslintPluginComponent } from './gen/eslint-plugin/eslint-plugin.component';
+import { EslintComponent } from './gen/eslint/eslint.component';
 
 export const PAGES = [
   {
@@ -145,7 +145,7 @@ export const PAGES = [
     path: 'tools', title: 'Tooling', subs: [
       { path: 'vscode-plugin', title: 'VS Code Plugin', component: VSCodePluginComponent },
       { path: 'scaffold', title: 'App Scaffold', component: ScaffoldComponent },
-      { path: 'eslint-plugin', title: 'ESLint Support', component: EslintPluginComponent },
+      { path: 'eslint', title: 'ESLint Support', component: EslintComponent },
     ]
   },
 ];

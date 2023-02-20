@@ -1,5 +1,5 @@
 {
-  "name": "@travetto/eslint-plugin",
+  "name": "@travetto/eslint",
   "version": "3.0.0-rc.10",
   "description": "ES Linting Rules",
   "keywords": [
@@ -13,13 +13,14 @@
     "email": "travetto.framework@gmail.com",
     "name": "Travetto Framework"
   },
-  "main": "support/main.ts",
+  "main": "__index__.ts",
   "files": [
-    "support"
+    "support",
+    "__index__.ts"
   ],
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/eslint-plugin"
+    "directory": "module/eslint"
   },
   "dependencies": {
     "@travetto/manifest": "^3.0.0-rc.11",
