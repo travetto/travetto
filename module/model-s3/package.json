@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-s3",
-  "version": "3.0.0-rc.16",
+  "version": "3.0.0-rc.17",
   "description": "S3 backing for the travetto model module.",
   "keywords": [
     "s3",
@@ -26,11 +26,11 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.272.0",
     "@aws-sdk/credential-provider-ini": "^3.218.0",
-    "@travetto/config": "^3.0.0-rc.16",
-    "@travetto/model": "^3.0.0-rc.16"
+    "@travetto/config": "^3.0.0-rc.17",
+    "@travetto/model": "^3.0.0-rc.17"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.0.0-rc.13"
+    "@travetto/command": "^3.0.0-rc.14"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {

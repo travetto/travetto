@@ -1,6 +1,6 @@
 {
   "name": "@travetto/image",
-  "version": "3.0.0-rc.13",
+  "version": "3.0.0-rc.14",
   "description": "Image support, resizing, and optimization",
   "keywords": [
     "images",
@@ -23,8 +23,8 @@
     "directory": "module/image"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.13",
-    "@travetto/command": "^3.0.0-rc.13"
+    "@travetto/base": "^3.0.0-rc.14",
+    "@travetto/command": "^3.0.0-rc.14"
   },
   "travetto": {
     "displayName": "Image"
