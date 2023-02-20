@@ -29,11 +29,10 @@ export class SimpleResolver implements TransformResolver {
   }
 
   /**
-   * Resolve an import name (e.g. @module/path/file) for a given input or type
+   * Resolve an import name (e.g. @module/path/file) for a file
    */
-  getImportName(fileOrType: string | ts.Type, removeExt?: boolean): string {
-    const ogSource = typeof fileOrType === 'string' ? fileOrType : DeclarationUtil.getPrimaryDeclarationNode(fileOrType).getSourceFile().fileName;
-    let sourceFile = path.toPosix(ogSource);
+  getFileImportName(file: string, removeExt?: boolean): string {
+    let sourceFile = path.toPosix(file);
 
     if (!sourceFile.endsWith('.js') && !sourceFile.endsWith('.ts')) {
       sourceFile = `${sourceFile}.ts`;
@@ -42,9 +41,17 @@ export class SimpleResolver implements TransformResolver {
     const imp =
       this.#manifestIndex.getEntry(/[.]ts$/.test(sourceFile) ? sourceFile : `${sourceFile}.js`)?.import ??
       this.#manifestIndex.getFromImport(sourceFile.replace(/^.*node_modules\//, '').replace(/[.]ts$/, ''))?.import ??
-      ogSource;
+      file;
 
     return removeExt ? imp.replace(/[.]js$/, '') : imp;
+  }
+
+  /**
+   * Resolve an import name (e.g. @module/path/file) for a type
+   */
+  getTypeImportName(type: ts.Type, removeExt?: boolean): string | undefined {
+    const ogSource = DeclarationUtil.getPrimaryDeclarationNode(type)?.getSourceFile()?.fileName;
+    return ogSource ? this.getFileImportName(ogSource, removeExt) : undefined;
   }
 
   /**
@@ -97,7 +104,7 @@ export class SimpleResolver implements TransformResolver {
   /**
    * Resolve an `AnyType` from a `ts.Type` or a `ts.Node`
    */
-  resolveType(node: ts.Type | ts.Node): AnyType {
+  resolveType(node: ts.Type | ts.Node, importName: string): AnyType {
     const visited = new VisitCache();
     const resolve = (resType: ts.Type, alias?: ts.Symbol, depth = 0): AnyType => {
 
@@ -149,7 +156,7 @@ export class SimpleResolver implements TransformResolver {
       if (!(err instanceof Error)) {
         throw err;
       }
-      console.error('Unable to resolve type', err.stack);
+      console.error(`Unable to resolve type in ${importName}`, err.stack);
       return { key: 'literal', ctor: Object, name: 'object' };
     }
   }

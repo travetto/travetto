@@ -153,7 +153,8 @@ export type AnyType = TupleType | ShapeType | UnionType | LiteralType | External
  */
 export interface TransformResolver {
   isKnownFile(file: string): boolean;
-  getImportName(fileOrType: string | ts.Type, removeExt?: boolean): string;
+  getFileImportName(file: string, removeExt?: boolean): string;
+  getTypeImportName(type: ts.Type, removeExt?: boolean): string | undefined;
   getAllTypeArguments(type: ts.Type): ts.Type[];
   getPropertiesOfType(type: ts.Type): ts.Symbol[];
   getTypeAsString(type: ts.Type): string | undefined;

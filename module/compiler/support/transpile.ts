@@ -45,6 +45,8 @@ export class TranspileUtil {
       OPT_CACHE[ctx.workspacePath] = {
         ...options,
         allowJs: true,
+        sourceMap: false,
+        inlineSourceMap: true,
         resolveJsonModule: true,
         sourceRoot: ctx.workspacePath,
         rootDir: ctx.workspacePath,

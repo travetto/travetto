@@ -145,7 +145,7 @@ export const TypeBuilder: {
   external: {
     build: (resolver, type) => {
       const name = CoreUtil.getSymbol(type)?.getName();
-      const importName = resolver.getImportName(type);
+      const importName = resolver.getTypeImportName(type)!;
       const tsTypeArguments = resolver.getAllTypeArguments(type);
       return { key: 'external', name, importName, tsTypeArguments };
     }
@@ -180,9 +180,14 @@ export const TypeBuilder: {
     build: (resolver, type, alias?) => {
       const tsFieldTypes: Record<string, ts.Type> = {};
       const name = CoreUtil.getSymbol(alias ?? type)?.getName();
-      const importName = resolver.getImportName(type);
+      const importName = resolver.getTypeImportName(type) ?? '<unknown>';
       const tsTypeArguments = resolver.getAllTypeArguments(type);
-      for (const member of resolver.getPropertiesOfType(type)) {
+      const props = resolver.getPropertiesOfType(type);
+      if (props.length === 0) {
+        return { key: 'unknown', name, importName };
+      }
+
+      for (const member of props) {
         const dec = DeclarationUtil.getPrimaryDeclarationNode(member);
         if (DeclarationUtil.isPublic(dec)) { // If public
           const memberType = resolver.getType(dec);
@@ -215,10 +220,10 @@ export const TypeBuilder: {
             ?.getSourceFile().fileName ?? '';
 
           if (importName === '.') {
-            importName = resolver.getImportName(rawSourceFile);
+            importName = resolver.getFileImportName(rawSourceFile);
           } else {
             const base = path.dirname(rawSourceFile);
-            importName = resolver.getImportName(path.resolve(base, importName));
+            importName = resolver.getFileImportName(path.resolve(base, importName));
           }
         }
         return { key: 'external', name, importName };

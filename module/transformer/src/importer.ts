@@ -26,7 +26,7 @@ export class ImportManager {
   constructor(public source: ts.SourceFile, public factory: ts.NodeFactory, resolver: TransformResolver) {
     this.#imports = ImportUtil.collectImports(source);
     this.#resolver = resolver;
-    this.#importName = this.#resolver.getImportName(source.fileName);
+    this.#importName = this.#resolver.getFileImportName(source.fileName);
   }
 
   #getImportFile(spec?: ts.Expression): string | undefined {
@@ -101,7 +101,7 @@ export class ImportManager {
    * Import a file if needed, and record it's identifier
    */
   importFile(file: string, name?: string): Import {
-    file = this.#resolver.getImportName(file);
+    file = this.#resolver.getFileImportName(file);
 
     // Allow for node classes to be imported directly
     if (/@types\/node/.test(file)) {

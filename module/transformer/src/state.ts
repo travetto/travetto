@@ -47,7 +47,7 @@ export class TransformerState implements State {
     this.#imports = new ImportManager(source, factory, this.#resolver);
     this.file = path.toPosix(this.source.fileName);
 
-    this.importName = this.#resolver.getImportName(this.file, true);
+    this.importName = this.#resolver.getFileImportName(this.file, true);
   }
 
   /**
@@ -68,7 +68,7 @@ export class TransformerState implements State {
    * Resolve an `AnyType` from a `ts.Type` or `ts.Node`
    */
   resolveType(node: ts.Type | ts.Node): AnyType {
-    const resolved = this.#resolver.resolveType(node);
+    const resolved = this.#resolver.resolveType(node, this.importName);
     this.#imports.importFromResolved(resolved);
     return resolved;
   }
@@ -80,7 +80,7 @@ export class TransformerState implements State {
     const resolved = this.resolveType(node);
     if (resolved.key !== 'external') {
       const file = node.getSourceFile().fileName;
-      const src = this.#resolver.getImportName(file);
+      const src = this.#resolver.getFileImportName(file);
       throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${src}`);
     }
     return resolved;
@@ -147,7 +147,7 @@ export class TransformerState implements State {
       this.#resolver.getType(ident)
     );
     const src = decl?.getSourceFile().fileName;
-    const mod = src ? this.#resolver.getImportName(src, true) : undefined;
+    const mod = src ? this.#resolver.getFileImportName(src, true) : undefined;
     const file = this.#manifestIndex.getFromImport(mod ?? '')?.outputFile;
     const targets = DocUtil.readAugments(this.#resolver.getType(ident));
     const module = file ? mod : undefined;
@@ -266,7 +266,7 @@ export class TransformerState implements State {
     if (this.#fileIdent === undefined) {
       this.#fileIdent = this.createIdentifier('ᚕf');
       const decl = this.factory.createVariableDeclaration(this.#fileIdent, undefined, undefined,
-        this.fromLiteral(this.#resolver.getImportName(this.source.fileName) ?? this.source.fileName)
+        this.fromLiteral(this.#resolver.getFileImportName(this.source.fileName) ?? this.source.fileName)
       );
       this.addStatements([
         this.factory.createVariableStatement([], this.factory.createVariableDeclarationList([decl]))

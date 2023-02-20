@@ -5,11 +5,22 @@ import { RootRegistry } from '@travetto/registry';
 
 import { Schema } from '../src/decorator/schema';
 import { SchemaValidator } from '../src/validate/validator';
+import { SchemaRegistry } from '../src/service/registry';
 
 @Schema()
 export class OptionalAsUnion {
   name: string;
   alias: string | undefined;
+}
+
+@Schema()
+class WithEmptyObject {
+  empty: {} = {};
+}
+
+@Schema()
+class SingleField {
+  single: { field?: 20 } = {};
 }
 
 @Suite()
@@ -48,5 +59,22 @@ class EdgeCases {
     });
 
     assert((await SchemaValidator.validate(OptionalAsUnion, data4)).alias === undefined);
+  }
+
+  @Test()
+  async testEmpty() {
+    const cfg = SchemaRegistry.getViewSchema(WithEmptyObject);
+    assert(cfg);
+    assert(cfg.fields.includes('empty'));
+    assert(cfg.schema.empty.type === Object);
+  }
+
+  @Test()
+  async testSingle() {
+    const cfg = SchemaRegistry.getViewSchema(SingleField);
+    assert(cfg);
+    assert(cfg.fields.includes('single'));
+    assert(cfg.schema.single.type !== Object);
+    assert(SchemaRegistry.getViewSchema(cfg.schema.single.type).schema.field.type === Number);
   }
 }
