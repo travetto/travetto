@@ -1,7 +1,8 @@
 import enquirer from 'enquirer';
 
 import { path } from '@travetto/manifest';
-import { CliCommand, OptionConfig } from '@travetto/cli';
+import { CliCommand, cliTpl, OptionConfig } from '@travetto/cli';
+import { GlobalTerminal } from '@travetto/terminal';
 
 import { Context } from './bin/context';
 import { Feature, FEATURES } from './bin/features';
@@ -22,7 +23,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
   getOptions(): Options {
     return {
       template: this.option({ def: 'todo', desc: 'Template' }),
-      cwd: this.option({ desc: 'Current Working Directory', def: process.cwd() }),
+      cwd: this.option({ desc: 'Current Working Directory override' }),
       dir: this.option({ desc: 'Target Directory' }),
       force: this.boolOption({ desc: 'Force writing into an existing directory', def: false })
     };
@@ -97,6 +98,8 @@ export class ScaffoldCommand extends CliCommand<Options> {
       return this.exit(1);
     }
 
+    this.cmd.cwd ??= path.cwd();
+
     if (!name && this.cmd.dir) {
       name = path.basename(this.cmd.dir);
     } else if (name && !this.cmd.dir) {
@@ -123,8 +126,13 @@ export class ScaffoldCommand extends CliCommand<Options> {
       return this.exit(1);
     }
 
-    await ctx.templateResolvedFiles();
-    await ctx.install();
-    await ctx.initialBuild();
+    console.log(cliTpl`\n${{ title: 'Creating Application' }}\n${'-'.repeat(30)}`);
+
+    await GlobalTerminal.streamLinesWithWaiting(ctx.install(), {
+      position: 'bottom',
+      end: true,
+      commitedPrefix: '>',
+      cycleDelay: 100
+    });
   }
 }

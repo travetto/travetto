@@ -134,7 +134,12 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
       }
       await PackUtil.writeEjectOutput(this.cmd.workspace, cfg.module, output, this.cmd.ejectFile);
     } else {
-      await GlobalTerminal.streamLinesWithWaiting(stream, { initialDelay: 0, cycleDelay: 100, end: true });
+      await GlobalTerminal.streamLinesWithWaiting(stream, {
+        initialDelay: 0,
+        cycleDelay: 100,
+        end: true,
+        commitedPrefix: String.fromCharCode(171)
+      });
       let msg = cliTpl`${{ success: 'Success' }} (${{ identifier: TimeUtil.prettyDeltaSinceTime(start) }}) ${{ subtitle: 'module' }}=${{ param: this.cmd.module }}`;
       if (this.cmd.output) {
         msg = cliTpl`${msg} ${{ subtitle: 'output' }}=${{ path: this.cmd.output }}`;

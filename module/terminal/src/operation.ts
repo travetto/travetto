@@ -96,19 +96,20 @@ export class TerminalOperation {
   /**
    * Stream lines with a waiting indicator
    */
-  static async streamLinesWithWaiting(term: TermState, lines: AsyncIterable<string>, cfg: TerminalWaitingConfig = {}): Promise<void> {
+  static async streamLinesWithWaiting(term: TermState, lines: AsyncIterable<string | undefined>, cfg: TerminalWaitingConfig = {}): Promise<void> {
     let writer: (() => Promise<unknown>) | undefined;
     let line: string | undefined;
 
     const commitLine = async (): Promise<void> => {
       await writer?.();
       if (line) {
-        const msg = `${String.fromCharCode(171)} ${line}`;
+        const msg = cfg.commitedPrefix ? `${cfg.commitedPrefix} ${line}` : line;
         if (cfg.position === 'inline') {
           await TerminalWriter.for(term).setPosition({ x: 0 }).changePosition({ y: -1 }).writeLine(msg).commit();
         } else {
           await TerminalWriter.for(term).writeLine(msg).commit();
         }
+        line = undefined;
       }
     };
 
@@ -116,9 +117,11 @@ export class TerminalOperation {
 
     for await (let msg of lines) {
       await commitLine();
-      msg = msg.replace(/\n$/, '');
-      writer = this.streamWaiting(term, msg, cfg, pos);
-      line = msg;
+      if (msg !== undefined) {
+        msg = msg.replace(/\n$/, '');
+        writer = this.streamWaiting(term, msg, cfg, pos);
+        line = msg;
+      }
     }
     await commitLine();
   }

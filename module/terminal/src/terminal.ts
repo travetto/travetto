@@ -128,10 +128,13 @@ export class Terminal implements TermState {
    * @param config
    * @returns
    */
-  async streamLinesWithWaiting(lines: AsyncIterable<string>, config: TerminalWaitingConfig): Promise<void> {
+  async streamLinesWithWaiting(lines: AsyncIterable<string | undefined>, config: TerminalWaitingConfig): Promise<void> {
     if (!this.interactive) {
       for await (const line of lines) {
-        await this.writeLines(line);
+        if (line !== undefined) {
+          const out = config.commitedPrefix ? `${config.commitedPrefix} ${line}` : line;
+          await this.writeLines(out);
+        }
       }
     } else {
       return TerminalOperation.streamLinesWithWaiting(this, lines, { position: 'bottom', ...config });

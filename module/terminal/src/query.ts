@@ -50,7 +50,16 @@ export class TerminalQuerier {
   }
 
   async #readInput(query: string): Promise<Buffer> {
+    const isRaw = this.#input.isRaw;
+    const isPaused = this.#input.isPaused();
+    const data = this.#input.listeners('data');
     try {
+      this.#input.removeAllListeners('data');
+
+      if (isPaused) {
+        this.#input.resume();
+      }
+
       this.#input.setRawMode(true);
       // Send data, but do not wait on it
       this.#output.write(query);
@@ -58,7 +67,14 @@ export class TerminalQuerier {
       const val: Buffer | string = this.#input.read();
       return typeof val === 'string' ? Buffer.from(val, 'utf8') : val;
     } finally {
-      this.#input.setRawMode(false);
+      if (isPaused) {
+        this.#input.pause();
+      }
+      this.#input.setRawMode(isRaw);
+      for (const fn of data) {
+        // @ts-ignore
+        this.#input.on('data', fn);
+      }
     }
   }
 

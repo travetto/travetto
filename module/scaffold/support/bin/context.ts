@@ -1,8 +1,10 @@
 import fs from 'fs/promises';
 import mustache from 'mustache';
 
+import { cliTpl } from '@travetto/cli';
 import { ManifestContext, path, RootIndex } from '@travetto/manifest';
 import { ExecUtil, ExecutionResult } from '@travetto/base';
+import { GlobalTerminal } from '@travetto/terminal';
 
 import { Feature } from './features';
 
@@ -53,7 +55,23 @@ export class Context {
   }
 
   #exec(cmd: string, args: string[]): Promise<ExecutionResult> {
-    return ExecUtil.spawn(cmd, args, { cwd: this.destination(), stdio: [0, 1, 2], isolatedEnv: true }).result;
+    const err: string[] = [];
+
+    const res = ExecUtil.spawn(cmd, args, {
+      cwd: this.destination(),
+      stdio: [0, 'pipe', 'pipe'],
+      isolatedEnv: true,
+      outputMode: 'text-stream',
+      onStdErrorLine: line => err.push(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`)
+    }).result;
+
+    res.then(val => {
+      if (err.length) {
+        val.stderr = err.join('\n');
+      }
+    });
+
+    return res;
   }
 
   get selfPath(): string {
@@ -151,23 +169,36 @@ export class Context {
     }
   }
 
-  async install(): Promise<void> {
+  async * install(): AsyncIterable<string | undefined> {
+
+    yield cliTpl`${{ type: 'Templating files' }}`;
+    await this.templateResolvedFiles();
+
+    yield cliTpl`${{ type: 'Installing dependencies' }}`;
     switch (this.packageManager) {
-      case 'npm':
-        await this.#exec('npm', ['i']);
+      case 'npm': {
+        const res = await this.#exec('npm', ['i']);
+        yield undefined;
+        GlobalTerminal.writeLines(res.stderr);
         break;
-      case 'yarn':
-        await this.#exec('yarn', []);
+      }
+      case 'yarn': {
+        const res = await this.#exec('yarn', []);
+        yield undefined;
+        GlobalTerminal.writeLines(res.stderr);
         break;
+      }
       default:
         throw new Error(`Unknown package manager: ${this.packageManager}`);
     }
-  }
 
-  async initialBuild(): Promise<void> {
+    yield cliTpl`${{ type: 'Initial Build' }}`;
     await this.#exec('npx', ['trv', 'build']);
     if (this.devDependencies.includes('@travetto/eslint')) {
+      yield cliTpl`${{ type: 'ESLint Registration' }}`;
       await this.#exec('npx', ['trv', 'lint:register']);
     }
+
+    yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDir }}`;
   }
 }
