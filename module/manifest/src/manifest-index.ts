@@ -304,9 +304,9 @@ export class ManifestIndex {
   getLocalInputFolderMapping(): [folder: string, moduleSourceRoot: string][] {
     return this.getLocalModules().flatMap(x =>
       ((!this.manifest.monoRepo || x.sourcePath !== this.manifest.workspacePath) ?
-        [x.sourcePath] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(x.sourcePath, y))
+        [x.sourcePath] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(this.#manifest.workspacePath, x.sourcePath, y))
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      ).map(f => [f, path.resolve(x.sourceFolder)] as [string, string])
+      ).map(f => [f, path.resolve(this.#manifest.workspacePath, x.sourceFolder)] as [string, string])
     );
   }
 
