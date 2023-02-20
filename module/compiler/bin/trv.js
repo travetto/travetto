@@ -54,7 +54,7 @@ const $getLauncher = async (ctx) => {
 };
 
 (async () => {
-  const ctx = await getManifestContext(process.env.TRV_COMPILER_CWD);
+  const ctx = await getManifestContext();
   const [op, args] = [VALID_OPS[process.argv[2]], process.argv.slice(3)];
 
   if (op === 'clean') {

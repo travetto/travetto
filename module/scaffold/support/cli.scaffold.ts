@@ -8,6 +8,7 @@ import { Feature, FEATURES } from './bin/features';
 
 type Options = {
   template: OptionConfig<string>;
+  cwd: OptionConfig<string>;
   dir: OptionConfig<string>;
   force: OptionConfig<boolean>;
 };
@@ -21,6 +22,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
   getOptions(): Options {
     return {
       template: this.option({ def: 'todo', desc: 'Template' }),
+      cwd: this.option({ desc: 'Current Working Directory', def: process.cwd() }),
       dir: this.option({ desc: 'Target Directory' }),
       force: this.boolOption({ desc: 'Force writing into an existing directory', def: false })
     };
@@ -98,13 +100,13 @@ export class ScaffoldCommand extends CliCommand<Options> {
     if (!name && this.cmd.dir) {
       name = path.basename(this.cmd.dir);
     } else if (name && !this.cmd.dir) {
-      this.cmd.dir = path.resolve(name);
+      this.cmd.dir = path.resolve(this.cmd.cwd, name);
     } else if (!name && !this.cmd.dir) {
       console.error('Either a name or a target directory are required');
       return this.exit(1);
     }
 
-    const ctx = new Context(name, this.cmd.template, path.resolve(this.cmd.dir));
+    const ctx = new Context(name, this.cmd.template, path.resolve(this.cmd.cwd, this.cmd.dir));
 
     if (!this.cmd.force) {
       await ctx.initialize();
