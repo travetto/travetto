@@ -1,9 +1,9 @@
 {
   "name": "@travetto-doc/rest",
   "dependencies": {
-    "@travetto/rest": "*",
-    "@travetto/cli": "*",
-    "@travetto/compiler": "*"
+    "@travetto/cli": "^3.0.0-rc.13",
+    "@travetto/compiler": "^3.0.0-rc.16",
+    "@travetto/rest": "^3.0.0-rc.16"
   },
   "travetto": {
     "isolated": true,

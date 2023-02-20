@@ -2,9 +2,9 @@
   "name": "@travetto-test/model_asset",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/model-mongo": "*",
-    "@travetto/model-s3": "*",
-    "@travetto/asset": "*"
+    "@travetto/asset": "^3.0.0-rc.15",
+    "@travetto/model-mongo": "^3.0.0-rc.15",
+    "@travetto/model-s3": "^3.0.0-rc.15"
   },
   "travetto": {},
   "private": true
