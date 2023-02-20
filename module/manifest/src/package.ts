@@ -91,10 +91,14 @@ export class PackageUtil {
     if (forceRead) {
       delete this.#cache[modulePath];
     }
-    return this.#cache[modulePath] ??= JSON.parse(readFileSync(
+    const res = this.#cache[modulePath] ??= JSON.parse(readFileSync(
       modulePath.endsWith('.json') ? modulePath : path.resolve(modulePath, 'package.json'),
       'utf8'
     ));
+
+    res.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx execution
+
+    return res;
   }
 
   /**

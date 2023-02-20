@@ -106,7 +106,7 @@ export async function getManifestContext(folder) {
 
   const res = {
     moduleType,
-    mainModule,
+    mainModule: mainModule ?? 'untitled', // When root package.json is missing a name
     mainFolder,
     workspacePath,
     monoRepo,
