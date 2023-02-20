@@ -1,6 +1,6 @@
 {
   "name": "@travetto/test",
-  "version": "3.0.0-rc.19",
+  "version": "3.0.0-rc.20",
   "description": "Declarative test framework",
   "keywords": [
     "unit-testing",
@@ -29,12 +29,12 @@
   "dependencies": {
     "@travetto/base": "^3.0.0-rc.15",
     "@travetto/registry": "^3.0.0-rc.18",
-    "@travetto/terminal": "^3.0.0-rc.7",
+    "@travetto/terminal": "^3.0.0-rc.8",
     "@travetto/worker": "^3.0.0-rc.15",
     "@travetto/yaml": "^3.0.0-rc.15"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.16",
+    "@travetto/cli": "^3.0.0-rc.17",
     "@travetto/transformer": "^3.0.0-rc.18"
   },
   "peerDependenciesMeta": {

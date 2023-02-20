@@ -28,7 +28,7 @@
     "@travetto/base": "^3.0.0-rc.15"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.16"
+    "@travetto/cli": "^3.0.0-rc.17"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
