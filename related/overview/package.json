@@ -19,7 +19,7 @@
     "directory": "related/overview"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.14"
+    "@travetto/base": "^3.0.0-rc.15"
   },
   "travetto": {
     "displayName": "Overview Docs"

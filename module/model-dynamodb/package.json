@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-dynamodb",
-  "version": "3.0.0-rc.18",
+  "version": "3.0.0-rc.19",
   "description": "DynamoDB backing for the travetto model module.",
   "keywords": [
     "typescript",
@@ -26,11 +26,11 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.272.0",
-    "@travetto/config": "^3.0.0-rc.18",
-    "@travetto/model": "^3.0.0-rc.18"
+    "@travetto/config": "^3.0.0-rc.19",
+    "@travetto/model": "^3.0.0-rc.19"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.0.0-rc.14"
+    "@travetto/command": "^3.0.0-rc.15"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {

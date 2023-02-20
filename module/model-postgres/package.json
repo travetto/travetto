@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-postgres",
-  "version": "3.0.0-rc.18",
+  "version": "3.0.0-rc.19",
   "description": "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "keywords": [
     "sql",
@@ -27,16 +27,16 @@
     "directory": "module/model-postgres"
   },
   "dependencies": {
-    "@travetto/config": "^3.0.0-rc.18",
-    "@travetto/context": "^3.0.0-rc.17",
-    "@travetto/model": "^3.0.0-rc.18",
-    "@travetto/model-query": "^3.0.0-rc.18",
-    "@travetto/model-sql": "^3.0.0-rc.18",
+    "@travetto/config": "^3.0.0-rc.19",
+    "@travetto/context": "^3.0.0-rc.18",
+    "@travetto/model": "^3.0.0-rc.19",
+    "@travetto/model-query": "^3.0.0-rc.19",
+    "@travetto/model-sql": "^3.0.0-rc.19",
     "@types/pg": "^8.6.6",
     "pg": "^8.9.0"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.0.0-rc.14"
+    "@travetto/command": "^3.0.0-rc.15"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {
