@@ -50,7 +50,7 @@ export class LockManager {
       const content = await fs.readFile(file, 'utf8');
       const filePid = parseInt(content, 10);
       if (stale) {
-        LogUtil.log('lock', [], 'warn', `${type} file is stale: ${stat.mtimeMs} vs ${Date.now()}`);
+        LogUtil.log('lock', [], 'info', `${type} file is stale: ${stat.mtimeMs} vs ${Date.now()}`);
       } else {
         pid = filePid;
       }

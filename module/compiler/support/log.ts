@@ -2,7 +2,12 @@ export type CompilerLogEvent = [level: 'info' | 'debug' | 'warn', message: strin
 export type CompilerLogger = (...args: CompilerLogEvent) => void;
 export type WithLogger<T> = (log: CompilerLogger) => Promise<T>;
 
-const LEVELS = { warn: true, debug: /^debug$/.test(process.env.TRV_BUILD ?? ''), info: !/^warn$/.test(process.env.TRV_BUILD ?? '') };
+const ENV_LEVEL = process.env.TRV_ENV_LEVEL ?? 'info';
+const LEVELS = {
+  warn: /^(debug|info|warn)$/.test(ENV_LEVEL),
+  info: /^(debug|info)$/.test(ENV_LEVEL),
+  debug: /^debug$/.test(ENV_LEVEL),
+};
 const SCOPE_MAX = 15;
 
 export class LogUtil {
