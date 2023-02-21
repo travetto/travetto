@@ -2,7 +2,7 @@ export type CompilerLogEvent = [level: 'info' | 'debug' | 'warn', message: strin
 export type CompilerLogger = (...args: CompilerLogEvent) => void;
 export type WithLogger<T> = (log: CompilerLogger) => Promise<T>;
 
-const ENV_LEVEL = process.env.TRV_ENV_LEVEL ?? 'info';
+const ENV_LEVEL = process.env.TRV_BUILD ?? 'info';
 const LEVELS = {
   warn: /^(debug|info|warn)$/.test(ENV_LEVEL),
   info: /^(debug|info)$/.test(ENV_LEVEL),
