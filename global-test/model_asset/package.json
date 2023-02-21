@@ -4,7 +4,7 @@
   "dependencies": {
     "@travetto/asset": "^3.0.0-rc.20",
     "@travetto/model-mongo": "^3.0.0-rc.20",
-    "@travetto/model-s3": "^3.0.0-rc.20"
+    "@travetto/model-s3": "^3.0.0-rc.21"
   },
   "travetto": {},
   "private": true
