@@ -16,6 +16,7 @@
   },
   "files": [
     "__index__.ts",
+    "support",
     "src"
   ],
   "main": "__index__.ts",
