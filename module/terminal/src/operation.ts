@@ -103,7 +103,7 @@ export class TerminalOperation {
     const commitLine = async (): Promise<void> => {
       await writer?.();
       if (line) {
-        const msg = cfg.commitedPrefix ? `${cfg.commitedPrefix} ${line}` : line;
+        const msg = cfg.committedPrefix ? `${cfg.committedPrefix} ${line}` : line;
         if (cfg.position === 'inline') {
           await TerminalWriter.for(term).setPosition({ x: 0 }).changePosition({ y: -1 }).writeLine(msg).commit();
         } else {

@@ -131,7 +131,7 @@ export class ScaffoldCommand extends CliCommand<Options> {
     await GlobalTerminal.streamLinesWithWaiting(ctx.install(), {
       position: 'bottom',
       end: true,
-      commitedPrefix: '>',
+      committedPrefix: '>',
       cycleDelay: 100
     });
   }

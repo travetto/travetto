@@ -132,7 +132,7 @@ export class Terminal implements TermState {
     if (!this.interactive) {
       for await (const line of lines) {
         if (line !== undefined) {
-          const out = config.commitedPrefix ? `${config.commitedPrefix} ${line}` : line;
+          const out = config.committedPrefix ? `${config.committedPrefix} ${line}` : line;
           await this.writeLines(out);
         }
       }
