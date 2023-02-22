@@ -4,4 +4,4 @@ Future Ideas
   - Observables in Angular?
 - Eventing in general
 - Enhance scaffold
-   * Support monorepo (npm/yarn workspaces)
+   * Support monorepo
