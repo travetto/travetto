@@ -166,13 +166,14 @@ export class TranspileUtil {
   static async runCompiler(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], watch: boolean, onMessage: (msg: unknown) => void): Promise<CompileResult> {
     const compiler = path.resolve(ctx.workspacePath, ctx.compilerFolder);
     const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/compiler-entry.js');
-    const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${Date.now()}.${Math.random()}.json`);
+    const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${process.pid}.${process.ppid}.${Date.now()}.json`);
 
     const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev =>
       path.resolve(manifest.workspacePath, manifest.modules[ev.module].sourceFolder, ev.file)
     );
 
     let proc: cp.ChildProcess | undefined;
+    let kill: (() => void) | undefined;
 
     try {
       await this.writeTextFile(deltaFile, changedFiles.join('\n'));
@@ -195,9 +196,14 @@ export class TranspileUtil {
             }
           })
           .on('exit', code => (code !== null && code > 0) ? rej(new Error('Failed during compilation')) : res('complete'));
+        kill = (): void => { proc?.kill('SIGKILL'); };
+        process.on('exit', kill);
       }));
     } finally {
       if (proc?.killed === false) { proc.kill('SIGKILL'); }
+      if (kill) {
+        process.removeListener('exit', kill);
+      }
       await fs.rm(deltaFile, { force: true });
     }
   }

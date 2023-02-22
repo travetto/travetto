@@ -46,7 +46,7 @@ export class IpcSupport {
 
 
   async activate(ctx: ExtensionContext): Promise<void> {
-    const file = Workspace.resolveExtensionFile(`ipc_${process.ppid}.ndjson`);
+    const file = Workspace.resolveToolFile(`ipc_${process.ppid}.ndjson`);
     ctx.environmentVariableCollection.replace('TRV_CLI_IPC', file);
 
     while (this.#active) {

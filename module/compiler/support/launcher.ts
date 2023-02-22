@@ -108,7 +108,14 @@ async function exportManifest(ctx: ManifestContext, output?: string, env = 'dev'
  * Launch
  */
 export async function launch(ctx: ManifestContext, root: ManifestContext, op?: 'build' | 'watch' | 'manifest', args: (string | undefined)[] = []): Promise<void> {
+  // If quiet enabled, turn off all output by default
+  LogUtil.level = process.env.TRV_BUILD ?? (process.env.TRV_QUIET ? 'none' : (!op ? 'warn' : 'info'));
+
   if (op !== 'manifest' && await LockManager.getCompileAction(root, op) === 'build') {
+
+    // Ready signal
+    process.send?.('ready');
+
     await LockManager.withLocks(root, async (acquire, release) => {
       let action: CompileResult;
       do {
@@ -118,7 +125,10 @@ export async function launch(ctx: ManifestContext, root: ManifestContext, op?: '
         }
         action = await compile(root, op, msg => {
           switch (msg) {
-            case 'build-complete': release('build'); break;
+            case 'build-complete': {
+              release('build');
+              break;
+            }
           }
         });
       } while (action === 'restart');

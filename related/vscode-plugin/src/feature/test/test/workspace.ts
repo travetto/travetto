@@ -18,7 +18,7 @@ export class WorkspaceResultsManager {
   constructor(log: Log, window: typeof vscode.window) {
     this.#log = log;
     this.#window = window;
-    this.#status = this.#window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    this.#status = this.#window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
     this.#status.command = 'workbench.action.showErrorsWarnings';
   }
 

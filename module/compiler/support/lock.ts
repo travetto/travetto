@@ -50,7 +50,7 @@ export class LockManager {
       const content = await fs.readFile(file, 'utf8');
       const filePid = parseInt(content, 10);
       if (stale) {
-        LogUtil.log('lock', [], 'info', `${type} file is stale: ${stat.mtimeMs} vs ${Date.now()}`);
+        LogUtil.log('lock', [], 'debug', `${type} file is stale: ${stat.mtimeMs} vs ${Date.now()}`);
       } else {
         pid = filePid;
       }
@@ -118,25 +118,24 @@ export class LockManager {
    * Read the watch lock file and determine its result, communicating with the user as necessary
    */
   static async #getWatchAction(ctx: ManifestContext, log: CompilerLogger, lockType: LockType | undefined, buildState: LockDetails): Promise<LockAction> {
-    const level = lockType ? 'info' : 'debug';
     if (lockType === 'watch') {
-      log(level, 'Already running');
+      log('info', 'Already running');
       return 'skip';
     } else {
       if (buildState.pid) {
-        log('info', 'Already running, waiting for build to finish');
+        log('warn', 'Already running, waiting for build to finish');
         switch (await this.#waitForRelease(ctx, 'build')) {
           case 'complete': {
-            log(level, 'Completed build');
+            log('info', 'Completed build');
             return 'skip';
           }
           case 'stale': {
-            log(level, 'Became stale, retrying');
+            log('info', 'Became stale, retrying');
             return 'retry';
           }
         }
       } else {
-        log(level, 'Already running, and has built');
+        log('info', 'Already running, and has built');
         return 'skip';
       }
     }
@@ -146,21 +145,20 @@ export class LockManager {
    * Read the build lock file and determine its result, communicating with the user as necessary
    */
   static async #getBuildAction(ctx: ManifestContext, log: CompilerLogger, lockType: LockType | undefined): Promise<LockAction> {
-    const level = lockType ? 'info' : 'debug';
     if (lockType === 'watch') {
-      log('info', 'Build already running, waiting to begin watch');
+      log('warn', 'Build already running, waiting to begin watch');
       const res = await this.#waitForRelease(ctx, 'build');
-      log(level, `Finished with status of ${res}, retrying`);
+      log('info', `Finished with status of ${res}, retrying`);
       return 'retry';
     } else {
-      log('info', 'Already running, waiting for completion');
+      log('warn', 'Already running, waiting for completion');
       switch (await this.#waitForRelease(ctx, lockType ?? 'build')) {
         case 'complete': {
-          log(level, 'Completed');
+          log('info', 'Completed');
           return 'skip';
         }
         case 'stale': {
-          log(level, 'Became stale, retrying');
+          log('info', 'Became stale, retrying');
           return 'retry';
         }
       }

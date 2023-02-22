@@ -9,6 +9,10 @@ export class Log {
     this.#prefix = `[${prefix}]`;
   }
 
+  show(): void {
+    Log.#log.show(true);
+  }
+
   info(message: string, ...args: unknown[]): void {
     Log.#log.info(this.#prefix, message, ...args);
   }

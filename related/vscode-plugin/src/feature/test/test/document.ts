@@ -353,11 +353,15 @@ export class DocumentResultsManager {
       switch (e.type) {
         case 'suite': {
           this.reset('suite', e.suite.classId);
-          this.store('suite', e.suite.classId, 'unknown', Decorations.buildSuite(e.suite), e.suite);
-
-          for (const test of Object.values(this.#results.test).filter(x => x.src.classId === e.suite.classId)) {
+          const tests = Object.values(this.#results.test).filter(x => x.src.classId === e.suite.classId);
+          for (const test of tests) {
             this.reset('test', `${test.src.classId}:${test.src.methodName}`);
           }
+          // Internal methods for before/after all/each
+          if (tests.find(x => x.src.methodName.includes('[['))) {
+            this.refreshDiagnostics();
+          }
+          this.store('suite', e.suite.classId, 'unknown', Decorations.buildSuite(e.suite), e.suite);
           break;
         }
         // Clear diags

@@ -5,6 +5,8 @@ import { path } from '@travetto/manifest';
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
+import { BuildStatus } from '../../../core/build';
+
 import { BaseFeature } from '../../base';
 
 import { WorkspaceResultsManager } from './workspace';
@@ -25,11 +27,6 @@ class TestRunnerFeature extends BaseFeature {
     this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
     this.#server = new ProcessServer(this.log, 'main', [`${this.module}/src/execute/watcher`, 'exec', 'false'])
       .onStart(() => {
-        // Trigger all visible editors on start
-        for (const editor of vscode.window.visibleTextEditors) {
-          this.onChangedActiveEditor(editor);
-        }
-
         this.#server.onMessage(['assertion', 'suite', 'test'], ev => {
           switch (ev.type) {
             case 'test': this.log.info('Event', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
@@ -37,6 +34,11 @@ class TestRunnerFeature extends BaseFeature {
           this.#consumer.onEvent(ev);
           this.#codeLensUpdated?.();
         });
+
+        // Trigger all visible editors on start
+        for (const editor of vscode.window.visibleTextEditors) {
+          this.onChangedActiveEditor(editor);
+        }
       })
       .onFail(async (err) => {
         if (err.message.includes('will not retry')) {
@@ -139,6 +141,6 @@ class TestRunnerFeature extends BaseFeature {
       }
     }));
 
-    this.#server.start();
+    BuildStatus.onBuildReady(() => this.#server.start()); // Wait for stable build
   }
 }

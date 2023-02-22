@@ -56,7 +56,7 @@ export class Workspace {
     return path.resolve(this.#manifestContext.workspacePath, this.#manifestContext.outputFolder, file);
   }
 
-  static resolveExtensionFile(file: string): string {
+  static resolveToolFile(file: string): string {
     return path.resolve(this.#manifestContext.workspacePath, this.#manifestContext.toolFolder, file);
   }
 
@@ -69,7 +69,6 @@ export class Workspace {
       ...this.#baseEnv,
       ...(debug ? { TRV_DYNAMIC: '1', } : { TRV_QUIET: '1' }),
       ...base,
-      TRV_BUILD: 'warn',
       TRV_MANIFEST: '',
       TRV_MODULE: cliModule ?? this.#manifestContext.mainModule
     };
@@ -289,18 +288,6 @@ export class Workspace {
     return ExecUtil.worker<T>(
       this.#cliFile, [command, ...args ?? []],
       { ...opts, env: this.#buildEnv(false, opts?.env, opts?.cliModule) }
-    );
-  }
-
-  static async build(): Promise<void> {
-    await vscode.window.withProgress(
-      { title: 'Building workspace', location: vscode.ProgressLocation.Window },
-      () => this.spawnCli('build', [], {
-        catchAsResult: true,
-        outputMode: 'text-stream',
-        onStdOutLine: line => this.#log.info(line),
-        onStdErrorLine: line => this.#log.error(line)
-      }).result
     );
   }
 }

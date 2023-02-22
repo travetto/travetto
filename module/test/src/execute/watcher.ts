@@ -69,13 +69,13 @@ export class TestWatcher {
 
     await RootRegistry.init();
 
-    process.send?.('ready');
-
     process.on('message', ev => {
       if (isRunEvent(ev)) {
         itr.add([ev.file, ev.class, ev.method].filter(x => !!x).join('#'), true);
       }
     });
+
+    process.send?.('ready');
 
     if (runAllOnStart) {
       for (const test of await RootIndex.findTest({})) {

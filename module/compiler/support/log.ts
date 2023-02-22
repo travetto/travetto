@@ -2,15 +2,23 @@ export type CompilerLogEvent = [level: 'info' | 'debug' | 'warn', message: strin
 export type CompilerLogger = (...args: CompilerLogEvent) => void;
 export type WithLogger<T> = (log: CompilerLogger) => Promise<T>;
 
-const ENV_LEVEL = process.env.TRV_BUILD ?? 'info';
-const LEVELS = {
-  warn: /^(debug|info|warn)$/.test(ENV_LEVEL),
-  info: /^(debug|info)$/.test(ENV_LEVEL),
-  debug: /^debug$/.test(ENV_LEVEL),
-};
 const SCOPE_MAX = 15;
 
 export class LogUtil {
+
+  static levels: {
+    debug: boolean;
+    info: boolean;
+    warn: boolean;
+  }
+
+  static set level(value: string) {
+    this.levels = {
+      warn: /^(debug|info|warn)$/.test(value),
+      info: /^(debug|info)$/.test(value),
+      debug: /^debug$/.test(value),
+    };
+  }
 
   /**
    * Is object a log event
@@ -22,7 +30,14 @@ export class LogUtil {
    */
   static log(scope: string, args: string[], ...[level, msg]: CompilerLogEvent): void {
     const message = msg.replaceAll(process.cwd(), '.');
-    LEVELS[level] && console.debug(new Date().toISOString(), `[${scope.padEnd(SCOPE_MAX, ' ')}]`, ...args, message);
+    if (LogUtil.levels[level]) {
+      const params = [`[${scope.padEnd(SCOPE_MAX, ' ')}]`, ...args, message];
+      if (!/(0|false|off|no)$/i.test(process.env.TRV_LOG_TIME ?? '')) {
+        params.unshift(new Date().toISOString());
+      }
+      // eslint-disable-next-line no-console
+      console[level]!(...params);
+    }
   }
 
   /**

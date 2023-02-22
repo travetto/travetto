@@ -37,15 +37,14 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   }
 
   async #launchServer(command: string, args: string[], opts: ExecutionOptions = {}): Promise<[ExecutionState, Promise<void>]> {
-    await Workspace.build();
-
+    const prefix = String.fromCharCode(171);
     const state = Workspace.spawnCli(command, args, {
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
       ...opts,
       env: { NO_COLOR: '1', TRV_QUIET: '1', TRV_LOG_TIME: 'false', ...opts.env },
       catchAsResult: true,
-      onStdOutLine: line => this.#log.info('>>>', line),
-      onStdErrorLine: line => this.#log.error('!!!', line)
+      onStdOutLine: line => this.#log.info(prefix, line),
+      onStdErrorLine: line => this.#log.error(prefix, line)
     });
 
     const ready = new Promise<void>((resolve, reject) => {
@@ -127,8 +126,12 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       }
     });
 
+    const kill = () => this.#state?.process.kill('SIGKILL')
+    process.on('exit', kill);
+
     this.#state.process.on('exit', () => {
       this.#log.info('Exited', this.#state?.process.pid);
+      process.removeListener('exit', kill);
       this.#state = undefined;
     });
 

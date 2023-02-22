@@ -1,5 +1,4 @@
 import { install } from 'source-map-support';
-import timers from 'timers/promises';
 import ts from 'typescript';
 import fs from 'fs/promises';
 
@@ -11,8 +10,6 @@ import { CompilerState } from './state';
 import { CompilerWatcher } from './watch';
 import { Log } from './log';
 import { CompileEmitError, CompileEmitEvent, CompileEmitter } from './types';
-
-const PING_THRESHOLD = 1000;
 
 /**
  * Compilation support
@@ -134,11 +131,10 @@ export class Compiler {
     if (watch) {
       Log.info('Watch is ready');
       await this.#watchLocalModules(emitter);
-      for await (const _ of timers.setInterval(PING_THRESHOLD)) {
-        if (!await fs.stat(this.#state.resolveOutputFile('.')).catch(() => false)) { // Output removed
+      const output = this.#state.resolveOutputFile('.');
+      for await (const _ of fs.watch(output)) {
+        if (!await fs.stat(output).catch(() => false)) {
           process.send?.('restart');
-        } else {
-          process.send?.('ping');
         }
       }
     }
