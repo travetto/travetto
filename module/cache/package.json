@@ -29,7 +29,7 @@
     "@travetto/model": "^3.0.0-rc.20"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.0-rc.21",
+    "@travetto/test": "^3.0.0-rc.22",
     "@travetto/transformer": "^3.0.0-rc.19"
   },
   "peerDependenciesMeta": {
