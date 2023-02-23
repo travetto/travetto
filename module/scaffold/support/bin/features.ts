@@ -80,6 +80,9 @@ export const FEATURES: Feature[] = [
         context: { modelService: 'SQLModelService', modelConfig: 'SQLModelConfig', modelImport: '@travetto/model-sql' }
       }
     ],
+    addons: [
+      { title: 'Command Support', package: '@travetto/command' }
+    ],
     default: 'MongoDB'
   },
 ];
