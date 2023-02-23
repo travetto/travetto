@@ -129,8 +129,8 @@ export class ScaffoldCommand extends CliCommand<Options> {
     console.log(cliTpl`\n${{ title: 'Creating Application' }}\n${'-'.repeat(30)}`);
 
     await GlobalTerminal.streamLinesWithWaiting(ctx.install(), {
-      position: 'bottom',
-      end: true,
+      position: 'inline',
+      end: false,
       committedPrefix: '>',
       cycleDelay: 100
     });

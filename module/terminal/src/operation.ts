@@ -1,6 +1,6 @@
 import { IterableUtil } from './iterable';
 import { TerminalWriter } from './writer';
-import { Indexed, TermCoord, TerminalProgressRender, TerminalWaitingConfig, TermLinePosition, TermState } from './types';
+import { Indexed, TerminalProgressRender, TerminalStreamingConfig, TerminalWaitingConfig, TermState } from './types';
 import { ColorOutputUtil, TermStyleInput } from './color-output';
 
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
@@ -10,8 +10,10 @@ export class TerminalOperation {
   /**
    * Allows for writing at top, bottom, or current position while new text is added
    */
-  static async streamToPosition(term: TermState, source: AsyncIterable<string>, pos: TermLinePosition = 'inline', curPos?: TermCoord): Promise<void> {
-    curPos ??= { ...await term.getCursorPosition() };
+  static async streamToPosition(term: TermState, source: AsyncIterable<string>, config: TerminalStreamingConfig = {}): Promise<void> {
+    const curPos = config.at ?? { ...await term.getCursorPosition() };
+    const pos = config.position ?? 'inline';
+
     const writePos = pos === 'inline' ?
       { ...curPos, x: 0 } :
       { x: 0, y: pos === 'top' ? 0 : -1 };
@@ -33,7 +35,9 @@ export class TerminalOperation {
       for await (const text of source) {
         await TerminalWriter.for(term).setPosition(writePos).write(text).clearLine(1).commit(true);
       }
-      await TerminalWriter.for(term).setPosition(writePos).clearLine().commit(true);
+      if (config.clearOnFinish ?? true) {
+        await TerminalWriter.for(term).setPosition(writePos).clearLine().commit(true);
+      }
     } finally {
       const finalCursor = await term.getCursorPosition();
       await TerminalWriter.for(term).scrollRangeClear().setPosition(finalCursor).showCursor().commit();
@@ -59,15 +63,15 @@ export class TerminalOperation {
   /**
    * Waiting indicator, streamed to a specific position, can be canceled
    */
-  static streamWaiting(term: TermState, message: string, config: TerminalWaitingConfig = {}, curPos?: TermCoord): () => Promise<void> {
+  static streamWaiting(term: TermState, message: string, config: TerminalWaitingConfig = {}): () => Promise<void> {
     const { stop, stream } = IterableUtil.cycle(STD_WAIT_STATES);
     const indicator = IterableUtil.map(
       stream,
       IterableUtil.DELAY(config),
-      (ch, i) => config.end ? `${message} ${ch}` : (i === 0 ? `${ch} ${message}` : ch)
+      (ch, i) => config.end ? `${message} ${ch}` : `${ch} ${message}`
     );
 
-    const final = this.streamToPosition(term, indicator, config.position ?? 'inline', curPos);
+    const final = this.streamToPosition(term, indicator, config);
     return async () => { stop(); return final; };
   }
 
@@ -100,12 +104,15 @@ export class TerminalOperation {
     let writer: (() => Promise<unknown>) | undefined;
     let line: string | undefined;
 
+    let pos = await term.getCursorPosition();
+
+
     const commitLine = async (): Promise<void> => {
       await writer?.();
       if (line) {
         const msg = cfg.committedPrefix ? `${cfg.committedPrefix} ${line}` : line;
         if (cfg.position === 'inline') {
-          await TerminalWriter.for(term).setPosition({ x: 0 }).changePosition({ y: -1 }).writeLine(msg).commit();
+          await TerminalWriter.for(term).setPosition(pos).write(msg).commit(true);
         } else {
           await TerminalWriter.for(term).writeLine(msg).commit();
         }
@@ -113,13 +120,12 @@ export class TerminalOperation {
       }
     };
 
-    const pos = await term.getCursorPosition();
-
     for await (let msg of lines) {
       await commitLine();
       if (msg !== undefined) {
         msg = msg.replace(/\n$/, '');
-        writer = this.streamWaiting(term, msg, cfg, pos);
+        pos = await term.getCursorPosition();
+        writer = this.streamWaiting(term, msg, { ...cfg, at: pos, clearOnFinish: false });
         line = msg;
       }
     }

@@ -50,21 +50,12 @@ export class Context {
   }
 
   #exec(cmd: string, args: string[]): Promise<ExecutionResult> {
-    const err: string[] = [];
-
     const res = ExecUtil.spawn(cmd, args, {
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
       isolatedEnv: true,
-      outputMode: 'text-stream',
-      onStdErrorLine: line => err.push(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`)
+      onStdErrorLine: line => GlobalTerminal.writeLines(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`)
     }).result;
-
-    res.then(val => {
-      if (err.length) {
-        val.stderr = err.join('\n');
-      }
-    });
 
     return res;
   }
@@ -87,9 +78,8 @@ export class Context {
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {
     const res = Object.entries(await this.sourceListing)
-      .filter(([f, conf]) => {
-        return !conf.requires || Context.#meetsRequirement([...this.#dependencies, ...this.#devDependencies], conf.requires)
-      });
+      .filter(([, conf]) => !conf.requires ||
+        Context.#meetsRequirement([...this.#dependencies, ...this.#devDependencies], conf.requires));
 
     return res;
   }
@@ -181,20 +171,16 @@ export class Context {
 
     yield cliTpl`${{ type: 'Installing dependencies' }} `;
     switch (this.packageManager) {
-      case 'npm': {
-        const res = await this.#exec('npm', ['i']);
-        yield undefined;
-        GlobalTerminal.writeLines(res.stderr);
-        break;
-      }
-      case 'yarn': {
-        const res = await this.#exec('yarn', []);
-        yield undefined;
-        GlobalTerminal.writeLines(res.stderr);
-        break;
-      }
-      default:
-        throw new Error(`Unknown package manager: ${this.packageManager} `);
+      case 'npm': await this.#exec('npm', ['i']); break;
+      case 'yarn': await this.#exec('yarn', []); break;
+      default: throw new Error(`Unknown package manager: ${this.packageManager} `);
+    }
+
+    yield cliTpl`${{ type: 'Ensuring latest dependencies' }} `;
+    switch (this.packageManager) {
+      case 'npm': await this.#exec('npm', ['update', '-S']); break;
+      case 'yarn': await this.#exec('yarn', ['upgrade']); break;
+      default: throw new Error(`Unknown package manager: ${this.packageManager} `);
     }
 
     yield cliTpl`${{ type: 'Initial Build' }} `;

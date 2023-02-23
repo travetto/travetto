@@ -21,7 +21,10 @@ async function compile(ctx: ManifestContext, op: 'watch' | 'build' | undefined, 
 
   await LogUtil.withLogger('precompile', async () => {
     for (const mod of PRECOMPILE_MODS) {
-      changes += (await TranspileUtil.compileIfStale(ctx, 'precompile', mod, SOURCE_SEED)).length;
+      const count = (await TranspileUtil.compileIfStale(ctx, 'precompile', mod, SOURCE_SEED)).length;
+      if (mod !== '@travetto/terminal') {
+        changes += count;
+      }
     }
   });
 

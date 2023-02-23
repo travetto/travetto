@@ -13,7 +13,8 @@ export type TerminalTableEvent = { idx: number, text: string, done?: boolean };
 export type TerminalTableConfig = { header?: string[], forceNonInteractiveOrder?: boolean };
 export type TerminalProgressEvent = { idx: number, total?: number, text?: string };
 export type TerminalProgressRender = (ev: TerminalProgressEvent) => string;
-export type TerminalWaitingConfig = { position?: TermLinePosition, end?: boolean, committedPrefix?: string } & DelayedConfig;
+export type TerminalStreamingConfig = { position?: TermLinePosition, clearOnFinish?: boolean, at?: TermCoord };
+export type TerminalWaitingConfig = { end?: boolean, committedPrefix?: string } & TerminalStreamingConfig & DelayedConfig;
 
 export type TermColorLevel = 0 | 1 | 2 | 3;
 export type TermColorScheme = 'dark' | 'light';

@@ -174,7 +174,7 @@ export class Terminal implements TermState {
       await IterableUtil.drain(source);
       return;
     }
-    return TerminalOperation.streamToPosition(this, IterableUtil.map(source, resolve), config?.position);
+    return TerminalOperation.streamToPosition(this, IterableUtil.map(source, resolve), config);
   }
 
   /**
