@@ -135,7 +135,7 @@ export class Workspace {
     this.context = context;
     this.#extensionIndex = extensionIndex;
     this.#manifestContext = manifestContext;
-    this.#req = module.createRequire(path.resolve('node_modules'));
+    this.#req = module.createRequire(path.resolve(manifestContext.workspacePath, 'node_modules'));
 
     await this.writeTheme();
 
