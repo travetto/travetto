@@ -1,5 +1,5 @@
 import { ObjectUtil } from './object';
-import { Class, ClassInstance } from './types';
+import { Class, ClassInstance, TypedObject } from './types';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 
@@ -183,4 +183,31 @@ export class DataUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.#deepAssignRaw(a, b, mode) as T & U;
   }
+
+  /**
+   * Filter object by excluding specific keys
+   * @param obj A value to filter, primitives will be untouched
+   * @param exclude Strings or patterns to exclude against
+   * @returns
+   */
+  static filterByKeys<T>(obj: T, exclude: (string | RegExp)[]): T {
+    if (obj !== null && obj !== undefined && typeof obj === 'object') {
+      const out: Partial<T> = {};
+      for (const key of TypedObject.keys(obj)) {
+        if (!exclude.some(r => typeof key === 'string' && (typeof r === 'string' ? r === key : r.test(key)))) {
+          const val = obj[key];
+          if (typeof val === 'object') {
+            out[key] = this.filterByKeys(val, exclude);
+          } else {
+            out[key] = val;
+          }
+        }
+      }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return out as T;
+    } else {
+      return obj;
+    }
+  }
+
 }

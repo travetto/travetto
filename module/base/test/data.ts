@@ -142,4 +142,22 @@ class DataUtilTests {
     // @ts-expect-error
     assert(data.showTime === 'false');
   }
+
+  @Test()
+  verifyFilterByKeys() {
+    assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20 }, ['age']), { name: 'bob' });
+    assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20 }, [/age/]), { name: 'bob' });
+    assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20 }, [/Age/i]), { name: 'bob' });
+    assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20 }, [/a/]), {});
+    assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20 }, ['age', /name/]), {});
+    assert.deepStrictEqual(DataUtil.filterByKeys({ name: 'bob', age: 20 }, ['age', /namE/]), { name: 'bob' });
+    assert.deepStrictEqual(
+      DataUtil.filterByKeys({ name: 'bob', age: 20, child: { age: 11, name: 'gob' } }, ['age', /namE/]),
+      { name: 'bob', child: { name: 'gob' } }
+    );
+    assert.deepStrictEqual(
+      DataUtil.filterByKeys({ name: 'bob', age: 20, child: { age: 11, name: 'gob' } }, []),
+      { name: 'bob', age: 20, child: { name: 'gob', age: 11 } }
+    );
+  }
 }

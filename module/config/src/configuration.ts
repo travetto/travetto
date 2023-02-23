@@ -26,6 +26,7 @@ export class Configuration {
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
   #profiles: string[] = ['application', ...GlobalEnv.profiles, 'override'];
   #sources: string[] = [];
+  #secrets: (RegExp | string)[] = [/password|private|secret/i];
 
   /**
    * Get a sub tree of the config, or everything if namespace is not passed
@@ -67,6 +68,18 @@ export class Configuration {
     for (const { config: element } of sorted) {
       DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(element), 'coerce');
     }
+
+    // Initialize Secrets
+    const userSpecified = (this.#get('config')?.secrets ?? []);
+    for (const el of Array.isArray(userSpecified) ? userSpecified : [userSpecified]) {
+      if (el !== undefined && el !== null && typeof el === 'string') {
+        if (el.startsWith('/')) {
+          this.#secrets.push(DataUtil.coerceType(el, RegExp, true));
+        } else {
+          this.#secrets.push(DataUtil.coerceType(el, String, true));
+        }
+      }
+    }
   }
 
   /**
@@ -89,7 +102,7 @@ export class Configuration {
       const data = BindUtil.bindSchemaToObject<ConfigData>(
         inst.constructor, {}, inst, { filterField: f => !f.secret, filterValue: v => v !== undefined }
       );
-      out[el.class.name] = data;
+      out[el.class.name] = DataUtil.filterByKeys(data, this.#secrets);
     }
     return { sources: this.#sources, active: out };
   }
