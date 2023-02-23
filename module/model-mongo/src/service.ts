@@ -450,7 +450,7 @@ export class MongoModelService implements
       cls,
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }) as WhereClause<T>
-    ) as mongo.Filter<Document>;
+    ) as mongo.Filter<mongo.Document>;
 
     const cursor = store.find(where, { timeout: true }).batchSize(100).sort(asFielded(idxCfg)[IdxFieldsⲐ]);
 

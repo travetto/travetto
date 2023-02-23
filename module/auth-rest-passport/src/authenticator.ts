@@ -98,7 +98,7 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, Fil
           ...this.#passportAuthenticateOptions,
           ...PassportUtil.createLoginContext(req, this.#extraOptions)
         },
-        (err, u) => this.#authHandler(err, u).then(resolve, reject));
+        (err: Error, u: U) => this.#authHandler(err, u).then(resolve, reject));
 
       filter(req, res);
     });

@@ -42,12 +42,12 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
    * Build the fastify server
    */
   async init(): Promise<FastifyInstance> {
-    const fastConf: FastifyServerOptions = {};
+    const fastConf: https.ServerOptions = {};
     if (isHttps(this.config.ssl?.active, fastConf)) {
       fastConf.https = (await this.config.ssl?.getKeys())!;
     }
     if (this.config.trustProxy) {
-      fastConf.trustProxy = true;
+      Object.assign(fastConf, { trustProxy: true });
     }
 
     const app = fastify(fastConf);
@@ -56,7 +56,7 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
     app.addContentTypeParser(/.*/, (req, body, done) => done(null, body));
 
     this.raw = app;
-    return app;
+    return this.raw;
   }
 
   async unregisterRoutes(key: string | symbol): Promise<void> {
