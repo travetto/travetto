@@ -18,7 +18,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   await BuildStatus.init(context);
   await ActivationManager.init();
   await ActivationManager.activate(context);
-  await BuildStatus.listenForChanges();
+  BuildStatus.listenForChanges();
 }
 
 export function deactivate(): Promise<void> {
