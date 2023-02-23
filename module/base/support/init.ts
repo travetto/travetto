@@ -1,5 +1,4 @@
 import fs from 'fs';
-import { RootIndex } from '@travetto/manifest';
 
 import { ConsoleManager } from '../src/console';
 import { ShutdownManager } from '../src/shutdown';
@@ -41,15 +40,5 @@ export async function init(manageShutdown = true): Promise<void> {
   // Register shutdown handler
   if (manageShutdown) {
     ShutdownManager.register();
-  }
-
-  if (RootIndex.hasModule('@travetto/terminal')) {
-    const { GlobalTerminal } = await import('@travetto/terminal');
-    await GlobalTerminal.init();
-    if (manageShutdown) {
-      ShutdownManager.onShutdown('', () => GlobalTerminal.reset());
-    } else {
-      process.on('exit', () => GlobalTerminal.reset());
-    }
   }
 }

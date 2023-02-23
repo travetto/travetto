@@ -131,8 +131,8 @@ export class TranspileUtil {
   }
 
   /**
- * Recompile folder if stale
- */
+   * Recompile folder if stale
+   */
   static async compileIfStale(ctx: ManifestContext, scope: string, mod: string, seed: string[]): Promise<string[]> {
     const files = await this.getModuleSources(ctx, mod, seed);
     const changes = files.filter(x => x.stale).map(x => x.input);

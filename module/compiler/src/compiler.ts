@@ -21,21 +21,22 @@ export class Compiler {
    */
   static async main(): Promise<void> {
     const [dirty, watch] = process.argv.slice(2);
-    install();
+    const state = await CompilerState.get(RootIndex);
     const dirtyFiles = (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
-    return new Compiler().init(dirtyFiles).then(c => c.run(watch === 'true'));
+    await new Compiler(state, dirtyFiles, watch === 'true').run();
+    process.exit(0);
   }
 
   #state: CompilerState;
   #dirtyFiles: string[];
+  #watch?: boolean;
 
-  async init(dirtyFiles: string[]): Promise<this> {
-    this.#state = await CompilerState.get(RootIndex);
+  constructor(state: CompilerState, dirtyFiles: string[], watch?: boolean) {
+    this.#state = state;
     this.#dirtyFiles = dirtyFiles[0] === '*' ?
       this.#state.getAllFiles() :
       dirtyFiles.map(f => this.#state.getBySource(f)!.input);
-
-    return this;
+    this.#watch = watch;
   }
 
   /**
@@ -96,7 +97,10 @@ export class Compiler {
   /**
    * Run the compiler
    */
-  async run(watch?: boolean): Promise<void> {
+  async run(): Promise<void> {
+    await GlobalTerminal.init();
+    install();
+
     Log.debug('Compilation started');
 
     process.on('disconnect', () => process.exit(0));
@@ -122,7 +126,7 @@ export class Compiler {
       } else {
         Log.debug('Compilation succeeded');
       }
-    } else if (watch) {
+    } else if (this.#watch) {
       // Prime compiler before complete
       const resolved = this.#state.getArbitraryInputFile();
       await emitter(resolved, true);
@@ -130,7 +134,7 @@ export class Compiler {
 
     process.send?.('build-complete');
 
-    if (watch) {
+    if (this.#watch) {
       Log.info('Watch is ready');
       await this.#watchLocalModules(emitter);
       const output = this.#state.resolveOutputFile('.');

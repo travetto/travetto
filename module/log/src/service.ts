@@ -1,5 +1,6 @@
 import { ObjectUtil, ConsoleListener, ConsoleManager, ConsoleEvent } from '@travetto/base';
 import { AutoCreate, DependencyRegistry, Injectable } from '@travetto/di';
+import { GlobalTerminal } from '@travetto/terminal';
 
 import { LogEvent, Logger } from './types';
 import { LoggerTarget } from './internal/types';
@@ -17,6 +18,8 @@ export class LogService implements ConsoleListener, AutoCreate {
   #listeners: Logger[] = [];
 
   async postConstruct(): Promise<void> {
+    await GlobalTerminal.init();
+
     const def = await DependencyRegistry.getInstance(CommonLogger);
     this.#listeners.push(def);
 

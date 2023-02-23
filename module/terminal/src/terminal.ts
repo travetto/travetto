@@ -93,6 +93,7 @@ export class Terminal implements TermState {
           () => this.interactive ? this.#query.backgroundColor() : undefined
         );
       })();
+      process.on('exit', () => this.reset());
     }
     return this.#init;
   }
@@ -204,6 +205,3 @@ export class Terminal implements TermState {
 }
 
 export const GlobalTerminal = new Terminal({ output: process.stdout });
-
-// Trigger
-GlobalTerminal.init();

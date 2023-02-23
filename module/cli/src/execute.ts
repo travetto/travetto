@@ -70,13 +70,17 @@ export class ExecutionManager {
    * @param args
    */
   static async run(argv: string[]): Promise<void> {
-    const { init } = await import('@travetto/base/support/init.js');
-    await init();
+    await GlobalTerminal.init();
 
-    const width = GlobalTerminal.width;
     commander
       .version(PackageUtil.getFrameworkVersion())
-      .configureOutput({ getOutHelpWidth: () => width, getErrHelpWidth: () => width });
+      .configureOutput({
+        getOutHelpWidth: () => GlobalTerminal.width,
+        getErrHelpWidth: () => GlobalTerminal.width
+      });
+
+    const { init } = await import('@travetto/base/support/init.js');
+    await init();
 
     const [, , cmd, ...args] = argv;
     if (cmd === 'main') {
