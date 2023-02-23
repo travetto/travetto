@@ -68,7 +68,13 @@ export class QueryStringTest {
         },
         { e: { $eq: 10 } }
       ]
-    } as WhereClause<unknown>);
+    } as WhereClause<{
+      A?: number;
+      B?: number;
+      C?: number;
+      d?: number;
+      e?: number;
+    }>);
   }
 
   @Test('Parse Complex Boolean')
@@ -99,7 +105,14 @@ export class QueryStringTest {
         },
         { e: { $eq: 10 } }
       ]
-    } as WhereClause<unknown>);
+    } as WhereClause<{
+      A?: number;
+      B?: number;
+      C?: number;
+      G?: number;
+      d?: number;
+      e?: number;
+    }>);
   }
 
   @Test('Parse Negation')
@@ -110,7 +123,10 @@ export class QueryStringTest {
         { A: { $eq: 5 } },
         { $not: { B: { $eq: 6 } } }
       ]
-    } as WhereClause<unknown>);
+    } as WhereClause<{
+      A?: number;
+      B?: number;
+    }>);
   }
 
   @Test('Parse Dotted Fields')
@@ -126,7 +142,11 @@ export class QueryStringTest {
           ]
         }
       ]
-    } as WhereClause<unknown>);
+    } as WhereClause<{
+      A?: { b?: { c?: number } };
+      B?: { z?: number };
+      c?: string;
+    }>);
   }
 
   @Test('Parse Unique Outputs')
