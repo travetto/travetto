@@ -10,7 +10,7 @@ import { CompileStateEntry } from './types';
 function folderMapper(root: string, prefix: string): { dir: string, translate: (val: string) => string } {
   let matched: string = '~~';
   prefix = `/${prefix}`;
-  const final = path.resolve(root).replace(/\/[^\/+]/, m => {
+  const final = path.resolve(root).replace(/\/[^\/]+/, m => {
     matched = m;
     return prefix;
   });
