@@ -28,7 +28,7 @@ export class LockManager {
    * Get the lock file name
    */
   static #getFileName(ctx: ManifestContext, type: LockType): string {
-    return path.resolve(ctx.workspacePath, ctx.toolFolder, `${type}.pid`);
+    return path.resolve(ctx.workspacePath, ctx.toolFolder, `${type}.lock`);
   }
 
   /**
@@ -47,8 +47,7 @@ export class LockManager {
     const stale = this.#isStale(stat);
     let pid: number | undefined;
     if (stat) {
-      const content = await fs.readFile(file, 'utf8');
-      const filePid = parseInt(content, 10);
+      const { pid: filePid } = JSON.parse(await fs.readFile(file, 'utf8'));
       if (stale) {
         LogUtil.log('lock', [], 'debug', `${type} file is stale: ${stat.mtimeMs} vs ${Date.now()}`);
       } else {
@@ -65,7 +64,7 @@ export class LockManager {
     const file = this.#getFileName(ctx, type);
     mkdirSync(path.dirname(file), { recursive: true });
     LogUtil.log('lock', [], 'debug', `Acquiring ${type}`);
-    writeFileSync(file, `${process.pid}`, 'utf8');
+    writeFileSync(file, JSON.stringify({ pid: process.pid }), 'utf8');
   }
 
   /**

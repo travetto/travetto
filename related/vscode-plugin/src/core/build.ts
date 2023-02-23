@@ -99,8 +99,8 @@ export class BuildStatus {
   }
 
   static async listenForChanges(): Promise<void> {
-    const watchLockFile = Workspace.resolveToolFile('watch.pid');
-    const buildLockFile = Workspace.resolveToolFile('build.pid');
+    const watchLockFile = Workspace.resolveToolFile('watch.lock');
+    const buildLockFile = Workspace.resolveToolFile('build.lock');
 
     for (; ;) {
       await fs.mkdir(path.dirname(watchLockFile), { recursive: true });

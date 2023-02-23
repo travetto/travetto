@@ -99,6 +99,8 @@ export class Compiler {
   async run(watch?: boolean): Promise<void> {
     Log.debug('Compilation started');
 
+    process.on('disconnect', () => process.exit(0));
+
     const emitter = await this.getCompiler();
     let failed = false;
 
