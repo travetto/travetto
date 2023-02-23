@@ -1,6 +1,8 @@
 import { Authorizer, Authenticator } from '@travetto/auth';
+import { SessionModelⲐ } from '@travetto/rest-session';
 import { InjectableFactory } from '@travetto/di';
 import { AppError } from '@travetto/base';
+import { ModelExpirySupport, MemoryModelService } from '@travetto/model';
 
 export const BasicAuthⲐ = Symbol.for('AUTH_BASIC');
 
@@ -10,6 +12,11 @@ class AuthConfig {
   @InjectableFactory()
   static getAuthorizer(): Authorizer { // Simply mirrors the identity back as the principal
     return { authorize: p => p };
+  }
+
+  @InjectableFactory(SessionModelⲐ)
+  static getStore(svc: MemoryModelService): ModelExpirySupport {
+    return svc;
   }
 
   @InjectableFactory(BasicAuthⲐ)

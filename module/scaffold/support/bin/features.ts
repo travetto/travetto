@@ -34,6 +34,7 @@ export const FEATURES: Feature[] = [
       { title: 'Fastify Lambda', package: '@travetto/rest-fastify-lambda' },
     ],
     addons: [
+      { package: '@travetto/auth-rest-session' },
       { title: 'OpenAPI', package: '@travetto/openapi' },
       { title: 'Logging', package: '@travetto/log' }
     ],
@@ -45,7 +46,12 @@ export const FEATURES: Feature[] = [
     title: 'Rest Authentication',
     package: '@travetto/auth-rest',
     addons: [
-      { title: 'Rest Session', package: '@travetto/rest-session', addons: [{ package: '@travetto/auth-rest-session' }] },
+      {
+        title: 'Rest Session', package: '@travetto/rest-session', addons: [
+          { package: '@travetto/auth-rest-session' },
+          { package: '@travetto/auth-rest-context' }
+        ]
+      },
       { title: 'Context', package: '@travetto/auth-rest-session' }
     ]
   },

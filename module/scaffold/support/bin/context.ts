@@ -24,11 +24,7 @@ export class Context {
   static #meetsRequirement(modules: string[], desired: string[]): boolean {
     let valid = true;
     for (const mod of desired) {
-      if (mod.endsWith('-')) {
-        valid = valid && !!modules.find(m => m.startsWith(mod));
-      } else {
-        valid = valid && modules.includes(mod);
-      }
+      valid = valid && modules.includes(mod);
       if (!valid) {
         break;
       }
@@ -90,9 +86,12 @@ export class Context {
   }
 
   async resolvedSourceListing(): Promise<[string, ListingEntry][]> {
-    return Object.entries(await this.sourceListing)
-      .filter(([, conf]) => !conf.requires
-        || Context.#meetsRequirement([...this.#dependencies, ...this.#devDependencies], conf.requires));
+    const res = Object.entries(await this.sourceListing)
+      .filter(([f, conf]) => {
+        return !conf.requires || Context.#meetsRequirement([...this.#dependencies, ...this.#devDependencies], conf.requires)
+      });
+
+    return res;
   }
 
   async initialize(): Promise<void> {
@@ -110,17 +109,20 @@ export class Context {
   }
 
   templateContext(): Record<string, unknown> {
-    const modules = this.#dependencies.map(x => x.split('/')).reduce((acc, [, v]) => ({ ...acc, [v]: true }), {});
-    const moduleNames = [...Object.keys(modules)].filter(x => !x.includes('-'));
+    const modules = [...this.#dependencies, ...this.#devDependencies]
+      .map(x => path.basename(x)).reduce((acc, v) => ({ ...acc, [v.replace(/[-]/g, '_')]: true }), {});
+    const moduleNames = [...Object.keys(modules)];
 
-    return Object.assign({
+    const context = Object.assign({
       frameworkVersion: RootIndex.mainDigest().framework.replace(/[.]\d+$/, '.0'),
       name: this.name,
       modules,
       moduleNames,
-      dependencies: this.#dependencies,
-      devDependencies: this.#devDependencies,
+      dependencies: [...new Set(this.#dependencies)].sort((a, b) => a.localeCompare(b)),
+      devDependencies: [...new Set(this.#devDependencies)].sort((a, b) => a.localeCompare(b)),
     }, ...this.#featureContexts);
+
+    return context;
   }
 
   async template(file: string, { rename }: ListingEntry): Promise<void> {
@@ -132,9 +134,9 @@ export class Context {
         .replaceAll('_$', '}}}'),
       this.templateContext(),
     )
-      .replace(/^\s*(\/\/.*@doc-exclude.*)\n/gsm, '')
-      .replace(/^\s*(\/\/|#)\s*\n/gsm, '')
-      .replace(/\s*(\/\/|#)\s*/gsm, '');
+      .replace(/(\/\/.*@doc-exclude.*)$/g, '')
+      .replace(/\s*(\/\/.*@doc-exclude.*)/g, '')
+      .replace(/^\s*(\/\/\s*)\n/gsm, '');
     await fs.mkdir(path.dirname(out), { recursive: true });
     await fs.writeFile(out, rendered, 'utf8');
   }
@@ -172,10 +174,12 @@ export class Context {
 
   async * install(): AsyncIterable<string | undefined> {
 
-    yield cliTpl`${{ type: 'Templating files' }}`;
+    yield cliTpl`${{
+      type: 'Templating files'
+    }}`;
     await this.templateResolvedFiles();
 
-    yield cliTpl`${{ type: 'Installing dependencies' }}`;
+    yield cliTpl`${{ type: 'Installing dependencies' }} `;
     switch (this.packageManager) {
       case 'npm': {
         const res = await this.#exec('npm', ['i']);
@@ -190,16 +194,16 @@ export class Context {
         break;
       }
       default:
-        throw new Error(`Unknown package manager: ${this.packageManager}`);
+        throw new Error(`Unknown package manager: ${this.packageManager} `);
     }
 
-    yield cliTpl`${{ type: 'Initial Build' }}`;
+    yield cliTpl`${{ type: 'Initial Build' }} `;
     await this.#exec('npx', ['trv', 'build']);
     if (this.#devDependencies.includes('@travetto/eslint')) {
-      yield cliTpl`${{ type: 'ESLint Registration' }}`;
+      yield cliTpl`${{ type: 'ESLint Registration' }} `;
       await this.#exec('npx', ['trv', 'lint:register']);
     }
 
-    yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDir }}`;
+    yield cliTpl`${{ success: 'Successfully created' }} at ${{ path: this.#targetDir }} `;
   }
 }

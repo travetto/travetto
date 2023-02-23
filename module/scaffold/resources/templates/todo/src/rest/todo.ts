@@ -3,12 +3,12 @@ import { NotFoundError } from '@travetto/model';
 import { Inject } from '@travetto/di';
 import { ModelQuery } from '@travetto/model-query';
 import { Schema } from '@travetto/schema';
-// {{#modules.auth-rest}}
+// {{#modules.auth_rest}}
 import { Authenticated } from '@travetto/auth-rest';
-// {{/modules.auth-rest}}
-// {{#modules.auth-rest-context}}
+// {{/modules.auth_rest}}
+// {{#modules.auth_rest_context}}
 import { AuthContextService } from '@travetto/auth-rest-context';
-// {{/modules.auth-rest-context}}
+// {{/modules.auth_rest_context}}
 import { $_modelService_$ } from '$_modelImport_$';
 
 import { Todo } from '../model/todo';
@@ -16,9 +16,9 @@ import { Todo } from '../model/todo';
 @Schema()
 class Query {
   q: {
-    // {{#modules.auth-rest-context}}
+    // {{#modules.auth_rest_context}}
     userId?: string;
-    // {{/modules.auth-rest-context}}
+    // {{/modules.auth_rest_context}}
   } = {};
 }
 
@@ -26,18 +26,18 @@ class Query {
  * Controller for managing all aspects of the Todo lifecycle
  */
 @Controller('/todo')
-// {{#modules.auth-rest}}
+// {{#modules.auth_rest}}
 @Authenticated()
-// {{/modules.auth-rest}}
+// {{/modules.auth_rest}}
 export class TodoController {
 
   @Inject()
   source: $_modelService_$;
 
-  // {{#modules.auth-rest-context}}
+  // {{#modules.auth_rest_context}}
   @Inject()
   auth: AuthContextService;
-  // {{/modules.auth-rest-context}}
+  // {{/modules.auth_rest_context}}
 
   /**
    * Get all Todos
@@ -45,9 +45,9 @@ export class TodoController {
   @Get('/')
   async getAll(query: Query): Promise<Todo[]> {
     query.q ??= {};
-    // {{#modules.auth-rest-context}}
+    // {{#modules.auth_rest_context}}
     query.q.userId = this.auth.get()?.id;
-    // {{/modules.auth-rest-context}}
+    // {{/modules.auth_rest_context}}
     return this.source.query(Todo, { where: query.q });
   }
 
@@ -57,11 +57,11 @@ export class TodoController {
   @Get('/:id')
   async getOne(id: string): Promise<Todo> {
     const q: ModelQuery<Todo> = { where: { id } };
-    // {{#modules.auth-rest-context}}
+    // {{#modules.auth_rest_context}}
     if (typeof q.where !== 'string') {
       q.where!.userId = this.auth.get()?.id;
     }
-    // {{/modules.auth-rest-context}}
+    // {{/modules.auth_rest_context}}
     return this.source.queryOne(Todo, q);
   }
 
@@ -70,9 +70,9 @@ export class TodoController {
    */
   @Post('/')
   async save(todo: Todo): Promise<Todo> {
-    // {{#modules.auth-rest-context}}
+    // {{#modules.auth_rest_context}}
     todo.userId = this.auth.get()?.id;
-    // {{/modules.auth-rest-context}}
+    // {{/modules.auth_rest_context}}
     return this.source.create(Todo, todo);
   }
 
@@ -81,9 +81,9 @@ export class TodoController {
    */
   @Put('/:id')
   async update(todo: Todo): Promise<Todo> {
-    // {{#modules.auth-rest-context}}
+    // {{#modules.auth_rest_context}}
     todo.userId = this.auth.get()?.id;
-    // {{/modules.auth-rest-context}}
+    // {{/modules.auth_rest_context}}
     return this.source.update(Todo, todo);
   }
 
@@ -93,11 +93,11 @@ export class TodoController {
   @Delete('/:id')
   async remove(id: string): Promise<void> {
     const q: ModelQuery<Todo> = { where: { id } };
-    // {{#modules.auth-rest-context}}
+    // {{#modules.auth_rest_context}}
     if (typeof q.where !== 'string') {
       q.where!.userId = this.auth.get()?.id;
     }
-    // {{/modules.auth-rest-context}}
+    // {{/modules.auth_rest_context}}
     if (await this.source.deleteByQuery(Todo, q) !== 1) {
       throw new NotFoundError(Todo, id);
     }
