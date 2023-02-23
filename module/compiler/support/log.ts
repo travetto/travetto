@@ -10,7 +10,7 @@ export class LogUtil {
     debug: boolean;
     info: boolean;
     warn: boolean;
-  }
+  };
 
   static set level(value: string) {
     this.levels = {

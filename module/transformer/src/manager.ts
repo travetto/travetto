@@ -32,6 +32,10 @@ export class TransformerManager {
       transformers.push(...getAllTransformers(await import(entry.import), entry.module));
     }
 
+    for (const x of transformers) {
+      process.send?.(['debug', `Loaded Transformer: ${x.key}#${x.type}`]);
+    }
+
     // Prepare a new visitor factory with a given type checker
     return new TransformerManager(manifestIndex, transformers);
   }

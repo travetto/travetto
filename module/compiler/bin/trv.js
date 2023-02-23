@@ -16,7 +16,7 @@ const COMPILER_FILES = [...['launcher', 'transpile', 'lock', 'log', 'lock-pinger
  * @return {Promise<import('@travetto/compiler/support/launcher').launch>}
  */
 const $getLauncher = async (ctx) => {
-  const compPkg = createRequire(path.resolve('node_modules')).resolve('@travetto/compiler/package.json');
+  const compPkg = createRequire(path.resolve(ctx.workspacePath, 'node_modules')).resolve('@travetto/compiler/package.json');
   const files = [];
 
   for (const file of COMPILER_FILES) {

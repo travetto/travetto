@@ -5,7 +5,7 @@ export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string 
 
 export type WatchEventListener = (ev: WatchEvent, folder: string) => void;
 type EventFilter = (ev: WatchEvent) => boolean;
-type WatchConfig = { filter?: EventFilter, ignore?: string[], createMissing?: boolean };
+type WatchConfig = { filter?: EventFilter, ignore?: string[], createMissing?: boolean, includeHidden?: boolean };
 
 async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
   try {
@@ -40,11 +40,11 @@ export async function watchFolders(
       const ignore = (await fs.readdir(folder)).filter(x => x.startsWith('.') && x.length > 2);
       return lib.subscribe(folder, (err, events) => {
         for (const ev of events) {
-          if (ev.type === 'delete' && validFolders.has(path.toPosix(ev.path))) {
+          const finalEv = { action: ev.type, file: path.toPosix(ev.path) };
+          if (ev.type === 'delete' && validFolders.has(finalEv.file)) {
             return process.exit(0); // Exit when watched folder is removed
           }
-          const finalEv = { action: ev.type, file: ev.path };
-          if (!config.filter || config.filter(finalEv)) {
+          if ((config.includeHidden || !finalEv.file.includes('/.')) && (!config.filter || config.filter(finalEv))) {
             onEvent(finalEv, targetFolder);
           }
         }

@@ -16,10 +16,10 @@ export class ManifestUtil {
    * Write file and copy over when ready
    */
   static async #writeJsonWithBuffer(ctx: ManifestContext, filename: string, obj: object): Promise<string> {
-    const tempName = path.resolve(ctx.workspacePath, ctx.mainFolder, filename).replace(/[\/\\: ]/g, '_');
+    const tempName = `manifest.${process.ppid}.${process.pid}.json.${Date.now()}`;
     const file = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule, filename);
     await fs.mkdir(path.dirname(file), { recursive: true });
-    const temp = path.resolve(os.tmpdir(), `${tempName}.${Date.now()}`);
+    const temp = path.resolve(os.tmpdir(), tempName);
     await fs.writeFile(temp, JSON.stringify(obj), 'utf8');
     await fs.copyFile(temp, file);
     fs.unlink(temp);
