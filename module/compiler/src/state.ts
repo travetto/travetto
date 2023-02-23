@@ -1,5 +1,4 @@
 import ts from 'typescript';
-import os from 'os';
 
 import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
@@ -7,6 +6,16 @@ import { TransformerManager } from '@travetto/transformer';
 import { CompilerUtil } from './util';
 import { TranspileUtil } from '../support/transpile';
 import { CompileStateEntry } from './types';
+
+function folderMapper(root: string, prefix: string): { dir: string, translate: (val: string) => string } {
+  let matched: string = '~~';
+  prefix = `/${prefix}`;
+  const final = path.resolve(root).replace(/\/[^\/+]/, m => {
+    matched = m;
+    return prefix;
+  });
+  return { dir: final, translate: (file: string) => file.replace(prefix, matched) };
+}
 
 export class CompilerState implements ts.CompilerHost {
 
@@ -16,7 +25,8 @@ export class CompilerState implements ts.CompilerHost {
 
   private constructor() { }
 
-  #rootDir = path.resolve(os.tmpdir(), '_');
+  #rootDir: string;
+  #inputPathToSource: (file: string) => string;
   #outputPath: string;
   #inputFiles = new Set<string>();
   #inputDirectoryToSource = new Map<string, string>();
@@ -36,6 +46,10 @@ export class CompilerState implements ts.CompilerHost {
   async init(idx: ManifestIndex): Promise<this> {
     this.#manifestIndex = idx;
     this.#manifest = idx.manifest;
+    const mapper = folderMapper(this.#manifest.workspacePath, '##');
+    this.#rootDir = mapper.dir;
+    this.#inputPathToSource = mapper.translate;
+
     this.#outputPath = path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
     this.#modules = Object.values(this.#manifest.modules);
 
@@ -153,28 +167,20 @@ export class CompilerState implements ts.CompilerHost {
     return [...this.#inputFiles];
   }
 
-  /**
-   * Used for translating non-project files (e.g. dependencies/node_modules) to the faux-root
-   * that is used during compilation.
-   */
-  translateRawInput(input: string): string {
-    return input.replace(this.#rootDir, this.#manifest.workspacePath);
-  }
-
   /* Start Compiler Host */
   getCanonicalFileName(file: string): string { return file; }
-  getCurrentDirectory(): string { return path.cwd(); }
+  getCurrentDirectory(): string { return this.#rootDir; }
   getDefaultLibFileName(opts: ts.CompilerOptions): string { return ts.getDefaultLibFileName(opts); }
   getNewLine(): string { return ts.sys.newLine; }
   useCaseSensitiveFileNames(): boolean { return ts.sys.useCaseSensitiveFileNames; }
   getDefaultLibLocation(): string { return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions)); }
 
   fileExists(inputFile: string): boolean {
-    return this.#inputToEntry.has(inputFile) || ts.sys.fileExists(this.translateRawInput(inputFile));
+    return this.#inputToEntry.has(inputFile) || ts.sys.fileExists(this.#inputPathToSource(inputFile));
   }
 
   directoryExists(inputDir: string): boolean {
-    return this.#inputDirectoryToSource.has(inputDir) || ts.sys.directoryExists(this.translateRawInput(inputDir));
+    return this.#inputDirectoryToSource.has(inputDir) || ts.sys.directoryExists(this.#inputPathToSource(inputDir));
   }
 
   writeFile(
@@ -197,7 +203,7 @@ export class CompilerState implements ts.CompilerHost {
 
   readFile(inputFile: string): string | undefined {
     const res = this.#sourceContents.get(inputFile) ?? ts.sys.readFile(
-      this.#inputToEntry.get(inputFile)?.source ?? this.translateRawInput(inputFile)
+      this.#inputToEntry.get(inputFile)?.source ?? this.#inputPathToSource(inputFile)
     );
     this.#sourceContents.set(inputFile, res);
     return res;
