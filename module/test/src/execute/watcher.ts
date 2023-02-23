@@ -92,6 +92,10 @@ export async function main(format: string = 'tap', runAllOnStart: string = 'true
   defineGlobalEnv({ test: true, dynamic: true });
   console.log('Starting');
   ConsoleManager.setDebugFromEnv();
+  // Quit on parent disconnect
+  if (process.send) {
+    process.on('disconnect', () => process.exit(0));
+  }
   try {
     await TestWatcher.watch(format, runAllOnStart !== 'false');
     console.log('Done');
