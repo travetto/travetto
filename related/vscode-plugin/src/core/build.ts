@@ -118,7 +118,8 @@ export class BuildStatus {
           await timers.setTimeout(250); // Wait a quarter second and retry
           continue;
         }
-      } else { // Else ask plugin to build
+      } else if (!watchStat) {
+        // No one is watching, wait for build
         this.#log.info('Waiting for build');
         this.#item.text = 'Building...';
         this.#emitter.emit('build-waiting');
