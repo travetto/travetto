@@ -222,7 +222,6 @@ export class Workspace {
         '**/@travetto/rest/src/util/route.js',
         '**/tslib/**'
       ],
-      trace: true,
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
       name: config.name,
