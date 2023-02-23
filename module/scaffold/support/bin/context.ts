@@ -44,7 +44,7 @@ export class Context {
   readonly name: string;
 
   constructor(name: string, template: string, targetDir: string) {
-    this.name = name;
+    this.name = name.replace(/[^a-zA-Z0-9]+/, '-').replace(/-+$/, '');
     this.#template = template;
     this.#targetDir = path.resolve(targetDir);
   }
