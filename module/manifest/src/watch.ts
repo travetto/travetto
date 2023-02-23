@@ -44,7 +44,9 @@ export async function watchFolders(
           if (ev.type === 'delete' && validFolders.has(finalEv.file)) {
             return process.exit(0); // Exit when watched folder is removed
           }
-          if ((config.includeHidden || !finalEv.file.includes('/.')) && (!config.filter || config.filter(finalEv))) {
+          const isHidden = !config.includeHidden && finalEv.file.replace(targetFolder, '').includes('/.');
+          const matches = !isHidden && (!config.filter || config.filter(finalEv));
+          if (matches) {
             onEvent(finalEv, targetFolder);
           }
         }
