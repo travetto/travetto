@@ -1,6 +1,6 @@
 {
   "name": "@travetto/compiler",
-  "version": "3.0.0-rc.29",
+  "version": "3.0.0-rc.30",
   "description": "Compiler",
   "keywords": [
     "compiler",
@@ -31,12 +31,12 @@
   },
   "dependencies": {
     "@parcel/watcher": "^2.1.0",
-    "@travetto/manifest": "^3.0.0-rc.15",
+    "@travetto/manifest": "^3.0.0-rc.16",
     "@travetto/terminal": "^3.0.0-rc.10",
-    "@travetto/transformer": "^3.0.0-rc.19"
+    "@travetto/transformer": "^3.0.0-rc.20"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.20"
+    "@travetto/cli": "^3.0.0-rc.21"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
