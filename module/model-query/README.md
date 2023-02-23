@@ -254,7 +254,7 @@ import { Injectable } from '@travetto/di';
 
 import { QueryModelService } from './query-service';
 
-@Config()
+@Config('model.custom')
 class CustomModelConfig { }
 
 @Injectable()

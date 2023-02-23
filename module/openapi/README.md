@@ -139,7 +139,7 @@ The module provides a command for the [Command Line Interface](https://github.co
 ```bash
 $ trv openapi:client --help
 
-Usage:  openapi:client [options] [format-or-preset]
+Usage:  openapi:client [options] <format-or-preset>
 
 Options:
   -x, --extended-help                                  Show Extended Help

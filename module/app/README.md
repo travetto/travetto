@@ -66,7 +66,7 @@ The run command allows for invocation of applications as defined by the [@Applic
 ```bash
 $ trv run --help
 
-Usage:  run [options] [application] [args...]
+Usage:  run [options] <application> [args...]
 
 Options:
   -e, --env <env>          Application environment
@@ -76,32 +76,32 @@ Options:
 Available Applications:
 
    ● complex 
-     usage: complex domain:string [port:number=3000]
-     target:  @travetto/app:doc/complex￮Complex
+     usage:  complex domain:string [port:number=3000]
+     target: @travetto/app:doc/complex￮Complex
 
-     —————————————————————————————————————————————————————————
+     ——————————————————————————————————————————————————————————
 
    ● simple 
-     usage: simple domain:string [port:number=3000]
-     target:  @travetto/app:doc/simple￮SimpleApp
+     usage:  simple domain:string [port:number=3000]
+     target: @travetto/app:doc/simple￮SimpleApp
 
-     —————————————————————————————————————————————————————————
+     ——————————————————————————————————————————————————————————
 
    ● simple-app 
-     usage: simple-app 
-     target:  @travetto/app:doc/entry-simple￮SimpleApp
+     usage:  simple-app 
+     target: @travetto/app:doc/entry-simple￮SimpleApp
 
-     —————————————————————————————————————————————————————————
+     ——————————————————————————————————————————————————————————
 
    ● simple-domain 
-     usage: simple-domain domain:string [port:number=3000]
-     target:  @travetto/app:doc/domain￮SimpleApp
+     usage:  simple-domain domain:string [port:number=3000]
+     target: @travetto/app:doc/domain￮SimpleApp
 
-     —————————————————————————————————————————————————————————
+     ——————————————————————————————————————————————————————————
 
    ● test-ep-test 
-     usage: test-ep-test [age:number=5] [format:html|pdf=html]
-     target:  @travetto/app:doc/entry￮EpTest
+     usage:  test-ep-test [age:number=5] [format:html|pdf=html]
+     target: @travetto/app:doc/entry￮EpTest
 ```
 
 Running without specifying an application `trv run`, will display all the available apps, and would look like:
@@ -110,7 +110,7 @@ Running without specifying an application `trv run`, will display all the availa
 ```bash
 $ trv run
 
-Usage: trv run [options] [application] [args...]
+Usage: trv run [options] <application> [args...]
 
 Options:
   -e, --env <env>          Application environment
@@ -120,32 +120,32 @@ Options:
 Available Applications:
 
    ● complex 
-     usage: complex domain:string [port:number=3000]
-     target:  @travetto/app:doc/complex￮Complex
+     usage:  complex domain:string [port:number=3000]
+     target: @travetto/app:doc/complex￮Complex
 
-     —————————————————————————————————————————————————————————
+     ——————————————————————————————————————————————————————————
 
    ● simple 
-     usage: simple domain:string [port:number=3000]
-     target:  @travetto/app:doc/simple￮SimpleApp
+     usage:  simple domain:string [port:number=3000]
+     target: @travetto/app:doc/simple￮SimpleApp
 
-     —————————————————————————————————————————————————————————
+     ——————————————————————————————————————————————————————————
 
    ● simple-app 
-     usage: simple-app 
-     target:  @travetto/app:doc/entry-simple￮SimpleApp
+     usage:  simple-app 
+     target: @travetto/app:doc/entry-simple￮SimpleApp
 
-     —————————————————————————————————————————————————————————
+     ——————————————————————————————————————————————————————————
 
    ● simple-domain 
-     usage: simple-domain domain:string [port:number=3000]
-     target:  @travetto/app:doc/domain￮SimpleApp
+     usage:  simple-domain domain:string [port:number=3000]
+     target: @travetto/app:doc/domain￮SimpleApp
 
-     —————————————————————————————————————————————————————————
+     ——————————————————————————————————————————————————————————
 
    ● test-ep-test 
-     usage: test-ep-test [age:number=5] [format:html|pdf=html]
-     target:  @travetto/app:doc/entry￮EpTest
+     usage:  test-ep-test [age:number=5] [format:html|pdf=html]
+     target: @travetto/app:doc/entry￮EpTest
 ```
 
 To invoke the `simple` application, you need to pass `domain` where port is optional with a default.
@@ -173,7 +173,7 @@ Manifest {
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.14.0'
+    nodeVersion: 'v18.14.2'
   }
 }
 Config { sources: [ 'override.3 - memory://override' ], active: {} }

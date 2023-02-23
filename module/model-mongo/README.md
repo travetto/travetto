@@ -90,8 +90,7 @@ export class MongoModelConfig {
    * Mongo client options
    */
   @Field(Object)
-  options: mongo.MongoClientOptions = {
-  };
+  options: mongo.MongoClientOptions = {};
 
   /**
    * Should we auto create the db

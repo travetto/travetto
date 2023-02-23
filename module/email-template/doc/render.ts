@@ -9,7 +9,7 @@ export async function main(): Promise<void> {
     new EmailTemplateResource()
   );
 
-  const res = await compiler.compile('/welcome.email.html', true);
+  const res = await compiler.compile('/email/welcome.email.html', true);
 
   console.log(
     res.html

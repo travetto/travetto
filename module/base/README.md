@@ -123,7 +123,7 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
 ```
 
 ## Stream Support
-The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L11) class provides basic stream utilities for use within the framework:
+The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L15) class provides basic stream utilities for use within the framework:
 
    
    *  `toBuffer(src: Readable | Buffer | string): Promise<Buffer>` for converting a stream/buffer/filepath to a Buffer.

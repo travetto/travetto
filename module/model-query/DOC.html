@@ -270,7 +270,7 @@ To enforce that these contracts are honored, the module provides shared test sui
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> QueryModelService <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./query-service'</span><span class="token punctuation">;</span>
 
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Config</span></span><span class="token punctuation">(</span><span class="token string">'model.custom'</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">CustomModelConfig</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>

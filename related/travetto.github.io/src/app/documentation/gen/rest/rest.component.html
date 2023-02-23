@@ -275,7 +275,7 @@ By default, the framework provides a default <a target="_blank" class="source-li
       </figcaption>
       <pre><code class="language-bash">$ trv run
 
-Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>application<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>application<span class="token operator">></span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
   -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>env<span class="token operator">></span>          Application environment
@@ -285,14 +285,14 @@ Options:
 Available Applications:
 
    ● custom
-     usage: custom
-     target:  @travetto/rest:doc/custom-app￮SampleApp
+     usage:  custom
+     target: @travetto/rest:doc/custom-app￮SampleApp
 
-     ————————————————————————————————————————————————————————————
+     ———————————————————————————————————————————————————————————
 
    ● rest Default rest application entrypoint
-     usage: rest
-     target:  @travetto/rest:src/application/rest￮RestApplication</code></pre>     
+     usage:  rest
+     target: @travetto/rest:src/application/rest￮RestApplication</code></pre>     
       </figure>
 
 <h3 id="creating-a-custom-app">Creating a Custom App</h3>
@@ -341,7 +341,7 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     dynamic: false,
     profiles: <span class="token punctuation">[</span> <span class="token string">'dev'</span> <span class="token punctuation">]</span>,
     resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    nodeVersion: <span class="token string">'v18.14.0'</span>
+    nodeVersion: <span class="token string">'v18.14.2'</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>)}

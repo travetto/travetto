@@ -329,7 +329,7 @@ First we must start the application:
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.14.0'
+    nodeVersion: 'v18.14.2'
   }
 }
 2029-03-14T04:00:01.510Z info  [@travetto/app:src/registry.ts:81] Config {
@@ -340,21 +340,21 @@ First we must start the application:
   ],
   active: {
     ApiHostConfig: {
-      servers: [ ServerObject_1856065672_50_163Ⲑsyn { url: 'http://localhost:3000' } ],
+      servers: [ ServerObject_1137222912_50_163Ⲑsyn { url: 'http://localhost:3000' } ],
       openapi: '3.0.1'
     },
     ApiInfoConfig: {
-      contact: ContactObject_1856065672_41_123Ⲑsyn {
+      contact: ContactObject_1137222912_41_123Ⲑsyn {
         name: 'Travetto Framework',
         email: 'travetto.framework@gmail.com'
       },
       description: '',
-      license: LicenseObject_1856065672_46_102Ⲑsyn { name: 'ISC' },
+      license: LicenseObject_1137222912_46_102Ⲑsyn { name: 'ISC' },
       title: '@travetto/todo-app',
       version: '0.0.0'
     },
     ApiSpecConfig: { output: './openapi.yml', persist: false, skipRoutes: false, exposeAllSchemas: false },
-    CommonLoggerConfig: { format: 'line', plain: false, timestamp: 'ms' },
+    CommonLoggerConfig: { format: 'line', plain: false, time: 'ms' },
     FileModelConfig: { folder: '/tmp/trv_file__travetto_todo_app', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
@@ -363,7 +363,7 @@ First we must start the application:
       username: '',
       password: '',
       port: 27017,
-      connectionOptions: connectionOptions_34_2Ⲑsyn {},
+      connectionOptions: {},
       srvRecord: false,
       options: {}
     },
