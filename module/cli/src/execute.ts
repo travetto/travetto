@@ -1,9 +1,7 @@
-import fs from 'fs/promises';
 import { program as commander } from 'commander';
 
-import { PackageUtil, path, RootIndex } from '@travetto/manifest';
+import { PackageUtil } from '@travetto/manifest';
 import { GlobalTerminal } from '@travetto/terminal';
-import { ShutdownManager } from '@travetto/base';
 
 import { CliCommandManager } from './command-manager';
 import { HelpUtil } from './help';
@@ -44,28 +42,6 @@ export class ExecutionManager {
   }
 
   /**
-   * Run file expecting a main method
-   */
-  static async runMain(file: string, args: string[]): Promise<void> {
-    try {
-      // If referenced file exists
-      if (await (fs.stat(path.resolve(file)).then(() => true, () => false))) {
-        file = path.join(RootIndex.manifest.mainModule, file);
-      }
-
-      const imp = RootIndex.getFromImport(file)?.import;
-      if (!imp) {
-        throw new Error(`Unknown file: ${file}`);
-      }
-
-      const mod = await import(imp);
-      await ShutdownManager.exitWithResponse(await mod.main(...args));
-    } catch (err) {
-      await ShutdownManager.exitWithResponse(err, true);
-    }
-  }
-
-  /**
    * Execute the command line
    * @param args
    */
@@ -83,10 +59,7 @@ export class ExecutionManager {
     await init();
 
     const [, , cmd, ...args] = argv;
-    if (cmd === 'main') {
-      const [file, ...rest] = args;
-      await this.runMain(file, rest);
-    } else if (cmd && !cmd.startsWith('-')) {
+    if (cmd && !cmd.startsWith('-')) {
       await this.runCommand(cmd, args);
     } else {
       // Load all commands
