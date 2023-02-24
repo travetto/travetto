@@ -6,4 +6,175 @@
 **Install: @travetto/eslint**
 ```bash
 npm install @travetto/eslint
+
+# or
+
+yarn add @travetto/eslint
+```
+
+[ESLint](https://eslint.org/) is the standard for linting [Typescript](https://typescriptlang.org) and [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) code.  This module provides some standard linting patterns and the ability to create custom rules. Due to the fact that the framework supports both [CommonJS](https://nodejs.org/api/modules.html) and [Ecmascript Module](https://nodejs.org/api/esm.html) formats, a novel solution was required to allow [ESLint](https://eslint.org/) to load [Ecmascript Module](https://nodejs.org/api/esm.html) files.  
+
+**Note**: The [ESLint](https://eslint.org/) has introduced [a new configuration format](https://eslint.org/blog/2022/08/new-config-system-part-3/) which allows for [Ecmascript Module](https://nodejs.org/api/esm.html) files.
+
+### CLI - Register
+In a new project, the first thing that will need to be done, post installation, is to create the eslint configuration file.  
+
+**Terminal: Registering the Configuration**
+```bash
+$ trv lint:register
+
+Wrote eslint config to <workspace-root>/eslint.config.js
+```
+
+This is the file the linter will use, and any other tooling (e.g. IDEs).  
+
+**Code: Sample configuration**
+```javascript
+process.env.TRV_MANIFEST = './.trv_output/node_modules/@travetto/eslint';
+const { buildConfig } = require('./.trv_output/node_modules/@travetto/eslint/support/bin/eslint-config.js');
+const { RootIndex } = require('./.trv_output/node_modules/@travetto/manifest/__index__.js');
+const pluginFiles = RootIndex.findSupport({ filter: f => /support\/eslint[.]/.test(f) });
+const plugins = pluginFiles.map(x => require(x.outputFile));
+const config = buildConfig(plugins);
+module.exports = config;
+```
+
+The output is tied to whether or not you are using the [CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html) format.
+
+### CLI - Lint
+
+Once installed, using the linter is as simple as invoking it via the cli:
+
+**Terminal: Running the Linter**
+```bash
+npx trv lint
+```
+
+Or pointing your IDE to reference the registered configuration file.
+
+### Custom Rules
+It can be seen in the sample configuration, that the configuration is looking for files with the pattern of `support/eslint/.*`
+
+These files will follow a given pattern of: 
+
+**Code: Custom Rule Shape**
+```typescript
+import type eslint from 'eslint';
+
+export type TrvEslintPlugin = {
+  name: string;
+  rules: Record<string, {
+    defaultLevel?: string | boolean | number;
+    create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener;
+  }>;
+};
+```
+
+An example plugin is used in the [Travetto](https://travetto.dev) framework for enforcing import patterns:
+
+**Code: Import Order Rule**
+```typescript
+import type eslint from 'eslint';
+import { Program, BaseExpression, Expression } from 'estree';
+
+import type { TrvEslintPlugin } from '@travetto/eslint';
+
+const groupTypeMap = {
+  node: ['node', 'travetto', 'local'],
+  travetto: ['travetto', 'local'],
+  local: ['local'],
+};
+
+interface TSAsExpression extends BaseExpression {
+  type: 'TSAsExpression';
+  expression: Expression;
+}
+
+declare module 'estree' {
+  interface ExpressionMap {
+    TSAsExpression: TSAsExpression;
+  }
+}
+
+export const ImportOrder: TrvEslintPlugin = {
+  name: '@travetto-import',
+  rules: {
+    order: {
+      defaultLevel: 'error',
+      create(context) {
+        function check({ body }: Program): void {
+          let groupType: (keyof typeof groupTypeMap) | undefined;
+          let groupSize = 0;
+          let contiguous = false;
+          let prev: eslint.AST.Program['body'][number] | undefined;
+
+          for (const node of body) {
+
+            let from: string | undefined;
+
+            if (node.type === 'ImportDeclaration') {
+              if (node.source?.value && typeof node.source.value === 'string') {
+                from = node.source.value;
+              }
+            } else if (node.type === 'VariableDeclaration' && node.kind === 'const') {
+              const [decl] = node.declarations;
+              let call: Expression | undefined;
+              const initType = decl?.init?.type;
+              if (initType === 'CallExpression') {
+                call = decl.init;
+              } else if (initType === 'TSAsExpression') { // tslint support
+                call = decl.init.expression;
+              }
+              if (
+                call?.type === 'CallExpression' && call.callee.type === 'Identifier' &&
+                call.callee.name === 'require' && call.arguments[0].type === 'Literal'
+              ) {
+                const arg1 = call.arguments[0];
+                if (arg1.value && typeof arg1.value === 'string') {
+                  from = arg1.value;
+                }
+              }
+            }
+
+            if (!from) {
+              continue;
+            }
+
+            const lineType: typeof groupType = /^@travetto/.test(from) ? 'travetto' : /^[^.]/.test(from) ? 'node' : 'local';
+
+            if (/module\/[^/]+\/doc\//.test(context.getFilename()) && lineType === 'local' && from.startsWith('..')) {
+              context.report({ message: 'Doc does not support parent imports', node });
+            }
+
+            if (groupType && !groupTypeMap[groupType].includes(lineType)) {
+              context.report({ message: `Invalid transition from ${groupType} to ${lineType}`, node });
+            }
+
+            if (groupType === lineType) {
+              groupSize += 1;
+            } else if (((node.loc?.end.line ?? 0) - (prev?.loc?.end.line ?? 0)) > 1) {
+              // Newlines
+              contiguous = false;
+              groupSize = 0;
+            }
+
+            if (groupSize === 0) { // New group, who dis
+              groupSize = 1;
+              groupType = lineType;
+            } else if (groupType === lineType && !contiguous) { // Contiguous same
+              // Do nothing
+            } else if (groupSize === 1) { // Contiguous diff, count 1
+              contiguous = true;
+              groupType = lineType;
+            } else { // Contiguous diff, count > 1
+              context.report({ message: `Invalid contiguous groups ${groupType} and ${lineType}`, node });
+            }
+            prev = node;
+          }
+        }
+        return { Program: check };
+      }
+    }
+  }
+};
 ```

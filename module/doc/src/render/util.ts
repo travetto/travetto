@@ -15,14 +15,6 @@ export class RenderUtil {
 
   static #imported = new Map<string, { root: AllType, wrap?: Wrapper }>();
 
-  static purge(file: string): void {
-    if (RootIndex.manifest.moduleType === 'commonjs') {
-      const mod = RootIndex.getFromSource(file)!.outputFile;
-      delete require.cache[path.toNative(mod)];
-    }
-    this.#imported.delete(file);
-  }
-
   /**
    * Render content of file and format
    * @param file

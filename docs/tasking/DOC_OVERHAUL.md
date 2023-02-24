@@ -2,8 +2,6 @@
 
 ## Missing
 - Terminal
-- Repo
-- Eslint
 
 ## Outdated
 - Base
@@ -20,3 +18,5 @@
 - Auth JWT
 - Auth Rest Session
 - Auth Rest Context
+- Repo
+- Eslint

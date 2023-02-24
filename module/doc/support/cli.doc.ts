@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { PackageUtil, path, RootIndex, watchFolders } from '@travetto/manifest';
-import { GlobalEnvConfig } from '@travetto/base';
+import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { RenderUtil } from '../src/render/util';
@@ -52,9 +52,19 @@ export class DocCommand extends CliCommand<Options> {
 
     const outputs = this.cmd.outputs.map(output => output.includes('.') ? [path.extname(output).substring(1), path.resolve(output)] : [output, null] as const);
 
-    // If specifying output
-    const write = async (): Promise<void> => {
-      RenderUtil.purge(docFile);
+    if (this.cmd.watch) {
+      const args = process.argv.slice(2).filter(x => !x.startsWith('-w') && !x.startsWith('--w'));
+      await watchFolders([path.dirname(docFile)],
+        () => ExecUtil.spawn('npx', ['trv', ...args], {
+          cwd: RootIndex.mainModule.sourcePath,
+          env: { TRV_QUIET: '1' },
+          stdio: 'inherit', catchAsResult: true
+        }), {
+        filter: ev => ev.action === 'update' && ev.file === docFile
+      });
+    }
+
+    try {
       for (const [fmt, out] of outputs) {
         const result = await RenderUtil.render(docFile, fmt);
         if (out) {
@@ -64,21 +74,10 @@ export class DocCommand extends CliCommand<Options> {
           process.stdout.write(result);
         }
       }
-    };
-
-    if (this.cmd.watch) {
-      await watchFolders([path.dirname(docFile)], () => setTimeout(write, 250), {
-        filter: ev => ev.action === 'update' && ev.file === docFile
-      });
-      await write();
-    } else {
-      try {
-        await write();
-        console.log(`Wrote docs for ${this.cmd.input}`);
-      } catch (err) {
-        console.error(err);
-        this.exit(1);
-      }
+      console.log(`Wrote docs for ${this.cmd.input}`);
+    } catch (err) {
+      console.error(err);
+      this.exit(1);
     }
   }
 }

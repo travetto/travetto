@@ -6,10 +6,12 @@ const { Library } = node;
 export const lib = {
   Travetto: Library('Travetto', 'https://travetto.dev'),
   Typescript: Library('Typescript', 'https://typescriptlang.org'),
+  Javascript: Library('Javascript', 'https://developer.mozilla.org/en-US/docs/Web/JavaScript'),
   Node: Library('Node', 'https://nodejs.org'),
   TravettoPlugin: Library('VSCode plugin', 'https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin'),
   Npm: Library('Npm', 'https://docs.npmjs.com/downloading-and-installing-node-js-and-npm'),
   Yarn: Library('Yarn', 'https://yarnpg.com'),
+  Eslint: Library('ESLint', 'https://eslint.org/'),
 
   // Module
   CommonJS: Library('CommonJS', 'https://nodejs.org/api/modules.html'),
@@ -89,7 +91,6 @@ export const lib = {
   DynamoDB: Library('DynamoDB', 'https://aws.amazon.com/dynamodb/'),
   Firestore: Library('Firestore', 'https://firebase.google.com/docs/firestore'),
   SQLite: Library('SQLite', 'https://www.sqlite.org/'),
-
 
   // Rest
   Express: Library('express', 'https://expressjs.com'),

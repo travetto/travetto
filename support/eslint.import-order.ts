@@ -1,5 +1,5 @@
 import type eslint from 'eslint';
-import { BaseExpression, Expression } from 'estree';
+import { Program, BaseExpression, Expression } from 'estree';
 
 import type { TrvEslintPlugin } from '@travetto/eslint';
 
@@ -25,8 +25,8 @@ export const ImportOrder: TrvEslintPlugin = {
   rules: {
     order: {
       defaultLevel: 'error',
-      create(context: eslint.Rule.RuleContext): { Program: (ast: eslint.AST.Program) => void } {
-        function Program({ body }: eslint.AST.Program): void {
+      create(context) {
+        function check({ body }: Program): void {
           let groupType: (keyof typeof groupTypeMap) | undefined;
           let groupSize = 0;
           let contiguous = false;
@@ -96,7 +96,7 @@ export const ImportOrder: TrvEslintPlugin = {
             prev = node;
           }
         }
-        return { Program };
+        return { Program: check };
       }
     }
   }
