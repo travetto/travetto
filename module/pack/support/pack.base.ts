@@ -95,6 +95,10 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   }
 
   async action(module: string, args: string[]): Promise<void> {
+    if (Array.isArray(module)) {
+      args = module;
+      module = RootIndex.mainModule.name;
+    }
     const start = Date.now();
     if (!module && this.monoRoot) {
       return this.showHelp(new Error('The module needs to specified when running from a monorepo root'));
