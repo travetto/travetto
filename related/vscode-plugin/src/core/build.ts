@@ -108,17 +108,26 @@ export class BuildStatus {
       const watchStat = await fs.stat(watchLockFile).catch(() => undefined);
       const buildStat = await fs.stat(buildLockFile).catch(() => undefined);
 
-      if ( // Are we actively compiling
-        watchStat && !BuildStatus.#isStale(watchStat) &&
-        buildStat && !BuildStatus.#isStale(buildStat)
-      ) {
-        this.#item.text = 'Compiling...';
-        // Wait until build is finished
-        if (await this.#waitForRelease(buildLockFile) === 'stale') { // If we failed at building
-          await timers.setTimeout(250); // Wait a quarter second and retry
-          continue;
+      if (watchStat && !BuildStatus.#isStale(watchStat)) {
+        if (buildStat && !BuildStatus.#isStale(buildStat)) {
+          this.#item.text = 'Compiling...';
+          // Wait until build is finished
+          if (await this.#waitForRelease(buildLockFile) === 'stale') { // If we failed at building
+            await timers.setTimeout(250); // Wait a quarter second and retry
+            continue;
+          }
+        } else {
+          const waitForBuild = this.#waitForAcquire(buildLockFile);
+          await Promise.race([waitForBuild, timers.setTimeout(1000)]);
+          waitForBuild.cleanup();
+          if (await fs.stat(buildLockFile).catch(() => undefined)) {
+            this.#log.info('Waiting for build');
+            this.#item.text = 'Building...';
+            // Ensure we build after we emit
+            await this.#waitForRelease(buildLockFile);
+          }
         }
-      } else if (!watchStat || BuildStatus.#isStale(watchStat)) {
+      } else {
         // No one is watching, wait for build
         this.#log.info('Waiting for build');
         this.#item.text = 'Building...';
