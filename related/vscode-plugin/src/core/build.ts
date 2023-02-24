@@ -118,7 +118,7 @@ export class BuildStatus {
           await timers.setTimeout(250); // Wait a quarter second and retry
           continue;
         }
-      } else if (!watchStat) {
+      } else if (!watchStat || BuildStatus.#isStale(watchStat)) {
         // No one is watching, wait for build
         this.#log.info('Waiting for build');
         this.#item.text = 'Building...';
