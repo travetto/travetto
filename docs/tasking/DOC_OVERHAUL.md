@@ -1,7 +1,6 @@
 # Docs Needed 
 
 ## Missing
-- Auth Rest Context
 - Terminal
 - Repo
 - Eslint
@@ -20,3 +19,4 @@
 - Manifest
 - Auth JWT
 - Auth Rest Session
+- Auth Rest Context
