@@ -1,8 +1,5 @@
 # Docs Needed 
 
-## Missing
-- Terminal
-
 ## Outdated
 - Base
 - Config
@@ -20,3 +17,7 @@
 - Auth Rest Context
 - Repo
 - Eslint
+- Terminal
+
+## Missing
+-# None
