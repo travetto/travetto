@@ -33,20 +33,20 @@ ${d.List(
   'File Watching'
 )}
 
-${d.SubSection('Project Manifesting')}
+${d.Section('Project Manifesting')}
 The project manifest fulfills two main goals: Compile-time Support, and Runtime Knowledge of the project.
 
-${d.SubSubSection('Compile-time Support')}
+${d.SubSection('Compile-time Support')}
 During the compilation process, the compiler needs to know every file that is eligible for compilation, when the file was last created/modified, and any specific patterns for interacting with a given file (e.g. transformers vs. testing code vs. support files that happen to share a common extension with code). 
 
-${d.SubSubSection('Runtime Knowledge')}
+${d.SubSection('Runtime Knowledge')}
 Additionally, once the code has been compiled (or even bundled after that), the executing process needs to know what files are available for loading, and any patterns necessary for knowing which files to load versus which ones to ignore. This allows for dynamic loading of modules/files without knowledge/access to the file system, and in a more performant manner.
 
-${d.SubSection('Anatomy of a Manifest')}
+${d.Section('Anatomy of a Manifest')}
 
 ${d.Code('Manifest for @travetto/manifest', manifest())}
 
-${d.SubSubSection('General Context')}
+${d.SubSection('General Context')}
 The general context describes the project-space and any important information for how to build/execute the code.
 
 The context contains:
@@ -62,7 +62,7 @@ ${d.List(
   d`Which package manager is in use ${lib.Npm} or ${lib.Yarn}`
 )}
 
-${d.SubSubSection('Modules')}
+${d.SubSection('Modules')}
 The modules represent all of the ${lib.Travetto}-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A prod-only version is produced when packaging the final output.
 
 Each module contains:
@@ -78,7 +78,7 @@ ${d.List(
   'Parent modules that imported this module',
 )}
 
-${d.SubSubSection('Module Files')}
+${d.SubSection('Module Files')}
 The module files are a simple categorization of files into a predetermined set of folders:
 ${d.List(
   '$root - All uncategorized files at the module root',
@@ -106,7 +106,7 @@ ${d.Code('Sample file', `
   "test" // Optional profile
 ]`)}
 
-${d.SubSection('Module Indexing')}
+${d.Section('Module Indexing')}
 Once the manifest is created, the application runtime can now read this manifest, which allows for influencing runtime behavior. The most common patterns include:
 ${d.List(
   'Loading all source files',

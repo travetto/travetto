@@ -4,13 +4,6 @@ import { RootIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.Ref('ConsoleManager', 'src/console.ts');
 
-const ObjectUtilLink = d.Ref(ObjectUtil.name, 'src/object.ts');
-const UtilLink = d.Ref(Util.name, 'src/util.ts');
-const DataUtilLink = d.Ref(DataUtil.name, 'src/data.ts');
-const AppErrorLink = d.Ref(AppError.name, 'src/error.ts');
-const StreamUtilLink = d.Ref(StreamUtil.name, 'src/stream.ts');
-const ExecUtilLink = d.Ref(ExecUtil.name, 'src/exec.ts');
-
 export const text = () => d`
 ${d.Header()}
 
@@ -18,12 +11,14 @@ Base is the foundation of all ${lib.Travetto} applications.  It is intended to b
 
 ${d.List(
   'Environment Support',
+  'Shared Global Environment State',
   'Console Management',
   'Standard Error Support',
-  'Stream Support',
+  'Stream Utilities',
   'Object Utilities',
   'Data Utilities',
   'Common Utilities',
+  'Time Utilities',
   'Process Execution',
   'Shutdown Management'
 )}
@@ -35,16 +30,19 @@ ${d.List(
   d`${d.Method('isFalse(key: string): boolean;')} - Test whether or not an environment flag is set and is false`,
   d`${d.Method('isSet(key:string): boolean;')} - Test whether or not an environment value is set (excludes: ${d.Input('null')}, ${d.Input("''")}, and ${d.Input('undefined')})`,
   d`${d.Method('get(key: string, def?: string): string;')} - Retrieve an environmental value with a potential default`,
+  d`${d.Method('getBoolean(key: string, isValue?: boolean)')} - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value`,
   d`${d.Method('getInt(key: string, def?: number): number;')} - Retrieve an environmental value as a number`,
   d`${d.Method('getList(key: string): string[];')} - Retrieve an environmental value as a list`,
 )}
 
+${d.Section('Shared Global Environment State')}
+
 
 ${d.Section('Standard Error Support')}
 
-While the framework is 100 % compatible with standard ${d.Input('Error')} instances, there are cases in which additional functionality is desired. Within the framework we use ${AppErrorLink} (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the ${mod.Rest} module and HTTP status codes).  
+While the framework is 100 % compatible with standard ${d.Input('Error')} instances, there are cases in which additional functionality is desired. Within the framework we use ${AppError} (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the ${mod.Rest} module and HTTP status codes).  
 
-The ${AppErrorLink} takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
+The ${AppError} takes in a message, and an optional payload and / or error classification. The currently supported error classifications are:
 ${d.List(
   d`${d.Input('general')} - General purpose errors`,
   d`${d.Input('system')} - Synonym for ${d.Input('general')}`,
@@ -103,18 +101,19 @@ ${d.Terminal('Sample environment flags for standard usage', `
 $ DEBUG=express:*,@travetto/rest npx trv run rest
 `)}
 
-${d.Section('Stream Support')}
-The ${StreamUtilLink} class provides basic stream utilities for use within the framework:
+${d.Section('Stream Utilities')}
+The ${StreamUtil} class provides basic stream utilities for use within the framework:
 
 ${d.List(
   d`${d.Method('toBuffer(src: Readable | Buffer | string): Promise<Buffer>')} for converting a stream/buffer/filepath to a Buffer.`,
   d`${d.Method('toReadable(src: Readable | Buffer | string):Promise<Readable>')} for converting a stream/buffer/filepath to a Readable`,
   d`${d.Method('writeToFile(src: Readable, out: string):Promise<void>')} will stream a readable into a file path, and wait for completion.`,
   d`${d.Method('waitForCompletion(src: Readable, finish:()=>Promise<any>)')} will ensure the stream remains open until the promise finish produces is satisfied.`,
+  d`${d.Method('streamLines(file: string, ensureEmpty = false): AsyncIterable<string>')} will watch a file for any line changes, and produce those changes as asynchronous iterable stream. Functionally, this is equivalent to using the Unix tail operation on a file`,
 )}
 
 ${d.Section('Object Utilities')}
-Simple functions for providing a minimal facsimile to ${lib.Lodash}, but without all the weight. Currently ${ObjectUtilLink} includes:
+Simple functions for providing a minimal facsimile to ${lib.Lodash}, but without all the weight. Currently ${ObjectUtil} includes:
 
 ${d.List(
   d`${d.Method('isPrimitive(el)')} determines if ${d.Input('el')} is a ${d.Input('string')}, ${d.Input('boolean')}, ${d.Input('number')} or ${d.Input('RegExp')}`,
@@ -122,10 +121,11 @@ ${d.List(
   d`${d.Method('isFunction(o)')} determines if ${d.Input('o')} is a simple ${d.Input('Function')}`,
   d`${d.Method('isClass(o)')} determines if ${d.Input('o')} is a class constructor`,
   d`${d.Method('isSimple(a)')} determines if ${d.Input('a')} is a simple value`,
+  d`${d.Method('isPromise(a)')} determines if ${d.Input('a')} is a promise`,
 )}
 
 ${d.Section('Data Utilities')}
-Data utilities for binding values, and type conversion. Currently ${DataUtilLink} includes:
+Data utilities for binding values, and type conversion. Currently ${DataUtil} includes:
 
 ${d.List(
   d`${d.Method('deepAssign(a, b, mode ?)')} which allows for deep assignment of ${d.Input('b')} onto ${d.Input('a')}, the ${d.Input('mode')} determines how aggressive the assignment is, and how flexible it is.  ${d.Input('mode')} can have any of the following values: ${d.List(
@@ -133,10 +133,13 @@ ${d.List(
     d`${d.Input('coerce')}, will attempt to force values from ${d.Input('b')} to fit the types of ${d.Input('a')}, and if it can't it will error out`,
     d`${d.Input('strict')}, will error out if the types do not match`,
   )}`,
+  d`${d.Method('coerceType(input: unknown, type: Class<unknown>, strict = true)')} which allows for converting an input type into a specified ${d.Input('type')} instance, or throw an error if the types are incompatible.`,
+  d`${d.Method('shallowClone<T = unknown>(a: T): T')} will shallowly clone a field`,
+  d`${d.Method('filterByKeys<T>(obj: T, exclude: (string | RegExp)[]): T')} will filter a given object, and return a plain object (if applicable) with fields excluded using the values in the ${d.Input('exclude')} input`,
 )}
 
 ${d.Section('Common Utilities')}
-Common utilities used throughout the framework. Currently ${UtilLink} includes:
+Common utilities used throughout the framework. Currently ${Util} includes:
 
 ${d.List(
   d`${d.Method('uuid(len: number)')} generates a simple uuid for use within the application.`,
@@ -144,7 +147,7 @@ ${d.List(
 )}
 
 ${d.Section('Process Execution')}
-Just like ${lib.ChildProcess}, the ${ExecUtilLink} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.
+Just like ${lib.ChildProcess}, the ${ExecUtil} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

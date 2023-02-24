@@ -9,7 +9,7 @@ ${d.Note(d`
 The ${lib.Eslint} has introduced ${d.Library('a new configuration format', 'https://eslint.org/blog/2022/08/new-config-system-part-3/')} which allows for ${lib.EcmascriptModule} files.
 `)}
 
-${d.SubSection('CLI - Register')}
+${d.Section('CLI - Register')}
 In a new project, the first thing that will need to be done, post installation, is to create the eslint configuration file.  
 
 ${d.Execute('Registering the Configuration', 'trv', ['lint:register'])}
@@ -20,7 +20,7 @@ ${d.Code('Sample configuration', '../../eslint.config.js')}
 
 The output is tied to whether or not you are using the ${lib.CommonJS} or ${lib.EcmascriptModule} format.
 
-${d.SubSection('CLI - Lint')}
+${d.Section('CLI - Lint')}
 
 Once installed, using the linter is as simple as invoking it via the cli:
 
@@ -28,7 +28,7 @@ ${d.Terminal('Running the Linter', 'npx trv lint')}
 
 Or pointing your IDE to reference the registered configuration file.
 
-${d.SubSection('Custom Rules')}
+${d.Section('Custom Rules')}
 It can be seen in the sample configuration, that the configuration is looking for files with the pattern of ${d.Path('support/eslint/.*')}
 
 These files will follow a given pattern of: 

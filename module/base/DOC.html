@@ -9,18 +9,24 @@
       <figcaption class="install">Install @travetto/base
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/base</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/base
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/base</code></pre>     
       </figure>
 
 Base is the foundation of all <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
 <ul> <li>Environment Support</li>
+ <li>Shared Global Environment State</li>
  <li>Console Management</li>
  <li>Standard Error Support</li>
- <li>Stream Support</li>
+ <li>Stream Utilities</li>
  <li>Object Utilities</li>
  <li>Data Utilities</li>
  <li>Common Utilities</li>
+ <li>Time Utilities</li>
  <li>Process Execution</li>
  <li>Shutdown Management</li></ul>
 
@@ -30,8 +36,11 @@ The functionality we support for testing and retrieving environment information:
  <li><code class="item method">isFalse(key: string): boolean;</code> - Test whether or not an environment flag is set and is false</li>
  <li><code class="item method">isSet(key:string): boolean;</code> - Test whether or not an environment value is set (excludes: <code class="item input">null</code>, <code class="item input">''</code>, and <code class="item input">undefined</code>)</li>
  <li><code class="item method">get(key: string, def?: string): string;</code> - Retrieve an environmental value with a potential default</li>
+ <li><code class="item method">getBoolean(key: string, isValue?: boolean)</code> - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value</li>
  <li><code class="item method">getInt(key: string, def?: number): number;</code> - Retrieve an environmental value as a number</li>
  <li><code class="item method">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li></ul>
+
+<h2 id="shared-global-environment-state">Shared Global Environment State</h2>
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 
@@ -130,13 +139,14 @@ Additionally, the logging framework will merge <a target="_blank" class="externa
 $ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>express:*,@travetto/rest npx trv run rest</code></pre>     
       </figure>
 
-<h2 id="stream-support">Stream Support</h2>
+<h2 id="stream-utilities">Stream Utilities</h2>
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L15">StreamUtil</a> class provides basic stream utilities for use within the framework:
 
 <ul> <li><code class="item method">toBuffer(src: Readable | Buffer | string): Promise&lt;Buffer&gt;</code> for converting a stream/buffer/filepath to a Buffer.</li>
  <li><code class="item method">toReadable(src: Readable | Buffer | string):Promise&lt;Readable&gt;</code> for converting a stream/buffer/filepath to a Readable</li>
  <li><code class="item method">writeToFile(src: Readable, out: string):Promise&lt;void&gt;</code> will stream a readable into a file path, and wait for completion.</li>
- <li><code class="item method">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li></ul>
+ <li><code class="item method">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li>
+ <li><code class="item method">streamLines(file: string, ensureEmpty = false): AsyncIterable&lt;string&gt;</code> will watch a file for any line changes, and produce those changes as asynchronous iterable stream. Functionally, this is equivalent to using the Unix tail operation on a file</li></ul>
 
 <h2 id="object-utilities">Object Utilities</h2>
 Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L10">ObjectUtil</a> includes:
@@ -145,14 +155,18 @@ Simple functions for providing a minimal facsimile to <a target="_blank" class="
  <li><code class="item method">isPlainObject(obj)</code> determines if the obj is a simple object</li>
  <li><code class="item method">isFunction(o)</code> determines if <code class="item input">o</code> is a simple <code class="item input">Function</code></li>
  <li><code class="item method">isClass(o)</code> determines if <code class="item input">o</code> is a class constructor</li>
- <li><code class="item method">isSimple(a)</code> determines if <code class="item input">a</code> is a simple value</li></ul>
+ <li><code class="item method">isSimple(a)</code> determines if <code class="item input">a</code> is a simple value</li>
+ <li><code class="item method">isPromise(a)</code> determines if <code class="item input">a</code> is a promise</li></ul>
 
 <h2 id="data-utilities">Data Utilities</h2>
 Data utilities for binding values, and type conversion. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/data.ts#L9">DataUtil</a> includes:
 
 <ul> <li><code class="item method">deepAssign(a, b, mode ?)</code> which allows for deep assignment of <code class="item input">b</code> onto <code class="item input">a</code>, the <code class="item input">mode</code> determines how aggressive the assignment is, and how flexible it is.  <code class="item input">mode</code> can have any of the following values: <ul> <li><code class="item input">loose</code>, which is the default is the most lenient. It will not error out, and overwrites will always happen</li>
  <li><code class="item input">coerce</code>, will attempt to force values from <code class="item input">b</code> to fit the types of <code class="item input">a</code>, and if it can't it will error out</li>
- <li><code class="item input">strict</code>, will error out if the types do not match</li></ul></li></ul>
+ <li><code class="item input">strict</code>, will error out if the types do not match</li></ul></li>
+ <li><code class="item method">coerceType(input: unknown, type: Class&lt;unknown&gt;, strict = true)</code> which allows for converting an input type into a specified <code class="item input">type</code> instance, or throw an error if the types are incompatible.</li>
+ <li><code class="item method">shallowClone&lt;T = unknown&gt;(a: T): T</code> will shallowly clone a field</li>
+ <li><code class="item method">filterByKeys&lt;T&gt;(obj: T, exclude: (string | RegExp)[]): T</code> will filter a given object, and return a plain object (if applicable) with fields excluded using the values in the <code class="item input">exclude</code> input</li></ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
 Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L14">Util</a> includes:

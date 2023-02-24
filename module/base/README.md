@@ -6,18 +6,24 @@
 **Install: @travetto/base**
 ```bash
 npm install @travetto/base
+
+# or
+
+yarn add @travetto/base
 ```
 
 Base is the foundation of all [Travetto](https://travetto.dev) applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
    
    *  Environment Support
+   *  Shared Global Environment State
    *  Console Management
    *  Standard Error Support
-   *  Stream Support
+   *  Stream Utilities
    *  Object Utilities
    *  Data Utilities
    *  Common Utilities
+   *  Time Utilities
    *  Process Execution
    *  Shutdown Management
 
@@ -28,8 +34,11 @@ The functionality we support for testing and retrieving environment information:
    *  `isFalse(key: string): boolean;` - Test whether or not an environment flag is set and is false
    *  `isSet(key:string): boolean;` - Test whether or not an environment value is set (excludes: `null`, `''`, and `undefined`)
    *  `get(key: string, def?: string): string;` - Retrieve an environmental value with a potential default
+   *  `getBoolean(key: string, isValue?: boolean)` - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value
    *  `getInt(key: string, def?: number): number;` - Retrieve an environmental value as a number
    *  `getList(key: string): string[];` - Retrieve an environmental value as a list
+
+## Shared Global Environment State
 
 ## Standard Error Support
 
@@ -122,7 +131,7 @@ Additionally, the logging framework will merge [debug](https://www.npmjs.com/pac
 $ DEBUG=express:*,@travetto/rest npx trv run rest
 ```
 
-## Stream Support
+## Stream Utilities
 The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L15) class provides basic stream utilities for use within the framework:
 
    
@@ -130,6 +139,7 @@ The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/
    *  `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable
    *  `writeToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
    *  `waitForCompletion(src: Readable, finish:()=>Promise<any>)` will ensure the stream remains open until the promise finish produces is satisfied.
+   *  `streamLines(file: string, ensureEmpty = false): AsyncIterable<string>` will watch a file for any line changes, and produce those changes as asynchronous iterable stream. Functionally, this is equivalent to using the Unix tail operation on a file
 
 ## Object Utilities
 Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [ObjectUtil](https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L10) includes:
@@ -140,6 +150,7 @@ Simple functions for providing a minimal facsimile to [lodash](https://lodash.co
    *  `isFunction(o)` determines if `o` is a simple `Function`
    *  `isClass(o)` determines if `o` is a class constructor
    *  `isSimple(a)` determines if `a` is a simple value
+   *  `isPromise(a)` determines if `a` is a promise
 
 ## Data Utilities
 Data utilities for binding values, and type conversion. Currently [DataUtil](https://github.com/travetto/travetto/tree/main/module/base/src/data.ts#L9) includes:
@@ -149,6 +160,9 @@ Data utilities for binding values, and type conversion. Currently [DataUtil](htt
       *  `loose`, which is the default is the most lenient. It will not error out, and overwrites will always happen
       *  `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
       *  `strict`, will error out if the types do not match
+   *  `coerceType(input: unknown, type: Class<unknown>, strict = true)` which allows for converting an input type into a specified `type` instance, or throw an error if the types are incompatible.
+   *  `shallowClone<T = unknown>(a: T): T` will shallowly clone a field
+   *  `filterByKeys<T>(obj: T, exclude: (string | RegExp)[]): T` will filter a given object, and return a plain object (if applicable) with fields excluded using the values in the `exclude` input
 
 ## Common Utilities
 Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L14) includes:

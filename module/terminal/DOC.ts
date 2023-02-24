@@ -10,7 +10,7 @@ ${d.List(
   'Terminal Interactions'
 )}
 
-${d.SubSection('Output Colorization')}
+${d.Section('Output Colorization')}
 
 Oddly enough, colorizing output in a terminal is a fairly complex process.  The standards are somewhat inconsistent and detection can be a tricky process. For terminals, ${lib.Node} supports 4 different levels of coloring:
 ${d.List(
@@ -42,7 +42,7 @@ ${d.Execute('Node help on colors', '/usr/bin/node', ['-h'], {
   formatCommand: (cmd, args) => `${cmd} ${args.join(' ')} | grep -i color`
 })}
 
-${d.SubSection('Terminal Interactions')}
+${d.Section('Terminal Interactions')}
 Within the ${lib.Travetto} framework, there are plenty of command line interactions that are enhanced with additional interactivity.  This mainly revolves around indicating progress while a program is executing.  The module provides support for:
 
 ${d.List(

@@ -62,7 +62,7 @@ ${d.Section('Template Development')}
 
 The module provides ${mod.Cli} and ${lib.TravettoPlugin} support for email template development.
 
-${d.SubSection('CLI Compilation')}
+${d.Section('CLI Compilation')}
 
 The module provides ${mod.Cli} support for email template compilation also. Running
 
@@ -70,7 +70,7 @@ ${d.Execute('Running template compilation', 'trv', ['email:compile', '-h'])}
 
 Will convert all ${d.Path('.email.html')} files into the appropriate ${d.Path('.compiled.html')}, ${d.Path('.compiled.text')} and ${d.Path('.compiled.subject')} files.  These will be used during the running of the application.  By default these files are added to the ${d.Path('.gitignore')} as they are generally not intended to be saved but to be generated during the build process.
 
-${d.SubSection(lib.TravettoPlugin)}
+${d.Section(lib.TravettoPlugin)}
 In addition to command line tools, the ${lib.TravettoPlugin} also supports:
 
 ${d.List(

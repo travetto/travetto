@@ -1,7 +1,7 @@
 import { spawnSync } from 'child_process';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
+import { ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { stripAnsiCodes } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
@@ -58,7 +58,6 @@ export class DocRunUtil {
         cwd: path.toPosix(config.cwd ?? path.cwd()),
         shell: '/bin/bash',
         env: {
-          ...Env.export(/^(TRV_.*|NODE_.*|.*COLOR.*|PATH)$/),
           DEBUG: '0',
           TRV_MANIFEST: '',
           TRV_BUILD: 'warn',

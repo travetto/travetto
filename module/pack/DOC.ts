@@ -16,7 +16,7 @@ ${d.List(
   'docker'
 )}
 
-${d.SubSection('CLI - pack:assemble')}
+${d.Section('CLI - pack:assemble')}
 
 Assemble is the operation that stages the project's code for deployment.  The assembly process goes through the following operations:
 
@@ -38,7 +38,7 @@ ${d.Snippet('Assemble Default Config', 'support/pack.config.ts', /assemble:/, /[
 
 ${d.Execute('Assemble Usage', 'trv', ['pack:assemble', '--help'])}
 
-${d.SubSection('CLI - pack:zip')}
+${d.Section('CLI - pack:zip')}
 
 Zip is an optional step, that can run post assembly.  The only configuration it currently provides is the ability to specify the output location for the zip file.
 
@@ -46,7 +46,7 @@ ${d.Snippet('Zip Default Config', 'support/pack.config.ts', /zip:/, /\}/)}
 
 ${d.Execute('Zip Usage', 'trv', ['pack:zip', '--help'])}
 
-${d.SubSection('CLI - pack:docker')}
+${d.Section('CLI - pack:docker')}
 
 Docker support is an optional step, that can run post assembly.  This allows for building a docker image, and currently only supports the base images as the only configuration options.
 
@@ -55,7 +55,7 @@ ${d.Snippet('Docker Default Config', 'support/pack.config.ts', /docker:/, /\}/)}
 ${d.Execute('Docker Usage', 'trv', ['pack:docker', '--help'])}
 
 
-${d.SubSection('Modes')}
+${d.Section('Modes')}
 Various modules may provide customizations to the default ${d.Path('pack.config.ts')} to allow for easy integration with the packing process.  A simple example of this is via the ${mod.Rest} module, for how to publish lambda packages.
 
 ${d.Code('Rest, pack.lambda.ts', '@travetto/rest-aws-lambda/support/pack.aws-lambda.ts')}
@@ -74,7 +74,7 @@ These two configurations will be loaded and layered, with the selected config ta
 
 ${d.Code('Example pack.config.ts', 'support/pack.config.ts')}
 
-${d.SubSection('Environment Override')}
+${d.Section('Environment Override')}
 
 When working with sub operations, passing command-line flags is challenging.  To support a more natural usage, the sub operations 
 allow their key parameters to be overridden via environment variables.
