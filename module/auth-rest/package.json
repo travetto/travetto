@@ -1,7 +1,7 @@
 {
   "name": "@travetto/auth-rest",
   "version": "3.0.0-rc.25",
-  "description": "Rest authentication integration support for the travetto framework",
+  "description": "Rest authentication integration support for the Travetto framework",
   "keywords": [
     "authentication",
     "rest",

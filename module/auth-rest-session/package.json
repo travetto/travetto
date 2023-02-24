@@ -1,7 +1,7 @@
 {
   "name": "@travetto/auth-rest-session",
   "version": "3.0.0-rc.25",
-  "description": "Rest authentication session integration support for the travetto framework",
+  "description": "Rest authentication session integration support for the Travetto framework",
   "keywords": [
     "authentication",
     "session",

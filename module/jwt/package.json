@@ -33,9 +33,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "contributors": [
-    "travetto framework"
-  ],
   "bugs": {
     "url": "https://github.com/travetto/travetto/issues"
   }

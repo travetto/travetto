@@ -1,7 +1,7 @@
 {
   "name": "@travetto/openapi",
   "version": "3.0.0-rc.25",
-  "description": "OpenAPI integration support for the travetto framework",
+  "description": "OpenAPI integration support for the Travetto framework",
   "keywords": [
     "rest",
     "travetto",

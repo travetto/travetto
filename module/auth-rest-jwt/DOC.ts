@@ -9,7 +9,7 @@ One of ${mod.AuthRest}'s main responsibilities is being able to send and receive
 
 The ${JWTPrincipalEncoder} is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again. 
 
-${d.Code('JWT Source', JWTPrincipalEncoder)}
+${d.Code(JWTPrincipalEncoder.name, JWTPrincipalEncoder)}
 
 As you can see, the encode token just creates a ${lib.JWT} based on the principal provided, and decoding verifies the token, and returns the principal.
 `;

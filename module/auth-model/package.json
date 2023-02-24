@@ -1,7 +1,7 @@
 {
   "name": "@travetto/auth-model",
   "version": "3.0.0-rc.24",
-  "description": "Authentication model support for the travetto framework",
+  "description": "Authentication model support for the Travetto framework",
   "keywords": [
     "authentication",
     "model",

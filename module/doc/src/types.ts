@@ -30,7 +30,7 @@ export interface RenderContextShape {
   baseUrl: string;
 
   /**
-   * Github root for travetto framework
+   * Github root for Travetto framework
    */
   travettoBaseUrl: string;
 

@@ -1,10 +1,8 @@
 # Docs Needed 
 
 ## Missing
-- Auth JWT
-- Auth Rest Session
 - Auth Rest Context
-- Terminal Color
+- Terminal
 - Repo
 - Eslint
 
@@ -20,3 +18,5 @@
 
 ## Completed
 - Manifest
+- Auth JWT
+- Auth Rest Session

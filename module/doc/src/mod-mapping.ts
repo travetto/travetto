@@ -13,31 +13,31 @@ export const MOD_MAPPING = {
   },
   Auth: {
     name:'@travetto/auth', folder:'@travetto/auth', displayName: 'Authentication',
-    description: 'Authentication scaffolding for the travetto framework'
+    description: 'Authentication scaffolding for the Travetto framework'
   },
   AuthModel: {
     name:'@travetto/auth-model', folder:'@travetto/auth-model', displayName: 'Authentication Model',
-    description: 'Authentication model support for the travetto framework'
+    description: 'Authentication model support for the Travetto framework'
   },
   AuthRest: {
     name:'@travetto/auth-rest', folder:'@travetto/auth-rest', displayName: 'Rest Auth',
-    description: 'Rest authentication integration support for the travetto framework'
+    description: 'Rest authentication integration support for the Travetto framework'
   },
   AuthRestContext: {
     name:'@travetto/auth-rest-context', folder:'@travetto/auth-rest-context', displayName: 'Rest Auth Context',
-    description: 'Rest authentication context integration support for the travetto framework'
+    description: 'Rest authentication context integration support for the Travetto framework'
   },
   AuthRestJwt: {
     name:'@travetto/auth-rest-jwt', folder:'@travetto/auth-rest-jwt', displayName: 'Rest Auth JWT',
-    description: 'Rest authentication JWT integration support for the travetto framework'
+    description: 'Rest authentication JWT integration support for the Travetto framework'
   },
   AuthRestPassport: {
     name:'@travetto/auth-rest-passport', folder:'@travetto/auth-rest-passport', displayName: 'Rest Auth Passport',
-    description: 'Rest authentication integration support for the travetto framework'
+    description: 'Rest authentication integration support for the Travetto framework'
   },
   AuthRestSession: {
     name:'@travetto/auth-rest-session', folder:'@travetto/auth-rest-session', displayName: 'Rest Auth Session',
-    description: 'Rest authentication session integration support for the travetto framework'
+    description: 'Rest authentication session integration support for the Travetto framework'
   },
   Base: {
     name:'@travetto/base', folder:'@travetto/base', displayName: 'Base',
@@ -49,7 +49,7 @@ export const MOD_MAPPING = {
   },
   Cli: {
     name:'@travetto/cli', folder:'@travetto/cli', displayName: 'Command Line Interface',
-    description: 'CLI infrastructure for travetto framework'
+    description: 'CLI infrastructure for Travetto framework'
   },
   Command: {
     name:'@travetto/command', folder:'@travetto/command', displayName: 'Command',
@@ -73,7 +73,7 @@ export const MOD_MAPPING = {
   },
   Doc: {
     name:'@travetto/doc', folder:'@travetto/doc', displayName: 'Documentation',
-    description: 'Documentation support for the travetto framework'
+    description: 'Documentation support for the Travetto framework'
   },
   Email: {
     name:'@travetto/email', folder:'@travetto/email', displayName: 'Email',
@@ -157,7 +157,7 @@ export const MOD_MAPPING = {
   },
   Openapi: {
     name:'@travetto/openapi', folder:'@travetto/openapi', displayName: 'OpenAPI Specification',
-    description: 'OpenAPI integration support for the travetto framework'
+    description: 'OpenAPI integration support for the Travetto framework'
   },
   Overview: {
     name:'@travetto/overview', folder:'@travetto/overview', displayName: 'Overview Docs',
