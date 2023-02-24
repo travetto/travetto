@@ -23,8 +23,8 @@ export const Html: Renderer = {
       case 'terminal':
       case 'config':
       case 'code': return `
-      <figure class="${c._type} ${'subtype' in c ? c.subtype! : ''}">
-      <figcaption class="${c._type} ${'subtype' in c ? c.subtype! : ''}">${recurse(c.title)}
+      <figure class="${c._type}">
+      <figcaption class="${c._type}">${recurse(c.title)}
       ${'file' in c && c.file ? `<cite><a target="_blank" href="${context.link(recurse(c.file), c)}">Source</a></cite>` : ''}
       </figcaption>
       <pre><code class="language-${c.language}">${context.cleanText(highlight(recurse(c.content), c.language))}</code></pre>     

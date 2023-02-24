@@ -18,7 +18,7 @@ export const Markdown: Renderer = {
       case 'install':
       case 'terminal':
       case 'config': return `
-**${titleCase(c._type)} ${'subtype' in c ? recurse(c.subtype!) : ''}: ${recurse(c.title)}**
+**${titleCase(c._type)}: ${recurse(c.title)}**
 \`\`\`${c.language}
 ${context.cleanText(recurse(c.content))}
 \`\`\`\n`;

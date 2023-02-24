@@ -279,11 +279,9 @@ export const node = {
    */
   Install: (title: Content, pkg: Content) => {
     if (typeof pkg === 'string' && !pkg.includes(' ')) {
-      return node.Group([
-        $n('install', { title: $c(title), language: 'bash', content: $c(`npm install ${pkg}`), subtype: $c('npm') }),
-        $c('or'),
-        $n('install', { title: $c(title), language: 'bash', content: $c(`yarn add ${pkg}`), subtype: $c('yarn') }),
-      ]);
+      return $n('install', {
+        title: $c(title), language: 'bash', content: $c(`npm install ${pkg}\n\n# or\n\nyarn add ${pkg}`)
+      });
     } else {
       return $n('install', { title: $c(title), language: 'bash', content: $c(pkg), subtype: undefined });
     }
