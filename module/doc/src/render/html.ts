@@ -23,8 +23,8 @@ export const Html: Renderer = {
       case 'terminal':
       case 'config':
       case 'code': return `
-      <figure class="${c._type}">
-      <figcaption class="${c._type}">${recurse(c.title)}
+      <figure class="${c._type} ${'subtype' in c ? c.subtype! : ''}">
+      <figcaption class="${c._type} ${'subtype' in c ? c.subtype! : ''}">${recurse(c.title)}
       ${'file' in c && c.file ? `<cite><a target="_blank" href="${context.link(recurse(c.file), c)}">Source</a></cite>` : ''}
       </figcaption>
       <pre><code class="language-${c.language}">${context.cleanText(highlight(recurse(c.content), c.language))}</code></pre>     
@@ -36,8 +36,9 @@ export const Html: Renderer = {
       case 'mod': return `<a class="module-link" href="${context.link(recurse(c.link), c)}" title="${recurse(c.description)}">${recurse(c.title)}</a>`;
       case 'image': return `<img src="${context.link(recurse(c.link), c)}" alt="${recurse(c.title)}">`;
       case 'section':
-      case 'subsection': {
-        const tag = c._type === 'section' ? 'h2' : 'h3';
+      case 'subsection':
+      case 'subsubsection': {
+        const tag = c._type === 'section' ? 'h2' : (c._type === 'subsection' ? 'h3' : 'h4');
         const title = recurse(c.title);
         return `<${tag} id="${context.getAnchorId(title)}">${title}</${tag}>`;
       }

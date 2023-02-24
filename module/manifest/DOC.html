@@ -5,14 +5,274 @@
 
         </h1>
 
-      <figure class="install">
-      <figcaption class="install">Install @travetto/manifest
+      <figure class="install [object Object]">
+      <figcaption class="install [object Object]">Install @travetto/manifest
       
       </figcaption>
       <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/manifest</code></pre>     
+      </figure>or
+      <figure class="install [object Object]">
+      <figcaption class="install [object Object]">Install @travetto/manifest
+      
+      </figcaption>
+      <pre><code class="language-bash"><span class="token function">yarn</span> <span class="token function">add</span> @travetto/manifest</code></pre>     
       </figure>
 
-This module provides functionality for basic path functionality and common typings for manifests
+This module aims to be the boundary between the file system and the code.  The module provides:
+
+<ul> <li>Project Manifesting</li>
+ <li>Runtime Indexing</li>
+ <li>Path Normalization</li>
+ <li>File Watching</li></ul>
+
+<h3 id="project-manifesting">Project Manifesting</h3>
+The project manifest fulfills two main goals: Compile-time Support, and Runtime Knowledge of the project.
+
+<h4 id="compile-time-support">Compile-time Support</h4>
+During the compilation process, the compiler needs to know every file that is eligible for compilation, when the file was last created/modified, and any specific patterns for interacting with a given file (e.g. transformers vs. testing code vs. support files that happen to share a common extension with code). 
+
+<h4 id="runtime-knowledge">Runtime Knowledge</h4>
+Additionally, once the code has been compiled (or even bundled after that), the executing process needs to know what files are available for loading, and any patterns necessary for knowing which files to load versus which ones to ignore. This allows for dynamic loading of modules/files without knowledge/access to the file system, and in a more performant manner.
+
+<h3 id="anatomy-of-a-manifest">Anatomy of a Manifest</h3>
+
+      <figure class="code ">
+      <figcaption class="code ">Manifest for @travetto/manifest
+      
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token punctuation">{{'{'}}</span>
+  <span class="token string-property property">"generated"</span><span class="token operator">:</span> <span class="token number">1868155200000</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"moduleType"</span><span class="token operator">:</span> <span class="token string">"commonjs"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"mainModule"</span><span class="token operator">:</span> <span class="token string">"@travetto/manifest"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"mainFolder"</span><span class="token operator">:</span> <span class="token string">"module/manifest"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"workspacePath"</span><span class="token operator">:</span> <span class="token string">"&lt;generated>"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"monoRepo"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"outputFolder"</span><span class="token operator">:</span> <span class="token string">".trv_output"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"toolFolder"</span><span class="token operator">:</span> <span class="token string">".trv_build"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"compilerFolder"</span><span class="token operator">:</span> <span class="token string">".trv_compiler"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"packageManager"</span><span class="token operator">:</span> <span class="token string">"npm"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"modules"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token string-property property">"@travetto/manifest"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token string-property property">"main"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"name"</span><span class="token operator">:</span> <span class="token string">"@travetto/manifest"</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"version"</span><span class="token operator">:</span> <span class="token string">"3.0.0-rc.17"</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"local"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"internal"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"sourceFolder"</span><span class="token operator">:</span> <span class="token string">"module/manifest"</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"outputFolder"</span><span class="token operator">:</span> <span class="token string">"node_modules/@travetto/manifest"</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"files"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
+        <span class="token string-property property">"$root"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"DOC.html"</span><span class="token punctuation">,</span>
+            <span class="token string">"unknown"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"LICENSE"</span><span class="token punctuation">,</span>
+            <span class="token string">"unknown"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"README.md"</span><span class="token punctuation">,</span>
+            <span class="token string">"md"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"doc"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"DOC.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
+            <span class="token string">"doc"</span>
+          <span class="token punctuation">]</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"$index"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"__index__.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"$package"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"package.json"</span><span class="token punctuation">,</span>
+            <span class="token string">"package-json"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"test"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"test/path.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
+            <span class="token string">"test"</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"test/root-index.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
+            <span class="token string">"test"</span>
+          <span class="token punctuation">]</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"test/fixtures"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"test/fixtures/simple.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"fixture"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
+            <span class="token string">"test"</span>
+          <span class="token punctuation">]</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"$transformer"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"support/transformer.function-metadata.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
+            <span class="token string">"compile"</span>
+          <span class="token punctuation">]</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"src"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/delta.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/dependencies.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/manifest-index.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/module.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/package.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/path.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/root-index.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/types.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/typings.d.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"typings"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/util.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"src/watch.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"ts"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"bin"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"bin/context.d.ts"</span><span class="token punctuation">,</span>
+            <span class="token string">"typings"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span>
+            <span class="token string">"bin/context.js"</span><span class="token punctuation">,</span>
+            <span class="token string">"js"</span><span class="token punctuation">,</span>
+            <span class="token number">1868155200000</span>
+          <span class="token punctuation">]</span>
+        <span class="token punctuation">]</span>
+      <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"profiles"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token string">"std"</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"parents"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+<h4 id="general-context">General Context</h4>
+The general context describes the project-space and any important information for how to build/execute the code.
+
+The context contains:
+<ul> <li>A generated timestamp</li>
+ <li>Module Type: <a target="_blank" class="external-link" href="https://nodejs.org/api/modules.html">commonjs</a> or <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">module</a></li>
+ <li>The main module to execute. <p class="note"><strong>Note</strong> This primarily pertains to mono-repo support when there are multiple modules in the project</p></li>
+ <li>The root path of the project/workspace</li>
+ <li>Whether or not the project is a mono-repo. <p class="note"><strong>Note</strong> This is determined by using the 'workspaces' field in your [object Object]</p></li>
+ <li>The location where all compiled code will be stored.  Defaults to: <code class="item path">.trv_output</code>.  <p class="note"><strong>Note</strong> Can be overridden in your [object Object] in 'travetto.outputFolder'</p></li>
+ <li>The location where the intermediate compiler will be created. Defaults to: <code class="item path">.trv_compiler</code></li>
+ <li>The location where tooling will be able to write to. Defaults to: <code class="item path">.trv_output</code></li>
+ <li>Which package manager is in use <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a> or <a target="_blank" class="external-link" href="https://yarnpg.com">Yarn</a></li></ul>
+
+<h4 id="modules">Modules</h4>
+The modules represent all of the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A prod-only version is produced when packaging the final output.
+
+Each module contains:
+<ul> <li>The dependency npm name</li>
+ <li>The dependency version</li>
+ <li>A flag to determine if its a local module</li>
+ <li>A flag to determine if the module is public (could be published to npm)</li>
+ <li>The path to the source folder, relative to the workspace root</li>
+ <li>The path to the output folder, relative to the workspace output root</li>
+ <li>The list of all files</li>
+ <li>The profiles a module applies to.  Values are std, test, compile, doc.  Any empty value implies std</li>
+ <li>Parent modules that imported this module</li></ul>
+
+<h4 id="module-files">Module Files</h4>
+The module files are a simple categorization of files into a predetermined set of folders:
+<ul> <li>$root - All uncategorized files at the module root</li>
+ <li>$index - __index__.ts, index.ts files at the root of the project</li>
+ <li>$package - The <a target="_blank" class="external-link" href="https://docs.npmjs.com/cli/v9/configuring-npm/package-json">Package JSON</a> for the project</li>
+ <li>src - Code that should be automatically loaded at runtime. All .ts files under the src/ folder</li>
+ <li>test - Code that contains test files. All .ts files under the test/ folder</li>
+ <li>test/fixtures - Test resource files, pertains to the main module only. Located under test/fixtures/</li>
+ <li>resources - Packaged resource, meant to pertain to the main module only. Files, under resources/</li>
+ <li>support - All .ts files under the support/ folder</li>
+ <li>support/resources - Packaged resource files, meant to be included by other modules, under support/resources/</li>
+ <li>support/fixtures - Test resources meant to shared across modules.  Under support/fixtures/</li>
+ <li>doc - Documentation files. All .ts files under the doc/ folder</li>
+ <li>$transformer - All .ts files under the pattern support/transform*.  These are used during compilation and never at runtime</li>
+ <li>bin - Entry point .js files.  All .js files under the bin/ folder</li></ul>
+
+Within each file there is a pattern of either a 3 or 4 element array:
+
+      <figure class="code ">
+      <figcaption class="code ">Sample file
+      
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token punctuation">[</span>
+  <span class="token string">"test/path.ts"</span><span class="token punctuation">,</span> <span class="token comment">// The module relative source path</span>
+  <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token comment">// The file type ts, js, package-json, typings, md, json, unknown</span>
+  <span class="token number">1676751649201.1897</span><span class="token punctuation">,</span> <span class="token comment">// Stat timestamp</span>
+  <span class="token string">"test"</span> <span class="token comment">// Optional profile</span>
+<span class="token punctuation">]</span></code></pre>     
+      </figure>
 
 <h3 id="module-indexing">Module Indexing</h3>
-The bootstrap process will also produce an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatic discovery that is used within the framework.
+Once the manifest is created, the application runtime can now read this manifest, which allows for influencing runtime behavior. The most common patterns include:
+<ul> <li>Loading all source files</li>
+ <li>Iterating over every test file</li>
+ <li>Finding all source folders for watching</li>
+ <li>Find all output folders for watching</li>
+ <li>Determining if a module is available or not</li>
+ <li>Resource scanning</li>
+ <li>Providing contextual information when provided a filename, import name, etc (e.g. logging, testing output)</li></ul>

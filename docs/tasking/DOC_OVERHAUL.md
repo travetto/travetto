@@ -1,7 +1,6 @@
 # Docs Needed 
 
 ## Missing
-- Manifest
 - Auth JWT
 - Auth Rest Session
 - Auth Rest Context
@@ -18,3 +17,6 @@
 - Rest Session
 - Compiler
 - Pack
+
+## Completed
+- Manifest

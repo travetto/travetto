@@ -16,6 +16,10 @@ export class RenderUtil {
   static #imported = new Map<string, { root: AllType, wrap?: Wrapper }>();
 
   static purge(file: string): void {
+    if (RootIndex.manifest.moduleType === 'commonjs') {
+      const mod = RootIndex.getFromSource(file)!.outputFile;
+      delete require.cache[path.toNative(mod)];
+    }
     this.#imported.delete(file);
   }
 
@@ -31,7 +35,11 @@ export class RenderUtil {
       throw new Error(`Unknown renderer with format: ${fmt}`);
     }
 
-    const mod = RootIndex.getFromSource(file)?.import;
+    let mod = RootIndex.getFromSource(file)?.import;
+
+    if (RootIndex.manifest.moduleType === 'module') {
+      mod = `${mod}?ts=${Date.now()}`;
+    }
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const res = await import(mod!) as DocumentShape;

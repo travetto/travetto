@@ -3,12 +3,272 @@
 # Manifest
 ## Manifest support
 
-**Install: @travetto/manifest**
+**Install npm: @travetto/manifest**
 ```bash
 npm install @travetto/manifest
 ```
+or
+**Install yarn: @travetto/manifest**
+```bash
+yarn add @travetto/manifest
+```
 
-This module provides functionality for basic path functionality and common typings for manifests
+This module aims to be the boundary between the file system and the code.  The module provides:
+
+   
+   *  Project Manifesting
+   *  Runtime Indexing
+   *  Path Normalization
+   *  File Watching
+
+### Project Manifesting
+The project manifest fulfills two main goals: Compile-time Support, and Runtime Knowledge of the project.
+
+#### Compile-time Support
+During the compilation process, the compiler needs to know every file that is eligible for compilation, when the file was last created/modified, and any specific patterns for interacting with a given file (e.g. transformers vs. testing code vs. support files that happen to share a common extension with code). 
+
+#### Runtime Knowledge
+Additionally, once the code has been compiled (or even bundled after that), the executing process needs to know what files are available for loading, and any patterns necessary for knowing which files to load versus which ones to ignore. This allows for dynamic loading of modules/files without knowledge/access to the file system, and in a more performant manner.
+
+### Anatomy of a Manifest
+
+**Code : Manifest for @travetto/manifest**
+```typescript
+{
+  "generated": 1868155200000,
+  "moduleType": "commonjs",
+  "mainModule": "@travetto/manifest",
+  "mainFolder": "module/manifest",
+  "workspacePath": "<generated>",
+  "monoRepo": true,
+  "outputFolder": ".trv_output",
+  "toolFolder": ".trv_build",
+  "compilerFolder": ".trv_compiler",
+  "packageManager": "npm",
+  "modules": {
+    "@travetto/manifest": {
+      "main": true,
+      "name": "@travetto/manifest",
+      "version": "3.0.0-rc.17",
+      "local": true,
+      "internal": false,
+      "sourceFolder": "module/manifest",
+      "outputFolder": "node_modules/@travetto/manifest",
+      "files": {
+        "$root": [
+          [
+            "DOC.html",
+            "unknown",
+            1868155200000
+          ],
+          [
+            "LICENSE",
+            "unknown",
+            1868155200000
+          ],
+          [
+            "README.md",
+            "md",
+            1868155200000
+          ]
+        ],
+        "doc": [
+          [
+            "DOC.ts",
+            "ts",
+            1868155200000,
+            "doc"
+          ]
+        ],
+        "$index": [
+          [
+            "__index__.ts",
+            "ts",
+            1868155200000
+          ]
+        ],
+        "$package": [
+          [
+            "package.json",
+            "package-json",
+            1868155200000
+          ]
+        ],
+        "test": [
+          [
+            "test/path.ts",
+            "ts",
+            1868155200000,
+            "test"
+          ],
+          [
+            "test/root-index.ts",
+            "ts",
+            1868155200000,
+            "test"
+          ]
+        ],
+        "test/fixtures": [
+          [
+            "test/fixtures/simple.ts",
+            "fixture",
+            1868155200000,
+            "test"
+          ]
+        ],
+        "$transformer": [
+          [
+            "support/transformer.function-metadata.ts",
+            "ts",
+            1868155200000,
+            "compile"
+          ]
+        ],
+        "src": [
+          [
+            "src/delta.ts",
+            "ts",
+            1868155200000
+          ],
+          [
+            "src/dependencies.ts",
+            "ts",
+            1868155200000
+          ],
+          [
+            "src/manifest-index.ts",
+            "ts",
+            1868155200000
+          ],
+          [
+            "src/module.ts",
+            "ts",
+            1868155200000
+          ],
+          [
+            "src/package.ts",
+            "ts",
+            1868155200000
+          ],
+          [
+            "src/path.ts",
+            "ts",
+            1868155200000
+          ],
+          [
+            "src/root-index.ts",
+            "ts",
+            1868155200000
+          ],
+          [
+            "src/types.ts",
+            "ts",
+            1868155200000
+          ],
+          [
+            "src/typings.d.ts",
+            "typings",
+            1868155200000
+          ],
+          [
+            "src/util.ts",
+            "ts",
+            1868155200000
+          ],
+          [
+            "src/watch.ts",
+            "ts",
+            1868155200000
+          ]
+        ],
+        "bin": [
+          [
+            "bin/context.d.ts",
+            "typings",
+            1868155200000
+          ],
+          [
+            "bin/context.js",
+            "js",
+            1868155200000
+          ]
+        ]
+      },
+      "profiles": [
+        "std"
+      ],
+      "parents": []
+    }
+  }
+}
+```
+
+#### General Context
+The general context describes the project-space and any important information for how to build/execute the code.
+
+The context contains:
+   
+   *  A generated timestamp
+   *  Module Type: [commonjs](https://nodejs.org/api/modules.html) or [module](https://nodejs.org/api/esm.html)
+   *  The main module to execute. **Note**: This primarily pertains to mono-repo support when there are multiple modules in the project
+   *  The root path of the project/workspace
+   *  Whether or not the project is a mono-repo. **Note**: This is determined by using the 'workspaces' field in your [object Object]
+   *  The location where all compiled code will be stored.  Defaults to: `.trv_output`.  **Note**: Can be overridden in your [object Object] in 'travetto.outputFolder'
+   *  The location where the intermediate compiler will be created. Defaults to: `.trv_compiler`
+   *  The location where tooling will be able to write to. Defaults to: `.trv_output`
+   *  Which package manager is in use [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Yarn](https://yarnpg.com)
+
+#### Modules
+The modules represent all of the [Travetto](https://travetto.dev)-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A prod-only version is produced when packaging the final output.
+
+Each module contains:
+   
+   *  The dependency npm name
+   *  The dependency version
+   *  A flag to determine if its a local module
+   *  A flag to determine if the module is public (could be published to npm)
+   *  The path to the source folder, relative to the workspace root
+   *  The path to the output folder, relative to the workspace output root
+   *  The list of all files
+   *  The profiles a module applies to.  Values are std, test, compile, doc.  Any empty value implies std
+   *  Parent modules that imported this module
+
+#### Module Files
+The module files are a simple categorization of files into a predetermined set of folders:
+   
+   *  $root - All uncategorized files at the module root
+   *  $index - __index__.ts, index.ts files at the root of the project
+   *  $package - The [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json) for the project
+   *  src - Code that should be automatically loaded at runtime. All .ts files under the src/ folder
+   *  test - Code that contains test files. All .ts files under the test/ folder
+   *  test/fixtures - Test resource files, pertains to the main module only. Located under test/fixtures/
+   *  resources - Packaged resource, meant to pertain to the main module only. Files, under resources/
+   *  support - All .ts files under the support/ folder
+   *  support/resources - Packaged resource files, meant to be included by other modules, under support/resources/
+   *  support/fixtures - Test resources meant to shared across modules.  Under support/fixtures/
+   *  doc - Documentation files. All .ts files under the doc/ folder
+   *  $transformer - All .ts files under the pattern support/transform*.  These are used during compilation and never at runtime
+   *  bin - Entry point .js files.  All .js files under the bin/ folder
+
+Within each file there is a pattern of either a 3 or 4 element array:
+
+**Code : Sample file**
+```typescript
+[
+  "test/path.ts", // The module relative source path
+  "ts", // The file type ts, js, package-json, typings, md, json, unknown
+  1676751649201.1897, // Stat timestamp
+  "test" // Optional profile
+]
+```
 
 ### Module Indexing
-The bootstrap process will also produce an index of all source files, which allows for fast in-memory scanning.  This allows for all the automatic discovery that is used within the framework.
+Once the manifest is created, the application runtime can now read this manifest, which allows for influencing runtime behavior. The most common patterns include:
+   
+   *  Loading all source files
+   *  Iterating over every test file
+   *  Finding all source folders for watching
+   *  Find all output folders for watching
+   *  Determining if a module is available or not
+   *  Resource scanning
+   *  Providing contextual information when provided a filename, import name, etc (e.g. logging, testing output)

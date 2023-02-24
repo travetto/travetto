@@ -18,7 +18,7 @@ export const Markdown: Renderer = {
       case 'install':
       case 'terminal':
       case 'config': return `
-**${titleCase(c._type)}: ${recurse(c.title)}**
+**${titleCase(c._type)} ${'subtype' in c ? recurse(c.subtype!) : ''}: ${recurse(c.title)}**
 \`\`\`${c.language}
 ${context.cleanText(recurse(c.content))}
 \`\`\`\n`;
@@ -30,6 +30,7 @@ ${context.cleanText(recurse(c.content))}
       case 'image': return `![${recurse(c.title)}](${context.link(recurse(c.link), c)})`;
       case 'section': return `## ${recurse(c.title)}`;
       case 'subsection': return `### ${recurse(c.title)}`;
+      case 'subsubsection': return `#### ${recurse(c.title)}`;
       case 'command':
       case 'method':
       case 'path':

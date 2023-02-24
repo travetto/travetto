@@ -4,6 +4,8 @@ import { path } from '@travetto/manifest';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { stripAnsiCodes } from '@travetto/terminal';
 
+export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
+
 export type RunConfig = {
   filter?: (line: string) => boolean;
   module?: string;
@@ -19,7 +21,7 @@ type RunState = {
 };
 
 class DocState {
-  baseline = new Date('2029-03-14T00:00:00.000').getTime();
+  baseline = COMMON_DATE;
   _s = 37;
   ids: Record<string, string> = {};
 

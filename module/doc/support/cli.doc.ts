@@ -67,9 +67,10 @@ export class DocCommand extends CliCommand<Options> {
     };
 
     if (this.cmd.watch) {
-      await watchFolders([path.dirname(docFile)], write, {
+      await watchFolders([path.dirname(docFile)], () => setTimeout(write, 250), {
         filter: ev => ev.action === 'update' && ev.file === docFile
       });
+      await write();
     } else {
       try {
         await write();

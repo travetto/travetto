@@ -108,6 +108,11 @@ export const node = {
    */
   SubSection: (title: Content) => $n('subsection', { title: $c(title) }),
   /**
+   * Sub-sub-section
+   * @param content
+   */
+  SubSubSection: (title: Content) => $n('subsubsection', { title: $c(title) }),
+  /**
    * Library reference
    * @param content
    */
@@ -268,13 +273,20 @@ export const node = {
   },
 
   /**
-   * NPM Installation
+   * Installing a package or program
    * @param title
    * @param pkg
    */
   Install: (title: Content, pkg: Content) => {
-    pkg = typeof pkg === 'string' && !pkg.includes(' ') ? `npm install ${pkg}` : pkg;
-    return $n('install', { title: $c(title), language: 'bash', content: $c(pkg) });
+    if (typeof pkg === 'string' && !pkg.includes(' ')) {
+      return node.Group([
+        $n('install', { title: $c(title), language: 'bash', content: $c(`npm install ${pkg}`), subtype: $c('npm') }),
+        $c('or'),
+        $n('install', { title: $c(title), language: 'bash', content: $c(`yarn add ${pkg}`), subtype: $c('yarn') }),
+      ]);
+    } else {
+      return $n('install', { title: $c(title), language: 'bash', content: $c(pkg), subtype: undefined });
+    }
   },
 
   /**

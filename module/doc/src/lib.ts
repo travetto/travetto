@@ -8,6 +8,13 @@ export const lib = {
   Typescript: Library('Typescript', 'https://typescriptlang.org'),
   Node: Library('Node', 'https://nodejs.org'),
   TravettoPlugin: Library('VSCode plugin', 'https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin'),
+  Npm: Library('Npm', 'https://docs.npmjs.com/downloading-and-installing-node-js-and-npm'),
+  Yarn: Library('Yarn', 'https://yarnpg.com'),
+
+  // Module
+  CommonJS: Library('CommonJS', 'https://nodejs.org/api/modules.html'),
+  EcmascriptModule: Library('Ecmascript Module', 'https://nodejs.org/api/esm.html'),
+  PackageJson: Library('Package JSON', 'https://docs.npmjs.com/cli/v9/configuring-npm/package-json'),
 
   // Download
   NodeDownload: Library('Node', 'https://nodejs.org/en/download/current/'),
