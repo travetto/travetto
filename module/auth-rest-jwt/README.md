@@ -3,9 +3,102 @@
 # Rest Auth JWT
 ## Rest authentication JWT integration support for the travetto framework
 
-**Install: @travetto/auth-rest-jwt**
+**Install npm: @travetto/auth-rest-jwt**
 ```bash
 npm install @travetto/auth-rest-jwt
 ```
+or
+**Install yarn: @travetto/auth-rest-jwt**
+```bash
+yarn add @travetto/auth-rest-jwt
+```
 
-The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L30) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.  This token does not own a session, but allows for encoding the auth state into JWT constructs.
+One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the travetto framework")'s main responsibilities is being able to send and receive authentication/authorization information from the client.  This data can be encoded in many different forms, and this module provides the ability to encode into and decode from [JWT](https://jwt.io/)s. This module fulfills the contract required by [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the travetto framework") of being able to encode and decode a user principal, by leveraging [JWT](https://github.com/travetto/travetto/tree/main/module/jwt#readme "JSON Web Token implementation")'s token generation features.
+
+The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L30) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again. 
+
+**Code : JWT Source**
+```typescript
+import { Principal } from '@travetto/auth';
+import { PrincipalEncoder } from '@travetto/auth-rest';
+import { AppError, GlobalEnv, TimeUtil } from '@travetto/base';
+import { Config } from '@travetto/config';
+import { Inject, Injectable } from '@travetto/di';
+import { FilterContext } from '@travetto/rest';
+import { JWTUtil, Payload } from '@travetto/jwt';
+
+@Config('rest.auth.jwt')
+export class RestJWTConfig {
+  header = 'Authorization';
+  signingKey?: string;
+  headerPrefix = 'Bearer ';
+  defaultAge = TimeUtil.timeToMs('1y');
+
+  postConstruct(): void {
+    if (!this.signingKey) {
+      if (GlobalEnv.prod) {
+        throw new AppError('The default signing key is not valid for production use, please specify a config value at rest.auth.jwt.signingKey');
+      }
+      this.signingKey = 'dummy';
+    }
+  }
+}
+
+/**
+ * Principal encoder via JWT
+ */
+@Injectable()
+export class JWTPrincipalEncoder implements PrincipalEncoder {
+
+  @Inject()
+  config: RestJWTConfig;
+
+  toJwtPayload(p: Principal): Payload {
+    const exp = Math.trunc((p.expiresAt?.getTime() ?? (Date.now() + this.config.defaultAge)) / 1000);
+    const iat = Math.trunc((p.issuedAt?.getTime() ?? Date.now()) / 1000);
+    return {
+      auth: p,
+      exp,
+      iat,
+      iss: p.issuer,
+      sub: p.id,
+    };
+  }
+
+  /**
+   * Get token for principal
+   */
+  async getToken(p: Principal): Promise<string> {
+    return await JWTUtil.create(this.toJwtPayload(p), { key: this.config.signingKey });
+  }
+
+  /**
+   * Verify token to principal
+   * @param token
+   */
+  async verifyToken(token: string): Promise<Principal> {
+    return (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.config.signingKey })).auth;
+  }
+
+  /**
+   * Write context
+   */
+  async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
+    if (p) {
+      res.setHeader(this.config.header, `${this.config.headerPrefix}${await this.getToken(p)}`);
+    }
+  }
+
+  /**
+   * Read JWT from request
+   */
+  async decode({ req }: FilterContext): Promise<Principal | undefined> {
+    const token = (req.headerFirst(this.config.header))?.replace(this.config.headerPrefix, '');
+    if (token) {
+      return this.verifyToken(token);
+    }
+  }
+}
+```
+
+As you can see, the encode token just creates a [JWT](https://jwt.io/) based on the principal provided, and decoding verifies the token, and returns the principal.

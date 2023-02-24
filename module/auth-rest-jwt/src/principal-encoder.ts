@@ -16,7 +16,7 @@ export class RestJWTConfig {
   postConstruct(): void {
     if (!this.signingKey) {
       if (GlobalEnv.prod) {
-        throw new AppError('The default signing key is not valid for production use, please specify a config value at rest.jwt.signingKey');
+        throw new AppError('The default signing key is not valid for production use, please specify a config value at rest.auth.jwt.signingKey');
       }
       this.signingKey = 'dummy';
     }
