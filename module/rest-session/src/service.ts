@@ -139,7 +139,7 @@ export class SessionService {
    */
   async readRequest(req: Request, id?: string): Promise<void> {
     if (!req[SessionⲐ]) {
-      id = this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.headerFirst(this.config.keyName);
+      id ??= this.config.transport === 'cookie' ? req.cookies.get(this.config.keyName) : req.headerFirst(this.config.keyName);
       if (id) {
         req[SessionⲐ] = (await this.#load(id))!;
       }

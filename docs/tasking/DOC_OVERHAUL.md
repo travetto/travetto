@@ -2,8 +2,6 @@
 
 ## Outdated
 - Model SQL
-- Registry
-- Rest Session
 - Compiler
 - Pack
 
@@ -18,6 +16,9 @@
 - Base
 - Config
 - Log
+- Registry
+- Rest Session
+
 
 ## Missing
 -# None

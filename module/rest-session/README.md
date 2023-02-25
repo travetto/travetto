@@ -6,100 +6,41 @@
 **Install: @travetto/rest-session**
 ```bash
 npm install @travetto/rest-session
+
+# or
+
+yarn add @travetto/rest-session
 ```
 
-This is a module that adds session support to the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") framework.  Sessions are represented as:
-
-**Code: Session Structure**
-```typescript
-export class Session<T extends SessionData = SessionData>  {
-  /**
-   * The expiry time when the session was loaded
-   */
-  /**
-   * The hash of the session at load
-   */
-  /**
-   * The session identifier
-   */
-  readonly id: string;
-  /**
-   * Session max age in ms
-   */
-  readonly maxAge?: number;
-  /**
-   * Session signature
-   */
-  readonly signature?: string;
-  /**
-   * Session initial issue timestamp
-   */
-  readonly issuedAt: Date;
-  /**
-   * Expires at time
-   */
-  expiresAt: Date | undefined;
-  /**
-   * What action should be taken against the session
-   */
-  action?: 'create' | 'destroy' | 'modify';
-  /**
-   * The session data
-   */
-  data: T | undefined;
-  /**
-   * Create a new Session object given a partial version of itself
-   */
-  constructor(data: Partial<Session>) ;
-  /**
-   * Get session value
-   */
-  getValue<V>(key: string): V | undefined ;
-  /**
-   * Set session value
-   */
-  setValue<V>(key: string, value: V): void ;
-  /**
-   * Determine if session has changed
-   */
-  isChanged(): boolean ;
-  /**
-   * Determine if the expiry time has changed
-   */
-  isTimeChanged(): boolean ;
-  /**
-   * See if the session is nearly expired
-   */
-  isAlmostExpired(): boolean ;
-  /**
-   * See if the session is truly expired
-   */
-  isExpired(): boolean ;
-  /**
-   * See if session is empty, has any data been written
-   */
-  isEmpty(): boolean ;
-  /**
-   * Refresh the session expiration time
-   */
-  refresh(): void ;
-  /**
-   * Mark the session for destruction, delete the data
-   */
-  destroy(): void ;
-  /**
-   * Serialize the session
-   */
-  toJSON(): unknown ;
-}
-```
+This is a module that adds session support to the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") framework.  Sessions allow for persistent data across multiple requests.  Within the framework the sessions are stored against any [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementation that provides [ModelExpirySupport](https://github.com/travetto/travetto/tree/main/module/model/src/service/expiry.ts), as the data needs to be able to be expired appropriately.  The list of supported model providers are: 
+   
+   *  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.")'s [FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L51) and [MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)
+   *  [Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")
+   *  [MongoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-mongo#readme "Mongo backing for the travetto model module.")
+   *  [S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")
+   *  [DynamoDB Model Support](https://github.com/travetto/travetto/tree/main/module/model-dynamodb#readme "DynamoDB backing for the travetto model module.")
+   *  [Elasticsearch Model Source](https://github.com/travetto/travetto/tree/main/module/model-elasticsearch#readme "Elasticsearch backing for the travetto model module, with real-time modeling support for Elasticsearch mappings.")
 
 A session allows for defining the expiration time, what state the session should be in, as well as the payload (session data).  The session and session data are accessible via the [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39) parameter as [Session](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L18) and [SessionData](https://github.com/travetto/travetto/tree/main/module/rest-session/src/session.ts#L8) respectively.  Iit can also be accessed via the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest-session/src/typings.d.ts#L7) as a session property.
 
 **Code: Sample Session Usage**
 ```typescript
+import { InjectableFactory } from '@travetto/di';
+import { MemoryModelService, ModelExpirySupport } from '@travetto/model';
 import { Controller, Put, Get } from '@travetto/rest';
-import { SessionData, Session } from '@travetto/rest-session';
+import { SessionData, Session, SessionModelⲐ } from '@travetto/rest-session';
+
+// Applies to entire execution, not just this file
+class SessionConfig {
+  /**
+   * Session provider must be specified. The memory service is sufficient for simple
+   *   workloads, buts falls down when dealing with multiple servers
+   */
+  @InjectableFactory(SessionModelⲐ)
+  static getSessionModel(memory: MemoryModelService): ModelExpirySupport {
+    return memory;
+  }
+}
 
 @Controller('/session')
 export class SessionRoutes {
@@ -124,6 +65,61 @@ export class SessionRoutes {
 
 This usage should be comparable to [express](https://expressjs.com), [koa](https://koajs.com/) and mostly every other framework.
 
-## Configuration
+## Session Configuration
 
-Session mechanics are defined by the underlying provider.
+The module supports a general set of configuration that should cover the majority of session behaviors:
+
+**Code: Session Config**
+```typescript
+import { AppError, GlobalEnv } from '@travetto/base';
+import { Config } from '@travetto/config';
+import { Secret } from '@travetto/schema';
+
+/**
+ * Rest session config
+ */
+@Config('rest.session')
+export class SessionConfig {
+  /**
+   * Should the session auto write
+   */
+  autoCommit = true;
+  /**
+   * Max age for a given session
+   */
+  maxAge = 30 * 60 * 1000; // Half hour
+  /**
+   * Can the session be renewed
+   */
+  renew = true;
+  /**
+   * Should the session support rolling renewals
+   */
+  rolling = false;
+  /**
+   * Should the session be signed
+   */
+  sign = true;
+  /**
+   * Secret for signing the session
+   */
+  @Secret()
+  secret?: string;
+  /**
+   * Signature key name
+   */
+  keyName = 'trv_sid';
+  /**
+   * Location for auth
+   */
+  transport: 'cookie' | 'header' = 'cookie';
+
+  postConstruct(): void {
+    if (!this.secret && GlobalEnv.prod) {
+      throw new AppError('Session secret is a required value for production', 'permissions');
+    }
+  }
+}
+```
+
+These are all configurable via the `rest.session.*` config values.  And as a note, in production, a secret is required to be specified.

@@ -1,5 +1,19 @@
+import { InjectableFactory } from '@travetto/di';
+import { MemoryModelService, ModelExpirySupport } from '@travetto/model';
 import { Controller, Put, Get } from '@travetto/rest';
-import { SessionData, Session } from '@travetto/rest-session';
+import { SessionData, Session, SessionModelⲐ } from '@travetto/rest-session';
+
+// Applies to entire execution, not just this file
+class SessionConfig {
+  /**
+   * Session provider must be specified. The memory service is sufficient for simple
+   *   workloads, buts falls down when dealing with multiple servers
+   */
+  @InjectableFactory(SessionModelⲐ)
+  static getSessionModel(memory: MemoryModelService): ModelExpirySupport {
+    return memory;
+  }
+}
 
 @Controller('/session')
 export class SessionRoutes {
