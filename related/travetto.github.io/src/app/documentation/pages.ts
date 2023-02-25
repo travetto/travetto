@@ -121,6 +121,7 @@ export const PAGES = [
     path: 'core', title: 'Core', subs: [
       { path: 'di', title: 'Dependency Injection  ', component: DiComponent },
       { path: 'config', title: 'Config ', component: ConfigComponent },
+      { path: 'registry', title: 'Registry', component: RegistryComponent },
       { path: 'schema', title: 'Schema', component: SchemaComponent },
       { path: 'schema-faker', title: 'Schema Faker', component: SchemaFakerComponent },
       { path: 'test', title: 'Test', component: TestComponent },
@@ -128,17 +129,14 @@ export const PAGES = [
       { path: 'yaml', title: 'YAML Parser', component: YamlComponent },
     ]
   },
-  { path: 'cli', title: 'CLI Support', component: CliComponent },
   {
-    path: 'base', title: 'Base', component: BaseComponent, subs: [
-      { path: 'terminal', title: 'Terminal', component: TerminalComponent },
-      { path: 'registry', title: 'Registry', component: RegistryComponent }
-    ]
-  },
-  {
-    path: 'compiler', title: 'Compiler', component: CompilerComponent, subs: [
+    path: 'foundation', title: 'Foundation', subs: [
+      { path: 'base', title: 'Base', component: BaseComponent },
+      { path: 'cli', title: 'CLI Support', component: CliComponent },
+      { path: 'compiler', title: 'Compiler', component: CompilerComponent },
       { path: 'transformer', title: 'Transformer', component: TransformerComponent },
-      { path: 'manifest', title: 'Manifest', component: ManifestComponent }
+      { path: 'manifest', title: 'Manifest', component: ManifestComponent },
+      { path: 'terminal', title: 'Terminal', component: TerminalComponent },
     ]
   },
   {

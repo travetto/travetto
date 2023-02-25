@@ -49,7 +49,7 @@ const routes: Routes = [
     HttpClientModule,
     DocumentationModule,
     BrowserAnimationsModule,
-    RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled', relativeLinkResolution: 'legacy' }),
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled' }),
     SharedModule
   ],
   providers: [],

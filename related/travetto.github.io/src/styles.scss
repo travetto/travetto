@@ -489,6 +489,11 @@ li {
     font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
     color: #333;
     text-shadow: 3px 3px 5px rgba(100,100,100,.3);
+
+    &.method {
+      color: #a60;      
+      letter-spacing: -1px;
+    }
   }
   
   ul {
