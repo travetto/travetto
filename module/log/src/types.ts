@@ -31,5 +31,5 @@ export interface Formatter {
  * @concrete ./internal/types:LoggerTarget
  */
 export interface Logger {
-  onLog(ev: LogEvent): void;
+  onLog(ev: LogEvent): unknown;
 }

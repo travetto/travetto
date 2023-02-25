@@ -10,13 +10,21 @@ export type Primitive = number | boolean | string | Date | Error;
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
 
 export type ConsoleEvent = {
+  /** Time of event */
   timestamp: Date;
+  /** The level of the console event */
   level: LogLevel;
+  /** The source file of the event */
   source: string;
+  /** The line number the console event was triggered from */
   line: number;
+  /** The module name for the source file */
   module: string;
+  /** The module path  for the source file*/
   modulePath: string;
+  /** The computed scope for the console. statement.  */
   scope?: string;
+  /** Arguments passed to the console call*/
   args: unknown[];
 };
 

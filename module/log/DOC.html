@@ -9,47 +9,134 @@
       <figcaption class="install">Install @travetto/log
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/log</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/log
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/log</code></pre>     
       </figure>
 
-This module provides logging functionality, building upon <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts">ConsoleManager</a> in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/base" title="Environment config and common utilities for travetto applications.">Base</a> module.  This is all ultimately built upon <a target="_blank" class="external-link" href="https://nodejs.org/api/console.html">console</a> operations. 
+This module provides logging functionality, building upon <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts">ConsoleManager</a> in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/base" title="Environment config and common utilities for travetto applications.">Base</a> module.  This is all ultimately built upon <a target="_blank" class="external-link" href="https://nodejs.org/api/console.html">console</a> operations. The logging infrastructure is built upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> system, and so new loggers can be created that rely upon dependency injected services and sources.
+
+<h2 id="creating-a-logger">Creating a Logger</h2>
+The default pattern for logging is to create a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L33">Logger</a> which simply consumes a logging event. The method is not asynchronous as ensuring the ordering of append calls will be the responsibility of the logger.  The default logger uses <code class="item method">console.log</code> and that is synchronous by default.
+
+      <figure class="code">
+      <figcaption class="code">Logger Shape
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L33">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Logger</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">onLog</span><span class="token punctuation">(</span>ev<span class="token operator">:</span> LogEvent<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+      <figure class="code">
+      <figcaption class="code">Log Event
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L5">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">LogEvent</span> <span class="token keyword">extends</span> <span class="token class-name">ConsoleEvent</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Log message
+   */</span>
+  message<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Log Message context
+   */</span>
+  context<span class="token operator">?</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">unknown</span><span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+      <figure class="code">
+      <figcaption class="code">Console Event
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/types.ts#L12">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">ConsoleEvent</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/** Time of event */</span>
+  timestamp<span class="token operator">:</span> Date<span class="token punctuation">;</span>
+  <span class="token comment">/** The level of the console event */</span>
+  level<span class="token operator">:</span> LogLevel<span class="token punctuation">;</span>
+  <span class="token comment">/** The source file of the event */</span>
+  source<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** The line number the console event was triggered from */</span>
+  line<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token comment">/** The module name for the source file */</span>
+  module<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** The module path  for the source file*/</span>
+  modulePath<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** The computed scope for the console. statement.  */</span>
+  scope<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Arguments passed to the console call*/</span>
+  args<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>     
+      </figure>
+
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L5">LogEvent</a> is an extension of the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/types.ts#L12">ConsoleEvent</a> with the addition of two fields:
+
+<ul> <li><code class="item field">message</code> - This is the primary argument passed to the console statement, if it happens to be a string, otherwise the field is left empty</li>
+ <li><code class="item field">context</code> - This is the final argument passed to the console statement, if it happens to be a simple object.  This is useful for external loggers that allow for searching/querying by complex data</li></ul>
+
+      <figure class="code">
+      <figcaption class="code">Custom Logger
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/doc/custom-logger.ts">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">import</span> fetch<span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> Headers <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node-fetch'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> LogEvent<span class="token punctuation">,</span> Logger <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/log'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomLogger</span> <span class="token keyword">implements</span> <span class="token class-name">Logger</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">onLog</span><span class="token punctuation">(</span>ev<span class="token operator">:</span> LogEvent<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> headers <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Headers</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    headers<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'Content-Type'</span><span class="token punctuation">,</span> <span class="token string">'application/json'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>ev<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">'http://localhost:8080/log'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span> headers<span class="token punctuation">,</span> body<span class="token punctuation">,</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
 <h2 id="logging-to-external-systems">Logging to External Systems</h2>
 By default the logging functionality logs messages directly to the console, relying on the <code class="item method">util.inspect</code> method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as <a target="_blank" class="external-link" href="https://www.json.org">JSON</a>, which is easily consumable by services like <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> or <a target="_blank" class="external-link" href="https://aws.amazon.com/cloudwatch/">AWS Cloudwatch</a> if running as a lambda or in a docker container.  
 
 The main caveat that comes with this, is that not all objects can be converted to JSON (specifically circular dependencies, and unsupported types).  That end, the framework recommends logging with the following format, <code class="item input">message: string</code>&nbsp;&nbsp;&nbsp;<code class="item input">context: Record&lt;string, Primitive&gt;</code>.  Here context can be recursive, but the general idea is to only pass in known data structures that will not break the <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> production.
 
-<h2 id="sample-output">Sample Output</h2>
-
-The logging output, as indicated provides context for location of invocation. Given the file <code class="item path">test/simple.ts</code>:
+<h2 id="environment-configuration">Environment Configuration</h2>
 
       <figure class="code">
-      <figcaption class="code">Various log levels
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/doc/output.ts">Source</a></cite>
+      <figcaption class="code">Standard Logging Config
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L14">Source</a></cite>
       </figcaption>
-      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Hello World'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CommonLoggerConfig</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/** Should we enrich the console by default */</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'TRV_LOG_FORMAT'</span><span class="token punctuation">)</span>
+  format<span class="token operator">:</span> <span class="token string">'line'</span> <span class="token operator">|</span> <span class="token string">'json'</span> <span class="token operator">=</span> <span class="token string">'line'</span><span class="token punctuation">;</span>
 
-  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Woah!'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> a<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> b<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> c<span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span> d<span class="token operator">:</span> <span class="token number">10</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Log file, if needed */</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'TRV_LOG_FILE'</span><span class="token punctuation">)</span>
+  file<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 
-  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">'Woah!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'TRV_LOG_PLAIN'</span><span class="token punctuation">)</span>
+  plain<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 
-  <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">debug</span><span class="token punctuation">(</span><span class="token string">'Test'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'TRV_LOG_TIME'</span><span class="token punctuation">)</span>
+  time<span class="token operator">:</span> <span class="token string">'s'</span> <span class="token operator">|</span> <span class="token string">'ms'</span> <span class="token operator">|</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">;</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Ignore</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">get</span> <span class="token function">timestamp</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token string">'s'</span> <span class="token operator">|</span> <span class="token string">'ms'</span> <span class="token operator">|</span> <span class="token boolean">false</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>time <span class="token operator">??</span> <span class="token string">'ms'</span><span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token string">'ms'</span> <span class="token operator">?</span> <span class="token string">'ms'</span> <span class="token operator">:</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>time <span class="token operator">===</span> <span class="token string">'s'</span> <span class="token operator">?</span> <span class="token string">'s'</span> <span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>GlobalEnv<span class="token punctuation">.</span>test<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>time <span class="token operator">=</span> <span class="token string">''</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>plain <span class="token operator">??=</span> GlobalTerminal<span class="token punctuation">.</span>colorLevel <span class="token operator">===</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-The corresponding output would be
-
-      <figure class="terminal">
-      <figcaption class="terminal">Logging output
-      
-      </figcaption>
-      <pre><code class="language-bash">$ trv main doc/output-run.ts
-
-<span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@travetto/log:doc/output.ts:2<span class="token punctuation">]</span> Hello World
-<span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@travetto/log:doc/output.ts:4<span class="token punctuation">]</span> Woah<span class="token operator">!</span> <span class="token punctuation">{{'{'}}</span>
-  a: <span class="token punctuation">{{'{'}}</span> b: <span class="token punctuation">{{'{'}}</span> c: <span class="token punctuation">{{'{'}}</span> d: <span class="token number">10</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span>
-<span class="token number">2029</span>-03-14T04:00:01.510Z info  <span class="token punctuation">[</span>@travetto/log:doc/output.ts:6<span class="token punctuation">]</span> Woah<span class="token operator">!</span>
-<span class="token number">2029</span>-03-14T04:00:02.450Z debug <span class="token punctuation">[</span>@travetto/log:doc/output.ts:8<span class="token punctuation">]</span> Test</code></pre>     
-      </figure>
+The following environment variables have control over the default logging config:
+<ul> <li><code class="item input">TRV_LOG_FORMAT</code> - This determines whether or not the output is standard text lines, or is it output as a single line of <a target="_blank" class="external-link" href="https://www.json.org">JSON</a></li>
+ <li><code class="item input">TRV_LOG_FILE</code> - This determines whether or not the logging goes to the console or if it is written to a file</li>
+ <li><code class="item input">TRV_LOG_PLAIN</code> - Allows for an override of whether or not to log colored output, this defaults to values provided by the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/terminal" title="General terminal support">Terminal</a> in response to <code class="item input">FORCE_COLOR</code> and <code class="item input">NO_COLOR</code></li>
+ <li><code class="item input">TRV_LOG_TIME</code> - This represents what level of time logging is desired, the default is <code class="item input">ms</code> which is millisecond output.  A value of <code class="item input">s</code> allows for second level logging, and <code class="item input">false</code> will disable the output. When ingesting the content into another logging, its generally desirable to suppress the initial time output as most other loggers will append as needed.</li></ul>

@@ -1,7 +1,6 @@
 # Docs Needed 
 
 ## Outdated
-- Log
 - Model SQL
 - Registry
 - Rest Session
@@ -18,6 +17,7 @@
 - Terminal
 - Base
 - Config
+- Log
 
 ## Missing
 -# None
