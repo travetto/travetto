@@ -39,6 +39,8 @@ export const lib = {
   JSDoc: Library('JSDoc', 'http://usejsdoc.org/about-getting-started.html'),
   CodeLens: Library('CodeLens',
     'https://code.visualstudio.com/api/language-extensions/programmatic-language-features#codelens-show-actionable-context-information-within-source-code'),
+  ORM: Library('Object Relationship Mapping', 'https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping'),
+  UUID: Library('UUID', 'https://en.wikipedia.org/wiki/Universally_unique_identifier'),
 
   // Node
   ChildProcess: Library('child_process', 'https://nodejs.org/api/child_process.html'),

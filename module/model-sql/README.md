@@ -12,43 +12,20 @@ npm install @travetto/model-sql
 yarn add @travetto/model-sql
 ```
 
-**Install: Specific SQL Client: mysql**
-```bash
-npm install @travetto/model-mysql
-
-# or
-
-yarn add @travetto/model-mysql
-```
-
-or 
-
-**Install: Specific SQL Client: mysql**
-```bash
-npm install @travetto/model-postgres
-
-# or
-
-yarn add @travetto/model-postgres
-```
-
-or 
-
-**Install: Specific SQL Client: mysql**
-```bash
-npm install @travetto/model-sqlite
-
-# or
-
-yarn add @travetto/model-sqlite
-```
-
 The current SQL client support stands at:
    
-   *  [MySQL](https://www.mysql.com/) - 8.6+
-   *  [Postgres](https://postgresql.org) - 14+
-   *  [SQLite](https://www.sqlite.org/) - (bettersqlite 8.0+)
+   *  [MySQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-mysql#readme "MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - MySQL 8.6+
+   *  [PostgreSQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-postgres#readme "PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.") - Postgres 14+
+   *  [SQLite Model Service](https://github.com/travetto/travetto/tree/main/module/model-sqlite#readme "SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.") - (bettersqlite 8.0+)
    *  `SQL Server` - Currently unsupported
    *  `Oracle` - Currently unsupported
 
 **Note**: Wider client support will roll out as usage increases.
+
+## Assumed Behavior
+
+The [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") works quite a bit different than the average [Object Relationship Mapping](https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping) in that it makes assertions about how data is stored in the database.  The primary goal of the [SQL](https://en.wikipedia.org/wiki/SQL) support is not to handle every scenario that a relational database can provide, but to integrate with the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") structure, while leverage relational datastores to the best of their abilities. 
+
+The primary difference is around unique identifiers, and how parent/child relationships are managed.  In a normal database primary keys could be composite values between various fields.  For example a unique identifier could be a combination of `date` + `orderNumber` + `customerNumber`.  This is perfectly normal in a relational model, but [SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.") assumes unique identifiers ([UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier)) as 32-character hexadecimal values.  In addition to these unique values, the parent's identifier is required in all children values.  This allows for some fairly optimized querying, updates, and deletions on changes.  
+
+What this translates to, is that the framework here dictates the final schema, and doesn't support adapting to existing relational data stores. In greenfield projects, this is not an issue, but will most likely preclude its use in adapting to existing relational data sets.
