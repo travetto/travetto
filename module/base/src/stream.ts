@@ -40,7 +40,7 @@ export class StreamUtil {
   }
 
   /**
-   * Convert input source to a buffer
+   * Convert input source (file, string, readable) to a buffer
    * @param src The input to convert to a buffer
    */
   static async toBuffer(src: All): Promise<Buffer> {
@@ -56,7 +56,7 @@ export class StreamUtil {
   }
 
   /**
-   * Convert input source to a stream
+   * Convert input source (file, buffer, readable, string) to a stream
    * @param src The input to convert to a stream
    */
   static async toStream(src: All): Promise<Readable> {
@@ -68,7 +68,7 @@ export class StreamUtil {
   }
 
   /**
-   * Persist to a file
+   * Persist (readable, buffer, string, or file) to a file
    * @param src The input to write to file
    * @param out The location to write to
    */
@@ -82,7 +82,7 @@ export class StreamUtil {
   }
 
   /**
-   * Delay ending stream until some milestone is achieved
+   * Delay ending stream until 'waitUntil' is resolved
    * @param stream The stream to wait for
    * @param waitUntil The function to track completion before the stream is done
    */
@@ -139,7 +139,10 @@ export class StreamUtil {
   }
 
   /**
-   * Stream lines from file, supporting asynchronous processing.  Will run until file is deleted
+   * Stream lines from file, supporting asynchronous processing.  Will watch a file for
+   * any line changes, and produce those changes as asynchronous iterable stream.
+   *
+   * Functionally, this is equivalent to using the Unix tail operation on a file.
    */
   static async * streamLines(file: string, ensureEmpty = false): AsyncIterable<string> {
     await fs.mkdir(path.dirname(file), { recursive: true });

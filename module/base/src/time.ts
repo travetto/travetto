@@ -52,19 +52,19 @@ export class TimeUtil {
   }
 
   /**
-   * Returns a new date with `age` units into the future
-   * @param age Number of units to extend
+   * Returns a new date with `amount` units into the future
+   * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
-  static timeFromNow(age: number | TimeSpan, unit?: TimeUnit): Date {
-    return new Date(Date.now() + this.timeToMs(age, unit));
+  static timeFromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date {
+    return new Date(Date.now() + this.timeToMs(amount, unit));
   }
 
   /**
-   * Wait for n units of time
+   * Wait for 'amount' units of time
    */
-  static wait(n: number | TimeSpan, unit?: TimeUnit): Promise<void> {
-    return timers.setTimeout(this.timeToMs(n, unit));
+  static wait(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Promise<void> {
+    return timers.setTimeout(this.timeToMs(amount, unit));
   }
 
   /**
@@ -88,16 +88,17 @@ export class TimeUtil {
   /**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */
-  static prettyDeltaSinceTime(time: number, unit?: TimeUnit): string {
+  static prettyDeltaSinceTime(time: number, unit: TimeUnit = 'ms'): string {
     return this.prettyDelta(Date.now() - time, unit);
   }
 
   /**
    * Pretty print a delta, with auto-detection of largest unit
+   * @param delta The number of milliseconds in the delta
    */
-  static prettyDelta(delta: number, unit?: TimeUnit): string {
+  static prettyDelta(delta: number, unit: TimeUnit = 'ms'): string {
     if (delta === 0) {
-      return `0${unit ?? 'ms'}`;
+      return `0${unit}`;
     } else if (delta < 0) {
       return `-${this.prettyDelta(-delta, unit)}`;
     }

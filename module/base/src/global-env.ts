@@ -36,6 +36,7 @@ export const GlobalEnv = {
   /** Get node version */
   get nodeVersion(): string { return process.version; },
 
+  /** Export as plain object */
   toJSON(): Record<string, unknown> {
     return {
       envName: this.envName, debug: this.debug, prod: this.prod, test: this.test,

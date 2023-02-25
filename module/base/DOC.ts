@@ -1,8 +1,11 @@
 import { d, mod, lib } from '@travetto/doc';
-import { ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util } from '@travetto/base';
+import { ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util, Env, FileResourceProvider, TimeUtil, FileQueryProvider } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.Ref('ConsoleManager', 'src/console.ts');
+
+const GlobalEnv = d.SnippetLink('GlobalEnv', 'src/global-env.ts', /export/);
+const ResourceProvider = d.SnippetLink('ResourceProvider', 'src/resource.ts', /interface ResourceProvider/);
 
 export const text = () => d`
 ${d.Header()}
@@ -13,6 +16,7 @@ ${d.List(
   'Environment Support',
   'Shared Global Environment State',
   'Console Management',
+  'Resource Access',
   'Standard Error Support',
   'Stream Utilities',
   'Object Utilities',
@@ -36,6 +40,40 @@ ${d.List(
 )}
 
 ${d.Section('Shared Global Environment State')}
+${GlobalEnv} is a non-cached interface to the ${Env} class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.
+
+${d.Snippet('GlobalEnv Shape', '@travetto/base/src/global-env.ts', /export/, /^[}] as const/, true)}
+
+The source for each field is:
+
+${d.List(
+  d`${d.Field('envName')} - This is derived from ${d.Field('process.env.TRV_ENV')} with a fallback of ${d.Field('process.NODE_ENV')}`,
+  d`${d.Field('prod')} - This is true if ${d.Field('envName')} is a prod value`,
+  d`${d.Field('dynamic')} - This is derived from ${d.Field('process.env.TRV_DYNAMIC')}. This field reflects certain feature sets used throughout the framework.`,
+  d`${d.Field('profiles')} - This is a list derived from ${d.Field('process.env.TRV_PROFILES')}.  This can be checked at runtime to see if specific profiles are met.  This primarily used in the framework to determine if the test profile is activated.`,
+  d`${d.Field('resourcePaths')} - This is a list derived from ${d.Field('process.env.TRV_RESOURCES')}.  This points to a list of folders that the ${FileResourceProvider} will search against, by default.`,
+  d`${d.Field('test')} - This is true if ${d.Field('profiles')} includes a value of ${d.Input('test')}`,
+  d`${d.Field('nodeVersion')} - This is derived from ${d.Field('process.version')}, and is used primarily for logging purposes`,
+)}
+
+In addition to reading these values, there is a defined method for setting/updating these values:
+
+${d.Snippet('GlobalEnv Update', '@travetto/base/src/global-env.ts', /export function define/, /^[}]/)}
+
+As you can see this method exists to update/change the ${d.Field('process.env')} values so that the usage of ${GlobalEnv} reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications). 
+
+${d.Section('Resource Access')}
+
+The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the ${mod.Manifest}'s data for what resources were found at manifesting time.
+
+${d.Snippet('ResourceProvider contract', 'src/resource.ts', /interface ResourceProvider/, /^[}]/)}
+
+The ${ResourceProvider} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a ${d.Class('Readable')} stream.  If a file is not found, it will throw an ${AppError} with a category of 'notfound'.  This contract is fairly simple to fill out, and the predominant implementation is ${FileResourceProvider}.  This ${ResourceProvider} will utilize the ${GlobalEnv}'s ${d.Field('resourcePaths')} information on where to attempt to find a requested resource. 
+
+${d.SubSection('Scanning for Resources')}
+Beyond directly asking for a resource, there a times where it is helpful to know what resources are available at runtime. This is primarily used during development, and is a discouraged pattern for production as assumptions about the file-system may be incorrect (or change without warning).
+
+To that end, ${FileQueryProvider} exists, and is a valid ${ResourceProvider}.  It also provides the ${d.Method('query')} method, to allow for scanning/finding resources that match certain patterns.  Additionally, this class also allows for watching all the resource folders.  This again is helpful during development/compilation, but should not be used in production.
 
 
 ${d.Section('Standard Error Support')}
@@ -143,8 +181,24 @@ Common utilities used throughout the framework. Currently ${Util} includes:
 
 ${d.List(
   d`${d.Method('uuid(len: number)')} generates a simple uuid for use within the application.`,
-  d`${d.Method('allowDenyMatcher(rules[])')} builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.`
+  d`${d.Method('allowDenyMatcher(rules[])')} builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.`,
+  d`${d.Method('naiveHash(text: string)')} produces a fast, and simplistic hash.  No guarantees are made, but performs more than adequately for framework purposes.`,
+  d`${d.Method('makeTemplate<T extends string>(wrap: (key: T, val: TemplatePrim) => string)')} produces a template function tied to the distinct string values that ${d.Input('key')} supports.`,
+  d`${d.Method('resolvablePromise()')} produces a ${d.Class('Promise')} instance with the ${d.Method('resolve')} and ${d.Method('reject')} methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.`,
 )}
+
+${d.Code('Sample makeTemplate Usage', `const tpl = makeTemplate((name: 'age'|'name', val) => \`**\${name}: \${val}**\`); 
+tpl\`{{age:20}} {{name: 'bob'}}\`;
+// produces
+'**age: 20** **name: bob**'
+`)}
+
+${d.Section('Time Utilities')}
+
+${TimeUtil} contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.  
+
+${d.Snippet('Time Utilities', 'src/time.ts', /TimeUtil/, /^}/, true)}
+
 
 ${d.Section('Process Execution')}
 Just like ${lib.ChildProcess}, the ${ExecUtil} exposes ${d.Method('spawn')} and ${d.Method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a ${d.Input('Promise')} structure, that throws an error on an non-zero return status.
@@ -153,14 +207,9 @@ A simple example would be:
 
 ${d.Code('Running a directory listing via ls', 'doc/exec.ts')}
 
-As you can see, the call returns not only the child process information, but the ${d.Input('Promise')} to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
+As you can see, the call returns not only the child process information, but the ${d.Input('Promise')} to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module allows for the following execution options:
 
-${d.List(
-  d`${d.Input('timeout')} as the number of milliseconds the process can run before terminating and throwing an error`,
-  d`${d.Input('quiet')} which suppresses all stdout/stderr output`,
-  d`${d.Input('stdin')} as a string, buffer or stream to provide input to the program you are running;`,
-  d`${d.Input('timeoutKill')} allows for registering functionality to execute when a process is force killed by timeout`
-)}
+${d.Snippet('Execution Options', 'src/exec.ts', /ExecutionOptions/, /^[}]/)}
 
 ${d.Section('Shutdown Management')}
 

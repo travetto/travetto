@@ -66,7 +66,7 @@ export class Util {
     }
   }
 
-  static buildEdgeMap<T, U extends OrderedState<T>>(items: List<U>): Map<T, Set<T>> {
+  static #buildEdgeMap<T, U extends OrderedState<T>>(items: List<U>): Map<T, Set<T>> {
     const edgeMap = new Map(items.map(x => [x.key, new Set(x.after ?? [])]));
 
     // Build out edge map
@@ -88,7 +88,7 @@ export class Util {
    * Produces a satisfied ordering for a list of orderable elements
    */
   static ordered<T, U extends OrderedState<T>>(items: List<U>): U[] {
-    const edgeMap = this.buildEdgeMap<T, U>(items);
+    const edgeMap = this.#buildEdgeMap<T, U>(items);
 
     // Loop through all items again
     const keys: T[] = [];

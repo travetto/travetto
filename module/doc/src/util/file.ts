@@ -105,8 +105,12 @@ export class FileUtil {
         if (info) {
           const [, space, __name, rest] = info;
           if (!rest.endsWith(';')) {
-            methodPrefix = space;
-            return x.replace(/[{]\s*$/, ';');
+            if (/\s*[{]\s*return.*$/.test(x)) {
+              return x.replace(/\s*[{]\s*return.*$/, ';');
+            } else {
+              methodPrefix = space;
+              return x.replace(/\s*[{]\s*$/, ';');
+            }
           }
         }
         return x;

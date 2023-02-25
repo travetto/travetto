@@ -57,7 +57,8 @@ export interface ExecutionState {
  */
 export interface ExecutionOptions extends SpawnOptions {
   /**
-   * Should an error be caught and returned as a result
+   * Should an error be caught and returned as a result. Determines whether an exit code > 0 throws
+   * an Error, or if it merely marks the process as completed, marking the result as invalid.
    */
   catchAsResult?: boolean;
   /**
@@ -65,19 +66,25 @@ export interface ExecutionOptions extends SpawnOptions {
    */
   isolatedEnv?: boolean;
   /**
-   * Built in timeout for any execution
+   * Built in timeout for any execution. The number of milliseconds the process can run before 
+   * terminating and throwing an error
    */
   timeout?: number;
   /**
-   * Whether or not to collect stdin/stdout, defaults to 'text'
+   * Determines how to treat the stdout/stderr data. 
+   *  - 'text' will assume the output streams are textual, and will convert to unicode data.
+   *  - 'text-stream' makes the same assumptions as 'text', but will only fire events, and will
+   *        not persist any data.  This is really useful for long running programs.
+   *  - 'binary' treats all stdout/stderr data as raw buffers, and will not perform any transformations.  
+   *  - 'raw' avoids touching stdout/stderr altogether, and leaves it up to the caller to decide.
    */
   outputMode?: 'raw' | 'binary' | 'text' | 'text-stream';
   /**
-   * On stderr line
+   * On stderr line.  Requires 'outputMode' to be either 'text' or 'text-stream'
    */
   onStdErrorLine?: (line: string) => void;
   /**
-   * On stdout line
+   * On stdout line.  Requires 'outputMode' to be either 'text' or 'text-stream'
    */
   onStdOutLine?: (line: string) => void;
   /**
@@ -97,7 +104,7 @@ export class ExecUtil {
    * Get standard execution options
    * @param opts The options to build out
    */
-  static getOpts(opts: ExecutionOptions): ExecutionOptions {
+  static #getOpts(opts: ExecutionOptions): ExecutionOptions {
     return {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       cwd: path.cwd(),
@@ -121,7 +128,7 @@ export class ExecUtil {
    * @param options The options to use to enhance the process
    * @param cmd The command being run
    */
-  static enhanceProcess(proc: ChildProcess, options: ExecutionOptions, cmd: string): Promise<ExecutionResult> {
+  static #enhanceProcess(proc: ChildProcess, options: ExecutionOptions, cmd: string): Promise<ExecutionResult> {
     const timeout = options.timeout;
 
     const res = new Promise<ExecutionResult>((resolve, reject) => {
@@ -205,8 +212,8 @@ export class ExecUtil {
    * @param options The enhancement options
    */
   static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
-    const proc = spawn(cmd, args, this.getOpts(options));
-    const result = this.enhanceProcess(proc, options, `${cmd} ${args.join(' ')}`);
+    const proc = spawn(cmd, args, this.#getOpts(options));
+    const result = this.#enhanceProcess(proc, options, `${cmd} ${args.join(' ')}`);
     return { process: proc, result };
   }
 
@@ -219,10 +226,10 @@ export class ExecUtil {
    */
   static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
     // Always register for the fork
-    const opts = this.getOpts(options);
+    const opts = this.#getOpts(options);
     const spawnArgs = [path.resolve(file), ...args];
     const proc = spawn(process.argv0, spawnArgs, opts);
-    const result = this.enhanceProcess(proc, options, spawnArgs.join(' '));
+    const result = this.#enhanceProcess(proc, options, spawnArgs.join(' '));
     return { process: proc, result };
   }
 

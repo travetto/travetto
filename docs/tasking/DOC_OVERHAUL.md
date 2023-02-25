@@ -1,7 +1,6 @@
 # Docs Needed 
 
 ## Outdated
-- Base
 - Config
 - Log
 - Model SQL
@@ -18,6 +17,7 @@
 - Repo
 - Eslint
 - Terminal
+- Base
 
 ## Missing
 -# None

@@ -18,6 +18,7 @@ Base is the foundation of all [Travetto](https://travetto.dev) applications.  It
    *  Environment Support
    *  Shared Global Environment State
    *  Console Management
+   *  Resource Access
    *  Standard Error Support
    *  Stream Utilities
    *  Object Utilities
@@ -39,6 +40,113 @@ The functionality we support for testing and retrieving environment information:
    *  `getList(key: string): string[];` - Retrieve an environmental value as a list
 
 ## Shared Global Environment State
+[GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10) is a non-cached interface to the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L4) class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.
+
+**Code: GlobalEnv Shape**
+```typescript
+export const GlobalEnv = {
+  /** Get environment name */
+  get envName(): string;
+  /** Get debug value */
+  get debug(): string | undefined;
+  /** Are we in production mode */
+  get prod(): boolean;
+  /** Is the app in dynamic mode? */
+  get dynamic(): boolean;
+  /** The list of the profiles */
+  get profiles(): string[];
+  /** Get list of resource paths */
+  get resourcePaths(): string[];
+  /** Is test */
+  get test(): boolean;
+  /** Get node version */
+  get nodeVersion(): string;
+  /** Export as plain object */
+  toJSON(): Record<string, unknown>;
+} as const;
+```
+
+The source for each field is:
+
+   
+   *  `envName` - This is derived from `process.env.TRV_ENV` with a fallback of `process.NODE_ENV`
+   *  `prod` - This is true if `envName` is a prod value
+   *  `dynamic` - This is derived from `process.env.TRV_DYNAMIC`. This field reflects certain feature sets used throughout the framework.
+   *  `profiles` - This is a list derived from `process.env.TRV_PROFILES`.  This can be checked at runtime to see if specific profiles are met.  This primarily used in the framework to determine if the test profile is activated.
+   *  `resourcePaths` - This is a list derived from `process.env.TRV_RESOURCES`.  This points to a list of folders that the [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46) will search against, by default.
+   *  `test` - This is true if `profiles` includes a value of `test`
+   *  `nodeVersion` - This is derived from `process.version`, and is used primarily for logging purposes
+
+In addition to reading these values, there is a defined method for setting/updating these values:
+
+**Code: GlobalEnv Update**
+```typescript
+export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
+  const { set = {} } = cfg;
+  const resources = [...cfg.resourcePaths ?? [], ...GlobalEnv.resourcePaths];
+  const test = cfg.test ?? GlobalEnv.test;
+  let debug = cfg.debug ?? GlobalEnv.debug;
+  const env = cfg.envName ?? GlobalEnv.envName;
+  const profiles = new Set([...GlobalEnv.profiles, ...(cfg.profiles ?? [])]);
+  const isProd = /^prod/i.test(env);
+
+  if (test) {
+    profiles.add(TEST);
+    debug = false;
+  } else {
+    profiles.add(isProd ? PROD : DEV);
+  }
+
+  for (const [k, v] of Object.entries(set)) {
+    (v === undefined || v === null) ? delete process.env[k] : process.env[k] = `${v}`;
+  }
+
+  process.env.TRV_ENV = env;
+  process.env.NODE_ENV = isProd ? 'production' : 'development';
+  process.env.TRV_DYNAMIC = `${cfg.dynamic ?? GlobalEnv.dynamic}`;
+  process.env.DEBUG = `${debug}`;
+  process.env.TRV_PROFILES = [...profiles].sort().join(',');
+  process.env.TRV_RESOURCES = resources.join(',');
+}
+```
+
+As you can see this method exists to update/change the `process.env` values so that the usage of [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10) reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications). 
+
+## Resource Access
+
+The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Manifest support")'s data for what resources were found at manifesting time.
+
+**Code: ResourceProvider contract**
+```typescript
+export interface ResourceProvider {
+  /**
+   * Describe the resource
+   * @param pth The path to resolve
+   */
+  describe(pth: string): Promise<ResourceDescription>;
+
+  /**
+   * Read a resource, mimicking fs.read
+   * @param pth The path to read
+   */
+  read(pth: string, binary?: false): Promise<string>;
+  read(pth: string, binary: true): Promise<Buffer>;
+  read(pth: string, binary?: boolean): Promise<string | Buffer>;
+
+  /**
+   * Read a resource as a stream, mimicking fs.readStream
+   * @param pth The path to read
+   */
+  readStream(pth: string, binary?: boolean): Promise<Readable>;
+}
+```
+
+The [ResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  This contract is fairly simple to fill out, and the predominant implementation is [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46).  This [ResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21) will utilize the [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10)'s `resourcePaths` information on where to attempt to find a requested resource. 
+
+### Scanning for Resources
+Beyond directly asking for a resource, there a times where it is helpful to know what resources are available at runtime. This is primarily used during development, and is a discouraged pattern for production as assumptions about the file-system may be incorrect (or change without warning).
+
+To that end, [FileQueryProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource-query.ts#L10) exists, and is a valid [ResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21).  It also provides the `query` method, to allow for scanning/finding resources that match certain patterns.  Additionally, this class also allows for watching all the resource folders.  This again is helpful during development/compilation, but should not be used in production.
 
 ## Standard Error Support
 
@@ -170,9 +278,66 @@ Common utilities used throughout the framework. Currently [Util](https://github.
    
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
+   *  `naiveHash(text: string)` produces a fast, and simplistic hash.  No guarantees are made, but performs more than adequately for framework purposes.
+   *  `makeTemplate<T extends string>(wrap: (key: T, val: TemplatePrim) => string)` produces a template function tied to the distinct string values that `key` supports.
+   *  `resolvablePromise()` produces a `Promise` instance with the `resolve` and `reject` methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.
+
+**Code: Sample makeTemplate Usage**
+```typescript
+const tpl = makeTemplate((name: 'age'|'name', val) => `**${name}: ${val}**`); 
+tpl`{{age:20}} {{name: 'bob'}}`;
+// produces
+'**age: 20** **name: bob**'
+```
+
+## Time Utilities
+
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L23) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.  
+
+**Code: Time Utilities**
+```typescript
+export class TimeUtil {
+  /**
+   * Test to see if a string is valid for relative time
+   * @param val
+   */
+  static isTimeSpan(val: string): val is TimeSpan;
+  /**
+   * Returns time units convert to ms
+   * @param amount Number of units to extend
+   * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
+   */
+  static timeToMs(amount: number | TimeSpan, unit?: TimeUnit): number;
+  /**
+   * Returns a new date with `amount` units into the future
+   * @param amount Number of units to extend
+   * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
+   */
+  static timeFromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date;
+  /**
+   * Wait for 'amount' units of time
+   */
+  static wait(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Promise<void>;
+  /**
+   * Get environment variable as time
+   * @param key env key
+   * @param def backup value if not valid or found
+   */
+  static getEnvTime(key: string, def?: number | TimeSpan): number;
+  /**
+   * Pretty print a delta between now and `time`, with auto-detection of largest unit
+   */
+  static prettyDeltaSinceTime(time: number, unit: TimeUnit = 'ms'): string;
+  /**
+   * Pretty print a delta, with auto-detection of largest unit
+   * @param delta The number of milliseconds in the delta
+   */
+  static prettyDelta(delta: number, unit: TimeUnit = 'ms'): string;
+}
+```
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L95) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L102) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 
@@ -187,13 +352,48 @@ export async function executeListing() {
 }
 ```
 
-As you can see, the call returns not only the child process information, but the `Promise` to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
+As you can see, the call returns not only the child process information, but the `Promise` to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module allows for the following execution options:
 
-   
-   *  `timeout` as the number of milliseconds the process can run before terminating and throwing an error
-   *  `quiet` which suppresses all stdout/stderr output
-   *  `stdin` as a string, buffer or stream to provide input to the program you are running;
-   *  `timeoutKill` allows for registering functionality to execute when a process is force killed by timeout
+**Code: Execution Options**
+```typescript
+export interface ExecutionOptions extends SpawnOptions {
+  /**
+   * Should an error be caught and returned as a result. Determines whether an exit code > 0 throws
+   * an Error, or if it merely marks the process as completed, marking the result as invalid.
+   */
+  catchAsResult?: boolean;
+  /**
+   * Should the environment be isolated, or inherit from process.env
+   */
+  isolatedEnv?: boolean;
+  /**
+   * Built in timeout for any execution. The number of milliseconds the process can run before 
+   * terminating and throwing an error
+   */
+  timeout?: number;
+  /**
+   * Determines how to treat the stdout/stderr data. 
+   *  - 'text' will assume the output streams are textual, and will convert to unicode data.
+   *  - 'text-stream' makes the same assumptions as 'text', but will only fire events, and will
+   *        not persist any data.  This is really useful for long running programs.
+   *  - 'binary' treats all stdout/stderr data as raw buffers, and will not perform any transformations.  
+   *  - 'raw' avoids touching stdout/stderr altogether, and leaves it up to the caller to decide.
+   */
+  outputMode?: 'raw' | 'binary' | 'text' | 'text-stream';
+  /**
+   * On stderr line.  Requires 'outputMode' to be either 'text' or 'text-stream'
+   */
+  onStdErrorLine?: (line: string) => void;
+  /**
+   * On stdout line.  Requires 'outputMode' to be either 'text' or 'text-stream'
+   */
+  onStdOutLine?: (line: string) => void;
+  /**
+   * The stdin source for the execution
+   */
+  stdin?: string | Buffer | Readable;
+}
+```
 
 ## Shutdown Management
 
