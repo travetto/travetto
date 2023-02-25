@@ -1,8 +1,11 @@
 import { readFileSync } from 'fs';
 
-import { d, lib } from '@travetto/doc';
+import { d, lib, mod } from '@travetto/doc';
 import { ManifestRoot, path, RootIndex } from '@travetto/manifest';
 import { COMMON_DATE } from '@travetto/doc/src/util/run';
+
+const RootIndexRef = d.Ref('RootIndex', '@travetto/manifest/src/root-index.ts');
+
 
 const manifest = () => {
   const obj: ManifestRoot = JSON.parse(readFileSync(path.resolve(RootIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json'), 'utf8'));
@@ -28,6 +31,7 @@ This module aims to be the boundary between the file system and the code.  The m
 
 ${d.List(
   'Project Manifesting',
+  'Class and Function Metadata',
   'Runtime Indexing',
   'Path Normalization',
   'File Watching'
@@ -41,6 +45,41 @@ During the compilation process, the compiler needs to know every file that is el
 
 ${d.SubSection('Runtime Knowledge')}
 Additionally, once the code has been compiled (or even bundled after that), the executing process needs to know what files are available for loading, and any patterns necessary for knowing which files to load versus which ones to ignore. This allows for dynamic loading of modules/files without knowledge/access to the file system, and in a more performant manner.
+
+
+${d.Section('Class and Function Metadata')}
+
+For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every ${d.Input('class')} is decorated with an additional field of ${d.Input('Ⲑid')}.  ${d.Input('Ⲑid')} represents a computed id that is tied to the file/class combination.
+
+${d.Input('Ⲑid')} is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the ${RootIndexRef} using the ${d.Method('getFunctionMetadata')} method.
+
+${d.Code('Test Class', './doc/test-class.ts')}
+
+${d.Code('Test Class Compiled', RootIndex.getFromImport('@travetto/manifest/doc/test-class')!.outputFile)}
+
+${d.Execute('Index Lookup at Runtime', 'trv', ['main', './doc/lookup.ts'])}
+
+${d.Section('Module Indexing')}
+Once the manifest is created, the application runtime can now read this manifest, which allows for influencing runtime behavior. The most common patterns include:
+${d.List(
+  'Loading all source files',
+  'Iterating over every test file',
+  'Finding all source folders for watching',
+  'Find all output folders for watching',
+  'Determining if a module is available or not',
+  'Resource scanning',
+  'Providing contextual information when provided a filename, import name, etc (e.g. logging, testing output)'
+)}
+
+${d.Section('Path Normalization')}
+By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up ${d.SnippetLink('path', './src/path.ts', /export/)} as an equivalent to ${lib.Node}'s ${lib.Path} library.  This allows for consistent behavior across all file-interactions, and also allows for easy analysis if ${lib.Node}'s ${lib.Path} library is ever imported.
+
+${d.Section('File Watching')}
+The module also leverages ${lib.ParcelWatcher}, to expose a single function of ${d.Method('watchFolders')}. Only the ${mod.Compiler} module packages ${lib.ParcelWatcher} as a direct dependency.  This means, that in production, by default all watch operations will fail with a missing dependency.
+
+${d.Snippet('Watch Folder Signature', 'src/watch.ts', /export type WatchEvent/, /^[)]:/)}
+
+This method allows for watching one or more folders, and registering a callback that will fire every time a file changes, and which of the registered folders it was triggered within. The return of the ${d.Method('watchFolders')} is a cleanup method, that when invoked will remove and stop all watching behavior.
 
 ${d.Section('Anatomy of a Manifest')}
 
@@ -105,16 +144,4 @@ ${d.Code('Sample file', `
   1676751649201.1897, // Stat timestamp
   "test" // Optional profile
 ]`)}
-
-${d.Section('Module Indexing')}
-Once the manifest is created, the application runtime can now read this manifest, which allows for influencing runtime behavior. The most common patterns include:
-${d.List(
-  'Loading all source files',
-  'Iterating over every test file',
-  'Finding all source folders for watching',
-  'Find all output folders for watching',
-  'Determining if a module is available or not',
-  'Resource scanning',
-  'Providing contextual information when provided a filename, import name, etc (e.g. logging, testing output)'
-)}
 `;

@@ -57,7 +57,7 @@ export const MOD_MAPPING = {
   },
   Compiler: {
     name:'@travetto/compiler', folder:'@travetto/compiler', displayName: 'Compiler',
-    description: 'Compiler'
+    description: 'The compiler infrastructure for the Travetto framework'
   },
   Config: {
     name:'@travetto/config', folder:'@travetto/config', displayName: 'Configuration',
@@ -105,7 +105,7 @@ export const MOD_MAPPING = {
   },
   Manifest: {
     name:'@travetto/manifest', folder:'@travetto/manifest', displayName: 'Manifest',
-    description: 'Manifest support'
+    description: 'Support for project indexing, manifesting, along with file watching'
   },
   Model: {
     name:'@travetto/model', folder:'@travetto/model', displayName: 'Data Modeling Support',

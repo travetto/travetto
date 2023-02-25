@@ -43,6 +43,7 @@ export const lib = {
   ChildProcess: Library('child_process', 'https://nodejs.org/api/child_process.html'),
   AsyncHooks: Library('async_hooks', 'https://nodejs.org/api/async_hooks.html'),
   Http: Library('http', 'https://nodejs.org/api/http.html'),
+  Path: Library('http', 'https://nodejs.org/api/path.html'),
   Https: Library('https', 'https://nodejs.org/api/https.html'),
   Console: Library('console', 'https://nodejs.org/api/console.html'),
   Assert: Library('assert', 'https://nodejs.org/api/assert.html'),
@@ -58,11 +59,12 @@ export const lib = {
   OpenAPIGenerator: Library('OpenAPI client generation tools', 'https://github.com/OpenAPITools/openapi-generator'),
   Gaze: Library('gaze', 'https://github.com/shama/gaze'),
   Chokidar: Library('chokidar', 'https://github.com/paulmillr/chokidar'),
-  Faker: Library('faker', 'https://github.com/marak/Faker.js/'),
+  Faker: Library('faker', 'https://github.com/faker-js/faker'),
   Yeoman: Library('yeoman', 'http://yeoman.io'),
   Commander: Library('commander', 'https://www.npmjs.com/package/commander'),
   Curl: Library('curl', 'https://curl.haxx.se/'),
   Fetch: Library('fetch', 'https://www.npmjs.com/package/node-fetch'),
+  ParcelWatcher: Library('fetch', 'https://www.npmjs.com/package/@parcel/watcher'),
 
   // JWT
   JWT: Library('JWT', 'https://jwt.io/'),

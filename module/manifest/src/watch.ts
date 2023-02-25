@@ -1,12 +1,6 @@
 import fs from 'fs/promises';
 import { path } from './path';
 
-export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
-
-export type WatchEventListener = (ev: WatchEvent, folder: string) => void;
-type EventFilter = (ev: WatchEvent) => boolean;
-type WatchConfig = { filter?: EventFilter, ignore?: string[], createMissing?: boolean, includeHidden?: boolean };
-
 async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
   try {
     return await import('@parcel/watcher');
@@ -15,6 +9,29 @@ async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
     throw err;
   }
 }
+
+export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
+type EventFilter = (ev: WatchEvent) => boolean;
+
+export type WatchEventListener = (ev: WatchEvent, folder: string) => void;
+export type WatchConfig = {
+  /**
+   * Predicate for filtering events
+   */
+  filter?: EventFilter;
+  /**
+   * List of top level folders to ignore
+   */
+  ignore?: string[];
+  /**
+   * If watching a folder that doesn't exist, should it be created?
+   */
+  createMissing?: boolean;
+  /**
+   * Include files that start with '.'
+   */
+  includeHidden?: boolean;
+};
 
 /**
  * Leverages @parcel/watcher to watch a series of folders

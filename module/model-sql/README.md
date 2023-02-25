@@ -6,11 +6,19 @@
 **Install: @travetto/model-sql**
 ```bash
 npm install @travetto/model-sql
+
+# or
+
+yarn add @travetto/model-sql
 ```
 
 **Install: Specific SQL Client: mysql**
 ```bash
 npm install @travetto/model-mysql
+
+# or
+
+yarn add @travetto/model-mysql
 ```
 
 or 
@@ -18,6 +26,10 @@ or
 **Install: Specific SQL Client: mysql**
 ```bash
 npm install @travetto/model-postgres
+
+# or
+
+yarn add @travetto/model-postgres
 ```
 
 or 
@@ -25,6 +37,10 @@ or
 **Install: Specific SQL Client: mysql**
 ```bash
 npm install @travetto/model-sqlite
+
+# or
+
+yarn add @travetto/model-sqlite
 ```
 
 The current SQL client support stands at:

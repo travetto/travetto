@@ -6,6 +6,10 @@
 **Install: @travetto/registry**
 ```bash
 npm install @travetto/registry
+
+# or
+
+yarn add @travetto/registry
 ```
 
 This module is the backbone for all "discovered" and "registered" behaviors within the framework. This is primarily used for building modules within the framework and not directly useful for application development.
@@ -39,12 +43,21 @@ interface Child {
   method: Function;
 }
 
+function isComplete(o: Partial<Group>): o is Group {
+  return !!o;
+}
+
 export class SampleRegistry extends MetadataRegistry<Group, Child> {
   /**
    * Finalize class after all metadata is collected
    */
   onInstallFinalize<T>(cls: Class<T>): Group {
-    return this.getOrCreatePending(cls) as Group;
+    const pending: Partial<Group> = this.getOrCreatePending(cls);
+    if (isComplete(pending)) {
+      return pending;
+    } else {
+      throw new Error('Invalid Group');
+    }
   }
 
   /**
@@ -68,7 +81,51 @@ As the [DynamicFileLoader](https://github.com/travetto/travetto/tree/main/module
 
 ## Supporting Metadata
 
-For the registries to work properly, metadata needs to be collected about files and classes to uniquely identify them, especially across file reloads for the live flow.  To achieve this, every `class` is decorated with additional fields.  The data that is added is:
+As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s readme, the framework produces hashes of methods, classes, and functions, to allow for detecting changes to individual parts of the codebase. During the live flow, various registries will inspect this information to determine if action should be taken.  
 
-   
-   *  `Ⲑid` represents a computed id that is tied to the file/class combination;
+**Code: Sample Class Diffing**
+```typescript
+#handleFileChanges(file: string, classes: Class[] = []): void {
+    const next = new Map<string, Class>(classes.map(cls => [cls.Ⲑid, cls] as const));
+
+    let prev = new Map<string, Class>();
+    if (this.#classes.has(file)) {
+      prev = new Map(this.#classes.get(file)!.entries());
+    }
+
+    const keys = new Set([...Array.from(prev.keys()), ...Array.from(next.keys())]);
+
+    if (!this.#classes.has(file)) {
+      this.#classes.set(file, new Map());
+    }
+
+    let changes = 0;
+
+    /**
+     * Determine delta based on the various classes (if being added, removed or updated)
+     */
+    for (const k of keys) {
+      if (!next.has(k)) {
+        changes += 1;
+        this.emit({ type: 'removing', prev: prev.get(k)! });
+        this.#classes.get(file)!.delete(k);
+      } else {
+        this.#classes.get(file)!.set(k, next.get(k)!);
+        if (!prev.has(k)) {
+          changes += 1;
+          this.emit({ type: 'added', curr: next.get(k)! });
+        } else {
+          const prevMeta = RootIndex.getFunctionMetadataFromClass(prev.get(k));
+          const nextMeta = RootIndex.getFunctionMetadataFromClass(next.get(k));
+          if (prevMeta?.hash !== nextMeta?.hash) {
+            changes += 1;
+            this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
+          }
+        }
+      }
+    }
+    if (!changes) {
+      this.#emitter.emit('unchanged-file', file);
+    }
+  }
+```

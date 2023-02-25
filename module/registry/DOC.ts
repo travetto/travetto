@@ -4,6 +4,7 @@ const RootReg = d.Ref('RootRegistry', 'src/service/root.ts');
 const MetadataReg = d.Ref('MetadataRegistry', 'src/service/metadata.ts');
 const DynamicFileLoader = d.Ref('DynamicFileLoader', '@travetto/base/src/internal/file-loader.ts');
 
+const RootIndex = d.Ref('RootIndex', '@travetto/manifest/src/root-index.ts');
 
 export const text = () => d`
 ${d.Header()}
@@ -36,9 +37,7 @@ As the ${DynamicFileLoader} notifies that a file has been changed, the ${RootReg
 
 ${d.Section('Supporting Metadata')}
 
-For the registries to work properly, metadata needs to be collected about files and classes to uniquely identify them, especially across file reloads for the live flow.  To achieve this, every ${d.Input('class')} is decorated with additional fields.  The data that is added is:
+As mentioned in ${mod.Manifest}'s readme, the framework produces hashes of methods, classes, and functions, to allow for detecting changes to individual parts of the codebase. During the live flow, various registries will inspect this information to determine if action should be taken.  
 
-${d.List(
-  d`${d.Input('Ⲑid')} represents a computed id that is tied to the file/class combination`
-)};
+${d.Snippet('Sample Class Diffing', 'src/source/class-source.ts', /^\s{2}#handleFileChanges/, /^\s{2}[}]/)}
 `;

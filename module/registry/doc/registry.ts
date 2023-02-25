@@ -11,12 +11,21 @@ interface Child {
   method: Function;
 }
 
+function isComplete(o: Partial<Group>): o is Group {
+  return !!o;
+}
+
 export class SampleRegistry extends MetadataRegistry<Group, Child> {
   /**
    * Finalize class after all metadata is collected
    */
   onInstallFinalize<T>(cls: Class<T>): Group {
-    return this.getOrCreatePending(cls) as Group;
+    const pending: Partial<Group> = this.getOrCreatePending(cls);
+    if (isComplete(pending)) {
+      return pending;
+    } else {
+      throw new Error('Invalid Group');
+    }
   }
 
   /**
