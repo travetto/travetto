@@ -8,6 +8,7 @@ export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
 
 export type RunConfig = {
   filter?: (line: string) => boolean;
+  rewrite?: (text: string) => string;
   module?: string;
   env?: Record<string, string>;
   profiles?: string[];
@@ -84,6 +85,9 @@ export class DocRunUtil {
       .replace(/(\d+[.]\d+[.]\d+)-(alpha|rc)[.]\d+/g, (all, v) => v);
     if (cfg.filter) {
       text = text.split(/\n/g).filter(cfg.filter).join('\n');
+    }
+    if (cfg.rewrite) {
+      text = cfg.rewrite(text);
     }
     return text;
   }

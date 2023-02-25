@@ -2,7 +2,7 @@
 
 ## Outdated
 - Model SQL
-- Compiler
+- Transformer
 
 ## Completed
 - Manifest
@@ -18,6 +18,7 @@
 - Registry
 - Rest Session
 - Pack
+- Compiler
 
 
 ## Missing
