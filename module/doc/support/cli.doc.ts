@@ -70,11 +70,11 @@ export class DocCommand extends CliCommand<Options> {
         if (out) {
           const finalName = path.resolve(out);
           await fs.writeFile(finalName, result, 'utf8');
+          console.log(`Wrote docs ${this.cmd.input}: ${finalName}`);
         } else {
           process.stdout.write(result);
         }
       }
-      console.log(`Wrote docs for ${this.cmd.input}`);
     } catch (err) {
       console.error(err);
       this.exit(1);

@@ -54,7 +54,7 @@ export async function main(target?: string): Promise<void> {
     if (mod.sourceFolder.endsWith('vscode-plugin')) {
       await copyPluginImages();
     }
-    const modName = mod.name.split('/')[1];
+    const modName = mod.name.endsWith('mono-repo') ? 'overview' : mod.name.split('/')[1];
     try {
       let html = await fs.readFile(path.resolve(mod.sourcePath, 'DOC.html'), 'utf8');
 
