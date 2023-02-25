@@ -12,6 +12,7 @@ export const lib = {
   Npm: Library('Npm', 'https://docs.npmjs.com/downloading-and-installing-node-js-and-npm'),
   Yarn: Library('Yarn', 'https://yarnpg.com'),
   Eslint: Library('ESLint', 'https://eslint.org/'),
+  Rollup: Library('Rollup', 'https://rollupjs.org/'),
 
   // Module
   CommonJS: Library('CommonJS', 'https://nodejs.org/api/modules.html'),

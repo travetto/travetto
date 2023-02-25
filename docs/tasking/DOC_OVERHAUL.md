@@ -3,7 +3,6 @@
 ## Outdated
 - Model SQL
 - Compiler
-- Pack
 
 ## Completed
 - Manifest
@@ -18,6 +17,7 @@
 - Log
 - Registry
 - Rest Session
+- Pack
 
 
 ## Missing
