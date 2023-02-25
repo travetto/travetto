@@ -16,6 +16,7 @@ This module aims to be the boundary between the file system and the code.  The m
 
    
    *  Project Manifesting
+   *  Manifest Delta
    *  Class and Function Metadata
    *  Runtime Indexing
    *  Path Normalization
@@ -29,6 +30,9 @@ During the compilation process, the compiler needs to know every file that is el
 
 ### Runtime Knowledge
 Additionally, once the code has been compiled (or even bundled after that), the executing process needs to know what files are available for loading, and any patterns necessary for knowing which files to load versus which ones to ignore. This allows for dynamic loading of modules/files without knowledge/access to the file system, and in a more performant manner.
+
+## Manifest Delta
+During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The [ManifestDeltaUtil](https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L21) provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s incremental behavior to know when a file has changed and needs to be recompiled.
 
 ## Class and Function Metadata
 
@@ -155,164 +159,50 @@ This method allows for watching one or more folders, and registering a callback 
       "outputFolder": "node_modules/@travetto/manifest",
       "files": {
         "$root": [
-          [
-            "DOC.html",
-            "unknown",
-            1868155200000
-          ],
-          [
-            "LICENSE",
-            "unknown",
-            1868155200000
-          ],
-          [
-            "README.md",
-            "md",
-            1868155200000
-          ],
-          [
-            "doc/test-class.ts",
-            "ts",
-            1868155200000
-          ]
+          [ "DOC.html", "unknown", 1868155200000 ],
+          [ "LICENSE", "unknown", 1868155200000 ],
+          [ "README.md", "md", 1868155200000 ]
         ],
         "doc": [
-          [
-            "DOC.ts",
-            "ts",
-            1868155200000,
-            "doc"
-          ],
-          [
-            "doc/lookup.ts",
-            "ts",
-            1868155200000,
-            "doc"
-          ],
-          [
-            "doc/test-class.ts",
-            "ts",
-            1868155200000,
-            "doc"
-          ]
+          [ "DOC.ts", "ts", 1868155200000, "doc" ],
+          [ "doc/lookup.ts", "ts", 1868155200000, "doc" ],
+          [ "doc/test-class.ts", "ts", 1868155200000, "doc" ]
         ],
         "$index": [
-          [
-            "__index__.ts",
-            "ts",
-            1868155200000
-          ]
+          [ "__index__.ts", "ts", 1868155200000 ]
         ],
         "$package": [
-          [
-            "package.json",
-            "package-json",
-            1868155200000
-          ]
+          [ "package.json", "package-json", 1868155200000 ]
         ],
         "test": [
-          [
-            "test/path.ts",
-            "ts",
-            1868155200000,
-            "test"
-          ],
-          [
-            "test/root-index.ts",
-            "ts",
-            1868155200000,
-            "test"
-          ]
+          [ "test/path.ts", "ts", 1868155200000, "test" ],
+          [ "test/root-index.ts", "ts", 1868155200000, "test" ]
         ],
         "test/fixtures": [
-          [
-            "test/fixtures/simple.ts",
-            "fixture",
-            1868155200000,
-            "test"
-          ]
+          [ "test/fixtures/simple.ts", "fixture", 1868155200000, "test" ]
         ],
         "$transformer": [
-          [
-            "support/transformer.function-metadata.ts",
-            "ts",
-            1868155200000,
-            "compile"
-          ]
+          [ "support/transformer.function-metadata.ts", "ts", 1868155200000, "compile" ]
         ],
         "src": [
-          [
-            "src/delta.ts",
-            "ts",
-            1868155200000
-          ],
-          [
-            "src/dependencies.ts",
-            "ts",
-            1868155200000
-          ],
-          [
-            "src/manifest-index.ts",
-            "ts",
-            1868155200000
-          ],
-          [
-            "src/module.ts",
-            "ts",
-            1868155200000
-          ],
-          [
-            "src/package.ts",
-            "ts",
-            1868155200000
-          ],
-          [
-            "src/path.ts",
-            "ts",
-            1868155200000
-          ],
-          [
-            "src/root-index.ts",
-            "ts",
-            1868155200000
-          ],
-          [
-            "src/types.ts",
-            "ts",
-            1868155200000
-          ],
-          [
-            "src/typings.d.ts",
-            "typings",
-            1868155200000
-          ],
-          [
-            "src/util.ts",
-            "ts",
-            1868155200000
-          ],
-          [
-            "src/watch.ts",
-            "ts",
-            1868155200000
-          ]
+          [ "src/delta.ts", "ts", 1868155200000 ],
+          [ "src/dependencies.ts", "ts", 1868155200000 ],
+          [ "src/manifest-index.ts", "ts", 1868155200000 ],
+          [ "src/module.ts", "ts", 1868155200000 ],
+          [ "src/package.ts", "ts", 1868155200000 ],
+          [ "src/path.ts", "ts", 1868155200000 ],
+          [ "src/root-index.ts", "ts", 1868155200000 ],
+          [ "src/types.ts", "ts", 1868155200000 ],
+          [ "src/typings.d.ts", "typings", 1868155200000 ],
+          [ "src/util.ts", "ts", 1868155200000 ],
+          [ "src/watch.ts", "ts", 1868155200000 ]
         ],
         "bin": [
-          [
-            "bin/context.d.ts",
-            "typings",
-            1868155200000
-          ],
-          [
-            "bin/context.js",
-            "js",
-            1868155200000
-          ]
+          [ "bin/context.d.ts", "typings", 1868155200000 ],
+          [ "bin/context.js", "js", 1868155200000 ]
         ]
       },
-      "profiles": [
-        "std"
-      ],
+      "profiles": [ "std" ],
       "parents": []
     }
   }

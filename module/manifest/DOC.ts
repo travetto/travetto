@@ -1,10 +1,11 @@
 import { readFileSync } from 'fs';
 
 import { d, lib, mod } from '@travetto/doc';
-import { ManifestRoot, path, RootIndex } from '@travetto/manifest';
+import { ManifestDeltaUtil, ManifestRoot, path, RootIndex } from '@travetto/manifest';
 import { COMMON_DATE } from '@travetto/doc/src/util/run';
 
-const RootIndexRef = d.Ref('RootIndex', '@travetto/manifest/src/root-index.ts');
+const RootIndexRef = d.Ref('RootIndex', 'src/root-index.ts');
+const DeltaRef = d.Ref('ManifestDeltaUtil', 'src/delta.ts');
 
 
 const manifest = () => {
@@ -14,14 +15,14 @@ const manifest = () => {
   delete obj.modules;
   obj.workspacePath = '<generated>';
   obj.generated = COMMON_DATE;
-  for (const mod of Object.values(modules)) {
-    for (const files of Object.values(mod.files)) {
+  for (const md of Object.values(modules)) {
+    for (const files of Object.values(md.files)) {
       for (const file of files) {
         file[2] = COMMON_DATE;
       }
     }
   }
-  return JSON.stringify({ ...obj, modules }, null, 2);
+  return JSON.stringify({ ...obj, modules }, null, 2).replace(/\[[^[]*?\]/gsm, v => v.replace(/\s+/gs, ' '));
 };
 
 export const text = () => d`
@@ -31,6 +32,7 @@ This module aims to be the boundary between the file system and the code.  The m
 
 ${d.List(
   'Project Manifesting',
+  'Manifest Delta',
   'Class and Function Metadata',
   'Runtime Indexing',
   'Path Normalization',
@@ -46,6 +48,8 @@ During the compilation process, the compiler needs to know every file that is el
 ${d.SubSection('Runtime Knowledge')}
 Additionally, once the code has been compiled (or even bundled after that), the executing process needs to know what files are available for loading, and any patterns necessary for knowing which files to load versus which ones to ignore. This allows for dynamic loading of modules/files without knowledge/access to the file system, and in a more performant manner.
 
+${d.Section('Manifest Delta')}
+During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The ${DeltaRef} provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the ${mod.Compiler}'s incremental behavior to know when a file has changed and needs to be recompiled.
 
 ${d.Section('Class and Function Metadata')}
 

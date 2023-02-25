@@ -19,6 +19,7 @@
 This module aims to be the boundary between the file system and the code.  The module provides:
 
 <ul> <li>Project Manifesting</li>
+ <li>Manifest Delta</li>
  <li>Class and Function Metadata</li>
  <li>Runtime Indexing</li>
  <li>Path Normalization</li>
@@ -32,6 +33,9 @@ During the compilation process, the compiler needs to know every file that is el
 
 <h3 id="runtime-knowledge">Runtime Knowledge</h3>
 Additionally, once the code has been compiled (or even bundled after that), the executing process needs to know what files are available for loading, and any patterns necessary for knowing which files to load versus which ones to ignore. This allows for dynamic loading of modules/files without knowledge/access to the file system, and in a more performant manner.
+
+<h2 id="manifest-delta">Manifest Delta</h2>
+During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L21">ManifestDeltaUtil</a> provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s incremental behavior to know when a file has changed and needs to be recompiled.
 
 <h2 id="class-and-function-metadata">Class and Function Metadata</h2>
 
@@ -167,164 +171,50 @@ This method allows for watching one or more folders, and registering a callback 
       <span class="token string-property property">"outputFolder"</span><span class="token operator">:</span> <span class="token string">"node_modules/@travetto/manifest"</span><span class="token punctuation">,</span>
       <span class="token string-property property">"files"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
         <span class="token string-property property">"$root"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"DOC.html"</span><span class="token punctuation">,</span>
-            <span class="token string">"unknown"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"LICENSE"</span><span class="token punctuation">,</span>
-            <span class="token string">"unknown"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"README.md"</span><span class="token punctuation">,</span>
-            <span class="token string">"md"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"doc/test-class.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span>
+          <span class="token punctuation">[</span> <span class="token string">"DOC.html"</span><span class="token punctuation">,</span> <span class="token string">"unknown"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"LICENSE"</span><span class="token punctuation">,</span> <span class="token string">"unknown"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"README.md"</span><span class="token punctuation">,</span> <span class="token string">"md"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span>
         <span class="token punctuation">]</span><span class="token punctuation">,</span>
         <span class="token string-property property">"doc"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"DOC.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
-            <span class="token string">"doc"</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"doc/lookup.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
-            <span class="token string">"doc"</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"doc/test-class.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
-            <span class="token string">"doc"</span>
-          <span class="token punctuation">]</span>
+          <span class="token punctuation">[</span> <span class="token string">"DOC.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span><span class="token punctuation">,</span> <span class="token string">"doc"</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"doc/lookup.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span><span class="token punctuation">,</span> <span class="token string">"doc"</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"doc/test-class.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span><span class="token punctuation">,</span> <span class="token string">"doc"</span> <span class="token punctuation">]</span>
         <span class="token punctuation">]</span><span class="token punctuation">,</span>
         <span class="token string-property property">"$index"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"__index__.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span>
+          <span class="token punctuation">[</span> <span class="token string">"__index__.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span>
         <span class="token punctuation">]</span><span class="token punctuation">,</span>
         <span class="token string-property property">"$package"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"package.json"</span><span class="token punctuation">,</span>
-            <span class="token string">"package-json"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span>
+          <span class="token punctuation">[</span> <span class="token string">"package.json"</span><span class="token punctuation">,</span> <span class="token string">"package-json"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span>
         <span class="token punctuation">]</span><span class="token punctuation">,</span>
         <span class="token string-property property">"test"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"test/path.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
-            <span class="token string">"test"</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"test/root-index.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
-            <span class="token string">"test"</span>
-          <span class="token punctuation">]</span>
+          <span class="token punctuation">[</span> <span class="token string">"test/path.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span><span class="token punctuation">,</span> <span class="token string">"test"</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"test/root-index.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span><span class="token punctuation">,</span> <span class="token string">"test"</span> <span class="token punctuation">]</span>
         <span class="token punctuation">]</span><span class="token punctuation">,</span>
         <span class="token string-property property">"test/fixtures"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"test/fixtures/simple.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"fixture"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
-            <span class="token string">"test"</span>
-          <span class="token punctuation">]</span>
+          <span class="token punctuation">[</span> <span class="token string">"test/fixtures/simple.ts"</span><span class="token punctuation">,</span> <span class="token string">"fixture"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span><span class="token punctuation">,</span> <span class="token string">"test"</span> <span class="token punctuation">]</span>
         <span class="token punctuation">]</span><span class="token punctuation">,</span>
         <span class="token string-property property">"$transformer"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"support/transformer.function-metadata.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span><span class="token punctuation">,</span>
-            <span class="token string">"compile"</span>
-          <span class="token punctuation">]</span>
+          <span class="token punctuation">[</span> <span class="token string">"support/transformer.function-metadata.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span><span class="token punctuation">,</span> <span class="token string">"compile"</span> <span class="token punctuation">]</span>
         <span class="token punctuation">]</span><span class="token punctuation">,</span>
         <span class="token string-property property">"src"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/delta.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/dependencies.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/manifest-index.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/module.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/package.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/path.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/root-index.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/types.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/typings.d.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"typings"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/util.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"src/watch.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"ts"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/delta.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/dependencies.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/manifest-index.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/module.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/package.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/path.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/root-index.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/types.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/typings.d.ts"</span><span class="token punctuation">,</span> <span class="token string">"typings"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/util.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/watch.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span>
         <span class="token punctuation">]</span><span class="token punctuation">,</span>
         <span class="token string-property property">"bin"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"bin/context.d.ts"</span><span class="token punctuation">,</span>
-            <span class="token string">"typings"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span><span class="token punctuation">,</span>
-          <span class="token punctuation">[</span>
-            <span class="token string">"bin/context.js"</span><span class="token punctuation">,</span>
-            <span class="token string">"js"</span><span class="token punctuation">,</span>
-            <span class="token number">1868155200000</span>
-          <span class="token punctuation">]</span>
+          <span class="token punctuation">[</span> <span class="token string">"bin/context.d.ts"</span><span class="token punctuation">,</span> <span class="token string">"typings"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"bin/context.js"</span><span class="token punctuation">,</span> <span class="token string">"js"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span>
         <span class="token punctuation">]</span>
       <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
-      <span class="token string-property property">"profiles"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-        <span class="token string">"std"</span>
-      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"profiles"</span><span class="token operator">:</span> <span class="token punctuation">[</span> <span class="token string">"std"</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
       <span class="token string-property property">"parents"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
