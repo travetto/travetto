@@ -214,11 +214,14 @@ export const node = {
    * @param outline
    * @param language
    */
-  Code: (title: Content, content: Content | Function, outline = false, language = 'typescript') => {
+  Code: (title: Content, content: Content | Function, outline = false, language = 'typescript', rewrite?: (text: string) => string) => {
     if (typeof content === 'function') {
       content = RootIndex.getFunctionMetadata(content)!.source;
     }
     const res = ResolveUtil.resolveCode(content, language, outline);
+    if (rewrite && typeof res.content === 'string') {
+      res.content = rewrite(res.content);
+    }
     return $n('code', { title: $c(title), content: $c(res.content), language: res.language, file: $c(res.file) });
   },
 

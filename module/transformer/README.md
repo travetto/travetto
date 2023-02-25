@@ -6,13 +6,20 @@
 **Install: @travetto/transformer**
 ```bash
 npm install @travetto/transformer
+
+# or
+
+yarn add @travetto/transformer
 ```
 
 This module provides support for enhanced AST transformations, and declarative transformer registration, with common patterns to support all the transformers used throughout the framework. Transformations are located by `support/transformer.<name>.ts` as the filename. 
 
-The module is primarily aimed at extremely advanced usages for things that cannot be detected at runtime.  The [Registry](https://github.com/travetto/travetto/tree/main/module/registry#readme "Patterns and utilities for handling registration of metadata and functionality for run-time use") module already has knowledge of all `class`es and `field`s, and is able to listen to changes there.  Many of the modules build upon work by some of the foundational transformers defined in [Registry](https://github.com/travetto/travetto/tree/main/module/registry#readme "Patterns and utilities for handling registration of metadata and functionality for run-time use"), [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.").  These all center around defining a registry of classes, and associated type information.
+The module is primarily aimed at extremely advanced usages for things that cannot be detected at runtime.  The [Registry](https://github.com/travetto/travetto/tree/main/module/registry#readme "Patterns and utilities for handling registration of metadata and functionality for run-time use") module already has knowledge of all `class`es and `field`s, and is able to listen to changes there.  Many of the modules build upon work by some of the foundational transformers defined in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching"), [Registry](https://github.com/travetto/travetto/tree/main/module/registry#readme "Patterns and utilities for handling registration of metadata and functionality for run-time use"), [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") and [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.").  These all center around defining a registry of classes, and associated type information.
 
 Because working with the [Typescript](https://typescriptlang.org) API can be delicate (and open to breaking changes), creating new transformers should be done cautiously. 
+
+## Monorepos and Idempotency
+Within the framework, any build or compile step will target the entire workspace, and for mono-repo projects, will include all modules.  The optimization this provides is great, but comes with a strict requirement that all compilation processes need to be idempotent.  This means that compiling a module directly, versus as a dependency should always produce the same output. This produces a requirement that all transformers are opt-in by the source code, and which transformers are needed in a file should be code-evident.  This also means that no transformers are optional, as that could produce different output depending on the dependency graph for a given module.
 
 ## Custom Transformer
 
@@ -28,7 +35,7 @@ export class MakeUpper {
 
   @OnProperty()
   static handleProperty(state: TransformerState, node: ts.PropertyDeclaration): ts.PropertyDeclaration {
-    if (!state.file.includes('doc/src')) {
+    if (!state.importName.startsWith('@travetto/transformer/doc/upper')) {
       return node;
     }
     return state.factory.updatePropertyDeclaration(
@@ -43,7 +50,7 @@ export class MakeUpper {
 
   @OnClass()
   static handleClass(state: TransformerState, node: ts.ClassDeclaration): ts.ClassDeclaration {
-    if (!state.file.includes('doc/src')) {
+    if (!state.importName.startsWith('@travetto/transformer/doc/upper')) {
       return node;
     }
     return state.factory.updateClassDeclaration(
@@ -58,7 +65,7 @@ export class MakeUpper {
 
   @OnMethod()
   static handleMethod(state: TransformerState, node: ts.MethodDeclaration): ts.MethodDeclaration {
-    if (!state.file.includes('doc/src')) {
+    if (!state.importName.startsWith('@travetto/transformer/doc/upper')) {
       return node;
     }
     return state.factory.updateMethodDeclaration(
@@ -77,3 +84,40 @@ export class MakeUpper {
 ```
 
 **Note**: This should be a strong indicator that it is very easy to break code in unexpected ways.
+
+**Code: Sample Input**
+```typescript
+export class Test {
+  name: string;
+  age: number;
+  dob: Date;
+
+  computeAge(): void {
+    this['age'] = (Date.now() - this.dob.getTime());
+  }
+}
+```
+
+**Code: Sample Output**
+```javascript
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.TEST = void 0;
+const tslib_1 = require("tslib");
+const Ⲑ_root_index_1 = tslib_1.__importStar(require("@travetto/manifest/src/root-index.js"));
+const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
+var ᚕf = "@travetto/transformer/doc/upper.js";
+let TEST = class TEST {
+    static Ⲑinit = Ⲑ_root_index_1.RootIndex.registerFunction(TEST, ᚕf, 649563175, { COMPUTEAGE: { hash: 1286718349 } }, false, false);
+    NAME;
+    AGE;
+    DOB;
+    COMPUTEAGE() {
+        this['AGE'] = (Date.now() - this.DOB.getTime());
+    }
+};
+TEST = tslib_1.__decorate([
+    Ⲑ_decorator_1.Register()
+], TEST);
+exports.TEST = TEST;
+```
