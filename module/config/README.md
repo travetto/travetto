@@ -6,6 +6,10 @@
 **Install: @travetto/config**
 ```bash
 npm install @travetto/config
+
+# or
+
+yarn add @travetto/config
 ```
 
 The config module provides support for loading application config on startup. Configuration values support the common [YAML](https://en.wikipedia.org/wiki/YAML) constructs as defined in [YAML](https://github.com/travetto/travetto/tree/main/module/yaml#readme "Simple YAML support, provides only clean subset of yaml").  Additionally, the configuration is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module, to enforce type correctness, and allow for validation of configuration as an 
@@ -16,26 +20,24 @@ entrypoint into the application.  Given that all [@Config](https://github.com/tr
 The configuration information is comprised of:
 
    
-   *  [YAML](https://en.wikipedia.org/wiki/YAML) files
-   *  environment variables
+   *  configuration files - [YAML](https://en.wikipedia.org/wiki/YAML), [JSON](https://www.json.org), and basic properties file
    *  configuration classes
 
-Config loading follows a defined resolution path, below is the order in increasing specificity:
+Config loading follows a defined resolution path, below is the order in increasing specificity (`ext` can be `yaml`, `yml`, `json`, `properties`):
    
-   1. `resources/application.yml` - Load the default `application.yml` if available.
-   1. `resources/*.yml` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
-   1. `resources/{env}.yml` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
-   1. `process.env` - Read startup configuration from environment to allow for overriding any values. Because we are overriding a [YAML](https://en.wikipedia.org/wiki/YAML) based configuration we need to compensate for the differences in usage patterns.  Generally all environment variables are passed in as `UPPER_SNAKE_CASE`. When reading from `process.env` we will map `UPPER_SNAKE_CASE` to `upper.snake.case`, and will attempt to match by case-insensitive name.
+   1. `resources/application.<ext>` - Load the default `application.<ext>` if available.
+   1. `resources/*.<ext>` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
+   1. `resources/{env}.<ext>` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
 
-By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class. This is due to the fact that environment data, as well as configuration data can only be interpreted in light of a class structure, as the data binding is what makes the configuration valid.
+By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
 
-## A Complete Example
+### A Complete Example
 
 A more complete example setup would look like:
 
 **Config: resources/application.yml**
 ```yaml
---
+---
 database:
   host: localhost
   creds:
@@ -43,13 +45,16 @@ database:
     password: test
 ```
 
-**Config: resources/prod.yml**
-```yaml
---
-database:
-  host: prod - host - db
-  creds:
-    user: admin - user
+**Config: resources/prod.json**
+```json
+{
+  "database": {
+    "host": "prod-host-db",
+    "creds": {
+      "user": "admin-user"
+    }
+  }
+}
 ```
 
 with environment variables
@@ -58,8 +63,6 @@ with environment variables
 ```properties
 TRV_ENV = prod
 TRV_PROFILES = prod
-DATABASE_PORT = 1234
-DATABASE_CREDS_PASSWORD = %secret%
 ```
 
 At runtime the resolved config would be:
@@ -70,24 +73,50 @@ $ trv main doc/resolve.ts
 
 Config {
   sources: [
-    'doc.1 - file:@travetto/config/resources/doc.yml',
+    'application.1 - file://./doc/resources/application.yml',
+    'prod.1 - file://./doc/resources/prod.json',
     'override.3 - memory://override'
   ],
   active: {
-    DBConfig: {
-      host: 'localhost',
-      port: 2000,
-      creds: creds_7_45Ⲑsyn { user: 'test', password: 'test' }
-    }
+    DBConfig: { host: 'prod-host-db', port: 2000, creds: { user: 'admin-user' } }
   }
 }
 ```
 
-## Secrets
-By default, when in production mode, the application startup will request redacted secrets to log out.  These secrets follow a standard set of rules, but can be amended by listing regular expressions under `config.redacted`.
+### Custom Configuration Provider
+In addition to files and environment variables, configuration sources can also be provided via the class itself.  This is useful for reading remote configurations, or dealing with complex configuration normalization.  The only caveat to this pattern, is that the these configuration sources cannot rely on the [Configuration](https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L14) service for input.  This means any needed configuration will need to be accessed via specific patterns.
+
+**Code: Custom Configuration Source**
+```typescript
+import { ConfigSource, ConfigValue } from '@travetto/config';
+import { Injectable } from '@travetto/di';
+
+@Injectable()
+export class CustomConfigSource implements ConfigSource {
+  priority = 1000;
+  name = 'custom';
+
+  async getValues(): Promise<ConfigValue[]> {
+    return [
+      {
+        config: { user: { name: 'bob' } },
+        priority: this.priority,
+        profile: 'override',
+        source: `custom://${CustomConfigSource.name}`
+      }
+    ];
+  }
+}
+```
+
+## Startup
+At startup, the [Configuration](https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L14) service will log out all the registered configuration objects.  The configuration state output is useful to determine if everything is configured properly when diagnosing runtime errors.  This service will find all configurations, and output a redacted version with all secrets removed.  The default pattern for secrets is `/password|private|secret/i`.  More values can be added in your configuration under the path `config.secrets`.  These values can either be simple strings (for exact match), or `/pattern/` to create a regular expression.
 
 ## Consuming
 The [Configuration](https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L14) service provides injectable access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+
+### Environment Variables
+Additionally there are times in which you may want to also support configuration via environment variables.  [EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L34) supports override configuration values when environment variables are present.
 
 The decorator takes in a namespace, of what part of the resolved configuration you want to bind to your class. Given the following class:
 
@@ -107,7 +136,7 @@ export class DBConfig {
 }
 ```
 
-Using the above config files, you'll notice that the port is not specified (its only specified in the environment variables).  This means when the application attempts to start up, it will fail if the port is not specified via an environment variable:
+You can see that the `DBConfig` allows for the `port` to be overridden by the `DATABASE_PORT` environment variable.
 
 **Terminal: Resolved database config**
 ```bash
@@ -119,7 +148,7 @@ $ trv main doc/dbconfig-run.ts
   type: 'ValidationResultError',
   at: 2029-03-14T04:00:00.618Z,
   class: '@travetto/config:doc/dbconfig￮DBConfig',
-  file: '@travetto/config/doc/dbconfig.ts',
+  file: './doc/dbconfig.ts',
   errors: [
     {
       kind: 'required',
@@ -142,15 +171,14 @@ $ DATABASE_PORT=200 trv main doc/dbconfig-run.ts
 
 Config {
   sources: [
-    'doc.1 - file:@travetto/config/resources/doc.yml',
+    'application.1 - file://./doc/resources/application.yml',
+    'prod.1 - file://./doc/resources/prod.json',
     'override.3 - memory://override'
   ],
   active: {
-    DBConfig: {
-      host: 'localhost',
-      port: 200,
-      creds: creds_7_45Ⲑsyn { user: 'test', password: 'test' }
-    }
+    DBConfig: { host: 'prod-host-db', port: 200, creds: { user: 'admin-user' } }
   }
 }
 ```
+
+Additionally you may notice that the `password` field is missing, as it is redacted by default.

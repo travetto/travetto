@@ -1,0 +1,8 @@
+{
+  "database": {
+    "host": "prod-host-db",
+    "creds": {
+      "user": "admin-user"
+    }
+  }
+}

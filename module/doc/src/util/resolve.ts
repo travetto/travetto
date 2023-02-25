@@ -48,7 +48,7 @@ export class ResolveUtil {
   static resolveConfig<T>(content: string | T, language: string): { content: string | T, language: string, file?: string } {
     let file: string | undefined;
     if (typeof content === 'string') {
-      if (/^[@:A-Za-z0-9\/\\\-_.]+[.](ya?ml|properties)$/.test(content)) {
+      if (/^[@:A-Za-z0-9\/\\\-_.]+[.](json|ya?ml|properties)$/.test(content)) {
         const res = FileUtil.read(content);
         language = res.language;
         file = res.file;

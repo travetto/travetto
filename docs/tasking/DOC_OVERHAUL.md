@@ -1,7 +1,6 @@
 # Docs Needed 
 
 ## Outdated
-- Config
 - Log
 - Model SQL
 - Registry
@@ -18,6 +17,7 @@
 - Eslint
 - Terminal
 - Base
+- Config
 
 ## Missing
 -# None

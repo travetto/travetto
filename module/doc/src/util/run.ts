@@ -58,6 +58,7 @@ export class DocRunUtil {
         cwd: path.toPosix(config.cwd ?? path.cwd()),
         shell: '/bin/bash',
         env: {
+          ...process.env,
           DEBUG: '0',
           TRV_MANIFEST: '',
           TRV_BUILD: 'warn',
