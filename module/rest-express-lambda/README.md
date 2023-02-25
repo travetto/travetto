@@ -6,6 +6,10 @@
 **Install: @travetto/rest-express-lambda**
 ```bash
 npm install @travetto/rest-express-lambda
+
+# or
+
+yarn add @travetto/rest-express-lambda
 ```
 
 The [express](https://expressjs.com) module supports AWS lambda integration when installed.  This produces an instance of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L21) that is able to integrate with AWS appropriately.

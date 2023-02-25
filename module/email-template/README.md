@@ -6,6 +6,10 @@
 **Install: @travetto/email-template**
 ```bash
 npm install @travetto/email-template
+
+# or
+
+yarn add @travetto/email-template
 ```
 
 This is primarily a set of command line tools for compiling and developing templates.  The primary input into this process is a `.email.html` under the `resources/email` folder.  This template drives the generation of the `html` and `text` outputs, as well as the `subject` file.
@@ -65,11 +69,11 @@ The image will be extracted out and embedded in the email as a multi part messag
 
 ## Template Development
 
-The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") and [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) support for email template development.
+The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") and [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) support for email template development.
 
-### CLI Compilation
+## CLI Compilation
 
-The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") support for email template compilation also. Running
+The module provides [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") support for email template compilation also. Running
 
 **Terminal: Running template compilation**
 ```bash
@@ -84,7 +88,7 @@ Options:
 
 Will convert all `.email.html` files into the appropriate `.compiled.html`, `.compiled.text` and `.compiled.subject` files.  These will be used during the running of the application.  By default these files are added to the `.gitignore` as they are generally not intended to be saved but to be generated during the build process.
 
-### [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin)
+## [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin)
 In addition to command line tools, the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) also supports:
 
    

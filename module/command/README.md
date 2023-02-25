@@ -6,6 +6,10 @@
 **Install: @travetto/command**
 ```bash
 npm install @travetto/command
+
+# or
+
+yarn add @travetto/command
 ```
 
 The command module provides the necessary foundation for calling complex commands at runtime. Additionally special attention is provided to running [docker](https://www.docker.com/community-edition) containers.

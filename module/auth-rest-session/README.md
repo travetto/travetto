@@ -3,13 +3,12 @@
 # Rest Auth Session
 ## Rest authentication session integration support for the Travetto framework
 
-**Install npm: @travetto/auth-rest-session**
+**Install: @travetto/auth-rest-session**
 ```bash
 npm install @travetto/auth-rest-session
-```
-or
-**Install yarn: @travetto/auth-rest-session**
-```bash
+
+# or
+
 yarn add @travetto/auth-rest-session
 ```
 
@@ -17,7 +16,7 @@ One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-re
 
 The [SessionPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/principal-encoder.ts#L12) is exposed as a tool for allowing for decoding/encoding principals into the session. 
 
-**Code : SessionPrincipalEncoder**
+**Code: SessionPrincipalEncoder**
 ```typescript
 import { Injectable, Inject } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';

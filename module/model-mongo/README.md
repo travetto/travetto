@@ -6,6 +6,10 @@
 **Install: @travetto/model-mongo**
 ```bash
 npm install @travetto/model-mongo
+
+# or
+
+yarn add @travetto/model-mongo
 ```
 
 This module provides an [mongodb](https://mongodb.com)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and query against [mongodb](https://mongodb.com).. Given the dynamic nature of [mongodb](https://mongodb.com), during development when models are modified, nothing needs to be done to adapt to the latest schema.

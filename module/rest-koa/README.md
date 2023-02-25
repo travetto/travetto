@@ -6,6 +6,10 @@
 **Install: @travetto/rest-koa**
 ```bash
 npm install @travetto/rest-koa
+
+# or
+
+yarn add @travetto/rest-koa
 ```
 
 The module is an [koa](https://koajs.com/) provider for the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module.  This module provides an implementation of [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L21) for automatic injection in the default Rest server.

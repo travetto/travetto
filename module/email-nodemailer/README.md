@@ -6,6 +6,10 @@
 **Install: @travetto/email-nodemailer**
 ```bash
 npm install @travetto/email-nodemailer
+
+# or
+
+yarn add @travetto/email-nodemailer
 ```
 
 Given the integration with [nodemailer](https://nodemailer.com/about/), all extensions should be usable out of the box. The primary [nodemailer](https://nodemailer.com/about/) modules are provided (assuming dependencies are installed):

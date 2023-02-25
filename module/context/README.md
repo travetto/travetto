@@ -6,6 +6,10 @@
 **Install: @travetto/context**
 ```bash
 npm install @travetto/context
+
+# or
+
+yarn add @travetto/context
 ```
 
 This module provides a wrapper around node's [async_hooks](https://nodejs.org/api/async_hooks.html) to maintain context across async calls. This is generally used for retaining contextual user information at various levels of async flow.

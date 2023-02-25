@@ -21,7 +21,7 @@ This module provides basic support for interacting with the terminal, and provid
 <ul> <li>Output Colorization</li>
  <li>Terminal Interactions</li></ul>
 
-<h3 id="output-colorization">Output Colorization</h3>
+<h2 id="output-colorization">Output Colorization</h2>
 
 Oddly enough, colorizing output in a terminal is a fairly complex process.  The standards are somewhat inconsistent and detection can be a tricky process. For terminals, <a target="_blank" class="external-link" href="https://nodejs.org">Node</a> supports 4 different levels of coloring:
 <ul> <li>0 - One color, essentially uncolored output</li>
@@ -84,13 +84,13 @@ NO_COLOR                    Alias <span class="token keyword">for</span> NODE_DI
 NODE_DISABLE_COLORS         <span class="token builtin class-name">set</span> to <span class="token number">1</span> to disable colors <span class="token keyword">in</span> the REPL</code></pre>     
       </figure>
 
-<h3 id="terminal-interactions">Terminal Interactions</h3>
+<h2 id="terminal-interactions">Terminal Interactions</h2>
 Within the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework, there are plenty of command line interactions that are enhanced with additional interactivity.  This mainly revolves around indicating progress while a program is executing.  The module provides support for:
 
 <ul> <li>Progress Bars</li>
  <li>Waiting Indicators</li>
  <li>Streaming Content</li></ul>
 
-This is generally meant for use within the framework, and so is highly tailored to the specific needs and scenarios.  You can see this pattern play out in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="Compiler">Compiler</a> progress output, or in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/pack" title="Code packing utilities">Pack</a>'s output.
+This is generally meant for use within the framework, and so is highly tailored to the specific needs and scenarios.  You can see this pattern play out in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a> progress output, or in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/pack" title="Code packing utilities">Pack</a>'s output.
 
 In these scenarios, the dynamic behaviors are dependent on having an interactive TTY.  When running without access to a proper stdin, the output will default to basic line printing.    This dynamic behavior can also be disabled using the environment variable <code class="item field">TRV_QUIET</code>.  When set to <code class="item input">1</code> will provide a minimal text-based experience.

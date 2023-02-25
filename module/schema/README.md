@@ -6,10 +6,14 @@
 **Install: @travetto/schema**
 ```bash
 npm install @travetto/schema
+
+# or
+
+yarn add @travetto/schema
 ```
 
 This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is 
-leveraged in the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support"), [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support."), [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module."), [OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the travetto framework") and [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") modules.  The schema is the backbone of all data transfer, as it helps to
+leveraged in the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support"), [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support."), [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module."), [OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the Travetto framework") and [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") modules.  The schema is the backbone of all data transfer, as it helps to
 provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file.
 
 This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.

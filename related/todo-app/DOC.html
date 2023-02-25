@@ -351,17 +351,11 @@ First we must start the application:
     <span class="token string">'override.3 - memory://override'</span>
   <span class="token punctuation">]</span>,
   active: <span class="token punctuation">{{'{'}}</span>
-    ApiHostConfig: <span class="token punctuation">{{'{'}}</span>
-      servers: <span class="token punctuation">[</span> ServerObject_1137222912_50_163Ⲑsyn <span class="token punctuation">{{'{'}}</span> url: <span class="token string">'http://localhost:3000'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
-      openapi: <span class="token string">'3.0.1'</span>
-    <span class="token punctuation">{{'}'}}</span>,
+    ApiHostConfig: <span class="token punctuation">{{'{'}}</span> servers: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token punctuation">{{'{'}}</span> url: <span class="token string">'http://localhost:3000'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>, openapi: <span class="token string">'3.0.1'</span> <span class="token punctuation">{{'}'}}</span>,
     ApiInfoConfig: <span class="token punctuation">{{'{'}}</span>
-      contact: ContactObject_1137222912_41_123Ⲑsyn <span class="token punctuation">{{'{'}}</span>
-        name: <span class="token string">'Travetto Framework'</span>,
-        email: <span class="token string">'travetto.framework@gmail.com'</span>
-      <span class="token punctuation">{{'}'}}</span>,
+      contact: <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'Travetto Framework'</span>, email: <span class="token string">'travetto.framework@gmail.com'</span> <span class="token punctuation">{{'}'}}</span>,
       description: <span class="token string">''</span>,
-      license: LicenseObject_1137222912_46_102Ⲑsyn <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'ISC'</span> <span class="token punctuation">{{'}'}}</span>,
+      license: <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'ISC'</span> <span class="token punctuation">{{'}'}}</span>,
       title: <span class="token string">'@travetto/todo-app'</span>,
       version: <span class="token string">'0.0.0'</span>
     <span class="token punctuation">{{'}'}}</span>,
@@ -370,20 +364,19 @@ First we must start the application:
     FileModelConfig: <span class="token punctuation">{{'{'}}</span> folder: <span class="token string">'/tmp/trv_file__travetto_todo_app'</span>, namespace: <span class="token string">'.'</span> <span class="token punctuation">{{'}'}}</span>,
     MemoryModelConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
     MongoModelConfig: <span class="token punctuation">{{'{'}}</span>
-      hosts: <span class="token punctuation">[</span> <span class="token string">'localhost'</span> <span class="token punctuation">]</span>,
+      hosts: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'localhost'</span> <span class="token punctuation">{{'}'}}</span>,
       namespace: <span class="token string">'app'</span>,
       username: <span class="token string">''</span>,
-      password: <span class="token string">''</span>,
       port: <span class="token number">27017</span>,
       connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       srvRecord: false,
       options: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
     <span class="token punctuation">{{'}'}}</span>,
-    RestAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+    RestAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
     RestAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
     RestAuthConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
     RestAuthLoginConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    RestAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> roles: <span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span>,
+    RestAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> roles: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
     RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
     RestConfig: <span class="token punctuation">{{'{'}}</span>
       serve: true,

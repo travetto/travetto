@@ -6,6 +6,10 @@
 **Install: @travetto/image**
 ```bash
 npm install @travetto/image
+
+# or
+
+yarn add @travetto/image
 ```
 
 This module provides functionality for image resizing, and png optimization. This is primarily meant to be used in conjunction with other modules, like the [Asset](https://github.com/travetto/travetto/tree/main/module/asset#readme "Modular library for storing and retrieving binary assets") module or the [Email Templating](https://github.com/travetto/travetto/tree/main/module/email-template#readme "Email templating module") module. It can also be invoked directly as needed (as it can be very handy for batch processing images on the command line).

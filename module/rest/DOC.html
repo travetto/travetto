@@ -9,7 +9,11 @@
       <figcaption class="install">Install @travetto/rest
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/rest</code></pre>     
       </figure>
 
 The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles <a target="_blank" class="external-link" href="https://expressjs.com">express</a> in the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12">TravettoRequest</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115">TravettoResponse</a> objects). This module is built upon the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> structure, and all controller method parameters follow the same rules/abilities as any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38">@Field</a> in a standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a> class.
@@ -266,7 +270,11 @@ By default, the framework provides a default <a target="_blank" class="source-li
       <figcaption class="install">Installing app support
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/app</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/app
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/app</code></pre>     
       </figure>
 
       <figure class="terminal">
@@ -520,7 +528,7 @@ A <code class="item input">next</code> parameter is also available to allow for 
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-Currently <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/asset-rest" title="Provides integration between the travetto asset and rest module.">Asset Rest Support</a> is implemented in this fashion, as well as <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a>.
+Currently <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/asset-rest" title="Provides integration between the travetto asset and rest module.">Asset Rest Support</a> is implemented in this fashion, as well as <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a>.
 
 <h3 id="configuring-interceptors">Configuring Interceptors</h3>
 All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:

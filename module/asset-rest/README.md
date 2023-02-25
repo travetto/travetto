@@ -6,6 +6,10 @@
 **Install: @travetto/asset-rest**
 ```bash
 npm install @travetto/asset-rest
+
+# or
+
+yarn add @travetto/asset-rest
 ```
 
 This module provides a clean and direct mechanism for processing uploads, built upon [busboy](https://github.com/mscdex/busboy). The module also provides some best practices with respect to temporary file deletion.

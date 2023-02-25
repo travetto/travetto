@@ -22,7 +22,7 @@
 The <a target="_blank" class="external-link" href="https://eslint.org/">ESLint</a> has introduced <a target="_blank" class="external-link" href="https://eslint.org/blog/2022/08/new-config-system-part-3/">a new configuration format</a> which allows for <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a> files.
 </p>
 
-<h3 id="cli-register">CLI - Register</h3>
+<h2 id="cli-register">CLI - Register</h2>
 In a new project, the first thing that will need to be done, post installation, is to create the eslint configuration file.  
 
       <figure class="terminal">
@@ -51,7 +51,7 @@ module<span class="token punctuation">.</span>exports <span class="token operato
 
 The output is tied to whether or not you are using the <a target="_blank" class="external-link" href="https://nodejs.org/api/modules.html">CommonJS</a> or <a target="_blank" class="external-link" href="https://nodejs.org/api/esm.html">Ecmascript Module</a> format.
 
-<h3 id="cli-lint">CLI - Lint</h3>
+<h2 id="cli-lint">CLI - Lint</h2>
 
 Once installed, using the linter is as simple as invoking it via the cli:
 
@@ -64,7 +64,7 @@ Once installed, using the linter is as simple as invoking it via the cli:
 
 Or pointing your IDE to reference the registered configuration file.
 
-<h3 id="custom-rules">Custom Rules</h3>
+<h2 id="custom-rules">Custom Rules</h2>
 It can be seen in the sample configuration, that the configuration is looking for files with the pattern of <code class="item path">support/eslint/.*</code>
 
 These files will follow a given pattern of: 

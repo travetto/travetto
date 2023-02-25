@@ -18,7 +18,7 @@ This module provides basic support for interacting with the terminal, and provid
    *  Output Colorization
    *  Terminal Interactions
 
-### Output Colorization
+## Output Colorization
 
 Oddly enough, colorizing output in a terminal is a fairly complex process.  The standards are somewhat inconsistent and detection can be a tricky process. For terminals, [Node](https://nodejs.org) supports 4 different levels of coloring:
    
@@ -76,7 +76,7 @@ NO_COLOR                    Alias for NODE_DISABLE_COLORS
 NODE_DISABLE_COLORS         set to 1 to disable colors in the REPL
 ```
 
-### Terminal Interactions
+## Terminal Interactions
 Within the [Travetto](https://travetto.dev) framework, there are plenty of command line interactions that are enhanced with additional interactivity.  This mainly revolves around indicating progress while a program is executing.  The module provides support for:
 
    
@@ -84,6 +84,6 @@ Within the [Travetto](https://travetto.dev) framework, there are plenty of comma
    *  Waiting Indicators
    *  Streaming Content
 
-This is generally meant for use within the framework, and so is highly tailored to the specific needs and scenarios.  You can see this pattern play out in the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "Compiler") progress output, or in [Pack](https://github.com/travetto/travetto/tree/main/module/pack#readme "Code packing utilities")'s output.
+This is generally meant for use within the framework, and so is highly tailored to the specific needs and scenarios.  You can see this pattern play out in the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework") progress output, or in [Pack](https://github.com/travetto/travetto/tree/main/module/pack#readme "Code packing utilities")'s output.
 
 In these scenarios, the dynamic behaviors are dependent on having an interactive TTY.  When running without access to a proper stdin, the output will default to basic line printing.    This dynamic behavior can also be disabled using the environment variable `TRV_QUIET`.  When set to `1` will provide a minimal text-based experience.

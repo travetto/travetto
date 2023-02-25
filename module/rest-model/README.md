@@ -6,6 +6,10 @@
 **Install: @travetto/rest-model**
 ```bash
 npm install @travetto/rest-model
+
+# or
+
+yarn add @travetto/rest-model
 ```
 
 To facilitate common RESTful patterns, the module exposes  [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") support in the form of [ModelRoutes](https://github.com/travetto/travetto/tree/main/module/rest-model/src/model.ts#L16).

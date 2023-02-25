@@ -6,6 +6,10 @@
 **Install: @travetto/scaffold**
 ```bash
 npm install @travetto/scaffold
+
+# or
+
+yarn add @travetto/scaffold
 ```
 
 A simple tool for scaffolding a reference project.  To get started, you need to make sure:
@@ -37,12 +41,12 @@ The code will establish some basic routes, specifically, `GET /` as the root end
 ### Additional Rest Features
 In addition to the core functionality, the `rest` feature has some useful sub-features.  Specifically:
 
-[OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the travetto framework") support for the restful api.  This will automatically expose a `openapi.yml` endpoint, and provide the necessary plumbing to support client generation.
+[OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the Travetto framework") support for the restful api.  This will automatically expose a `openapi.yml` endpoint, and provide the necessary plumbing to support client generation.
 
 [Logging](https://github.com/travetto/travetto/tree/main/module/log#readme "Logging framework that integrates at the console.log level.") support for better formatting, [debug](https://www.npmjs.com/package/debug) like support, and colorized output.  This is generally useful for server logs, especially during development.
 
 ## Authentication
-Authentication is also supported on the Restful endpoints by selecting [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the travetto framework") during setup.  This will support basic authentication running out of local memory, with user [REST Session](https://github.com/travetto/travetto/tree/main/module/rest-session#readme "Session provider for the travetto rest module.")s.
+Authentication is also supported on the Restful endpoints by selecting [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") during setup.  This will support basic authentication running out of local memory, with user [REST Session](https://github.com/travetto/travetto/tree/main/module/rest-session#readme "Session provider for the travetto rest module.")s.
 
 ## Testing
 [Testing](https://github.com/travetto/travetto/tree/main/module/test#readme "Declarative test framework") can also be configured out of the box to provide simple test cases for the data model.

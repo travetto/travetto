@@ -6,6 +6,10 @@
 **Install: @travetto/model-query**
 ```bash
 npm install @travetto/model-query
+
+# or
+
+yarn add @travetto/model-query
 ```
 
 This module provides an enhanced query contract for [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations.  This contract has been externalized due to it being more complex than many implementations can natively support.  In addition to the contract, this module provides support for textual query language that can be checked and parsed into the proper query structure.

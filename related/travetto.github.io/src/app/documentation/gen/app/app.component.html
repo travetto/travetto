@@ -9,7 +9,11 @@
       <figcaption class="install">Install @travetto/app
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/app</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/app
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/app</code></pre>     
       </figure>
 
 The <a class="module-link" routerLink="/docs/base" title="Environment config and common utilities for travetto applications.">Base</a> module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21">@Application</a> who's job is to register entry points into the application, along with the associated  metadata. 

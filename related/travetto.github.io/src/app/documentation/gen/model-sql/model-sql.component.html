@@ -9,39 +9,26 @@
       <figcaption class="install">Install @travetto/model-sql
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-sql</code></pre>     
-      </figure>
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-sql
 
-      <figure class="install">
-      <figcaption class="install">Specific SQL Client: mysql
-      
-      </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-mysql</code></pre>     
-      </figure>
+<span class="token comment"># or</span>
 
-or 
-
-      <figure class="install">
-      <figcaption class="install">Specific SQL Client: mysql
-      
-      </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-postgres</code></pre>     
-      </figure>
-
-or 
-
-      <figure class="install">
-      <figcaption class="install">Specific SQL Client: mysql
-      
-      </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/model-sqlite</code></pre>     
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/model-sql</code></pre>     
       </figure>
 
 The current SQL client support stands at:
-<ul> <li><a target="_blank" class="external-link" href="https://www.mysql.com/">MySQL</a> - 8.6+</li>
- <li><a target="_blank" class="external-link" href="https://postgresql.org">Postgres</a> - 14+</li>
- <li><a target="_blank" class="external-link" href="https://www.sqlite.org/">SQLite</a> - (bettersqlite 8.0+)</li>
+<ul> <li><a class="module-link" routerLink="/docs/model-mysql" title="MySQL backing for the travetto model module, with real-time modeling support for SQL schemas.">MySQL Model Service</a> - MySQL 8.6+</li>
+ <li><a class="module-link" routerLink="/docs/model-postgres" title="PostgreSQL backing for the travetto model module, with real-time modeling support for SQL schemas.">PostgreSQL Model Service</a> - Postgres 14+</li>
+ <li><a class="module-link" routerLink="/docs/model-sqlite" title="SQLite backing for the travetto model module, with real-time modeling support for SQL schemas.">SQLite Model Service</a> - (bettersqlite 8.0+)</li>
  <li><code class="item input">SQL Server</code> - Currently unsupported</li>
  <li><code class="item input">Oracle</code> - Currently unsupported</li></ul>
 
 <p class="note"><strong>Note</strong> Wider client support will roll out as usage increases.</p>
+
+<h2 id="assumed-behavior">Assumed Behavior</h2>
+
+The <a class="module-link" routerLink="/docs/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a> works quite a bit different than the average <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping">Object Relationship Mapping</a> in that it makes assertions about how data is stored in the database.  The primary goal of the <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/SQL">SQL</a> support is not to handle every scenario that a relational database can provide, but to integrate with the <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> structure, while leverage relational datastores to the best of their abilities. 
+
+The primary difference is around unique identifiers, and how parent/child relationships are managed.  In a normal database primary keys could be composite values between various fields.  For example a unique identifier could be a combination of <code class="item input">date</code> + <code class="item input">orderNumber</code> + <code class="item input">customerNumber</code>.  This is perfectly normal in a relational model, but <a class="module-link" routerLink="/docs/model-sql" title="SQL backing for the travetto model module, with real-time modeling support for SQL schemas.">SQL Model Service</a> assumes unique identifiers (<a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a>) as 32-character hexadecimal values.  In addition to these unique values, the parent's identifier is required in all children values.  This allows for some fairly optimized querying, updates, and deletions on changes.  
+
+What this translates to, is that the framework here dictates the final schema, and doesn't support adapting to existing relational data stores. In greenfield projects, this is not an issue, but will most likely preclude its use in adapting to existing relational data sets.

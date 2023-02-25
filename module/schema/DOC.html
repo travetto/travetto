@@ -9,11 +9,15 @@
       <figcaption class="install">Install @travetto/schema
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/schema</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/schema
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/schema</code></pre>     
       </figure>
 
 This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is 
-leveraged in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/config" title="Configuration support">Configuration</a>, <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/app" title="Application registration/management and run support.">Application</a>, <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a>, <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/openapi" title="OpenAPI integration support for the travetto framework">OpenAPI Specification</a> and <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> modules.  The schema is the backbone of all data transfer, as it helps to
+leveraged in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/config" title="Configuration support">Configuration</a>, <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/app" title="Application registration/management and run support.">Application</a>, <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a>, <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/openapi" title="OpenAPI integration support for the Travetto framework">OpenAPI Specification</a> and <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> modules.  The schema is the backbone of all data transfer, as it helps to
 provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file.
 
 This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.

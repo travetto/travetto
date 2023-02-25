@@ -5,25 +5,23 @@
 
         </h1>
 
-      <figure class="install [object Object]">
-      <figcaption class="install [object Object]">Install @travetto/auth-rest-session
+      <figure class="install">
+      <figcaption class="install">Install @travetto/auth-rest-session
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/auth-rest-session</code></pre>     
-      </figure>or
-      <figure class="install [object Object]">
-      <figcaption class="install [object Object]">Install @travetto/auth-rest-session
-      
-      </figcaption>
-      <pre><code class="language-bash"><span class="token function">yarn</span> <span class="token function">add</span> @travetto/auth-rest-session</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/auth-rest-session
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/auth-rest-session</code></pre>     
       </figure>
 
 One of <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a>'s main responsibilities is being able to send and receive authentication/authorization information from the client.  This data can be encoded in many different forms, and this module provides the ability to encode into and decode from the user's <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session" title="Session provider for the travetto rest module.">REST Session</a> context. This module fulfills the contract required by <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a> of being able to encode and decode a user principal by storing the user principal in the session.
 
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/principal-encoder.ts#L12">SessionPrincipalEncoder</a> is exposed as a tool for allowing for decoding/encoding principals into the session. 
 
-      <figure class="code ">
-      <figcaption class="code ">SessionPrincipalEncoder
+      <figure class="code">
+      <figcaption class="code">SessionPrincipalEncoder
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-session/src/principal-encoder.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable<span class="token punctuation">,</span> Inject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>

@@ -6,6 +6,10 @@
 **Install: @travetto/model-s3**
 ```bash
 npm install @travetto/model-s3
+
+# or
+
+yarn add @travetto/model-s3
 ```
 
 This module provides an [s3](https://aws.amazon.com/documentation/s3/)-based implementation for the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.").  This source allows the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") module to read, write and stream against [s3](https://aws.amazon.com/documentation/s3/).

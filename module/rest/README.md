@@ -6,6 +6,10 @@
 **Install: @travetto/rest**
 ```bash
 npm install @travetto/rest
+
+# or
+
+yarn add @travetto/rest
 ```
 
 The module provides a declarative API for creating and describing an RESTful application.  Since the framework is declarative, decorators are used to configure almost everything. The module is framework agnostic (but resembles [express](https://expressjs.com) in the [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12) and [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115) objects). This module is built upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") structure, and all controller method parameters follow the same rules/abilities as any [@Field](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38) in a standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class.
@@ -256,6 +260,10 @@ By default, the framework provides a default [@Application](https://github.com/t
 **Install: Installing app support**
 ```bash
 npm install @travetto/app
+
+# or
+
+yarn add @travetto/app
 ```
 
 **Terminal: Standard application**
@@ -495,7 +503,7 @@ export class LoggingInterceptor implements RestInterceptor {
 }
 ```
 
-Currently [Asset Rest Support](https://github.com/travetto/travetto/tree/main/module/asset-rest#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the travetto framework").
+Currently [Asset Rest Support](https://github.com/travetto/travetto/tree/main/module/asset-rest#readme "Provides integration between the travetto asset and rest module.") is implemented in this fashion, as well as [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework").
 
 ### Configuring Interceptors
 All framework-provided interceptors, follow the same patterns for general configuration.  This falls into three areas:

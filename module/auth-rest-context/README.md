@@ -3,13 +3,12 @@
 # Rest Auth Context
 ## Rest authentication context integration support for the Travetto framework
 
-**Install npm: @travetto/auth-rest-context**
+**Install: @travetto/auth-rest-context**
 ```bash
 npm install @travetto/auth-rest-context
-```
-or
-**Install yarn: @travetto/auth-rest-context**
-```bash
+
+# or
+
 yarn add @travetto/auth-rest-context
 ```
 
@@ -17,7 +16,7 @@ This module exposes a service [AuthContextService](https://github.com/travetto/t
 
 This module intercepts the `auth` field on the http request object, and persists it using the [Async Context](https://github.com/travetto/travetto/tree/main/module/context#readme "Async-aware state management, maintaining context across asynchronous calls.") module, meaning this information is now able to be retrieved outside of the normal execution flow, while the http request is still processing.
 
-**Code : AuthContextService**
+**Code: AuthContextService**
 ```typescript
 import { Principal } from '@travetto/auth';
 import { AsyncContext } from '@travetto/context';

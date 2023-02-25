@@ -5,25 +5,23 @@
 
         </h1>
 
-      <figure class="install [object Object]">
-      <figcaption class="install [object Object]">Install @travetto/auth-rest-context
+      <figure class="install">
+      <figcaption class="install">Install @travetto/auth-rest-context
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/auth-rest-context</code></pre>     
-      </figure>or
-      <figure class="install [object Object]">
-      <figcaption class="install [object Object]">Install @travetto/auth-rest-context
-      
-      </figcaption>
-      <pre><code class="language-bash"><span class="token function">yarn</span> <span class="token function">add</span> @travetto/auth-rest-context</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/auth-rest-context
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/auth-rest-context</code></pre>     
       </figure>
 
 This module exposes a service <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-context/src/service.ts#L11">AuthContextService</a> that is <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">@Injectable</a>, and will provide access to the user's authentication context without access to the request object.  This is extremely useful for auditing, logging, and other enforcement patterns. 
 
 This module intercepts the <code class="item field">auth</code> field on the http request object, and persists it using the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/context" title="Async-aware state management, maintaining context across asynchronous calls.">Async Context</a> module, meaning this information is now able to be retrieved outside of the normal execution flow, while the http request is still processing.
 
-      <figure class="code ">
-      <figcaption class="code ">AuthContextService
+      <figure class="code">
+      <figcaption class="code">AuthContextService
       <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth-rest-context/src/service.ts">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Principal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/auth'</span><span class="token punctuation">;</span>

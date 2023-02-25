@@ -339,17 +339,11 @@ First we must start the application:
     'override.3 - memory://override'
   ],
   active: {
-    ApiHostConfig: {
-      servers: [ ServerObject_1137222912_50_163Ⲑsyn { url: 'http://localhost:3000' } ],
-      openapi: '3.0.1'
-    },
+    ApiHostConfig: { servers: { '0': { url: 'http://localhost:3000' } }, openapi: '3.0.1' },
     ApiInfoConfig: {
-      contact: ContactObject_1137222912_41_123Ⲑsyn {
-        name: 'Travetto Framework',
-        email: 'travetto.framework@gmail.com'
-      },
+      contact: { name: 'Travetto Framework', email: 'travetto.framework@gmail.com' },
       description: '',
-      license: LicenseObject_1137222912_46_102Ⲑsyn { name: 'ISC' },
+      license: { name: 'ISC' },
       title: '@travetto/todo-app',
       version: '0.0.0'
     },
@@ -358,20 +352,19 @@ First we must start the application:
     FileModelConfig: { folder: '/tmp/trv_file__travetto_todo_app', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
-      hosts: [ 'localhost' ],
+      hosts: { '0': 'localhost' },
       namespace: 'app',
       username: '',
-      password: '',
       port: 27017,
       connectionOptions: {},
       srvRecord: false,
       options: {}
     },
-    RestAcceptsConfig: { types: [] },
+    RestAcceptsConfig: { types: {} },
     RestAsyncContextConfig: {},
     RestAuthConfig: {},
     RestAuthLoginConfig: {},
-    RestAuthVerifyConfig: { roles: [] },
+    RestAuthVerifyConfig: { roles: {} },
     RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
     RestConfig: {
       serve: true,

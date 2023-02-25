@@ -9,18 +9,25 @@
       <figcaption class="install">Install @travetto/base
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/base</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/base
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/base</code></pre>     
       </figure>
 
 Base is the foundation of all <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 
 <ul> <li>Environment Support</li>
+ <li>Shared Global Environment State</li>
  <li>Console Management</li>
+ <li>Resource Access</li>
  <li>Standard Error Support</li>
- <li>Stream Support</li>
+ <li>Stream Utilities</li>
  <li>Object Utilities</li>
  <li>Data Utilities</li>
  <li>Common Utilities</li>
+ <li>Time Utilities</li>
  <li>Process Execution</li>
  <li>Shutdown Management</li></ul>
 
@@ -30,8 +37,123 @@ The functionality we support for testing and retrieving environment information:
  <li><code class="item method">isFalse(key: string): boolean;</code> - Test whether or not an environment flag is set and is false</li>
  <li><code class="item method">isSet(key:string): boolean;</code> - Test whether or not an environment value is set (excludes: <code class="item input">null</code>, <code class="item input">''</code>, and <code class="item input">undefined</code>)</li>
  <li><code class="item method">get(key: string, def?: string): string;</code> - Retrieve an environmental value with a potential default</li>
+ <li><code class="item method">getBoolean(key: string, isValue?: boolean)</code> - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value</li>
  <li><code class="item method">getInt(key: string, def?: number): number;</code> - Retrieve an environmental value as a number</li>
  <li><code class="item method">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li></ul>
+
+<h2 id="shared-global-environment-state">Shared Global Environment State</h2>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10">GlobalEnv</a> is a non-cached interface to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L4">Env</a> class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.
+
+      <figure class="code">
+      <figcaption class="code">GlobalEnv Shape
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> GlobalEnv <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/** Get environment name */</span>
+  <span class="token keyword">get</span> <span class="token function">envName</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Get debug value */</span>
+  <span class="token keyword">get</span> <span class="token function">debug</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Are we in production mode */</span>
+  <span class="token keyword">get</span> <span class="token function">prod</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Is the app in dynamic mode? */</span>
+  <span class="token keyword">get</span> <span class="token function">dynamic</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/** The list of the profiles */</span>
+  <span class="token keyword">get</span> <span class="token function">profiles</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Get list of resource paths */</span>
+  <span class="token keyword">get</span> <span class="token function">resourcePaths</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Is test */</span>
+  <span class="token keyword">get</span> <span class="token function">test</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Get node version */</span>
+  <span class="token keyword">get</span> <span class="token function">nodeVersion</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Export as plain object */</span>
+  <span class="token function">toJSON</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">unknown</span><span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span> <span class="token keyword">as</span> <span class="token keyword">const</span><span class="token punctuation">;</span></code></pre>     
+      </figure>
+
+The source for each field is:
+
+<ul> <li><code class="item field">envName</code> - This is derived from <code class="item field">process.env.TRV_ENV</code> with a fallback of <code class="item field">process.NODE_ENV</code></li>
+ <li><code class="item field">prod</code> - This is true if <code class="item field">envName</code> is a prod value</li>
+ <li><code class="item field">dynamic</code> - This is derived from <code class="item field">process.env.TRV_DYNAMIC</code>. This field reflects certain feature sets used throughout the framework.</li>
+ <li><code class="item field">profiles</code> - This is a list derived from <code class="item field">process.env.TRV_PROFILES</code>.  This can be checked at runtime to see if specific profiles are met.  This primarily used in the framework to determine if the test profile is activated.</li>
+ <li><code class="item field">resourcePaths</code> - This is a list derived from <code class="item field">process.env.TRV_RESOURCES</code>.  This points to a list of folders that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46">FileResourceProvider</a> will search against, by default.</li>
+ <li><code class="item field">test</code> - This is true if <code class="item field">profiles</code> includes a value of <code class="item input">test</code></li>
+ <li><code class="item field">nodeVersion</code> - This is derived from <code class="item field">process.version</code>, and is used primarily for logging purposes</li></ul>
+
+In addition to reading these values, there is a defined method for setting/updating these values:
+
+      <figure class="code">
+      <figcaption class="code">GlobalEnv Update
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L54">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">defineGlobalEnv</span><span class="token punctuation">(</span>cfg<span class="token operator">:</span> GlobalEnvConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> set <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> cfg<span class="token punctuation">;</span>
+  <span class="token keyword">const</span> resources <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">...</span>cfg<span class="token punctuation">.</span>resourcePaths <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token operator">...</span>GlobalEnv<span class="token punctuation">.</span>resourcePaths<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> test <span class="token operator">=</span> cfg<span class="token punctuation">.</span>test <span class="token operator">??</span> GlobalEnv<span class="token punctuation">.</span>test<span class="token punctuation">;</span>
+  <span class="token keyword">let</span> debug <span class="token operator">=</span> cfg<span class="token punctuation">.</span>debug <span class="token operator">??</span> GlobalEnv<span class="token punctuation">.</span>debug<span class="token punctuation">;</span>
+  <span class="token keyword">const</span> env <span class="token operator">=</span> cfg<span class="token punctuation">.</span>envName <span class="token operator">??</span> GlobalEnv<span class="token punctuation">.</span>envName<span class="token punctuation">;</span>
+  <span class="token keyword">const</span> profiles <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token operator">...</span>GlobalEnv<span class="token punctuation">.</span>profiles<span class="token punctuation">,</span> <span class="token operator">...</span><span class="token punctuation">(</span>cfg<span class="token punctuation">.</span>profiles <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> isProd <span class="token operator">=</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^prod</span><span class="token regex-delimiter">/</span><span class="token regex-flags">i</span></span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span>env<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>test<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    profiles<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token constant">TEST</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    debug <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
+    profiles<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>isProd <span class="token operator">?</span> <span class="token constant">PROD</span> <span class="token operator">:</span> <span class="token constant">DEV</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> <span class="token punctuation">[</span>k<span class="token punctuation">,</span> v<span class="token punctuation">]</span> <span class="token keyword">of</span> Object<span class="token punctuation">.</span><span class="token function">entries</span><span class="token punctuation">(</span>set<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token punctuation">(</span>v <span class="token operator">===</span> <span class="token keyword">undefined</span> <span class="token operator">||</span> v <span class="token operator">===</span> <span class="token keyword">null</span><span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token keyword">delete</span> process<span class="token punctuation">.</span>env<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">:</span> process<span class="token punctuation">.</span>env<span class="token punctuation">[</span>k<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>v<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_ENV</span> <span class="token operator">=</span> env<span class="token punctuation">;</span>
+  process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">NODE_ENV</span> <span class="token operator">=</span> isProd <span class="token operator">?</span> <span class="token string">'production'</span> <span class="token operator">:</span> <span class="token string">'development'</span><span class="token punctuation">;</span>
+  process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_DYNAMIC</span> <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>cfg<span class="token punctuation">.</span>dynamic <span class="token operator">??</span> GlobalEnv<span class="token punctuation">.</span>dynamic<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+  process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">DEBUG</span> <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>debug<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+  process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_PROFILES</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token operator">...</span>profiles<span class="token punctuation">]</span><span class="token punctuation">.</span><span class="token function">sort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">','</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_RESOURCES</span> <span class="token operator">=</span> resources<span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">','</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+As you can see this method exists to update/change the <code class="item field">process.env</code> values so that the usage of <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10">GlobalEnv</a> reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications). 
+
+<h2 id="resource-access">Resource Access</h2>
+
+The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.
+
+      <figure class="code">
+      <figcaption class="code">ResourceProvider contract
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ResourceProvider</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Describe the resource
+   * @param pth The path to resolve
+   */</span>
+  <span class="token function">describe</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>ResourceDescription<span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * Read a resource, mimicking fs.read
+   * @param pth The path to read
+   */</span>
+  <span class="token function">read</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> binary<span class="token operator">?</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">read</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> binary<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Buffer<span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">read</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> binary<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span> <span class="token operator">|</span> Buffer<span class="token operator">></span><span class="token punctuation">;</span>
+
+  <span class="token comment">/**
+   * Read a resource as a stream, mimicking fs.readStream
+   * @param pth The path to read
+   */</span>
+  <span class="token function">readStream</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> binary<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Readable<span class="token operator">></span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
+
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">ResourceProvider</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> with a category of 'notfound'.  This contract is fairly simple to fill out, and the predominant implementation is <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46">FileResourceProvider</a>.  This <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">ResourceProvider</a> will utilize the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10">GlobalEnv</a>'s <code class="item field">resourcePaths</code> information on where to attempt to find a requested resource. 
+
+<h3 id="scanning-for-resources">Scanning for Resources</h3>
+Beyond directly asking for a resource, there a times where it is helpful to know what resources are available at runtime. This is primarily used during development, and is a discouraged pattern for production as assumptions about the file-system may be incorrect (or change without warning).
+
+To that end, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource-query.ts#L10">FileQueryProvider</a> exists, and is a valid <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">ResourceProvider</a>.  It also provides the <code class="item method">query</code> method, to allow for scanning/finding resources that match certain patterns.  Additionally, this class also allows for watching all the resource folders.  This again is helpful during development/compilation, but should not be used in production.
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 
@@ -130,13 +252,14 @@ Additionally, the logging framework will merge <a target="_blank" class="externa
 $ <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span>express:*,@travetto/rest npx trv run rest</code></pre>     
       </figure>
 
-<h2 id="stream-support">Stream Support</h2>
+<h2 id="stream-utilities">Stream Utilities</h2>
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L15">StreamUtil</a> class provides basic stream utilities for use within the framework:
 
 <ul> <li><code class="item method">toBuffer(src: Readable | Buffer | string): Promise&lt;Buffer&gt;</code> for converting a stream/buffer/filepath to a Buffer.</li>
  <li><code class="item method">toReadable(src: Readable | Buffer | string):Promise&lt;Readable&gt;</code> for converting a stream/buffer/filepath to a Readable</li>
  <li><code class="item method">writeToFile(src: Readable, out: string):Promise&lt;void&gt;</code> will stream a readable into a file path, and wait for completion.</li>
- <li><code class="item method">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li></ul>
+ <li><code class="item method">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li>
+ <li><code class="item method">streamLines(file: string, ensureEmpty = false): AsyncIterable&lt;string&gt;</code> will watch a file for any line changes, and produce those changes as asynchronous iterable stream. Functionally, this is equivalent to using the Unix tail operation on a file</li></ul>
 
 <h2 id="object-utilities">Object Utilities</h2>
 Simple functions for providing a minimal facsimile to <a target="_blank" class="external-link" href="https://lodash.com">lodash</a>, but without all the weight. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L10">ObjectUtil</a> includes:
@@ -145,23 +268,88 @@ Simple functions for providing a minimal facsimile to <a target="_blank" class="
  <li><code class="item method">isPlainObject(obj)</code> determines if the obj is a simple object</li>
  <li><code class="item method">isFunction(o)</code> determines if <code class="item input">o</code> is a simple <code class="item input">Function</code></li>
  <li><code class="item method">isClass(o)</code> determines if <code class="item input">o</code> is a class constructor</li>
- <li><code class="item method">isSimple(a)</code> determines if <code class="item input">a</code> is a simple value</li></ul>
+ <li><code class="item method">isSimple(a)</code> determines if <code class="item input">a</code> is a simple value</li>
+ <li><code class="item method">isPromise(a)</code> determines if <code class="item input">a</code> is a promise</li></ul>
 
 <h2 id="data-utilities">Data Utilities</h2>
 Data utilities for binding values, and type conversion. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/data.ts#L9">DataUtil</a> includes:
 
 <ul> <li><code class="item method">deepAssign(a, b, mode ?)</code> which allows for deep assignment of <code class="item input">b</code> onto <code class="item input">a</code>, the <code class="item input">mode</code> determines how aggressive the assignment is, and how flexible it is.  <code class="item input">mode</code> can have any of the following values: <ul> <li><code class="item input">loose</code>, which is the default is the most lenient. It will not error out, and overwrites will always happen</li>
  <li><code class="item input">coerce</code>, will attempt to force values from <code class="item input">b</code> to fit the types of <code class="item input">a</code>, and if it can't it will error out</li>
- <li><code class="item input">strict</code>, will error out if the types do not match</li></ul></li></ul>
+ <li><code class="item input">strict</code>, will error out if the types do not match</li></ul></li>
+ <li><code class="item method">coerceType(input: unknown, type: Class&lt;unknown&gt;, strict = true)</code> which allows for converting an input type into a specified <code class="item input">type</code> instance, or throw an error if the types are incompatible.</li>
+ <li><code class="item method">shallowClone&lt;T = unknown&gt;(a: T): T</code> will shallowly clone a field</li>
+ <li><code class="item method">filterByKeys&lt;T&gt;(obj: T, exclude: (string | RegExp)[]): T</code> will filter a given object, and return a plain object (if applicable) with fields excluded using the values in the <code class="item input">exclude</code> input</li></ul>
 
 <h2 id="common-utilities">Common Utilities</h2>
 Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L14">Util</a> includes:
 
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
- <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li></ul>
+ <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
+ <li><code class="item method">naiveHash(text: string)</code> produces a fast, and simplistic hash.  No guarantees are made, but performs more than adequately for framework purposes.</li>
+ <li><code class="item method">makeTemplate&lt;T extends string&gt;(wrap: (key: T, val: TemplatePrim) =&gt; string)</code> produces a template function tied to the distinct string values that <code class="item input">key</code> supports.</li>
+ <li><code class="item method">resolvablePromise()</code> produces a <code class="item class">Promise</code> instance with the <code class="item method">resolve</code> and <code class="item method">reject</code> methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.</li></ul>
+
+      <figure class="code">
+      <figcaption class="code">Sample makeTemplate Usage
+      
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">const</span> tpl <span class="token operator">=</span> <span class="token function">makeTemplate</span><span class="token punctuation">(</span><span class="token punctuation">(</span>name<span class="token operator">:</span> <span class="token string">'age'</span><span class="token operator">|</span><span class="token string">'name'</span><span class="token punctuation">,</span> val<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">**</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>name<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>val<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">**</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+tpl<span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">{{'{'}}{{'{'}}age:20{{'}'}}{{'}'}} {{'{'}}{{'{'}}name: 'bob'{{'}'}}{{'}'}}</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+<span class="token comment">// produces</span>
+<span class="token string">'**age: 20** **name: bob**'</span></code></pre>     
+      </figure>
+
+<h2 id="time-utilities">Time Utilities</h2>
+
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L23">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.  
+
+      <figure class="code">
+      <figcaption class="code">Time Utilities
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L23">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TimeUtil</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Test to see if a string is valid for relative time
+   * @param val
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">isTimeSpan</span><span class="token punctuation">(</span>val<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> val <span class="token keyword">is</span> TimeSpan<span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Returns time units convert to ms
+   * @param amount Number of units to extend
+   * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">timeToMs</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">?</span><span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Returns a new date with `amount` units into the future
+   * @param amount Number of units to extend
+   * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">timeFromNow</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> Date<span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Wait for 'amount' units of time
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">wait</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Get environment variable as time
+   * @param key env key
+   * @param def backup value if not valid or found
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">getEnvTime</span><span class="token punctuation">(</span>key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> def<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Pretty print a delta between now and `time`, with auto-detection of largest unit
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">prettyDeltaSinceTime</span><span class="token punctuation">(</span>time<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Pretty print a delta, with auto-detection of largest unit
+   * @param delta The number of milliseconds in the delta
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">prettyDelta</span><span class="token punctuation">(</span>delta<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
 <h2 id="process-execution">Process Execution</h2>
-Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L95">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
+Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L102">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 
@@ -178,12 +366,50 @@ A simple example would be:
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-As you can see, the call returns not only the child process information, but the <code class="item input">Promise</code> to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module also supports:
+As you can see, the call returns not only the child process information, but the <code class="item input">Promise</code> to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module allows for the following execution options:
 
-<ul> <li><code class="item input">timeout</code> as the number of milliseconds the process can run before terminating and throwing an error</li>
- <li><code class="item input">quiet</code> which suppresses all stdout/stderr output</li>
- <li><code class="item input">stdin</code> as a string, buffer or stream to provide input to the program you are running;</li>
- <li><code class="item input">timeoutKill</code> allows for registering functionality to execute when a process is force killed by timeout</li></ul>
+      <figure class="code">
+      <figcaption class="code">Execution Options
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L58">Source</a></cite>
+      </figcaption>
+      <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ExecutionOptions</span> <span class="token keyword">extends</span> <span class="token class-name">SpawnOptions</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Should an error be caught and returned as a result. Determines whether an exit code > 0 throws
+   * an Error, or if it merely marks the process as completed, marking the result as invalid.
+   */</span>
+  catchAsResult<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Should the environment be isolated, or inherit from process.env
+   */</span>
+  isolatedEnv<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Built in timeout for any execution. The number of milliseconds the process can run before
+   * terminating and throwing an error
+   */</span>
+  timeout<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Determines how to treat the stdout/stderr data.
+   *  - 'text' will assume the output streams are textual, and will convert to unicode data.
+   *  - 'text-stream' makes the same assumptions as 'text', but will only fire events, and will
+   *        not persist any data.  This is really useful for long running programs.
+   *  - 'binary' treats all stdout/stderr data as raw buffers, and will not perform any transformations.
+   *  - 'raw' avoids touching stdout/stderr altogether, and leaves it up to the caller to decide.
+   */</span>
+  outputMode<span class="token operator">?</span><span class="token operator">:</span> <span class="token string">'raw'</span> <span class="token operator">|</span> <span class="token string">'binary'</span> <span class="token operator">|</span> <span class="token string">'text'</span> <span class="token operator">|</span> <span class="token string">'text-stream'</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * On stderr line.  Requires 'outputMode' to be either 'text' or 'text-stream'
+   */</span>
+  onStdErrorLine<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span>line<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * On stdout line.  Requires 'outputMode' to be either 'text' or 'text-stream'
+   */</span>
+  onStdOutLine<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span>line<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The stdin source for the execution
+   */</span>
+  stdin<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> Buffer <span class="token operator">|</span> Readable<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>     
+      </figure>
 
 <h2 id="shutdown-management">Shutdown Management</h2>
 

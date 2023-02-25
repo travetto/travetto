@@ -6,6 +6,10 @@
 **Install: @travetto/email**
 ```bash
 npm install @travetto/email
+
+# or
+
+yarn add @travetto/email
 ```
 
 A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the [NullTransport](https://github.com/travetto/travetto/tree/main/module/email/src/transport.ts#L15) which will just drop emails. The structure of the API is derived from  [nodemailer](https://nodemailer.com/about/), but is compatible with any library that can handle the [MessageOptions](https://github.com/travetto/travetto/tree/main/module/email/src/types.ts#L37) input.

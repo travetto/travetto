@@ -6,6 +6,10 @@
 **Install: @travetto/app**
 ```bash
 npm install @travetto/app
+
+# or
+
+yarn add @travetto/app
 ```
 
 The [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module provides a simplistic entrypoint to allow for the application to run, but that is not sufficient for more complex applications. This module provides a decorator, [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) who's job is to register entry points into the application, along with the associated  metadata. 

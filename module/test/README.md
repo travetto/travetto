@@ -6,6 +6,10 @@
 **Install: @travetto/test**
 ```bash
 npm install @travetto/test
+
+# or
+
+yarn add @travetto/test
 ```
 
 This module provides unit testing functionality that integrates with the framework. It is a declarative framework, using decorators to define tests and suites. The test produces results in the following formats:
@@ -218,7 +222,7 @@ class SimpleTest {
 
 ## Running Tests
 
-To run the tests you can either call the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for travetto framework") by invoking
+To run the tests you can either call the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") by invoking
 
 **Terminal: Test Help Output**
 ```bash

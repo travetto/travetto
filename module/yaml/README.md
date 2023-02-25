@@ -6,6 +6,10 @@
 **Install: @travetto/yaml**
 ```bash
 npm install @travetto/yaml
+
+# or
+
+yarn add @travetto/yaml
 ```
 
 In the desire to provide a minimal footprint, the framework provides a minimal [YAML](https://en.wikipedia.org/wiki/YAML) parser/serializer to handle standard configuration structure.

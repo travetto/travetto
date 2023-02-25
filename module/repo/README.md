@@ -41,7 +41,7 @@ npx trv repo:version prerelease rc
 After a release is cut, a new commit will be created that marks the next stable point in the commit history.
 
 **Code: Versioning Commit**
-```log
+```bash
 commit e9dc1a1de9625ab47398997fee6a95dd5a426900
 Author: Travetto Framework <travetto.framework@gmail.com>
 Date:   Thu Feb 23 17:51:37 2023 -0500

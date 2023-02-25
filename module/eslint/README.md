@@ -16,7 +16,7 @@ yarn add @travetto/eslint
 
 **Note**: The [ESLint](https://eslint.org/) has introduced [a new configuration format](https://eslint.org/blog/2022/08/new-config-system-part-3/) which allows for [Ecmascript Module](https://nodejs.org/api/esm.html) files.
 
-### CLI - Register
+## CLI - Register
 In a new project, the first thing that will need to be done, post installation, is to create the eslint configuration file.  
 
 **Terminal: Registering the Configuration**
@@ -41,7 +41,7 @@ module.exports = config;
 
 The output is tied to whether or not you are using the [CommonJS](https://nodejs.org/api/modules.html) or [Ecmascript Module](https://nodejs.org/api/esm.html) format.
 
-### CLI - Lint
+## CLI - Lint
 
 Once installed, using the linter is as simple as invoking it via the cli:
 
@@ -52,7 +52,7 @@ npx trv lint
 
 Or pointing your IDE to reference the registered configuration file.
 
-### Custom Rules
+## Custom Rules
 It can be seen in the sample configuration, that the configuration is looking for files with the pattern of `support/eslint/.*`
 
 These files will follow a given pattern of: 

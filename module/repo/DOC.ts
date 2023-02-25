@@ -23,7 +23,7 @@ Date:   Thu Feb 23 17:51:37 2023 -0500
 Date:   Thu Feb 23 17:51:37 2023 -0500
 
     Publish @travetto/app,@travetto/asset,@travetto/asset-rest,@travetto/auth,@travetto/auth-model,@travetto/auth-rest,@travetto/auth-rest-context,@travetto/auth-rest-jwt,@travetto/auth-rest-passport,@travetto/auth-rest-session,...
-`, false, 'log')}
+`, false, 'bash')}
 
 ${d.SubSection('CLI - Publish')}
 The publish functionality is relatively naive, but consistent.  The code will look at all modules in the mono-repo and check the listed version against what is available in the npm registry.  If the local version is newer, it is a candidate for publishing.  

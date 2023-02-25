@@ -6,6 +6,10 @@
 **Install: @travetto/model**
 ```bash
 npm install @travetto/model
+
+# or
+
+yarn add @travetto/model
 ```
 
 This module provides a set of contracts/interfaces to data model persistence, modification and retrieval.  This module builds heavily upon the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding."), which is used for data model validation.
@@ -49,7 +53,7 @@ export interface ModelBasicSupport<C = unknown> {
 ```
 
 ### [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/service/crud.ts#L11)
-The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the travetto framework"), is an example of a module that only needs create, read and delete, and so any implementation of [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") that honors this contract, can be used with the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the travetto framework") model extension.
+The crud contract, builds upon the basic contract, and is built around the idea of simple data retrieval and storage, to create a foundation for other services that need only basic support.  The model extension in [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework"), is an example of a module that only needs create, read and delete, and so any implementation of [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") that honors this contract, can be used with the [Authentication](https://github.com/travetto/travetto/tree/main/module/auth#readme "Authentication scaffolding for the Travetto framework") model extension.
 
 **Code: Crud Contract**
 ```typescript
@@ -293,34 +297,35 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     sorted: new Map<string, Map<string, Map<string, number>>>(),
     unsorted: new Map<string, Map<string, Set<string>>>()
   };
-  get client(): Map<string, StoreType> { return this.#store; }
-  async postConstruct(): Promise<void> ;
+  get client(): Map<string, StoreType>;
+  constructor(public readonly config: MemoryModelConfig) { }
+  async postConstruct(): Promise<void>;
   // CRUD Support
-  uuid(): string ;
-  async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> ;
-  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> ;
-  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> ;
-  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> ;
-  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T> ;
-  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> ;
-  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> ;
+  uuid(): string;
+  async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T>;
+  async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
+  async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T>;
+  async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
+  async updatePartial<T extends ModelType>(cls: Class<T>, item: Partial<T> & { id: string }, view?: string): Promise<T>;
+  async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void>;
+  async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T>;
   // Stream Support
-  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> ;
-  async getStream(location: string): Promise<Readable> ;
-  async describeStream(location: string): Promise<StreamMeta> ;
-  async deleteStream(location: string): Promise<void> ;
+  async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void>;
+  async getStream(location: string): Promise<Readable>;
+  async describeStream(location: string): Promise<StreamMeta>;
+  async deleteStream(location: string): Promise<void>;
   // Expiry Support
-  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> ;
+  async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number>;
   // Storage Support
-  async createStorage(): Promise<void> ;
-  async deleteStorage(): Promise<void> ;
-  async createModel<T extends ModelType>(cls: Class<T>): Promise<void> ;
-  async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void> ;
+  async createStorage(): Promise<void>;
+  async deleteStorage(): Promise<void>;
+  async createModel<T extends ModelType>(cls: Class<T>): Promise<void>;
+  async truncateModel<T extends ModelType>(cls: Class<T>): Promise<void>;
   // Indexed
-  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> ;
-  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> ;
-  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T> ;
-  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T> ;
+  async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T>;
+  async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void>;
+  upsertByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: OptionalId<T>): Promise<T>;
+  async * listByIndex<T extends ModelType>(cls: Class<T>, idx: string, body?: DeepPartial<T>): AsyncIterable<T>;
 }
 ```
 

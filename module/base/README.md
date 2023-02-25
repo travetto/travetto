@@ -114,7 +114,7 @@ As you can see this method exists to update/change the `process.env` values so t
 
 ## Resource Access
 
-The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Manifest support")'s data for what resources were found at manifesting time.
+The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
 **Code: ResourceProvider contract**
 ```typescript

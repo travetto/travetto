@@ -6,6 +6,10 @@
 **Install: @travetto/asset**
 ```bash
 npm install @travetto/asset
+
+# or
+
+yarn add @travetto/asset
 ```
 
 The asset module requires an [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) to provide functionality for reading and writing streams. You can use any existing providers to serve as your [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3), or you can roll your own.
@@ -13,6 +17,10 @@ The asset module requires an [Streaming](https://github.com/travetto/travetto/tr
 **Install: provider**
 ```bash
 npm install @travetto/model-{provider}
+
+# or
+
+yarn add @travetto/model-{provider}
 ```
 
 Currently, the following are packages that provide [Streaming](https://github.com/travetto/travetto/tree/main/module/model/src/service/stream.ts#L3) support:

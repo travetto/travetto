@@ -9,7 +9,11 @@
       <figcaption class="install">Install @travetto/rest-aws-lambda
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest-aws-lambda</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/rest-aws-lambda
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/rest-aws-lambda</code></pre>     
       </figure>
 
 The module provides support basic support with AWS lambdas. When using one of the specific rest modules (e.g. <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest-express" title="Express provider for the travetto rest module.">Express REST Source</a>), you can install the appropriate lambda-related dependencies installed (e.g. <a target="_blank" class="external-link" href="https://github.com/awslabs/aws-serverless-express/blob/master/README.md">aws-serverless-express</a>) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers. 

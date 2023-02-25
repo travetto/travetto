@@ -9,7 +9,11 @@
       <figcaption class="install">Install @travetto/scaffold
       
       </figcaption>
-      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/scaffold</code></pre>     
+      <pre><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @travetto/scaffold
+
+<span class="token comment"># or</span>
+
+<span class="token function">yarn</span> <span class="token function">add</span> @travetto/scaffold</code></pre>     
       </figure>
 
 A simple tool for scaffolding a reference project.  To get started, you need to make sure:
@@ -44,12 +48,12 @@ The code will establish some basic routes, specifically, <code class="item input
 <h3 id="additional-rest-features">Additional Rest Features</h3>
 In addition to the core functionality, the <code class="item input">rest</code> feature has some useful sub-features.  Specifically:
 
-<a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/openapi" title="OpenAPI integration support for the travetto framework">OpenAPI Specification</a> support for the restful api.  This will automatically expose a <code class="item path">openapi.yml</code> endpoint, and provide the necessary plumbing to support client generation.
+<a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/openapi" title="OpenAPI integration support for the Travetto framework">OpenAPI Specification</a> support for the restful api.  This will automatically expose a <code class="item path">openapi.yml</code> endpoint, and provide the necessary plumbing to support client generation.
 
 <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/log" title="Logging framework that integrates at the console.log level.">Logging</a> support for better formatting, <a target="_blank" class="external-link" href="https://www.npmjs.com/package/debug">debug</a> like support, and colorized output.  This is generally useful for server logs, especially during development.
 
 <h2 id="authentication">Authentication</h2>
-Authentication is also supported on the Restful endpoints by selecting <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the travetto framework">Rest Auth</a> during setup.  This will support basic authentication running out of local memory, with user <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session" title="Session provider for the travetto rest module.">REST Session</a>s.
+Authentication is also supported on the Restful endpoints by selecting <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/auth-rest" title="Rest authentication integration support for the Travetto framework">Rest Auth</a> during setup.  This will support basic authentication running out of local memory, with user <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest-session" title="Session provider for the travetto rest module.">REST Session</a>s.
 
 <h2 id="testing">Testing</h2>
 <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/test" title="Declarative test framework">Testing</a> can also be configured out of the box to provide simple test cases for the data model.
