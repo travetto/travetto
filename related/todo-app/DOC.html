@@ -35,7 +35,9 @@ $ <span class="token function">git</span> init <span class="token builtin class-
 
 $ <span class="token function">npm</span> init <span class="token parameter variable">-f</span>
 $ <span class="token function">npm</span> i @travetto/<span class="token punctuation">{{'{'}}</span>log,rest-express,model-mongo,cli<span class="token punctuation">{{'}'}}</span>
-$ <span class="token function">npm</span> i <span class="token parameter variable">-d</span> @travetto/<span class="token punctuation">{{'{'}}</span>eslint,compiler,test<span class="token punctuation">{{'}'}}</span></code></pre>     
+$ <span class="token function">npm</span> i <span class="token parameter variable">-D</span> @travetto/<span class="token punctuation">{{'{'}}</span>eslint,compiler,test<span class="token punctuation">{{'}'}}</span> node-fetch@^2.6.9 @types/node-fetch
+
+$ npx trv lint:register</code></pre>     
       </figure>
 
 <h2 id="establishing-the-model">Establishing The Model</h2>
@@ -408,7 +410,9 @@ First we must start the application:
 <span class="token number">2029</span>-03-14T04:00:02.450Z info  <span class="token punctuation">[</span>@travetto/rest:src/application/rest.ts:194<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
-next, let's execute <a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-fetch">fetch</a> requests to interact with the new api:
+next, let's execute <a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-fetch">fetch</a> requests to interact with the new api.
+
+Create <code class="item path">support/create-todo.ts</code> with the following contents:
 
       <figure class="code">
       <figcaption class="code">Creating Todo by fetch
@@ -433,7 +437,7 @@ next, let's execute <a target="_blank" class="external-link" href="https://www.n
       <figcaption class="terminal">Create Output
       
       </figcaption>
-      <pre><code class="language-bash">$ trv main doc/create-todo.ts
+      <pre><code class="language-bash">$ trv main support/create-todo.ts
 
 <span class="token punctuation">{{'{'}}</span>
   text: <span class="token string">'New Todo'</span>,
@@ -441,6 +445,8 @@ next, let's execute <a target="_blank" class="external-link" href="https://www.n
   id: <span class="token string">'22e793aed76ee063d13feec2e5e95b45'</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
+
+Now create <code class="item path">support/list-todo.ts</code> with the following contents:
 
       <figure class="code">
       <figcaption class="code">Listing Todos by fetch
@@ -458,7 +464,7 @@ next, let's execute <a target="_blank" class="external-link" href="https://www.n
       <figcaption class="terminal">Listing Output
       
       </figcaption>
-      <pre><code class="language-bash">$ trv main doc/list-todo.ts
+      <pre><code class="language-bash">$ trv main support/list-todo.ts
 
 <span class="token punctuation">[</span>
   <span class="token punctuation">{{'{'}}</span>

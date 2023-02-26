@@ -57,7 +57,9 @@ $ git init .
 
 $ npm init -f
 $ npm i @travetto/{log,rest-express,model-mongo,cli}
-$ npm i -d @travetto/{eslint,compiler,test}
+$ npm i -D @travetto/{eslint,compiler,test} node-fetch@^2.6.9 @types/node-fetch
+
+$ npx trv lint:register
 `)}
 
 ${d.Section('Establishing The Model')}
@@ -114,15 +116,28 @@ First we must start the application:
 
 ${d.Terminal('Application Startup', startupOutput)}
 
-next, let's execute ${lib.Fetch} requests to interact with the new api:
+next, let's execute ${lib.Fetch} requests to interact with the new api.
+
+Create ${d.Path('support/create-todo.ts')} with the following contents:
 
 ${d.Code('Creating Todo by fetch', 'doc/create-todo.ts')}
 
-${d.Execute('Create Output', 'trv', ['main', 'doc/create-todo.ts'], { env: { TRV_LOG_PLAIN: '1' } })}
+${d.Execute(
+    'Create Output', 'trv', ['main', 'doc/create-todo.ts'],
+    {
+      env: { TRV_LOG_PLAIN: '1' },
+      formatCommand: (name, args) => `${name} ${args.map(v => v.replaceAll('doc/create', 'support/create')).join(' ')}`
+    }
+  )}
+
+Now create ${d.Path('support/list-todo.ts')} with the following contents:
 
 ${d.Code('Listing Todos by fetch', 'doc/list-todo.ts')}
 
-${d.Execute('Listing Output', 'trv', ['main', 'doc/list-todo.ts'], { env: { TRV_LOG_PLAIN: '1' } })}
+${d.Execute('Listing Output', 'trv', ['main', 'doc/list-todo.ts'], {
+    env: { TRV_LOG_PLAIN: '1' },
+    formatCommand: (name, args) => `${name} ${args.map(v => v.replaceAll('doc/list', 'support/list')).join(' ')}`
+  })}
 `;
 
   // Wrap it up

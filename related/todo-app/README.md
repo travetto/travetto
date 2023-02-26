@@ -33,7 +33,9 @@ $ git init .
 
 $ npm init -f
 $ npm i @travetto/{log,rest-express,model-mongo,cli}
-$ npm i -d @travetto/{eslint,compiler,test}
+$ npm i -D @travetto/{eslint,compiler,test} node-fetch@^2.6.9 @types/node-fetch
+
+$ npx trv lint:register
 ```
 
 ## Establishing The Model
@@ -396,7 +398,9 @@ First we must start the application:
 2029-03-14T04:00:02.450Z info  [@travetto/rest:src/application/rest.ts:194] Listening { port: 3000 }
 ```
 
-next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api:
+next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api.
+
+Create `support/create-todo.ts` with the following contents:
 
 **Code: Creating Todo by fetch**
 ```typescript
@@ -417,7 +421,7 @@ export async function main() {
 
 **Terminal: Create Output**
 ```bash
-$ trv main doc/create-todo.ts
+$ trv main support/create-todo.ts
 
 {
   text: 'New Todo',
@@ -425,6 +429,8 @@ $ trv main doc/create-todo.ts
   id: '22e793aed76ee063d13feec2e5e95b45'
 }
 ```
+
+Now create `support/list-todo.ts` with the following contents:
 
 **Code: Listing Todos by fetch**
 ```typescript
@@ -438,7 +444,7 @@ export async function main() {
 
 **Terminal: Listing Output**
 ```bash
-$ trv main doc/list-todo.ts
+$ trv main support/list-todo.ts
 
 [
   {
