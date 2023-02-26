@@ -50,8 +50,8 @@ export class RepoVersionCommand extends CliCommand<VersionOptions> {
 
     await PackageManager.version(RootIndex.manifest, modules, level, prefix);
 
-    await CliModuleUtil.synchronizeModuleVersions();
+    const versions = await CliModuleUtil.synchronizeModuleVersions();
 
-    console.log!(await CliScmUtil.createCommit(`Publish ${modules.map(x => `${x.name}#${x.version}`).join(',')}`));
+    console.log!(await CliScmUtil.createCommit(`Publish ${modules.map(x => `${x.name}#${versions[x.name]?.replace('^', '') ?? x.version}`).join(',')}`));
   }
 }

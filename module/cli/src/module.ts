@@ -112,8 +112,10 @@ export class CliModuleUtil {
   /**
    * Synchronize all workspace modules to have the correct versions from the current packages
    */
-  static async synchronizeModuleVersions(): Promise<void> {
-    await PackageUtil.syncVersions((await this.findModules('all')).map(x => x.sourcePath));
+  static async synchronizeModuleVersions(): Promise<Record<string, string>> {
+    const versions = {};
+    await PackageUtil.syncVersions((await this.findModules('all')).map(x => x.sourcePath), versions);
+    return versions;
   }
 
   /**

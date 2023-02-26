@@ -81,7 +81,7 @@ export class PackageManager {
       return this.dryRunPackaging(ctx, opts);
     }
 
-    const versionTag = mod.version.replace(/^.*-(rc|alpha|beta|next)[.]\d+/, (a, b) => b) || 'latest';
+    const versionTag = mod.version.match(/^.*-(rc|alpha|beta|next)[.]\d+/)?.[1] ?? 'latest';
     let args: string[];
     switch (ctx.packageManager) {
       case 'npm':
