@@ -19,8 +19,9 @@ export class DocCommand extends CliCommand<Options> {
   name = 'doc';
 
   getOptions(): Options {
+    const input = RootIndex.mainModule.files['doc']?.find(x => x.sourceFile.endsWith('DOC.ts'));
     return {
-      input: this.option({ desc: 'Input File', def: 'DOC.ts' }),
+      input: this.option({ desc: 'Input File', def: input?.relativeFile ?? 'DOC.ts' }),
       outputs: this.listOption({ desc: 'Outputs', def: [] }),
       watch: this.boolOption({ desc: 'Watch' })
     };
