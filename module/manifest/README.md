@@ -152,7 +152,7 @@ This method allows for watching one or more folders, and registering a callback 
     "@travetto/manifest": {
       "main": true,
       "name": "@travetto/manifest",
-      "version": "3.0.0-rc.17",
+      "version": "x.x.x",
       "local": true,
       "internal": false,
       "sourceFolder": "module/manifest",

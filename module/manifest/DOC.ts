@@ -1,7 +1,7 @@
 import { readFileSync } from 'fs';
 
 import { d, lib, mod } from '@travetto/doc';
-import { ManifestDeltaUtil, ManifestRoot, path, RootIndex } from '@travetto/manifest';
+import { ManifestRoot, path, RootIndex } from '@travetto/manifest';
 import { COMMON_DATE } from '@travetto/doc/src/util/run';
 
 const RootIndexRef = d.Ref('RootIndex', 'src/root-index.ts');
@@ -16,6 +16,7 @@ const manifest = () => {
   obj.workspacePath = '<generated>';
   obj.generated = COMMON_DATE;
   for (const md of Object.values(modules)) {
+    md.version = 'x.x.x';
     for (const files of Object.values(md.files)) {
       for (const file of files) {
         file[2] = COMMON_DATE;
