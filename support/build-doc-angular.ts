@@ -45,6 +45,8 @@ export async function main(target?: string): Promise<void> {
         progressPosition: 'bottom',
         filter: mod => mods.has(mod)
       });
+    await ExecUtil.spawn('trv', ['doc'], { env: { TRV_MANIFEST: '' }, cwd: RootIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
+    mods.add(RootIndex.mainModule);
   } else {
     const opts = { env: { TRV_MANIFEST: '' }, cwd: [...mods][0].sourcePath, stdio: 'inherit' } as const;
     await ExecUtil.spawn('trv', ['doc'], opts).result;

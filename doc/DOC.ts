@@ -26,11 +26,11 @@ export const wrap = {
 <app-module-chart></app-module-chart>`,
   md: (content: string): string => `
 <h1>   
-  <sub><img src="./docs/images/logo.png" height="40"></sub>
+  <sub><img src="./doc/images/logo.png" height="40"></sub>
   The Travetto Framework
 </h1>
 
 ${content}
 
-![Module Layout](./docs/images/modules.png)`
+![Module Layout](./doc/images/modules.png)`
 };

@@ -2,7 +2,7 @@
 <!-- Please modify https://github.com/travetto/travetto/tree/main/doc/DOC.ts and execute "npx trv doc" to rebuild -->
 
 <h1>   
-  <sub><img src="./docs/images/logo.png" height="40"></sub>
+  <sub><img src="./doc/images/logo.png" height="40"></sub>
   The Travetto Framework
 </h1>
 
@@ -20,4 +20,4 @@ The framework relies up five key principles:
 ## Modules
 Every module within the framework follows the overarching philosophy.  For the most part each module is as isolated as possible.  The modules are stacked vertically to generally indicate dependencies.  The only exception is for common libraries, which are unrelated.
 
-![Module Layout](./docs/images/modules.png)
+![Module Layout](./doc/images/modules.png)
