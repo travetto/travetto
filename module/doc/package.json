@@ -1,6 +1,6 @@
 {
   "name": "@travetto/doc",
-  "version": "3.0.0-rc.21",
+  "version": "3.0.0-rc.22",
   "description": "Documentation support for the Travetto framework",
   "keywords": [
     "docs",
@@ -24,12 +24,12 @@
     "directory": "module/doc"
   },
   "dependencies": {
-    "@travetto/base": "^3.0.0-rc.21",
+    "@travetto/base": "^3.0.0-rc.22",
     "@types/prismjs": "^1.26.0",
     "prismjs": "^1.29.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.0.0-rc.24"
+    "@travetto/cli": "^3.0.0-rc.25"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

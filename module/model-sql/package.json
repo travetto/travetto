@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-sql",
-  "version": "3.0.0-rc.26",
+  "version": "3.0.0-rc.27",
   "description": "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.",
   "keywords": [
     "sql",
@@ -27,14 +27,14 @@
     "directory": "module/model-sql"
   },
   "dependencies": {
-    "@travetto/config": "^3.0.0-rc.25",
-    "@travetto/context": "^3.0.0-rc.24",
-    "@travetto/model": "^3.0.0-rc.25",
-    "@travetto/model-query": "^3.0.0-rc.26"
+    "@travetto/config": "^3.0.0-rc.26",
+    "@travetto/context": "^3.0.0-rc.25",
+    "@travetto/model": "^3.0.0-rc.26",
+    "@travetto/model-query": "^3.0.0-rc.27"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.0.0-rc.21",
-    "@travetto/test": "^3.0.0-rc.27"
+    "@travetto/command": "^3.0.0-rc.22",
+    "@travetto/test": "^3.0.0-rc.28"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {
