@@ -16,6 +16,10 @@ const COMPILER_FILES = [...['launcher', 'transpile', 'lock', 'log', 'lock-pinger
  * @return {Promise<import('@travetto/compiler/support/launcher').launch>}
  */
 const $getLauncher = async (ctx) => {
+  const tsconfigFile = path.resolve(ctx.workspacePath, 'tsconfig.json');
+  if (!(await fs.stat(tsconfigFile).catch(() => undefined))) {
+    await fs.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
+  }
   const compPkg = createRequire(path.resolve(ctx.workspacePath, 'node_modules')).resolve('@travetto/compiler/package.json');
   const files = [];
 

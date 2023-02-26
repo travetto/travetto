@@ -23,7 +23,7 @@ Beyond the [Typescript](https://typescriptlang.org) compiler functionality, the 
 
 ## CLI
 
-The cli, [trv](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trv.js#L56) is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations.
+The cli, [trv](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trv.js#L60) is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations.
 
 The CLI supports the following operations:
 
@@ -67,7 +67,7 @@ The compiler will move through the following phases on a given compilation execu
 
 ### Bootstrapping
 
-Given that the framework is distributed as [Typescript](https://typescriptlang.org) only files, there is a bootstrapping problem that needs to be mitigated.  The [trv](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trv.js#L56) entrypoint, along with a small context utility in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching") are the only [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) files needed to run the project.  The [trv](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trv.js#L56) entry point will compile `@travetto/compiler/support/*` files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.  
+Given that the framework is distributed as [Typescript](https://typescriptlang.org) only files, there is a bootstrapping problem that needs to be mitigated.  The [trv](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trv.js#L60) entrypoint, along with a small context utility in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching") are the only [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) files needed to run the project.  The [trv](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trv.js#L60) entry point will compile `@travetto/compiler/support/*` files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.  
 
 ### Lock Management
 
