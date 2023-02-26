@@ -1,6 +1,6 @@
 {
   "name": "@travetto/config",
-  "version": "3.0.0-rc.24",
+  "version": "3.0.0-rc.25",
   "description": "Configuration support",
   "keywords": [
     "yaml",
@@ -26,9 +26,9 @@
     "directory": "module/config"
   },
   "dependencies": {
-    "@travetto/di": "^3.0.0-rc.23",
-    "@travetto/schema": "^3.0.0-rc.24",
-    "@travetto/yaml": "^3.0.0-rc.20"
+    "@travetto/di": "^3.0.0-rc.24",
+    "@travetto/schema": "^3.0.0-rc.25",
+    "@travetto/yaml": "^3.0.0-rc.21"
   },
   "travetto": {
     "displayName": "Configuration"
