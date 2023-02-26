@@ -11,9 +11,16 @@ ${d.Install('Setting up the necessary config', `
 $ git config --global.username <Username> #Set your git username
 `)}
 
-Once installed you can invoke the scaffolding by running
+Once the necessary configuration is setup, you can invoke the scaffolding by running
 
-${d.Terminal('Running Generator', '$ npx @travetto/scaffold')}
+${d.Terminal('Running Generator', `
+$ npx @travetto/scaffold
+
+# or
+
+$ npx @travetto/scaffold@<version-or-tag>
+
+`)}
 
 The generator will ask about enabling the following features:
 

@@ -3,15 +3,6 @@
 # App Scaffold
 ## App Scaffold for the Travetto framework
 
-**Install: @travetto/scaffold**
-```bash
-npm install @travetto/scaffold
-
-# or
-
-yarn add @travetto/scaffold
-```
-
 A simple tool for scaffolding a reference project.  To get started, you need to make sure:
 
 **Install: Setting up the necessary config**
@@ -19,11 +10,15 @@ A simple tool for scaffolding a reference project.  To get started, you need to 
 $ git config --global.username <Username> #Set your git username
 ```
 
-Once installed you can invoke the scaffolding by running
+Once the necessary configuration is setup, you can invoke the scaffolding by running
 
 **Terminal: Running Generator**
 ```bash
 $ npx @travetto/scaffold
+
+# or
+
+$ npx @travetto/scaffold@<version-or-tag>
 ```
 
 The generator will ask about enabling the following features:

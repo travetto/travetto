@@ -59,7 +59,7 @@ ${context.cleanText(recurse(c.content))}
         return out.join('\n');
       }
       case 'header':
-        return `# ${recurse(c.title)}\n${c.description ? `## ${recurse(c.description)}\n` : ''}${'install' in c ? recurse(n.Install(c.package, c.package)) : ''}\n`;
+        return `# ${recurse(c.title)}\n${c.description ? `## ${recurse(c.description)}\n` : ''}${('install' in c && c.install) ? recurse(n.Install(c.package, c.package)) : ''}\n`;
       case 'text':
         return c.content.replace(/&nbsp;/g, ' ');
     }

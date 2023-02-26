@@ -73,7 +73,7 @@ export const Html: Renderer = {
       case 'header':
         return `<h1>${recurse(c.title)}
           ${c.description ? `<small>${recurse(c.description)}</small>\n` : ''}
-        </h1>\n${'install' in c ? recurse(n.Install(`Install ${c.package}`, c.package)) : ''}\n`;
+        </h1>\n${('install' in c && c.install) ? recurse(n.Install(`Install ${c.package}`, c.package)) : ''}\n`;
       case 'text':
         return c.content;
     }
