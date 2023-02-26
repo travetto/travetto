@@ -1,6 +1,6 @@
 {
   "name": "@travetto/scaffold",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "App Scaffold for the Travetto framework",
   "keywords": [
     "generator",
