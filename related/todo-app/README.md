@@ -18,7 +18,7 @@ The following tutorial wil walk you through setting up a [Travetto](https://trav
 Install
    
    *  [Node](https://nodejs.org/en/download/current/) v19.x+ (recommended, but v18.x+ supported)
-   *  [Mongodb](https://docs.mongodb.com/manual/administration/install-community/) 3.6+ (required)
+   *  [Mongodb](https://docs.mongodb.com/manual/administration/install-community/) 3.6+ (required, but 4.4+ recommended)
    *  [VSCode](https://code.visualstudio.com/download) (recommended)
    *  [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) (recommended)
 
@@ -32,7 +32,8 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,test,rest-express,model-mongo,compiler,cli}
+$ npm i @travetto/{log,rest-express,model-mongo,cli}
+$ npm i -d @travetto/{eslint,compiler,test}
 ```
 
 ## Establishing The Model

@@ -18,7 +18,7 @@ The following tutorial wil walk you through setting up a <a target="_blank" clas
 
 Install
 <ul> <li><a target="_blank" class="external-link" href="https://nodejs.org/en/download/current/">Node</a> v19.x+ (recommended, but v18.x+ supported)</li>
- <li><a target="_blank" class="external-link" href="https://docs.mongodb.com/manual/administration/install-community/">Mongodb</a> 3.6+ (required)</li>
+ <li><a target="_blank" class="external-link" href="https://docs.mongodb.com/manual/administration/install-community/">Mongodb</a> 3.6+ (required, but 4.4+ recommended)</li>
  <li><a target="_blank" class="external-link" href="https://code.visualstudio.com/download">VSCode</a> (recommended)</li>
  <li><a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a> (recommended)</li></ul>
 
@@ -34,7 +34,8 @@ $ <span class="token builtin class-name">cd</span> todo-project
 $ <span class="token function">git</span> init <span class="token builtin class-name">.</span>
 
 $ <span class="token function">npm</span> init <span class="token parameter variable">-f</span>
-$ <span class="token function">npm</span> i @travetto/<span class="token punctuation">{{'{'}}</span>log,test,rest-express,model-mongo,compiler,cli<span class="token punctuation">{{'}'}}</span></code></pre>     
+$ <span class="token function">npm</span> i @travetto/<span class="token punctuation">{{'{'}}</span>log,rest-express,model-mongo,cli<span class="token punctuation">{{'}'}}</span>
+$ <span class="token function">npm</span> i <span class="token parameter variable">-d</span> @travetto/<span class="token punctuation">{{'{'}}</span>eslint,compiler,test<span class="token punctuation">{{'}'}}</span></code></pre>     
       </figure>
 
 <h2 id="establishing-the-model">Establishing The Model</h2>
