@@ -44,10 +44,8 @@ export class CompilerWatcher {
     for (const ctx of [...contexts, this.#state.manifest]) {
       const newManifest = await ManifestUtil.buildManifest(ctx);
       for (const file of files) {
-        if (
-          file.folderKey && file.moduleFile && file.type &&
-          file.mod in newManifest.modules && file.folderKey in newManifest.modules[file.mod].files
-        ) {
+        if (file.folderKey && file.moduleFile && file.type && file.mod in newManifest.modules) {
+          newManifest.modules[file.mod].files[file.folderKey] ??= [];
           newManifest.modules[file.mod].files[file.folderKey]!.push([file.moduleFile, file.type, Date.now()]);
         }
       }
@@ -74,7 +72,9 @@ export class CompilerWatcher {
 
     return async ({ file: sourceFile, action }: WatchEvent, folder: string): Promise<void> => {
       const mod = mods[folder];
-      const moduleFile = sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile;
+      const moduleFile = mod.sourceFolder ?
+        (sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile) :
+        sourceFile.replace(`${this.#state.manifest.workspacePath}/`, '');
       switch (action) {
         case 'create': {
           const fileType = ManifestModuleUtil.getFileType(moduleFile);
@@ -82,8 +82,8 @@ export class CompilerWatcher {
             mod: mod.name,
             modFolder: folder,
             moduleFile,
-            folderKey: ManifestModuleUtil.getFolderKey(sourceFile),
-            type: ManifestModuleUtil.getFileType(sourceFile)
+            folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
+            type: ManifestModuleUtil.getFileType(moduleFile)
           });
           if (CompilerUtil.validFile(fileType)) {
             await this.#rebuildManifestsIfNeeded();

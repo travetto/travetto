@@ -42,7 +42,7 @@ ${d.Section('Prerequisites')}
 Install
 ${d.List(
     d`${lib.NodeDownload} v19.x+ (recommended, but v18.x+ supported)`,
-    d`${lib.MongoDownload} 3.6+ (required)`,
+    d`${lib.MongoDownload} 3.6+ (required, but 4.4+ recommended)`,
     d`${lib.VSCodeDownload} (recommended)`,
     d`${lib.TravettoPlugin} (recommended)`
   )}
@@ -56,7 +56,8 @@ $ cd todo-project
 $ git init .
 
 $ npm init -f
-$ npm i @travetto/{log,test,rest-express,model-mongo,compiler,cli}
+$ npm i @travetto/{log,rest-express,model-mongo,cli}
+$ npm i -d @travetto/{eslint,compiler,test}
 `)}
 
 ${d.Section('Establishing The Model')}
