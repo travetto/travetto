@@ -297,23 +297,4 @@ export class ManifestIndex {
     }
     return out;
   }
-
-  /**
-   * Get local folders that represent the user's controlled input
-   */
-  getLocalInputFolderMapping(): [folder: string, moduleSourceRoot: string][] {
-    return this.getLocalModules().flatMap(x =>
-      ((!this.manifest.monoRepo || x.sourcePath !== this.manifest.workspacePath) ?
-        [x.sourcePath] : [...Object.keys(x.files)].filter(y => !y.startsWith('$')).map(y => path.resolve(this.#manifest.workspacePath, x.sourcePath, y))
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      ).map(f => [f, path.resolve(this.#manifest.workspacePath, x.sourceFolder)] as [string, string])
-    );
-  }
-
-  /**
-   * Get local output folders
-   */
-  getLocalOutputFolders(): string[] {
-    return this.getLocalModules().map(x => x.outputPath);
-  }
 }

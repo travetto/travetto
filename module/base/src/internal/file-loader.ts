@@ -77,9 +77,9 @@ class $DynamicFileLoader {
       }
     }, 0);
 
-    // Watch all output
+    // Watch local output
     await watchFolders(
-      RootIndex.getLocalOutputFolders(),
+      RootIndex.getLocalModules().map(x => x.outputPath),
       (ev, folder) => this.dispatch(ev, folder),
       { filter: ev => ev.file.endsWith('.js'), createMissing: true }
     );

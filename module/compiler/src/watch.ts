@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 
 import {
   ManifestContext, ManifestModuleUtil, ManifestUtil, WatchEvent, ManifestModuleFolderType,
-  ManifestModuleFileType, path, ManifestModule, watchFolders, WatchEventListener
+  ManifestModuleFileType, path, ManifestModule, watchFolders, WatchEventListener, watchFolderImmediate, WatchConfig
 } from '@travetto/manifest';
 import { getManifestContext } from '@travetto/manifest/bin/context';
 
@@ -125,18 +125,35 @@ export class CompilerWatcher {
   /**
    * Watch files based on root index
    */
-  watchFiles(emit: CompileEmitter): Promise<() => Promise<void>> {
-    return watchFolders(
-      this.#state.manifestIndex.getLocalInputFolderMapping(),
-      this.#getWatcher({
-        create: emit,
-        update: emit,
-        delete: (outputFile) => fs.rm(outputFile, { force: true })
-      }),
-      {
-        filter: ev => ev.file.endsWith('.ts') || ev.file.endsWith('.js') || ev.file.endsWith('package.json'),
-        ignore: ['node_modules']
+  async watchFiles(emit: CompileEmitter): Promise<() => Promise<void>> {
+    let watchRoot: (() => Promise<void>) | undefined = undefined;
+
+    const idx = this.#state.manifestIndex;
+    const modules = [...idx.getModuleList('all')].map(x => idx.getModule(x)!);
+    const remove = (outputFile: string): Promise<void> => fs.rm(outputFile, { force: true });
+    const handler = this.#getWatcher({ create: emit, update: emit, delete: remove });
+    const options: WatchConfig = {
+      filter: ev => ev.file.endsWith('.ts') || ev.file.endsWith('.js') || ev.file.endsWith('package.json'),
+      ignore: ['node_modules']
+    };
+
+    const moduleFolders = modules
+      .filter(x => !idx.manifest.monoRepo || x.sourcePath !== idx.manifest.workspacePath)
+      .map(x => [x.sourcePath, x.sourcePath] as const);
+
+    // Add monorepo folders
+    if (idx.manifest.monoRepo) {
+      const mono = modules.find(x => x.sourcePath === idx.manifest.workspacePath)!;
+      for (const folder of Object.keys(mono.files)) {
+        if (!folder.startsWith('$')) {
+          moduleFolders.push([path.resolve(mono.sourcePath, folder), mono.sourcePath]);
+        }
       }
-    );
+      watchRoot = await watchFolderImmediate(mono.sourcePath, handler, options);
+    }
+
+    const watchAll = await watchFolders(moduleFolders, handler, options);
+
+    return () => Promise.all([watchRoot?.(), watchAll()]).then(() => { });
   }
 }

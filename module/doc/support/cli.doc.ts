@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { PackageUtil, path, RootIndex, watchFolders } from '@travetto/manifest';
+import { PackageUtil, path, RootIndex, watchFolderImmediate } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
@@ -19,9 +19,8 @@ export class DocCommand extends CliCommand<Options> {
   name = 'doc';
 
   getOptions(): Options {
-    const input = RootIndex.mainModule.files['doc']?.find(x => x.sourceFile.endsWith('DOC.ts'));
     return {
-      input: this.option({ desc: 'Input File', def: input?.relativeFile ?? 'DOC.ts' }),
+      input: this.option({ desc: 'Input File', def: 'DOC.ts' }),
       outputs: this.listOption({ desc: 'Outputs', def: [] }),
       watch: this.boolOption({ desc: 'Watch' })
     };
@@ -55,7 +54,7 @@ export class DocCommand extends CliCommand<Options> {
 
     if (this.cmd.watch) {
       const args = process.argv.slice(2).filter(x => !x.startsWith('-w') && !x.startsWith('--w'));
-      await watchFolders([path.dirname(docFile)],
+      await watchFolderImmediate(path.dirname(docFile),
         () => ExecUtil.spawn('npx', ['trv', ...args], {
           cwd: RootIndex.mainModule.sourcePath,
           env: { TRV_QUIET: '1' },

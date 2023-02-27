@@ -1,3 +1,4 @@
+import { watch, Stats } from 'fs';
 import fs from 'fs/promises';
 import { path } from './path';
 
@@ -11,14 +12,14 @@ async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
 }
 
 export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
-type EventFilter = (ev: WatchEvent) => boolean;
+export type WatchEventFilter = (ev: WatchEvent) => boolean;
 
 export type WatchEventListener = (ev: WatchEvent, folder: string) => void;
 export type WatchConfig = {
   /**
    * Predicate for filtering events
    */
-  filter?: EventFilter;
+  filter?: WatchEventFilter;
   /**
    * List of top level folders to ignore
    */
@@ -34,13 +35,67 @@ export type WatchConfig = {
 };
 
 /**
+ * Watch files for a given folder
+ * @param folder
+ * @param onEvent
+ * @param options
+ */
+export async function watchFolderImmediate(
+  folder: string,
+  onEvent: WatchEventListener,
+  options: WatchConfig = {}
+): Promise<() => Promise<void>> {
+  const watchPath = path.resolve(folder);
+  const watcher = watch(watchPath, { persistent: true, encoding: 'utf8' });
+  const lastStats: Record<string, Stats | undefined> = {};
+  const invalidFilter = (el: string): boolean =>
+    (el === '.' || el === '..' || (!options.includeHidden && el.startsWith('.')) || !!options.ignore?.includes(el));
+
+  for (const el of await fs.readdir(watchPath)) {
+    if (invalidFilter(el)) {
+      continue;
+    }
+    const file = path.resolve(watchPath, el);
+    lastStats[file] = await fs.stat(file);
+  }
+  watcher.on('change', async (type: string, file: string): Promise<void> => {
+    if (invalidFilter(file)) {
+      return;
+    }
+
+    file = path.resolve(watchPath, file);
+
+    const stat = await fs.stat(file).catch(() => undefined);
+    const prevStat = lastStats[file];
+    lastStats[file] = stat;
+
+    if (prevStat?.mtimeMs === stat?.mtimeMs) {
+      return;
+    }
+    let ev: WatchEvent;
+    if (prevStat && !stat) {
+      ev = { action: 'delete', file };
+    } else if (!prevStat && stat) {
+      ev = { action: 'create', file };
+    } else {
+      ev = { action: 'update', file };
+    }
+    if (!options.filter || options.filter(ev)) {
+      onEvent(ev, folder);
+    }
+  });
+  process.on('exit', () => watcher.close());
+  return async () => watcher.close();
+}
+
+/**
  * Leverages @parcel/watcher to watch a series of folders
  * @param folders
  * @param onEvent
- * @private
+ * @param options
  */
 export async function watchFolders(
-  folders: string[] | [folder: string, targetFolder: string][],
+  folders: string[] | [folder: string, targetFolder: string][] | (readonly [folder: string, targetFolder: string])[],
   onEvent: WatchEventListener,
   config: WatchConfig = {}
 ): Promise<() => Promise<void>> {
