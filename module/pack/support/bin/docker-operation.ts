@@ -6,6 +6,7 @@ import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell';
 import { DockerPackConfig, DockerPackFactoryModule } from './types';
+import { PackOperation } from './operation';
 
 export class DockerPackOperation {
 
@@ -18,7 +19,7 @@ export class DockerPackOperation {
    */
   static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
     const dockerFile = path.resolve(cfg.workspace, 'Dockerfile');
-    const title = cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: cfg.dockerFactory }}`;
+
     const factory = RootIndex.getFromImport(cfg.dockerFactory);
     if (!factory) {
       throw new Error(`Unable to resolve docker factory at ${cfg.dockerFactory}`);
@@ -26,11 +27,11 @@ export class DockerPackOperation {
     const mod: DockerPackFactoryModule = await import(factory.import);
     const content = (await mod.factory(cfg)).trim();
 
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Generating Docker File' }} ${{ path: dockerFile }} ${{ param: cfg.dockerFactory }}`);
+
     if (cfg.ejectFile) {
-      yield ActiveShellCommand.comment(title);
       yield* ActiveShellCommand.createFile(dockerFile, content.split(/\n/));
     } else {
-      yield [title];
       await fs.writeFile(dockerFile, content, 'utf8');
     }
   }
@@ -39,15 +40,13 @@ export class DockerPackOperation {
    * Pull Docker Base Image
    */
   static async* pullDockerBaseImage(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    const title = cliTpl`${{ title: 'Pulling Docker Base Image' }} ${{ param: cfg.dockerImage }}`;
-
     const command = ['docker', 'pull', cfg.dockerImage];
 
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Pulling Docker Base Image' }} ${{ param: cfg.dockerImage }}`);
+
     if (cfg.ejectFile) {
-      yield ActiveShellCommand.comment(title);
       yield command;
     } else {
-      yield [title];
       await ExecUtil.spawn(command[0], command.slice(1), {}).result;
     }
   }
@@ -56,16 +55,15 @@ export class DockerPackOperation {
    * Building Docker Container
    */
   static async* buildDockerContainer(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    const title = cliTpl`${{ title: 'Building Docker Container' }} ${{ param: cfg.dockerTag?.join(',') }}`;
     const cmd = ['docker', 'build', ...DockerPackOperation.getDockerTags(cfg).flatMap(x => ['-t', x]), '.'];
 
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Building Docker Container' }} ${{ param: cfg.dockerTag?.join(',') }}`);
+
     if (cfg.ejectFile) {
-      yield ActiveShellCommand.comment(title);
       yield ActiveShellCommand.chdir(cfg.workspace);
       yield cmd;
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
-      yield [title];
       await ExecUtil.spawn(cmd[0], cmd.slice(1), { cwd: cfg.workspace, stdio: [0, 'pipe', 2] }).result;
     }
   }
@@ -78,16 +76,15 @@ export class DockerPackOperation {
       return;
     }
     const tags = DockerPackOperation.getDockerTags(cfg);
-    const title = cliTpl`${{ title: 'Push Container to registry' }} ${{ param: cfg.dockerRegistry }}`;
     const cmd = ['docker', 'image', 'push'];
 
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Push Container to registry' }} ${{ param: cfg.dockerRegistry }}`);
+
     if (cfg.ejectFile) {
-      yield ActiveShellCommand.comment(title);
       for (const tag of tags) {
         yield [...cmd, tag];
       }
     } else {
-      yield [title];
       for (const tag of tags) {
         await ExecUtil.spawn(cmd[0], [...cmd.slice(1), tag], { stdio: [0, 'pipe', 2] }).result;
       }

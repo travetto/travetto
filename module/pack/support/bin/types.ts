@@ -63,6 +63,7 @@ export type ShellCommandImpl = {
   export(key: string, value: string): string[];
   chdir(dest: string): string[];
   comment(message: string): string[];
+  echo(text: string): string[];
   zip(output: string): string[];
 };
 
