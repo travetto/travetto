@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-fastify-lambda",
-  "version": "3.0.1-rc.0",
+  "version": "3.0.1-rc.1",
   "description": "Fastify AWS Lambda provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -26,9 +26,9 @@
   },
   "dependencies": {
     "@fastify/aws-lambda": "^3.2.0",
-    "@travetto/rest": "^3.0.1-rc.0",
-    "@travetto/rest-aws-lambda": "^3.0.1-rc.0",
-    "@travetto/rest-fastify": "^3.0.1-rc.0"
+    "@travetto/rest": "^3.0.1-rc.1",
+    "@travetto/rest-aws-lambda": "^3.0.1-rc.1",
+    "@travetto/rest-fastify": "^3.0.1-rc.1"
   },
   "travetto": {
     "displayName": "Fastify REST AWS Lambda Source"
