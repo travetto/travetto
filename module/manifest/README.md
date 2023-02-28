@@ -96,14 +96,14 @@ The module also leverages [fetch](https://www.npmjs.com/package/@parcel/watcher)
 **Code: Watch Folder Signature**
 ```typescript
 export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
-type EventFilter = (ev: WatchEvent) => boolean;
+export type WatchEventFilter = (ev: WatchEvent) => boolean;
 
 export type WatchEventListener = (ev: WatchEvent, folder: string) => void;
 export type WatchConfig = {
   /**
    * Predicate for filtering events
    */
-  filter?: EventFilter;
+  filter?: WatchEventFilter;
   /**
    * List of top level folders to ignore
    */
@@ -119,15 +119,15 @@ export type WatchConfig = {
 };
 
 /**
- * Leverages @parcel/watcher to watch a series of folders
- * @param folders
+ * Watch files for a given folder
+ * @param folder
  * @param onEvent
- * @private
+ * @param options
  */
-export async function watchFolders(
-  folders: string[] | [folder: string, targetFolder: string][],
+export async function watchFolderImmediate(
+  folder: string,
   onEvent: WatchEventListener,
-  config: WatchConfig = {}
+  options: WatchConfig = {}
 ): Promise<() => Promise<void>> {
 ```
 

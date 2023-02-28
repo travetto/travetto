@@ -322,7 +322,7 @@ First we must start the application:
     author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
     license: 'ISC',
     version: '0.0.0',
-    framework: '3.0.0'
+    framework: '3.0.1'
   },
   env: {
     envName: 'dev',

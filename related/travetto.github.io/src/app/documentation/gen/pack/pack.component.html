@@ -34,16 +34,15 @@ There are three primary cli commands for packing your code:
 Usage:  pack <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>           Workspace <span class="token keyword">for</span> building
-  -c, --no-clean                        Disables: Clean workspace
-  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>                 Output Location
-  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>       Entry point <span class="token punctuation">(</span>default: <span class="token string">"node_modules/@travetto/cli/support/cli.js"</span><span class="token punctuation">)</span>
-  -ec, --entry-command <span class="token operator">&lt;</span>entry-command<span class="token operator">></span>  Entry <span class="token builtin class-name">command</span>
-  -m, --no-minify                       Disables: Minify output
-  -sm, <span class="token parameter variable">--sourcemap</span>                      Bundle <span class="token builtin class-name">source</span> maps
-  -is, --include-sources                Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
-  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>         Eject commands to <span class="token function">file</span>
-  -h, <span class="token parameter variable">--help</span>                            display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>      Workspace <span class="token keyword">for</span> building
+  -c, --no-clean                   Disables: Clean workspace
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>            Output Location
+  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>  Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
+  -m, --no-minify                  Disables: Minify output
+  -sm, <span class="token parameter variable">--sourcemap</span>                 Bundle <span class="token builtin class-name">source</span> maps
+  -is, --include-sources           Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
+  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>    Eject commands to <span class="token function">file</span>
+  -h, <span class="token parameter variable">--help</span>                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the <code class="item input">eject-file</code> flag that will allow for a script to be produced (base on the host operating system).
@@ -100,16 +99,15 @@ This command is nearly identical to the standard <code class="item input">pack</
 Usage:  pack:zip <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>           Workspace <span class="token keyword">for</span> building
-  -c, --no-clean                        Disables: Clean workspace
-  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>                 Output Location <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack.zip"</span><span class="token punctuation">)</span>
-  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>       Entry point <span class="token punctuation">(</span>default: <span class="token string">"node_modules/@travetto/cli/support/cli.js"</span><span class="token punctuation">)</span>
-  -ec, --entry-command <span class="token operator">&lt;</span>entry-command<span class="token operator">></span>  Entry <span class="token builtin class-name">command</span>
-  -m, --no-minify                       Disables: Minify output
-  -sm, <span class="token parameter variable">--sourcemap</span>                      Bundle <span class="token builtin class-name">source</span> maps
-  -is, --include-sources                Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
-  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>         Eject commands to <span class="token function">file</span>
-  -h, <span class="token parameter variable">--help</span>                            display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>      Workspace <span class="token keyword">for</span> building
+  -c, --no-clean                   Disables: Clean workspace
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>            Output Location <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack.zip"</span><span class="token punctuation">)</span>
+  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>  Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
+  -m, --no-minify                  Disables: Minify output
+  -sm, <span class="token parameter variable">--sourcemap</span>                 Bundle <span class="token builtin class-name">source</span> maps
+  -is, --include-sources           Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
+  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>    Eject commands to <span class="token function">file</span>
+  -h, <span class="token parameter variable">--help</span>                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
 <h2 id="cli-pack-docker">CLI - pack:docker</h2>
@@ -128,8 +126,7 @@ Options:
   -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>               Workspace <span class="token keyword">for</span> building
   -c, --no-clean                            Disables: Clean workspace
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>                     Output Location
-  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>           Entry point <span class="token punctuation">(</span>default: <span class="token string">"node_modules/@travetto/cli/support/cli.js"</span><span class="token punctuation">)</span>
-  -ec, --entry-command <span class="token operator">&lt;</span>entry-command<span class="token operator">></span>      Entry <span class="token builtin class-name">command</span>
+  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>           Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
   -m, --no-minify                           Disables: Minify output
   -sm, <span class="token parameter variable">--sourcemap</span>                          Bundle <span class="token builtin class-name">source</span> maps
   -is, --include-sources                    Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
@@ -170,34 +167,46 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token comment"># Cleaning Output $DIST</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Cleaning Output <span class="token variable">$DIST</span>
+"</span>
 <span class="token function">rm</span> <span class="token parameter variable">-rf</span> <span class="token variable">$DIST</span>
 <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> <span class="token variable">$DIST</span>
 
 <span class="token comment"># Writing .env.js</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Writing .env.js
+"</span>
 <span class="token builtin class-name">echo</span> <span class="token string">"process.env.TRV_MANIFEST = 'node_modules/<span class="token variable">$MOD</span>';"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/.env.js
 <span class="token builtin class-name">echo</span> <span class="token string">"process.env.TRV_CLI_IPC = '';"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env.js
 
 <span class="token comment"># Writing package.json</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Writing package.json
+"</span>
 <span class="token builtin class-name">echo</span> <span class="token string">"{{'{'}}<span class="token entity" title="\&quot;">\"</span>type<span class="token entity" title="\&quot;">\"</span>:<span class="token entity" title="\&quot;">\"</span>commonjs<span class="token entity" title="\&quot;">\"</span>{{'}'}}"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/package.json
 
 <span class="token comment"># Writing entry scripts cli.sh args=(run rest)</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Writing entry scripts cli.sh args=(run rest)
+"</span>
 <span class="token builtin class-name">echo</span> <span class="token string">"#!/bin/sh"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/cli.sh
 <span class="token builtin class-name">echo</span> <span class="token string">"cd \<span class="token variable"><span class="token variable">$(</span><span class="token function">dirname</span> <span class="token punctuation">\</span>"<span class="token punctuation">\</span>$0<span class="token punctuation">\</span>"<span class="token variable">)</span></span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/cli.sh
-<span class="token builtin class-name">echo</span> <span class="token string">"node cli run rest \<span class="token variable">$@</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/cli.sh
+<span class="token builtin class-name">echo</span> <span class="token string">"node cli.js run rest \<span class="token variable">$@</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/cli.sh
 <span class="token function">chmod</span> <span class="token number">755</span> <span class="token variable">$DIST</span>/cli.sh
 
 <span class="token comment"># Writing entry scripts cli.cmd args=(run rest)</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Writing entry scripts cli.cmd args=(run rest)
+"</span>
 <span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/cli.cmd
 <span class="token builtin class-name">echo</span> <span class="token string">"cd %~p0"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/cli.cmd
-<span class="token builtin class-name">echo</span> <span class="token string">"node cli run rest %*"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/cli.cmd
+<span class="token builtin class-name">echo</span> <span class="token string">"node cli.js run rest %*"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/cli.cmd
 <span class="token function">chmod</span> <span class="token number">755</span> <span class="token variable">$DIST</span>/cli.cmd
 
 <span class="token comment"># Copying over resources</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Copying over resources
+"</span>
 <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> <span class="token variable">$DIST</span>/node_modules/<span class="token variable">$MOD</span>
 <span class="token function">cp</span> <span class="token variable">$TRV_OUT</span>/node_modules/<span class="token variable">$MOD</span>/package.json <span class="token variable">$DIST</span>/node_modules/<span class="token variable">$MOD</span>/package.json
 <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> <span class="token variable">$DIST</span>/node_modules/@travetto/manifest
@@ -206,17 +215,23 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token comment"># Generating App Cache node_modules/$MOD/trv-app-cache.json</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Generating App Cache node_modules/<span class="token variable">$MOD</span>/trv-app-cache.json
+"</span>
 <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> <span class="token variable">$DIST</span>/node_modules/<span class="token variable">$MOD</span>
 <span class="token assign-left variable">DEBUG</span><span class="token operator">=</span><span class="token number">0</span> <span class="token assign-left variable">TRV_MODULE</span><span class="token operator">=</span><span class="token variable">$MOD</span> npx trv main @travetto/app/support/bin/list <span class="token operator">></span> <span class="token variable">$DIST</span>/node_modules/<span class="token variable">$MOD</span>/trv-app-cache.json
 
 <span class="token comment"># Writing Manifest node_modules/$MOD</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Writing Manifest node_modules/<span class="token variable">$MOD</span>
+"</span>
 <span class="token assign-left variable">TRV_MODULE</span><span class="token operator">=</span><span class="token variable">$MOD</span> npx trv manifest <span class="token variable">$DIST</span>/node_modules/<span class="token variable">$MOD</span> prod
 
-<span class="token comment"># Bundling Output minify=true sourcemap= entryPoint=node_modules/@travetto/cli/support/cli.js</span>
+<span class="token comment"># Bundling Output minify=true sourcemap= entryPoint=@travetto/cli/support/entry.cli</span>
 
-<span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENTRY</span><span class="token operator">=</span>node_modules/@travetto/cli/support/cli.js
-<span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENTRY_NAME</span><span class="token operator">=</span>cli
+<span class="token builtin class-name">echo</span> <span class="token string">"Bundling Output minify=true sourcemap= entryPoint=@travetto/cli/support/entry.cli
+"</span>
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENTRY</span><span class="token operator">=</span>node_modules/@travetto/cli/support/entry.cli.js
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENTRY_COMMAND</span><span class="token operator">=</span>cli
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_COMPRESS</span><span class="token operator">=</span>true
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_OUTPUT</span><span class="token operator">=</span><span class="token variable">$DIST</span>
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_FORMAT</span><span class="token operator">=</span>commonjs
@@ -227,6 +242,8 @@ npx rollup <span class="token parameter variable">-c</span> node_modules/@travet
 
 <span class="token comment"># Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Generating Docker File <span class="token variable">$DIST</span>/Dockerfile @travetto/pack/support/pack.dockerfile
+"</span>
 <span class="token builtin class-name">echo</span> <span class="token string">"FROM node:18-alpine3.16"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"WORKDIR /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"COPY . ."</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
@@ -235,10 +252,14 @@ npx rollup <span class="token parameter variable">-c</span> node_modules/@travet
 
 <span class="token comment"># Pulling Docker Base Image node:18-alpine3.16</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Pulling Docker Base Image node:18-alpine3.16
+"</span>
 <span class="token function">docker</span> pull node:18-alpine3.16
 
 <span class="token comment"># Building Docker Container latest</span>
 
+<span class="token builtin class-name">echo</span> <span class="token string">"Building Docker Container latest
+"</span>
 <span class="token builtin class-name">cd</span> <span class="token variable">$DIST</span>
 <span class="token function">docker</span> build <span class="token parameter variable">-t</span> travetto_todo-app:latest <span class="token builtin class-name">.</span>
 <span class="token builtin class-name">cd</span> <span class="token variable">$ROOT</span></code></pre>     

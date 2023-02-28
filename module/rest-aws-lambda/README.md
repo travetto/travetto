@@ -14,6 +14,22 @@ yarn add @travetto/rest-aws-lambda
 
 The module provides support basic support with AWS lambdas. When using one of the specific rest modules (e.g. [Express REST Source](https://github.com/travetto/travetto/tree/main/module/rest-express#readme "Express provider for the travetto rest module.")), you can install the appropriate lambda-related dependencies installed (e.g. [aws-serverless-express](https://github.com/awslabs/aws-serverless-express/blob/master/README.md)) to enable integration with AWS.  Nothing in the code needs to be modified to support the AWS integration, but there are some limitations of using AWS Lambdas as HTTP handlers. 
 
-## Packaging Lambdas
+## CLI - Packaging Lambdas
 
-TODO: Pending Pack
+**Terminal: Invoking a Package Build**
+```bash
+$ trv pack:lambda -h
+
+Usage:  pack:lambda [options]
+
+Options:
+  -w, --workspace <workspace>      Workspace for building
+  -c, --no-clean                   Disables: Clean workspace
+  -o, --output <output>            Output Location (default: "travetto_rest-aws-lambda.zip")
+  -e, --entry-point <entry-point>  Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler")
+  -m, --no-minify                  Disables: Minify output
+  -sm, --sourcemap                 Bundle source maps
+  -is, --include-sources           Include source with source maps
+  -x, --eject-file <eject-file>    Eject commands to file
+  -h, --help                       display help for command
+```

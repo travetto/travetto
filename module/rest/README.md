@@ -322,7 +322,7 @@ Manifest {
     author: undefined,
     license: undefined,
     version: '0.0.0',
-    framework: '3.0.0'
+    framework: '3.0.1'
   },
   env: {
     envName: 'dev',

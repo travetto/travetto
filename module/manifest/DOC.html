@@ -103,17 +103,17 @@ The module also leverages <a target="_blank" class="external-link" href="https:/
 
       <figure class="code">
       <figcaption class="code">Watch Folder Signature
-      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/watch.ts#L13">Source</a></cite>
+      <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/watch.ts#L14">Source</a></cite>
       </figcaption>
       <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">WatchEvent</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> action<span class="token operator">:</span> <span class="token string">'create'</span> <span class="token operator">|</span> <span class="token string">'update'</span> <span class="token operator">|</span> <span class="token string">'delete'</span><span class="token punctuation">,</span> file<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-<span class="token keyword">type</span> <span class="token class-name">EventFilter</span> <span class="token operator">=</span> <span class="token punctuation">(</span>ev<span class="token operator">:</span> WatchEvent<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+<span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">WatchEventFilter</span> <span class="token operator">=</span> <span class="token punctuation">(</span>ev<span class="token operator">:</span> WatchEvent<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">WatchEventListener</span> <span class="token operator">=</span> <span class="token punctuation">(</span>ev<span class="token operator">:</span> WatchEvent<span class="token punctuation">,</span> folder<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">void</span><span class="token punctuation">;</span>
 <span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">WatchConfig</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Predicate for filtering events
    */</span>
-  filter<span class="token operator">?</span><span class="token operator">:</span> EventFilter<span class="token punctuation">;</span>
+  filter<span class="token operator">?</span><span class="token operator">:</span> WatchEventFilter<span class="token punctuation">;</span>
   <span class="token comment">/**
    * List of top level folders to ignore
    */</span>
@@ -129,15 +129,15 @@ The module also leverages <a target="_blank" class="external-link" href="https:/
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
- * Leverages @parcel/watcher to watch a series of folders
- * @param folders
+ * Watch files for a given folder
+ * @param folder
  * @param onEvent
- * @private
+ * @param options
  */</span>
-<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">watchFolders</span><span class="token punctuation">(</span>
-  folders<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token punctuation">[</span>folder<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> targetFolder<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">watchFolderImmediate</span><span class="token punctuation">(</span>
+  folder<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span>
   onEvent<span class="token operator">:</span> WatchEventListener<span class="token punctuation">,</span>
-  config<span class="token operator">:</span> WatchConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
+  options<span class="token operator">:</span> WatchConfig <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">>></span> <span class="token punctuation">{{'{'}}</span></code></pre>     
       </figure>
 
