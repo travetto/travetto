@@ -115,16 +115,16 @@ export class AppRunUtil {
    * @param title
    * @param choices
    */
-  static async chooseApp(title: string, choices: AppChoice[], resolveParameters?: true): Promise<ResolvedAppChoice | undefined>;
-  static async chooseApp(title: string, choices: AppChoice[], resolveParameters: false): Promise<AppChoice | undefined>;
-  static async chooseApp(title: string, choices: AppChoice[], resolveParameters?: boolean): Promise<AppChoice | ResolvedAppChoice | undefined> {
+  static async chooseApp(title: string, choices: AppChoice[]): Promise<ResolvedAppChoice | undefined>;
+  static async chooseApp(title: string, choices: AppChoice[]): Promise<AppChoice | undefined>;
+  static async chooseApp(title: string, choices: AppChoice[]): Promise<AppChoice | ResolvedAppChoice | undefined> {
     const items = choices
       .map(x => this.#buildQuickPickItem(x))
       .filter((x): x is PickItem => !!x);
 
     const res = await ParameterSelector.getObjectQuickPickList(title, items);
     let choice: AppChoice | undefined = res?.target;
-    if (choice && resolveParameters && !choice.resolved) {
+    if (choice && !choice.resolved) {
       const inputs = await this.#selectParameters(choice);
       if (inputs) {
         const key = `${choice.targetId}#${choice.name}:${inputs.join(',')}`;
