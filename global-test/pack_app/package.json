@@ -6,7 +6,7 @@
     "@travetto/cli": "^3.0.2-rc.1"
   },
   "devDependencies": {
-    "@travetto/pack": "^3.0.2-rc.1",
+    "@travetto/pack": "^3.0.2-rc.2",
     "@travetto/compiler": "^3.0.2-rc.1"
   },
   "travetto": {},
