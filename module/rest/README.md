@@ -322,7 +322,7 @@ Manifest {
     author: undefined,
     license: undefined,
     version: '0.0.0',
-    framework: '3.0.1'
+    framework: '3.0.x'
   },
   env: {
     envName: 'dev',
@@ -332,7 +332,7 @@ Manifest {
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.14.2'
+    nodeVersion: 'v18.x.x'
   }
 }
 ```

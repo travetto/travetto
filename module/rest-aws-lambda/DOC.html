@@ -29,13 +29,15 @@ The module provides support basic support with AWS lambdas. When using one of th
 Usage:  pack:lambda <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>      Workspace <span class="token keyword">for</span> building
-  -c, --no-clean                   Disables: Clean workspace
-  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>            Output Location <span class="token punctuation">(</span>default: <span class="token string">"travetto_rest-aws-lambda.zip"</span><span class="token punctuation">)</span>
-  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>  Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/rest-aws-lambda/support/entry.handler"</span><span class="token punctuation">)</span>
-  -m, --no-minify                  Disables: Minify output
-  -sm, <span class="token parameter variable">--sourcemap</span>                 Bundle <span class="token builtin class-name">source</span> maps
-  -is, --include-sources           Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
-  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>    Eject commands to <span class="token function">file</span>
-  -h, <span class="token parameter variable">--help</span>                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>         Workspace <span class="token keyword">for</span> building
+  -c, --no-clean                      Disables: Clean workspace
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>               Output location <span class="token punctuation">(</span>default: <span class="token string">"travetto_rest-aws-lambda.zip"</span><span class="token punctuation">)</span>
+  -es, --main-scripts <span class="token operator">&lt;</span>main-scripts<span class="token operator">></span>  Create entry scripts
+  -f, --main-name <span class="token operator">&lt;</span>main-name<span class="token operator">></span>         Main name <span class="token keyword">for</span> build artifact <span class="token punctuation">(</span>default: <span class="token string">"index"</span><span class="token punctuation">)</span>
+  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>     Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/rest-aws-lambda/support/entry.handler"</span><span class="token punctuation">)</span>
+  -m, --no-minify                     Disables: Minify output
+  -sm, <span class="token parameter variable">--sourcemap</span>                    Bundle <span class="token builtin class-name">source</span> maps
+  -is, --include-sources              Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
+  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>       Eject commands to <span class="token function">file</span>
+  -h, <span class="token parameter variable">--help</span>                          display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>

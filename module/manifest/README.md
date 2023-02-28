@@ -116,6 +116,10 @@ export type WatchConfig = {
    * Include files that start with '.'
    */
   includeHidden?: boolean;
+  /**
+   * Should watching prevent normal exiting, until watch is removed?
+   */
+  persistent?: boolean;
 };
 
 /**

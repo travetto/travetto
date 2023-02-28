@@ -77,6 +77,6 @@ export class TemplateManager {
       } catch (err) {
         console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
       }
-    }, ev => ev.action !== 'delete' && VALID_FILE(ev.file));
+    }, { filter: ev => ev.action !== 'delete' && VALID_FILE(ev.file), persistent: true });
   }
 }

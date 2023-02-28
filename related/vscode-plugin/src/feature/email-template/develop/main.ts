@@ -14,7 +14,7 @@ import { Content, EmailTemplateCommand, EmailTemplateEvent } from './types';
 export class EmailTemplateFeature extends BaseFeature {
 
   static isTemplate(f?: string): boolean {
-    return /resources\/email\/.*[.]email[.]html$/.test(f ?? '');
+    return /resources\/.*[.]email[.]html$/.test(f ?? '');
   }
 
   #server: ProcessServer<EmailTemplateCommand, EmailTemplateEvent>;

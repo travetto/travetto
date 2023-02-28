@@ -32,6 +32,10 @@ export type WatchConfig = {
    * Include files that start with '.'
    */
   includeHidden?: boolean;
+  /**
+   * Should watching prevent normal exiting, until watch is removed?
+   */
+  persistent?: boolean;
 };
 
 /**
@@ -46,7 +50,7 @@ export async function watchFolderImmediate(
   options: WatchConfig = {}
 ): Promise<() => Promise<void>> {
   const watchPath = path.resolve(folder);
-  const watcher = watch(watchPath, { persistent: true, encoding: 'utf8' });
+  const watcher = watch(watchPath, { persistent: options.persistent, encoding: 'utf8' });
   const lastStats: Record<string, Stats | undefined> = {};
   const invalidFilter = (el: string): boolean =>
     (el === '.' || el === '..' || (!options.includeHidden && el.startsWith('.')) || !!options.ignore?.includes(el));
@@ -129,6 +133,11 @@ export async function watchFolders(
   // Allow for multiple calls
   let finalProm: Promise<void> | undefined;
   const remove = (): Promise<void> => finalProm ??= Promise.all(subs.map(x => x?.unsubscribe())).then(() => { });
+
+  // Cleanup on intent to exit
+  if (!config.persistent) {
+    process.on('SIGUSR2', remove);
+  }
 
   // Cleanup on exit
   process.on('exit', remove);

@@ -38,7 +38,7 @@ function getFilesFromModule(m: ManifestModule): string[] {
 export function getOutput(): OutputOptions {
   const format: Package['type'] = Env.get('BUNDLE_FORMAT', 'commonjs');
   const dir = Env.get('BUNDLE_OUTPUT')!;
-  const entryName = Env.get('BUNDLE_ENTRY_COMMAND')!;
+  const mainFile = Env.get('BUNDLE_MAIN_FILE')!;
   return {
     format,
     intro: INTRO[format],
@@ -50,7 +50,7 @@ export function getOutput(): OutputOptions {
       !(Env.getBoolean('BUNDLE_SOURCES') ?? false),
     compact:
       Env.getBoolean('BUNDLE_COMPRESS') ?? true,
-    file: path.resolve(dir, `${entryName}.js`),
+    file: path.resolve(dir, mainFile),
     ...(format === 'commonjs' ? {} : {
       inlineDynamicImports: true
     }),

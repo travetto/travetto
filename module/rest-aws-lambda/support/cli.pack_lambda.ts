@@ -16,14 +16,12 @@ export class PackLambdaCommand extends BasePackCommand<CommonPackOptions, Common
   getOptions(): CommonPackOptions {
     const opts = this.getCommonOptions();
     opts.entryPoint.def = '@travetto/rest-aws-lambda/support/entry.handler';
+    opts.mainName.def = 'index';
     opts.output.def = this.monoRoot ? '<module>.zip' : `${this.getSimpleModuleName()}.zip`;
     return opts;
   }
 
   getOperations(): PackOperationShape<CommonPackConfig>[] {
-    return [
-      ...super.getOperations().filter(x => x !== PackOperation.writeEntryScript),
-      PackOperation.compress
-    ];
+    return [...super.getOperations(), PackOperation.compress];
   }
 }

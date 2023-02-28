@@ -5,11 +5,12 @@ export type CommonPackConfig = {
   output: string;
   clean: boolean;
   ejectFile: string;
+  mainName: string;
+  mainScripts: boolean;
   module: string;
 
   // Bundle
   entryPoint: string;
-  entryCommand: string;
   entryArguments: string[];
   minify: boolean;
   sourcemap: boolean;
@@ -21,6 +22,8 @@ export type CommonPackOptions = {
   output: OptionConfig<string>;
   clean: OptionConfig<boolean>;
   ejectFile: OptionConfig<string>;
+  mainName: OptionConfig<string>;
+  mainScripts: OptionConfig<boolean>;
 
   // Bundle
   entryPoint: OptionConfig<string>;

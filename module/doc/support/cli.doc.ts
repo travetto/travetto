@@ -60,7 +60,8 @@ export class DocCommand extends CliCommand<Options> {
           env: { TRV_QUIET: '1' },
           stdio: 'inherit', catchAsResult: true
         }), {
-        filter: ev => ev.action === 'update' && ev.file === docFile
+        filter: ev => ev.action === 'update' && ev.file === docFile,
+        persistent: true
       });
     }
 

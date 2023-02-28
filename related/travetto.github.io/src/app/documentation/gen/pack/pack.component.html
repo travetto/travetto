@@ -34,15 +34,17 @@ There are three primary cli commands for packing your code:
 Usage:  pack <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>      Workspace <span class="token keyword">for</span> building
-  -c, --no-clean                   Disables: Clean workspace
-  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>            Output Location
-  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>  Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
-  -m, --no-minify                  Disables: Minify output
-  -sm, <span class="token parameter variable">--sourcemap</span>                 Bundle <span class="token builtin class-name">source</span> maps
-  -is, --include-sources           Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
-  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>    Eject commands to <span class="token function">file</span>
-  -h, <span class="token parameter variable">--help</span>                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>         Workspace <span class="token keyword">for</span> building
+  -c, --no-clean                      Disables: Clean workspace
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>               Output location
+  -es, --main-scripts <span class="token operator">&lt;</span>main-scripts<span class="token operator">></span>  Create entry scripts
+  -f, --main-name <span class="token operator">&lt;</span>main-name<span class="token operator">></span>         Main name <span class="token keyword">for</span> build artifact <span class="token punctuation">(</span>default: <span class="token string">"cli"</span><span class="token punctuation">)</span>
+  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>     Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
+  -m, --no-minify                     Disables: Minify output
+  -sm, <span class="token parameter variable">--sourcemap</span>                    Bundle <span class="token builtin class-name">source</span> maps
+  -is, --include-sources              Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
+  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>       Eject commands to <span class="token function">file</span>
+  -h, <span class="token parameter variable">--help</span>                          display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the <code class="item input">eject-file</code> flag that will allow for a script to be produced (base on the host operating system).
@@ -99,15 +101,17 @@ This command is nearly identical to the standard <code class="item input">pack</
 Usage:  pack:zip <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
 
 Options:
-  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>      Workspace <span class="token keyword">for</span> building
-  -c, --no-clean                   Disables: Clean workspace
-  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>            Output Location <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack.zip"</span><span class="token punctuation">)</span>
-  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>  Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
-  -m, --no-minify                  Disables: Minify output
-  -sm, <span class="token parameter variable">--sourcemap</span>                 Bundle <span class="token builtin class-name">source</span> maps
-  -is, --include-sources           Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
-  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>    Eject commands to <span class="token function">file</span>
-  -h, <span class="token parameter variable">--help</span>                       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
+  -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>         Workspace <span class="token keyword">for</span> building
+  -c, --no-clean                      Disables: Clean workspace
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>               Output location <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack.zip"</span><span class="token punctuation">)</span>
+  -es, --main-scripts <span class="token operator">&lt;</span>main-scripts<span class="token operator">></span>  Create entry scripts
+  -f, --main-name <span class="token operator">&lt;</span>main-name<span class="token operator">></span>         Main name <span class="token keyword">for</span> build artifact <span class="token punctuation">(</span>default: <span class="token string">"cli"</span><span class="token punctuation">)</span>
+  -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>     Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
+  -m, --no-minify                     Disables: Minify output
+  -sm, <span class="token parameter variable">--sourcemap</span>                    Bundle <span class="token builtin class-name">source</span> maps
+  -is, --include-sources              Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps
+  -x, --eject-file <span class="token operator">&lt;</span>eject-file<span class="token operator">></span>       Eject commands to <span class="token function">file</span>
+  -h, <span class="token parameter variable">--help</span>                          display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>     
       </figure>
 
 <h2 id="cli-pack-docker">CLI - pack:docker</h2>
@@ -125,7 +129,9 @@ Usage:  pack:docker <span class="token punctuation">[</span>options<span class="
 Options:
   -w, <span class="token parameter variable">--workspace</span> <span class="token operator">&lt;</span>workspace<span class="token operator">></span>               Workspace <span class="token keyword">for</span> building
   -c, --no-clean                            Disables: Clean workspace
-  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>                     Output Location
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>                     Output location
+  -es, --main-scripts <span class="token operator">&lt;</span>main-scripts<span class="token operator">></span>        Create entry scripts
+  -f, --main-name <span class="token operator">&lt;</span>main-name<span class="token operator">></span>               Main name <span class="token keyword">for</span> build artifact <span class="token punctuation">(</span>default: <span class="token string">"cli"</span><span class="token punctuation">)</span>
   -e, --entry-point <span class="token operator">&lt;</span>entry-point<span class="token operator">></span>           Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
   -m, --no-minify                           Disables: Minify output
   -sm, <span class="token parameter variable">--sourcemap</span>                          Bundle <span class="token builtin class-name">source</span> maps
@@ -231,7 +237,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 <span class="token builtin class-name">echo</span> <span class="token string">"Bundling Output minify=true sourcemap= entryPoint=@travetto/cli/support/entry.cli
 "</span>
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENTRY</span><span class="token operator">=</span>node_modules/@travetto/cli/support/entry.cli.js
-<span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENTRY_COMMAND</span><span class="token operator">=</span>cli
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_MAIN_FILE</span><span class="token operator">=</span>cli.js
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_COMPRESS</span><span class="token operator">=</span>true
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_OUTPUT</span><span class="token operator">=</span><span class="token variable">$DIST</span>
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_FORMAT</span><span class="token operator">=</span>commonjs

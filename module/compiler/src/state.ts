@@ -110,11 +110,10 @@ export class CompilerState implements ts.CompilerHost {
     } else if (inputFile.endsWith('.js')) {
       this.writeFile(this.#inputToEntry.get(inputFile)!.output!, ts.transpile(this.readFile(inputFile)!, this.#compilerOptions), false);
     } else if (inputFile.endsWith('.ts')) {
-      const source = this.readFile(inputFile);
       return program.emit(
         program.getSourceFile(inputFile)!,
         (...args) => this.writeFile(...args), undefined, false,
-        /^[/][/]\s*@skip-transformers/.test(source!) ? undefined : this.#transformerManager.get()
+        this.#transformerManager.get()
       );
     }
   }

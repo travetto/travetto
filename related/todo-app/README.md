@@ -322,7 +322,7 @@ First we must start the application:
     author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
     license: 'ISC',
     version: '0.0.0',
-    framework: '3.0.1'
+    framework: '3.0.x'
   },
   env: {
     envName: 'dev',
@@ -332,7 +332,7 @@ First we must start the application:
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.14.2'
+    nodeVersion: 'v18.x.x'
   }
 }
 2029-03-14T04:00:01.510Z info  [@travetto/app:src/registry.ts:81] Config {

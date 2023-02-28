@@ -23,13 +23,15 @@ $ trv pack:lambda -h
 Usage:  pack:lambda [options]
 
 Options:
-  -w, --workspace <workspace>      Workspace for building
-  -c, --no-clean                   Disables: Clean workspace
-  -o, --output <output>            Output Location (default: "travetto_rest-aws-lambda.zip")
-  -e, --entry-point <entry-point>  Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler")
-  -m, --no-minify                  Disables: Minify output
-  -sm, --sourcemap                 Bundle source maps
-  -is, --include-sources           Include source with source maps
-  -x, --eject-file <eject-file>    Eject commands to file
-  -h, --help                       display help for command
+  -w, --workspace <workspace>         Workspace for building
+  -c, --no-clean                      Disables: Clean workspace
+  -o, --output <output>               Output location (default: "travetto_rest-aws-lambda.zip")
+  -es, --main-scripts <main-scripts>  Create entry scripts
+  -f, --main-name <main-name>         Main name for build artifact (default: "index")
+  -e, --entry-point <entry-point>     Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler")
+  -m, --no-minify                     Disables: Minify output
+  -sm, --sourcemap                    Bundle source maps
+  -is, --include-sources              Include source with source maps
+  -x, --eject-file <eject-file>       Eject commands to file
+  -h, --help                          display help for command
 ```

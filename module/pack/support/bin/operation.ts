@@ -60,7 +60,7 @@ export class PackOperation {
 
     const env = Object.fromEntries(([
       ['BUNDLE_ENTRY', entryPointFile],
-      ['BUNDLE_ENTRY_COMMAND', cfg.entryCommand],
+      ['BUNDLE_MAIN_FILE', `${cfg.mainName}.js`],
       ['BUNDLE_COMPRESS', cfg.minify],
       ['BUNDLE_SOURCEMAP', cfg.sourcemap],
       ['BUNDLE_SOURCES', cfg.includeSources],
@@ -140,16 +140,20 @@ export class PackOperation {
    * Create launcher scripts (.sh, .cmd) to run output
    */
   static async * writeEntryScript(cfg: CommonPackConfig): AsyncIterable<string[]> {
+    if (!cfg.mainScripts && !cfg.entryPoint.includes('@travetto/cli')) {
+      return;
+    }
+
     const title = 'Writing entry scripts';
 
     const files = ([['posix', 'sh'], ['win32', 'cmd']] as const)
       .map(([type, ext]) => ({
-        fileTitle: cliTpl`${{ title }} ${{ path: `${cfg.entryCommand}.${ext}` }} args=(${{ param: cfg.entryArguments.join(' ') }})`,
-        file: `${cfg.entryCommand}.${ext}`,
+        fileTitle: cliTpl`${{ title }} ${{ path: `${cfg.mainName}.${ext}` }} args=(${{ param: cfg.entryArguments.join(' ') }})`,
+        file: `${cfg.mainName}.${ext}`,
         text: [
           ShellCommands[type].scriptOpen(),
           ShellCommands[type].chdirScript(),
-          ShellCommands[type].callCommandWithAllArgs('node', `${cfg.entryCommand}.js`, ...cfg.entryArguments),
+          ShellCommands[type].callCommandWithAllArgs('node', `${cfg.mainName}.js`, ...cfg.entryArguments),
         ].map(x => x.join(' '))
       }));
 

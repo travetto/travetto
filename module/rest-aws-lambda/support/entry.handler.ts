@@ -1,16 +1,18 @@
-import { DependencyRegistry } from '@travetto/di';
-import { RootRegistry } from '@travetto/registry';
-import { init } from '@travetto/base/support/init';
 
 import type { LambdaAPIGatewayProxyEvent, LambdaContext, LambdaAPIGatewayProxyResult } from '../src/types';
-import { AwsLambdaRestApplication, AwsLambdaHandler } from '../src/server';
+import type { AwsLambdaHandler } from '../src/server';
 
-async function buildApp(): Promise<{
-  handle(event: LambdaAPIGatewayProxyEvent, context: LambdaContext): Promise<LambdaAPIGatewayProxyResult>;
-}> {
-  init();
+type HandleFunction = (event: LambdaAPIGatewayProxyEvent, context: LambdaContext) => Promise<LambdaAPIGatewayProxyResult>;
+
+async function buildApp(): Promise<{ handle: HandleFunction }> {
+  const { init } = await import('@travetto/base/support/init');
+  await init();
+
+  const { RootRegistry } = await import('@travetto/registry');
   await RootRegistry.init();
 
+  const { DependencyRegistry } = await import('@travetto/di');
+  const { AwsLambdaRestApplication } = await import('../src/server.js');
   const app = await DependencyRegistry.getInstance(AwsLambdaRestApplication);
   await app.run();
   return app;

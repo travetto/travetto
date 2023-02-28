@@ -55,9 +55,6 @@ export class ExecutionManager {
         getErrHelpWidth: () => GlobalTerminal.width
       });
 
-    const { init } = await import('@travetto/base/support/init.js');
-    await init();
-
     const [, , cmd, ...args] = argv;
     if (cmd && !cmd.startsWith('-')) {
       await this.runCommand(cmd, args);

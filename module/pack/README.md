@@ -29,15 +29,17 @@ $ trv pack --help
 Usage:  pack [options] [args...]
 
 Options:
-  -w, --workspace <workspace>      Workspace for building
-  -c, --no-clean                   Disables: Clean workspace
-  -o, --output <output>            Output Location
-  -e, --entry-point <entry-point>  Entry point (default: "@travetto/cli/support/entry.cli")
-  -m, --no-minify                  Disables: Minify output
-  -sm, --sourcemap                 Bundle source maps
-  -is, --include-sources           Include source with source maps
-  -x, --eject-file <eject-file>    Eject commands to file
-  -h, --help                       display help for command
+  -w, --workspace <workspace>         Workspace for building
+  -c, --no-clean                      Disables: Clean workspace
+  -o, --output <output>               Output location
+  -es, --main-scripts <main-scripts>  Create entry scripts
+  -f, --main-name <main-name>         Main name for build artifact (default: "cli")
+  -e, --entry-point <entry-point>     Entry point (default: "@travetto/cli/support/entry.cli")
+  -m, --no-minify                     Disables: Minify output
+  -sm, --sourcemap                    Bundle source maps
+  -is, --include-sources              Include source with source maps
+  -x, --eject-file <eject-file>       Eject commands to file
+  -h, --help                          display help for command
 ```
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the `eject-file` flag that will allow for a script to be produced (base on the host operating system).
@@ -89,15 +91,17 @@ $ trv pack:zip --help
 Usage:  pack:zip [options] [args...]
 
 Options:
-  -w, --workspace <workspace>      Workspace for building
-  -c, --no-clean                   Disables: Clean workspace
-  -o, --output <output>            Output Location (default: "travetto_pack.zip")
-  -e, --entry-point <entry-point>  Entry point (default: "@travetto/cli/support/entry.cli")
-  -m, --no-minify                  Disables: Minify output
-  -sm, --sourcemap                 Bundle source maps
-  -is, --include-sources           Include source with source maps
-  -x, --eject-file <eject-file>    Eject commands to file
-  -h, --help                       display help for command
+  -w, --workspace <workspace>         Workspace for building
+  -c, --no-clean                      Disables: Clean workspace
+  -o, --output <output>               Output location (default: "travetto_pack.zip")
+  -es, --main-scripts <main-scripts>  Create entry scripts
+  -f, --main-name <main-name>         Main name for build artifact (default: "cli")
+  -e, --entry-point <entry-point>     Entry point (default: "@travetto/cli/support/entry.cli")
+  -m, --no-minify                     Disables: Minify output
+  -sm, --sourcemap                    Bundle source maps
+  -is, --include-sources              Include source with source maps
+  -x, --eject-file <eject-file>       Eject commands to file
+  -h, --help                          display help for command
 ```
 
 ## CLI - pack:docker
@@ -113,7 +117,9 @@ Usage:  pack:docker [options] [args...]
 Options:
   -w, --workspace <workspace>               Workspace for building
   -c, --no-clean                            Disables: Clean workspace
-  -o, --output <output>                     Output Location
+  -o, --output <output>                     Output location
+  -es, --main-scripts <main-scripts>        Create entry scripts
+  -f, --main-name <main-name>               Main name for build artifact (default: "cli")
   -e, --entry-point <entry-point>           Entry point (default: "@travetto/cli/support/entry.cli")
   -m, --no-minify                           Disables: Minify output
   -sm, --sourcemap                          Bundle source maps
@@ -218,7 +224,7 @@ TRV_MODULE=$MOD npx trv manifest $DIST/node_modules/$MOD prod
 echo "Bundling Output minify=true sourcemap= entryPoint=@travetto/cli/support/entry.cli
 "
 export BUNDLE_ENTRY=node_modules/@travetto/cli/support/entry.cli.js
-export BUNDLE_ENTRY_COMMAND=cli
+export BUNDLE_MAIN_FILE=cli.js
 export BUNDLE_COMPRESS=true
 export BUNDLE_OUTPUT=$DIST
 export BUNDLE_FORMAT=commonjs

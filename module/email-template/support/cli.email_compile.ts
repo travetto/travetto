@@ -1,5 +1,4 @@
 import { RootRegistry } from '@travetto/registry';
-import { TimeUtil } from '@travetto/base';
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngine } from '@travetto/email/src/template';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
@@ -39,8 +38,6 @@ export class EmailCompileCommand extends CliCommand<Options> {
       try {
         const template = new TemplateManager(engine, compiler);
         await template.watchCompile();
-        await TimeUtil.wait('1d');
-        await new Promise(r => process.on('exit', r));
       } catch {
         return this.exit(1);
       }

@@ -78,6 +78,8 @@ export class DocRunUtil {
     text = stripAnsiCodes(text.trim())
       .replace(new RegExp(path.cwd(), 'g'), '.')
       .replaceAll(RootIndex.manifest.workspacePath, '<workspace-root>')
+      .replace(/^(\s*framework:\s*')(\d+[.]\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x${post}`)
+      .replace(/^(\s*nodeVersion:\s*'v)(\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x.x${post}`)
       .replace(/^(.{1,4})?Compiling[.]*/, '') // Compiling message, remove
       .replace(/[A-Za-z0-9_.\-\/\\]+\/travetto\/module\//g, '@travetto/')
       .replace(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}([.]\d{3})?Z?/g, this.#docState.getDate.bind(this.#docState))
