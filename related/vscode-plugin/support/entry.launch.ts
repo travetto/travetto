@@ -1,10 +1,8 @@
+// @skip-transformers 
 import path from 'path';
+import type vscode from 'vscode';
 
-/**
- * @param {import('vscode').ExtensionContext} context
- * @returns {Promise<void>}
- */
-async function activate(context) {
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
   let root = context.extension.extensionPath;
   try {
     // eslint-disable-next-line no-undef
@@ -15,11 +13,6 @@ async function activate(context) {
   return (await import('../src/extension.js')).activate(context);
 }
 
-/**
- * @returns {Promise<void>}
- */
-async function deactivate() {
+export async function deactivate(): Promise<void> {
   return (await import('../src/extension.js')).deactivate();
 }
-
-module.exports = { activate, deactivate };

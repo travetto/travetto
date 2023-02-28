@@ -145,7 +145,7 @@ export async function launch(ctx: ManifestContext, root: ManifestContext, op?: '
       // TODO: Externalize somehow?
       const outputPath = path.resolve(ctx.workspacePath, ctx.outputFolder);
       process.env.TRV_MANIFEST = path.resolve(outputPath, 'node_modules', ctx.mainModule);
-      const cliMain = path.join(outputPath, 'node_modules', '@travetto/cli/support/cli.js');
+      const cliMain = path.join(outputPath, 'node_modules', '@travetto/cli/support/entry.cli.js');
       return import(cliMain);
     }
   }

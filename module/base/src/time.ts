@@ -96,7 +96,7 @@ export class TimeUtil {
    * Pretty print a delta, with auto-detection of largest unit
    * @param delta The number of milliseconds in the delta
    */
-  static prettyDelta(delta: number, unit: TimeUnit = 'ms'): string {
+  static prettyDelta(delta: number, unit?: TimeUnit): string {
     if (delta === 0) {
       return `0${unit}`;
     } else if (delta < 0) {

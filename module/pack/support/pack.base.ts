@@ -28,18 +28,33 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
     return !!RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath;
   }
 
+  get entries(): string[] {
+    return RootIndex.findSupport({ filter: x => x.includes('entry.') })
+      .map(x => x.import.replace(/[.][^.]+s$/, ''));
+  }
+
+  /**
+   * Add help output
+   */
+  async help(): Promise<string> {
+    const entryPoints = this.entries.map(x => cliTpl`${{ subtitle: '*' }} ${{ identifier: x }}`);
+
+    return ['', cliTpl`${{ title: 'Available Entry Points:' }}`, '', ...entryPoints, ''].join('\n');
+  }
+
+
   getArgs(): string | undefined {
     return this.monoRoot ? '<module> [args...]' : '[args...]';
   }
 
   getCommonOptions(): CommonPackOptions {
+    const entries = this.entries;
+    const mainEntry = this.entries.find(x => x.startsWith('@travetto/cli'))!;
     return {
       workspace: this.option({ short: 'w', desc: 'Workspace for building' }),
       clean: this.boolOption({ short: 'c', desc: 'Clean workspace', def: true }),
       output: this.option({ short: 'o', desc: 'Output Location' }),
-
-      entryPoint: this.option({ short: 'e', desc: 'Entry point', def: 'node_modules/@travetto/cli/support/cli.js' }),
-      entryCommand: this.option({ short: 'ec', desc: 'Entry command' }),
+      entryPoint: this.choiceOption({ short: 'e', desc: 'Entry point', def: mainEntry, choices: entries }),
       minify: this.boolOption({ short: 'm', desc: 'Minify output', def: true }),
       sourcemap: this.boolOption({ short: 'sm', desc: 'Bundle source maps' }),
       includeSources: this.boolOption({ short: 'is', desc: 'Include source with source maps' }),
@@ -89,7 +104,8 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
 
   async buildConfig(): Promise<S> {
     this.cmd.workspace ??= path.resolve(os.tmpdir(), RootIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
-    this.cmd.entryCommand ??= path.basename(this.cmd.entryPoint).replace(/[.][tj]s$/, '');
+    this.cmd.entrySource = `${path.basename(this.cmd.entryPoint)}.js`;
+    this.cmd.entryCommand = path.basename(this.cmd.entryPoint).replace(/entry[.]/, '');
     this.cmd.module = RootIndex.mainModule.name;
     return this.cmd;
   }

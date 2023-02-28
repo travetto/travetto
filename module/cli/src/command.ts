@@ -108,7 +108,13 @@ export abstract class CliCommand<V extends OptionMap = OptionMap> {
     // @ts-expect-error
     const config: T = {
       type: String,
-      combine: (v: K, acc) => choices.includes(v) ? v : acc,
+      combine: (v: K, acc) => {
+        if (v && !choices.includes(v)) {
+          this.showHelp(`Invalid choice: ${v}.  Supported values are: ${choices.join(', ')}`);
+          return this.exit(1);
+        }
+        return v ?? acc;
+      },
       choices,
       completion: true,
       ...cfg

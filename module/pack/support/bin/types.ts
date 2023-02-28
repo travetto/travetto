@@ -10,6 +10,7 @@ export type CommonPackConfig = {
   // Bundle
   entryPoint: string;
   entryCommand: string;
+  entrySource: string;
   entryArguments: string[];
   minify: boolean;
   sourcemap: boolean;
@@ -24,7 +25,6 @@ export type CommonPackOptions = {
 
   // Bundle
   entryPoint: OptionConfig<string>;
-  entryCommand: OptionConfig<string>;
   minify: OptionConfig<boolean>;
   sourcemap: OptionConfig<boolean>;
   includeSources: OptionConfig<boolean>;

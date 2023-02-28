@@ -71,7 +71,7 @@ export class ModelCandidateUtil {
    */
   static async getCandidates(op: keyof ModelStorageSupport): Promise<CandidateNames> {
     return GlobalTerminal.withWaiting('Resolving', ExecUtil.worker<CandidateNames>(
-      RootIndex.resolveFileImport('@travetto/cli/support/cli.ts'),
+      RootIndex.resolveFileImport('@travetto/cli/support/entry.cli'),
       ['main', '@travetto/model/support/bin/candidate.ts', op]
     ).message);
   }

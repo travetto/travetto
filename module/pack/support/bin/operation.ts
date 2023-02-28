@@ -56,9 +56,10 @@ export class PackOperation {
 
     const bundleCommand = ['npx', 'rollup', '-c', 'node_modules/@travetto/pack/support/bin/rollup.js'];
 
+    const entryPointFile = RootIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RootIndex.manifest.outputFolder}/`)[1];
+
     const env = Object.fromEntries(([
-      ['BUNDLE_ENTRY', cfg.entryPoint],
-      ['BUNDLE_ENTRY_NAME', cfg.entryCommand],
+      ['BUNDLE_ENTRY', entryPointFile],
       ['BUNDLE_COMPRESS', cfg.minify],
       ['BUNDLE_SOURCEMAP', cfg.sourcemap],
       ['BUNDLE_SOURCES', cfg.includeSources],
@@ -147,7 +148,7 @@ export class PackOperation {
         text: [
           ShellCommands[type].scriptOpen(),
           ShellCommands[type].chdirScript(),
-          ShellCommands[type].callCommandWithAllArgs('node', cfg.entryCommand, ...cfg.entryArguments),
+          ShellCommands[type].callCommandWithAllArgs('node', cfg.entrySource, ...cfg.entryArguments),
         ].map(x => x.join(' '))
       }));
 
@@ -210,7 +211,7 @@ export class PackOperation {
    * Generate the trv-app-cache.json for @travetto/app, which is needed for 'running' programs
    */
   static async * primeAppCache(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const isRun = cfg.entryCommand === 'cli' && cfg.entryArguments.filter(x => !x.startsWith('-'))[0] === 'run';
+    const isRun = /entry[.]cli/.test(cfg.entryPoint) && cfg.entryArguments.filter(x => !x.startsWith('-'))[0] === 'run';
     if (!isRun) {
       return;
     }
