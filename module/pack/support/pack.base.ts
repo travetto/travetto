@@ -33,16 +33,6 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
       .map(x => x.import.replace(/[.][^.]+s$/, ''));
   }
 
-  /**
-   * Add help output
-   */
-  async help(): Promise<string> {
-    const entryPoints = this.entries.map(x => cliTpl`${{ subtitle: '*' }} ${{ identifier: x }}`);
-
-    return ['', cliTpl`${{ title: 'Available Entry Points:' }}`, '', ...entryPoints, ''].join('\n');
-  }
-
-
   getArgs(): string | undefined {
     return this.monoRoot ? '<module> [args...]' : '[args...]';
   }
@@ -104,7 +94,6 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
 
   async buildConfig(): Promise<S> {
     this.cmd.workspace ??= path.resolve(os.tmpdir(), RootIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
-    this.cmd.entrySource = `${path.basename(this.cmd.entryPoint)}.js`;
     this.cmd.entryCommand = path.basename(this.cmd.entryPoint).replace(/entry[.]/, '');
     this.cmd.module = RootIndex.mainModule.name;
     return this.cmd;

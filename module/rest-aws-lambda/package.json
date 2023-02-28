@@ -29,10 +29,18 @@
     "@types/aws-lambda": "^8.10.110"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.1-rc.1"
+    "@travetto/test": "^3.0.1-rc.1",
+    "@travetto/pack": "^3.0.1-rc.1",
+    "@travetto/cli": "^3.0.1-rc.1"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
+      "optional": true
+    },
+    "@travetto/pack": {
+      "optional": true
+    },
+    "@travetto/cli": {
       "optional": true
     }
   },

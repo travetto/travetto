@@ -60,6 +60,7 @@ export class PackOperation {
 
     const env = Object.fromEntries(([
       ['BUNDLE_ENTRY', entryPointFile],
+      ['BUNDLE_ENTRY_COMMAND', cfg.entryCommand],
       ['BUNDLE_COMPRESS', cfg.minify],
       ['BUNDLE_SOURCEMAP', cfg.sourcemap],
       ['BUNDLE_SOURCES', cfg.includeSources],
@@ -148,7 +149,7 @@ export class PackOperation {
         text: [
           ShellCommands[type].scriptOpen(),
           ShellCommands[type].chdirScript(),
-          ShellCommands[type].callCommandWithAllArgs('node', cfg.entrySource, ...cfg.entryArguments),
+          ShellCommands[type].callCommandWithAllArgs('node', `${cfg.entryCommand}.js`, ...cfg.entryArguments),
         ].map(x => x.join(' '))
       }));
 
