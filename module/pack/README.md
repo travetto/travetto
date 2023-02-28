@@ -33,7 +33,7 @@ Options:
   -c, --no-clean                      Disables: Clean workspace
   -o, --output <output>               Output location
   -es, --main-scripts <main-scripts>  Create entry scripts
-  -f, --main-name <main-name>         Main name for build artifact (default: "cli")
+  -f, --main-name <main-name>         Main name for build artifact
   -e, --entry-point <entry-point>     Entry point (default: "@travetto/cli/support/entry.cli")
   -m, --no-minify                     Disables: Minify output
   -sm, --sourcemap                    Bundle source maps
@@ -95,7 +95,7 @@ Options:
   -c, --no-clean                      Disables: Clean workspace
   -o, --output <output>               Output location (default: "travetto_pack.zip")
   -es, --main-scripts <main-scripts>  Create entry scripts
-  -f, --main-name <main-name>         Main name for build artifact (default: "cli")
+  -f, --main-name <main-name>         Main name for build artifact
   -e, --entry-point <entry-point>     Entry point (default: "@travetto/cli/support/entry.cli")
   -m, --no-minify                     Disables: Minify output
   -sm, --sourcemap                    Bundle source maps
@@ -119,7 +119,7 @@ Options:
   -c, --no-clean                            Disables: Clean workspace
   -o, --output <output>                     Output location
   -es, --main-scripts <main-scripts>        Create entry scripts
-  -f, --main-name <main-name>               Main name for build artifact (default: "cli")
+  -f, --main-name <main-name>               Main name for build artifact
   -e, --entry-point <entry-point>           Entry point (default: "@travetto/cli/support/entry.cli")
   -m, --no-minify                           Disables: Minify output
   -sm, --sourcemap                          Bundle source maps
@@ -178,23 +178,23 @@ echo "Writing package.json
 "
 echo "{\"type\":\"commonjs\"}" > $DIST/package.json
 
-# Writing entry scripts cli.sh args=(run rest) 
+# Writing entry scripts entry.cli.sh args=(run rest) 
 
-echo "Writing entry scripts cli.sh args=(run rest)
+echo "Writing entry scripts entry.cli.sh args=(run rest)
 "
-echo "#!/bin/sh" > $DIST/cli.sh
-echo "cd \$(dirname \"\$0\")" >> $DIST/cli.sh
-echo "node cli.js run rest \$@" >> $DIST/cli.sh
-chmod 755 $DIST/cli.sh
+echo "#!/bin/sh" > $DIST/entry.cli.sh
+echo "cd \$(dirname \"\$0\")" >> $DIST/entry.cli.sh
+echo "node entry.cli.js run rest \$@" >> $DIST/entry.cli.sh
+chmod 755 $DIST/entry.cli.sh
 
-# Writing entry scripts cli.cmd args=(run rest) 
+# Writing entry scripts entry.cli.cmd args=(run rest) 
 
-echo "Writing entry scripts cli.cmd args=(run rest)
+echo "Writing entry scripts entry.cli.cmd args=(run rest)
 "
-echo "" > $DIST/cli.cmd
-echo "cd %~p0" >> $DIST/cli.cmd
-echo "node cli.js run rest %*" >> $DIST/cli.cmd
-chmod 755 $DIST/cli.cmd
+echo "" > $DIST/entry.cli.cmd
+echo "cd %~p0" >> $DIST/entry.cli.cmd
+echo "node entry.cli.js run rest %*" >> $DIST/entry.cli.cmd
+chmod 755 $DIST/entry.cli.cmd
 
 # Copying over resources 
 
@@ -224,7 +224,7 @@ TRV_MODULE=$MOD npx trv manifest $DIST/node_modules/$MOD prod
 echo "Bundling Output minify=true sourcemap= entryPoint=@travetto/cli/support/entry.cli
 "
 export BUNDLE_ENTRY=node_modules/@travetto/cli/support/entry.cli.js
-export BUNDLE_MAIN_FILE=cli.js
+export BUNDLE_MAIN_FILE=entry.cli.js
 export BUNDLE_COMPRESS=true
 export BUNDLE_OUTPUT=$DIST
 export BUNDLE_FORMAT=commonjs
@@ -241,7 +241,7 @@ echo "FROM node:18-alpine3.16" > $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "COPY . ." >> $DIST/Dockerfile
 echo "" >> $DIST/Dockerfile
-echo "ENTRYPOINT [\"/app/cli.sh\"]" >> $DIST/Dockerfile
+echo "ENTRYPOINT [\"/app/entry.cli.sh\"]" >> $DIST/Dockerfile
 
 # Pulling Docker Base Image node:18-alpine3.16 
 

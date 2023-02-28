@@ -44,7 +44,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
       clean: this.boolOption({ short: 'c', desc: 'Clean workspace', def: true }),
       output: this.option({ short: 'o', desc: 'Output location' }),
       mainScripts: this.option({ short: 'es', desc: 'Create entry scripts' }),
-      mainName: this.option({ short: 'f', desc: 'Main name for build artifact', def: path.basename(mainEntry).replace(/entry[.]/, '') }),
+      mainName: this.option({ short: 'f', desc: 'Main name for build artifact' }),
       entryPoint: this.option({ short: 'e', desc: 'Entry point', def: mainEntry }),
       minify: this.boolOption({ short: 'm', desc: 'Minify output', def: true }),
       sourcemap: this.boolOption({ short: 'sm', desc: 'Bundle source maps' }),
@@ -96,6 +96,7 @@ export abstract class BasePackCommand<T extends CommonPackOptions, S extends Com
   async buildConfig(): Promise<S> {
     this.cmd.workspace ??= path.resolve(os.tmpdir(), RootIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
     this.cmd.module = RootIndex.mainModule.name;
+    this.cmd.mainName ??= path.basename(this.cmd.entryPoint);
     return this.cmd;
   }
 
