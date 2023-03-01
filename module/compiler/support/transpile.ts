@@ -45,8 +45,6 @@ export class TranspileUtil {
       OPT_CACHE[ctx.workspacePath] = {
         ...options,
         allowJs: true,
-        sourceMap: false,
-        inlineSourceMap: true,
         resolveJsonModule: true,
         sourceRoot: ctx.workspacePath,
         rootDir: ctx.workspacePath,
@@ -69,7 +67,11 @@ export class TranspileUtil {
         .replace(/from '(@travetto\/(.*?))'/g, (_, i, s) => `from '${path.resolve(compilerOut, `${i}${s.includes('/') ? '.js' : '/__index__.js'}`)}'`);
 
       const ts = (await import('typescript')).default;
-      const content = ts.transpile(text, await this.getCompilerOptions(ctx), inputFile);
+      const content = ts.transpile(text, {
+        ...await this.getCompilerOptions(ctx),
+        sourceMap: false,
+        inlineSourceMap: true,
+      }, inputFile);
       await this.writeTextFile(outputFile, content);
     } else if (inputFile.endsWith('package.json')) {
       const pkg: Package = JSON.parse(await fs.readFile(inputFile, 'utf8'));
