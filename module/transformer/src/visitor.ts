@@ -2,6 +2,7 @@ import ts from 'typescript';
 
 import { DecoratorMeta, TransformerType, NodeTransformer, TransformerSet, State, TransformPhase } from './types/visitor';
 import { CoreUtil } from './util/core';
+import { ManifestModuleUtil } from '@travetto/manifest';
 
 /**
  * AST Visitor Factory, combines all active transformers into a single pass transformer for the ts compiler
@@ -77,7 +78,8 @@ export class VisitorFactory<S extends State = State> {
    */
   visitor(): ts.TransformerFactory<ts.SourceFile> {
     return (context: ts.TransformationContext) => (file: ts.SourceFile): ts.SourceFile => {
-      if (!file.fileName.endsWith('.ts')) { // Skip all non-ts files
+      const type = ManifestModuleUtil.getFileType(file.fileName);
+      if (type !== 'ts') { // Skip all non-ts files
         return file;
       }
 

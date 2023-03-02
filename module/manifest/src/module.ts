@@ -15,17 +15,15 @@ const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
   '.cjs': 'js',
   '.json': 'json',
   '.ts': 'ts',
+  '.tsx': 'ts',
   '.md': 'md'
 };
 
-const INDEX_FILES = new Set([
-  'index.ts',
-  'index.js',
-  '__index__.ts',
-  '__index__.js',
-  '__index.ts',
-  '__index.js'
-]);
+const INDEX_FILES = new Set(
+  ['__index__', '__index', 'index'].flatMap(f =>
+    ['ts', 'tsx', 'js'].map(ext => `${f}.${ext}`)
+  )
+);
 
 export class ManifestModuleUtil {
 
@@ -33,6 +31,13 @@ export class ManifestModuleUtil {
 
   static #getNewest(stat: { mtimeMs: number, ctimeMs: number }): number {
     return Math.max(stat.mtimeMs, stat.ctimeMs);
+  }
+
+  /**
+   * Replace a source file's extension with a given value
+   */
+  static #sourceToExtension(inputFile: string, ext: string): string {
+    return inputFile.replace(/[.][tj]sx?$/, ext);
   }
 
   /**
@@ -93,7 +98,7 @@ export class ManifestModuleUtil {
    * Get file type for a file name
    */
   static getFileType(moduleFile: string): ManifestModuleFileType {
-    if (moduleFile === 'package.json') {
+    if (moduleFile.endsWith('package.json')) {
       return 'package-json';
     } else if (
       moduleFile.startsWith('support/fixtures/') ||
@@ -209,5 +214,19 @@ export class ManifestModuleUtil {
     const sorted = [...declared].sort((a, b) => a.name.localeCompare(b.name));
     const modules = await Promise.all(sorted.map(x => this.describeModule(ctx, x)));
     return Object.fromEntries(modules.map(m => [m.name, m]));
+  }
+
+  /**
+   * Get the output file name for a given input
+   */
+  static sourceToOutputExt(inputFile: string): string {
+    return this.#sourceToExtension(inputFile, '.js');
+  }
+
+  /**
+   * Get the file without an extension
+   */
+  static sourceToBlankExt(inputFile: string): string {
+    return this.#sourceToExtension(inputFile, '');
   }
 }

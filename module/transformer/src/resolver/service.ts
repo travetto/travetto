@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestIndex, path } from '@travetto/manifest';
+import { ManifestIndex, ManifestModuleUtil, path } from '@travetto/manifest';
 
 import type { AnyType, TransformResolver } from './types';
 import { TypeCategorize, TypeBuilder } from './builder';
@@ -34,16 +34,18 @@ export class SimpleResolver implements TransformResolver {
   getFileImportName(file: string, removeExt?: boolean): string {
     let sourceFile = path.toPosix(file);
 
-    if (!sourceFile.endsWith('.js') && !sourceFile.endsWith('.ts')) {
+    const type = ManifestModuleUtil.getFileType(file);
+
+    if (type !== 'js' && type !== 'ts') {
       sourceFile = `${sourceFile}.ts`;
     }
 
     const imp =
-      this.#manifestIndex.getEntry(/[.]ts$/.test(sourceFile) ? sourceFile : `${sourceFile}.js`)?.import ??
-      this.#manifestIndex.getFromImport(sourceFile.replace(/^.*node_modules\//, '').replace(/[.]ts$/, ''))?.import ??
+      this.#manifestIndex.getEntry(ManifestModuleUtil.getFileType(sourceFile) === 'ts' ? sourceFile : `${sourceFile}.js`)?.import ??
+      this.#manifestIndex.getFromImport(ManifestModuleUtil.sourceToBlankExt(sourceFile).replace(/^.*node_modules\//, ''))?.import ??
       file;
 
-    return removeExt ? imp.replace(/[.]js$/, '') : imp;
+    return removeExt ? ManifestModuleUtil.sourceToBlankExt(imp) : imp;
   }
 
   /**
