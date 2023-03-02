@@ -2,7 +2,7 @@ import type { OutputOptions } from 'rollup';
 import type terser from '@rollup/plugin-terser';
 
 import { Env } from '@travetto/base';
-import { ManifestModule, Package, path, RootIndex } from '@travetto/manifest';
+import { ManifestModule, ManifestModuleUtil, Package, path, RootIndex } from '@travetto/manifest';
 
 const INTRO = {
   commonjs: `
@@ -32,7 +32,7 @@ function getFilesFromModule(m: ManifestModule): string[] {
       .filter(f => !/support\/(test|doc)/.test(f[0]))
   ]
     .filter(([, t]) => t === 'ts' || t === 'js' || t === 'json')
-    .map(([f]) => path.resolve(m.outputFolder, f.replace(/[.]ts$/, '.js')));
+    .map(([f]) => ManifestModuleUtil.sourceToOutputExt(path.resolve(m.outputFolder, f)));
 }
 
 export function getOutput(): OutputOptions {

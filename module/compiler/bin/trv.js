@@ -9,7 +9,7 @@ import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
 const VALID_OPS = { watch: 'watch', build: 'build', clean: 'clean', manifest: 'manifest' };
 
-const COMPILER_FILES = [...['launcher', 'transpile', 'lock', 'log', 'lock-pinger'].map(x => `support/${x}.js`), 'package.json'];
+const COMPILER_FILES = [...['launcher', 'transpile', 'lock', 'log', 'lock-pinger'].map(x => `support/${x}.ts`), 'package.json'];
 
 /**
  * @param {import('@travetto/manifest').ManifestContext} ctx
@@ -20,12 +20,12 @@ const $getLauncher = async (ctx) => {
   if (!(await fs.stat(tsconfigFile).catch(() => undefined))) {
     await fs.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
   }
-  const compPkg = createRequire(path.resolve(ctx.workspacePath, 'node_modules')).resolve('@travetto/compiler/package.json');
+  const compMod = path.dirname(createRequire(path.resolve(ctx.workspacePath, 'node_modules')).resolve('@travetto/compiler/package.json'));
   const files = [];
 
   for (const file of COMPILER_FILES) {
-    const target = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/compiler', file);
-    const src = compPkg.replace('package.json', file.replace(/[.]js$/, '.ts'));
+    const target = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/compiler', file).replace(/[.]tsx?$/, '.js');
+    const src = path.resolve(compMod, file);
 
     const targetTime = await fs.stat(target).then(s => Math.max(s.mtimeMs, s.ctimeMs)).catch(() => 0);
     const srcTime = await fs.stat(src).then(s => Math.max(s.mtimeMs, s.ctimeMs));
@@ -35,7 +35,7 @@ const $getLauncher = async (ctx) => {
       const module = ctx.moduleType === 'module' ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS;
       await fs.mkdir(path.dirname(target), { recursive: true });
       const text = await fs.readFile(src, 'utf8');
-      if (file.endsWith('.js')) {
+      if (/[.]tsx?$/.test(file)) {
         const content = ts.transpile(
           text,
           { target: ts.ScriptTarget.ES2020, module, esModuleInterop: true, allowSyntheticDefaultImports: true }

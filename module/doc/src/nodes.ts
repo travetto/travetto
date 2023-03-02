@@ -1,6 +1,6 @@
 import { existsSync } from 'fs';
 
-import { path, RootIndex, PackageUtil } from '@travetto/manifest';
+import { path, RootIndex, PackageUtil, ManifestModuleUtil } from '@travetto/manifest';
 
 import { FileUtil, } from './util/file';
 import { DocRunUtil, RunConfig } from './util/run';
@@ -170,7 +170,7 @@ export const node = {
     }
 
     const script = DocRunUtil.run(cmd, args, cfg);
-    const prefix = !/.*\/doc\/.*[.]ts$/.test(cmd) ? '$' : '$ node ';
+    const prefix = !(/.*\/doc\//.test(cmd) && ManifestModuleUtil.getFileType(cmd) !== 'ts') ? '$' : '$ node ';
 
     const commandDisplay = cfg.formatCommand?.(cmd, args) ?? `${cmd} ${args.join(' ')}`;
 

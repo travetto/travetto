@@ -133,7 +133,10 @@ export class CompilerWatcher {
     const remove = (outputFile: string): Promise<void> => fs.rm(outputFile, { force: true });
     const handler = this.#getWatcher({ create: emit, update: emit, delete: remove });
     const options: WatchConfig = {
-      filter: ev => ev.file.endsWith('.ts') || ev.file.endsWith('.js') || ev.file.endsWith('package.json'),
+      filter: ev => {
+        const type = ManifestModuleUtil.getFileType(ev.file);
+        return type === 'ts' || type === 'typings' || type === 'js' || type === 'package-json';
+      },
       ignore: ['node_modules']
     };
 

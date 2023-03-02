@@ -1,3 +1,4 @@
+import { ManifestModuleUtil } from './module';
 import { path } from './path';
 
 import {
@@ -78,13 +79,14 @@ export class ManifestIndex {
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
     return files.map(([f, type, ts, profile = 'std']) => {
+      const isSource = type === 'ts' || type === 'js';
       const sourceFile = path.resolve(this.#manifest.workspacePath, m.sourceFolder, f);
-      const js = (type === 'ts' ? f.replace(/[.]ts$/, '.js') : f);
+      const js = isSource ? ManifestModuleUtil.sourceToOutputExt(f) : f;
       const outputFile = this.#resolveOutput(m.outputFolder, js);
       const modImport = `${m.name}/${js}`;
       let id = modImport.replace(`${m.name}/`, _ => _.replace(/[/]$/, ':'));
-      if (type === 'ts' || type === 'js') {
-        id = id.replace(/[.]js$/, '');
+      if (isSource) {
+        id = ManifestModuleUtil.sourceToBlankExt(id);
       }
 
       return { id, type, sourceFile, outputFile, import: modImport, profile, relativeFile: f, module: m.name };
@@ -117,7 +119,6 @@ export class ManifestIndex {
           this.#sourceToEntry.set(entry.sourceFile, entry);
           this.#importToEntry.set(entry.import, entry);
           this.#importToEntry.set(entry.import.replace(/[.]js$/, ''), entry);
-          this.#importToEntry.set(entry.import.replace(/[.]js$/, '.ts'), entry);
         }
       }
     }
@@ -221,7 +222,7 @@ export class ManifestIndex {
    * Resolve import
    */
   resolveFileImport(name: string): string {
-    return this.#importToEntry.get(name)?.outputFile ?? name;
+    return this.getFromImport(name)?.outputFile ?? name;
   }
 
   /**
@@ -237,6 +238,8 @@ export class ManifestIndex {
    * @param source
    */
   getFromImport(imp: string): IndexedFile | undefined {
+    // Strip ext
+    imp = ManifestModuleUtil.sourceToBlankExt(imp);
     return this.#importToEntry.get(imp);
   }
 

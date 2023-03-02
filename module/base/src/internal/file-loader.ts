@@ -1,6 +1,6 @@
 import timers from 'timers/promises';
 
-import { RootIndex, WatchEvent, watchFolders } from '@travetto/manifest';
+import { ManifestModuleUtil, RootIndex, WatchEvent, watchFolders } from '@travetto/manifest';
 
 import { ObjectUtil } from '../object';
 import { ShutdownManager } from '../shutdown';
@@ -81,7 +81,10 @@ class $DynamicFileLoader {
     await watchFolders(
       RootIndex.getLocalModules().map(x => x.outputPath),
       (ev, folder) => this.dispatch(ev, folder),
-      { filter: ev => ev.file.endsWith('.js'), createMissing: true }
+      {
+        filter: ev => ManifestModuleUtil.getFileType(ev.file) === 'js',
+        createMissing: true
+      }
     );
   }
 }

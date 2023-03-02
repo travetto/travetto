@@ -104,17 +104,18 @@ export class CompilerState implements ts.CompilerHost {
     return prog;
   }
 
-  writeInputFile(program: ts.Program, inputFile: string): ts.EmitResult | undefined {
-    if (inputFile.endsWith('.json')) {
-      this.writeFile(this.#inputToEntry.get(inputFile)!.output!, this.readFile(inputFile)!, false);
-    } else if (inputFile.endsWith('.js')) {
-      this.writeFile(this.#inputToEntry.get(inputFile)!.output!, ts.transpile(this.readFile(inputFile)!, this.#compilerOptions), false);
-    } else if (inputFile.endsWith('.ts')) {
-      return program.emit(
-        program.getSourceFile(inputFile)!,
-        (...args) => this.writeFile(...args), undefined, false,
-        this.#transformerManager.get()
-      );
+  writeInputFile(program: ts.Program, inputFile: string): ts.EmitResult | undefined | void {
+    switch (ManifestModuleUtil.getFileType(inputFile)) {
+      case 'package-json':
+        return this.writeFile(this.#inputToEntry.get(inputFile)!.output!, this.readFile(inputFile)!, false);
+      case 'js':
+        return this.writeFile(this.#inputToEntry.get(inputFile)!.output!, ts.transpile(this.readFile(inputFile)!, this.#compilerOptions), false);
+      case 'ts':
+        return program.emit(
+          program.getSourceFile(inputFile)!,
+          (...args) => this.writeFile(...args), undefined, false,
+          this.#transformerManager.get()
+        );
     }
   }
 
@@ -131,7 +132,7 @@ export class CompilerState implements ts.CompilerHost {
     const fileType = ManifestModuleUtil.getFileType(moduleFile);
     const outputFile = fileType === 'typings' ?
       undefined :
-      path.resolve(this.#outputPath, CompilerUtil.inputToOutput(relativeInput));
+      path.resolve(this.#outputPath, ManifestModuleUtil.sourceToOutputExt(relativeInput));
 
     const entry = { source: sourceFile, input: inputFile, output: outputFile, module, relativeInput };
 

@@ -20,6 +20,27 @@ const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math
  */
 export class TranspileUtil {
   /**
+   * Determine file type
+   */
+  static getFileType(file: string): 'ts' | 'js' | 'package-json' | 'typings' | undefined {
+    return file.endsWith('package.json') ? 'package-json' :
+      (file.endsWith('.js') ? 'js' :
+        (file.endsWith('.d.ts') ? 'typings' : (/[.]tsx?$/.test(file) ? 'ts' : undefined)));
+  }
+
+  /**  Convert a file to a given ext */
+  static #sourceToExtension(inputFile: string, ext: string): string {
+    return inputFile.replace(/[.][tj]sx?$/, ext);
+  }
+
+  /**
+   * Get the output file name for a given input
+   */
+  static sourceToOutputExt(inputFile: string): string {
+    return this.#sourceToExtension(inputFile, '.js');
+  }
+
+  /**
    * Write text file, and ensure folder exists
    */
   static writeTextFile = (file: string, content: string): Promise<void> =>
@@ -59,7 +80,8 @@ export class TranspileUtil {
    * Output a file, support for ts, js, and package.json
    */
   static async transpileFile(ctx: ManifestContext, inputFile: string, outputFile: string): Promise<void> {
-    if (inputFile.endsWith('.ts') || inputFile.endsWith('.js')) {
+    const type = this.getFileType(inputFile);
+    if (type === 'js' || type === 'ts') {
       const compilerOut = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules');
 
       const text = (await fs.readFile(inputFile, 'utf8'))
@@ -73,10 +95,10 @@ export class TranspileUtil {
         inlineSourceMap: true,
       }, inputFile);
       await this.writeTextFile(outputFile, content);
-    } else if (inputFile.endsWith('package.json')) {
+    } else if (type === 'package-json') {
       const pkg: Package = JSON.parse(await fs.readFile(inputFile, 'utf8'));
-      const main = pkg.main?.replace(/[.]ts$/, '.js');
-      const files = pkg.files?.map(x => x.replace('.ts', '.js'));
+      const main = pkg.main ? this.sourceToOutputExt(pkg.main) : undefined;
+      const files = pkg.files?.map(x => this.sourceToOutputExt(x));
 
       const content = JSON.stringify({ ...pkg, main, type: ctx.moduleType, files }, null, 2);
       await this.writeTextFile(outputFile, content);
@@ -109,10 +131,12 @@ export class TranspileUtil {
 
         if (stat.isDirectory()) {
           folders.push(resolvedInput);
-        } else if (file.endsWith('.d.ts')) {
-          // Do nothing
-        } else if (file.endsWith('.ts') || file.endsWith('.js')) {
-          files.push(resolvedInput);
+        } else {
+          switch (this.getFileType(file)) {
+            case 'js':
+            case 'ts':
+              files.push(resolvedInput);
+          }
         }
       }
     }
@@ -120,7 +144,7 @@ export class TranspileUtil {
     const outputFolder = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', module);
     const out: ModFile[] = [];
     for (const input of files) {
-      const output = input.replace(inputFolder, outputFolder).replace(/[.]ts$/, '.js');
+      const output = this.sourceToOutputExt(input.replace(inputFolder, outputFolder));
       const inputTs = await fs.stat(input).then(RECENT_STAT, () => 0);
       if (inputTs) {
         const outputTs = await fs.stat(output).then(RECENT_STAT, () => 0);

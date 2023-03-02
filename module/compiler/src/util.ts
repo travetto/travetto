@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestContext, ManifestModuleFileType, ManifestRoot, Package, path } from '@travetto/manifest';
+import { ManifestContext, ManifestModuleFileType, ManifestModuleUtil, ManifestRoot, Package, path } from '@travetto/manifest';
 
 type OutputToSource = (outputFile: string) => ({ source: string } | undefined);
 export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
@@ -18,15 +18,6 @@ export class CompilerUtil {
   static validFile = (type: ManifestModuleFileType): boolean => type === 'ts' || type === 'package-json' || type === 'js';
 
   /**
-   * Map input file to output format, generally converting ts extensions to js
-   * @param file
-   * @returns
-   */
-  static inputToOutput(file: string): string {
-    return file.replace(/[.][tj]s$/, '.js');
-  }
-
-  /**
    * Determines if write callback data has sourcemap information
    * @param data
    * @returns
@@ -41,7 +32,7 @@ export class CompilerUtil {
    */
   static rewriteSourceMap(ctx: ManifestContext, text: string, outputToSource: OutputToSource): string {
     const data: { sourceRoot?: string, sources: string[] } = JSON.parse(text);
-    const output = this.inputToOutput(path.resolve(ctx.workspacePath, ctx.outputFolder, data.sources[0]));
+    const output = ManifestModuleUtil.sourceToOutputExt(path.resolve(ctx.workspacePath, ctx.outputFolder, data.sources[0]));
     const { source: file } = outputToSource(output) ?? {};
 
     if (file) {
@@ -77,7 +68,7 @@ export class CompilerUtil {
   }
 
   /**
-   * Rewrites the package.json to target .js files instead of .ts files, and pins versions
+   * Rewrites the package.json to target output file names, and pins versions
    * @param manifest
    * @param file
    * @param text
@@ -86,10 +77,10 @@ export class CompilerUtil {
   static rewritePackageJSON(manifest: ManifestRoot, text: string): string {
     const pkg: Package = JSON.parse(text);
     if (pkg.files) {
-      pkg.files = pkg.files.map(x => this.inputToOutput(x));
+      pkg.files = pkg.files.map(x => ManifestModuleUtil.sourceToOutputExt(x));
     }
     if (pkg.main) {
-      pkg.main = this.inputToOutput(pkg.main);
+      pkg.main = ManifestModuleUtil.sourceToOutputExt(pkg.main);
     }
     pkg.type = manifest.moduleType;
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {

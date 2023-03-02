@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { PackageUtil, path } from '@travetto/manifest';
+import { ManifestModuleUtil, PackageUtil, path } from '@travetto/manifest';
 
 import { Import } from '../types/shared';
 
@@ -12,7 +12,7 @@ export class ImportUtil {
    * useful for handling failed imports, but still transpiling
    */
   static optionalResolve(file: string, base?: string): string {
-    if (base?.endsWith('.ts')) {
+    if (base && ManifestModuleUtil.getFileType(base) === 'ts') {
       base = path.dirname(base);
     }
     if (base && file.startsWith('.')) {

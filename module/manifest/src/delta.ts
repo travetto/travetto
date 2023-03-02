@@ -36,15 +36,18 @@ export class ManifestDeltaUtil {
     const root = `${ctx.workspacePath}/${ctx.outputFolder}/${left.outputFolder}`;
     const right = new Set(
       (await ManifestModuleUtil.scanFolder(root, left.main))
-        .filter(x => (x.endsWith('.ts') || x.endsWith('.js') || x.endsWith('package.json')))
-        .map(x => x.replace(`${root}/`, '').replace(/[.][tj]s$/, ''))
+        .filter(x => {
+          const type = ManifestModuleUtil.getFileType(x);
+          return type === 'ts' || type === 'typings' || type === 'js' || type === 'package-json';
+        })
+        .map(x => ManifestModuleUtil.sourceToBlankExt(x.replace(`${root}/`, '')))
     );
 
     for (const el of Object.keys(left.files)) {
-      const output = `${outputFolder}/${left.outputFolder}/${el.replace(/[.]ts$/, '.js')}`;
+      const output = ManifestModuleUtil.sourceToOutputExt(`${outputFolder}/${left.outputFolder}/${el}`);
       const [, , leftTs] = left.files[el];
       const stat = await fs.stat(output).catch(() => { });
-      right.delete(el.replace(/[.][tj]s$/, ''));
+      right.delete(ManifestModuleUtil.sourceToBlankExt(el));
 
       if (!stat) {
         add(el, 'added');
