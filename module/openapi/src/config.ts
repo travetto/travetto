@@ -46,7 +46,7 @@ export class ApiHostConfig {
   /**
    * OpenAPI Version
    */
-  openapi = '3.0.1';
+  openapi = '3.1.0';
 }
 
 /**
@@ -74,7 +74,7 @@ export class ApiSpecConfig {
   exposeAllSchemas: boolean = false;
 
   async postConstruct(): Promise<void> {
-    this.output = path.toPosix(this.output);
+    this.output = path.resolve(this.output);
     if (!this.output || this.output === '-') {
       this.persist = false;
     } else {
