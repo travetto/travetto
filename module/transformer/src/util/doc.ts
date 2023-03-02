@@ -12,7 +12,7 @@ export class DocUtil {
    * See if node has js docs
    */
   static hasJSDoc(o: ts.Node): o is (ts.Node & { jsDoc: ts.JSDoc[] }) {
-    return 'jsDoc' in o;
+    return 'jsDoc' in o && o.jsDoc !== null && o.jsDoc !== undefined && Array.isArray(o.jsDoc) && o.jsDoc.length > 0;
   }
 
   /**

@@ -22,7 +22,7 @@ export class Compiler {
   static async main(): Promise<void> {
     const [dirty, watch] = process.argv.slice(2);
     const state = await CompilerState.get(RootIndex);
-    const dirtyFiles = (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
+    const dirtyFiles = dirty.endsWith('.ts') ? [dirty] : (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
     await new Compiler(state, dirtyFiles, watch === 'true').run();
     process.exit(0);
   }
