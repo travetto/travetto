@@ -25,7 +25,7 @@ export class OpenApiSpecCommand extends CliCommand<Options> {
 
   async action(): Promise<void> {
     const result = await ExecUtil.worker(
-      RootIndex.resolveFileImport('@travetto/cli/support/cli.ts'),
+      RootIndex.resolveFileImport('@travetto/cli/support/entry.cli.ts'),
       ['main', '@travetto/openapi/support/bin/generate.ts'],
       { env: { TRV_OPENAPI_OUTPUT: this.cmd.output, TRV_OPENAPI_PERSIST: '1' } }
     ).message;
