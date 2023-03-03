@@ -33,12 +33,12 @@ export async function main(target?: string): Promise<void> {
 
   const mods = new Set((await CliModuleUtil.findModules('all'))
     .filter(x => !target || x.sourcePath === path.resolve(root, target))
-    .filter(x => (x.files.doc ?? []).some(f => f.sourceFile.endsWith('DOC.ts'))));
+    .filter(x => (x.files.doc ?? []).some(f => /DOC[.]tsx?$/.test(f.sourceFile))));
 
   if (mods.size > 1) {
     // Build out docs
     await CliModuleUtil.execOnModules('all',
-      (mod, opts) => ExecUtil.spawn('trv', ['doc'], opts),
+      (mod, opts) => ExecUtil.spawn('trv', ['doc'], { ...opts, env: { ...opts.env ?? {}, TRV_BUILD: 'none' } }),
       {
         showStdout: false,
         progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
@@ -48,7 +48,7 @@ export async function main(target?: string): Promise<void> {
     await ExecUtil.spawn('trv', ['doc'], { env: { TRV_MANIFEST: '' }, cwd: RootIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
     mods.add(RootIndex.mainModule);
   } else {
-    const opts = { env: { TRV_MANIFEST: '' }, cwd: [...mods][0].sourcePath, stdio: 'inherit' } as const;
+    const opts = { env: { TRV_MANIFEST: '', TRV_BUILD: 'none' }, cwd: [...mods][0].sourcePath, stdio: 'inherit' } as const;
     await ExecUtil.spawn('trv', ['doc'], opts).result;
   }
 

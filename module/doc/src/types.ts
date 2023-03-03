@@ -1,64 +1,34 @@
-export interface DocNode { _type: string }
+import { JSXElement, ValidHtmlTags } from '../jsx-runtime';
+import { JSXElementByFn, c } from './jsx';
 
-export type Content = DocNode | string;
-
-export type TextType = { _type: 'text', content: string };
-
-export type Wrapper = Record<string, (c: string) => string>;
+export type Wrapper = Record<string, (cnt: string) => string>;
 
 /**
  * Document file shape
  */
-export interface DocumentShape<T extends DocNode = DocNode> {
-  text: () => (T | Promise<T>);
+export interface DocumentShape {
+  text: JSXElement | JSXElement[] | (() => Promise<JSXElement | JSXElement[]>);
   wrap?: Wrapper;
 }
 
-/**
- * Render context shape
- */
-export interface RenderContextShape {
-
-  /**
-   * Filename
-   */
-  file: string;
-
-  /**
-   * Github root for project
-   */
-  baseUrl: string;
-
-  /**
-   * Github root for Travetto framework
-   */
-  travettoBaseUrl: string;
-
-  /**
-   * Get table of contents
-   */
-  toc(root: DocNode): DocNode;
-
-  /**
-   * Generate link location
-   */
-  link(text: string, line?: number | { [key: string]: unknown, line?: number }): string;
-
-  /**
-   * Clean text
-   */
-  cleanText(a?: string): string;
-
-  /**
-   * Get a consistent anchor id
-   */
-  getAnchorId(a: string): string;
-}
-
-/**
- * Renderer support
- */
-export type Renderer = {
-  ext: string;
-  render(node: DocNode, context: RenderContextShape, root?: DocNode): string;
+export type RenderState<T extends JSXElement, C> = {
+  el: T;
+  props: T['props'];
+  recurse: () => Promise<string>;
+  stack: JSXElement[];
+  // @ts-expect-error
+  createState: <K extends keyof typeof c>(key: K, props: JSXElementByFn<K>['props']) => RenderState<JSXElementByFn<K>, C>;
+  context: C;
 };
+
+/**
+ * Renderer
+ */
+export type RenderProvider<C> =
+  {
+    ext: string;
+    finalize: (text: string, ctx: C) => string;
+  } &
+  { [K in ValidHtmlTags]: (state: RenderState<JSXElement<K>, C>) => Promise<string>; } &
+  // @ts-expect-error
+  { [K in keyof typeof c]: (state: RenderState<JSXElementByFn<K>, C>) => Promise<string>; };

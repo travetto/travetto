@@ -92,6 +92,9 @@ export class SerializeUtil {
     return (res[SendStreamⲐ] ? res[SendStreamⲐ](output) : StreamUtil.pipe(output, res[NodeEntityⲐ]));
   }
 
+  /**
+   * Send empty response
+   */
   static serializeEmpty(req: Request, res: Response): void {
     res.status(req.method === 'POST' || req.method === 'PUT' ? 201 : 204);
     res.send('');

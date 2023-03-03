@@ -1,4 +1,3 @@
-export { node } from './src/nodes';
-export { lib } from './src/lib';
-export { mod } from './src/mod';
-export { doc, d } from './src/doc';
+export { JSXElement as DocJSXElement, isJSXElement as isDocJSXElement } from './jsx-runtime';
+export { c, d, JSXElementByFn as DocJSXElementByFn } from './src/jsx';
+export { MOD_MAPPING as mod } from './src/mapping/mod-mapping';

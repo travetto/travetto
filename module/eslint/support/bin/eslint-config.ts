@@ -27,7 +27,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
     { ignores: IGNORES, },
     {
       ...RULE_COMMON,
-      files: ['**/*.ts', '**/*.js'],
+      files: ['**/*.ts', '**/*.tsx', '**/*.js'],
       plugins: {
         '@typescript-eslint': {
           rules: tsEslintPlugin.rules,
@@ -44,7 +44,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
     },
     {
       ...RULE_COMMON,
-      files: ['**/*.ts'],
+      files: ['**/*.ts', '**/*.tsx'],
       rules: {
         '@typescript-eslint/explicit-function-return-type': 'warn',
         'no-undef': 0,
@@ -52,7 +52,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
     },
     {
       ...RULE_COMMON,
-      files: ['**/DOC.ts', '**/doc/**/*.ts'],
+      files: ['**/DOC.ts', '**/DOC.tsx', '**/doc/**/*.ts', '**/doc/**/*.tsx'],
       rules: {
         'max-len': 0,
         '@typescript-eslint/quotes': 'warn',
@@ -63,14 +63,18 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
     },
     {
       ...RULE_COMMON,
-      files: ['module/compiler/**/*.ts', 'module/transformer/**/*.ts', '**/support/transform*.ts', '**/support/transformer.*.ts'],
+      files: [
+        'module/compiler/**/*.ts', 'module/transformer/**/*.ts',
+        '**/support/transform*.ts', '**/support/transformer.*.ts',
+        '**/support/transform*.tsx', '**/support/transformer.*.tsx'
+      ],
       rules: {
         'no-restricted-imports': 0
       }
     },
     {
       ...RULE_COMMON,
-      files: ['**/test/**/*.ts', '**/support/test/**/*.ts'],
+      files: ['**/test/**/*.ts', '**/test/**/*.tsx', '**/support/test/**/*.ts', '**/support/test/**/*.tsx'],
       rules: {
         '@typescript-eslint/consistent-type-assertions': 0,
         '@typescript-eslint/explicit-function-return-type': 0

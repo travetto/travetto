@@ -1,3 +1,5 @@
+import { Readable } from 'stream';
+
 import { Controller, Get, Produces, Request } from '@travetto/rest';
 import { FileResourceProvider } from '@travetto/base';
 
@@ -8,19 +10,19 @@ export class UIController {
 
   @Get('/')
   @Produces('text/html')
-  getHomepage(): ReadableStream {
+  getHomepage(): Promise<Readable> {
     return this.resources.readStream('/ui/index.html');
   }
 
   @Get(/[.]js$/)
   @Produces('application/javascript')
-  getJs(req: Request): ReadableStream {
+  getJs(req: Request): Promise<Readable> {
     return this.resources.readStream(req.url);
   }
 
   @Get(/[.]css$/)
   @Produces('text/css')
-  getCss(req: Request): ReadableStream {
+  getCss(req: Request): Promise<Readable> {
     return this.resources.readStream(req.url);
   }
 }
