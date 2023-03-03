@@ -1,34 +1,39 @@
-import { existsSync, readFileSync } from 'fs';
+import fs from 'fs/promises';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { ManifestModuleUtil, path, RootIndex } from '@travetto/manifest';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
 
 /**
  * Standard file utilities
  */
-export class FileUtil {
+export class DocFileUtil {
 
   static #decCache: Record<string, boolean> = {};
   static #extToLang: Record<string, string> = {
     ts: 'typescript',
+    tsx: 'typescript',
     js: 'javascript',
     yml: 'yaml',
     sh: 'bash',
   };
+
+  static isFile(src: string): boolean {
+    return /^[@:A-Za-z0-9\/\\\-_.]+[.]([a-z]{2,10})$/.test(src);
+  }
 
   /**
    * Resolve file
    * @param file
    * @returns
    */
-  static resolveFile(file: string): string {
+  static async resolveFile(file: string): Promise<string> {
     let resolved = path.resolve(file);
-    if (!existsSync(resolved)) {
-      if (file.endsWith('.ts')) {
+    if (!(await fs.stat(resolved).catch(() => false))) {
+      if (ManifestModuleUtil.getFileType(file) === 'ts') {
         resolved = RootIndex.getSourceFile(file);
       }
-      if (!existsSync(resolved)) {
+      if (!(await fs.stat(resolved).catch(() => false))) {
         throw new Error(`Unknown file to resolve: ${file}`);
       }
     }
@@ -41,15 +46,15 @@ export class FileUtil {
    * @param file
    * @returns
    */
-  static read(file: string): { content: string, language: string, file: string } {
-    file = this.resolveFile(file);
+  static async read(file: string): Promise<{ content: string, language: string, file: string }> {
+    file = await this.resolveFile(file);
 
     const ext = path.extname(file).replace(/^[.]/, '');
     const language = this.#extToLang[ext] ?? ext;
 
     let text: string | undefined;
     if (language) {
-      text = readFileSync(file, 'utf8');
+      text = await fs.readFile(file, 'utf8');
 
       text = text.split(/\n/)
         .map(x => {
@@ -65,18 +70,28 @@ export class FileUtil {
     return { content: text ?? '', language, file };
   }
 
+  static async readCodeSnippet(file: string, startPattern: RegExp): Promise<{ file: string, startIdx: number, lines: string[], language: string }> {
+    const res = await this.read(file);
+    const lines = res.content.split(/\n/g);
+    const startIdx = lines.findIndex(l => startPattern.test(l));
+    if (startIdx < 0) {
+      throw new Error(`Pattern ${startPattern.source} not found in ${file}`);
+    }
+    return { file: res.file, startIdx, lines, language: res.language };
+  }
+
   /**
    * Determine if a file is a decorator
    */
-  static isDecorator(name: string, file: string): boolean {
-    file = this.resolveFile(file);
+  static async isDecorator(name: string, file: string): Promise<boolean> {
+    file = await this.resolveFile(file);
 
     const key = `${name}:${file}`;
     if (key in this.#decCache) {
       return this.#decCache[key];
     }
 
-    const text = readFileSync(file, 'utf8')
+    const text = (await fs.readFile(file, 'utf8'))
       .split(/\n/g);
 
     const start = text.findIndex(x => new RegExp(`function ${name}\\b`).test(x));

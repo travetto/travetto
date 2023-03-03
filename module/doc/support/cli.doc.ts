@@ -4,7 +4,7 @@ import { PackageUtil, path, RootIndex, watchFolderImmediate } from '@travetto/ma
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
-import { RenderUtil } from '../src/render/util';
+import { DocRenderer } from '../src/render/renderer';
 
 type Options = {
   input: OptionConfig<string>;
@@ -20,7 +20,7 @@ export class DocCommand extends CliCommand<Options> {
 
   getOptions(): Options {
     return {
-      input: this.option({ desc: 'Input File', def: 'DOC.ts' }),
+      input: this.option({ desc: 'Input File', def: 'DOC.tsx' }),
       outputs: this.listOption({ desc: 'Outputs', def: [] }),
       watch: this.boolOption({ desc: 'Watch' })
     };
@@ -50,7 +50,10 @@ export class DocCommand extends CliCommand<Options> {
       this.cmd.outputs = workspacePkg.travetto?.docOutputs ?? ['README.md'];
     }
 
-    const outputs = this.cmd.outputs.map(output => output.includes('.') ? [path.extname(output).substring(1), path.resolve(output)] : [output, null] as const);
+    const outputs = this.cmd.outputs.map(output =>
+      output.includes('.') ? [path.extname(output).substring(1), path.resolve(output)] :
+        [output, null] as const
+    );
 
     if (this.cmd.watch) {
       const args = process.argv.slice(2).filter(x => !x.startsWith('-w') && !x.startsWith('--w'));
@@ -66,8 +69,10 @@ export class DocCommand extends CliCommand<Options> {
     }
 
     try {
+      const ctx = await DocRenderer.get(docFile, RootIndex.manifest);
+
       for (const [fmt, out] of outputs) {
-        const result = await RenderUtil.render(docFile, fmt);
+        const result = await ctx.render(fmt);
         if (out) {
           const finalName = path.resolve(out);
           await fs.writeFile(finalName, result, 'utf8');

@@ -1,5 +1,3 @@
-import { spawnSync } from 'child_process';
-
 import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { stripAnsiCodes } from '@travetto/terminal';
@@ -62,7 +60,7 @@ export class DocRunUtil {
           ...process.env,
           DEBUG: '0',
           TRV_MANIFEST: '',
-          TRV_BUILD: 'warn',
+          TRV_BUILD: 'none',
           TRV_MODULE: config.module ?? '',
           ...(config.profiles ? { TRV_PROFILES: config.profiles.join(' ') } : {}),
           ...(config.env ?? {})
@@ -99,35 +97,23 @@ export class DocRunUtil {
    */
   static runBackground(cmd: string, args: string[], config: RunConfig = {}): ExecutionState {
     const state = this.runState(cmd, args, config);
-    return ExecUtil.spawn(state.cmd, state.args, {
-      ...state.opts,
-      stdio: 'pipe'
-    });
+    return ExecUtil.spawn(state.cmd, state.args, { ...state.opts, stdio: 'pipe' });
   }
 
   /**
    * Run command synchronously and return output
    */
-  static run(cmd: string, args: string[], config: RunConfig = {}): string {
+  static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
     let final: string;
     try {
       const state = this.runState(cmd, args, config);
-      const spawnCfg = {
-        ...state.opts,
-        stdio: 'pipe' as const,
-        encoding: 'utf8',
-        maxBuffer: 1024 * 1024 * 20,
-      } as const;
-
-      const res = spawnSync(state.cmd, state.args, spawnCfg);
-
-      if (res.error) {
-        throw res.error;
+      const res = await ExecUtil.spawn(state.cmd, state.args, { stdio: 'pipe', ...state.opts, catchAsResult: true }).result;
+      if (!res.valid) {
+        throw new Error(res.stderr);
       }
       final = stripAnsiCodes(res.stdout.toString()).trim() || stripAnsiCodes(res.stderr.toString()).trim();
     } catch (err) {
       if (err instanceof Error) {
-        console.log('Found!', cmd, args, '\n', err);
         final = err.message;
       } else {
         throw err;

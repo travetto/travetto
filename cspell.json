@@ -75,6 +75,7 @@
         "pgcrypto",
         "picomatch",
         "pngquant",
+        "preact",
         "precompiler",
         "preid",
         "prismjs",

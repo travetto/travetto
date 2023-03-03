@@ -20,7 +20,7 @@ const EXT_MAPPING: Record<string, ManifestModuleFileType> = {
 };
 
 const INDEX_FILES = new Set(
-  ['__index__', '__index', 'index'].flatMap(f =>
+  ['__index__', '__index', 'index', 'jsx-runtime'].flatMap(f =>
     ['ts', 'tsx', 'js'].map(ext => `${f}.${ext}`)
   )
 );
@@ -122,7 +122,7 @@ export class ManifestModuleUtil {
       return 'compile';
     } else if (moduleFile.startsWith('support/test/') || moduleFile.startsWith('test/')) {
       return 'test';
-    } else if (moduleFile.startsWith('doc/') || moduleFile === 'DOC.ts') {
+    } else if (moduleFile.startsWith('doc/') || /^DOC[.]tsx?$/.test(moduleFile)) {
       return 'doc';
     } else {
       return;
@@ -154,7 +154,7 @@ export class ManifestModuleUtil {
         case 'support': return key;
         default: return '$other';
       }
-    } else if (moduleFile === 'DOC.ts') {
+    } else if (/^DOC[.]tsx?$/.test(moduleFile)) {
       return 'doc';
     } else if (INDEX_FILES.has(moduleFile)) {
       return '$index';
