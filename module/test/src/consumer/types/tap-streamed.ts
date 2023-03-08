@@ -67,7 +67,7 @@ export class TapStreamedEmitter implements TestConsumer {
 
     this.#progress = this.#terminal.streamToPosition(this.#results,
       TapStreamedEmitter.makeProgressBar(this.#terminal, total),
-      { position: 'bottom' }
+      { position: 'bottom', minDelay: 100 }
     );
   }
 

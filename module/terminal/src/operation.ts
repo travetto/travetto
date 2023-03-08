@@ -32,9 +32,24 @@ export class TerminalOperation {
       }
       await batch.commit();
 
+      let start = Date.now();
+      const minDelay = config.minDelay ?? 0;
+
+      const lines: string[] = [];
       for await (const text of source) {
-        await TerminalWriter.for(term).setPosition(writePos).write(text).clearLine(1).commit(true);
+        lines.push(text);
+        if ((Date.now() - start) >= minDelay) {
+          const next = lines.splice(0, lines.length).pop()!;
+          start = Date.now();
+          await TerminalWriter.for(term).setPosition(writePos).write(next).clearLine(1).commit(true);
+        }
       }
+
+      const last = lines.splice(0, lines.length).pop();
+      if (last) {
+        await TerminalWriter.for(term).setPosition(writePos).write(last).clearLine(1).commit(true);
+      }
+
       if (config.clearOnFinish ?? true) {
         await TerminalWriter.for(term).setPosition(writePos).clearLine().commit(true);
       }

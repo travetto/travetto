@@ -43,6 +43,7 @@ export class TerminalQuerier {
   #queue = IterableUtil.simpleQueue();
   #output: tty.WriteStream;
   #input: tty.ReadStream;
+  #restore?: () => void;
 
   constructor(input: tty.ReadStream, output: tty.WriteStream) {
     this.#input = input;
@@ -53,6 +54,20 @@ export class TerminalQuerier {
     const isRaw = this.#input.isRaw;
     const isPaused = this.#input.isPaused();
     const data = this.#input.listeners('data');
+
+    this.#restore = (): void => {
+      this.#input.removeAllListeners('readable');
+
+      if (isPaused) {
+        this.#input.pause();
+      }
+      this.#input.setRawMode(isRaw);
+      for (const fn of data) {
+        // @ts-ignore
+        this.#input.on('data', fn);
+      }
+    };
+
     try {
       this.#input.removeAllListeners('data');
 
@@ -67,14 +82,8 @@ export class TerminalQuerier {
       const val: Buffer | string = this.#input.read();
       return typeof val === 'string' ? Buffer.from(val, 'utf8') : val;
     } finally {
-      if (isPaused) {
-        this.#input.pause();
-      }
-      this.#input.setRawMode(isRaw);
-      for (const fn of data) {
-        // @ts-ignore
-        this.#input.on('data', fn);
-      }
+      this.#restore?.();
+      this.#restore = undefined;
     }
   }
 
@@ -90,7 +99,8 @@ export class TerminalQuerier {
     return this.query(ANSIQueries.color('background'));
   }
 
-  close(): Promise<void> {
-    return this.#queue.close();
+  close(): void {
+    this.#restore?.();
+    this.#queue.close();
   }
 }
