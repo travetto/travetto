@@ -32,6 +32,7 @@ class $ShutdownManager {
   #shutdownCode = -1;
   #unhandled: UnhandledHandler[] = [];
   #exit = process.exit;
+  #exitRequestHandlers: (() => (void | Promise<void>))[] = [];
 
   async #getAvailableListeners(exitCode: number): Promise<unknown[]> {
     const promises: Promise<unknown>[] = [];
@@ -141,6 +142,7 @@ class $ShutdownManager {
     process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
     process.on('SIGTERM', this.execute.bind(this, 143));
+    process.on('SIGUSR2', this.requestExit.bind(this));
     process.on('uncaughtException', this.executeUnhandled.bind(this));
     process.on('unhandledRejection', this.executeUnhandled.bind(this));
   }
@@ -204,6 +206,24 @@ class $ShutdownManager {
       process[!failure ? 'stdout' : 'stderr'].write(`${msg}\n`);
     }
     return this.exit(!failure ? 0 : (res && res instanceof Error ? res : 1));
+  }
+
+  /**
+   * Listen for request for graceful exit
+   */
+  onExitRequested(handler: Closeable | (() => void)): void {
+    if ('close' in handler) {
+      handler = handler.close.bind(handler);
+    }
+    this.#exitRequestHandlers.push(handler);
+  }
+
+  /**
+   * Indicates the program is over, allowing cleanup of any resources that could block process exit
+   */
+  async requestExit(): Promise<void> {
+    await Promise.all(this.#exitRequestHandlers.map(x => x()));
+    await this.exit(process.exitCode ?? 0);
   }
 }
 

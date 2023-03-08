@@ -60,23 +60,28 @@ export class TemplateManager {
   /**
    * Watch compilation
    */
-  async watchCompile(cb?: (file: string) => void): Promise<void> {
-    await this.resources.watchFiles(async ({ file, action }) => {
+  async * watchCompile(): AsyncIterable<string> {
+    const stream = this.resources.watchFiles();
+    for await (const { file, action } of stream) {
+      if (action === 'delete' || !VALID_FILE(file)) {
+        continue;
+      }
+
       try {
         const rel = file.replace(EmailTemplateResource.PATH_PREFIX, '');
         console.log(`Contents ${action}`, { file, rel });
         if (this.resources.isTemplateFile(rel)) {
           await this.compiler.compile(rel, true);
-          cb?.(rel);
+          yield rel;
         } else {
           await this.compiler.compileAll(true);
           for (const el of await this.resources.findAllTemplates()) {
-            cb?.(el.rel);
+            yield el.rel;
           }
         }
       } catch (err) {
         console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
       }
-    }, { filter: ev => ev.action !== 'delete' && VALID_FILE(ev.file), persistent: true });
+    }
   }
 }

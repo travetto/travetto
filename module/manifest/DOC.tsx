@@ -85,9 +85,11 @@ export const text = <>
   <c.Section title='File Watching'>
     The module also leverages {d.library('ParcelWatcher')}, to expose a single function of {d.method('watchFolders')}. Only the {d.mod('Compiler')} module packages {d.library('ParcelWatcher')} as a direct dependency.  This means, that in production, by default all watch operations will fail with a missing dependency.
 
-    <c.Code title='Watch Folder Signature' src='src/watch.ts' startRe={/export type WatchEvent/} endRe={/^[)]:/} />
+    <c.Code title='Watch Configuration' src='src/watch.ts' startRe={/export type WatchEvent/} endRe={/export type WatchStream/} />
 
     This method allows for watching one or more folders, and registering a callback that will fire every time a file changes, and which of the registered folders it was triggered within. The return of the {d.method('watchFolders')} is a cleanup method, that when invoked will remove and stop all watching behavior.
+
+    <c.Code title='Watch Configuration' src='src/watch.ts' startRe={/function watchFolders/} endRe={/^[)]:/} />
   </c.Section>
   <c.Section title='Anatomy of a Manifest'>
 
@@ -131,19 +133,19 @@ export const text = <>
     <c.SubSection title='Module Files'>
       The module files are a simple categorization of files into a predetermined set of folders:
       <ul>
-        <li>$root - All uncategorized files at the module root</li>
-        <li>$index - __index__.ts, index.ts files at the root of the project</li>
-        <li>$package - The {d.library('PackageJson')} for the project</li>
-        <li>src - Code that should be automatically loaded at runtime. All .ts files under the src/ folder</li>
-        <li>test - Code that contains test files. All .ts files under the test/ folder</li>
-        <li>test/fixtures - Test resource files, pertains to the main module only. Located under test/fixtures/</li>
-        <li>resources - Packaged resource, meant to pertain to the main module only. Files, under resources/</li>
-        <li>support - All .ts files under the support/ folder</li>
-        <li>support/resources - Packaged resource files, meant to be included by other modules, under support/resources/</li>
-        <li>support/fixtures - Test resources meant to shared across modules.  Under support/fixtures/</li>
-        <li>doc - Documentation files. All .ts files under the doc/ folder</li>
-        <li>$transformer - All .ts files under the pattern support/transform*.  These are used during compilation and never at runtime</li>
-        <li>bin - Entry point .js files.  All .js files under the bin/ folder</li>
+        <li>{d.path('$root')} - All uncategorized files at the module root</li>
+        <li>{d.path('$index')} - {d.path('__index__.ts')}, {d.path('index.ts')} files at the root of the project</li>
+        <li>{d.path('$package')} - The {d.library('PackageJson')} for the project</li>
+        <li>{d.path('src')} - Code that should be automatically loaded at runtime. All .ts files under the {d.path('src/')} folder</li>
+        <li>{d.path('test')} - Code that contains test files. All .ts files under the {d.path('test/')} folder</li>
+        <li>{d.path('test/fixtures')} - Test resource files, pertains to the main module only. Located under {d.path('test/fixtures/')}</li>
+        <li>{d.path('resources')} - Packaged resource, meant to pertain to the main module only. Files, under {d.path('resources/')}</li>
+        <li>{d.path('support')} - All .ts files under the {d.path('support/')} folder</li>
+        <li>{d.path('support/resources')} - Packaged resource files, meant to be included by other modules, under {d.path('support/resources/')}</li>
+        <li>{d.path('support/fixtures')} - Test resources meant to shared across modules.  Under {d.path('support/fixtures/')}</li>
+        <li>{d.path('doc')} - Documentation files. {d.path('DOC.tsx')} and All .ts/.tsx files under the {d.path('doc/')} folder</li>
+        <li>{d.path('$transformer')} - All .ts files under the pattern {d.path('support/transform*')}.  These are used during compilation and never at runtime</li>
+        <li>{d.path('bin')} - Entry point .js files.  All .js files under the {d.path('bin/')} folder</li>
       </ul>
 
       Within each file there is a pattern of either a 3 or 4 element array:

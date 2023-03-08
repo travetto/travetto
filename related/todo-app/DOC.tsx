@@ -5,6 +5,7 @@ import { RootIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
+import { ShutdownManager } from '@travetto/base';
 
 const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 const TodoRoot = d.ref('Todo App', RootIndex.mainModule.outputPath);
@@ -18,7 +19,7 @@ async function init() {
     env: { REST_LOG_PATHS: '!*', REST_PORT: '12555' }
   });
 
-  process.on('SIGUSR2', () => cmd.process.kill('SIGKILL'));
+  ShutdownManager.onExitRequested(() => cmd.process.kill('SIGKILL'));
 
   cmd.process.stdout?.on('data', v =>
     startupBuffer.push(Buffer.from(v)));

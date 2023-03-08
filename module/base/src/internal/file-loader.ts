@@ -28,11 +28,9 @@ class $DynamicFileLoader {
   #loader: ModuleLoader;
   #initialized = false;
 
-  async dispatch(ev: WatchEvent, folder: string): Promise<void> {
+  async dispatch(ev: WatchEvent): Promise<void> {
     if (ev.action !== 'create') {
       await this.#loader.unload(ev.file);
-    } else {
-      RootIndex.reinitForModule(RootIndex.mainModule.name);
     }
     if (ev.action !== 'delete') {
       await timers.setTimeout(100);
@@ -63,9 +61,13 @@ class $DynamicFileLoader {
 
     process.on('message', async ev => {
       if (isTriggerEvent(ev)) {
+        if (ev.action === 'create') {
+          // Load new content
+          RootIndex.reinitForModule(RootIndex.mainModule.name);
+        }
         const found = RootIndex.getFromSource(ev.file);
         if (found) {
-          this.dispatch({ action: ev.action, file: found.outputFile }, RootIndex.getModule(found.module)!.sourceFolder);
+          this.dispatch({ action: ev.action, file: found.outputFile, folder: RootIndex.getModule(found.module)!.sourceFolder });
         }
       }
     });
@@ -77,15 +79,20 @@ class $DynamicFileLoader {
       }
     }, 0);
 
-    // Watch local output
-    await watchFolders(
-      RootIndex.getLocalModules().map(x => x.outputPath),
-      (ev, folder) => this.dispatch(ev, folder),
-      {
-        filter: ev => ManifestModuleUtil.getFileType(ev.file) === 'js',
-        createMissing: true
+    // Fire off, and let it run in the bg
+    (async (): Promise<void> => {
+      // Watch local output
+      const stream = watchFolders(RootIndex.getLocalModules().map(x => x.outputPath), { createMissing: true });
+
+      ShutdownManager.onExitRequested(stream);
+      ShutdownManager.onShutdown(this.constructor, stream);
+
+      for await (const ev of stream) {
+        if (ev?.file && ManifestModuleUtil.getFileType(ev.file) === 'js') {
+          await this.dispatch(ev);
+        }
       }
-    );
+    })();
   }
 }
 

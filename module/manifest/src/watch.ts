@@ -1,5 +1,6 @@
 import { watch, Stats } from 'fs';
 import fs from 'fs/promises';
+
 import { path } from './path';
 
 async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
@@ -11,15 +12,25 @@ async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
   }
 }
 
-export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
-export type WatchEventFilter = (ev: WatchEvent) => boolean;
+export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string, folder: string };
 
-export type WatchEventListener = (ev: WatchEvent, folder: string) => void;
-export type WatchConfig = {
+export type WatchFolder = {
   /**
-   * Predicate for filtering events
+   * Source folder
    */
-  filter?: WatchEventFilter;
+  src: string;
+  /**
+   * Target folder name, useful for deconstructing
+   */
+  target?: string;
+  /**
+   * Filter events
+   */
+  filter?: (ev: WatchEvent) => boolean;
+  /**
+   * Only look at immediate folder
+   */
+  immediate?: boolean;
   /**
    * List of top level folders to ignore
    */
@@ -32,25 +43,66 @@ export type WatchConfig = {
    * Include files that start with '.'
    */
   includeHidden?: boolean;
-  /**
-   * Should watching prevent normal exiting, until watch is removed?
-   */
-  persistent?: boolean;
 };
 
+export type WatchStream = AsyncIterable<WatchEvent> & { close: () => Promise<void> };
+
+const DEDUPE_THRESHOLD = 50;
+
+class Queue<X> implements AsyncIterator<X>, AsyncIterable<X> {
+  #queue: X[] = [];
+  #done = false;
+  #ready: Promise<void>;
+  #fire: (() => void);
+  #onClose: (() => (void | Promise<void>))[] = [];
+  #recentKeys = new Map<string, number>();
+
+  constructor() {
+    this.#ready = new Promise(r => this.#fire = r);
+  }
+
+  // Allow for iteration
+  [Symbol.asyncIterator](): AsyncIterator<X> { return this; }
+
+  async next(): Promise<IteratorResult<X>> {
+    if (!this.#done && !this.#queue.length) {
+      this.#recentKeys = new Map([...this.#recentKeys.entries()] // Cull before waiting
+        .filter(([, time]) => (Date.now() - time) < DEDUPE_THRESHOLD));
+      await this.#ready;
+      this.#ready = new Promise(r => this.#fire = r);
+    }
+    return { value: (this.#queue.length ? this.#queue.shift() : undefined)!, done: this.#done };
+  }
+
+  add(item: X | X[]): void {
+    const now = Date.now();
+    for (const value of Array.isArray(item) ? item : [item]) {
+      const key = JSON.stringify(value);
+      if ((now - (this.#recentKeys.get(key) ?? 0)) > DEDUPE_THRESHOLD) {
+        this.#queue.push(value);
+        this.#recentKeys.set(key, now);
+        this.#fire();
+      }
+    }
+  }
+
+  registerOnClose(handler: () => (void | Promise<void>)): void {
+    this.#onClose.push(handler);
+  }
+
+  async close(): Promise<void> {
+    this.#done = true;
+    this.#fire();
+    await Promise.all(this.#onClose.map(x => x()));
+  }
+}
+
 /**
- * Watch files for a given folder
- * @param folder
- * @param onEvent
- * @param options
+ * Watch immediate files for a given folder
  */
-export async function watchFolderImmediate(
-  folder: string,
-  onEvent: WatchEventListener,
-  options: WatchConfig = {}
-): Promise<() => Promise<void>> {
-  const watchPath = path.resolve(folder);
-  const watcher = watch(watchPath, { persistent: options.persistent, encoding: 'utf8' });
+async function watchFolderImmediate(queue: Queue<WatchEvent>, options: WatchFolder): Promise<void> {
+  const watchPath = path.resolve(options.src);
+  const watcher = watch(watchPath, { persistent: true, encoding: 'utf8' });
   const lastStats: Record<string, Stats | undefined> = {};
   const invalidFilter = (el: string): boolean =>
     (el === '.' || el === '..' || (!options.includeHidden && el.startsWith('.')) || !!options.ignore?.includes(el));
@@ -62,6 +114,9 @@ export async function watchFolderImmediate(
     const file = path.resolve(watchPath, el);
     lastStats[file] = await fs.stat(file);
   }
+
+  const target = options.target ?? options.src;
+
   watcher.on('change', async (type: string, file: string): Promise<void> => {
     if (invalidFilter(file)) {
       return;
@@ -78,69 +133,66 @@ export async function watchFolderImmediate(
     }
     let ev: WatchEvent;
     if (prevStat && !stat) {
-      ev = { action: 'delete', file };
+      ev = { action: 'delete', file, folder: target };
     } else if (!prevStat && stat) {
-      ev = { action: 'create', file };
+      ev = { action: 'create', file, folder: target };
     } else {
-      ev = { action: 'update', file };
+      ev = { action: 'update', file, folder: target };
     }
     if (!options.filter || options.filter(ev)) {
-      onEvent(ev, folder);
+      queue.add(ev);
     }
   });
-  process.on('exit', () => watcher.close());
-  return async () => watcher.close();
+
+  queue.registerOnClose(() => watcher.close());
 }
 
 /**
- * Leverages @parcel/watcher to watch a series of folders
+ * Watch recursive files for a given folder
+ */
+async function watchFolderRecursive(queue: Queue<WatchEvent>, options: WatchFolder): Promise<void> {
+  const lib = await getWatcher();
+  const target = options.target ?? options.src;
+
+  if (await fs.stat(options.src).then(() => true, () => options.createMissing)) {
+    await fs.mkdir(options.src, { recursive: true });
+    const ignore = (await fs.readdir(options.src)).filter(x => x.startsWith('.') && x.length > 2);
+    const cleanup = await lib.subscribe(options.src, (err, events) => {
+      for (const ev of events) {
+        const finalEv = { action: ev.type, file: path.toPosix(ev.path), folder: target };
+        if (ev.type === 'delete' && finalEv.file === options.src) {
+          return queue.close();
+        }
+        const isHidden = !options.includeHidden && finalEv.file.replace(target, '').includes('/.');
+        const matches = !isHidden && (!options.filter || options.filter(finalEv));
+        if (matches) {
+          queue.add(finalEv);
+        }
+      }
+    }, { ignore: [...ignore, ...options.ignore ?? []] });
+    queue.registerOnClose(() => cleanup.unsubscribe());
+  }
+}
+
+/**
+ * Watch a series of folders
  * @param folders
  * @param onEvent
  * @param options
  */
-export async function watchFolders(
-  folders: string[] | [folder: string, targetFolder: string][] | (readonly [folder: string, targetFolder: string])[],
-  onEvent: WatchEventListener,
-  config: WatchConfig = {}
-): Promise<() => Promise<void>> {
-  const lib = await getWatcher();
-  const createMissing = config.createMissing ?? false;
-  const validFolders = new Set(folders.map(x => typeof x === 'string' ? x : x[0]));
-
-  const subs = await Promise.all(folders.map(async value => {
-    const folder = typeof value === 'string' ? value : value[0];
-    const targetFolder = typeof value === 'string' ? value : value[1];
-
-    if (await fs.stat(folder).then(() => true, () => createMissing)) {
-      await fs.mkdir(folder, { recursive: true });
-      const ignore = (await fs.readdir(folder)).filter(x => x.startsWith('.') && x.length > 2);
-      return lib.subscribe(folder, (err, events) => {
-        for (const ev of events) {
-          const finalEv = { action: ev.type, file: path.toPosix(ev.path) };
-          if (ev.type === 'delete' && validFolders.has(finalEv.file)) {
-            return process.exit(0); // Exit when watched folder is removed
-          }
-          const isHidden = !config.includeHidden && finalEv.file.replace(targetFolder, '').includes('/.');
-          const matches = !isHidden && (!config.filter || config.filter(finalEv));
-          if (matches) {
-            onEvent(finalEv, targetFolder);
-          }
-        }
-      }, { ignore: [...ignore, ...config.ignore ?? []] });
+export function watchFolders(
+  folders: string[] | WatchFolder[],
+  config: Omit<WatchFolder, 'src' | 'target'> = {}
+): WatchStream {
+  const queue = new Queue<WatchEvent>();
+  for (const folder of folders) {
+    if (typeof folder === 'string') {
+      watchFolderRecursive(queue, { ...config, src: folder });
+    } else if (!folder.immediate) {
+      watchFolderRecursive(queue, { ...config, ...folder });
+    } else {
+      watchFolderImmediate(queue, { ...config, ...folder });
     }
-  }));
-
-  // Allow for multiple calls
-  let finalProm: Promise<void> | undefined;
-  const remove = (): Promise<void> => finalProm ??= Promise.all(subs.map(x => x?.unsubscribe())).then(() => { });
-
-  // Cleanup on intent to exit
-  if (!config.persistent) {
-    process.on('SIGUSR2', remove);
   }
-
-  // Cleanup on exit
-  process.on('exit', remove);
-
-  return remove;
+  return queue;
 }

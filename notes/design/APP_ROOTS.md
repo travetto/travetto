@@ -8,7 +8,7 @@ Module Structure
   * support/
   * test/
     * resources/
-  * doc.ts
+  * DOC.tsx
   * index.ts - Root index for loading
 
 ## Test

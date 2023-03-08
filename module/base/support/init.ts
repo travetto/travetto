@@ -42,3 +42,7 @@ export async function init(manageShutdown = true): Promise<void> {
     ShutdownManager.register();
   }
 }
+
+export async function cleanup(): Promise<void> {
+  await ShutdownManager.requestExit();
+}

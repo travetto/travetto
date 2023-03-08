@@ -228,9 +228,11 @@ export class TranspileUtil {
     } finally {
       if (proc?.killed === false) { proc.kill('SIGKILL'); }
       if (kill) {
-        process.removeListener('exit', kill);
+        process.off('exit', kill);
       }
-      process.stdout.write('\x1b[s\x1b[?25h\x1b[r\x1b[u');
+      if (process.stdout.isTTY) {
+        process.stdout.write('\x1b[s\x1b[?25h\x1b[r\x1b[u');
+      }
       await fs.rm(deltaFile, { force: true });
     }
   }
