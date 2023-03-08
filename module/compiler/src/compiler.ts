@@ -119,7 +119,7 @@ export class Compiler {
     };
 
     if (this.#dirtyFiles.length) {
-      await GlobalTerminal.trackProgress(this.emit(this.#dirtyFiles, emitter), resolveEmittedFile, { position: 'bottom' });
+      await GlobalTerminal.trackProgress(this.emit(this.#dirtyFiles, emitter), resolveEmittedFile, { position: 'bottom', minDelay: 50 });
       if (failed) {
         Log.debug('Compilation failed');
         process.exit(1);

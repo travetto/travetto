@@ -230,6 +230,7 @@ export class TranspileUtil {
       if (kill) {
         process.removeListener('exit', kill);
       }
+      process.stdout.write('\x1b[s\x1b[?25h\x1b[r\x1b[u');
       await fs.rm(deltaFile, { force: true });
     }
   }

@@ -137,10 +137,16 @@ export class TerminalWriter {
 
   /** Reset */
   reset(): this {
-    return this
-      .write(ANSICodes.POSITION_SAVE())
-      .write(ANSICodes.SHOW_CURSOR())
-      .write(ANSICodes.SCROLL_RANGE_CLEAR())
-      .write(ANSICodes.POSITION_RESTORE());
+    return this.write(this.resetCommands());
+  }
+
+  /** Reset Commands */
+  resetCommands(): string {
+    return [
+      ANSICodes.POSITION_SAVE(),
+      ANSICodes.SHOW_CURSOR(),
+      ANSICodes.SCROLL_RANGE_CLEAR(),
+      ANSICodes.POSITION_RESTORE()
+    ].join('');
   }
 }

@@ -13,6 +13,7 @@ import { ColorOutputUtil, Prim, TermColorFn, TermColorPalette, TermColorPaletteI
 type TerminalStreamPositionConfig = {
   position?: TermLinePosition;
   staticMessage?: string;
+  minDelay?: number;
 };
 
 type TerminalProgressConfig = TerminalStreamPositionConfig & {
@@ -98,12 +99,11 @@ export class Terminal implements TermState {
     return this.#init;
   }
 
-  async reset(): Promise<void> {
-    await this.#query.close();
+  reset(): void {
+    this.#query.close();
     if (this.interactive) {
-      await this.writer().reset().commit();
+      this.#output.write(this.writer().resetCommands());
     }
-    return;
   }
 
   getCursorPosition(): Promise<TermCoord> {
