@@ -5,3 +5,5 @@ module/*/DOC.html linguist-generated
 related/*/DOC.html linguist-generated
 
 *.ts eol=lf
+*.tsx eol=lf
+*.js eol=lf
