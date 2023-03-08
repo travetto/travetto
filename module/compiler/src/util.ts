@@ -3,7 +3,6 @@ import ts from 'typescript';
 import { ManifestContext, ManifestModuleFileType, ManifestModuleUtil, ManifestRoot, Package, path } from '@travetto/manifest';
 
 type OutputToSource = (outputFile: string) => ({ source: string } | undefined);
-export type FileWatchEvent = { type: 'create' | 'delete' | 'update', path: string };
 
 const nativeCwd = process.cwd();
 

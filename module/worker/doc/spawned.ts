@@ -9,6 +9,7 @@ export async function main(): Promise<void> {
 
   exec.send('ready'); // Indicate the child is ready to receive requests
 
-  const heartbeat = (): void => { timers.setTimeout(5000).then(heartbeat); }; // Keep-alive
-  heartbeat();
+  for await (const _ of timers.setInterval(5000)) {
+    // Keep-alive
+  }
 }

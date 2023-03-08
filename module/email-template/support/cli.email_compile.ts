@@ -35,11 +35,9 @@ export class EmailCompileCommand extends CliCommand<Options> {
     console!.log(cliTpl`Successfully compiled ${{ param: `${all.length}` }} templates`);
 
     if (this.cmd.watch) {
-      try {
-        const template = new TemplateManager(engine, compiler);
-        await template.watchCompile();
-      } catch {
-        return this.exit(1);
+      const template = new TemplateManager(engine, compiler);
+      for await (const _ of template.watchCompile()) {
+        // Iterate until done
       }
     }
   }

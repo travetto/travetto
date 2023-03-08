@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { PackageUtil, path, RootIndex, watchFolderImmediate } from '@travetto/manifest';
+import { PackageUtil, path, RootIndex, watchFolders } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
@@ -56,34 +56,35 @@ export class DocCommand extends CliCommand<Options> {
     );
 
     if (this.cmd.watch) {
-      const args = process.argv.slice(2).filter(x => !x.startsWith('-w') && !x.startsWith('--w'));
-      await watchFolderImmediate(path.dirname(docFile),
-        () => ExecUtil.spawn('npx', ['trv', ...args], {
-          cwd: RootIndex.mainModule.sourcePath,
-          env: { TRV_QUIET: '1' },
-          stdio: 'inherit', catchAsResult: true
-        }), {
-        filter: ev => ev.action === 'update' && ev.file === docFile,
-        persistent: true
-      });
-    }
-
-    try {
-      const ctx = await DocRenderer.get(docFile, RootIndex.manifest);
-
-      for (const [fmt, out] of outputs) {
-        const result = await ctx.render(fmt);
-        if (out) {
-          const finalName = path.resolve(out);
-          await fs.writeFile(finalName, result, 'utf8');
-          console.log(`Wrote docs ${this.cmd.input}: ${finalName}`);
-        } else {
-          process.stdout.write(result);
+      const args = process.argv.slice(2).filter(x => !/(-w|--watch)/.test(x));
+      const stream = watchFolders([{ src: path.dirname(docFile), immediate: true }]);
+      for await (const { action, file } of stream) {
+        if (action === 'update' && file === docFile) {
+          await ExecUtil.spawn('npx', ['trv', ...args], {
+            cwd: RootIndex.mainModule.sourcePath,
+            env: { TRV_QUIET: '1' },
+            stdio: 'inherit', catchAsResult: true
+          });
         }
       }
-    } catch (err) {
-      console.error(err);
-      this.exit(1);
+    } else {
+      try {
+        const ctx = await DocRenderer.get(docFile, RootIndex.manifest);
+
+        for (const [fmt, out] of outputs) {
+          const result = await ctx.render(fmt);
+          if (out) {
+            const finalName = path.resolve(out);
+            await fs.writeFile(finalName, result, 'utf8');
+            console.log(`Wrote docs ${this.cmd.input}: ${finalName}`);
+          } else {
+            process.stdout.write(result);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        this.exit(1);
+      }
     }
   }
 }

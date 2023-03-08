@@ -1,20 +1,27 @@
 import { readFileSync } from 'fs';
-import fs from 'fs/promises';
 
 import {
   ManifestContext, ManifestModuleUtil, ManifestUtil, WatchEvent, ManifestModuleFolderType,
-  ManifestModuleFileType, path, ManifestModule, watchFolders, WatchEventListener, watchFolderImmediate, WatchConfig
+  ManifestModuleFileType, path, ManifestModule, watchFolders, WatchConfig, WatchFolder, RootIndex, WatchStream
 } from '@travetto/manifest';
 import { getManifestContext } from '@travetto/manifest/bin/context';
 
 import { CompilerState } from './state';
 import { CompilerUtil } from './util';
-import { CompileEmitter, CompileWatcherHandler } from './types';
 
 /**
  * Utils for watching
  */
 export class CompilerWatcher {
+
+  /**
+   * Watch state
+   * @param state
+   * @returns
+   */
+  static watch(state: CompilerState): AsyncIterable<WatchEvent> {
+    return new CompilerWatcher(state).watchChanges();
+  }
 
   #sourceHashes = new Map<string, number>();
   #manifestContexts = new Map<string, ManifestContext>();
@@ -62,15 +69,21 @@ export class CompilerWatcher {
   }
 
   /**
-   * Get a watcher for a given compiler state
-   * @param state
-   * @param handler
-   * @returns
-   */
-  #getWatcher(handler: CompileWatcherHandler): WatchEventListener {
-    const mods = this.#getModuleMap();
+ * Get a watcher for a given compiler state
+ * @param state
+ * @param handler
+ * @returns
+ */
+  async * watchChanges(): AsyncIterable<WatchEvent> {
+    const stream = this.#watchFiles();
 
-    return async ({ file: sourceFile, action }: WatchEvent, folder: string): Promise<void> => {
+    const mods = this.#getModuleMap();
+    for await (const { file: sourceFile, action, folder } of stream) {
+
+      if (folder === '.trv_internal') {
+        break;
+      }
+
       const mod = mods[folder];
       const moduleFile = mod.sourceFolder ?
         (sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile) :
@@ -91,7 +104,7 @@ export class CompilerWatcher {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             const input = this.#state.registerInput(mod, moduleFile);
             this.#sourceHashes.set(sourceFile, hash);
-            handler.create(input);
+            yield { action, file: input, folder };
           }
           break;
         }
@@ -103,7 +116,7 @@ export class CompilerWatcher {
             if (this.#sourceHashes.get(sourceFile) !== hash) {
               this.#state.resetInputSource(entry.input);
               this.#sourceHashes.set(sourceFile, hash);
-              handler.update(entry.input);
+              yield { action, file: entry.input, folder };
             }
           }
           break;
@@ -114,24 +127,20 @@ export class CompilerWatcher {
             this.#state.removeInput(entry.input);
             if (entry.output) {
               this.#dirtyFiles.push({ mod: mod.name, modFolder: folder });
-              handler.delete(entry.output);
+              yield { action, file: entry.output, folder };
             }
           }
         }
       }
-    };
+    }
   }
 
   /**
    * Watch files based on root index
    */
-  async watchFiles(emit: CompileEmitter): Promise<() => Promise<void>> {
-    let watchRoot: (() => Promise<void>) | undefined = undefined;
-
+  #watchFiles(): WatchStream {
     const idx = this.#state.manifestIndex;
     const modules = [...idx.getModuleList('all')].map(x => idx.getModule(x)!);
-    const remove = (outputFile: string): Promise<void> => fs.rm(outputFile, { force: true });
-    const handler = this.#getWatcher({ create: emit, update: emit, delete: remove });
     const options: WatchConfig = {
       filter: ev => {
         const type = ManifestModuleUtil.getFileType(ev.file);
@@ -140,23 +149,36 @@ export class CompilerWatcher {
       ignore: ['node_modules']
     };
 
-    const moduleFolders = modules
+    const moduleFolders: WatchFolder[] = modules
       .filter(x => !idx.manifest.monoRepo || x.sourcePath !== idx.manifest.workspacePath)
-      .map(x => [x.sourcePath, x.sourcePath] as const);
+      .map(x => ({ src: x.sourcePath, target: x.sourcePath }));
 
     // Add monorepo folders
     if (idx.manifest.monoRepo) {
       const mono = modules.find(x => x.sourcePath === idx.manifest.workspacePath)!;
       for (const folder of Object.keys(mono.files)) {
         if (!folder.startsWith('$')) {
-          moduleFolders.push([path.resolve(mono.sourcePath, folder), mono.sourcePath]);
+          moduleFolders.push({ src: path.resolve(mono.sourcePath, folder), target: mono.sourcePath });
         }
       }
-      watchRoot = await watchFolderImmediate(mono.sourcePath, handler, options);
+      moduleFolders.push({ src: mono.sourcePath, target: mono.sourcePath, immediate: true });
     }
 
-    const watchAll = await watchFolders(moduleFolders, handler, options);
+    // Watch output folders
+    const outputWatch = (root: string, sources: string[]): WatchFolder => {
+      const valid = new Set(sources.map(src => path.resolve(root, src)));
+      return {
+        src: root, target: '.trv_internal', immediate: true, includeHidden: true,
+        filter: ev => ev.action === 'delete' && valid.has(path.resolve(root, ev.file))
+      };
+    };
+    moduleFolders.push(
+      outputWatch(RootIndex.manifest.workspacePath, [
+        RootIndex.manifest.outputFolder,
+        RootIndex.manifest.compilerFolder
+      ])
+    );
 
-    return () => Promise.all([watchRoot?.(), watchAll()]).then(() => { });
+    return watchFolders(moduleFolders, options);
   }
 }

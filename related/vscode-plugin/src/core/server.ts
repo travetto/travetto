@@ -1,4 +1,4 @@
-import { ExecutionOptions, ExecutionState } from '@travetto/base';
+import { ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
 
 import { Workspace } from './workspace';
 import { Log } from './log';
@@ -32,8 +32,12 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     this.#args = args;
     this.#opts = opts;
     this.#log = log;
-    process.on('SIGINT', () => this.stop());
-    process.on('exit', () => this.stop());
+
+    const stopper = (): void => this.stop();
+
+    ShutdownManager.onExitRequested(stopper);
+    process.on('SIGINT', stopper);
+    process.on('exit', stopper);
   }
 
   async #launchServer(command: string, args: string[], opts: ExecutionOptions = {}): Promise<[ExecutionState, Promise<void>]> {
@@ -126,7 +130,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       }
     });
 
-    const kill = () => this.#state?.process.kill('SIGKILL')
+    const kill = (): void => { this.#state?.process.kill('SIGKILL'); };
     process.on('exit', kill);
 
     this.#state.process.on('exit', () => {

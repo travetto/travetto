@@ -39,20 +39,6 @@ export class Compiler {
     this.#watch = watch;
   }
 
-  /**
-   * Watches local modules
-   */
-  #watchLocalModules(emit: CompileEmitter): Promise<() => Promise<void>> {
-    return new CompilerWatcher(this.#state).watchFiles(async file => {
-      const err = await emit(file, true);
-      if (err) {
-        Log.info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
-      } else {
-        Log.info(`Compiled ${file.split('node_modules/')[1]}`);
-      }
-      return err;
-    });
-  }
 
   /**
    * Compile in a single pass, only emitting dirty files
@@ -136,12 +122,16 @@ export class Compiler {
 
     if (this.#watch) {
       Log.info('Watch is ready');
-      await this.#watchLocalModules(emitter);
-      const output = this.#state.resolveOutputFile('.');
-      for await (const _ of fs.watch(output)) {
-        if (!await fs.stat(output).catch(() => false)) {
-          process.send?.('restart');
+      for await (const { file } of CompilerWatcher.watch(this.#state)) {
+        const err = await emitter(file, true);
+        if (err) {
+          Log.info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
+        } else {
+          Log.info(`Compiled ${file.split('node_modules/')[1]}`);
         }
+      }
+      if (!process.exitCode) {
+        process.send?.('restart');
       }
     }
   }

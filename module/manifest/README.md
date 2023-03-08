@@ -90,17 +90,27 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
 ## File Watching
 The module also leverages [fetch](https://www.npmjs.com/package/@parcel/watcher), to expose a single function of `watchFolders`. Only the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework") module packages [fetch](https://www.npmjs.com/package/@parcel/watcher) as a direct dependency.  This means, that in production, by default all watch operations will fail with a missing dependency.
 
-**Code: Watch Folder Signature**
+**Code: Watch Configuration**
 ```typescript
-export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
-export type WatchEventFilter = (ev: WatchEvent) => boolean;
+export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string, folder: string };
 
-export type WatchEventListener = (ev: WatchEvent, folder: string) => void;
-export type WatchConfig = {
+export type WatchFolder = {
   /**
-   * Predicate for filtering events
+   * Source folder
    */
-  filter?: WatchEventFilter;
+  src: string;
+  /**
+   * Target folder name, useful for deconstructing
+   */
+  target?: string;
+  /**
+   * Filter events
+   */
+  filter?: (ev: WatchEvent) => boolean;
+  /**
+   * Only look at immediate folder
+   */
+  immediate?: boolean;
   /**
    * List of top level folders to ignore
    */
@@ -113,26 +123,20 @@ export type WatchConfig = {
    * Include files that start with '.'
    */
   includeHidden?: boolean;
-  /**
-   * Should watching prevent normal exiting, until watch is removed?
-   */
-  persistent?: boolean;
 };
 
-/**
- * Watch files for a given folder
- * @param folder
- * @param onEvent
- * @param options
- */
-export async function watchFolderImmediate(
-  folder: string,
-  onEvent: WatchEventListener,
-  options: WatchConfig = {}
-): Promise<() => Promise<void>> {
+export type WatchStream = AsyncIterable<WatchEvent> & { close: () => Promise<void> };
 ```
 
 This method allows for watching one or more folders, and registering a callback that will fire every time a file changes, and which of the registered folders it was triggered within. The return of the `watchFolders` is a cleanup method, that when invoked will remove and stop all watching behavior.
+
+**Code: Watch Configuration**
+```typescript
+export function watchFolders(
+  folders: string[] | WatchFolder[],
+  config: Omit<WatchFolder, 'src' | 'target'> = {}
+): WatchStream {
+```
 
 ## Anatomy of a Manifest
 
@@ -196,6 +200,7 @@ This method allows for watching one or more folders, and registering a callback 
           [ "src/types.ts", "ts", 1868155200000 ],
           [ "src/typings.d.ts", "typings", 1868155200000 ],
           [ "src/util.ts", "ts", 1868155200000 ],
+          [ "src/watch.ts", "ts", 1868155200000 ],
           [ "src/watch.ts", "ts", 1868155200000 ]
         ],
         "bin": [
@@ -238,19 +243,19 @@ The modules represent all of the [Travetto](https://travetto.dev)-aware dependen
 
 ### Module Files
 The module files are a simple categorization of files into a predetermined set of folders:
-   *  $root - All uncategorized files at the module root
-   *  $index - __index__.ts, index.ts files at the root of the project
-   *  $package - The [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json) for the project
-   *  src - Code that should be automatically loaded at runtime. All .ts files under the src/ folder
-   *  test - Code that contains test files. All .ts files under the test/ folder
-   *  test/fixtures - Test resource files, pertains to the main module only. Located under test/fixtures/
-   *  resources - Packaged resource, meant to pertain to the main module only. Files, under resources/
-   *  support - All .ts files under the support/ folder
-   *  support/resources - Packaged resource files, meant to be included by other modules, under support/resources/
-   *  support/fixtures - Test resources meant to shared across modules.  Under support/fixtures/
-   *  doc - Documentation files. All .ts files under the doc/ folder
-   *  $transformer - All .ts files under the pattern support/transform*.  These are used during compilation and never at runtime
-   *  bin - Entry point .js files.  All .js files under the bin/ folder
+   *  `$root` - All uncategorized files at the module root
+   *  `$index` - `__index__.ts`, `index.ts` files at the root of the project
+   *  `$package` - The [Package JSON](https://docs.npmjs.com/cli/v9/configuring-npm/package-json) for the project
+   *  `src` - Code that should be automatically loaded at runtime. All .ts files under the `src/` folder
+   *  `test` - Code that contains test files. All .ts files under the `test/` folder
+   *  `test/fixtures` - Test resource files, pertains to the main module only. Located under `test/fixtures/`
+   *  `resources` - Packaged resource, meant to pertain to the main module only. Files, under `resources/`
+   *  `support` - All .ts files under the `support/` folder
+   *  `support/resources` - Packaged resource files, meant to be included by other modules, under `support/resources/`
+   *  `support/fixtures` - Test resources meant to shared across modules.  Under `support/fixtures/`
+   *  `doc` - Documentation files. `DOC.tsx` and All .ts/.tsx files under the `doc/` folder
+   *  `$transformer` - All .ts files under the pattern `support/transform*`.  These are used during compilation and never at runtime
+   *  `bin` - Entry point .js files.  All .js files under the `bin/` folder
 Within each file there is a pattern of either a 3 or 4 element array:
 
 **Code: Sample file**

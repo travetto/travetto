@@ -124,7 +124,9 @@ export class EditorState {
         case 'send': this.#onSend(msg); break;
       }
     });
-    await this.#template.watchCompile(f => this.renderFile(f));
+    for await (const f of this.#template.watchCompile()) {
+      await this.renderFile(f);
+    }
   }
 }
 
