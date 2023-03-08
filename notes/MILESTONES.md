@@ -348,6 +348,10 @@ All "extension" points have been moved to their own modules, removing support fo
 ### Transpilation/Loading Overhaul
 One of the primary goals here is to end up with a `.trv_cache` folder that is directly invokable without compilation. The ideal here is the previous work around a "readonly" mode is replaced in a world where there is only javascript files.  This provides an increased level of security while setting the stage for integrating with existing js bundlers.  This will have ramifications in the pack extension.
 
+### JSX Support
+
+### Docs to JSX
+
 ### ESM Support
 
 ### Filesystem access 
