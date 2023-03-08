@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-aws-lambda",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "RESTful APIs entry point support for AWS Lambdas.",
   "keywords": [
     "rest",
@@ -25,13 +25,13 @@
     "directory": "module/rest-aws-lambda"
   },
   "dependencies": {
-    "@travetto/rest": "^3.0.2",
+    "@travetto/rest": "^3.0.3",
     "@types/aws-lambda": "^8.10.110"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.0.2",
-    "@travetto/pack": "^3.0.2",
-    "@travetto/cli": "^3.0.2"
+    "@travetto/test": "^3.0.3",
+    "@travetto/pack": "^3.0.3",
+    "@travetto/cli": "^3.0.3"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
