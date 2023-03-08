@@ -30,9 +30,7 @@
     "@travetto/openapi": "^3.0.3",
     "@travetto/rest-express": "^3.0.3",
     "@travetto/rest-session": "^3.0.3",
-    "vue": "^2.7.14",
-    "preact": "^10.13.0",
-    "preact-render-to-string": "^5.2.6"
+    "vue": "^2.7.14"
   },
   "devDependencies": {
     "@travetto/pack": "^3.0.3"
