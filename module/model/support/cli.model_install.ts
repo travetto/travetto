@@ -1,4 +1,4 @@
-import { cliTpl } from '@travetto/cli';
+import { CliCommand, cliTpl } from '@travetto/cli';
 import { ConsoleManager } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 
@@ -8,17 +8,20 @@ import { ModelInstallUtil } from './bin/install';
 /**
  * CLI Entry point for installing models
  */
+@CliCommand()
 export class ModelInstallCommand extends BaseModelCommand {
-  name = 'model:install';
-  op = 'createModel' as const;
 
-  async action(provider: string, models: string[]): Promise<void> {
+  get op(): this['op'] {
+    return 'createModel' as const;
+  }
+
+  async action(provider: string, models: string[]): Promise<void | number> {
     try {
       ConsoleManager.setDebug(false);
       await RootRegistry.init();
 
       if (!await this.validate(provider, models)) {
-        return this.exit(1);
+        return 1;
       }
 
       const resolved = await this.resolve(provider, models);

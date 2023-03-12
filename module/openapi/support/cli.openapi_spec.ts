@@ -1,25 +1,20 @@
-import { BaseCliCommand, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, CliCommand } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
-
-type Options = {
-  output: OptionConfig<string>;
-};
 
 /**
  * CLI for outputting the open api spec to a local file
  */
-export class OpenApiSpecCommand extends BaseCliCommand<Options> {
-  name = 'openapi:spec';
+@CliCommand()
+export class OpenApiSpecCommand implements BaseCliCommand {
 
-  getOptions(): Options {
-    return { output: this.option({ desc: 'Output files', def: './openapi.yml' }) };
-  }
+  /** Output files */
+  output = './openapi.yml';
 
   envInit(): GlobalEnvConfig {
     return {
       debug: false,
-      set: { API_SPEC_OUTPUT: this.cmd.output }
+      set: { API_SPEC_OUTPUT: this.output }
     };
   }
 
@@ -27,10 +22,10 @@ export class OpenApiSpecCommand extends BaseCliCommand<Options> {
     const result = await ExecUtil.worker(
       RootIndex.resolveFileImport('@travetto/cli/support/entry.cli.ts'),
       ['main', '@travetto/openapi/support/bin/generate.ts'],
-      { env: { TRV_OPENAPI_OUTPUT: this.cmd.output, TRV_OPENAPI_PERSIST: '1' } }
+      { env: { TRV_OPENAPI_OUTPUT: this.output, TRV_OPENAPI_PERSIST: '1' } }
     ).message;
 
-    if (this.cmd.output === '-' || !this.cmd.output) {
+    if (this.output === '-' || !this.output) {
       console.log!(result);
     }
   }

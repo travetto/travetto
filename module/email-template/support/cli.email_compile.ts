@@ -2,26 +2,21 @@ import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngine } from '@travetto/email/src/template';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
-import { BaseCliCommand, cliTpl, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, CliCommand, cliTpl } from '@travetto/cli';
 
 import { EmailTemplateCompiler } from '../src/compiler';
 import { EmailTemplateResource } from '../src/resource';
 
 import { TemplateManager } from './bin/template';
 
-type Options = {
-  watch: OptionConfig<boolean>;
-};
-
 /**
  * CLI Entry point for running the email server
  */
-export class EmailCompileCommand extends BaseCliCommand<Options> {
-  name = 'email:compile';
+@CliCommand()
+export class EmailCompileCommand implements BaseCliCommand {
 
-  getOptions(): Options {
-    return { watch: this.boolOption({ desc: 'Compile in watch mode' }) };
-  }
+  /** Compile in watch mode */
+  watch?: boolean;
 
   async action(): Promise<void> {
     await RootRegistry.init();
@@ -34,7 +29,7 @@ export class EmailCompileCommand extends BaseCliCommand<Options> {
     const all = await compiler.compileAll(true);
     console!.log(cliTpl`Successfully compiled ${{ param: `${all.length}` }} templates`);
 
-    if (this.cmd.watch) {
+    if (this.watch) {
       const template = new TemplateManager(engine, compiler);
       for await (const _ of template.watchCompile()) {
         // Iterate until done

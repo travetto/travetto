@@ -1,38 +1,30 @@
-import { BaseCliCommand, cliTpl } from '@travetto/cli';
+import { BaseCliCommand, CliCommand, CliHelp, cliTpl } from '@travetto/cli';
+import { MinLength } from '@travetto/schema';
 import { GlobalTerminal } from '@travetto/terminal';
 
 import { ServiceUtil } from './bin/service';
-import { ServiceAction, SERVICE_ACTIONS } from './bin/types';
+import { ServiceAction } from './bin/types';
 
 /**
  * `npx trv service`
  *
  * Allows for running services
  */
-export class CliServiceCommand extends BaseCliCommand<{}> {
-  name = 'service';
+@CliCommand()
+export class CliServiceCommand implements BaseCliCommand {
 
-  getArgs(): string {
-    return `<${SERVICE_ACTIONS.join('|')}> [...services]`;
-  }
-
-  async action(action: ServiceAction, services: string[]): Promise<void> {
-    if (!action) {
-      return this.showHelp(`Please specify what service action to perform: ${SERVICE_ACTIONS.join(', ')}`);
-    }
-
+  async action(action: ServiceAction, @MinLength(0) services: string[]): Promise<CliHelp | void> {
     const all = (await ServiceUtil.findAll())
       .filter(x => services?.length ? services.includes(x.name) : true)
       .sort((a, b) => a.name.localeCompare(b.name));
 
     if (!all.length) {
-      return this.showHelp('', '\nNo services found\n');
+      return new CliHelp('No services found\n');
     }
 
     if (!action) {
       const list = all.map(x => cliTpl` * ${{ identifier: x.name }}@${{ type: x.version }}`);
-      return this.showHelp(undefined,
-        cliTpl`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${list.join('\n')}`);
+      return new CliHelp(cliTpl`\n${{ title: '   Available Services' }}\n${'-'.repeat(20)}\n${list.join('\n')}`);
     }
 
     const maxName = Math.max(...all.map(x => x.name.length), 'Service'.length) + 3;
@@ -56,4 +48,3 @@ export class CliServiceCommand extends BaseCliCommand<{}> {
       });
   }
 }
-

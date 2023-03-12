@@ -1,21 +1,20 @@
-import { CommonPackConfig, CommonPackOptions } from './bin/types';
+import { CliCommand } from '@travetto/cli';
+
 import { PackOperation } from './bin/operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
 
 /**
  * Standard zip support for pack
  */
-export class PackZipCommand extends BasePackCommand<CommonPackOptions, CommonPackConfig> {
+@CliCommand()
+export class PackZipCommand extends BasePackCommand {
 
-  name = 'pack:zip';
-
-  getOptions(): CommonPackOptions {
-    const opts = this.getCommonOptions();
-    opts.output.def = this.monoRoot ? '<module>.zip' : `${this.getSimpleModuleName()}.zip`;
-    return opts;
+  constructor() {
+    super();
+    this.output = this.monoRoot ? '<module>.zip' : `${this.getSimpleModuleName()}.zip`;
   }
 
-  getOperations(): PackOperationShape<CommonPackConfig>[] {
+  getOperations(): PackOperationShape[] {
     return [
       ...super.getOperations(),
       PackOperation.compress

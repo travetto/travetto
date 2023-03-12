@@ -1,56 +1,49 @@
-import { BaseCliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
+import os from 'os';
+
+import { BaseCliCommand, CliCommand, CliHelp, CliModuleUtil } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
-
-type Options = {
-  changed: OptionConfig<boolean>;
-  workers: OptionConfig<number>;
-  prefixOutput: OptionConfig<boolean>;
-  showStdout: OptionConfig<boolean>;
-};
+import { Max, Min } from '@travetto/schema';
 
 /**
  * Repo execution
  */
-export class RepoExecCommand extends BaseCliCommand<Options> {
-  name = 'exec';
+@CliCommand()
+export class RepoExecCommand implements BaseCliCommand {
+
+  /** Only changed modules */
+  changed = true;
+  /** Number of concurrent workers */
+  @Min(1) @Max(os.cpus().length)
+  workers = WorkPool.DEFAULT_SIZE;
+  /** Prefix output by folder */
+  prefixOutput = true;
+  /** Show stdout */
+  showStdout = true;
 
   isActive(): boolean {
     return !!RootIndex.manifest.monoRepo;
-  }
-
-  getOptions(): Options {
-    return {
-      changed: this.boolOption({ desc: 'Only changed modules', def: true }),
-      workers: this.option({ desc: 'Number of concurrent workers', def: WorkPool.DEFAULT_SIZE }),
-      prefixOutput: this.boolOption({ desc: 'Prefix output by folder', def: true }),
-      showStdout: this.boolOption({ desc: 'Show stdout', def: true })
-    };
-  }
-
-  getArgs(): string {
-    return '<command> [...args]';
   }
 
   envInit(): GlobalEnvConfig {
     return { debug: false };
   }
 
-  async action(cmd: string, args: string[]): Promise<void> {
+  async action(cmd: string, args: string[]): Promise<void | CliHelp> {
     if (!cmd) {
-      return this.showHelp('Command is a required field');
+      return new CliHelp('Command is a required field');
     }
 
     await CliModuleUtil.execOnModules(
-      this.cmd.changed ? 'changed' : 'all',
+      this.changed ? 'changed' : 'all',
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       (mod, opts) => ExecUtil.spawn(cmd, args, opts),
       {
-        progressMessage: mod => `Running '${this.args.join(' ')}' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
-        showStdout: this.cmd.showStdout,
-        prefixOutput: this.cmd.prefixOutput,
-        workerCount: this.cmd.workers,
+        progressMessage: mod => `Running '${cmd} ${args.join(' ')}' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
+        showStdout: this.showStdout,
+        prefixOutput: this.prefixOutput,
+        workerCount: this.workers,
       }
     );
   }

@@ -1,37 +1,25 @@
 import enquirer from 'enquirer';
 
 import { path } from '@travetto/manifest';
-import { BaseCliCommand, cliTpl, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, CliCommand, cliTpl } from '@travetto/cli';
 import { GlobalTerminal } from '@travetto/terminal';
 
 import { Context } from './bin/context';
 import { Feature, FEATURES } from './bin/features';
 
-type Options = {
-  template: OptionConfig<string>;
-  cwd: OptionConfig<string>;
-  dir: OptionConfig<string>;
-  force: OptionConfig<boolean>;
-};
-
 /**
  * Command to run scaffolding
  */
-export class ScaffoldCommand extends BaseCliCommand<Options> {
-  name = 'scaffold';
-
-  getOptions(): Options {
-    return {
-      template: this.option({ def: 'todo', desc: 'Template' }),
-      cwd: this.option({ desc: 'Current Working Directory override' }),
-      dir: this.option({ desc: 'Target Directory' }),
-      force: this.boolOption({ desc: 'Force writing into an existing directory', def: false })
-    };
-  }
-
-  getArgs(): string {
-    return '[name]';
-  }
+@CliCommand()
+export class ScaffoldCommand implements BaseCliCommand {
+  /** Template */
+  template = 'todo';
+  /** Current Working Directory override */
+  cwd: string = path.cwd();
+  /** Target Directory */
+  dir?: string;
+  /** Force writing into an existing directory */
+  force = false;
 
   async #getName(name?: string): Promise<string> {
     if (!name) {
@@ -88,30 +76,28 @@ export class ScaffoldCommand extends BaseCliCommand<Options> {
     }
   }
 
-  async action(name?: string): Promise<void> {
+  async action(name?: string): Promise<void | number> {
     try {
       name = await this.#getName(name);
     } catch (err) {
       if (err instanceof Error) {
         console.error('Failed to provide correct input', err.message);
       }
-      return this.exit(1);
+      return 1;
     }
 
-    this.cmd.cwd ??= path.cwd();
-
-    if (!name && this.cmd.dir) {
-      name = path.basename(this.cmd.dir);
-    } else if (name && !this.cmd.dir) {
-      this.cmd.dir = path.resolve(this.cmd.cwd, name);
-    } else if (!name && !this.cmd.dir) {
+    if (!name && this.dir) {
+      name = path.basename(this.dir);
+    } else if (name && !this.dir) {
+      this.dir = path.resolve(this.cwd, name);
+    } else if (!name && !this.dir) {
       console.error('Either a name or a target directory are required');
-      return this.exit(1);
+      return 1;
     }
 
-    const ctx = new Context(name, this.cmd.template, path.resolve(this.cmd.cwd, this.cmd.dir));
+    const ctx = new Context(name, this.template, path.resolve(this.cwd, this.dir!));
 
-    if (!this.cmd.force) {
+    if (!this.force) {
       await ctx.initialize();
     }
 
@@ -123,7 +109,7 @@ export class ScaffoldCommand extends BaseCliCommand<Options> {
       if (err instanceof Error) {
         console.error('Failed to provide correct input', err.message);
       }
-      return this.exit(1);
+      return 1;
     }
 
     console.log(cliTpl`\n${{ title: 'Creating Application' }}\n${'-'.repeat(30)}`);

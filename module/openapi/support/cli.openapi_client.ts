@@ -3,24 +3,32 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import cp from 'child_process';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { ExecUtil, FileResourceProvider } from '@travetto/base';
-import { BaseCliCommand, cliTpl, OptionConfig, ListOptionConfig } from '@travetto/cli';
+import { ExecUtil, FileResourceProvider, ShutdownManager } from '@travetto/base';
+import { BaseCliCommand, cliTpl, CliCommand } from '@travetto/cli';
+import { Alias } from '@travetto/schema';
 
-type Options = {
-  extendedHelp: OptionConfig<boolean>;
-  props: ListOptionConfig<string>;
-  input: OptionConfig<string>;
-  output: OptionConfig<string>;
-  dockerImage: OptionConfig<string>;
-  watch: OptionConfig<boolean>;
-};
 /**
  * CLI for generating the cli client
  */
-export class OpenApiClientCommand extends BaseCliCommand<Options> {
+@CliCommand()
+export class OpenApiClientCommand implements BaseCliCommand {
   #presets: Record<string, [string, object] | [string]>;
-  name = 'openapi:client';
   #resources = new FileResourceProvider(['@travetto/openapi#support/resources']);
+
+  /** Show Extended Help */
+  @Alias('-x')
+  extendedHelp?: boolean;
+  /** Additional Properties */
+  @Alias('-a', '--additional-properties')
+  props: string[] = [];
+  /** Input file */
+  input = './openapi.yml';
+  /** Output folder */
+  output = './api-client';
+  /** Docker Image to user */
+  dockerImage = 'arcsine/openapi-generator:latest';
+  /** Watch for file changes */
+  watch?: boolean;
 
   async getPresets(): Promise<Record<string, [string, object] | [string]>> {
     if (!this.#presets) {
@@ -37,7 +45,7 @@ export class OpenApiClientCommand extends BaseCliCommand<Options> {
   getListOfFormats(): string[] {
     const formatCache = path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.outputFolder, 'trv-openapi-formats.json');
     if (!existsSync(formatCache)) {
-      const stdout = cp.execSync(`docker run --rm ${this.cmd.dockerImage} list`, { stdio: ['pipe', 'pipe'], encoding: 'utf8' }).trim();
+      const stdout = cp.execSync(`docker run --rm ${this.dockerImage} list`, { stdio: ['pipe', 'pipe'], encoding: 'utf8' }).trim();
       const lines = stdout
         .split('DOCUMENTATION')[0]
         .trim()
@@ -49,17 +57,6 @@ export class OpenApiClientCommand extends BaseCliCommand<Options> {
     }
     const list: string[] = JSON.parse(readFileSync(formatCache, 'utf8'));
     return list;
-  }
-
-  getOptions(): Options {
-    return {
-      extendedHelp: this.boolOption({ name: 'extended-help', short: 'x', desc: 'Show Extended Help' }),
-      props: this.listOption({ name: 'additional-properties', short: 'a', desc: 'Additional Properties' }),
-      input: this.option({ desc: 'Input file', def: './openapi.yml', combine: v => path.resolve(v), completion: true }),
-      output: this.option({ desc: 'Output folder', def: './api-client', combine: v => path.resolve(v), completion: true }),
-      dockerImage: this.option({ desc: 'Docker Image to use', def: 'arcsine/openapi-generator:latest' }),
-      watch: this.boolOption({ desc: 'Watch for file changes' })
-    };
   }
 
   async help(): Promise<string> {
@@ -80,7 +77,7 @@ ${{ subtitle: 'Available Formats' }}
 ----------------------------------
 ${this.getListOfFormats().map(x => cliTpl`* ${{ input: x }}`).join('\n')} `;
 
-    return this.cmd.extendedHelp ? `${presetText}\n${formatText}` : presetText;
+    return this.extendedHelp ? `${presetText}\n${formatText}` : presetText;
   }
 
   getArgs(): string {
@@ -88,14 +85,10 @@ ${this.getListOfFormats().map(x => cliTpl`* ${{ input: x }}`).join('\n')} `;
   }
 
   async action(format: string): Promise<void> {
-    if (!format) {
-      return this.showHelp('Format is required');
-    }
-
     // Ensure its there
-    await fs.mkdir(this.cmd.output, { recursive: true });
+    await fs.mkdir(this.output, { recursive: true });
 
-    let propMap = Object.fromEntries(this.cmd.props?.map(p => p.split('=')) ?? []);
+    let propMap = Object.fromEntries(this.props?.map(p => p.split('=')) ?? []);
 
     if (format.startsWith('@travetto/')) {
       const key = format.split('@travetto/')[1];
@@ -109,22 +102,22 @@ ${this.getListOfFormats().map(x => cliTpl`* ${{ input: x }}`).join('\n')} `;
     const args = [
       'run',
       '--user', `${process.geteuid?.()}:${process.getgid?.()}`,
-      '-v', `${this.cmd.output}:/workspace`,
-      '-v', `${path.dirname(this.cmd.input)}:/input`,
+      '-v', `${this.output}:/workspace`,
+      '-v', `${path.dirname(this.input)}:/input`,
       '-it',
       '--rm',
-      this.cmd.dockerImage,
+      this.dockerImage,
       'generate',
       '--skip-validate-spec',
       '--remove-operation-id-prefix',
       '-g', format,
       '-o', '/workspace',
-      '-i', `/input/${path.basename(this.cmd.input)}`,
-      ...(this.cmd.watch ? ['-w'] : []),
+      '-i', `/input/${path.basename(this.input)}`,
+      ...(this.watch ? ['-w'] : []),
       ...(propList ? ['--additional-properties', propList] : [])
     ];
 
     const { result } = ExecUtil.spawn('docker', args, { stdio: [0, 1, 2] });
-    await result.catch(err => this.exit(1));
+    await result.catch(err => ShutdownManager.exit(1));
   }
 }
