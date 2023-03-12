@@ -1,7 +1,7 @@
 import enquirer from 'enquirer';
 
 import { path } from '@travetto/manifest';
-import { CliCommand, cliTpl, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, cliTpl, OptionConfig } from '@travetto/cli';
 import { GlobalTerminal } from '@travetto/terminal';
 
 import { Context } from './bin/context';
@@ -17,7 +17,7 @@ type Options = {
 /**
  * Command to run scaffolding
  */
-export class ScaffoldCommand extends CliCommand<Options> {
+export class ScaffoldCommand extends BaseCliCommand<Options> {
   name = 'scaffold';
 
   getOptions(): Options {

@@ -1,6 +1,6 @@
 import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
-import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 
 type Options = {
   changed: OptionConfig<boolean>;
@@ -9,7 +9,7 @@ type Options = {
 /**
  * Command line support for linting
  */
-export class LintCommand extends CliCommand<Options> {
+export class LintCommand extends BaseCliCommand<Options> {
   name = 'lint';
 
   getOptions(): Options {

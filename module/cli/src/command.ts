@@ -41,7 +41,7 @@ function clamp(v: number, l?: number, u?: number): number | undefined {
 /**
  * Base command
  */
-export abstract class CliCommand<V extends OptionMap = OptionMap> {
+export abstract class BaseCliCommand<V extends OptionMap = OptionMap> {
   /**
    * Command object
    */

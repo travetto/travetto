@@ -1,4 +1,4 @@
-import { CliCommand, cliTpl } from '@travetto/cli';
+import { BaseCliCommand, cliTpl } from '@travetto/cli';
 import { GlobalTerminal } from '@travetto/terminal';
 
 import { ServiceUtil } from './bin/service';
@@ -9,7 +9,7 @@ import { ServiceAction, SERVICE_ACTIONS } from './bin/types';
  *
  * Allows for running services
  */
-export class CliServiceCommand extends CliCommand<{}> {
+export class CliServiceCommand extends BaseCliCommand<{}> {
   name = 'service';
 
   getArgs(): string {

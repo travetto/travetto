@@ -1,4 +1,4 @@
-import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 
 type Options = {
@@ -11,7 +11,7 @@ type Options = {
  *
  * Allows for listing of modules
  */
-export class RepoListCommand extends CliCommand<Options> {
+export class RepoListCommand extends BaseCliCommand<Options> {
 
   name = 'list';
 

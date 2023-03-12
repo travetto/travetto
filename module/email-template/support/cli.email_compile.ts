@@ -2,7 +2,7 @@ import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngine } from '@travetto/email/src/template';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
-import { CliCommand, cliTpl, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, cliTpl, OptionConfig } from '@travetto/cli';
 
 import { EmailTemplateCompiler } from '../src/compiler';
 import { EmailTemplateResource } from '../src/resource';
@@ -16,7 +16,7 @@ type Options = {
 /**
  * CLI Entry point for running the email server
  */
-export class EmailCompileCommand extends CliCommand<Options> {
+export class EmailCompileCommand extends BaseCliCommand<Options> {
   name = 'email:compile';
 
   getOptions(): Options {

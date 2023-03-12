@@ -4,7 +4,7 @@ import cp from 'child_process';
 
 import { path, RootIndex } from '@travetto/manifest';
 import { ExecUtil, FileResourceProvider } from '@travetto/base';
-import { CliCommand, cliTpl, OptionConfig, ListOptionConfig } from '@travetto/cli';
+import { BaseCliCommand, cliTpl, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 type Options = {
   extendedHelp: OptionConfig<boolean>;
@@ -17,7 +17,7 @@ type Options = {
 /**
  * CLI for generating the cli client
  */
-export class OpenApiClientCommand extends CliCommand<Options> {
+export class OpenApiClientCommand extends BaseCliCommand<Options> {
   #presets: Record<string, [string, object] | [string]>;
   name = 'openapi:client';
   #resources = new FileResourceProvider(['@travetto/openapi#support/resources']);

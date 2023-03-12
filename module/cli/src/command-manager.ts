@@ -2,7 +2,7 @@ import { ShutdownManager } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 import { cliTpl } from './color';
-import { CliCommand } from './command';
+import { BaseCliCommand } from './command';
 
 const COMMAND_PACKAGE = [
   [/^run$/, 'app', true],
@@ -36,10 +36,10 @@ export class CliCommandManager {
   static async loadCommand(
     cmd: string,
     cfg: {
-      filter?: (p: CliCommand) => boolean;
+      filter?: (p: BaseCliCommand) => boolean;
       failOnMissing?: boolean;
     } = {}
-  ): Promise<CliCommand | undefined> {
+  ): Promise<BaseCliCommand | undefined> {
     const command = cmd.replace(/:/g, '_');
     const found = this.getCommandMapping().get(command)!;
     if (!found) {
@@ -64,7 +64,7 @@ ${{ identifier: install }}
       for (const v of values) {
         try {
           const inst = new v();
-          if (inst instanceof CliCommand && (!cfg.filter || cfg.filter(inst))) {
+          if (inst instanceof BaseCliCommand && (!cfg.filter || cfg.filter(inst))) {
             return inst;
           }
         } catch { }
@@ -80,11 +80,11 @@ ${{ identifier: install }}
   /**
    * Load all available commands
    */
-  static async loadAllCommands(op?: (p: CliCommand) => unknown | Promise<unknown>): Promise<CliCommand[]> {
+  static async loadAllCommands(op?: (p: BaseCliCommand) => unknown | Promise<unknown>): Promise<BaseCliCommand[]> {
     const commands = await Promise.all(
       [...this.getCommandMapping().keys()]
         .map(k => this.loadCommand(k, {
-          filter(cmd: CliCommand) {
+          filter(cmd: BaseCliCommand) {
             return RootIndex.getFunctionMetadata(cmd.constructor)?.abstract !== true && cmd.isActive?.() !== false;
           }
         }))

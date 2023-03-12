@@ -1,11 +1,11 @@
-import { CliCommand } from '@travetto/cli';
+import { BaseCliCommand } from '@travetto/cli';
 
 /**
  * `npx trv echo`
  *
  * Allows for cleaning of the cache dire
  */
-export class CliEchoCommand extends CliCommand {
+export class CliEchoCommand extends BaseCliCommand {
   name = 'echo';
 
   getOptions() {

@@ -1,4 +1,4 @@
-import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
@@ -13,7 +13,7 @@ type Options = {
 /**
  * Repo execution
  */
-export class RepoExecCommand extends CliCommand<Options> {
+export class RepoExecCommand extends BaseCliCommand<Options> {
   name = 'exec';
 
   isActive(): boolean {

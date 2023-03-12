@@ -1,6 +1,6 @@
 import os from 'os';
 
-import { CliCommand, cliTpl } from '@travetto/cli';
+import { BaseCliCommand, cliTpl } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
@@ -22,7 +22,7 @@ const BASIC_OP_SET = [
   PackOperation.bundle,
 ];
 
-export abstract class BasePackCommand<T extends CommonPackOptions, S extends CommonPackConfig> extends CliCommand<{}> {
+export abstract class BasePackCommand<T extends CommonPackOptions, S extends CommonPackConfig> extends BaseCliCommand<{}> {
 
   get monoRoot(): boolean {
     return !!RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath;

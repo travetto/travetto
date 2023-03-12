@@ -1,10 +1,10 @@
-import { CliCommand, CliModuleUtil } from '@travetto/cli';
+import { BaseCliCommand, CliModuleUtil } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 
 /**
  * Enforces all packages to write out their versions and dependencies
  */
-export class VersionSyncCommand extends CliCommand {
+export class VersionSyncCommand extends BaseCliCommand {
   name = 'version-sync';
 
   isActive(): boolean {
