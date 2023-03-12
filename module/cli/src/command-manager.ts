@@ -3,6 +3,7 @@ import { RootIndex } from '@travetto/manifest';
 
 import { cliTpl } from './color';
 import { BaseCliCommand } from './command';
+import { CliCommandRegistry } from './registry';
 
 const COMMAND_PACKAGE = [
   [/^run$/, 'app', true],
@@ -20,28 +21,11 @@ const COMMAND_PACKAGE = [
 export class CliCommandManager {
 
   /**
-   * Get list of all commands available
-   */
-  static getCommandMapping(): Map<string, string> {
-    const all = new Map<string, string>();
-    for (const { outputFile: output, import: imp } of RootIndex.findSupport({ filter: /\/cli[.]/, checkProfile: false })) {
-      all.set(output.replace(/^.*\/cli[.](.*?)[.][^.]+$/, (_, f) => f), imp);
-    }
-    return all;
-  }
-
-  /**
    * Load command
    */
-  static async loadCommand(
-    cmd: string,
-    cfg: {
-      filter?: (p: BaseCliCommand) => boolean;
-      failOnMissing?: boolean;
-    } = {}
-  ): Promise<BaseCliCommand | undefined> {
+  static async loadCommand(cmd: string): Promise<BaseCliCommand | undefined> {
     const command = cmd.replace(/:/g, '_');
-    const found = this.getCommandMapping().get(command)!;
+    const found = CliCommandRegistry.getCommandMapping().get(command)!;
     if (!found) {
       const matchedCfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
       if (matchedCfg) {
@@ -59,43 +43,34 @@ ${{ identifier: install }}
       }
       throw new Error(`Unknown command: ${cmd}`);
     }
-    try {
-      const values = Object.values<{ new(...args: unknown[]): unknown }>(await import(found));
-      for (const v of values) {
-        try {
-          const inst = new v();
-          if (inst instanceof BaseCliCommand && (!cfg.filter || cfg.filter(inst))) {
-            return inst;
-          }
-        } catch { }
+    const values = Object.values<{ new(...args: unknown[]): unknown }>(await import(found));
+    for (const v of values) {
+      const cfg = CliCommandRegistry.get(v);
+      if (cfg) {
+        const inst = new cfg.cls();
+        if (inst.isActive && !inst.isActive()) {
+          continue;
+        }
+        return inst;
       }
-    } catch (importErr) {
-      console.error(`Import error: ${cmd}`, importErr);
     }
-    if (cfg.failOnMissing ?? false) {
-      throw new Error(`Not a valid command: ${cmd}`);
-    }
+    throw new Error(`Not a valid command: ${cmd}`);
   }
 
   /**
    * Load all available commands
    */
-  static async loadAllCommands(op?: (p: BaseCliCommand) => unknown | Promise<unknown>): Promise<BaseCliCommand[]> {
+  static async loadAllCommands(): Promise<BaseCliCommand[]> {
     const commands = await Promise.all(
-      [...this.getCommandMapping().keys()]
-        .map(k => this.loadCommand(k, {
-          filter(cmd: BaseCliCommand) {
-            return RootIndex.getFunctionMetadata(cmd.constructor)?.abstract !== true && cmd.isActive?.() !== false;
-          }
-        }))
+      [...CliCommandRegistry.getCommandMapping().keys()]
+        .map(k => [k, this.loadCommand(k)] as const)
     );
 
     return await Promise.all(commands
-      .filter((x): x is Exclude<typeof x, undefined> => !!x)
-      .sort((a, b) => a.name.localeCompare(b.name))
+      .sort((a, b) => a[0].localeCompare(b[0]))
       .map(async x => {
-        await op?.(x);
-        return x;
+        await op?.(x[1]);
+        return x[1];
       }));
   }
 }

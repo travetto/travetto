@@ -1,24 +1,20 @@
-import { CommonPackConfig, CommonPackOptions } from '@travetto/pack/support/bin/types';
+import { CommonPackConfig } from '@travetto/pack/support/bin/types';
 import { PackOperation } from '@travetto/pack/support/bin/operation';
 import { BasePackCommand, PackOperationShape } from '@travetto/pack/support/pack.base';
+import { CliCommand } from '@travetto/cli';
 
 /**
  * Standard lambda support for pack
  */
-export class PackLambdaCommand extends BasePackCommand<CommonPackOptions, CommonPackConfig> {
+@CliCommand()
+export class PackLambdaCommand extends BasePackCommand {
 
-  name = 'pack:lambda';
+  entryPoint = '@travetto/rest-aws-lambda/support/entry.handler';
+  mainName = 'index';
+  output = this.monoRoot ? '<module>.zip' : `${this.getSimpleModuleName()}.zip`;
 
   getArgs(): string | undefined {
     return this.monoRoot ? '<module>' : '';
-  }
-
-  getOptions(): CommonPackOptions {
-    const opts = this.getCommonOptions();
-    opts.entryPoint.def = '@travetto/rest-aws-lambda/support/entry.handler';
-    opts.mainName.def = 'index';
-    opts.output.def = this.monoRoot ? '<module>.zip' : `${this.getSimpleModuleName()}.zip`;
-    return opts;
   }
 
   getOperations(): PackOperationShape<CommonPackConfig>[] {

@@ -2,29 +2,22 @@ import fs from 'fs/promises';
 
 import { PackageUtil, path, RootIndex, watchFolders } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
-import { BaseCliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
+import { BaseCliCommand, CliCommand } from '@travetto/cli';
 
 import { DocRenderer } from '../src/render/renderer';
-
-type Options = {
-  input: OptionConfig<string>;
-  outputs: ListOptionConfig<string>;
-  watch: OptionConfig<boolean>;
-};
 
 /**
  * Command line support for generating module docs.
  */
-export class DocCommand extends BaseCliCommand<Options> {
-  name = 'doc';
+@CliCommand()
+export class DocCommand implements BaseCliCommand {
 
-  getOptions(): Options {
-    return {
-      input: this.option({ desc: 'Input File', def: 'DOC.tsx' }),
-      outputs: this.listOption({ desc: 'Outputs', def: [] }),
-      watch: this.boolOption({ desc: 'Watch' })
-    };
-  }
+  /** Input File */
+  input = 'DOC.tsx';
+  /** Outputs */
+  outputs: string[] = [];
+  /** Watch? */
+  watch = false;
 
   envInit(): GlobalEnvConfig {
     return {
@@ -38,24 +31,24 @@ export class DocCommand extends BaseCliCommand<Options> {
     };
   }
 
-  async action(): Promise<void> {
-    const docFile = path.resolve(this.cmd.input);
+  async action(): Promise<void | number> {
+    const docFile = path.resolve(this.input);
     if (!(await fs.stat(docFile).catch(() => false))) {
-      console.error(`The input ${this.cmd.input} does not exist`);
-      return this.exit(1);
+      console.error(`The input ${this.input} does not exist`);
+      return 1;
     }
 
-    if (this.cmd.outputs.length === 0) {
+    if (this.outputs.length === 0) {
       const workspacePkg = PackageUtil.readPackage(RootIndex.manifest.workspacePath);
-      this.cmd.outputs = workspacePkg.travetto?.docOutputs ?? ['README.md'];
+      this.outputs = workspacePkg.travetto?.docOutputs ?? ['README.md'];
     }
 
-    const outputs = this.cmd.outputs.map(output =>
+    const outputs = this.outputs.map(output =>
       output.includes('.') ? [path.extname(output).substring(1), path.resolve(output)] :
         [output, null] as const
     );
 
-    if (this.cmd.watch) {
+    if (this.watch) {
       const args = process.argv.slice(2).filter(x => !/(-w|--watch)/.test(x));
       const stream = watchFolders([{ src: path.dirname(docFile), immediate: true }]);
       for await (const { action, file } of stream) {
@@ -76,14 +69,14 @@ export class DocCommand extends BaseCliCommand<Options> {
           if (out) {
             const finalName = path.resolve(out);
             await fs.writeFile(finalName, result, 'utf8');
-            console.log(`Wrote docs ${this.cmd.input}: ${finalName}`);
+            console.log(`Wrote docs ${this.input}: ${finalName}`);
           } else {
             process.stdout.write(result);
           }
         }
       } catch (err) {
         console.error(err);
-        this.exit(1);
+        return 1;
       }
     }
   }

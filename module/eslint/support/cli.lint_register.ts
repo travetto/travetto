@@ -1,12 +1,12 @@
 import fs from 'fs/promises';
 
-import { BaseCliCommand } from '@travetto/cli';
+import { BaseCliCommand, CliCommand } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 
 import { buildEslintConfig } from './bin/eslint-config-file';
 
-export class LintConfigureCommand extends BaseCliCommand {
-  name = 'lint:register';
+@CliCommand()
+export class LintConfigureCommand implements BaseCliCommand {
 
   async action(): Promise<void> {
     const content = buildEslintConfig();

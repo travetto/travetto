@@ -1,30 +1,23 @@
-import { BaseCliCommand, cliTpl, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, cliTpl } from '@travetto/cli';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
+import { Ignore } from '@travetto/schema';
 
 import { ModelCandidateUtil } from './bin/candidate';
-
-type Options = {
-  env: OptionConfig<string>;
-};
 
 /**
  * CLI Entry point for exporting model schemas
  */
-export abstract class BaseModelCommand extends BaseCliCommand<Options> {
+export abstract class BaseModelCommand implements BaseCliCommand {
 
   restoreEnv?: (err: Error) => unknown;
 
-  op: keyof ModelStorageSupport;
-
+  @Ignore()
   resolve = ModelCandidateUtil.resolve.bind(ModelCandidateUtil);
 
-  getArgs(): string {
-    return '[provider] [models...]';
-  }
+  /** Application Environment */
+  env?: string;
 
-  getOptions(): Options {
-    return { env: this.option({ desc: 'Application environment' }) };
-  }
+  abstract get op(): keyof ModelStorageSupport;
 
   usage({ providers, models }: { providers: string[], models: string[] }, err = ''): Promise<void> {
     return this.showHelp(err, cliTpl`   
@@ -51,4 +44,6 @@ ${models.map(p => cliTpl`  * ${{ param: p }}`).join('\n')}
     }
     return true;
   }
+
+  abstract action(...args: unknown[]): ReturnType<BaseCliCommand['action']>;
 }

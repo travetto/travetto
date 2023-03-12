@@ -1,5 +1,6 @@
 export * from './src/command';
 export * from './src/command-manager';
+export * from './src/decorators';
 export * from './src/execute';
 export * from './src/help';
 export * from './src/color';

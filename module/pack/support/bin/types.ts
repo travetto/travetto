@@ -1,5 +1,3 @@
-import { ListOptionConfig, OptionConfig } from '@travetto/cli';
-
 export type CommonPackConfig = {
   workspace: string;
   output: string;
@@ -17,20 +15,6 @@ export type CommonPackConfig = {
   includeSources: boolean;
 };
 
-export type CommonPackOptions = {
-  workspace: OptionConfig<string>;
-  output: OptionConfig<string>;
-  clean: OptionConfig<boolean>;
-  ejectFile: OptionConfig<string>;
-  mainName: OptionConfig<string>;
-  mainScripts: OptionConfig<boolean>;
-
-  // Bundle
-  entryPoint: OptionConfig<string>;
-  minify: OptionConfig<boolean>;
-  sourcemap: OptionConfig<boolean>;
-  includeSources: OptionConfig<boolean>;
-};
 
 export type DockerPackConfig = {
   dockerFactory: string;
@@ -42,15 +26,6 @@ export type DockerPackConfig = {
   dockerRegistry: string;
 } & CommonPackConfig;
 
-export type DockerPackOptions = {
-  dockerFactory: OptionConfig<string>;
-  dockerImage: OptionConfig<string>;
-  dockerName: OptionConfig<string>;
-  dockerTag: ListOptionConfig<string>;
-  dockerPort: ListOptionConfig<string>;
-  dockerPush: OptionConfig<boolean>;
-  dockerRegistry: OptionConfig<string>;
-} & CommonPackOptions;
 
 export type ShellCommandImpl = {
   var(name: string): string;
