@@ -1,4 +1,4 @@
-import { CliCommand, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, OptionConfig } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 
@@ -9,7 +9,7 @@ type Options = {
 /**
  * CLI for outputting the open api spec to a local file
  */
-export class OpenApiSpecCommand extends CliCommand<Options> {
+export class OpenApiSpecCommand extends BaseCliCommand<Options> {
   name = 'openapi:spec';
 
   getOptions(): Options {

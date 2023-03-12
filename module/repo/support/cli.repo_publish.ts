@@ -1,4 +1,4 @@
-import { CliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, CliModuleUtil, OptionConfig } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 
 import { PackageManager } from './bin/package-manager';
@@ -12,7 +12,7 @@ type Options = {
 *
 * Publish all pending modules
 */
-export class RepoPublishCommand extends CliCommand<Options> {
+export class RepoPublishCommand extends BaseCliCommand<Options> {
 
   name = 'repo:publish';
 

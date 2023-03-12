@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 
 import { PackageUtil, path, RootIndex, watchFolders } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
-import { CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
+import { BaseCliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 
 import { DocRenderer } from '../src/render/renderer';
 
@@ -15,7 +15,7 @@ type Options = {
 /**
  * Command line support for generating module docs.
  */
-export class DocCommand extends CliCommand<Options> {
+export class DocCommand extends BaseCliCommand<Options> {
   name = 'doc';
 
   getOptions(): Options {

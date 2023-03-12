@@ -1,4 +1,4 @@
-import { CliCommand, CliScmUtil, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, CliScmUtil, OptionConfig } from '@travetto/cli';
 import { CliModuleUtil } from '@travetto/cli/src/module';
 import { RootIndex } from '@travetto/manifest';
 
@@ -14,7 +14,7 @@ type VersionOptions = {
 *
 * Version all all changed dependencies
 */
-export class RepoVersionCommand extends CliCommand<VersionOptions> {
+export class RepoVersionCommand extends BaseCliCommand<VersionOptions> {
 
   name = 'repo:version';
 

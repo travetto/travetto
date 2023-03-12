@@ -3,7 +3,7 @@ import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
 import { GlobalEnvConfig } from '@travetto/base';
-import { CliCommand, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, OptionConfig } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 
 import type { RunState } from '../src/execute/types';
@@ -19,7 +19,7 @@ type Options = {
 /**
  * Launch test framework and execute tests
  */
-export class TestCommand extends CliCommand<Options> {
+export class TestCommand extends BaseCliCommand<Options> {
   name = 'test';
   _types: string[];
 

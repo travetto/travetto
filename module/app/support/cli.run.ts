@@ -1,4 +1,4 @@
-import { cliTpl, CliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
+import { cliTpl, BaseCliCommand, OptionConfig, ListOptionConfig } from '@travetto/cli';
 import { GlobalEnvConfig, ErrorUtil } from '@travetto/base';
 
 import { AppListLoader } from './bin/list';
@@ -17,7 +17,7 @@ type Options = {
 /**
  * The main entry point for the application cli
  */
-export class AppRunCommand extends CliCommand<Options> {
+export class AppRunCommand extends BaseCliCommand<Options> {
   #loader: AppListLoader = new AppListLoader();
 
   name = 'run';

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { ShutdownManager } from '@travetto/base';
-import { CliCommand } from '@travetto/cli';
+import { BaseCliCommand } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 
 /**
@@ -9,7 +9,7 @@ import { path, RootIndex } from '@travetto/manifest';
  *
  * Allows for running of main entry points
  */
-export class MainCommand extends CliCommand {
+export class MainCommand extends BaseCliCommand {
 
   name = 'main';
 

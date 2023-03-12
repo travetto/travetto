@@ -1,4 +1,4 @@
-import { CliCommand, cliTpl, OptionConfig } from '@travetto/cli';
+import { BaseCliCommand, cliTpl, OptionConfig } from '@travetto/cli';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 
 import { ModelCandidateUtil } from './bin/candidate';
@@ -10,7 +10,7 @@ type Options = {
 /**
  * CLI Entry point for exporting model schemas
  */
-export abstract class BaseModelCommand extends CliCommand<Options> {
+export abstract class BaseModelCommand extends BaseCliCommand<Options> {
 
   restoreEnv?: (err: Error) => unknown;
 
