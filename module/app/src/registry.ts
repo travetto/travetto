@@ -95,13 +95,6 @@ class $ApplicationRegistry {
       }
     }
   }
-
-  /**
-   * Clear all apps on reset
-   */
-  onReset(): void {
-    this.#applications.clear();
-  }
 }
 
 export const ApplicationRegistry = new $ApplicationRegistry();
