@@ -1,20 +1,18 @@
-import { BaseCliCommand, CliCommand, CliModuleUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 
 import { PackageManager } from './bin/package-manager';
 
 /**
-* `npx trv repo:publish`
-*
-* Publish all pending modules
-*/
+ * Publish all pending modules
+ */
 @CliCommand()
-export class RepoPublishCommand implements BaseCliCommand {
+export class RepoPublishCommand implements CliCommandShape {
 
   /** Dry Run? */
   dryRun = true;
 
-  async action(...args: unknown[]): Promise<void> {
+  async main(): Promise<void> {
     const published = await CliModuleUtil.execOnModules('all', (mod, opts) => PackageManager.isPublished(RootIndex.manifest, mod, opts), {
       filter: mod => !!mod.local && !mod.internal,
       progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,

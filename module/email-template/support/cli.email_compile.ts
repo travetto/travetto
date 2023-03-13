@@ -2,7 +2,7 @@ import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngine } from '@travetto/email/src/template';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
-import { BaseCliCommand, CliCommand, cliTpl } from '@travetto/cli';
+import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 
 import { EmailTemplateCompiler } from '../src/compiler';
 import { EmailTemplateResource } from '../src/resource';
@@ -13,12 +13,12 @@ import { TemplateManager } from './bin/template';
  * CLI Entry point for running the email server
  */
 @CliCommand()
-export class EmailCompileCommand implements BaseCliCommand {
+export class EmailCompileCommand implements CliCommandShape {
 
   /** Compile in watch mode */
   watch?: boolean;
 
-  async action(): Promise<void> {
+  async main(): Promise<void> {
     await RootRegistry.init();
 
     // Let the engine template

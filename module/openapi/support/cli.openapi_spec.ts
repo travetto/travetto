@@ -1,4 +1,4 @@
-import { BaseCliCommand, CliCommand } from '@travetto/cli';
+import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 
@@ -6,7 +6,7 @@ import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
  * CLI for outputting the open api spec to a local file
  */
 @CliCommand()
-export class OpenApiSpecCommand implements BaseCliCommand {
+export class OpenApiSpecCommand implements CliCommandShape {
 
   /** Output files */
   output = './openapi.yml';
@@ -18,7 +18,7 @@ export class OpenApiSpecCommand implements BaseCliCommand {
     };
   }
 
-  async action(): Promise<void> {
+  async main(): Promise<void> {
     const result = await ExecUtil.worker(
       RootIndex.resolveFileImport('@travetto/cli/support/entry.cli.ts'),
       ['main', '@travetto/openapi/support/bin/generate.ts'],

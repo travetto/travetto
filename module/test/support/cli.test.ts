@@ -1,14 +1,11 @@
-import { readFileSync } from 'fs';
 import fs from 'fs/promises';
 import os from 'os';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { path } from '@travetto/manifest';
 import { GlobalEnvConfig } from '@travetto/base';
-import { BaseCliCommand, CliCommand, CliHelp } from '@travetto/cli';
+import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
-import { Max, Min } from '@travetto/schema';
-
-import type { RunState } from '../src/execute/types';
+import { Max, Min, Required, ValidationError } from '@travetto/schema';
 
 type TestMode = 'single' | 'standard';
 type TestFormat = 'tap' | 'tap-streamed' | 'xunit' | 'event' | 'exec';
@@ -17,9 +14,7 @@ type TestFormat = 'tap' | 'tap-streamed' | 'xunit' | 'event' | 'exec';
  * Launch test framework and execute tests
  */
 @CliCommand()
-export class TestCommand implements BaseCliCommand {
-  #types: string[];
-
+export class TestCommand implements CliCommandShape {
   /** Output format for test results */
   format: TestFormat = 'tap';
   /** Number of tests to run concurrently */
@@ -28,46 +23,45 @@ export class TestCommand implements BaseCliCommand {
   /** Test run mode */
   mode: TestMode = 'standard';
 
-  getTypes(): string[] {
-    if (!this.#types) {
-      this.#types = RootIndex
-        .findSrc({ filter: /consumer\/types\/.*/, profiles: ['test'] })
-        .map(x => readFileSync(`${x.outputFile}`, 'utf8').match(/Consumable.?[(]'([^']+)/)?.[1])
-        .filter((x?: string): x is string => !!x);
-    }
-    return this.#types;
-  }
-
   envInit(): GlobalEnvConfig {
     return { test: true };
   }
 
-  getArgs(): string {
-    return '[regexes...]';
+  isFirstFile(first: string): Promise<boolean> {
+    return fs.stat(path.resolve(first ?? '')).then(x => x.isFile(), () => false);
   }
 
-  async action(regexes: string[]): Promise<void | CliHelp> {
-    const { runTests } = await import('./bin/run.js');
+  async resolvedMode(first: string, rest: string[]): Promise<TestMode> {
+    return (await this.isFirstFile(first)) && rest.length === 0 ? 'single' : this.mode;
+  }
 
-    const [first] = regexes;
+  async validate(first: string, rest: string[]): Promise<ValidationError | undefined> {
 
-    const isFile = await fs.stat(path.resolve(first ?? '')).then(x => x.isFile(), () => false);
-
-    const state: RunState = {
-      args: !first ? ['test/.*'] : regexes,
-      mode: isFile && regexes.length === 1 ? 'single' : this.mode,
-      concurrency: this.concurrency,
-      format: this.format
-    };
-
-    if (state.mode === 'single') {
-      if (!isFile) {
-        return new CliHelp('You must specify a proper test file to run in single mode');
+    if (await this.resolvedMode(first, rest)) {
+      if (!await this.isFirstFile(first)) {
+        return {
+          message: 'You must specify a proper test file to run in single mode',
+          kind: 'required',
+          path: 'regexes'
+        };
       } else if (!/test\//.test(first)) {
-        return new CliHelp('Only files in the test/ folder are permitted to be run');
+        return {
+          message: 'Only files in the test/ folder are permitted to be run',
+          kind: 'required',
+          path: 'regexes'
+        };
       }
     }
+  }
 
-    await runTests(state);
+  async main(@Required() first: string = 'test/.*', regexes: string[] = []): Promise<void> {
+    const { runTests } = await import('./bin/run.js');
+
+    return runTests({
+      args: [first, ...regexes],
+      mode: await this.resolvedMode(first, regexes),
+      concurrency: this.concurrency,
+      format: this.format
+    });
   }
 }

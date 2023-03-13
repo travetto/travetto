@@ -160,6 +160,10 @@ export interface FieldConfig extends DescribableConfig {
    * Is this field a getter or setter
    */
   accessor?: string;
+  /**
+   * Is the field for a method
+   */
+  forMethod?: boolean;
 }
 
 export type ViewFieldsConfig<T> = { with: Extract<(keyof T), string>[] } | { without: Extract<(keyof T), string>[] };
