@@ -9,12 +9,10 @@ import { CliCommand } from '@travetto/cli';
 @CliCommand()
 export class PackLambdaCommand extends BasePackCommand {
 
-  entryPoint = '@travetto/rest-aws-lambda/support/entry.handler';
-  mainName = 'index';
-  output = this.monoRoot ? '<module>.zip' : `${this.getSimpleModuleName()}.zip`;
-
-  getArgs(): string | undefined {
-    return this.monoRoot ? '<module>' : '';
+  initializeFlags(): void {
+    this.entryPoint = '@travetto/rest-aws-lambda/support/entry.handler';
+    this.mainName = 'index';
+    this.output = this.monoRoot ? '<module>.zip' : `${this.getSimpleModuleName()}.zip`;
   }
 
   getOperations(): PackOperationShape<CommonPackConfig>[] {

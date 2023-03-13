@@ -4,7 +4,7 @@ import { TransformerState, DecoratorMeta, DecoratorUtil, AfterClass } from '@tra
 import { SchemaTransformUtil } from '@travetto/schema/support/transform-util';
 
 /**
- * Converts classes with `@CliCommand` to register 'action' types
+ * Converts classes with `@CliCommand` to `@Schema` and maps the main method
  */
 export class CliCommandTransformer {
 
@@ -22,7 +22,7 @@ export class CliCommandTransformer {
     // Find runnable method
     const runMethod = node.members
       .find((x): x is ts.MethodDeclaration =>
-        ts.isMethodDeclaration(x) && x.name!.getText() === 'action'
+        ts.isMethodDeclaration(x) && x.name!.getText() === 'main'
       );
 
     if (!runMethod) {

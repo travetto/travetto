@@ -1,12 +1,12 @@
 import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
-import { BaseCliCommand, CliCommand, CliModuleUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 
 /**
  * Command line support for linting
  */
 @CliCommand()
-export class LintCommand implements BaseCliCommand {
+export class LintCommand implements CliCommandShape {
 
   /** Only check changed modules */
   changed = false;
@@ -15,7 +15,7 @@ export class LintCommand implements BaseCliCommand {
     return { debug: false };
   }
 
-  async action(): Promise<number> {
+  async main(): Promise<number> {
     const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
 
     const res = await ExecUtil.spawn('npx', ['eslint', ...mods.filter(x => x.local).map(x => x.sourcePath)], {

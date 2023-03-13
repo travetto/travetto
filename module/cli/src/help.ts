@@ -1,197 +1,121 @@
-import type commander from 'commander';
+import { Primitive } from '@travetto/base';
+import { ValidationResultError } from '@travetto/schema';
+import { stripAnsiCodes } from '@travetto/terminal';
 
 import { cliTpl } from './color';
-
-const TYPE_PATTERN = /(\[[^\]]+\])/g;
-const REQ_TYPE_PATTERN = /(<[^>]+>)/g;
-const TITLE_PATTERN = /^(\S[^:]+:)/gim;
-
-const OPTIONS_PATTERN = new RegExp([
-  '^',
-  '(?<space>[ ]+)',
-  '(?<shortName>-[^, ]+)',
-  '(?<paramSpace>,?[ ]*)?',
-  '(?<longName>--\\S+)?',
-  '((?<typeSpace>[ ]+)?(?<type>(?:\\[[^\\]]+\\])|(?:[<][^>]+[>])))?',
-  '((?<descriptionSpace>[ ]+)(?<description>.*?))?',
-  '((?<defaultPre>[ ]*[(])(?<defaultKey>default)(?<defaultSpace>: )(?<defaultValue>[^)]+)(?<defaultPost>[)]))?',
-  '(?:[ ]+)?',
-  '$',
-].join(''), 'gim');
-
-type OptionsGroup = {
-  space: string; shortName: string;
-  paramSpace?: string; longName?: string;
-  typeSpace?: string; type?: string;
-  descriptionSpace?: string;
-  description?: string;
-  defaultPre?: string; defaultKey?: string; defaultSpace?: string; defaultValue?: string; defaultPost?: string;
-};
-
-const COMMANDS_PATTERN = new RegExp([
-  '^',
-  '(?<space>[ ]+)',
-  '(?<name>\\S+)',
-  '(?<optionsSpace>[ ]+)?',
-  '(?<options>(?:\\[|<).*(?:\\]|>))?',
-  '((?<descriptionSpace>[ ]+)(?<description>[a-z][^\\n\\[]+))?',
-  '(?:[ ]+)?',
-  '$',
-].join(''), 'gim');
-
-type CommandGroup = {
-  space: string; name: string;
-  optionsSpace?: string; options?: string;
-  descriptionSpace?: string; description?: string;
-};
-
-const USAGE_PATTERN = new RegExp([
-  '^',
-  '(?<title>Usage:)',
-  '(?<space>[ ]+)?',
-  '(?<name>[^\\[ ]+)?',
-  '(?<nameSpace>[ ]+)?',
-  '(?<options>(?:\\[|<).*(?:\\]|>))?',
-  '(?:[ ]+)?',
-  '$',
-].join(''), 'gim');
-
-type UsageGroup = {
-  title: string; space?: string;
-  name?: string; nameSpace?: string;
-  options?: string;
-};
-
-function namedReplace<T>(text: string, pattern: RegExp, replacer: (data: T) => (string | (string | undefined)[])): string {
-  return text.replace(pattern, (...args: unknown[]): string => {
-    const groups = args[args.length - 1];
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const res = replacer(groups as T);
-    if (typeof res === 'string') {
-      return res;
-    } else {
-      return res.filter(x => !!x).join('');
-    }
-  });
-}
+import { CliCommandShape } from './types';
+import { CliCommandRegistry } from './registry';
+import { CliCommandSchemaUtil } from './schema';
 
 /**
- * Utilities for formatting help
+ * Utilities for showing help
  */
 export class HelpUtil {
 
   /**
-   * Extract key from the text
-   * @param text Source text
-   * @param key
-   */
-  static extractValue(text: string, key: string): readonly [string, string] {
-    let sub = '';
-    if (text.includes(key)) {
-      const start = text.indexOf(key);
-      let end = text.indexOf('\n\n', start);
-      if (end < 0) {
-        end = text.length;
-      }
-      sub = text.substring(start, end);
-      text = text.substring(end);
-    }
-    return [sub, text] as const;
-  }
-
-  /**
-   * Colorize Usage
-   */
-  static colorizeOptions(option: string): string {
-    return namedReplace<OptionsGroup>(option, OPTIONS_PATTERN,
-      ({
-        space, shortName, paramSpace, longName, typeSpace, type, descriptionSpace, description,
-        defaultPre, defaultKey, defaultSpace, defaultValue, defaultPost
-      }) =>
-        [
-          space,
-          cliTpl`${{ param: shortName }}`,
-          paramSpace,
-          cliTpl`${{ param: longName }}`,
-          typeSpace,
-          cliTpl`${{ type }}`,
-          descriptionSpace,
-          cliTpl`${{ description }}`,
-          defaultPre,
-          cliTpl`${{ description: defaultKey }}`,
-          defaultSpace,
-          cliTpl`${{ input: defaultValue }}`,
-          defaultPost
-        ]
-    )
-      .replace(TITLE_PATTERN, title => cliTpl`${{ title }}`);
-  }
-
-  /**
-   * Colorize command section
-   */
-  static colorizeCommands(commands: string): string {
-    return namedReplace<CommandGroup>(commands, COMMANDS_PATTERN,
-      ({ space, name, optionsSpace, options, descriptionSpace, description }) => [
-        space,
-        cliTpl`${{ param: name }}`,
-        optionsSpace,
-        options?.replace(TYPE_PATTERN, input => cliTpl`${{ input }}`).replace(REQ_TYPE_PATTERN, type => cliTpl`${{ type }}`),
-        descriptionSpace,
-        cliTpl`${{ description }}`
-      ]
-    )
-      .replace(TITLE_PATTERN, title => cliTpl`${{ title }}`);
-  }
-
-  /**
-   * Colorize usage
-   */
-  static colorizeUsage(usage: string): string {
-    return namedReplace<UsageGroup>(usage, USAGE_PATTERN,
-      ({ title, space, name, nameSpace, options }) => [
-        cliTpl`${{ title }}`,
-        space,
-        cliTpl`${{ param: name }}`,
-        nameSpace,
-        options?.replace(TYPE_PATTERN, input => cliTpl`${{ input }}`),
-      ]
-    );
-  }
-
-  /**
-   * Get full help text
-   */
-  static getHelpText(text: string, extraText?: string): string {
-    const [usage, text2] = this.extractValue(text, 'Usage:');
-    const [options, text3] = this.extractValue(text2, 'Options:');
-    const [commands, textFinal] = this.extractValue(text3, 'Commands:');
-
-    const out: string = [
-      this.colorizeUsage(usage),
-      this.colorizeOptions(options),
-      this.colorizeCommands(commands),
-      textFinal
-    ]
-      .map(x => x.trim())
-      .filter(x => !!x)
-      .join('\n\n');
-
-    return `${[out, extraText].filter(x => !!x).join('\n')}\n`;
-  }
-
-  /**
-   * Show the help
+   * Render command-specific help
    * @param command
-   * @param failure
-   * @param extra
    */
-  static showHelp(command: commander.Command, failure?: string, extra?: string): void {
-    if (failure) {
-      console!.error(cliTpl`${{ failure }}\n`);
+  static async #renderCommandHelp(command: CliCommandShape): Promise<string> {
+    const commandName = CliCommandRegistry.getName(command);
+
+    command.initializeFlags?.();
+
+    // Ensure finalized
+    const { flags, args } = await CliCommandSchemaUtil.getSchema(command);
+
+    const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`];
+    for (const field of args) {
+      const name = `${field.name}${field.array ? '...' : ''}`;
+      usage.push(cliTpl`${{ input: field.required ? `<${name}>` : `[${name}]` }}`);
     }
-    console![failure ? 'error' : 'log'](
-      HelpUtil.getHelpText(command.helpInformation(), extra)
-    );
+
+    const params: string[] = [];
+    const descs: string[] = [];
+
+    for (const flag of flags) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const key = flag.name as keyof CliCommandShape;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const flagVal = command[key] as unknown as Exclude<Primitive, Error>;
+
+      let aliases = flag.flagNames ?? [];
+      if (flag.type === 'boolean' && !flag.array) {
+        if (flagVal === true) {
+          aliases = (flag.flagNames ?? []).filter(x => !/^[-][^-]/.test(x));
+        } else {
+          aliases = (flag.flagNames ?? []).filter(x => !x.startsWith('--no-'));
+        }
+      }
+      const param = [cliTpl`${{ param: aliases.join(', ') }}`];
+      if (!(flag.type === 'boolean' && !flag.array)) {
+        param.push(cliTpl`${{ type: `<${flag.name}>` }}`);
+      }
+      params.push(param.join(' '));
+      const desc = [cliTpl`${{ title: flag.description }}`];
+
+      if (key !== 'help' && flagVal !== null && flagVal !== undefined) {
+        desc.push(cliTpl`(default: ${{ input: flagVal }})`);
+      }
+      descs.push(desc.join(' '));
+    }
+
+    const paramWidths = params.map(x => stripAnsiCodes(x).length);
+    const descWidths = descs.map(x => stripAnsiCodes(x).length);
+
+    const paramWidth = Math.max(...paramWidths);
+    const descWidth = Math.max(...descWidths);
+
+    const helpText = await (command.help?.() ?? '');
+
+    return [
+      usage.join(' '),
+      '',
+      cliTpl`${{ title: 'Options:' }}`,
+      ...params.map((_, i) =>
+        `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descs[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`
+      ),
+      '',
+      ...(helpText ? [helpText] : [])
+    ].join('\n');
+  }
+
+  /**
+   * Render help listing of all commands
+   */
+  static async #renderAllHelp(): Promise<string> {
+    const rows: string[] = [];
+    const keys = [...CliCommandRegistry.getCommandMapping().keys()].sort((a, b) => a.localeCompare(b));
+    const maxWidth = keys.reduce((a, b) => Math.max(a, stripAnsiCodes(b).length), 0);
+
+    for (const cmd of keys) {
+      const inst = await CliCommandRegistry.getInstance(cmd);
+      if (inst) {
+        const schema = await CliCommandSchemaUtil.getSchema(inst);
+        rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
+      }
+    }
+    return [
+      cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`,
+      '',
+      cliTpl`${{ title: 'Commands:' }}`,
+      ...rows,
+      ''
+    ].join('\n');
+  }
+
+  /**
+   * Render help
+   */
+  static async renderHelp(command?: CliCommandShape): Promise<string> {
+    return command ? this.#renderCommandHelp(command) : this.#renderAllHelp();
+  }
+
+  /**
+   * Render validation error to a string
+   */
+  static renderValidationError(cmd: CliCommandShape, err: ValidationResultError): string {
+    console.error!(err);
+    return '';
   }
 }

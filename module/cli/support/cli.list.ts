@@ -1,13 +1,11 @@
-import { BaseCliCommand, CliCommand, CliModuleUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 
 /**
- * `npx trv list`
- *
  * Allows for listing of modules
  */
 @CliCommand()
-export class RepoListCommand implements BaseCliCommand {
+export class RepoListCommand implements CliCommandShape {
 
   /** Only show changed modules */
   changed = false;
@@ -19,22 +17,22 @@ export class RepoListCommand implements BaseCliCommand {
     return !!RootIndex.manifest.monoRepo;
   }
 
-  async action(): Promise<void> {
+  async main(): Promise<void> {
     const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
     if (!this.graph) {
       for (const mod of mods.map(x => x.sourceFolder).sort()) {
-        console.log!(mod);
+        process.stdout.write(`${mod}\n`);
       }
     } else {
-      console.log!('digraph g {');
+      process.stdout.write('digraph g {\n');
       for (const el of mods) {
         for (const dep of el.parents) {
           if (dep !== RootIndex.mainPackage.name) {
-            console.log!(`  "${dep}" -> "${el.name}";`);
+            process.stdout.write(`  "${dep}" -> "${el.name}";\n`);
           }
         }
       }
-      console.log!('}');
+      process.stdout.write('}\n');
     }
   }
 }

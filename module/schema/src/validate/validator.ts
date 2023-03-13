@@ -40,7 +40,7 @@ export class SchemaValidator {
 
     const fields = TypedObject.keys<SchemaConfig>(schema);
     for (const field of fields) {
-      if (schema[field].access !== 'readonly') { // Do not validate readonly fields
+      if (schema[field].access !== 'readonly' && !schema[field].forMethod) { // Do not validate readonly fields
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         errors = errors.concat(this.#validateFieldSchema(schema[field], o[field as keyof T], relative));
       }

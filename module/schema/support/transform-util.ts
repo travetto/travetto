@@ -128,6 +128,12 @@ export class SchemaTransformUtil {
       }
     }
 
+    const tags = ts.getJSDocTags(node);
+    const aliases = tags.filter(x => x.tagName.getText() === 'alias');
+    if (aliases.length) {
+      attrs.push(state.factory.createPropertyAssignment('alias', state.fromLiteral(aliases.map(x => x.comment).filter(x => !!x))));
+    }
+
     const params: ts.Expression[] = [];
 
     const existing = state.findDecorator('@travetto/schema', node, 'Field', FIELD_MOD);

@@ -1,16 +1,16 @@
-import { BaseCliCommand, CliCommand, CliModuleUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 
 /**
  * Enforces all packages to write out their versions and dependencies
  */
 @CliCommand()
-export class VersionSyncCommand implements BaseCliCommand {
+export class VersionSyncCommand implements CliCommandShape {
   isActive(): boolean {
     return !!RootIndex.manifest.monoRepo;
   }
 
-  async action(): Promise<void> {
+  async main(): Promise<void> {
     await CliModuleUtil.synchronizeModuleVersions();
   }
 }

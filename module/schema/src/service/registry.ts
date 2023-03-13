@@ -233,7 +233,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       const { fields, schema } = this.getViewSchema(cls);
       const out = [];
       for (const el of fields) {
-        if (el.startsWith(`${method}.`)) {
+        if (el.startsWith(`${method}.`) && schema[el].forMethod) {
           out.push(schema[el]);
         }
       }
@@ -302,6 +302,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   registerPendingParamConfig(target: Class, method: string, idx: number, type: ClassList, conf?: Partial<FieldConfig>): Class {
     conf ??= {};
     conf.index = idx;
+    conf.forMethod = true;
     return this.registerPendingFieldConfig(target, `${method}.${idx}`, type, conf);
   }
 

@@ -2,9 +2,9 @@ export type CommonPackConfig = {
   workspace: string;
   output: string;
   clean: boolean;
-  ejectFile: string;
+  ejectFile?: string;
   mainName: string;
-  mainScripts: boolean;
+  mainScripts?: boolean;
   module: string;
 
   // Bundle
@@ -20,10 +20,10 @@ export type DockerPackConfig = {
   dockerFactory: string;
   dockerImage: string;
   dockerName: string;
-  dockerTag: string[];
-  dockerPort: string[];
-  dockerPush: boolean;
-  dockerRegistry: string;
+  dockerTag?: string[];
+  dockerPort?: string[];
+  dockerPush?: boolean;
+  dockerRegistry?: string;
 } & CommonPackConfig;
 
 

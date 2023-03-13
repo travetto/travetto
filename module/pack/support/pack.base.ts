@@ -1,125 +1,111 @@
 import os from 'os';
 
-import { BaseCliCommand, CliHelp, cliTpl } from '@travetto/cli';
+import { CliCommandShape, CliFlag, cliTpl } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
+import { Ignore, Required, Schema, ValidationError } from '@travetto/schema';
 
-import { CommonPackConfig } from './bin/types';
 import { PackOperation } from './bin/operation';
 import { PackUtil } from './bin/util';
-import { Alias, Ignore } from '@travetto/schema';
 
-export type PackOperationShape<T extends CommonPackConfig = CommonPackConfig> = ((config: T) => AsyncIterable<string[]>);
+export type PackOperationShape<T> = ((config: T) => AsyncIterable<string[]>);
 
-const BASIC_OP_SET = [
-  PackOperation.clean,
-  PackOperation.writeEnv,
-  PackOperation.writePackageJson,
-  PackOperation.writeEntryScript,
-  PackOperation.copyResources,
-  PackOperation.primeAppCache,
-  PackOperation.writeManifest,
-  PackOperation.bundle,
-];
+@Schema()
+export abstract class BasePackCommand implements CliCommandShape {
 
-export abstract class BasePackCommand implements BaseCliCommand {
+  static get monoRoot(): boolean {
+    return !!RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath;
+  }
 
-  /** Workspace for building */
-  @Alias('-w')
+  static get entryPoints(): string[] {
+    return RootIndex.findSupport({ filter: x => x.includes('entry.') })
+      .map(x => x.import.replace(/[.][^.]+s$/, ''));
+  }
+
+  static getSimpleModuleName(): string {
+    return RootIndex.mainPackage.name.replace(/[\/]/, '_').replace(/@/, '');
+  }
+
+  @CliFlag({ desc: 'Workspace for building', short: 'w' })
   workspace: string = path.resolve(os.tmpdir(), RootIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
-  /** Clean workspace */
-  @Alias('-c')
+
+  @CliFlag({ desc: 'Clean workspace' })
   clean = true;
-  /** Output location */
-  @Alias('-o')
-  output?: string;
-  /** Create entry scripts */
-  @Alias('-es')
+
+  @CliFlag({ desc: 'Output location', short: 'o' })
+  @Required(false)
+  output: string;
+
+  @CliFlag({ desc: 'Create entry scripts', short: 'es' })
   mainScripts?: boolean;
-  /** Main name for build artifact */
-  @Alias('-f')
-  mainName?: string;
-  /** Entry point  */
-  @Alias('-e')
-  entryPoint?: string;
-  /** Minify output */
-  @Alias('-m')
+
+  @CliFlag({ desc: 'Main name for build artifact', short: 'f' })
+  @Required(false)
+  mainName: string;
+
+  @CliFlag({ desc: 'Entry point', short: 'e' })
+  @Required(false)
+  entryPoint: string = '@travetto/cli/support/entry.cli';
+
+  @CliFlag({ desc: 'Minify output' })
   minify = true;
-  /** Bundle source maps */
-  @Alias('-sm')
+
+  @CliFlag({ desc: 'Bundle source maps', short: 'sm' })
   sourcemap = false;
-  /** Include source with source maps */
-  @Alias('-is')
+
+  @CliFlag({ desc: 'Include source with source maps', short: 'is' })
   includeSources = false;
-  /** Eject commands to file */
-  @Alias('-x')
+
+  @CliFlag({ desc: 'Eject commands to file', short: 'x' })
   ejectFile?: string;
+
+  @CliFlag({ desc: 'Module to pack', short: 'm' })
+  @Required(false)
+  module: string;
 
   /** Entry arguments */
   @Ignore()
   entryArguments: string[] = [];
 
-  get monoRoot(): boolean {
-    return !!RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath;
-  }
-
-  get entryPoints(): string[] {
-    return RootIndex.findSupport({ filter: x => x.includes('entry.') })
-      .map(x => x.import.replace(/[.][^.]+s$/, ''));
-  }
-
-  getArgs(): string | undefined {
-    return this.monoRoot ? '<module> [args...]' : '[args...]';
-  }
-
-  getSimpleModuleName(): string {
-    return RootIndex.mainPackage.name.replace(/[\/]/, '_').replace(/@/, '');
-  }
-
-  getOperations(): PackOperationShape[] {
-    return BASIC_OP_SET.slice(0);
+  getOperations(): PackOperationShape<this>[] {
+    return [
+      PackOperation.clean,
+      PackOperation.writeEnv,
+      PackOperation.writePackageJson,
+      PackOperation.writeEntryScript,
+      PackOperation.copyResources,
+      PackOperation.primeAppCache,
+      PackOperation.writeManifest,
+      PackOperation.bundle,
+    ];
   }
 
   /**
    * Run all operations
    */
-  async * runOperations(cfg: S): AsyncIterable<string> {
+  async * runOperations(): AsyncIterable<string> {
     for (const op of this.getOperations()) {
-      for await (const msg of op(cfg)) {
+      for await (const msg of op(this)) {
         yield msg.join(' ');
       }
     }
   }
 
-
   getModule(moduleName: string): string {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    let module = this.monoRoot ? moduleName : RootIndex.mainModule.name;
+    let module = BasePackCommand.monoRoot ? moduleName : RootIndex.mainModule.name;
     module = RootIndex.getModuleByFolder(module)?.name ?? module;
 
     // Reinitialize for module
-    if (this.monoRoot) {
+    if (BasePackCommand.monoRoot) {
       RootIndex.reinitForModule(module);
     }
 
     return module;
   }
 
-  async action(module: string, args: string[]): Promise<void | CliHelp> {
-    if (Array.isArray(module)) {
-      args = module;
-      module = RootIndex.mainModule.name;
-    }
-    const start = Date.now();
-    if (!module && this.monoRoot) {
-      return new CliHelp('The module needs to specified when running from a monorepo root');
-    }
-
-    module = this.getModule(module);
-
-    this.entryArguments = Array.isArray(args) ? args : [];
-
+  finalizeFlags(): void {
     // Resolve all files to absolute paths
     if (this.output) {
       this.output = path.resolve(this.output);
@@ -128,8 +114,23 @@ export abstract class BasePackCommand implements BaseCliCommand {
       this.ejectFile = path.resolve(this.ejectFile);
     }
     this.workspace = path.resolve(this.workspace);
+  }
 
-    const stream = this.runOperations(this);
+  async validate(args: string[]): Promise<ValidationError | undefined> {
+    if (!this.module && BasePackCommand.monoRoot) {
+      return {
+        message: 'The module needs to specified when running from a monorepo root',
+        kind: 'required',
+        path: 'module'
+      };
+    }
+  }
+
+  async main(args: string[] = []): Promise<void> {
+    this.entryArguments = args;
+
+    const module = this.getModule(this.module!);
+    const stream = this.runOperations();
 
     // Eject to file
     if (this.ejectFile) {
@@ -137,8 +138,10 @@ export abstract class BasePackCommand implements BaseCliCommand {
       for await (const line of stream) {
         output.push(line);
       }
-      await PackUtil.writeEjectOutput(this.workspace, cfg.module, output, this.ejectFile);
+      await PackUtil.writeEjectOutput(this.workspace, module, output, this.ejectFile);
     } else {
+      const start = Date.now();
+
       await GlobalTerminal.streamLinesWithWaiting(stream, {
         initialDelay: 0,
         cycleDelay: 100,

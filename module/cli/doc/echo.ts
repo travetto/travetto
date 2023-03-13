@@ -1,17 +1,15 @@
-import { BaseCliCommand, CliCommand } from '@travetto/cli';
+import { CliCommandShape, CliCommand } from '@travetto/cli';
 
 /**
- * `npx trv echo`
- *
  * Allows for cleaning of the cache dire
  */
 @CliCommand()
-export class CliEchoCommand implements BaseCliCommand {
+export class CliEchoCommand implements CliCommandShape {
 
   /** Upper case */
   uppercase?: boolean;
 
-  async action(args: string[]) {
+  async main(args: string[]) {
     if (this.uppercase) {
       args = args.map(x => x.toUpperCase());
     }

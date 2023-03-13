@@ -1,7 +1,7 @@
 import enquirer from 'enquirer';
 
 import { path } from '@travetto/manifest';
-import { BaseCliCommand, CliCommand, cliTpl } from '@travetto/cli';
+import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { GlobalTerminal } from '@travetto/terminal';
 
 import { Context } from './bin/context';
@@ -11,7 +11,7 @@ import { Feature, FEATURES } from './bin/features';
  * Command to run scaffolding
  */
 @CliCommand()
-export class ScaffoldCommand implements BaseCliCommand {
+export class ScaffoldCommand implements CliCommandShape {
   /** Template */
   template = 'todo';
   /** Current Working Directory override */
@@ -76,23 +76,15 @@ export class ScaffoldCommand implements BaseCliCommand {
     }
   }
 
-  async action(name?: string): Promise<void | number> {
-    try {
-      name = await this.#getName(name);
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error('Failed to provide correct input', err.message);
-      }
-      return 1;
-    }
+  async main(name?: string): Promise<void> {
+    name = await this.#getName(name);
 
     if (!name && this.dir) {
       name = path.basename(this.dir);
     } else if (name && !this.dir) {
       this.dir = path.resolve(this.cwd, name);
     } else if (!name && !this.dir) {
-      console.error('Either a name or a target directory are required');
-      return 1;
+      throw new Error('Either a name or a target directory are required');
     }
 
     const ctx = new Context(name, this.template, path.resolve(this.cwd, this.dir!));
@@ -101,15 +93,8 @@ export class ScaffoldCommand implements BaseCliCommand {
       await ctx.initialize();
     }
 
-    try {
-      for await (const feature of this.#resolveFeatures(FEATURES)) {
-        await ctx.resolveFeature(feature);
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        console.error('Failed to provide correct input', err.message);
-      }
-      return 1;
+    for await (const feature of this.#resolveFeatures(FEATURES)) {
+      await ctx.resolveFeature(feature);
     }
 
     console.log(cliTpl`\n${{ title: 'Creating Application' }}\n${'-'.repeat(30)}`);

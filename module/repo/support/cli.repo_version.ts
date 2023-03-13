@@ -1,6 +1,7 @@
-import { BaseCliCommand, CliCommand, CliHelp, CliScmUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliScmUtil } from '@travetto/cli';
 import { CliModuleUtil } from '@travetto/cli/src/module';
 import { RootIndex } from '@travetto/manifest';
+import { ValidationError } from '@travetto/schema';
 
 import { PackageManager, SemverLevel } from './bin/package-manager';
 
@@ -8,31 +9,37 @@ import { PackageManager, SemverLevel } from './bin/package-manager';
  * Version all changed dependencies
  */
 @CliCommand()
-export class RepoVersionCommand implements BaseCliCommand {
+export class RepoVersionCommand implements CliCommandShape {
   /** Only version changed modules */
   changed = true;
   /** Force operation, even in a dirty workspace */
   force = false;
 
-  async action(level: SemverLevel, prefix?: string): Promise<void | CliHelp | number> {
+  async validate(...args: unknown[]): Promise<ValidationError | undefined> {
     if (!this.force && await CliScmUtil.isWorkspaceDirty()) {
-      return new CliHelp('Cannot update versions with uncommitted changes');
+      return {
+        message: 'Cannot update versions with uncommitted changes',
+        path: '.',
+        kind: 'invalid'
+      };
     }
+  }
 
+  async main(level: SemverLevel, prefix?: string): Promise<void> {
     const allModules = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
 
     const modules = allModules.filter(x => !x.internal);
 
     // Do we have valid changes?
     if (!modules.length) {
-      console.error!('No modules available for versioning');
-      return 1;
+      throw new Error('No modules available for versioning');
     }
 
     await PackageManager.version(RootIndex.manifest, modules, level, prefix);
 
     const versions = await CliModuleUtil.synchronizeModuleVersions();
+    const commitMessage = `Publish ${modules.map(x => `${x.name}#${versions[x.name]?.replace('^', '') ?? x.version}`).join(',')}`;
 
-    console.log!(await CliScmUtil.createCommit(`Publish ${modules.map(x => `${x.name}#${versions[x.name]?.replace('^', '') ?? x.version}`).join(',')}`));
+    console.log!(await CliScmUtil.createCommit(commitMessage));
   }
 }
