@@ -1,6 +1,6 @@
 import os from 'os';
 
-import { Config } from '@travetto/config';
+import { Config, EnvVar } from '@travetto/config';
 import { Required } from '@travetto/schema';
 
 import { RestSslConfig } from './ssl';
@@ -17,6 +17,7 @@ export class RestConfig {
   /**
    * The port to listen to
    */
+  @EnvVar('REST_PORT')
   port = 3000;
   /**
    * Should we trust the proxy requests implicitly

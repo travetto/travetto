@@ -1,8 +1,7 @@
 import { RetargettingProxy, Class, AppError, Util, GlobalEnv } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
-import { DependencyRegistry, Inject } from '@travetto/di';
+import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
-import { Application } from '@travetto/app';
 
 import { RouteConfig, Request, ServerHandle } from '../types';
 import { RestConfig } from './config';
@@ -15,9 +14,7 @@ import { RestServer } from './server';
 /**
  * The rest application
  */
-@Application('rest', {
-  description: 'Default rest application entrypoint'
-})
+@Injectable()
 export class RestApplication<T = unknown>  {
 
   @Inject()

@@ -45,14 +45,15 @@ export class ExecutionManager {
    * Run the given command object with the given arguments
    */
   static async runCommand(cmd: CliCommandShape, args: string[]): Promise<void> {
+    const remainingArgs = await CliCommandSchemaUtil.bindFlags(cmd, args);
+    const finalArgs = await CliCommandSchemaUtil.getArgs(cmd, remainingArgs);
+    await CliCommandSchemaUtil.validate(cmd, finalArgs);
+
     if (cmd.envInit) {
       defineGlobalEnv(await cmd.envInit());
       ConsoleManager.setDebugFromEnv();
     }
 
-    const remainingArgs = await CliCommandSchemaUtil.bindFlags(cmd, args);
-    const finalArgs = await CliCommandSchemaUtil.getArgs(cmd, remainingArgs);
-    await CliCommandSchemaUtil.validate(cmd, finalArgs);
     return await cmd.main(...finalArgs);
   }
 

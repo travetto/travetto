@@ -32,11 +32,12 @@ export class MainCommand implements CliCommandShape {
     }
   }
 
-  async main(fileOrImport: string, args: string[]): Promise<void> {
+  async main(fileOrImport: string, args: string[] = []): Promise<void> {
+    const allArgs = process.argv.slice(process.argv.indexOf(fileOrImport) + 1);
     try {
       const imp = await this.#getImport(fileOrImport);
       const mod = await import(imp!);
-      await ShutdownManager.exitWithResponse(await mod.main(...args));
+      await ShutdownManager.exitWithResponse(await mod.main(...allArgs));
     } catch (err) {
       await ShutdownManager.exitWithResponse(err, true);
     }

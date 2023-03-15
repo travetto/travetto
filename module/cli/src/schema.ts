@@ -19,7 +19,7 @@ function fieldToInput(x: FieldConfig): CliCommandInput {
   });
 }
 
-const isBoolFlag = (x: CliCommandInput): boolean => x.type !== 'boolean' && !x.array;
+const isBoolFlag = (x: CliCommandInput): boolean => x.type === 'boolean' && !x.array;
 
 /**
  * Allows binding describing/binding inputs for commands
@@ -102,21 +102,36 @@ export class CliCommandSchemaUtil {
     const copy = [...args.slice(0, restIdx < 0 ? args.length : restIdx)];
     const extra = restIdx < 0 ? [] : args.slice(restIdx);
     const schema = await this.getSchema(cmd);
-    const out = [];
+    const out: unknown[] = [];
+    const found: boolean[] = copy.map(x => false);
+    let i = 0;
 
     for (const el of schema.args) {
-      if (!copy.length) {
+      // Siphon off unrecognized flags, in order
+      while (i < copy.length && copy[i].startsWith('-')) {
+        i += 1;
+      }
+
+      if (i >= copy.length) {
         out.push(el.array ? [] : undefined);
       } else if (el.array) {
-        out.push(copy.splice(0, copy.length));
+        const sub: string[] = [];
+        while (i < copy.length) {
+          if (!copy[i].startsWith('-')) {
+            sub.push(copy[i]);
+            found[i] = true;
+          }
+          i += 1;
+        }
+        out.push(sub);
       } else {
-        out.push(copy.shift());
+        out.push(copy[i]);
+        found[i] = true;
+        i += 1;
       }
     }
 
-    console.log(schema.args, out);
-
-    return [...out, extra];
+    return [...out, [...copy.filter((_, idx) => !found[idx]), ...extra]];
   }
 
   /**
@@ -177,7 +192,7 @@ export class CliCommandSchemaUtil {
       async (): Promise<void> => { await SchemaValidator.validate(cls, cmd); },
       async (): Promise<void> => { await SchemaValidator.validateMethod(cls, 'main', args); },
       async (): Promise<void> => {
-        const res = await cmd.validate?.(args);
+        const res = await cmd.validate?.(...args);
         if (res) {
           throw new ValidationResultError(Array.isArray(res) ? res : [res]);
         }

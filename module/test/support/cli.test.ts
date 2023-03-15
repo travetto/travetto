@@ -35,26 +35,26 @@ export class TestCommand implements CliCommandShape {
     return (await this.isFirstFile(first)) && rest.length === 0 ? 'single' : this.mode;
   }
 
-  async validate(first: string, rest: string[]): Promise<ValidationError | undefined> {
+  async validate(first: string = 'test/.*', rest: string[]): Promise<ValidationError | undefined> {
 
-    if (await this.resolvedMode(first, rest)) {
-      if (!await this.isFirstFile(first)) {
-        return {
-          message: 'You must specify a proper test file to run in single mode',
-          kind: 'required',
-          path: 'regexes'
-        };
-      } else if (!/test\//.test(first)) {
-        return {
-          message: 'Only files in the test/ folder are permitted to be run',
-          kind: 'required',
-          path: 'regexes'
-        };
-      }
+    const mode = await this.resolvedMode(first, rest);
+
+    if (mode === 'single' && !await this.isFirstFile(first)) {
+      return {
+        message: 'You must specify a proper test file to run in single mode',
+        kind: 'required',
+        path: 'regexes'
+      };
+    } else if (!/test\//.test(first)) {
+      return {
+        message: 'Only files in the test/ folder are permitted to be run',
+        kind: 'required',
+        path: 'regexes'
+      };
     }
   }
 
-  async main(@Required() first: string = 'test/.*', regexes: string[] = []): Promise<void> {
+  async main(first: string = 'test/.*', regexes: string[] = []): Promise<void> {
     const { runTests } = await import('./bin/run.js');
 
     return runTests({
