@@ -41,7 +41,6 @@ import { SharedModule } from '../shared/shared.module';
 import { WorkerComponent } from './gen/worker/worker.component';
 import { RestSessionComponent } from './gen/rest-session/rest-session.component';
 import { ModelSqlComponent } from './gen/model-sql/model-sql.component';
-import { AppComponent } from './gen/app/app.component';
 import { OpenapiComponent } from './gen/openapi/openapi.component';
 import { CommandComponent } from './gen/command/command.component';
 import { PackComponent } from './gen/pack/pack.component';
@@ -123,7 +122,6 @@ import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.componen
     WorkerComponent,
     RestSessionComponent,
     ModelSqlComponent,
-    AppComponent,
     OpenapiComponent,
     CommandComponent,
     ImageComponent,

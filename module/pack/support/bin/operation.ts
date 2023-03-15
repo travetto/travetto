@@ -213,33 +213,6 @@ export class PackOperation {
   }
 
   /**
-   * Generate the trv-app-cache.json for @travetto/app, which is needed for 'running' programs
-   */
-  static async * primeAppCache(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const isRun = /entry[.]cli/.test(cfg.entryPoint) && cfg.entryArguments.filter(x => !x.startsWith('-'))[0] === 'run';
-    if (!isRun) {
-      return;
-    }
-
-    const appCacheCmd = ['npx', 'trv', 'main', '@travetto/app/support/bin/list'];
-    const sub = path.join(RootIndex.manifest.modules[RootIndex.mainModule.name].outputFolder, 'trv-app-cache.json');
-    const env = { DEBUG: '0', TRV_MODULE: cfg.module };
-    const appCache = path.resolve(cfg.workspace, sub);
-
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Generating App Cache' }} ${{ path: sub }}`);
-
-    if (cfg.ejectFile) {
-      yield ActiveShellCommand.mkdir(path.dirname(appCache));
-      yield [...Object.entries(env).map(x => `${x[0]}=${x[1]}`), ...appCacheCmd, '>', appCache];
-    } else {
-      const { stdout } = await ExecUtil.spawn(appCacheCmd[0], appCacheCmd.slice(1), { env }).result;
-
-      await fs.mkdir(path.dirname(appCache), { recursive: true });
-      await fs.writeFile(appCache, stdout, 'utf8');
-    }
-  }
-
-  /**
    * Produce the output manifest, only including prod dependencies
    */
   static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {

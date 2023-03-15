@@ -83,7 +83,7 @@ export class ParameterTest {
   @Test()
   async simpleParameters() {
     const ep = ParameterTest.getEndpoint('/:name', 'post');
-    assert.doesNotThrow(() =>
+    await assert.doesNotReject(() =>
       ParamExtractor.extract(ep, {
         params: { name: 'bob' },
         query: {
@@ -92,31 +92,31 @@ export class ParameterTest {
       } as unknown as Request, {} as Response)
     );
 
-    assert.throws(() => {
+    await assert.rejects(() =>
       ParamExtractor.extract(ep, {
         params: { name: 'bob' },
         query: {
           age: 'blue'
         }
-      } as unknown as Request, {} as Response);
-    });
+      } as unknown as Request, {} as Response)
+    );
   }
 
   @Test()
   async testHeaders() {
     const ep = ParameterTest.getEndpoint('/login', 'post');
 
-    assert.doesNotThrow(() =>
+    await assert.doesNotReject(() =>
       ParamExtractor.extract(ep, {
         header: (key: string) => key
       } as unknown as Request, {} as Response)
     );
 
-    assert.throws(() => {
+    await assert.rejects(() =>
       ParamExtractor.extract(ep, {
         header: (key: string) => { }
-      } as unknown as Request, {} as Response);
-    });
+      } as unknown as Request, {} as Response)
+    );
 
   }
 
@@ -124,21 +124,21 @@ export class ParameterTest {
   async testOptional() {
     const ep = ParameterTest.getEndpoint('/user/:id', 'post');
 
-    assert.doesNotThrow(() =>
+    await assert.doesNotReject(() =>
       ParamExtractor.extract(ep, {
         query: {},
         params: { id: '5' }
       } as unknown as Request, {} as Response)
     );
 
-    assert.throws(() =>
+    await assert.rejects(() =>
       ParamExtractor.extract(ep, {
         query: { age: 'blue' },
         params: { id: '5' }
       } as unknown as Request, {} as Response), ValidationResultError
     );
 
-    assert.throws(() =>
+    await assert.rejects(() =>
       ParamExtractor.extract(ep, {
         params: {}, query: {}
       } as unknown as Request, {} as Response), ValidationResultError
@@ -150,7 +150,7 @@ export class ParameterTest {
     const ep = ParameterTest.getEndpoint('/req/res', 'post');
     const req = { path: '/path' };
     const res = { status: 200 };
-    const items = ParamExtractor.extract(ep, req as unknown as Request, res as unknown as Response);
+    const items = await ParamExtractor.extract(ep, req as unknown as Request, res as unknown as Response);
 
     assert(req === items[0]);
     assert(res === items[1]);
@@ -191,8 +191,8 @@ export class ParameterTest {
   @Test()
   async realWorld() {
     const ep = ParameterTest.getEndpoint('/job/output/:jobId', 'get');
-    assert.doesNotThrow(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: {} } as unknown as Request, {} as Response));
-    assert.throws(() => ParamExtractor.extract(ep, { params: {}, query: {} } as unknown as Request, {} as Response), ValidationResultError);
-    assert.throws(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { time: 'blue' } } as unknown as Request, {} as Response), ValidationResultError);
+    await assert.doesNotReject(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: {} } as unknown as Request, {} as Response));
+    await assert.rejects(() => ParamExtractor.extract(ep, { params: {}, query: {} } as unknown as Request, {} as Response), ValidationResultError);
+    await assert.rejects(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { time: 'blue' } } as unknown as Request, {} as Response), ValidationResultError);
   }
 }

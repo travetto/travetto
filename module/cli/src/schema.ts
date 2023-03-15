@@ -1,4 +1,4 @@
-import { Class } from '@travetto/base';
+import { Class, ConsoleManager } from '@travetto/base';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
@@ -44,11 +44,16 @@ export class CliCommandSchemaUtil {
     }
 
     // Ensure finalized
-    const parent = SchemaRegistry.getParentClass(cls);
-    if (parent?.Ⲑid) {
-      SchemaRegistry.install(parent, { type: 'added', curr: parent });
+    try {
+      ConsoleManager.setDebug(false);
+      const parent = SchemaRegistry.getParentClass(cls);
+      if (parent?.Ⲑid) {
+        SchemaRegistry.onInstall(parent, { type: 'added', curr: parent });
+      }
+      SchemaRegistry.onInstall(cls, { type: 'added', curr: cls });
+    } finally {
+      ConsoleManager.setDebugFromEnv();
     }
-    SchemaRegistry.install(cls, { type: 'added', curr: cls });
 
     const schema = await SchemaRegistry.getViewSchema(cls);
     const flags = [...Object.values(schema.schema)].filter(v => !v.forMethod).map(fieldToInput);
@@ -97,7 +102,8 @@ export class CliCommandSchemaUtil {
   /**
    * Produce the arguments into the final argument set
    */
-  static async getArgs(cmd: CliCommandShape, args: string[]): Promise<unknown[]> {
+  static async bindArgs(cmd: CliCommandShape, args: string[]): Promise<[known: unknown[], unknown: string[]]> {
+    const cls = this.#getClass(cmd);
     const restIdx = args.indexOf('--');
     const copy = [...args.slice(0, restIdx < 0 ? args.length : restIdx)];
     const extra = restIdx < 0 ? [] : args.slice(restIdx);
@@ -131,7 +137,11 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    return [...out, [...copy.filter((_, idx) => !found[idx]), ...extra]];
+    const final = [...copy.filter((_, idx) => !found[idx]), ...extra];
+    return [
+      BindUtil.coerceMethodParams(cls, 'main', out, true),
+      final
+    ];
   }
 
   /**
@@ -139,7 +149,6 @@ export class CliCommandSchemaUtil {
    */
   static async bindFlags(cmd: CliCommandShape, args: string[]): Promise<string[]> {
     const schema = await this.getSchema(cmd);
-    await cmd.initializeFlags?.();
 
     const restIdx = args.indexOf('--');
     const copy = [...args.slice(0, restIdx < 0 ? args.length : restIdx)]
@@ -178,7 +187,6 @@ export class CliCommandSchemaUtil {
 
     const cls = this.#getClass(cmd);
     BindUtil.bindSchemaToObject(cls, cmd, template);
-    await cmd.finalizeFlags?.();
 
     return [...out, ...extra];
   }
@@ -189,8 +197,8 @@ export class CliCommandSchemaUtil {
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
     const cls = this.#getClass(cmd);
     const validators = [
-      async (): Promise<void> => { await SchemaValidator.validate(cls, cmd); },
-      async (): Promise<void> => { await SchemaValidator.validateMethod(cls, 'main', args); },
+      (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),
+      (): Promise<void> => SchemaValidator.validateMethod(cls, 'main', args),
       async (): Promise<void> => {
         const res = await cmd.validate?.(...args);
         if (res) {
@@ -203,7 +211,7 @@ export class CliCommandSchemaUtil {
       if (!(err instanceof ValidationResultError)) {
         throw err;
       }
-      return err.errors.map(v => ({ ...v, index: i }));
+      return err.errors.map(v => ({ ...v, message: `${v.message}. [${i}]`, index: i }));
     }));
 
     const errors = (await Promise.all(results)).flatMap(x => (x ?? []));

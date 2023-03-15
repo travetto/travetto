@@ -16,25 +16,40 @@ import { CliCommandSchemaUtil } from './schema';
  */
 export class ExecutionManager {
 
-  static #getAction(cmd: CliCommandShape, args: string[]): 'runHelp' | 'runIpc' | 'runCommand' {
+  static async #bindAndValidateArgs(cmd: CliCommandShape, args: string[]): Promise<unknown[]> {
+    await cmd.initialize?.();
+
+    const remainingArgs = await CliCommandSchemaUtil.bindFlags(cmd, args);
+    const [known, unknown] = await CliCommandSchemaUtil.bindArgs(cmd, remainingArgs);
+
+    await cmd.finalize?.(unknown);
+
+    await CliCommandSchemaUtil.validate(cmd, known);
+
+    return known;
+  }
+
+  static #getAction(cmd: CliCommandShape, args: string[]): 'help' | 'ipc' | 'command' {
     return args.find(a => /^(-h|--help)$/.test(a)) ?
-      'runHelp' :
-      (process.env.TRV_CLI_IPC && cmd.jsonIpc) ? 'runIpc' : 'runCommand';
+      'help' :
+      (process.env.TRV_CLI_IPC && cmd.jsonIpc) ? 'ipc' : 'command';
   }
 
   /**
    * Run help
    */
-  static async runHelp(cmd: CliCommandShape, args: string[]): Promise<void> {
+  static async help(cmd: CliCommandShape, args: string[]): Promise<void> {
     console.log!(await HelpUtil.renderHelp(cmd));
   }
 
   /**
    * Append IPC payload to provided file
    */
-  static async runIpc(cmd: CliCommandShape, args: string[]): Promise<void> {
+  static async ipc(cmd: CliCommandShape, args: string[]): Promise<void> {
+    const known = await this.#bindAndValidateArgs(cmd, args);
+
     const file = process.env.TRV_CLI_IPC!;
-    const data = await cmd.jsonIpc!(...args);
+    const data = await cmd.jsonIpc!(...known);
     const name = CliCommandRegistry.getName(cmd);
     const payload = JSON.stringify({ type: name, data });
     await mkdir(path.dirname(file), { recursive: true });
@@ -44,17 +59,15 @@ export class ExecutionManager {
   /**
    * Run the given command object with the given arguments
    */
-  static async runCommand(cmd: CliCommandShape, args: string[]): Promise<void> {
-    const remainingArgs = await CliCommandSchemaUtil.bindFlags(cmd, args);
-    const finalArgs = await CliCommandSchemaUtil.getArgs(cmd, remainingArgs);
-    await CliCommandSchemaUtil.validate(cmd, finalArgs);
+  static async command(cmd: CliCommandShape, args: string[]): Promise<void> {
+    const known = await this.#bindAndValidateArgs(cmd, args);
 
     if (cmd.envInit) {
       defineGlobalEnv(await cmd.envInit());
       ConsoleManager.setDebugFromEnv();
     }
 
-    return await cmd.main(...finalArgs);
+    return await cmd.main(...known);
   }
 
   /**

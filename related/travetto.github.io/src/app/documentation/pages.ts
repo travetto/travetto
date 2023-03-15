@@ -2,7 +2,6 @@ import { CliComponent } from './gen/cli/cli.component';
 import { VSCodePluginComponent } from './gen/vscode-plugin/vscode-plugin.component';
 import { ScaffoldComponent } from './gen/scaffold/scaffold.component';
 import { ConfigComponent } from './gen/config/config.component';
-import { AppComponent } from './gen/app/app.component';
 import { DiComponent } from './gen/di/di.component';
 import { SchemaComponent } from './gen/schema/schema.component';
 import { ModelComponent } from './gen/model/model.component';
@@ -59,13 +58,14 @@ import { EslintComponent } from './gen/eslint/eslint.component';
 
 export const PAGES = [
   {
-    path: 'app', title: 'Application', component: AppComponent, subs: [
+    path: 'app', title: 'Application', subs: [
       { path: 'command', title: 'Command', component: CommandComponent },
       { path: 'cache', title: 'Cache', component: CacheComponent },
       { path: 'pack', title: 'Pack', component: PackComponent },
       { path: 'image', title: 'Image', component: ImageComponent },
       { path: 'log', title: 'Log', component: LogComponent },
-      { path: 'context', title: 'Context', component: ContextComponent }
+      { path: 'context', title: 'Context', component: ContextComponent },
+      { path: 'schema-faker', title: 'Schema Faker', component: SchemaFakerComponent },
     ]
   },
   {
@@ -121,9 +121,7 @@ export const PAGES = [
     path: 'core', title: 'Core', subs: [
       { path: 'di', title: 'Dependency Injection  ', component: DiComponent },
       { path: 'config', title: 'Config ', component: ConfigComponent },
-      { path: 'registry', title: 'Registry', component: RegistryComponent },
-      { path: 'schema', title: 'Schema', component: SchemaComponent },
-      { path: 'schema-faker', title: 'Schema Faker', component: SchemaFakerComponent },
+      { path: 'cli', title: 'CLI Support', component: CliComponent },
       { path: 'test', title: 'Test', component: TestComponent },
       { path: 'worker', title: 'Worker', component: WorkerComponent },
       { path: 'yaml', title: 'YAML Parser', component: YamlComponent },
@@ -132,7 +130,8 @@ export const PAGES = [
   {
     path: 'foundation', title: 'Foundation', subs: [
       { path: 'base', title: 'Base', component: BaseComponent },
-      { path: 'cli', title: 'CLI Support', component: CliComponent },
+      { path: 'schema', title: 'Schema', component: SchemaComponent },
+      { path: 'registry', title: 'Registry', component: RegistryComponent },
       { path: 'compiler', title: 'Compiler', component: CompilerComponent },
       { path: 'transformer', title: 'Transformer', component: TransformerComponent },
       { path: 'manifest', title: 'Manifest', component: ManifestComponent },

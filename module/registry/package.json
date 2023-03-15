@@ -30,10 +30,14 @@
     "@travetto/base": "^3.0.3"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^3.0.3"
+    "@travetto/transformer": "^3.0.3",
+    "@travetto/cli": "^3.0.3"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
+      "optional": true
+    },
+    "@travetto/cli": {
       "optional": true
     }
   },

@@ -21,7 +21,6 @@
     "start": "npx travetto run"
   },
   "dependencies": {
-    "@travetto/app": "^3.0.3",
     "@travetto/auth-rest": "^3.0.3",
     "@travetto/auth-rest-session": "^3.0.3",
     "@travetto/cli": "^3.0.3",

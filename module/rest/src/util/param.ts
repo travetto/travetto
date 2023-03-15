@@ -72,7 +72,7 @@ class $ParamExtractor {
    * @param req The request
    * @param res The response
    */
-  extract(route: EndpointConfig, req: Request, res: Response): unknown[] {
+  async extract(route: EndpointConfig, req: Request, res: Response): Promise<unknown[]> {
     const cls = route.class;
     const method = route.handlerName;
     const routed = route.params.map(c => (c.extract ?? this.defaultExtractors[c.location])(c, req, res));
@@ -80,7 +80,7 @@ class $ParamExtractor {
     const params = BindUtil.coerceMethodParams(cls, method, routed, true);
 
     try {
-      SchemaValidator.validateMethod(cls, method, params);
+      await SchemaValidator.validateMethod(cls, method, params);
     } catch (err) {
       if (err instanceof ValidationResultError) {
         for (const el of err.errors) {

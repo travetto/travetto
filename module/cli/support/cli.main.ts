@@ -11,6 +11,8 @@ import { ValidationError } from '@travetto/schema';
 @CliCommand()
 export class MainCommand implements CliCommandShape {
 
+  #unknownArgs?: string[];
+
   async #getImport(fileOrImport: string): Promise<string | undefined> {
     // If referenced file exists
     let file = fileOrImport;
@@ -32,8 +34,12 @@ export class MainCommand implements CliCommandShape {
     }
   }
 
+  finalize(unknownArgs?: string[] | undefined): void | Promise<void> {
+    this.#unknownArgs = unknownArgs;
+  }
+
   async main(fileOrImport: string, args: string[] = []): Promise<void> {
-    const allArgs = process.argv.slice(process.argv.indexOf(fileOrImport) + 1);
+    const allArgs = [...args, ...this.#unknownArgs ?? []];
     try {
       const imp = await this.#getImport(fileOrImport);
       const mod = await import(imp!);

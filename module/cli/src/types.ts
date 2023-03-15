@@ -1,6 +1,8 @@
 import { GlobalEnvConfig } from '@travetto/base';
 import { ValidationError } from '@travetto/schema';
 
+type OrProm<T> = T | Promise<T>;
+
 /**
  * Base command
  */
@@ -8,15 +10,15 @@ export interface CliCommandShape {
   /**
    * Action target of the command
    */
-  main(...args: unknown[]): void | Promise<void>;
+  main(...args: unknown[]): OrProm<void>;
   /**
    * Setup environment before command runs
    */
-  envInit?(): Promise<GlobalEnvConfig> | GlobalEnvConfig;
+  envInit?(): OrProm<GlobalEnvConfig>;
   /**
    * Extra help
    */
-  help?(): Promise<string> | string;
+  help?(): OrProm<string>;
   /**
    * Supports JSON IPC?
    */
@@ -28,15 +30,15 @@ export interface CliCommandShape {
   /**
    * Run before binding occurs
    */
-  initializeFlags?(): void | Promise<void>;
+  initialize?(): OrProm<void>;
   /**
    * Run before validation occurs
    */
-  finalizeFlags?(): void | Promise<void>;
+  finalize?(unknownArgs?: string[]): OrProm<void>;
   /**
    * Validation method
    */
-  validate?(...args: unknown[]): Promise<ValidationError | ValidationError[] | undefined> | ValidationError | ValidationError[] | undefined;
+  validate?(...args: unknown[]): OrProm<ValidationError | ValidationError[] | undefined>;
 }
 
 export type CliCommandInput = {

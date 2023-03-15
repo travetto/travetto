@@ -35,7 +35,7 @@ export class DocCommand implements CliCommandShape {
     };
   }
 
-  finalizeFlags(): void {
+  finalize(): void {
     if (this.outputs.length === 0) {
       const workspacePkg = PackageUtil.readPackage(RootIndex.manifest.workspacePath);
       this.outputs = workspacePkg.travetto?.docOutputs ?? ['README.md'];
