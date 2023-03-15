@@ -153,7 +153,7 @@ export class RouteUtil {
 
     const handlerBound: Filter = async ({ req, res }: FilterContext): Promise<unknown> => {
       if ('class' in route) {
-        const params = ParamExtractor.extract(route, req, res);
+        const params = await ParamExtractor.extract(route, req, res);
         return route.handler.apply(route.instance, params);
       } else {
         return route.handler.call(route.instance, req, res);

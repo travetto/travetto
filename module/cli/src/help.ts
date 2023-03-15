@@ -19,15 +19,15 @@ export class HelpUtil {
   static async #renderCommandHelp(command: CliCommandShape): Promise<string> {
     const commandName = CliCommandRegistry.getName(command);
 
-    command.initializeFlags?.();
+    command.initialize?.();
 
     // Ensure finalized
     const { flags, args } = await CliCommandSchemaUtil.getSchema(command);
 
     const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`];
     for (const field of args) {
-      const name = `${field.name}${field.array ? '...' : ''}`;
-      usage.push(cliTpl`${{ input: field.required ? `<${name}>` : `[${name}]` }}`);
+      const arg = `${field.name}${field.array ? '...' : ''}:${field.type}`;
+      usage.push(cliTpl`${{ input: field.required ? `<${arg}>` : `[${arg}]` }}`);
     }
 
     const params: string[] = [];
@@ -115,7 +115,12 @@ export class HelpUtil {
    * Render validation error to a string
    */
   static renderValidationError(cmd: CliCommandShape, err: ValidationResultError): string {
-    console.error!(err);
-    return '';
+    console.log(err.errors);
+    return [
+      '',
+      cliTpl`${{ failure: 'Execution failed' }}:`,
+      ...err.errors.map(e => cliTpl` * ${{ failure: e.message }}`),
+      '',
+    ].join('\n');
   }
 }

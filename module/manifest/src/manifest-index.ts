@@ -261,7 +261,7 @@ export class ManifestIndex {
     return name ? this.getModule(name) : undefined;
   }
   /**
-   * Build module list from an expression list (e.g. `@travetto/app,-@travetto/log)
+   * Build module list from an expression list (e.g. `@travetto/rest,-@travetto/log)
    */
   getModuleList(mode: 'local' | 'all', exprList: string = ''): Set<string> {
     const allMods = Object.keys(this.#manifest.modules);

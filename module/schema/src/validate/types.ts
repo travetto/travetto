@@ -26,6 +26,10 @@ export interface ValidationError {
    */
   re?: string;
   /**
+   * Number to compare against
+   */
+  n?: number | Date;
+  /**
    * The type of the field
    */
   type?: string;
@@ -55,6 +59,10 @@ export interface ValidationResult {
    * Potential regular expression for the result
    */
   re?: RegExp;
+  /**
+   * Number to compare against
+   */
+  n?: number | Date;
 }
 
 /**

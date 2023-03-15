@@ -202,6 +202,7 @@ export class SchemaValidator {
     const out: ValidationError[] = [];
     for (const res of results) {
       const err: ValidationError = {
+        ...res,
         kind: res.kind,
         value: res.value,
         message: '',
@@ -311,7 +312,7 @@ export class SchemaValidator {
    * @param method The method being invoked
    * @param params The params to validate
    */
-  static validateMethod<T>(cls: Class<T>, method: string, params: unknown[]): void {
+  static async validateMethod<T>(cls: Class<T>, method: string, params: unknown[]): Promise<void> {
     const errors: ValidationError[] = [];
     for (const field of SchemaRegistry.getMethodSchema(cls, method)) {
       errors.push(...this.#validateFieldSchema(field, params[field.index!]));

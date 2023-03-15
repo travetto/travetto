@@ -40,11 +40,6 @@ mkdir -p $DIST/node_modules/@travetto/manifest
 cp $TRV_OUT/node_modules/@travetto/manifest/package.json $DIST/node_modules/@travetto/manifest/package.json
 cp -r -p $ROOT/resources $DIST/resources
 
-# Generating App Cache node_modules/$MOD/trv-app-cache.json 
-
-mkdir -p $DIST/node_modules/$MOD
-DEBUG=0 TRV_MODULE=$MOD npx trv main @travetto/app/support/bin/list > $DIST/node_modules/$MOD/trv-app-cache.json
-
 # Writing Manifest node_modules/$MOD 
 
 TRV_MODULE=$MOD npx trv manifest $DIST/node_modules/$MOD prod

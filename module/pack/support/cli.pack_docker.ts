@@ -24,8 +24,8 @@ export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Registry ', short: 'dr' })
   dockerRegistry?: string;
 
-  finalizeFlags(): void {
-    super.finalizeFlags();
+  finalize(): void {
+    super.finalize();
     if (this.dockerFactory.startsWith('.')) {
       this.dockerFactory = RootIndex.getFromSource(path.resolve(this.dockerFactory))?.import ?? this.dockerFactory;
     }

@@ -75,7 +75,6 @@ export abstract class BasePackCommand implements CliCommandShape {
       PackOperation.writePackageJson,
       PackOperation.writeEntryScript,
       PackOperation.copyResources,
-      PackOperation.primeAppCache,
       PackOperation.writeManifest,
       PackOperation.bundle,
     ];
@@ -105,7 +104,7 @@ export abstract class BasePackCommand implements CliCommandShape {
     return module;
   }
 
-  finalizeFlags(): void {
+  finalize(): void {
     // Resolve all files to absolute paths
     if (this.output) {
       this.output = path.resolve(this.output);

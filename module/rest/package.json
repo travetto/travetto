@@ -26,7 +26,6 @@
     "directory": "module/rest"
   },
   "dependencies": {
-    "@travetto/app": "^3.0.3",
     "@travetto/base": "^3.0.3",
     "@travetto/config": "^3.0.3",
     "@travetto/context": "^3.0.3",

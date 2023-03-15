@@ -12,6 +12,8 @@ import { Max, Min } from '@travetto/schema';
 @CliCommand()
 export class RepoExecCommand implements CliCommandShape {
 
+  #unknownArgs?: string[];
+
   /** Only changed modules */
   changed = true;
 
@@ -33,13 +35,19 @@ export class RepoExecCommand implements CliCommandShape {
     return { debug: false };
   }
 
+  finalize(unknownArgs?: string[] | undefined): void | Promise<void> {
+    this.#unknownArgs = unknownArgs;
+  }
+
   async main(cmd: string, args: string[]): Promise<void> {
+    const finalArgs = [...args, ...this.#unknownArgs ?? []];
+
     await CliModuleUtil.execOnModules(
       this.changed ? 'changed' : 'all',
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      (mod, opts) => ExecUtil.spawn(cmd, args, opts),
+      (mod, opts) => ExecUtil.spawn(cmd, finalArgs, opts),
       {
-        progressMessage: mod => `Running '${cmd} ${args.join(' ')}' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
+        progressMessage: mod => `Running '${cmd} ${finalArgs.join(' ')}' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
         showStdout: this.showStdout,
         prefixOutput: this.prefixOutput,
         workerCount: this.workers,
