@@ -7,7 +7,7 @@ type OrProm<T> = T | Promise<T>;
 export type Waitable = { wait(): Promise<unknown> } | { on(event: 'close', cb: Function): unknown };
 
 export type AppClass = {
-  run(...args: unknown[]): OrProm<Waitable | Closeable | void | undefined>;
+  run(): OrProm<Waitable | Closeable | void | undefined>;
 };
 
 export type ApplicationParam = (Omit<FieldConfig, 'type' | 'match'> & { type: string, match?: { re: string } });

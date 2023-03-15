@@ -1,10 +1,9 @@
 import { RootIndex } from '@travetto/manifest';
-import { ShutdownManager, Class, ConcreteClass, GlobalEnv } from '@travetto/base';
-import { DependencyRegistry, InjectionError } from '@travetto/di';
-import { BindUtil, SchemaValidator } from '@travetto/schema';
+import { ShutdownManager, GlobalEnv, Closeable } from '@travetto/base';
+import { DependencyRegistry } from '@travetto/di';
 import { Configuration } from '@travetto/config';
 
-import { AppClass, ApplicationConfig } from './types';
+import { ApplicationConfig, Waitable } from './types';
 
 /**
  * Registration point for all applications. Generally invoked by using
@@ -35,54 +34,23 @@ class $ApplicationRegistry {
     return Array.from(this.#applications.values());
   }
 
-  /**
-   * Prepare parameters for usage
-   */
-  prepareParams(name: string, args: string[]): unknown[] {
-    const config = this.#applications.get(name)!;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cleaned = BindUtil.coerceMethodParams(config.target! as Class, 'run', args);
-    SchemaValidator.validateMethod(config.target!, 'run', cleaned);
-    return cleaned;
-  }
-
-  /**
-   * Runs the application, by name
-   */
-  async run(name: string, args: string[]): Promise<void> {
-    const config = this.#applications.get(name);
-    if (!config) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      throw new InjectionError('Application not found', { Ⲑid: name } as Class);
-    }
-
-    const cleaned = this.prepareParams(name, args);
-
-    console.log('Running application', {
-      name: config.name,
-      target: config.targetId
-    });
-
+  async initMessage(): Promise<void> {
     // Show manifest
     console.log('Manifest', {
       info: RootIndex.mainDigest(),
       env: GlobalEnv.toJSON()
     });
 
-    // Get instance of app class
-    const inst = DependencyRegistry.get(config.target!) ?
-      await DependencyRegistry.getInstance(config.target!) :
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      new (config.target! as ConcreteClass<AppClass>)();
-
     const rootConfig = await DependencyRegistry.getInstance(Configuration);
 
     // Show config
     console.log('Config', await rootConfig.exportActive());
+  }
 
-    const ret = await inst.run(...cleaned);
-
-    const target = ret ?? inst;
+  /**
+   * Runs the application, by name
+   */
+  async run(target: Waitable | Closeable | void | undefined): Promise<void> {
 
     if (target) {
       if ('close' in target) {
