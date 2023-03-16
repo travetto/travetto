@@ -21,7 +21,7 @@ export type DockerPackConfig = {
   dockerImage: string;
   dockerName: string;
   dockerTag?: string[];
-  dockerPort?: string[];
+  dockerPort?: number[];
   dockerPush?: boolean;
   dockerRegistry?: string;
 } & CommonPackConfig;

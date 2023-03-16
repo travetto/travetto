@@ -52,8 +52,13 @@ export abstract class BaseRunCommand {
    * Wait for a response to finish
    * @param src
    */
-  async waitFor(src: RunResponse | Promise<RunResponse>): Promise<void> {
-    const target = await src;
+  async run(src: () => (RunResponse | Promise<RunResponse>)): Promise<void> {
+    if (this.module && this.module !== RootIndex.mainModule.name) { // Mono-repo support
+      RootIndex.reinitForModule(this.module); // Reinit with specified module
+    }
+    await RootRegistry.init();
+
+    const target = await src();
     if (target) {
       if ('close' in target) {
         ShutdownManager.onShutdown(target, target); // Tie shutdown into app close
@@ -64,15 +69,5 @@ export abstract class BaseRunCommand {
         await new Promise<void>(res => target.on('close', res));
       }
     }
-  }
-
-  /**
-   * Initializes the registry
-   */
-  async preMain(): Promise<void> {
-    if (this.module && this.module !== RootIndex.mainModule.name) { // Mono-repo support
-      RootIndex.reinitForModule(this.module); // Reinit with specified module
-    }
-    await RootRegistry.init();
   }
 }

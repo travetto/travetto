@@ -70,7 +70,7 @@ export class AssertCheck {
     } else if (fn === 'includes') {
       assertion.operator = fn;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      [assertion.expected, assertion.actual, assertion.message] = args as [unknown, unknown, string];
+      [assertion.actual, assertion.expected, assertion.message] = args as [unknown, unknown, string];
     } else if (fn === 'instanceof') {
       assertion.operator = fn;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -99,6 +99,10 @@ export class AssertCheck {
       // Actually run the assertion
       switch (fn) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        case 'includes': assertFn((actual as unknown[]).includes(expected), message); break;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        case 'test': assertFn((expected as RegExp).test(actual as string), message); break;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'instanceof': assertFn(actual instanceof (expected as Class), message); break;
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         case 'in': assertFn((actual as string) in (expected as object), message); break;
@@ -120,10 +124,6 @@ export class AssertCheck {
             }
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             assert[fn as 'ok'].apply(null, args as [boolean, string | undefined]);
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          } else if (expected && !!(expected as Record<string, Function>)[fn]) { // Dotted Method call (e.g. assert.rejects)
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            assertFn((expected as typeof assert)[fn as 'ok'](actual));
           }
       }
 

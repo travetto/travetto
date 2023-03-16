@@ -115,9 +115,7 @@ export class HelpUtil {
    * Render validation error to a string
    */
   static renderValidationError(cmd: CliCommandShape, err: ValidationResultError): string {
-    console.log(err.errors);
     return [
-      '',
       cliTpl`${{ failure: 'Execution failed' }}:`,
       ...err.errors.map(e => cliTpl` * ${{ failure: e.message }}`),
       '',

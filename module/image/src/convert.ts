@@ -34,7 +34,7 @@ export class ImageConverter {
    * Resize/conversion util
    */
   static CONVERTER = new CommandOperation({
-    containerImage: ' jameskyburz/graphicsmagick-alpine:v1.0.0',
+    containerImage: 'jameskyburz/graphicsmagick-alpine:v1.0.0',
     localCheck: ['gm', ['-version']]
   });
 

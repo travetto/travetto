@@ -34,7 +34,7 @@ export interface CliCommandShape {
   /**
    * Run before validation occurs
    */
-  finalize?(unknownArgs?: string[]): OrProm<void>;
+  finalize?(unknownArgs: string[]): OrProm<void>;
   /**
    * Validation method
    */

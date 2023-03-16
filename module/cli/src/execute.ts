@@ -23,7 +23,6 @@ export class ExecutionManager {
     const [known, unknown] = await CliCommandSchemaUtil.bindArgs(cmd, remainingArgs);
 
     await cmd.finalize?.(unknown);
-
     await CliCommandSchemaUtil.validate(cmd, known);
 
     return known;
@@ -92,10 +91,10 @@ export class ExecutionManager {
           throw err;
         } else if (command && err instanceof ValidationResultError) {
           console.error(await HelpUtil.renderValidationError(command, err));
+          console.error!(await HelpUtil.renderHelp(command));
         } else {
           console.error!(cliTpl`${{ failure: err.message }}`);
         }
-        console.error!(await HelpUtil.renderHelp(command));
       }
     }
   }

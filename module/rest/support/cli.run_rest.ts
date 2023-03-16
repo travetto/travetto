@@ -17,8 +17,10 @@ export class RunRestCommand extends BaseRunCommand {
     return this.port ? { REST_PORT: `${this.port}` } : {};
   }
 
-  async main(): Promise<void> {
-    const app = await DependencyRegistry.getInstance(RestApplication);
-    return this.waitFor(app.run());
+  main(): Promise<void> {
+    return this.run(async () => {
+      const app = await DependencyRegistry.getInstance(RestApplication);
+      return app.run();
+    });
   }
 }
