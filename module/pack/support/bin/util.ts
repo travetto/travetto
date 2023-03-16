@@ -33,31 +33,34 @@ export class PackUtil {
   /**
    * Finalize eject output
    */
-  static async writeEjectOutput(
-    workspace: string,
-    module: string,
-    output: string[],
-    file: string
-  ): Promise<void> {
-    const vars = {
-      DIST: workspace,
-      TRV_OUT: RootIndex.outputRoot,
-      ROOT: path.cwd(),
-      MOD: module
-    };
+  static async writeEjectOutput(workspace: string, module: string, output: AsyncIterable<string>, file: string): Promise<void> {
+    const vars = { DIST: workspace, TRV_OUT: RootIndex.outputRoot, ROOT: path.cwd(), MOD: module };
 
-    const content = [
+    const replaceArgs = (text: string): string => Object.entries(vars)
+      .reduce((str, [k, v]) => str.replaceAll(v, ActiveShellCommand.var(k)), text);
+
+    const preamble = [
       ActiveShellCommand.scriptOpen(),
       ...Object.entries(vars).map(([k, v]) => ActiveShellCommand.export(k, v).join(' ')),
-      Object.entries(vars).reduce((text, [k, v]) => text.replaceAll(v, ActiveShellCommand.var(k)), output.join('\n')),
-      '', ''
     ].join('\n');
 
-    if (file === '-' || file === '/dev/stdout') {
-      console.log!(content);
-    } else {
+    let stream: fs.FileHandle | undefined;
+
+    if (!(file === '-' || file === '/dev/stdout')) {
       await fs.mkdir(path.dirname(file), { recursive: true });
-      await fs.writeFile(file, content, 'utf8');
+      await fs.truncate(file);
+      stream = await fs.open(file, 'utf8');
     }
+
+    const write = (text: string): Promise<unknown> | unknown => stream ? stream.write(`${text}\n`) : process.stdout.write(`${text}\n`);
+
+    await write(preamble);
+    for await (const line of output) {
+      await write(replaceArgs(line));
+    }
+    await write(file);
+    await write('\n');
+
+    await stream?.close();
   }
 }

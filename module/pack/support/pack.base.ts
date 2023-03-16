@@ -27,6 +27,8 @@ export abstract class BasePackCommand implements CliCommandShape {
     return RootIndex.mainPackage.name.replace(/[\/]/, '_').replace(/@/, '');
   }
 
+  #unknownArgs?: string[];
+
   @CliFlag({ desc: 'Workspace for building', short: 'w' })
   workspace: string = path.resolve(os.tmpdir(), RootIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
 
@@ -104,7 +106,9 @@ export abstract class BasePackCommand implements CliCommandShape {
     return module;
   }
 
-  finalize(): void {
+  finalize(unknown: string[]): void {
+    this.#unknownArgs = unknown;
+
     // Resolve all files to absolute paths
     if (this.output) {
       this.output = path.resolve(this.output);
@@ -126,18 +130,18 @@ export abstract class BasePackCommand implements CliCommandShape {
   }
 
   async main(args: string[] = []): Promise<void> {
-    this.entryArguments = args;
+    console.log(args, this.#unknownArgs);
+    this.entryArguments = [...args, ...this.#unknownArgs ?? []];
 
-    const module = this.getModule(this.module!);
+    this.module = this.getModule(this.module);
+
+    this.mainName ??= path.basename(this.module);
+
     const stream = this.runOperations();
 
     // Eject to file
     if (this.ejectFile) {
-      const output: string[] = [];
-      for await (const line of stream) {
-        output.push(line);
-      }
-      await PackUtil.writeEjectOutput(this.workspace, module, output, this.ejectFile);
+      await PackUtil.writeEjectOutput(this.workspace, this.module, stream, this.ejectFile);
     } else {
       const start = Date.now();
 

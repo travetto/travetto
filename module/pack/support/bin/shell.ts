@@ -27,7 +27,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     export: (key, value) => ['set', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
     comment: (message) => ['\nREM', stripAnsiCodes(message), '\n'],
-    echo: (message) => ['echo', `"${escape(stripAnsiCodes(message))}\n"`],
+    echo: (message) => ['echo', `"${escape(stripAnsiCodes(message))}"\n`],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile]
   },
   posix: {
@@ -47,7 +47,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     export: (key, value) => ['export', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
     comment: (message) => ['\n#', stripAnsiCodes(message), '\n'],
-    echo: (message) => ['echo', `"${escape(stripAnsiCodes(message))}\n"`],
+    echo: (message) => ['echo', `"${escape(stripAnsiCodes(message))}"\n`],
     zip: (outputFile) => ['zip', '-r', outputFile, '.']
   },
 };

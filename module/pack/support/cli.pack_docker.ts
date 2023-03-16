@@ -1,8 +1,8 @@
 import { path, RootIndex } from '@travetto/manifest';
+import { CliCommand, CliFlag } from '@travetto/cli';
 
 import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
-import { CliCommand, CliFlag } from '@travetto/cli';
 
 /**
  * Standard docker support for pack
@@ -18,14 +18,14 @@ export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Image Tag ', short: 'dt' })
   dockerTag: string[] = ['latest'];
   @CliFlag({ desc: 'Docker Image Port ', short: 'dp' })
-  dockerPort: string[] = [];
+  dockerPort: number[] = [];
   @CliFlag({ desc: 'Docker Push Tags ', short: 'dx' })
   dockerPush = false;
   @CliFlag({ desc: 'Docker Registry ', short: 'dr' })
   dockerRegistry?: string;
 
-  finalize(): void {
-    super.finalize();
+  finalize(unknownArgs: string[]): void {
+    super.finalize(unknownArgs);
     if (this.dockerFactory.startsWith('.')) {
       this.dockerFactory = RootIndex.getFromSource(path.resolve(this.dockerFactory))?.import ?? this.dockerFactory;
     }
