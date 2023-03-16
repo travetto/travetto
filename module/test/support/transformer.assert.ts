@@ -238,8 +238,8 @@ export class AssertTransformer {
         const resolved = state.resolveType(root);
         if (resolved.key === 'literal' && matched.find(x => resolved.ctor === x)) { // Ensure method is against real type
           switch (key.text) {
-            case 'test': return { fn: key.text, args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)] };
             case 'includes': return { fn: key.text, args: [comp.expression.expression, comp.arguments[0], ...args.slice(1)] };
+            case 'test': return { fn: key.text, args: [comp.arguments[0], comp.expression.expression, ...args.slice(1)] };
           }
         }
       }

@@ -23,7 +23,7 @@ export class ColorOutputUtilTest {
 
     const output = ColorOutputUtil.colorer(term, { text: 'red', underline: true })('apple');
     assert(output !== 'apple');
-    assert(/apple/.test(output));
+    assert(/apple.*39m/.test(output));
     assert(output.includes('\x1b[24;39m'));
     assert(output.includes('\x1b[91;4m'));
   }
