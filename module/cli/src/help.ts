@@ -1,9 +1,8 @@
 import { Primitive } from '@travetto/base';
-import { ValidationResultError } from '@travetto/schema';
 import { stripAnsiCodes } from '@travetto/terminal';
 
 import { cliTpl } from './color';
-import { CliCommandShape } from './types';
+import { CliCommandShape, CliValidationResultError } from './types';
 import { CliCommandRegistry } from './registry';
 import { CliCommandSchemaUtil } from './schema';
 
@@ -114,7 +113,7 @@ export class HelpUtil {
   /**
    * Render validation error to a string
    */
-  static renderValidationError(cmd: CliCommandShape, err: ValidationResultError): string {
+  static renderValidationError(cmd: CliCommandShape, err: CliValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
       ...err.errors.map(e => cliTpl` * ${{ failure: e.message }}`),

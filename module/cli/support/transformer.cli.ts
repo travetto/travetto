@@ -12,7 +12,7 @@ export class CliCommandTransformer {
    * On presence of `@CliCommand`
    */
   @AfterClass('CliCommand')
-  static registerAppMethod(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta): typeof node {
+  static registerMainMethod(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta): typeof node {
     const dec = dm?.dec;
 
     if (!dec || !ts.isCallExpression(dec.expression)) { // If not valid

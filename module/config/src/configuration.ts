@@ -1,4 +1,4 @@
-import { AppError, Class, ClassInstance, GlobalEnv, DataUtil, Env } from '@travetto/base';
+import { AppError, Class, ClassInstance, GlobalEnv, DataUtil } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootIndex } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
@@ -79,11 +79,6 @@ export class Configuration {
           this.#secrets.push(DataUtil.coerceType(el, String, true));
         }
       }
-    }
-
-    if (Env.getBoolean('TRV_INTRO_MESSAGE')) {
-      console.log('Manifest', { info: RootIndex.mainDigest(), env: GlobalEnv.toJSON() });
-      console.log('Config', await this.exportActive());
     }
   }
 

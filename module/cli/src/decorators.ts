@@ -1,4 +1,4 @@
-import { ClassInstance, ConcreteClass } from '@travetto/base';
+import { Class, ClassInstance, ConcreteClass } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -11,10 +11,13 @@ import { CliCommandRegistry } from './registry';
  * @augments `@travetto/cli:CliCommand`
  */
 export function CliCommand() {
-  return function <T extends CliCommandShape>(target: ConcreteClass<T>): void {
-    const file = RootIndex.getFunctionMetadata(target)!.source;
-    const name = (file.match(/cli.(.*)[.]tsx?$/)![1].replaceAll('_', ':'));
-    CliCommandRegistry.registerClass({ name, cls: target });
+  return function <T extends CliCommandShape>(target: Class<T>): void {
+    const meta = RootIndex.getFunctionMetadata(target);
+    if (meta && !meta.abstract) {
+      const name = (meta.source.match(/cli.(.*)[.]tsx?$/)![1].replaceAll('_', ':'));
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      CliCommandRegistry.registerClass({ name, cls: target as ConcreteClass<T> });
+    }
   };
 }
 

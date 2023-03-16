@@ -1,7 +1,7 @@
-import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { ValidationError } from '@travetto/schema';
+import { CliCommandShape, CliCommand, cliTpl, CliValidationError } from '@travetto/cli';
 import { GlobalTerminal } from '@travetto/terminal';
-import { CommandService } from '../__index__';
+
+import { CommandService } from '../src/types';
 
 import { ServiceUtil } from './bin/service';
 import { ServiceAction } from './bin/types';
@@ -18,7 +18,7 @@ export class CliServiceCommand implements CliCommandShape {
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async validate(action: string, services: string[]): Promise<ValidationError | undefined> {
+  async validate(action: string, services: string[]): Promise<CliValidationError | undefined> {
     const all = await this.#getServices(services);
 
     if (!all.length) {

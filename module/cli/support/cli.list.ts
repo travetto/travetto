@@ -1,6 +1,8 @@
 import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 
+const write = (line: string): Promise<void> => new Promise(r => process.stdout.write(`${line}\n`, () => r()));
+
 /**
  * Allows for listing of modules
  */
@@ -21,18 +23,18 @@ export class RepoListCommand implements CliCommandShape {
     const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
     if (!this.graph) {
       for (const mod of mods.map(x => x.sourceFolder).sort()) {
-        process.stdout.write(`${mod}\n`);
+        await write(mod);
       }
     } else {
-      process.stdout.write('digraph g {\n');
+      await write('digraph g {');
       for (const el of mods) {
         for (const dep of el.parents) {
           if (dep !== RootIndex.mainPackage.name) {
-            process.stdout.write(`  "${dep}" -> "${el.name}";\n`);
+            await write(`  "${dep}" -> "${el.name}";`);
           }
         }
       }
-      process.stdout.write('}\n');
+      await write('}');
     }
   }
 }

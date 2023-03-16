@@ -1,7 +1,7 @@
 import { Class, ConsoleManager } from '@travetto/base';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
+import { CliCommandInput, CliCommandSchema, CliCommandShape, CliValidationResultError } from './types';
 
 function fieldToInput(x: FieldConfig): CliCommandInput {
   return ({
@@ -216,7 +216,7 @@ export class CliCommandSchemaUtil {
 
     const errors = (await Promise.all(results)).flatMap(x => (x ?? []));
     if (errors.length) {
-      throw new ValidationResultError(errors);
+      throw new CliValidationResultError(errors);
     }
     return cmd;
   }

@@ -2,6 +2,7 @@ import { RetargettingProxy, Class, AppError, Util, GlobalEnv } from '@travetto/b
 import { RootIndex } from '@travetto/manifest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
+import { Configuration } from '@travetto/config';
 
 import { RouteConfig, Request, ServerHandle } from '../types';
 import { RestConfig } from './config';
@@ -188,6 +189,11 @@ export class RestApplication<T = unknown>  {
    * Run the application
    */
   async run(): Promise<ServerHandle> {
+    const cfg = await DependencyRegistry.getInstance(Configuration).then(svc => svc.exportActive());
+
+    // Log on startup
+    console.log('Manifest', { info: RootIndex.mainDigest(), env: GlobalEnv.toJSON() });
+    console.log('Config', cfg);
     console.info('Listening', { port: this.config.port });
     return await this.server.listen();
   }
