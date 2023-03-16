@@ -1,7 +1,6 @@
-import { CliCommandShape, CliCommand, CliScmUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliScmUtil, CliValidationError } from '@travetto/cli';
 import { CliModuleUtil } from '@travetto/cli/src/module';
 import { RootIndex } from '@travetto/manifest';
-import { ValidationError } from '@travetto/schema';
 
 import { PackageManager, SemverLevel } from './bin/package-manager';
 
@@ -15,7 +14,7 @@ export class RepoVersionCommand implements CliCommandShape {
   /** Force operation, even in a dirty workspace */
   force = false;
 
-  async validate(...args: unknown[]): Promise<ValidationError | undefined> {
+  async validate(...args: unknown[]): Promise<CliValidationError | undefined> {
     if (!this.force && await CliScmUtil.isWorkspaceDirty()) {
       return {
         message: 'Cannot update versions with uncommitted changes',

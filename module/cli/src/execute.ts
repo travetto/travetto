@@ -3,10 +3,9 @@ import { appendFile, mkdir } from 'fs/promises';
 import { GlobalTerminal } from '@travetto/terminal';
 import { path } from '@travetto/manifest';
 import { ConsoleManager, defineGlobalEnv } from '@travetto/base';
-import { ValidationResultError } from '@travetto/schema';
 
 import { HelpUtil } from './help';
-import { CliCommandShape } from './types';
+import { CliCommandShape, CliValidationResultError } from './types';
 import { CliCommandRegistry } from './registry';
 import { cliTpl } from './color';
 import { CliCommandSchemaUtil } from './schema';
@@ -18,13 +17,10 @@ export class ExecutionManager {
 
   static async #bindAndValidateArgs(cmd: CliCommandShape, args: string[]): Promise<unknown[]> {
     await cmd.initialize?.();
-
     const remainingArgs = await CliCommandSchemaUtil.bindFlags(cmd, args);
     const [known, unknown] = await CliCommandSchemaUtil.bindArgs(cmd, remainingArgs);
-
     await cmd.finalize?.(unknown);
     await CliCommandSchemaUtil.validate(cmd, known);
-
     return known;
   }
 
@@ -89,7 +85,7 @@ export class ExecutionManager {
       } catch (err) {
         if (!(err instanceof Error)) {
           throw err;
-        } else if (command && err instanceof ValidationResultError) {
+        } else if (command && err instanceof CliValidationResultError) {
           console.error(await HelpUtil.renderValidationError(command, err));
           console.error!(await HelpUtil.renderHelp(command));
         } else {

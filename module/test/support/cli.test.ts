@@ -3,9 +3,9 @@ import os from 'os';
 
 import { path } from '@travetto/manifest';
 import { GlobalEnvConfig } from '@travetto/base';
-import { CliCommandShape, CliCommand } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
-import { Max, Min, Required, ValidationError } from '@travetto/schema';
+import { Max, Min } from '@travetto/schema';
 
 type TestMode = 'single' | 'standard';
 type TestFormat = 'tap' | 'tap-streamed' | 'xunit' | 'event' | 'exec';
@@ -35,7 +35,7 @@ export class TestCommand implements CliCommandShape {
     return (await this.isFirstFile(first)) && rest.length === 0 ? 'single' : this.mode;
   }
 
-  async validate(first: string = 'test/.*', rest: string[]): Promise<ValidationError | undefined> {
+  async validate(first: string = 'test/.*', rest: string[]): Promise<CliValidationError | undefined> {
 
     const mode = await this.resolvedMode(first, rest);
 

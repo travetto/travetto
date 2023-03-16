@@ -2,10 +2,10 @@ import fs from 'fs/promises';
 
 import { PackageUtil, path, RootIndex, watchFolders } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
-import { CliCommandShape, CliCommand } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
+import { MinLength } from '@travetto/schema';
 
 import { DocRenderer } from '../src/render/renderer';
-import { MinLength, ValidationError } from '@travetto/schema';
 
 /**
  * Command line support for generating module docs.
@@ -43,7 +43,7 @@ export class DocCommand implements CliCommandShape {
     this.input = path.resolve(this.input);
   }
 
-  async validate(...args: unknown[]): Promise<ValidationError | undefined> {
+  async validate(...args: unknown[]): Promise<CliValidationError | undefined> {
     const docFile = path.resolve(this.input);
     if (!(await fs.stat(docFile).catch(() => false))) {
       return {

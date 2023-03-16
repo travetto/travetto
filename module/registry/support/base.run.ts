@@ -1,6 +1,6 @@
 import { Closeable, GlobalEnvConfig, ShutdownManager } from '@travetto/base';
-import { RootIndex } from '@travetto/manifest';
-import { Schema, ValidationError } from '@travetto/schema';
+import { path, RootIndex } from '@travetto/manifest';
+import { CliCommand, CliFlag, CliValidationError } from '@travetto/cli';
 
 import { RootRegistry } from '../src/service/root';
 
@@ -12,16 +12,16 @@ type RunResponse = Waitable | Closeable | void | undefined;
 /**
  * Base for runnable applications
  */
-@Schema()
+@CliCommand()
 export abstract class BaseRunCommand {
 
-  /** Application environment */
+  @CliFlag({ short: 'e', desc: 'Application environment' })
   env?: string;
 
-  /** Additional application profiles */
+  @CliFlag({ short: 'p', desc: 'Additional application profiles' })
   profile: string[] = [];
 
-  /** Module to run for */
+  @CliFlag({ short: 'm', desc: 'Module to run for' })
   module?: string;
 
   envSet?(): Record<string, string | boolean | number>;
@@ -31,15 +31,22 @@ export abstract class BaseRunCommand {
       debug: process.env.DEBUG || false,
       envName: this.env,
       profiles: this.profile,
-      set: {
-        TRV_INTRO_MESSAGE: true,
-        ...this.envSet?.() ?? {}
-      }
+      set: this.envSet?.()
     };
   }
 
-  async validate(): Promise<ValidationError | undefined> {
-    if (!module && RootIndex.manifest.monoRepo && RootIndex.mainModule.sourcePath === RootIndex.manifest.workspacePath) {
+  abstract main(...args: unknown[]): void | Promise<void>;
+
+  async validate(): Promise<CliValidationError | undefined> {
+    if (this.module) {
+      if (!RootIndex.getModule(this.module)) {
+        return {
+          kind: 'required',
+          path: 'module',
+          message: `${this.module} is an unknown module`
+        };
+      }
+    } else if (RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath) {
       return {
         kind: 'required',
         path: 'module',

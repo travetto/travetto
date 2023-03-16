@@ -1,7 +1,30 @@
 import { GlobalEnvConfig } from '@travetto/base';
-import { ValidationError } from '@travetto/schema';
 
 type OrProm<T> = T | Promise<T>;
+
+export type CliValidationError = {
+  /**
+   * The error message
+   */
+  message: string;
+  /**
+   * The object path of the error
+   */
+  path: string;
+  /**
+   * The kind of validation
+   */
+  kind: string;
+};
+
+export class CliValidationResultError extends Error {
+  errors: CliValidationError[];
+
+  constructor(errors: CliValidationError[]) {
+    super('');
+    this.errors = errors;
+  }
+}
 
 /**
  * Base command
@@ -38,7 +61,7 @@ export interface CliCommandShape {
   /**
    * Validation method
    */
-  validate?(...args: unknown[]): OrProm<ValidationError | ValidationError[] | undefined>;
+  validate?(...args: unknown[]): OrProm<CliValidationError | CliValidationError[] | undefined>;
 }
 
 export type CliCommandInput = {

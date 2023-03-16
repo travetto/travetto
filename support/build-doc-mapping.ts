@@ -29,7 +29,7 @@ export async function main(): Promise<void> {
   for (const mod of out.sort((a, b) => a.name.localeCompare(b.name))) {
     text.push(`
   ${mod.simpleName}: {
-    name:'${mod.name}', folder:'${mod.name}', displayName: '${mod.displayName}',
+    name: '${mod.name}', folder: '${mod.name}', displayName: '${mod.displayName}',
     description: '${mod.description?.replaceAll("'", '\\\'')}'
   }`);
   }

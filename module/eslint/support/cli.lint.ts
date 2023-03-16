@@ -15,7 +15,7 @@ export class LintCommand implements CliCommandShape {
     return { debug: false };
   }
 
-  async main(): Promise<number> {
+  async main(): Promise<void> {
     const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
 
     const res = await ExecUtil.spawn('npx', ['eslint', ...mods.filter(x => x.local).map(x => x.sourcePath)], {
@@ -24,6 +24,6 @@ export class LintCommand implements CliCommandShape {
       catchAsResult: true
     }).result;
 
-    return res.code;
+    process.exitCode = res.code;
   }
 }
