@@ -122,8 +122,13 @@ export class CliRunUtil {
             ...choice,
             prettyName: `${choice.name} [${module.name}]`,
             inputFlags: ['--module', module.name]
-          })
+          });
         }
+        output.push({
+          ...choice,
+          prettyName: `${choice.name} [${choice.module}]`,
+          inputFlags: ['--module', choice.module]
+        });
       } else {
         output.push(choice);
       }

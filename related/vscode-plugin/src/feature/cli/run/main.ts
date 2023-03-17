@@ -37,7 +37,7 @@ export class CliRunFeature extends BaseFeature {
    */
   async exportLaunchConfig(): Promise<void> {
     try {
-      const choice = await CliRunUtil.makeChoice('Export Application Launch', await this.getValidRecent(10));
+      const choice = await CliRunUtil.makeChoice('Export Run', await this.getValidRecent(10));
 
       if (!choice) {
         return;
@@ -81,14 +81,14 @@ export class CliRunFeature extends BaseFeature {
    * @param title
    * @param apps
    */
-  async debugTarget(appOrName?: RunChoice | string | Recent, inputs?: string[]): Promise<void> {
+  async debugTarget(targetOrName?: RunChoice | string | Recent, inputs?: string[]): Promise<void> {
     let choice: RunChoice | undefined;
-    if (appOrName) {
-      if (typeof appOrName === 'string') {
+    if (targetOrName) {
+      if (typeof targetOrName === 'string') {
         const list = await CliRunUtil.getChoices();
-        choice = list.find(x => x.name === appOrName);
-      } else if ('name' in appOrName) {
-        choice = appOrName;
+        choice = list.find(x => x.name === targetOrName);
+      } else if ('name' in targetOrName) {
+        choice = targetOrName;
       } else {
         // Get recent
         choice = (await this.getValidRecent(1))[0];
@@ -109,7 +109,7 @@ export class CliRunFeature extends BaseFeature {
         vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
       }
     } else {
-      this.log.info('No app selected');
+      this.log.info('No target selected');
     }
   }
 
