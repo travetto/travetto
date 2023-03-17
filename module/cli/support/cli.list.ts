@@ -23,12 +23,18 @@ export class RepoListCommand implements CliCommandShape {
 
     const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
     switch (this.format) {
-      case 'list':
+      case 'list': {
         for (const mod of mods.map(x => x.sourceFolder).sort()) {
           await write(mod);
         }
         break;
-      case 'graph':
+      }
+      case 'json': {
+        const outputMap = CliModuleUtil.getDependencyGraph(mods);
+        await write(JSON.stringify(Object.entries(outputMap).map(([name, children]) => ({ name, children })), null, 2));
+        break;
+      }
+      case 'graph': {
         await write('digraph g {');
         for (const el of mods) {
           for (const dep of el.parents) {
@@ -38,41 +44,6 @@ export class RepoListCommand implements CliCommandShape {
           }
         }
         await write('}');
-        break;
-      case 'json': {
-        type Entry = { children: Set<string>, name: string, active: Set<string>, parents?: string[] };
-        const childMap: Map<string, Entry> = new Map();
-        const get = (name: string): Entry =>
-          childMap.has(name) ? childMap.get(name)! : childMap.set(name, { children: new Set(), name, active: new Set() }).get(name)!;
-
-        for (const el of mods) {
-          get(el.name).parents = el.parents;
-          for (const dep of el.parents) {
-            const par = get(dep);
-            par.children.add(el.name); // Store child into parent
-            par.active.add(el.name);
-          }
-        }
-
-        const output: string[] = [];
-
-        while (childMap.size > 0) {
-          for (const el of [...childMap.values()].filter(x => x.active.size === 0)) {
-            output.push(JSON.stringify({ name: el.name, children: [...el.children] }));
-            for (const parent of el.parents ?? []) {
-              // Extend children into parents
-              for (const val of el.children) {
-                childMap.get(parent)!.children.add(val);
-              }
-            }
-            for (const val of childMap.values()) {
-              val.active.delete(el.name);
-            }
-            childMap.delete(el.name);
-          }
-        }
-
-        await write(`[\n${output.join(',\n')}\n]`);
         break;
       }
     }

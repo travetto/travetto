@@ -1,6 +1,7 @@
 import { Closeable, GlobalEnvConfig, ShutdownManager } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
-import { CliCommand, CliFlag, CliValidationError } from '@travetto/cli';
+import { CliCommand, CliFlag, CliModuleUtil, CliValidationError } from '@travetto/cli';
+import { Required } from '@travetto/schema';
 
 import { RootRegistry } from '../src/service/root';
 
@@ -22,6 +23,7 @@ export abstract class BaseRunCommand {
   profile: string[] = [];
 
   @CliFlag({ short: 'm', desc: 'Module to run for' })
+  @Required(RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath)
   module?: string;
 
   envSet?(): Record<string, string | boolean | number>;
@@ -45,13 +47,18 @@ export abstract class BaseRunCommand {
           path: 'module',
           message: `${this.module} is an unknown module`
         };
+      } else {
+        const self = RootIndex.getModuleFromSource(RootIndex.getFunctionMetadata(this.constructor)!.source)!.name;
+        const mods = await CliModuleUtil.findModules('all');
+        const graph = CliModuleUtil.getDependencyGraph(mods);
+        if (!graph[this.module].includes(self)) {
+          return {
+            kind: 'required',
+            path: 'module',
+            message: `${this.module} does not have ${self} as a dependency`
+          };
+        }
       }
-    } else if (RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath) {
-      return {
-        kind: 'required',
-        path: 'module',
-        message: 'Module is a required flag when running from a monorepo root'
-      };
     }
   }
 
