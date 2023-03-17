@@ -9,7 +9,7 @@ export type TermStyle =
 
 export type TermStyleInput = TermStyle | RGBInput;
 export type Prim = string | number | boolean | Date | RegExp;
-export type TermColorPaletteInput = Record<string, TermStyleInput | [TermStyleInput, TermStyleInput]>;
+export type TermColorPaletteInput = Record<string, TermStyleInput | [dark: TermStyleInput, light: TermStyleInput]>;
 export type TermColorFn = (text: Prim) => string;
 export type TermColorPalette<T> = Record<keyof T, TermColorFn>;
 
@@ -92,7 +92,7 @@ export class ColorOutputUtil {
   /**
    * Make a simple primitive colorer
    */
-  static colorer(term: TermState, style: TermStyleInput | [light: TermStyleInput, dark: TermStyleInput]): TermColorFn {
+  static colorer(term: TermState, style: TermStyleInput | [dark: TermStyleInput, light: TermStyleInput]): TermColorFn {
     const schemes = {
       light: this.getStyledLevels(Array.isArray(style) ? style[1] ?? style[0] : style),
       dark: this.getStyledLevels(Array.isArray(style) ? style[0] : style),

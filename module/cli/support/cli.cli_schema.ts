@@ -27,9 +27,8 @@ export class CliSchemaCommand {
       console.log(JSON.stringify(await this.#getSchema(name), null, 2));
     } else {
       const names = [...CliCommandRegistry.getCommandMapping().keys()];
-      const pairs = names.map(x => this.#getSchema(x).then(schema => [x, schema]));
-      const data = Object.fromEntries(await Promise.all(pairs));
-      console.log(JSON.stringify(data, null, 2));
+      const schemas = await Promise.all(names.map(x => this.#getSchema(x)));
+      console.log(JSON.stringify(schemas, null, 2));
     }
   }
 }
