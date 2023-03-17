@@ -152,7 +152,7 @@ export class CliCommandSchemaUtil {
   /**
    * Bind arguments to command
    */
-  static async bindFlags(cmd: CliCommandShape, args: string[]): Promise<string[]> {
+  static async bindFlags<T extends CliCommandShape>(cmd: T, args: string[]): Promise<string[]> {
     const schema = await this.getSchema(cmd);
 
     const restIdx = args.indexOf('--');
@@ -168,24 +168,31 @@ export class CliCommandSchemaUtil {
     }
 
     const out = [];
-    const template: any = {};
+    const template: Partial<T> = {};
     for (let i = 0; i < copy.length; i += 1) {
       const arg = copy[i];
       const next = copy[i + 1];
 
       const input = flagMap.get(arg);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const key = input!.name as keyof T;
       if (!input) {
         out.push(arg);
       } else if (isBoolFlag(input)) {
-        template[input.name] = !arg.startsWith('--no');
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        template[key] = !arg.startsWith('--no') as T[typeof key];
       } else if (next === undefined || next.startsWith('-')) {
-        template[input.name] = null;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        template[key] = null as T[typeof key];
       } else if (input.array) {
-        template[input.name] ??= [];
-        template[input.name].push(next);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const arr = template[key] ??= [] as T[typeof key];
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        (arr as unknown[]).push(next);
         i += 1; // Skip next
       } else {
-        template[input.name] = next;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        template[key] = next as T[typeof key];
         i += 1; // Skip next
       }
     }

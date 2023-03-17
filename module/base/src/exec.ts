@@ -66,16 +66,16 @@ export interface ExecutionOptions extends SpawnOptions {
    */
   isolatedEnv?: boolean;
   /**
-   * Built in timeout for any execution. The number of milliseconds the process can run before 
+   * Built in timeout for any execution. The number of milliseconds the process can run before
    * terminating and throwing an error
    */
   timeout?: number;
   /**
-   * Determines how to treat the stdout/stderr data. 
+   * Determines how to treat the stdout/stderr data.
    *  - 'text' will assume the output streams are textual, and will convert to unicode data.
    *  - 'text-stream' makes the same assumptions as 'text', but will only fire events, and will
    *        not persist any data.  This is really useful for long running programs.
-   *  - 'binary' treats all stdout/stderr data as raw buffers, and will not perform any transformations.  
+   *  - 'binary' treats all stdout/stderr data as raw buffers, and will not perform any transformations.
    *  - 'raw' avoids touching stdout/stderr altogether, and leaves it up to the caller to decide.
    */
   outputMode?: 'raw' | 'binary' | 'text' | 'text-stream';

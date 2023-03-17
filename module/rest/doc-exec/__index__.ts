@@ -7,6 +7,11 @@ export * from '@travetto/rest/doc/custom-app';
 class Config {
   @InjectableFactory()
   static target(): RestServer<unknown> {
-    return { init: () => { }, listen: () => { }, registerRoutes: () => { } } as unknown as RestServer;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return {
+      init: () => { },
+      listen: () => { },
+      registerRoutes: () => { }
+    } as unknown as RestServer;
   }
 }

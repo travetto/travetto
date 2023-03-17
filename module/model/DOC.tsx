@@ -28,7 +28,7 @@ const ModelImplementations = () => {
     <thead><tr>{...modelImplHeader}</tr></thead>
     <tbody>{...modelImplRows}</tbody>
   </table>;
-}
+};
 
 export const text = <>
   <c.StdHeader />
