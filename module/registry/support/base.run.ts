@@ -1,7 +1,6 @@
 import { Closeable, GlobalEnvConfig, ShutdownManager } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
-import { CliCommand, CliCommandRegistry, CliFlag, CliModuleUtil, CliValidationError } from '@travetto/cli';
-import { Required } from '@travetto/schema';
+import { CliCommand, CliFlag, CliModuleUtil, CliValidationError } from '@travetto/cli';
 
 import { RootRegistry } from '../src/service/root';
 
@@ -16,6 +15,8 @@ type RunResponse = Waitable | Closeable | void | undefined;
 @CliCommand()
 export abstract class BaseRunCommand {
 
+  #moduleRequired = false;
+
   @CliFlag({ short: 'e', desc: 'Application environment' })
   env?: string;
 
@@ -23,8 +24,15 @@ export abstract class BaseRunCommand {
   profile: string[] = [];
 
   @CliFlag({ short: 'm', desc: 'Module to run for' })
-  @Required(RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath)
   module?: string;
+
+  constructor(moduleRequired = false) {
+    this.#moduleRequired = moduleRequired;
+  }
+
+  runTarget(): boolean {
+    return true;
+  }
 
   envSet?(): Record<string, string | boolean | number>;
 
@@ -59,14 +67,15 @@ export abstract class BaseRunCommand {
           };
         }
       }
+    } else if (this.#moduleRequired) {
+      if (RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath) {
+        return {
+          kind: 'required',
+          path: 'module',
+          message: 'module is a required field when in a monorepo'
+        };
+      }
     }
-  }
-
-  async jsonIpc(...args: unknown[]): Promise<unknown> {
-    return {
-      name: CliCommandRegistry.getName(this),
-      args: process.argv.slice(3)  // Send everything through
-    };
   }
 
   /**

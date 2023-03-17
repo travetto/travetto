@@ -38,7 +38,10 @@ export interface CliCommandShape {
     module: string;
     cls: Class<CliCommandShape>;
   };
-
+  /**
+   * Is this command something that should be run?
+   */
+  runTarget?(): boolean;
   /**
    * Action target of the command
    */
@@ -88,6 +91,7 @@ export type CliCommandSchema = {
   name: string;
   title: string;
   module: string;
+  runTarget?: boolean;
   description?: string;
   args: CliCommandInput[];
   flags: CliCommandInput[];

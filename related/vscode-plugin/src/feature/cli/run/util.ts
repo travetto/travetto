@@ -109,7 +109,7 @@ export class CliRunUtil {
     let modules: { name: string, children: Set<string> }[];
 
     // Only return `run:* targets
-    choices = choices.filter(x => x.name.startsWith('run:'));
+    choices = choices.filter(x => x.runTarget);
 
     const output: RunChoice[] = [];
     for (const choice of choices) {

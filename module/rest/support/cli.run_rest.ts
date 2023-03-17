@@ -13,6 +13,11 @@ export class RunRestCommand extends BaseRunCommand {
   /** Port to run on */
   port?: number;
 
+  // Module is required
+  constructor() {
+    super(true);
+  }
+
   envSet(): Record<string, string | number | boolean> {
     return this.port ? { REST_PORT: `${this.port}` } : {};
   }

@@ -5,7 +5,7 @@ import { path } from '@travetto/manifest';
 import { ConsoleManager, defineGlobalEnv } from '@travetto/base';
 
 import { HelpUtil } from './help';
-import { CliCommandShape, CliValidationResultError } from './types';
+import { CliCommandMetaⲐ, CliCommandShape, CliValidationResultError } from './types';
 import { CliCommandRegistry } from './registry';
 import { cliTpl } from './color';
 import { CliCommandSchemaUtil } from './schema';
@@ -27,7 +27,7 @@ export class ExecutionManager {
   static #getAction(cmd: CliCommandShape, args: string[]): 'help' | 'ipc' | 'command' {
     return args.find(a => /^(-h|--help)$/.test(a)) ?
       'help' :
-      (process.env.TRV_CLI_IPC && cmd.jsonIpc) ? 'ipc' : 'command';
+      (process.env.TRV_CLI_IPC && cmd.runTarget?.()) ? 'ipc' : 'command';
   }
 
   /**
@@ -41,11 +41,14 @@ export class ExecutionManager {
    * Append IPC payload to provided file
    */
   static async ipc(cmd: CliCommandShape, args: string[]): Promise<void> {
-    const known = await this.#bindAndValidateArgs(cmd, args);
-
+    await this.#bindAndValidateArgs(cmd, args);
     const file = process.env.TRV_CLI_IPC!;
-    const data = await cmd.jsonIpc!(...known);
-    const payload = JSON.stringify({ type: '@travetto/cli:run', data });
+    const payload = JSON.stringify({
+      type: '@travetto/cli:run', data: {
+        name: cmd[CliCommandMetaⲐ]!.name,
+        args: process.argv.slice(3)
+      }
+    });
     await mkdir(path.dirname(file), { recursive: true });
     await appendFile(file, `${payload}\n`);
   }

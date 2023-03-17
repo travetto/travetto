@@ -88,26 +88,6 @@
         "category": "Travetto"
       },
       {
-        "command": "travetto.app.run:new",
-        "title": "Run New App",
-        "category": "Travetto"
-      },
-      {
-        "command": "travetto.app.run:recent",
-        "title": "Run Recent App",
-        "category": "Travetto"
-      },
-      {
-        "command": "travetto.app.run:mostRecent",
-        "title": "Run Most Recent App",
-        "category": "Travetto"
-      },
-      {
-        "command": "travetto.app.run:export",
-        "title": "Export App Launch",
-        "category": "Travetto"
-      },
-      {
         "command": "travetto.cli.run:new",
         "title": "Run New Command",
         "category": "Travetto"
@@ -219,20 +199,20 @@
           "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorIsOpen"
         },
         {
-          "command": "travetto.app.run:new",
-          "when": "travetto.app && !inDebugMode"
+          "command": "travetto.cli.run:new",
+          "when": "travetto.cli && !inDebugMode"
         },
         {
-          "command": "travetto.app.run:recent",
-          "when": "travetto.app && !inDebugMode"
+          "command": "travetto.cli.run:recent",
+          "when": "travetto.cli && !inDebugMode"
         },
         {
-          "command": "travetto.app.run:mostRecent",
-          "when": "travetto.app && !inDebugMode"
+          "command": "travetto.cli.run:mostRecent",
+          "when": "travetto.cli && !inDebugMode"
         },
         {
-          "command": "travetto.app.run:export",
-          "when": "travetto.app"
+          "command": "travetto.cli.run:export",
+          "when": "travetto.cli"
         },
         {
           "command": "travetto.email-template.develop:preview-html",
