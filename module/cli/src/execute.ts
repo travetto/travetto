@@ -45,7 +45,6 @@ export class ExecutionManager {
 
     const file = process.env.TRV_CLI_IPC!;
     const data = await cmd.jsonIpc!(...known);
-    const name = CliCommandRegistry.getName(cmd, true);
     const payload = JSON.stringify({ type: '@travetto/cli:run', data });
     await mkdir(path.dirname(file), { recursive: true });
     await appendFile(file, `${payload}\n`);
