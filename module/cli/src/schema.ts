@@ -89,12 +89,15 @@ export class CliCommandSchemaUtil {
       }
     }
 
+    const fullSchema = SchemaRegistry.get(cls);
+    const meta = cmd[CliCommandMetaⲐ]!;
     const cfg = {
       args: method,
       flags,
-      title: SchemaRegistry.get(cls).title ?? cls.name,
-      name: cmd[CliCommandMetaⲐ]!.name,
-      description: SchemaRegistry.get(cls).description ?? ''
+      module: meta.module,
+      title: fullSchema.title ?? cls.name,
+      name: meta.name,
+      description: fullSchema.description ?? ''
     };
     this.#schemas.set(cls, cfg);
     return cfg;
