@@ -24,7 +24,7 @@ class $ActivationManager {
   add(config: ActivationConfig): void {
     this.#registry.add(config);
     if (config.command && typeof config.command === 'string') {
-      this.#commandRegistry.set(config.command, config);
+      this.#commandRegistry.set(`${config.module}:${config.command}`, config);
     }
   }
 
@@ -35,7 +35,7 @@ class $ActivationManager {
         const inst = entry.instance = new cls(module, command === true ? undefined : command);
         await vscode.commands.executeCommand('setContext', inst.moduleBase, true);
         if (typeof command === 'string') {
-          this.#commandRegistry.get(command)!.instance = entry.instance;
+          this.#commandRegistry.get(`${module}:${command}`)!.instance = entry.instance;
           await vscode.commands.executeCommand('setContext', `${inst.moduleBase}.${command}`, true);
         }
       }
@@ -44,6 +44,7 @@ class $ActivationManager {
 
   async activate(ctx: vscode.ExtensionContext): Promise<void> {
     for (const { instance } of this.#registry.values()) {
+      this.#log.info('Activating', instance?.module, instance?.command);
       instance?.activate?.(ctx);
     }
     this.#ipcSupport.activate(ctx);
