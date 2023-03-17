@@ -87,6 +87,7 @@ export type CliCommandInput = {
 export type CliCommandSchema = {
   name: string;
   title: string;
+  module: string;
   description?: string;
   args: CliCommandInput[];
   flags: CliCommandInput[];
