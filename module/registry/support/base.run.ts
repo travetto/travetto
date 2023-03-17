@@ -1,6 +1,6 @@
 import { Closeable, GlobalEnvConfig, ShutdownManager } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
-import { CliCommand, CliFlag, CliModuleUtil, CliValidationError } from '@travetto/cli';
+import { CliCommand, CliCommandRegistry, CliFlag, CliModuleUtil, CliValidationError } from '@travetto/cli';
 import { Required } from '@travetto/schema';
 
 import { RootRegistry } from '../src/service/root';
@@ -51,7 +51,7 @@ export abstract class BaseRunCommand {
         const self = RootIndex.getModuleFromSource(RootIndex.getFunctionMetadata(this.constructor)!.source)!.name;
         const mods = await CliModuleUtil.findModules('all');
         const graph = CliModuleUtil.getDependencyGraph(mods);
-        if (!graph[this.module].includes(self)) {
+        if (self !== this.module && !graph[this.module].includes(self)) {
           return {
             kind: 'required',
             path: 'module',
@@ -60,6 +60,13 @@ export abstract class BaseRunCommand {
         }
       }
     }
+  }
+
+  async jsonIpc(...args: unknown[]): Promise<unknown> {
+    return {
+      name: CliCommandRegistry.getName(this),
+      args: process.argv.slice(3)  // Send everything through
+    };
   }
 
   /**
