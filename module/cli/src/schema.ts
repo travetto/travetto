@@ -91,12 +91,13 @@ export class CliCommandSchemaUtil {
 
     const fullSchema = SchemaRegistry.get(cls);
     const meta = cmd[CliCommandMetaⲐ]!;
-    const cfg = {
+    const cfg: CliCommandSchema = {
       args: method,
       flags,
       module: meta.module,
       title: fullSchema.title ?? cls.name,
       name: meta.name,
+      runTarget: cmd.runTarget?.(),
       description: fullSchema.description ?? ''
     };
     this.#schemas.set(cls, cfg);
@@ -175,7 +176,7 @@ export class CliCommandSchemaUtil {
 
       const input = flagMap.get(arg);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const key = input!.name as keyof T;
+      const key = input?.name as keyof T;
       if (!input) {
         out.push(arg);
       } else if (isBoolFlag(input)) {

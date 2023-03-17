@@ -81,19 +81,8 @@ export class CliRunFeature extends BaseFeature {
    * @param title
    * @param apps
    */
-  async debugTarget(targetOrName?: RunChoice | string | Recent, inputs?: string[]): Promise<void> {
-    let choice: RunChoice | undefined;
-    if (targetOrName) {
-      if (typeof targetOrName === 'string') {
-        const list = await CliRunUtil.getChoices();
-        choice = list.find(x => x.name === targetOrName);
-      } else if ('name' in targetOrName) {
-        choice = targetOrName;
-      } else {
-        // Get recent
-        choice = (await this.getValidRecent(1))[0];
-      }
-    }
+  async debugTarget(target: RunChoice | Recent, inputs?: string[]): Promise<void> {
+    const choice = 'name' in target ? target : (await this.getValidRecent(1))[0];
 
     if (choice) {
       this.log.info('Running', choice.name, inputs);
@@ -117,11 +106,10 @@ export class CliRunFeature extends BaseFeature {
    * Register command handlers
    */
   activate(context: vscode.ExtensionContext): void {
-    console.log('REgistering again?', new Date());
+    console.log('Registering again?', new Date());
     this.#storage = new ActionStorage<RunChoice>('cli.run', context);
 
     this.register('new', () => this.chooseAndRun('Run New Command', { mode: 'all' }));
-    this.register('run', (name?: string) => this.debugTarget(name));
     this.register('recent', () => this.chooseAndRun('Run Recent Command', { mode: 'recent', count: 10 }));
     this.register('mostRecent', () => this.debugTarget({ mode: 'recent', count: 1 }));
     this.register('export', () => this.exportLaunchConfig());
@@ -130,7 +118,17 @@ export class CliRunFeature extends BaseFeature {
   /**
    * On IPC trigger to run a target
    */
-  onEvent(ev: TargetEvent<{ name: string, args: string[] }>): Promise<void> {
-    return this.debugTarget(ev.data.name, ev.data.args);
+  async onEvent(ev: TargetEvent<{ name: string, args: string[] }>): Promise<void> {
+    try {
+      const args = ev.data.args;
+      await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
+        name: `[Travetto] ${ev.data.name}${args ? `: ${args.join(' ')}` : ''}`,
+        useCli: true,
+        main: ev.data.name,
+        args: [...args],
+      }));
+    } catch (err) {
+      vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
+    }
   }
 }
