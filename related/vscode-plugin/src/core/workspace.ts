@@ -26,6 +26,10 @@ export class Workspace {
   static #importToFile = new Map<string, string | undefined>();
   static #log = new Log('travetto.vscode.workspace');
 
+  static get isMonoRepo(): boolean {
+    return !!this.#manifestContext.monoRepo;
+  }
+
   /**
    * Get workspace path
    */
