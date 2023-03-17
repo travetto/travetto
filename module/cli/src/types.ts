@@ -1,4 +1,4 @@
-import { GlobalEnvConfig } from '@travetto/base';
+import { Class, GlobalEnvConfig } from '@travetto/base';
 
 type OrProm<T> = T | Promise<T>;
 
@@ -26,10 +26,19 @@ export class CliValidationResultError extends Error {
   }
 }
 
+export const CliCommandMetaⲐ = Symbol.for('@travetto/cli:command-meta');
+
 /**
  * Base command
  */
 export interface CliCommandShape {
+  /** Metadata */
+  [CliCommandMetaⲐ]?: {
+    name: string;
+    module: string;
+    cls: Class<CliCommandShape>;
+  };
+
   /**
    * Action target of the command
    */
@@ -76,7 +85,9 @@ export type CliCommandInput = {
 };
 
 export type CliCommandSchema = {
+  name: string;
   title: string;
+  description?: string;
   args: CliCommandInput[];
   flags: CliCommandInput[];
 };

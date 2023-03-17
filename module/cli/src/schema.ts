@@ -1,7 +1,7 @@
 import { Class, ConsoleManager } from '@travetto/base';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
-import { CliCommandInput, CliCommandSchema, CliCommandShape, CliValidationResultError } from './types';
+import { CliCommandInput, CliCommandSchema, CliCommandShape, CliValidationResultError, CliCommandMetaⲐ } from './types';
 
 function fieldToInput(x: FieldConfig): CliCommandInput {
   return ({
@@ -28,16 +28,11 @@ export class CliCommandSchemaUtil {
 
   static #schemas = new Map<Class, CliCommandSchema>();
 
-  static #getClass(cmd: CliCommandShape): Class<CliCommandShape> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return cmd.constructor as Class;
-  }
-
   /**
    * Get schema for a given command
    */
   static async getSchema(cmd: CliCommandShape): Promise<CliCommandSchema> {
-    const cls = this.#getClass(cmd);
+    const cls = cmd[CliCommandMetaⲐ]!.cls;
 
     if (this.#schemas.has(cls)) {
       return this.#schemas.get(cls)!;
@@ -94,7 +89,13 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const cfg = { args: method, flags, title: SchemaRegistry.get(cls).title ?? '' };
+    const cfg = {
+      args: method,
+      flags,
+      title: SchemaRegistry.get(cls).title ?? cls.name,
+      name: cmd[CliCommandMetaⲐ]!.name,
+      description: SchemaRegistry.get(cls).description ?? ''
+    };
     this.#schemas.set(cls, cfg);
     return cfg;
   }
@@ -103,7 +104,8 @@ export class CliCommandSchemaUtil {
    * Produce the arguments into the final argument set
    */
   static async bindArgs(cmd: CliCommandShape, args: string[]): Promise<[known: unknown[], unknown: string[]]> {
-    const cls = this.#getClass(cmd);
+    const cls = cmd[CliCommandMetaⲐ]!.cls;
+
     const restIdx = args.indexOf('--');
     const copy = [...args.slice(0, restIdx < 0 ? args.length : restIdx)];
     const extra = restIdx < 0 ? [] : args.slice(restIdx);
@@ -185,7 +187,7 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const cls = this.#getClass(cmd);
+    const cls = cmd[CliCommandMetaⲐ]!.cls;
     BindUtil.bindSchemaToObject(cls, cmd, template);
 
     return [...out, ...extra];
@@ -195,7 +197,8 @@ export class CliCommandSchemaUtil {
    * Validate command shape with the given arguments
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
-    const cls = this.#getClass(cmd);
+    const cls = cmd[CliCommandMetaⲐ]!.cls;
+
     const validators = [
       (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),
       (): Promise<void> => SchemaValidator.validateMethod(cls, 'main', args),

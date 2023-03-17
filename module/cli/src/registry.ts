@@ -2,7 +2,7 @@ import { Class, ConcreteClass } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 import { cliTpl } from './color';
-import { CliCommandShape } from './types';
+import { CliCommandShape, CliCommandMetaⲐ } from './types';
 
 type CliCommandConfig = {
   name: string;
@@ -77,9 +77,17 @@ ${{ identifier: install }}
   /**
    * Get the name of a command from a given instance
    */
-  getName(cmd: CliCommandShape): string | undefined {
+  getName(cmd: CliCommandShape, withModule = false): string | undefined {
     const cls = this.#getClass(cmd);
-    return this.#get(cls)?.name;
+    const cfg = this.#get(cls);
+    if (cfg) {
+      let prefix: string = '';
+      if (withModule) {
+        prefix = RootIndex.getModuleFromSource(RootIndex.getFunctionMetadata(cfg.cls)!.source)!.name;
+        prefix = `${prefix}:`;
+      }
+      return `${prefix}${cfg.name}`;
+    }
   }
 
   /**
@@ -96,6 +104,12 @@ ${{ identifier: install }}
         if (cfg) {
           const inst = new cfg.cls();
           if (!inst.isActive || inst.isActive()) {
+            inst[CliCommandMetaⲐ] = {
+              name, cls: cfg.cls,
+              module: RootIndex.getModuleFromSource(
+                RootIndex.getFunctionMetadata(cfg.cls)!.source
+              )!.name
+            };
             return inst;
           }
         }
