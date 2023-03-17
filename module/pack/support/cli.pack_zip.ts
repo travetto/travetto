@@ -1,4 +1,4 @@
-import { CliCommand } from '@travetto/cli';
+import { CliCommand, CliUtil } from '@travetto/cli';
 
 import { PackOperation } from './bin/operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
@@ -10,7 +10,7 @@ import { BasePackCommand, PackOperationShape } from './pack.base';
 export class PackZipCommand extends BasePackCommand {
 
   initializeFlags(): void {
-    this.output = PackZipCommand.monoRoot ? '<module>.zip' : `${PackZipCommand.getSimpleModuleName()}.zip`;
+    this.output = CliUtil.monoRoot ? '<module>.zip' : `${CliUtil.getSimpleModuleName()}.zip`;
   }
 
   getOperations(): PackOperationShape<this>[] {

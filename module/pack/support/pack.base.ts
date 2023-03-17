@@ -1,10 +1,10 @@
 import os from 'os';
 
-import { CliCommandShape, CliFlag, cliTpl } from '@travetto/cli';
+import { CliCommandShape, CliFlag, cliTpl, CliUtil } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
-import { Ignore, Required, Schema, ValidationError } from '@travetto/schema';
+import { Ignore, Required, Schema } from '@travetto/schema';
 
 import { PackOperation } from './bin/operation';
 import { PackUtil } from './bin/util';
@@ -14,17 +14,9 @@ export type PackOperationShape<T> = ((config: T) => AsyncIterable<string[]>);
 @Schema()
 export abstract class BasePackCommand implements CliCommandShape {
 
-  static get monoRoot(): boolean {
-    return !!RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath;
-  }
-
   static get entryPoints(): string[] {
     return RootIndex.findSupport({ filter: x => x.includes('entry.') })
       .map(x => x.import.replace(/[.][^.]+s$/, ''));
-  }
-
-  static getSimpleModuleName(): string {
-    return RootIndex.mainPackage.name.replace(/[\/]/, '_').replace(/@/, '');
   }
 
   #unknownArgs?: string[];
@@ -63,7 +55,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   ejectFile?: string;
 
   @CliFlag({ desc: 'Module to pack', short: 'm' })
-  @Required(false)
+  @Required(CliUtil.monoRoot)
   module: string;
 
   /** Entry arguments */
@@ -93,13 +85,13 @@ export abstract class BasePackCommand implements CliCommandShape {
     }
   }
 
-  getModule(moduleName: string): string {
+  initModule(moduleName: string): string {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    let module = BasePackCommand.monoRoot ? moduleName : RootIndex.mainModule.name;
+    let module = CliUtil.monoRoot ? moduleName : RootIndex.mainModule.name;
     module = RootIndex.getModuleByFolder(module)?.name ?? module;
 
     // Reinitialize for module
-    if (BasePackCommand.monoRoot) {
+    if (CliUtil.monoRoot) {
       RootIndex.reinitForModule(module);
     }
 
@@ -119,21 +111,11 @@ export abstract class BasePackCommand implements CliCommandShape {
     this.workspace = path.resolve(this.workspace);
   }
 
-  async validate(args: string[]): Promise<ValidationError | undefined> {
-    if (!this.module && BasePackCommand.monoRoot) {
-      return {
-        message: 'The module needs to specified when running from a monorepo root',
-        kind: 'required',
-        path: 'module'
-      };
-    }
-  }
-
   async main(args: string[] = []): Promise<void> {
     console.log(args, this.#unknownArgs);
     this.entryArguments = [...args, ...this.#unknownArgs ?? []];
 
-    this.module = this.getModule(this.module);
+    this.module = this.initModule(this.module);
 
     this.mainName ??= path.basename(this.module);
 

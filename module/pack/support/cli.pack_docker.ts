@@ -1,5 +1,5 @@
 import { path, RootIndex } from '@travetto/manifest';
-import { CliCommand, CliFlag } from '@travetto/cli';
+import { CliCommand, CliFlag, CliUtil } from '@travetto/cli';
 
 import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
@@ -14,7 +14,7 @@ export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Image to extend ', short: 'di' })
   dockerImage = 'node:18-alpine3.16';
   @CliFlag({ desc: 'Docker Image Name ', short: 'dn' })
-  dockerName = PackDockerCommand.monoRoot ? '<module>' : PackDockerCommand.getSimpleModuleName();
+  dockerName = CliUtil.monoRoot ? '<module>' : CliUtil.getSimpleModuleName();
   @CliFlag({ desc: 'Docker Image Tag ', short: 'dt' })
   dockerTag: string[] = ['latest'];
   @CliFlag({ desc: 'Docker Image Port ', short: 'dp' })
