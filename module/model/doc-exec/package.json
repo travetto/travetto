@@ -1,0 +1,16 @@
+{
+  "name": "@travetto-doc/model",
+  "dependencies": {
+    "@travetto/model": "^3.0.1",
+    "@travetto/model-mysql": "^3.0.1",
+    "@travetto/compiler": "^3.0.1",
+    "@travetto/registry": "^3.0.1",
+    "@travetto/cli": "^3.0.1"
+  },
+  "travetto": {
+    "isolated": true,
+    "mainSource": [
+      "@travetto/model"
+    ]
+  }
+}

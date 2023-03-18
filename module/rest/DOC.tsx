@@ -136,7 +136,7 @@ export const text = <>
 
     By default, the framework provides a default {CliCommand} for {RestApplication} that will follow default behaviors, and spin up the REST server.
 
-    <c.Execution title='Standard application' cmd='trv' args={['run']} config={{
+    <c.Execution title='Standard application' cmd='trv' args={['run:rest']} config={{
       cwd: './doc-exec'
     }} />
 

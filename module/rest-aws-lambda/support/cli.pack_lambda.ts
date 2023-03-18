@@ -11,6 +11,7 @@ export class PackLambdaCommand extends BasePackCommand {
   initialize(): void {
     this.entryPoint = '@travetto/rest-aws-lambda/support/entry.handler';
     this.output = CliUtil.monoRoot ? '<module>.zip' : `${CliUtil.getSimpleModuleName()}.zip`;
+    this.mainScripts = false;
   }
 
   getOperations(): PackOperationShape<this>[] {

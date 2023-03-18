@@ -25,7 +25,8 @@ export class HelpUtil {
 
     const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`];
     for (const field of args) {
-      const arg = `${field.name}${field.array ? '...' : ''}:${field.type}`;
+      const type = field.type === 'string' && field.choices && field.choices.length <= 5 ? field.choices?.join('|') : field.type;
+      const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required ? `<${arg}>` : `[${arg}]` }}`);
     }
 
@@ -48,13 +49,14 @@ export class HelpUtil {
       }
       const param = [cliTpl`${{ param: aliases.join(', ') }}`];
       if (!(flag.type === 'boolean' && !flag.array)) {
-        param.push(cliTpl`${{ type: `<${flag.name}>` }}`);
+        const type = flag.type === 'string' && flag.choices && flag.choices.length <= 3 ? flag.choices?.join('|') : flag.type;
+        param.push(cliTpl`${{ type: `<${type}>` }}`);
       }
       params.push(param.join(' '));
       const desc = [cliTpl`${{ title: flag.description }}`];
 
       if (key !== 'help' && flagVal !== null && flagVal !== undefined) {
-        desc.push(cliTpl`(default: ${{ input: flagVal }})`);
+        desc.push(cliTpl`(default: ${{ input: JSON.stringify(flagVal) }})`);
       }
       descs.push(desc.join(' '));
     }
@@ -76,7 +78,7 @@ export class HelpUtil {
       ),
       '',
       ...(helpText ? [helpText] : [])
-    ].join('\n');
+    ].map(x => x.trimEnd()).join('\n');
   }
 
   /**
@@ -103,7 +105,7 @@ export class HelpUtil {
       cliTpl`${{ title: 'Commands:' }}`,
       ...rows,
       ''
-    ].join('\n');
+    ].map(x => x.trimEnd()).join('\n');
   }
 
   /**

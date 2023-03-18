@@ -30,6 +30,23 @@ export class TableManager {
   /**
    * Create all needed tables for a given class
    */
+  async exportTables(cls: Class): Promise<string[]> {
+    const out: string[] = [];
+    for (const op of this.#dialect.getCreateAllTablesSQL(cls)) {
+      out.push(op);
+    }
+    const indices = ModelRegistry.get(cls).indices;
+    if (indices) {
+      for (const op of this.#dialect.getCreateAllIndicesSQL(cls, indices)) {
+        out.push(op);
+      }
+    }
+    return out;
+  }
+
+  /**
+   * Create all needed tables for a given class
+   */
   @WithAsyncContext({})
   @Connected()
   @Transactional()

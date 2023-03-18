@@ -15,7 +15,7 @@ import { CliCommandSchemaUtil } from './schema';
  */
 export class ExecutionManager {
 
-  static async #prepareRun(cmd: CliCommandShape): Promise<void> {
+  static async #envInit(cmd: CliCommandShape): Promise<void> {
     if (cmd.envInit) {
       defineGlobalEnv({
         debug: process.env.DEBUG || false,
@@ -23,9 +23,6 @@ export class ExecutionManager {
       });
       ConsoleManager.setDebugFromEnv();
     }
-
-    const cfg = CliCommandRegistry.getConfig(cmd);
-    await cfg?.preMain?.(cmd);
   }
 
   static async #bindAndValidateArgs(cmd: CliCommandShape, args: string[]): Promise<unknown[]> {
@@ -48,6 +45,8 @@ export class ExecutionManager {
    * Run help
    */
   static async help(cmd: CliCommandShape, args: string[]): Promise<void> {
+    await cmd.initialize?.();
+    await this.#envInit(cmd);
     console.log!(await HelpUtil.renderHelp(cmd));
   }
 
@@ -74,7 +73,10 @@ export class ExecutionManager {
    */
   static async command(cmd: CliCommandShape, args: string[]): Promise<void> {
     const known = await this.#bindAndValidateArgs(cmd, args);
-    await this.#prepareRun(cmd);
+    await this.#envInit(cmd);
+    const cfg = CliCommandRegistry.getConfig(cmd);
+    await cfg?.preMain?.(cmd);
+
     const result = await cmd.main(...known);
 
     // Listen to result if non-empty
