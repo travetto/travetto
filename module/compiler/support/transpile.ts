@@ -1,6 +1,7 @@
 import path from 'path';
 import fs from 'fs/promises';
 import os from 'os';
+import timers from 'timers/promises';
 import cp from 'child_process';
 import { createRequire } from 'module';
 
@@ -204,7 +205,7 @@ export class TranspileUtil {
     try {
       await this.writeTextFile(deltaFile, changedFiles.join('\n'));
 
-      return await LogUtil.withLogger('compiler-exec', log => new Promise<CompileResult>((res, rej) => {
+      const result = await LogUtil.withLogger('compiler-exec', log => new Promise<CompileResult>((res, rej) => {
         proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
           env: {
             ...process.env,
@@ -225,6 +226,12 @@ export class TranspileUtil {
         kill = (): void => { proc?.kill('SIGKILL'); };
         process.on('exit', kill);
       }));
+
+      if (result === 'restart') {
+        await timers.setTimeout(150 + 100 * Math.random());
+      }
+
+      return result;
     } finally {
       if (proc?.killed === false) { proc.kill('SIGKILL'); }
       if (kill) {
