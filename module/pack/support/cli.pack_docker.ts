@@ -7,7 +7,7 @@ import { BasePackCommand, PackOperationShape } from './pack.base';
 /**
  * Standard docker support for pack
  */
-@CliCommand()
+@CliCommand({ fields: ['module'] })
 export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Factory source ', short: 'df' })
   dockerFactory = '@travetto/pack/support/pack.dockerfile';

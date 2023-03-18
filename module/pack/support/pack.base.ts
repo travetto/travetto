@@ -1,6 +1,6 @@
 import os from 'os';
 
-import { CliCommandShape, CliFlag, cliTpl, CliUtil } from '@travetto/cli';
+import { CliCommandShape, CliFlag, cliTpl } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
@@ -54,8 +54,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   @CliFlag({ desc: 'Eject commands to file', short: 'x' })
   ejectFile?: string;
 
-  @CliFlag({ desc: 'Module to pack', short: 'm' })
-  @Required(CliUtil.monoRoot)
+  @Ignore()
   module: string;
 
   /** Entry arguments */
@@ -85,19 +84,6 @@ export abstract class BasePackCommand implements CliCommandShape {
     }
   }
 
-  initModule(moduleName: string): string {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    let module = CliUtil.monoRoot ? moduleName : RootIndex.mainModule.name;
-    module = RootIndex.getModuleByFolder(module)?.name ?? module;
-
-    // Reinitialize for module
-    if (CliUtil.monoRoot) {
-      RootIndex.reinitForModule(module);
-    }
-
-    return module;
-  }
-
   finalize(unknown: string[]): void {
     this.#unknownArgs = unknown;
 
@@ -112,11 +98,8 @@ export abstract class BasePackCommand implements CliCommandShape {
   }
 
   async main(args: string[] = []): Promise<void> {
-    console.log(args, this.#unknownArgs);
     this.entryArguments = [...args, ...this.#unknownArgs ?? []];
-
-    this.module = this.initModule(this.module);
-
+    this.module ??= RootIndex.mainModule.name;
     this.mainName ??= path.basename(this.module);
 
     const stream = this.runOperations();

@@ -71,7 +71,7 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
     }
 
     if (addModule) {
-      SchemaRegistry.registerPendingFieldConfig(target, 'module', [String], {
+      SchemaRegistry.registerPendingFieldConfig(target, 'module', String, {
         aliases: ['m'],
         description: 'Module to run for',
         required: { active: CliUtil.monoRoot }

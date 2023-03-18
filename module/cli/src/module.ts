@@ -239,6 +239,10 @@ export class CliModuleUtil {
       if (!RootIndex.getModule(mod)) {
         return modError(`${mod} is an unknown module`);
       } else {
+        if (mod !== selfMod) {
+          RootIndex.reinitForModule(mod);
+        }
+
         const mods = await this.findModules('all');
         const graph = this.getDependencyGraph(mods);
         if (selfMod !== mod && !graph[mod].includes(selfMod)) {
