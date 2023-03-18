@@ -25,7 +25,7 @@ class TestRunnerFeature extends BaseFeature {
   constructor(module?: string, command?: string) {
     super(module, command);
     this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
-    this.#server = new ProcessServer(this.log, 'test:watcher', ['-f', 'exec', '-m', 'change'])
+    this.#server = new ProcessServer(this.log, 'test:watch', ['-f', 'exec', '-m', 'change'])
       .onStart(() => {
         this.#server.onMessage(['assertion', 'suite', 'test'], ev => {
           switch (ev.type) {

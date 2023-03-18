@@ -1,10 +1,4 @@
-import type { CliCommandSchema } from '@travetto/cli';
-
-type CliArg = CliCommandSchema['args'][number];
-
-type Arg = Omit<CliArg, 'type'> & {
-  type: CliArg['type'] | 'module'
-};
+import type { CliCommandInput, CliCommandSchema } from '@travetto/cli';
 
 /**
  * Run choice
@@ -15,7 +9,7 @@ export type RunChoice = Omit<CliCommandSchema, 'args'> & {
   resolved?: boolean;
   time?: number;
   key?: string;
-  args: Arg[];
+  args: CliCommandInput[];
   inputFlags?: string[];
 };
 

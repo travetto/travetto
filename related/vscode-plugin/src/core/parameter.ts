@@ -1,17 +1,14 @@
 import vscode from 'vscode';
 
-import { Class } from '@travetto/base';
-import type { ApplicationConfig } from '@travetto/app';
+import { CliCommandInput } from '@travetto/cli';
 
 import { Workspace } from './workspace';
-
-type ParamConfig = Exclude<ApplicationConfig['params'], undefined>[number];
 
 /**
  * Input parameter with metadata
  */
-interface ParamWithMeta {
-  param: ParamConfig;
+interface InputWithMeta {
+  param: CliCommandInput;
   total?: number;
   step?: number;
   input?: string;
@@ -23,29 +20,19 @@ type Complex = vscode.InputBox | vscode.QuickPick<vscode.QuickPickItem>;
  * Selects a parameter
  */
 export class ParameterSelector {
-  static getParamType(param: Class | string): 'string' | 'boolean' | 'number' {
-    if (param === Number || param === 'number') {
-      return 'number';
-    } else if (param === Boolean || param === 'boolean') {
-      return 'boolean';
-    } else {
-      return 'string';
-    }
-  }
-
   /**
    * Create the input handler
    * @param provider Input Parameter provider
    * @param config The configuration for the parameter
    */
-  static buildQuick<T extends Complex>(config: ParamWithMeta, provider: () => T): T {
+  static buildQuick<T extends Complex>(config: InputWithMeta, provider: () => T): T {
     const qp = provider();
     qp.ignoreFocusOut = true;
     qp.step = config.step;
     qp.totalSteps = config.total;
     qp.value = (config.input || (config.param.default !== undefined ? `${config.param.default}` : undefined))!;
     qp.placeholder = qp.title;
-    qp.title = `Enter value for ${config.param.title || config.param.name}`;
+    qp.title = `Enter value for ${config.param.description || config.param.name}`;
     return qp;
   }
 
@@ -53,7 +40,7 @@ export class ParameterSelector {
    * Build quick input
    * @param conf
    */
-  static buildQuickInput(conf: ParamWithMeta): vscode.InputBox {
+  static buildQuickInput(conf: InputWithMeta): vscode.InputBox {
     return this.buildQuick(conf, vscode.window.createInputBox);
   }
 
@@ -62,13 +49,13 @@ export class ParameterSelector {
    * @param conf The parameter to pick for
    * @param choices List of choices
    */
-  static buildQuickPickList(conf: ParamWithMeta, choices: string[]): vscode.QuickPick<vscode.QuickPickItem> {
+  static buildQuickPickList(conf: InputWithMeta, choices: string[]): vscode.QuickPick<vscode.QuickPickItem> {
     const qp = this.buildQuick(conf, vscode.window.createQuickPick);
-    qp.title = `Select ${conf.param.title || conf.param.name}`;
+    qp.title = `Select ${conf.param.description || conf.param.name}`;
     qp.items = choices.map(x => ({ label: x }));
     qp.canSelectMany = false;
 
-    if (qp.value !== undefined && this.getParamType(conf.param.type) === 'boolean') {
+    if (qp.value !== undefined && conf.param.type === 'boolean') {
       qp.value = `${qp.value}` === 'true' ? 'yes' : 'no';
     }
 
@@ -107,10 +94,10 @@ export class ParameterSelector {
    * @param conf The parameter to look for
    * @param root The root to search in
    */
-  static async getFile(conf: ParamWithMeta, root?: string): Promise<string | undefined> {
+  static async getFile(conf: InputWithMeta, root?: string): Promise<string | undefined> {
     const res = await vscode.window.showOpenDialog({
       defaultUri: root ? vscode.Uri.file(root) : Workspace.folder.uri,
-      openLabel: `Select ${conf.param.title || conf.param.name}`,
+      openLabel: `Select ${conf.param.description || conf.param.name}`,
       canSelectFiles: true,
       canSelectMany: false
     });
@@ -121,7 +108,7 @@ export class ParameterSelector {
    * Get quick pick input
    * @param conf
    */
-  static getQuickInput(conf: ParamWithMeta): Promise<string> {
+  static getQuickInput(conf: InputWithMeta): Promise<string> {
     return this.getInput(this.buildQuickInput(conf));
   }
 
@@ -131,7 +118,7 @@ export class ParameterSelector {
    * @param conf
    * @param choices
    */
-  static getQuickPickList(conf: ParamWithMeta, choices: string[]): Promise<string> {
+  static getQuickPickList(conf: InputWithMeta, choices: string[]): Promise<string> {
     return this.getInput(
       this.buildQuickPickList(conf, choices),
       x => x.value ?? x.selectedItems[0].label);
@@ -156,17 +143,16 @@ export class ParameterSelector {
    * Build input depending on provided configuration
    * @param conf Parameter configuration
    */
-  static async getParameter(conf: ParamWithMeta): Promise<string | undefined> {
-    switch (this.getParamType(conf.param.type)) {
+  static async getParameter(conf: InputWithMeta): Promise<string | undefined> {
+    switch (conf.param.type) {
       case 'number': return this.getQuickInput(conf);
       case 'boolean': return this.getQuickPickList(conf, ['yes', 'no']).then(x => `${x === 'yes'}`);
+      case 'file': return this.getFile(conf);
       case 'string':
       default: {
-        if (conf.param.enum) {
+        if (conf.param.choices) {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          return this.getQuickPickList(conf, conf.param.enum?.values as string[] ?? []);
-        } else if (conf.param.specifier === 'file') {
-          return this.getFile(conf);
+          return this.getQuickPickList(conf, conf.param.choices as string[]);
         } else {
           return this.getQuickInput(conf);
         }

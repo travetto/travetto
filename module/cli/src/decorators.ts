@@ -7,6 +7,8 @@ import { CliCommandRegistry } from './registry';
 import { CliModuleUtil } from './module';
 import { CliUtil } from './util';
 
+type ExtraFields = 'module' | 'profile' | 'env';
+
 const getName = (source: string): string => source.match(/cli.(.*)[.]tsx?$/)![1].replaceAll('_', ':');
 const getMod = (cls: Class): string => RootIndex.getModuleFromSource(RootIndex.getFunctionMetadata(cls)!.source)!.name;
 
@@ -15,7 +17,7 @@ const getMod = (cls: Class): string => RootIndex.getModuleFromSource(RootIndex.g
  * @augments `@travetto/schema:Schema`
  * @augments `@travetto/cli:CliCommand`
  */
-export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, addEnv?: boolean, runTarget?: boolean, hidden?: boolean } = {}) {
+export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, hidden?: boolean } = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
     const meta = RootIndex.getFunctionMetadata(target);
     if (!meta || meta.abstract) {
@@ -25,8 +27,12 @@ export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, add
     const name = getName(meta.source);
 
     if (name.startsWith('run:') || cfg.runTarget) {
-      cfg = { runTarget: true, addProfile: true, addEnv: true, ...cfg };
+      cfg = { runTarget: true, ...cfg };
     }
+
+    const addEnv = cfg.fields?.includes('env');
+    const addProfile = cfg.fields?.includes('profile');
+    const addModule = cfg.fields?.includes('module');
 
     CliCommandRegistry.registerClass({
       module: getMod(target),
@@ -35,10 +41,10 @@ export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, add
       cls: target as ConcreteClass<T>,
       hidden: cfg.hidden,
       preMain: (cmd: CliCommandShape & { env?: string, profile?: string[], module?: string }) => {
-        if (cfg.addEnv) { defineGlobalEnv({ envName: cmd.env }); }
-        if (cfg.addProfile) { defineGlobalEnv({ profiles: cmd.profile }); }
-        if (cfg.addEnv || cfg.addProfile) { ConsoleManager.setDebugFromEnv(); }
-        if (cfg.addModule) {
+        if (addEnv) { defineGlobalEnv({ envName: cmd.env }); }
+        if (addProfile) { defineGlobalEnv({ profiles: cmd.profile }); }
+        if (addEnv || addProfile) { ConsoleManager.setDebugFromEnv(); }
+        if (addModule) {
           if (cmd.module && cmd.module !== RootIndex.mainModule.name) { // Mono-repo support
             RootIndex.reinitForModule(cmd.module); // Reinit with specified module
           }
@@ -48,7 +54,7 @@ export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, add
 
     const pendingCls = SchemaRegistry.getOrCreatePending(target);
 
-    if (cfg.addEnv) {
+    if (addEnv) {
       SchemaRegistry.registerPendingFieldConfig(target, 'env', String, {
         aliases: ['e'],
         description: 'Application environment',
@@ -56,7 +62,7 @@ export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, add
       });
     }
 
-    if (cfg.addProfile) {
+    if (addProfile) {
       SchemaRegistry.registerPendingFieldConfig(target, 'profile', [String], {
         aliases: ['p'],
         description: 'Additional application profiles',
@@ -64,7 +70,7 @@ export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, add
       });
     }
 
-    if (cfg.addModule) {
+    if (addModule) {
       SchemaRegistry.registerPendingFieldConfig(target, 'module', [String], {
         aliases: ['m'],
         description: 'Module to run for',
@@ -83,7 +89,7 @@ export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, add
 /**
  * Decorator to register a CLI command flag
  */
-export function CliFlag(cfg: { name?: string, short?: string, desc?: string }) {
+export function CliFlag(cfg: { name?: string, short?: string, desc?: string, file?: boolean }) {
   return function (target: ClassInstance, prop: string | symbol): void {
     const aliases: string[] = [];
     if (cfg.name) {
@@ -93,7 +99,7 @@ export function CliFlag(cfg: { name?: string, short?: string, desc?: string }) {
       aliases.push(cfg.short.startsWith('-') ? cfg.short : `-${cfg.short}`);
     }
     if (typeof prop === 'string') {
-      SchemaRegistry.registerPendingFieldFacet(target.constructor, prop, { aliases, description: cfg.desc });
+      SchemaRegistry.registerPendingFieldFacet(target.constructor, prop, { aliases, description: cfg.desc, specifier: cfg.file ? 'file' : undefined });
     }
   };
 }
