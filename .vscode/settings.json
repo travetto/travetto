@@ -7,7 +7,7 @@
     "**/.trv_compiler/**": true,
     "**/.trv_output/**": true,
     "**/node_modules/**": true,
-    ".git/**": true,
+    ".git/**": true
   },
   "files.watcherExclude": {
     ".git/**": true,
@@ -15,7 +15,6 @@
     "**/.trv_compiler/**": true,
     "**/.trv_output/**": true,
     "related/vscode-plugin/out/**": true,
-    "related/travetto.github.io/.angular/**": true,
-    "related/travetto.github.io/node_modules/**": true,
+    "**/.angular/**": true,
   }
 }

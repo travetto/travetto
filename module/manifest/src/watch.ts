@@ -65,13 +65,13 @@ class Queue<X> implements AsyncIterator<X>, AsyncIterable<X> {
   [Symbol.asyncIterator](): AsyncIterator<X> { return this; }
 
   async next(): Promise<IteratorResult<X>> {
-    if (!this.#done && !this.#queue.length) {
+    while (!this.#done && !this.#queue.length) {
       this.#recentKeys = new Map([...this.#recentKeys.entries()] // Cull before waiting
         .filter(([, time]) => (Date.now() - time) < DEDUPE_THRESHOLD));
       await this.#ready;
       this.#ready = new Promise(r => this.#fire = r);
     }
-    return { value: (this.#queue.length ? this.#queue.shift() : undefined)!, done: this.#done };
+    return { value: this.#queue.shift()!, done: this.#done };
   }
 
   add(item: X | X[]): void {
@@ -157,9 +157,16 @@ async function watchFolderRecursive(queue: Queue<WatchEvent>, options: WatchFold
   if (await fs.stat(options.src).then(() => true, () => options.createMissing)) {
     await fs.mkdir(options.src, { recursive: true });
     const ignore = (await fs.readdir(options.src)).filter(x => x.startsWith('.') && x.length > 2);
-    const cleanup = await lib.subscribe(options.src, (err, events) => {
+    const cleanup = await lib.subscribe(options.src, async (err, events) => {
       for (const ev of events) {
         const finalEv = { action: ev.type, file: path.toPosix(ev.path), folder: target };
+        if (ev.type !== 'delete') {
+          const stats = await fs.stat(finalEv.file);
+          if ((stats.ctimeMs - Date.now()) < DEDUPE_THRESHOLD) {
+            ev.type = 'create'; // Force create on newly stated files
+          }
+        }
+
         if (ev.type === 'delete' && finalEv.file === options.src) {
           return queue.close();
         }

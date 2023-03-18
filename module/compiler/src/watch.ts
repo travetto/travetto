@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 
 import {
   ManifestContext, ManifestModuleUtil, ManifestUtil, WatchEvent, ManifestModuleFolderType,
-  ManifestModuleFileType, path, ManifestModule, watchFolders, WatchConfig, WatchFolder, RootIndex, WatchStream
+  ManifestModuleFileType, path, ManifestModule, watchFolders, WatchFolder, RootIndex, WatchStream
 } from '@travetto/manifest';
 import { getManifestContext } from '@travetto/manifest/bin/context';
 
@@ -141,12 +141,12 @@ export class CompilerWatcher {
   #watchFiles(): WatchStream {
     const idx = this.#state.manifestIndex;
     const modules = [...idx.getModuleList('all')].map(x => idx.getModule(x)!);
-    const options: WatchConfig = {
-      filter: ev => {
+    const options: Partial<WatchFolder> = {
+      filter: (ev: WatchEvent): boolean => {
         const type = ManifestModuleUtil.getFileType(ev.file);
         return type === 'ts' || type === 'typings' || type === 'js' || type === 'package-json';
       },
-      ignore: ['node_modules']
+      ignore: ['node_modules', '**/.trv_*'],
     };
 
     const moduleFolders: WatchFolder[] = modules
