@@ -1,6 +1,6 @@
 import os from 'os';
 
-import { CliCommandShape, CliFlag, cliTpl } from '@travetto/cli';
+import { CliCommandShape, CliFlag, cliTpl, CliUtil } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
@@ -86,6 +86,8 @@ export abstract class BasePackCommand implements CliCommandShape {
 
   finalize(unknown: string[]): void {
     this.#unknownArgs = unknown;
+
+    this.output = this.output?.replace('<module>', CliUtil.getSimpleModuleName(this.module ?? ''));
 
     // Resolve all files to absolute paths
     if (this.output) {
