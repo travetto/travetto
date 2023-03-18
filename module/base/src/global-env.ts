@@ -64,6 +64,7 @@ export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
     profiles.add(TEST);
     debug = false;
   } else {
+    profiles.delete(!isProd ? PROD : DEV);
     profiles.add(isProd ? PROD : DEV);
   }
 

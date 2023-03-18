@@ -8,7 +8,7 @@ export const text = <>
     <c.Section title='CLI - Version'>
         The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by {d.library('Npm')}'s and {d.library('Yarn')}'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
 
-        <c.Execution title='Version execution' cmd='trv' args={['repo:version']} />
+        <c.Execution title='Version execution' cmd='trv' args={['repo:version', '-h']} />
 
         Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:
 
@@ -33,7 +33,7 @@ Date:   Thu Feb 23 17:51:37 2023 -0500
 
         By default the tool will execute a dry run only, and requires passing a flag to disable the dry run.
 
-        <c.Terminal title='Publishing changes' src='npx trv repo:publish -d' />
+        <c.Terminal title='Publishing changes' src='npx trv repo:publish --no-dry-run' />
 
         If no modules are currently changed, then the command will indicate there is no work to do, and exit gracefully.
     </c.Section>

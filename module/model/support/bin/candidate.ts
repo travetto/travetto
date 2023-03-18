@@ -12,7 +12,10 @@ import type { ModelType } from '../../src/types/model';
 export class ModelCandidateUtil {
 
   static async export(op: keyof ModelStorageSupport): Promise<{ models: string[], providers: string[] }> {
-    return { models: await this.getModelNames(), providers: await this.getProviderNames(op) };
+    return {
+      models: await this.getModelNames(),
+      providers: await this.getProviderNames(op)
+    };
   }
 
   /**

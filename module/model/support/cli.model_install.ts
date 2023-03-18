@@ -1,4 +1,5 @@
 import { CliCommand, cliTpl } from '@travetto/cli';
+import { Ignore } from '@travetto/schema';
 
 import { BaseModelCommand } from './base-command';
 import { ModelInstallUtil } from './bin/install';
@@ -7,9 +8,10 @@ import { ModelCandidateUtil } from './bin/candidate';
 /**
  * Installing models
  */
-@CliCommand()
+@CliCommand({ fields: ['env', 'module'] })
 export class ModelInstallCommand extends BaseModelCommand {
 
+  @Ignore()
   op = 'createModel' as const;
 
   async main(provider: string, models: string[]): Promise<void> {

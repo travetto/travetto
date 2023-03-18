@@ -32,7 +32,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   output: string;
 
   @CliFlag({ desc: 'Create entry scripts', short: 'es' })
-  mainScripts?: boolean;
+  mainScripts: boolean = true;
 
   @CliFlag({ desc: 'Main name for build artifact', short: 'f' })
   @Required(false)

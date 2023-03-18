@@ -121,6 +121,10 @@ export class SQLModelService implements
     return this.#dialect.generateId();
   }
 
+  async exportModel<T extends ModelType>(e: Class<T>): Promise<string> {
+    return (await this.#manager.exportTables(e)).join('\n');
+  }
+
   async changeSchema(cls: Class, change: SchemaChange): Promise<void> {
     await this.#manager.changeSchema(cls, change);
   }

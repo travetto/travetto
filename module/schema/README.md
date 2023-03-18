@@ -13,7 +13,7 @@ npm install @travetto/schema
 yarn add @travetto/schema
 ```
 
-This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is leveraged in the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support"), [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support."), [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module."), [OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the Travetto framework") and [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") modules.  The schema is the backbone of all data transfer, as it helps to provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file. 
+This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is leveraged in the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support"), [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework"), [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module."), [OpenAPI Specification](https://github.com/travetto/travetto/tree/main/module/openapi#readme "OpenAPI integration support for the Travetto framework") and [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") modules.  The schema is the backbone of all data transfer, as it helps to provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file. 
 
 This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.
 
@@ -203,12 +203,13 @@ Validation Failed {
   "errors": [
     {
       "kind": "type",
+      "type": "number",
       "message": "age is not a valid number",
-      "path": "age",
-      "type": "number"
+      "path": "age"
     },
     {
       "kind": "required",
+      "active": true,
       "message": "address.street2 is required",
       "path": "address.street2"
     }
@@ -269,6 +270,10 @@ export interface ValidationError {
    * Regular expression to match
    */
   re?: string;
+  /**
+   * Number to compare against
+   */
+  n?: number | Date;
   /**
    * The type of the field
    */
@@ -341,9 +346,9 @@ Validation Failed {
   "errors": [
     {
       "kind": "type",
+      "type": "PointImpl",
       "message": "point is not a valid PointImpl",
-      "path": "point",
-      "type": "PointImpl"
+      "path": "point"
     }
   ]
 }

@@ -23,6 +23,8 @@ export abstract class BaseModelCommand implements CliCommandShape {
   }
 
   async help(): Promise<string> {
+    await RootRegistry.init();
+
     const candidates = await ModelCandidateUtil.export(this.op);
     return cliTpl`   
 ${{ title: 'Providers' }}:
