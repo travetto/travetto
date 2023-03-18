@@ -21,18 +21,19 @@ The module provides support basic support with AWS lambdas. When using one of th
 ```bash
 $ trv pack:lambda -h
 
-Usage:  pack:lambda [options]
+Usage: pack:lambda [options]
 
 Options:
-  -w, --workspace <workspace>         Workspace for building
-  -c, --no-clean                      Disables: Clean workspace
-  -o, --output <output>               Output location (default: "travetto_rest-aws-lambda.zip")
-  -es, --main-scripts <main-scripts>  Create entry scripts
-  -f, --main-name <main-name>         Main name for build artifact (default: "index")
-  -e, --entry-point <entry-point>     Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler")
-  -m, --no-minify                     Disables: Minify output
-  -sm, --sourcemap                    Bundle source maps
-  -is, --include-sources              Include source with source maps
-  -x, --eject-file <eject-file>       Eject commands to file
-  -h, --help                          display help for command
+  -w, --workspace <string>    Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean         Clean workspace (default: true)
+  -o, --output <string>       Output location (default: "travetto_rest-aws-lambda.zip")
+  -es, --main-scripts         Create entry scripts (default: false)
+  -f, --main-name <string>    Main name for build artifact
+  -e, --entry-point <string>  Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler")
+  --minify, --no-minify       Minify output (default: true)
+  -sm, --sourcemap            Bundle source maps (default: false)
+  -is, --include-sources      Include source with source maps (default: false)
+  -x, --eject-file <string>   Eject commands to file
+  -m, --module <string>       Module to run for
+  -h, --help                  display help for command
 ```

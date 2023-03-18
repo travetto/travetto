@@ -76,6 +76,7 @@ export class DocRunUtil {
     text = stripAnsiCodes(text.trim())
       .replace(new RegExp(path.cwd(), 'g'), '.')
       .replaceAll(RootIndex.manifest.workspacePath, '<workspace-root>')
+      .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
       .replace(/^(\s*framework:\s*')(\d+[.]\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x${post}`)
       .replace(/^(\s*nodeVersion:\s*'v)(\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x.x${post}`)
       .replace(/^(.{1,4})?Compiling[.]*/, '') // Compiling message, remove

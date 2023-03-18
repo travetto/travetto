@@ -93,13 +93,13 @@ The run command allows for generating documentation output.
 ```bash
 $ trv doc --help
 
-Usage:  doc [options]
+Usage: doc [options]
 
 Options:
-  -i, --input <input>      Input File (default: "DOC.tsx")
-  -o, --outputs <outputs>  Outputs (default: [])
-  -w, --watch              Watch
-  -h, --help               display help for command
+  -i, --input <string>    Input File (default: "DOC.tsx")
+  -o, --outputs <string>  Outputs (default: [])
+  -w, --watch             Watch? (default: false)
+  -h, --help              display help for command
 ```
 
 By default, running the command will output the [Markdown](https://en.wikipedia.org/wiki/Markdown) content directly to the terminal.
@@ -151,13 +151,7 @@ Sample documentation for fictional module.  This module fictitiously relies upon
 
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
-Options:
-  -V, <span class="token parameter variable">--version</span>                  output the version number
-  -h, <span class="token parameter variable">--help</span>                     display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
-
 Commands:
-  doc <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
-  main <span class="token operator">&lt;</span>fileOrImport<span class="token operator">></span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-  <span class="token builtin class-name">help</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  doc          Command line support <span class="token keyword">for</span> generating module docs.</code></pre>
   </figure>
 ```

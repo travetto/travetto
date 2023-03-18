@@ -220,13 +220,13 @@ To run the tests you can either call the [Command Line Interface](https://github
 ```bash
 $ trv test --help
 
-Usage:  test [options] [regexes...]
+Usage: test [options] [first:string] [regexes...:string]
 
 Options:
-  -f, --format <format>            Output format for test results (default: "tap")
-  -c, --concurrency <concurrency>  Number of tests to run concurrently (default: 4)
-  -m, --mode <mode>                Test run mode (default: "standard")
-  -h, --help                       display help for command
+  -f, --format <string>         Output format for test results (default: "tap")
+  -c, --concurrency <number>    Number of tests to run concurrently (default: 4)
+  -m, --mode <single|standard>  Test run mode (default: "standard")
+  -h, --help                    display help for command
 ```
 
 The regexes are the patterns of tests you want to run, and all tests must be found under the `test/` folder.

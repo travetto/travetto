@@ -145,6 +145,7 @@ $ trv main doc/dbconfig-run.ts
   errors: [
     {
       kind: 'required',
+      active: true,
       value: undefined,
       message: 'port is required',
       path: 'port',

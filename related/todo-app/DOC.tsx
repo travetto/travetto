@@ -5,7 +5,7 @@ import { RootIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
-import { ShutdownManager } from '@travetto/base';
+import { ShutdownManager, Util } from '@travetto/base';
 
 const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 const TodoRoot = d.ref('Todo App', RootIndex.mainModule.outputPath);
@@ -15,8 +15,8 @@ async function init() {
 
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.runBackground('trv', ['run', 'rest'], {
-    env: { REST_LOG_PATHS: '!*', REST_PORT: '12555' }
+  const cmd = DocRunUtil.runBackground('trv', ['run:rest', '--port=12555'], {
+    env: { REST_LOG_PATHS: '!*' }
   });
 
   ShutdownManager.onExitRequested(() => cmd.process.kill('SIGKILL'));
@@ -45,6 +45,7 @@ function TableOfContents({ root }: { root: () => DocJSXElement }) {
 
 export const text = async () => {
   const startupOutput = await init();
+  const key = Util.uuid(80);
   let root: DocJSXElement;
   return root = <>
     <c.Header title='Getting Started: A Todo App' />
@@ -145,10 +146,13 @@ $ npx trv lint:register
       <c.Code title='Creating Todo by fetch' src='doc/create-todo.ts' />
 
       <c.Execution
-        title='Create Output' cmd='trv' args={['main', 'doc/create-todo.ts']}
+        title='Create Output' cmd='trv' args={['main', 'doc/create-todo.ts', key]}
         config={{
           env: { TRV_LOG_PLAIN: '1' },
-          formatCommand: (name, args) => [name, ...args].map(v => v.replaceAll('doc/create', 'support/create')).join(' ')
+          rewrite: line => line.replaceAll(key, '<key>').replace(/[0-9a-f]{32}/, '<uniqueId>'),
+          formatCommand: (name, args) => [name, ...args].map(v =>
+            v.replaceAll('doc/create', 'support/create').replace(key, '<key>')
+          ).join(' ')
         }}
       />
 
@@ -156,9 +160,12 @@ $ npx trv lint:register
 
       <c.Code title='Listing Todos by fetch' src='doc/list-todo.ts' />
 
-      <c.Execution title='Listing Output' cmd='trv' args={['main', 'doc/list-todo.ts']} config={{
+      <c.Execution title='Listing Output' cmd='trv' args={['main', 'doc/list-todo.ts', key]} config={{
         env: { TRV_LOG_PLAIN: '1' },
-        formatCommand: (name, args) => [name, ...args].map(v => v.replaceAll('doc/list', 'support/list')).join(' ')
+        rewrite: line => line.replaceAll(key, '<key>').replace(/[0-9a-f]{32}/, '<uniqueId>'),
+        formatCommand: (name, args) => [name, ...args].map(
+          v => v.replaceAll('doc/list', 'support/list').replace(key, '<key>')
+        ).join(' ')
       }} />
     </c.Section>
   </>;

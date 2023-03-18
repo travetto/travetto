@@ -26,20 +26,21 @@ There are three primary cli commands for packing your code:
 ```bash
 $ trv pack --help
 
-Usage:  pack [options] [args...]
+Usage: pack [options]
 
 Options:
-  -w, --workspace <workspace>         Workspace for building
-  -c, --no-clean                      Disables: Clean workspace
-  -o, --output <output>               Output location
-  -es, --main-scripts <main-scripts>  Create entry scripts
-  -f, --main-name <main-name>         Main name for build artifact
-  -e, --entry-point <entry-point>     Entry point (default: "@travetto/cli/support/entry.cli")
-  -m, --no-minify                     Disables: Minify output
-  -sm, --sourcemap                    Bundle source maps
-  -is, --include-sources              Include source with source maps
-  -x, --eject-file <eject-file>       Eject commands to file
-  -h, --help                          display help for command
+  -w, --workspace <string>           Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                Clean workspace (default: true)
+  -o, --output <string>              Output location
+  --main-scripts, --no-main-scripts  Create entry scripts (default: true)
+  -f, --main-name <string>           Main name for build artifact
+  -e, --entry-point <string>         Entry point (default: "@travetto/cli/support/entry.cli")
+  --minify, --no-minify              Minify output (default: true)
+  -sm, --sourcemap                   Bundle source maps (default: false)
+  -is, --include-sources             Include source with source maps (default: false)
+  -x, --eject-file <string>          Eject commands to file
+  -m, --module <string>              Module to run for
+  -h, --help                         display help for command
 ```
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the `eject-file` flag that will allow for a script to be produced (base on the host operating system). 
@@ -86,20 +87,21 @@ This command is nearly identical to the standard `pack` operation, except for th
 ```bash
 $ trv pack:zip --help
 
-Usage:  pack:zip [options] [args...]
+Usage: pack:zip [options]
 
 Options:
-  -w, --workspace <workspace>         Workspace for building
-  -c, --no-clean                      Disables: Clean workspace
-  -o, --output <output>               Output location (default: "travetto_pack.zip")
-  -es, --main-scripts <main-scripts>  Create entry scripts
-  -f, --main-name <main-name>         Main name for build artifact
-  -e, --entry-point <entry-point>     Entry point (default: "@travetto/cli/support/entry.cli")
-  -m, --no-minify                     Disables: Minify output
-  -sm, --sourcemap                    Bundle source maps
-  -is, --include-sources              Include source with source maps
-  -x, --eject-file <eject-file>       Eject commands to file
-  -h, --help                          display help for command
+  -w, --workspace <string>           Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                Clean workspace (default: true)
+  -o, --output <string>              Output location (default: "travetto_pack.zip")
+  --main-scripts, --no-main-scripts  Create entry scripts (default: true)
+  -f, --main-name <string>           Main name for build artifact
+  -e, --entry-point <string>         Entry point (default: "@travetto/cli/support/entry.cli")
+  --minify, --no-minify              Minify output (default: true)
+  -sm, --sourcemap                   Bundle source maps (default: false)
+  -is, --include-sources             Include source with source maps (default: false)
+  -x, --eject-file <string>          Eject commands to file
+  -m, --module <string>              Module to run for
+  -h, --help                         display help for command
 ```
 
 ## CLI - pack:docker
@@ -109,27 +111,28 @@ This command starts off identical to the standard `pack` operation, but it conta
 ```bash
 $ trv pack:docker --help
 
-Usage:  pack:docker [options] [args...]
+Usage: pack:docker [options]
 
 Options:
-  -w, --workspace <workspace>               Workspace for building
-  -c, --no-clean                            Disables: Clean workspace
-  -o, --output <output>                     Output location
-  -es, --main-scripts <main-scripts>        Create entry scripts
-  -f, --main-name <main-name>               Main name for build artifact
-  -e, --entry-point <entry-point>           Entry point (default: "@travetto/cli/support/entry.cli")
-  -m, --no-minify                           Disables: Minify output
-  -sm, --sourcemap                          Bundle source maps
-  -is, --include-sources                    Include source with source maps
-  -x, --eject-file <eject-file>             Eject commands to file
-  -df, --docker-factory <docker-factory>    Docker Factory source (default: "@travetto/pack/support/pack.dockerfile")
-  -di, --docker-image <docker-image>        Docker Image to extend (default: "node:18-alpine3.16")
-  -dn, --docker-name <docker-name>          Docker Image Name (default: "travetto_pack")
-  -dt, --docker-tag <docker-tag>            Docker Image Tag (default: ["latest"])
-  -dp, --docker-port <docker-port>          Docker Image Port (default: [])
-  -dx, --docker-push                        Docker Push Tags
-  -dr, --docker-registry <docker-registry>  Docker Registry
-  -h, --help                                display help for command
+  -w, --workspace <string>           Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                Clean workspace (default: true)
+  -o, --output <string>              Output location
+  --main-scripts, --no-main-scripts  Create entry scripts (default: true)
+  -f, --main-name <string>           Main name for build artifact
+  -e, --entry-point <string>         Entry point (default: "@travetto/cli/support/entry.cli")
+  --minify, --no-minify              Minify output (default: true)
+  -sm, --sourcemap                   Bundle source maps (default: false)
+  -is, --include-sources             Include source with source maps (default: false)
+  -x, --eject-file <string>          Eject commands to file
+  -df, --docker-factory <string>     Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
+  -di, --docker-image <string>       Docker Image to extend  (default: "node:18-alpine3.16")
+  -dn, --docker-name <string>        Docker Image Name  (default: "travetto_pack")
+  -dt, --docker-tag <string>         Docker Image Tag  (default: ["latest"])
+  -dp, --docker-port <number>        Docker Image Port  (default: [])
+  -dx, --docker-push                 Docker Push Tags  (default: false)
+  -dr, --docker-registry <string>    Docker Registry
+  -m, --module <string>              Module to run for
+  -h, --help                         display help for command
 ```
 
 The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the `--eject-file`  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. 
@@ -145,82 +148,78 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 **Terminal: Sample Ejected File**
 ```bash
-$ trv pack:docker -x /dev/stdout run rest
+$ trv pack:docker -x /dev/stdout run:rest
 
 #!/bin/sh
-export DIST=/tmp/_home_tim_Code_travetto_related_todo-app
+export DIST=/tmp/<temp-folder>
 export TRV_OUT=<workspace-root>/.trv_output
 export ROOT=<workspace-root>/related/todo-app
 export MOD=@travetto/todo-app
 
 # Cleaning Output $DIST 
 
-echo "Cleaning Output $DIST
-"
+echo "Cleaning Output $DIST"
+
 rm -rf $DIST
 mkdir -p $DIST
 
 # Writing .env.js 
 
-echo "Writing .env.js
-"
+echo "Writing .env.js"
+
 echo "process.env.TRV_MANIFEST = 'node_modules/$MOD';" > $DIST/.env.js
+echo "process.env.TRV_MODULE = '$MOD';" >> $DIST/.env.js
 echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js
 
 # Writing package.json 
 
-echo "Writing package.json
-"
+echo "Writing package.json"
+
 echo "{\"type\":\"commonjs\"}" > $DIST/package.json
 
-# Writing entry scripts entry.cli.sh args=(run rest) 
+# Writing entry scripts todo-app.sh args=(run:rest) 
 
-echo "Writing entry scripts entry.cli.sh args=(run rest)
-"
-echo "#!/bin/sh" > $DIST/entry.cli.sh
-echo "cd \$(dirname \"\$0\")" >> $DIST/entry.cli.sh
-echo "node entry.cli.js run rest \$@" >> $DIST/entry.cli.sh
-chmod 755 $DIST/entry.cli.sh
+echo "Writing entry scripts todo-app.sh args=(run:rest)"
 
-# Writing entry scripts entry.cli.cmd args=(run rest) 
+echo "#!/bin/sh" > $DIST/todo-app.sh
+echo "cd \$(dirname \"\$0\")" >> $DIST/todo-app.sh
+echo "node todo-app.js run:rest \$@" >> $DIST/todo-app.sh
+chmod 755 $DIST/todo-app.sh
 
-echo "Writing entry scripts entry.cli.cmd args=(run rest)
-"
-echo "" > $DIST/entry.cli.cmd
-echo "cd %~p0" >> $DIST/entry.cli.cmd
-echo "node entry.cli.js run rest %*" >> $DIST/entry.cli.cmd
-chmod 755 $DIST/entry.cli.cmd
+# Writing entry scripts todo-app.cmd args=(run:rest) 
+
+echo "Writing entry scripts todo-app.cmd args=(run:rest)"
+
+echo "" > $DIST/todo-app.cmd
+echo "cd %~p0" >> $DIST/todo-app.cmd
+echo "node todo-app.js run:rest %*" >> $DIST/todo-app.cmd
+chmod 755 $DIST/todo-app.cmd
 
 # Copying over resources 
 
-echo "Copying over resources
-"
+echo "Copying over resources"
+
 mkdir -p $DIST/node_modules/$MOD
 cp $TRV_OUT/node_modules/$MOD/package.json $DIST/node_modules/$MOD/package.json
 mkdir -p $DIST/node_modules/@travetto/manifest
 cp $TRV_OUT/node_modules/@travetto/manifest/package.json $DIST/node_modules/@travetto/manifest/package.json
 cp -r -p $ROOT/resources $DIST/resources
 
-# Generating App Cache node_modules/$MOD/trv-app-cache.json 
-
-echo "Generating App Cache node_modules/$MOD/trv-app-cache.json
-"
-mkdir -p $DIST/node_modules/$MOD
-DEBUG=0 TRV_MODULE=$MOD npx trv main @travetto/app/support/bin/list > $DIST/node_modules/$MOD/trv-app-cache.json
-
 # Writing Manifest node_modules/$MOD 
 
-echo "Writing Manifest node_modules/$MOD
-"
+echo "Writing Manifest node_modules/$MOD"
+
 TRV_MODULE=$MOD npx trv manifest $DIST/node_modules/$MOD prod
 
-# Bundling Output minify=true sourcemap= entryPoint=@travetto/cli/support/entry.cli 
+# Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.cli 
 
-echo "Bundling Output minify=true sourcemap= entryPoint=@travetto/cli/support/entry.cli
-"
+echo "Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.cli"
+
 export BUNDLE_ENTRY=node_modules/@travetto/cli/support/entry.cli.js
-export BUNDLE_MAIN_FILE=entry.cli.js
+export BUNDLE_MAIN_FILE=todo-app.js
 export BUNDLE_COMPRESS=true
+export BUNDLE_SOURCEMAP=false
+export BUNDLE_SOURCES=false
 export BUNDLE_OUTPUT=$DIST
 export BUNDLE_FORMAT=commonjs
 export TRV_MANIFEST=$TRV_OUT/node_modules/$MOD
@@ -230,24 +229,24 @@ cd $ROOT
 
 # Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile 
 
-echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile
-"
+echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile"
+
 echo "FROM node:18-alpine3.16" > $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "COPY . ." >> $DIST/Dockerfile
 echo "" >> $DIST/Dockerfile
-echo "ENTRYPOINT [\"/app/entry.cli.sh\"]" >> $DIST/Dockerfile
+echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
 
 # Pulling Docker Base Image node:18-alpine3.16 
 
-echo "Pulling Docker Base Image node:18-alpine3.16
-"
+echo "Pulling Docker Base Image node:18-alpine3.16"
+
 docker pull node:18-alpine3.16
 
 # Building Docker Container latest 
 
-echo "Building Docker Container latest
-"
+echo "Building Docker Container latest"
+
 cd $DIST
 docker build -t travetto_todo-app:latest .
 cd $ROOT

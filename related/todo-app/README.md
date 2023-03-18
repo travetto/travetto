@@ -305,8 +305,7 @@ First we must start the application:
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/app:src/registry.ts:61] Running application { name: 'rest', target: '@travetto/rest:src/application/rest￮RestApplication' }
-2029-03-14T04:00:00.837Z info  [@travetto/app:src/registry.ts:67] Manifest {
+2029-03-14T04:00:00.618Z info  [@travetto/rest:src/application/rest.ts:195] Manifest {
   info: {
     name: '@travetto/todo-app',
     main: undefined,
@@ -326,7 +325,7 @@ First we must start the application:
     nodeVersion: 'v18.x.x'
   }
 }
-2029-03-14T04:00:01.510Z info  [@travetto/app:src/registry.ts:81] Config {
+2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:196] Config {
   sources: [
     'application.1 - file://./resources/application.yml',
     'dev.1 - file://./resources/dev.yml',
@@ -335,7 +334,7 @@ First we must start the application:
   active: {
     ApiHostConfig: { servers: { '0': { url: 'http://localhost:3000' } }, openapi: '3.1.0' },
     ApiInfoConfig: {
-      contact: { name: 'Travetto Framework', email: 'travetto.framework@gmail.com' },
+      contact: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
       description: '',
       license: { name: 'ISC' },
       title: '@travetto/todo-app',
@@ -391,7 +390,7 @@ First we must start the application:
     }
   }
 }
-2029-03-14T04:00:02.450Z info  [@travetto/rest:src/application/rest.ts:194] Listening { port: 3000 }
+2029-03-14T04:00:01.510Z info  [@travetto/rest:src/application/rest.ts:197] Listening { port: 3000 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api. 
@@ -402,10 +401,10 @@ Create `support/create-todo.ts` with the following contents:
 ```typescript
 import fetch from 'node-fetch';
 
-export async function main() {
+export async function main(key: string) {
   const res = await fetch('http://localhost:3000/todo', {
     method: 'POST',
-    body: JSON.stringify({ text: 'New Todo' }),
+    body: JSON.stringify({ text: `New Todo - ${key}` }),
     headers: {
       'Content-Type': 'application/json'
     }
@@ -417,12 +416,12 @@ export async function main() {
 
 **Terminal: Create Output**
 ```bash
-$ trv main support/create-todo.ts
+$ trv main support/create-todo.ts <key>
 
 {
-  text: 'New Todo',
-  created: '2029-03-14T04:00:02.762Z',
-  id: '22e793aed76ee063d13feec2e5e95b45'
+  text: 'New Todo - <key>',
+  created: '2029-03-14T04:00:02.450Z',
+  id: '<uniqueId>'
 }
 ```
 
@@ -432,21 +431,21 @@ Now create `support/list-todo.ts` with the following contents:
 ```typescript
 import fetch from 'node-fetch';
 
-export async function main() {
-  const res = await fetch('http://localhost:3000/todo').then(r => r.json());
+export async function main(key: string) {
+  const res = await fetch(`http://localhost:3000/todo?q=${key}`).then(r => r.json());
   console.log!(res);
 }
 ```
 
 **Terminal: Listing Output**
 ```bash
-$ trv main support/list-todo.ts
+$ trv main support/list-todo.ts <key>
 
 [
   {
-    id: '22e793aed76ee063d13feec2e5e95b45',
-    text: 'New Todo',
-    created: '2029-03-14T04:00:03.086Z'
+    id: '<uniqueId>',
+    text: 'New Todo - <key>',
+    created: '2029-03-14T04:00:02.819Z'
   }
 ]
 ```

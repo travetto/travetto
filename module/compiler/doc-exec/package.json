@@ -1,0 +1,13 @@
+{
+  "name": "@travetto-doc/compiler",
+  "dependencies": {
+    "@travetto/cli": "^3.0.0",
+    "@travetto/compiler": "^3.0.0"
+  },
+  "travetto": {
+    "isolated": true,
+    "mainSource": [
+      "@travetto/cli"
+    ]
+  }
+}

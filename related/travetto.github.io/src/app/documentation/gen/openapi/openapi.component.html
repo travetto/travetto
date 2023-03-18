@@ -27,9 +27,9 @@ All of the high level configurations can be found in the following structure:
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/openapi/src/config.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ServerObject<span class="token punctuation">,</span> ContactObject<span class="token punctuation">,</span> LicenseObject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'openapi3-ts/src/model/OpenApi'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token keyword">type</span> <span class="token punctuation">{{'{'}}</span> ServerObject<span class="token punctuation">,</span> ContactObject<span class="token punctuation">,</span> LicenseObject <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'openapi3-ts'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config<span class="token punctuation">,</span> EnvVar <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Config <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/config'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> path<span class="token punctuation">,</span> RootIndex <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/manifest'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> GlobalEnv <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Required <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
@@ -85,12 +85,10 @@ All of the high level configurations can be found in the following structure:
   <span class="token comment">/**
    * Where to output file to
    */</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'TRV_OPENAPI_OUTPUT'</span><span class="token punctuation">)</span>
   output<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">'openapi.yml'</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Should file be generated at runtime
    */</span>
-  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'TRV_OPENAPI_PERSIST'</span><span class="token punctuation">)</span>
   persist<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Skip emitting all routes
@@ -131,10 +129,11 @@ The module provides a command for the <a class="module-link" routerLink="/docs/c
 </figcaption>
     <pre><code class="language-bash">$ trv openapi:spec <span class="token parameter variable">--help</span>
 
-Usage:  openapi:spec <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+Usage: openapi:spec <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>  Output files <span class="token punctuation">(</span>default: <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Output files
+  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Module to run <span class="token keyword">for</span>
   -h, <span class="token parameter variable">--help</span>             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
@@ -152,19 +151,16 @@ The module provides a command for the <a class="module-link" routerLink="/docs/c
 </figcaption>
     <pre><code class="language-bash">$ trv openapi:client <span class="token parameter variable">--help</span>
 
-Usage:  openapi:client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>format-or-preset<span class="token operator">></span>
+Usage: openapi:client <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>format:string<span class="token operator">></span>
 
 Options:
-  -x, --extended-help                                  Show Extended Help
-  -a, --additional-properties <span class="token operator">&lt;</span>additional-properties<span class="token operator">></span>  Additional Properties <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -i, <span class="token parameter variable">--input</span> <span class="token operator">&lt;</span>input<span class="token operator">></span>                                  Input <span class="token function">file</span> <span class="token punctuation">(</span>default:
-                                                       <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
-  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>output<span class="token operator">></span>                                Output folder <span class="token punctuation">(</span>default:
-                                                       <span class="token string">"./api-client"</span><span class="token punctuation">)</span>
-  -d, --docker-image <span class="token operator">&lt;</span>docker-image<span class="token operator">></span>                    Docker Image to use <span class="token punctuation">(</span>default:
-                                                       <span class="token string">"arcsine/openapi-generator:latest"</span><span class="token punctuation">)</span>
-  -w, <span class="token parameter variable">--watch</span>                                          Watch <span class="token keyword">for</span> <span class="token function">file</span> changes
-  -h, <span class="token parameter variable">--help</span>                                           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+  -x, --extended-help                   Show Extended Help
+  -a, --additional-properties <span class="token operator">&lt;</span>string<span class="token operator">></span>  Additional Properties <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  -i, <span class="token parameter variable">--input</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                  Input <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"./openapi.yml"</span><span class="token punctuation">)</span>
+  -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                 Output folder <span class="token punctuation">(</span>default: <span class="token string">"./api-client"</span><span class="token punctuation">)</span>
+  -d, --docker-image <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker Image to user <span class="token punctuation">(</span>default: <span class="token string">"arcsine/openapi-generator:latest"</span><span class="token punctuation">)</span>
+  -w, <span class="token parameter variable">--watch</span>                           Watch <span class="token keyword">for</span> <span class="token function">file</span> changes
+  -h, <span class="token parameter variable">--help</span>                            display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
 
 Available Presets
 ----------------------------------

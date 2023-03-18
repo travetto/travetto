@@ -58,7 +58,6 @@ export class PackUtil {
     for await (const line of output) {
       await write(replaceArgs(line));
     }
-    await write(file);
     await write('\n');
 
     await stream?.close();

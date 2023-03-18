@@ -101,7 +101,7 @@ export class ExecutionManager {
 
     const [, , cmd, ...args] = argv;
     if (!cmd || /^(-h|--help)$/.test(cmd)) {
-      console.log!(await HelpUtil.renderHelp());
+      console.info!(await HelpUtil.renderHelp());
     } else {
       let command: CliCommandShape | undefined;
       try {
@@ -117,6 +117,7 @@ export class ExecutionManager {
           console.error!(await HelpUtil.renderHelp(command));
         } else {
           console.error!(cliTpl`${{ failure: err.message }}`);
+          console.error!();
         }
       }
     }

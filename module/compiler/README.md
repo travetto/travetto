@@ -45,26 +45,21 @@ $ TRV_BUILD=debug trv build
 2029-03-14T04:00:04.003Z [manifest       ] Started
 2029-03-14T04:00:04.495Z [manifest       ] Completed
 2029-03-14T04:00:05.066Z [transformers   ] Started
-2029-03-14T04:00:05.307Z [transformers   ] @travetto-test/transformer Skipped
-2029-03-14T04:00:05.952Z [transformers   ] @travetto/app Skipped
-2029-03-14T04:00:06.859Z [transformers   ] @travetto/base Skipped
-2029-03-14T04:00:07.720Z [transformers   ] @travetto/cache Skipped
-2029-03-14T04:00:08.179Z [transformers   ] @travetto/di Skipped
-2029-03-14T04:00:08.588Z [transformers   ] @travetto/manifest Skipped
-2029-03-14T04:00:09.493Z [transformers   ] @travetto/registry Skipped
-2029-03-14T04:00:10.395Z [transformers   ] @travetto/rest Skipped
-2029-03-14T04:00:10.407Z [transformers   ] @travetto/schema Skipped
-2029-03-14T04:00:10.799Z [transformers   ] @travetto/test Skipped
-2029-03-14T04:00:11.013Z [transformers   ] Completed
-2029-03-14T04:00:11.827Z [delta          ] Started
-2029-03-14T04:00:11.894Z [delta          ] Completed
-2029-03-14T04:00:12.133Z [manifest       ] Started
-2029-03-14T04:00:13.123Z [manifest       ] Wrote manifest @travetto/mono-repo
-2029-03-14T04:00:14.014Z [manifest       ] Completed
-2029-03-14T04:00:14.924Z [compile        ] Started action=build changed=
-2029-03-14T04:00:15.690Z [compile        ] Skipped
-2029-03-14T04:00:15.865Z [lock           ] Releasing build
-2029-03-14T04:00:16.757Z [build          ] Successfully built
+2029-03-14T04:00:05.307Z [transformers   ] @travetto/base Skipped
+2029-03-14T04:00:05.952Z [transformers   ] @travetto/cli Skipped
+2029-03-14T04:00:06.859Z [transformers   ] @travetto/manifest Skipped
+2029-03-14T04:00:07.720Z [transformers   ] @travetto/registry Skipped
+2029-03-14T04:00:08.179Z [transformers   ] @travetto/schema Skipped
+2029-03-14T04:00:08.588Z [transformers   ] Completed
+2029-03-14T04:00:09.493Z [delta          ] Started
+2029-03-14T04:00:10.395Z [delta          ] Completed
+2029-03-14T04:00:10.407Z [manifest       ] Started
+2029-03-14T04:00:10.799Z [manifest       ] Wrote manifest @travetto-doc/compiler
+2029-03-14T04:00:11.013Z [manifest       ] Completed
+2029-03-14T04:00:11.827Z [compile        ] Started action=build changed=
+2029-03-14T04:00:11.894Z [compile        ] Skipped
+2029-03-14T04:00:12.133Z [lock           ] Releasing build
+2029-03-14T04:00:13.123Z [build          ] Successfully built
 ```
 
 **Terminal: Sample trv output with default log level**

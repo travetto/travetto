@@ -15,7 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/schema</code></pre>
   </figure>
 
-This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is leveraged in the <a class="module-link" routerLink="/docs/config" title="Configuration support">Configuration</a>, <a class="module-link" routerLink="/docs/app" title="Application registration/management and run support.">Application</a>, <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a>, <a class="module-link" routerLink="/docs/openapi" title="OpenAPI integration support for the Travetto framework">OpenAPI Specification</a> and <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> modules.  The schema is the backbone of all data transfer, as it helps to provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file. <br><br>
+This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is leveraged in the <a class="module-link" routerLink="/docs/config" title="Configuration support">Configuration</a>, <a class="module-link" routerLink="/docs/cli" title="CLI infrastructure for Travetto framework">Command Line Interface</a>, <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a>, <a class="module-link" routerLink="/docs/openapi" title="OpenAPI integration support for the Travetto framework">OpenAPI Specification</a> and <a class="module-link" routerLink="/docs/model" title="Datastore abstraction for core operations.">Data Modeling Support</a> modules.  The schema is the backbone of all data transfer, as it helps to provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file. <br><br>
 This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.
 <h2 id="registration">Registration</h2>
 
@@ -231,12 +231,13 @@ Validation Failed <span class="token punctuation">{{'{'}}</span>
   <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
     <span class="token punctuation">{{'{'}}</span>
       <span class="token string">"kind"</span><span class="token builtin class-name">:</span> <span class="token string">"type"</span>,
+      <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"number"</span>,
       <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"age is not a valid number"</span>,
-      <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token string">"age"</span>,
-      <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"number"</span>
+      <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token string">"age"</span>
     <span class="token punctuation">{{'}'}}</span>,
     <span class="token punctuation">{{'{'}}</span>
       <span class="token string">"kind"</span><span class="token builtin class-name">:</span> <span class="token string">"required"</span>,
+      <span class="token string">"active"</span><span class="token builtin class-name">:</span> true,
       <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"address.street2 is required"</span>,
       <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token string">"address.street2"</span>
     <span class="token punctuation">{{'}'}}</span>
@@ -304,6 +305,10 @@ When the validator is executed, it has access to the entire object, and you can 
    * Regular expression to match
    */</span>
   re<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Number to compare against
+   */</span>
+  n<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> Date<span class="token punctuation">;</span>
   <span class="token comment">/**
    * The type of the field
    */</span>
@@ -385,9 +390,9 @@ Validation Failed <span class="token punctuation">{{'{'}}</span>
   <span class="token string">"errors"</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>
     <span class="token punctuation">{{'{'}}</span>
       <span class="token string">"kind"</span><span class="token builtin class-name">:</span> <span class="token string">"type"</span>,
+      <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"PointImpl"</span>,
       <span class="token string">"message"</span><span class="token builtin class-name">:</span> <span class="token string">"point is not a valid PointImpl"</span>,
-      <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token string">"point"</span>,
-      <span class="token string">"type"</span><span class="token builtin class-name">:</span> <span class="token string">"PointImpl"</span>
+      <span class="token string">"path"</span><span class="token builtin class-name">:</span> <span class="token string">"point"</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">]</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>

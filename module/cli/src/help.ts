@@ -67,7 +67,10 @@ export class HelpUtil {
     const paramWidth = Math.max(...paramWidths);
     const descWidth = Math.max(...descWidths);
 
-    const helpText = await (command.help?.() ?? '');
+    const helpText = await (command.help?.() ?? []);
+    if (helpText.length && helpText[helpText.length - 1] !== '') {
+      helpText.push('');
+    }
 
     return [
       usage.join(' '),
@@ -77,7 +80,7 @@ export class HelpUtil {
         `  ${params[i]}${' '.repeat((paramWidth - paramWidths[i]))}  ${descs[i].padEnd(descWidth)}${' '.repeat((descWidth - descWidths[i]))}`
       ),
       '',
-      ...(helpText ? [helpText] : [])
+      ...helpText
     ].map(x => x.trimEnd()).join('\n');
   }
 

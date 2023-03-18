@@ -25,7 +25,7 @@ export class OpenApiClientCommand implements CliCommandShape {
   @CliFlag({ desc: 'Watch for file changes' })
   watch?: boolean;
 
-  async help(): Promise<string> {
+  async help(): Promise<string[]> {
     return OpenApiClientHelp.help(this.dockerImage, this.extendedHelp ?? false);
   }
 

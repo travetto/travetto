@@ -83,7 +83,7 @@ node cli run myapp
 
     As indicated, any of the pack operations can be ejected, and produce an output that can be run independent of the pack command.  This is helpful when integrating with more complicated build processes.
 
-    <c.Execution title='Sample Ejected File' cmd='trv' args={['pack:docker', '-x', '/dev/stdout', 'run', 'rest']} config={{
+    <c.Execution title='Sample Ejected File' cmd='trv' args={['pack:docker', '-x', '/dev/stdout', 'run:rest']} config={{
       cwd: path.resolve(RootIndex.manifest.workspacePath, 'related/todo-app'),
     }} />
   </c.Section>

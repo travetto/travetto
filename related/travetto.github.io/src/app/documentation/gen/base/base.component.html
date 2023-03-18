@@ -102,6 +102,7 @@ In addition to reading these values, there is a defined method for setting/updat
     profiles<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token constant">TEST</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     debug <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
+    profiles<span class="token punctuation">.</span><span class="token function">delete</span><span class="token punctuation">(</span><span class="token operator">!</span>isProd <span class="token operator">?</span> <span class="token constant">PROD</span> <span class="token operator">:</span> <span class="token constant">DEV</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
     profiles<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>isProd <span class="token operator">?</span> <span class="token constant">PROD</span> <span class="token operator">:</span> <span class="token constant">DEV</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 

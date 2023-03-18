@@ -24,9 +24,9 @@ All of the high level configurations can be found in the following structure:
 
 **Code: Config: OpenAPI Configuration**
 ```typescript
-import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
+import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
 
-import { Config, EnvVar } from '@travetto/config';
+import { Config } from '@travetto/config';
 import { path, RootIndex } from '@travetto/manifest';
 import { GlobalEnv } from '@travetto/base';
 import { Required } from '@travetto/schema';
@@ -82,12 +82,10 @@ export class ApiSpecConfig {
   /**
    * Where to output file to
    */
-  @EnvVar('TRV_OPENAPI_OUTPUT')
   output: string = 'openapi.yml';
   /**
    * Should file be generated at runtime
    */
-  @EnvVar('TRV_OPENAPI_PERSIST')
   persist?: boolean;
   /**
    * Skip emitting all routes
@@ -124,10 +122,11 @@ The module provides a command for the [Command Line Interface](https://github.co
 ```bash
 $ trv openapi:spec --help
 
-Usage:  openapi:spec [options]
+Usage: openapi:spec [options]
 
 Options:
-  -o, --output <output>  Output files (default: "./openapi.yml")
+  -o, --output <string>  Output files
+  -m, --module <string>  Module to run for
   -h, --help             display help for command
 ```
 
@@ -142,19 +141,16 @@ The module provides a command for the [Command Line Interface](https://github.co
 ```bash
 $ trv openapi:client --help
 
-Usage:  openapi:client [options] <format-or-preset>
+Usage: openapi:client [options] <format:string>
 
 Options:
-  -x, --extended-help                                  Show Extended Help
-  -a, --additional-properties <additional-properties>  Additional Properties (default: [])
-  -i, --input <input>                                  Input file (default:
-                                                       "./openapi.yml")
-  -o, --output <output>                                Output folder (default:
-                                                       "./api-client")
-  -d, --docker-image <docker-image>                    Docker Image to use (default:
-                                                       "arcsine/openapi-generator:latest")
-  -w, --watch                                          Watch for file changes
-  -h, --help                                           display help for command
+  -x, --extended-help                   Show Extended Help
+  -a, --additional-properties <string>  Additional Properties (default: [])
+  -i, --input <string>                  Input file (default: "./openapi.yml")
+  -o, --output <string>                 Output folder (default: "./api-client")
+  -d, --docker-image <string>           Docker Image to user (default: "arcsine/openapi-generator:latest")
+  -w, --watch                           Watch for file changes
+  -h, --help                            display help for command
 
 Available Presets
 ----------------------------------

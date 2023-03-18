@@ -493,11 +493,20 @@ The module provides the ability to generate an export of the model structure fro
 </figcaption>
     <pre><code class="language-bash">$ trv model:export <span class="token parameter variable">--help</span>
 
-Usage:  model:export <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>provider<span class="token punctuation">]</span> <span class="token punctuation">[</span>models<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+Usage: model:export <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
 
 Options:
-  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>env<span class="token operator">></span>  Application environment
-  -h, <span class="token parameter variable">--help</span>       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>     Application environment
+  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Module to run <span class="token keyword">for</span>
+  -h, <span class="token parameter variable">--help</span>             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Providers
+--------------------
+  * SQL
+
+Models
+--------------------
+  * samplemodel</code></pre>
   </figure>
 
 <h2 id="cli-model-install">CLI - model:install</h2>
@@ -510,9 +519,19 @@ The module provides the ability to install all the various <a target="_blank" cl
 </figcaption>
     <pre><code class="language-bash">$ trv model:install <span class="token parameter variable">--help</span>
 
-Usage:  model:install <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>provider<span class="token punctuation">]</span> <span class="token punctuation">[</span>models<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+Usage: model:install <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>provider:string<span class="token operator">></span> <span class="token operator">&lt;</span>models<span class="token punctuation">..</span>.:string<span class="token operator">></span>
 
 Options:
-  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>env<span class="token operator">></span>  Application environment
-  -h, <span class="token parameter variable">--help</span>       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>     Application environment
+  -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  Module to run <span class="token keyword">for</span>
+  -h, <span class="token parameter variable">--help</span>             display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
+
+Providers
+--------------------
+  * Memory
+  * SQL
+
+Models
+--------------------
+  * samplemodel</code></pre>
   </figure>

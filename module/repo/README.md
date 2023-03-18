@@ -20,16 +20,14 @@ The versioning operation will find all the changed modules (and the modules that
 
 **Terminal: Version execution**
 ```bash
-$ trv repo:version
+$ trv repo:version -h
 
-Please specify a level to continue
-
-Usage: trv repo:version [options] <level> [prefix]
+Usage: repo:version [options] <level:patch|major|minor|prerelease> [prefix:string]
 
 Options:
-  -c, --no-changed  Disables: Only version changed modules
-  -f, --force       Force operation, even in a dirty workspace
-  -h, --help        display help for command
+  --changed, --no-changed  Only version changed modules (default: true)
+  -f, --force              Force operation, even in a dirty workspace (default: false)
+  -h, --help               display help for command
 ```
 
 Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:
@@ -48,7 +46,7 @@ Author: Travetto Framework <travetto.framework@gmail.com>
 Date:   Thu Feb 23 17:51:37 2023 -0500
 Date:   Thu Feb 23 17:51:37 2023 -0500
 
-    Publish @travetto/app,@travetto/asset,@travetto/asset-rest,@travetto/auth,@travetto/auth-model,@travetto/auth-rest,@travetto/auth-rest-context,@travetto/auth-rest-jwt,@travetto/auth-rest-passport,@travetto/auth-rest-session,...
+    Publish @travetto/asset,@travetto/asset-rest,@travetto/auth,@travetto/auth-model,@travetto/auth-rest,@travetto/auth-rest-context,@travetto/auth-rest-jwt,@travetto/auth-rest-passport,@travetto/auth-rest-session,...
 ```
 
 ## CLI - Publish
@@ -58,18 +56,18 @@ The publish functionality is relatively naive, but consistent.  The code will lo
 ```bash
 $ trv repo:publish -h
 
-Usage:  repo:publish [options]
+Usage: repo:publish [options]
 
 Options:
-  -d, --no-dry-run  Disables: Dry Run?
-  -h, --help        display help for command
+  --dry-run, --no-dry-run  Dry Run? (default: true)
+  -h, --help               display help for command
 ```
 
 By default the tool will execute a dry run only, and requires passing a flag to disable the dry run.
 
 **Terminal: Publishing changes**
 ```bash
-npx trv repo:publish -d
+npx trv repo:publish --no-dry-run
 ```
 
 If no modules are currently changed, then the command will indicate there is no work to do, and exit gracefully.
