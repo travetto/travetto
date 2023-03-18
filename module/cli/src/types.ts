@@ -80,6 +80,7 @@ export type CliCommandInput = {
   array?: boolean;
   default?: unknown;
   flagNames?: string[];
+  envVars?: string[];
 };
 
 /**
