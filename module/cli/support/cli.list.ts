@@ -7,7 +7,7 @@ const write = (line: string): Promise<void> => new Promise(r => process.stdout.w
  * Allows for listing of modules
  */
 @CliCommand()
-export class RepoListCommand implements CliCommandShape {
+export class ListModuleCommand implements CliCommandShape {
 
   /** Only show changed modules */
   changed = false;

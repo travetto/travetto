@@ -14,7 +14,7 @@ export const text = <>
   <c.StdHeader />
 
   This module's purpose is to allow for proper declaration and validation of data types, in the course of running a program.  The framework defined here, is
-  leveraged in the {d.mod('Config')}, {d.mod('App')}, {d.mod('Rest')}, {d.mod('Openapi')} and {d.mod('Model')} modules.  The schema is the backbone of all data transfer, as it helps to
+  leveraged in the {d.mod('Config')}, {d.mod('Cli')}, {d.mod('Rest')}, {d.mod('Openapi')} and {d.mod('Model')} modules.  The schema is the backbone of all data transfer, as it helps to
   provide validation on correctness of input, whether it is a rest request, command line inputs, or a configuration file. <br />
 
   This module provides a mechanism for registering classes and field level information as well the ability to apply that information at runtime.
