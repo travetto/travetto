@@ -131,7 +131,7 @@ export class SchemaTransformUtil {
     const tags = ts.getJSDocTags(node);
     const aliases = tags.filter(x => x.tagName.getText() === 'alias');
     if (aliases.length) {
-      attrs.push(state.factory.createPropertyAssignment('alias', state.fromLiteral(aliases.map(x => x.comment).filter(x => !!x))));
+      attrs.push(state.factory.createPropertyAssignment('aliases', state.fromLiteral(aliases.map(x => x.comment).filter(x => !!x))));
     }
 
     const params: ts.Expression[] = [];
