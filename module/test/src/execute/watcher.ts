@@ -1,7 +1,7 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
 import { WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
-import { ConsoleManager, defineGlobalEnv, ObjectUtil } from '@travetto/base';
+import { ObjectUtil } from '@travetto/base';
 
 import { SuiteRegistry } from '../registry/suite';
 import { buildStandardTestManager } from '../worker/standard';
@@ -85,21 +85,5 @@ export class TestWatcher {
     }
 
     await pool.process(src);
-  }
-}
-
-export async function main(format: string = 'tap', runAllOnStart: string = 'true'): Promise<void> {
-  defineGlobalEnv({ test: true, dynamic: true });
-  console.log('Starting');
-  ConsoleManager.setDebugFromEnv();
-  // Quit on parent disconnect
-  if (process.send) {
-    process.on('disconnect', () => process.exit(0));
-  }
-  try {
-    await TestWatcher.watch(format, runAllOnStart !== 'false');
-    console.log('Done');
-  } catch (err) {
-    console.error(err);
   }
 }

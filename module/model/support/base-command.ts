@@ -1,7 +1,9 @@
-import { ConsoleManager } from '@travetto/base';
+import { ConsoleManager, GlobalEnvConfig } from '@travetto/base';
 import { CliCommandShape, cliTpl } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 import { Ignore, ValidationError } from '@travetto/schema';
+
+import { ModelStorageSupport } from '../src/service/storage';
 
 import { ModelCandidateUtil } from './bin/candidate';
 
@@ -14,10 +16,14 @@ export abstract class BaseModelCommand implements CliCommandShape {
   env?: string;
 
   @Ignore()
-  op: 'exportModel' | 'createModel';
+  op: keyof ModelStorageSupport;
+
+  envInit(): GlobalEnvConfig {
+    return { debug: false };
+  }
 
   async help(): Promise<string> {
-    const candidates = await ModelCandidateUtil.getCandidates(this.op);
+    const candidates = await ModelCandidateUtil.export(this.op);
     return cliTpl`   
 ${{ title: 'Providers' }}:
 ${candidates.providers.map(p => cliTpl`  * ${{ type: p }}`).join('\n')}
@@ -31,7 +37,7 @@ ${candidates.models.map(p => cliTpl`  * ${{ param: p }}`).join('\n')}
     ConsoleManager.setDebug(false);
     await RootRegistry.init();
 
-    const candidates = await ModelCandidateUtil.getCandidates(this.op);
+    const candidates = await ModelCandidateUtil.export(this.op);
     if (!candidates.providers.includes(provider)) {
       return {
         message: `${provider} is not a valid provider`,

@@ -1,5 +1,7 @@
 import type { MailTemplateEngine } from '@travetto/email';
 import { TypedObject } from '@travetto/base';
+import { DependencyRegistry } from '@travetto/di';
+import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
 
 import { EmailTemplateCompiler, Compilation } from '../../src/compiler';
 import { EmailTemplateResource } from '../../src/resource';
@@ -10,6 +12,13 @@ const VALID_FILE = (file: string): boolean => /[.](html|scss|css|png|jpe?g|gif|y
  *
  */
 export class TemplateManager {
+
+  static async createInstance(): Promise<TemplateManager> {
+    return new TemplateManager(
+      await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget),
+      new EmailTemplateCompiler(new EmailTemplateResource())
+    );
+  }
 
   compiler: EmailTemplateCompiler;
   engine: MailTemplateEngine;

@@ -7,8 +7,7 @@ import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
 
-type TestMode = 'single' | 'standard';
-type TestFormat = 'tap' | 'tap-streamed' | 'xunit' | 'event' | 'exec';
+import { TestFormat, TestMode } from './bin/types';
 
 /**
  * Launch test framework and execute tests

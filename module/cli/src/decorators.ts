@@ -15,7 +15,7 @@ const getMod = (cls: Class): string => RootIndex.getModuleFromSource(RootIndex.g
  * @augments `@travetto/schema:Schema`
  * @augments `@travetto/cli:CliCommand`
  */
-export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, addEnv?: boolean, runTarget?: boolean } = {}) {
+export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, addEnv?: boolean, runTarget?: boolean, hidden?: boolean } = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
     const meta = RootIndex.getFunctionMetadata(target);
     if (!meta || meta.abstract) {
@@ -33,6 +33,7 @@ export function CliCommand(cfg: { addModule?: boolean, addProfile?: boolean, add
       name,
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: target as ConcreteClass<T>,
+      hidden: cfg.hidden,
       preMain: (cmd: CliCommandShape & { env?: string, profile?: string[], module?: string }) => {
         if (cfg.addEnv) { defineGlobalEnv({ envName: cmd.env }); }
         if (cfg.addProfile) { defineGlobalEnv({ profiles: cmd.profile }); }

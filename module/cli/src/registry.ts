@@ -9,6 +9,7 @@ type CliCommandConfig = {
   module: string;
   cls: ConcreteClass<CliCommandShape>;
   runTarget?: boolean;
+  hidden?: boolean;
   preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 };
 
