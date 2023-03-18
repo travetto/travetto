@@ -11,3 +11,6 @@ model.s3:
 model.dynamodb:
   client:
     endpoint: http://localhost:8000
+
+model.firestore:
+  projectId: bob
