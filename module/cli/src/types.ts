@@ -1,7 +1,12 @@
-import { Class, GlobalEnvConfig } from '@travetto/base';
+import { Closeable, GlobalEnvConfig } from '@travetto/base';
 
 type OrProm<T> = T | Promise<T>;
 
+type RunResponse = { wait(): Promise<unknown> } | { on(event: 'close', cb: Function): unknown } | Closeable | void | undefined;
+
+/**
+ * Constrained version of Schema's Validation Error
+ */
 export type CliValidationError = {
   /**
    * The error message
@@ -17,6 +22,9 @@ export type CliValidationError = {
   kind: string;
 };
 
+/**
+ * Provides a basic error wrapper for internal try/catch instanceof
+ */
 export class CliValidationResultError extends Error {
   errors: CliValidationError[];
 
@@ -26,26 +34,14 @@ export class CliValidationResultError extends Error {
   }
 }
 
-export const CliCommandMetaⲐ = Symbol.for('@travetto/cli:command-meta');
-
 /**
- * Base command
+ * CLI Command Contract
  */
 export interface CliCommandShape {
-  /** Metadata */
-  [CliCommandMetaⲐ]?: {
-    name: string;
-    module: string;
-    cls: Class<CliCommandShape>;
-  };
-  /**
-   * Is this command something that should be run?
-   */
-  runTarget?(): boolean;
   /**
    * Action target of the command
    */
-  main(...args: unknown[]): OrProm<void>;
+  main(...args: unknown[]): OrProm<RunResponse>;
   /**
    * Setup environment before command runs
    */
@@ -54,10 +50,6 @@ export interface CliCommandShape {
    * Extra help
    */
   help?(): OrProm<string>;
-  /**
-   * Supports JSON IPC?
-   */
-  jsonIpc?(...args: unknown[]): Promise<unknown>;
   /**
    * Is the command active/eligible for usage
    */
@@ -76,6 +68,9 @@ export interface CliCommandShape {
   validate?(...args: unknown[]): OrProm<CliValidationError | CliValidationError[] | undefined>;
 }
 
+/**
+ * CLI Command argument/flag shape
+ */
 export type CliCommandInput = {
   name: string;
   description?: string;
@@ -87,6 +82,9 @@ export type CliCommandInput = {
   flagNames?: string[];
 };
 
+/**
+ * CLI Command schema shape
+ */
 export type CliCommandSchema = {
   name: string;
   title: string;

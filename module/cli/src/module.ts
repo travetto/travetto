@@ -4,6 +4,8 @@ import { IndexedModule, PackageUtil, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
 
 import { CliScmUtil } from './scm';
+import { CliValidationError } from './types';
+import { CliUtil } from './util';
 
 type ModuleRunConfig<T = ExecutionResult> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
@@ -24,6 +26,8 @@ const COLORS = TypedObject.keys(NAMED_COLORS)
   .map(([k]) => GlobalTerminal.colorer(k));
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
+
+const modError = (message: string): CliValidationError => ({ kind: 'required', path: 'module', message });
 
 /**
  * Simple utilities for understanding modules for CLI use cases
@@ -225,5 +229,22 @@ export class CliModuleUtil {
       }
     }
     return output;
+  }
+
+  /**
+   * Validate the module status for a given cli command
+   */
+  static async validateCommandModule(selfMod: string, { module: mod }: { module?: string }): Promise<CliValidationError | undefined> {
+    if (CliUtil.monoRoot && mod) {
+      if (!RootIndex.getModule(mod)) {
+        return modError(`${mod} is an unknown module`);
+      } else {
+        const mods = await this.findModules('all');
+        const graph = this.getDependencyGraph(mods);
+        if (selfMod !== mod && !graph[mod].includes(selfMod)) {
+          return modError(`${mod} does not have ${selfMod} as a dependency`);
+        }
+      }
+    }
   }
 }

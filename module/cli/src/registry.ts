@@ -2,11 +2,14 @@ import { Class, ConcreteClass } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 import { cliTpl } from './color';
-import { CliCommandShape, CliCommandMetaⲐ } from './types';
+import { CliCommandShape } from './types';
 
 type CliCommandConfig = {
   name: string;
+  module: string;
   cls: ConcreteClass<CliCommandShape>;
+  runTarget?: boolean;
+  preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 };
 
 const COMMAND_PACKAGE = [
@@ -75,19 +78,19 @@ ${{ identifier: install }}
   }
 
   /**
+   * Get config for a given instance
+   */
+  getConfig(cmd: CliCommandShape): CliCommandConfig {
+    return this.#get(this.#getClass(cmd))!;
+  }
+
+  /**
    * Get the name of a command from a given instance
    */
   getName(cmd: CliCommandShape, withModule = false): string | undefined {
-    const cls = this.#getClass(cmd);
-    const cfg = this.#get(cls);
-    if (cfg) {
-      let prefix: string = '';
-      if (withModule) {
-        prefix = RootIndex.getModuleFromSource(RootIndex.getFunctionMetadata(cfg.cls)!.source)!.name;
-        prefix = `${prefix}:`;
-      }
-      return `${prefix}${cfg.name}`;
-    }
+    const cfg = this.getConfig(cmd);
+    const prefix = withModule ? `${cfg.module}:` : '';
+    return `${prefix}${cfg.name}`;
   }
 
   /**
@@ -104,12 +107,6 @@ ${{ identifier: install }}
         if (cfg) {
           const inst = new cfg.cls();
           if (!inst.isActive || inst.isActive()) {
-            inst[CliCommandMetaⲐ] = {
-              name, cls: cfg.cls,
-              module: RootIndex.getModuleFromSource(
-                RootIndex.getFunctionMetadata(cfg.cls)!.source
-              )!.name
-            };
             return inst;
           }
         }
