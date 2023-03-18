@@ -9,7 +9,7 @@ import { BasePackCommand, PackOperationShape } from './pack.base';
 @CliCommand({ fields: ['module'] })
 export class PackZipCommand extends BasePackCommand {
 
-  initializeFlags(): void {
+  initialize(): void {
     this.output = CliUtil.monoRoot ? '<module>.zip' : `${CliUtil.getSimpleModuleName()}.zip`;
   }
 

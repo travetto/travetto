@@ -29,6 +29,7 @@ export class PackDockerCommand extends BasePackCommand {
     if (this.dockerFactory.startsWith('.')) {
       this.dockerFactory = RootIndex.getFromSource(path.resolve(this.dockerFactory))?.import ?? this.dockerFactory;
     }
+    this.dockerName = this.dockerName.replace('<module>', CliUtil.getSimpleModuleName(this.module ?? ''));
   }
 
   getOperations(): PackOperationShape<this>[] {
