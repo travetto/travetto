@@ -122,12 +122,16 @@ export class Compiler {
 
     if (this.#watch) {
       Log.info('Watch is ready');
-      for await (const { file } of CompilerWatcher.watch(this.#state)) {
-        const err = await emitter(file, true);
-        if (err) {
-          Log.info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
+      for await (const { file, action } of CompilerWatcher.watch(this.#state)) {
+        if (action !== 'delete') {
+          const err = await emitter(file, true);
+          if (err) {
+            Log.info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
+          } else {
+            Log.info(`Compiled ${file.split('node_modules/')[1]}`);
+          }
         } else {
-          Log.info(`Compiled ${file.split('node_modules/')[1]}`);
+          Log.info(`Removed ${file.split('node_modules/')[1]}`);
         }
       }
       if (!process.exitCode) {

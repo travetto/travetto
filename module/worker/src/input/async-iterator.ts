@@ -27,7 +27,7 @@ export class ManualAsyncIterator<X> implements AsyncIterator<X>, AsyncIterable<X
    * Wait for next event to fire
    */
   async next(): Promise<IteratorResult<X>> {
-    if (!this.#done && !this.#queue.length) {
+    while (!this.#done && !this.#queue.length) {
       await this.#ready;
       this.#ready = Util.resolvablePromise();
     }
