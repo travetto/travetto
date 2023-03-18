@@ -1,7 +1,8 @@
 import { Class, ConsoleManager } from '@travetto/base';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { CliCommandRegistry } from './registry';
 
-import { CliCommandInput, CliCommandSchema, CliCommandShape, CliValidationResultError, CliCommandMetaⲐ } from './types';
+import { CliCommandInput, CliCommandSchema, CliCommandShape, CliValidationResultError } from './types';
 
 function fieldToInput(x: FieldConfig): CliCommandInput {
   return ({
@@ -32,7 +33,8 @@ export class CliCommandSchemaUtil {
    * Get schema for a given command
    */
   static async getSchema(cmd: CliCommandShape): Promise<CliCommandSchema> {
-    const cls = cmd[CliCommandMetaⲐ]!.cls;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const cls = cmd.constructor as Class<CliCommandShape>;
 
     if (this.#schemas.has(cls)) {
       return this.#schemas.get(cls)!;
@@ -90,14 +92,12 @@ export class CliCommandSchemaUtil {
     }
 
     const fullSchema = SchemaRegistry.get(cls);
-    const meta = cmd[CliCommandMetaⲐ]!;
+    const { cls: _cls, preMain: _preMain, ...meta } = CliCommandRegistry.getConfig(cmd);
     const cfg: CliCommandSchema = {
+      ...meta,
       args: method,
       flags,
-      module: meta.module,
       title: fullSchema.title ?? cls.name,
-      name: meta.name,
-      runTarget: cmd.runTarget?.(),
       description: fullSchema.description ?? ''
     };
     this.#schemas.set(cls, cfg);
@@ -108,7 +108,8 @@ export class CliCommandSchemaUtil {
    * Produce the arguments into the final argument set
    */
   static async bindArgs(cmd: CliCommandShape, args: string[]): Promise<[known: unknown[], unknown: string[]]> {
-    const cls = cmd[CliCommandMetaⲐ]!.cls;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const cls = cmd.constructor as Class<CliCommandShape>;
 
     const restIdx = args.indexOf('--');
     const copy = [...args.slice(0, restIdx < 0 ? args.length : restIdx)];
@@ -198,7 +199,8 @@ export class CliCommandSchemaUtil {
       }
     }
 
-    const cls = cmd[CliCommandMetaⲐ]!.cls;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const cls = cmd.constructor as Class<CliCommandShape>;
     BindUtil.bindSchemaToObject(cls, cmd, template);
 
     return [...out, ...extra];
@@ -208,7 +210,8 @@ export class CliCommandSchemaUtil {
    * Validate command shape with the given arguments
    */
   static async validate(cmd: CliCommandShape, args: unknown[]): Promise<typeof cmd> {
-    const cls = cmd[CliCommandMetaⲐ]!.cls;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const cls = cmd.constructor as Class<CliCommandShape>;
 
     const validators = [
       (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),

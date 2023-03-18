@@ -1,31 +1,23 @@
 import { DependencyRegistry } from '@travetto/di';
-import { CliCommand } from '@travetto/cli';
-import { BaseRunCommand } from '@travetto/registry/support/base.run';
+import { CliRunCommand } from '@travetto/cli';
 
 import { RestApplication } from '../src/application/rest';
+import { ServerHandle } from '../src/types';
 
 /**
  * Run a rest server as an application
  */
-@CliCommand()
-export class RunRestCommand extends BaseRunCommand {
+@CliRunCommand({ needsModule: true })
+export class RunRestCommand {
 
   /** Port to run on */
   port?: number;
 
-  // Module is required
-  constructor() {
-    super(true);
-  }
-
-  envSet(): Record<string, string | number | boolean> {
+  envInit(): Record<string, string | number | boolean> {
     return this.port ? { REST_PORT: `${this.port}` } : {};
   }
 
-  main(): Promise<void> {
-    return this.run(async () => {
-      const app = await DependencyRegistry.getInstance(RestApplication);
-      return app.run();
-    });
+  main(): Promise<ServerHandle> {
+    return DependencyRegistry.runInstance(RestApplication);
   }
 }

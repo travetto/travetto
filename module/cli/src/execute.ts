@@ -2,10 +2,10 @@ import { appendFile, mkdir } from 'fs/promises';
 
 import { GlobalTerminal } from '@travetto/terminal';
 import { path } from '@travetto/manifest';
-import { ConsoleManager, defineGlobalEnv } from '@travetto/base';
+import { ConsoleManager, defineGlobalEnv, ShutdownManager } from '@travetto/base';
 
 import { HelpUtil } from './help';
-import { CliCommandMetaⲐ, CliCommandShape, CliValidationResultError } from './types';
+import { CliCommandShape, CliValidationResultError } from './types';
 import { CliCommandRegistry } from './registry';
 import { cliTpl } from './color';
 import { CliCommandSchemaUtil } from './schema';
@@ -14,6 +14,19 @@ import { CliCommandSchemaUtil } from './schema';
  * Execution manager
  */
 export class ExecutionManager {
+
+  static async #prepareRun(cmd: CliCommandShape): Promise<void> {
+    if (cmd.envInit) {
+      defineGlobalEnv({
+        debug: process.env.DEBUG || false,
+        ...await cmd.envInit(),
+      });
+      ConsoleManager.setDebugFromEnv();
+    }
+
+    const cfg = CliCommandRegistry.getConfig(cmd);
+    await cfg?.preMain?.(cmd);
+  }
 
   static async #bindAndValidateArgs(cmd: CliCommandShape, args: string[]): Promise<unknown[]> {
     await cmd.initialize?.();
@@ -25,9 +38,10 @@ export class ExecutionManager {
   }
 
   static #getAction(cmd: CliCommandShape, args: string[]): 'help' | 'ipc' | 'command' {
+    const cfg = CliCommandRegistry.getConfig(cmd);
     return args.find(a => /^(-h|--help)$/.test(a)) ?
       'help' :
-      (process.env.TRV_CLI_IPC && cmd.runTarget?.()) ? 'ipc' : 'command';
+      (process.env.TRV_CLI_IPC && cfg.runTarget) ? 'ipc' : 'command';
   }
 
   /**
@@ -43,9 +57,11 @@ export class ExecutionManager {
   static async ipc(cmd: CliCommandShape, args: string[]): Promise<void> {
     await this.#bindAndValidateArgs(cmd, args);
     const file = process.env.TRV_CLI_IPC!;
+    const cfg = CliCommandRegistry.getConfig(cmd);
     const payload = JSON.stringify({
       type: '@travetto/cli:run', data: {
-        name: cmd[CliCommandMetaⲐ]!.name,
+        name: cfg.name,
+        module: cfg.module,
         args: process.argv.slice(3)
       }
     });
@@ -58,13 +74,20 @@ export class ExecutionManager {
    */
   static async command(cmd: CliCommandShape, args: string[]): Promise<void> {
     const known = await this.#bindAndValidateArgs(cmd, args);
+    await this.#prepareRun(cmd);
+    const result = await cmd.main(...known);
 
-    if (cmd.envInit) {
-      defineGlobalEnv(await cmd.envInit());
-      ConsoleManager.setDebugFromEnv();
+    // Listen to result if non-empty
+    if (result !== undefined && result !== null) {
+      if ('close' in result) {
+        ShutdownManager.onShutdown(result, result); // Tie shutdown into app close
+      }
+      if ('wait' in result) {
+        await result.wait(); // Wait for close signal
+      } else if ('on' in result) {
+        await new Promise<void>(res => result.on('close', res)); // Wait for callback
+      }
     }
-
-    return await cmd.main(...known);
   }
 
   /**
