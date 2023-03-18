@@ -1,6 +1,5 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { Application } from '@travetto/app';
 import { Field, Schema } from '@travetto/schema';
 import { FileResourceProvider } from '@travetto/base';
 
@@ -16,6 +15,7 @@ import { SerializeInterceptor } from './src/interceptor/serialize';
 import { CookiesInterceptor, RestCookieConfig } from './src/interceptor/cookies';
 import { RestConfig } from './src/application/config';
 import { AsyncContextInterceptor } from './src/interceptor/context';
+import { CliCommand } from '@travetto/cli';
 
 const Request = d.codeLink('TravettoRequest', 'src/typings.d.ts', /interface TravettoRequest/);
 const Response = d.codeLink('TravettoResponse', 'src/typings.d.ts', /interface TravettoResponse/);
@@ -134,21 +134,21 @@ export const text = <>
 
   <c.Section title='Running an App'>
 
-    By default, the framework provides a default {Application} at {RestApplication} that will follow default behaviors, and spin up the REST server.
+    By default, the framework provides a default {CliCommand} for {RestApplication} that will follow default behaviors, and spin up the REST server.
 
     <c.Execution title='Standard application' cmd='trv' args={['run']} config={{
       cwd: './doc-exec'
     }} />
 
-    <c.SubSection title='Creating a Custom App'>
+    <c.SubSection title='Creating a Custom CLI Entry Point'>
 
-      To customize a REST server, you may need to construct an entry point using the {Application} decorator. This could look like:
+      To customize a REST server, you may need to construct an entry point using the {CliCommand} decorator. This could look like:
 
-      <c.Code title='Application entry point for Rest Applications' src='doc/custom-app.ts' />
+      <c.Code title='Application entry point for Rest Applications' src='doc/cli.run_rest_custom.ts' />
 
-      And using the pattern established in the {d.mod('App')} module, you would run your program using {d.command('npx trv run custom')}.
+      And using the pattern established in the {d.mod('Cli')} module, you would run your program using {d.command('npx trv run:rest:custom')}.
 
-      <c.Execution title='Custom application' cmd='trv' args={['run', 'custom']} config={{ cwd: './doc-exec' }} />
+      <c.Execution title='Custom application' cmd='trv' args={['run:rest:custom']} config={{ cwd: './doc-exec' }} />
     </c.SubSection>
   </c.Section>
 

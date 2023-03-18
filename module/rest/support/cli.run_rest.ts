@@ -7,7 +7,7 @@ import { ServerHandle } from '../src/types';
 /**
  * Run a rest server as an application
  */
-@CliCommand({ addModule: true })
+@CliCommand({ fields: ['module', 'env', 'profile'] })
 export class RunRestCommand {
 
   /** Port to run on */

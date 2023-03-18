@@ -14,13 +14,12 @@ type CliCommandConfig = {
 };
 
 const COMMAND_PACKAGE = [
-  [/^run$/, 'app', true],
-  [/^test$/, 'test', false],
+  [/^test(:watch)?$/, 'test', false],
   [/^service$/, 'command', true],
   [/^lint(:register)?$/, 'lint', true],
   [/^model:(install|export)$/, 'model', true],
   [/^openapi:(spec|client)$/, 'openapi', true],
-  [/^email:(compile)$/, 'email-template', false],
+  [/^email:(compile|editor)$/, 'email-template', false],
   [/^pack(:zip|:docker)?$/, 'pack', false],
 ] as const;
 

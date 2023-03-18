@@ -11,7 +11,7 @@ import { OpenApiService } from '../src/service';
 /**
  * CLI for outputting the open api spec to a local file
  */
-@CliCommand({ addModule: true })
+@CliCommand({ fields: ['module'] })
 export class OpenApiSpecCommand implements CliCommandShape {
 
   /** Output files */

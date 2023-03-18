@@ -12,7 +12,7 @@ function fieldToInput(x: FieldConfig): CliCommandInput {
     required: x.required?.active,
     choices: x.enum?.values,
     type: x.type === Boolean ? 'boolean' :
-      x.type === String ? 'string' :
+      x.type === String ? (x.specifier === 'file' ? 'file' : 'string') :
         x.type === Number ? 'number' :
           x.type === RegExp ? 'regex' : 'string',
     default: x.default,

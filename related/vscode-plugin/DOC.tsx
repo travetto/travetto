@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 import { Test, Suite } from '@travetto/test';
-import { Application } from '@travetto/app';
+import { CliCommand } from '@travetto/cli';
 
 export const text = <>
   <c.Header title='VS Code Plugin' />
@@ -11,7 +11,7 @@ export const text = <>
   The currently supported features are:
   <ul>
     <li>Real-time test evaluation and debugging</li>
-    <li>Application launching with parameters</li>
+    <li>Cli command launching with parameters</li>
     <li>Terminal integration for framework links</li>
     <li>Miscellaneous utilities</li>
   </ul>
@@ -47,34 +47,38 @@ export const text = <>
     </c.SubSection>
   </c.Section>
 
-  <c.Section title='Application Launching'>
+  <c.Section title='CLI Running'>
 
-    While using the {d.mod('App')}, a common pattern is to use {Application} annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated. <br />
+    While using the {d.mod('Cli')}, a common pattern is to use {CliCommand} annotations to define entry points into the application.  These entry points can take parameters, and if using the cli, you can invoke them with parameters, type checked and validated. <br />
 
-    The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.
+    The plugin exposes this functionality as a command, to allow you to debug these commands directly from the editor.
 
     <c.SubSection title='Running'>
 
       <c.Image title='Run Workflow' href='https://travetto.dev/assets/images/vscode-plugin/run-workflow.gif' />
 
-      Launching relies upon the command {d.input('Travetto: Run New Application')}.  This will show you a list of the available entry points in the application, with the parameters they support.  Selecting an application will take you through the parameter flow to select inputs, and once all parameters are selected, your application will launch.
+      Launching relies upon the command {d.input('Travetto: Run New Command')}.  This will show you a list of the available entry points in the project, with the parameters they support.  Selecting a command will take you through the parameter flow to select inputs, and once all parameters are selected, your command will launch.
 
-      After running and selecting a configuration for an application, you can now access those configurations via {d.input('Travetto: Run Recent Application')}.  This allows you to execute a recent run that you can invoke immediately without prompting for inputs. If you find yourself running the same application multiple times, you can also invoke {d.input('Travetto: Run Most Recent Application')} to bypass application selection overall.
+      After running and selecting a configuration for a command, you can now access those configurations via {d.input('Travetto: Run Recent Command')}.  This allows you to execute a recent run that you can invoke immediately without prompting for inputs. If you find yourself running the same application multiple times, you can also invoke {d.input('Travetto: Run Most Recent Command')} to bypass application selection overall.
     </c.SubSection>
     <c.SubSection title='Exporting and Customizing'>
 
       <c.Image title='Export Workflow' href='https://travetto.dev/assets/images/vscode-plugin/run-export-workflow.gif' />
 
-      If at any point in time, you wish to modify the launch configuration of any application, you can execute the command {d.input('Travetto: Export Application Launch')}, and it will provide the same options as launch.  The only difference is that instead of running the application when it's done, you will have a new launch config in your debug launch configs.  This option is now completely independent from the plugin and can be modified without issue.
+      If at any point in time, you wish to modify the launch configuration of any command, you can execute {d.input('Travetto: Export Command')}, and it will provide the same options as launch.  The only difference is that instead of running the command, you will have a new debug launch config.  This option is now completely independent from the plugin and can be modified without issue.
     </c.SubSection>
     <c.SubSection title='Commands'>
 
       <ul>
-        <li>{d.input('Travetto: Run New Application')} to launch a new application config</li>
-        <li>{d.input('Travetto: Run Recent Application')} to launch a previously configured application</li>
-        <li>{d.input('Travetto: Run Most Recent Application')} to launch the most recently run configured application</li>
-        <li>{d.input('Travetto: Export Application Launch')} to export an application config</li>
+        <li>{d.input('Travetto: Run New Command')} to launch a new command config</li>
+        <li>{d.input('Travetto: Run Recent Command')} to launch a previously configured command</li>
+        <li>{d.input('Travetto: Run Most Recent Command')} to launch the most recently run configured command</li>
+        <li>{d.input('Travetto: Export Command')} to export an command config</li>
       </ul>
+    </c.SubSection>
+
+    <c.SubSection title='Running from Command Line'>
+      When invoking commands from the terminal (within VSCode), the CLI will delegate the relevant commands to the VSCode plugin.  This allows for more customization of entry points, as well as ability to leverage aliases/scripts (e.g. {d.input('npm start')}) as a way of unifying the tooling.
     </c.SubSection>
   </c.Section>
 
@@ -115,7 +119,7 @@ export const text = <>
       <ul>
         <li>You should have the {d.library('Travetto')} framework installed, version 1.1.0 and higher.</li>
         <li>Tests require the {d.mod('Test')} module to be installed.</li>
-        <li>Application running requires the {d.mod('App')} module to be installed.</li>
+        <li>CLI command running requires the {d.mod('Cli')} module to be installed.</li>
       </ul>
     </c.SubSection>
   </c.Section>
