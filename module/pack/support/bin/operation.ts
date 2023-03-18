@@ -12,6 +12,9 @@ async function writeRawFile(file: string, contents: string, mode?: string): Prom
   await fs.writeFile(file, contents, { encoding: 'utf8', mode });
 }
 
+/**
+ * General pack operations
+ */
 export class PackOperation {
 
   static async * title(cfg: CommonPackConfig, title: string): AsyncIterable<string[]> {
@@ -118,6 +121,7 @@ export class PackOperation {
     const file = '.env.js';
     const env = {
       TRV_MANIFEST: `node_modules/${cfg.module}`,
+      TRV_MODULE: cfg.module,
       TRV_CLI_IPC: ''
     };
 

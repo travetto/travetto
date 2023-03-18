@@ -16,7 +16,8 @@ function fieldToInput(x: FieldConfig): CliCommandInput {
         x.type === Number ? 'number' :
           x.type === RegExp ? 'regex' : 'string',
     default: x.default,
-    flagNames: (x.aliases ?? []).slice(0)
+    flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),
+    envVars: (x.aliases ?? []).slice(0).filter(v => v.startsWith('env.')).map(v => v.replace('env.', ''))
   });
 }
 
@@ -162,15 +163,26 @@ export class CliCommandSchemaUtil {
       .flatMap(k => (k.startsWith('--') && k.includes('=')) ? k.split('=') : [k]);
     const extra = restIdx < 0 ? [] : args.slice(restIdx);
 
+    const template: Partial<T> = {};
+
     const flagMap = new Map<string, CliCommandInput>();
     for (const flag of schema.flags) {
       for (const name of flag.flagNames ?? []) {
         flagMap.set(name, flag);
       }
+      for (const envName of flag.envVars ?? []) {
+        if (envName in process.env) {
+          let val: string | string[] = process.env[envName]!;
+          if (flag.array) {
+            val = val.split(/\s*,\s*/g);
+          }
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          template[flag.name as keyof T] = val as T[keyof T];
+        }
+      }
     }
 
     const out = [];
-    const template: Partial<T> = {};
     for (let i = 0; i < copy.length; i += 1) {
       const arg = copy[i];
       const next = copy[i + 1];

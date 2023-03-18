@@ -25,11 +25,6 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
     }
 
     const name = getName(meta.source);
-
-    if (name.startsWith('run:') || cfg.runTarget) {
-      cfg = { runTarget: true, ...cfg };
-    }
-
     const addEnv = cfg.fields?.includes('env');
     const addProfile = cfg.fields?.includes('profile');
     const addModule = cfg.fields?.includes('module');
@@ -40,14 +35,13 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: target as ConcreteClass<T>,
       hidden: cfg.hidden,
+      runTarget: cfg.runTarget ?? name.startsWith('run:'),
       preMain: (cmd: CliCommandShape & { env?: string, profile?: string[], module?: string }) => {
         if (addEnv) { defineGlobalEnv({ envName: cmd.env }); }
         if (addProfile) { defineGlobalEnv({ profiles: cmd.profile }); }
         if (addEnv || addProfile) { ConsoleManager.setDebugFromEnv(); }
-        if (addModule) {
-          if (cmd.module && cmd.module !== RootIndex.mainModule.name) { // Mono-repo support
-            RootIndex.reinitForModule(cmd.module); // Reinit with specified module
-          }
+        if (addModule && cmd.module && cmd.module !== RootIndex.mainModule.name) { // Mono-repo support
+          RootIndex.reinitForModule(cmd.module); // Reinit with specified module
         }
       }
     });
@@ -72,7 +66,7 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
 
     if (addModule) {
       SchemaRegistry.registerPendingFieldConfig(target, 'module', String, {
-        aliases: ['m'],
+        aliases: ['m', 'env.TRV_MODULE'],
         description: 'Module to run for',
         required: { active: CliUtil.monoRoot }
       });
@@ -89,7 +83,7 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
 /**
  * Decorator to register a CLI command flag
  */
-export function CliFlag(cfg: { name?: string, short?: string, desc?: string, file?: boolean }) {
+export function CliFlag(cfg: { name?: string, short?: string, desc?: string, file?: boolean, envVars?: string[] }) {
   return function (target: ClassInstance, prop: string | symbol): void {
     const aliases: string[] = [];
     if (cfg.name) {
@@ -98,8 +92,13 @@ export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fil
     if (cfg.short) {
       aliases.push(cfg.short.startsWith('-') ? cfg.short : `-${cfg.short}`);
     }
+    if (cfg.envVars) {
+      aliases.push(...cfg.envVars.map(v => `env.${v}`));
+    }
     if (typeof prop === 'string') {
-      SchemaRegistry.registerPendingFieldFacet(target.constructor, prop, { aliases, description: cfg.desc, specifier: cfg.file ? 'file' : undefined });
+      SchemaRegistry.registerPendingFieldFacet(target.constructor, prop, {
+        aliases, description: cfg.desc, specifier: cfg.file ? 'file' : undefined
+      });
     }
   };
 }
