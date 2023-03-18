@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import { CliRunCommand } from '@travetto/cli';
+import { CliCommand } from '@travetto/cli';
 
 import { RestApplication } from '../src/application/rest';
 import { ServerHandle } from '../src/types';
@@ -7,7 +7,7 @@ import { ServerHandle } from '../src/types';
 /**
  * Run a rest server as an application
  */
-@CliRunCommand({ needsModule: true })
+@CliCommand({ addModule: true })
 export class RunRestCommand {
 
   /** Port to run on */
