@@ -1,6 +1,8 @@
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { RootIndex } from '@travetto/manifest';
-import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
+import { GlobalEnvConfig } from '@travetto/base';
+import { RootRegistry } from '@travetto/registry';
+import { DependencyRegistry } from '@travetto/di';
+import { OpenApiService } from '../__index__';
 
 /**
  * CLI for outputting the open api spec to a local file
@@ -19,11 +21,10 @@ export class OpenApiSpecCommand implements CliCommandShape {
   }
 
   async main(): Promise<void> {
-    const result = await ExecUtil.worker(
-      RootIndex.resolveFileImport('@travetto/cli/support/entry.cli.ts'),
-      ['main', '@travetto/openapi/support/bin/generate.ts'],
-      { env: { TRV_OPENAPI_OUTPUT: this.output, TRV_OPENAPI_PERSIST: '1' } }
-    ).message;
+    await RootRegistry.init();
+
+    const instance = await DependencyRegistry.getInstance(OpenApiService);
+    const result = instance.spec;
 
     if (this.output === '-' || !this.output) {
       console.log!(result);

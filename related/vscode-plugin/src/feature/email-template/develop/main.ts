@@ -31,7 +31,7 @@ export class EmailTemplateFeature extends BaseFeature {
   ) {
     super(module, command);
 
-    this.#server = new ProcessServer(this.log, 'main', [`${this.module}/support/bin/editor`])
+    this.#server = new ProcessServer(this.log, 'email:editor', [])
       .onStart(() => {
         this.#server.onMessage('changed', ev => this.#emitter.emit('render', ev));
         this.#server.onMessage('changed-failed', ev => this.log.info('Email template', ev));

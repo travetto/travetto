@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { path } from '@travetto/manifest';
-import { ConsoleManager, defineGlobalEnv, ErrorUtil, TimeUtil } from '@travetto/base';
+import { ConsoleManager, ErrorUtil, TimeUtil } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
 import { RunnerUtil } from '../execute/util';
@@ -88,10 +88,4 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
       concurrency: 1
     }).run();
   }
-}
-
-export async function main(): Promise<void> {
-  defineGlobalEnv({ test: true, set: { FORCE_COLOR: 0 } });
-  ConsoleManager.setDebugFromEnv();
-  await new TestChildWorker().activate();
 }

@@ -90,8 +90,11 @@ export class HelpUtil {
     for (const cmd of keys) {
       const inst = await CliCommandRegistry.getInstance(cmd);
       if (inst) {
-        const schema = await CliCommandSchemaUtil.getSchema(inst);
-        rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
+        const cfg = await CliCommandRegistry.getConfig(inst);
+        if (!cfg.hidden) {
+          const schema = await CliCommandSchemaUtil.getSchema(inst);
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
+        }
       }
     }
     return [

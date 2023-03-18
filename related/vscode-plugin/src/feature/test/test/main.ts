@@ -25,7 +25,7 @@ class TestRunnerFeature extends BaseFeature {
   constructor(module?: string, command?: string) {
     super(module, command);
     this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
-    this.#server = new ProcessServer(this.log, 'main', [`${this.module}/src/execute/watcher`, 'exec', 'false'])
+    this.#server = new ProcessServer(this.log, 'test:watcher', ['-f', 'exec', '-m', 'change'])
       .onStart(() => {
         this.#server.onMessage(['assertion', 'suite', 'test'], ev => {
           switch (ev.type) {
@@ -70,8 +70,8 @@ class TestRunnerFeature extends BaseFeature {
     await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
       useCli: true,
       name: 'Debug Travetto',
-      main: 'main',
-      args: [`${this.module}/support/bin/direct`, file.replace(`${Workspace.path}/`, ''), `${line}`],
+      main: 'test:direct',
+      args: [file.replace(`${Workspace.path}/`, ''), `${line}`],
       cliModule: file
     }));
   }
