@@ -261,65 +261,14 @@ Additionally, the <a class="module-link" href="https://github.com/travetto/trave
 
 <h2 id="running-an-app">Running an App</h2>
 
-By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21">@Application</a> at <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L21">RestApplication</a> that will follow default behaviors, and spin up the REST server.
+By default, the framework provides a default <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20">@CliCommand</a> for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19">RestApplication</a> that will follow default behaviors, and spin up the REST server.
 
   <figure class="terminal">
     <figcaption class="terminal">Standard application
 
 </figcaption>
-    <pre><code class="language-bash">$ trv run
+    <pre><code class="language-bash">$ trv run:rest
 
-Usage: trv run <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>application<span class="token operator">></span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-
-Options:
-  -e, <span class="token parameter variable">--env</span> <span class="token operator">&lt;</span>env<span class="token operator">></span>          Application environment
-  -p, <span class="token parameter variable">--profile</span> <span class="token operator">&lt;</span>profile<span class="token operator">></span>  Additional application profiles <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
-  -h, <span class="token parameter variable">--help</span>               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
-
-Available Applications:
-
-   ● custom
-     usage:  custom
-     target: @travetto/rest:doc/custom-app￮SampleApp
-
-     ———————————————————————————————————————————————————————————
-
-   ● rest Default rest application entrypoint
-     usage:  rest
-     target: @travetto/rest:src/application/rest￮RestApplication</code></pre>
-  </figure>
-
-<h3 id="creating-a-custom-app">Creating a Custom App</h3>
-
-To customize a REST server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21">@Application</a> decorator. This could look like:
-
-  <figure class="code">
-    <figcaption class="code">Application entry point for Rest Applications
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/custom-app.ts">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Application <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/app'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestApplication <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
-
-<span class="token decorator"><span class="token at operator">@</span><span class="token function">Application</span></span><span class="token punctuation">(</span><span class="token string">'custom'</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token keyword">extends</span> <span class="token class-name">RestApplication</span> <span class="token punctuation">{{'{'}}</span>
-
-  override <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token comment">// Configure server before running</span>
-    <span class="token keyword">return</span> <span class="token keyword">super</span><span class="token punctuation">.</span><span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
-  </figure>
-
-And using the pattern established in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/app" title="Application registration/management and run support.">Application</a> module, you would run your program using <code class="item command">npx trv run custom</code>.
-
-  <figure class="terminal">
-    <figcaption class="terminal">Custom application
-
-</figcaption>
-    <pre><code class="language-bash">$ trv run custom
-
-Running application <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'custom'</span>, target: <span class="token string">'@travetto/rest:doc/custom-app￮SampleApp'</span> <span class="token punctuation">{{'}'}}</span>
 Manifest <span class="token punctuation">{{'{'}}</span>
   info: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto-doc/rest'</span>,
@@ -360,6 +309,94 @@ Config <span class="token punctuation">{{'{'}}</span>
     RestGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
     RestLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
     RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+<h3 id="creating-a-custom-cli-entry-point">Creating a Custom CLI Entry Point</h3>
+
+To customize a REST server, you may need to construct an entry point using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20">@CliCommand</a> decorator. This could look like:
+
+  <figure class="code">
+    <figcaption class="code">Application entry point for Rest Applications
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/cli.run_rest_custom.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> GlobalEnvConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RootRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RestApplication<span class="token punctuation">,</span> RestSslConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token function">envInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> GlobalEnvConfig <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> envName<span class="token operator">:</span> <span class="token string">'prod'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'CUSTOM STARTUP'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">await</span> RootRegistry<span class="token punctuation">.</span><span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> ssl <span class="token operator">=</span> <span class="token keyword">await</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">getInstance</span><span class="token punctuation">(</span>RestSslConfig<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    ssl<span class="token punctuation">.</span>active <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+
+    <span class="token comment">// Configure server before running</span>
+    <span class="token keyword">return</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">runInstance</span><span class="token punctuation">(</span>RestApplication<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+And using the pattern established in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/cli" title="CLI infrastructure for Travetto framework">Command Line Interface</a> module, you would run your program using <code class="item command">npx trv run:rest:custom</code>.
+
+  <figure class="terminal">
+    <figcaption class="terminal">Custom application
+
+</figcaption>
+    <pre><code class="language-bash">$ trv run:rest:custom
+
+CUSTOM STARTUP
+Manifest <span class="token punctuation">{{'{'}}</span>
+  info: <span class="token punctuation">{{'{'}}</span>
+    name: <span class="token string">'@travetto-doc/rest'</span>,
+    main: undefined,
+    author: undefined,
+    license: undefined,
+    version: <span class="token string">'0.0.0'</span>,
+    framework: <span class="token string">'3.0.x'</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  env: <span class="token punctuation">{{'{'}}</span>
+    envName: <span class="token string">'prod'</span>,
+    debug: <span class="token string">'0'</span>,
+    prod: true,
+    test: false,
+    dynamic: false,
+    profiles: <span class="token punctuation">[</span> <span class="token string">'prod'</span> <span class="token punctuation">]</span>,
+    resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
+    nodeVersion: <span class="token string">'v18.x.x'</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+Config <span class="token punctuation">{{'{'}}</span>
+  sources: <span class="token punctuation">[</span> <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,
+  active: <span class="token punctuation">{{'{'}}</span>
+    RestAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+    RestAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+    RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+    RestConfig: <span class="token punctuation">{{'{'}}</span>
+      serve: true,
+      port: <span class="token number">3000</span>,
+      trustProxy: false,
+      hostname: <span class="token string">'localhost'</span>,
+      bindAddress: <span class="token string">'0.0.0.0'</span>,
+      baseUrl: <span class="token string">'http://localhost:3000'</span>,
+      defaultMessage: <span class="token boolean">true</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    RestCookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
+    RestCorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+    RestGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+    RestLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+    RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>

@@ -233,57 +233,12 @@ Per the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module supports typing requests and request bodies for run-time validation of requests.
 
 ## Running an App
-By default, the framework provides a default [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) at [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L21) that will follow default behaviors, and spin up the REST server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20) for [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19) that will follow default behaviors, and spin up the REST server.
 
 **Terminal: Standard application**
 ```bash
-$ trv run
+$ trv run:rest
 
-Usage: trv run [options] <application> [args...]
-
-Options:
-  -e, --env <env>          Application environment
-  -p, --profile <profile>  Additional application profiles (default: [])
-  -h, --help               display help for command
-
-Available Applications:
-
-   ● custom 
-     usage:  custom 
-     target: @travetto/rest:doc/custom-app￮SampleApp
-
-     ———————————————————————————————————————————————————————————
-
-   ● rest Default rest application entrypoint
-     usage:  rest 
-     target: @travetto/rest:src/application/rest￮RestApplication
-```
-
-### Creating a Custom App
-To customize a REST server, you may need to construct an entry point using the [@Application](https://github.com/travetto/travetto/tree/main/module/app/src/decorator.ts#L21) decorator. This could look like:
-
-**Code: Application entry point for Rest Applications**
-```typescript
-import { Application } from '@travetto/app';
-import { RestApplication } from '@travetto/rest';
-
-@Application('custom')
-export class SampleApp extends RestApplication {
-
-  override run() {
-    // Configure server before running
-    return super.run();
-  }
-}
-```
-
-And using the pattern established in the [Application](https://github.com/travetto/travetto/tree/main/module/app#readme "Application registration/management and run support.") module, you would run your program using `npx trv run custom`.
-
-**Terminal: Custom application**
-```bash
-$ trv run custom
-
-Running application { name: 'custom', target: '@travetto/rest:doc/custom-app￮SampleApp' }
 Manifest {
   info: {
     name: '@travetto-doc/rest',
@@ -324,6 +279,88 @@ Config {
     RestGetCacheConfig: {},
     RestLogRoutesConfig: {},
     RestSslConfig: { active: false }
+  }
+}
+Listening { port: 3000 }
+```
+
+### Creating a Custom CLI Entry Point
+To customize a REST server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20) decorator. This could look like:
+
+**Code: Application entry point for Rest Applications**
+```typescript
+import { GlobalEnvConfig } from '@travetto/base';
+import { CliCommand } from '@travetto/cli';
+import { DependencyRegistry } from '@travetto/di';
+import { RootRegistry } from '@travetto/registry';
+import { RestApplication, RestSslConfig } from '@travetto/rest';
+
+@CliCommand()
+export class SampleApp {
+
+  envInit(): GlobalEnvConfig {
+    return { envName: 'prod' };
+  }
+
+  async main() {
+    console.log('CUSTOM STARTUP');
+    await RootRegistry.init();
+    const ssl = await DependencyRegistry.getInstance(RestSslConfig);
+    ssl.active = true;
+
+    // Configure server before running
+    return DependencyRegistry.runInstance(RestApplication);
+  }
+}
+```
+
+And using the pattern established in the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") module, you would run your program using `npx trv run:rest:custom`.
+
+**Terminal: Custom application**
+```bash
+$ trv run:rest:custom
+
+CUSTOM STARTUP
+Manifest {
+  info: {
+    name: '@travetto-doc/rest',
+    main: undefined,
+    author: undefined,
+    license: undefined,
+    version: '0.0.0',
+    framework: '3.0.x'
+  },
+  env: {
+    envName: 'prod',
+    debug: '0',
+    prod: true,
+    test: false,
+    dynamic: false,
+    profiles: [ 'prod' ],
+    resourcePaths: [],
+    nodeVersion: 'v18.x.x'
+  }
+}
+Config {
+  sources: [ 'override.3 - memory://override' ],
+  active: {
+    RestAcceptsConfig: { types: {} },
+    RestAsyncContextConfig: {},
+    RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
+    RestConfig: {
+      serve: true,
+      port: 3000,
+      trustProxy: false,
+      hostname: 'localhost',
+      bindAddress: '0.0.0.0',
+      baseUrl: 'http://localhost:3000',
+      defaultMessage: true
+    },
+    RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+    RestCorsConfig: {},
+    RestGetCacheConfig: {},
+    RestLogRoutesConfig: {},
+    RestSslConfig: { active: true }
   }
 }
 Listening { port: 3000 }

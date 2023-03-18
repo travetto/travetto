@@ -30,10 +30,13 @@ export class CliServiceCommand implements CliCommandShape {
     }
   }
 
-  async help(): Promise<string> {
+  async help(): Promise<string[]> {
     const all = await this.#getServices([]);
-    const list = all.map(x => cliTpl` * ${{ identifier: x.name }}@${{ type: x.version }}`);
-    return cliTpl`${{ title: 'Available Services' }}\n${'-'.repeat(20)}\n${list.join('\n')}\n`;
+    return [
+      cliTpl`${{ title: 'Available Services' }}`,
+      '-'.repeat(20),
+      ...all.map(x => cliTpl` * ${{ identifier: x.name }}@${{ type: x.version }}`)
+    ];
   }
 
   async main(action: ServiceAction, services: string[] = []): Promise<void> {

@@ -30,12 +30,6 @@ export class DocAngularCommand {
       target = target.replace(root, '').split('/').pop()!;
     }
 
-    // Restart services
-    if (!target || target === 'todo-app') {
-      console.log!('Restarting Services');
-      await (ExecUtil.spawn('trv', ['service', 'restart'], { stdio: 'inherit' }).result);
-    }
-
     const mods = new Set((await CliModuleUtil.findModules('all'))
       .filter(x => !target || x.sourcePath === path.resolve(root, target))
       .filter(x => (x.files.doc ?? []).some(f => /DOC[.]tsx?$/.test(f.sourceFile))));

@@ -49,7 +49,7 @@ export interface CliCommandShape {
   /**
    * Extra help
    */
-  help?(): OrProm<string>;
+  help?(): OrProm<string[]>;
   /**
    * Is the command active/eligible for usage
    */

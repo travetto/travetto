@@ -381,11 +381,20 @@ The module provides the ability to generate an export of the model structure fro
 ```bash
 $ trv model:export --help
 
-Usage:  model:export [options] [provider] [models...]
+Usage: model:export [options] <provider:string> <models...:string>
 
 Options:
-  -e, --env <env>  Application environment
-  -h, --help       display help for command
+  -e, --env <string>     Application environment
+  -m, --module <string>  Module to run for
+  -h, --help             display help for command
+
+Providers
+--------------------
+  * SQL
+
+Models
+--------------------
+  * samplemodel
 ```
 
 ## CLI - model:install
@@ -395,9 +404,19 @@ The module provides the ability to install all the various [@Model](https://gith
 ```bash
 $ trv model:install --help
 
-Usage:  model:install [options] [provider] [models...]
+Usage: model:install [options] <provider:string> <models...:string>
 
 Options:
-  -e, --env <env>  Application environment
-  -h, --help       display help for command
+  -e, --env <string>     Application environment
+  -m, --module <string>  Module to run for
+  -h, --help             display help for command
+
+Providers
+--------------------
+  * Memory
+  * SQL
+
+Models
+--------------------
+  * samplemodel
 ```

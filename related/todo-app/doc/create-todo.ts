@@ -1,9 +1,9 @@
 import fetch from 'node-fetch';
 
-export async function main() {
+export async function main(key: string) {
   const res = await fetch('http://localhost:3000/todo', {
     method: 'POST',
-    body: JSON.stringify({ text: 'New Todo' }),
+    body: JSON.stringify({ text: `New Todo - ${key}` }),
     headers: {
       'Content-Type': 'application/json'
     }

@@ -200,7 +200,6 @@ export function watchFolders(
           [ "src/types.ts", "ts", 1868155200000 ],
           [ "src/typings.d.ts", "typings", 1868155200000 ],
           [ "src/util.ts", "ts", 1868155200000 ],
-          [ "src/watch.ts", "ts", 1868155200000 ],
           [ "src/watch.ts", "ts", 1868155200000 ]
         ],
         "bin": [

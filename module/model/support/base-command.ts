@@ -22,17 +22,19 @@ export abstract class BaseModelCommand implements CliCommandShape {
     return { debug: false };
   }
 
-  async help(): Promise<string> {
+  async help(): Promise<string[]> {
     await RootRegistry.init();
 
     const candidates = await ModelCandidateUtil.export(this.op);
-    return cliTpl`   
-${{ title: 'Providers' }}:
-${candidates.providers.map(p => cliTpl`  * ${{ type: p }}`).join('\n')}
-
-${{ title: 'Models' }}:
-${candidates.models.map(p => cliTpl`  * ${{ param: p }}`).join('\n')}
-`;
+    return [
+      cliTpl`${{ title: 'Providers' }}`,
+      '-'.repeat(20),
+      ...candidates.providers.map(p => cliTpl`  * ${{ type: p }}`),
+      '',
+      cliTpl`${{ title: 'Models' }}`,
+      '-'.repeat(20),
+      ...candidates.models.map(p => cliTpl`  * ${{ param: p }}`)
+    ];
   }
 
   async validate(provider: string, models: string[]): Promise<ValidationError | undefined> {

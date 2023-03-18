@@ -63,7 +63,7 @@ The module provides [Command Line Interface](https://github.com/travetto/travett
 ```bash
 $ trv email:compile -h
 
-Usage:  email:compile [options]
+Usage: email:compile [options]
 
 Options:
   -w, --watch  Compile in watch mode

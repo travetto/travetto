@@ -24,16 +24,14 @@ The versioning operation will find all the changed modules (and the modules that
     <figcaption class="terminal">Version execution
 
 </figcaption>
-    <pre><code class="language-bash">$ trv repo:version
+    <pre><code class="language-bash">$ trv repo:version <span class="token parameter variable">-h</span>
 
-Please specify a level to <span class="token builtin class-name">continue</span>
-
-Usage: trv repo:version <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>level<span class="token operator">></span> <span class="token punctuation">[</span>prefix<span class="token punctuation">]</span>
+Usage: repo:version <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>level:patch<span class="token operator">|</span>major<span class="token operator">|</span>minor<span class="token operator">|</span>prerelease<span class="token operator">></span> <span class="token punctuation">[</span>prefix:string<span class="token punctuation">]</span>
 
 Options:
-  -c, --no-changed  Disables: Only version changed modules
-  -f, <span class="token parameter variable">--force</span>       Force operation, even <span class="token keyword">in</span> a dirty workspace
-  -h, <span class="token parameter variable">--help</span>        display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  --changed, --no-changed  Only version changed modules <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -f, <span class="token parameter variable">--force</span>              Force operation, even <span class="token keyword">in</span> a dirty workspace <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:
@@ -56,7 +54,7 @@ Author: Travetto Framework <span class="token operator">&lt;</span>travetto.fram
 Date:   Thu Feb <span class="token number">23</span> <span class="token number">17</span>:51:37 <span class="token number">2023</span> <span class="token parameter variable">-0500</span>
 Date:   Thu Feb <span class="token number">23</span> <span class="token number">17</span>:51:37 <span class="token number">2023</span> <span class="token parameter variable">-0500</span>
 
-    Publish @travetto/app,@travetto/asset,@travetto/asset-rest,@travetto/auth,@travetto/auth-model,@travetto/auth-rest,@travetto/auth-rest-context,@travetto/auth-rest-jwt,@travetto/auth-rest-passport,@travetto/auth-rest-session,<span class="token punctuation">..</span>.</code></pre>
+    Publish @travetto/asset,@travetto/asset-rest,@travetto/auth,@travetto/auth-model,@travetto/auth-rest,@travetto/auth-rest-context,@travetto/auth-rest-jwt,@travetto/auth-rest-passport,@travetto/auth-rest-session,<span class="token punctuation">..</span>.</code></pre>
   </figure>
 
 <h2 id="cli-publish">CLI - Publish</h2>
@@ -69,11 +67,11 @@ The publish functionality is relatively naive, but consistent.  The code will lo
 </figcaption>
     <pre><code class="language-bash">$ trv repo:publish <span class="token parameter variable">-h</span>
 
-Usage:  repo:publish <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+Usage: repo:publish <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
-  -d, --no-dry-run  Disables: Dry Run?
-  -h, <span class="token parameter variable">--help</span>        display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  --dry-run, --no-dry-run  Dry Run? <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 By default the tool will execute a dry run only, and requires passing a flag to disable the dry run.
@@ -82,7 +80,7 @@ By default the tool will execute a dry run only, and requires passing a flag to 
     <figcaption class="terminal">Publishing changes
 
 </figcaption>
-    <pre><code class="language-bash">npx trv repo:publish <span class="token parameter variable">-d</span></code></pre>
+    <pre><code class="language-bash">npx trv repo:publish --no-dry-run</code></pre>
   </figure>
 
 If no modules are currently changed, then the command will indicate there is no work to do, and exit gracefully.

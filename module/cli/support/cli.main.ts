@@ -7,7 +7,7 @@ import { path, RootIndex } from '@travetto/manifest';
 /**
  * Allows for running of main entry points
  */
-@CliCommand()
+@CliCommand({ hidden: true })
 export class MainCommand implements CliCommandShape {
 
   #unknownArgs?: string[];

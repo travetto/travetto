@@ -4,7 +4,7 @@ import { CliCommandRegistry, CliCommandSchema, CliCommandSchemaUtil, CliValidati
 /**
  * Generates the schema for all CLI operations
  */
-@CliCommand()
+@CliCommand({ hidden: true })
 export class CliSchemaCommand {
 
   async #getSchema(name: string): Promise<CliCommandSchema> {
