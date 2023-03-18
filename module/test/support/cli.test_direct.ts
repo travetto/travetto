@@ -14,7 +14,7 @@ export class TestDirectCommand {
     return { test: true };
   }
 
-  main(...args: string[]): Promise<void> {
-    return runTests({ args, format: this.format, mode: 'single', concurrency: 1 });
+  main(file: string, args: string[]): Promise<void> {
+    return runTests({ args: [file, ...args], format: this.format, mode: 'single', concurrency: 1 });
   }
 }
