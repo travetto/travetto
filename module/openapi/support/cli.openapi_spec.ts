@@ -1,23 +1,24 @@
+import fs from 'fs/promises';
+
 import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { GlobalEnvConfig } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
-import { OpenApiService } from '../__index__';
+import { path } from '@travetto/manifest';
+
+import { OpenApiService } from '../src/service';
 
 /**
  * CLI for outputting the open api spec to a local file
  */
-@CliCommand()
+@CliCommand({ addModule: true })
 export class OpenApiSpecCommand implements CliCommandShape {
 
   /** Output files */
-  output = './openapi.yml';
+  output?: string;
 
   envInit(): GlobalEnvConfig {
-    return {
-      debug: false,
-      set: { API_SPEC_OUTPUT: this.output }
-    };
+    return { debug: false };
   }
 
   async main(): Promise<void> {
@@ -27,7 +28,10 @@ export class OpenApiSpecCommand implements CliCommandShape {
     const result = instance.spec;
 
     if (this.output === '-' || !this.output) {
-      console.log!(result);
+      console.log!(JSON.stringify(result, null, 2));
+    } else {
+      await fs.mkdir(path.dirname(this.output), { recursive: true });
+      await fs.writeFile(this.output, JSON.stringify(result, null, 2), 'utf8');
     }
   }
 }

@@ -1,10 +1,9 @@
-import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/src/model/OpenApi';
+import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
 
-import { Config, EnvVar } from '@travetto/config';
+import { Config } from '@travetto/config';
 import { path, RootIndex } from '@travetto/manifest';
 import { GlobalEnv } from '@travetto/base';
 import { Required } from '@travetto/schema';
-
 
 /**
  * API Information, infers as much as possible from the package.json
@@ -57,12 +56,10 @@ export class ApiSpecConfig {
   /**
    * Where to output file to
    */
-  @EnvVar('TRV_OPENAPI_OUTPUT')
   output: string = 'openapi.yml';
   /**
    * Should file be generated at runtime
    */
-  @EnvVar('TRV_OPENAPI_PERSIST')
   persist?: boolean;
   /**
    * Skip emitting all routes

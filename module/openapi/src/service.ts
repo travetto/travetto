@@ -65,7 +65,7 @@ export class OpenApiService {
         ...new SpecGenerator().generate(this.apiSpecConfig)
       };
     }
-    return this._spec;
+    return this._spec!;
   }
 
   /**
