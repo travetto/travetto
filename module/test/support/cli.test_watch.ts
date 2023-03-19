@@ -1,7 +1,6 @@
 import { GlobalEnvConfig } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
-import { TestWatcher } from '../src/execute/watcher';
 import { TestFormat } from './bin/types';
 
 /**
@@ -24,6 +23,7 @@ export class TestWatcherCommand {
     }
 
     try {
+      const { TestWatcher } = await import('../src/execute/watcher.js');
       console.log('Starting');
       await TestWatcher.watch(this.format, this.mode === 'all');
       console.log('Done');

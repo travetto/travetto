@@ -6,8 +6,6 @@ import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { path } from '@travetto/manifest';
 
-import { OpenApiService } from '../src/service';
-
 /**
  * CLI for outputting the open api spec to a local file
  */
@@ -22,6 +20,8 @@ export class OpenApiSpecCommand implements CliCommandShape {
   }
 
   async main(): Promise<void> {
+    const { OpenApiService } = await import('../src/service.js');
+
     await RootRegistry.init();
 
     const instance = await DependencyRegistry.getInstance(OpenApiService);

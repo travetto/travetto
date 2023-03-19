@@ -3,7 +3,7 @@ import { TypedObject } from '@travetto/base';
 import { DependencyRegistry } from '@travetto/di';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
 
-import { EmailTemplateCompiler, Compilation } from '../../src/compiler';
+import type { EmailTemplateCompiler, Compilation } from '../../src/compiler';
 import { EmailTemplateResource } from '../../src/resource';
 
 const VALID_FILE = (file: string): boolean => /[.](html|scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
@@ -14,9 +14,11 @@ const VALID_FILE = (file: string): boolean => /[.](html|scss|css|png|jpe?g|gif|y
 export class TemplateManager {
 
   static async createInstance(): Promise<TemplateManager> {
+    const { EmailTemplateCompiler: Compiler } = await import('../../src/compiler.js');
+
     return new TemplateManager(
       await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget),
-      new EmailTemplateCompiler(new EmailTemplateResource())
+      new Compiler(new EmailTemplateResource())
     );
   }
 
@@ -70,6 +72,8 @@ export class TemplateManager {
    * Watch compilation
    */
   async * watchCompile(): AsyncIterable<string> {
+    const { EmailTemplateResource: Res } = await import('../../src/resource.js');
+
     const stream = this.resources.watchFiles();
     for await (const { file, action } of stream) {
       if (action === 'delete' || !VALID_FILE(file)) {
@@ -77,7 +81,7 @@ export class TemplateManager {
       }
 
       try {
-        const rel = file.replace(EmailTemplateResource.PATH_PREFIX, '');
+        const rel = file.replace(Res.PATH_PREFIX, '');
         console.log(`Contents ${action}`, { file, rel });
         if (this.resources.isTemplateFile(rel)) {
           await this.compiler.compile(rel, true);

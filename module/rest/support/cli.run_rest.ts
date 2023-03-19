@@ -1,7 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand } from '@travetto/cli';
-
-import { RestApplication } from '../src/application/rest';
 import { ServerHandle } from '../src/types';
 
 /**
@@ -17,7 +15,8 @@ export class RunRestCommand {
     return this.port ? { REST_PORT: `${this.port}` } : {};
   }
 
-  main(): Promise<ServerHandle> {
+  async main(): Promise<ServerHandle> {
+    const { RestApplication } = await import('../src/application/rest.js');
     return DependencyRegistry.runInstance(RestApplication);
   }
 }

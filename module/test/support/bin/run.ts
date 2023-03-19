@@ -1,8 +1,5 @@
 import { ShutdownManager, TimeUtil } from '@travetto/base';
 
-import { RunnerUtil } from '../../src/execute/util';
-import { Runner } from '../../src/execute/runner';
-
 import type { RunState } from '../../src/execute/types';
 
 declare global {
@@ -19,6 +16,9 @@ declare global {
  * @param opts
  */
 export async function runTests(opts: RunState): Promise<void> {
+  const { RunnerUtil } = await import('../../src/execute/util.js');
+  const { Runner } = await import('../../src/execute/runner.js');
+
   RunnerUtil.registerCleanup('runner');
 
   if (process.env.TRV_TEST_DELAY) {
