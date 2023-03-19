@@ -74,7 +74,7 @@ export interface CliCommandShape {
 export type CliCommandInput = {
   name: string;
   description?: string;
-  type: 'string' | 'file' | 'number' | 'boolean' | 'regex';
+  type: 'string' | 'file' | 'number' | 'boolean' | 'date' | 'regex';
   choices?: unknown[];
   required?: boolean;
   array?: boolean;

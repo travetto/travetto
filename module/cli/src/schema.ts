@@ -11,10 +11,11 @@ function fieldToInput(x: FieldConfig): CliCommandInput {
     array: x.array,
     required: x.required?.active,
     choices: x.enum?.values,
-    type: x.type === Boolean ? 'boolean' :
-      x.type === String ? (x.specifier === 'file' ? 'file' : 'string') :
-        x.type === Number ? 'number' :
-          x.type === RegExp ? 'regex' : 'string',
+    type: x.type === Date ? 'date' :
+      x.type === Boolean ? 'boolean' :
+        x.type === String ? (x.specifier === 'file' ? 'file' : 'string') :
+          x.type === Number ? 'number' :
+            x.type === RegExp ? 'regex' : 'string',
     default: x.default,
     flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),
     envVars: (x.aliases ?? []).slice(0).filter(v => v.startsWith('env.')).map(v => v.replace('env.', ''))

@@ -13,11 +13,7 @@ npm install @travetto/cli
 yarn add @travetto/cli
 ```
 
-The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution. 
-
-As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with `cli.`.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.
-
-## General
+The cli module represents the primary entry point for execution within the framework. One of the main goals for this module is extensibility, as adding new entry points is meant to be trivial. The framework leverages this module for exposing all executable tools and entry points.  To see a high level listing of all supported commands, invoke `trv --help`
 
 **Terminal: General Usage**
 ```bash
@@ -25,68 +21,392 @@ $ trv --help
 
 Usage:  [options] [command]
 
-Options:
-  -V, --version                  output the version number
-  -h, --help                     display help for command
-
 Commands:
-  echo [options] [args...]
-  main <fileOrImport> [args...]
-  help [command]                 display help for command
+  doc            Command line support for generating module docs.
+  doc:angular    Generate documentation into the angular webapp under related/travetto.github.io
+  doc:mapping    Generate module mapping for @travetto/doc
+  email:compile  CLI Entry point for running the email server
+  email:editor   The email editor compilation service and output serving
+  exec           Repo execution
+  lint           Command line support for linting
+  lint:register  Writes the lint configuration file
+  list           Allows for listing of modules
+  model:export   Exports model schemas
+  model:install  Installing models
+  openapi:client CLI for generating the cli client
+  openapi:spec   CLI for outputting the open api spec to a local file
+  pack           Standard pack support
+  pack:docker    Standard docker support for pack
+  pack:lambda    Standard lambda support for pack
+  pack:zip       Standard zip support for pack
+  repo:publish   Publish all pending modules
+  repo:version   Version all changed dependencies
+  run:double     Doubles a number
+  run:rest       Run a rest server as an application
+  scaffold       Command to run scaffolding
+  service        Allows for running services
+  test           Launch test framework and execute tests
+  test:watch     Invoke the test watcher
+  version-sync   Enforces all packages to write out their versions and dependencies
 ```
 
-This will show all the available options/choices that are exposed given the currently installed modules.
+This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 
 
-## Extending
-Extending the `cli` is fairly straightforward.  It is built upon [commander](https://www.npmjs.com/package/commander), with a model that is extensible:
+This module also has a tight integration with the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin), allowing the editing experience to benefit from the commands defined. The most commonly used commands will be the ones packaged with the framework, but its also very easy to create new commands.  With the correct configuration, these commands will also be exposed within VSCode.
 
-**Code: Echo Command**
+At it's heart, a cli command is the contract defined by what flags, and what arguments the command supports. Within the framework this requires three criteria to be met:
+   *  The file must be located in the `support/` folder, and have a name that matches `cli.*.ts`
+   *  The file must be a class that has a main method
+   *  The class must use the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20) decorator
+
+**Code: Basic Command**
 ```typescript
 import { CliCommand } from '@travetto/cli';
 
-/**
- * `npx trv echo`
- *
- * Allows for cleaning of the cache dire
- */
-export class CliEchoCommand extends CliCommand {
-  name = 'echo';
-
-  getOptions() {
-    return { uppercase: this.boolOption({ desc: 'Upper case' }) };
-  }
-
-  getArgs() {
-    return '[args...]';
-  }
-
-  async action(args: string[]) {
-    if (this.cmd.uppercase) {
-      args = args.map(x => x.toUpperCase());
-    }
-    console.log!(args);
+@CliCommand()
+export class BasicCommand {
+  main() {
+    console.log('Hello');
   }
 }
 ```
 
-With the corresponding output:
-
-**Terminal: Echo Command Help**
+**Terminal: Basic Command Help**
 ```bash
-$ trv echo --help
+$ trv basic -h
 
-Usage:  echo [options] [args...]
+Usage: doc/cli.basic [options]
 
 Options:
-  -u, --uppercase  Upper case
-  -h, --help       display help for command
+  -h, --help  display help for command
 ```
 
-And actually using it:
+## Command Naming
+The file name `support/cli.<name>.ts` has a direct mapping to the cli command name.   This hard mapping allows for the framework to be able to know which file to invoke without needing to load all command-related files. 
 
-**Terminal: Echo Command Run**
+Examples of mappings:
+   *  `cli.test.ts` maps to `test`
+   *  `cli.pack_docker.ts` maps to `pack:docker`
+   *  `cli.email_template.ts` maps to `email:template`
+The pattern is that underscores(_) translate to colons (:), and the `cli.` prefix, and `.ts` suffix are dropped.
+
+## Binding Flags
+[@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20) is a wrapper for [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14), and so every class that uses the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20) decorator is now a full [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) class. The fields of the class represent the flags that are available to the command.
+
+**Code: Basic Command with Flag**
+```typescript
+import { CliCommand } from '@travetto/cli';
+
+@CliCommand()
+export class BasicCommand {
+
+  loud?: boolean;
+
+  main() {
+    console.log(this.loud ? 'HELLO' : 'Hello');
+  }
+}
+```
+
+**Terminal: Basic Command with Flag Help**
 ```bash
-$ trv echo -u bOb rOb DRoP
+$ trv basic:flag -h
 
-[ 'BOB', 'ROB', 'DROP' ]
+Usage: doc/cli.basic:flag [options]
+
+Options:
+  -l, --loud
+  -h, --help  display help for command
 ```
+
+As you can see the command now has the support of a basic boolean flag to determine if the response should be loud or not.  The default value here is undefined/false, and so is an opt-in experience.
+
+**Terminal: Basic Command with Loud Flag**
+```bash
+$ trv basic:flag --loud
+
+HELLO
+```
+
+The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20) supports the following data types for flags:
+   *  Boolean values
+   *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L179), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L185), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L173), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124) decorators help provide additional validation.
+   *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L106) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L85) provide additional constraints
+   *  Date values. The [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124) decorators help provide additional validation.
+   *  String lists. Same as String, but allowing multiple values.
+   *  Numeric lists. Same as Number, but allowing multiple values.
+
+## Binding Arguments
+The `main()` method is the entrypoint for the command, represents a series of parameters. Some will be required, some may be optional.  The arguments support all types supported by the flags, and decorators can be provided using the decorators inline on parameters.     Optional arguments in the method, will be optional at run time, and filled with the provided default values.
+
+**Code: Basic Command with Arg**
+```typescript
+import { CliCommand } from '@travetto/cli';
+import { Max, Min } from '@travetto/schema';
+
+@CliCommand()
+export class BasicCommand {
+
+  main(@Min(1) @Max(10) volume: number = 1) {
+    console.log(volume > 7 ? 'HELLO' : 'Hello');
+  }
+}
+```
+
+**Terminal: Basic Command**
+```bash
+$ trv basic:arg -h
+
+Usage: doc/cli.basic:arg [options] [volume:number]
+
+Options:
+  -h, --help  display help for command
+```
+
+**Terminal: Basic Command with Invalid Loud Arg**
+```bash
+$ trv basic:arg 20
+
+Execution failed:
+ * volume is bigger than (10). [1]
+
+Usage: doc/cli.basic:arg [options] [volume:number]
+
+Options:
+  -h, --help  display help for command
+```
+
+**Terminal: Basic Command with Loud Arg > 7**
+```bash
+$ trv basic:arg 8
+
+HELLO
+```
+
+**Terminal: Basic Command without Arg**
+```bash
+$ trv basic:arg
+
+Hello
+```
+
+Additionally, if you provide a field as an array, it will collect all valid values (excludes flags, and any arguments past a `--`).
+
+**Code: Basic Command with Arg List**
+```typescript
+import { CliCommand } from '@travetto/cli';
+import { Max, Min } from '@travetto/schema';
+
+@CliCommand()
+export class BasicCommand {
+
+  reverse?: boolean;
+
+  main(@Min(1) @Max(10) volumes: number[]) {
+    console.log(volumes.sort((a, b) => (a - b) * (this.reverse ? -1 : 1)).join(' '));
+  }
+}
+```
+
+**Terminal: Basic Command**
+```bash
+$ trv basic:arglist -h
+
+Usage: doc/cli.basic:arglist [options] <volumes...:number>
+
+Options:
+  -r, --reverse
+  -h, --help     display help for command
+```
+
+**Terminal: Basic Arg List**
+```bash
+$ trv basic:arglist 10 5 3 9 8 1
+
+1 3 5 8 9 10
+```
+
+**Terminal: Basic Arg List with Invalid Number**
+```bash
+$ trv basic:arglist 10 5 3 9 20 1
+
+Execution failed:
+ * volumes[4] is bigger than (10). [1]
+
+Usage: doc/cli.basic:arglist [options] <volumes...:number>
+
+Options:
+  -r, --reverse
+  -h, --help     display help for command
+```
+
+**Terminal: Basic Arg List with Reverse**
+```bash
+$ trv basic:arglist -r 10 5 3 9 8 1
+
+10 9 8 5 3 1
+```
+
+## Customization
+By default, all fields are treated as flags and all parameters of `main()` are treated as arguments within the validation process.  Like the standard [@Schema](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14) behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
+
+**Code: Custom Command with Metadata**
+```typescript
+import { CliCommand } from '@travetto/cli';
+import { Max, Min } from '@travetto/schema';
+
+/**
+ * Custom Argument Command
+ */
+@CliCommand()
+export class CustomCommand {
+
+  /**
+   * The message to send back to the user
+   * @alias -m
+   * @alias --message
+   */
+  text: string = 'hello';
+
+  main(@Min(1) @Max(10) volume: number = 1) {
+    console.log(volume > 7 ? this.text.toUpperCase() : this.text);
+  }
+}
+```
+
+**Terminal: Custom Command Help**
+```bash
+$ trv custom:arg -h
+
+Usage: doc/cli.custom:arg [options] [volume:number]
+
+Options:
+  -m, --message <string>  The message to send back to the user (default: "hello")
+  -h, --help              display help for command
+```
+
+**Terminal: Custom Command Help with overridden Text**
+```bash
+$ trv custom:arg 10 -m cUsToM
+
+CUSTOM
+```
+
+**Terminal: Custom Command Help with default Text**
+```bash
+$ trv custom:arg 6
+
+hello
+```
+
+## Environment Variable Support
+In addition to standard flag overriding (e.g. `/** @alias -m */`), the command execution also supports allowing environment variables to provide values (secondary to whatever is passed in on the command line).
+
+**Code: Custom Command with Env Var**
+```typescript
+import { CliCommand } from '@travetto/cli';
+import { Max, Min } from '@travetto/schema';
+
+/**
+ * Custom Argument Command
+ */
+@CliCommand()
+export class CustomCommand {
+
+  /**
+   * The message to send back to the user
+   * @alias env.MESSAGE
+   */
+  text: string = 'hello';
+
+  main(@Min(1) @Max(10) volume: number = 1) {
+    console.log(volume > 7 ? this.text.toUpperCase() : this.text);
+  }
+}
+```
+
+**Terminal: Custom Command Help**
+```bash
+$ trv custom:env-arg -h
+
+Usage: doc/cli.custom:env-arg [options] [volume:number]
+
+Options:
+  -t, --text <string>  The message to send back to the user (default: "hello")
+  -h, --help           display help for command
+```
+
+**Terminal: Custom Command Help with default Text**
+```bash
+$ trv custom:env-arg 6
+
+hello
+```
+
+**Terminal: Custom Command Help with overridden Text**
+```bash
+$ MESSAGE=CuStOm trv custom:env-arg 10
+
+CUSTOM
+```
+
+**Terminal: Custom Command Help with overridden Text**
+```bash
+$ MESSAGE=CuStOm trv custom:env-arg 7
+
+CuStOm
+```
+
+## VSCode Integration
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") does expose a cli target `run:rest` that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin).
+
+**Code: Simple Run Target**
+```typescript
+import { CliCommand } from '@travetto/cli';
+
+/**
+ * Simple Run Target
+ */
+@CliCommand({ runTarget: true })
+export class RunCommand {
+
+  main(name: string) {
+    console.log(name);
+  }
+}
+```
+
+Also, any command name that starts with `run:` (i.e. `support/cli.run_*.ts`), will be opted-in to the run behavior unless explicitly disabled.
+
+## Advanced Usage
+If the goal is to run a more complex application, which may include depending on [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), we can take a look at [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.")'s target:
+
+**Code: Simple Run Target**
+```typescript
+import { DependencyRegistry } from '@travetto/di';
+import { CliCommand } from '@travetto/cli';
+import { ServerHandle } from '../src/types';
+
+/**
+ * Run a rest server as an application
+ */
+@CliCommand({ fields: ['module', 'env', 'profile'] })
+export class RunRestCommand {
+
+  /** Port to run on */
+  port?: number;
+
+  envInit(): Record<string, string | number | boolean> {
+    return this.port ? { REST_PORT: `${this.port}` } : {};
+  }
+
+  async main(): Promise<ServerHandle> {
+    const { RestApplication } = await import('../src/application/rest.js');
+    return DependencyRegistry.runInstance(RestApplication);
+  }
+}
+```
+
+As noted in the example above, `fields` is specified in this execution, with support for `module`, `env`, and `profile`. These env and profile flags are directly tied to the GlobalEnv flags defined in the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module. 
+
+The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.

@@ -15,9 +15,7 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/cli</code></pre>
   </figure>
 
-The cli is the primary structure for interacting with the external requirements of the framework.  This can range from running tests, to running applications, to generating email templates. The main executable can be installed globally or locally.  If installed globally and locally, it will defer to the local installation for execution. <br><br>
-As is the custom, modules are able to register their own cli extensions as scripts, whose name starts with <code class="item path">cli.</code>.  These scripts are then picked up at runtime and all available options are provided when viewing the help documentation.  The following are all the supported cli operations and the various settings they allow.
-<h2 id="general">General</h2>
+The cli module represents the primary entry point for execution within the framework. One of the main goals for this module is extensibility, as adding new entry points is meant to be trivial. The framework leverages this module for exposing all executable tools and entry points.  To see a high level listing of all supported commands, invoke <code class="item input">trv --help</code>
 
   <figure class="terminal">
     <figcaption class="terminal">General Usage
@@ -27,76 +25,458 @@ As is the custom, modules are able to register their own cli extensions as scrip
 
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
-Options:
-  -V, <span class="token parameter variable">--version</span>                  output the version number
-  -h, <span class="token parameter variable">--help</span>                     display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span>
-
 Commands:
-  <span class="token builtin class-name">echo</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-  main <span class="token operator">&lt;</span>fileOrImport<span class="token operator">></span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-  <span class="token builtin class-name">help</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>                 display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  doc            Command line support <span class="token keyword">for</span> generating module docs.
+  doc:angular    Generate documentation into the angular webapp under related/travetto.github.io
+  doc:mapping    Generate module mapping <span class="token keyword">for</span> @travetto/doc
+  email:compile  CLI Entry point <span class="token keyword">for</span> running the email server
+  email:editor   The email editor compilation <span class="token function">service</span> and output serving
+  <span class="token builtin class-name">exec</span>           Repo execution
+  lint           Command line support <span class="token keyword">for</span> linting
+  lint:register  Writes the lint configuration <span class="token function">file</span>
+  list           Allows <span class="token keyword">for</span> listing of modules
+  model:export   Exports model schemas
+  model:install  Installing models
+  openapi:client CLI <span class="token keyword">for</span> generating the cli client
+  openapi:spec   CLI <span class="token keyword">for</span> outputting the <span class="token function">open</span> api spec to a <span class="token builtin class-name">local</span> <span class="token function">file</span>
+  pack           Standard pack support
+  pack:docker    Standard <span class="token function">docker</span> support <span class="token keyword">for</span> pack
+  pack:lambda    Standard lambda support <span class="token keyword">for</span> pack
+  pack:zip       Standard <span class="token function">zip</span> support <span class="token keyword">for</span> pack
+  repo:publish   Publish all pending modules
+  repo:version   Version all changed dependencies
+  run:double     Doubles a number
+  run:rest       Run a rest server as an application
+  scaffold       Command to run scaffolding
+  <span class="token function">service</span>        Allows <span class="token keyword">for</span> running services
+  <span class="token builtin class-name">test</span>           Launch <span class="token builtin class-name">test</span> framework and execute tests
+  test:watch     Invoke the <span class="token builtin class-name">test</span> watcher
+  version-sync   Enforces all packages to <span class="token function">write</span> out their versions and dependencies</code></pre>
   </figure>
 
-This will show all the available options/choices that are exposed given the currently installed modules.
-
-<h2 id="extending">Extending</h2>
-
-Extending the <code class="item input">cli</code> is fairly straightforward.  It is built upon <a target="_blank" class="external-link" href="https://www.npmjs.com/package/commander">commander</a>, with a model that is extensible:
+This listing is from the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> monorepo, and represents the majority of tools that can be invoked from the command line. <br><br>
+This module also has a tight integration with the <a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a>, allowing the editing experience to benefit from the commands defined. The most commonly used commands will be the ones packaged with the framework, but its also very easy to create new commands.  With the correct configuration, these commands will also be exposed within VSCode.<br><br>
+At it's heart, a cli command is the contract defined by what flags, and what arguments the command supports. Within the framework this requires three criteria to be met:
+<ul> <li>The file must be located in the <code class="item path">support/</code> folder, and have a name that matches <code class="item path">cli.*.ts</code></li>
+<li>The file must be a class that has a main method</li>
+<li>The class must use the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20">@CliCommand</a> decorator</li>
+</ul>
 
   <figure class="code">
-    <figcaption class="code">Echo Command
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/echo.ts">Source</a></cite>
+    <figcaption class="code">Basic Command
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/cli.basic.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BasicCommand</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Hello'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Command Help
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic <span class="token parameter variable">-h</span>
+
+Usage: doc/cli.basic <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+<h2 id="command-naming">Command Naming</h2>
+
+The file name <code class="item path">support/cli.&lt;name&gt;.ts</code> has a direct mapping to the cli command name.   This hard mapping allows for the framework to be able to know which file to invoke without needing to load all command-related files. <br><br>
+Examples of mappings:
+<ul> <li><code class="item path">cli.test.ts</code> maps to <code class="item input">test</code></li>
+<li><code class="item path">cli.pack_docker.ts</code> maps to <code class="item input">pack:docker</code></li>
+<li><code class="item path">cli.email_template.ts</code> maps to <code class="item input">email:template</code></li>
+</ul>
+The pattern is that underscores(_) translate to colons (:), and the <code class="item input">cli.</code> prefix, and <code class="item input">.ts</code> suffix are dropped.
+
+<h2 id="binding-flags">Binding Flags</h2>
+
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20">@CliCommand</a> is a wrapper for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a>, and so every class that uses the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20">@CliCommand</a> decorator is now a full <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a> class. The fields of the class represent the flags that are available to the command.
+
+  <figure class="code">
+    <figcaption class="code">Basic Command with Flag
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/cli.basic_flag.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BasicCommand</span> <span class="token punctuation">{{'{'}}</span>
+
+  loud<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+
+  <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>loud <span class="token operator">?</span> <span class="token string">'HELLO'</span> <span class="token operator">:</span> <span class="token string">'Hello'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Command with Flag Help
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:flag <span class="token parameter variable">-h</span>
+
+Usage: doc/cli.basic:flag <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -l, <span class="token parameter variable">--loud</span>
+  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+As you can see the command now has the support of a basic boolean flag to determine if the response should be loud or not.  The default value here is undefined/false, and so is an opt-in experience.
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Command with Loud Flag
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:flag <span class="token parameter variable">--loud</span>
+
+HELLO</code></pre>
+  </figure>
+
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20">@CliCommand</a> supports the following data types for flags:
+<ul> <li>Boolean values</li>
+<li>Number values. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L179">@Integer</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L185">@Float</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L173">@Precision</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114">@Min</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124">@Max</a> decorators help provide additional validation.</li>
+<li>String values. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114">@MinLength</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124">@MaxLength</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L106">@Match</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L85">@Enum</a> provide additional constraints</li>
+<li>Date values. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114">@Min</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124">@Max</a> decorators help provide additional validation.</li>
+<li>String lists. Same as String, but allowing multiple values.</li>
+<li>Numeric lists. Same as Number, but allowing multiple values.</li>
+</ul>
+
+<h2 id="binding-arguments">Binding Arguments</h2>
+
+The <code class="item method">main()</code> method is the entrypoint for the command, represents a series of parameters. Some will be required, some may be optional.  The arguments support all types supported by the flags, and decorators can be provided using the decorators inline on parameters.     Optional arguments in the method, will be optional at run time, and filled with the provided default values.
+
+  <figure class="code">
+    <figcaption class="code">Basic Command with Arg
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/cli.basic_arg.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Max<span class="token punctuation">,</span> Min <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BasicCommand</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token function">main</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Min</span></span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token decorator"><span class="token at operator">@</span><span class="token function">Max</span></span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span> volume<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>volume <span class="token operator">></span> <span class="token number">7</span> <span class="token operator">?</span> <span class="token string">'HELLO'</span> <span class="token operator">:</span> <span class="token string">'Hello'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Command
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:arg <span class="token parameter variable">-h</span>
+
+Usage: doc/cli.basic:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+
+Options:
+  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Command with Invalid Loud Arg
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:arg <span class="token number">20</span>
+
+Execution failed:
+ * volume is bigger than <span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>. <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
+
+Usage: doc/cli.basic:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+
+Options:
+  -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Command with Loud Arg > 7
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:arg <span class="token number">8</span>
+
+HELLO</code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Command without Arg
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:arg
+
+Hello</code></pre>
+  </figure>
+
+Additionally, if you provide a field as an array, it will collect all valid values (excludes flags, and any arguments past a <code class="item input">--</code>).
+
+  <figure class="code">
+    <figcaption class="code">Basic Command with Arg List
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/cli.basic_arglist.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Max<span class="token punctuation">,</span> Min <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">BasicCommand</span> <span class="token punctuation">{{'{'}}</span>
+
+  reverse<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+
+  <span class="token function">main</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Min</span></span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token decorator"><span class="token at operator">@</span><span class="token function">Max</span></span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span> volumes<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>volumes<span class="token punctuation">.</span><span class="token function">sort</span><span class="token punctuation">(</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span>a <span class="token operator">-</span> b<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>reverse <span class="token operator">?</span> <span class="token operator">-</span><span class="token number">1</span> <span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">' '</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Command
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:arglist <span class="token parameter variable">-h</span>
+
+Usage: doc/cli.basic:arglist <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
+
+Options:
+  -r, <span class="token parameter variable">--reverse</span>
+  -h, <span class="token parameter variable">--help</span>     display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Arg List
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:arglist <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">8</span> <span class="token number">1</span>
+
+<span class="token number">1</span> <span class="token number">3</span> <span class="token number">5</span> <span class="token number">8</span> <span class="token number">9</span> <span class="token number">10</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Arg List with Invalid Number
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:arglist <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">20</span> <span class="token number">1</span>
+
+Execution failed:
+ * volumes<span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span> is bigger than <span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>. <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
+
+Usage: doc/cli.basic:arglist <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
+
+Options:
+  -r, <span class="token parameter variable">--reverse</span>
+  -h, <span class="token parameter variable">--help</span>     display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Basic Arg List with Reverse
+
+</figcaption>
+    <pre><code class="language-bash">$ trv basic:arglist <span class="token parameter variable">-r</span> <span class="token number">10</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">9</span> <span class="token number">8</span> <span class="token number">1</span>
+
+<span class="token number">10</span> <span class="token number">9</span> <span class="token number">8</span> <span class="token number">5</span> <span class="token number">3</span> <span class="token number">1</span></code></pre>
+  </figure>
+
+<h2 id="customization">Customization</h2>
+
+By default, all fields are treated as flags and all parameters of <code class="item method">main()</code> are treated as arguments within the validation process.  Like the standard <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/schema.ts#L14">@Schema</a> behavior, we can leverage the metadata of the fields/parameters to help provide additional customization/context for the users of the commands.
+
+  <figure class="code">
+    <figcaption class="code">Custom Command with Metadata
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/cli.custom_arg.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Max<span class="token punctuation">,</span> Min <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Custom Argument Command
+ */</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomCommand</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token comment">/**
+   * The message to send back to the user
+   * @alias -m
+   * @alias --message
+   */</span>
+  text<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">'hello'</span><span class="token punctuation">;</span>
+
+  <span class="token function">main</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Min</span></span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token decorator"><span class="token at operator">@</span><span class="token function">Max</span></span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span> volume<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>volume <span class="token operator">></span> <span class="token number">7</span> <span class="token operator">?</span> <span class="token keyword">this</span><span class="token punctuation">.</span>text<span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>text<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Custom Command Help
+
+</figcaption>
+    <pre><code class="language-bash">$ trv custom:arg <span class="token parameter variable">-h</span>
+
+Usage: doc/cli.custom:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+
+Options:
+  -m, <span class="token parameter variable">--message</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>              display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Custom Command Help with overridden Text
+
+</figcaption>
+    <pre><code class="language-bash">$ trv custom:arg <span class="token number">10</span> <span class="token parameter variable">-m</span> cUsToM
+
+CUSTOM</code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Custom Command Help with default Text
+
+</figcaption>
+    <pre><code class="language-bash">$ trv custom:arg <span class="token number">6</span>
+
+hello</code></pre>
+  </figure>
+
+<h2 id="environment-variable-support">Environment Variable Support</h2>
+
+In addition to standard flag overriding (e.g. <code class="item input">/** @alias -m */</code>), the command execution also supports allowing environment variables to provide values (secondary to whatever is passed in on the command line).
+
+  <figure class="code">
+    <figcaption class="code">Custom Command with Env Var
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/cli.custom_env-arg.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Max<span class="token punctuation">,</span> Min <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Custom Argument Command
+ */</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomCommand</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token comment">/**
+   * The message to send back to the user
+   * @alias env.MESSAGE
+   */</span>
+  text<span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">=</span> <span class="token string">'hello'</span><span class="token punctuation">;</span>
+
+  <span class="token function">main</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Min</span></span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token decorator"><span class="token at operator">@</span><span class="token function">Max</span></span><span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span> volume<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>volume <span class="token operator">></span> <span class="token number">7</span> <span class="token operator">?</span> <span class="token keyword">this</span><span class="token punctuation">.</span>text<span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>text<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Custom Command Help
+
+</figcaption>
+    <pre><code class="language-bash">$ trv custom:env-arg <span class="token parameter variable">-h</span>
+
+Usage: doc/cli.custom:env-arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+
+Options:
+  -t, <span class="token parameter variable">--text</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Custom Command Help with default Text
+
+</figcaption>
+    <pre><code class="language-bash">$ trv custom:env-arg <span class="token number">6</span>
+
+hello</code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Custom Command Help with overridden Text
+
+</figcaption>
+    <pre><code class="language-bash">$ <span class="token assign-left variable">MESSAGE</span><span class="token operator">=</span>CuStOm trv custom:env-arg <span class="token number">10</span>
+
+CUSTOM</code></pre>
+  </figure>
+
+  <figure class="terminal">
+    <figcaption class="terminal">Custom Command Help with overridden Text
+
+</figcaption>
+    <pre><code class="language-bash">$ <span class="token assign-left variable">MESSAGE</span><span class="token operator">=</span>CuStOm trv custom:env-arg <span class="token number">7</span>
+
+CuStOm</code></pre>
+  </figure>
+
+<h2 id="vscode-integration">VSCode Integration</h2>
+
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> does expose a cli target <code class="item input">run:rest</code> that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the <a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a>.
+
+  <figure class="code">
+    <figcaption class="code">Simple Run Target
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/cli.run_simple.ts">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
 
 <span class="token comment">/**
- * `npx trv echo`
- *
- * Allows for cleaning of the cache dire
+ * Simple Run Target
  */</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CliEchoCommand</span> <span class="token keyword">extends</span> <span class="token class-name">CliCommand</span> <span class="token punctuation">{{'{'}}</span>
-  name <span class="token operator">=</span> <span class="token string">'echo'</span><span class="token punctuation">;</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> runTarget<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RunCommand</span> <span class="token punctuation">{{'{'}}</span>
 
-  <span class="token function">getOptions</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> uppercase<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">boolOption</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> desc<span class="token operator">:</span> <span class="token string">'Upper case'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token function">getArgs</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token string">'[args...]'</span><span class="token punctuation">;</span>
-  <span class="token punctuation">{{'}'}}</span>
-
-  <span class="token keyword">async</span> <span class="token function">action</span><span class="token punctuation">(</span>args<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>cmd<span class="token punctuation">.</span>uppercase<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      args <span class="token operator">=</span> args<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>x <span class="token operator">=></span> x<span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-    <span class="token punctuation">{{'}'}}</span>
-    <span class="token builtin">console</span><span class="token punctuation">.</span>log<span class="token operator">!</span><span class="token punctuation">(</span>args<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">main</span><span class="token punctuation">(</span>name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>name<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-With the corresponding output:
+Also, any command name that starts with <code class="item input">run:</code> (i.e. <code class="item path">support/cli.run_*.ts</code>), will be opted-in to the run behavior unless explicitly disabled.
 
-  <figure class="terminal">
-    <figcaption class="terminal">Echo Command Help
+<h2 id="advanced-usage">Advanced Usage</h2>
 
-</figcaption>
-    <pre><code class="language-bash">$ trv <span class="token builtin class-name">echo</span> <span class="token parameter variable">--help</span>
+If the goal is to run a more complex application, which may include depending on <a class="module-link" routerLink="/docs/di" title="Dependency registration/management and injection support.">Dependency Injection</a>, we can take a look at <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a>'s target:
 
-Usage:  <span class="token builtin class-name">echo</span> <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.<span class="token punctuation">]</span>
-
-Options:
-  -u, <span class="token parameter variable">--uppercase</span>  Upper <span class="token keyword">case</span>
-  -h, <span class="token parameter variable">--help</span>       display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
-  </figure>
-
-And actually using it:
-
-  <figure class="terminal">
-    <figcaption class="terminal">Echo Command Run
+  <figure class="code">
+    <figcaption class="code">Simple Run Target
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/support/cli.run_rest.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-bash">$ trv <span class="token builtin class-name">echo</span> <span class="token parameter variable">-u</span> bOb rOb DRoP
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ServerHandle <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types'</span><span class="token punctuation">;</span>
 
-<span class="token punctuation">[</span> <span class="token string">'BOB'</span>, <span class="token string">'ROB'</span>, <span class="token string">'DROP'</span> <span class="token punctuation">]</span></code></pre>
+<span class="token comment">/**
+ * Run a rest server as an application
+ */</span>
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> fields<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'module'</span><span class="token punctuation">,</span> <span class="token string">'env'</span><span class="token punctuation">,</span> <span class="token string">'profile'</span><span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RunRestCommand</span> <span class="token punctuation">{{'{'}}</span>
+
+  <span class="token comment">/** Port to run on */</span>
+  port<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+
+  <span class="token function">envInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">boolean</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">?</span> <span class="token punctuation">{{'{'}}</span> <span class="token constant">REST_PORT</span><span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span> <span class="token punctuation">{{'}'}}</span> <span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token keyword">async</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>ServerHandle<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> RestApplication <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'../src/application/rest.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> DependencyRegistry<span class="token punctuation">.</span><span class="token function">runInstance</span><span class="token punctuation">(</span>RestApplication<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
+
+As noted in the example above, <code class="item input">fields</code> is specified in this execution, with support for <code class="item input">module</code>, <code class="item input">env</code>, and <code class="item input">profile</code>. These env and profile flags are directly tied to the GlobalEnv flags defined in the <a class="module-link" routerLink="/docs/base" title="Environment config and common utilities for travetto applications.">Base</a> module. <br><br>
+The <code class="item input">module</code> field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
