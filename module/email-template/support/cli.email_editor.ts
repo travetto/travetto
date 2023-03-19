@@ -1,4 +1,4 @@
-import { GlobalEnvConfig } from '@travetto/base';
+import { GlobalEnvConfig, ShutdownManager } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
 import { RootRegistry } from '@travetto/registry';
@@ -20,6 +20,9 @@ export class EmailEditorCommand {
     await RootRegistry.init();
     const editor = new EditorState(await TemplateManager.createInstance());
     await editor.init();
-    process.send?.('ready');
+    if (process.send) {
+      process.on('disconnect', () => ShutdownManager.execute());
+      process.send('ready');
+    }
   }
 }
