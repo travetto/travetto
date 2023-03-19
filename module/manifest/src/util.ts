@@ -76,6 +76,7 @@ export class ManifestUtil {
       file = path.resolve(file, MANIFEST_FILE);
     }
     const manifest: ManifestRoot = JSON.parse(readFileSync(file, 'utf8'));
+    // Support packaged environments, by allowing empty outputFolder
     if (!manifest.outputFolder) {
       manifest.outputFolder = path.cwd();
       manifest.workspacePath = path.cwd();

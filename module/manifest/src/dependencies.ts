@@ -39,9 +39,12 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
       .map(x => new RegExp(`^${x.replace(/[*]/g, '.*?')}$`));
   }
 
-  constructor(public ctx: ManifestContext) { }
+  constructor(public ctx: ManifestContext) {
+    this.#mainSourcePath = path.resolve(this.ctx.workspacePath, this.ctx.mainFolder);
+  }
 
   #mainPatterns: RegExp[] = [];
+  #mainSourcePath: string;
 
   /**
    * Initialize visitor, and provide global dependencies
@@ -76,7 +79,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    * Is valid dependency for searching
    */
   valid(req: PackageVisitReq<ModuleDep>): boolean {
-    return req.sourcePath === path.cwd() || (
+    return req.sourcePath === this.#mainSourcePath || (
       req.rel !== 'peer' &&
       (!!req.pkg.travetto || req.pkg.private === true || !req.sourcePath.includes('node_modules') || req.rel === 'global')
     );

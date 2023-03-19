@@ -1,4 +1,4 @@
-import { path } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 
 import { TypedObject } from './types';
 import { ObjectUtil } from './object';
@@ -80,7 +80,7 @@ export class ErrorUtil {
    */
   static cleanStack(err: Error | string, filter: RegExp = DEFAULT_FILTER): string {
     let lastLocation: string = '';
-    const cwd = path.cwd();
+    const cwd = RootIndex.mainModule.sourcePath;
     const cwdPrefix = `${cwd}/`;
     const errText = path.toPosix(typeof err === 'string' ? err : err.stack!);
     const body = errText
