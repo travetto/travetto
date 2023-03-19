@@ -1,5 +1,5 @@
 import { Class } from '@travetto/base';
-import { ModelRegistry } from '@travetto/model';
+import { ModelRegistry } from '@travetto/model/src/registry/model';
 import { InjectableConfig, DependencyRegistry } from '@travetto/di';
 import { ModelStorageSupportTarget } from '@travetto/model/src/internal/service/common';
 

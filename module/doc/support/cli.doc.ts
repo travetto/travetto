@@ -5,8 +5,6 @@ import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
-import { DocRenderer } from '../src/render/renderer';
-
 /**
  * Command line support for generating module docs.
  */
@@ -69,6 +67,7 @@ export class DocCommand implements CliCommandShape {
   }
 
   async render(): Promise<void> {
+    const { DocRenderer } = await import('../src/render/renderer.js');
     const ctx = await DocRenderer.get(this.input, RootIndex.manifest);
     const outputs = this.outputs.map(output =>
       output.includes('.') ? [path.extname(output).substring(1), path.resolve(output)] :

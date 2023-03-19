@@ -1,5 +1,7 @@
 import { CliCommand } from '../src/decorators';
-import { CliCommandRegistry, CliCommandSchema, CliCommandSchemaUtil, CliValidationError } from '../__index__';
+import { CliCommandSchema, CliValidationError } from '../src/types';
+import { CliCommandRegistry } from '../src/registry';
+import { CliCommandSchemaUtil } from '../src/schema';
 
 /**
  * Generates the schema for all CLI operations
