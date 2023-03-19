@@ -1,11 +1,11 @@
-import { path, RootIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 export class CliUtil {
   /**
    * Are we running from a mono-root?
    */
   static get monoRoot(): boolean {
-    return !!RootIndex.manifest.monoRepo && path.cwd() === RootIndex.manifest.workspacePath;
+    return !!RootIndex.manifest.monoRepo && RootIndex.mainModule.sourcePath === RootIndex.manifest.workspacePath;
   }
 
   /**

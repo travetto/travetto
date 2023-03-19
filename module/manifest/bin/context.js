@@ -23,20 +23,27 @@ async function $getPkg(inputFolder) {
 const WS_ROOT = {};
 
 /**
- * Get module name from a given file
- * @param {string} file
- * @return {Promise<string|void>}
+ * Get module root for a given folder
+ * @param {string} dir
+ * @return {Promise<string>}
  */
-async function $getModuleFromFile(file) {
-  let dir = path.dirname(file);
+async function $getModuleRoot(dir) {
   let prev;
   while (dir !== prev && !(await fs.stat(path.resolve(dir, 'package.json')).catch(() => false))) {
     prev = dir;
     dir = path.dirname(dir);
   }
-  try {
-    return (await $getPkg(dir)).name;
-  } catch { }
+  return dir;
+}
+
+
+/**
+ * Get module name from a given file
+ * @param {string} file
+ * @return {Promise<string|void>}
+ */
+async function $getModuleFromFile(file) {
+  return $getPkg(await $getModuleRoot(path.dirname(file))).then(v => v.name, () => { });
 }
 
 /**
@@ -94,7 +101,7 @@ export async function getManifestContext(folder) {
     }
   }
 
-  const mainPath = path.resolve(folder ?? '.');
+  const mainPath = await $getModuleRoot(path.resolve(folder ?? '.'));
   const { name: mainModule, workspaces, travetto } = (await $getPkg(mainPath));
   const monoRepo = workspacePath !== mainPath || !!workspaces;
   const outputFolder = travetto?.outputFolder ?? '.trv_output';
