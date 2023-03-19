@@ -49,12 +49,13 @@ export class DocRunUtil {
   static #docState = new DocState();
 
   static runState(cmd: string, args: string[], config: RunConfig = {}): RunState {
+    const cwd = config.cwd ?? (config.module ? RootIndex.getModule(config.module)! : RootIndex.mainModule).sourcePath;
     args = [...args];
     return {
       cmd,
       args,
       opts: {
-        cwd: path.toPosix(config.cwd ?? path.cwd()),
+        cwd: path.toPosix(cwd),
         shell: '/bin/bash',
         env: {
           ...process.env,
@@ -73,8 +74,9 @@ export class DocRunUtil {
    * Clean run output
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
+    const cwd = path.toPosix((cfg.module ? RootIndex.getModule(cfg.module)! : RootIndex.mainModule).sourcePath);
     text = stripAnsiCodes(text.trim())
-      .replace(new RegExp(path.cwd(), 'g'), '.')
+      .replaceAll(cwd, '.')
       .replaceAll(RootIndex.manifest.workspacePath, '<workspace-root>')
       .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
       .replace(/^(\s*framework:\s*')(\d+[.]\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x${post}`)

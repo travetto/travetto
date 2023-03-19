@@ -352,7 +352,7 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
   <span class="token comment">/**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */</span>
-  <span class="token keyword">static</span> <span class="token function">prettyDeltaSinceTime</span><span class="token punctuation">(</span>time<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">prettyDeltaSinceTime</span><span class="token punctuation">(</span>time<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> unit<span class="token operator">?</span><span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Pretty print a delta, with auto-detection of largest unit
    * @param delta The number of milliseconds in the delta

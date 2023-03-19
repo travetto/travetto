@@ -310,7 +310,7 @@ export class TimeUtil {
   /**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */
-  static prettyDeltaSinceTime(time: number, unit: TimeUnit = 'ms'): string;
+  static prettyDeltaSinceTime(time: number, unit?: TimeUnit): string;
   /**
    * Pretty print a delta, with auto-detection of largest unit
    * @param delta The number of milliseconds in the delta

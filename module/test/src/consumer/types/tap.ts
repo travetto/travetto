@@ -1,4 +1,4 @@
-import { path } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 import { GlobalTerminal, Terminal } from '@travetto/terminal';
 import { ErrorUtil, ObjectUtil, TimeUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
@@ -61,8 +61,6 @@ export class TapEmitter implements TestConsumer {
       }
       this.log(`# ${header}`);
 
-      const cwd = path.cwd();
-
       // Handle each assertion
       if (test.assertions.length) {
         let subCount = 0;
@@ -72,7 +70,7 @@ export class TapEmitter implements TestConsumer {
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(asrt.file.replace(cwd, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
+            `${this.#enhancer.assertFile(asrt.file.replace(RootIndex.mainModule.sourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
           ].join(' ');
 
           if (asrt.error) {
