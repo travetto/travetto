@@ -347,7 +347,7 @@ First we must start the application:
       exposeAllSchemas: false
     },
     CommonLoggerConfig: { format: 'line', plain: false, time: 'ms' },
-    FileModelConfig: { folder: '/tmp/trv_file__travetto_todo_app', namespace: '.' },
+    FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
     MemoryModelConfig: {},
     MongoModelConfig: {
       hosts: { '0': 'localhost' },
