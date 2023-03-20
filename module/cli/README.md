@@ -379,6 +379,42 @@ export class RunCommand {
 Also, any command name that starts with `run:` (i.e. `support/cli.run_*.ts`), will be opted-in to the run behavior unless explicitly disabled.
 
 ## Advanced Usage
+
+**Code: Anatomy of a Command**
+```typescript
+export interface CliCommandShape {
+  /**
+   * Action target of the command
+   */
+  main(...args: unknown[]): OrProm<RunResponse>;
+  /**
+   * Setup environment before command runs
+   */
+  envInit?(): OrProm<GlobalEnvConfig>;
+  /**
+   * Extra help
+   */
+  help?(): OrProm<string[]>;
+  /**
+   * Is the command active/eligible for usage
+   */
+  isActive?(): boolean;
+  /**
+   * Run before binding occurs
+   */
+  initialize?(): OrProm<void>;
+  /**
+   * Run before validation occurs
+   */
+  finalize?(unknownArgs: string[]): OrProm<void>;
+  /**
+   * Validation method
+   */
+  validate?(...unknownArgs: unknown[]): OrProm<CliValidationError | CliValidationError[] | undefined>;
+}
+```
+
+### Dependency Injection
 If the goal is to run a more complex application, which may include depending on [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support."), we can take a look at [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.")'s target:
 
 **Code: Simple Run Target**
@@ -410,3 +446,32 @@ export class RunRestCommand {
 As noted in the example above, `fields` is specified in this execution, with support for `module`, `env`, and `profile`. These env and profile flags are directly tied to the GlobalEnv flags defined in the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module. 
 
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
+
+### Custom Validation
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L10) errors that are returned will be shared with the user, and fail to invoke the `main` method.
+
+**Code: CliValidationError**
+```typescript
+export type CliValidationError = {
+  /**
+   * The error message
+   */
+  message: string;
+  /**
+   * Source of validation
+   */
+  source?: 'flag' | 'arg' | 'custom';
+};
+```
+
+A simple example of the validation can be found in the `doc` command:
+
+**Code: Simple Validation Example**
+```typescript
+async validate(...args: unknown[]): Promise<CliValidationError | undefined> {
+    const docFile = path.resolve(this.input);
+    if (!(await fs.stat(docFile).catch(() => false))) {
+      return { message: `input: ${this.input} does not exist`, source: 'flag' };
+    }
+  }
+```

@@ -116,12 +116,26 @@ export const text = <>
   </c.Section>
 
   <c.Section title='Advanced Usage'>
-    If the goal is to run a more complex application, which may include depending on {d.mod('Di')}, we can take a look at {d.mod('Rest')}'s target:
 
-    <c.Code title='Simple Run Target' src='../rest/support/cli.run_rest.ts' />
+    <c.Code title='Anatomy of a Command' src='src/types.ts' startRe={/CliCommandShape/} endRe={/^\}/} />
 
-    As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, {d.input('env')}, and {d.input('profile')}. These env and profile flags are directly tied to the GlobalEnv flags defined in the {d.mod('Base')} module. <br />
+    <c.SubSection title='Dependency Injection'>
+      If the goal is to run a more complex application, which may include depending on {d.mod('Di')}, we can take a look at {d.mod('Rest')}'s target:
 
-    The {d.input('module')} field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
+      <c.Code title='Simple Run Target' src='../rest/support/cli.run_rest.ts' />
+
+      As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, {d.input('env')}, and {d.input('profile')}. These env and profile flags are directly tied to the GlobalEnv flags defined in the {d.mod('Base')} module. <br />
+
+      The {d.input('module')} field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
+    </c.SubSection>
+
+    <c.SubSection title='Custom Validation'>
+      In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any {d.codeLink('CliValidationError', 'src/types.ts', /type CliValidationError/)} errors that are returned will be shared with the user, and fail to invoke the {d.method('main')} method.
+
+      <c.Code title='CliValidationError' src='src/types.ts' startRe={/type CliValidationError/} endRe={/^\}/} />
+
+      A simple example of the validation can be found in the {d.input('doc')} command:
+      <c.Code title='Simple Validation Example' src='@travetto/doc/support/cli.doc.ts' startRe={/validate\(/} endRe={/^[ ]{2}\}/} />
+    </c.SubSection>
   </c.Section>
 </>;

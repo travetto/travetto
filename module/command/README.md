@@ -84,7 +84,7 @@ The module provides the ability to start/stop/restart services as [docker](https
 ```bash
 $ trv service --help
 
-Usage: service [options] <action:status|start|stop|restart> [services...:string]
+Usage: service [options] <action:start|stop|status|restart> [services...:string]
 
 Options:
   -h, --help  display help for command

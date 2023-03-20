@@ -389,3 +389,12 @@ The shift to 4.9+ brought some unexpected changes that required rewriting how de
 
 ### Pack Overhaul
 * Now integrates with rollup for producing a tree-shaken singular output file
+
+------------------------------------------------------
+Release 3.1.0: 2023-03-01 -- Momentum
+------------------------------------------------------
+
+## Major/Breaking Changes
+* @travetto/app is gone, and has been merged into @travetto/cli
+* @travetto/cli has been completely rewritten and now is entirely based on @travetto/schema
+* Upgrade to Typescript 5.0
