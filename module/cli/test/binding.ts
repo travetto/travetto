@@ -11,6 +11,8 @@ import { CliCommandSchemaUtil } from '../src/schema';
 @CliCommand()
 class Entity {
 
+  ids?: number[] = [];
+
   /**
    * My color
    *
@@ -113,5 +115,23 @@ export class SchemaBindingSuite {
     [found, unknown] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
     assert.deepStrictEqual(found, ['george', true, []]);
     assert.deepStrictEqual(unknown, ['--', '--age', '20', 'orange']);
+  }
+
+  @Test()
+  async bindNegativeNumbers() {
+    let found: unknown[] = [];
+    let remaining: string[] = [];
+
+    const entity = new Entity();
+
+    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-i', '10', '-i', '20', 'george']);
+    [found,] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
+    assert.deepStrictEqual(found, ['george', undefined, []]);
+    assert.deepStrictEqual(entity.ids, [10, 20]);
+
+    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-i', '-10', '--ids', '22', 'george']);
+    [found,] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
+    assert.deepStrictEqual(found, ['george', undefined, []]);
+    assert.deepStrictEqual(entity.ids, [-10, 22]);
   }
 }

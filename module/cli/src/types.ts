@@ -20,6 +20,10 @@ export type CliValidationError = {
    * The kind of validation
    */
   kind: string;
+  /**
+   * Source of validation
+   */
+  source?: 'flag' | 'arg' | 'custom';
 };
 
 /**

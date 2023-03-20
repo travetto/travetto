@@ -27,7 +27,7 @@ const COLORS = TypedObject.keys(NAMED_COLORS)
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
 
-const modError = (message: string): CliValidationError => ({ kind: 'required', path: 'module', message });
+const modError = (message: string): CliValidationError => ({ source: 'flag', kind: 'required', path: 'module', message: `module: ${message}` });
 
 /**
  * Simple utilities for understanding modules for CLI use cases

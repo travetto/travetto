@@ -1,5 +1,5 @@
 import { path, RootIndex } from '@travetto/manifest';
-import { CliCommand, CliFlag, CliUtil } from '@travetto/cli';
+import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli';
 
 import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
@@ -23,6 +23,30 @@ export class PackDockerCommand extends BasePackCommand {
   dockerPush = false;
   @CliFlag({ desc: 'Docker Registry ', short: 'dr', envVars: ['PACK_DOCKER_REGISTRY'] })
   dockerRegistry?: string;
+
+  async validate(...unknownArgs: string[]): Promise<CliValidationError[] | undefined> {
+    const errs: CliValidationError[] = [];
+    if (this.dockerPort?.length) {
+      for (let i = 0; i < this.dockerPort.length; i++) {
+        if (this.dockerPort[i] < 1) {
+          errs.push({
+            kind: 'invalid',
+            path: `dockerPort[${i}]`,
+            source: 'flag',
+            message: `dockerPort[${i}] is less than (1)`
+          });
+        } else if (this.dockerPort[i] > 65536) {
+          errs.push({
+            kind: 'invalid',
+            path: `dockerPort[${i}]`,
+            source: 'flag',
+            message: `dockerPort[${i}] is greater than (65536)`
+          });
+        }
+      }
+    }
+    return errs;
+  }
 
   finalize(unknownArgs: string[]): void {
     super.finalize(unknownArgs);

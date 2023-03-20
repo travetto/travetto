@@ -19,7 +19,8 @@ export class CliSchemaCommand {
       return {
         kind: 'invalid',
         path: 'name',
-        message: `${name} is not a valid cli command`
+        source: 'arg',
+        message: `name: ${name} is not a valid cli command`
       };
     }
   }

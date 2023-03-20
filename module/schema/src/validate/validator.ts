@@ -40,7 +40,7 @@ export class SchemaValidator {
 
     const fields = TypedObject.keys<SchemaConfig>(schema);
     for (const field of fields) {
-      if (schema[field].access !== 'readonly' && !schema[field].forMethod) { // Do not validate readonly fields
+      if (schema[field].access !== 'readonly') { // Do not validate readonly fields
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         errors = errors.concat(this.#validateFieldSchema(schema[field], o[field as keyof T], relative));
       }
@@ -107,20 +107,24 @@ export class SchemaValidator {
   static #validateRange(field: FieldConfig, key: 'min' | 'max', value: string | number | Date): boolean {
 
     const f = field[key]!;
-    if (typeof f.n === 'number') {
+    const fn = f.n;
+    if (typeof fn === 'number') {
       if (typeof value === 'string') {
         value = parseInt(value, 10);
       }
       if (field.type === Date) {
         value = new Date(value);
       }
-      if (key === 'min' && value < f.n || key === 'max' && value > f.n) {
+      const valN = typeof value === 'number' ? value : value.getTime();
+      if (key === 'min' && valN < fn || key === 'max' && valN > fn) {
         return true;
       }
     } else {
-      const date = f.n.getTime();
+      const date = fn.getTime();
       if (typeof value === 'string') {
         value = Date.parse(value);
+      } else if (value instanceof Date) {
+        value = value.getTime();
       }
       if (key === 'min' && value < date || key === 'max' && value > date) {
         return true;

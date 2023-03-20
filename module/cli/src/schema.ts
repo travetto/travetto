@@ -22,6 +22,10 @@ function fieldToInput(x: FieldConfig): CliCommandInput {
   });
 }
 
+const VALID_FLAG = /^-{1,2}[a-z]/i;
+const LONG_FLAG = /^--[a-z]/i;
+const SHORT_FLAG = /^-[a-z]/i;
+
 const isBoolFlag = (x: CliCommandInput): boolean => x.type === 'boolean' && !x.array;
 
 /**
@@ -55,7 +59,7 @@ export class CliCommandSchemaUtil {
     }
 
     const schema = await SchemaRegistry.getViewSchema(cls);
-    const flags = [...Object.values(schema.schema)].filter(v => !v.forMethod).map(fieldToInput);
+    const flags = Object.values(schema.schema).map(fieldToInput);
 
     // Add help command
     flags.push({ name: 'help', flagNames: ['h'], description: 'display help for command', type: 'boolean' });
@@ -64,13 +68,13 @@ export class CliCommandSchemaUtil {
 
     const used = new Set(flags
       .flatMap(f => f.flagNames ?? [])
-      .filter(x => /^-[^-]/.test(x) || x.replaceAll('-', '').length < 3)
+      .filter(x => SHORT_FLAG.test(x) || x.replaceAll('-', '').length < 3)
       .map(x => x.replace(/^-+/, ''))
     );
 
     for (const flag of flags) {
-      let short = (flag.flagNames ?? []).find(x => /^-[^-]/.test(x) || x.replaceAll('-', '').length < 3)?.replace(/^-+/, '');
-      const long = (flag.flagNames ?? []).find(x => /^--[^-]/.test(x) || x.replaceAll('-', '').length > 2)?.replace(/^-+/, '') ??
+      let short = (flag.flagNames ?? []).find(x => SHORT_FLAG.test(x) || x.replaceAll('-', '').length < 3)?.replace(/^-+/, '');
+      const long = (flag.flagNames ?? []).find(x => LONG_FLAG.test(x) || x.replaceAll('-', '').length > 2)?.replace(/^-+/, '') ??
         flag.name.replace(/([a-z])([A-Z])/g, (_, l, r: string) => `${l}-${r.toLowerCase()}`);
       const aliases: string[] = flag.flagNames = [];
 
@@ -123,7 +127,7 @@ export class CliCommandSchemaUtil {
 
     for (const el of schema.args) {
       // Siphon off unrecognized flags, in order
-      while (i < copy.length && copy[i].startsWith('-')) {
+      while (i < copy.length && VALID_FLAG.test(copy[i])) {
         i += 1;
       }
 
@@ -132,7 +136,7 @@ export class CliCommandSchemaUtil {
       } else if (el.array) {
         const sub: string[] = [];
         while (i < copy.length) {
-          if (!copy[i].startsWith('-')) {
+          if (!VALID_FLAG.test(copy[i])) {
             sub.push(copy[i]);
             found[i] = true;
           }
@@ -196,7 +200,7 @@ export class CliCommandSchemaUtil {
       } else if (isBoolFlag(input)) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         template[key] = !arg.startsWith('--no') as T[typeof key];
-      } else if (next === undefined || next.startsWith('-')) {
+      } else if (next === undefined || VALID_FLAG.test(next)) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         template[key] = null as T[typeof key];
       } else if (input.array) {
@@ -237,11 +241,13 @@ export class CliCommandSchemaUtil {
       },
     ];
 
+    const SOURCES = ['flag', 'arg', 'custom'] as const;
+
     const results = validators.map((x, i) => x().catch(err => {
       if (!(err instanceof ValidationResultError)) {
         throw err;
       }
-      return err.errors.map(v => ({ ...v, message: `${v.message}. [${i}]`, index: i }));
+      return err.errors.map(v => ({ source: SOURCES[i], ...v }));
     }));
 
     const errors = (await Promise.all(results)).flatMap(x => (x ?? []));

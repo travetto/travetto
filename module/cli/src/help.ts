@@ -6,6 +6,12 @@ import { CliCommandShape, CliValidationResultError } from './types';
 import { CliCommandRegistry } from './registry';
 import { CliCommandSchemaUtil } from './schema';
 
+const validationSourceMap = {
+  custom: '',
+  arg: 'Argument',
+  flag: 'Flag'
+};
+
 /**
  * Utilities for showing help
  */
@@ -132,7 +138,9 @@ export class HelpUtil {
   static renderValidationError(cmd: CliCommandShape, err: CliValidationResultError): string {
     return [
       cliTpl`${{ failure: 'Execution failed' }}:`,
-      ...err.errors.map(e => cliTpl` * ${{ failure: e.message }}`),
+      ...err.errors.map(e => e.source && e.source !== 'custom' ?
+        cliTpl` * ${{ identifier: validationSourceMap[e.source] }} ${{ subtitle: e.message }}` :
+        cliTpl` * ${{ failure: e.message }}`),
       '',
     ].join('\n');
   }

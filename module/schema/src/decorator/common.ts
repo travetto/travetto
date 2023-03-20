@@ -16,9 +16,10 @@ export function Describe(config: Partial<DescribableConfig>) {
   return (target: Class | ClassInstance, property?: string, descOrIdx?: PropertyDescriptor | number): void => {
     if (isClassInstance(target, property)) {
       if (descOrIdx !== undefined && typeof descOrIdx === 'number') {
-        property = `${property}.${descOrIdx}`;
+        SchemaRegistry.registerPendingParamFacet(target.constructor, property!, descOrIdx, config);
+      } else {
+        SchemaRegistry.registerPendingFieldFacet(target.constructor, property!, config);
       }
-      SchemaRegistry.registerPendingFieldFacet(target.constructor, property!, config);
     } else {
       SchemaRegistry.register(target, config);
     }

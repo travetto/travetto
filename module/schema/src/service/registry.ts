@@ -28,7 +28,6 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   #subTypes = new Map<Class, Map<string, Class>>();
   #typeKeys = new Map<Class, string>();
   #pendingViews = new Map<Class, Map<string, ViewFieldsConfig<unknown>>>();
-  #methodSchemas = new Map<Class, Map<string, FieldConfig[]>>();
 
   constructor() {
     super(RootRegistry);
@@ -191,6 +190,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       validators: [],
       subType: false,
       metadata: {},
+      methods: {},
       views: {
         [AllViewⲐ]: {
           schema: {},
@@ -225,22 +225,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param method
    */
   getMethodSchema<T>(cls: Class<T>, method: string): FieldConfig[] {
-    if (!this.#methodSchemas.has(cls)) {
-      this.#methodSchemas.set(cls, new Map());
-    }
-    const cache = this.#methodSchemas.get(cls)!;
-    if (!cache.has(method) && this.has(cls)) {
-      const { fields, schema } = this.getViewSchema(cls);
-      const out = [];
-      for (const el of fields) {
-        if (el.startsWith(`${method}.`) && schema[el].forMethod) {
-          out.push(schema[el]);
-        }
-      }
-      out.sort((a, b) => a.index! - b.index!);
-      cache.set(method, out);
-    }
-    return cache.get(method)! ?? [];
+    return (this.get(cls)?.methods?.[method] ?? []).filter(x => !!x).sort((a, b) => a.index! - b.index!);
   }
 
   /**
@@ -265,9 +250,18 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param idx The param index
    * @param config The config to register
    */
-  registerPendingParamFacet(target: Class, prop: string, idx: number, config: Partial<FieldConfig>): Class {
-    config.index = idx;
-    return this.registerPendingFieldFacet(target, `${prop}.${idx}`, config);
+  registerPendingParamFacet(target: Class, method: string, idx: number, config: Partial<FieldConfig>): Class {
+    const methods = this.getOrCreatePending(target)!.methods!;
+    const params = (methods[method] ??= []);
+    params[idx] = {
+      // @ts-expect-error
+      name: `${method}.${idx}`,
+      ...params[idx] ?? {},
+      owner: target,
+      index: idx,
+      ...config,
+    };
+    return target;
   }
 
   /**
@@ -300,10 +294,11 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param conf Extra config
    */
   registerPendingParamConfig(target: Class, method: string, idx: number, type: ClassList, conf?: Partial<FieldConfig>): Class {
-    conf ??= {};
-    conf.index = idx;
-    conf.forMethod = true;
-    return this.registerPendingFieldConfig(target, `${method}.${idx}`, type, conf);
+    return this.registerPendingParamFacet(target, method, idx, {
+      ...conf,
+      array: Array.isArray(type),
+      type: Array.isArray(type) ? type[0] : type,
+    });
   }
 
   /**
@@ -335,6 +330,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       schema: { ...dest.views[AllViewⲐ].schema, ...src.views?.[AllViewⲐ].schema },
       fields: [...dest.views[AllViewⲐ].fields, ...src.views?.[AllViewⲐ].fields ?? []]
     };
+    dest.methods = { ...src.methods ?? {}, ...dest.methods ?? {} };
     dest.metadata = { ...src.metadata ?? {}, ...dest.metadata ?? {} };
     dest.subType = src.subType || dest.subType;
     dest.title = src.title || dest.title;
@@ -411,7 +407,6 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       // Recompute subtypes
       this.#subTypes.clear();
       this.#typeKeys.delete(cls);
-      this.#methodSchemas.delete(cls);
       this.#accessorDescriptors.delete(cls);
 
       // Recompute subtype mappings
