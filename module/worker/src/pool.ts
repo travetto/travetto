@@ -30,7 +30,8 @@ type WorkCompletionEvent<X> = { idx: number, total?: number, value: X };
  */
 export class WorkPool<X> {
 
-  static DEFAULT_SIZE = Math.min(os.cpus().length - 1, 4);
+  static MAX_SIZE = os.cpus().length - 1;
+  static DEFAULT_SIZE = Math.min(WorkPool.MAX_SIZE, 4);
 
   /**
    * Generic-pool pool

@@ -1,5 +1,3 @@
-import os from 'os';
-
 import { CliCommand, CliCommandShape, CliModuleUtil } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { RootIndex } from '@travetto/manifest';
@@ -18,7 +16,7 @@ export class RepoExecCommand implements CliCommandShape {
   changed = true;
 
   /** Number of concurrent workers */
-  @Min(1) @Max(os.cpus().length - 1)
+  @Min(1) @Max(WorkPool.MAX_SIZE)
   workers = WorkPool.DEFAULT_SIZE;
 
   /** Prefix output by folder */

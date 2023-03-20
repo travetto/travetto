@@ -1,5 +1,4 @@
 import fs from 'fs/promises';
-import os from 'os';
 
 import { path } from '@travetto/manifest';
 import { GlobalEnvConfig } from '@travetto/base';
@@ -17,8 +16,8 @@ export class TestCommand implements CliCommandShape {
   /** Output format for test results */
   format: TestFormat = 'tap';
   /** Number of tests to run concurrently */
-  @Min(1) @Max(os.cpus().length)
-  concurrency: number = WorkPool.DEFAULT_SIZE;
+  @Min(1) @Max(WorkPool.MAX_SIZE)
+  concurrency: number = WorkPool.MAX_SIZE;
   /** Test run mode */
   mode: TestMode = 'standard';
 
