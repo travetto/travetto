@@ -93,12 +93,20 @@ export class HelpUtil {
     const maxWidth = keys.reduce((a, b) => Math.max(a, stripAnsiCodes(b).length), 0);
 
     for (const cmd of keys) {
-      const inst = await CliCommandRegistry.getInstance(cmd);
-      if (inst) {
-        const cfg = await CliCommandRegistry.getConfig(inst);
-        if (!cfg.hidden) {
-          const schema = await CliCommandSchemaUtil.getSchema(inst);
-          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
+      try {
+        const inst = await CliCommandRegistry.getInstance(cmd);
+        if (inst) {
+          const cfg = await CliCommandRegistry.getConfig(inst);
+          if (!cfg.hidden) {
+            const schema = await CliCommandSchemaUtil.getSchema(inst);
+            rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
+          }
+        }
+      } catch (err) {
+        if (err instanceof Error) {
+          rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ failure: err.message.split(/\n/)[0] }}`);
+        } else {
+          throw err;
         }
       }
     }
