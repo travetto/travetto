@@ -22,11 +22,12 @@ The versioning operation will find all the changed modules (and the modules that
 ```bash
 $ trv repo:version -h
 
-Usage: repo:version [options] <level:patch|major|minor|prerelease> [prefix:string]
+Usage: repo:version [options] <level:string> [prefix:string]
 
 Options:
   --changed, --no-changed  Only version changed modules (default: true)
   -f, --force              Force operation, even in a dirty workspace (default: false)
+  --commit, --no-commit    Produce release commit message (default: true)
   -h, --help               display help for command
 ```
 

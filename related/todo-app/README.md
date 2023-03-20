@@ -322,7 +322,7 @@ First we must start the application:
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v18.x.x'
+    nodeVersion: 'v19.x.x'
   }
 }
 2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:196] Config {

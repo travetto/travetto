@@ -26,11 +26,12 @@ The versioning operation will find all the changed modules (and the modules that
 </figcaption>
     <pre><code class="language-bash">$ trv repo:version <span class="token parameter variable">-h</span>
 
-Usage: repo:version <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>level:patch<span class="token operator">|</span>major<span class="token operator">|</span>minor<span class="token operator">|</span>prerelease<span class="token operator">></span> <span class="token punctuation">[</span>prefix:string<span class="token punctuation">]</span>
+Usage: repo:version <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>level:string<span class="token operator">></span> <span class="token punctuation">[</span>prefix:string<span class="token punctuation">]</span>
 
 Options:
   --changed, --no-changed  Only version changed modules <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -f, <span class="token parameter variable">--force</span>              Force operation, even <span class="token keyword">in</span> a dirty workspace <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  --commit, --no-commit    Produce release commit message <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -h, <span class="token parameter variable">--help</span>               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 

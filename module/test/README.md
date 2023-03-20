@@ -224,7 +224,7 @@ Usage: test [options] [first:string] [regexes...:string]
 
 Options:
   -f, --format <string>         Output format for test results (default: "tap")
-  -c, --concurrency <number>    Number of tests to run concurrently (default: 4)
+  -c, --concurrency <number>    Number of tests to run concurrently (default: 7)
   -m, --mode <single|standard>  Test run mode (default: "standard")
   -h, --help                    display help for command
 ```
