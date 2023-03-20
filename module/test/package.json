@@ -1,6 +1,6 @@
 {
   "name": "@travetto/test",
-  "version": "3.1.0-rc.0",
+  "version": "3.1.0-rc.1",
   "description": "Declarative test framework",
   "keywords": [
     "unit-testing",
@@ -34,7 +34,7 @@
     "@travetto/yaml": "^3.1.0-rc.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.1.0-rc.0",
+    "@travetto/cli": "^3.1.0-rc.1",
     "@travetto/transformer": "^3.1.0-rc.0"
   },
   "peerDependenciesMeta": {

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/pack",
-  "version": "3.1.0-rc.0",
+  "version": "3.1.0-rc.1",
   "description": "Code packing utilities",
   "keywords": [
     "travetto",
@@ -33,7 +33,7 @@
     "rollup-plugin-sourcemaps": "^0.6.3"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.1.0-rc.0"
+    "@travetto/cli": "^3.1.0-rc.1"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
