@@ -35,19 +35,18 @@ export class TerminalOperation {
       let start = Date.now();
       const minDelay = config.minDelay ?? 0;
 
-      const lines: string[] = [];
+      let line: string = '';
       for await (const text of source) {
-        lines.push(text);
+        line = text;
         if ((Date.now() - start) >= minDelay) {
-          const next = lines.splice(0, lines.length).pop()!;
           start = Date.now();
-          await TerminalWriter.for(term).setPosition(writePos).write(next).clearLine(1).commit(true);
+          await TerminalWriter.for(term).setPosition(writePos).write(line).clearLine(1).commit(true);
+          line = '';
         }
       }
 
-      const last = lines.splice(0, lines.length).pop();
-      if (last) {
-        await TerminalWriter.for(term).setPosition(writePos).write(last).clearLine(1).commit(true);
+      if (line) {
+        await TerminalWriter.for(term).setPosition(writePos).write(line).clearLine(1).commit(true);
       }
 
       if (config.clearOnFinish ?? true) {

@@ -19,6 +19,10 @@ export interface SuitesSummary extends Counts {
   duration: number;
 }
 
+export type TestRunState = {
+  testCount?: number;
+};
+
 /**
  * A test result handler
  */
@@ -26,7 +30,7 @@ export interface TestConsumer {
   /**
    * Listen for start of the test run
    */
-  onStart?(files: string[]): Promise<void> | void;
+  onStart?(testState: TestRunState): Promise<void> | void;
   /**
    * Handle individual tests events
    */

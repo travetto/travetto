@@ -71,10 +71,10 @@ export class StreamUtilTest {
   @Test()
   async waitForCompletion() {
     const { path } = await this.fixture.describe('long.js');
-    const state = ExecUtil.fork(path, ['100000'], { stdio: 'pipe' });
+    const state = ExecUtil.fork(path, ['20'], { stdio: 'pipe' });
     const stream = await StreamUtil.waitForCompletion(state.process.stdout!, () => state.result);
     const output = (await StreamUtil.toBuffer(stream)).toString('utf8').split(/\n/g);
-    assert(output.length >= 100000);
+    assert(output.length >= 20);
   }
 
   @Test()

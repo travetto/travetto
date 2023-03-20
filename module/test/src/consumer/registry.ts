@@ -58,9 +58,8 @@ export const TestConsumerRegistry = new $TestConsumerRegistry();
  * @param type The unique identifier for the consumer
  * @param isDefault Is this the default consumer.  Last one wins
  */
-export function Consumable(type: string, isDefault = false): ClassDecorator {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return function (cls: Class<TestConsumer>) {
+export function Consumable(type: string, isDefault = false): (cls: Class<TestConsumer>) => void {
+  return function (cls: Class<TestConsumer>): void {
     TestConsumerRegistry.add(type, cls, isDefault);
-  } as ClassDecorator;
+  };
 }

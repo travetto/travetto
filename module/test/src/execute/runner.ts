@@ -42,7 +42,8 @@ export class Runner {
       max: this.#state.concurrency
     });
 
-    await consumer.onStart(files);
+    const testCount = await RunnerUtil.getTestCount(this.#state.args);
+    await consumer.onStart({ testCount });
     await pool.process(new IterableWorkSet(files));
     return consumer.summarizeAsBoolean();
   }
@@ -55,7 +56,7 @@ export class Runner {
 
     const [file, ...args] = this.#state.args;
 
-    await consumer.onStart([path.resolve(file)]);
+    await consumer.onStart({});
     await TestExecutor.execute(consumer, file, ...args);
     return consumer.summarizeAsBoolean();
   }
