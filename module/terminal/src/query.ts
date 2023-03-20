@@ -1,4 +1,5 @@
-import tty from 'tty';
+import type tty from 'tty';
+import { spawn } from 'child_process';
 
 import { ANSICodes } from './codes';
 import { IterableUtil } from './iterable';
@@ -6,6 +7,31 @@ import { RGB, TermCoord, TermQuery } from './types';
 
 const to256 = (x: string): number => Math.trunc(parseInt(x, 16) / (16 ** (x.length - 2)));
 const COLOR_RESPONSE = /(?<r>][0-9a-f]+)[/](?<g>[0-9a-f]+)[/](?<b>[0-9a-f]+)[/]?(?<a>[0-9a-f]+)?/i;
+
+// @ts-expect-error
+const queryScript = (function (...bytes) {
+  const i = process.stdin;
+  i.setRawMode(true);
+  i.resume();
+  i.once('readable', function () {
+    const inp = i.read();
+    /* @ts-expect-error */
+    process.send(Buffer.isBuffer(inp) ? inp.toString('utf8') : inp);
+    i.setRawMode(false);
+  });
+  process.stdout.write(String.fromCharCode(...bytes));
+});
+
+const runQuery = async (input: tty.ReadStream, output: tty.WriteStream, code: string): Promise<Buffer> => {
+  const script = queryScript.toString().replaceAll('\'', '"').replaceAll('\n', '');
+  const fullScript = `(${script})(${code.split('').map(x => x.charCodeAt(0))})`
+  const proc = spawn(process.argv0, ['-e', fullScript], { stdio: [input, output, 2, 'ipc'], detached: true });
+  const text = await new Promise<string>((res, rej) => {
+    proc.once('message', res);
+    proc.on('error', rej);
+  });
+  return Buffer.from(text, 'utf8');
+};
 
 const ANSIQueries = {
   /** Parse xterm color response */
@@ -50,45 +76,8 @@ export class TerminalQuerier {
     this.#output = output;
   }
 
-  async #readInput(query: string): Promise<Buffer> {
-    const isRaw = this.#input.isRaw;
-    const isPaused = this.#input.isPaused();
-    const data = this.#input.listeners('data');
-
-    this.#restore = (): void => {
-      this.#input.removeAllListeners('readable');
-
-      if (isPaused) {
-        this.#input.pause();
-      }
-      this.#input.setRawMode(isRaw);
-      for (const fn of data) {
-        // @ts-ignore
-        this.#input.on('data', fn);
-      }
-    };
-
-    try {
-      this.#input.removeAllListeners('data');
-
-      if (isPaused) {
-        this.#input.resume();
-      }
-
-      this.#input.setRawMode(true);
-      // Send data, but do not wait on it
-      this.#output.write(query);
-      await new Promise(res => this.#input.once('readable', res));
-      const val: Buffer | string = this.#input.read();
-      return typeof val === 'string' ? Buffer.from(val, 'utf8') : val;
-    } finally {
-      this.#restore?.();
-      this.#restore = undefined;
-    }
-  }
-
   query<T>(q: TermQuery<T>): Promise<T> {
-    return this.#queue.add(() => this.#readInput(q.query()).then(q.response));
+    return this.#queue.add(() => runQuery(this.#input, this.#output, q.query()).then(q.response));
   }
 
   cursorPosition(): Promise<TermCoord> {

@@ -139,7 +139,6 @@ class $ShutdownManager {
   register(): void {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     process.exit = this.execute.bind(this) as (() => never); // NOTE: We do not actually throw an error the first time, to allow for graceful shutdown
-    process.on('exit', this.execute.bind(this));
     process.on('SIGINT', this.execute.bind(this, 130));
     process.on('SIGTERM', this.execute.bind(this, 143));
     process.on('SIGUSR2', this.requestExit.bind(this));
