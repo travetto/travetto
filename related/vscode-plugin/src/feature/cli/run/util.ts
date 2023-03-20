@@ -126,11 +126,13 @@ export class CliRunUtil {
             inputFlags: ['--module', module.name]
           });
         }
-        output.push({
-          ...choice,
-          prettyName: `${choice.name} [${choice.module}]`,
-          inputFlags: ['--module', choice.module]
-        });
+        if (modules.find(m => m.local && m.name === choice.module)) {
+          output.push({
+            ...choice,
+            prettyName: `${choice.name} [${choice.module}]`,
+            inputFlags: ['--module', choice.module]
+          });
+        }
       } else {
         output.push(choice);
       }
