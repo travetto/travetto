@@ -1,8 +1,5 @@
-Active Development (3.0.0 - RC)
+Active Development (3.1.0 - RC)
 =====================================
-- Rewrite docs:
-   * DOCS_OVERHAUL.md
-- Tests
-   * config
-   * base
-   * manifest
+CLI Run Targets should not expand into non-local modules
+Update cli docs for custom validation
+Add 3.1.0 milestone docs back

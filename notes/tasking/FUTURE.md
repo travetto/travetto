@@ -5,5 +5,3 @@ Future Ideas
 - Eventing in general
 - Enhance scaffold
    * Support monorepo
-- TSX Support
-   * Custom factories on a per project basis?
