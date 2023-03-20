@@ -13,6 +13,12 @@ export class PackageUtil {
   static #cache: Record<string, Package> = {};
   static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};
 
+  static #exec<T>(cwd: string, cmd: string): Promise<T> {
+    const env = { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH };
+    const text = execSync(cmd, { cwd, encoding: 'utf8', env, stdio: ['pipe', 'pipe'] }).toString().trim();
+    return JSON.parse(text);
+  }
+
   /**
    * Clear out cached package file reads
    */
@@ -186,15 +192,13 @@ export class PackageUtil {
         let out: PackageWorkspaceEntry[];
         switch (ctx.packageManager) {
           case 'npm': {
-            const text = execSync('npm query .workspace', { cwd: rootPath, encoding: 'utf8', env: { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH } });
-            out = JSON.parse(text)
-              .map((d: { location: string, name: string }) => ({ sourcePath: d.location, name: d.name }));
+            const res = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
+            out = res.map(d => ({ sourcePath: d.location, name: d.name }));
             break;
           }
           case 'yarn': {
-            const text = execSync('yarn -s workspaces info', { cwd: rootPath, encoding: 'utf8', env: { PATH: process.env.PATH, NODE_PATH: process.env.NODE_PATH } });
-            out = Object.entries<{ location: string }>(JSON.parse(text))
-              .map(([name, { location }]) => ({ sourcePath: location, name }));
+            const res = await this.#exec<Record<string, { location: string }>>(rootPath, 'npm query .workspace');
+            out = Object.entries(res).map(([name, { location }]) => ({ sourcePath: location, name }));
             break;
           }
         }
