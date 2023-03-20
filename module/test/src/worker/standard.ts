@@ -40,8 +40,8 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
           ['test:child'],
           {
             cwd,
-            env: { TRV_MANIFEST: RootIndex.getModule(module)!.outputPath },
-            stdio: [0, 'ignore', 2, 'ipc']
+            env: { TRV_MANIFEST: RootIndex.getModule(module)!.outputPath, TRV_QUIET: '1' },
+            stdio: ['ignore', 'ignore', 2, 'ipc']
           }
         )
       );

@@ -1,4 +1,4 @@
-import { TestConsumer } from '../types';
+import { TestConsumer, TestRunState } from '../types';
 import { TestResultsSummarizer } from './summarizer';
 import { TestConsumerRegistry } from '../registry';
 import { TestEvent } from '../../model/event';
@@ -27,9 +27,9 @@ export class RunnableTestConsumer implements TestConsumer {
     }
   }
 
-  async onStart(files: string[]): Promise<void> {
+  async onStart(state: TestRunState): Promise<void> {
     for (const c of this.#consumers) {
-      await c.onStart?.(files);
+      await c.onStart?.(state);
     }
   }
 

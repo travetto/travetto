@@ -52,11 +52,34 @@
       "outFiles": [
         "${workspaceFolder}/.trv_output/**/*.js",
       ],
+      "cwd": "${workspaceFolder}",
       "args": [
-        "run",
-        "rest"
+        "run:rest",
+        "-m",
+        "@travetto/todo-app"
       ],
-      "cwd": "${workspaceFolder}/related/todo-app"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Test Tap-Streamed",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/node_modules/.bin/trv",
+      "sourceMaps": true,
+      "outFiles": [
+        "${workspaceFolder}/.trv_output/**/*.js",
+      ],
+      "env": {
+        "TRV_MODULE": "@travetto/mono-repo"
+      },
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "test",
+        "-f",
+        "tap-streamed"
+      ],
     }
   ]
 }

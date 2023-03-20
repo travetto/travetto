@@ -1,13 +1,12 @@
 import { GlobalTerminal, TermStyleInput, Terminal } from '@travetto/terminal';
 import { ManualAsyncIterator } from '@travetto/worker';
-import { RootIndex } from '@travetto/manifest';
-
-import { SuitesSummary, TestConsumer } from '../types';
-import { Consumable } from '../registry';
 
 import { TestEvent } from '../../model/event';
 import { TestResult } from '../../model/test';
-import { SuiteRegistry } from '../../registry/suite';
+
+import { SuitesSummary, TestConsumer, TestRunState } from '../types';
+import { Consumable } from '../registry';
+
 import { TapEmitter } from './tap';
 
 /**
@@ -49,24 +48,11 @@ export class TapStreamedEmitter implements TestConsumer {
     this.#consumer = new TapEmitter(this.#terminal);
   }
 
-  async onStart(files: string[]): Promise<void> {
+  async onStart(state: TestRunState): Promise<void> {
     this.#consumer.onStart();
 
-    // Load all tests
-    for (const file of files) {
-      await import(RootIndex.getFromSource(file)!.import);
-    }
-
-    await SuiteRegistry.init();
-
-    const suites = SuiteRegistry.getClasses();
-    const total = suites
-      .map(c => SuiteRegistry.get(c))
-      .filter(c => !RootIndex.getFunctionMetadata(c.class)?.abstract)
-      .reduce((acc, c) => acc + (c.tests?.length ?? 0), 0);
-
     this.#progress = this.#terminal.streamToPosition(this.#results,
-      TapStreamedEmitter.makeProgressBar(this.#terminal, total),
+      TapStreamedEmitter.makeProgressBar(this.#terminal, state.testCount ?? 0),
       { position: 'bottom', minDelay: 100 }
     );
   }

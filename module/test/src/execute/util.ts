@@ -1,7 +1,7 @@
 import { createReadStream } from 'fs';
 import readline from 'readline';
 
-import { ShutdownManager, TimeUtil } from '@travetto/base';
+import { ExecUtil, ShutdownManager, TimeUtil } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 /**
@@ -46,5 +46,19 @@ export class RunnerUtil {
     return (await Promise.all(validFiles))
       .filter(x => x.valid)
       .map(x => x.file);
+  }
+
+  /**
+   * Get count of tests for a given set of patterns
+   * @param patterns
+   * @returns
+   */
+  static async getTestCount(patterns: string[]): Promise<number> {
+    const proc = ExecUtil.spawn('npx', ['trv', 'test:count', ...patterns], { stdio: 'pipe', catchAsResult: true });
+    const countRes = await proc.result;
+    if (!countRes.valid) {
+      throw new Error(countRes.stderr);
+    }
+    return countRes.valid ? +countRes.stdout : 0;
   }
 }
