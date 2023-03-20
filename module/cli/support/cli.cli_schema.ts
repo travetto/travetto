@@ -17,8 +17,6 @@ export class CliSchemaCommand {
   async validate(name?: string): Promise<CliValidationError | undefined> {
     if (name && !CliCommandRegistry.getCommandMapping().has(name)) {
       return {
-        kind: 'invalid',
-        path: 'name',
         source: 'arg',
         message: `name: ${name} is not a valid cli command`
       };

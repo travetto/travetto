@@ -38,17 +38,9 @@ export class TestCommand implements CliCommandShape {
     const mode = await this.resolvedMode(first, rest);
 
     if (mode === 'single' && !await this.isFirstFile(first)) {
-      return {
-        message: 'You must specify a proper test file to run in single mode',
-        kind: 'required',
-        path: 'regexes'
-      };
+      return { message: 'You must specify a proper test file to run in single mode', source: 'arg' };
     } else if (!/test\//.test(first)) {
-      return {
-        message: 'Only files in the test/ folder are permitted to be run',
-        kind: 'required',
-        path: 'regexes'
-      };
+      return { message: 'Only files in the test/ folder are permitted to be run', source: 'arg' };
     }
   }
 

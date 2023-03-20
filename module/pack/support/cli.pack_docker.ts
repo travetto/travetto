@@ -29,19 +29,9 @@ export class PackDockerCommand extends BasePackCommand {
     if (this.dockerPort?.length) {
       for (let i = 0; i < this.dockerPort.length; i++) {
         if (this.dockerPort[i] < 1) {
-          errs.push({
-            kind: 'invalid',
-            path: `dockerPort[${i}]`,
-            source: 'flag',
-            message: `dockerPort[${i}] is less than (1)`
-          });
+          errs.push({ source: 'flag', message: `dockerPort[${i}] is less than (1)` });
         } else if (this.dockerPort[i] > 65536) {
-          errs.push({
-            kind: 'invalid',
-            path: `dockerPort[${i}]`,
-            source: 'flag',
-            message: `dockerPort[${i}] is greater than (65536)`
-          });
+          errs.push({ source: 'flag', message: `dockerPort[${i}] is greater than (65536)` });
         }
       }
     }

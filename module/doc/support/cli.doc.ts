@@ -44,11 +44,7 @@ export class DocCommand implements CliCommandShape {
   async validate(...args: unknown[]): Promise<CliValidationError | undefined> {
     const docFile = path.resolve(this.input);
     if (!(await fs.stat(docFile).catch(() => false))) {
-      return {
-        kind: 'required',
-        path: 'input',
-        message: `The input ${this.input} does not exist`
-      };
+      return { message: `input: ${this.input} does not exist`, source: 'flag' };
     }
   }
 

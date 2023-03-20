@@ -25,11 +25,7 @@ export class MainCommand implements CliCommandShape {
   async validate(fileOrImport: string): Promise<CliValidationError | undefined> {
     const imp = await this.#getImport(fileOrImport);
     if (!imp) {
-      return {
-        message: `Unknown file: ${fileOrImport}`,
-        kind: 'required',
-        path: 'fileOrImport'
-      };
+      return { message: `Unknown file: ${fileOrImport}` };
     }
   }
 

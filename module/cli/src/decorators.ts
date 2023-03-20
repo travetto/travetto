@@ -72,10 +72,11 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
       });
 
       // Register validator for module
-      (pendingCls.validators ??= []).push(item =>
+      (pendingCls.validators ??= []).push(async item => {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        CliModuleUtil.validateCommandModule(getMod(target), item as { module?: string })
-      );
+        const res = await CliModuleUtil.validateCommandModule(getMod(target), item as { module?: string });
+        return res ? { ...res, kind: 'custom', path: '.' } : res;
+      });
     }
   };
 }

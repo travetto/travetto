@@ -13,14 +13,6 @@ export type CliValidationError = {
    */
   message: string;
   /**
-   * The object path of the error
-   */
-  path: string;
-  /**
-   * The kind of validation
-   */
-  kind: string;
-  /**
    * Source of validation
    */
   source?: 'flag' | 'arg' | 'custom';
@@ -69,7 +61,7 @@ export interface CliCommandShape {
   /**
    * Validation method
    */
-  validate?(...args: unknown[]): OrProm<CliValidationError | CliValidationError[] | undefined>;
+  validate?(...unknownArgs: unknown[]): OrProm<CliValidationError | CliValidationError[] | undefined>;
 }
 
 /**

@@ -22,11 +22,7 @@ export class CliServiceCommand implements CliCommandShape {
     const all = await this.#getServices(services);
 
     if (!all.length) {
-      return {
-        message: 'No services found',
-        kind: 'required',
-        path: 'services'
-      };
+      return { message: 'No services found' };
     }
   }
 

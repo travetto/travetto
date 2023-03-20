@@ -236,7 +236,7 @@ export class CliCommandSchemaUtil {
       async (): Promise<void> => {
         const res = await cmd.validate?.(...args);
         if (res) {
-          throw new ValidationResultError(Array.isArray(res) ? res : [res]);
+          throw new CliValidationResultError(Array.isArray(res) ? res : [res]);
         }
       },
     ];
@@ -244,7 +244,7 @@ export class CliCommandSchemaUtil {
     const SOURCES = ['flag', 'arg', 'custom'] as const;
 
     const results = validators.map((x, i) => x().catch(err => {
-      if (!(err instanceof ValidationResultError)) {
+      if (!(err instanceof CliValidationResultError) && !(err instanceof ValidationResultError)) {
         throw err;
       }
       return err.errors.map(v => ({ source: SOURCES[i], ...v }));
