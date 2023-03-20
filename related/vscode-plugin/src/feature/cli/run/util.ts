@@ -6,6 +6,8 @@ import { ParameterSelector } from '../../../core/parameter';
 
 type PickItem = vscode.QuickPickItem & { target: RunChoice };
 
+type ModuleGraphItem<T> = { name: string, children: T, local?: boolean };
+
 /**
  * Utils for handling cli running
  */
@@ -86,14 +88,14 @@ export class CliRunUtil {
     return selected;
   }
 
-  static async getModules(): Promise<{ name: string, children: Set<string> }[]> {
+  static async getModules(): Promise<ModuleGraphItem<Set<string>>[]> {
     const res = Workspace.spawnCli('list', ['-f', 'json'], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
     const data = await res.result;
     if (!data.valid) {
       throw new Error(`Unable to collect module list: ${data.message}`);
     }
-    const result: { name: string, children: string[] }[] = JSON.parse(data.stdout);
-    return result.map(x => ({ name: x.name, children: new Set(x.children) }));
+    const result: ModuleGraphItem<string[]>[] = JSON.parse(data.stdout);
+    return result.map(x => ({ name: x.name, children: new Set(x.children), local: !!x.local }));
   }
 
   /**
@@ -106,7 +108,7 @@ export class CliRunUtil {
       throw new Error(`Unable to collect cli command list: ${data.message}`);
     }
     let choices: RunChoice[] = JSON.parse(data.stdout);
-    let modules: { name: string, children: Set<string> }[];
+    let modules: ModuleGraphItem<Set<string>>[];
 
     // Only return `run:* targets
     choices = choices.filter(x => x.runTarget);
@@ -117,7 +119,7 @@ export class CliRunUtil {
       const moduleFlag = choice.flags.find(x => x.name === 'module' && x.type === 'string');
       if (Workspace.isMonoRepo && moduleFlag) {
         modules ??= await this.getModules();
-        for (const module of modules.filter(m => m.children.has(choice.module))) {
+        for (const module of modules.filter(m => m.local && m.children.has(choice.module))) {
           output.push({
             ...choice,
             prettyName: `${choice.name} [${module.name}]`,

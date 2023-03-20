@@ -31,7 +31,7 @@ export class ListModuleCommand implements CliCommandShape {
       }
       case 'json': {
         const outputMap = CliModuleUtil.getDependencyGraph(mods);
-        await write(JSON.stringify(Object.entries(outputMap).map(([name, children]) => ({ name, children })), null, 2));
+        await write(JSON.stringify(Object.entries(outputMap).map(([name, children]) => ({ name, children, local: RootIndex.getModule(name)?.local })), null, 2));
         break;
       }
       case 'graph': {
