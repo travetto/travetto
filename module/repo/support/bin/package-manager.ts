@@ -1,7 +1,7 @@
 import { ExecUtil, ExecutionOptions, ExecutionState, ExecutionResult } from '@travetto/base';
 import { IndexedModule, ManifestContext } from '@travetto/manifest';
 
-export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease';
+export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';
 
 /**
  * Utilities for working with package managers
