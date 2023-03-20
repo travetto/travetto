@@ -13,6 +13,8 @@ export class RepoVersionCommand implements CliCommandShape {
   changed = true;
   /** Force operation, even in a dirty workspace */
   force = false;
+  /** Produce release commit message */
+  commit = true;
 
   async validate(...args: unknown[]): Promise<CliValidationError | undefined> {
     if (!this.force && await CliScmUtil.isWorkspaceDirty()) {
@@ -37,8 +39,9 @@ export class RepoVersionCommand implements CliCommandShape {
     await PackageManager.version(RootIndex.manifest, modules, level, prefix);
 
     const versions = await CliModuleUtil.synchronizeModuleVersions();
-    const commitMessage = `Publish ${modules.map(x => `${x.name}#${versions[x.name]?.replace('^', '') ?? x.version}`).join(',')}`;
-
-    console.log!(await CliScmUtil.createCommit(commitMessage));
+    if (this.commit) {
+      const commitMessage = `Publish ${modules.map(x => `${x.name}#${versions[x.name]?.replace('^', '') ?? x.version}`).join(',')}`;
+      console.log!(await CliScmUtil.createCommit(commitMessage));
+    }
   }
 }
