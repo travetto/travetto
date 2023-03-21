@@ -6,7 +6,7 @@ import { ManifestModule, ManifestModuleUtil, Package, path, RootIndex } from '@t
 
 const INTRO = {
   commonjs: `
-globalThis.crypto = require('crypto');
+try { globalThis.crypto = require('crypto'); } catch {}
 try { require('./.env.js')} catch {}
 
 function __importStar(mod) { 
@@ -18,7 +18,7 @@ function __importStar(mod) {
 }
 `,
   module: `
-globalThis.crypto = await import('crypto');
+tyr{ globalThis.crypto = await import('crypto'); } catch {}
 try {await import('./.env.js')} catch {}
 `
 };
