@@ -12,6 +12,9 @@ import { Appender, Formatter, LogEvent } from './types';
 
 @Config('log')
 export class CommonLoggerConfig {
+  @EnvVar('TRV_LOG_COMMON')
+  commonActive?: boolean;
+
   /** Should we enrich the console by default */
   @EnvVar('TRV_LOG_FORMAT')
   format: 'line' | 'json' = 'line';
@@ -46,6 +49,10 @@ export class CommonLogger {
 
   @Inject()
   config: CommonLoggerConfig;
+
+  get active(): boolean {
+    return this.config.commonActive !== false;
+  }
 
   postConstruct(): void {
     this.#formatter = this.config.format === 'line' ?

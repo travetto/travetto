@@ -21,7 +21,9 @@ export class LogService implements ConsoleListener, AutoCreate {
     await GlobalTerminal.init();
 
     const def = await DependencyRegistry.getInstance(CommonLogger);
-    this.#listeners.push(def);
+    if (def.active) {
+      this.#listeners.push(def);
+    }
 
     const loggers = DependencyRegistry.getCandidateTypes(LoggerTarget);
     const instances = await Promise.all(loggers.map(l => DependencyRegistry.getInstance<Logger>(l.class, l.qualifier)));
