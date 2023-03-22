@@ -4,7 +4,7 @@ import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 import { RestApplication, RestSslConfig } from '@travetto/rest';
 
-@CliCommand()
+@CliCommand({ runTarget: true })
 export class SampleApp {
 
   envInit(): GlobalEnvConfig {

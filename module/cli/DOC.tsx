@@ -108,11 +108,9 @@ export const text = <>
   </c.Section>
 
   <c.Section title='VSCode Integration'>
-    By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  {d.mod('Rest')} does expose a cli target {d.input('run:rest')} that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the {d.library('TravettoPlugin')}.
+    By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  {d.mod('Rest')} does expose a cli target {d.input('run:rest')} that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the {d.library('TravettoPlugin')}. This is achieved by setting the {d.input('runTarget')} field on the {CliCommand} decorator.  This means the target will be visible within the editor tooling.
 
     <c.Code title='Simple Run Target' src='doc/cli.run_simple.ts' />
-
-    Also, any command name that starts with {d.input('run:')} (i.e. {d.path('support/cli.run_*.ts')}), will be opted-in to the run behavior unless explicitly disabled.
   </c.Section>
 
   <c.Section title='Advanced Usage'>

@@ -76,6 +76,11 @@ export const text = <>
 
       And similarly, the {d.input('description')} will be picked up from the {d.library('JSDoc')} comments, and additionally all fields can be set using the {Describe} decorator.
     </c.SubSection>
+    <c.SubSection title='Parameters'>
+      Parameters are available in certain scenarios (e.g. {d.mod('Rest')} endpoints and {d.mod('Cli')} main methods).  In these scenarios, all of the field decorators are valid, but need to be called slightly differently to pass the typechecker. The simple solution is to use the {d.field('Arg')} field of the decorator to convince Typescript its the correct type.
+
+      <c.Code title='Sample Parameter Usage' src='doc/param-usage.ts'></c.Code>
+    </c.SubSection>
   </c.Section>
 
   <c.Section title='Binding/Validation'>

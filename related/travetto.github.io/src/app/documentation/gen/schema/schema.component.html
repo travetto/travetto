@@ -71,25 +71,25 @@ From this schema, the registry would have the following information:
 <h3 id="fields">Fields</h3>
 
 This schema provides a powerful base for data binding and validation at runtime.  Additionally there may be types that cannot be detected, or some information that the programmer would like to override. Below are the supported field decorators:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L38">@Field</a> defines a field that will be serialized.</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L78">@Required</a> defines a that field should be required</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L85">@Enum</a> defines the allowable values that a field can have</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L106">@Match</a> defines a regular expression that the field value should match</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114">@MinLength</a> enforces min length of a string</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124">@MaxLength</a> enforces max length of a string</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114">@Min</a> enforces min value for a date or a number</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124">@Max</a> enforces max value for a date or a number</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L151">@Email</a> ensures string field matches basic email regex</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L158">@Telephone</a> ensures string field matches basic telephone regex</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L165">@Url</a> ensures string field matches basic url regex</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L204">@Ignore</a> exclude from auto schema registration</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L179">@Integer</a> ensures number passed in is only a whole number</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L185">@Float</a> ensures number passed in allows fractional values</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L197">@Currency</a> provides support for standard currency</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L93">@Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L98">@LongText</a> same as text, but expects longer form content</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L65">@Readonly</a> defines a that field should not be bindable external to the class</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L59">@Writeonly</a> defines a that field should not be exported in serialization, but that it can be bound to</li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L31">@Field</a> defines a field that will be serialized.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L71">@Required</a> defines a that field should be required</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L78">@Enum</a> defines the allowable values that a field can have</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99">@Match</a> defines a regular expression that the field value should match</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107">@MinLength</a> enforces min length of a string</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117">@MaxLength</a> enforces max length of a string</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107">@Min</a> enforces min value for a date or a number</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117">@Max</a> enforces max value for a date or a number</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L144">@Email</a> ensures string field matches basic email regex</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L151">@Telephone</a> ensures string field matches basic telephone regex</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L158">@Url</a> ensures string field matches basic url regex</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L197">@Ignore</a> exclude from auto schema registration</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L172">@Integer</a> ensures number passed in is only a whole number</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L178">@Float</a> ensures number passed in allows fractional values</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L190">@Currency</a> provides support for standard currency</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L86">@Text</a> indicates that a field is expecting natural language input, not just discrete values</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L91">@LongText</a> same as text, but expects longer form content</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L58">@Readonly</a> defines a that field should not be bindable external to the class</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L52">@Writeonly</a> defines a that field should not be exported in serialization, but that it can be bound to</li>
 </ul>
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. <br><br>
 Just like the class, all fields can be defined with
@@ -97,6 +97,26 @@ Just like the class, all fields can be defined with
 <li><code class="item input">examples</code> - A set of examples as <a target="_blank" class="external-link" href="https://www.json.org">JSON</a> or <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/YAML">YAML</a></li>
 </ul>
 And similarly, the <code class="item input">description</code> will be picked up from the <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a> comments, and additionally all fields can be set using the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/common.ts#L15">@Describe</a> decorator.
+
+<h3 id="parameters">Parameters</h3>
+
+Parameters are available in certain scenarios (e.g. <a class="module-link" routerLink="/docs/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> endpoints and <a class="module-link" routerLink="/docs/cli" title="CLI infrastructure for Travetto framework">Command Line Interface</a> main methods).  In these scenarios, all of the field decorators are valid, but need to be called slightly differently to pass the typechecker. The simple solution is to use the <code class="item field">Arg</code> field of the decorator to convince Typescript its the correct type.
+
+  <figure class="code">
+    <figcaption class="code">Sample Parameter Usage
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/schema/doc/param-usage.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Match<span class="token punctuation">,</span> Min <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../__index__'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token constant">NAME_REGEX</span> <span class="token operator">=</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">[A-Z][a-z]+(\s+[A-Z][a-z]+)*</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ParamUsage</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">main</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">Match</span></span><span class="token punctuation">(</span><span class="token constant">NAME_REGEX</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Param name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token decorator"><span class="token at operator">@</span><span class="token function">Min</span></span><span class="token punctuation">(</span><span class="token number">20</span><span class="token punctuation">)</span><span class="token punctuation">.</span>Param age<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Valid name and age!'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> name<span class="token punctuation">,</span> age <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
 
 <h2 id="binding-validation">Binding/Validation</h2>
 

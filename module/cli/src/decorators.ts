@@ -35,7 +35,6 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: target as ConcreteClass<T>,
       hidden: cfg.hidden,
-      runTarget: cfg.runTarget ?? name.startsWith('run:'),
       preMain: (cmd: CliCommandShape & { env?: string, profile?: string[], module?: string }) => {
         if (addEnv) { defineGlobalEnv({ envName: cmd.env }); }
         if (addProfile) { defineGlobalEnv({ profiles: cmd.profile }); }

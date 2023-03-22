@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { Suite, Test, BeforeAll } from '@travetto/test';
-import { Describe, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
+import { Describe, Min, Required, SchemaRegistry, ValidationResultError } from '@travetto/schema';
 
 import { Query, Header, Path, Context } from '../src/decorator/param';
 import { Post, Get } from '../src/decorator/endpoint';
@@ -41,6 +41,9 @@ class ParamController {
 
   @Get('/job/output/:jobId')
   async jobOutput(@Path() jobId: string, @Required(false) @Query() time: Date) { }
+
+  @Get('/job/output-min/:jobId')
+  async jobOutputMin(@Path() jobId: string, @Min(10).Param @Query() age: number) { }
 
   @Get('/job/output2')
   async jobOutput2(@Query({ name: 'optional' }) time?: Date) { }
@@ -194,5 +197,14 @@ export class ParameterTest {
     await assert.doesNotReject(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: {} } as unknown as Request, {} as Response));
     await assert.rejects(() => ParamExtractor.extract(ep, { params: {}, query: {} } as unknown as Request, {} as Response), ValidationResultError);
     await assert.rejects(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { time: 'blue' } } as unknown as Request, {} as Response), ValidationResultError);
+  }
+
+  @Test()
+  async realWorldMin() {
+    const ep = ParameterTest.getEndpoint('/job/output-min/:jobId', 'get');
+    await assert.doesNotReject(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { age: '20' } } as unknown as Request, {} as Response));
+    await assert.rejects(() => ParamExtractor.extract(ep, { params: {}, query: {} } as unknown as Request, {} as Response), ValidationResultError);
+    await assert.rejects(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { age: 'blue' } } as unknown as Request, {} as Response), ValidationResultError);
+    await assert.rejects(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { age: 9 } } as unknown as Request, {} as Response), ValidationResultError);
   }
 }

@@ -130,9 +130,9 @@ HELLO
 
 The [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20) supports the following data types for flags:
    *  Boolean values
-   *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L179), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L185), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L173), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124) decorators help provide additional validation.
-   *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L106) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L85) provide additional constraints
-   *  Date values. The [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L114) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L124) decorators help provide additional validation.
+   *  Number values. The [@Integer](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L172), [@Float](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L178), [@Precision](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L166), [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117) decorators help provide additional validation.
+   *  String values. [@MinLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107), [@MaxLength](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117), [@Match](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L99) and [@Enum](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L78) provide additional constraints
+   *  Date values. The [@Min](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L107) and [@Max](https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L117) decorators help provide additional validation.
    *  String lists. Same as String, but allowing multiple values.
    *  Numeric lists. Same as Number, but allowing multiple values.
 
@@ -358,7 +358,7 @@ CuStOm
 ```
 
 ## VSCode Integration
-By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") does expose a cli target `run:rest` that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin).
+By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") does expose a cli target `run:rest` that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L20) decorator.  This means the target will be visible within the editor tooling.
 
 **Code: Simple Run Target**
 ```typescript
@@ -375,8 +375,6 @@ export class RunCommand {
   }
 }
 ```
-
-Also, any command name that starts with `run:` (i.e. `support/cli.run_*.ts`), will be opted-in to the run behavior unless explicitly disabled.
 
 ## Advanced Usage
 
@@ -426,7 +424,7 @@ import { ServerHandle } from '../src/types';
 /**
  * Run a rest server as an application
  */
-@CliCommand({ fields: ['module', 'env', 'profile'] })
+@CliCommand({ runTarget: true, fields: ['module', 'env', 'profile'] })
 export class RunRestCommand {
 
   /** Port to run on */
