@@ -305,8 +305,8 @@ First we must start the application:
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/rest:src/application/rest.ts:195] Manifest {
-  info: {
+2029-03-14T04:00:00.618Z info  [@travetto/config:src/configuration.ts:141] Initialized {
+  manifest: {
     name: '@travetto/todo-app',
     main: undefined,
     author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
@@ -323,74 +323,74 @@ First we must start the application:
     profiles: [ 'dev' ],
     resourcePaths: [],
     nodeVersion: 'v19.x.x'
-  }
-}
-2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:196] Config {
-  sources: [
-    'application.1 - file://./resources/application.yml',
-    'dev.1 - file://./resources/dev.yml',
-    'override.3 - memory://override'
-  ],
-  active: {
-    ApiHostConfig: { servers: { '0': { url: 'http://localhost:3000' } }, openapi: '3.1.0' },
-    ApiInfoConfig: {
-      contact: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
-      description: '',
-      license: { name: 'ISC' },
-      title: '@travetto/todo-app',
-      version: '0.0.0'
-    },
-    ApiSpecConfig: {
-      output: './openapi.yml',
-      persist: false,
-      skipRoutes: false,
-      exposeAllSchemas: false
-    },
-    CommonLoggerConfig: { format: 'line', plain: false, time: 'ms' },
-    FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
-    MemoryModelConfig: {},
-    MongoModelConfig: {
-      hosts: { '0': 'localhost' },
-      namespace: 'app',
-      username: '',
-      port: 27017,
-      connectionOptions: {},
-      srvRecord: false,
-      options: {}
-    },
-    RestAcceptsConfig: { types: {} },
-    RestAsyncContextConfig: {},
-    RestAuthConfig: {},
-    RestAuthLoginConfig: {},
-    RestAuthVerifyConfig: { roles: {} },
-    RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-    RestConfig: {
-      serve: true,
-      port: 3000,
-      trustProxy: false,
-      hostname: 'localhost',
-      bindAddress: '0.0.0.0',
-      baseUrl: 'http://localhost:3000',
-      defaultMessage: true
-    },
-    RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-    RestCorsConfig: {},
-    RestGetCacheConfig: {},
-    RestLogRoutesConfig: {},
-    RestSessionConfig: {},
-    RestSslConfig: { active: false },
-    SessionConfig: {
-      autoCommit: true,
-      maxAge: 1800000,
-      renew: true,
-      rolling: false,
-      sign: true,
-      keyName: 'trv_sid',
-      transport: 'cookie'
+  },
+  config: {
+    sources: [
+      'application.1 - file://./resources/application.yml',
+      'dev.1 - file://./resources/dev.yml',
+      'override.3 - memory://override'
+    ],
+    active: {
+      ApiHostConfig: { openapi: '3.1.0' },
+      ApiInfoConfig: {
+        contact: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
+        description: '',
+        license: { name: 'ISC' },
+        title: '@travetto/todo-app',
+        version: '0.0.0'
+      },
+      ApiSpecConfig: {
+        output: './openapi.yml',
+        persist: false,
+        skipRoutes: false,
+        exposeAllSchemas: false
+      },
+      CommonLoggerConfig: { format: 'line', plain: false, time: 'ms' },
+      FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
+      MemoryModelConfig: {},
+      MongoModelConfig: {
+        hosts: { '0': 'localhost' },
+        namespace: 'app',
+        username: '',
+        port: 27017,
+        connectionOptions: {},
+        srvRecord: false,
+        options: {}
+      },
+      RestAcceptsConfig: { types: {} },
+      RestAsyncContextConfig: {},
+      RestAuthConfig: {},
+      RestAuthLoginConfig: {},
+      RestAuthVerifyConfig: { roles: {} },
+      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
+      RestConfig: {
+        serve: true,
+        port: 3000,
+        trustProxy: false,
+        hostname: 'localhost',
+        bindAddress: '0.0.0.0',
+        baseUrl: 'http://localhost:3000',
+        defaultMessage: true
+      },
+      RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      RestCorsConfig: {},
+      RestGetCacheConfig: {},
+      RestLogRoutesConfig: {},
+      RestSessionConfig: {},
+      RestSslConfig: { active: false },
+      SessionConfig: {
+        autoCommit: true,
+        maxAge: 1800000,
+        renew: true,
+        rolling: false,
+        sign: true,
+        keyName: 'trv_sid',
+        transport: 'cookie'
+      }
     }
   }
 }
-2029-03-14T04:00:01.510Z info  [@travetto/rest:src/application/rest.ts:197] Listening { port: 3000 }
+2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:196] Listening { port: 3000 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api. 
@@ -420,7 +420,7 @@ $ trv main support/create-todo.ts <key>
 
 {
   text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:02.450Z',
+  created: '2029-03-14T04:00:01.510Z',
   id: '<uniqueId>'
 }
 ```
@@ -445,7 +445,7 @@ $ trv main support/list-todo.ts <key>
   {
     id: '<uniqueId>',
     text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:02.819Z'
+    created: '2029-03-14T04:00:01.814Z'
   }
 ]
 ```

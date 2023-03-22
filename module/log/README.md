@@ -93,6 +93,9 @@ The main caveat that comes with this, is that not all objects can be converted t
 **Code: Standard Logging Config**
 ```typescript
 export class CommonLoggerConfig {
+  @EnvVar('TRV_LOG_COMMON')
+  commonActive?: boolean;
+
   /** Should we enrich the console by default */
   @EnvVar('TRV_LOG_FORMAT')
   format: 'line' | 'json' = 'line';

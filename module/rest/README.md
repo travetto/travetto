@@ -239,8 +239,8 @@ By default, the framework provides a default [@CliCommand](https://github.com/tr
 ```bash
 $ trv run:rest
 
-Manifest {
-  info: {
+Initialized {
+  manifest: {
     name: '@travetto-doc/rest',
     main: undefined,
     author: undefined,
@@ -257,28 +257,28 @@ Manifest {
     profiles: [ 'dev' ],
     resourcePaths: [],
     nodeVersion: 'v19.x.x'
-  }
-}
-Config {
-  sources: [ 'override.3 - memory://override' ],
-  active: {
-    RestAcceptsConfig: { types: {} },
-    RestAsyncContextConfig: {},
-    RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-    RestConfig: {
-      serve: true,
-      port: 3000,
-      trustProxy: false,
-      hostname: 'localhost',
-      bindAddress: '0.0.0.0',
-      baseUrl: 'http://localhost:3000',
-      defaultMessage: true
-    },
-    RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-    RestCorsConfig: {},
-    RestGetCacheConfig: {},
-    RestLogRoutesConfig: {},
-    RestSslConfig: { active: false }
+  },
+  config: {
+    sources: [ 'override.3 - memory://override' ],
+    active: {
+      RestAcceptsConfig: { types: {} },
+      RestAsyncContextConfig: {},
+      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
+      RestConfig: {
+        serve: true,
+        port: 3000,
+        trustProxy: false,
+        hostname: 'localhost',
+        bindAddress: '0.0.0.0',
+        baseUrl: 'http://localhost:3000',
+        defaultMessage: true
+      },
+      RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      RestCorsConfig: {},
+      RestGetCacheConfig: {},
+      RestLogRoutesConfig: {},
+      RestSslConfig: { active: false }
+    }
   }
 }
 Listening { port: 3000 }
@@ -321,8 +321,8 @@ And using the pattern established in the [Command Line Interface](https://github
 $ trv run:rest:custom
 
 CUSTOM STARTUP
-Manifest {
-  info: {
+Initialized {
+  manifest: {
     name: '@travetto-doc/rest',
     main: undefined,
     author: undefined,
@@ -339,28 +339,28 @@ Manifest {
     profiles: [ 'prod' ],
     resourcePaths: [],
     nodeVersion: 'v19.x.x'
-  }
-}
-Config {
-  sources: [ 'override.3 - memory://override' ],
-  active: {
-    RestAcceptsConfig: { types: {} },
-    RestAsyncContextConfig: {},
-    RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-    RestConfig: {
-      serve: true,
-      port: 3000,
-      trustProxy: false,
-      hostname: 'localhost',
-      bindAddress: '0.0.0.0',
-      baseUrl: 'http://localhost:3000',
-      defaultMessage: true
-    },
-    RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
-    RestCorsConfig: {},
-    RestGetCacheConfig: {},
-    RestLogRoutesConfig: {},
-    RestSslConfig: { active: true }
+  },
+  config: {
+    sources: [ 'override.3 - memory://override' ],
+    active: {
+      RestAcceptsConfig: { types: {} },
+      RestAsyncContextConfig: {},
+      RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
+      RestConfig: {
+        serve: true,
+        port: 3000,
+        trustProxy: false,
+        hostname: 'localhost',
+        bindAddress: '0.0.0.0',
+        baseUrl: 'http://localhost:3000',
+        defaultMessage: true
+      },
+      RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
+      RestCorsConfig: {},
+      RestGetCacheConfig: {},
+      RestLogRoutesConfig: {},
+      RestSslConfig: { active: true }
+    }
   }
 }
 Listening { port: 3000 }

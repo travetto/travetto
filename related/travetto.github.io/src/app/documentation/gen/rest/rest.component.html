@@ -269,8 +269,8 @@ By default, the framework provides a default <a target="_blank" class="source-li
 </figcaption>
     <pre><code class="language-bash">$ trv run:rest
 
-Manifest <span class="token punctuation">{{'{'}}</span>
-  info: <span class="token punctuation">{{'{'}}</span>
+Initialized <span class="token punctuation">{{'{'}}</span>
+  manifest: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto-doc/rest'</span>,
     main: undefined,
     author: undefined,
@@ -287,28 +287,28 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     profiles: <span class="token punctuation">[</span> <span class="token string">'dev'</span> <span class="token punctuation">]</span>,
     resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
     nodeVersion: <span class="token string">'v19.x.x'</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span>
-Config <span class="token punctuation">{{'{'}}</span>
-  sources: <span class="token punctuation">[</span> <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,
-  active: <span class="token punctuation">{{'{'}}</span>
-    RestAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-    RestAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-    RestConfig: <span class="token punctuation">{{'{'}}</span>
-      serve: true,
-      port: <span class="token number">3000</span>,
-      trustProxy: false,
-      hostname: <span class="token string">'localhost'</span>,
-      bindAddress: <span class="token string">'0.0.0.0'</span>,
-      baseUrl: <span class="token string">'http://localhost:3000'</span>,
-      defaultMessage: <span class="token boolean">true</span>
-    <span class="token punctuation">{{'}'}}</span>,
-    RestCookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
-    RestCorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    RestGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    RestLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  config: <span class="token punctuation">{{'{'}}</span>
+    sources: <span class="token punctuation">[</span> <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,
+    active: <span class="token punctuation">{{'{'}}</span>
+      RestAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      RestAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      RestConfig: <span class="token punctuation">{{'{'}}</span>
+        serve: true,
+        port: <span class="token number">3000</span>,
+        trustProxy: false,
+        hostname: <span class="token string">'localhost'</span>,
+        bindAddress: <span class="token string">'0.0.0.0'</span>,
+        baseUrl: <span class="token string">'http://localhost:3000'</span>,
+        defaultMessage: <span class="token boolean">true</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      RestCookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
+      RestCorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>
@@ -357,8 +357,8 @@ And using the pattern established in the <a class="module-link" routerLink="/doc
     <pre><code class="language-bash">$ trv run:rest:custom
 
 CUSTOM STARTUP
-Manifest <span class="token punctuation">{{'{'}}</span>
-  info: <span class="token punctuation">{{'{'}}</span>
+Initialized <span class="token punctuation">{{'{'}}</span>
+  manifest: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'@travetto-doc/rest'</span>,
     main: undefined,
     author: undefined,
@@ -375,28 +375,28 @@ Manifest <span class="token punctuation">{{'{'}}</span>
     profiles: <span class="token punctuation">[</span> <span class="token string">'prod'</span> <span class="token punctuation">]</span>,
     resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
     nodeVersion: <span class="token string">'v19.x.x'</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">{{'}'}}</span>
-Config <span class="token punctuation">{{'{'}}</span>
-  sources: <span class="token punctuation">[</span> <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,
-  active: <span class="token punctuation">{{'{'}}</span>
-    RestAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-    RestAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
-    RestConfig: <span class="token punctuation">{{'{'}}</span>
-      serve: true,
-      port: <span class="token number">3000</span>,
-      trustProxy: false,
-      hostname: <span class="token string">'localhost'</span>,
-      bindAddress: <span class="token string">'0.0.0.0'</span>,
-      baseUrl: <span class="token string">'http://localhost:3000'</span>,
-      defaultMessage: <span class="token boolean">true</span>
-    <span class="token punctuation">{{'}'}}</span>,
-    RestCookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
-    RestCorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    RestGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    RestLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-    RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>,
+  config: <span class="token punctuation">{{'{'}}</span>
+    sources: <span class="token punctuation">[</span> <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,
+    active: <span class="token punctuation">{{'{'}}</span>
+      RestAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      RestAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      RestConfig: <span class="token punctuation">{{'{'}}</span>
+        serve: true,
+        port: <span class="token number">3000</span>,
+        trustProxy: false,
+        hostname: <span class="token string">'localhost'</span>,
+        bindAddress: <span class="token string">'0.0.0.0'</span>,
+        baseUrl: <span class="token string">'http://localhost:3000'</span>,
+        defaultMessage: <span class="token boolean">true</span>
+      <span class="token punctuation">{{'}'}}</span>,
+      RestCookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
+      RestCorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+      RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">3000</span> <span class="token punctuation">{{'}'}}</span></code></pre>

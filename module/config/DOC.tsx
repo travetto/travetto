@@ -48,6 +48,15 @@ export const text = <>
       }} />
     </c.SubSection>
 
+    <c.SubSection title='Standard Configuration Extension'>
+      The framework provides two simple base classes that assist with existing patterns of usage to make adding in new configuration sources as easy as possible.  The goal here is for the developer to either instantiate or extend these classes and produce a configuration source unique to their needs:
+
+      <c.Code title='Memory Provider' src='src/source/memory.ts'></c.Code>
+
+      <c.Code title='Environment JSON Provider' src='src/source/env.ts'></c.Code>
+
+    </c.SubSection>
+
     <c.SubSection title='Custom Configuration Provider'>
       In addition to files and environment variables, configuration sources can also be provided via the class itself.  This is useful for reading remote configurations, or dealing with complex configuration normalization.  The only caveat to this pattern, is that the these configuration sources cannot rely on the {Configuration} service for input.  This means any needed configuration will need to be accessed via specific patterns.
 

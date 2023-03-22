@@ -111,6 +111,9 @@ The main caveat that comes with this, is that not all objects can be converted t
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CommonLoggerConfig</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'TRV_LOG_COMMON'</span><span class="token punctuation">)</span>
+  commonActive<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+
   <span class="token comment">/** Should we enrich the console by default */</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">EnvVar</span></span><span class="token punctuation">(</span><span class="token string">'TRV_LOG_FORMAT'</span><span class="token punctuation">)</span>
   format<span class="token operator">:</span> <span class="token string">'line'</span> <span class="token operator">|</span> <span class="token string">'json'</span> <span class="token operator">=</span> <span class="token string">'line'</span><span class="token punctuation">;</span>

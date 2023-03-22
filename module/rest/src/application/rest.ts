@@ -46,6 +46,10 @@ export class RestApplication<T = unknown>  {
       restProvider: this.server.constructor.name
     };
 
+    // Log on startup, before DI finishes
+    const cfg = await DependencyRegistry.getInstance(Configuration);
+    await cfg.initBanner();
+
     await this.server.init();
 
     this.interceptors = await this.getInterceptors();
@@ -189,11 +193,6 @@ export class RestApplication<T = unknown>  {
    * Run the application
    */
   async run(): Promise<ServerHandle> {
-    const cfg = await DependencyRegistry.getInstance(Configuration).then(svc => svc.exportActive());
-
-    // Log on startup
-    console.log('Manifest', { info: RootIndex.mainDigest(), env: GlobalEnv.toJSON() });
-    console.log('Config', cfg);
     console.info('Listening', { port: this.config.port });
     return await this.server.listen();
   }

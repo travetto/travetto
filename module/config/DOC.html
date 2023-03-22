@@ -91,9 +91,80 @@ Config <span class="token punctuation">{{'{'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
+<h3 id="standard-configuration-extension">Standard Configuration Extension</h3>
+
+The framework provides two simple base classes that assist with existing patterns of usage to make adding in new configuration sources as easy as possible.  The goal here is for the developer to either instantiate or extend these classes and produce a configuration source unique to their needs:
+
+  <figure class="code">
+    <figcaption class="code">Memory Provider
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/config/src/source/memory.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigData <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../parser/types'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigSource<span class="token punctuation">,</span> ConfigValue <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types'</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Meant to be instantiated and provided as a unique config source
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">MemoryConfigSource</span> <span class="token keyword">implements</span> <span class="token class-name">ConfigSource</span> <span class="token punctuation">{{'{'}}</span>
+  priority <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span>
+  data<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> ConfigData<span class="token operator">></span><span class="token punctuation">;</span>
+  name <span class="token operator">=</span> <span class="token string">'memory'</span><span class="token punctuation">;</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span>data<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> ConfigData<span class="token operator">></span><span class="token punctuation">,</span> priority<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>data <span class="token operator">=</span> data<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>priority <span class="token operator">=</span> priority<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token function">getValues</span><span class="token punctuation">(</span>profiles<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> ConfigValue<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">const</span> out<span class="token operator">:</span> ConfigValue<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> profile <span class="token keyword">of</span> profiles<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>data<span class="token punctuation">[</span>profile<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+        out<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> profile<span class="token punctuation">,</span> config<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>data<span class="token punctuation">[</span>profile<span class="token punctuation">]</span><span class="token punctuation">,</span> source<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">://</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>profile<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> priority<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>priority <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">{{'}'}}</span>
+    <span class="token punctuation">{{'}'}}</span>
+    <span class="token keyword">return</span> out<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+  <figure class="code">
+    <figcaption class="code">Environment JSON Provider
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/config/src/source/env.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env<span class="token punctuation">,</span> GlobalEnv <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ConfigSource<span class="token punctuation">,</span> ConfigValue <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'./types'</span><span class="token punctuation">;</span>
+
+<span class="token comment">/**
+ * Represents the environment mapped data as a JSON blob
+ */</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">EnvConfigSource</span> <span class="token keyword">implements</span> <span class="token class-name">ConfigSource</span> <span class="token punctuation">{{'{'}}</span>
+  priority<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  name <span class="token operator">=</span> <span class="token string">'env'</span><span class="token punctuation">;</span>
+  #envKey<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span>key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> priority<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>#envKey <span class="token operator">=</span> key<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>priority <span class="token operator">=</span> priority<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token function">getValues</span><span class="token punctuation">(</span>profiles<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> ConfigValue<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>Env<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#envKey<span class="token punctuation">,</span> <span class="token string">'{{'{'}}{{'}'}}'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token punctuation">{{'{'}}</span> profile<span class="token operator">:</span> GlobalEnv<span class="token punctuation">.</span>envName<span class="token punctuation">,</span> config<span class="token operator">:</span> data<span class="token punctuation">,</span> source<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">://</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>#envKey<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> priority<span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>priority <span class="token punctuation">{{'}'}}</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>e<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">env.</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>#envKey<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string"> is an invalid format</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> text<span class="token operator">:</span> Env<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#envKey<span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
 <h3 id="custom-configuration-provider">Custom Configuration Provider</h3>
 
-In addition to files and environment variables, configuration sources can also be provided via the class itself.  This is useful for reading remote configurations, or dealing with complex configuration normalization.  The only caveat to this pattern, is that the these configuration sources cannot rely on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L14">Configuration</a> service for input.  This means any needed configuration will need to be accessed via specific patterns.
+In addition to files and environment variables, configuration sources can also be provided via the class itself.  This is useful for reading remote configurations, or dealing with complex configuration normalization.  The only caveat to this pattern, is that the these configuration sources cannot rely on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L16">Configuration</a> service for input.  This means any needed configuration will need to be accessed via specific patterns.
 
   <figure class="code">
     <figcaption class="code">Custom Configuration Source
@@ -123,11 +194,11 @@ In addition to files and environment variables, configuration sources can also b
 
 <h2 id="startup">Startup</h2>
 
-At startup, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L14">Configuration</a> service will log out all the registered configuration objects.  The configuration state output is useful to determine if everything is configured properly when diagnosing runtime errors.  This service will find all configurations, and output a redacted version with all secrets removed.  The default pattern for secrets is <code class="item input">/password|private|secret/i</code>.  More values can be added in your configuration under the path <code class="item field">config.secrets</code>.  These values can either be simple strings (for exact match), or <code class="item input">/pattern/</code> to create a regular expression.
+At startup, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L16">Configuration</a> service will log out all the registered configuration objects.  The configuration state output is useful to determine if everything is configured properly when diagnosing runtime errors.  This service will find all configurations, and output a redacted version with all secrets removed.  The default pattern for secrets is <code class="item input">/password|private|secret/i</code>.  More values can be added in your configuration under the path <code class="item field">config.secrets</code>.  These values can either be simple strings (for exact match), or <code class="item input">/pattern/</code> to create a regular expression.
 
 <h2 id="consuming">Consuming</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L14">Configuration</a> service provides injectable access to all of the loaded configuration. For simplicity, a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13">@Config</a> allows for classes to automatically be bound with config information on post construction via the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module. The decorator will install a <code class="item method">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/configuration.ts#L16">Configuration</a> service provides injectable access to all of the loaded configuration. For simplicity, a decorator, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13">@Config</a> allows for classes to automatically be bound with config information on post construction via the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/di" title="Dependency registration/management and injection support.">Dependency Injection</a> module. The decorator will install a <code class="item method">postConstruct</code> method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 <h3 id="environment-variables">Environment Variables</h3>
 
 Additionally there are times in which you may want to also support configuration via environment variables.  <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L34">EnvVar</a> supports override configuration values when environment variables are present. <br><br>

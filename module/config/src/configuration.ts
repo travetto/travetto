@@ -1,3 +1,5 @@
+import util from 'util';
+
 import { AppError, Class, ClassInstance, GlobalEnv, DataUtil } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootIndex } from '@travetto/manifest';
@@ -128,5 +130,19 @@ export class Configuration {
       }
     }
     return out;
+  }
+
+  /**
+   * Log current configuration state
+   */
+  async initBanner(): Promise<void> {
+    const og = util.inspect.defaultOptions.depth;
+    util.inspect.defaultOptions.depth = 100;
+    console.log('Initialized', {
+      manifest: RootIndex.mainDigest(),
+      env: GlobalEnv.toJSON(),
+      config: await this.exportActive()
+    });
+    util.inspect.defaultOptions.depth = og;
   }
 }
