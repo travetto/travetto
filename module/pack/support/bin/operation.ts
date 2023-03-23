@@ -242,9 +242,11 @@ export class PackOperation {
 
     if (cfg.ejectFile) {
       yield ActiveShellCommand.chdir(cfg.workspace);
+      await ActiveShellCommand.mkdir(path.dirname(cfg.output));
       yield ActiveShellCommand.zip(cfg.output);
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
+      await fs.mkdir(path.dirname(cfg.output), { recursive: true });
       const [cmd, ...args] = ActiveShellCommand.zip(cfg.output);
       await ExecUtil.spawn(cmd, args, { cwd: cfg.workspace }).result;
     }
