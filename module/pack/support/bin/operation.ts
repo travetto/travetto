@@ -97,7 +97,7 @@ export class PackOperation {
    */
   static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = 'package.json';
-    const pkg = { type: RootIndex.manifest.moduleType };
+    const pkg = { type: RootIndex.manifest.moduleType, main: `${cfg.mainName}.js` };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 
