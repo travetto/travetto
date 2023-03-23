@@ -69,6 +69,7 @@ export abstract class BasePackCommand implements CliCommandShape {
       PackOperation.writeEntryScript,
       PackOperation.copyResources,
       PackOperation.writeManifest,
+      PackOperation.duplicateNodeModules,
       PackOperation.bundle,
     ];
   }

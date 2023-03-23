@@ -7,6 +7,7 @@ import { cliTpl } from '@travetto/cli';
 import { CommonPackConfig } from './types';
 import { PackUtil } from './util';
 import { ActiveShellCommand, ShellCommands } from './shell';
+import { RUNTIME_MODULES } from './config';
 
 async function writeRawFile(file: string, contents: string, mode?: string): Promise<void> {
   await fs.writeFile(file, contents, { encoding: 'utf8', mode });
@@ -230,6 +231,22 @@ export class PackOperation {
       yield [...Object.entries(env).map(([k, v]) => `${k}=${v}`), ...cmd];
     } else {
       await ExecUtil.spawn(cmd[0], cmd.slice(1), { env, stdio: ['inherit', 'ignore', 'inherit'] }).result;
+    }
+  }
+
+  /**
+   * Duplicate node_modules
+   */
+  static async * duplicateNodeModules(cfg: CommonPackConfig): AsyncIterable<string[]> {
+    const src = path.resolve(cfg.workspace, 'node_modules');
+    const dest = path.resolve(cfg.workspace, RUNTIME_MODULES);
+
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Creating a Copy of Node Modules' }} ${{ path: path.join('node_modules') }}`);
+
+    if (cfg.ejectFile) {
+      yield ActiveShellCommand.copyRecursive(src, dest);
+    } else {
+      await PackUtil.copyRecursive(src, dest);
     }
   }
 

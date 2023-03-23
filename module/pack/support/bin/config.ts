@@ -1,26 +1,23 @@
 import type { OutputOptions } from 'rollup';
+import { __importStar } from 'tslib';
+
 import type terser from '@rollup/plugin-terser';
 
 import { Env } from '@travetto/base';
 import { ManifestModule, ManifestModuleUtil, Package, path, RootIndex } from '@travetto/manifest';
 
-const INTRO = {
-  commonjs: `
-try { globalThis.crypto = require('crypto'); } catch {}
-try { require('./.env.js')} catch {}
+export const RUNTIME_MODULES = 'trv_node_modules';
 
-function __importStar(mod) { 
-  if (mod && mod.__esModule) return mod;
-  var result = {};
-  if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
-  result['default'] = mod;
-  return result;
-}
-`,
-  module: `
-tyr{ globalThis.crypto = await import('crypto'); } catch {}
-try {await import('./.env.js')} catch {}
-`
+const makeIntro = (doImport: (name: string) => string): string => `
+try { (${doImport('child_process')}).execFileSync('mkdir -p node_modules/ && cp -r ${RUNTIME_MODULES}/* node_modules/', { shell:true}); } catch {}
+try { globalThis.crypto = ${doImport('crypto')}; } catch {}
+try { ${doImport('./.env.js')} } catch {}
+`;
+
+const INTRO = {
+  commonjs: `${makeIntro(v => `require('${v}')`)}
+  ${__importStar.toString().replace(/function([^(]+)/, 'function __importStar')}`,
+  module: makeIntro(v => `await import('${v}')`)
 };
 
 function getFilesFromModule(m: ManifestModule): string[] {
