@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest",
-  "version": "3.1.0-rc.2",
+  "version": "3.1.0-rc.3",
   "description": "Declarative api for RESTful APIs with support for the dependency injection module.",
   "keywords": [
     "rest",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@travetto/base": "^3.1.0-rc.0",
-    "@travetto/config": "^3.1.0-rc.2",
+    "@travetto/config": "^3.1.0-rc.3",
     "@travetto/context": "^3.1.0-rc.0",
     "@travetto/di": "^3.1.0-rc.0",
     "@travetto/registry": "^3.1.0-rc.0",
