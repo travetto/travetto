@@ -40,11 +40,7 @@ class TestRunnerFeature extends BaseFeature {
           this.onChangedActiveEditor(editor);
         }
       })
-      .onFail(async (err) => {
-        if (err.message.includes('will not retry')) {
-          await vscode.window.showErrorMessage(err.message.replace(/^Execution/, 'Test server'));
-        }
-      });
+      .onFail(err => vscode.window.showErrorMessage(`Test Server: ${err.message}`));
   }
 
   /**
@@ -119,7 +115,7 @@ class TestRunnerFeature extends BaseFeature {
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', this.launchTestDebugger.bind(this));
-    this.register('reload', () => this.#server.restart());
+    this.register('reload', () => this.#server.restart(true));
     this.register('rerun', () => this.#consumer.trackEditor(vscode.window.activeTextEditor));
 
     vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
@@ -141,6 +137,7 @@ class TestRunnerFeature extends BaseFeature {
       }
     }));
 
-    BuildStatus.onBuildReady(() => this.#server.start()); // Wait for stable build
+    BuildStatus.onBuildReady(() => { this.#server.restart(true); }); // Wait for stable build
+    BuildStatus.onBuildWaiting(() => { this.#server.stop(true); }); // On waiting, disable
   }
 }

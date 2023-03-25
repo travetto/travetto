@@ -73,6 +73,26 @@
   "contributes": {
     "commands": [
       {
+        "command": "travetto.compiler:stop",
+        "title": "Stop Compiler",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.compiler:start",
+        "title": "Restart Compiler",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.compiler:clean-all",
+        "title": "Clean Code + Compiler Output",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.compiler:clean",
+        "title": "Clean Code Output",
+        "category": "Travetto"
+      },
+      {
         "command": "travetto.test.test:rerun",
         "title": "Re-Run Tests",
         "category": "Travetto"
@@ -186,6 +206,18 @@
         }
       ],
       "commandPalette": [
+        {
+          "command": "travetto.compiler:start"
+        },
+        {
+          "command": "travetto.compiler:stop"
+        },
+        {
+          "command": "travetto.compiler:clean"
+        },
+        {
+          "command": "travetto.compiler:clean-all"
+        },
         {
           "command": "travetto.test.test:line",
           "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorIsOpen"

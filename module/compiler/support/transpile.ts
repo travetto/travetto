@@ -11,10 +11,14 @@ import { LogUtil } from './log';
 
 type ModFile = { input: string, output: string, stale: boolean };
 export type CompileResult = 'restart' | 'complete' | 'skipped';
+export type BuildEvent = { type: 'restart' | 'start' | 'complete' } | { type: 'status', idx: number, total: number };
 
 const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};
 const SRC_REQ = createRequire(path.resolve('node_modules'));
 const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
+
+const isBuildEvent = (ev: unknown): ev is BuildEvent =>
+  ev !== undefined && ev !== null && typeof ev === 'object' && 'type' in ev && typeof ev.type === 'string';
 
 /**
  * Transpile utilities for launching
@@ -190,7 +194,7 @@ export class TranspileUtil {
   /**
    * Run compiler
    */
-  static async runCompiler(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], watch: boolean, onMessage: (msg: unknown) => void): Promise<CompileResult> {
+  static async runCompiler(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], watch: boolean, onMessage: (msg: BuildEvent) => void): Promise<CompileResult> {
     const compiler = path.resolve(ctx.workspacePath, ctx.compilerFolder);
     const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/compiler-entry.js');
     const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${process.pid}.${process.ppid}.${Date.now()}.json`);
@@ -216,10 +220,14 @@ export class TranspileUtil {
           .on('message', msg => {
             if (LogUtil.isLogEvent(msg)) {
               log(...msg);
-            } else if (msg === 'restart') {
-              res(msg);
-            } else {
-              onMessage(msg);
+            } else if (isBuildEvent(msg)) {
+              // Send to parent if exists
+              process.send?.(msg);
+              if (msg.type === 'restart') {
+                res('restart');
+              } else {
+                onMessage(msg);
+              }
             }
           })
           .on('exit', code => (code !== null && code > 0) ? rej(new Error('Failed during compilation')) : res('complete'));

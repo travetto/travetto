@@ -72,10 +72,15 @@ export class Compiler {
    */
   async * emit(files: string[], emitter: CompileEmitter): AsyncIterable<CompileEmitEvent> {
     let i = 0;
+    let lastSent = Date.now();
     for (const file of files) {
       const err = await emitter(file);
       const imp = file.replace(/.*node_modules\//, '');
       yield { file: imp, i: i += 1, err, total: files.length };
+      if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
+        lastSent = Date.now();
+        process.send?.({ type: 'status', total: files.length, idx: i });
+      }
     }
     Log.debug(`Compiled ${i} files`);
   }
@@ -89,7 +94,9 @@ export class Compiler {
 
     Log.debug('Compilation started');
 
-    process.on('disconnect', () => process.exit(0));
+    if (process.send) {
+      process.on('disconnect', () => process.exit(0));
+    }
 
     const emitter = await this.getCompiler();
     let failed = false;
@@ -103,6 +110,8 @@ export class Compiler {
       }
       return { idx: i, total, text: `Compiling [%idx/%total] -- ${file}` };
     };
+
+    process.send?.({ type: 'start' });
 
     if (this.#dirtyFiles.length) {
       await GlobalTerminal.trackProgress(this.emit(this.#dirtyFiles, emitter), resolveEmittedFile, { position: 'bottom', minDelay: 50 });
@@ -118,7 +127,7 @@ export class Compiler {
       await emitter(resolved, true);
     }
 
-    process.send?.('build-complete');
+    process.send?.({ type: 'complete' });
 
     if (this.#watch) {
       Log.info('Watch is ready');
@@ -135,7 +144,7 @@ export class Compiler {
         }
       }
       if (!process.exitCode) {
-        process.send?.('restart');
+        process.send?.({ type: 'restart' });
       }
     }
   }

@@ -44,11 +44,7 @@ export class EmailTemplateFeature extends BaseFeature {
           this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
         }
       })
-      .onFail(async (err) => {
-        if (err.message.includes('will not retry')) {
-          await vscode.window.showErrorMessage(err.message.replace(/^Execution/, 'Email Template Preview'));
-        }
-      });
+      .onFail(err => vscode.window.showErrorMessage(`Email Template Preview: ${err.message}`));
   }
 
   getPanel(): vscode.WebviewPanel {
@@ -95,7 +91,7 @@ export class EmailTemplateFeature extends BaseFeature {
     }
     if (open) {
       if (this.#active.size === 0) {
-        this.#server.start();
+        this.#server.start(true);
       }
       this.#active.add(file.fileName);
     } else {
@@ -114,7 +110,7 @@ export class EmailTemplateFeature extends BaseFeature {
     }
 
     await this.getPanel();
-    await this.#server.start();
+    await this.#server.start(true);
 
     this.#format = format;
 

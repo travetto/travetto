@@ -4,8 +4,10 @@ import { Workspace } from './workspace';
 import { Log } from './log';
 
 const READY_WAIT_WINDOW = 1000 * 15;
-const TWO_MINUTE_WINDOW = 1000 * 60 * 2;
 const HOUR_WINDOW = 1000 * 60 * 60;
+
+const KILL_WINDOW = 1000 * 60 * 2;
+const KILL_WINDOW_PRETTY = '2 minutes';
 const MAX_KILL_COUNT = 5;
 
 /**
@@ -14,12 +16,13 @@ const MAX_KILL_COUNT = 5;
 export class ProcessServer<C extends { type: string }, E extends { type: string }> {
 
   static getCurrentBucket(): number {
-    return Math.trunc((Date.now() % HOUR_WINDOW) / TWO_MINUTE_WINDOW);
+    return Math.trunc((Date.now() % HOUR_WINDOW) / KILL_WINDOW);
   }
 
   #onStart: (() => (void | Promise<void>))[] = [];
+  #onExit: (() => (void | Promise<void>))[] = [];
   #onFail: ((err: Error) => (void | Promise<void>))[] = [];
-  #respawn = true;
+  #active = true;
   #state: ExecutionState | undefined;
   #command: string;
   #args: string[];
@@ -33,7 +36,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     this.#opts = opts;
     this.#log = log;
 
-    const stopper = (): void => this.stop();
+    const stopper = (): Promise<void> => this.#stop();
 
     ShutdownManager.onExitRequested(stopper);
     process.on('SIGINT', stopper);
@@ -68,6 +71,82 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     return [state, ready];
   }
 
+
+  /**
+   * Start server, and indicate if this is continuing from a previous failure
+   * @param fromExit
+   * @returns
+   */
+  async #start(fromExit?: boolean): Promise<void> {
+    if (this.#state) {
+      this.#log.info('Already started');
+      return;
+    } else if (!this.#active) {
+      this.#log.info('Server should not be respawned, skipping');
+      return;
+    }
+    const key = ProcessServer.getCurrentBucket();
+    if ((this.#killCount[key] ?? 0) >= MAX_KILL_COUNT) {
+      this.#active = false;
+      const msg = `Exited ${MAX_KILL_COUNT} times in ${KILL_WINDOW_PRETTY}, will not retry`;
+      this.#log.error(msg);
+      const err = new Error(msg);
+      for (const fn of this.#onFail) {
+        await fn(err);
+      }
+      return; // Give up
+    } else if (fromExit) {
+      this.#killCount[key] = (this.#killCount[key] ?? 0) + 1;
+    }
+
+    this.#log.info('Starting', this.#command, ...this.#args);
+
+    const [state, ready] = await this.#launchServer(this.#command, this.#args, this.#opts);
+    this.#state = state;
+
+    this.#log.info('Started', this.#state.process.pid);
+
+    ready.then(async () => {
+      this.#log.info('Ready', this.#state!.process.pid);
+      for (const fn of this.#onStart) {
+        await fn();
+      }
+    });
+
+    const kill = (): void => { this.#state?.process.kill('SIGKILL'); };
+    process.on('exit', kill);
+
+    this.#state.process.on('exit', async () => {
+      for (const fn of this.#onExit) {
+        await fn();
+      }
+      this.#log.info('Exited', this.#state?.process.pid);
+      process.removeListener('exit', kill);
+      this.#state = undefined;
+    });
+
+    this.#state.result.then(result => {
+      this.#log.info('Killed', this.#state?.process.pid, { respawn: this.#active, exitCode: result.code, valid: result.valid });
+      this.#active && this.#start(true);
+    });
+
+    return ready;
+  }
+
+  /**
+   * Stop server, and prevent respawn
+   */
+  async #stop(): Promise<void> {
+    if (this.#state) {
+      this.#log.info('Stopping');
+      const proc = this.#state.process;
+      this.#state = undefined;
+      const waitForKill = new Promise<void>(res => proc.on('exit', res));
+      proc.kill('SIGKILL');
+      await waitForKill;
+    }
+  }
+
   get running(): boolean {
     return this.#state !== undefined && !this.#state.process.killed;
   }
@@ -81,6 +160,14 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   }
 
   /**
+   * Listen for when the application exits
+   */
+  onExit(handler: () => void): this {
+    this.#onExit.push(handler);
+    return this;
+  }
+
+  /**
    * Listen for failures during the process execution
    */
   onFail(handler: (err: Error) => void): this {
@@ -89,89 +176,38 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   }
 
   /**
-   * Start server, and indicate if this is continuing from a previous failure
-   * @param fromFailure
-   * @returns
+   * Force start, even from a non-active state
+   * @returns 
    */
-  async start(fromFailure?: boolean): Promise<void> {
-    if (this.#state) {
-      this.#log.info('Already started');
-      return;
-    } else if (!this.#respawn) {
-      this.#log.info('Server should not be respawned, skipping');
-      return;
-    }
-    const key = ProcessServer.getCurrentBucket();
-    if ((this.#killCount[key] ?? 0) >= MAX_KILL_COUNT) {
-      if (this.#onFail.length) {
-        this.#log.error(`Failed ${MAX_KILL_COUNT} times in 2 minutes, will not retry`);
-        const err = new Error(`Failed ${MAX_KILL_COUNT} times in 2 minutes, will not retry`);
-        for (const fn of this.#onFail) {
-          await fn(err);
-        }
-      }
-      return; // Give up
-    } else if (fromFailure) {
-      this.#killCount[key] = (this.#killCount[key] ?? 0) + 1;
-    }
-
-    this.#log.info('Starting', this.#command, ...this.#args);
-
-    const [state, ready] = await this.#launchServer(this.#command, this.#args, this.#opts);
-    this.#state = state;
-
-    this.#log.info('Started', this.#state.process.pid);
-
-    ready.then(async () => {
+  start(forceActive = false): Promise<void> {
+    if (forceActive) {
       this.#killCount = [];
-      this.#log.info('Ready', this.#state!.process.pid);
-      for (const fn of this.#onStart) {
-        await fn();
-      }
-    });
-
-    const kill = (): void => { this.#state?.process.kill('SIGKILL'); };
-    process.on('exit', kill);
-
-    this.#state.process.on('exit', () => {
-      this.#log.info('Exited', this.#state?.process.pid);
-      process.removeListener('exit', kill);
-      this.#state = undefined;
-    });
-
-    this.#state.result.then(result => {
-      this.#log.info('Killed', this.#state?.process.pid, { respawn: this.#respawn, exitCode: result.code, valid: result.valid });
-      this.#respawn && this.start(!result.valid);
-    });
-
-    return ready;
+      this.#active = true;
+    }
+    return this.#start();
   }
 
   /**
    * Restart server
    */
-  restart(): void {
+  async restart(forceActive = false): Promise<void> {
     if (!this.#state) {
-      this.start();
+      this.start(forceActive);
     } else {
       this.#killCount = []; // Clear out kill count on a forced restart
-      this.#state.process.kill('SIGKILL'); // Will auto respawn
+      await this.#stop();
     }
   }
 
   /**
-   * Stop server, and prevent respawn
+   * Force stop, to an inactive state
+   * @returns 
    */
-  stop(allowRespawn = false): void {
-    if (this.#state) {
-      this.#log.info('Stopping');
-      this.#respawn = false;
-      this.#state.process.kill();
-      this.#state = undefined;
-      if (allowRespawn) {
-        setTimeout(() => this.#respawn = true, 1000);
-      }
+  stop(forceInactive = false): Promise<void> {
+    if (forceInactive) {
+      this.#active = false;
     }
+    return this.#stop();
   }
 
   /**

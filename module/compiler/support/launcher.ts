@@ -3,7 +3,7 @@ import path from 'path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import { TranspileUtil, CompileResult } from './transpile';
+import { TranspileUtil, CompileResult, BuildEvent } from './transpile';
 import { LockManager } from './lock';
 import { LogUtil } from './log';
 
@@ -16,7 +16,7 @@ const importManifest = (ctx: ManifestContext): Promise<typeof import('@travetto/
 /**
  * Run the compiler
  */
-async function compile(ctx: ManifestContext, op: 'watch' | 'build' | undefined, onMessage: (msg: unknown) => void): Promise<CompileResult> {
+async function compile(ctx: ManifestContext, op: 'watch' | 'build' | undefined, onMessage: (msg: BuildEvent) => void): Promise<CompileResult> {
   let changes = 0;
 
   await LogUtil.withLogger('precompile', async () => {
@@ -117,7 +117,10 @@ export async function launch(ctx: ManifestContext, root: ManifestContext, op?: '
   if (op !== 'manifest' && await LockManager.getCompileAction(root, op) === 'build') {
 
     // Ready signal
-    process.send?.('ready');
+    if (process.send) {
+      process.send('ready');
+      process.on('disconnect', () => process.exit(0));
+    }
 
     await LockManager.withLocks(root, async (acquire, release) => {
       let action: CompileResult;
@@ -127,8 +130,8 @@ export async function launch(ctx: ManifestContext, root: ManifestContext, op?: '
           acquire('build');
         }
         action = await compile(root, op, msg => {
-          switch (msg) {
-            case 'build-complete': {
+          switch (msg.type) {
+            case 'complete': {
               release('build');
               break;
             }

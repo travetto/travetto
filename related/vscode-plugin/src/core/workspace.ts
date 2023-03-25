@@ -9,6 +9,8 @@ import { ManifestContext, ManifestIndex, path } from '@travetto/manifest';
 import { EnvDict, LaunchConfig } from './types';
 import { Log } from './log';
 
+type MProm<T> = Promise<T> & { resolve: (val: T) => void, reject: (err?: Error) => void };
+
 /**
  * Standard set of workspace utilities
  */
@@ -291,5 +293,11 @@ export class Workspace {
       this.#cliFile, [command, ...args ?? []],
       { ...opts, env: this.#buildEnv(false, opts?.env, opts?.cliModule) }
     );
+  }
+
+  static manualPromise<T>(): MProm<T> {
+    let ops: Pick<MProm<T>, 'reject' | 'resolve'>;
+    const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
+    return Object.assign(prom, ops!);
   }
 }

@@ -11,16 +11,12 @@ import { Log } from './log';
 
 const STALE_THRESHOLD = 1000;
 
-type MProm<T> = Promise<T> & { resolve: (val: T) => void, reject: (err?: Error) => void };
 type LockState = 'missing' | 'stale' | 'valid';
 type CProm = Promise<LockState> & { cleanup: () => void };
 
-const manualPromise = <T>(): MProm<T> => {
-  let ops: Pick<MProm<T>, 'reject' | 'resolve'>;
-  const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
-  return Object.assign(prom, ops!);
-};
-
+/**
+ * Represents the general build status of the workspace, allowing operations to wait for builds to be complete before running
+ */
 export class BuildStatus {
   /**
    * Determine if the given stats are stale for modification time
@@ -40,7 +36,7 @@ export class BuildStatus {
     let timer: NodeJS.Timeout | undefined;
     let registered = existsSync(file);
 
-    const prom = manualPromise<LockState>();
+    const prom = Workspace.manualPromise<LockState>();
 
     const handler = async (): Promise<void> => {
       if (timer) {
@@ -110,7 +106,7 @@ export class BuildStatus {
 
       if (watchStat && !BuildStatus.#isStale(watchStat)) {
         if (buildStat && !BuildStatus.#isStale(buildStat)) {
-          this.#item.text = 'Compiling...';
+          this.#item.text = '$(flame) Compiling';
           // Wait until build is finished
           if (await this.#waitForRelease(buildLockFile) === 'stale') { // If we failed at building
             await timers.setTimeout(250); // Wait a quarter second and retry
@@ -122,7 +118,7 @@ export class BuildStatus {
           waitForBuild.cleanup();
           if (await fs.stat(buildLockFile).catch(() => undefined)) {
             this.#log.info('Waiting for build');
-            this.#item.text = 'Building...';
+            this.#item.text = '$(flame) Building';
             // Ensure we build after we emit
             await this.#waitForRelease(buildLockFile);
           }
@@ -130,15 +126,16 @@ export class BuildStatus {
       } else {
         // No one is watching, wait for build
         this.#log.info('Waiting for build');
-        this.#item.text = 'Building...';
+        this.#item.text = '$(debug-pause) Waiting for build';
         this.#emitter.emit('build-waiting');
         // Ensure we build after we emit
         await this.#waitForAcquire(buildLockFile);
+        this.#item.text = '$(flame) Building';
         await this.#waitForRelease(buildLockFile);
       }
 
       // Code is ready!
-      this.#item.text = 'Code Ready';
+      this.#item.text = '$(pass-filled) Ready';
       this.#log.info('Build is ready');
       this.#emitter.emit('build-ready');
       // Wait until a new build is started, or the watch process gives up the lock file
