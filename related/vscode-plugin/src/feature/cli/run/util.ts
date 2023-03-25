@@ -89,7 +89,7 @@ export class CliRunUtil {
   }
 
   static async getModules(): Promise<ModuleGraphItem<Set<string>>[]> {
-    const res = Workspace.spawnCli('list', ['-f', 'json'], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
+    const res = Workspace.spawnCli('repo:list', ['-f', 'json'], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
     const data = await res.result;
     if (!data.valid) {
       throw new Error(`Unable to collect module list: ${data.message}`);

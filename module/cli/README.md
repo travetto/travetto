@@ -22,32 +22,35 @@ $ trv --help
 Usage:  [options] [command]
 
 Commands:
-  doc            Command line support for generating module docs.
-  doc:angular    Generate documentation into the angular webapp under related/travetto.github.io
-  doc:mapping    Generate module mapping for @travetto/doc
-  email:compile  CLI Entry point for running the email server
-  email:editor   The email editor compilation service and output serving
-  exec           Repo execution
-  lint           Command line support for linting
-  lint:register  Writes the lint configuration file
-  list           Allows for listing of modules
-  model:export   Exports model schemas
-  model:install  Installing models
-  openapi:client CLI for generating the cli client
-  openapi:spec   CLI for outputting the open api spec to a local file
-  pack           Standard pack support
-  pack:docker    Standard docker support for pack
-  pack:lambda    Standard lambda support for pack
-  pack:zip       Standard zip support for pack
-  repo:publish   Publish all pending modules
-  repo:version   Version all changed dependencies
-  run:double     Doubles a number
-  run:rest       Run a rest server as an application
-  scaffold       Command to run scaffolding
-  service        Allows for running services
-  test           Launch test framework and execute tests
-  test:watch     Invoke the test watcher
-  version-sync   Enforces all packages to write out their versions and dependencies
+  doc               Command line support for generating module docs.
+  doc:angular       Generate documentation into the angular webapp under related/travetto.github.io
+  doc:mapping       Generate module mapping for @travetto/doc
+  email:compile     CLI Entry point for running the email server
+  email:editor      The email editor compilation service and output serving
+  exec              Repo execution
+  lint              Command line support for linting
+  lint:register     Writes the lint configuration file
+  list              Allows for listing of modules
+  model:export      Exports model schemas
+  model:install     Installing models
+  openapi:client    CLI for generating the cli client
+  openapi:spec      CLI for outputting the open api spec to a local file
+  pack              Standard pack support
+  pack:docker       Standard docker support for pack
+  pack:lambda       Standard lambda support for pack
+  pack:zip          Standard zip support for pack
+  repo:exec         Repo execution
+  repo:list         Allows for listing of modules
+  repo:publish      Publish all pending modules
+  repo:version      Version all changed dependencies
+  repo:version-sync Enforces all packages to write out their versions and dependencies
+  run:double        Doubles a number
+  run:rest          Run a rest server as an application
+  scaffold          Command to run scaffolding
+  service           Allows for running services
+  test              Launch test framework and execute tests
+  test:watch        Invoke the test watcher
+  version-sync      Enforces all packages to write out their versions and dependencies
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 

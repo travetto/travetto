@@ -42,7 +42,7 @@ During the compilation process, it is helpful to know how the output content dif
 <h2 id="class-and-function-metadata">Class and Function Metadata</h2>
 
 For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every <code class="item input">class</code> is decorated with an additional field of <code class="item input">Ⲑid</code>.  <code class="item input">Ⲑid</code> represents a computed id that is tied to the file/class combination. <br><br>
-<code class="item input">Ⲑid</code> is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/root-index.ts#L12">RootIndex</a> using the <code class="item method">getFunctionMetadata</code> method.
+<code class="item input">Ⲑid</code> is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/root-index.ts#L11">RootIndex</a> using the <code class="item method">getFunctionMetadata</code> method.
 
   <figure class="code">
     <figcaption class="code">Test Class
@@ -179,6 +179,9 @@ This method allows for watching one or more folders, and registering a callback 
   <span class="token string-property property">"toolFolder"</span><span class="token operator">:</span> <span class="token string">".trv_build"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"compilerFolder"</span><span class="token operator">:</span> <span class="token string">".trv_compiler"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"packageManager"</span><span class="token operator">:</span> <span class="token string">"npm"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"version"</span><span class="token operator">:</span> <span class="token string">"3.1.0-rc.0"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"description"</span><span class="token operator">:</span> <span class="token string">"Support for project indexing, manifesting, along with file watching"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"frameworkVersion"</span><span class="token operator">:</span> <span class="token string">"3.1.0-rc.0"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"modules"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token string-property property">"@travetto/manifest"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token string-property property">"main"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>

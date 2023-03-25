@@ -13,7 +13,11 @@ npm install @travetto/repo
 yarn add @travetto/repo
 ```
 
-The repo module aims to provide some simple mono-repo based tools, primarily around module publishing.  The module provides two cli operations:
+The repo module aims to provide concise monorepo based tools.  The monorepo support within the [Travetto](https://travetto.dev) framework, is based on [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)/[Yarn](https://yarnpg.com) workspaces.  This module is not a requirement for monorepo support, but provides some quality of life improvements for:
+   *  Versioning releases
+   *  Publishing releases
+   *  Listing local modules
+   *  Running commands on all workspace modules
 
 ## CLI - Version
 The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)'s and [Yarn](https://yarnpg.com)'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
@@ -72,3 +76,197 @@ npx trv repo:publish --no-dry-run
 ```
 
 If no modules are currently changed, then the command will indicate there is no work to do, and exit gracefully.
+
+## CLI - List
+The listing functionality provides the ability to get the workspace modules in the following formats:
+
+**Terminal: List execution**
+```bash
+$ trv repo:list -h
+
+Usage: repo:list [options]
+
+Options:
+  -c, --changed                   Only show changed modules (default: false)
+  -f, --format <graph|json|list>  Output format (default: "list")
+  -h, --help                      display help for command
+```
+
+   *  `list` - Standard text list, each module on its own line
+   *  `graph` - Modules as a digraph, mapping interdependencies
+   *  `json` - Graph of modules in JSON form, with additional data (useful for quickly building a dependency graph)
+
+**Terminal: List execution of Monorepo**
+```bash
+$ trv repo:list
+
+global-test/asset-rest
+global-test/auth-rest
+global-test/model_asset
+global-test/model_auth-model
+global-test/model_cache
+global-test/model_rest-session
+global-test/openapi
+global-test/pack_app
+global-test/rest-session
+global-test/transformer-test
+module/asset
+module/asset-rest
+module/auth
+module/auth-model
+module/auth-rest
+module/auth-rest-context
+module/auth-rest-jwt
+module/auth-rest-passport
+module/auth-rest-session
+module/base
+module/cache
+module/cli
+module/command
+module/compiler
+module/config
+module/context
+module/di
+module/doc
+module/email
+module/email-nodemailer
+module/email-template
+module/eslint
+module/image
+module/jwt
+module/log
+module/manifest
+module/model
+module/model-dynamodb
+module/model-elasticsearch
+module/model-firestore
+module/model-mongo
+module/model-mysql
+module/model-postgres
+module/model-query
+module/model-redis
+module/model-s3
+module/model-sql
+module/model-sqlite
+module/openapi
+module/pack
+module/registry
+module/repo
+module/rest
+module/rest-aws-lambda
+module/rest-express
+module/rest-express-lambda
+module/rest-fastify
+module/rest-fastify-lambda
+module/rest-koa
+module/rest-koa-lambda
+module/rest-model
+module/rest-model-query
+module/rest-session
+module/scaffold
+module/schema
+module/schema-faker
+module/terminal
+module/test
+module/transformer
+module/worker
+module/yaml
+related/todo-app
+```
+
+## CLI - Exec
+The exec command allows for running commands on all modules, or just changed modules.
+
+**Terminal: Exec execution**
+```bash
+$ trv repo:exec -h
+
+Usage: repo:exec [options] <cmd:string> [args...:string]
+
+Options:
+  -c, --changed                        Only changed modules (default: false)
+  -w, --workers <number>               Number of concurrent workers (default: 4)
+  --prefix-output, --no-prefix-output  Prefix output by folder (default: true)
+  --show-stdout, --no-show-stdout      Show stdout (default: true)
+  -h, --help                           display help for command
+```
+
+The standard format includes prefixed output to help identify which module produced which output.
+
+**Terminal: List execution of Monorepo**
+```bash
+$ trv repo:exec pwd
+
+global-test/asset-rest <workspace-root>/global-test/asset-rest
+         global-test/auth-rest <workspace-root>/global-test/auth-rest
+       global-test/model_asset <workspace-root>/global-test/model_asset
+  global-test/model_auth-model <workspace-root>/global-test/model_auth-model
+       global-test/model_cache <workspace-root>/global-test/model_cache
+global-test/model_rest-session <workspace-root>/global-test/model_rest-session
+           global-test/openapi <workspace-root>/global-test/openapi
+          global-test/pack_app <workspace-root>/global-test/pack_app
+      global-test/rest-session <workspace-root>/global-test/rest-session
+  global-test/transformer-test <workspace-root>/global-test/transformer-test
+                  module/asset <workspace-root>/module/asset
+             module/asset-rest <workspace-root>/module/asset-rest
+                   module/auth <workspace-root>/module/auth
+             module/auth-model <workspace-root>/module/auth-model
+              module/auth-rest <workspace-root>/module/auth-rest
+      module/auth-rest-context <workspace-root>/module/auth-rest-context
+          module/auth-rest-jwt <workspace-root>/module/auth-rest-jwt
+     module/auth-rest-passport <workspace-root>/module/auth-rest-passport
+      module/auth-rest-session <workspace-root>/module/auth-rest-session
+                   module/base <workspace-root>/module/base
+                  module/cache <workspace-root>/module/cache
+                    module/cli <workspace-root>/module/cli
+                module/command <workspace-root>/module/command
+               module/compiler <workspace-root>/module/compiler
+                 module/config <workspace-root>/module/config
+                module/context <workspace-root>/module/context
+                     module/di <workspace-root>/module/di
+                    module/doc <workspace-root>/module/doc
+                  module/email <workspace-root>/module/email
+       module/email-nodemailer <workspace-root>/module/email-nodemailer
+         module/email-template <workspace-root>/module/email-template
+                 module/eslint <workspace-root>/module/eslint
+                  module/image <workspace-root>/module/image
+                    module/jwt <workspace-root>/module/jwt
+                    module/log <workspace-root>/module/log
+               module/manifest <workspace-root>/module/manifest
+                  module/model <workspace-root>/module/model
+         module/model-dynamodb <workspace-root>/module/model-dynamodb
+    module/model-elasticsearch <workspace-root>/module/model-elasticsearch
+        module/model-firestore <workspace-root>/module/model-firestore
+            module/model-mongo <workspace-root>/module/model-mongo
+            module/model-mysql <workspace-root>/module/model-mysql
+         module/model-postgres <workspace-root>/module/model-postgres
+            module/model-query <workspace-root>/module/model-query
+            module/model-redis <workspace-root>/module/model-redis
+               module/model-s3 <workspace-root>/module/model-s3
+              module/model-sql <workspace-root>/module/model-sql
+           module/model-sqlite <workspace-root>/module/model-sqlite
+                module/openapi <workspace-root>/module/openapi
+                   module/pack <workspace-root>/module/pack
+               module/registry <workspace-root>/module/registry
+                   module/repo .
+                   module/rest <workspace-root>/module/rest
+        module/rest-aws-lambda <workspace-root>/module/rest-aws-lambda
+           module/rest-express <workspace-root>/module/rest-express
+    module/rest-express-lambda <workspace-root>/module/rest-express-lambda
+           module/rest-fastify <workspace-root>/module/rest-fastify
+    module/rest-fastify-lambda <workspace-root>/module/rest-fastify-lambda
+               module/rest-koa <workspace-root>/module/rest-koa
+        module/rest-koa-lambda <workspace-root>/module/rest-koa-lambda
+             module/rest-model <workspace-root>/module/rest-model
+       module/rest-model-query <workspace-root>/module/rest-model-query
+           module/rest-session <workspace-root>/module/rest-session
+               module/scaffold <workspace-root>/module/scaffold
+                 module/schema <workspace-root>/module/schema
+           module/schema-faker <workspace-root>/module/schema-faker
+               module/terminal <workspace-root>/module/terminal
+                   module/test <workspace-root>/module/test
+              related/todo-app <workspace-root>/related/todo-app
+            module/transformer <workspace-root>/module/transformer
+                 module/worker <workspace-root>/module/worker
+                   module/yaml <workspace-root>/module/yaml
+```

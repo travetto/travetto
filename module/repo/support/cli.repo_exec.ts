@@ -1,8 +1,8 @@
-import { CliCommand, CliCommandShape, CliModuleUtil } from '@travetto/cli';
+import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
-import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { Max, Min } from '@travetto/schema';
+import { RepoExecUtil } from './bin/exec';
 
 /**
  * Repo execution
@@ -13,7 +13,7 @@ export class RepoExecCommand implements CliCommandShape {
   #unknownArgs?: string[];
 
   /** Only changed modules */
-  changed = true;
+  changed = false;
 
   /** Number of concurrent workers */
   @Min(1) @Max(WorkPool.MAX_SIZE)
@@ -25,10 +25,6 @@ export class RepoExecCommand implements CliCommandShape {
   /** Show stdout */
   showStdout = true;
 
-  isActive(): boolean {
-    return !!RootIndex.manifest.monoRepo;
-  }
-
   envInit(): GlobalEnvConfig {
     return { debug: false };
   }
@@ -37,10 +33,10 @@ export class RepoExecCommand implements CliCommandShape {
     this.#unknownArgs = unknownArgs;
   }
 
-  async main(cmd: string, args: string[]): Promise<void> {
+  async main(cmd: string, args: string[] = []): Promise<void> {
     const finalArgs = [...args, ...this.#unknownArgs ?? []];
 
-    await CliModuleUtil.execOnModules(
+    await RepoExecUtil.execOnModules(
       this.changed ? 'changed' : 'all',
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       (mod, opts) => ExecUtil.spawn(cmd, finalArgs, opts),

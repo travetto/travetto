@@ -152,6 +152,6 @@ Sample documentation for fictional module.  This module fictitiously relies upon
 Usage:  <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>command<span class="token punctuation">]</span>
 
 Commands:
-  doc          Command line support <span class="token keyword">for</span> generating module docs.</code></pre>
+  doc        Command line support <span class="token keyword">for</span> generating module docs.</code></pre>
   </figure>
 ```

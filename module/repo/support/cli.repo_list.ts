@@ -15,10 +15,6 @@ export class ListModuleCommand implements CliCommandShape {
   /** Output format */
   format: 'graph' | 'json' | 'list' = 'list';
 
-  isActive(): boolean {
-    return !!RootIndex.manifest.monoRepo;
-  }
-
   async main(): Promise<void> {
 
     const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');

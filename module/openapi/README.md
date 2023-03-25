@@ -50,12 +50,10 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    const info = RootIndex.mainPackage;
-    this.contact ??= info.author ?? {};
-    this.description ??= info.description;
-    this.license ??= { name: info.license! };
-    this.title ??= info.name;
+    const info = RootIndex.manifest;
+    this.title ??= info.mainModule;
     this.version ??= info.version;
+    this.description ??= info.description;
   }
 }
 

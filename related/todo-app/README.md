@@ -306,14 +306,7 @@ First we must start the application:
 **Terminal: Application Startup**
 ```bash
 2029-03-14T04:00:00.618Z info  [@travetto/config:src/configuration.ts:141] Initialized {
-  manifest: {
-    name: '@travetto/todo-app',
-    main: undefined,
-    author: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
-    license: 'ISC',
-    version: '0.0.0',
-    framework: '3.1.x'
-  },
+  manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.1.0', version: '0.0.0' },
   env: {
     envName: 'dev',
     debug: '0',
@@ -332,13 +325,7 @@ First we must start the application:
     ],
     active: {
       ApiHostConfig: { openapi: '3.1.0' },
-      ApiInfoConfig: {
-        contact: { email: 'travetto.framework@gmail.com', name: 'Travetto Framework' },
-        description: '',
-        license: { name: 'ISC' },
-        title: '@travetto/todo-app',
-        version: '0.0.0'
-      },
+      ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
         output: './openapi.yml',
         persist: false,

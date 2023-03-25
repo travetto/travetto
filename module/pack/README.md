@@ -167,7 +167,7 @@ mkdir -p $DIST
 
 echo "Writing .env.js"
 
-echo "process.env.TRV_MANIFEST = 'node_modules/$MOD';" > $DIST/.env.js
+echo "process.env.TRV_MANIFEST = 'manifest.json';" > $DIST/.env.js
 echo "process.env.TRV_MODULE = '$MOD';" >> $DIST/.env.js
 echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js
 
@@ -175,7 +175,7 @@ echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js
 
 echo "Writing package.json"
 
-echo "{\"type\":\"commonjs\"}" > $DIST/package.json
+echo "{\"type\":\"commonjs\",\"main\":\"todo-app.js\"}" > $DIST/package.json
 
 # Writing entry scripts todo-app.sh args=(run:rest) 
 
@@ -199,17 +199,13 @@ chmod 755 $DIST/todo-app.cmd
 
 echo "Copying over resources"
 
-mkdir -p $DIST/node_modules/$MOD
-cp $TRV_OUT/node_modules/$MOD/package.json $DIST/node_modules/$MOD/package.json
-mkdir -p $DIST/node_modules/@travetto/manifest
-cp $TRV_OUT/node_modules/@travetto/manifest/package.json $DIST/node_modules/@travetto/manifest/package.json
 cp -r -p $ROOT/resources $DIST/resources
 
-# Writing Manifest node_modules/$MOD 
+# Writing Manifest manifest.json 
 
-echo "Writing Manifest node_modules/$MOD"
+echo "Writing Manifest manifest.json"
 
-TRV_MODULE=$MOD npx trv manifest $DIST/node_modules/$MOD prod
+TRV_MODULE=$MOD npx trv manifest $DIST/manifest.json prod
 
 # Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.cli 
 

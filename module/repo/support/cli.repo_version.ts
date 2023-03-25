@@ -34,7 +34,7 @@ export class RepoVersionCommand implements CliCommandShape {
 
     await PackageManager.version(RootIndex.manifest, modules, level, prefix);
 
-    const versions = await CliModuleUtil.synchronizeModuleVersions();
+    const versions = await PackageManager.synchronizeVersions();
     if (this.commit) {
       const commitMessage = `Publish ${modules.map(x => `${x.name}#${versions[x.name]?.replace('^', '') ?? x.version}`).join(',')}`;
       console.log!(await CliScmUtil.createCommit(commitMessage));

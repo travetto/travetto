@@ -15,7 +15,13 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/repo</code></pre>
   </figure>
 
-The repo module aims to provide some simple mono-repo based tools, primarily around module publishing.  The module provides two cli operations:
+The repo module aims to provide concise monorepo based tools.  The monorepo support within the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> framework, is based on <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a>/<a target="_blank" class="external-link" href="https://yarnpg.com">Yarn</a> workspaces.  This module is not a requirement for monorepo support, but provides some quality of life improvements for:
+<ul> <li>Versioning releases</li>
+<li>Publishing releases</li>
+<li>Listing local modules</li>
+<li>Running commands on all workspace modules</li>
+</ul>
+
 <h2 id="cli-version">CLI - Version</h2>
 
 The versioning operation will find all the changed modules (and the modules that depend on the changed), and will update the versions in accordance with the user preferences.  The versioning logic is backed by <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a>'s and <a target="_blank" class="external-link" href="https://yarnpg.com">Yarn</a>'s versioning functionality and so it is identical to using the tool manually. The determination of what has or hasn't changed is relative to the last versioning commit.
@@ -85,3 +91,208 @@ By default the tool will execute a dry run only, and requires passing a flag to 
   </figure>
 
 If no modules are currently changed, then the command will indicate there is no work to do, and exit gracefully.
+
+<h2 id="cli-list">CLI - List</h2>
+
+The listing functionality provides the ability to get the workspace modules in the following formats:
+
+  <figure class="terminal">
+    <figcaption class="terminal">List execution
+
+</figcaption>
+    <pre><code class="language-bash">$ trv repo:list <span class="token parameter variable">-h</span>
+
+Usage: repo:list <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+
+Options:
+  -c, <span class="token parameter variable">--changed</span>                   Only show changed modules <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -f, <span class="token parameter variable">--format</span> <span class="token operator">&lt;</span>graph<span class="token operator">|</span>json<span class="token operator">|</span>list<span class="token operator">></span>  Output <span class="token function">format</span> <span class="token punctuation">(</span>default: <span class="token string">"list"</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>                      display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+<ul> <li><code class="item input">list</code> - Standard text list, each module on its own line</li>
+<li><code class="item input">graph</code> - Modules as a digraph, mapping interdependencies</li>
+<li><code class="item input">json</code> - Graph of modules in JSON form, with additional data (useful for quickly building a dependency graph)</li>
+</ul>
+
+  <figure class="terminal">
+    <figcaption class="terminal">List execution of Monorepo
+
+</figcaption>
+    <pre><code class="language-bash">$ trv repo:list
+
+global-test/asset-rest
+global-test/auth-rest
+global-test/model_asset
+global-test/model_auth-model
+global-test/model_cache
+global-test/model_rest-session
+global-test/openapi
+global-test/pack_app
+global-test/rest-session
+global-test/transformer-test
+module/asset
+module/asset-rest
+module/auth
+module/auth-model
+module/auth-rest
+module/auth-rest-context
+module/auth-rest-jwt
+module/auth-rest-passport
+module/auth-rest-session
+module/base
+module/cache
+module/cli
+module/command
+module/compiler
+module/config
+module/context
+module/di
+module/doc
+module/email
+module/email-nodemailer
+module/email-template
+module/eslint
+module/image
+module/jwt
+module/log
+module/manifest
+module/model
+module/model-dynamodb
+module/model-elasticsearch
+module/model-firestore
+module/model-mongo
+module/model-mysql
+module/model-postgres
+module/model-query
+module/model-redis
+module/model-s3
+module/model-sql
+module/model-sqlite
+module/openapi
+module/pack
+module/registry
+module/repo
+module/rest
+module/rest-aws-lambda
+module/rest-express
+module/rest-express-lambda
+module/rest-fastify
+module/rest-fastify-lambda
+module/rest-koa
+module/rest-koa-lambda
+module/rest-model
+module/rest-model-query
+module/rest-session
+module/scaffold
+module/schema
+module/schema-faker
+module/terminal
+module/test
+module/transformer
+module/worker
+module/yaml
+related/todo-app</code></pre>
+  </figure>
+
+<h2 id="cli-exec">CLI - Exec</h2>
+
+The exec command allows for running commands on all modules, or just changed modules.
+
+  <figure class="terminal">
+    <figcaption class="terminal">Exec execution
+
+</figcaption>
+    <pre><code class="language-bash">$ trv repo:exec <span class="token parameter variable">-h</span>
+
+Usage: repo:exec <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>cmd:string<span class="token operator">></span> <span class="token punctuation">[</span>args<span class="token punctuation">..</span>.:string<span class="token punctuation">]</span>
+
+Options:
+  -c, <span class="token parameter variable">--changed</span>                        Only changed modules <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  -w, <span class="token parameter variable">--workers</span> <span class="token operator">&lt;</span>number<span class="token operator">></span>               Number of concurrent workers <span class="token punctuation">(</span>default: <span class="token number">4</span><span class="token punctuation">)</span>
+  --prefix-output, --no-prefix-output  Prefix output by folder <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
+  --show-stdout, --no-show-stdout      Show stdout <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -h, <span class="token parameter variable">--help</span>                           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  </figure>
+
+The standard format includes prefixed output to help identify which module produced which output.
+
+  <figure class="terminal">
+    <figcaption class="terminal">List execution of Monorepo
+
+</figcaption>
+    <pre><code class="language-bash">$ trv repo:exec <span class="token builtin class-name">pwd</span>
+
+global-test/asset-rest <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/asset-rest
+         global-test/auth-rest <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/auth-rest
+       global-test/model_asset <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/model_asset
+  global-test/model_auth-model <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/model_auth-model
+       global-test/model_cache <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/model_cache
+global-test/model_rest-session <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/model_rest-session
+           global-test/openapi <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/openapi
+          global-test/pack_app <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/pack_app
+      global-test/rest-session <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/rest-session
+  global-test/transformer-test <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/global-test/transformer-test
+                  module/asset <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/asset
+             module/asset-rest <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/asset-rest
+                   module/auth <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth
+             module/auth-model <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth-model
+              module/auth-rest <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth-rest
+      module/auth-rest-context <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth-rest-context
+          module/auth-rest-jwt <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth-rest-jwt
+     module/auth-rest-passport <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth-rest-passport
+      module/auth-rest-session <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/auth-rest-session
+                   module/base <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/base
+                  module/cache <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cache
+                    module/cli <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli
+                module/command <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/command
+               module/compiler <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/compiler
+                 module/config <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/config
+                module/context <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/context
+                     module/di <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/di
+                    module/doc <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/doc
+                  module/email <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/email
+       module/email-nodemailer <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/email-nodemailer
+         module/email-template <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/email-template
+                 module/eslint <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/eslint
+                  module/image <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/image
+                    module/jwt <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/jwt
+                    module/log <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/log
+               module/manifest <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/manifest
+                  module/model <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model
+         module/model-dynamodb <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-dynamodb
+    module/model-elasticsearch <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-elasticsearch
+        module/model-firestore <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-firestore
+            module/model-mongo <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-mongo
+            module/model-mysql <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-mysql
+         module/model-postgres <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-postgres
+            module/model-query <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-query
+            module/model-redis <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-redis
+               module/model-s3 <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-s3
+              module/model-sql <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-sql
+           module/model-sqlite <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/model-sqlite
+                module/openapi <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/openapi
+                   module/pack <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/pack
+               module/registry <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/registry
+                   module/repo <span class="token builtin class-name">.</span>
+                   module/rest <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest
+        module/rest-aws-lambda <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-aws-lambda
+           module/rest-express <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-express
+    module/rest-express-lambda <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-express-lambda
+           module/rest-fastify <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-fastify
+    module/rest-fastify-lambda <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-fastify-lambda
+               module/rest-koa <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-koa
+        module/rest-koa-lambda <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-koa-lambda
+             module/rest-model <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-model
+       module/rest-model-query <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-model-query
+           module/rest-session <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/rest-session
+               module/scaffold <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/scaffold
+                 module/schema <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/schema
+           module/schema-faker <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/schema-faker
+               module/terminal <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/terminal
+                   module/test <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/test
+              related/todo-app <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/related/todo-app
+            module/transformer <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/transformer
+                 module/worker <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/worker
+                   module/yaml <span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/yaml</code></pre>
+  </figure>

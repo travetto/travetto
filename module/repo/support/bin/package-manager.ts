@@ -1,5 +1,9 @@
+import path from 'path';
+import fs from 'fs/promises';
+
 import { ExecUtil, ExecutionOptions, ExecutionState, ExecutionResult } from '@travetto/base';
-import { IndexedModule, ManifestContext } from '@travetto/manifest';
+import { IndexedModule, ManifestContext, Package, PackageUtil } from '@travetto/manifest';
+import { CliModuleUtil } from '@travetto/cli';
 
 export type SemverLevel = 'minor' | 'patch' | 'major' | 'prerelease' | 'premajor' | 'preminor' | 'prepatch';
 
@@ -90,5 +94,51 @@ export class PackageManager {
         break;
     }
     return ExecUtil.spawn(ctx.packageManager, args, opts);
+  }
+
+  /**
+   * Write package
+   */
+  static async writePackageIfChanged(modulePath: string, pkg: Package): Promise<void> {
+    const final = JSON.stringify(pkg, null, 2);
+    const target = path.resolve(modulePath, 'package.json');
+    const current = (await fs.readFile(target, 'utf8').catch(() => '')).trim();
+    if (final !== current) {
+      await fs.writeFile(target, `${final}\n`, 'utf8');
+    }
+  }
+
+  /**
+   * Synchronize all workspace modules to have the correct versions from the current packages
+   */
+  static async synchronizeVersions(): Promise<Record<string, string>> {
+    const versions: Record<string, string> = {};
+    const folders = (await CliModuleUtil.findModules('all')).map(x => x.sourcePath);
+    const packages = folders.map(folder => {
+      const pkg = PackageUtil.readPackage(folder, true);
+      versions[pkg.name] = `^${pkg.version}`;
+      return { folder, pkg };
+    });
+
+    for (const { pkg } of packages) {
+      for (const group of [
+        pkg.dependencies ?? {},
+        pkg.devDependencies ?? {},
+        pkg.optionalDependencies ?? {},
+        pkg.peerDependencies ?? {}
+      ]) {
+        for (const [mod, ver] of Object.entries(versions)) {
+          if (mod in group && !/^[*]|(file:.*)$/.test(group[mod])) {
+            group[mod] = ver;
+          }
+        }
+      }
+    }
+
+    for (const { folder, pkg } of packages) {
+      await this.writePackageIfChanged(folder, pkg);
+    }
+
+    return versions;
   }
 }

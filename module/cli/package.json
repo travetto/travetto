@@ -25,8 +25,7 @@
   },
   "dependencies": {
     "@travetto/schema": "^3.1.0-rc.2",
-    "@travetto/terminal": "^3.1.0-rc.0",
-    "@travetto/worker": "^3.1.0-rc.0"
+    "@travetto/terminal": "^3.1.0-rc.0"
   },
   "travetto": {
     "displayName": "Command Line Interface"

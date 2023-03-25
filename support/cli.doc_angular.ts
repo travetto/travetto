@@ -3,6 +3,8 @@ import fs from 'fs/promises';
 import { ExecUtil, FileQueryProvider } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
+import { RepoExecUtil } from '@travetto/repo';
+
 
 const page = (f: string): string => path.resolve('related/travetto.github.io/src', f);
 
@@ -36,7 +38,7 @@ export class DocAngularCommand {
 
     if (mods.size > 1) {
       // Build out docs
-      await CliModuleUtil.execOnModules('all',
+      await RepoExecUtil.execOnModules('all',
         (mod, opts) => ExecUtil.spawn('trv', ['doc'], { ...opts, env: { ...opts.env ?? {}, TRV_BUILD: 'none' } }),
         {
           showStdout: false,

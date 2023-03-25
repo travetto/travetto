@@ -53,12 +53,10 @@ All of the high level configurations can be found in the following structure:
   version<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
 
   <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">const</span> info <span class="token operator">=</span> RootIndex<span class="token punctuation">.</span>mainPackage<span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>contact <span class="token operator">??=</span> info<span class="token punctuation">.</span>author <span class="token operator">??</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>description <span class="token operator">??=</span> info<span class="token punctuation">.</span>description<span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>license <span class="token operator">??=</span> <span class="token punctuation">{{'{'}}</span> name<span class="token operator">:</span> info<span class="token punctuation">.</span>license<span class="token operator">!</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>title <span class="token operator">??=</span> info<span class="token punctuation">.</span>name<span class="token punctuation">;</span>
+    <span class="token keyword">const</span> info <span class="token operator">=</span> RootIndex<span class="token punctuation">.</span>manifest<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>title <span class="token operator">??=</span> info<span class="token punctuation">.</span>mainModule<span class="token punctuation">;</span>
     <span class="token keyword">this</span><span class="token punctuation">.</span>version <span class="token operator">??=</span> info<span class="token punctuation">.</span>version<span class="token punctuation">;</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>description <span class="token operator">??=</span> info<span class="token punctuation">.</span>description<span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span>
 
