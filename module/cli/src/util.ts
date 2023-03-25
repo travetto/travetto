@@ -12,7 +12,7 @@ export class CliUtil {
    * Get a simplified version of a module name
    * @returns
    */
-  static getSimpleModuleName(name = RootIndex.mainPackage.name): string {
+  static getSimpleModuleName(name = RootIndex.mainModuleName): string {
     return name.replace(/[\/]/, '_').replace(/@/, '');
   }
 }

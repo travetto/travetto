@@ -7,7 +7,6 @@ import { cliTpl } from '@travetto/cli';
 import { CommonPackConfig } from './types';
 import { PackUtil } from './util';
 import { ActiveShellCommand, ShellCommands } from './shell';
-import { RUNTIME_MODULES } from './config';
 
 async function writeRawFile(file: string, contents: string, mode?: string): Promise<void> {
   await fs.writeFile(file, contents, { encoding: 'utf8', mode });
@@ -121,7 +120,7 @@ export class PackOperation {
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = '.env.js';
     const env = {
-      TRV_MANIFEST: `node_modules/${cfg.module}`,
+      TRV_MANIFEST: 'manifest.json',
       TRV_MODULE: cfg.module,
       TRV_CLI_IPC: ''
     };
@@ -185,31 +184,13 @@ export class PackOperation {
       dest: path.resolve(cfg.workspace, 'resources')
     };
 
-    const copyFiles = [
-      RootIndex.manifest.modules[RootIndex.mainModule.name],
-      RootIndex.manifest.modules['@travetto/manifest']
-    ].map(mod => ({
-      src: path.resolve(RootIndex.outputRoot, mod.outputFolder, 'package.json'),
-      dest: path.resolve(cfg.workspace, mod.outputFolder, 'package.json'),
-      destFolder: path.resolve(cfg.workspace, mod.outputFolder)
-    }));
-
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Copying over resources' }}`);
 
     if (cfg.ejectFile) {
-      yield* copyFiles.flatMap(mod => [
-        ActiveShellCommand.mkdir(path.dirname(mod.dest)),
-        ActiveShellCommand.copy(mod.src, mod.dest)
-      ]);
       if (resources.count) {
         yield ActiveShellCommand.copyRecursive(resources.src, path.resolve(cfg.workspace, 'resources'));
       }
     } else {
-      for (const { src, dest, destFolder } of copyFiles) {
-        await fs.mkdir(destFolder, { recursive: true });
-        await fs.copyFile(src, dest);
-      }
-
       if (resources.count) {
         await fs.mkdir(path.dirname(resources.dest), { recursive: true });
         await PackUtil.copyRecursive(resources.src, resources.dest);
@@ -221,32 +202,16 @@ export class PackOperation {
    * Produce the output manifest, only including prod dependencies
    */
   static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const out = path.resolve(cfg.workspace, 'node_modules', cfg.module);
+    const out = path.resolve(cfg.workspace, 'manifest.json');
     const cmd = ['npx', 'trv', 'manifest', out, 'prod'];
     const env = { TRV_MODULE: cfg.module };
 
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: path.join('node_modules', cfg.module) }}`);
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: 'manifest.json' }}`);
 
     if (cfg.ejectFile) {
       yield [...Object.entries(env).map(([k, v]) => `${k}=${v}`), ...cmd];
     } else {
       await ExecUtil.spawn(cmd[0], cmd.slice(1), { env, stdio: ['inherit', 'ignore', 'inherit'] }).result;
-    }
-  }
-
-  /**
-   * Duplicate node_modules
-   */
-  static async * duplicateNodeModules(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const src = path.resolve(cfg.workspace, 'node_modules');
-    const dest = path.resolve(cfg.workspace, RUNTIME_MODULES);
-
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Creating a Copy of Node Modules' }} ${{ path: path.join('node_modules') }}`);
-
-    if (cfg.ejectFile) {
-      yield ActiveShellCommand.copyRecursive(src, dest);
-    } else {
-      await PackUtil.copyRecursive(src, dest);
     }
   }
 

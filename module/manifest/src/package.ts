@@ -3,13 +3,15 @@ import fs from 'fs/promises';
 import { createRequire } from 'module';
 import { execSync } from 'child_process';
 
-import { ManifestContext, Package, PackageDigest, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
+import { ManifestContext, Package, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 import { path } from './path';
 
+/**
+ * Utilities for querying, traversing and reading package.json files.
+ */
 export class PackageUtil {
 
   static #req = createRequire(path.resolve('node_modules'));
-  static #framework: Package;
   static #cache: Record<string, Package> = {};
   static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};
 
@@ -115,18 +117,6 @@ export class PackageUtil {
   }
 
   /**
-   * Write package
-   */
-  static async writePackageIfChanged(modulePath: string, pkg: Package): Promise<void> {
-    const final = JSON.stringify(pkg, null, 2);
-    const target = path.resolve(modulePath, 'package.json');
-    const current = (await fs.readFile(target, 'utf8').catch(() => '')).trim();
-    if (final !== current) {
-      await fs.writeFile(target, `${final}\n`, 'utf8');
-    }
-  }
-
-  /**
    * Visit packages with ability to track duplicates
    */
   static async visitPackages<T>(
@@ -165,21 +155,6 @@ export class PackageUtil {
   }
 
   /**
-   * Get version of manifest package
-   */
-  static getFrameworkVersion(): string {
-    return (this.#framework ??= this.importPackage('@travetto/manifest')).version;
-  }
-
-  /**
-   * Produce simple digest of
-   */
-  static digest(pkg: Package): PackageDigest {
-    const { main, name, author, license, version } = pkg;
-    return { name, main, author, license, version, framework: this.getFrameworkVersion() };
-  }
-
-  /**
    * Find workspace values from rootPath
    */
   static async resolveWorkspaces(ctx: ManifestContext, rootPath: string): Promise<PackageWorkspaceEntry[]> {
@@ -209,35 +184,5 @@ export class PackageUtil {
       }
     }
     return this.#workspaces[rootPath];
-  }
-
-  /**
-   * Sync versions across a series of folders
-   */
-  static async syncVersions(folders: string[], versionMapping: Record<string, string> = {}): Promise<void> {
-    const packages = folders.map(folder => {
-      const pkg = this.readPackage(folder, true);
-      versionMapping[pkg.name] = `^${pkg.version}`;
-      return { folder, pkg };
-    });
-
-    for (const { pkg } of packages) {
-      for (const group of [
-        pkg.dependencies ?? {},
-        pkg.devDependencies ?? {},
-        pkg.optionalDependencies ?? {},
-        pkg.peerDependencies ?? {}
-      ]) {
-        for (const [mod, ver] of Object.entries(versionMapping)) {
-          if (mod in group && !/^[*]|(file:.*)$/.test(group[mod])) {
-            group[mod] = ver;
-          }
-        }
-      }
-    }
-
-    for (const { folder, pkg } of packages) {
-      await this.writePackageIfChanged(folder, pkg);
-    }
   }
 }

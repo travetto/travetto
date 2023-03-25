@@ -30,7 +30,7 @@ class $DynamicFileLoader {
     if (ev.action !== 'create') {
       await this.#loader.unload(ev.file);
     } else {
-      RootIndex.reinitForModule(RootIndex.mainModule.name);
+      RootIndex.reinitForModule(RootIndex.mainModuleName);
     }
     if (ev.action !== 'delete') {
       await this.#loader.load(ev.file);
@@ -62,7 +62,7 @@ class $DynamicFileLoader {
       if (isTriggerEvent(ev)) {
         if (ev.action === 'create') {
           // Load new content
-          RootIndex.reinitForModule(RootIndex.mainModule.name);
+          RootIndex.reinitForModule(RootIndex.mainModuleName);
         }
         const found = RootIndex.getFromSource(ev.file);
         if (found) {

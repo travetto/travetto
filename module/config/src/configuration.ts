@@ -139,7 +139,7 @@ export class Configuration {
     const og = util.inspect.defaultOptions.depth;
     util.inspect.defaultOptions.depth = 100;
     console.log('Initialized', {
-      manifest: RootIndex.mainDigest(),
+      manifest: RootIndex.manifestDigest(),
       env: GlobalEnv.toJSON(),
       config: await this.exportActive()
     });

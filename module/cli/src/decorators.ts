@@ -39,7 +39,7 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
         if (addEnv) { defineGlobalEnv({ envName: cmd.env }); }
         if (addProfile) { defineGlobalEnv({ profiles: cmd.profile }); }
         if (addEnv || addProfile) { ConsoleManager.setDebugFromEnv(); }
-        if (addModule && cmd.module && cmd.module !== RootIndex.mainModule.name) { // Mono-repo support
+        if (addModule && cmd.module && cmd.module !== RootIndex.mainModuleName) { // Mono-repo support
           RootIndex.reinitForModule(cmd.module); // Reinit with specified module
         }
       }

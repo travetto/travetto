@@ -1,7 +1,6 @@
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, Package, PackageDigest } from './types';
-import { PackageUtil } from './package';
+import { FunctionMetadata, ManifestContext, Package } from './types';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
@@ -11,7 +10,6 @@ type Metadated = { [METADATA]: FunctionMetadata };
  */
 class $RootIndex extends ManifestIndex {
 
-  #config: Package | undefined;
   #metadata = new Map<string, FunctionMetadata>();
 
   /**
@@ -20,7 +18,6 @@ class $RootIndex extends ManifestIndex {
    */
   reinitForModule(module: string): void {
     this.init(`${this.outputRoot}/node_modules/${module}`);
-    this.#config = undefined;
   }
 
   /**
@@ -49,32 +46,28 @@ class $RootIndex extends ManifestIndex {
   }
 
   /**
-   * Get main module for manifest
+   * Get main module name
    */
-  get mainModule(): IndexedModule {
-    return this.getModule(this.mainPackage.name)!;
+  get mainModuleName(): string {
+    return this.manifest.mainModule;
   }
 
   /**
-   * Get main package for manifest
+   * Get main module for manifest
    */
-  get mainPackage(): Package {
-    if (!this.#config) {
-      const { outputPath } = this.getModule(this.manifest.mainModule)!;
-      this.#config = {
-        ...{
-          name: 'untitled',
-          description: 'A Travetto application',
-          version: '0.0.0',
-        },
-        ...PackageUtil.readPackage(outputPath)
-      };
-    }
-    return this.#config;
+  get mainModule(): IndexedModule {
+    return this.getModule(this.mainModuleName)!;
   }
 
-  mainDigest(): PackageDigest {
-    return PackageUtil.digest(this.mainPackage);
+  /**
+   * Digest manifest
+   */
+  manifestDigest(): Pick<ManifestContext, 'mainModule' | 'frameworkVersion' | 'version'> {
+    return {
+      mainModule: this.manifest.mainModule,
+      frameworkVersion: this.manifest.frameworkVersion,
+      version: this.manifest.version,
+    };
   }
 
   /**

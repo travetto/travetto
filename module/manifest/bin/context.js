@@ -81,6 +81,7 @@ async function $getWorkspaceRoot(base = process.cwd()) {
  */
 export async function getManifestContext(folder) {
   const workspacePath = path.resolve(await $getWorkspaceRoot(folder));
+  const req = createRequire(`${workspacePath}/node_modules`);
 
   // If manifest specified via env var, and is a package name
   if (!folder && process.env.TRV_MODULE) {
@@ -88,7 +89,6 @@ export async function getManifestContext(folder) {
     if (/[.](t|j)s$/.test(process.env.TRV_MODULE)) {
       process.env.TRV_MODULE = await $getModuleFromFile(process.env.TRV_MODULE) ?? process.env.TRV_MODULE;
     }
-    const req = createRequire(`${workspacePath}/node_modules`);
     try {
       folder = path.dirname(req.resolve(`${process.env.TRV_MODULE}/package.json`));
     } catch {
@@ -102,7 +102,7 @@ export async function getManifestContext(folder) {
   }
 
   const mainPath = await $getModuleRoot(path.resolve(folder ?? '.'));
-  const { name: mainModule, workspaces, travetto } = (await $getPkg(mainPath));
+  const { name: mainModule, workspaces, travetto, version, description } = (await $getPkg(mainPath));
   const monoRepo = workspacePath !== mainPath || !!workspaces;
   const outputFolder = travetto?.outputFolder ?? '.trv_output';
 
@@ -110,6 +110,8 @@ export async function getManifestContext(folder) {
   const mainFolder = mainPath === workspacePath ? '' : mainPath.replace(`${workspacePath}/`, '');
   /** @type {'yarn'|'npm'} */
   const packageManager = await fs.stat(path.resolve(workspacePath, 'yarn.lock')).then(() => 'yarn', () => 'npm');
+
+  const { version: frameworkVersion } = JSON.parse(await fs.readFile(req.resolve('@travetto/manifest/package.json'), 'utf8'));
 
   const res = {
     moduleType,
@@ -120,7 +122,10 @@ export async function getManifestContext(folder) {
     outputFolder,
     toolFolder: '.trv_build',
     compilerFolder: '.trv_compiler',
-    packageManager
+    packageManager,
+    version,
+    description,
+    frameworkVersion
   };
   return res;
 }

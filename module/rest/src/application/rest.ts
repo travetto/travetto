@@ -41,7 +41,7 @@ export class RestApplication<T = unknown>  {
 
   async postConstruct(): Promise<void> {
     this.info = {
-      info: RootIndex.mainDigest(),
+      info: RootIndex.manifestDigest(),
       env: GlobalEnv.toJSON(),
       restProvider: this.server.constructor.name
     };

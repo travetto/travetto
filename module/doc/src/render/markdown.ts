@@ -108,7 +108,7 @@ ${context.cleanText(content.text)}
   Header: async ({ props }) => `# ${props.title}\n${props.description ? `## ${props.description}\n` : ''}\n`,
 
   StdHeader: async state => {
-    const mod = state.el.props.mod ?? RootIndex.mainPackage.name;
+    const mod = state.el.props.mod ?? RootIndex.mainModuleName;
     const pkg = PackageUtil.readPackage(RootIndex.getModule(mod)!.sourcePath);
     const title = pkg.travetto?.displayName ?? pkg.name;
     const desc = pkg.description;

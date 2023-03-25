@@ -69,7 +69,6 @@ export abstract class BasePackCommand implements CliCommandShape {
       PackOperation.writeEntryScript,
       PackOperation.copyResources,
       PackOperation.writeManifest,
-      PackOperation.duplicateNodeModules,
       PackOperation.bundle,
     ];
   }
@@ -102,7 +101,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
   async main(args: string[] = []): Promise<void> {
     this.entryArguments = [...args, ...this.#unknownArgs ?? []];
-    this.module ||= RootIndex.mainModule.name;
+    this.module ||= RootIndex.mainModuleName;
     this.mainName ??= path.basename(this.module);
 
     const stream = this.runOperations();

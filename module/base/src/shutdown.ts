@@ -84,7 +84,7 @@ class $ShutdownManager {
       this.#shutdownCode = exitCode;
     }
 
-    const name = RootIndex.mainPackage.name;
+    const name = RootIndex.mainModuleName;
 
     try {
       // If the err is not an exit code

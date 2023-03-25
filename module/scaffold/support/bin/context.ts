@@ -105,7 +105,7 @@ export class Context {
     const moduleNames = [...Object.keys(modules)];
 
     const context = Object.assign({
-      frameworkVersion: RootIndex.mainDigest().framework.replace(/[.]\d+$/, '.0'),
+      frameworkVersion: RootIndex.manifest.frameworkVersion.replace(/[.]\d+$/, '.0'),
       name: this.name,
       modules,
       moduleNames,

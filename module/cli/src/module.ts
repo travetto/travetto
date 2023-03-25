@@ -1,6 +1,9 @@
+import path from 'path';
+import fs from 'fs/promises';
+
 import { ColorDefineUtil, NAMED_COLORS, Terminal, GlobalTerminal, TermLinePosition } from '@travetto/terminal';
 import { Env, ExecutionOptions, ExecutionResult, ExecutionState, TypedObject } from '@travetto/base';
-import { IndexedModule, PackageUtil, RootIndex } from '@travetto/manifest';
+import { IndexedModule, Package, PackageUtil, RootIndex } from '@travetto/manifest';
 import { IterableWorkSet, WorkPool, type Worker } from '@travetto/worker';
 
 import { CliScmUtil } from './scm';
@@ -115,12 +118,50 @@ export class CliModuleUtil {
     ).filter(x => x.sourcePath !== RootIndex.manifest.workspacePath);
   }
 
+
+  /**
+   * Write package
+   */
+  static async writePackageIfChanged(modulePath: string, pkg: Package): Promise<void> {
+    const final = JSON.stringify(pkg, null, 2);
+    const target = path.resolve(modulePath, 'package.json');
+    const current = (await fs.readFile(target, 'utf8').catch(() => '')).trim();
+    if (final !== current) {
+      await fs.writeFile(target, `${final}\n`, 'utf8');
+    }
+  }
+
   /**
    * Synchronize all workspace modules to have the correct versions from the current packages
    */
   static async synchronizeModuleVersions(): Promise<Record<string, string>> {
-    const versions = {};
-    await PackageUtil.syncVersions((await this.findModules('all')).map(x => x.sourcePath), versions);
+    const versions: Record<string, string> = {};
+    const folders = (await this.findModules('all')).map(x => x.sourcePath);
+    const packages = folders.map(folder => {
+      const pkg = PackageUtil.readPackage(folder, true);
+      versions[pkg.name] = `^${pkg.version}`;
+      return { folder, pkg };
+    });
+
+    for (const { pkg } of packages) {
+      for (const group of [
+        pkg.dependencies ?? {},
+        pkg.devDependencies ?? {},
+        pkg.optionalDependencies ?? {},
+        pkg.peerDependencies ?? {}
+      ]) {
+        for (const [mod, ver] of Object.entries(versions)) {
+          if (mod in group && !/^[*]|(file:.*)$/.test(group[mod])) {
+            group[mod] = ver;
+          }
+        }
+      }
+    }
+
+    for (const { folder, pkg } of packages) {
+      await this.writePackageIfChanged(folder, pkg);
+    }
+
     return versions;
   }
 

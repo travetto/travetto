@@ -35,6 +35,9 @@ export type ManifestContext = {
   monoRepo?: boolean;
   moduleType: 'module' | 'commonjs';
   packageManager: 'yarn' | 'npm';
+  frameworkVersion: string;
+  description: string;
+  version: string;
 };
 
 export type ManifestRoot = ManifestContext & {
@@ -85,9 +88,6 @@ export type Package = {
   private?: boolean;
   publishConfig?: { access?: 'restricted' | 'public' };
 };
-
-export type PackageDigestField = 'name' | 'main' | 'author' | 'license' | 'version';
-export type PackageDigest = Pick<Package, PackageDigestField> & { framework: string };
 
 type OrProm<T> = T | Promise<T>;
 
