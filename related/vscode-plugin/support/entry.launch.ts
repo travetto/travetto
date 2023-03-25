@@ -9,7 +9,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     // eslint-disable-next-line no-undef
     root = __dirname.replace(/node_modules.*$/, ''); // Local development
   } catch { }
-  process.env.TRV_MANIFEST = path.resolve(root, 'node_modules', context.extension.packageJSON.name);
+  process.env.TRV_MANIFEST = path.resolve(root, 'manifest.json');
   const { init, cleanup: clean } = await import('@travetto/base/support/init.js');
   await init(false);
   cleanup = clean;
