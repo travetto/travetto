@@ -47,7 +47,7 @@ export class CliScmUtil {
    */
   static async findChangedModulesSince(hash: string): Promise<IndexedModule[]> {
     const ws = RootIndex.manifest.workspacePath;
-    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `HEAD..${hash}`], { cwd: ws }).result;
+    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `HEAD..${hash}`, ':!**/DOC.tsx', ':!**/DOC.html', ':!**/README.md'], { cwd: ws }).result;
     const out = new Set<IndexedModule>();
     for (const line of res.stdout.split(/\n/g)) {
       const mod = RootIndex.getFromSource(path.resolve(ws, line));
