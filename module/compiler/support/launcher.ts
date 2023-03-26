@@ -141,6 +141,11 @@ export async function launch(ctx: ManifestContext, root: ManifestContext, op?: '
     });
   }
 
+  // Disconnect for non-cli operations
+  if (op && process.send) {
+    process.disconnect();
+  }
+
   switch (op) {
     case 'manifest': return exportManifest(ctx, ...args);
     case 'build': return LogUtil.log('build', [], 'info', 'Successfully built');

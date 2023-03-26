@@ -239,6 +239,8 @@ export class TranspileUtil {
         await timers.setTimeout(150 + 100 * Math.random());
       }
 
+      LogUtil.log('compiler-exec', [], 'info', `Result ${result}, exit code: ${proc?.exitCode}`);
+
       return result;
     } finally {
       if (proc?.killed === false) { proc.kill('SIGKILL'); }

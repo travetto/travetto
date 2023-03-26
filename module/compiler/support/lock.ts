@@ -105,7 +105,7 @@ export class LockManager {
       handler();
 
       remove = (): void => {
-        clearInterval(timer);
+        clearTimeout(timer);
         unwatchFile(file, handler);
       };
     });
