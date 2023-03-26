@@ -1,6 +1,9 @@
 import vscode from 'vscode';
+import fs from 'fs/promises';
 
 import { CliCommandInput } from '@travetto/cli';
+import { ExecUtil } from '@travetto/base';
+import { path } from '@travetto/manifest';
 
 import { Workspace } from './workspace';
 
@@ -20,6 +23,26 @@ type Complex = vscode.InputBox | vscode.QuickPick<vscode.QuickPickItem>;
  * Selects a parameter
  */
 export class ParameterSelector {
+  static #rgPath: string;
+
+  static async #getRgPath(): Promise<string> {
+    if (!this.#rgPath) {
+      for (const folder of ['node_modules.asar.unpacked', 'node_modules']) {
+        for (const mod of ['vscode-ripgrep', '@vscode/ripgrep']) {
+          const file = path.resolve(vscode.env.appRoot, folder, mod, 'bin', 'rg');
+          if (await fs.stat(file).catch(() => false)) {
+            this.#rgPath = file;
+            break;
+          }
+        }
+      }
+    }
+    if (!this.#rgPath) {
+      throw new Error('Unable to find ripgrep path');
+    }
+    return this.#rgPath;
+  }
+
   /**
    * Create the input handler
    * @param provider Input Parameter provider
@@ -95,13 +118,58 @@ export class ParameterSelector {
    * @param root The root to search in
    */
   static async getFile(conf: InputWithMeta, root?: string): Promise<string | undefined> {
-    const res = await vscode.window.showOpenDialog({
-      defaultUri: root ? vscode.Uri.file(root) : Workspace.folder.uri,
-      openLabel: `Select ${conf.param.description || conf.param.name}`,
-      canSelectFiles: true,
-      canSelectMany: false
-    });
-    return res === undefined ? res : res[0].fsPath;
+    const disposables: vscode.Disposable[] = [];
+    try {
+      const rgPath = await this.#getRgPath();
+      return await new Promise<string | undefined>((resolve, reject) => {
+        const input = vscode.window.createQuickPick<{ label: string, description: string }>();
+        input.placeholder = 'Type to search for files';
+        disposables.push(
+          input.onDidChangeValue(async value => {
+            if (!value) {
+              input.items = [];
+              return;
+            }
+
+            const q = process.platform === 'win32' ? '"' : '\'';
+            let query = value.includes('*') ? value : `{${value}*,${value}*/**}`;
+            if (!query.startsWith('*')) {
+              query = `**/${query}`;
+            }
+
+            const cwd = root ?? Workspace.uri.fsPath;
+            const args = ['--max-count', '50', '--files', '-g', [q, query, q].join('')];
+
+            input.busy = true;
+            const items: { label: string, description: string }[] = [];
+            const proc = ExecUtil.spawn(rgPath, args, {
+              stdio: [0, 'pipe', 2],
+              outputMode: 'text-stream',
+              shell: true,
+              cwd,
+              catchAsResult: true,
+              onStdOutLine: item => items.push({ label: item, description: path.resolve(cwd, item) })
+            });
+            await proc.result;
+            input.items = items;
+            input.busy = false;
+          }),
+          input.onDidChangeSelection(items => {
+            if (items[0]) {
+              resolve(items[0].description);
+            }
+            input.hide();
+          }),
+          input.onDidHide(() => {
+            resolve(undefined);
+            input.dispose();
+          })
+        );
+        input.show();
+      });
+    } finally {
+      disposables.forEach(d => d.dispose());
+    }
   }
 
   /**
