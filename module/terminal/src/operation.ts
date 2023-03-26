@@ -5,7 +5,17 @@ import { ColorOutputUtil, TermStyleInput } from './color-output';
 
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
+/**
+ * Standard Terminal Operations
+ */
 export class TerminalOperation {
+
+  static truncateIfNeeded(term: TermState, text: string, suffix = '...'): string {
+    if (text.length > term.width) {
+      return `${text.substring(0, term.width - suffix.length)}${suffix}`;
+    }
+    return text;
+  }
 
   /**
    * Allows for writing at top, bottom, or current position while new text is added
@@ -104,7 +114,7 @@ export class TerminalOperation {
         .replace(/%idx/, idxStr)
         .replace(/%total/, totalStr)
         .replace(/%pct/, `${Math.trunc(pct * 100)}`);
-      const full = ` ${line}`.padEnd(term.width);
+      const full = this.truncateIfNeeded(term, ` ${line}`.padEnd(term.width));
       const mid = Math.trunc(pct * term.width);
       const [l, r] = [full.substring(0, mid), full.substring(mid)];
       return `${color(l)}${r}`;
@@ -139,7 +149,7 @@ export class TerminalOperation {
       if (msg !== undefined) {
         msg = msg.replace(/\n$/, '');
         pos = await term.getCursorPosition();
-        writer = this.streamWaiting(term, msg, { ...cfg, at: pos, clearOnFinish: false });
+        writer = this.streamWaiting(term, this.truncateIfNeeded(term, msg), { ...cfg, at: pos, clearOnFinish: false });
         line = msg;
       }
     }
