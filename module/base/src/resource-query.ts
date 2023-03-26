@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { watchFolders, path, WatchConfig, WatchStream } from '@travetto/manifest';
+import { watchFolders, path, WatchFolder, WatchStream } from '@travetto/manifest';
 
 import { FileResourceConfig, FileResourceProvider } from './resource';
 
@@ -60,7 +60,7 @@ export class FileQueryProvider extends FileResourceProvider {
    * @param onEvent
    * @param filter
    */
-  watchFiles(config?: WatchConfig): WatchStream {
+  watchFiles(config?: Omit<WatchFolder, 'src' | 'target'>): WatchStream {
     console.log('Watching', this.getAllPaths());
     return watchFolders(this.getAllPaths(), config);
   }
