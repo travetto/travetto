@@ -28,12 +28,12 @@ function prop<V>(obj: Partial<FieldConfig>): PropType<V> {
  * @param config The field configuration
  * @augments `@travetto/schema:Field`
  */
-export function Field(type: ClassList, config?: Partial<FieldConfig>) {
+export function Field(type: ClassList, ...config: Partial<FieldConfig>[]) {
   return (f: ClassInstance, k: string, idx?: number): void => {
     if (idx !== undefined && typeof idx === 'number') {
-      SchemaRegistry.registerPendingParamConfig(f.constructor, k, idx, type, config);
+      SchemaRegistry.registerPendingParamConfig(f.constructor, k, idx, type, Object.assign({}, ...config));
     } else {
-      SchemaRegistry.registerPendingFieldConfig(f.constructor, k, type, config);
+      SchemaRegistry.registerPendingFieldConfig(f.constructor, k, type, Object.assign({}, ...config));
     }
   };
 }
@@ -44,6 +44,12 @@ export function Field(type: ClassList, config?: Partial<FieldConfig>) {
  * @augments `@travetto/schema:Field`
  */
 export function Alias(...aliases: string[]): PropType<unknown> { return prop({ aliases }); }
+/**
+ * Specifier for the field
+ * @param specifier The specifier for a field
+ * @augments `@travetto/schema:Field`
+ */
+export function Specifier(specifier: string): PropType<unknown> { return prop({ specifier }); }
 /**
  * Mark a field as writeonly
  * @param active This determines if this field is readonly or not.

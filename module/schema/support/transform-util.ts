@@ -140,12 +140,18 @@ export class SchemaTransformUtil {
     if (!existing) {
       const resolved = this.toConcreteType(state, typeExpr, node, config.root);
       params.push(resolved);
+      if (attrs.length) {
+        params.push(state.factory.createObjectLiteralExpression(attrs));
+      }
     } else {
-      params.push(...DecoratorUtil.getArguments(existing) ?? []);
-    }
-
-    if (attrs.length) {
-      params.push(state.factory.createObjectLiteralExpression(attrs));
+      const args = DecoratorUtil.getArguments(existing) ?? [];
+      if (args.length > 0) {
+        params.push(args[0]);
+      }
+      params.push(state.extendObjectLiteral(state.factory.createObjectLiteralExpression(attrs)));
+      if (args.length > 1) {
+        params.push(...args.slice(1));
+      }
     }
 
     const newModifiers = [
