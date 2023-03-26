@@ -84,7 +84,7 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
 /**
  * Decorator to register a CLI command flag
  */
-export function CliFlag(cfg: { name?: string, short?: string, desc?: string, file?: boolean, envVars?: string[] }) {
+export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fileExtensions?: string[], envVars?: string[] }) {
   return function (target: ClassInstance, prop: string | symbol): void {
     const aliases: string[] = [];
     if (cfg.name) {
@@ -98,7 +98,8 @@ export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fil
     }
     if (typeof prop === 'string') {
       SchemaRegistry.registerPendingFieldFacet(target.constructor, prop, {
-        aliases, description: cfg.desc, specifiers: cfg.file ? ['file'] : undefined
+        aliases, description: cfg.desc,
+        specifiers: cfg.fileExtensions?.length ? ['file', ...cfg.fileExtensions.map(x => `ext:${x.replace(/[*.]/g, '')}`)] : undefined
       });
     }
   };

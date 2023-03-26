@@ -5,17 +5,19 @@ import { CliCommandRegistry } from './registry';
 import { CliCommandInput, CliCommandSchema, CliCommandShape, CliValidationResultError } from './types';
 
 function fieldToInput(x: FieldConfig): CliCommandInput {
+  const type = x.type === Date ? 'date' :
+    x.type === Boolean ? 'boolean' :
+      x.type === String ? (x.specifiers?.includes('file') ? 'file' : 'string') :
+        x.type === Number ? 'number' :
+          x.type === RegExp ? 'regex' : 'string';
   return ({
     name: x.name,
     description: x.description,
     array: x.array,
     required: x.required?.active,
     choices: x.enum?.values,
-    type: x.type === Date ? 'date' :
-      x.type === Boolean ? 'boolean' :
-        x.type === String ? (x.specifiers?.includes('file') ? 'file' : 'string') :
-          x.type === Number ? 'number' :
-            x.type === RegExp ? 'regex' : 'string',
+    fileExtensions: type === 'file' ? x.specifiers?.filter(s => s.startsWith('ext:')).map(s => s.split('ext:')[1]) : undefined,
+    type,
     default: x.default,
     flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),
     envVars: (x.aliases ?? []).slice(0).filter(v => v.startsWith('env.')).map(v => v.replace('env.', ''))

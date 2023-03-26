@@ -71,6 +71,7 @@ export type CliCommandInput = {
   name: string;
   description?: string;
   type: 'string' | 'file' | 'number' | 'boolean' | 'date' | 'regex';
+  fileExtensions?: string[];
   choices?: unknown[];
   required?: boolean;
   array?: boolean;

@@ -119,26 +119,31 @@ export class ParameterSelector {
    */
   static async getFile(conf: InputWithMeta, root?: string): Promise<string | undefined> {
     const disposables: vscode.Disposable[] = [];
+    const rgPath = await this.#getRgPath();
+    const baseArgs = ['--max-count', '50', '--files'];
+    const quote = process.platform === 'win32' ? '"' : '\'';
+    const cwd = root ?? Workspace.uri.fsPath;
+    const placeholder = 'Type to search for files';
+    const exts: string[] = conf.param.fileExtensions ?? [];
+
     try {
-      const rgPath = await this.#getRgPath();
       return await new Promise<string | undefined>((resolve, reject) => {
         const input = vscode.window.createQuickPick<{ label: string, description: string }>();
-        input.placeholder = 'Type to search for files';
+        input.placeholder = exts.length ? `${placeholder} (${exts.map(x => `.${x}`).join(', ')})` : placeholder;
+
         disposables.push(
           input.onDidChangeValue(async value => {
             if (!value) {
               input.items = [];
               return;
             }
+            value = value.replace(/[*?]/g, '').replace(/[.]$/, '');
 
-            const q = process.platform === 'win32' ? '"' : '\'';
-            let query = value.includes('*') ? value : `{${value}*,${value}*/**}`;
-            if (!query.startsWith('*')) {
-              query = `**/${query}`;
-            }
+            const fileQueries = exts.length ? exts.map(ext => `**/*${value}*.${ext}`) : [`*${value}*`];
+            const dirQueries = exts.length ? exts.map(ext => `**/*${value}*/**/*.${ext}`) : [`**/*${value}*/**`];
+            const query = `{${[...fileQueries, ...dirQueries].join(',')}}`;
 
-            const cwd = root ?? Workspace.uri.fsPath;
-            const args = ['--max-count', '50', '--files', '-g', [q, query, q].join('')];
+            const args = [...baseArgs, '-g', [quote, query, quote].join('')];
 
             input.busy = true;
             const items: { label: string, description: string }[] = [];
