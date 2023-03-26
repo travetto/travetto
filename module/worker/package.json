@@ -1,6 +1,6 @@
 {
   "name": "@travetto/worker",
-  "version": "3.1.0-rc.1",
+  "version": "3.1.0-rc.2",
   "description": "Process management utilities, with a focus on inter-process communication",
   "keywords": [
     "exec",
@@ -25,7 +25,7 @@
     "directory": "module/worker"
   },
   "dependencies": {
-    "@travetto/base": "^3.1.0-rc.1",
+    "@travetto/base": "^3.1.0-rc.2",
     "generic-pool": "^3.9.0"
   },
   "travetto": {

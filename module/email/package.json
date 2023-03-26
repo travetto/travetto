@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email",
-  "version": "3.1.0-rc.4",
+  "version": "3.1.0-rc.5",
   "description": "Email transmission module.",
   "keywords": [
     "email",
@@ -23,9 +23,9 @@
     "directory": "module/email"
   },
   "dependencies": {
-    "@travetto/base": "^3.1.0-rc.1",
-    "@travetto/config": "^3.1.0-rc.4",
-    "@travetto/di": "^3.1.0-rc.1",
+    "@travetto/base": "^3.1.0-rc.2",
+    "@travetto/config": "^3.1.0-rc.5",
+    "@travetto/di": "^3.1.0-rc.2",
     "@types/mustache": "^4.2.2",
     "mustache": "^4.2.0"
   },
