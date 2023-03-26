@@ -153,9 +153,9 @@ export function watchFolders(
   "toolFolder": ".trv_build",
   "compilerFolder": ".trv_compiler",
   "packageManager": "npm",
-  "version": "3.1.0-rc.1",
+  "version": "x.x.x",
   "description": "Support for project indexing, manifesting, along with file watching",
-  "frameworkVersion": "3.1.0-rc.1",
+  "frameworkVersion": "x.x.x",
   "modules": {
     "@travetto/manifest": {
       "main": true,
@@ -230,6 +230,9 @@ The context contains:
    *  The location where the intermediate compiler will be created. Defaults to: `.trv_compiler`
    *  The location where tooling will be able to write to. Defaults to: `.trv_output`
    *  Which package manager is in use [Npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [Yarn](https://yarnpg.com)
+   *  The main module version
+   *  The main module description
+   *  The framework version (based on @travetto/manifest)
 
 ### Modules
 The modules represent all of the [Travetto](https://travetto.dev)-aware dependencies (including dev dependencies) used for compiling, testing and executing.  A prod-only version is produced when packaging the final output. Each module contains:

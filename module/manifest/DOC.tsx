@@ -16,6 +16,8 @@ const manifest = () => {
   delete obj.modules;
   obj.workspacePath = '<generated>';
   obj.generated = COMMON_DATE;
+  obj.version = 'x.x.x';
+  obj.frameworkVersion = 'x.x.x';
   for (const md of Object.values(modules)) {
     md.version = 'x.x.x';
     for (const files of Object.values(md.files)) {
@@ -112,6 +114,9 @@ export const text = <>
         <li>The location where the intermediate compiler will be created. Defaults to: {d.path('.trv_compiler')}</li>
         <li>The location where tooling will be able to write to. Defaults to: {d.path('.trv_output')}</li>
         <li>Which package manager is in use {d.library('Npm')} or {d.library('Yarn')}</li>
+        <li>The main module version</li>
+        <li>The main module description</li>
+        <li>The framework version (based on @travetto/manifest)</li>
       </ul>
     </c.SubSection>
     <c.SubSection title='Modules'>

@@ -179,9 +179,9 @@ This method allows for watching one or more folders, and registering a callback 
   <span class="token string-property property">"toolFolder"</span><span class="token operator">:</span> <span class="token string">".trv_build"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"compilerFolder"</span><span class="token operator">:</span> <span class="token string">".trv_compiler"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"packageManager"</span><span class="token operator">:</span> <span class="token string">"npm"</span><span class="token punctuation">,</span>
-  <span class="token string-property property">"version"</span><span class="token operator">:</span> <span class="token string">"3.1.0-rc.1"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"version"</span><span class="token operator">:</span> <span class="token string">"x.x.x"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"description"</span><span class="token operator">:</span> <span class="token string">"Support for project indexing, manifesting, along with file watching"</span><span class="token punctuation">,</span>
-  <span class="token string-property property">"frameworkVersion"</span><span class="token operator">:</span> <span class="token string">"3.1.0-rc.1"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"frameworkVersion"</span><span class="token operator">:</span> <span class="token string">"x.x.x"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"modules"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token string-property property">"@travetto/manifest"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token string-property property">"main"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
@@ -256,6 +256,9 @@ The context contains:
 <li>The location where the intermediate compiler will be created. Defaults to: <code class="item path">.trv_compiler</code></li>
 <li>The location where tooling will be able to write to. Defaults to: <code class="item path">.trv_output</code></li>
 <li>Which package manager is in use <a target="_blank" class="external-link" href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm">Npm</a> or <a target="_blank" class="external-link" href="https://yarnpg.com">Yarn</a></li>
+<li>The main module version</li>
+<li>The main module description</li>
+<li>The framework version (based on @travetto/manifest)</li>
 </ul>
 
 <h3 id="modules">Modules</h3>
