@@ -98,7 +98,7 @@ export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fil
     }
     if (typeof prop === 'string') {
       SchemaRegistry.registerPendingFieldFacet(target.constructor, prop, {
-        aliases, description: cfg.desc, specifier: cfg.file ? 'file' : undefined
+        aliases, description: cfg.desc, specifiers: cfg.file ? ['file'] : undefined
       });
     }
   };

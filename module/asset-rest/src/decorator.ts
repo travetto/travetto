@@ -31,7 +31,7 @@ export function Upload(
 
   return (inst: ClassInstance, prop: string, idx: number): void => {
     // Register field
-    SchemaRegistry.registerPendingParamConfig(inst.constructor, prop, idx, Object, { specifier: 'file' });
+    SchemaRegistry.registerPendingParamConfig(inst.constructor, prop, idx, Object, { specifiers: ['file'] });
     ControllerRegistry.registerEndpointInterceptorConfig(
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       inst.constructor, inst[prop] as RouteHandler, RestAssetInterceptor,
@@ -69,7 +69,7 @@ export function UploadAll(config: Partial<ParamConfig> & UploadConfig = {}) {
     // Find the request object, and mark it as a file param
     params?.some((el, i) => {
       if (el.contextType === RequestTarget) {
-        SchemaRegistry.registerPendingParamConfig(target.constructor, propertyKey, i, Object, { specifier: 'file' });
+        SchemaRegistry.registerPendingParamConfig(target.constructor, propertyKey, i, Object, { specifiers: ['file'] });
         return true;
       }
     });

@@ -27,10 +27,8 @@ Commands:
   doc:mapping       Generate module mapping for @travetto/doc
   email:compile     CLI Entry point for running the email server
   email:editor      The email editor compilation service and output serving
-  exec              Repo execution
   lint              Command line support for linting
   lint:register     Writes the lint configuration file
-  list              Allows for listing of modules
   model:export      Exports model schemas
   model:install     Installing models
   openapi:client    CLI for generating the cli client
@@ -50,7 +48,6 @@ Commands:
   service           Allows for running services
   test              Launch test framework and execute tests
   test:watch        Invoke the test watcher
-  version-sync      Enforces all packages to write out their versions and dependencies
 ```
 
 This listing is from the [Travetto](https://travetto.dev) monorepo, and represents the majority of tools that can be invoked from the command line. 

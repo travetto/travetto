@@ -13,7 +13,7 @@ function fieldToInput(x: FieldConfig): CliCommandInput {
     choices: x.enum?.values,
     type: x.type === Date ? 'date' :
       x.type === Boolean ? 'boolean' :
-        x.type === String ? (x.specifier === 'file' ? 'file' : 'string') :
+        x.type === String ? (x.specifiers?.includes('file') ? 'file' : 'string') :
           x.type === Number ? 'number' :
             x.type === RegExp ? 'regex' : 'string',
     default: x.default,

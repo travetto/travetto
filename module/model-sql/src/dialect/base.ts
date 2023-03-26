@@ -242,7 +242,7 @@ export abstract class SQLDialect implements DialectState {
     } else if (conf.type === Boolean) {
       type = this.COLUMN_TYPES.BOOLEAN;
     } else if (conf.type === String) {
-      if (conf.specifier && conf.specifier.startsWith('text')) {
+      if (conf.specifiers?.includes('text')) {
         type = this.COLUMN_TYPES.TEXT;
       } else {
         type = this.PARAMETERIZED_COLUMN_TYPES.VARCHAR(conf.maxlength ? conf.maxlength.n : this.DEFAULT_STRING_LEN);

@@ -153,9 +153,9 @@ export function watchFolders(
   "toolFolder": ".trv_build",
   "compilerFolder": ".trv_compiler",
   "packageManager": "npm",
-  "version": "3.1.0-rc.0",
+  "version": "3.1.0-rc.1",
   "description": "Support for project indexing, manifesting, along with file watching",
-  "frameworkVersion": "3.1.0-rc.0",
+  "frameworkVersion": "3.1.0-rc.1",
   "modules": {
     "@travetto/manifest": {
       "main": true,

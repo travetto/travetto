@@ -253,6 +253,14 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   registerPendingParamFacet(target: Class, method: string, idx: number, config: Partial<FieldConfig>): Class {
     const methods = this.getOrCreatePending(target)!.methods!;
     const params = (methods[method] ??= []);
+
+    if (config.aliases) {
+      config.aliases = [...params[idx]?.aliases ?? [], ...config.aliases];
+    }
+    if (config.specifiers) {
+      config.specifiers = [...params[idx]?.specifiers ?? [], ...config.specifiers];
+    }
+
     params[idx] = {
       // @ts-expect-error
       name: `${method}.${idx}`,
@@ -278,6 +286,12 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       // Partial config while building
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       allViewConf.schema[prop] = {} as FieldConfig;
+    }
+    if (config.aliases) {
+      config.aliases = [...allViewConf.schema[prop].aliases ?? [], ...config.aliases];
+    }
+    if (config.specifiers) {
+      config.specifiers = [...allViewConf.schema[prop].specifiers ?? [], ...config.specifiers];
     }
 
     Object.assign(allViewConf.schema[prop], config);

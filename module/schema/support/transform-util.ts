@@ -148,7 +148,7 @@ export class SchemaTransformUtil {
       if (args.length > 0) {
         params.push(args[0]);
       }
-      params.push(state.extendObjectLiteral(state.factory.createObjectLiteralExpression(attrs)));
+      params.push(state.factory.createObjectLiteralExpression(attrs));
       if (args.length > 1) {
         params.push(...args.slice(1));
       }

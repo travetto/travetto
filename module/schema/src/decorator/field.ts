@@ -45,12 +45,6 @@ export function Field(type: ClassList, ...config: Partial<FieldConfig>[]) {
  */
 export function Alias(...aliases: string[]): PropType<unknown> { return prop({ aliases }); }
 /**
- * Specifier for the field
- * @param specifier The specifier for a field
- * @augments `@travetto/schema:Field`
- */
-export function Specifier(specifier: string): PropType<unknown> { return prop({ specifier }); }
-/**
  * Mark a field as writeonly
  * @param active This determines if this field is readonly or not.
  * @augments `@travetto/schema:Field`
@@ -89,12 +83,12 @@ export function Enum(values: string[], message?: string): PropType<string | numb
  * Mark the field as indicating it's storing textual data
  * @augments `@travetto/schema:Field`
  */
-export function Text(): PropType<string | string[]> { return prop({ specifier: 'text' }); }
+export function Text(): PropType<string | string[]> { return prop({ specifiers: ['text'] }); }
 /**
  * Mark the field to indicate it's for long form text
  * @augments `@travetto/schema:Field`
  */
-export function LongText(): PropType<string | string[]> { return prop({ specifier: 'text-long' }); }
+export function LongText(): PropType<string | string[]> { return prop({ specifiers: ['text', 'long'] }); }
 
 /**
  * Require the field to match a specific RegExp
@@ -203,3 +197,10 @@ export function Currency(): PropType<number> { return Precision(13, 2); }
 export function Ignore(): PropertyDecorator {
   return (target: Object, property: string | symbol) => { };
 }
+
+/**
+ * Specifier for the field
+ * @param specifiers The specifiers for a field
+ * @augments `@travetto/schema:Field`
+ */
+export function Specifier(...specifiers: string[]): PropType<unknown> { return prop({ specifiers }); }

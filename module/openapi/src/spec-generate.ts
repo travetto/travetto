@@ -273,7 +273,7 @@ export class SpecGenerator {
     if (param.location) {
       if (param.location === 'body') {
         return {
-          requestBody: field.specifier === 'file' ? this.#buildUploadBody() : this.#getEndpointBody(field, this.#getHeaderValue(ep, 'accepts'))
+          requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, this.#getHeaderValue(ep, 'accepts'))
         };
       } else if (field.type && SchemaRegistry.has(field.type) && (param.location === 'query' || param.location === 'header')) {
         return { parameters: this.#schemaToDotParams(param.location, field) };
@@ -286,7 +286,7 @@ export class SpecGenerator {
           schema: field.array ? { type: 'array', items: this.#getType(field) } : this.#getType(field)
         };
         return { parameters: [epParam] };
-      } else if (field.specifier === 'file') {
+      } else if (field.specifiers?.includes('file')) {
         return { requestBody: this.#buildUploadBody() };
       }
     }

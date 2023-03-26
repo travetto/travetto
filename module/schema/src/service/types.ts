@@ -115,7 +115,7 @@ export interface FieldConfig extends DescribableConfig {
   /**
    * Does the field have a specialization
    */
-  specifier?: string;
+  specifiers?: string[];
   /**
    * The numeric precision
    */

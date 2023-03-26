@@ -135,7 +135,7 @@ export class ElasticsearchSchemaUtil {
         props[field] = { type: 'boolean' };
       } else if (conf.type === String) {
         let text = {};
-        if (conf.specifier && conf.specifier.startsWith('text')) {
+        if (conf.specifiers?.includes('text')) {
           text = {
             fields: {
               text: { type: 'text' }

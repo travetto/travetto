@@ -4,7 +4,7 @@ import { d, c } from '@travetto/doc';
 import {
   Currency, Email, Enum, Field, Float, Ignore, Integer,
   LongText, Match, Max, MaxLength, Min, MinLength, Readonly,
-  Required, Telephone, Url, Writeonly, Text
+  Required, Telephone, Url, Writeonly, Text, Secret, Specifier
 } from './src/decorator/field';
 
 import { Schema } from './src/decorator/schema';
@@ -63,6 +63,8 @@ export const text = <>
         <li>{LongText} same as text, but expects longer form content</li>
         <li>{Readonly} defines a that field should not be bindable external to the class</li>
         <li>{Writeonly} defines a that field should not be exported in serialization, but that it can be bound to</li>
+        <li>{Secret} marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.</li>
+        <li>{Specifier} attributes additional specifiers to a field, allowing for more specification beyond just the field's type.</li>
       </ul>
 
       Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. <br />
