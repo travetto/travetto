@@ -9,12 +9,17 @@ import { PackageManager, SemverLevel } from './bin/package-manager';
  */
 @CliCommand()
 export class RepoVersionCommand implements CliCommandShape {
-  /** Only version changed modules */
-  changed = true;
+  /** The mode for versioning */
+  mode: 'all' | 'changed' | 'direct' = 'changed';
   /** Force operation, even in a dirty workspace */
   force = false;
   /** Produce release commit message */
   commit = true;
+  /**
+   * The module when mode is single
+   * @alias m
+   */
+  modules?: string[];
 
   async validate(...args: unknown[]): Promise<CliValidationError | undefined> {
     if (!this.force && await CliScmUtil.isWorkspaceDirty()) {
@@ -23,9 +28,9 @@ export class RepoVersionCommand implements CliCommandShape {
   }
 
   async main(level: SemverLevel, prefix?: string): Promise<void> {
-    const allModules = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
+    const allModules = await CliModuleUtil.findModules(this.mode === 'changed' ? 'changed' : 'all');
 
-    const modules = allModules.filter(x => !x.internal);
+    const modules = allModules.filter(x => !x.internal && (this.mode !== 'direct' || this.modules?.includes(x.name)));
 
     // Do we have valid changes?
     if (!modules.length) {

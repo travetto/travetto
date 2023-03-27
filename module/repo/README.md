@@ -29,10 +29,11 @@ $ trv repo:version -h
 Usage: repo:version [options] <level:string> [prefix:string]
 
 Options:
-  --changed, --no-changed  Only version changed modules (default: true)
-  -f, --force              Force operation, even in a dirty workspace (default: false)
-  --commit, --no-commit    Produce release commit message (default: true)
-  -h, --help               display help for command
+  --mode <all|changed|direct>  The mode for versioning (default: "changed")
+  -f, --force                  Force operation, even in a dirty workspace (default: false)
+  --commit, --no-commit        Produce release commit message (default: true)
+  -m, --modules <string>       The module when mode is single
+  -h, --help                   display help for command
 ```
 
 Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:

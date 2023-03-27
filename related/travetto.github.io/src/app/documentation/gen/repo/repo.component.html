@@ -35,10 +35,11 @@ The versioning operation will find all the changed modules (and the modules that
 Usage: repo:version <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>level:string<span class="token operator">></span> <span class="token punctuation">[</span>prefix:string<span class="token punctuation">]</span>
 
 Options:
-  --changed, --no-changed  Only version changed modules <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
-  -f, <span class="token parameter variable">--force</span>              Force operation, even <span class="token keyword">in</span> a dirty workspace <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
-  --commit, --no-commit    Produce release commit message <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
-  -h, <span class="token parameter variable">--help</span>               display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
+  <span class="token parameter variable">--mode</span> <span class="token operator">&lt;</span>all<span class="token operator">|</span>changed<span class="token operator">|</span>direct<span class="token operator">></span>  The mode <span class="token keyword">for</span> versioning <span class="token punctuation">(</span>default: <span class="token string">"changed"</span><span class="token punctuation">)</span>
+  -f, <span class="token parameter variable">--force</span>                  Force operation, even <span class="token keyword">in</span> a dirty workspace <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
+  --commit, --no-commit        Produce release commit message <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
+  -m, <span class="token parameter variable">--modules</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>       The module when mode is single
+  -h, <span class="token parameter variable">--help</span>                   display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
 
 Level is a standard semver level of: major, minor, patch or prerelease.  The prefix argument only applies to the prerelease and allows for determining the prerelease level.  For example:
