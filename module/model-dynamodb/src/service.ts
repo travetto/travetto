@@ -13,7 +13,6 @@ import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { DynamoDBModelConfig } from './config';
 
@@ -58,6 +57,7 @@ async function loadAndCheckExpiry<T extends ModelType>(cls: Class<T>, doc: strin
 @Injectable()
 export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
+  uuid = ModelCrudUtil.uuidGenerator();
   client: dynamodb.DynamoDB;
 
   constructor(public readonly config: DynamoDBModelConfig) { }
@@ -269,10 +269,6 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
   }
 
   // Crud
-  uuid(): string {
-    return ModelUtil.uuid();
-  }
-
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const res = await this.client.getItem({
       TableName: this.#resolveTable(cls),

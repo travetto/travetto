@@ -1,7 +1,6 @@
 import type { CommandService } from '@travetto/command';
-import { getVersion } from '../src/internal/version';
 
-const version = getVersion();
+const version = '8.6.2';
 
 const port = 9200;
 
@@ -11,8 +10,8 @@ export const service: CommandService = {
   port,
   env: {
     'discovery.type': 'single-node',
+    'action.destructive_requires_name': 'false',
     'xpack.security.enabled': 'false',
-    'xpack.monitoring.enabled': 'false',
     'xpack.ml.enabled': 'false',
     'xpack.graph.enabled': 'false',
     'xpack.watcher.enabled': 'false',

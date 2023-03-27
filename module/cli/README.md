@@ -41,8 +41,6 @@ Commands:
   repo:list         Allows for listing of modules
   repo:publish      Publish all pending modules
   repo:version      Version all changed dependencies
-  repo:version copy Version all changed dependencies
-  repo:version-one  Version all changed dependencies
   repo:version-sync Enforces all packages to write out their versions and dependencies
   run:double        Doubles a number
   run:rest          Run a rest server as an application

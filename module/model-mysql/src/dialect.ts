@@ -28,10 +28,6 @@ export class MySQLDialect extends SQLDialect {
       JSON: 'TEXT'
     });
 
-    // Word boundary
-    // Field maxlength
-    this.idField.minlength = this.idField.maxlength = { n: this.KEY_LEN };
-
     /**
      * Set string length limit based on version
      */
@@ -63,7 +59,7 @@ export class MySQLDialect extends SQLDialect {
    * Compute hash
    */
   hash(value: string): string {
-    return `SHA2('${value}', ${this.KEY_LEN * 4})`;
+    return `SHA2('${value}', '256')`;
   }
 
   /**

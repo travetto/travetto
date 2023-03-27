@@ -2,19 +2,18 @@ import { Class } from '@travetto/base';
 
 import { ModelType, OptionalId } from '../types/model';
 import { ModelBasicSupport } from './basic';
+import { UuidGenerator } from './types';
 
 /**
  * Interface for simple CRUD
- *
  * @concrete ../internal/service/common:ModelCrudSupportTarget
  */
 export interface ModelCrudSupport extends ModelBasicSupport {
 
   /**
-   * Generate a uuid
-   * @param value The optional value to generate a uuid around.  Passing the same value multiple times produces the same output.
+   * Uuid Generator
    */
-  uuid(): string;
+  uuid: UuidGenerator;
 
   /**
    * Update an item

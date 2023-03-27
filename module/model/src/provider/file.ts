@@ -22,7 +22,6 @@ import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
 import { StreamModel, STREAMS } from '../internal/service/stream';
-import { ModelUtil } from '../internal/util';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -59,6 +58,8 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       }
     }
   }
+
+  uuid = ModelCrudUtil.uuidGenerator();
 
   get client(): string {
     return this.config.folder;
@@ -103,10 +104,6 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
       throw new NotFoundError(cls, item.id);
     }
     return item;
-  }
-
-  uuid(): string {
-    return ModelUtil.uuid(32);
   }
 
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {

@@ -29,7 +29,6 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
-import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { MongoUtil, WithId } from './internal/util';
 import { MongoModelConfig } from './config';
@@ -54,6 +53,7 @@ export class MongoModelService implements
   ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySuggestSupport, ModelExpirySupport {
 
+  uuid = ModelCrudUtil.uuidGenerator();
   client: mongo.MongoClient;
   #db: mongo.Db;
   #bucket: mongo.GridFSBucket;
@@ -85,13 +85,6 @@ export class MongoModelService implements
 
   getWhere<T extends ModelType>(cls: Class<T>, where: WhereClause<T>, checkExpiry = true): Record<string, unknown> {
     return MongoUtil.prepareQuery(cls, { where }, checkExpiry).filter;
-  }
-
-  /**
-   * Build a mongo identifier
-   */
-  uuid(): string {
-    return ModelUtil.uuid();
   }
 
   // Storage
@@ -499,8 +492,8 @@ export class MongoModelService implements
   }
 
   async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany = false): Promise<T> {
-    const results = await this.query(cls, { ...query, limit: failOnMany ? 2 : 1 });
-    return ModelQueryUtil.verifyGetSingleCounts(cls, results, failOnMany);
+    const results = await this.query<T>(cls, { ...query, limit: failOnMany ? 2 : 1 });
+    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, results, failOnMany);
   }
 
   // Query Crud
@@ -565,14 +558,14 @@ export class MongoModelService implements
 
   // Suggest
   async suggestValues<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<string[]> {
-    const q = ModelQuerySuggestUtil.getSuggestFieldQuery(cls, field, prefix, query);
-    const results = await this.query(cls, q);
-    return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a) => a, query && query.limit);
+    const q = ModelQuerySuggestUtil.getSuggestFieldQuery<T>(cls, field, prefix, query);
+    const results = await this.query<T>(cls, q);
+    return ModelQuerySuggestUtil.combineSuggestResults<T, string>(cls, field, prefix, results, (a) => a, query && query.limit);
   }
 
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
-    const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, query);
-    const results = await this.query(cls, q);
+    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
+    const results = await this.query<T>(cls, q);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (_, b) => b, query && query.limit);
   }
 }

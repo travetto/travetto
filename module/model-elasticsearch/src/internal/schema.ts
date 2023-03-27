@@ -1,44 +1,23 @@
+import { InlineScript, MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+
 import { Class, DataUtil, ObjectUtil } from '@travetto/base';
 import { ModelRegistry } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
-import { getVersion } from './version';
-
-type FieldType = {
-  type?: string;
-  format?: string;
-  scaling_factor?: number;
-  fields?: Record<string, FieldType>;
-  dynamic?: boolean;
-  properties?: Record<string, FieldType>;
-};
-
-type SchemaType = {
-  properties: Record<string, FieldType>;
-  dynamic: boolean;
-};
-
-type UpdateScript = {
-  params: Record<string, unknown>;
-  lang: 'painless';
-  source: string;
-};
 
 /**
  * Utils for ES Schema management
  */
 export class ElasticsearchSchemaUtil {
 
-  static MAJOR_VER = parseInt(getVersion().split('.')[0], 10);
-
   /**
    * Build the update script for a given object
    */
-  static generateUpdateScript(o: Record<string, unknown>, path: string = '', arr = false): UpdateScript {
+  static generateUpdateScript(o: Record<string, unknown>, path: string = '', arr = false): InlineScript {
     const ops: string[] = [];
-    const out: UpdateScript = {
+    const out: InlineScript = {
       params: {},
       lang: 'painless',
       source: ''
@@ -53,13 +32,13 @@ export class ElasticsearchSchemaUtil {
       } else if (ObjectUtil.isPrimitive(o[x]) || Array.isArray(o[x])) {
         const param = prop.toLowerCase().replace(/[^a-z0-9_$]/g, '_');
         ops.push(`ctx._source.${prop} = params.${param}`);
-        out.params[param] = o[x];
+        out.params![param] = o[x];
       } else {
         ops.push(`ctx._source.${prop} = ctx._source.${prop} == null ? [:] : ctx._source.${prop}`);
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const sub = this.generateUpdateScript(o[x] as Record<string, unknown>, prop);
         ops.push(sub.source);
-        Object.assign(out.params, sub.params);
+        Object.assign(out.params!, sub.params);
       }
     }
     out.source = ops.join(';');
@@ -68,32 +47,32 @@ export class ElasticsearchSchemaUtil {
   }
 
   /**
-   * Build one or more schemas depending on the polymorphic state
+   * Build one or more mappings depending on the polymorphic state
    */
-  static generateSourceSchema(cls: Class, config?: EsSchemaConfig): SchemaType {
+  static generateSchemaMapping(cls: Class, config?: EsSchemaConfig): MappingTypeMapping {
     return ModelRegistry.get(cls).baseType ?
-      this.generateAllSourceSchema(cls, config) :
-      this.generateSingleSourceSchema(cls, config);
+      this.generateAllMapping(cls, config) :
+      this.generateSingleMapping(cls, config);
   }
 
   /**
-   * Generate all schemas
+   * Generate all mappings
    */
-  static generateAllSourceSchema(cls: Class, config?: EsSchemaConfig): SchemaType {
+  static generateAllMapping(cls: Class, config?: EsSchemaConfig): MappingTypeMapping {
     const allTypes = ModelRegistry.getClassesByBaseType(cls);
-    return allTypes.reduce<SchemaType>((acc, schemaCls) => {
-      DataUtil.deepAssign(acc, this.generateSingleSourceSchema(schemaCls, config));
+    return allTypes.reduce<MappingTypeMapping>((acc, schemaCls) => {
+      DataUtil.deepAssign(acc, this.generateSingleMapping(schemaCls, config));
       return acc;
     }, { properties: {}, dynamic: false });
   }
 
   /**
-   * Build a schema for a given class
+   * Build a mapping for a given class
    */
-  static generateSingleSourceSchema<T>(cls: Class<T>, config?: EsSchemaConfig): SchemaType {
+  static generateSingleMapping<T>(cls: Class<T>, config?: EsSchemaConfig): MappingTypeMapping {
     const schema = SchemaRegistry.getViewSchema(cls);
 
-    const props: SchemaType['properties'] = {};
+    const props: Record<string, MappingProperty> = {};
 
     for (const field of schema.fields) {
       const conf = schema.schema[field];
@@ -155,7 +134,7 @@ export class ElasticsearchSchemaUtil {
       } else if (SchemaRegistry.has(conf.type)) {
         props[field] = {
           type: conf.array ? 'nested' : 'object',
-          ...this.generateSingleSourceSchema(conf.type, config)
+          ...this.generateSingleMapping(conf.type, config)
         };
       }
     }

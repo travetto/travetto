@@ -20,7 +20,6 @@ import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
 import { StreamModel, STREAMS } from '../internal/service/stream';
 import { IndexConfig } from '../registry/types';
-import { ModelUtil } from '../internal/util';
 
 const STREAM_META = `${STREAMS}_meta`;
 
@@ -58,6 +57,8 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     sorted: new Map<string, Map<string, Map<string, number>>>(),
     unsorted: new Map<string, Map<string, Set<string>>>()
   };
+
+  uuid = ModelCrudUtil.uuidGenerator();
   get client(): Map<string, StoreType> { return this.#store; }
 
   constructor(public readonly config: MemoryModelConfig) { }
@@ -168,10 +169,6 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   }
 
   // CRUD Support
-  uuid(): string {
-    return ModelUtil.uuid(32);
-  }
-
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const store = this.#getStore(cls);
     if (store.has(id)) {

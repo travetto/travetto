@@ -1,7 +1,8 @@
 import {
   ModelType,
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
-  NotFoundError, ModelRegistry, ExistsError, OptionalId
+  NotFoundError, ModelRegistry, ExistsError, OptionalId,
+  ModelUuidGenerator
 } from '@travetto/model';
 import { DataUtil, Class } from '@travetto/base';
 import { SchemaChange } from '@travetto/schema';
@@ -9,7 +10,7 @@ import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClauseRaw
+  PageableModelQuery, ValidStringFields, WhereClauseRaw,
 } from '@travetto/model-query';
 
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
@@ -44,6 +45,7 @@ export class SQLModelService implements
   #manager: TableManager;
   #context: AsyncContext;
   #dialect: SQLDialect;
+  uuid: ModelUuidGenerator;
 
   readonly config: SQLModelConfig;
 
@@ -107,6 +109,7 @@ export class SQLModelService implements
       if (this.#dialect.conn.init) {
         await this.#dialect.conn.init();
       }
+      this.uuid = ModelCrudUtil.uuidGenerator(this.#dialect.ID_LEN);
       this.#manager = new TableManager(this.#context, this.#dialect);
       await ModelStorageUtil.registerModelChangeListener(this);
       ModelExpiryUtil.registerCull(this);
@@ -115,10 +118,6 @@ export class SQLModelService implements
 
   get conn(): Connection {
     return this.#dialect.conn;
-  }
-
-  uuid(): string {
-    return this.#dialect.generateId();
   }
 
   async exportModel<T extends ModelType>(e: Class<T>): Promise<string> {
@@ -259,8 +258,8 @@ export class SQLModelService implements
 
   @Connected()
   async queryOne<T extends ModelType>(cls: Class<T>, builder: ModelQuery<T>, failOnMany = true): Promise<T> {
-    const res = await this.query(cls, { ...builder, limit: failOnMany ? 2 : 1 });
-    return ModelQueryUtil.verifyGetSingleCounts(cls, res, failOnMany);
+    const res = await this.query<T>(cls, { ...builder, limit: failOnMany ? 2 : 1 });
+    return ModelQueryUtil.verifyGetSingleCounts<T>(cls, res, failOnMany);
   }
 
   @Connected()
@@ -285,8 +284,8 @@ export class SQLModelService implements
 
   @Connected()
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
-    const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, query);
-    const results = await this.query(cls, q);
+    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
+    const results = await this.query<T>(cls, q);
     return ModelQuerySuggestUtil.combineSuggestResults(cls, field, prefix, results, (a, b) => b, query?.limit);
   }
 

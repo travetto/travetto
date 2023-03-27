@@ -1,12 +1,14 @@
 import es from '@elastic/elasticsearch';
-import { Search } from '@elastic/elasticsearch/api/requestParams';
+import {
+  AggregationsStringTermsAggregate, AggregationsStringTermsBucket, DeleteByQueryRequest, SearchRequest, SearchResponse
+} from '@elastic/elasticsearch/lib/api/types';
 
 import {
   ModelCrudSupport, BulkOp, BulkResponse, ModelBulkSupport, ModelExpirySupport,
   ModelIndexedSupport, ModelType, ModelStorageSupport, NotFoundError, ModelRegistry,
   OptionalId
 } from '@travetto/model';
-import { ShutdownManager, type Class, AppError, TypedObject } from '@travetto/base';
+import { ShutdownManager, type Class, AppError } from '@travetto/base';
 import { SchemaChange, DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
@@ -23,14 +25,12 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelQuerySuggestSupport } from '@travetto/model-query/src/service/suggest';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
-import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { ElasticsearchModelConfig } from './config';
 import { EsBulkError } from './internal/types';
 import { ElasticsearchQueryUtil } from './internal/query';
 import { ElasticsearchSchemaUtil } from './internal/schema';
 import { IndexManager } from './index-manager';
-import { SearchResponse } from './types';
 
 type WithId<T> = T & { _id?: string };
 
@@ -47,6 +47,7 @@ export class ElasticsearchModelService implements
   ModelQuerySupport, ModelQueryCrudSupport,
   ModelQuerySuggestSupport, ModelQueryFacetSupport {
 
+  uuid = ModelCrudUtil.uuidGenerator();
   client: es.Client;
   manager: IndexManager;
 
@@ -55,14 +56,17 @@ export class ElasticsearchModelService implements
   /**
    * Directly run the search
    */
-  async execSearch<T extends ModelType>(cls: Class<T>, search: Search<unknown>): Promise<SearchResponse<T>> {
-    const res = await this.client.search({
+  async execSearch<T extends ModelType>(cls: Class<T>, search: SearchRequest): Promise<SearchResponse<T>> {
+    let query = search.query;
+    if (query && Object.keys(query).length === 0) {
+      query = undefined;
+    }
+    const res = await this.client.search<T>({
       ...this.manager.getIdentity(cls),
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      ...search as Search<T>
+      ...search,
+      query
     });
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return res as unknown as SearchResponse<T>;
+    return res;
   }
 
   /**
@@ -111,14 +115,11 @@ export class ElasticsearchModelService implements
   changeSchema(cls: Class, change: SchemaChange): Promise<void> { return this.manager.changeSchema(cls, change); }
   truncateModel(cls: Class): Promise<void> { return this.deleteByQuery(cls, {}).then(() => { }); }
 
-  uuid(): string {
-    return ModelUtil.uuid();
-  }
-
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     try {
       const res = await this.client.get({ ...this.manager.getIdentity(cls), id });
-      return this.postLoad(cls, res.body._source);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return this.postLoad(cls, res._source as T);
     } catch {
       throw new NotFoundError(cls, id);
     }
@@ -128,7 +129,7 @@ export class ElasticsearchModelService implements
     ModelCrudUtil.ensureNotSubType(cls);
 
     try {
-      const { body: res } = await this.client.delete({
+      const res = await this.client.delete({
         ...this.manager.getIdentity(cls),
         id,
         refresh: true
@@ -225,23 +226,23 @@ export class ElasticsearchModelService implements
   }
 
   async * list<T extends ModelType>(cls: Class<T>): AsyncIterable<T> {
-    let search: SearchResponse<T> = await this.execSearch(cls, {
+    let search: SearchResponse<T> = await this.execSearch<T>(cls, {
       scroll: '2m',
       size: 100,
-      body: ElasticsearchQueryUtil.getSearchBody(cls, {})
+      query: ElasticsearchQueryUtil.getSearchQuery(cls, {})
     });
 
-    while (search.body.hits.hits.length > 0) {
-      for (const el of search.body.hits.hits) {
+    while (search.hits.hits.length > 0) {
+      for (const el of search.hits.hits) {
         try {
-          yield this.postLoad(cls, el._source);
+          yield this.postLoad(cls, el._source!);
         } catch (err) {
           if (!(err instanceof NotFoundError)) {
             throw err;
           }
         }
         search = await this.client.scroll({
-          scroll_id: search.body._scroll_id,
+          scroll_id: search._scroll_id,
           scroll: '2m'
         });
       }
@@ -256,9 +257,7 @@ export class ElasticsearchModelService implements
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const esIdent = this.manager.getIdentity((op.upsert ?? op.delete ?? op.insert ?? op.update ?? { constructor: cls }).constructor as Class);
-      const ident: { _index: string, _type?: unknown } = (ElasticsearchSchemaUtil.MAJOR_VER < 7 ?
-        { _index: esIdent.index, _type: esIdent.type } :
-        { _index: esIdent.index });
+      const ident: { _index: string, _type?: unknown } = { _index: esIdent.index };
 
       if (op.delete) {
         acc.push({ delete: { ...ident, _id: op.delete.id } });
@@ -278,8 +277,8 @@ export class ElasticsearchModelService implements
       return acc;
     }, []);
 
-    const { body: res } = await this.client.bulk({
-      body,
+    const res = await this.client.bulk({
+      operations: body,
       refresh: true
     });
 
@@ -299,10 +298,14 @@ export class ElasticsearchModelService implements
 
     for (let i = 0; i < res.items.length; i++) {
       const item = res.items[i];
-      const [k] = TypedObject.keys<Record<Count | 'create' | 'index', unknown>>(item);
-      const v = item[k]!;
-      if (v.error) {
-        out.errors.push(v.error);
+      const [k] = Object.keys(item);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const v = item[k as keyof typeof item]!;
+      if (k === 'error') {
+        out.errors.push({
+          reason: v.error!.reason!,
+          type: v.error!.type
+        });
         out.counts.error += 1;
       } else {
         let sk: Count;
@@ -311,12 +314,13 @@ export class ElasticsearchModelService implements
         } else if (k === 'index') {
           sk = operations[i].insert ? 'insert' : 'upsert';
         } else {
-          sk = k;
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          sk = k as Count;
         }
 
         if (v.result === 'created') {
-          out.insertedIds.set(i, v._id);
-          (operations[i].insert ?? operations[i].upsert)!.id = v._id;
+          out.insertedIds.set(i, v._id!);
+          (operations[i].insert ?? operations[i].upsert)!.id = v._id!;
         }
 
         out.counts[sk] += 1;
@@ -334,29 +338,29 @@ export class ElasticsearchModelService implements
   // Indexed
   async getByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<T> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
-    const res: SearchResponse<T> = await this.execSearch(cls, {
-      body: ElasticsearchQueryUtil.getSearchBody(cls,
+    const res: SearchResponse<T> = await this.execSearch<T>(cls, {
+      query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, body))
       )
     });
-    if (!res.body.hits.hits.length) {
+    if (!res.hits.hits.length) {
       throw new NotFoundError(`${cls.name}: ${idx}`, key);
     }
-    return this.postLoad(cls, res.body.hits.hits[0]._source);
+    return this.postLoad(cls, res.hits.hits[0]._source!);
   }
 
   async deleteByIndex<T extends ModelType>(cls: Class<T>, idx: string, body: DeepPartial<T>): Promise<void> {
     const { key } = ModelIndexedUtil.computeIndexKey(cls, idx, body);
     const res = await this.client.deleteByQuery({
       index: this.manager.getIdentity(cls).index,
-      body: ElasticsearchQueryUtil.getSearchBody(cls,
+      query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, body))
       ),
       refresh: true
     });
-    if (res.body.deleted) {
+    if (res.deleted) {
       return;
     }
     throw new NotFoundError(`${cls.name}: ${idx}`, key);
@@ -371,27 +375,27 @@ export class ElasticsearchModelService implements
     if (cfg.type === 'unique') {
       throw new AppError('Cannot list on unique indices', 'data');
     }
-    let search: SearchResponse<T> = await this.execSearch(cls, {
+    let search = await this.execSearch<T>(cls, {
       scroll: '2m',
       size: 100,
-      body: ElasticsearchQueryUtil.getSearchBody(cls,
+      query: ElasticsearchQueryUtil.getSearchQuery(cls,
         ElasticsearchQueryUtil.extractWhereTermQuery(cls,
           ModelIndexedUtil.projectIndex(cls, idx, body, { emptySortValue: { $exists: true } }))
       ),
       sort: ElasticsearchQueryUtil.getSort(cfg.fields)
     });
 
-    while (search.body.hits.hits.length > 0) {
-      for (const el of search.body.hits.hits) {
+    while (search.hits.hits.length > 0) {
+      for (const el of search.hits.hits) {
         try {
-          yield this.postLoad(cls, el._source);
+          yield this.postLoad(cls, el._source!);
         } catch (err) {
           if (!(err instanceof NotFoundError)) {
             throw err;
           }
         }
         search = await this.client.scroll({
-          scroll_id: search.body._scroll_id,
+          scroll_id: search._scroll_id,
           scroll: '2m'
         });
       }
@@ -407,23 +411,22 @@ export class ElasticsearchModelService implements
   }
 
   async queryOne<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, failOnMany?: boolean): Promise<T> {
-    return ModelQueryUtil.verifyGetSingleCounts(cls, await this.query(cls, { ...query, limit: failOnMany ? 2 : 1 }));
+    return ModelQueryUtil.verifyGetSingleCounts(cls, await this.query<T>(cls, { ...query, limit: failOnMany ? 2 : 1 }));
   }
 
   async queryCount<T extends ModelType>(cls: Class<T>, query: Query<T>): Promise<number> {
     const req = ElasticsearchQueryUtil.getSearchObject(cls, { ...query, limit: 0 }, this.config.schemaConfig);
-    const res: number | { value: number } = (await this.execSearch(cls, req)).body.hits.total || { value: 0 };
+    const res: number | { value: number } = (await this.execSearch(cls, req)).hits.total || { value: 0 };
     return typeof res !== 'number' ? res.value : res;
   }
 
   // Query Crud
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
-    const { body: res } = await this.client.deleteByQuery({
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      body: undefined as unknown as {},
+    const res = await this.client.deleteByQuery({
       ...this.manager.getIdentity(cls),
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      ...ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false) as DeleteByQueryRequest,
       refresh: true,
-      ...ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig, false)
     });
     return res.deleted ?? 0;
   }
@@ -433,22 +436,19 @@ export class ElasticsearchModelService implements
     const script = ElasticsearchSchemaUtil.generateUpdateScript(data);
 
     const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
-    const { body: res } = await this.client.updateByQuery({
+    const res = await this.client.updateByQuery({
       ...this.manager.getIdentity(cls),
       refresh: true,
-      body: {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        query: (search.body as Record<string, unknown>).query,
-        script
-      }
+      query: search.query,
+      script,
     });
 
-    return res.updated;
+    return res.updated ?? 0;
   }
 
   // Query Facet
   async suggest<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, prefix?: string, query?: PageableModelQuery<T>): Promise<T[]> {
-    const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, query);
+    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, query);
     const search = ElasticsearchQueryUtil.getSearchObject(cls, q);
     const res = await this.execSearch(cls, search);
     const safe = ElasticsearchQueryUtil.cleanIdRemoval<T>(search, res);
@@ -460,7 +460,7 @@ export class ElasticsearchModelService implements
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const select: SelectClause<T> = { [field]: 1 } as SelectClause<T>;
 
-    const q = ModelQuerySuggestUtil.getSuggestQuery(cls, field, prefix, {
+    const q = ModelQuerySuggestUtil.getSuggestQuery<T>(cls, field, prefix, {
       select,
       ...query
     });
@@ -476,16 +476,17 @@ export class ElasticsearchModelService implements
 
     const search = {
       body: {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        query: (q.body as Record<string, unknown>).query ?? { ['match_all']: {} },
+        query: q.query ?? { ['match_all']: {} },
         aggs: { [field]: { terms: { field, size: 100 } } }
       },
       size: 0
     };
 
     const res = await this.execSearch(cls, search);
-    const { buckets } = res.body.aggregations[field];
-    const out = buckets.map(b => ({ key: b.key, count: b.doc_count }));
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const { buckets } = res.aggregations![field] as AggregationsStringTermsAggregate;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const out = (buckets as AggregationsStringTermsBucket[]).map(b => ({ key: b.key, count: b.doc_count }));
     return out;
   }
 }

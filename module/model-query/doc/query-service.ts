@@ -5,14 +5,12 @@ import { ValidStringFields } from '@travetto/model-query/src/model/where-clause'
 import { Class } from '@travetto/base';
 import { ModelType, OptionalId } from '@travetto/model';
 import { ModelQuery, PageableModelQuery } from '@travetto/model-query/src/model/query';
-import { ModelUtil } from '@travetto/model/src/internal/util';
+import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 
 export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {
+  uuid = ModelCrudUtil.uuidGenerator();
   get client(): unknown { // @doc-exclude
     return undefined;
-  }
-  uuid(): string {
-    return ModelUtil.uuid();
   }
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     return {} as T;

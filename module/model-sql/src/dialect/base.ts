@@ -6,7 +6,6 @@ import { BulkResponse, IndexConfig } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelType } from '@travetto/model/src/types/model';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
-import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { SQLUtil, VisitStack } from '../internal/util';
 import { DeleteWrapper, InsertWrapper, DialectState } from '../internal/types';
@@ -46,7 +45,13 @@ export abstract class SQLDialect implements DialectState {
   /**
    * Default length of unique ids
    */
-  KEY_LEN = 64;
+  ID_LEN = 32;
+
+  /**
+   * Hash Length
+   */
+  HASH_LEN = 64;
+
   /**
    * Default length for varchar
    */
@@ -104,8 +109,8 @@ export abstract class SQLDialect implements DialectState {
    * Generate an id field
    */
   idField = makeField('id', String, true, {
-    maxlength: { n: 32 },
-    minlength: { n: 32 }
+    maxlength: { n: this.ID_LEN },
+    minlength: { n: this.ID_LEN }
   });
 
   /**
@@ -117,8 +122,8 @@ export abstract class SQLDialect implements DialectState {
    * Parent path reference
    */
   parentPathField = makeField('__parent_path', String, true, {
-    maxlength: { n: this.KEY_LEN },
-    minlength: { n: this.KEY_LEN },
+    maxlength: { n: this.HASH_LEN },
+    minlength: { n: this.HASH_LEN },
     required: { active: true }
   });
 
@@ -126,8 +131,8 @@ export abstract class SQLDialect implements DialectState {
    * Path reference
    */
   pathField = makeField('__path', String, true, {
-    maxlength: { n: this.KEY_LEN },
-    minlength: { n: this.KEY_LEN },
+    maxlength: { n: this.HASH_LEN },
+    minlength: { n: this.HASH_LEN },
     required: { active: true }
   });
 
@@ -306,13 +311,6 @@ export abstract class SQLDialect implements DialectState {
    * Modify a sql column
    */
   abstract getModifyColumnSQL(stack: VisitStack[]): string;
-
-  /**
-   * Generate a UUID
-   */
-  generateId(): string {
-    return ModelUtil.uuid(this.KEY_LEN);
-  }
 
   /**
    * Determine table/field namespace for a given stack location
@@ -646,7 +644,7 @@ ${this.getLimitSQL(cls, query)}`;
       if (!idField) {
         fields.push(idField = this.idField);
       } else {
-        idField.maxlength = { n: this.KEY_LEN };
+        idField.maxlength = { n: this.ID_LEN };
       }
     }
 
