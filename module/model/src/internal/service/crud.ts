@@ -96,6 +96,10 @@ export class ModelCrudUtil {
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
 
+    if (item.prePersist) {
+      await item.prePersist();
+    }
+
     let errors: ValidationError[] = [];
     try {
       await SchemaValidator.validate(cls, item);
@@ -112,11 +116,6 @@ export class ModelCrudUtil {
     if (errors.length) {
       throw new ValidationResultError(errors);
     }
-
-    if (item.prePersist) {
-      await item.prePersist();
-    }
-
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return item as T;
   }
