@@ -45,6 +45,6 @@ export class AuthContextService {
    * @returns principal if authenticated
    * @returns undefined if not authenticated
    */
-  get = (): (Principal | undefined) => this.context.get<Principal>(PrincipalⲐ);
+  get = <T = { [key: string]: unknown }>(): (Principal<T> | undefined) => this.context.get<Principal<T>>(PrincipalⲐ);
 }
 ```
