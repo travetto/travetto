@@ -1,5 +1,5 @@
 import es from '@elastic/elasticsearch';
-import { Reindex } from '@elastic/elasticsearch/api/requestParams';
+import { ReindexRequest } from '@elastic/elasticsearch/lib/api/types';
 
 import { Class } from '@travetto/base';
 import { ModelRegistry, ModelType } from '@travetto/model';
@@ -8,7 +8,6 @@ import { SchemaChange } from '@travetto/schema';
 
 import { ElasticsearchModelConfig } from './config';
 import { ElasticsearchSchemaUtil } from './internal/schema';
-import { EsIdentity } from './internal/types';
 
 /**
  * Manager for elasticsearch indices and schemas
@@ -17,7 +16,7 @@ export class IndexManager implements ModelStorageSupport {
 
   #indexToAlias = new Map<string, string>();
   #aliasToIndex = new Map<string, string>();
-  #identities = new Map<Class, EsIdentity>();
+  #identities = new Map<Class, { index: string }>();
   #client: es.Client;
 
   constructor(public readonly config: ElasticsearchModelConfig, client: es.Client) {
@@ -41,13 +40,13 @@ export class IndexManager implements ModelStorageSupport {
   }
 
   /**
-   * Build the elasticsearch identity set for a given class (index, type)
+   * Build the elasticsearch identity set for a given class (index)
    */
-  getIdentity<T extends ModelType>(cls: Class<T>): EsIdentity {
+  getIdentity<T extends ModelType>(cls: Class<T>): { index: string } {
     if (!this.#identities.has(cls)) {
       const col = this.getStore(cls);
       const index = this.getNamespacedIndex(col);
-      this.#identities.set(cls, ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { index, type: '_doc' } : { index });
+      this.#identities.set(cls, { index });
     }
     return { ...this.#identities.get(cls)! };
   }
@@ -58,15 +57,15 @@ export class IndexManager implements ModelStorageSupport {
   async computeAliasMappings(force = false): Promise<void> {
     if (force || !this.#indexToAlias.size) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const { body: aliases } = (await this.#client.cat.aliases({
+      const aliases = (await this.#client.cat.aliases({
         format: 'json'
-      })) as { body: { index: string, alias: string }[] };
+      }));
 
       this.#indexToAlias = new Map();
       this.#aliasToIndex = new Map();
       for (const al of aliases) {
-        this.#indexToAlias.set(al.index, al.alias);
-        this.#aliasToIndex.set(al.alias, al.index);
+        this.#indexToAlias.set(al.index!, al.alias!);
+        this.#aliasToIndex.set(al.alias!, al.index!);
       }
     }
   }
@@ -77,21 +76,19 @@ export class IndexManager implements ModelStorageSupport {
    * @param alias
    */
   async createIndex(cls: Class, alias = true): Promise<string> {
-    const schema = ElasticsearchSchemaUtil.generateSourceSchema(cls, this.config.schemaConfig);
+    const mapping = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
     const ident = this.getIdentity(cls); // Already namespaced
     const concreteIndex = `${ident.index}_${Date.now()}`;
     try {
       await this.#client.indices.create({
         index: concreteIndex,
-        body: {
-          mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
-          settings: this.config.indexCreate,
-          ...(alias ? { aliases: { [ident.index]: {} } } : {})
-        }
+        mappings: mapping,
+        settings: this.config.indexCreate,
+        ...(alias ? { aliases: { [ident.index]: {} } } : {})
       });
       console.debug('Index created', { index: ident.index, concrete: concreteIndex });
       console.debug('Index Config', {
-        mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
+        mappings: mapping,
         settings: this.config.indexCreate
       });
     } catch (err) {
@@ -120,10 +117,10 @@ export class IndexManager implements ModelStorageSupport {
   }
 
   async exportModel(cls: Class<ModelType>): Promise<string> {
-    const schema = ElasticsearchSchemaUtil.generateSourceSchema(cls, this.config.schemaConfig);
+    const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
     const ident = this.getIdentity(cls); // Already namespaced
     return `curl -XPOST $ES_HOST/${ident.index} -d '${JSON.stringify({
-      mappings: ElasticsearchSchemaUtil.MAJOR_VER < 7 ? { [ident.type!]: schema } : schema,
+      mappings: schema,
       settings: this.config.indexCreate
     })}'`;
   }
@@ -159,7 +156,7 @@ export class IndexManager implements ModelStorageSupport {
       return acc;
     }, []);
 
-    const { index, type } = this.getIdentity(cls);
+    const { index } = this.getIdentity(cls);
 
     // If removing fields or changing types, run as script to update data
     if (removes.length || fieldChanges.length) { // Removing and adding
@@ -170,14 +167,12 @@ export class IndexManager implements ModelStorageSupport {
 
       const allChange = removes.concat(fieldChanges);
 
-      const reindexBody: Reindex = {
-        body: {
-          source: { index: curr },
-          dest: { index: next },
-          script: {
-            lang: 'painless',
-            source: allChange.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
-          }
+      const reindexBody: ReindexRequest = {
+        source: { index: curr },
+        dest: { index: next },
+        script: {
+          lang: 'painless',
+          source: allChange.map(x => `ctx._source.remove("${x}");`).join(' ') // Removing
         },
         wait_for_completion: true
       };
@@ -190,11 +185,10 @@ export class IndexManager implements ModelStorageSupport {
 
       await this.#client.indices.putAlias({ index: next, name: index });
     } else { // Only update the schema
-      const schema = ElasticsearchSchemaUtil.generateSourceSchema(cls, this.config.schemaConfig);
+      const schema = ElasticsearchSchemaUtil.generateSchemaMapping(cls, this.config.schemaConfig);
 
       await this.#client.indices.putMapping({
         index,
-        type,
         body: schema
       });
     }

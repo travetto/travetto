@@ -1,6 +1,7 @@
 import { Class } from '@travetto/base';
 
 import { BulkOp } from '../../service/bulk';
+import { ModelUuidGenerator } from '../../service/types';
 import { ModelType } from '../../types/model';
 import { ModelCrudUtil } from './crud';
 
@@ -19,7 +20,7 @@ export class ModelBulkUtil {
    * @param operations
    * @param idSource
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[], idSource: { uuid(): string }): Promise<BulkPreStore<T>> {
+  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[], idSource: { uuid: ModelUuidGenerator }): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
     const upsertedIds = new Map<number, string>();
     const updatedIds = new Map<number, string>();

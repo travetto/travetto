@@ -60,10 +60,9 @@ The [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/servi
 export interface ModelCrudSupport extends ModelBasicSupport {
 
   /**
-   * Generate a uuid
-   * @param value The optional value to generate a uuid around.  Passing the same value multiple times produces the same output.
+   * Uuid Generator
    */
-  uuid(): string;
+  uuid: UuidGenerator;
 
   /**
    * Update an item
@@ -234,8 +233,8 @@ All fields are optional, but the `id` and `type` are important as those field ty
 |[Redis Model Support](https://github.com/travetto/travetto/tree/main/module/model-redis#readme "Redis backing for the travetto model module.")|X|X|X|X| ||
 |[S3 Model Support](https://github.com/travetto/travetto/tree/main/module/model-s3#readme "S3 backing for the travetto model module.")|X|X| |X|X| |
 |[SQL Model Service](https://github.com/travetto/travetto/tree/main/module/model-sql#readme "SQL backing for the travetto model module, with real-time modeling support for SQL schemas.")|X|X|X|X| |X|
-|[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L54)|X|X|X|X|X|X|
-|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L51)|X|X| |X|X|X|
+|[MemoryModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/memory.ts#L53)|X|X|X|X|X|X|
+|[FileModelService](https://github.com/travetto/travetto/tree/main/module/model/src/provider/file.ts#L50)|X|X| |X|X|X|
 
 ## Custom Model Service
 In addition to the provided contracts, the module also provides common utilities and shared test suites.  The common utilities are useful for repetitive functionality, that is unable to be shared due to not relying upon inheritance (this was an intentional design decision).  This allows for all the [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations.") implementations to completely own the functionality and also to be able to provide additional/unique functionality that goes beyond the interface.
@@ -262,7 +261,6 @@ import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
 import { StreamModel, STREAMS } from '../internal/service/stream';
 import { IndexConfig } from '../registry/types';
-import { ModelUtil } from '../internal/util';
 const STREAM_META = `${STREAMS}_meta`;
 type StoreType = Map<string, Buffer>;
 @Config('model.memory')
@@ -291,11 +289,11 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     sorted: new Map<string, Map<string, Map<string, number>>>(),
     unsorted: new Map<string, Map<string, Set<string>>>()
   };
+  uuid = ModelCrudUtil.uuidGenerator();
   get client(): Map<string, StoreType>;
   constructor(public readonly config: MemoryModelConfig) { }
   async postConstruct(): Promise<void>;
   // CRUD Support
-  uuid(): string;
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T>;
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T>;

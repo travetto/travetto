@@ -59,7 +59,7 @@ class SchemaSuite {
 
   @Test('verifySchema')
   async verifySchema() {
-    const schema = ElasticsearchSchemaUtil.generateSourceSchema(Person);
+    const schema = ElasticsearchSchemaUtil.generateSchemaMapping(Person);
     assert.deepStrictEqual(schema, {
       properties: {
         id: { type: 'keyword' },
@@ -81,7 +81,7 @@ class SchemaSuite {
       dynamic: false
     });
 
-    const schema2 = ElasticsearchSchemaUtil.generateSourceSchema(SimpleNested);
+    const schema2 = ElasticsearchSchemaUtil.generateSchemaMapping(SimpleNested);
     assert.deepStrictEqual(schema2, {
       properties: {
         id: { type: 'keyword' },
@@ -104,7 +104,7 @@ class SchemaSuite {
 
   @Test('Numeric schema')
   async testNumericSchema() {
-    const schema3 = ElasticsearchSchemaUtil.generateSourceSchema(Numerical);
+    const schema3 = ElasticsearchSchemaUtil.generateSchemaMapping(Numerical);
 
     assert(schema3.properties.money.type === 'scaled_float');
     assert(schema3.properties.whole.type === 'integer');

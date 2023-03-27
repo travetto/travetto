@@ -1,4 +1,4 @@
-import { Search } from '@elastic/elasticsearch/api/requestParams';
+import { QueryDslQueryContainer, SearchRequest, SearchResponse, Sort, SortOptions } from '@elastic/elasticsearch/lib/api/types';
 
 import { Class, DataUtil, ObjectUtil } from '@travetto/base';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
@@ -10,7 +10,6 @@ import { IndexConfig } from '@travetto/model/src/registry/types';
 import { ModelType } from '@travetto/model/src/types/model';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { SearchResponse } from '../types';
 import { EsSchemaConfig } from './types';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -68,17 +67,13 @@ export class ElasticsearchQueryUtil {
   /**
    * Build sort mechanism
    */
-  static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']): string[] {
-    return sort.map(x => {
+  static getSort<T extends ModelType>(sort: SortClause<T>[] | IndexConfig<T>['fields']): Sort {
+    return sort.map<SortOptions>(x => {
       const o = this.extractSimple(x);
       const k = Object.keys(o)[0];
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const v = o[k] as (boolean | -1 | 1);
-      if (v === 1 || v === true) {
-        return k;
-      } else {
-        return `${k}:desc`;
-      }
+      return { [k]: { order: v === 1 || v === true ? 'asc' : 'desc' } };
     });
   }
 
@@ -239,7 +234,7 @@ export class ElasticsearchQueryUtil {
    * @param cls
    * @param search
    */
-  static getSearchBody<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): { query?: Record<string, unknown> } {
+  static getSearchQuery<T extends ModelType>(cls: Class<T>, search: Record<string, unknown>, checkExpiry = true): QueryDslQueryContainer {
     const clauses = [];
     if (search && Object.keys(search).length) {
       clauses.push(search);
@@ -262,20 +257,20 @@ export class ElasticsearchQueryUtil {
       });
     }
     return clauses.length === 0 ? {} :
-      clauses.length === 1 ? { query: clauses[0] } :
-        { query: { bool: { must: clauses } } };
+      clauses.length === 1 ? clauses[0] :
+        { bool: { must: clauses } };
   }
 
   /**
    * Build a base search object from a class and a query
    */
-  static getSearchObject<T extends ModelType>(cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, checkExpiry = true): Search {
+  static getSearchObject<T extends ModelType>(cls: Class<T>, query: Query<T>, config?: EsSchemaConfig, checkExpiry = true): SearchRequest {
     query.where = query.where ? (typeof query.where === 'string' ? QueryLanguageParser.parseToQuery(query.where) : query.where) : {};
     QueryVerifier.verify(cls, query); // Verify
 
-    const search: Search = {
+    const search: SearchRequest = {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      body: this.getSearchBody(cls, this.extractWhereQuery(cls, query.where as WhereClause<T>, config), checkExpiry)
+      query: this.getSearchQuery(cls, this.extractWhereQuery(cls, query.where as WhereClause<T>, config), checkExpiry)
     };
 
     const sort = query.sort;
@@ -309,7 +304,7 @@ export class ElasticsearchQueryUtil {
   /**
    * Safely load the data, excluding ids if needed
    */
-  static cleanIdRemoval<T>(req: Search, results: SearchResponse<T>): T[] {
+  static cleanIdRemoval<T>(req: SearchRequest, results: SearchResponse<T>): T[] {
     const out: T[] = [];
 
     const toArr = <V>(x: V | V[] | undefined): V[] => (x ? (Array.isArray(x) ? x : [x]) : []);
@@ -321,8 +316,8 @@ export class ElasticsearchQueryUtil {
     ];
     const includeId = select[0].includes('_id') || (select[0].length === 0 && !select[1].includes('_id'));
 
-    for (const r of results.body.hits.hits) {
-      const obj = r._source;
+    for (const r of results.hits.hits) {
+      const obj = r._source!;
       if (includeId) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         (obj as unknown as { _id: string })._id = r._id;

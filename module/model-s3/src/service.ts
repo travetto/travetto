@@ -14,7 +14,6 @@ import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { S3ModelConfig } from './config';
 
@@ -34,6 +33,7 @@ const STREAM_SPACE = '@travetto/model-s3:stream';
 @Injectable()
 export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, ModelExpirySupport {
 
+  uuid = ModelCrudUtil.uuidGenerator();
   client: s3.S3;
 
   constructor(public readonly config: S3ModelConfig) { }
@@ -145,10 +145,6 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
         }
       });
     }
-  }
-
-  uuid(): string {
-    return ModelUtil.uuid(32);
   }
 
   async postConstruct(): Promise<void> {

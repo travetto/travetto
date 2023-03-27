@@ -1,18 +1,37 @@
 import crypto from 'crypto';
 
-import { Class, ObjectUtil } from '@travetto/base';
-import { SchemaRegistry, SchemaValidator } from '@travetto/schema';
+import { Class, ObjectUtil, Util } from '@travetto/base';
+import { SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
 import { ModelType, OptionalId } from '../../types/model';
 import { NotFoundError } from '../../error/not-found';
 import { ExistsError } from '../../error/exists';
 import { SubTypeNotSupportedError } from '../../error/invalid-sub-type';
+import { ModelUuidGenerator } from '../../service/types';
 
 /**
  * Crud utilities
  */
 export class ModelCrudUtil {
+
+  /**
+   * Build a uuid generator
+   */
+  static uuidGenerator(create: () => string, valid: (id: string) => boolean): ModelUuidGenerator;
+  static uuidGenerator(len?: number): ModelUuidGenerator;
+  static uuidGenerator(lenOrCreate: (() => string) | number = 32, valid?: (id: string) => boolean): ModelUuidGenerator {
+    if (typeof lenOrCreate === 'number') {
+      const len = lenOrCreate;
+      const create = (): string => Util.uuid(len);
+      create.valid = (id: string): boolean => id.length === len && /^[0-9a-f]+$/i.test(id);
+      return create;
+    } else {
+      const create = (): string => lenOrCreate();
+      create.valid = valid!;
+      return create;
+    }
+  }
 
   /**
    * Provide hash value
@@ -61,7 +80,7 @@ export class ModelCrudUtil {
    * @param cls Type to store for
    * @param item Item to store
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, idSource: { uuid(): string }): Promise<T> {
+  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, idSource: { uuid: ModelUuidGenerator }): Promise<T> {
     if (!item.id) {
       item.id = idSource.uuid();
     }
@@ -77,7 +96,22 @@ export class ModelCrudUtil {
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
 
-    await SchemaValidator.validate(cls, item);
+    let errors: ValidationError[] = [];
+    try {
+      await SchemaValidator.validate(cls, item);
+    } catch (err) {
+      if (err instanceof ValidationResultError) {
+        errors = err.errors;
+      }
+    }
+
+    if (!idSource.uuid.valid(item.id!)) {
+      errors.push({ kind: 'invalid', path: 'id', value: item.id!, type: 'string', message: `${item.id!} is an invalid value for \`id\`` });
+    }
+
+    if (errors.length) {
+      throw new ValidationResultError(errors);
+    }
 
     if (item.prePersist) {
       await item.prePersist();

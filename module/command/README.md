@@ -92,7 +92,7 @@ Options:
 Available Services
 --------------------
  * dynamodb@1.20.0
- * elasticsearch@7.17.0
+ * elasticsearch@8.6.2
  * firestore@latest
  * mongodb@6.0
  * mysql@8.0
@@ -110,7 +110,7 @@ $ trv service status
 Service          Version    Status
 -------------------------------------------------
 dynamodb          1.20.0    Running 93af422e793a
-elasticsearch     7.17.0    Running ed76ee063d13
+elasticsearch      8.6.2    Running ed76ee063d13
 firestore         latest    Running feec2e5e95b4
 mongodb              6.0    Running 5513eba6734e
 mysql                8.0    Running 307bc66d442a

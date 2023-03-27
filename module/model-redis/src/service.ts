@@ -12,7 +12,6 @@ import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
-import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { RedisModelConfig } from './config';
 
@@ -26,6 +25,7 @@ type RedisMulti = ReturnType<RedisClient['multi']>;
 @Injectable()
 export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
+  uuid = ModelCrudUtil.uuidGenerator();
   client: RedisClient;
 
   constructor(public readonly config: RedisModelConfig) { }
@@ -187,10 +187,6 @@ export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, 
         }
       }
     }
-  }
-
-  uuid(): string {
-    return ModelUtil.uuid(32);
   }
 
   async has<T extends ModelType>(cls: Class<T>, id: string, error?: 'notfound' | 'data'): Promise<void> {

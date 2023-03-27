@@ -25,7 +25,7 @@ export class TextTestSuite {
 
   @Test()
   async validateTextSchema() {
-    const schema = ElasticsearchSchemaUtil.generateSingleSourceSchema(TextAble);
+    const schema = ElasticsearchSchemaUtil.generateSingleMapping(TextAble);
 
     assert(schema.properties);
     assert(schema.properties.bio);

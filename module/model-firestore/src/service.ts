@@ -10,7 +10,6 @@ import {
 
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelIndexedUtil } from '@travetto/model/src/internal/service/indexed';
-import { ModelUtil } from '@travetto/model/src/internal/util';
 
 import { FirestoreModelConfig } from './config';
 
@@ -25,6 +24,7 @@ const toSimpleObj = <T>(inp: T, missingValue: unknown = null): PartialWithFieldV
 @Injectable()
 export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport {
 
+  uuid = ModelCrudUtil.uuidGenerator();
   client: Firestore;
 
   constructor(public readonly config: FirestoreModelConfig) { }
@@ -57,10 +57,6 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
   }
 
   // Crud
-  uuid(): string {
-    return ModelUtil.uuid();
-  }
-
   async get<T extends ModelType>(cls: Class<T>, id: string): Promise<T> {
     const res = await this.#getCollection(cls).doc(id).get();
 
