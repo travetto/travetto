@@ -362,7 +362,7 @@ export class TransformerState implements State {
    */
   getForeignTarget(state: TransformerState, ret: ForeignType): ts.Expression {
     return state.fromLiteral({
-      Ⲑid: `${ret.source.split('node_modules')[1]}+${ret.name}`
+      Ⲑid: `${ret.source.split('node_modules/')[1]}+${ret.name}`
     });
   }
 }
