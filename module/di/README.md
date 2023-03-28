@@ -195,6 +195,45 @@ class Config {
 }
 ```
 
+## Non-Framework Dependencies
+The module is built around the framework's management of class registration, and being able to decorate the code with [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31) decorators. There may also be a desire to leverage external code and pull it into the dependency injection framework.  This could easily be achieved using a wrapper class that is owned by the framework. 
+
+It is also possible to directly reference external types, and they will be converted into unique symbols.  These symbols cannot be used manually, but can be leveraged using [@Inject](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31) decorators.
+
+**Code: Example External Dependencies**
+```typescript
+import { EventEmitter } from 'events';
+import { Writable } from 'stream';
+
+import { Inject, Injectable, InjectableFactory } from '@travetto/di';
+
+class Source {
+  @InjectableFactory()
+  static emitter(): EventEmitter {
+    return new EventEmitter();
+  }
+
+  @InjectableFactory(Symbol.for('custom-1'))
+  static writable(): Writable {
+    return {} as Writable;
+  }
+
+  @InjectableFactory(Symbol.for('custom-2'))
+  static writableAlt(): Writable {
+    return {} as Writable;
+  }
+}
+
+@Injectable()
+class Service {
+  @Inject()
+  emitter: EventEmitter;
+
+  @Inject(Symbol.for('custom-2'))
+  writable: Writable;
+}
+```
+
 ## Manual Invocation
 Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the [DependencyRegistry](https://github.com/travetto/travetto/tree/main/module/di/src/registry.ts#L1). The registry allows for requesting a dependency by class reference:
 

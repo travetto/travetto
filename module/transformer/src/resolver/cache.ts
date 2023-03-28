@@ -16,7 +16,7 @@ export class VisitCache {
     // Check for recursion
     switch (type?.key) {
       case 'shape':
-      case 'external': {
+      case 'managed': {
         if (this.storage.has(tsType)) {
           const target = this.storage.get(tsType)!;
           if (target.key !== 'pointer') {

@@ -63,6 +63,14 @@ export const text = <>
     </c.SubSection>
   </c.Section>
 
+  <c.Section title='Non-Framework Dependencies'>
+    The module is built around the framework's management of class registration, and being able to decorate the code with {Injectable} decorators. There may also be a desire to leverage external code and pull it into the dependency injection framework.  This could easily be achieved using a wrapper class that is owned by the framework. <br />
+
+    It is also possible to directly reference external types, and they will be converted into unique symbols.  These symbols cannot be used manually, but can be leveraged using {Inject} decorators.
+
+    <c.Code title='Example External Dependencies' src='./doc/injectable-foreign.ts' />
+  </c.Section>
+
   <c.Section title='Manual Invocation'>
 
     Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the <c.CodeLink title='DependencyRegistry' src={DependencyRegistry.constructor} startRe={/./} />. The registry allows for requesting a dependency by class reference:

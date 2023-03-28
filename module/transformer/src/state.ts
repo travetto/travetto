@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { ManifestIndex, path } from '@travetto/manifest';
 
-import { ExternalType, AnyType } from './resolver/types';
+import { ManagedType, AnyType } from './resolver/types';
 import { State, DecoratorMeta, Transformer, ModuleNameⲐ } from './types/visitor';
 import { SimpleResolver } from './resolver/service';
 import { ImportManager } from './importer';
@@ -53,7 +53,7 @@ export class TransformerState implements State {
   /**
    * Get or import the node or external type
    */
-  getOrImport(type: ExternalType): ts.Identifier | ts.PropertyAccessExpression {
+  getOrImport(type: ManagedType): ts.Identifier | ts.PropertyAccessExpression {
     return this.#imports.getOrImport(this.factory, type);
   }
 
@@ -76,9 +76,9 @@ export class TransformerState implements State {
   /**
    * Resolve external type
    */
-  resolveExternalType(node: ts.Node): ExternalType {
+  resolveManagedType(node: ts.Node): ManagedType {
     const resolved = this.resolveType(node);
-    if (resolved.key !== 'external') {
+    if (resolved.key !== 'managed') {
       const file = node.getSourceFile().fileName;
       const src = this.#resolver.getFileImportName(file);
       throw new Error(`Unable to import non-external type: ${node.getText()} ${resolved.key}: ${src}`);
@@ -93,7 +93,7 @@ export class TransformerState implements State {
     const type = 'flags' in node ? this.resolveType(node) : node;
     switch (type.key) {
       case 'literal': return this.factory.createIdentifier(type.ctor!.name);
-      case 'external': return this.getOrImport(type);
+      case 'managed': return this.getOrImport(type);
       case 'shape': return;
     }
   }
@@ -347,5 +347,13 @@ export class TransformerState implements State {
         }
       }
     }
+  }
+
+  /**
+   * Get import name for a given file
+   * @param file
+   */
+  getFileImportName(file: string): string {
+    return this.#resolver.getFileImportName(file);
   }
 }

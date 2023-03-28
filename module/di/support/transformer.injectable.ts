@@ -3,6 +3,7 @@ import ts from 'typescript';
 import {
   TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, OnSetter
 } from '@travetto/transformer';
+import { ForeignType } from '@travetto/transformer/src/resolver/types';
 
 const INJECTABLE_MOD = '@travetto/di/src/decorator';
 
@@ -10,6 +11,12 @@ const INJECTABLE_MOD = '@travetto/di/src/decorator';
  * Injectable/Injection transformer
  */
 export class InjectableTransformer {
+
+  static foreignTarget(state: TransformerState, ret: ForeignType): ts.Expression {
+    return state.fromLiteral({
+      Ⲑid: `${ret.source.split('node_modules')[1]}+${ret.name}`
+    });
+  }
 
   /**
    * Handle a specific declaration param/property
@@ -25,14 +32,26 @@ export class InjectableTransformer {
     const callExpr = existing?.expression as ts.CallExpression;
     const args: ts.Expression[] = [...(callExpr?.arguments ?? [])];
 
-    let optional: ts.Expression | undefined = undefined;
-    if (optional === undefined && !!param.questionToken) {
-      optional = state.fromLiteral(true);
+    const payload: { target?: unknown, qualifier?: unknown, optional?: boolean } = {};
+
+    if (!!param.questionToken) {
+      payload.optional = true;
     }
 
     const keyParam = ts.isSetAccessorDeclaration(param) ? param.parameters[0] : param;
-    const target = state.getOrImport(state.resolveExternalType(keyParam));
-    args.unshift(state.fromLiteral({ target, optional }));
+    const type = state.resolveType(keyParam);
+
+    if (type.key === 'managed') {
+      payload.target = state.getOrImport(type);
+    } else if (type.key === 'foreign') {
+      payload.target = this.foreignTarget(state, type);
+    } else {
+      const file = param.getSourceFile().fileName;
+      const src = state.getFileImportName(file);
+      throw new Error(`Unable to import non-external type: ${param.getText()} ${type.key}: ${src}`);
+    }
+
+    args.unshift(state.fromLiteral(payload));
 
     return args;
   }
@@ -52,7 +71,7 @@ export class InjectableTransformer {
       if (clause.token === ts.SyntaxKind.ImplementsKeyword) {
         for (const typeExpression of clause.types) {
           const resolvedType = state.resolveType(typeExpression);
-          if (resolvedType.key === 'external') {
+          if (resolvedType.key === 'managed') {
             const resolved = state.getOrImport(resolvedType);
             interfaces.push(resolved);
           }
@@ -134,21 +153,22 @@ export class InjectableTransformer {
     const dependencies = node.parameters.map(x => this.processDeclaration(state, x));
 
     // Read target from config or resolve
-    let target;
+    const config: { dependencies: unknown[], target?: unknown, qualifier?: unknown, src?: unknown } = {
+      dependencies,
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      src: (node.parent as ts.ClassDeclaration).name,
+    };
     const ret = state.resolveReturnType(node);
-    if (ret.key === 'external') {
-      target = state.getOrImport(ret);
+    if (ret.key === 'managed') {
+      config.target = state.getOrImport(ret);
+    } else if (ret.key === 'foreign') {
+      config.target = this.foreignTarget(state, ret);
     }
 
     // Build decl
     const args = [...(dec && ts.isCallExpression(dec.expression) ? dec.expression.arguments : [undefined])];
 
-    args.unshift(state.extendObjectLiteral({
-      dependencies,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      src: (node.parent as ts.ClassDeclaration).name,
-      target
-    }));
+    args.unshift(state.extendObjectLiteral(config));
 
     // Replace decorator
     return state.factory.updateMethodDeclaration(

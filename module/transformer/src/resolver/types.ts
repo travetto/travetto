@@ -31,9 +31,9 @@ export interface Type<K extends string> {
 }
 
 /**
- * A type that is not defined in the scope of the given file
+ * A type that is not defined in the scope of the given file, but is importable from the project
  */
-export interface ExternalType extends Type<'external'> {
+export interface ManagedType extends Type<'managed'> {
   /**
    *  Location the type came from, for class references
    */
@@ -142,11 +142,26 @@ export interface PointerType extends Type<'pointer'> {
 }
 
 /**
+ * Foreign type, outside of framework
+ */
+export interface ForeignType extends Type<'foreign'> {
+  /**
+   * Identifier for type
+   */
+  name: string;
+
+  /**
+   * Primary source file
+   */
+  source: string;
+}
+
+/**
  * Unknown type, should default to object
  */
 export interface UnknownType extends Type<'unknown'> { }
 
-export type AnyType = TupleType | ShapeType | UnionType | LiteralType | ExternalType | PointerType | UnknownType;
+export type AnyType = TupleType | ShapeType | UnionType | LiteralType | ManagedType | PointerType | UnknownType | ForeignType;
 
 /**
  * Simple interface for checked methods

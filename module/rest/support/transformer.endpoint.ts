@@ -31,7 +31,7 @@ export class RestTransformer {
     let detectedParamType: string | undefined;
 
     const isContext =
-      (paramType.key === 'external' &&
+      (paramType.key === 'managed' &&
         DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@travetto/rest:Context')
       ) ||
       (pDec && !/(Path|Header|Query|Body|Param|QuerySchema)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
@@ -39,7 +39,7 @@ export class RestTransformer {
     // Detect default behavior
     if (isContext) {
       detectedParamType = 'Context';
-      if (paramType.key === 'external') {
+      if (paramType.key === 'managed') {
         conf = state.extendObjectLiteral(conf, { contextType: state.getOrImport(paramType) });
         node = SchemaTransformUtil.computeField(state, node, { type: { key: 'unknown' } });
       } else {
@@ -50,7 +50,7 @@ export class RestTransformer {
       const config: { type: AnyType, name?: string } = { type: paramType };
 
       // If primitive
-      if (paramType.key !== 'external' && paramType.key !== 'shape') {
+      if (paramType.key !== 'managed' && paramType.key !== 'shape') {
         // Get path of endpoint
         const arg = DecoratorUtil.getPrimaryArgument(epDec.dec);
         // If non-regex

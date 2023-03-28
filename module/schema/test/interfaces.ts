@@ -21,10 +21,15 @@ interface Address {
   mode?: 'a' | 'b';
 }
 
+type Address3 = {
+  poBox: number;
+};
+
 @Schema()
 class User {
   address: Address;
   address2?: Address2;
+  address3?: Address3;
 }
 
 @Suite()
@@ -73,6 +78,28 @@ class ViewsTest {
       assert(err instanceof ValidationResultError);
       console.warn('Validation Failed', { error: err });
       assert(findError(err.errors, 'address.mode', 'is only allowed to be'));
+    }
+
+    // @ts-expect-error
+    r = User.from({ address: { street1: 'a', mode: 'b' }, address2: { mode: 'a' } });
+    try {
+      await SchemaValidator.validate(User, r);
+      assert.fail('Validation should have failed');
+    } catch (err) {
+      assert(err instanceof ValidationResultError);
+      console.warn('Validation Failed', { error: err });
+      assert(findError(err.errors, 'address2.mode', 'is only allowed to be'));
+    }
+
+    // @ts-expect-error
+    r = User.from({ address: { street1: 'a', mode: 'b' }, address3: { poBox: 'green' } });
+    try {
+      await SchemaValidator.validate(User, r);
+      assert.fail('Validation should have failed');
+    } catch (err) {
+      assert(err instanceof ValidationResultError);
+      console.warn('Validation Failed', { error: err });
+      assert(findError(err.errors, 'address3.poBox', 'number'));
     }
   }
 }

@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { PackageUtil, path } from '@travetto/manifest';
 
-import { AnyType, TransformResolver, ExternalType } from './resolver/types';
+import { AnyType, TransformResolver, ManagedType } from './resolver/types';
 import { ImportUtil } from './util/import';
 import { CoreUtil } from './util/core';
 import { Import } from './types/shared';
@@ -128,11 +128,11 @@ export class ImportManager {
    */
   importFromResolved(...types: AnyType[]): void {
     for (const type of types) {
-      if (type.key === 'external' && type.importName && type.importName !== this.#importName) {
+      if (type.key === 'managed' && type.importName && type.importName !== this.#importName) {
         this.importFile(type.importName);
       }
       switch (type.key) {
-        case 'external':
+        case 'managed':
         case 'literal': this.importFromResolved(...type.typeArguments || []); break;
         case 'union':
         case 'tuple': this.importFromResolved(...type.subTypes || []); break;
@@ -217,7 +217,7 @@ export class ImportManager {
   /**
    * Get the identifier and import if needed
    */
-  getOrImport(factory: ts.NodeFactory, type: ExternalType): ts.Identifier | ts.PropertyAccessExpression {
+  getOrImport(factory: ts.NodeFactory, type: ManagedType): ts.Identifier | ts.PropertyAccessExpression {
     if (type.importName === this.#importName) {
       return factory.createIdentifier(type.name!);
     } else {

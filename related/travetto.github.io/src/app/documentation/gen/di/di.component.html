@@ -225,6 +225,48 @@ By default, if there is only one candidate without qualification, then that cand
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
+<h2 id="non-framework-dependencies">Non-Framework Dependencies</h2>
+
+The module is built around the framework's management of class registration, and being able to decorate the code with <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">@Injectable</a> decorators. There may also be a desire to leverage external code and pull it into the dependency injection framework.  This could easily be achieved using a wrapper class that is owned by the framework. <br><br>
+It is also possible to directly reference external types, and they will be converted into unique symbols.  These symbols cannot be used manually, but can be leveraged using <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">@Inject</a> decorators.
+
+  <figure class="code">
+    <figcaption class="code">Example External Dependencies
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/di/doc/injectable-foreign.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EventEmitter <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'events'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Writable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'stream'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject<span class="token punctuation">,</span> Injectable<span class="token punctuation">,</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">class</span> <span class="token class-name">Source</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">emitter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> EventEmitter <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">EventEmitter</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span>Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'custom-1'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">writable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Writable <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token keyword">as</span> Writable<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">InjectableFactory</span></span><span class="token punctuation">(</span>Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'custom-2'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token keyword">static</span> <span class="token function">writableAlt</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Writable <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token keyword">as</span> Writable<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">Service</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  emitter<span class="token operator">:</span> EventEmitter<span class="token punctuation">;</span>
+
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span>Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'custom-2'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  writable<span class="token operator">:</span> Writable<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
 <h2 id="manual-invocation">Manual Invocation</h2>
 
 Some times you will need to lookup a dependency dynamically, or you want to control the injection process at a more granular level. To achieve that you will need to directly access the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/registry.ts#L1">DependencyRegistry</a>. The registry allows for requesting a dependency by class reference:

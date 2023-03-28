@@ -33,7 +33,7 @@ const GLOBAL_SIMPLE: Record<string, Function> = {
   PromiseConstructor: Promise.constructor
 };
 
-type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape' | 'literal' | 'external' | 'union';
+type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape' | 'literal' | 'managed' | 'union' | 'foreign';
 
 /**
  * Type categorizer, input for builder
@@ -53,7 +53,13 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
   } else if (objectFlags & ts.ObjectFlags.Reference && !CoreUtil.getSymbol(type)) { // Tuple type?
     return { category: 'tuple', type };
   } else if (objectFlags & ts.ObjectFlags.Anonymous) {
-    return { category: 'shape', type };
+    const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
+    const sourceFile = source.fileName;
+    if (sourceFile?.endsWith('.d.ts') && !resolver.isKnownFile(sourceFile)) {
+      return { category: 'foreign', type };
+    } else {
+      return { category: 'shape', type };
+    }
   } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
     let resolvedType = type;
     if (CoreUtil.hasTarget(resolvedType)) {
@@ -66,14 +72,14 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
 
     const source = DeclarationUtil.getPrimaryDeclarationNode(resolvedType).getSourceFile();
     const sourceFile = source.fileName;
-    if (sourceFile?.includes('@types/node/globals') || sourceFile?.includes('typescript/lib')) {
+    if (sourceFile?.includes('typescript/lib')) {
       return { category: 'literal', type };
     } else if (sourceFile?.endsWith('.d.ts') && !resolver.isKnownFile(sourceFile)) {
-      return { category: 'unknown', type };
+      return { category: 'foreign', type: resolvedType };
     } else if (!resolvedType.isClass()) { // Not a real type
       return { category: 'shape', type: resolvedType };
     } else {
-      return { category: 'external', type: resolvedType };
+      return { category: 'managed', type: resolvedType };
     }
   } else if (flags & (
     ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral |
@@ -142,12 +148,19 @@ export const TypeBuilder: {
       }
     }
   },
-  external: {
+  foreign: {
+    build: (resolver, type) => {
+      const name = CoreUtil.getSymbol(type)?.getName();
+      const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
+      return { key: 'foreign', name, source: source.fileName };
+    }
+  },
+  managed: {
     build: (resolver, type) => {
       const name = CoreUtil.getSymbol(type)?.getName();
       const importName = resolver.getTypeImportName(type)!;
       const tsTypeArguments = resolver.getAllTypeArguments(type);
-      return { key: 'external', name, importName, tsTypeArguments };
+      return { key: 'managed', name, importName, tsTypeArguments };
     }
   },
   union: {
@@ -226,7 +239,7 @@ export const TypeBuilder: {
             importName = resolver.getFileImportName(path.resolve(base, importName));
           }
         }
-        return { key: 'external', name, importName };
+        return { key: 'managed', name, importName };
       }
     }
   }

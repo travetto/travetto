@@ -13,7 +13,7 @@ export class SchemaTransformUtil {
   static toConcreteType(state: TransformerState, type: AnyType, node: ts.Node, root: ts.Node = node): ts.Expression {
     switch (type.key) {
       case 'pointer': return this.toConcreteType(state, type.target, node, root);
-      case 'external': return state.getOrImport(type);
+      case 'managed': return state.getOrImport(type);
       case 'tuple': return state.fromLiteral(type.subTypes.map(x => this.toConcreteType(state, x, node, root)!));
       case 'literal': {
         if ((type.ctor === Array) && type.typeArguments?.length) {
@@ -60,6 +60,7 @@ export class SchemaTransformUtil {
         }
         break;
       }
+      case 'foreign':
       case 'unknown':
       default: {
         // Object
@@ -208,7 +209,7 @@ export class SchemaTransformUtil {
   static ensureType(state: TransformerState, anyType: AnyType, target: ts.Node): Record<string, unknown> {
     const { out, type } = this.unwrapType(anyType);
     switch (type?.key) {
-      case 'external': out.type = state.typeToIdentifier(type); break;
+      case 'managed': out.type = state.typeToIdentifier(type); break;
       case 'shape': out.type = SchemaTransformUtil.toConcreteType(state, type, target); break;
       case 'literal': {
         if (type.ctor) {
@@ -233,7 +234,7 @@ export class SchemaTransformUtil {
     const { type } = this.unwrapType(state.resolveReturnType(node));
     let cls;
     switch (type?.key) {
-      case 'external': {
+      case 'managed': {
         const [dec] = DeclarationUtil.getDeclarations(type.original!);
         cls = dec && ts.isClassDeclaration(dec) ? dec : undefined;
         break;
