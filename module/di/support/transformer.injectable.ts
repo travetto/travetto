@@ -3,7 +3,6 @@ import ts from 'typescript';
 import {
   TransformerState, DecoratorMeta, OnClass, OnProperty, OnStaticMethod, DecoratorUtil, LiteralUtil, OnSetter
 } from '@travetto/transformer';
-import { ForeignType } from '@travetto/transformer/src/resolver/types';
 
 const INJECTABLE_MOD = '@travetto/di/src/decorator';
 
@@ -11,12 +10,6 @@ const INJECTABLE_MOD = '@travetto/di/src/decorator';
  * Injectable/Injection transformer
  */
 export class InjectableTransformer {
-
-  static foreignTarget(state: TransformerState, ret: ForeignType): ts.Expression {
-    return state.fromLiteral({
-      Ⲑid: `${ret.source.split('node_modules')[1]}+${ret.name}`
-    });
-  }
 
   /**
    * Handle a specific declaration param/property
@@ -44,7 +37,7 @@ export class InjectableTransformer {
     if (type.key === 'managed') {
       payload.target = state.getOrImport(type);
     } else if (type.key === 'foreign') {
-      payload.target = this.foreignTarget(state, type);
+      payload.target = state.getForeignTarget(state, type);
     } else {
       const file = param.getSourceFile().fileName;
       const src = state.getFileImportName(file);
@@ -158,11 +151,14 @@ export class InjectableTransformer {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       src: (node.parent as ts.ClassDeclaration).name,
     };
-    const ret = state.resolveReturnType(node);
+    let ret = state.resolveReturnType(node);
+    if (ret.key === 'literal' && ret.ctor === Promise && ret.typeArguments) {
+      ret = ret.typeArguments![0];
+    }
     if (ret.key === 'managed') {
       config.target = state.getOrImport(ret);
     } else if (ret.key === 'foreign') {
-      config.target = this.foreignTarget(state, ret);
+      config.target = state.getForeignTarget(state, ret);
     }
 
     // Build decl

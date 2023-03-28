@@ -41,7 +41,7 @@ class Source {
   }
 
   @InjectableFactory(Symbol.for('custom-2'))
-  static writableAlt(): Writable {
+  static async writableAlt(): Promise<Writable> {
     return { writable: true } as Writable;
   }
 

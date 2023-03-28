@@ -53,13 +53,14 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
   } else if (objectFlags & ts.ObjectFlags.Reference && !CoreUtil.getSymbol(type)) { // Tuple type?
     return { category: 'tuple', type };
   } else if (objectFlags & ts.ObjectFlags.Anonymous) {
-    const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
-    const sourceFile = source.fileName;
-    if (sourceFile?.endsWith('.d.ts') && !resolver.isKnownFile(sourceFile)) {
-      return { category: 'foreign', type };
-    } else {
-      return { category: 'shape', type };
-    }
+    try {
+      const source = DeclarationUtil.getPrimaryDeclarationNode(type).getSourceFile();
+      const sourceFile = source.fileName;
+      if (sourceFile?.endsWith('.d.ts') && !resolver.isKnownFile(sourceFile)) {
+        return { category: 'foreign', type };
+      }
+    } catch { }
+    return { category: 'shape', type };
   } else if (objectFlags & (ts.ObjectFlags.Reference | ts.ObjectFlags.Class | ts.ObjectFlags.Interface)) {
     let resolvedType = type;
     if (CoreUtil.hasTarget(resolvedType)) {
