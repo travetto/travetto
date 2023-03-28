@@ -22,7 +22,7 @@ export class AssetUtil {
     const hashStream = str.pipe(hasher);
     try {
       return await new Promise<string>((res, rej) => {
-        hashStream.on('finish', e => e ? rej(e) : res(hasher.read().toString()));
+        hashStream.on('finish', (e?: Error) => e ? rej(e) : res(hasher.read().toString()));
       });
     } finally {
       try { str.close(); } catch { }

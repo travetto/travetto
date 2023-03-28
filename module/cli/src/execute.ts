@@ -7,7 +7,6 @@ import { ConsoleManager, defineGlobalEnv, ShutdownManager } from '@travetto/base
 import { HelpUtil } from './help';
 import { CliCommandShape, CliValidationResultError } from './types';
 import { CliCommandRegistry } from './registry';
-import { cliTpl } from './color';
 import { CliCommandSchemaUtil } from './schema';
 
 /**
@@ -116,7 +115,7 @@ export class ExecutionManager {
           console.error(await HelpUtil.renderValidationError(command, err));
           console.error!(await HelpUtil.renderHelp(command));
         } else {
-          console.error!(cliTpl`${{ failure: err.message }}`);
+          console.error!(err);
           console.error!();
         }
       }
