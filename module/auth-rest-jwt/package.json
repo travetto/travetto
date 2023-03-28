@@ -29,7 +29,7 @@
     "@travetto/auth": "^3.1.0-rc.3",
     "@travetto/auth-rest": "^3.1.0-rc.8",
     "@travetto/config": "^3.1.0-rc.8",
-    "@travetto/di": "^3.1.0-rc.5",
+    "@travetto/di": "^3.1.0-rc.6",
     "@travetto/jwt": "^3.1.0-rc.3",
     "@travetto/rest": "^3.1.0-rc.8"
   },

@@ -28,7 +28,7 @@
     "@travetto/auth": "^3.1.0-rc.3",
     "@travetto/auth-rest": "^3.1.0-rc.8",
     "@travetto/context": "^3.1.0-rc.5",
-    "@travetto/di": "^3.1.0-rc.5",
+    "@travetto/di": "^3.1.0-rc.6",
     "@travetto/rest": "^3.1.0-rc.8"
   },
   "travetto": {

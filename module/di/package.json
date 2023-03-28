@@ -1,6 +1,6 @@
 {
   "name": "@travetto/di",
-  "version": "3.1.0-rc.5",
+  "version": "3.1.0-rc.6",
   "description": "Dependency registration/management and injection support.",
   "keywords": [
     "ast-transformations",
