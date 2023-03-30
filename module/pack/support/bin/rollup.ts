@@ -10,7 +10,7 @@ import { RootIndex } from '@travetto/manifest';
 import { getEntry, getOutput, getTerserConfig, getFiles } from './config';
 import { travettoImportPlugin } from './rollup-esm-dynamic-import';
 
-const NEVER_INCLUDE = new Set(['node-forge', '@parcel/watcher']);
+const NEVER_INCLUDE = new Set(['@parcel/watcher']);
 
 export default function buildConfig(): RollupOptions {
   const output = getOutput();
