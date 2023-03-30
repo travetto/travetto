@@ -1,6 +1,8 @@
+import os from 'os';
 import fs from 'fs/promises';
 import type { OpenAPIObject } from 'openapi3-ts';
 
+import { Util } from '@travetto/base';
 import { path } from '@travetto/manifest';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistry, RestConfig } from '@travetto/rest';
@@ -81,7 +83,10 @@ export class OpenApiService {
 
       // TODO: Should use file abstraction
       await fs.mkdir(path.dirname(this.apiSpecConfig.output), { recursive: true });
-      await fs.writeFile(this.apiSpecConfig.output, output);
+      const tempFile = path.resolve(os.tmpdir(), `${Util.uuid()}.yml`)
+      await fs.writeFile(tempFile, output);
+      await fs.copyFile(tempFile, this.apiSpecConfig.output);
+      await fs.unlink(tempFile);
     } catch (err) {
       console.error('Unable to persist openapi spec', err);
     }
