@@ -302,6 +302,11 @@ export class TodoController {
 ## Running the App
 First we must start the application:
 
+**Terminal: Start the Application**
+```bash
+npx trv run:rest
+```
+
 **Terminal: Application Startup**
 ```bash
 2029-03-14T04:00:00.618Z info  [@travetto/config:src/configuration.ts:141] Initialized {

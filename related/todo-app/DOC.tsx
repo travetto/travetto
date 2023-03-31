@@ -137,6 +137,10 @@ $ npx trv lint:register
 
       First we must start the application:
 
+      <c.Terminal
+        title='Start the Application' src='npx trv run:rest'
+      />
+
       <c.Terminal title='Application Startup' src={startupOutput} />
 
       next, let's execute {d.library('Fetch')} requests to interact with the new api. <br />
