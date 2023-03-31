@@ -68,8 +68,8 @@ export class DocAngularCommand {
 
         if (modName === 'todo-app') {
           html = html
-            .replace(/(<h1>(?:[\n\r]|.)*)(\s*<div class="toc">(?:[\r\n]|.)*?<\/div>(?:[\r\n]|.)*?<\/div>\s*)((?:[\r\n]|.)*)/m,
-              (_, h, toc, text) => `${toc.trim()}\n<div class="documentation">\n${h}\n${text}\n</div>\n`);
+            .replace(/(<h1>(?:[\n\r]|.)*)(<h2.*?\s*<ol>(?:[\r\n]|.)*?<\/ol>)((?:[\r\n]|.)*)/m,
+              (_, h, toc, text) => `<div class="toc"><div class="inner">${toc.trim()}</div></div>\n<div class="documentation">\n${h}\n${text}\n</div>\n`);
         }
 
         await fs.writeFile(page(`app/documentation/gen/${modName}/${modName}.component.html`), html, 'utf8');

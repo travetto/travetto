@@ -37,7 +37,7 @@ function TableOfContents({ root }: { root: () => DocJSXElement }) {
   const children = root().props.children ?? [];
   const final = Array.isArray(children) ? children : [children];
   const sections: DocJSXElementByFn<'Section'>[] =
-    final.filter(x => isDocJSXElement(x) && x.type === c.Section);
+    final.filter(x => isDocJSXElement(x) && x.type === c.Section && (x as unknown as DocJSXElementByFn<'Section'>).props.title !== 'Overview');
   return <ol>
     {...sections.map(v => <li><c.Anchor title={v.props.title} href={v.props.title} /></li>)}
   </ol>;

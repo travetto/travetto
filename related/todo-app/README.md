@@ -6,7 +6,6 @@ The following tutorial wil walk you through setting up a [Travetto](https://trav
 
 ## Overview
 
-   1. [Overview](#overview)
    1. [Prerequisites](#prerequisites)
    1. [Project Initialization](#project-initialization)
    1. [Establishing The Model](#establishing-the-model)
