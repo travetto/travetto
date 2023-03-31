@@ -83,7 +83,7 @@ export class OpenApiService {
 
       // TODO: Should use file abstraction
       await fs.mkdir(path.dirname(this.apiSpecConfig.output), { recursive: true });
-      const tempFile = path.resolve(os.tmpdir(), `${Util.uuid()}.yml`)
+      const tempFile = path.resolve(os.tmpdir(), `${Util.uuid()}.yml`);
       await fs.writeFile(tempFile, output);
       await fs.copyFile(tempFile, this.apiSpecConfig.output);
       await fs.unlink(tempFile);
