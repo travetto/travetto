@@ -144,7 +144,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
     const service = await this.service;
 
     const people = [1, 2, 3, 8].map(x => Person.from({
-      id: service.uuid(),
+      id: service.idSource.create(),
       name: 'Bob',
       age: 20 + x,
       gender: 'm',
@@ -217,7 +217,7 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
   async verifyNestedQuery() {
     const service = await this.service;
 
-    const id = service.uuid();
+    const id = service.idSource.create();
 
     await service.create(Note, Note.from({
       id,

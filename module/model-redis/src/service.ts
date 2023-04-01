@@ -25,7 +25,7 @@ type RedisMulti = ReturnType<RedisClient['multi']>;
 @Injectable()
 export class RedisModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
   client: RedisClient;
 
   constructor(public readonly config: RedisModelConfig) { }

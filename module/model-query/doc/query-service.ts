@@ -8,7 +8,7 @@ import { ModelQuery, PageableModelQuery } from '@travetto/model-query/src/model/
 import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 
 export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySuggestSupport {
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
   get client(): unknown { // @doc-exclude
     return undefined;
   }

@@ -53,7 +53,7 @@ export class MongoModelService implements
   ModelQueryCrudSupport, ModelQueryFacetSupport,
   ModelQuerySuggestSupport, ModelExpirySupport {
 
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
   client: mongo.MongoClient;
   #db: mongo.Db;
   #bucket: mongo.GridFSBucket;

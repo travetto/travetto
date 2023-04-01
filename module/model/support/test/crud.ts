@@ -62,7 +62,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     const people = [1, 2, 3, 8].map(x => Person.from({
-      id: service.uuid(),
+      id: service.idSource.create(),
       name: 'Bob',
       age: 20 + x,
       gender: 'm',
@@ -81,7 +81,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 23);
 
     await assert.rejects(async () => {
-      await service.get(Person, service.uuid());
+      await service.get(Person, service.idSource.create());
     }, NotFoundError);
   }
 
@@ -203,7 +203,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     const people = [1, 2, 3].map(x => Person.from({
-      id: service.uuid(),
+      id: service.idSource.create(),
       name: 'Bob',
       age: 20 + x,
       gender: 'm',

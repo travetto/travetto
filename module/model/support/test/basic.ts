@@ -21,7 +21,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     const person = Person.from({
-      id: service.uuid(),
+      id: service.idSource.create(),
       name: 'Bob',
       age: 25,
       gender: 'm'
@@ -34,7 +34,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(single.age === 25);
 
     await assert.rejects(async () => {
-      await service.get(Person, service.uuid());
+      await service.get(Person, service.idSource.create());
     }, NotFoundError);
 
     await service.delete(Person, person.id);
@@ -50,7 +50,7 @@ export abstract class ModelBasicSuite extends BaseModelSuite<ModelCrudSupport> {
     const service = await this.service;
 
     const { id } = await service.create(Person, {
-      id: service.uuid(),
+      id: service.idSource.create(),
       name: 'Bob',
       age: 25,
       gender: 'm'

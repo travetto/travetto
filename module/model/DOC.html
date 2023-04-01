@@ -69,9 +69,9 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelCrudSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelBasicSupport</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token comment">/**
-   * Uuid Generator
+   * Id Source
    */</span>
-  uuid<span class="token operator">:</span> UuidGenerator<span class="token punctuation">;</span>
+  idSource<span class="token operator">:</span> ModelIdSource<span class="token punctuation">;</span>
 
   <span class="token comment">/**
    * Update an item
@@ -221,11 +221,11 @@ Finally, there is support for <a target="_blank" class="source-link" href="https
 
 <h2 id="declaration">Declaration</h2>
 
-Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L4">ModelType</a>
+Models are declared via the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12">@Model</a> decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L9">ModelType</a>
 
   <figure class="code">
     <figcaption class="code">ModelType
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L4">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L9">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelType</span> <span class="token punctuation">{{'{'}}</span>
@@ -395,7 +395,7 @@ In addition to the provided contracts, the module also provides common utilities
     sorted<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Map<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> Map<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> Map<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">number</span><span class="token operator">>>></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
     unsorted<span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Map<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> Map<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> Set<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">>>></span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
-  uuid <span class="token operator">=</span> ModelCrudUtil<span class="token punctuation">.</span><span class="token function">uuidGenerator</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  idSource <span class="token operator">=</span> ModelCrudUtil<span class="token punctuation">.</span><span class="token function">uuidSource</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">get</span> <span class="token function">client</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Map<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> StoreType<span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token keyword">public</span> <span class="token keyword">readonly</span> config<span class="token operator">:</span> MemoryModelConfig<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
   <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>

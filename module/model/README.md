@@ -60,9 +60,9 @@ The [CRUD](https://github.com/travetto/travetto/tree/main/module/model/src/servi
 export interface ModelCrudSupport extends ModelBasicSupport {
 
   /**
-   * Uuid Generator
+   * Id Source
    */
-  uuid: UuidGenerator;
+  idSource: ModelIdSource;
 
   /**
    * Update an item
@@ -195,7 +195,7 @@ export interface ModelBulkSupport extends ModelCrudSupport {
 ```
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L4)
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L9)
 
 **Code: ModelType**
 ```typescript
@@ -289,7 +289,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     sorted: new Map<string, Map<string, Map<string, number>>>(),
     unsorted: new Map<string, Map<string, Set<string>>>()
   };
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
   get client(): Map<string, StoreType>;
   constructor(public readonly config: MemoryModelConfig) { }
   async postConstruct(): Promise<void>;

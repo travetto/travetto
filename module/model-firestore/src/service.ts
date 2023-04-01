@@ -24,7 +24,7 @@ const toSimpleObj = <T>(inp: T, missingValue: unknown = null): PartialWithFieldV
 @Injectable()
 export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupport, ModelIndexedSupport {
 
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
   client: Firestore;
 
   constructor(public readonly config: FirestoreModelConfig) { }

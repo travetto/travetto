@@ -1,8 +1,8 @@
 import { Class } from '@travetto/base';
 
-import { ModelType, OptionalId } from '../types/model';
+import { ModelType, OptionalId, ModelIdSource } from '../types/model';
+
 import { ModelBasicSupport } from './basic';
-import { UuidGenerator } from './types';
 
 /**
  * Interface for simple CRUD
@@ -11,9 +11,9 @@ import { UuidGenerator } from './types';
 export interface ModelCrudSupport extends ModelBasicSupport {
 
   /**
-   * Uuid Generator
+   * Id Source
    */
-  uuid: UuidGenerator;
+  idSource: ModelIdSource;
 
   /**
    * Update an item

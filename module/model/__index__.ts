@@ -9,7 +9,6 @@ export * from './src/service/indexed';
 export * from './src/service/expiry';
 export * from './src/service/storage';
 export * from './src/service/stream';
-export * from './src/service/types';
 
 export * from './src/provider/file';
 export * from './src/provider/memory';

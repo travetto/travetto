@@ -47,7 +47,7 @@ export class ElasticsearchModelService implements
   ModelQuerySupport, ModelQueryCrudSupport,
   ModelQuerySuggestSupport, ModelQueryFacetSupport {
 
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
   client: es.Client;
   manager: IndexManager;
 

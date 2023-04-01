@@ -46,7 +46,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkUpdate() {
     const service = await this.service;
-    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.uuid() }));
+    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
 
     const res = await service.processBulk(User, users.map(u => ({ insert: u })));
     assert(res.counts.insert === 4);
@@ -60,7 +60,7 @@ export abstract class ModelBulkSuite extends BaseModelSuite<ModelBulkSupport> {
   @Test()
   async bulkDelete() {
     const service = await this.service;
-    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.uuid() }));
+    const users = [0, 1, 2, 4].map(x => User.from({ name: `name-${x}`, id: service.idSource.create() }));
 
     const res = await service.processBulk(User, users.map(u => ({ insert: u })));
     assert(res.counts.insert === 4);

@@ -410,9 +410,20 @@ export async function main(key: string) {
 $ trv main support/create-todo.ts <key>
 
 {
-  text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:01.510Z',
-  id: '<uniqueId>'
+  message: 'Validation errors have occurred',
+  category: 'data',
+  type: 'ValidationResultError',
+  at: '2029-03-14T04:00:01.510Z',
+  errors: [
+    {
+      kind: 'invalid',
+      path: 'id',
+      value: '<uniqueId>',
+      type: 'string',
+      message: 'f422e793aed76ee063d13feec2e5e95b is an invalid value for `id`'
+    }
+  ],
+  status: 400
 }
 ```
 
@@ -432,11 +443,5 @@ export async function main(key: string) {
 ```bash
 $ trv main support/list-todo.ts <key>
 
-[
-  {
-    id: '<uniqueId>',
-    text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:01.814Z'
-  }
-]
+[]
 ```

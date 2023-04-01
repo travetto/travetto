@@ -4,11 +4,14 @@ import { Class, ObjectUtil, Util } from '@travetto/base';
 import { SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
-import { ModelType, OptionalId } from '../../types/model';
+import { ModelIdSource, ModelType, OptionalId } from '../../types/model';
 import { NotFoundError } from '../../error/not-found';
 import { ExistsError } from '../../error/exists';
 import { SubTypeNotSupportedError } from '../../error/invalid-sub-type';
-import { ModelUuidGenerator } from '../../service/types';
+
+export type ModelCrudProvider = {
+  idSource: ModelIdSource;
+};
 
 /**
  * Crud utilities
@@ -18,19 +21,10 @@ export class ModelCrudUtil {
   /**
    * Build a uuid generator
    */
-  static uuidGenerator(create: () => string, valid: (id: string) => boolean): ModelUuidGenerator;
-  static uuidGenerator(len?: number): ModelUuidGenerator;
-  static uuidGenerator(lenOrCreate: (() => string) | number = 32, valid?: (id: string) => boolean): ModelUuidGenerator {
-    if (typeof lenOrCreate === 'number') {
-      const len = lenOrCreate;
-      const create = (): string => Util.uuid(len);
-      create.valid = (id: string): boolean => id.length === len && /^[0-9a-f]+$/i.test(id);
-      return create;
-    } else {
-      const create = (): string => lenOrCreate();
-      create.valid = valid!;
-      return create;
-    }
+  static uuidSource(len?: number): ModelIdSource {
+    const create = (): string => Util.uuid(len);
+    const valid = (id: string): boolean => id.length === len && /^[0-9a-f]+$/i.test(id);
+    return { create, valid };
   }
 
   /**
@@ -80,9 +74,9 @@ export class ModelCrudUtil {
    * @param cls Type to store for
    * @param item Item to store
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, idSource: { uuid: ModelUuidGenerator }): Promise<T> {
+  static async preStore<T extends ModelType>(cls: Class<T>, item: Partial<OptionalId<T>>, provider: ModelCrudProvider): Promise<T> {
     if (!item.id) {
-      item.id = idSource.uuid();
+      item.id = provider.idSource.create();
     }
 
     if (ObjectUtil.isPlainObject(item)) {
@@ -109,7 +103,7 @@ export class ModelCrudUtil {
       }
     }
 
-    if (!idSource.uuid.valid(item.id!)) {
+    if (!provider.idSource.valid(item.id!)) {
       errors.push({ kind: 'invalid', path: 'id', value: item.id!, type: 'string', message: `${item.id!} is an invalid value for \`id\`` });
     }
 

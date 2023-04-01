@@ -57,7 +57,7 @@ async function loadAndCheckExpiry<T extends ModelType>(cls: Class<T>, doc: strin
 @Injectable()
 export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySupport, ModelStorageSupport, ModelIndexedSupport {
 
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
   client: dynamodb.DynamoDB;
 
   constructor(public readonly config: DynamoDBModelConfig) { }

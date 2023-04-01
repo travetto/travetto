@@ -1,9 +1,8 @@
 import { Class } from '@travetto/base';
 
 import { BulkOp } from '../../service/bulk';
-import { ModelUuidGenerator } from '../../service/types';
 import { ModelType } from '../../types/model';
-import { ModelCrudUtil } from './crud';
+import { ModelCrudProvider, ModelCrudUtil } from './crud';
 
 export type BulkPreStore<T extends ModelType> = {
   insertedIds: Map<number, string>;
@@ -18,9 +17,9 @@ export class ModelBulkUtil {
    * Prepares bulk ops for storage
    * @param cls
    * @param operations
-   * @param idSource
+   * @param provider
    */
-  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[], idSource: { uuid: ModelUuidGenerator }): Promise<BulkPreStore<T>> {
+  static async preStore<T extends ModelType>(cls: Class<T>, operations: BulkOp<T>[], provider: ModelCrudProvider): Promise<BulkPreStore<T>> {
     const insertedIds = new Map<number, string>();
     const upsertedIds = new Map<number, string>();
     const updatedIds = new Map<number, string>();
@@ -30,14 +29,14 @@ export class ModelBulkUtil {
     let i = 0;
     for (const op of operations) {
       if ('insert' in op && op.insert) {
-        op.insert = await ModelCrudUtil.preStore(cls, op.insert, idSource);
+        op.insert = await ModelCrudUtil.preStore(cls, op.insert, provider);
         insertedIds.set(i, op.insert.id!);
       } else if ('update' in op && op.update) {
-        op.update = await ModelCrudUtil.preStore(cls, op.update, idSource);
+        op.update = await ModelCrudUtil.preStore(cls, op.update, provider);
         updatedIds.set(i, op.update.id);
       } else if ('upsert' in op && op.upsert) {
         const isNew = !op.upsert.id;
-        op.upsert = await ModelCrudUtil.preStore(cls, op.upsert, idSource);
+        op.upsert = await ModelCrudUtil.preStore(cls, op.upsert, provider);
         if (isNew) {
           upsertedIds.set(i, op.upsert.id!);
         } else {

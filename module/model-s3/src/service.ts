@@ -33,7 +33,7 @@ const STREAM_SPACE = '@travetto/model-s3:stream';
 @Injectable()
 export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, ModelExpirySupport {
 
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
   client: s3.S3;
 
   constructor(public readonly config: S3ModelConfig) { }

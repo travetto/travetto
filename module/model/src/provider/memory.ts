@@ -58,7 +58,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
     unsorted: new Map<string, Map<string, Set<string>>>()
   };
 
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
   get client(): Map<string, StoreType> { return this.#store; }
 
   constructor(public readonly config: MemoryModelConfig) { }
@@ -188,7 +188,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     if (!item.id) {
-      item.id = this.uuid();
+      item.id = this.idSource.create();
     }
     this.#find(cls, item.id, 'data');
     return await this.upsert(cls, item);

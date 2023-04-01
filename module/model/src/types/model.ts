@@ -1,4 +1,9 @@
 /**
+ * Model Id Source
+ */
+export type ModelIdSource = { create: () => string, valid: (id: string) => boolean };
+
+/**
  * Simple model interface
  */
 export interface ModelType {

@@ -59,7 +59,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
     }
   }
 
-  uuid = ModelCrudUtil.uuidGenerator();
+  idSource = ModelCrudUtil.uuidSource();
 
   get client(): string {
     return this.config.folder;
@@ -121,7 +121,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   async create<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     if (!item.id) {
-      item.id = this.uuid();
+      item.id = this.idSource.create();
     }
 
     const file = await this.#resolveName(cls, '.json', item.id);

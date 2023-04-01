@@ -2,7 +2,7 @@ import {
   ModelType,
   BulkOp, BulkResponse, ModelCrudSupport, ModelStorageSupport, ModelBulkSupport,
   NotFoundError, ModelRegistry, ExistsError, OptionalId,
-  ModelUuidGenerator
+  ModelIdSource
 } from '@travetto/model';
 import { DataUtil, Class } from '@travetto/base';
 import { SchemaChange } from '@travetto/schema';
@@ -45,7 +45,7 @@ export class SQLModelService implements
   #manager: TableManager;
   #context: AsyncContext;
   #dialect: SQLDialect;
-  uuid: ModelUuidGenerator;
+  idSource: ModelIdSource;
 
   readonly config: SQLModelConfig;
 
@@ -109,7 +109,7 @@ export class SQLModelService implements
       if (this.#dialect.conn.init) {
         await this.#dialect.conn.init();
       }
-      this.uuid = ModelCrudUtil.uuidGenerator(this.#dialect.ID_LEN);
+      this.idSource = ModelCrudUtil.uuidSource(this.#dialect.ID_LEN);
       this.#manager = new TableManager(this.#context, this.#dialect);
       await ModelStorageUtil.registerModelChangeListener(this);
       ModelExpiryUtil.registerCull(this);

@@ -65,7 +65,7 @@ export abstract class AuthModelServiceSuite {
   @Test()
   async authenticate() {
     const pre = User.from({
-      id: this.svc.uuid(),
+      id: this.svc.idSource.create(),
       password: 'bob',
       details: {}
     });
