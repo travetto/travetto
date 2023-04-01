@@ -1,9 +1,12 @@
 import assert from 'assert';
+import os from 'os';
+import fs from 'fs/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { RootIndex } from '@travetto/manifest';
+import { RootIndex, path } from '@travetto/manifest';
 
 import { ExecUtil } from '../src/exec';
+import { StreamUtil } from '../src/stream';
 
 
 @Suite()
@@ -41,5 +44,25 @@ export class ExecUtilTest {
     proc.process.stdin?.end();
     const result = await proc.result;
     assert(result.stdout === 'Hello Worldy');
+  }
+
+  @Test()
+  async pipe() {
+    const src = await this.fixture.readStream('/logo.png');
+
+    const state = ExecUtil.spawn('gm', [
+      'convert', '-resize', '100x',
+      '-auto-orient', '-strip', '-quality', '86',
+      '-', '-'
+    ]);
+
+    StreamUtil.pipe(src, state.process.stdin!);
+
+    const tempFile = path.resolve(os.tmpdir(), `${Math.random()}.png`);
+    await StreamUtil.writeToFile(state.process.stdout!, tempFile);
+
+    const test = await fs.stat(tempFile);
+    await fs.unlink(tempFile);
+    assert(test.size > 0);
   }
 }
