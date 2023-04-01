@@ -50,7 +50,7 @@ export class SessionService {
 
   #modelService: ModelExpirySupport;
 
-  constructor(@Inject(SessionModelⲐ, { resolution: 'loose' }) service: ModelExpirySupport) {
+  constructor(@Inject(SessionModelⲐ) service: ModelExpirySupport) {
     this.#modelService = service;
   }
 

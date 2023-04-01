@@ -54,7 +54,7 @@ export function InjectArgs(configs?: InjectConfig[][]) {
  * @augments `@travetto/di:Inject`
  */
 export function Inject(first?: InjectConfig | symbol, ...args: (InjectConfig | undefined)[]) {
-  return (target: unknown, propertyKey: string | symbol, idx?: number | PropertyDescriptor): void => {
+  return (target: unknown, propertyKey?: string, idx?: number | PropertyDescriptor): void => {
     if (typeof idx !== 'number') { // Only register if on property
       const config: InjectConfig = collapseConfig(first, ...args);
 
