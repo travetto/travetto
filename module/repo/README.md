@@ -103,6 +103,7 @@ $ trv repo:list
 
 global-test/asset-rest
 global-test/auth-rest
+global-test/auth-rest-jwt
 global-test/model_asset
 global-test/model_auth-model
 global-test/model_cache
@@ -200,6 +201,7 @@ $ trv repo:exec pwd
 
 global-test/asset-rest <workspace-root>/global-test/asset-rest
          global-test/auth-rest <workspace-root>/global-test/auth-rest
+     global-test/auth-rest-jwt <workspace-root>/global-test/auth-rest-jwt
        global-test/model_asset <workspace-root>/global-test/model_asset
   global-test/model_auth-model <workspace-root>/global-test/model_auth-model
        global-test/model_cache <workspace-root>/global-test/model_cache

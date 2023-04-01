@@ -1,0 +1,184 @@
+import assert from 'assert';
+import timers from 'timers/promises';
+
+import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
+import { BaseRestSuite } from '@travetto/rest/support/test/base';
+import { Suite, Test } from '@travetto/test';
+import { Inject, InjectableFactory } from '@travetto/di';
+import { AppError } from '@travetto/base';
+import { Authenticator } from '@travetto/auth';
+
+import { AuthService, Authenticate, Authenticated } from '@travetto/auth-rest';
+
+const TestAuthⲐ = Symbol.for('TEST_AUTH');
+
+class Config {
+  @InjectableFactory(TestAuthⲐ)
+  static getAuthenticator(): Authenticator {
+    return {
+      async authenticate(body: { username?: string, password?: string }) {
+        if (body.username === 'super-user' && body.password === 'password') {
+          return {
+            id: '5',
+            details: { name: 'Billy' },
+            permissions: ['perm1', 'perm2'],
+            issuer: 'custom',
+          };
+        }
+        throw new AppError('User unknown', 'authentication');
+      }
+    };
+  }
+}
+
+@Controller('/test/auth')
+class TestAuthController {
+
+  @Inject()
+  svc: AuthService;
+
+  @Post('/login')
+  @Authenticate(TestAuthⲐ)
+  async simpleLogin() {
+  }
+
+  @Get('/self')
+  @Authenticated()
+  async getSelf(req: Request) {
+    return req.auth;
+  }
+
+  @Get('/logout')
+  @Authenticated()
+  async logout(req: Request) {
+    await this.svc.logout(req);
+    return new Redirect('/auth/self', 301);
+  }
+}
+
+@Controller('/test/auth-all')
+@Authenticated()
+class TestAuthAllController {
+
+  @Get('/self')
+  async getSelf(req: Request) {
+    return req.auth;
+  }
+}
+
+@Suite()
+export abstract class AuthRestJWTServerSuite extends BaseRestSuite {
+
+  getCookie(headers: Record<string, string | string[] | undefined>): string | undefined {
+    const v = headers['set-cookie'];
+    if (v) {
+      if (typeof v === 'string') {
+        return v;
+      } else {
+        return v[0];
+      }
+    }
+  }
+
+  getCookieValue(headers: Record<string, string | string[] | undefined>): string | undefined {
+    return this.getCookie(headers)?.split(';')[0];
+  }
+
+  getCookieExpires(headers: Record<string, string | string[] | undefined>): Date | undefined {
+    const v = this.getCookie(headers)?.match('expires=([^;]+);')?.[1];
+    return v ? new Date(v) : undefined;
+  }
+
+  @Test()
+  async testBadAuth() {
+    const { status } = await this.request('post', '/test/auth/login', {
+      throwOnError: false,
+      body: {
+        username: 'Todd',
+        password: 'Rod'
+      }
+    });
+    assert(status === 401);
+  }
+
+  @Test()
+  async testGoodAuth() {
+    const { headers, status } = await this.request('post', '/test/auth/login', {
+      throwOnError: false,
+      body: {
+        username: 'super-user',
+        password: 'password'
+      }
+    });
+    assert(this.getCookie(headers));
+    assert(status === 201);
+  }
+
+  @Test()
+  async testBlockedAuthenticated() {
+    const { status } = await this.request('get', '/test/auth/self', {
+      throwOnError: false
+    });
+    assert(status === 401);
+  }
+
+  @Test()
+  async testGoodAuthenticated() {
+    const { headers, status } = await this.request('post', '/test/auth/login', {
+      throwOnError: false,
+      body: {
+        username: 'super-user',
+        password: 'password'
+      }
+    });
+    assert(status === 201);
+    const cookie = this.getCookieValue(headers);
+    assert(cookie);
+
+    const { status: lastStatus } = await this.request('get', '/test/auth/self', {
+      throwOnError: false,
+      headers: { cookie }
+    });
+    assert(lastStatus === 200);
+  }
+
+  @Test()
+  async testCookieRollingRenewAuthenticated() {
+    const { headers, status } = await this.request('post', '/test/auth/login', {
+      throwOnError: false,
+      body: {
+        username: 'super-user',
+        password: 'password'
+      }
+    });
+    assert(status === 201);
+
+    const cookie = this.getCookieValue(headers);
+    assert(cookie);
+
+    const expires = this.getCookieExpires(headers);
+    assert(expires);
+
+    const { headers: selfHeaders, status: lastStatus } = await this.request('get', '/test/auth/self', {
+      throwOnError: false,
+      headers: { cookie }
+    });
+    assert(this.getCookie(selfHeaders) === undefined);
+    assert(lastStatus === 200);
+
+    await timers.setTimeout(1100);
+
+    const { headers: selfHeadersRenew } = await this.request('get', '/test/auth/self', {
+      throwOnError: false,
+      headers: { cookie }
+    });
+    assert(this.getCookie(selfHeadersRenew));
+
+    const expiresRenew = this.getCookieExpires(selfHeadersRenew);
+    assert(expiresRenew);
+
+    const delta = expiresRenew.getTime() - expires.getTime();
+    assert(delta < 1300);
+    assert(delta > 500);
+  }
+}

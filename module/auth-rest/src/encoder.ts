@@ -7,6 +7,10 @@ import { FilterContext } from '@travetto/rest';
  */
 export interface PrincipalEncoder {
   /**
+   * Run before encoding, allows for any necessary modifications
+   */
+  preEncode?(p: Principal): void | Promise<void>;
+  /**
    * Write principal
    * @param ctx The travetto filter context
    * @param p The auth principal

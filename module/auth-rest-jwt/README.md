@@ -15,7 +15,9 @@ yarn add @travetto/auth-rest-jwt
 
 One of [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework")'s main responsibilities is being able to send and receive authentication/authorization information from the client.  This data can be encoded in many different forms, and this module provides the ability to encode into and decode from [JWT](https://jwt.io/)s. This module fulfills the contract required by [Rest Auth](https://github.com/travetto/travetto/tree/main/module/auth-rest#readme "Rest authentication integration support for the Travetto framework") of being able to encode and decode a user principal, by leveraging [JWT](https://github.com/travetto/travetto/tree/main/module/jwt#readme "JSON Web Token implementation")'s token generation features. 
 
-The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L30) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
+The token can be encoded as a cookie or as a header depending on configuration.  Additionally, the encoding process allows for auto-renewing of the token if that is desired.  When encoding as a cookie, this becomes a seamless experience, and can be understood as a light-weight session. 
+
+The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/auth-rest-jwt/src/principal-encoder.ts#L40) is exposed as a tool for allowing for converting an authenticated principal into a JWT, and back again.
 
 **Code: JWTPrincipalEncoder**
 ```typescript
@@ -26,15 +28,25 @@ import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';
 import { JWTUtil, Payload } from '@travetto/jwt';
+import { Ignore } from '@travetto/schema';
 
 @Config('rest.auth.jwt')
 export class RestJWTConfig {
+  mode: 'cookie' | 'header' = 'header';
   header = 'Authorization';
+  cookie = 'trv.auth';
   signingKey?: string;
   headerPrefix = 'Bearer ';
-  defaultAge = TimeUtil.timeToMs('1y');
+  maxAge: string | number = '1h';
+  rollingRenew: boolean = false;
+
+  @Ignore()
+  maxAgeMs: number;
 
   postConstruct(): void {
+
+    this.maxAgeMs = typeof this.maxAge === 'string' ? TimeUtil.timeToMs(this.maxAge as '1y') : this.maxAge;
+
     if (!this.signingKey) {
       if (GlobalEnv.prod) {
         throw new AppError('The default signing key is not valid for production use, please specify a config value at rest.auth.jwt.signingKey');
@@ -54,8 +66,8 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   config: RestJWTConfig;
 
   toJwtPayload(p: Principal): Payload {
-    const exp = Math.trunc((p.expiresAt?.getTime() ?? (Date.now() + this.config.defaultAge)) / 1000);
-    const iat = Math.trunc((p.issuedAt?.getTime() ?? Date.now()) / 1000);
+    const exp = Math.trunc(p.expiresAt!.getTime() / 1000);
+    const iat = Math.trunc(p.issuedAt!.getTime() / 1000);
     return {
       auth: p,
       exp,
@@ -77,7 +89,12 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
    * @param token
    */
   async verifyToken(token: string): Promise<Principal> {
-    return (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.config.signingKey })).auth;
+    const res = (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.config.signingKey })).auth;
+    return {
+      ...res,
+      expiresAt: new Date(res.expiresAt!),
+      issuedAt: new Date(res.issuedAt!),
+    };
   }
 
   /**
@@ -85,7 +102,31 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
    */
   async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
     if (p) {
-      res.setHeader(this.config.header, `${this.config.headerPrefix}${await this.getToken(p)}`);
+      const token = await this.getToken(p);
+      if (this.config.mode === 'cookie') {
+        res.cookies.set(this.config.cookie, token, { expires: p.expiresAt });
+      } else {
+        res.setHeader(this.config.header, `${this.config.headerPrefix}${token}`);
+      }
+    } else if (this.config.mode === 'cookie') {
+      res.cookies.set(this.config.cookie, '', { expires: new Date(Date.now() - 1000 * 60 * 60) }); // Clear out cookie
+    }
+  }
+
+  /**
+   * Run before encoding, allowing for session extending if needed
+   */
+  preEncode(p: Principal): void {
+    p.expiresAt ??= new Date(Date.now() + this.config.maxAgeMs);
+    p.issuedAt ??= new Date();
+
+    if (this.config.rollingRenew) {
+      const end = p.expiresAt.getTime();
+      const midPoint = end - this.config.maxAgeMs / 2;
+      if (Date.now() > midPoint) { // If we are past the half way mark, renew the token
+        p.issuedAt = new Date();
+        p.expiresAt = new Date(Date.now() + this.config.maxAgeMs); // This will trigger a re-send
+      }
     }
   }
 
@@ -93,7 +134,10 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
    * Read JWT from request
    */
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    const token = (req.headerFirst(this.config.header))?.replace(this.config.headerPrefix, '');
+    const token = this.config.mode === 'cookie' ?
+      req.cookies.get(this.config.cookie) :
+      (req.headerFirst(this.config.header))?.replace(this.config.headerPrefix, '');
+
     if (token) {
       return this.verifyToken(token);
     }

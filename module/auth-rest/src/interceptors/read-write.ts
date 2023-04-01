@@ -29,11 +29,16 @@ export class AuthReadWriteInterceptor implements RestInterceptor {
   async intercept(ctx: FilterContext, next: FilterNext): Promise<FilterReturn> {
     const { req } = ctx;
     let og: Principal | undefined;
+    let ogExpires: Date | undefined;
     try {
       og = req.auth = await this.encoder.decode(ctx);
+      ogExpires = og?.expiresAt;
       return await next();
     } finally {
-      if (og !== req.auth || (req.auth && og && og.expiresAt !== req.auth.expiresAt)) { // If it changed
+      if (req.auth) {
+        await this.encoder.preEncode?.(req.auth);
+      }
+      if (req.auth !== og || ogExpires !== req.auth?.expiresAt) { // If it changed
         await this.encoder.encode(ctx, req.auth);
       }
       req.auth = undefined;
