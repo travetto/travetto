@@ -11,6 +11,10 @@ export class TextNode implements Node<string> {
     if (ch === 0x22 /* dbl quote*/ || ch === 0x27 /* sgl quote */) {
       this.value = this.value.substring(1, this.value.length - 1).replace(new RegExp(`\\\\${value[0]}`, 'g'), value[0]);
     }
+    this.value = this.value
+      .replaceAll('\\n', '\n')
+      .replaceAll('\\t', '\t')
+      .replaceAll('\\r', '\r');
   }
 }
 

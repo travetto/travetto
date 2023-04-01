@@ -24,7 +24,11 @@ export class TextBlock implements Block<string> {
         this.value += '\n';
       }
     } else {
-      this.value += tokens.join('').trimRight() + (this.subtype === 'full' ? '\n' : ' ');
+      const toAdd = tokens.join('').trimEnd()
+        .replaceAll('\\n', '\n')
+        .replaceAll('\\t', '\t')
+        .replaceAll('\\r', '\r');
+      this.value += toAdd + (this.subtype === 'full' ? '\n' : ' ');
     }
   }
 }

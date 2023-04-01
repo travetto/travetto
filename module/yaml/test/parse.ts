@@ -2,13 +2,16 @@
 import assert from 'assert';
 
 import { ObjectUtil } from '@travetto/base';
-import { Suite, Test } from '@travetto/test';
+import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { SimpleObject } from '../src/internal/type/common';
 import { YamlUtil } from '../src/util';
 
 @Suite()
 export class ParserTest {
+
+  fixture = new TestFixtures();
+
   @Test()
   testFullText() {
     const output = YamlUtil.parse(`
@@ -222,5 +225,16 @@ add:
   - src`) as SimpleObject;
     assert(Array.isArray(output.add));
     assert.deepStrictEqual(output.add, ['package.json', { '.trv_cache': 'cache' }, 'src']);
+  }
+  @Test()
+  async newlines() {
+    const data = await this.fixture.read('/withNewlines.yml');
+    assert(data !== '');
+
+    const output = YamlUtil.parse(data) as SimpleObject;
+    assert.deepEqual(Object.keys(output), ['name', 'multilineName']);
+    assert(output.name === 'a\nb\nc\nd');
+
+    assert.deepStrictEqual(output.multilineName, 'Line 1\nLine 2\nLine 3\nLine\t4');
   }
 }
