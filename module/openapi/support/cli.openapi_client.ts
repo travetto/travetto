@@ -30,6 +30,9 @@ export class OpenApiClientCommand implements CliCommandShape {
   }
 
   async main(format: string): Promise<void> {
+    this.output = path.resolve(this.output);
+    this.input = path.resolve(this.input);
+
     // Ensure its there
     await fs.mkdir(this.output, { recursive: true });
 
