@@ -21,7 +21,7 @@ export class ModelCrudUtil {
   /**
    * Build a uuid generator
    */
-  static uuidSource(len?: number): ModelIdSource {
+  static uuidSource(len: number = 32): ModelIdSource {
     const create = (): string => Util.uuid(len);
     const valid = (id: string): boolean => id.length === len && /^[0-9a-f]+$/i.test(id);
     return { create, valid };
