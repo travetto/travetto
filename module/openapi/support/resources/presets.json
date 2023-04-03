@@ -1,26 +1,26 @@
 {
-  "angular12": [
+  "angular15": [
     "typescript-angular",
     {
       "supportsES6": true,
-      "ngVersion": "11.0"
+      "stringEnums": true,
+      "ngVersion": "15.0",
+      "fileNaming": "kebab-case"
     }
   ],
-  "angular11": [
+  "angular14": [
     "typescript-angular",
     {
       "supportsES6": true,
-      "ngVersion": "11.0"
-    }
-  ],
-  "angular10": [
-    "typescript-angular",
-    {
-      "supportsES6": true,
-      "ngVersion": "10.0"
+      "stringEnums": true,
+      "ngVersion": "14.0",
+      "fileNaming": "kebab-case"
     }
   ],
   "fetch": [
-    "typescript-fetch"
+    "typescript-fetch",
+    {
+      "stringEnums": true
+    }
   ]
 }
