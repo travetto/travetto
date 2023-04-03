@@ -94,8 +94,12 @@ export class CliRunUtil {
     if (!data.valid) {
       throw new Error(`Unable to collect module list: ${data.message}`);
     }
-    const result: ModuleGraphItem<string[]>[] = JSON.parse(data.stdout);
-    return result.map(x => ({ name: x.name, children: new Set(x.children), local: !!x.local }));
+    try {
+      const result: ModuleGraphItem<string[]>[] = JSON.parse(data.stdout);
+      return result.map(x => ({ name: x.name, children: new Set(x.children), local: !!x.local }));
+    } catch {
+      throw new Error(`Unable to collect module list: ${data.stderr || data.stdout}`);
+    }
   }
 
   /**
