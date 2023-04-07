@@ -1,0 +1,18 @@
+{
+  "TestSuite": {
+    "prefix": "suite",
+    "body": [
+      "import assert from 'assert';",
+      "",
+      "import {Suite, Test} from '@travetto/test';",
+      "",
+      "@Suite()",
+      "class ${1:name}Suite {",
+      "  @Test()",
+      "  async simpleTest() {",
+      "    assert(true);",
+      "  }",
+      "}"
+    ]
+  }
+}

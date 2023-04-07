@@ -59,7 +59,8 @@
   },
   "publisher": "arcsine",
   "categories": [
-    "Other"
+    "Other",
+    "Snippets"
   ],
   "activationEvents": [
     "workspaceContains:node_modules/@travetto",
@@ -71,6 +72,12 @@
     "theme": "light"
   },
   "contributes": {
+    "snippets": [
+      {
+        "language": "typescript",
+        "path": "snippets/ts.json"
+      }
+    ],
     "commands": [
       {
         "command": "travetto.compiler:stop",
