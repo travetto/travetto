@@ -72,7 +72,7 @@ All of the high level configurations can be found in the following structure:
   <span class="token comment">/**
    * OpenAPI Version
    */</span>
-  openapi <span class="token operator">=</span> <span class="token string">'3.1.0'</span><span class="token punctuation">;</span>
+  openapi <span class="token operator">=</span> <span class="token string">'3.0.0'</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
 <span class="token comment">/**
@@ -98,10 +98,10 @@ All of the high level configurations can be found in the following structure:
   exposeAllSchemas<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
 
   <span class="token keyword">async</span> <span class="token function">postConstruct</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">=</span> path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>output<span class="token punctuation">)</span><span class="token punctuation">;</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">||</span> <span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">===</span> <span class="token string">'-'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>persist <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span> <span class="token keyword">else</span> <span class="token punctuation">{{'{'}}</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>output <span class="token operator">=</span> path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span>RootIndex<span class="token punctuation">.</span>mainModule<span class="token punctuation">.</span>sourcePath<span class="token punctuation">,</span> <span class="token keyword">this</span><span class="token punctuation">.</span>output<span class="token punctuation">)</span><span class="token punctuation">;</span>
       <span class="token keyword">this</span><span class="token punctuation">.</span>persist <span class="token operator">??=</span> GlobalEnv<span class="token punctuation">.</span>dynamic<span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>persist<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -162,10 +162,9 @@ Options:
 
 Available Presets
 ----------------------------------
-* @travetto/angular10 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">10.0</span>
-* @travetto/angular11 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">11.0</span>
-* @travetto/angular12 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">11.0</span>
-* @travetto/fetch -- typescript-fetch</code></pre>
+* @travetto/angular14 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,stringEnums<span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">14.0</span>,fileNaming<span class="token operator">=</span>kebab-case
+* @travetto/angular15 -- typescript-angular <span class="token assign-left variable">supportsES6</span><span class="token operator">=</span>true,stringEnums<span class="token operator">=</span>true,ngVersion<span class="token operator">=</span><span class="token number">15.0</span>,fileNaming<span class="token operator">=</span>kebab-case
+* @travetto/fetch -- typescript-fetch <span class="token assign-left variable">stringEnums</span><span class="token operator">=</span>true</code></pre>
   </figure>
 
 This tool relies upon a custom build of <a target="_blank" class="external-link" href="https://github.com/OpenAPITools/openapi-generator">OpenAPI client generation tools</a>, which supports watching.  This allows for fast responsive client generation as the shape of the API changes.

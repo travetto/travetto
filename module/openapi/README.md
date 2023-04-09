@@ -69,7 +69,7 @@ export class ApiHostConfig {
   /**
    * OpenAPI Version
    */
-  openapi = '3.1.0';
+  openapi = '3.0.0';
 }
 
 /**
@@ -95,10 +95,10 @@ export class ApiSpecConfig {
   exposeAllSchemas: boolean = false;
 
   async postConstruct(): Promise<void> {
-    this.output = path.resolve(this.output);
     if (!this.output || this.output === '-') {
       this.persist = false;
     } else {
+      this.output = path.resolve(RootIndex.mainModule.sourcePath, this.output);
       this.persist ??= GlobalEnv.dynamic;
     }
     if (this.persist) {
@@ -152,10 +152,9 @@ Options:
 
 Available Presets
 ----------------------------------
-* @travetto/angular10 -- typescript-angular supportsES6=true,ngVersion=10.0
-* @travetto/angular11 -- typescript-angular supportsES6=true,ngVersion=11.0
-* @travetto/angular12 -- typescript-angular supportsES6=true,ngVersion=11.0
-* @travetto/fetch -- typescript-fetch
+* @travetto/angular14 -- typescript-angular supportsES6=true,stringEnums=true,ngVersion=14.0,fileNaming=kebab-case
+* @travetto/angular15 -- typescript-angular supportsES6=true,stringEnums=true,ngVersion=15.0,fileNaming=kebab-case
+* @travetto/fetch -- typescript-fetch stringEnums=true
 ```
 
 This tool relies upon a custom build of [OpenAPI client generation tools](https://github.com/OpenAPITools/openapi-generator), which supports watching.  This allows for fast responsive client generation as the shape of the API changes.
