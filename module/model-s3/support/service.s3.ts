@@ -8,7 +8,7 @@ try {
   mkdirSync(temp);
 } catch { }
 
-const version = 'latest';
+const version = '2.0.1';
 
 export const service: CommandService = {
   name: 's3',
@@ -21,7 +21,7 @@ export const service: CommandService = {
     HOST_TMP_FOLDER: temp
   },
   volumes: {
-    [temp]: '/tmp/localstack'
+    [temp]: '/var/lib/localstack'
   },
   ports: { 4566: 4566, 4571: 4571, 8080: 8080, 8081: 8081 },
   image: `localstack/localstack:${version}`
