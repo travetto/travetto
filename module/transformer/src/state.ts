@@ -295,13 +295,16 @@ export class TransformerState implements State {
    * @param type
    */
   generateUniqueIdentifier(node: ts.Node, type: AnyType): string {
-    let unique: string;
+    let unique: string | undefined;
     try {
       // Tie to source location if possible
       const tgt = DeclarationUtil.getPrimaryDeclarationNode(type.original!);
-      unique = `${ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line}_${tgt.getEnd() - tgt.getStart()}`;
-      if (tgt.getSourceFile().fileName !== this.source.fileName) { // if in same file
-        unique = `${SystemUtil.naiveHash(tgt.getSourceFile().fileName)}_${unique}`;
+      const fileName = tgt.getSourceFile().fileName;
+
+      if (fileName === this.source.fileName) { // if in same file suffix with location
+        unique = `${ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line}_${tgt.getEnd() - tgt.getStart()}`;
+      } else {
+        // Otherwise treat it as external and add nothing to it
       }
     } catch {
       // Determine type unique ident
@@ -312,7 +315,7 @@ export class TransformerState implements State {
     if (!name && hasEscapedName(node)) {
       name = `${node.name.escapedText}`;
     }
-    return `${name}_${unique}`;
+    return unique ? `${name}_${unique}` : name;
   }
 
   /**
