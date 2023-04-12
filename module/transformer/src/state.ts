@@ -308,13 +308,15 @@ export class TransformerState implements State {
       }
     } catch {
       // Determine type unique ident
-      unique = SystemUtil.uuid(type.name ? 5 : 10);
+      const imp = this.#resolver.getFileImportName(this.source.fileName);
+      unique = `${SystemUtil.naiveHash(`${imp}${type.name ?? 'unknown'}`)}`;
     }
     // Otherwise read name with uuid
     let name = type.name && !type.name.startsWith('_') ? type.name : '';
     if (!name && hasEscapedName(node)) {
       name = `${node.name.escapedText}`;
     }
+    name ||= 'Shape';
     return unique ? `${name}_${unique}` : name;
   }
 

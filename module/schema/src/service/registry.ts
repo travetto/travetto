@@ -136,6 +136,14 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   }
 
   /**
+   * Return all subtypes by discriminator for a given class
+   * @param cls The base class to resolve from
+   */
+  getSubTypesForClass(cls: Class): Map<string, Class> | undefined {
+    return this.#subTypes.get(cls);
+  }
+
+  /**
    * Register sub types for a class
    * @param cls The class to register against
    * @param type The subtype name

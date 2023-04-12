@@ -5,6 +5,7 @@ import type {
 } from 'openapi3-ts';
 
 import { ControllerRegistry, EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType } from '@travetto/rest';
+import { RootIndex } from '@travetto/manifest';
 import { Class } from '@travetto/base';
 import { SchemaRegistry, FieldConfig } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
@@ -224,9 +225,21 @@ export class SpecGenerator {
           properties[fieldName] = this.#processSchemaField(def.schema[fieldName], required);
         }
 
+        const extra: Record<string, unknown> = {};
+        if (RootIndex.getFunctionMetadata(type)?.abstract) {
+          const map = SchemaRegistry.getSubTypesForClass(type);
+          if (map) {
+            extra.oneOf = [...new Set(map.values())].map(c => {
+              this.#processSchema(c);
+              return this.#getType(c);
+            });
+          }
+        }
+
         Object.assign(this.#allSchemas[typeId], {
           properties,
-          ...(required.length ? { required } : {})
+          ...(required.length ? { required } : {}),
+          ...extra
         });
       } else {
         this.#allSchemas[typeId] = { title: typeId };
