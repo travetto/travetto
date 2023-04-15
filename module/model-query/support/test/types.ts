@@ -9,6 +9,13 @@ export class Address {
   @Text() street2?: string;
 }
 
+@Model('query-todo-version')
+export class Todo {
+  version = 0;
+  id: string;
+  @Text() text: string;
+}
+
 @Model('query-person')
 export class Person {
   id: string;

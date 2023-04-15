@@ -41,6 +41,9 @@ export class QueryModelService implements ModelQueryCrudSupport, ModelQueryFacet
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     return 0;
   }
+  async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
+    return {} as T;
+  }
   async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     return 0;
   }

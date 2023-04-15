@@ -10,7 +10,7 @@ import { AsyncContext } from '@travetto/context';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
-  PageableModelQuery, ValidStringFields, WhereClauseRaw,
+  PageableModelQuery, ValidStringFields, WhereClause, WhereClauseRaw,
 } from '@travetto/model-query';
 
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
@@ -94,8 +94,10 @@ export class SQLModelService implements
     return this.#dialect.executeSQL<T>(sql);
   }
 
-  async #deleteRaw<T extends ModelType>(cls: Class<T>, id: string, checkExpiry = true): Promise<void> {
-    const where: WhereClauseRaw<ModelType> = { id };
+  async #deleteRaw<T extends ModelType>(cls: Class<T>, id: string, where?: WhereClauseRaw<T>, checkExpiry = true): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    ((where ??= {}) as WhereClauseRaw<ModelType>).id = id;
+
     const count = await this.#dialect.deleteAndGetCount<ModelType>(cls, {
       where: ModelQueryUtil.getWhereClause(cls, where, checkExpiry)
     });
@@ -162,7 +164,7 @@ export class SQLModelService implements
 
   @Transactional()
   async update<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
-    await this.#deleteRaw(cls, item.id, true);
+    await this.#deleteRaw(cls, item.id, {}, true);
     return await this.create(cls, item);
   }
 
@@ -170,7 +172,7 @@ export class SQLModelService implements
   async upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T> {
     try {
       if (item.id) {
-        await this.#deleteRaw(cls, item.id, false);
+        await this.#deleteRaw(cls, item.id, {}, false);
       }
     } catch (err) {
       if (!(err instanceof NotFoundError)) {
@@ -206,7 +208,7 @@ export class SQLModelService implements
 
   @Transactional()
   async delete<T extends ModelType>(cls: Class<T>, id: string): Promise<void> {
-    await this.#deleteRaw(cls, id, false);
+    await this.#deleteRaw(cls, id, {}, false);
   }
 
   @Transactional()
@@ -266,6 +268,15 @@ export class SQLModelService implements
   async queryCount<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     const { records } = await this.#exec<{ total: string | number }>(this.#dialect.getQueryCountSQL(cls, ModelQueryUtil.getQueryAndVerify(cls, query)));
     return +records[0].total;
+  }
+
+  @Connected()
+  @Transactional()
+  async updateOneWithQuery<T extends ModelType>(cls: Class<T>, item: T, query: ModelQuery<T>): Promise<T> {
+    query = ModelQueryUtil.getQueryWithId(cls, item, query);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    await this.#deleteRaw(cls, item.id, query.where as WhereClause<T>, true);
+    return await this.create(cls, item);
   }
 
   @Connected()

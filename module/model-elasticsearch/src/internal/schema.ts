@@ -1,6 +1,6 @@
 import { InlineScript, MappingProperty, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
-import { Class, DataUtil, ObjectUtil } from '@travetto/base';
+import { Class, DataUtil } from '@travetto/base';
 import { ModelRegistry } from '@travetto/model';
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { SchemaRegistry } from '@travetto/schema';
@@ -15,35 +15,39 @@ export class ElasticsearchSchemaUtil {
   /**
    * Build the update script for a given object
    */
-  static generateUpdateScript(o: Record<string, unknown>, path: string = '', arr = false): InlineScript {
-    const ops: string[] = [];
+  static generateUpdateScript(o: Record<string, unknown>): InlineScript {
     const out: InlineScript = {
-      params: {},
       lang: 'painless',
-      source: ''
+      source: `
+ for (entry in params.body.entrySet()) {
+  def key = entry.getKey();
+  def value = entry.getValue();
+  if (key ==~ /^_?id$/) {
+    continue;
+  }
+  if (value == null) {
+    ctx._source.remove(key);
+  } else {
+    ctx._source[key] = value;
+  }
+ }
+`,
+      params: { body: o },
     };
-    for (const x of Object.keys(o ?? {})) {
-      if (!path && (x === '_id' || x === 'id')) {
-        continue;
-      }
-      const prop = arr ? `${path}[${x}]` : `${path}${path ? '.' : ''}${x}`;
-      if (o[x] === undefined || o[x] === null) {
-        ops.push(`ctx._source.${path}${path ? '.' : ''}remove("${x}")`);
-      } else if (ObjectUtil.isPrimitive(o[x]) || Array.isArray(o[x])) {
-        const param = prop.toLowerCase().replace(/[^a-z0-9_$]/g, '_');
-        ops.push(`ctx._source.${prop} = params.${param}`);
-        out.params![param] = o[x];
-      } else {
-        ops.push(`ctx._source.${prop} = ctx._source.${prop} == null ? [:] : ctx._source.${prop}`);
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const sub = this.generateUpdateScript(o[x] as Record<string, unknown>, prop);
-        ops.push(sub.source);
-        Object.assign(out.params!, sub.params);
-      }
-    }
-    out.source = ops.join(';');
-
     return out;
+  }
+
+  /**
+   * Generate replace script
+   * @param o
+   * @returns
+   */
+  static generateReplaceScript(o: Record<string, unknown>): InlineScript {
+    return {
+      lang: 'painless',
+      source: 'ctx._source.clear(); ctx._source.putAll(params.body)',
+      params: { body: o }
+    };
   }
 
   /**

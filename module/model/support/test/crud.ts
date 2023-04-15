@@ -127,7 +127,6 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
       gender: 'f',
       address: {
         street1: 'changed\n',
-        street2: undefined
       }
     }));
 
@@ -172,7 +171,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
   async testBlankPartialUpdate() {
     const service = await this.service;
     const o = await service.create(User2, User2.from({
-      name: 'bob'
+      name: 'bob',
     }));
 
     assert(o.address === undefined);
@@ -187,7 +186,8 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     const o3 = await service.get(User2, o.id);
 
     assert(o3.address !== undefined);
-    assert(o3.address!.street1 === 'blue');
+    assert(o3.address.street1 === 'blue');
+    assert(o3.address.street2 === undefined);
   }
 
   @Test('verify dates')
@@ -281,5 +281,30 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(o2.name === 'oscar');
     assert(o2.age === 20);
     assert(o2.address.street2 === 'roader');
+  }
+
+  @Test('Verify nested list in partial update')
+  async testPartialUpdateOnLists() {
+    const service = await this.service;
+    const o = await service.create(SimpleList, {
+      names: ['rob', 'tom'],
+      simples: [
+        { name: 'roger' },
+        { name: 'dodger' }
+      ]
+    });
+    assert(o.names.length === 2);
+    assert(o.simples);
+    assert(o.simples.length === 2);
+
+    const o2 = await service.updatePartial(SimpleList, {
+      id: o.id,
+      names: ['dawn'],
+      simples: [{ name: 'jim' }]
+    });
+
+    assert(o2.names.length === 1);
+    assert(o2.simples);
+    assert(o2.simples.length === 1);
   }
 }

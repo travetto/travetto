@@ -61,6 +61,13 @@ Reinforcing the complexity provided in these contracts, the <a target="_blank" c
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ModelQueryCrudSupport</span> <span class="token keyword">extends</span> <span class="token class-name">ModelCrudSupport</span><span class="token punctuation">,</span> ModelQuerySupport <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
+   * A standard update operation, but ensures the data matches the query before the update is finalized
+   * @param cls The model class
+   * @param data The data
+   * @param query The additional query to validate
+  */</span>
+  <span class="token generic-function"><span class="token function">updateOneWithQuery</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> data<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">,</span> query<span class="token operator">:</span> ModelQuery<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token comment">/**
    * Update/replace all with partial data, by query
    * @param cls The model class
    * @param query The query to search for

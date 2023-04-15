@@ -134,7 +134,7 @@ export class MongoUtil {
   /**
    * Convert `'a.b.c'` to `{ a: { b: { c: ... }}}`
    */
-  static extractSimple<T>(o: T, path: string = ''): Record<string, unknown> {
+  static extractSimple<T>(o: T, path: string = '', recursive: boolean = true): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const sub = o as Record<string, unknown>;
@@ -150,7 +150,11 @@ export class MongoUtil {
         const isPlain = v && ObjectUtil.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';
         if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.Ⲑid) {
-          Object.assign(out, this.extractSimple(v, `${subpath}.`));
+          if (recursive) {
+            Object.assign(out, this.extractSimple(v, `${subpath}.`));
+          } else {
+            out[subpath] = v;
+          }
         } else {
           if (firstKey === '$gt' || firstKey === '$lt' || firstKey === '$gte' || firstKey === '$lte') {
             for (const [sk, sv] of Object.entries(v)) {

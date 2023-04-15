@@ -1,6 +1,6 @@
 import es from '@elastic/elasticsearch';
 import {
-  AggregationsStringTermsAggregate, AggregationsStringTermsBucket, DeleteByQueryRequest, SearchRequest, SearchResponse
+  AggregationsStringTermsAggregate, AggregationsStringTermsBucket, DeleteByQueryRequest, SearchRequest, SearchResponse, UpdateByQueryResponse
 } from '@elastic/elasticsearch/lib/api/types';
 
 import {
@@ -9,7 +9,7 @@ import {
   OptionalId
 } from '@travetto/model';
 import { ShutdownManager, type Class, AppError } from '@travetto/base';
-import { SchemaChange, DeepPartial } from '@travetto/schema';
+import { SchemaChange, DeepPartial, BindUtil } from '@travetto/schema';
 import { Injectable } from '@travetto/di';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport,
@@ -96,7 +96,7 @@ export class ElasticsearchModelService implements
   async postConstruct(this: ElasticsearchModelService): Promise<void> {
     this.client = new es.Client({
       nodes: this.config.hosts,
-      ...(this.config.options || {})
+      ...(this.config.options || {}),
     });
     await this.client.cluster.health({});
     this.manager = new IndexManager(this.config, this.client);
@@ -132,7 +132,7 @@ export class ElasticsearchModelService implements
       const res = await this.client.delete({
         ...this.manager.getIdentity(cls),
         id,
-        refresh: true
+        refresh: true,
       });
       if (res.result === 'not_found') {
         throw new NotFoundError(cls, id);
@@ -421,6 +421,47 @@ export class ElasticsearchModelService implements
   }
 
   // Query Crud
+  async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
+    ModelCrudUtil.ensureNotSubType(cls);
+
+    const item = await ModelCrudUtil.preStore(cls, data, this);
+    const id = item.id;
+
+    query = ModelQueryUtil.getQueryWithId(cls, data, query);
+
+    if (ModelRegistry.get(cls).expiresAt) {
+      await this.get(cls, id);
+    }
+
+    const search = ElasticsearchQueryUtil.getSearchObject(cls, query, this.config.schemaConfig);
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const copy = BindUtil.bindSchemaToObject(cls, {} as T, item);
+
+    try {
+      const res = await this.client.updateByQuery({
+        ...this.manager.getIdentity(cls),
+        refresh: true,
+        query: search.query,
+        max_docs: 1,
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        script: ElasticsearchSchemaUtil.generateReplaceScript(copy as {})
+      });
+
+      if (res.version_conflicts || res.updated === undefined || res.updated === 0) {
+        throw new NotFoundError(cls, id);
+      }
+    } catch (err) {
+      if (err instanceof es.errors.ResponseError && (err.body as UpdateByQueryResponse).version_conflicts) {
+        throw new NotFoundError(cls, id);
+      } else {
+        throw err;
+      }
+    }
+
+    return item;
+  }
+
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T> = {}): Promise<number> {
     const res = await this.client.deleteByQuery({
       ...this.manager.getIdentity(cls),

@@ -78,4 +78,19 @@ export class ModelQueryUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return query as U & { where: WhereClause<T> };
   }
+
+  /**
+   * Get query with an id enforced
+   */
+  static getQueryWithId<T extends ModelType, U extends Query<T> | ModelQuery<T>>(
+    cls: Class<T>,
+    item: T,
+    query: U
+  ): U & { where: WhereClause<T> & { id: string } } {
+    query.where = this.getWhereClause(cls, query.where);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    (query.where as WhereClauseRaw<ModelType>).id = item.id;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return query as U & { where: WhereClause<T> & { id: string } };
+  }
 }

@@ -10,6 +10,13 @@ import { ModelQuery } from '../model/query';
  */
 export interface ModelQueryCrudSupport extends ModelCrudSupport, ModelQuerySupport {
   /**
+   * A standard update operation, but ensures the data matches the query before the update is finalized
+   * @param cls The model class
+   * @param data The data
+   * @param query The additional query to validate
+  */
+  updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T>;
+  /**
    * Update/replace all with partial data, by query
    * @param cls The model class
    * @param query The query to search for

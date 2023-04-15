@@ -6,7 +6,6 @@
   "files.exclude": {
     "**/.trv_compiler/**": true,
     "**/.trv_output/**": true,
-    "**/node_modules/**": true,
     ".git/**": true
   },
   "files.watcherExclude": {

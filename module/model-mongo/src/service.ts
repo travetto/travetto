@@ -234,7 +234,7 @@ export class MongoModelService implements
 
     let final: Record<string, unknown> = item;
 
-    const items = MongoUtil.extractSimple(final);
+    const items = MongoUtil.extractSimple(final, undefined, false);
     final = Object
       .entries(items)
       .reduce<Record<string, unknown>>((acc, [k, v]) => {
@@ -258,7 +258,7 @@ export class MongoModelService implements
     );
 
     if (!res.value) {
-      new NotFoundError(cls, id);
+      throw new NotFoundError(cls, id);
     }
 
     return this.get(cls, id);
@@ -497,6 +497,19 @@ export class MongoModelService implements
   }
 
   // Query Crud
+  async updateOneWithQuery<T extends ModelType>(cls: Class<T>, data: T, query: ModelQuery<T>): Promise<T> {
+    const col = await this.getStore(cls);
+    const item = await ModelCrudUtil.preStore(cls, data, this);
+    query = ModelQueryUtil.getQueryWithId(cls, data, query);
+
+    const { filter } = MongoUtil.prepareQuery(cls, query);
+    const res = await col.replaceOne(filter, item);
+    if (res.matchedCount === 0) {
+      throw new NotFoundError(cls, item.id);
+    }
+    return item;
+  }
+
   async deleteByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>): Promise<number> {
     const col = await this.getStore(cls);
     const { filter } = MongoUtil.prepareQuery(cls, query, false);

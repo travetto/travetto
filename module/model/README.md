@@ -79,7 +79,11 @@ export interface ModelCrudSupport extends ModelBasicSupport {
   upsert<T extends ModelType>(cls: Class<T>, item: OptionalId<T>): Promise<T>;
 
   /**
-   * Update Partial
+   * Update partial, respecting only top level keys.
+   *
+   * When invoking this method, any top level keys that are null/undefined are treated as removals/deletes.  Any properties
+   * that point to sub objects/arrays are treated as wholesale replacements.
+   *
    * @param id The document identifier to update
    * @param item The document to partially update.
    * @param view The schema view to validate against

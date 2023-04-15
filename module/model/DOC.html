@@ -88,7 +88,11 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
   <span class="token generic-function"><span class="token function">upsert</span><span class="token generic class-name"><span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> ModelType<span class="token operator">></span></span></span><span class="token punctuation">(</span>cls<span class="token operator">:</span> Class<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">,</span> item<span class="token operator">:</span> OptionalId<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span><span class="token punctuation">;</span>
 
   <span class="token comment">/**
-   * Update Partial
+   * Update partial, respecting only top level keys.
+   *
+   * When invoking this method, any top level keys that are null/undefined are treated as removals/deletes.  Any properties
+   * that point to sub objects/arrays are treated as wholesale replacements.
+   *
    * @param id The document identifier to update
    * @param item The document to partially update.
    * @param view The schema view to validate against

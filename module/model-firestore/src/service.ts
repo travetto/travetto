@@ -93,7 +93,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
     const cleaned = toSimpleObj(item, FieldValue.delete());
-    await this.#getCollection(cls).doc(id).set(cleaned, { merge: true });
+    await this.#getCollection(cls).doc(id).set(cleaned, { mergeFields: Object.keys(item) });
     return this.get(cls, id);
   }
 

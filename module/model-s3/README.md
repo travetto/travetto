@@ -36,7 +36,7 @@ export class Init {
 }
 ```
 
-where the [S3ModelConfig](https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts#L11) is defined by:
+where the [S3ModelConfig](https://github.com/travetto/travetto/tree/main/module/model-s3/src/config.ts#L12) is defined by:
 
 **Code: Structure of S3ModelConfig**
 ```typescript
@@ -45,6 +45,7 @@ import type s3 from '@aws-sdk/client-s3';
 
 import { Config, EnvVar } from '@travetto/config';
 import { Field, Required } from '@travetto/schema';
+import { GlobalEnv } from '@travetto/base';
 
 /**
  * S3 Support as an Asset Source
@@ -97,6 +98,11 @@ export class S3ModelConfig {
         secretAccessKey: this.secretAccessKey
       }
     };
+
+    // We are in localhost and not in prod, turn on forcePathStyle
+    if (!GlobalEnv.prod && this.endpoint.includes('localhost')) {
+      this.config.forcePathStyle ??= true;
+    }
   }
 }
 ```

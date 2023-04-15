@@ -98,7 +98,7 @@ Available Services
  * mysql@8.0
  * postgresql@14.6
  * redis@7
- * s3@latest
+ * s3@2.0.1
 ```
 
 A sample of all services available to the entire framework:
@@ -109,8 +109,14 @@ $ trv service status
 
 Service          Version    Status
 -------------------------------------------------
-mongodb              6.0    Running 93af422e793a
-s3                latest    Running ed76ee063d13
+dynamodb          1.20.0    Running 93af422e793a
+elasticsearch      8.6.2    Running ed76ee063d13
+firestore         latest    Running feec2e5e95b4
+mongodb              6.0    Running 5513eba6734e
+mysql                8.0    Running 307bc66d442a
+postgresql          14.6    Running e78291e71040
+redis                  7    Running 77ba279b4e30
+s3                 2.0.1    Running fdacfc55b9e3
 ```
 
 ### Defining new Services
