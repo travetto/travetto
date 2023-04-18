@@ -12,7 +12,7 @@
     "@travetto/model-s3": "^3.1.5",
     "@travetto/model-sqlite": "^3.1.4",
     "@travetto/rest-express": "^3.1.3",
-    "@travetto/rest-session": "^3.1.5"
+    "@travetto/rest-session": "^3.1.6"
   },
   "travetto": {},
   "private": true
