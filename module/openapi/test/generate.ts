@@ -3,7 +3,7 @@ import { ParameterObject } from 'openapi3-ts/src/model/OpenApi';
 import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { Controller, Delete, Get, Head, Patch, Put } from '@travetto/rest';
+import { Controller, Delete, Get, Head, Patch, Put, Undocumented } from '@travetto/rest';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { SpecGenerator } from '../src/spec-generate';
@@ -46,6 +46,21 @@ class TestCont {
   @Get('/download')
   async download(size?: number): Promise<Readable> {
     return new Readable({});
+  }
+
+  @Undocumented()
+  @Delete('/random')
+  async ignore(): Promise<void> {
+
+  }
+}
+
+@Undocumented()
+@Controller('/test2')
+class IgnoredCont {
+  @Get('/user')
+  async getUser(name: string) {
+    return new TestUser();
   }
 }
 
@@ -294,5 +309,11 @@ export class GenerateSuite {
     assert(param.in === 'query');
     assert(param.name === 'size');
     assert.deepStrictEqual(param.schema, { type: 'number' });
+  }
+
+  @Test()
+  verifyUndocumented() {
+    const config = new SpecGenerator().generate({});
+    assert(!config.paths['/test/random']);
   }
 }

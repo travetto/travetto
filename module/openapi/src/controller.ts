@@ -1,4 +1,4 @@
-import { Controller, Get, SetHeaders } from '@travetto/rest';
+import { Controller, Get, SetHeaders, Undocumented } from '@travetto/rest';
 import { Inject } from '@travetto/di';
 import { YamlUtil } from '@travetto/yaml';
 
@@ -7,6 +7,7 @@ import { OpenApiService } from './service';
 /**
  * Basic controller for surfacing the api spec
  */
+@Undocumented()
 @Controller('/')
 export class OpenApiController {
 

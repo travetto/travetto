@@ -24,6 +24,11 @@ function register(config: Partial<EndpointConfig | ControllerConfig>): EndpointD
 export function Describe(desc: DescribableConfig): EndpointDecorator { return register(desc); }
 
 /**
+ * Marks a class/endpoint as being undocumented
+ */
+export function Undocumented(): EndpointDecorator { return register({ documented: false }); }
+
+/**
  * Set response headers on success
  * @param headers The response headers to set
  */

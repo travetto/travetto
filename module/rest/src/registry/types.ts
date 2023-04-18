@@ -32,6 +32,10 @@ export interface DescribableConfig {
    * Description
    */
   description?: string;
+  /**
+   * Is the resource documented
+   */
+  documented?: boolean;
 }
 
 /**

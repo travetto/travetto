@@ -168,7 +168,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
   }
 
   /**
-   * Merge descriptions
+   * Merge describable
    * @param src Root describable (controller, endpoint)
    * @param dest Target (controller, endpoint)
    */
@@ -180,6 +180,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     dest.interceptors = [...(dest.interceptors ?? []), ...(src.interceptors ?? [])];
     dest.title = src.title || dest.title;
     dest.description = src.description || dest.description;
+    dest.documented = src.documented ?? dest.documented;
   }
 
   /**

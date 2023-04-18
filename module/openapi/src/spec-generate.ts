@@ -11,7 +11,6 @@ import { SchemaRegistry, FieldConfig } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { ApiSpecConfig } from './config';
-import { OpenApiController } from './controller';
 
 const DEFINITION = '#/components/schemas';
 
@@ -355,28 +354,19 @@ export class SpecGenerator {
   }
 
   /**
-   * Process each controller
-   */
-  processController(cls: Class): void {
-    const ctrl = ControllerRegistry.get(cls);
-
-    this.#tags.push({
-      name: this.#getTypeTag(ctrl.class),
-      description: ctrl.description || ctrl.title
-    });
-
-    for (const ep of ctrl.endpoints) {
-      this.processEndpoint(ctrl, ep);
-    }
-  }
-
-  /**
    * Generate full specification
    */
   generate(config: Partial<ApiSpecConfig> = {}): GeneratedSpec {
 
     for (const cls of ControllerRegistry.getClasses()) {
-      for (const ep of ControllerRegistry.get(cls).endpoints) {
+      const controller = ControllerRegistry.get(cls);
+      if (controller.documented === false) {
+        continue;
+      }
+      for (const ep of controller.endpoints) {
+        if (ep.documented === false) {
+          continue;
+        }
         if (ep.requestType) {
           this.#processSchema(ep.requestType.type);
         }
@@ -391,8 +381,20 @@ export class SpecGenerator {
 
     if (!config.skipRoutes) {
       for (const cls of ControllerRegistry.getClasses()) {
-        if (cls.Ⲑid !== OpenApiController.Ⲑid) {
-          this.processController(cls);
+        const controller = ControllerRegistry.get(cls);
+        if (controller.documented === false) {
+          continue;
+        }
+        this.#tags.push({
+          name: this.#getTypeTag(controller.class),
+          description: controller.description || controller.title
+        });
+
+        for (const ep of controller.endpoints) {
+          if (ep.documented === false) {
+            continue;
+          }
+          this.processEndpoint(controller, ep);
         }
       }
     }
