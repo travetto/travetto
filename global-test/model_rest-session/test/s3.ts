@@ -17,6 +17,7 @@ class Config {
 @Suite()
 @ModelSuite()
 export class S3RestSessionServerSuite extends RestSessionServerSuite {
+  timeScale = 10;
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 }
