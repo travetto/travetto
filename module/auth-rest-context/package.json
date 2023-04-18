@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-rest-context",
-  "version": "3.1.3",
+  "version": "3.1.4",
   "description": "Rest authentication context integration support for the Travetto framework",
   "keywords": [
     "authentication",
@@ -26,10 +26,10 @@
   },
   "dependencies": {
     "@travetto/auth": "^3.1.1",
-    "@travetto/auth-rest": "^3.1.3",
+    "@travetto/auth-rest": "^3.1.4",
     "@travetto/context": "^3.1.1",
     "@travetto/di": "^3.1.1",
-    "@travetto/rest": "^3.1.2"
+    "@travetto/rest": "^3.1.3"
   },
   "travetto": {
     "displayName": "Rest Auth Context"
