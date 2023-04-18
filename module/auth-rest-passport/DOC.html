@@ -31,7 +31,7 @@ Within the node ecosystem, the most prevalent auth framework is <a target="_blan
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">FbUser</span> <span class="token punctuation">{{'{'}}</span>
   username<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  roles<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  permissions<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span>
 
 <span class="token keyword">export</span> <span class="token keyword">const</span> <span class="token constant">FB_AUTH</span> <span class="token operator">=</span> Symbol<span class="token punctuation">.</span><span class="token function">for</span><span class="token punctuation">(</span><span class="token string">'auth_facebook'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -52,7 +52,7 @@ Within the node ecosystem, the most prevalent auth framework is <a target="_blan
       <span class="token punctuation">)</span><span class="token punctuation">,</span>
       <span class="token punctuation">(</span>user<span class="token operator">:</span> FbUser<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
         id<span class="token operator">:</span> user<span class="token punctuation">.</span>username<span class="token punctuation">,</span>
-        permissions<span class="token operator">:</span> user<span class="token punctuation">.</span>roles<span class="token punctuation">,</span>
+        permissions<span class="token operator">:</span> user<span class="token punctuation">.</span>permissions<span class="token punctuation">,</span>
         details<span class="token operator">:</span> user
       <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
     <span class="token punctuation">)</span><span class="token punctuation">;</span>

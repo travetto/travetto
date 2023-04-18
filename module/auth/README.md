@@ -127,11 +127,11 @@ const pbkdf2 = util.promisify(crypto.pbkdf2);
  */
 export class AuthUtil {
   /**
-   * Build matcher for role permissions in allow/deny fashion
+   * Build matcher for permissions in allow/deny fashion
    *
-   * @param roles Roles to build matcher for
+   * @param permissions Permissions to build matcher for
    */
-  static roleMatcher(roles: string[]): (perms: Set<string>) => boolean;
+  static permissionMatcher(permissions: string[]): (perms: Set<string>) => boolean;
   /**
    * Generate a hash for a given value
    *

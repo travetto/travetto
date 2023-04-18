@@ -17,13 +17,13 @@ export function Authenticate(source: symbol, ...sources: symbol[]): EndpointDeco
 
 /**
  * Ensure the controller/route is authenticated, give a set of permissions
- * @param roles Set of required/disallowed permissions
+ * @param permissions Set of required/disallowed permissions
  * @augments `@travetto/auth:Authenticated`
  */
-export function Authenticated(roles: string[] = []): EndpointDecorator {
+export function Authenticated(permissions: string[] = []): EndpointDecorator {
   return ControllerRegistry.createInterceptorConfigDecorator(AuthVerifyInterceptor, {
     state: 'authenticated',
-    roles,
+    permissions,
   });
 }
 

@@ -352,7 +352,7 @@ npx trv run:rest
       RestAsyncContextConfig: {},
       RestAuthConfig: {},
       RestAuthLoginConfig: {},
-      RestAuthVerifyConfig: { roles: {} },
+      RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
       RestConfig: {
         serve: true,

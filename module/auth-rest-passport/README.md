@@ -27,7 +27,7 @@ import { PassportAuthenticator } from '@travetto/auth-rest-passport';
 
 export class FbUser {
   username: string;
-  roles: string[];
+  permissions: string[];
 }
 
 export const FB_AUTH = Symbol.for('auth_facebook');
@@ -48,7 +48,7 @@ export class AppConfig {
       ),
       (user: FbUser) => ({
         id: user.username,
-        permissions: user.roles,
+        permissions: user.permissions,
         details: user
       })
     );

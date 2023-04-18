@@ -145,11 +145,11 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">AuthUtil</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
-   * Build matcher for role permissions in allow/deny fashion
+   * Build matcher for permissions in allow/deny fashion
    *
-   * @param roles Roles to build matcher for
+   * @param permissions Permissions to build matcher for
    */</span>
-  <span class="token keyword">static</span> <span class="token function">roleMatcher</span><span class="token punctuation">(</span>roles<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> Set<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token keyword">static</span> <span class="token function">permissionMatcher</span><span class="token punctuation">(</span>permissions<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token punctuation">(</span>perms<span class="token operator">:</span> Set<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Generate a hash for a given value
    *

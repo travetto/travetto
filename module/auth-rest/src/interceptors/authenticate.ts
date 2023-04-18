@@ -14,9 +14,9 @@ export class RestAuthVerifyConfig extends ManagedInterceptorConfig {
    */
   state?: 'authenticated' | 'unauthenticated';
   /**
-   * What are the roles for verification, allowed or disallowed
+   * What are the permissions for verification, allowed or disallowed
    */
-  roles: string[] = [];
+  permissions: string[] = [];
 
   @Ignore()
   matcher: (key: Set<string>) => boolean;
@@ -43,7 +43,7 @@ export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConf
   }
 
   finalizeConfig(config: RestAuthVerifyConfig): RestAuthVerifyConfig {
-    config.matcher = AuthUtil.roleMatcher(config.roles ?? []);
+    config.matcher = AuthUtil.permissionMatcher(config.permissions ?? []);
     return config;
   }
 

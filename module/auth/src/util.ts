@@ -20,12 +20,12 @@ export class AuthUtil {
   }
 
   /**
-   * Build matcher for role permissions in allow/deny fashion
+   * Build matcher for permissions in allow/deny fashion
    *
-   * @param roles Roles to build matcher for
+   * @param permissions Permissions to build matcher for
    */
-  static roleMatcher(roles: string[]): (perms: Set<string>) => boolean {
-    return Util.allowDenyMatcher<string[], [Set<string>]>(roles,
+  static permissionMatcher(permissions: string[]): (perms: Set<string>) => boolean {
+    return Util.allowDenyMatcher<string[], [Set<string>]>(permissions,
       x => x.split('|'),
       this.#matchPermissionSet.bind(this),
     );
