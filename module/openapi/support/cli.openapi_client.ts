@@ -1,8 +1,7 @@
-import fs from 'fs/promises';
-
 import { path } from '@travetto/manifest';
-import { ExecUtil, ShutdownManager } from '@travetto/base';
+import { ShutdownManager } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
+import { DockerContainer } from '@travetto/command';
 
 import { OpenApiClientHelp } from './bin/help';
 import { OpenApiClientPresets } from './bin/presets';
@@ -25,6 +24,27 @@ export class OpenApiClientCommand implements CliCommandShape {
   @CliFlag({ desc: 'Watch for file changes' })
   watch?: boolean;
 
+  async getPropList(format: string): Promise<string> {
+    let propMap = Object.fromEntries(this.props?.map(p => p.split('=')) ?? []);
+
+    if (format.startsWith('@travetto/')) {
+      const key = format.split('@travetto/')[1];
+      const [, props] = (await OpenApiClientPresets.getPresets())[key];
+      propMap = { ...props, ...propMap };
+    }
+
+    return OpenApiClientPresets.presetMap(propMap);
+  }
+
+  async getResolvedFormat(format: string): Promise<string> {
+    if (format.startsWith('@travetto/')) {
+      const key = format.split('@travetto/')[1];
+      const [fmt] = (await OpenApiClientPresets.getPresets())[key];
+      return fmt;
+    }
+    return format;
+  }
+
   async help(): Promise<string[]> {
     return OpenApiClientHelp.help(this.dockerImage, this.extendedHelp ?? false);
   }
@@ -33,39 +53,30 @@ export class OpenApiClientCommand implements CliCommandShape {
     this.output = path.resolve(this.output);
     this.input = path.resolve(this.input);
 
-    // Ensure its there
-    await fs.mkdir(this.output, { recursive: true });
+    const cmd = new DockerContainer(this.dockerImage)
+      .setUser(process.geteuid?.() ?? 0, process.getgid?.() ?? 0)
+      .addVolume(this.output, '/workspace')
+      .addVolume(path.dirname(this.input), '/input')
+      .setInteractive(true)
+      .setTTY(false)
+      .setDeleteOnFinish(true);
 
-    let propMap = Object.fromEntries(this.props?.map(p => p.split('=')) ?? []);
+    const propList = await this.getPropList(format);
 
-    if (format.startsWith('@travetto/')) {
-      const key = format.split('@travetto/')[1];
-      const [fmt, props] = (await OpenApiClientPresets.getPresets())[key];
-      format = fmt;
-      propMap = { ...props, ...propMap };
-    }
-
-    const propList = OpenApiClientPresets.presetMap(propMap);
-
-    const args = [
-      'run',
-      '--user', `${process.geteuid?.()}:${process.getgid?.()}`,
-      '-v', `${this.output}:/workspace`,
-      '-v', `${path.dirname(this.input)}:/input`,
-      '-it',
-      '--rm',
-      this.dockerImage,
+    const res = cmd.run([
       'generate',
       '--skip-validate-spec',
       '--remove-operation-id-prefix',
-      '-g', format,
+      '-g', await this.getResolvedFormat(format),
       '-o', '/workspace',
       '-i', `/input/${path.basename(this.input)}`,
       ...(this.watch ? ['-w'] : []),
       ...(propList ? ['--additional-properties', propList] : [])
-    ];
+    ]);
 
-    const { result } = ExecUtil.spawn('docker', args, { stdio: [0, 1, 2] });
-    await result.catch(err => ShutdownManager.exit(1));
+    const result = await res;
+    if (!result.valid) {
+      ShutdownManager.exit(1);
+    }
   }
 }

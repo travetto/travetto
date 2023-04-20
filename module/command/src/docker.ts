@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 import cp from 'child_process';
-import { rmSync } from 'fs';
+import { rmSync, mkdirSync } from 'fs';
 
 
 import { path } from '@travetto/manifest';
@@ -40,6 +40,8 @@ export class DockerContainer {
   #runAway: boolean = false;
   /** Labels */
   #labels: string[] = [];
+  /** User to run as */
+  #user: string;
   /**
    * List of volumes to mount
    */
@@ -104,6 +106,11 @@ export class DockerContainer {
   get id(): string {
     const first = this.#pendingExecutions.size > 0 ? this.#pendingExecutions.values().next().value : undefined;
     return first && !first.process.killed ? first.process.pid : -1;
+  }
+
+  setUser(uid: number, gid: number): this {
+    this.#user = `${uid}:${gid}`;
+    return this;
   }
 
   /**
@@ -177,6 +184,7 @@ export class DockerContainer {
    * Add a volume into the container
    */
   addVolume(local: string, container: string): this {
+    mkdirSync(local, { recursive: true });
     this.#volumes.set(local, container);
     return this;
   }
@@ -247,7 +255,11 @@ export class DockerContainer {
       flags.push('-i');
     }
     if (this.#tty) {
-      flags.push('-t');
+      if (!process.stdout.isTTY) {
+        console.error('Cannot start docker in tty mode in a non-TTY environment, ignoring request for tty');
+      } else {
+        flags.push('-t');
+      }
     }
     for (const [k, v] of this.#env.entries()) {
       flags.push('-e', v === '' ? k : `${k}=${v}`);
@@ -261,6 +273,9 @@ export class DockerContainer {
    */
   getLaunchFlags(extra?: string[]): string[] {
     const flags: string[] = [];
+    if (this.#user) {
+      flags.push('--user', this.#user);
+    }
     if (this.#workingDir) {
       flags.push('-w', this.#workingDir);
     }
