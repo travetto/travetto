@@ -3,6 +3,9 @@ import { FilterContext, Request } from '@travetto/rest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { Principal, Authorizer, Authenticator } from '@travetto/auth';
 import { AuthenticatorTarget } from '@travetto/auth/src/internal/types';
+import { AsyncContext } from '@travetto/context';
+
+import { AuthToken, AuthTokenⲐ } from './internal/types';
 
 /**
  * Auth service to allow for rest-based interaction
@@ -13,6 +16,9 @@ export class AuthService {
 
   @Inject()
   authorizer?: Authorizer;
+
+  @Inject()
+  context: AsyncContext;
 
   async postConstruct(): Promise<void> {
     // Find all identity sources
@@ -70,4 +76,19 @@ export class AuthService {
   async logout(req: Request): Promise<void> {
     req.auth = undefined;
   }
+
+  /**
+   * Get the authentication token, if it exists
+   */
+  getAuthenticationToken(): AuthToken | undefined {
+    return this.context.get<AuthToken>(AuthTokenⲐ);
+  }
+
+  /**
+   * Set/overwrite the user's authentication token
+   */
+  setAuthenticationToken(token: AuthToken): void {
+    this.context.set(AuthTokenⲐ, token);
+  }
 }
+

@@ -4,11 +4,13 @@ import timers from 'timers/promises';
 import { Controller, Get, Post, Redirect, Request } from '@travetto/rest';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { Suite, Test } from '@travetto/test';
-import { Inject, InjectableFactory } from '@travetto/di';
+import { DependencyRegistry, Inject, InjectableFactory } from '@travetto/di';
 import { AppError } from '@travetto/base';
 import { Authenticator } from '@travetto/auth';
 
 import { AuthService, Authenticate, Authenticated } from '@travetto/auth-rest';
+import { JWTUtil } from '@travetto/jwt';
+import { RestJWTConfig } from '../../src/principal-encoder';
 
 const TestAuthⲐ = Symbol.for('TEST_AUTH');
 
@@ -46,6 +48,12 @@ class TestAuthController {
   @Authenticated()
   async getSelf(req: Request) {
     return req.auth;
+  }
+
+  @Get('/token')
+  @Authenticated()
+  async getToken() {
+    return this.svc.getAuthenticationToken()?.token;
   }
 
   @Get('/logout')
@@ -141,6 +149,31 @@ export abstract class AuthRestJWTServerSuite extends BaseRestSuite {
     });
     assert(lastStatus === 200);
   }
+
+  @Test()
+  async testTokenRetrieval() {
+    const config = await DependencyRegistry.getInstance(RestJWTConfig);
+
+    const { headers, status } = await this.request('post', '/test/auth/login', {
+      throwOnError: false,
+      body: {
+        username: 'super-user',
+        password: 'password'
+      }
+    });
+    assert(status === 201);
+    const cookie = this.getCookieValue(headers);
+    assert(cookie);
+
+    const { body, status: lastStatus } = await this.request('get', '/test/auth/token', {
+      throwOnError: false,
+      headers: { cookie }
+    });
+    assert(lastStatus === 200);
+    assert(typeof body === 'string');
+    assert(JWTUtil.verify(body, { key: config.signingKey }));
+  }
+
 
   @Test()
   async testCookieRollingRenewAuthenticated() {
