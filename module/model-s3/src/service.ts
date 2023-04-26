@@ -93,6 +93,10 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
     const { UploadId } = await this.client.createMultipartUpload(this.#q(STREAM_SPACE, id, {
       ContentType: meta.contentType,
       ContentLength: meta.size,
+      Metadata: {
+        ...meta,
+        size: `${meta.size}`
+      }
     }));
 
     const parts: s3.CompletedPart[] = [];
