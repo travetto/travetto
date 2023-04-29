@@ -3,6 +3,7 @@ import { ShutdownManager, Class, TimeSpan, TimeUtil } from '@travetto/base';
 import { ModelRegistry } from '../../registry/model';
 import { ModelExpirySupport } from '../../service/expiry';
 import { ModelType } from '../../types/model';
+import { NotFoundError } from '../../error/not-found';
 
 /**
  * Utils for model expiry
@@ -49,5 +50,23 @@ export class ModelExpiryUtil {
         }
       })();
     }
+  }
+
+  /**
+   * Simple cull operation for a given model type
+   * @param svc
+   */
+  static async naiveDeleteExpired<T extends ModelType>(svc: ModelExpirySupport, cls: Class<T>, suppressErrors = false): Promise<number> {
+    const deleting = [];
+    for await (const el of svc.list(cls)) {
+      if (this.getExpiryState(cls, el).expired) {
+        deleting.push(svc.delete(cls, el.id).catch(err => {
+          if (!suppressErrors && !(err instanceof NotFoundError)) {
+            throw err;
+          }
+        }));
+      }
+    }
+    return (await Promise.all(deleting)).length;
   }
 }

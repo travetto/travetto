@@ -222,17 +222,7 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
 
   // Expiry
   async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number> {
-    const deleting = [];
-    for await (const el of this.list(cls)) {
-      if (ModelExpiryUtil.getExpiryState(cls, el).expired) {
-        deleting.push(this.delete(cls, el.id).catch(err => {
-          if (!(err instanceof NotFoundError)) {
-            throw err;
-          }
-        }));
-      }
-    }
-    return (await Promise.all(deleting)).length;
+    return ModelExpiryUtil.naiveDeleteExpired(this, cls);
   }
 
   // Storage management
