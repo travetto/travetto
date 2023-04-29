@@ -1,6 +1,6 @@
 {
   "name": "@travetto/asset-rest",
-  "version": "3.1.6",
+  "version": "3.1.7",
   "description": "Provides integration between the travetto asset and rest module.",
   "keywords": [
     "rest",
