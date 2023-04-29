@@ -52,7 +52,7 @@ class FullConfiguration {
 }
 ```
 
-Reading of and writing assets uses the [AssetService](https://github.com/travetto/travetto/tree/main/module/asset/src/service.ts#L15).  Below you can see an example dealing with a user's profile image.
+Reading of and writing assets uses the [AssetService](https://github.com/travetto/travetto/tree/main/module/asset/src/service.ts#L18).  Below you can see an example dealing with a user's profile image.
 
 **Code: User Profile Images**
 ```typescript
@@ -112,12 +112,24 @@ import { Readable } from 'stream';
 import { StreamMeta } from '@travetto/model';
 
 /**
- * A retrieval/storable asset
+ * An asset, for storage
  *
  * @concrete ./internal/types:AssetImpl
  */
 export interface Asset extends StreamMeta {
+  source: Readable | string | Buffer;
+  localFile?: string;
+}
+
+/**
+ * An asset response
+ */
+export interface AssetResponse extends StreamMeta {
   stream(): Readable;
+  /**
+   * Response byte range, inclusive
+   */
+  range?: [start: number, end: number];
 }
 ```
 

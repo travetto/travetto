@@ -85,7 +85,7 @@ export class AssetRestUtil {
     } else {
       const contentType = req.getContentType();
       if (contentType) {
-        return `file-upload.${mime.getExtension(contentType.type)}`;
+        return `file-upload.${mime.getExtension(contentType.full)}`;
       } else {
         return 'file-upload.unknown';
       }

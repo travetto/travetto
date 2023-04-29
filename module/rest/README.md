@@ -127,7 +127,7 @@ export class Simple {
     return { success: true };
   }
 
-  @Get(/\/img(.*)[.](jpg|png|gif)/)
+  @Get('img/*')
   async getImage(
     req: Request,
     @Query('w') @Integer().Param @Min(100).Param width?: number,

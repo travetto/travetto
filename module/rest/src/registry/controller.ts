@@ -198,11 +198,8 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     srcConf.params = (config.params ?? srcConf.params).map(x => ({ ...x }));
 
     // Ensure path starts with '/'
-    const p = srcConf.path;
-    if (typeof p === 'string' && !p.startsWith('/')) {
-      srcConf.path = `/${p}`;
-    } else if (p instanceof RegExp && !p.source.startsWith('\\/') && !p.source.startsWith('^') && !p.source.endsWith('$')) {
-      srcConf.path = new RegExp(`/${p.source}`, p.flags);
+    if (!srcConf.path.startsWith('/')) {
+      srcConf.path = `/${srcConf.path}`;
     }
 
     this.mergeDescribable(config, srcConf);
@@ -239,7 +236,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     final.endpoints = final.endpoints
       .sort((a, b) => a.priority - b.priority)
       .map(ep => {
-        ep.id = `${ep.method}#${final.basePath}${typeof ep.path === 'string' ? ep.path : ep.path.source}`;
+        ep.id = `${ep.method}#${final.basePath}${ep.path}`;
         return ep;
       })
       .filter(ep => !foundRoutes.has(ep.id) && !!(foundRoutes.add(ep.id)));

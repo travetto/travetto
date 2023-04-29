@@ -14,13 +14,13 @@ export class UIController {
     return this.resources.readStream('/ui/index.html');
   }
 
-  @Get(/[.]js$/)
+  @Get('js/*')
   @Produces('application/javascript')
   getJs(req: Request): Promise<Readable> {
     return this.resources.readStream(req.url);
   }
 
-  @Get(/[.]css$/)
+  @Get('css/*')
   @Produces('text/css')
   getCss(req: Request): Promise<Readable> {
     return this.resources.readStream(req.url);

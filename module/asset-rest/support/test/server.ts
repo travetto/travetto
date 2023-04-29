@@ -58,7 +58,7 @@ class TestUploadController {
     return { hash1: file1.hash, hash2: file2.hash };
   }
 
-  @Get(/.*/)
+  @Get('*')
   async get(req: Request, res: Response) {
     let start: number | undefined = undefined;
     let end: number | undefined = undefined;

@@ -4,8 +4,6 @@ import type { RestInterceptor } from './interceptor/types';
 
 export type HeaderMap = Record<string, (string | (() => string))>;
 
-export type PathType = string | RegExp;
-
 export type Request = TravettoRequest;
 export type Response = TravettoResponse;
 
@@ -68,7 +66,7 @@ export interface RouteConfig {
   /**
    * The path of the route
    */
-  path: PathType;
+  path: string;
   /**
    * The function the route will call
    */

@@ -86,4 +86,11 @@ export class TestController {
       size: req.raw?.length
     };
   }
+
+  @Get('/fun/*')
+  getFun(req: Request) {
+    return {
+      path: req.url.split('fun/')[1]
+    };
+  }
 }

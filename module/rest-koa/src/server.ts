@@ -69,11 +69,9 @@ export class KoaRestServer implements RestServer<koa> {
 
     // Register all routes to extract the proper request/response for the framework
     for (const route of routes) {
-      if (route.path === '*') { // Wildcard is no longer supported directly
-        route.path = /.*/;
-      }
+      const routePath = route.path.replaceAll('*', '(.*)');
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      router[route.method as 'get'](route.path!, async (ctx) => {
+      router[route.method as 'get'](routePath, async (ctx) => {
         const [req, res] = ctx[TravettoEntityⲐ] ??= [
           KoaServerUtil.getRequest(ctx),
           KoaServerUtil.getResponse(ctx)
