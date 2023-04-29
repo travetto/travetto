@@ -60,15 +60,10 @@ class TestUploadController {
 
   @Get('*')
   async get(req: Request, res: Response) {
-    let start: number | undefined = undefined;
-    let end: number | undefined = undefined;
+    const [start, end] = AssetRestUtil.getRequestedRange(req) ?? [];
     if (req.headers.range) {
       res.setHeader('Accept-Ranges', 'bytes');
-      const range = req.headers.range;
-      [start, end] = range.replace(/bytes=/, '').split('-')
-        .map(x => x ? parseInt(x, 10) : undefined);
     }
-
     const response = await this.service.get(req.url.replace(/^\/test\/upload\//, ''), start, end);
     return AssetRestUtil.downloadable(response);
   }

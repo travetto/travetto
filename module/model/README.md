@@ -317,7 +317,7 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream>;
   async describeStream(location: string): Promise<StreamMeta>;
   async deleteStream(location: string): Promise<void>;
-  // Expiry Support
+  // Expiry
   async deleteExpired<T extends ModelType>(cls: Class<T>): Promise<number>;
   // Storage Support
   async createStorage(): Promise<void>;
