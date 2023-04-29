@@ -4,6 +4,7 @@ import assert from 'assert';
 import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { AssetUtil } from '../src/util';
+import { path } from '@travetto/manifest';
 
 @Suite()
 export class UtilTest {
@@ -45,8 +46,9 @@ export class UtilTest {
 
     const { path: png } = await this.fixture.describe('/logo');
     const asset = await AssetUtil.fileToAsset(png);
+    assert(path.basename(file) === 'logo.png');
     assert(asset.contentType === 'image/png');
-    assert(asset.filename === png);
+    assert(asset.filename === 'logo.png');
     assert(asset.size === (await fs.stat(png)).size);
   }
 }

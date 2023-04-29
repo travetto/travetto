@@ -49,9 +49,9 @@ export abstract class AssetServiceSuite {
     const service = this.assetService;
     const { path: pth } = await this.fixture.describe('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
-    await service.upsert(file);
+    const loc = await service.upsert(file);
 
-    const saved = await service.get(pth);
+    const saved = await service.get(loc);
 
     assert(file.contentType === saved.contentType);
     assert(file.size === saved.size);
@@ -64,6 +64,7 @@ export abstract class AssetServiceSuite {
     const service = this.assetService;
     const { path: pth } = await this.fixture.describe('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
+    assert(file.filename === 'asset.yml');
     const loc = await service.upsert(file);
 
     const out = await service.describe(loc);

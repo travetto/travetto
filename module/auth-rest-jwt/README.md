@@ -22,7 +22,7 @@ The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/
 **Code: JWTPrincipalEncoder**
 ```typescript
 import { Principal } from '@travetto/auth';
-import { PrincipalEncoder } from '@travetto/auth-rest';
+import { AuthService, PrincipalEncoder } from '@travetto/auth-rest';
 import { AppError, GlobalEnv, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
@@ -65,11 +65,16 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   @Inject()
   config: RestJWTConfig;
 
+  @Inject()
+  auth: AuthService;
+
   toJwtPayload(p: Principal): Payload {
     const exp = Math.trunc(p.expiresAt!.getTime() / 1000);
     const iat = Math.trunc(p.issuedAt!.getTime() / 1000);
     return {
-      auth: p,
+      auth: {
+        ...p,
+      },
       exp,
       iat,
       iss: p.issuer,
@@ -88,8 +93,11 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
    * Verify token to principal
    * @param token
    */
-  async verifyToken(token: string): Promise<Principal> {
+  async verifyToken(token: string, setActive = false): Promise<Principal> {
     const res = (await JWTUtil.verify<{ auth: Principal }>(token, { key: this.config.signingKey })).auth;
+    if (setActive) {
+      this.auth.setAuthenticationToken({ token, type: 'jwt' });
+    }
     return {
       ...res,
       expiresAt: new Date(res.expiresAt!),
@@ -139,7 +147,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
       (req.headerFirst(this.config.header))?.replace(this.config.headerPrefix, '');
 
     if (token) {
-      return this.verifyToken(token);
+      return this.verifyToken(token, true);
     }
   }
 }

@@ -6,7 +6,7 @@ import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, StreamMeta } from '../service/stream';
+import { ModelStreamSupport, PartialStream, StreamMeta } from '../service/stream';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -18,7 +18,7 @@ import { ExistsError } from '../error/exists';
 import { ModelIndexedSupport } from '../service/indexed';
 import { ModelIndexedUtil } from '../internal/service/indexed';
 import { ModelStorageUtil } from '../internal/service/storage';
-import { StreamModel, STREAMS } from '../internal/service/stream';
+import { ModelStreamUtil, StreamModel, STREAMS } from '../internal/service/stream';
 import { IndexConfig } from '../registry/types';
 
 const STREAM_META = `${STREAMS}_meta`;
@@ -247,6 +247,15 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async getStream(location: string): Promise<Readable> {
     const streams = this.#find(STREAMS, location, 'notfound');
     return StreamUtil.bufferToStream(streams.get(location)!);
+  }
+
+  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
+    const streams = this.#find(STREAMS, location, 'notfound');
+    const buffer = streams.get(location)!;
+    end ??= (buffer.length - 1);
+    ModelStreamUtil.checkRange(start, end, buffer.length);
+    const stream = await StreamUtil.bufferToStream(buffer.subarray(start, end + 1));
+    return { stream, range: [start, end] };
   }
 
   async describeStream(location: string): Promise<StreamMeta> {

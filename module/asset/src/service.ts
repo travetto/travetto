@@ -1,7 +1,10 @@
+import { Readable } from 'stream';
+
 import { Inject, Injectable } from '@travetto/di';
 import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta } from '@travetto/model';
+import { StreamUtil } from '@travetto/base';
 
-import { Asset } from './types';
+import { Asset, AssetResponse } from './types';
 import { AssetNamingStrategy, SimpleNamingStrategy } from './naming';
 
 export const AssetModelⲐ = Symbol.for('@travetto/asset:model');
@@ -48,7 +51,7 @@ export class AssetService {
    * @param overwriteIfFound Overwrite the asset if found
    * @param strategy The naming strategy to use, defaults to the service's strategy if not provided
    */
-  async upsert({ stream, ...asset }: Asset, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
+  async upsert({ source, ...asset }: Asset, overwriteIfFound = true, strategy?: AssetNamingStrategy): Promise<string> {
     // Apply strategy on save
     const location = (strategy ?? this.#namingStrategy!).resolve(asset);
 
@@ -68,7 +71,8 @@ export class AssetService {
       }
     }
 
-    await this.#store.upsertStream(location, stream(), asset);
+    const stream = await StreamUtil.toStream(source);
+    await this.#store.upsertStream(location, stream, asset);
     return location;
   }
 
@@ -79,9 +83,17 @@ export class AssetService {
    *
    * @param location The location to find.
    */
-  async get(location: string): Promise<Asset> {
-    const stream = await this.#store.getStream(location);
+  async get(location: string, start?: number, end?: number): Promise<AssetResponse> {
     const info = await this.describe(location);
-    return { stream: () => stream, ...info };
+    let stream: Readable;
+    let extra: Partial<AssetResponse> | undefined;
+    if (start === undefined) {
+      stream = await this.#store.getStream(location);
+    } else {
+      const res = await this.#store.getStreamPartial(location, start, end);
+      stream = res.stream;
+      extra = { range: res.range };
+    }
+    return { stream: () => stream, ...info, ...extra };
   }
 }

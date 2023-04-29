@@ -7,7 +7,7 @@ import {
   ModelCrudSupport, ModelStorageSupport, ModelStreamSupport,
   ModelExpirySupport, ModelBulkSupport, ModelIndexedSupport,
   StreamMeta, BulkOp, BulkResponse,
-  NotFoundError, ExistsError, IndexConfig
+  NotFoundError, ExistsError, IndexConfig, PartialStream
 } from '@travetto/model';
 import {
   ModelQuery, ModelQueryCrudSupport, ModelQueryFacetSupport, ModelQuerySupport,
@@ -26,7 +26,7 @@ import { ModelQuerySuggestUtil } from '@travetto/model-query/src/internal/servic
 import { PointImpl } from '@travetto/model-query/src/internal/model/point';
 import { ModelQueryExpiryUtil } from '@travetto/model-query/src/internal/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
-import { StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
+import { ModelStreamUtil, StreamModel, STREAMS } from '@travetto/model/src/internal/service/stream';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 import { ModelBulkUtil } from '@travetto/model/src/internal/service/bulk';
 
@@ -306,6 +306,20 @@ export class MongoModelService implements
       throw new NotFoundError(STREAMS, location);
     }
     return res;
+  }
+
+  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
+    const meta = await this.describeStream(location);
+
+    end ??= meta.size - 1;
+
+    ModelStreamUtil.checkRange(start, end, meta.size);
+
+    const res = await this.#bucket.openDownloadStreamByName(location, { start, end: end + 1 });
+    if (!res) {
+      throw new NotFoundError(STREAMS, location);
+    }
+    return { stream: res, range: [start, end] };
   }
 
   async describeStream(location: string): Promise<StreamMeta> {

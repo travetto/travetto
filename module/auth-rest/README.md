@@ -123,7 +123,7 @@ export class AppConfig {
 The symbol `FB_AUTH` is what will be used to reference providers at runtime.  This was chosen, over `class` references due to the fact that most providers will not be defined via a new class, but via an [@InjectableFactory](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L74) method.
 
 ## Route Declaration
-Like the [AuthService](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/service.ts#L11), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use. 
+Like the [AuthService](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/service.ts#L14), there are common auth patterns that most users will implement. The framework has codified these into decorators that a developer can pick up and use. 
 
 [@Authenticate](https://github.com/travetto/travetto/tree/main/module/auth-rest/src/decorator.ts#L12) integrates with middleware that will authenticate the user as defined by the specified providers, or throw an error if authentication is unsuccessful.
 

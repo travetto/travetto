@@ -6,6 +6,7 @@ import { Suite, Test, TestFixtures } from '@travetto/test';
 
 import { BaseModelSuite } from './base';
 import { ModelStreamSupport } from '../../src/service/stream';
+import { StreamUtil } from '@travetto/base';
 
 @Suite()
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
@@ -67,5 +68,37 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
     await assert.rejects(async () => {
       await service.getStream(meta.hash);
     });
+  }
+
+  @Test()
+  async partialStream(): Promise<void> {
+    const service = await this.service;
+    const [meta, stream] = await this.getStream('/text.txt');
+
+    await service.upsertStream(meta.hash, stream, meta);
+
+    const retrieved = await service.getStream(meta.hash);
+    const content = (await StreamUtil.toBuffer(retrieved)).toString('utf8');
+    assert(content.startsWith('abc'));
+    assert(content.endsWith('xyz'));
+
+    const partial = await service.getStreamPartial(meta.hash, 10, 20);
+    const subContent = (await StreamUtil.toBuffer(partial.stream)).toString('utf8');
+    assert(subContent.length === (partial.range[1] - partial.range[0]) + 1);
+    assert(subContent === 'klmnopqrstu');
+
+    const partialUnbounded = await service.getStreamPartial(meta.hash, 10);
+    const subContent2 = (await StreamUtil.toBuffer(partialUnbounded.stream)).toString('utf8');
+    assert(subContent2.length === (partialUnbounded.range[1] - partialUnbounded.range[0]) + 1);
+    assert(subContent2.startsWith('klm'));
+    assert(subContent2.endsWith('xyz'));
+
+    const partialSingle = await service.getStreamPartial(meta.hash, 10, 10);
+    const subContent3 = (await StreamUtil.toBuffer(partialSingle.stream)).toString('utf8');
+    assert(subContent3.length === 1);
+    assert(subContent3 === 'k');
+
+    await assert.rejects(() => service.getStreamPartial(meta.hash, -10, 10));
+    await assert.rejects(() => service.getStreamPartial(meta.hash, 0, 27));
   }
 }

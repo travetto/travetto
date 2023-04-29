@@ -14,9 +14,18 @@ export interface StreamMeta {
    */
   hash: string;
   /**
-   * The original filename of the file
+   * The original base filename of the file
    */
   filename: string;
+  /**
+   * Filenames title, optional for elements like images, audio, videos
+   */
+  title?: string;
+}
+
+export interface PartialStream {
+  stream: Readable;
+  range: [number, number];
 }
 
 /**
@@ -39,6 +48,12 @@ export interface ModelStreamSupport {
    * @param location The location of the stream
    */
   getStream(location: string): Promise<Readable>;
+
+  /**
+   * Get partial stream from asset store given a starting byte and an optional ending byte
+   * @param location The location of the stream
+   */
+  getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream>;
 
   /**
    * Get metadata for stream

@@ -88,16 +88,29 @@ export class AssetUtil {
   /**
    * Convert local file to asset structure
    */
-  static async fileToAsset(file: string, remote: string = file, metadata: Partial<StreamMeta> = {}): Promise<Asset> {
+  static async fileToAsset(file: string, metadata: Partial<StreamMeta> = {}): Promise<Asset> {
+
     const hash = metadata.hash ?? await this.hashFile(file);
     const size = metadata.size ?? (await fs.stat(file)).size;
     const contentType = metadata.contentType ?? await this.resolveFileType(file);
+    let filename = metadata.filename;
+
+    if (!filename) {
+      filename = path.basename(file);
+      if (!filename.includes('.')) {
+        const ext = mime.getExtension(contentType);
+        if (ext) {
+          filename = `${filename}.${ext}`;
+        }
+      }
+    }
 
     return {
       size,
-      filename: remote,
+      filename,
       contentType,
-      stream: () => createReadStream(file),
+      localFile: file,
+      source: createReadStream(file),
       hash
     };
   }

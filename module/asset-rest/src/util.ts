@@ -2,9 +2,10 @@ import { createWriteStream } from 'fs';
 import fs from 'fs/promises';
 import os from 'os';
 import stream from 'stream';
+import mime from 'mime';
 
 import { Renderable, Request, Response } from '@travetto/rest';
-import { Asset, AssetUtil } from '@travetto/asset';
+import { Asset, AssetResponse, AssetUtil } from '@travetto/asset';
 import { path } from '@travetto/manifest';
 import { StreamUtil, AppError } from '@travetto/base';
 
@@ -79,18 +80,34 @@ export class AssetRestUtil {
    */
   static getFileName(req: Request): string {
     const [, match] = (req.header('content-disposition') ?? '').match(FILENAME_EXTRACT) ?? [];
-    return match ?? `file-upload.${req.getContentType()?.subtype ?? 'unknown'}`;
+    if (match) {
+      return match;
+    } else {
+      const contentType = req.getContentType();
+      if (contentType) {
+        return `file-upload.${mime.getExtension(contentType.type)}`;
+      } else {
+        return 'file-upload.unknown';
+      }
+    }
   }
 
   /**
    * Make any asset downloadable
    */
-  static downloadable(asset: Asset): Renderable {
+  static downloadable(asset: AssetResponse): Renderable {
     return {
       render(res: Response): stream.Readable {
-        res.status(200);
         res.setHeader('Content-Type', asset.contentType);
         res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
+        if (!asset.range) {
+          res.status(200);
+        } else {
+          const [start, end] = asset.range;
+          res.status(206);
+          res.setHeader('Content-Range', `bytes ${start}-${end}/${asset.size}`);
+          res.setHeader('Content-Length', `${end - start + 1}`);
+        }
         return asset.stream!();
       }
     };

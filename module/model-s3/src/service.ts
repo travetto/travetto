@@ -5,7 +5,7 @@ import type { MetadataBearer } from '@aws-sdk/types';
 
 import {
   ModelCrudSupport, ModelStreamSupport, ModelStorageSupport, StreamMeta,
-  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId
+  ModelType, ModelRegistry, ExistsError, NotFoundError, OptionalId, PartialStream
 } from '@travetto/model';
 import { Injectable } from '@travetto/di';
 import { StreamUtil, Class, AppError } from '@travetto/base';
@@ -16,6 +16,7 @@ import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
 
 import { S3ModelConfig } from './config';
+import { ModelStreamUtil } from '@travetto/model/src/internal/service/stream';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;
@@ -299,6 +300,25 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
       res.Body && ('pipe' in res.Body) // Stream
     ) {
       return StreamUtil.toStream(res.Body);
+    }
+    throw new AppError(`Unable to read type: ${typeof res.Body}`);
+  }
+
+  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
+    const meta = await this.describeStream(location);
+    end ??= meta.size - 1;
+
+    ModelStreamUtil.checkRange(start, end, meta.size);
+
+    // Read from s3
+    const res = await this.client.getObject(this.#q(STREAM_SPACE, location, {
+      Range: `bytes=${start}-${end}`
+    }));
+    if (res.Body instanceof Buffer || // Buffer
+      typeof res.Body === 'string' || // string
+      res.Body && ('pipe' in res.Body) // Stream
+    ) {
+      return { stream: await StreamUtil.toStream(res.Body), range: [start, end] };
     }
     throw new AppError(`Unable to read type: ${typeof res.Body}`);
   }

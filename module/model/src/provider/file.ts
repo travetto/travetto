@@ -12,7 +12,7 @@ import { Config } from '@travetto/config';
 import { Required } from '@travetto/schema';
 
 import { ModelCrudSupport } from '../service/crud';
-import { ModelStreamSupport, StreamMeta } from '../service/stream';
+import { ModelStreamSupport, PartialStream, StreamMeta } from '../service/stream';
 import { ModelType, OptionalId } from '../types/model';
 import { ModelExpirySupport } from '../service/expiry';
 import { ModelRegistry } from '../registry/model';
@@ -21,7 +21,7 @@ import { ModelCrudUtil } from '../internal/service/crud';
 import { ModelExpiryUtil } from '../internal/service/expiry';
 import { NotFoundError } from '../error/not-found';
 import { ExistsError } from '../error/exists';
-import { StreamModel, STREAMS } from '../internal/service/stream';
+import { ModelStreamUtil, StreamModel, STREAMS } from '../internal/service/stream';
 
 type Suffix = '.bin' | '.meta' | '.json' | '.expires';
 
@@ -188,6 +188,17 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   async getStream(location: string): Promise<Readable> {
     const file = await this.#find(STREAMS, BIN, location);
     return createReadStream(file);
+  }
+
+  async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
+    const file = await this.#find(STREAMS, BIN, location);
+    const meta = await this.describeStream(location);
+    end ??= meta.size - 1;
+
+    ModelStreamUtil.checkRange(start, end, meta.size);
+
+    const stream = createReadStream(file, { start, end });
+    return { stream, range: [start, end] };
   }
 
   async describeStream(location: string): Promise<StreamMeta> {
