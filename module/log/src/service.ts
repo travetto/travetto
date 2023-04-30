@@ -20,17 +20,17 @@ export class LogService implements ConsoleListener, AutoCreate {
   async postConstruct(): Promise<void> {
     await GlobalTerminal.init();
 
-    const def = await DependencyRegistry.getInstance(CommonLogger);
-    if (def.active) {
-      this.#listeners.push(def);
-    }
+    const loggers = DependencyRegistry.getCandidateTypes(LoggerTarget).filter(c => c.class !== CommonLogger);
 
-    const loggers = DependencyRegistry.getCandidateTypes(LoggerTarget);
-    const instances = await Promise.all(loggers.map(l => DependencyRegistry.getInstance<Logger>(l.class, l.qualifier)));
-    for (const inst of instances) {
-      this.#listeners.push(inst);
+    // If the user specified logger(s) directly, load them all
+    if (loggers.length) {
+      const instances = await Promise.all(loggers.map(l => DependencyRegistry.getInstance<Logger>(l.class, l.qualifier)));
+      for (const inst of instances) {
+        this.#listeners.push(inst);
+      }
+    } else { // Otherwise fall back to the common logger
+      this.#listeners.push(await DependencyRegistry.getInstance(CommonLogger));
     }
-
     // Take over
     ConsoleManager.set(this, true);
   }

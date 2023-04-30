@@ -1,69 +1,39 @@
-import { GlobalEnv } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
-import { Inject, Injectable } from '@travetto/di';
-import { Ignore } from '@travetto/schema';
-import { GlobalTerminal } from '@travetto/terminal';
+import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 
-import { ConsoleAppender } from './appender/console';
-import { FileAppender } from './appender/file';
-import { JsonFormatter } from './formatter/json';
-import { LineFormatter } from './formatter/line';
-import { Appender, Formatter, LogEvent } from './types';
+import { ConsoleLogAppender } from './appender/console';
+import { FileLogAppender } from './appender/file';
+import { JsonLogFormatter } from './formatter/json';
+import { LineLogFormatter } from './formatter/line';
+import { LogAppender, LogFormatter, LogEvent, LogCommonⲐ, Logger } from './types';
 
 @Config('log')
 export class CommonLoggerConfig {
-  @EnvVar('TRV_LOG_COMMON')
-  commonActive?: boolean;
-
-  /** Should we enrich the console by default */
   @EnvVar('TRV_LOG_FORMAT')
   format: 'line' | 'json' = 'line';
 
-  /** Log file, if needed */
-  @EnvVar('TRV_LOG_FILE')
-  file?: string;
-
-  @EnvVar('TRV_LOG_PLAIN')
-  plain?: boolean;
-
-  @EnvVar('TRV_LOG_TIME')
-  time: 's' | 'ms' | string = 'ms';
-
-  @Ignore()
-  get timestamp(): 's' | 'ms' | false {
-    return (this.time ?? 'ms') === 'ms' ? 'ms' : (this.time === 's' ? 's' : false);
-  }
-
-  postConstruct(): void {
-    if (GlobalEnv.test) {
-      this.time = '';
-    }
-    this.plain ??= GlobalTerminal.colorLevel === 0;
-  }
+  @EnvVar('TRV_LOG_OUTPUT')
+  output: 'console' | 'file' | string = 'console';
 }
 
 @Injectable()
-export class CommonLogger {
-  #appender: Appender;
-  #formatter: Formatter;
+export class CommonLogger implements Logger {
 
   @Inject()
   config: CommonLoggerConfig;
 
-  get active(): boolean {
-    return this.config.commonActive !== false;
-  }
+  @Inject(LogCommonⲐ, { optional: true })
+  formatter: LogFormatter;
 
-  postConstruct(): void {
-    this.#formatter = this.config.format === 'line' ?
-      new LineFormatter(this.config) :
-      new JsonFormatter();
-    this.#appender = this.config.file ?
-      new FileAppender({ file: this.config.file }) :
-      new ConsoleAppender();
+  @Inject(LogCommonⲐ, { optional: true })
+  appender: LogAppender;
+
+  async postConstruct(): Promise<void> {
+    this.formatter ??= await DependencyRegistry.getInstance(this.config.format === 'line' ? LineLogFormatter : JsonLogFormatter);
+    this.appender ??= await DependencyRegistry.getInstance(this.config.output !== 'console' ? FileLogAppender : ConsoleLogAppender);
   }
 
   onLog(ev: LogEvent): void {
-    this.#appender.append(ev, this.#formatter.format(ev));
+    this.appender.append(ev, this.formatter.format(ev));
   }
 }

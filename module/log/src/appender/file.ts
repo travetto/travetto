@@ -1,24 +1,33 @@
-import { createWriteStream, WriteStream } from 'fs';
-import { Appender, LogEvent } from '../types';
+import { createWriteStream, WriteStream, mkdirSync } from 'fs';
 
-/**
- * File appender options
- */
-export interface FileAppenderOpts {
-  file: string;
+import { Injectable } from '@travetto/di';
+import { Config, EnvVar } from '@travetto/config';
+import { path, RootIndex } from '@travetto/manifest';
+
+import { LogAppender, LogEvent } from '../types';
+
+@Config('log')
+export class FileLogAppenderConfig {
+  @EnvVar('TRV_LOG_OUTPUT')
+  output?: 'file' | string;
+
+  postConstruct(): void {
+    if (!this.output || this.output === 'file' || this.output === 'console') {
+      this.output = path.resolve(RootIndex.manifest.toolFolder, 'logs', `${RootIndex.manifest.mainModule}.log`);
+    }
+  }
 }
 
 /**
- * File appender logger
+ * File Logging Appender
  */
-export class FileAppender implements Appender {
+@Injectable()
+export class FileLogAppender implements LogAppender {
   stream: WriteStream;
 
-  constructor(opts: FileAppenderOpts) {
-    this.stream = createWriteStream(opts.file, {
-      autoClose: true,
-      flags: 'a'
-    });
+  constructor(opts: FileLogAppenderConfig) {
+    mkdirSync(path.dirname(opts.output!), { recursive: true });
+    this.stream = createWriteStream(opts.output!, { autoClose: true, flags: 'a' });
   }
 
   append(ev: LogEvent, formatted: string): void {

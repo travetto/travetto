@@ -1,8 +1,12 @@
 import util from 'util';
 
 import { GlobalTerminal } from '@travetto/terminal';
+import { Injectable } from '@travetto/di';
+import { Config, EnvVar } from '@travetto/config';
+import { GlobalEnv } from '@travetto/base';
+import { Ignore } from '@travetto/schema';
 
-import { LogEvent, Formatter } from '../types';
+import { LogEvent, LogFormatter } from '../types';
 
 /**
  * Level coloring
@@ -28,27 +32,55 @@ export interface LineFormatterOpts {
   location?: boolean;
 }
 
-/**
- * Line formatter
- */
-export class LineFormatter implements Formatter {
-  #opts: LineFormatterOpts;
+@Config('log')
+export class LineLogFormatterConfig {
+  @EnvVar('TRV_LOG_PLAIN')
+  plain?: boolean;
 
-  constructor(opts: LineFormatterOpts = {}) {
-    const notPlain = opts.plain !== true;
-    this.#opts = {
-      colorize: notPlain,
-      timestamp: notPlain ? opts.timestamp : undefined,
-      align: true, level: notPlain, location: notPlain,
-      ...opts
-    };
+  @EnvVar('TRV_LOG_TIME')
+  time?: 's' | 'ms' | string;
+
+  colorize?: boolean;
+  align?: boolean;
+  level?: boolean;
+  location?: boolean;
+
+  @Ignore()
+  timestamp?: 's' | 'ms';
+
+  postConstruct(): void {
+    if (GlobalEnv.test) {
+      this.plain = true;
+      this.time = undefined;
+    }
+    this.time ??= (!this.plain ? 'ms' : undefined);
+    this.plain ??= GlobalTerminal.colorLevel === 0;
+    this.colorize ??= !this.plain;
+    this.location ??= !this.plain;
+    this.level ??= !this.plain;
+    if (this.time !== undefined && this.time === 'ms' || this.time === 's') {
+      this.timestamp = this.time;
+    }
+  }
+}
+
+/**
+ * Line Logging Formatter
+ */
+@Injectable()
+export class LineLogFormatter implements LogFormatter {
+
+  opts: LineLogFormatterConfig;
+
+  constructor(opts: LineLogFormatterConfig) {
+    this.opts = opts;
   }
 
   pretty(ev: LogEvent, o: unknown): string {
     return util.inspect(o, {
       showHidden: ev.level === 'debug',
       depth: 4,
-      colors: this.#opts.colorize !== false,
+      colors: this.opts.colorize !== false,
       breakLength: 100
     });
   }
@@ -57,35 +89,34 @@ export class LineFormatter implements Formatter {
    * Format an event into a single line
    */
   format(ev: LogEvent): string {
-    const opts = this.#opts;
     const out = [];
 
-    if (opts.timestamp) {
+    if (this.opts.timestamp) {
       let timestamp = ev.timestamp.toISOString();
-      if (opts.timestamp === 's') {
+      if (this.opts.timestamp === 's') {
         timestamp = timestamp.replace(/[.]\d{3}/, '');
       }
-      if (opts.colorize) {
+      if (this.opts.colorize) {
         timestamp = STYLES.timestamp(timestamp);
       }
       out.push(timestamp);
     }
 
-    if (opts.level) {
+    if (this.opts.level) {
       let level: string = ev.level;
-      if (opts.align) {
+      if (this.opts.align) {
         level = level.padEnd(5, ' ');
       }
-      if (opts.colorize) {
+      if (this.opts.colorize) {
         level = STYLES[ev.level](level);
       }
       out.push(level);
     }
 
-    if (ev.source && opts.location) {
+    if (ev.source && this.opts.location) {
       const ns = `${ev.module}:${ev.modulePath}`;
       let loc = ev.line ? `${ns}:${ev.line}` : ns;
-      if (opts.colorize) {
+      if (this.opts.colorize) {
         loc = STYLES.location(loc);
       }
       out.push(`[${loc}]`);

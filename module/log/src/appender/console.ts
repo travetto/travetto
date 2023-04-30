@@ -1,10 +1,26 @@
-import { Appender, LogEvent } from '../types';
+import { Injectable } from '@travetto/di';
+import { Config } from '@travetto/config';
+
+import { LogAppender, LogEvent } from '../types';
+
+@Config('log')
+export class ConsoleLogAppenderConfig {
+  logToLevel = true;
+}
 
 /**
- * Console.output
+ * Console Logging Appender
  */
-export class ConsoleAppender implements Appender {
+@Injectable()
+export class ConsoleLogAppender implements LogAppender {
+
+  config: ConsoleLogAppenderConfig;
+
+  constructor(config: ConsoleLogAppenderConfig) {
+    this.config = config;
+  }
+
   append(ev: LogEvent, formatted: string): void {
-    console![ev.level](formatted);
+    console![this.config.logToLevel ? ev.level : 'log'](formatted);
   }
 }

@@ -1,23 +1,26 @@
-import { LogEvent, Formatter } from '../types';
+import { Injectable } from '@travetto/di';
+import { Config, EnvVar } from '@travetto/config';
 
-/**
- * JSON Options
- */
-export interface JSONFormatterOpts {
-  depth?: number;
+import { LogEvent, LogFormatter } from '../types';
+
+@Config('log')
+export class JSONLogFormatterConfig {
+  @EnvVar('TRV_LOG_JSON_INDENT')
+  jsonIndent?: number;
 }
 
 /**
- * JSON Formatter
+ * JSON Logging Formatter
  */
-export class JsonFormatter implements Formatter {
-  #opts: JSONFormatterOpts;
+@Injectable()
+export class JsonLogFormatter implements LogFormatter {
+  opts: JSONLogFormatterConfig;
 
-  constructor(opts: JSONFormatterOpts = {}) {
-    this.#opts = opts;
+  constructor(opts: JSONLogFormatterConfig) {
+    this.opts = opts;
   }
 
   format(ev: LogEvent): string {
-    return JSON.stringify(ev, null, this.#opts.depth);
+    return JSON.stringify(ev, null, this.opts.jsonIndent);
   }
 }

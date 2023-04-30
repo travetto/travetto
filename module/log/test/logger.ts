@@ -7,7 +7,7 @@ import { RootRegistry } from '@travetto/registry';
 
 import { LogService } from '../src/service';
 import { LogEvent, Logger } from '../src/types';
-import { JsonFormatter } from '../src/formatter/json';
+import { JsonLogFormatter } from '../src/formatter/json';
 
 @Injectable()
 class CustomLogger implements Logger {
@@ -44,7 +44,7 @@ class LoggerTest {
 
   @Test('Formatter')
   async shouldFormat() {
-    const formatter = new JsonFormatter({});
+    const formatter = new JsonLogFormatter({});
     const now = new Date();
     assert(formatter.format({ level: 'error', timestamp: now } as LogEvent) === `{"level":"error","timestamp":"${now.toISOString()}"}`);
   }

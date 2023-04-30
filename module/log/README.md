@@ -15,8 +15,40 @@ yarn add @travetto/log
 
 This module provides logging functionality, building upon [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts) in the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module.  This is all ultimately built upon [console](https://nodejs.org/api/console.html) operations. The logging infrastructure is built upon the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") system, and so new loggers can be created that rely upon dependency injected services and sources.
 
+## Extending the Common Logger
+By default, the system ships with the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L11), and by default will leverage the [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L36) and the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7). The configuration [CommonLoggerConfig](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L11) provides two configuration variables that allows for switching out [LineLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/line.ts#L36) for the [JsonLogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/formatter/json.ts#L15), depending on the value of `CommonLoggerConfig.format`.  Additionally the [ConsoleLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/console.ts#L7) can be swapped out for the [FileLogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/appender/file.ts#L9) depending on the value of `CommonLoggerConfig.output`.
+
+**Code: Standard Logging Config**
+```typescript
+export class CommonLoggerConfig {
+  @EnvVar('TRV_LOG_FORMAT')
+  format: 'line' | 'json' = 'line';
+
+  @EnvVar('TRV_LOG_OUTPUT')
+  output: 'console' | 'file' | string = 'console';
+}
+```
+
+In addition to these simple overrides, the [CommonLogger](https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L11) can be extended by providing an implementation of either a [LogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L31) or [LogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L23), with the declared symbol of `LogCommonⲐ`.
+
+**Code: Sample Common Formatter**
+```typescript
+import { Injectable } from '@travetto/di';
+import { LogFormatter, LogCommonⲐ, LogEvent } from '@travetto/log';
+
+@Injectable(LogCommonⲐ)
+export class SampleFormatter implements LogFormatter {
+
+  format(e: LogEvent): string {
+    return `${e.timestamp} [${e.level}]#[${e.scope ?? 'unknown'}] ${e.message ?? 'NO MESSAGE'} ${(e.args ?? []).join(' ')}`;
+  }
+}
+```
+
+As you can see, implementing [LogFormatter](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L31)/[LogAppender](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L23) with the appropriate symbol is all that is necessary to customize the general logging functionality.
+
 ## Creating a Logger
-The default pattern for logging is to create a [Logger](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L33) which simply consumes a logging event. The method is not asynchronous as ensuring the ordering of append calls will be the responsibility of the logger.  The default logger uses `console.log` and that is synchronous by default.
+The default pattern for logging is to create a [Logger](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L38) which simply consumes a logging event. The method is not asynchronous as ensuring the ordering of append calls will be the responsibility of the logger.  The default logger uses `console.log` and that is synchronous by default.
 
 **Code: Logger Shape**
 ```typescript
@@ -61,7 +93,7 @@ export type ConsoleEvent = {
 };
 ```
 
-The [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L5) is an extension of the [ConsoleEvent](https://github.com/travetto/travetto/tree/main/module/base/src/types.ts#L12) with the addition of two fields:
+The [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8) is an extension of the [ConsoleEvent](https://github.com/travetto/travetto/tree/main/module/base/src/types.ts#L12) with the addition of two fields:
    *  `message` - This is the primary argument passed to the console statement, if it happens to be a string, otherwise the field is left empty
    *  `context` - This is the final argument passed to the console statement, if it happens to be a simple object.  This is useful for external loggers that allow for searching/querying by complex data
 
@@ -93,39 +125,16 @@ The main caveat that comes with this, is that not all objects can be converted t
 **Code: Standard Logging Config**
 ```typescript
 export class CommonLoggerConfig {
-  @EnvVar('TRV_LOG_COMMON')
-  commonActive?: boolean;
-
-  /** Should we enrich the console by default */
   @EnvVar('TRV_LOG_FORMAT')
   format: 'line' | 'json' = 'line';
 
-  /** Log file, if needed */
-  @EnvVar('TRV_LOG_FILE')
-  file?: string;
-
-  @EnvVar('TRV_LOG_PLAIN')
-  plain?: boolean;
-
-  @EnvVar('TRV_LOG_TIME')
-  time: 's' | 'ms' | string = 'ms';
-
-  @Ignore()
-  get timestamp(): 's' | 'ms' | false {
-    return (this.time ?? 'ms') === 'ms' ? 'ms' : (this.time === 's' ? 's' : false);
-  }
-
-  postConstruct(): void {
-    if (GlobalEnv.test) {
-      this.time = '';
-    }
-    this.plain ??= GlobalTerminal.colorLevel === 0;
-  }
+  @EnvVar('TRV_LOG_OUTPUT')
+  output: 'console' | 'file' | string = 'console';
 }
 ```
 
 The following environment variables have control over the default logging config:
    *  `TRV_LOG_FORMAT` - This determines whether or not the output is standard text lines, or is it output as a single line of [JSON](https://www.json.org)
-   *  `TRV_LOG_FILE` - This determines whether or not the logging goes to the console or if it is written to a file
+   *  `TRV_LOG_OUTPUT` - This determines whether or not the logging goes to the console or if it is written to a file
    *  `TRV_LOG_PLAIN` - Allows for an override of whether or not to log colored output, this defaults to values provided by the [Terminal](https://github.com/travetto/travetto/tree/main/module/terminal#readme "General terminal support") in response to `FORCE_COLOR` and `NO_COLOR`
    *  `TRV_LOG_TIME` - This represents what level of time logging is desired, the default is `ms` which is millisecond output.  A value of `s` allows for second level logging, and `false` will disable the output. When ingesting the content into another logging, its generally desirable to suppress the initial time output as most other loggers will append as needed.
