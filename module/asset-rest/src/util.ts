@@ -105,6 +105,7 @@ export class AssetRestUtil {
         } else {
           const [start, end] = asset.range;
           res.status(206);
+          res.setHeader('Accept-Ranges', 'bytes');
           res.setHeader('Content-Range', `bytes ${start}-${end}/${asset.size}`);
           res.setHeader('Content-Length', `${end - start + 1}`);
         }
