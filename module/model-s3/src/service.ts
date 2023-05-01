@@ -306,9 +306,8 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
 
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
     const meta = await this.describeStream(location);
-    end ??= meta.size - 1;
 
-    ModelStreamUtil.checkRange(start, end, meta.size);
+    [start, end] = ModelStreamUtil.enforceRange(start, end, meta.size);
 
     // Read from s3
     const res = await this.client.getObject(this.#q(STREAM_SPACE, location, {

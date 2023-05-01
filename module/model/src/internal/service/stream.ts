@@ -6,9 +6,16 @@ export const StreamModel: Class<ModelType> = Cls;
 export const STREAMS = '_streams';
 
 export class ModelStreamUtil {
-  static checkRange(start: number, end: number, size: number): void {
-    if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start < 0 || end >= size) {
+  static enforceRange(start: number, end: number | undefined, size: number): [start: number, end: number] {
+
+    end ??= size - 1;
+
+    if (Number.isNaN(start) || Number.isNaN(end) || !Number.isFinite(start) || start >= size || start < 0) {
       throw new AppError('Invalid position, out of range', 'data');
     }
+    if (end >= size) {
+      end = size - 1;
+    }
+    return [start, end];
   }
 }

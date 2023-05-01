@@ -116,13 +116,13 @@ export class AssetRestUtil {
   /**
    * Get requested byte range from a given request
    */
-  static getRequestedRange(req: Request): [start: number, end?: number] | undefined {
+  static getRequestedRange(req: Request, chunkSize: number = 100 * 1024): [start: number, end?: number] | undefined {
     const range = req.header('range');
     if (range) {
       const [start, end] = range.replace(/bytes=/, '').split('-')
-        .map(x => x ? parseInt(x, 10) : undefined);
+        .map(x => x !== undefined ? parseInt(x, 10) : undefined);
       if (start !== undefined) {
-        return [start, end];
+        return [start, end ?? (start + chunkSize)];
       }
     }
   }

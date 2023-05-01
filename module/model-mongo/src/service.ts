@@ -311,9 +311,7 @@ export class MongoModelService implements
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
     const meta = await this.describeStream(location);
 
-    end ??= meta.size - 1;
-
-    ModelStreamUtil.checkRange(start, end, meta.size);
+    [start, end] = ModelStreamUtil.enforceRange(start, end, meta.size);
 
     const res = await this.#bucket.openDownloadStreamByName(location, { start, end: end + 1 });
     if (!res) {

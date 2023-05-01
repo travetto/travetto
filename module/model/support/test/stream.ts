@@ -98,7 +98,12 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
     assert(subContent3.length === 1);
     assert(subContent3 === 'k');
 
+    const partialOverbounded = await service.getStreamPartial(meta.hash, 20, 40);
+    const subContent4 = (await StreamUtil.toBuffer(partialOverbounded.stream)).toString('utf8');
+    assert(subContent4.length === 6);
+    assert(subContent4.endsWith('xyz'));
+
     await assert.rejects(() => service.getStreamPartial(meta.hash, -10, 10));
-    await assert.rejects(() => service.getStreamPartial(meta.hash, 0, 27));
+    await assert.rejects(() => service.getStreamPartial(meta.hash, 30, 37));
   }
 }

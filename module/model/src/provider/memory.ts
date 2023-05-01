@@ -252,8 +252,9 @@ export class MemoryModelService implements ModelCrudSupport, ModelStreamSupport,
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
     const streams = this.#find(STREAMS, location, 'notfound');
     const buffer = streams.get(location)!;
-    end ??= (buffer.length - 1);
-    ModelStreamUtil.checkRange(start, end, buffer.length);
+
+    [start, end] = ModelStreamUtil.enforceRange(start, end, buffer.length);
+
     const stream = await StreamUtil.bufferToStream(buffer.subarray(start, end + 1));
     return { stream, range: [start, end] };
   }

@@ -58,6 +58,7 @@ export class LineLogFormatterConfig {
     this.colorize ??= !this.plain;
     this.location ??= !this.plain;
     this.level ??= !this.plain;
+    this.align ??= !this.plain;
     if (this.time !== undefined && this.time === 'ms' || this.time === 's') {
       this.timestamp = this.time;
     }

@@ -336,8 +336,21 @@ npx trv run:rest
         skipRoutes: false,
         exposeAllSchemas: false
       },
-      CommonLoggerConfig: { format: 'line', plain: false, time: 'ms' },
+      CommonLoggerConfig: { format: 'line', output: 'console' },
+      ConsoleLogAppenderConfig: { logToLevel: true },
+      FileLogAppenderConfig: {
+        output: './.trv_build/logs/@travetto/todo-app.log'
+      },
       FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
+      JSONLogFormatterConfig: {},
+      LineLogFormatterConfig: {
+        plain: false,
+        time: 'ms',
+        colorize: true,
+        align: true,
+        level: true,
+        location: true
+      },
       MemoryModelConfig: {},
       MongoModelConfig: {
         hosts: { '0': 'localhost' },

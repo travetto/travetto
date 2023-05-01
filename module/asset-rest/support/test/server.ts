@@ -240,7 +240,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
 
     const itemRanged3 = await this.request('get', `/test/upload/${loc}`, {
       headers: {
-        Range: 'bytes=20-30'
+        Range: 'bytes=30-20'
       },
       throwOnError: false
     });

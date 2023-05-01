@@ -193,9 +193,8 @@ export class FileModelService implements ModelCrudSupport, ModelStreamSupport, M
   async getStreamPartial(location: string, start: number, end?: number): Promise<PartialStream> {
     const file = await this.#find(STREAMS, BIN, location);
     const meta = await this.describeStream(location);
-    end ??= meta.size - 1;
 
-    ModelStreamUtil.checkRange(start, end, meta.size);
+    [start, end] = ModelStreamUtil.enforceRange(start, end, meta.size);
 
     const stream = createReadStream(file, { start, end });
     return { stream, range: [start, end] };
