@@ -121,7 +121,7 @@ export class AssetRestUtil {
     const range = req.header('range');
     if (range) {
       const [start, end] = range.replace(/bytes=/, '').split('-')
-        .map(x => x !== undefined ? parseInt(x, 10) : undefined);
+        .map(x => x ? parseInt(x, 10) : undefined);
       if (start !== undefined) {
         return [start, end ?? (start + chunkSize)];
       }
