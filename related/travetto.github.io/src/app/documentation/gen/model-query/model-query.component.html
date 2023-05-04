@@ -198,6 +198,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 <h3 id="array-fields">Array Fields</h3>
 
 <ul> <li><code class="item input">field: {{'{'}} $all: T[]] {{'}'}}</code> checks to see if the records value contains everything within <code class="item input">$all</code></li>
+<li><code class="item input">field: {{'{'}} $empty: boolean {{'}'}}</code> to determine if an array is missing or is of zero length.  Due to the nature of this operation, this is only supported on lists at the top level of the document.</li>
 </ul>
 
 <h3 id="string-fields">String Fields</h3>

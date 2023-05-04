@@ -5,7 +5,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { ModelCrudSupport } from '@travetto/model/src/service/crud';
 import { TimeUtil } from '@travetto/base';
 
-import { Aged, Location, Names, Note, Person, SimpleList } from './types';
+import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists } from './types';
 
 import { ModelQuerySupport } from '../../src/service/query';
 
@@ -296,8 +296,77 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       }
     });
     assert(simple4 === 3);
+  }
 
+  @Test()
+  async verifyArrayEmptyVsNot() {
+    const service = await this.service;
+    await service.create(WithNestedLists, {
+      tags: ['a', 'b']
+    });
 
+    await service.create(WithNestedLists, {
+      names: ['c', 'd'],
+    });
+
+    await service.create(WithNestedLists, {
+      names: ['c', 'd'],
+      tags: ['e', 'f']
+    });
+
+    await service.create(WithNestedLists, {
+      names: ['g', 'h'],
+      tags: []
+    });
+
+    await service.create(WithNestedLists, {
+      names: [],
+      tags: []
+    });
+
+    let total = await service.queryCount(WithNestedLists, {
+      where: {
+        names: { $empty: false }
+      }
+    });
+    assert(total === 3);
+    total = await service.queryCount(WithNestedLists, {
+      where: {
+        names: { $empty: true }
+      }
+    });
+    assert(total === 2);
+
+    total = await service.queryCount(WithNestedLists, {
+      where: {
+        tags: { $empty: true }
+      }
+    });
+    assert(total === 3);
+
+    total = await service.queryCount(WithNestedLists, {
+      where: {
+        tags: { $empty: false }
+      }
+    });
+    assert(total === 2);
+
+    total = await service.queryCount(WithNestedLists, {
+      where: {
+        tags: { $empty: true },
+        names: { $empty: true }
+      }
+    });
+    assert(total === 1);
+
+    total = await service.queryCount(WithNestedLists, {
+      where: {
+        tags: { $empty: false },
+        names: { $empty: false }
+      }
+    });
+
+    assert(total === 1);
   }
 }
 

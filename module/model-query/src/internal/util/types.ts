@@ -3,10 +3,10 @@ import { Class } from '@travetto/base';
 
 import { PointImpl } from '../model/point';
 
-const st = (t: string | string[], arr: boolean = false): Set<string> =>
-  new Set((Array.isArray(t) ? t : [t]).map(v => arr ? `${v}[]` : v));
+const st = (t: string | string[], isArr: boolean = false): Set<string> =>
+  new Set((Array.isArray(t) ? t : [t]).map(v => isArr ? `${v}[]` : v));
 
-const basic = (types: Set<string>): Record<string, Set<string>> => ({ $ne: types, $eq: types, $exists: st('boolean') });
+const basic = (types: Set<string>): Record<string, Set<string>> => ({ $ne: types, $eq: types, $exists: st('boolean'), $empty: st('boolean') });
 const scalar = (types: Set<string>): Record<string, Set<string>> => ({ $in: types, $nin: types });
 const str = (): Record<string, Set<string>> => ({ $regex: st(['RegExp', 'string']) });
 const comp = (types: Set<string>): Record<string, Set<string>> => ({ $lt: types, $lte: types, $gt: types, $gte: types });

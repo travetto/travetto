@@ -478,6 +478,19 @@ export abstract class SQLDialect implements DialectState {
               }
               break;
             }
+            case '$empty': {
+              const valueTable = this.parentTable(sStack);
+              const alias = `_all_${sStack.length}`;
+              const pPath = this.ident(this.parentPathField.name);
+              const rpPath = this.resolveName([...sStack, field, this.parentPathField]);
+
+              items.push(`0 ${v ? '=' : '<>'} (
+                SELECT COUNT(${alias}.${this.ident(field.name)})
+                FROM ${valueTable} ${alias} 
+                WHERE ${alias}.${pPath} = ${rpPath}
+              )`);
+              break;
+            }
             case '$exists': items.push(`${sPath} ${v ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`); break;
             case '$ne': case '$eq': {
               if (v === null || v === undefined) {
@@ -648,17 +661,19 @@ ${this.getLimitSQL(cls, query)}`;
       }
     }
 
+    const fieldSql = fields
+      .map(f => {
+        const def = this.getColumnDefinition(f) || '';
+        return f.name === this.idField.name && !parent ?
+          def.replace('DEFAULT NULL', 'NOT NULL') : def;
+      })
+      .filter(x => !!x.trim())
+      .join(',\n  ');
+
     /* eslint-disable @typescript-eslint/indent */
     const out = `
 CREATE TABLE IF NOT EXISTS ${this.table(stack)} (
-  ${fields
-        .map(f => {
-          const def = this.getColumnDefinition(f) || '';
-          return f.name === this.idField.name && !parent ?
-            def.replace('DEFAULT NULL', 'NOT NULL') : def;
-        })
-        .filter(x => !!x.trim())
-        .join(',\n  ')},
+  ${fieldSql}${fieldSql.length ? ',' : ''}
   ${this.getColumnDefinition(this.pathField)} UNIQUE,
   ${!parent ?
         `PRIMARY KEY (${this.ident(this.idField)})` :

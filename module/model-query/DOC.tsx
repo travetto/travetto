@@ -82,6 +82,7 @@ export const text = <>
     <c.SubSection title='Array Fields'>
       <ul>
         <li>{d.input('field: { $all: T[]] }')} checks to see if the records value contains everything within {d.input('$all')}</li>
+        <li>{d.input('field: { $empty: boolean }')} to determine if an array is missing or is of zero length.  Due to the nature of this operation, this is only supported on lists at the top level of the document.</li>
       </ul>
     </c.SubSection>
     <c.SubSection title='String Fields'>

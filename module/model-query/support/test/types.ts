@@ -75,3 +75,10 @@ export class Aged {
   id: string;
   createdAt: Date;
 }
+
+@Model()
+export class WithNestedLists {
+  id: string;
+  tags?: string[] = [];
+  names?: string[] = [];
+}

@@ -160,6 +160,15 @@ export class MongoUtil {
             for (const [sk, sv] of Object.entries(v)) {
               v[sk] = ModelQueryUtil.resolveComparator(sv);
             }
+          } else if (firstKey === '$empty') {
+            const isEmpty = v.$empty;
+            if (isEmpty) {
+              v.$size = 0;
+            } else {
+              v.$exists = true;
+              v.$not = { $size: 0 };
+            }
+            delete v.$empty;
           } else if (firstKey === '$regex') {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             v.$regex = DataUtil.toRegex(v.$regex as string | RegExp);

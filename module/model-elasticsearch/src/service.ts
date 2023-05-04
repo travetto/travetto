@@ -61,12 +61,17 @@ export class ElasticsearchModelService implements
     if (query && Object.keys(query).length === 0) {
       query = undefined;
     }
-    const res = await this.client.search<T>({
-      ...this.manager.getIdentity(cls),
-      ...search,
-      query
-    });
-    return res;
+    try {
+      const res = await this.client.search<T>({
+        ...this.manager.getIdentity(cls),
+        ...search,
+        query
+      });
+      return res;
+    } catch (err) {
+      console.error((err as any).meta.body.error);
+      throw err;
+    }
   }
 
   /**

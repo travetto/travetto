@@ -5,7 +5,7 @@ import { ControllerRegistry } from '@travetto/rest';
 import { querySchemaParamConfig } from '@travetto/rest/src/internal/param';
 import {
   ModelQueryFacetSupport, ModelQuerySupport, ModelQuerySuggestSupport,
-  SortClause, ValidStringFields
+  SortClause, ValidStringFields, PropWhereClause
 } from '@travetto/model-query';
 import { isQuerySuggestSupported, isQuerySupported } from '@travetto/model-query/src/internal/service/common';
 
@@ -51,7 +51,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>): (target: C
           limit: full.limit,
           offset: full.offset,
           sort: convert<SortClause<T>[]>(full.sort),
-          where: convert(full.where)
+          where: convert<PropWhereClause<T>>(full.where)
         });
       } else {
         throw new AppError(`${this.source.constructor.Ⲑid} does not support querying`);
