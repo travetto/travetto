@@ -4,10 +4,9 @@ import { Authenticator, Principal } from '@travetto/auth';
 import { FilterContext, Request, Response } from '@travetto/rest';
 import { LoginContextⲐ } from '@travetto/auth-rest/src/internal/types';
 
-import { PassportAuthOptions, PassportUtil } from './util';
+import { PassportUtil } from './util';
 
 type SimplePrincipal = Omit<Principal, 'issuedAt' | 'expiresAt'>;
-
 
 type Handler = (req: Request, res: Response, next: Function) => unknown;
 
@@ -25,8 +24,7 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, Fil
   #strategyName: string;
   #strategy: passport.Strategy;
   #toPrincipal: (user: U) => SimplePrincipal;
-  #passportAuthenticateOptions: passport.AuthenticateOptions;
-  #extraOptions: PassportAuthOptions;
+  #passportOptions: (req: Request) => passport.AuthenticateOptions;
   session = false;
 
   /**
@@ -35,20 +33,18 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, Fil
    * @param strategyName Name of passport strategy
    * @param strategy  A passport strategy
    * @param toPrincipal  How to convert a user to an identity
-   * @param passportAuthenticateOptions Extra passport options
+   * @param opts Extra passport options
    */
   constructor(
     strategyName: string,
     strategy: passport.Strategy,
     toPrincipal: (user: U) => SimplePrincipal,
-    passportAuthenticateOptions: passport.AuthenticateOptions = {},
-    extraOptions: PassportAuthOptions = {}
+    opts: passport.AuthenticateOptions | ((req: Request) => passport.AuthenticateOptions) = {},
   ) {
     this.#strategyName = strategyName;
     this.#strategy = strategy;
     this.#toPrincipal = toPrincipal;
-    this.#passportAuthenticateOptions = passportAuthenticateOptions;
-    this.#extraOptions = extraOptions;
+    this.#passportOptions = typeof opts === 'function' ? opts : ((): Partial<passport.AuthenticateOptions> => opts);
     passport.use(this.#strategyName, this.#strategy);
   }
 
@@ -92,11 +88,13 @@ export class PassportAuthenticator<U> implements Authenticator<U, Principal, Fil
       // Get the login context
       req[LoginContextⲐ] = PassportUtil.getLoginContext(req);
 
+      const requestOptions = this.#passportOptions(req);
+
       const filter = passport.authenticate(this.#strategyName,
         {
           session: this.session,
-          ...this.#passportAuthenticateOptions,
-          ...PassportUtil.createLoginContext(req, this.#extraOptions)
+          ...requestOptions,
+          ...PassportUtil.enhanceLoginContext(req, requestOptions)
         },
         (err: Error, u: U) => this.#authHandler(err, u).then(resolve, reject));
 

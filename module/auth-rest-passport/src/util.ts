@@ -1,13 +1,18 @@
 import passport from 'passport';
 
-import { ObjectUtil } from '@travetto/base';
 import { Request } from '@travetto/rest';
 
 import { LoginContext } from '@travetto/auth-rest';
 
-export interface PassportAuthOptions {
-  state?: ((req: Request) => Record<string, unknown>) | Record<string, unknown>;
-}
+const readState = (state?: string): Record<string, unknown> | undefined => {
+  try {
+    if (state) {
+      return JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
+    }
+  } catch {
+    return;
+  }
+};
 
 /**
  * Passport utilities
@@ -15,16 +20,15 @@ export interface PassportAuthOptions {
 export class PassportUtil {
 
   /**
-   * Create login context
+   * Enhance passport options with enhanced state information
    * @param req The travetto request,
-   * @param state The passport auth config state
+   * @param opts The passport auth options
    */
-  static createLoginContext(req: Request, { state }: PassportAuthOptions): Partial<passport.AuthenticateOptions> {
-    const stateRec = ObjectUtil.isFunction(state) ? state.call(null, req) : (state ?? {});
-    const json = JSON.stringify({ referer: req.header('referer'), ...stateRec });
-
+  static enhanceLoginContext(req: Request, opts: Partial<passport.AuthenticateOptions> = {}): Partial<passport.AuthenticateOptions> {
+    const state = readState(opts.state);
+    const json = JSON.stringify({ referer: req.header('referer'), ...state });
     return {
-      state: Buffer.from(json).toString('base64')
+      state: Buffer.from(json).toString('base64'),
     };
   }
 
@@ -36,7 +40,7 @@ export class PassportUtil {
     if (req.query.state) {
       if (typeof req.query.state === 'string' && req.query.state) {
         try {
-          return JSON.parse(Buffer.from(req.query.state, 'base64').toString('utf8'));
+          return readState(req.query.state);
         } catch {
           console.error('Unable to process previous login state');
         }
