@@ -82,3 +82,15 @@ export class WithNestedLists {
   tags?: string[] = [];
   names?: string[] = [];
 }
+
+@Schema()
+class NamedSubNested {
+  names?: string[] = [];
+}
+
+@Model()
+export class WithNestedNestedLists {
+  id: string;
+  tags?: string[] = [];
+  sub?: NamedSubNested;
+}

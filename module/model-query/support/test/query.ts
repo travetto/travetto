@@ -5,7 +5,7 @@ import { BaseModelSuite } from '@travetto/model/support/test/base';
 import { ModelCrudSupport } from '@travetto/model/src/service/crud';
 import { TimeUtil } from '@travetto/base';
 
-import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists } from './types';
+import { Aged, Location, Names, Note, Person, SimpleList, WithNestedLists, WithNestedNestedLists } from './types';
 
 import { ModelQuerySupport } from '../../src/service/query';
 
@@ -363,6 +363,77 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
       where: {
         tags: { $empty: false },
         names: { $empty: false }
+      }
+    });
+
+    assert(total === 1);
+  }
+
+  @Test()
+  async verifyNestedArrayEmptyVsNot() {
+    const service = await this.service;
+    await service.create(WithNestedNestedLists, {
+      tags: ['a', 'b']
+    });
+
+    await service.create(WithNestedNestedLists, {
+      sub: { names: ['c', 'd'] },
+    });
+
+    await service.create(WithNestedNestedLists, {
+      sub: { names: ['c', 'd'] },
+      tags: ['e', 'f']
+    });
+
+    await service.create(WithNestedNestedLists, {
+      sub: { names: ['g', 'h'] },
+      tags: []
+    });
+
+    await service.create(WithNestedNestedLists, {
+      sub: {},
+      tags: []
+    });
+
+    let total = await service.queryCount(WithNestedNestedLists, {
+      where: {
+        sub: { names: { $empty: false } }
+      }
+    });
+    assert(total === 3);
+    total = await service.queryCount(WithNestedNestedLists, {
+      where: {
+        sub: { names: { $empty: true } }
+      }
+    });
+    assert(total === 2);
+
+    total = await service.queryCount(WithNestedNestedLists, {
+      where: {
+        tags: { $empty: true }
+      }
+    });
+    assert(total === 3);
+
+    total = await service.queryCount(WithNestedNestedLists, {
+      where: {
+        tags: { $empty: false }
+      }
+    });
+    assert(total === 2);
+
+    total = await service.queryCount(WithNestedNestedLists, {
+      where: {
+        tags: { $empty: true },
+        sub: { names: { $empty: true } }
+      }
+    });
+    assert(total === 1);
+
+    total = await service.queryCount(WithNestedNestedLists, {
+      where: {
+        tags: { $empty: false },
+        sub: { names: { $empty: false } }
       }
     });
 

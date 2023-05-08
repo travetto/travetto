@@ -82,7 +82,7 @@ export const text = <>
     <c.SubSection title='Array Fields'>
       <ul>
         <li>{d.input('field: { $all: T[]] }')} checks to see if the records value contains everything within {d.input('$all')}</li>
-        <li>{d.input('field: { $empty: boolean }')} to determine if an array is missing or is of zero length.  Due to the nature of this operation, this is only supported on lists at the top level of the document.</li>
+        <li>{d.input('field: { $empty: boolean }')} to determine if an array is missing or is of zero length. </li>
       </ul>
     </c.SubSection>
     <c.SubSection title='String Fields'>
@@ -93,7 +93,7 @@ export const text = <>
     <c.SubSection title='Geo Point Fields'>
       <ul>
         <li>{d.input('field: { $geoWithin: Point[] }')} determines if the value is within the bounding region of the points</li>
-        <li>{d.input("field: {$near: Point, $maxDistance: number, $unit: 'km' | 'm' | 'mi' | 'ft' }")} searches at a point, and looks out radially</li>
+        <li>{d.input("field: { $near: Point, $maxDistance: number, $unit: 'km' | 'm' | 'mi' | 'ft' }")} searches at a point, and looks out radially</li>
       </ul>
     </c.SubSection>
     <c.SubSection title='Groupings'>

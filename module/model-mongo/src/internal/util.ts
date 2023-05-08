@@ -163,10 +163,10 @@ export class MongoUtil {
           } else if (firstKey === '$empty') {
             const isEmpty = v.$empty;
             if (isEmpty) {
-              v.$size = 0;
+              v.$in = [null, []];
             } else {
               v.$exists = true;
-              v.$not = { $size: 0 };
+              v.$nin = [null, []];
             }
             delete v.$empty;
           } else if (firstKey === '$regex') {

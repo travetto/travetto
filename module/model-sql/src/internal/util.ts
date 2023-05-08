@@ -198,12 +198,17 @@ export class SQLUtil {
               pathObj.push(val);
               config.path[config.path.length - 1] = { ...top, index: i++ };
               handler.onSub({ ...config, value: val });
+              if (!field.array) {
+                config.descend();
+              }
             } finally {
               pathObj.pop();
             }
             i += 1;
           }
-          return config.descend();
+          if (field.array) {
+            config.descend();
+          }
         }
       },
       onSimple: (config) => {

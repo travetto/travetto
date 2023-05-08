@@ -1,4 +1,4 @@
-import { InlineScript, QueryDslQueryContainer, SearchRequest, SearchResponse, Sort, SortOptions } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer, SearchRequest, SearchResponse, Sort, SortOptions } from '@elastic/elasticsearch/lib/api/types';
 
 import { Class, DataUtil, ObjectUtil } from '@travetto/base';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
@@ -23,18 +23,6 @@ const has$Not = (o: unknown): o is ({ $not: WhereClause<unknown> }) => !!o && '$
  * Support tools for dealing with elasticsearch specific requirements
  */
 export class ElasticsearchQueryUtil {
-
-  /**
-   * Build the update script for a given object
-   */
-  static generateEmptyScript(path: string): InlineScript {
-    const out: InlineScript = {
-      lang: 'painless',
-      source: 'return doc[params.key] == null || doc[params.key].size() == 0;',
-      params: { key: path },
-    };
-    return out;
-  }
 
   /**
    * Convert `a.b.c` to `a : { b : { c : ... }}`
@@ -170,11 +158,9 @@ export class ElasticsearchQueryUtil {
             }
             case '$empty': {
               const q = {
-                script: {
-                  script: this.generateEmptyScript(sPath)
-                }
+                exists: { field: sPath }
               };
-              items.push(v ? q : { bool: { ['must_not']: q } });
+              items.push(!v ? q : { bool: { ['must_not']: q } });
               break;
             }
             case '$regex': {
