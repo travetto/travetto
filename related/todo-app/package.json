@@ -25,7 +25,7 @@
     "@travetto/auth-rest-session": "^3.1.9",
     "@travetto/cli": "^3.1.2",
     "@travetto/log": "^3.1.4",
-    "@travetto/model-mongo": "^3.1.7",
+    "@travetto/model-mongo": "^3.1.8",
     "@travetto/openapi": "^3.1.7",
     "@travetto/rest-express": "^3.1.4",
     "@travetto/rest-session": "^3.1.8",
