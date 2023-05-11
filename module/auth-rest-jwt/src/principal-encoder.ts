@@ -9,7 +9,7 @@ import { Ignore } from '@travetto/schema';
 
 @Config('rest.auth.jwt')
 export class RestJWTConfig {
-  mode: 'cookie' | 'header' = 'header';
+  mode: 'cookie' | 'header' | 'all' = 'header';
   header = 'Authorization';
   cookie = 'trv.auth';
   signingKey?: string;
@@ -19,6 +19,14 @@ export class RestJWTConfig {
 
   @Ignore()
   maxAgeMs: number;
+
+  get cookieMode(): boolean {
+    return this.mode === 'cookie' || this.mode === 'all';
+  }
+
+  get headerMode(): boolean {
+    return this.mode === 'header' || this.mode === 'all';
+  }
 
   postConstruct(): void {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -88,12 +96,13 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   async encode({ res }: FilterContext, p: Principal | undefined): Promise<void> {
     if (p) {
       const token = await this.getToken(p);
-      if (this.config.mode === 'cookie') {
+      if (this.config.cookieMode) {
         res.cookies.set(this.config.cookie, token, { expires: p.expiresAt });
-      } else {
+      }
+      if (this.config.headerMode) {
         res.setHeader(this.config.header, `${this.config.headerPrefix}${token}`);
       }
-    } else if (this.config.mode === 'cookie') {
+    } else if (this.config.cookieMode) {
       res.cookies.set(this.config.cookie, '', { expires: new Date(Date.now() - 1000 * 60 * 60) }); // Clear out cookie
     }
   }
@@ -119,12 +128,19 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
    * Read JWT from request
    */
   async decode({ req }: FilterContext): Promise<Principal | undefined> {
-    const token = this.config.mode === 'cookie' ?
-      req.cookies.get(this.config.cookie) :
-      (req.headerFirst(this.config.header))?.replace(this.config.headerPrefix, '');
+    let token: string | undefined = undefined;
+    if (this.config.cookieMode) {
+      token ??= req.cookies.get(this.config.cookie);
+    }
+    if (this.config.headerMode) {
+      const header = req.headerFirst(this.config.header);
+      if (header?.startsWith(this.config.headerPrefix)) {
+        token ??= header.replace(this.config.headerPrefix, '').trim();
+      }
+    }
 
     if (token) {
-      return this.verifyToken(token, true);
+      return await this.verifyToken(token, true);
     }
   }
 }
