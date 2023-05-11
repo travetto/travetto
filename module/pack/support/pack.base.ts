@@ -54,6 +54,9 @@ export abstract class BasePackCommand implements CliCommandShape {
   @CliFlag({ desc: 'Eject commands to file', short: 'x' })
   ejectFile?: string;
 
+  @CliFlag({ desc: 'Rollup configuration file', short: 'r' })
+  rollupConfiguration = '@travetto/pack/support/bin/rollup';
+
   @Ignore()
   module: string;
 

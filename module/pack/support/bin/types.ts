@@ -8,6 +8,7 @@ export type CommonPackConfig = {
   module: string;
 
   // Bundle
+  rollupConfiguration: string;
   entryPoint: string;
   entryArguments: string[];
   minify: boolean;

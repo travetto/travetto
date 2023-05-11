@@ -57,7 +57,7 @@ export class PackOperation {
   static async * bundle(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const cwd = RootIndex.outputRoot;
 
-    const bundleCommand = ['npx', 'rollup', '-c', 'node_modules/@travetto/pack/support/bin/rollup.js'];
+    const bundleCommand = ['npx', 'rollup', '-c', RootIndex.resolveFileImport(cfg.rollupConfiguration)];
 
     const entryPointFile = RootIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RootIndex.manifest.outputFolder}/`)[1];
 
