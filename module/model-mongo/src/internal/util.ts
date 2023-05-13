@@ -55,7 +55,6 @@ export class MongoUtil {
 
   static async postLoadId<T extends ModelType>(item: T): Promise<T> {
     if (isWithId(item)) {
-      item.id = this.idToString(item._id!);
       delete item._id;
     }
     return item;
@@ -66,8 +65,6 @@ export class MongoUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const itemWithId = item as WithId<T>;
       itemWithId._id = this.uuid(item.id);
-      // @ts-expect-error
-      delete item.id;
     }
     return item;
   }

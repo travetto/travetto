@@ -69,7 +69,9 @@ export class ElasticsearchModelService implements
       });
       return res;
     } catch (err) {
-      console.error((err as any).meta.body.error);
+      if (err instanceof es.errors.ResponseError && err.meta.body && typeof err.meta.body === 'object' && 'error' in err.meta.body) {
+        console.error(err.meta.body.error);
+      }
       throw err;
     }
   }
@@ -77,24 +79,23 @@ export class ElasticsearchModelService implements
   /**
    * Convert _id to id
    */
-  async postLoad<T extends ModelType>(cls: Class<T>, o: T): Promise<T> {
-    if (isWithId(o)) {
-      o.id = o._id!;
-      delete o._id;
+  async postLoad<T extends ModelType>(cls: Class<T>, item: T): Promise<T> {
+    if (isWithId(item)) {
+      delete item._id;
     }
 
-    o = await ModelCrudUtil.load(cls, o);
+    item = await ModelCrudUtil.load(cls, item);
 
     const { expiresAt } = ModelRegistry.get(cls);
 
     if (expiresAt) {
-      const expiry = ModelExpiryUtil.getExpiryState(cls, o);
+      const expiry = ModelExpiryUtil.getExpiryState(cls, item);
       if (!expiry.expired) {
-        return o;
+        return item;
       }
-      throw new NotFoundError(cls, o.id);
+      throw new NotFoundError(cls, item.id);
     } else {
-      return o;
+      return item;
     }
   }
 
@@ -269,15 +270,11 @@ export class ElasticsearchModelService implements
       } else if (op.insert) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         acc.push({ create: { ...ident, _id: op.insert.id } }, op.insert as T);
-        delete op.insert.id;
       } else if (op.upsert) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         acc.push({ index: { ...ident, _id: op.upsert.id } }, op.upsert as T);
-        delete op.upsert.id;
       } else if (op.update) {
         acc.push({ update: { ...ident, _id: op.update.id } }, { doc: op.update });
-        // @ts-expect-error
-        delete op.update.id;
       }
       return acc;
     }, []);
