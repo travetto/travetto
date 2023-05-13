@@ -336,9 +336,7 @@ export class SpecGenerator {
       }
     }
 
-    const epPath = (
-      !ep.path ? '/' : typeof ep.path === 'string' ? ep.path : ep.path.source
-    ).replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
+    const epPath = (!ep.path ? '/' : ep.path).replace(/:([A-Za-z0-9_]+)\b/g, (__, param) => `{${param}}`);
 
     const key = `${ctrl.basePath}${epPath}`.replace(/[\/]+/g, '/');
 
