@@ -205,7 +205,7 @@ export interface ModelBulkSupport extends ModelCrudSupport {
 ```
 
 ## Declaration
-Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L9)
+Models are declared via the [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13) decorator, which allows the system to know that this is a class that is compatible with the module.  The only requirement for a model is the [ModelType](https://github.com/travetto/travetto/tree/main/module/model/src/types/model.ts#L9)
 
 **Code: ModelType**
 ```typescript
@@ -384,7 +384,7 @@ export class MemoryPolymorphicSuite extends ModelPolymorphismSuite {
 ```
 
 ## CLI - model:export
-The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12)s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
+The module provides the ability to generate an export of the model structure from all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13)s within the application.  This is useful for being able to generate the appropriate files to manually create the data schemas in production.
 
 **Terminal: Running model export**
 ```bash
@@ -407,7 +407,7 @@ Models
 ```
 
 ## CLI - model:install
-The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L12)s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
+The module provides the ability to install all the various [@Model](https://github.com/travetto/travetto/tree/main/module/model/src/registry/decorator.ts#L13)s within the application given the current configuration being targeted.  This is useful for being able to prepare the datastore manually.
 
 **Terminal: Running model install**
 ```bash

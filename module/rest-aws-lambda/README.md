@@ -24,16 +24,17 @@ $ trv pack:lambda -h
 Usage: pack:lambda [options]
 
 Options:
-  -w, --workspace <string>    Workspace for building (default: "/tmp/<temp-folder>")
-  --clean, --no-clean         Clean workspace (default: true)
-  -o, --output <string>       Output location (default: "travetto_rest-aws-lambda.zip")
-  -es, --main-scripts         Create entry scripts (default: false)
-  -f, --main-name <string>    Main name for build artifact
-  -e, --entry-point <string>  Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler")
-  --minify, --no-minify       Minify output (default: true)
-  -sm, --sourcemap            Bundle source maps (default: false)
-  -is, --include-sources      Include source with source maps (default: false)
-  -x, --eject-file <string>   Eject commands to file
-  -m, --module <string>       Module to run for
-  -h, --help                  display help for command
+  -w, --workspace <string>             Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                  Clean workspace (default: true)
+  -o, --output <string>                Output location (default: "travetto_rest-aws-lambda.zip")
+  -es, --main-scripts                  Create entry scripts (default: false)
+  -f, --main-name <string>             Main name for build artifact
+  -e, --entry-point <string>           Entry point (default: "@travetto/rest-aws-lambda/support/entry.handler")
+  --minify, --no-minify                Minify output (default: true)
+  -sm, --sourcemap                     Bundle source maps (default: false)
+  -is, --include-sources               Include source with source maps (default: false)
+  -x, --eject-file <string>            Eject commands to file
+  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  -m, --module <string>                Module to run for
+  -h, --help                           display help for command
 ```

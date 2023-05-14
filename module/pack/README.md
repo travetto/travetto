@@ -29,18 +29,19 @@ $ trv pack --help
 Usage: pack [options]
 
 Options:
-  -w, --workspace <string>           Workspace for building (default: "/tmp/<temp-folder>")
-  --clean, --no-clean                Clean workspace (default: true)
-  -o, --output <string>              Output location
-  --main-scripts, --no-main-scripts  Create entry scripts (default: true)
-  -f, --main-name <string>           Main name for build artifact
-  -e, --entry-point <string>         Entry point (default: "@travetto/cli/support/entry.cli")
-  --minify, --no-minify              Minify output (default: true)
-  -sm, --sourcemap                   Bundle source maps (default: false)
-  -is, --include-sources             Include source with source maps (default: false)
-  -x, --eject-file <string>          Eject commands to file
-  -m, --module <string>              Module to run for
-  -h, --help                         display help for command
+  -w, --workspace <string>             Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                  Clean workspace (default: true)
+  -o, --output <string>                Output location
+  --main-scripts, --no-main-scripts    Create entry scripts (default: true)
+  -f, --main-name <string>             Main name for build artifact
+  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.cli")
+  --minify, --no-minify                Minify output (default: true)
+  -sm, --sourcemap                     Bundle source maps (default: false)
+  -is, --include-sources               Include source with source maps (default: false)
+  -x, --eject-file <string>            Eject commands to file
+  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  -m, --module <string>                Module to run for
+  -h, --help                           display help for command
 ```
 
 This command line operation will compile your project, and produce a ready to use workspace as a deliverable. Additionally, you can pass in a file to the `eject-file` flag that will allow for a script to be produced (base on the host operating system). 
@@ -90,18 +91,19 @@ $ trv pack:zip --help
 Usage: pack:zip [options]
 
 Options:
-  -w, --workspace <string>           Workspace for building (default: "/tmp/<temp-folder>")
-  --clean, --no-clean                Clean workspace (default: true)
-  -o, --output <string>              Output location (default: "travetto_pack.zip")
-  --main-scripts, --no-main-scripts  Create entry scripts (default: true)
-  -f, --main-name <string>           Main name for build artifact
-  -e, --entry-point <string>         Entry point (default: "@travetto/cli/support/entry.cli")
-  --minify, --no-minify              Minify output (default: true)
-  -sm, --sourcemap                   Bundle source maps (default: false)
-  -is, --include-sources             Include source with source maps (default: false)
-  -x, --eject-file <string>          Eject commands to file
-  -m, --module <string>              Module to run for
-  -h, --help                         display help for command
+  -w, --workspace <string>             Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                  Clean workspace (default: true)
+  -o, --output <string>                Output location (default: "travetto_pack.zip")
+  --main-scripts, --no-main-scripts    Create entry scripts (default: true)
+  -f, --main-name <string>             Main name for build artifact
+  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.cli")
+  --minify, --no-minify                Minify output (default: true)
+  -sm, --sourcemap                     Bundle source maps (default: false)
+  -is, --include-sources               Include source with source maps (default: false)
+  -x, --eject-file <string>            Eject commands to file
+  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  -m, --module <string>                Module to run for
+  -h, --help                           display help for command
 ```
 
 ## CLI - pack:docker
@@ -114,25 +116,26 @@ $ trv pack:docker --help
 Usage: pack:docker [options]
 
 Options:
-  -w, --workspace <string>           Workspace for building (default: "/tmp/<temp-folder>")
-  --clean, --no-clean                Clean workspace (default: true)
-  -o, --output <string>              Output location
-  --main-scripts, --no-main-scripts  Create entry scripts (default: true)
-  -f, --main-name <string>           Main name for build artifact
-  -e, --entry-point <string>         Entry point (default: "@travetto/cli/support/entry.cli")
-  --minify, --no-minify              Minify output (default: true)
-  -sm, --sourcemap                   Bundle source maps (default: false)
-  -is, --include-sources             Include source with source maps (default: false)
-  -x, --eject-file <string>          Eject commands to file
-  -df, --docker-factory <string>     Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
-  -di, --docker-image <string>       Docker Image to extend  (default: "node:18-alpine3.16")
-  -dn, --docker-name <string>        Docker Image Name  (default: "travetto_pack")
-  -dt, --docker-tag <string>         Docker Image Tag  (default: ["latest"])
-  -dp, --docker-port <number>        Docker Image Port  (default: [])
-  -dx, --docker-push                 Docker Push Tags  (default: false)
-  -dr, --docker-registry <string>    Docker Registry
-  -m, --module <string>              Module to run for
-  -h, --help                         display help for command
+  -w, --workspace <string>             Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                  Clean workspace (default: true)
+  -o, --output <string>                Output location
+  --main-scripts, --no-main-scripts    Create entry scripts (default: true)
+  -f, --main-name <string>             Main name for build artifact
+  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.cli")
+  --minify, --no-minify                Minify output (default: true)
+  -sm, --sourcemap                     Bundle source maps (default: false)
+  -is, --include-sources               Include source with source maps (default: false)
+  -x, --eject-file <string>            Eject commands to file
+  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  -df, --docker-factory <string>       Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
+  -di, --docker-image <string>         Docker Image to extend  (default: "node:18-alpine3.16")
+  -dn, --docker-name <string>          Docker Image Name  (default: "travetto_pack")
+  -dt, --docker-tag <string>           Docker Image Tag  (default: ["latest"])
+  -dp, --docker-port <number>          Docker Image Port  (default: [])
+  -dx, --docker-push                   Docker Push Tags  (default: false)
+  -dr, --docker-registry <string>      Docker Registry
+  -m, --module <string>                Module to run for
+  -h, --help                           display help for command
 ```
 
 The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the `--eject-file`  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. 
@@ -220,7 +223,7 @@ export BUNDLE_OUTPUT=$DIST
 export BUNDLE_FORMAT=commonjs
 export TRV_MANIFEST=$TRV_OUT/node_modules/$MOD
 cd $TRV_OUT
-npx rollup -c node_modules/@travetto/pack/support/bin/rollup.js
+npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/bin/rollup.js
 cd $ROOT
 
 # Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile 
