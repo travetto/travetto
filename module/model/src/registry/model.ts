@@ -64,8 +64,8 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     delete view.id.required; // Allow ids to be optional
 
     if ('type' in view && this.getBaseModel(cls) !== cls) {
-      config.subType = schema.subType; // Copy from schema
-      delete view.type.required; // Allow type to be optional
+      config.subType = !!schema.subTypeName; // Copy from schema
+      delete view[schema.subTypeField].required; // Allow type to be optional
     }
     return config;
   }

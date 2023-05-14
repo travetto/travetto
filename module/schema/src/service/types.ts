@@ -64,9 +64,17 @@ export interface ClassConfig extends DescribableConfig {
    */
   validators: ValidatorFn<unknown, unknown>[];
   /**
-   * Is the class a sub type
+   * Is the class a base type
    */
-  subType?: boolean;
+  baseType?: boolean;
+  /**
+   * Sub type name
+   */
+  subTypeName?: string;
+  /**
+   * The field the subtype is determined by
+   */
+  subTypeField: string;
   /**
    * Metadata that is related to the schema structure
    */

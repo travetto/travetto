@@ -1,4 +1,5 @@
 import { Class } from '@travetto/base';
+import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelType } from '../types/model';
 import { ModelRegistry } from './model';
@@ -15,6 +16,7 @@ export function Model(conf: Partial<ModelOptions<ModelType>> | string = {}) {
       conf = { store: conf };
     }
     ModelRegistry.register(target, conf);
+    SchemaRegistry.register(target, { baseType: conf.baseType });
     return target;
   };
 }

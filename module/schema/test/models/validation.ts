@@ -36,8 +36,8 @@ export class DateTestSchema {
   date: Date;
 }
 
-@Schema()
-export abstract class Aaaz {
+@Schema({ baseType: true })
+export class Aaaz {
   type?: string;
   a: boolean;
 }

@@ -228,7 +228,7 @@ export class SpecGenerator {
         if (RootIndex.getFunctionMetadata(type)?.abstract) {
           const map = SchemaRegistry.getSubTypesForClass(type);
           if (map) {
-            extra.oneOf = [...new Set(map.values())].map(c => {
+            extra.oneOf = map.map(c => {
               this.#processSchema(c);
               return this.#getType(c);
             });

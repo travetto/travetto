@@ -1,23 +1,15 @@
-import { Class, AppError, ObjectUtil, ClassInstance, ConcreteClass } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
+import { Class, AppError } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 
 import { ClassList, FieldConfig, ClassConfig, SchemaConfig, ViewFieldsConfig, ViewConfig } from './types';
 import { SchemaChangeListener } from './changes';
 import { AllViewⲐ } from '../internal/types';
 
-function hasType<T>(o: unknown): o is { type: Class<T> | string } {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return !!o && !ObjectUtil.isPrimitive(o) && 'type' in (o as object) && !!(o as Record<string, string>)['type'];
-}
-
-function isWithType<T>(o: T, cfg: ClassConfig | undefined): o is T & { type?: string } {
-  return !!cfg && !!cfg.subType && 'type' in cfg.views[AllViewⲐ].schema;
-}
-
-function getConstructor<T>(o: T): ConcreteClass<T> {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return (o as unknown as ClassInstance<T>).constructor;
-}
+const classToSubTypeName = (cls: Class): string => cls.name
+  .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
+  .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
+  .toLowerCase();
 
 /**
  * Schema registry for listening to changes
@@ -26,21 +18,29 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
 
   #accessorDescriptors = new Map<Class, Map<string, PropertyDescriptor>>();
   #subTypes = new Map<Class, Map<string, Class>>();
-  #typeKeys = new Map<Class, string>();
   #pendingViews = new Map<Class, Map<string, ViewFieldsConfig<unknown>>>();
+  #baseSchema = new Map<Class, Class>();
 
   constructor() {
     super(RootRegistry);
   }
 
-  #computeSubTypeName(cls: Class): string {
-    if (!this.#typeKeys.has(cls)) {
-      this.#typeKeys.set(cls, cls.name
-        .replace(/([A-Z])([A-Z][a-z])/g, (all, l, r) => `${l}_${r.toLowerCase()}`)
-        .replace(/([a-z]|\b)([A-Z])/g, (all, l, r) => l ? `${l}_${r.toLowerCase()}` : r.toLowerCase())
-        .toLowerCase());
+  /**
+   * Find base schema class for a given class
+   */
+  getBaseSchema(cls: Class): Class {
+    if (!this.#baseSchema.has(cls)) {
+      let conf = this.get(cls) ?? this.getOrCreatePending(cls);
+      let parent = cls;
+
+      while (conf && !conf.baseType) {
+        parent = this.getParentClass(parent)!;
+        conf = this.get(parent) ?? this.pending.get(MetadataRegistry.id(parent));
+      }
+
+      this.#baseSchema.set(cls, conf ? parent : cls);
     }
-    return this.#typeKeys.get(cls)!;
+    return this.#baseSchema.get(cls)!;
   }
 
   /**
@@ -48,9 +48,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param cls Base class
    */
   getSubTypeName(cls: Class): string | undefined {
-    if (this.get(cls).subType) {
-      return this.#computeSubTypeName(cls);
-    }
+    return this.get(cls).subTypeName;
   }
 
   /**
@@ -83,8 +81,12 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * Ensure type is set properly
    */
   ensureInstanceTypeField<T>(cls: Class, o: T): void {
-    if (isWithType(o, this.get(cls)) && !o.type) {  // Do we have a type field defined
-      o.type = this.#computeSubTypeName(cls); // Assign if missing
+    const schema = this.get(cls);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const typeField = (schema.subTypeField) as keyof T;
+    if (schema.subTypeName && typeField in schema.views[AllViewⲐ].schema && !o[typeField]) {  // Do we have a type field defined
+      // @ts-expect-error
+      o[typeField] = schema.subTypeName; // Assign if missing
     }
   }
 
@@ -112,64 +114,59 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param o Actual instance
    */
   resolveSubTypeForInstance<T>(cls: Class<T>, o: T): Class {
-    return this.resolveSubType(cls, hasType<T>(o) ? o.type : getConstructor(o));
-  }
+    const base = this.getBaseSchema(cls);
+    const clsSchema = this.get(cls);
+    const baseSchema = this.get(base);
 
-  /**
-   * Resolve the sub type for a class and a type
-   * @param cls The base class
-   * @param type The sub tye value
-   */
-  resolveSubType(cls: Class, type: Class | string): Class {
-    if (this.#subTypes.has(cls)) {
-      const typeId = type && (typeof type === 'string' ? type : type.Ⲑid);
-      if (type) {
-        return this.#subTypes.get(cls)!.get(typeId) ?? cls;
+    if (clsSchema.subTypeName || baseSchema.baseType) { // We have a sub type
+      // @ts-expect-error
+      const type = o[baseSchema.subTypeField] ?? clsSchema.subTypeName ?? baseSchema.subTypeName;
+      const ret = this.#subTypes.get(base)!.get(type)!;
+      // @ts-expect-error
+      if (ret && !(new ret() instanceof cls)) {
+        throw new AppError(`Resolved class ${ret.name} is not assignable to ${cls.name}`);
       }
-    } else if (this.get(cls)?.subType) {
-      const expectedType = this.#typeKeys.get(cls);
-      if (expectedType && typeof type === 'string' && expectedType !== type) {
-        throw new AppError(`Data of type ${type} does not match expected class type ${expectedType}`, 'data');
-      }
+      return ret;
+    } else {
+      return cls;
     }
-    return cls;
   }
 
   /**
    * Return all subtypes by discriminator for a given class
    * @param cls The base class to resolve from
    */
-  getSubTypesForClass(cls: Class): Map<string, Class> | undefined {
-    return this.#subTypes.get(cls);
+  getSubTypesForClass(cls: Class): Class[] | undefined {
+    const res = this.#subTypes.get(cls)?.values();
+    return res ? [...res] : undefined;
   }
 
   /**
    * Register sub types for a class
    * @param cls The class to register against
-   * @param type The subtype name
+   * @param name The subtype name
    */
-  registerSubTypes(cls: Class, type?: string): string {
+  registerSubTypes(cls: Class, name?: string): void {
     // Mark as subtype
-    (this.get(cls) ?? this.getOrCreatePending(cls)).subType = true;
+    const config = (this.get(cls) ?? this.getOrCreatePending(cls));
+    let base: Class | undefined = this.getBaseSchema(cls);
 
-    type ??= this.#computeSubTypeName(cls)!;
-
-    this.#typeKeys.set(cls, type);
-
-    let parent = this.getParentClass(cls)!;
-    let parentConfig = this.get(parent);
-
-    while (parentConfig) {
-      if (!this.#subTypes.has(parent)) {
-        this.#subTypes.set(parent, new Map());
-      }
-      this.#subTypes.get(parent)!.set(type, cls);
-      this.#subTypes.get(parent)!.set(cls.Ⲑid, cls);
-      parent = this.getParentClass(parent!)!;
-      parentConfig = this.get(parent);
+    if (!this.#subTypes.has(base)) {
+      this.#subTypes.set(base, new Map());
     }
 
-    return type;
+    if (base !== cls || config.baseType) {
+      config.subTypeField = (this.get(base) ?? this.getOrCreatePending(base)).subTypeField;
+      config.subTypeName = name ?? config.subTypeName ?? classToSubTypeName(cls);
+      this.#subTypes.get(base)!.set(config.subTypeName!, cls);
+    }
+    if (base !== cls) {
+      while (base && ('Ⲑid' in base)) {
+        this.#subTypes.get(base)!.set(config.subTypeName!, cls);
+        const parent = this.getParentClass(base);
+        base = parent ? this.getBaseSchema(parent) : undefined;
+      }
+    }
   }
 
   /**
@@ -196,7 +193,8 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     return {
       class: cls,
       validators: [],
-      subType: false,
+      subTypeField: 'type',
+      baseType: RootIndex.getFunctionMetadata(cls)?.abstract,
       metadata: {},
       methods: {},
       views: {
@@ -347,14 +345,18 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
    * @param dest Target config
    * @param src Source config
    */
-  mergeConfigs(dest: ClassConfig, src: Partial<ClassConfig>): ClassConfig {
+  mergeConfigs(dest: ClassConfig, src: Partial<ClassConfig>, inherited = false): ClassConfig {
     dest.views[AllViewⲐ] = {
       schema: { ...dest.views[AllViewⲐ].schema, ...src.views?.[AllViewⲐ].schema },
       fields: [...dest.views[AllViewⲐ].fields, ...src.views?.[AllViewⲐ].fields ?? []]
     };
+    if (!inherited) {
+      dest.baseType = src.baseType ?? dest.baseType;
+      dest.subTypeName = src.subTypeName ?? dest.subTypeName;
+    }
     dest.methods = { ...src.methods ?? {}, ...dest.methods ?? {} };
     dest.metadata = { ...src.metadata ?? {}, ...dest.metadata ?? {} };
-    dest.subType = src.subType || dest.subType;
+    dest.subTypeField = src.subTypeField ?? dest.subTypeField;
     dest.title = src.title || dest.title;
     dest.validators = [...src.validators ?? [], ...dest.validators];
     return dest;
@@ -397,7 +399,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (parent) {
       const parentConfig = this.get(parent);
       if (parentConfig) {
-        config = this.mergeConfigs(config, parentConfig);
+        config = this.mergeConfigs(config, parentConfig, true);
       }
     }
 
@@ -428,7 +430,7 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
     if (e.type === 'removing' && this.hasExpired(cls)) {
       // Recompute subtypes
       this.#subTypes.clear();
-      this.#typeKeys.delete(cls);
+      this.#baseSchema.delete(cls);
       this.#accessorDescriptors.delete(cls);
 
       // Recompute subtype mappings
