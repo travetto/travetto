@@ -1,6 +1,6 @@
 {
   "name": "@travetto/config",
-  "version": "3.1.3",
+  "version": "3.1.4",
   "description": "Configuration support",
   "keywords": [
     "yaml",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@travetto/di": "^3.1.1",
-    "@travetto/schema": "^3.1.3",
+    "@travetto/schema": "^3.1.4",
     "@travetto/yaml": "^3.1.1"
   },
   "travetto": {
