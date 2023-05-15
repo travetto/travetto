@@ -44,14 +44,6 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   }
 
   /**
-   * Get subtype name for a class
-   * @param cls Base class
-   */
-  getSubTypeName(cls: Class): string | undefined {
-    return this.get(cls).subTypeName;
-  }
-
-  /**
    * Retrieve class level metadata
    * @param cls
    * @param prop

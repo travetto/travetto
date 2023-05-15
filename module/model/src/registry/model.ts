@@ -63,7 +63,7 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     const view = schema.views[AllViewⲐ].schema;
     delete view.id.required; // Allow ids to be optional
 
-    if ('type' in view && this.getBaseModel(cls) !== cls) {
+    if (schema.subTypeField in view && this.getBaseModel(cls) !== cls) {
       config.subType = !!schema.subTypeName; // Copy from schema
       delete view[schema.subTypeField].required; // Allow type to be optional
     }
@@ -134,8 +134,9 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   getStore(cls: Class): string {
     if (!this.stores.has(cls)) {
       const config = this.get(cls) ?? this.getOrCreatePending(cls);
-      if (config.subType) {
-        return this.getStore(this.getBaseModel(cls));
+      const base = this.getBaseModel(cls);
+      if (base !== cls) {
+        return this.getStore(base);
       }
 
       const name = config.store ?? cls.name.toLowerCase();

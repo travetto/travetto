@@ -26,7 +26,8 @@ export class ModelQuerySuggestUtil {
     const clauses: WhereClauseRaw<ModelType>[] = prefix ? [{ [field]: { $regex: this.getSuggestRegex(prefix) } }] : [];
 
     if (config.subType) {
-      clauses.push({ type: SchemaRegistry.getSubTypeName(cls) });
+      const { subTypeField, subTypeName } = SchemaRegistry.get(cls);
+      clauses.push({ [subTypeField]: subTypeName });
     }
 
     if (config.expiresAt) {
@@ -83,7 +84,7 @@ export class ModelQuerySuggestUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.getSuggestQuery<ModelType>(cls, field as ValidStringFields<ModelType>, prefix, {
       ...(query ?? {}),
-      select: { [field]: true, ...(config.subType ? { type: true } : {}) }
+      select: { [field]: true, ...(config.subType ? { [SchemaRegistry.get(cls).subTypeField]: true } : {}) }
     }) as Query<T>;
   }
 }

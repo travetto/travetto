@@ -14,10 +14,6 @@ export interface ModelType {
    */
   id: string;
   /**
-   * Type of model to save
-   */
-  type?: string;
-  /**
    * Run before saving
    */
   prePersist?(): void | Promise<void>;

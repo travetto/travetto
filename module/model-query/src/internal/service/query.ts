@@ -47,8 +47,9 @@ export class ModelQueryUtil {
 
     const conf = ModelRegistry.get(cls);
     if (conf.subType) {
+      const { subTypeField, subTypeName } = SchemaRegistry.get(cls);
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      clauses.push({ type: SchemaRegistry.getSubTypeName(cls) } as WhereClauseRaw<T>);
+      clauses.push({ [subTypeField]: subTypeName } as WhereClauseRaw<T>);
     }
     if (checkExpiry && conf.expiresAt) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

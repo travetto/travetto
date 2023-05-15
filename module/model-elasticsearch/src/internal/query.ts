@@ -259,8 +259,9 @@ export class ElasticsearchQueryUtil {
       });
     }
     if (subType) {
+      const { subTypeField, subTypeName } = SchemaRegistry.get(cls);
       clauses.push({
-        term: { type: { value: SchemaRegistry.getSubTypeName(cls) } }
+        term: { [subTypeField]: { value: subTypeName } }
       });
     }
     return clauses.length === 0 ? {} :

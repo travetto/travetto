@@ -1,4 +1,4 @@
-import { assert } from 'console';
+import assert from 'assert';
 
 import { RootRegistry } from '@travetto/registry';
 import { SubType } from '@travetto/schema';
