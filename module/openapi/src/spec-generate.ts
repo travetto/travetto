@@ -228,10 +228,12 @@ export class SpecGenerator {
         if (RootIndex.getFunctionMetadata(type)?.abstract) {
           const map = SchemaRegistry.getSubTypesForClass(type);
           if (map) {
-            extra.oneOf = map.map(c => {
-              this.#processSchema(c);
-              return this.#getType(c);
-            });
+            extra.oneOf = map
+              .filter(x => !RootIndex.getFunctionMetadata(x)?.abstract)
+              .map(c => {
+                this.#processSchema(c);
+                return this.#getType(c);
+              });
           }
         }
 
