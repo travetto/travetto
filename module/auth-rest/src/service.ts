@@ -7,6 +7,8 @@ import { AsyncContext } from '@travetto/context';
 
 import { AuthToken, AuthTokenⲐ } from './internal/types';
 
+const PrincipalⲐ = Symbol.for('@travetto/auth:principal');
+
 /**
  * Auth service to allow for rest-based interaction
  */
@@ -90,5 +92,21 @@ export class AuthService {
   setAuthenticationToken(token: AuthToken): void {
     this.context.set(AuthTokenⲐ, token);
   }
-}
 
+  /**
+  * Set principal
+  * @param p The auth principal
+  */
+  setPrincipal(p: Principal | undefined): void {
+    this.context.set(PrincipalⲐ, p);
+  }
+
+  /**
+   * Get the principal from the context
+   * @returns principal if authenticated
+   * @returns undefined if not authenticated
+   */
+  getPrincipal<T = { [key: string]: unknown }>(): (Principal<T> | undefined) {
+    return this.context.get<Principal<T>>(PrincipalⲐ);
+  }
+}

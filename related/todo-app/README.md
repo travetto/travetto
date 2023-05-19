@@ -364,6 +364,7 @@ npx trv run:rest
       RestAcceptsConfig: { types: {} },
       RestAsyncContextConfig: {},
       RestAuthConfig: {},
+      RestAuthContextConfig: {},
       RestAuthLoginConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },

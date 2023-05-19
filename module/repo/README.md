@@ -52,7 +52,7 @@ Author: Travetto Framework <travetto.framework@gmail.com>
 Date:   Thu Feb 23 17:51:37 2023 -0500
 Date:   Thu Feb 23 17:51:37 2023 -0500
 
-    Publish @travetto/asset,@travetto/asset-rest,@travetto/auth,@travetto/auth-model,@travetto/auth-rest,@travetto/auth-rest-context,@travetto/auth-rest-jwt,@travetto/auth-rest-passport,@travetto/auth-rest-session,...
+    Publish @travetto/asset,@travetto/asset-rest,@travetto/auth,@travetto/auth-model,@travetto/auth-rest,@travetto/auth-rest-jwt,@travetto/auth-rest-passport,@travetto/auth-rest-session,...
 ```
 
 ## CLI - Publish
@@ -117,7 +117,6 @@ module/asset-rest
 module/auth
 module/auth-model
 module/auth-rest
-module/auth-rest-context
 module/auth-rest-jwt
 module/auth-rest-passport
 module/auth-rest-session
@@ -215,7 +214,6 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
                    module/auth <workspace-root>/module/auth
              module/auth-model <workspace-root>/module/auth-model
               module/auth-rest <workspace-root>/module/auth-rest
-      module/auth-rest-context <workspace-root>/module/auth-rest-context
           module/auth-rest-jwt <workspace-root>/module/auth-rest-jwt
      module/auth-rest-passport <workspace-root>/module/auth-rest-passport
       module/auth-rest-session <workspace-root>/module/auth-rest-session

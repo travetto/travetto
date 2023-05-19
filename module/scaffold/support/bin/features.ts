@@ -47,7 +47,6 @@ export const FEATURES: Feature[] = [
     addons: [
       { title: 'Rest Session', package: '@travetto/rest-session' },
       { title: 'Auth Rest Session', package: '@travetto/auth-rest-session' },
-      { title: 'Auth Rest Context', package: '@travetto/auth-rest-context' }
     ]
   },
   {

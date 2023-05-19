@@ -62,7 +62,6 @@ import { RestFastifyLambdaComponent } from './gen/rest-fastify-lambda/rest-fasti
 import { RestKoaLambdaComponent } from './gen/rest-koa-lambda/rest-koa-lambda.component';
 import { RestAwsLambdaComponent } from './gen/rest-aws-lambda/rest-aws-lambda.component';
 import { EmailNodemailerComponent } from './gen/email-nodemailer/email-nodemailer.component';
-import { AuthRestContextComponent } from './gen/auth-rest-context/auth-rest-context.component';
 import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component';
 import { TerminalComponent } from './gen/terminal/terminal.component';
 import { ManifestComponent } from './gen/manifest/manifest.component';
@@ -145,7 +144,6 @@ import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.componen
     RestKoaLambdaComponent,
     RestAwsLambdaComponent,
     EmailNodemailerComponent,
-    AuthRestContextComponent,
     SchemaFakerComponent,
     TerminalComponent,
     ManifestComponent,

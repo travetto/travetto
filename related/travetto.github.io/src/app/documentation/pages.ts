@@ -50,7 +50,6 @@ import { RestExpressLambdaComponent } from './gen/rest-express-lambda/rest-expre
 import { RestKoaLambdaComponent } from './gen/rest-koa-lambda/rest-koa-lambda.component';
 import { RestFastifyLambdaComponent } from './gen/rest-fastify-lambda/rest-fastify-lambda.component';
 import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.component';
-import { AuthRestContextComponent } from './gen/auth-rest-context/auth-rest-context.component';
 import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component';
 import { ManifestComponent } from './gen/manifest/manifest.component';
 import { TerminalComponent } from './gen/terminal/terminal.component';
@@ -106,7 +105,6 @@ export const PAGES = [
       { path: 'auth-rest', title: 'Rest', component: AuthRestComponent },
       { path: 'auth-rest-passport', title: 'Rest Passport', component: AuthRestPassportComponent },
       { path: 'auth-rest-session', title: 'Rest Session', component: AuthRestSessionComponent },
-      { path: 'auth-rest-context', title: 'Rest Context', component: AuthRestContextComponent },
       { path: 'auth-rest-jwt', title: 'Rest JWT', component: AuthRestJwtComponent },
       { path: 'jwt', title: 'JWT', component: JwtComponent }
     ]
