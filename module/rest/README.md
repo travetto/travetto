@@ -400,7 +400,7 @@ export class RestBodyParseConfig extends ManagedInterceptorConfig {
 ```
 
 ### SerializeInterceptor
-[SerializeInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L17) is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
+[SerializeInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/serialize.ts#L14) is what actually sends the response to the requestor. Given the ability to prioritize interceptors, another interceptor can have higher priority and allow for complete customization of response handling.
 
 ### CorsInterceptor
 [CorsInterceptor](https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/cors.ts#L45) allows cors functionality to be configured out of the box, by setting properties in your `application.yml`, specifically, `rest.cors.active: true`

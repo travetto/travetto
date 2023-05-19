@@ -98,6 +98,17 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
   }
 
   /**
+   * Rewrite token with new permissions
+   */
+  updateTokenPermissions(token: string, permissions: string[]): Promise<string> {
+    return JWTUtil.rewrite<{ auth: Principal }>(
+      token,
+      p => ({ ...p, permissions }),
+      { key: this.config.signingKey }
+    );
+  }
+
+  /**
    * Verify token to principal
    * @param token
    */

@@ -118,6 +118,10 @@ export class JWTUtil {
    */
   static read<T extends Payload = Payload>(jwt: string): TypedSig<T>;
   /**
+   * Rewrite a token with a simple transformation
+   */
+  static async rewrite<T extends Payload>(jwt: string, transformer: (o: T) => T, options: SignOptions = {}): Promise<string>;
+  /**
    * Verify the token
    */
   static async verify<T>(jwt: string, options: VerifyOptions = {}): Promise<Payload & T>;

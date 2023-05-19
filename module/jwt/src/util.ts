@@ -77,6 +77,14 @@ export class JWTUtil {
   }
 
   /**
+   * Rewrite a token with a simple transformation
+   */
+  static async rewrite<T extends Payload>(jwt: string, transformer: (o: T) => T, options: SignOptions = {}): Promise<string> {
+    const { payload } = await this.read<T>(jwt);
+    return await this.create(transformer(payload), options);
+  }
+
+  /**
    * Verify the token
    */
   static async verify<T>(jwt: string, options: VerifyOptions = {}): Promise<Payload & T> {
