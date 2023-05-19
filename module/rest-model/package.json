@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-model",
-  "version": "3.1.9",
+  "version": "3.1.10",
   "description": "RESTful support for generating APIs from Model classes.",
   "keywords": [
     "rest",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@travetto/model": "^3.1.10",
-    "@travetto/rest": "^3.1.6",
+    "@travetto/rest": "^3.1.7",
     "@travetto/schema": "^3.1.4"
   },
   "travetto": {
