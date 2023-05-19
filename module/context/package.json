@@ -1,6 +1,6 @@
 {
   "name": "@travetto/context",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Async-aware state management, maintaining context across asynchronous calls.",
   "keywords": [
     "async-hooks",
@@ -26,10 +26,10 @@
     "directory": "module/context"
   },
   "dependencies": {
-    "@travetto/di": "^3.1.1"
+    "@travetto/di": "^3.1.2"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.1.1"
+    "@travetto/test": "^3.1.2"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
