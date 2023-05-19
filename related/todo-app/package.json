@@ -21,8 +21,8 @@
     "start": "npx travetto run"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^3.1.10",
-    "@travetto/auth-rest-session": "^3.1.12",
+    "@travetto/auth-rest": "^3.1.11",
+    "@travetto/auth-rest-session": "^3.1.13",
     "@travetto/cli": "^3.1.4",
     "@travetto/log": "^3.1.6",
     "@travetto/model-mongo": "^3.1.10",
