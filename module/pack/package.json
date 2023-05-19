@@ -24,12 +24,12 @@
     "directory": "module/pack"
   },
   "dependencies": {
-    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-json": "^6.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.1",
-    "@rollup/plugin-terser": "^0.4.0",
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-terser": "^0.4.3",
     "@travetto/base": "^3.1.1",
-    "rollup": "^3.17.2",
+    "rollup": "^3.22.0",
     "rollup-plugin-sourcemaps": "^0.6.3"
   },
   "peerDependencies": {

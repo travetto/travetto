@@ -35,11 +35,11 @@
     "@travetto/image": "^3.1.2",
     "@types/inline-css": "^3.0.1",
     "@types/parse5": "^7.0.0",
-    "@types/sass": "^1.43.1",
+    "@types/sass": "^1.45.0",
     "foundation-emails": "^2.4.0",
     "html-entities": "^2.3.3",
     "inline-css": "^4.0.2",
-    "sass": "^1.58.3"
+    "sass": "^1.62.1"
   },
   "peerDependencies": {
     "@travetto/cli": "^3.1.4",

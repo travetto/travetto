@@ -27,7 +27,7 @@
   "dependencies": {
     "@travetto/config": "^3.1.4",
     "@travetto/model": "^3.1.10",
-    "redis": "^4.6.4"
+    "redis": "^4.6.6"
   },
   "peerDependencies": {
     "@travetto/command": "^3.1.2"
