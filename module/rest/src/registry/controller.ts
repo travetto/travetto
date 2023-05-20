@@ -1,11 +1,11 @@
 import { DependencyRegistry } from '@travetto/di';
 import { Primitive, Class, ClassInstance } from '@travetto/base';
 import { MetadataRegistry } from '@travetto/registry';
+import { SchemaRegistry } from '@travetto/schema';
 
-import { EndpointConfig, ControllerConfig, EndpointDecorator } from './types';
+import { EndpointConfig, ControllerConfig, EndpointDecorator, ControllerRegistryVisitor } from './types';
 import { Filter, RouteHandler, ParamConfig } from '../types';
 import { RestInterceptor } from '../interceptor/types';
-
 
 type ValidFieldNames<T> = {
   [K in keyof T]:
@@ -246,6 +246,40 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
     }
 
     return final;
+  }
+
+  /**
+   * Allows for simple visiting of the controller registry, along with endpoints and types
+   */
+  async visit<T = unknown>(visitor: ControllerRegistryVisitor<T>, options: { skipUndocumented?: boolean } = {}): Promise<T> {
+    const { skipUndocumented = true } = options;
+    for (const cls of this.getClasses()) {
+      const controller = this.get(cls);
+      if (controller.documented === false && skipUndocumented) {
+        continue;
+      }
+      await visitor.onControllerStart?.(controller);
+      for (const endpoint of controller.endpoints) {
+        await visitor.onEndpointStart?.(endpoint, controller);
+        if (endpoint.documented === false && skipUndocumented) {
+          continue;
+        }
+        if (visitor.onSchema) {
+          if (endpoint.responseType?.type.Ⲑid) {
+            await visitor.onSchema(SchemaRegistry.get(endpoint.responseType.type));
+          }
+          if (endpoint.requestType?.type.Ⲑid) {
+            await visitor.onSchema(SchemaRegistry.get(endpoint.requestType.type));
+          }
+          for (const param of SchemaRegistry.getMethodSchema(cls, endpoint.handlerName)) {
+            await visitor.onSchema(SchemaRegistry.get(param.type));
+          }
+        }
+        await visitor.onEndpointEnd?.(endpoint, controller);
+      }
+      await visitor.onControllerEnd?.(controller);
+    }
+    return await visitor.onComplete?.() ?? undefined as T;
   }
 }
 

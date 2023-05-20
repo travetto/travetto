@@ -3,10 +3,10 @@ import { ParameterObject } from 'openapi3-ts/src/model/OpenApi';
 import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { Controller, Delete, Get, Head, Patch, Put, Undocumented } from '@travetto/rest';
+import { Controller, ControllerRegistry, Delete, Get, Head, Patch, Put, Undocumented } from '@travetto/rest';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
-import { SpecGenerator } from '../src/spec-generate';
+import { OpenapiVisitor } from '../src/spec-generate';
 import { TestUser } from './model';
 
 
@@ -73,7 +73,7 @@ export class GenerateSuite {
 
   @Test()
   async verifyGeneral() {
-    const config = new SpecGenerator().generate({});
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(config);
     assert(Object.keys(config.paths).length === 7);
     assert(Object.keys(config.components.schemas).length >= 2);
@@ -81,7 +81,7 @@ export class GenerateSuite {
 
   @Test()
   async verifyGetUser() {
-    const config = new SpecGenerator().generate({});
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/user'].get);
     assert(config.paths['/test/user'].get.parameters?.length === 1);
 
@@ -103,7 +103,7 @@ export class GenerateSuite {
 
   @Test()
   async verifyGetUsers() {
-    const config = new SpecGenerator().generate({});
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/users'].get);
     assert(config.paths['/test/users'].get.parameters?.length === 1);
 
@@ -125,7 +125,7 @@ export class GenerateSuite {
 
   @Test()
   async verifyPutNames() {
-    const config = new SpecGenerator().generate({});
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/names'].put);
     assert(config.paths['/test/names'].put.parameters?.length === 1);
 
@@ -149,7 +149,7 @@ export class GenerateSuite {
 
   @Test()
   async verifyPatchWho() {
-    const config = new SpecGenerator().generate({});
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/who'].patch);
     assert(config.paths['/test/who'].patch.responses['200']);
     assert.deepStrictEqual(config.paths['/test/who'].patch.responses['200'], {
@@ -197,7 +197,7 @@ export class GenerateSuite {
 
   @Test()
   async verifyDeleteOne() {
-    const config = new SpecGenerator().generate({});
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/{id}'].delete);
     assert(config.paths['/test/{id}'].delete.responses['201']);
     assert.deepStrictEqual(config.paths['/test/{id}'].delete.responses['201'], {
@@ -217,7 +217,7 @@ export class GenerateSuite {
 
   @Test()
   async verifyDeleteAll() {
-    const config = new SpecGenerator().generate({});
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/all/{id}'].delete);
     assert(config.paths['/test/all/{id}'].delete.responses['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].delete.responses['201'], {
@@ -256,7 +256,7 @@ export class GenerateSuite {
 
   @Test()
   async verifyHeadAll() {
-    const config = new SpecGenerator().generate({});
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/all/{id}'].head);
     assert(config.paths['/test/all/{id}'].head.responses['201']);
     assert.deepStrictEqual(config.paths['/test/all/{id}'].head.responses['201'], {
@@ -293,8 +293,8 @@ export class GenerateSuite {
   }
 
   @Test()
-  verifyDownload() {
-    const config = new SpecGenerator().generate({});
+  async verifyDownload() {
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(config.paths['/test/download'].get);
     assert(config.paths['/test/download'].get.responses['200']);
     assert.deepStrictEqual(config.paths['/test/download'].get.responses['200'], {
@@ -312,8 +312,8 @@ export class GenerateSuite {
   }
 
   @Test()
-  verifyUndocumented() {
-    const config = new SpecGenerator().generate({});
+  async verifyUndocumented() {
+    const config = await ControllerRegistry.visit(new OpenapiVisitor({}));
     assert(!config.paths['/test/random']);
   }
 }

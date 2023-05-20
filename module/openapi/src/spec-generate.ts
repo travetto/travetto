@@ -4,10 +4,10 @@ import type {
   RequestBodyObject, TagObject, PathsObject
 } from 'openapi3-ts';
 
-import { ControllerRegistry, EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType } from '@travetto/rest';
+import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerRegistryVisitor } from '@travetto/rest';
 import { RootIndex } from '@travetto/manifest';
 import { Class } from '@travetto/base';
-import { SchemaRegistry, FieldConfig } from '@travetto/schema';
+import { SchemaRegistry, FieldConfig, ClassConfig } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { ApiSpecConfig } from './config';
@@ -29,11 +29,17 @@ type GeneratedSpec = {
 /**
  * Spec generation utilities
  */
-export class SpecGenerator {
+export class OpenapiVisitor implements ControllerRegistryVisitor<GeneratedSpec> {
   #tags: TagObject[] = [];
   #allSchemas: SchemasObject = {};
   #schemas: SchemasObject = {};
   #paths: PathsObject = {};
+
+  #config: Partial<ApiSpecConfig> = {};
+
+  constructor(config: Partial<ApiSpecConfig> = {}) {
+    this.#config = config;
+  }
 
   /**
    * Get type id
@@ -197,15 +203,17 @@ export class SpecGenerator {
   /**
    * Process schema class
    */
-  #processSchema(type?: string | Class): string | undefined {
-    if (type === undefined || typeof type === 'string') {
-      return undefined;
+  onSchema(type?: ClassConfig): void {
+    if (type === undefined) {
+      return;
     }
 
-    const typeId = this.#getTypeId(type);
+    const cls = type.class;
+
+    const typeId = this.#getTypeId(cls);
 
     if (!this.#allSchemas[typeId]) {
-      const config = SchemaRegistry.get(type);
+      const config = SchemaRegistry.get(cls);
       if (config) {
         this.#allSchemas[typeId] = {
           title: config.title || config.description,
@@ -219,19 +227,19 @@ export class SpecGenerator {
 
         for (const fieldName of def.fields) {
           if (SchemaRegistry.has(def.schema[fieldName].type)) {
-            this.#processSchema(def.schema[fieldName].type);
+            this.onSchema(SchemaRegistry.get(def.schema[fieldName].type));
           }
           properties[fieldName] = this.#processSchemaField(def.schema[fieldName], required);
         }
 
         const extra: Record<string, unknown> = {};
-        if (RootIndex.getFunctionMetadata(type)?.abstract) {
-          const map = SchemaRegistry.getSubTypesForClass(type);
+        if (RootIndex.getFunctionMetadata(cls)?.abstract) {
+          const map = SchemaRegistry.getSubTypesForClass(cls);
           if (map) {
             extra.oneOf = map
               .filter(x => !RootIndex.getFunctionMetadata(x)?.abstract)
               .map(c => {
-                this.#processSchema(c);
+                this.onSchema(SchemaRegistry.get(c));
                 return this.#getType(c);
               });
           }
@@ -246,7 +254,6 @@ export class SpecGenerator {
         this.#allSchemas[typeId] = { title: typeId };
       }
     }
-    return typeId;
   }
 
   /**
@@ -309,7 +316,10 @@ export class SpecGenerator {
   /**
    * Process controller endpoint
    */
-  processEndpoint(ctrl: ControllerConfig, ep: EndpointConfig): void {
+  onEndpointEnd(ep: EndpointConfig, ctrl: ControllerConfig): void {
+    if (this.#config.skipRoutes) {
+      return;
+    }
 
     const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
 
@@ -353,53 +363,18 @@ export class SpecGenerator {
     };
   }
 
-  /**
-   * Generate full specification
-   */
-  generate(config: Partial<ApiSpecConfig> = {}): GeneratedSpec {
-
-    for (const cls of ControllerRegistry.getClasses()) {
-      const controller = ControllerRegistry.get(cls);
-      if (controller.documented === false) {
-        continue;
-      }
-      for (const ep of controller.endpoints) {
-        if (ep.documented === false) {
-          continue;
-        }
-        if (ep.requestType) {
-          this.#processSchema(ep.requestType.type);
-        }
-        if (ep.responseType) {
-          this.#processSchema(ep.responseType.type);
-        }
-        for (const param of SchemaRegistry.getMethodSchema(cls, ep.handlerName)) {
-          this.#processSchema(param.type);
-        }
-      }
+  onControllerEnd(controller: ControllerConfig): void {
+    if (this.#config.skipRoutes) {
+      return;
     }
+    this.#tags.push({
+      name: this.#getTypeTag(controller.class),
+      description: controller.description || controller.title
+    });
+  }
 
-    if (!config.skipRoutes) {
-      for (const cls of ControllerRegistry.getClasses()) {
-        const controller = ControllerRegistry.get(cls);
-        if (controller.documented === false) {
-          continue;
-        }
-        this.#tags.push({
-          name: this.#getTypeTag(controller.class),
-          description: controller.description || controller.title
-        });
-
-        for (const ep of controller.endpoints) {
-          if (ep.documented === false) {
-            continue;
-          }
-          this.processEndpoint(controller, ep);
-        }
-      }
-    }
-
-    if (config.exposeAllSchemas) {
+  onComplete(): GeneratedSpec {
+    if (this.#config.exposeAllSchemas) {
       this.#schemas = this.#allSchemas;
     }
 

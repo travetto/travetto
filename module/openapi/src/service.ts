@@ -10,7 +10,7 @@ import { SchemaRegistry } from '@travetto/schema';
 import { YamlUtil } from '@travetto/yaml';
 
 import { ApiHostConfig, ApiInfoConfig, ApiSpecConfig } from './config';
-import { SpecGenerator } from './spec-generate';
+import { OpenapiVisitor } from './spec-generate';
 
 /**
  * Open API generation service
@@ -59,12 +59,12 @@ export class OpenApiService {
   /**
    * Get specification object
    */
-  get spec(): OpenAPIObject {
+  async getSpec(): Promise<OpenAPIObject> {
     if (!this._spec) {
       this._spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
-        ...new SpecGenerator().generate(this.apiSpecConfig)
+        ...await ControllerRegistry.visit(new OpenapiVisitor(this.apiSpecConfig))
       };
     }
     return this._spec!;
@@ -77,9 +77,11 @@ export class OpenApiService {
     try {
       console.debug('Generating OpenAPI Spec', { output: this.apiSpecConfig.output });
 
+      const spec = await this.getSpec();
+
       const output = this.apiSpecConfig.output.endsWith('.json') ?
-        JSON.stringify(this.spec, undefined, 2) :
-        YamlUtil.serialize(this.spec);
+        JSON.stringify(spec, undefined, 2) :
+        YamlUtil.serialize(spec);
 
       // TODO: Should use file abstraction
       await fs.mkdir(path.dirname(this.apiSpecConfig.output), { recursive: true });
