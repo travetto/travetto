@@ -4,7 +4,7 @@ import type {
   RequestBodyObject, TagObject, PathsObject
 } from 'openapi3-ts';
 
-import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerRegistryVisitor } from '@travetto/rest';
+import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
 import { RootIndex } from '@travetto/manifest';
 import { Class } from '@travetto/base';
 import { SchemaRegistry, FieldConfig, ClassConfig } from '@travetto/schema';
@@ -29,7 +29,7 @@ type GeneratedSpec = {
 /**
  * Spec generation utilities
  */
-export class OpenapiVisitor implements ControllerRegistryVisitor<GeneratedSpec> {
+export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   #tags: TagObject[] = [];
   #allSchemas: SchemasObject = {};
   #schemas: SchemasObject = {};

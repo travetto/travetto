@@ -7,6 +7,7 @@ import { Schema } from '@travetto/schema';
 import { AuthService, Authenticated } from '@travetto/auth-rest';
 import { } from '@travetto/auth-rest';
 // {{/modules.auth_rest}}
+// @ts-expect-error
 import { $_modelService_$ } from '$_modelImport_$';
 
 import { Todo } from '../model/todo';

@@ -1,0 +1,38 @@
+{
+  "name": "@travetto/rest-client",
+  "version": "3.1.11",
+  "description": "RESTful support for generating clients for controller endpoints",
+  "keywords": [
+    "rest",
+    "rpc",
+    "client",
+    "travetto",
+    "typescript"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "__index__.ts",
+    "src"
+  ],
+  "main": "__index__.ts",
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "module/rest-clietn"
+  },
+  "dependencies": {
+    "@travetto/config": "^3.1.5",
+    "@travetto/rest": "^3.1.8",
+    "@travetto/schema": "^3.1.5"
+  },
+  "travetto": {
+    "displayName": "RESTful Client Support"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

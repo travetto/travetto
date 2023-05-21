@@ -10,6 +10,7 @@ export * from './src/decorator/controller';
 export * from './src/decorator/param';
 export * from './src/decorator/endpoint';
 export * from './src/registry/controller';
+export * from './src/registry/visitor';
 export * from './src/registry/types';
 export * from './src/response/redirect';
 export * from './src/response/renderable';

@@ -2,7 +2,7 @@ import type { OpenAPIObject } from 'openapi3-ts';
 
 import { ManifestUtil } from '@travetto/manifest';
 import { Injectable, Inject } from '@travetto/di';
-import { ControllerRegistry, RestConfig } from '@travetto/rest';
+import { ControllerRegistry, ControllerVisitUtil, RestConfig } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
 import { YamlUtil } from '@travetto/yaml';
 
@@ -61,7 +61,7 @@ export class OpenApiService {
       this._spec = {
         ...this.apiHostConfig,
         info: { ...this.apiInfoConfig },
-        ...await ControllerRegistry.visit(new OpenapiVisitor(this.apiSpecConfig))
+        ...await ControllerVisitUtil.visit(new OpenapiVisitor(this.apiSpecConfig))
       };
     }
     return this._spec!;
