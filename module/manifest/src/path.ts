@@ -8,7 +8,7 @@ export const path = {
   cwd,
   toPosix: posix,
   delimiter,
-  basename: (file: string): string => posix(basename(file)),
+  basename: (file: string, suffix?: string): string => posix(basename(file, suffix)),
   extname: (file: string): string => posix(extname(file)),
   dirname: (file: string): string => posix(dirname(file)),
   resolve: (...args: string[]): string => posix(resolve(cwd(), ...args.map(f => posix(f)))),

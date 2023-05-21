@@ -15,12 +15,12 @@ export class ManifestUtil {
   /**
    * Write file and copy over when ready
    */
-  static async #writeJsonWithBuffer(ctx: ManifestContext, filename: string, obj: object): Promise<string> {
-    const tempName = `manifest.${process.ppid}.${process.pid}.json.${Date.now()}`;
-    const file = path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule, filename);
+  static async writeFileWithBuffer(file: string, content: string): Promise<string> {
+    const ext = path.extname(file);
+    const tempName = `${path.basename(file, ext)}.${process.ppid}.${process.pid}.${Date.now()}${ext}`;
     await fs.mkdir(path.dirname(file), { recursive: true });
     const temp = path.resolve(os.tmpdir(), tempName);
-    await fs.writeFile(temp, JSON.stringify(obj), 'utf8');
+    await fs.writeFile(temp, content, 'utf8');
     await fs.copyFile(temp, file);
     fs.unlink(temp);
     return file;
@@ -88,7 +88,10 @@ export class ManifestUtil {
    * Write manifest for a given context, return location
    */
   static writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<string> {
-    return this.#writeJsonWithBuffer(ctx, MANIFEST_FILE, manifest);
+    return this.writeFileWithBuffer(
+      path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule, MANIFEST_FILE),
+      JSON.stringify(manifest)
+    );
   }
 
   /**

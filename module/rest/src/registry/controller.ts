@@ -253,32 +253,33 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
    */
   async visit<T = unknown>(visitor: ControllerRegistryVisitor<T>, options: { skipUndocumented?: boolean } = {}): Promise<T> {
     const { skipUndocumented = true } = options;
+    const onSchema = (cls?: Class): unknown | Promise<unknown> =>
+      cls && SchemaRegistry.has(cls) ? visitor.onSchema?.(SchemaRegistry.get(cls)) : undefined;
+
     for (const cls of this.getClasses()) {
       const controller = this.get(cls);
       if (controller.documented === false && skipUndocumented) {
         continue;
       }
+
       await visitor.onControllerStart?.(controller);
       for (const endpoint of controller.endpoints) {
-        await visitor.onEndpointStart?.(endpoint, controller);
         if (endpoint.documented === false && skipUndocumented) {
           continue;
         }
-        if (visitor.onSchema) {
-          if (endpoint.responseType?.type.Ⲑid) {
-            await visitor.onSchema(SchemaRegistry.get(endpoint.responseType.type));
-          }
-          if (endpoint.requestType?.type.Ⲑid) {
-            await visitor.onSchema(SchemaRegistry.get(endpoint.requestType.type));
-          }
-          for (const param of SchemaRegistry.getMethodSchema(cls, endpoint.handlerName)) {
-            await visitor.onSchema(SchemaRegistry.get(param.type));
-          }
+
+        const params = SchemaRegistry.getMethodSchema(cls, endpoint.handlerName);
+        await visitor.onEndpointStart?.(endpoint, controller, params);
+        await onSchema(endpoint.responseType?.type);
+        await onSchema(endpoint.requestType?.type);
+        for (const param of params) {
+          await onSchema(param.type);
         }
-        await visitor.onEndpointEnd?.(endpoint, controller);
+        await visitor.onEndpointEnd?.(endpoint, controller, params);
       }
       await visitor.onControllerEnd?.(controller);
     }
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return await visitor.onComplete?.() ?? undefined as T;
   }
 }

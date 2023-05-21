@@ -2,7 +2,7 @@ import { Class } from '@travetto/base';
 
 import { RestInterceptor } from '../interceptor/types';
 import { Filter, HeaderMap, RouteConfig, RouteHandler } from '../types';
-import { ClassConfig } from '@travetto/schema';
+import { ClassConfig, FieldConfig } from '@travetto/schema';
 
 /**
  * Endpoint decorator for composition of routing logic
@@ -112,8 +112,8 @@ export interface ControllerRegistryVisitor<T = unknown> {
   onControllerStart?(controller: ControllerConfig): Promise<unknown> | unknown;
   onControllerEnd?(controller: ControllerConfig): Promise<unknown> | unknown;
 
-  onEndpointStart?(endpoint: EndpointConfig, controller: ControllerConfig): Promise<unknown> | unknown;
-  onEndpointEnd?(endpoint: EndpointConfig, controller: ControllerConfig): Promise<unknown> | unknown;
+  onEndpointStart?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: FieldConfig[]): Promise<unknown> | unknown;
+  onEndpointEnd?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: FieldConfig[]): Promise<unknown> | unknown;
 
   onSchema?(schema: ClassConfig): Promise<unknown> | unknown;
 
