@@ -112,13 +112,17 @@ export interface ControllerVisitor<T = unknown> {
 
   onControllerStart?(controller: ControllerConfig): Promise<unknown> | unknown;
   onControllerEnd?(controller: ControllerConfig): Promise<unknown> | unknown;
-  onControllerRemove?(cls: Class): Promise<unknown> | unknown;
 
   onEndpointStart?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: FieldConfig[]): Promise<unknown> | unknown;
   onEndpointEnd?(endpoint: EndpointConfig, controller: ControllerConfig, methodParams: FieldConfig[]): Promise<unknown> | unknown;
-  onEndpointRemove?(endpoint: EndpointConfig, controller: ControllerConfig): Promise<unknown> | unknown;
 
   onSchema?(schema: ClassConfig): Promise<unknown> | unknown;
+
+  onControllerAdd?(cls: Class): Promise<unknown> | unknown;
+  onControllerRemove?(cls: Class): Promise<unknown> | unknown;
+
+  onSchemaAdd?(cls: Class): Promise<boolean> | boolean;
+  onSchemaRemove?(cls: Class): Promise<boolean> | boolean;
 
   onComplete?(): T | Promise<T>;
 }
