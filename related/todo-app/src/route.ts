@@ -64,7 +64,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Put('/:id/complete')
-  async complete(id: string, completed: boolean = true): Promise<Todo> {
+  async complete(id: string, completed: boolean = false): Promise<Todo> {
     return await this._svc.complete(id, completed);
   }
 

@@ -1,9 +1,10 @@
 import { Readable } from 'stream';
 
-import { Controller, Get, Produces, Request } from '@travetto/rest';
+import { Controller, Get, Produces, Request, Undocumented } from '@travetto/rest';
 import { FileResourceProvider } from '@travetto/base';
 
 @Controller('/ui')
+@Undocumented()
 export class UIController {
 
   resources = new FileResourceProvider({ includeCommon: true });

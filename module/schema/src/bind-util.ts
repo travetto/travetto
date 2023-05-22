@@ -67,9 +67,7 @@ export class BindUtil {
         sub = sub[name] as Record<string, unknown>;
 
         if (idx && key !== undefined) {
-          if (sub[key] === undefined) {
-            sub[key] = {};
-          }
+          sub[key] ??= {};
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           sub = sub[key] as Record<string, unknown>;
         }
@@ -85,6 +83,7 @@ export class BindUtil {
         const arr = last.indexOf('[') > 0;
         const name = last.split(/[^A-Za-z_0-9]/)[0];
         const idx = arr ? last.split(/[\[\]]/)[1] : '';
+
         let key = arr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
         if (sub[name] === undefined) {
           sub[name] = (typeof key === 'string') ? {} : [];
@@ -123,11 +122,11 @@ export class BindUtil {
           if (ObjectUtil.isPlainObject(v)) {
             Object.assign(out, this.flattenPaths(v, `${pre}[${i}].`));
           } else {
-            out[`${pre}[${i}]`] = v;
+            out[`${pre}[${i}]`] = v ?? '';
           }
         }
       } else {
-        out[pre] = value;
+        out[pre] = value ?? '';
       }
     }
     return out;

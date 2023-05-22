@@ -17,12 +17,13 @@
   },
   "files": [
     "__index__.ts",
-    "src"
+    "src",
+    "support"
   ],
   "main": "__index__.ts",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
-    "directory": "module/rest-clietn"
+    "directory": "module/rest-client"
   },
   "dependencies": {
     "@travetto/config": "^3.1.5",

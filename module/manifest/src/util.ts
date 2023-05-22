@@ -17,7 +17,7 @@ export class ManifestUtil {
    */
   static async writeFileWithBuffer(file: string, content: string): Promise<string> {
     const ext = path.extname(file);
-    const tempName = `${path.basename(file, ext)}.${process.ppid}.${process.pid}.${Date.now()}${ext}`;
+    const tempName = `${path.basename(file, ext)}.${process.ppid}.${process.pid}.${Date.now()}.${Math.random()}.${ext}`;
     await fs.mkdir(path.dirname(file), { recursive: true });
     const temp = path.resolve(os.tmpdir(), tempName);
     await fs.writeFile(temp, content, 'utf8');

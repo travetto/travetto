@@ -251,6 +251,9 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
   registerPendingParamFacet(target: Class, method: string, idx: number, config: Partial<FieldConfig>): Class {
     const methods = this.getOrCreatePending(target)!.methods!;
     const params = (methods[method] ??= []);
+    if (config.name === '') {
+      delete config.name;
+    }
 
     if (config.aliases) {
       config.aliases = [...params[idx]?.aliases ?? [], ...config.aliases];

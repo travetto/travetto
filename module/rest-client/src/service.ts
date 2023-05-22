@@ -1,12 +1,14 @@
-import { Inject, Injectable } from '@travetto/di';
-import { RestClientConfig } from './config';
-import { ControllerRegistry, ControllerVisitor } from '@travetto/rest';
-import { AngularClientGenerator } from './provider/angular';
-import { FetchClientGenerator } from './provider/fetch/fetch';
+import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
+import { RootIndex, path } from '@travetto/manifest';
+import { ControllerRegistry, ControllerVisitUtil, ControllerVisitor } from '@travetto/rest';
+
+import { RestClientConfig } from './config';
+import { AngularClientGenerator } from './provider/angular';
+import { FetchClientGenerator } from './provider/fetch';
 
 @Injectable()
-export class RestClientGeneratorService {
+export class RestClientGeneratorService implements AutoCreate {
 
   @Inject()
   config: RestClientConfig;
@@ -15,11 +17,22 @@ export class RestClientGeneratorService {
 
   async postConstruct(): Promise<void> {
     this.providers = this.config.providers.map(x => {
+
+      x.output = path.resolve(
+        RootIndex.manifest.workspacePath,
+        RootIndex.mainModule.sourceFolder,
+        x.output
+      );
+
       switch (x.type) {
         case 'angular': return new AngularClientGenerator(x.output);
         case 'fetch': return new FetchClientGenerator(x.output);
       }
     });
+
+    if (!this.providers.length) {
+      return;
+    }
 
     SchemaRegistry.on(async ev => {
       if (ev.type === 'removing') {
@@ -50,5 +63,10 @@ export class RestClientGeneratorService {
         }
       }
     });
+
+    // Initial render
+    for (const p of this.providers) {
+      await ControllerVisitUtil.visit(p);
+    }
   }
 }

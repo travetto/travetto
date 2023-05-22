@@ -7,5 +7,5 @@ type RestClientProvider = {
 
 @Config('rest.client')
 export class RestClientConfig {
-  providers: RestClientProvider[];
+  providers: RestClientProvider[] = [];
 }

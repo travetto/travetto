@@ -241,6 +241,29 @@ class DataBinding {
     });
   }
 
+  @Test()
+  async validateEmptyBind() {
+    assert.deepStrictEqual(
+      BindUtil.flattenPaths({
+        children: [
+          { age: '' }
+        ]
+      }),
+      { 'children[0].age': '' }
+    );
+
+    assert.deepStrictEqual(
+      BindUtil.expandPaths(
+        { 'children[0].age': undefined }
+      ),
+      {
+        children: [
+          { age: undefined }
+        ]
+      }
+    );
+  }
+
   @Test('Validate bind')
   async validatePrimitiveBindToObject() {
     const person = Person.from({

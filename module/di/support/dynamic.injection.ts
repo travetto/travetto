@@ -79,7 +79,7 @@ class $DynamicDependencyRegistry {
 
   destroyInstance(cls: Class, qualifier: symbol): void {
     const classId = cls.Ⲑid;
-    const proxy = this.#proxies.get(classId)!.get(qualifier);
+    const proxy = this.#proxies.get(classId)?.get(qualifier);
     this.#registryDestroyInstance(cls, qualifier);
     if (proxy) {
       proxy.setTarget(null);

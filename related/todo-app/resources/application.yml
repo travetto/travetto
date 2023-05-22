@@ -3,3 +3,8 @@ api.spec:
 
 rest:
   cors: { active : true }
+
+rest.client:
+  providers:
+    - type: fetch
+      output: ./api-client

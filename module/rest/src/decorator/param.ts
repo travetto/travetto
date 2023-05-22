@@ -68,6 +68,7 @@ export function Body(param: Partial<ParamConfig> = {}): ParamDecorator { return 
  * @augments `@travetto/rest:Param`
  */
 export function QuerySchema(config: Partial<ParamConfig> & { view?: string, key?: string } = {}): ParamDecorator {
+  config.key ??= '_';
   return Param('query', querySchemaParamConfig(config));
 }
 
