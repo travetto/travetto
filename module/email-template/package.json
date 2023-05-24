@@ -19,8 +19,8 @@
   "files": [
     "__index__.ts",
     "src",
-    "support",
-    "!resources"
+    "!resources",
+    "support"
   ],
   "main": "__index__.ts",
   "repository": {
