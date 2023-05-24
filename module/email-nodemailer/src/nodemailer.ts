@@ -14,11 +14,29 @@ type Transport = TransportType | json.Options | smtp.Options | ses.Options | sen
 export class NodemailerTransport implements MailTransport {
   #transport: Transporter;
 
+  /**
+   * Force content into alternative slots
+   */
+  #forceContentToAlternative(msg: MessageOptions): MessageOptions {
+    for (const [key, mime] of [['text', 'text/plain'], ['html', 'text/html']] as const) {
+      if (msg[key]) {
+        (msg.alternatives ??= []).push({
+          content: msg[key], contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `${mime}; charset=utf-8`
+        });
+        delete msg[key];
+      }
+    }
+    return msg;
+  }
+
   constructor(transportFactory: Transport) {
     this.#transport = createTransport(transportFactory);
   }
 
   async send<S extends SentMessage = SentMessage>(mail: MessageOptions): Promise<S> {
+
+    mail = this.#forceContentToAlternative(mail);
+
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const res = await this.#transport.sendMail(mail) as {
       messageId?: string;

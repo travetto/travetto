@@ -31,37 +31,6 @@ export class MailService {
   }
 
   /**
-   * Force content into alternative slots, satisfies node mailer
-   */
-  #forceContentToAlternative(msg: MessageOptions): MessageOptions {
-    for (const [key, mime] of [['text', 'text/plain'], ['html', 'text/html']] as const) {
-      if (msg[key]) {
-        (msg.alternatives ??= []).push({
-          content: msg[key], contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `${mime}; charset=utf-8`
-        });
-        delete msg[key];
-      }
-    }
-    return msg;
-  }
-
-  /**
-   * Send multiple messages.
-   */
-  async sendAll<S extends SentMessage = SentMessage>(messages: MessageOptions[], base: Partial<MessageOptions> = {}): Promise<S[]> {
-    return Promise.all(messages.map(msg => this.send<S>({
-      ...base,
-      ...msg,
-      ...(msg.context || base.context ? {
-        context: {
-          ...(base.context || {}),
-          ...(msg.context || {})
-        }
-      } : {})
-    })));
-  }
-
-  /**
    * Get compiled content by key
    */
   async getCompiled(key: string): Promise<{ html: string, text?: string, subject: string }> {
@@ -83,9 +52,9 @@ export class MailService {
    * @param ctx
    * @returns
    */
-  async buildMessage(key: string | MessageOptions, ctx?: Record<string, unknown>): Promise<MessageOptions> {
+  async buildMessage(key: string | MessageOptions, ctx: Record<string, unknown>): Promise<MessageOptions> {
     const tpl = (typeof key === 'string' ? await this.getCompiled(key) : key);
-    ctx ??= (typeof key === 'string' ? {} : key.context ?? {});
+
     const [rawHtml, text, subject] = await Promise.all([
       tpl.html ? this.#tplEngine!.template(tpl.html, ctx) : undefined,
       tpl.text ? this.#tplEngine!.template(tpl.text, ctx) : undefined,
@@ -110,11 +79,27 @@ export class MailService {
   /**
    * Send a single message
    */
-  async send<S extends SentMessage = SentMessage>(key: string, base?: MessageWithoutBody): Promise<S>;
+  async send<S extends SentMessage = SentMessage>(key: string, ctx?: Record<string, unknown>, base?: MessageWithoutBody): Promise<S>;
   async send<S extends SentMessage = SentMessage>(message: MessageOptions): Promise<S>;
-  async send<S extends SentMessage = SentMessage>(keyOrMessage: MessageOptions | string, base?: MessageWithoutBody): Promise<S> {
-    let msg = await this.buildMessage(keyOrMessage);
-    msg = this.#forceContentToAlternative(msg);
+  async send<S extends SentMessage = SentMessage>(keyOrMessage: MessageOptions | string, ctx?: Record<string, unknown>, base?: MessageWithoutBody): Promise<S> {
+    ctx ??= (typeof keyOrMessage === 'string' ? {} : keyOrMessage.context) ?? {};
+    const msg = await this.buildMessage(keyOrMessage, ctx);
     return this.#transport.send<S>({ ...base, ...msg });
+  }
+
+  /**
+   * Send multiple messages.
+   */
+  async sendAll<S extends SentMessage = SentMessage>(messages: MessageOptions[], base: Partial<MessageOptions> = {}): Promise<S[]> {
+    return Promise.all(messages.map(msg => this.send<S>({
+      ...base,
+      ...msg,
+      ...(msg.context || base.context ? {
+        context: {
+          ...(base.context || {}),
+          ...(msg.context || {})
+        }
+      } : {})
+    })));
   }
 }

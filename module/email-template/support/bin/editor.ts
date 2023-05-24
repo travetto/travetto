@@ -58,7 +58,7 @@ export class EditorState {
     }
   }
 
-  async #onConfigure(msg: InboundMessage & { type: 'configure' }): Promise<void> {
+  async onConfigure(msg: InboundMessage & { type: 'configure' }): Promise<void> {
     this.response({ type: 'configured', file: await EditorConfig.ensureConfig() });
   }
 
@@ -75,7 +75,7 @@ export class EditorState {
     }
   }
 
-  async #onSend(msg: InboundMessage & { type: 'send' }): Promise<void> {
+  async onSend(msg: InboundMessage & { type: 'send' }): Promise<void> {
     const cfg = await EditorConfig.get();
     const to = msg.to || cfg.to;
     const from = msg.from || cfg.from;
@@ -101,9 +101,9 @@ export class EditorState {
         msg.file = msg.file.replace(EmailTemplateResource.PATH_PREFIX, '');
       }
       switch (msg.type) {
-        case 'configure': this.#onConfigure(msg); break;
+        case 'configure': this.onConfigure(msg); break;
         case 'redraw': this.#onRedraw(msg); break;
-        case 'send': this.#onSend(msg); break;
+        case 'send': this.onSend(msg); break;
       }
     });
     for await (const f of this.#template.watchCompile()) {

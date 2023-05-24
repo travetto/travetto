@@ -1,3 +1,4 @@
 Active Development (3.2.0 - RC)
 =====================================
-* Auth-rest-context merged into auth-rest
+* Email-template, fix vscode in monorepo?
+* New rest-client module to allow for faster/lighter client generation
