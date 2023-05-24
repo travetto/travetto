@@ -7,13 +7,15 @@ import { MailTemplateEngine } from './template';
 import { MailUtil } from './util';
 import { EmailResource } from './resource';
 
+type MessageWithoutBody = Omit<MessageOptions, 'html' | 'text' | 'subject'>;
+
 /**
  * Email service for sending and templating emails
  */
 @Injectable()
 export class MailService {
 
-  #compiled = new Map<string, MessageOptions>();
+  #compiled = new Map<string, { html: string, subject: string, text?: string }>();
   #transport: MailTransport;
   #tplEngine: MailTemplateEngine;
   #resources: EmailResource;
@@ -26,6 +28,21 @@ export class MailService {
     this.#tplEngine = tplEngine;
     this.#transport = transport;
     this.#resources = resources;
+  }
+
+  /**
+   * Force content into alternative slots, satisfies node mailer
+   */
+  #forceContentToAlternative(msg: MessageOptions): MessageOptions {
+    for (const [key, mime] of [['text', 'text/plain'], ['html', 'text/html']] as const) {
+      if (msg[key]) {
+        (msg.alternatives ??= []).push({
+          content: msg[key], contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: `${mime}; charset=utf-8`
+        });
+        delete msg[key];
+      }
+    }
+    return msg;
   }
 
   /**
@@ -45,10 +62,9 @@ export class MailService {
   }
 
   /**
-   * Send a pre compiled email that has a relevant html, subject and optional text file associated
+   * Get compiled content by key
    */
-  async sendCompiled<S extends SentMessage = SentMessage>(key: string, msg: Omit<MessageOptions, 'html' | 'text' | 'subject'>): Promise<S> {
-    // Bypass cache if in dynamic mode
+  async getCompiled(key: string): Promise<{ html: string, text?: string, subject: string }> {
     if (GlobalEnv.dynamic || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         this.#resources.read(`${key}.compiled.html`),
@@ -58,43 +74,47 @@ export class MailService {
 
       this.#compiled.set(key, { html, text, subject });
     }
-    return this.send<S>({ ...msg, ...this.#compiled.get(key)! });
+    return this.#compiled.get(key)!;
+  }
+
+  /**
+   * Build message from key/context
+   * @param key 
+   * @param ctx 
+   * @returns 
+   */
+  async buildMessage(key: string | MessageOptions, ctx?: Record<string, unknown>): Promise<MessageOptions> {
+    const tpl = (typeof key === 'string' ? await this.getCompiled(key) : key);
+    ctx ??= (typeof key === 'string' ? {} : key.context ?? {});
+    const [rawHtml, text, subject] = await Promise.all([
+      tpl.html ? this.#tplEngine!.template(tpl.html, ctx) : undefined,
+      tpl.text ? this.#tplEngine!.template(tpl.text, ctx) : undefined,
+      tpl.subject ? this.#tplEngine!.template(tpl.subject, ctx) : undefined
+    ]);
+
+    const msg: MessageOptions = {
+      html: rawHtml ?? '',
+      text,
+      subject
+    }
+
+    if (msg.html) {
+      const { html, attachments } = await MailUtil.extractImageAttachments(msg.html);
+      msg.html = html;
+      msg.attachments = attachments;
+    }
+
+    return msg;
   }
 
   /**
    * Send a single message
    */
-  async send<S extends SentMessage>(msg: MessageOptions): Promise<S> {
-    // Template if context is provided
-    if (msg.context) {
-      const [html, text, subject] = await Promise.all([
-        msg.html ? this.#tplEngine!.template(msg.html, msg.context) : undefined,
-        msg.text ? this.#tplEngine!.template(msg.text, msg.context) : undefined,
-        msg.subject ? this.#tplEngine!.template(msg.subject, msg.context) : undefined
-      ]);
-
-      Object.assign(msg, { html, text, subject });
-    }
-
-    if (msg.text) {
-      (msg.alternatives = msg.alternatives || []).push({
-        content: msg.text, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: 'text/plain; charset=utf-8'
-      });
-      delete msg.text;
-    }
-
-    // Force html to the end per the mime spec
-    if (msg.html) {
-      const { html, attachments } = await MailUtil.extractImageAttachments(msg.html);
-      (msg.attachments = msg.attachments || []).push(...attachments);
-      (msg.alternatives = msg.alternatives || []).push({
-        // NOTE: The leading space on the content type is to force node mailer to not do anything fancy with
-        content: html, contentDisposition: 'inline', contentTransferEncoding: '7bit', contentType: ' text/html; charset=utf-8'
-      });
-      // @ts-expect-error
-      delete msg.html; // This is a hack to fix nodemailer
-    }
-
-    return this.#transport.send<S>(msg);
+  async send<S extends SentMessage = SentMessage>(key: string, base?: MessageWithoutBody): Promise<S>;
+  async send<S extends SentMessage = SentMessage>(message: MessageOptions): Promise<S>;
+  async send<S extends SentMessage = SentMessage>(keyOrMessage: MessageOptions | string, base?: MessageWithoutBody): Promise<S> {
+    let msg = await this.buildMessage(keyOrMessage);
+    msg = this.#forceContentToAlternative(msg);
+    return this.#transport.send<S>({ ...base, ...msg });
   }
 }
