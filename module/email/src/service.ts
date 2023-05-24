@@ -7,7 +7,8 @@ import { MailTemplateEngine } from './template';
 import { MailUtil } from './util';
 import { EmailResource } from './resource';
 
-type MessageWithoutBody = Omit<MessageOptions, 'html' | 'text' | 'subject'>;
+type Compiled = { html: string, text?: string, subject: string };
+type MessageWithoutBody = Omit<MessageOptions, keyof Compiled>;
 
 /**
  * Email service for sending and templating emails
@@ -15,7 +16,7 @@ type MessageWithoutBody = Omit<MessageOptions, 'html' | 'text' | 'subject'>;
 @Injectable()
 export class MailService {
 
-  #compiled = new Map<string, { html: string, subject: string, text?: string }>();
+  #compiled = new Map<string, Compiled>();
   #transport: MailTransport;
   #tplEngine: MailTemplateEngine;
   #resources: EmailResource;
@@ -33,7 +34,7 @@ export class MailService {
   /**
    * Get compiled content by key
    */
-  async getCompiled(key: string): Promise<{ html: string, text?: string, subject: string }> {
+  async getCompiled(key: string): Promise<Compiled> {
     if (GlobalEnv.dynamic || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         this.#resources.read(`${key}.compiled.html`),
@@ -48,43 +49,53 @@ export class MailService {
 
   /**
    * Build message from key/context
-   * @param key
+   * @param keyOrMessage
    * @param ctx
    * @returns
    */
-  async buildMessage(key: string | MessageOptions, ctx: Record<string, unknown>): Promise<MessageOptions> {
-    const tpl = (typeof key === 'string' ? await this.getCompiled(key) : key);
+  async templateMessage(keyOrMessage: string | Compiled, ctx: Record<string, unknown>): Promise<Compiled> {
+    const tpl = (typeof keyOrMessage === 'string' ? await this.getCompiled(keyOrMessage) : keyOrMessage);
 
-    const [rawHtml, text, subject] = await Promise.all([
+    const [html, text, subject] = await Promise.all([
       tpl.html ? this.#tplEngine!.template(tpl.html, ctx) : undefined,
       tpl.text ? this.#tplEngine!.template(tpl.text, ctx) : undefined,
       tpl.subject ? this.#tplEngine!.template(tpl.subject, ctx) : undefined
     ]);
 
-    const msg: MessageOptions = {
-      html: rawHtml ?? '',
-      text,
-      subject
-    };
-
-    if (msg.html) {
-      const { html, attachments } = await MailUtil.extractImageAttachments(msg.html);
-      msg.html = html;
-      msg.attachments = attachments;
-    }
-
-    return msg;
+    return { html: html!, text, subject: subject! };
   }
 
   /**
    * Send a single message
    */
-  async send<S extends SentMessage = SentMessage>(key: string, ctx?: Record<string, unknown>, base?: MessageWithoutBody): Promise<S>;
+  async send<S extends SentMessage = SentMessage>(
+    message: Pick<MessageOptions, 'to' | 'from' | 'replyTo'>,
+    key: string,
+    ctx?: Record<string, unknown>,
+    base?: MessageWithoutBody
+  ): Promise<S>;
   async send<S extends SentMessage = SentMessage>(message: MessageOptions): Promise<S>;
-  async send<S extends SentMessage = SentMessage>(keyOrMessage: MessageOptions | string, ctx?: Record<string, unknown>, base?: MessageWithoutBody): Promise<S> {
-    ctx ??= (typeof keyOrMessage === 'string' ? {} : keyOrMessage.context) ?? {};
-    const msg = await this.buildMessage(keyOrMessage, ctx);
-    return this.#transport.send<S>({ ...base, ...msg });
+  async send<S extends SentMessage = SentMessage>(
+    message: MessageOptions | Pick<MessageOptions, 'to' | 'from' | 'replyTo'>,
+    key?: string,
+    ctx?: Record<string, unknown>,
+    base?: MessageWithoutBody
+  ): Promise<S> {
+    const keyOrMessage = key ?? ('html' in message ? message : '') ?? '';
+    const context = ctx ?? (('context' in message) ? message.context : {}) ?? {};
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const compiled = await this.templateMessage(keyOrMessage as Compiled, context);
+
+    const final = { ...base, ...message, ...compiled };
+
+    // Extract images
+    if (compiled.html) {
+      const { html, attachments } = await MailUtil.extractImageAttachments(compiled.html);
+      final.html = html;
+      final.attachments = [...attachments, ...(final.attachments ?? [])];
+    }
+
+    return this.#transport.send<S>(final);
   }
 
   /**
