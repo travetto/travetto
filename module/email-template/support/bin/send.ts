@@ -60,7 +60,7 @@ ${EditorConfig.getDefaultConfig()}`.trim();
         throw new Error('Node mailer support is missing');
       }
 
-      const info = await svc.send<SMTPTransport.SentMessageInfo>(key, context, { to, from });
+      const info = await svc.send<SMTPTransport.SentMessageInfo>({ to, from }, key, context);
       console.log('Sent email', { to });
 
       const senderConfig = await EditorConfig.getSenderConfig();
