@@ -79,9 +79,9 @@ export class MailService {
 
   /**
    * Build message from key/context
-   * @param key 
-   * @param ctx 
-   * @returns 
+   * @param key
+   * @param ctx
+   * @returns
    */
   async buildMessage(key: string | MessageOptions, ctx?: Record<string, unknown>): Promise<MessageOptions> {
     const tpl = (typeof key === 'string' ? await this.getCompiled(key) : key);
@@ -96,7 +96,7 @@ export class MailService {
       html: rawHtml ?? '',
       text,
       subject
-    }
+    };
 
     if (msg.html) {
       const { html, attachments } = await MailUtil.extractImageAttachments(msg.html);
