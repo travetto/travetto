@@ -29,7 +29,7 @@ When looking up a resources, every asset folder is consulted, in order, and the 
 
 The template extension points are defined at:
 <ol> <li><code class="item path">email/wrapper.html</code> - This is the wrapping chrome for the email</li>
-<li><code class="item path">email/theme.scss</code> - The entry point for adding, and overriding any <a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a></li>
+<li><code class="item path">email/main.scss</code> - The entry point for adding, and overriding any <a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a></li>
 </ol>
 In addition to the overrides, you can find the list of available settings at <a target="_blank" class="source-link" href="https://github.com/foundation/foundation-emails/blob/develop/scss/settings/_settings.scss">Github</a>
 
@@ -39,7 +39,7 @@ The general process is as follows:
 <ol> <li>Load in a general wrapper for email, located at <code class="item path">/resources/email/wrapper.html</code>.</li>
 <li>Load in the general stylings as <a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a>, from <code class="item path">/resources/email/main.scss</code>.</li>
 <li>Resolving all mustache partial templates, at <code class="item path">/resources/email/**/*.email.html</code>.</li>
-<li> Render the <a target="_blank" class="external-link" href="https://github.com/zurb/inky">inky</a> directives into the final <code class="item input">html</code> output.</li>
+<li>Render the <a target="_blank" class="external-link" href="https://github.com/zurb/inky">inky</a> directives into the final <code class="item input">html</code> output.</li>
 <li>Extract the subject from the <code class="item input">html</code>'s <code class="item input">&lt;title&gt;</code> tag, if present.</li>
 <li>Inline and optimize all images for email transmission.</li>
 <li>Generate markdown version of email to support the alternate <code class="item input">text</code> format.</li>

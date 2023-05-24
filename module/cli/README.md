@@ -27,6 +27,7 @@ Commands:
   doc:mapping       Generate module mapping for @travetto/doc
   email:compile     CLI Entry point for running the email server
   email:editor      The email editor compilation service and output serving
+  email:test        CLI Entry point for running the email server
   lint              Command line support for linting
   lint:register     Writes the lint configuration file
   model:export      Exports model schemas

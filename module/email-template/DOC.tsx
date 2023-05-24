@@ -27,7 +27,7 @@ export const text = <>
 
     <ol>
       <li>{d.path('email/wrapper.html')} - This is the wrapping chrome for the email</li>
-      <li>{d.path('email/theme.scss')} - The entry point for adding, and overriding any {d.library('Sass')}</li>
+      <li>{d.path('email/main.scss')} - The entry point for adding, and overriding any {d.library('Sass')}</li>
     </ol>
 
     In addition to the overrides, you can find the list of available settings at <c.Ref title='Github' href='https://github.com/foundation/foundation-emails/blob/develop/scss/settings/_settings.scss' />
@@ -41,7 +41,7 @@ export const text = <>
       <li>Load in a general wrapper for email, located at {d.path('/resources/email/wrapper.html')}.</li>
       <li>Load in the general stylings as {d.library('Sass')}, from {d.path('/resources/email/main.scss')}.</li>
       <li>Resolving all mustache partial templates, at {d.path('/resources/email/**/*.email.html')}.</li>
-      < li > Render the {d.library('Inky')} directives into the final {d.input('html')} output.</li >
+      <li>Render the {d.library('Inky')} directives into the final {d.input('html')} output.</li>
       <li>Extract the subject from the {d.input('html')}'s {d.input('<title>')} tag, if present.</li>
       <li>Inline and optimize all images for email transmission.</li>
       <li>Generate markdown version of email to support the alternate {d.input('text')} format.</li>

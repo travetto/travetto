@@ -25,7 +25,7 @@ When looking up a resources, every asset folder is consulted, in order, and the 
 ## Template Extension Points
 The template extension points are defined at:
    1. `email/wrapper.html` - This is the wrapping chrome for the email
-   1. `email/theme.scss` - The entry point for adding, and overriding any [sass](https://github.com/sass/dart-sass)
+   1. `email/main.scss` - The entry point for adding, and overriding any [sass](https://github.com/sass/dart-sass)
 In addition to the overrides, you can find the list of available settings at [Github](https://github.com/foundation/foundation-emails/blob/develop/scss/settings/_settings.scss)
 
 ## Template Compilation
@@ -33,7 +33,7 @@ The general process is as follows:
    1. Load in a general wrapper for email, located at `/resources/email/wrapper.html`.
    1. Load in the general stylings as [sass](https://github.com/sass/dart-sass), from `/resources/email/main.scss`.
    1. Resolving all mustache partial templates, at `/resources/email/**/*.email.html`.
-   1.  Render the [inky](https://github.com/zurb/inky) directives into the final `html` output.
+   1. Render the [inky](https://github.com/zurb/inky) directives into the final `html` output.
    1. Extract the subject from the `html`'s `<title>` tag, if present.
    1. Inline and optimize all images for email transmission.
    1. Generate markdown version of email to support the alternate `text` format.
