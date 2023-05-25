@@ -86,7 +86,7 @@ export class MailService {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const compiled = await this.templateMessage(keyOrMessage as Compiled, context);
 
-    const final = { ...base, ...message, ...compiled };
+    const final = { ...base, ...message, ...compiled, context };
 
     // Extract images
     if (compiled.html) {
