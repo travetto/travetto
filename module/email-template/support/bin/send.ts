@@ -1,7 +1,4 @@
-import type * as SMTPTransport from 'nodemailer/lib/smtp-transport';
-
-import { MailService } from '@travetto/email';
-import { NodemailerTransport } from '@travetto/email-nodemailer';
+import { MailService, SentMessage } from '@travetto/email';
 import { MailTransportTarget } from '@travetto/email/src/internal/types';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -21,8 +18,9 @@ export class EditorSendService {
     if (!this.#svc) {
       const senderConfig = await EditorConfig.getSenderConfig();
 
-      if (senderConfig) {
+      if (senderConfig?.host?.includes('ethereal.email')) {
         const cls = class { };
+        const { NodemailerTransport } = await import('@travetto/email-nodemailer');
         DependencyRegistry.registerFactory({
           fn: () => new NodemailerTransport(senderConfig),
           target: MailTransportTarget,
@@ -60,12 +58,12 @@ ${EditorConfig.getDefaultConfig()}`.trim();
         throw new Error('Node mailer support is missing');
       }
 
-      const info = await svc.send<SMTPTransport.SentMessageInfo>({ to, from }, key, context);
+      const info = await svc.send<{ host?: string } & SentMessage>({ to, from }, key, context);
       console.log('Sent email', { to });
 
       const senderConfig = await EditorConfig.getSenderConfig();
-      return senderConfig.host?.includes('ethereal') ? {
-        url: (await import('nodemailer')).getTestMessageUrl(info)
+      return senderConfig.host?.includes('ethereal.email') ? {
+        url: (await import('nodemailer')).getTestMessageUrl(info as any)
       } : {};
     } catch (err) {
       console.warn('Failed to send email', { to, error: err });

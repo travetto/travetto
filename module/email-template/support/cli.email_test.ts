@@ -4,12 +4,17 @@ import { CliCommandShape, CliCommand } from '@travetto/cli';
 
 import { TemplateManager } from './bin/template';
 import { EditorState } from './bin/editor';
+import { GlobalEnvConfig } from '@travetto/base';
 
 /**
  * CLI Entry point for running the email server
  */
 @CliCommand()
 export class EmailTestCommand implements CliCommandShape {
+
+  envInit(): GlobalEnvConfig {
+    return { envName: 'dev' };
+  }
 
   async main(file: string, to: string): Promise<void> {
     file = path.resolve(file).split('resources/')[1];
