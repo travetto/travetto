@@ -49,8 +49,8 @@ export class EmailTemplateCompiler {
   /**
    * Inline image sources
    */
-  async inlineImageSource(html: string, baseRel: string): Promise<string> {
-    const { tokens, finalize } = await this.resources.tokenizeResources(html, EmailTemplateCompiler.HTML_CSS_IMAGE_URLS, baseRel);
+  async inlineImageSource(html: string): Promise<string> {
+    const { tokens, finalize } = await this.resources.tokenizeResources(html, EmailTemplateCompiler.HTML_CSS_IMAGE_URLS);
     const pendingImages: Promise<[token: string, content: string]>[] = [];
 
     for (const [token, src] of tokens) {
@@ -136,7 +136,7 @@ export class EmailTemplateCompiler {
     );
 
     // Inline Images
-    html = await this.inlineImageSource(html, path.dirname(rel));
+    html = await this.inlineImageSource(html);
 
     // Generate text version
     const text = await MarkdownUtil.htmlToMarkdown(tpl);

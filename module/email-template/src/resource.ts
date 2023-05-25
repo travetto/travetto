@@ -57,8 +57,7 @@ export class EmailTemplateResource extends FileQueryProvider {
    */
   async tokenizeResources(
     text: string,
-    patterns: RegExp[],
-    baseRel: string
+    patterns: RegExp[]
   ): Promise<{
     text: string;
     tokens: Map<string, string>;
@@ -71,10 +70,9 @@ export class EmailTemplateResource extends FileQueryProvider {
         if (src.includes('://')) { // No urls
           continue;
         }
-        const relative = `${baseRel}/${src}`;
-        await this.describe(relative);
+        await this.describe(src);
         const token = `@@${id += 1}@@`;
-        tokens.set(token, relative);
+        tokens.set(token, src);
         text = text.replace(all, `${pre}${token}`);
       }
     }
