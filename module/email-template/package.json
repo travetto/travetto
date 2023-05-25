@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-template",
-  "version": "3.1.14",
+  "version": "3.1.15",
   "description": "Email templating module",
   "keywords": [
     "email",
@@ -31,7 +31,7 @@
     "@travetto/base": "^3.1.1",
     "@travetto/config": "^3.1.5",
     "@travetto/di": "^3.1.2",
-    "@travetto/email": "^3.1.9",
+    "@travetto/email": "^3.1.10",
     "@travetto/image": "^3.1.2",
     "@types/inline-css": "^3.0.1",
     "@types/parse5": "^7.0.0",
