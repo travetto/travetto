@@ -200,9 +200,14 @@ export class FetchRequestUtil {
       }
 
       if (resolved.ok) {
-        const res = await resolved.json();
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        return res as Promise<T>;
+        if (resolved.headers.get('content-type') === 'application/json') {
+          const res = await resolved.json();
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          return res as Promise<T>;
+        } else {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          return undefined as unknown as Promise<T>;
+        }
       } else {
         let res;
         if (resolved.headers.get('content-type') === 'application/json') {
