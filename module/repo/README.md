@@ -155,6 +155,7 @@ module/registry
 module/repo
 module/rest
 module/rest-aws-lambda
+module/rest-client
 module/rest-express
 module/rest-express-lambda
 module/rest-fastify
@@ -252,6 +253,7 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
                    module/repo .
                    module/rest <workspace-root>/module/rest
         module/rest-aws-lambda <workspace-root>/module/rest-aws-lambda
+            module/rest-client <workspace-root>/module/rest-client
            module/rest-express <workspace-root>/module/rest-express
     module/rest-express-lambda <workspace-root>/module/rest-express-lambda
            module/rest-fastify <workspace-root>/module/rest-fastify

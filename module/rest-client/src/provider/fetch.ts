@@ -9,6 +9,7 @@ import { BaseFetchService } from './fetch-template/base-service';
 import { FetchRequestUtil } from './fetch-template/util';
 import { placeholder } from './fetch-template/types';
 import { CommonUtil } from './shared/common';
+import { RootIndex } from '@travetto/manifest';
 
 export class FetchClientGenerator extends ClientGenerator {
 
@@ -17,8 +18,28 @@ export class FetchClientGenerator extends ClientGenerator {
       ['./base-service.ts', BaseFetchService],
       ['./utils.ts', FetchRequestUtil],
       ['./types.ts', placeholder],
-      ['./common.ts', CommonUtil]
+      ['./common.ts', CommonUtil],
     ];
+  }
+
+  init(): void {
+    this.registerContent('./package.json', {
+      imports: [],
+      classId: '',
+      file: './package.json',
+      name: '',
+      content: [
+        `{\n`,
+        `  "name": "`, this.moduleName, `",\n`,
+        `  "version": "${RootIndex.mainModule.version}",\n`,
+        `  "main": "index.ts",\n`,
+        `  "dependencies": {\n`,
+        `    "@types/node-fetch": "^2.6.2",\n`,
+        `    "node-fetch": "^2.6.9"\n`,
+        `  }\n`,
+        `}\n`
+      ]
+    });
   }
 
   getUploadType(): string | Imp {
@@ -26,15 +47,15 @@ export class FetchClientGenerator extends ClientGenerator {
   }
 
   renderEndpoint(endpoint: EndpointConfig, controller: ControllerConfig): RenderContent {
-    const out: (string | Imp)[] = [];
     const {
       imports, method, paramConfigField, paramConfig, paramInputs, paramNameArr, returnType, doc
     } = this.describeEndpoint(endpoint, controller);
+    const classId = `${controller.class.Ⲑid}_${endpoint.handlerName}`;
 
     const util = { classId: FetchRequestUtil.Ⲑid, file: './utils.ts', name: FetchRequestUtil.name };
     imports.push(util);
 
-    out.push(
+    const content = [
       `  ${paramConfigField} = ${paramConfig} as const;\n\n`,
       doc,
       `  ${endpoint.handlerName} (\n`,
@@ -45,15 +66,9 @@ export class FetchClientGenerator extends ClientGenerator {
       `      params: ${paramNameArr}, paramConfigs: this.${paramConfigField}\n`,
       `    });\n`,
       `  }\n\n`,
-    );
+    ];
 
-    return {
-      imports,
-      classId: `${controller.class.Ⲑid}_${endpoint.handlerName}`,
-      name: endpoint.handlerName,
-      file: '',
-      content: out
-    };
+    return { imports, classId, name: endpoint.handlerName, file: '', content };
   }
 
   renderController(controller: ControllerConfig): RenderContent {

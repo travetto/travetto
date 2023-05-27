@@ -6,6 +6,7 @@ import { ControllerRegistry, ControllerVisitUtil, ControllerVisitor } from '@tra
 import { RestClientConfig } from './config';
 import { AngularClientGenerator } from './provider/angular';
 import { FetchClientGenerator } from './provider/fetch';
+import { GlobalEnv } from '@travetto/base';
 
 @Injectable()
 export class RestClientGeneratorService implements AutoCreate {
@@ -15,20 +16,28 @@ export class RestClientGeneratorService implements AutoCreate {
 
   providers: ControllerVisitor[];
 
+  async renderProvider(provider: ControllerVisitor): Promise<void> {
+    await ControllerVisitUtil.visit(provider);
+  }
+
   async postConstruct(): Promise<void> {
+    if (!GlobalEnv.dynamic || !this.config.providers.length) {
+      return;
+    }
+
     this.providers = this.config.providers.map(x => {
 
       x.output = path.resolve(
         RootIndex.manifest.workspacePath,
-        RootIndex.mainModule.sourceFolder,
+        x.output.startsWith('@') ? RootIndex.mainModule.sourceFolder : '.',
         x.output
       );
 
       switch (x.type) {
-        case 'angular': return new AngularClientGenerator(x.output);
-        case 'fetch': return new FetchClientGenerator(x.output);
+        case 'angular': return new AngularClientGenerator(x.output, x.moduleName);
+        case 'fetch': return new FetchClientGenerator(x.output, x.moduleName);
       }
-    });
+    }).filter(x => !!x);
 
     if (!this.providers.length) {
       return;
@@ -66,7 +75,7 @@ export class RestClientGeneratorService implements AutoCreate {
 
     // Initial render
     for (const p of this.providers) {
-      await ControllerVisitUtil.visit(p);
+      await this.renderProvider(p);
     }
   }
 }

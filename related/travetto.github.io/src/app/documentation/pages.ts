@@ -54,6 +54,7 @@ import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component'
 import { ManifestComponent } from './gen/manifest/manifest.component';
 import { TerminalComponent } from './gen/terminal/terminal.component';
 import { EslintComponent } from './gen/eslint/eslint.component';
+import { RestClientComponent } from './gen/rest-client/rest-client/rest-client.component';
 
 export const PAGES = [
   {
@@ -92,7 +93,8 @@ export const PAGES = [
       { path: 'rest-koa-lambda', title: 'Koa Lambda', component: RestKoaLambdaComponent },
       { path: 'rest-fastify-lambda', title: 'Fastify Lambda', component: RestFastifyLambdaComponent },
       { path: 'rest-session', title: 'Session', component: RestSessionComponent },
-      { path: 'openapi', title: 'OpenAPI', component: OpenapiComponent }
+      { path: 'openapi', title: 'OpenAPI', component: OpenapiComponent },
+      { path: 'rest-client', title: 'Rest Client', component: RestClientComponent }
     ]
   },
   {

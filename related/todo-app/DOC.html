@@ -306,7 +306,7 @@ Finally, we establish the controller at <code class="item path">src/route.ts</co
    * @param id Todo id
    */</span>
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Put</span></span><span class="token punctuation">(</span><span class="token string">'/:id/complete'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">complete</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> completed<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Todo<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">complete</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> completed<span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">=</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Todo<span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>_svc<span class="token punctuation">.</span><span class="token function">complete</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span> completed<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
@@ -338,7 +338,7 @@ First we must start the application:
 
 </figcaption>
     <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@travetto/config:src/configuration.ts:141<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
-  manifest: <span class="token punctuation">{{'{'}}</span> mainModule: <span class="token string">'@travetto/todo-app'</span>, frameworkVersion: <span class="token string">'3.1.0'</span>, version: <span class="token string">'0.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
+  manifest: <span class="token punctuation">{{'{'}}</span> mainModule: <span class="token string">'@travetto/todo-app'</span>, frameworkVersion: <span class="token string">'3.1.1'</span>, version: <span class="token string">'0.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
     envName: <span class="token string">'dev'</span>,
     debug: <span class="token string">'0'</span>,
@@ -396,6 +396,7 @@ First we must start the application:
       RestAuthLoginConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestAuthVerifyConfig: <span class="token punctuation">{{'{'}}</span> permissions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestBodyParseConfig: <span class="token punctuation">{{'{'}}</span> limit: <span class="token string">'100kb'</span>, parsingTypes: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
+      RestClientConfig: <span class="token punctuation">{{'{'}}</span> providers: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token punctuation">[</span>Object<span class="token punctuation">]</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestConfig: <span class="token punctuation">{{'{'}}</span>
         serve: true,
         port: <span class="token number">3000</span>,

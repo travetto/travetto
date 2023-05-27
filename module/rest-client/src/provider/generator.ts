@@ -22,7 +22,6 @@ export type RenderContent = Imp & {
   content: (string | Imp)[];
 };
 
-
 type EndpointDesc = {
   method: string;
   returnType: (string | Imp)[];
@@ -43,8 +42,11 @@ export abstract class ClientGenerator implements ControllerVisitor {
 
   abstract renderController(cfg: ControllerConfig): RenderContent;
 
-  constructor(output: string) {
+  moduleName: string;
+
+  constructor(output: string, moduleName?: string) {
     this.#output = output;
+    this.moduleName = moduleName ?? `${RootIndex.mainModule.name}-client`;
     this.init?.();
   }
 
@@ -92,7 +94,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
       text.push(`export const __placeholder__${file.replace(/[^A-Z]/gi, '_')} = {};\n`);
     }
 
-    await ManifestUtil.writeFileWithBuffer(output, text.join(''));
+    await ManifestUtil.writeFileWithBuffer(output, text.join('').trim());
   }
 
   resolveType(type?: Class): string | Imp {
@@ -269,9 +271,9 @@ export abstract class ClientGenerator implements ControllerVisitor {
       await this.renderContent(file, contents);
     }
     await ManifestUtil.writeFileWithBuffer(path.join(this.#output, 'index.ts'), [
-      ...[...Object.keys(files)].map(f =>
-        `export * from '${f.replace(/[.]ts$/, '')}';\n`
-      ),
+      ...[...Object.keys(files)]
+        .filter(f => !f.includes('.json'))
+        .map(f => `export * from '${f.replace(/[.]ts$/, '')}';\n`),
     ].join(''));
   }
 

@@ -1,0 +1,6 @@
+---
+rest.client:
+  providers:
+    - type: fetch
+      output: api-client/sample
+      moduleName: '@travetto-client/sample'

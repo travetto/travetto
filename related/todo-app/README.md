@@ -283,7 +283,7 @@ export class TodoController {
    * @param id Todo id
    */
   @Put('/:id/complete')
-  async complete(id: string, completed: boolean = true): Promise<Todo> {
+  async complete(id: string, completed: boolean = false): Promise<Todo> {
     return await this._svc.complete(id, completed);
   }
 
@@ -310,7 +310,7 @@ npx trv run:rest
 **Terminal: Application Startup**
 ```bash
 2029-03-14T04:00:00.618Z info  [@travetto/config:src/configuration.ts:141] Initialized {
-  manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.1.0', version: '0.0.0' },
+  manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.1.1', version: '0.0.0' },
   env: {
     envName: 'dev',
     debug: '0',
@@ -368,6 +368,7 @@ npx trv run:rest
       RestAuthLoginConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
+      RestClientConfig: { providers: { '0': [Object] } },
       RestConfig: {
         serve: true,
         port: 3000,

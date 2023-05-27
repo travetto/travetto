@@ -171,6 +171,10 @@ export const MOD_MAPPING = {
     name: '@travetto/rest-aws-lambda', folder: '@travetto/rest-aws-lambda', displayName: 'RESTful AWS Lambda',
     description: 'RESTful APIs entry point support for AWS Lambdas.'
   },
+  RestClient: {
+    name: '@travetto/rest-client', folder: '@travetto/rest-client', displayName: 'RESTful Client Support',
+    description: 'RESTful support for generating clients for controller endpoints'
+  },
   RestExpress: {
     name: '@travetto/rest-express', folder: '@travetto/rest-express', displayName: 'Express REST Source',
     description: 'Express provider for the travetto rest module.'
