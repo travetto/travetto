@@ -43,10 +43,12 @@ export abstract class ClientGenerator implements ControllerVisitor {
   abstract renderController(cfg: ControllerConfig): RenderContent;
 
   moduleName: string;
+  subFolder: string;
 
-  constructor(output: string, moduleName?: string) {
+  constructor(output: string, moduleName?: string, subFolder?: string) {
     this.#output = output;
     this.moduleName = moduleName ?? `${RootIndex.mainModule.name}-client`;
+    this.subFolder = subFolder ?? '.';
     this.init?.();
   }
 
@@ -57,7 +59,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
   }
 
   async renderContent(file: string, content: RenderContent[]): Promise<void> {
-    const output = path.resolve(this.#output, file);
+    const output = path.resolve(this.#output, this.subFolder, file);
     const text: string[] = [];
     const imports: Record<string, string[]> = {};
 
@@ -257,7 +259,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
   async finalize(): Promise<void> {
     await fs.mkdir(this.#output, { recursive: true });
     for (const [file, cls] of this.commonFiles) {
-      const base = path.resolve(this.#output, file);
+      const base = path.resolve(this.#output, this.subFolder, file);
       const baseSource = RootIndex.getFunctionMetadata(cls)!.source;
       await fs.copyFile(baseSource, base);
     }
@@ -270,7 +272,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
     for (const [file, contents] of Object.entries(files)) {
       await this.renderContent(file, contents);
     }
-    await ManifestUtil.writeFileWithBuffer(path.join(this.#output, 'index.ts'), [
+    await ManifestUtil.writeFileWithBuffer(path.join(this.#output, this.subFolder, 'index.ts'), [
       ...[...Object.keys(files)]
         .filter(f => !f.includes('.json'))
         .map(f => `export * from '${f.replace(/[.]ts$/, '')}';\n`),

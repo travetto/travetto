@@ -23,16 +23,17 @@ export class FetchClientGenerator extends ClientGenerator {
   }
 
   init(): void {
-    this.registerContent('./package.json', {
+    const file = this.subFolder === '.' ? './package.json' : '../package.json';
+    this.registerContent(file, {
       imports: [],
       classId: '',
-      file: './package.json',
+      file,
       name: '',
       content: [
         `{\n`,
         `  "name": "`, this.moduleName, `",\n`,
         `  "version": "${RootIndex.mainModule.version}",\n`,
-        `  "main": "index.ts",\n`,
+        `  "main": "${this.subFolder ?? '.'}/index.ts",\n`,
         `  "dependencies": {\n`,
         `    "@types/node-fetch": "^2.6.2",\n`,
         `    "node-fetch": "^2.6.9"\n`,
