@@ -8,6 +8,7 @@ import { ClientGenerator, Imp, RenderContent } from './generator';
 import { BaseAngularService } from './angular-template/base-service';
 import { AngularRequestUtil } from './angular-template/util';
 import { Configuration } from './angular-template/types';
+import { CommonUtil } from './shared/common';
 
 export class AngularClientGenerator extends ClientGenerator {
 
@@ -15,7 +16,8 @@ export class AngularClientGenerator extends ClientGenerator {
     return [
       ['./base-service.ts', BaseAngularService],
       ['./utils.ts', AngularRequestUtil],
-      ['./types.ts', Configuration]
+      ['./types.ts', Configuration],
+      ['./common.ts', CommonUtil]
     ];
   }
 

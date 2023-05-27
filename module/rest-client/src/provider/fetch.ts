@@ -8,6 +8,7 @@ import { ClientGenerator, Imp, RenderContent } from './generator';
 import { BaseFetchService } from './fetch-template/base-service';
 import { FetchRequestUtil } from './fetch-template/util';
 import { placeholder } from './fetch-template/types';
+import { CommonUtil } from './shared/common';
 
 export class FetchClientGenerator extends ClientGenerator {
 
@@ -15,7 +16,8 @@ export class FetchClientGenerator extends ClientGenerator {
     return [
       ['./base-service.ts', BaseFetchService],
       ['./utils.ts', FetchRequestUtil],
-      ['./types.ts', placeholder]
+      ['./types.ts', placeholder],
+      ['./common.ts', CommonUtil]
     ];
   }
 

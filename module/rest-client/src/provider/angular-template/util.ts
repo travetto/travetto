@@ -7,6 +7,7 @@ import { IAngularRequestShape, IAngularService, ParamConfig } from './types';
 import type { HttpResponse, HttpEvent } from '@angular/common/http';
 // @ts-ignore
 import type { Observable } from 'rxjs';
+import { CommonUtil } from './common';
 
 type Chunk = { name: string, blob: Blob };
 
@@ -23,44 +24,6 @@ type RequestOptions = {
  */
 export class AngularRequestUtil {
 
-  static isPlainObject(obj: unknown): obj is Record<string, unknown> {
-    return typeof obj === 'object' // separate from primitives
-      && obj !== undefined
-      && obj !== null         // is obvious
-      && obj.constructor === Object // separate instances (Array, DOM, ...)
-      && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
-  }
-
-  static flattenPaths(data: Record<string, unknown> | string | boolean | number | Date, prefix: string = ''): Record<string, unknown> {
-    if (!this.isPlainObject(data) && !Array.isArray(data)) {
-      if (data !== undefined && data !== '' && data !== null) {
-        return { [prefix]: data };
-      } else {
-        return {};
-      }
-    }
-    const out: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(data)) {
-      const pre = prefix ? `${prefix}.${key}` : key;
-      if (this.isPlainObject(value)) {
-        Object.assign(out, this.flattenPaths(value, pre)
-        );
-      } else if (Array.isArray(value)) {
-        for (let i = 0; i < value.length; i++) {
-          const v = value[i];
-          if (this.isPlainObject(v)) {
-            Object.assign(out, this.flattenPaths(v, `${pre}[${i}]`));
-          } else if (v !== undefined && v !== '' && data !== null) {
-            out[`${pre}[${i}]`] = v;
-          }
-        }
-      } else if (value !== undefined && value !== '' && value !== null) {
-        out[pre] = value;
-      }
-    }
-    return out;
-  }
-
   static buildRequestShape(
     cfg: IAngularService,
     method: IAngularRequestShape['method'],
@@ -76,7 +39,7 @@ export class AngularRequestUtil {
       const loc = paramConfigs[i].location;
       if ((loc === 'header' || loc === 'query') && params[i] !== undefined) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const sub = this.flattenPaths(params[i] as string, paramConfigs[i].complex ? paramConfigs[i].key : paramConfigs[i].name);
+        const sub = CommonUtil.flattenPaths(params[i] as string, paramConfigs[i].complex ? paramConfigs[i].key : paramConfigs[i].name);
         if (loc === 'header') {
           Object.assign(headers, sub);
         } else {
@@ -143,7 +106,7 @@ export class AngularRequestUtil {
   static getError(err: Error | Response): Error {
     if (err instanceof Error) {
       return err;
-    } else if (this.isPlainObject(err)) {
+    } else if (CommonUtil.isPlainObject(err)) {
       const out = new Error();
       Object.assign(out, err);
       return out;
