@@ -1,34 +1,22 @@
 // @ts-ignore
-import type { HttpClient } from '@angular/common/http';
+import type { HttpResponse, HttpEvent, HttpClient } from '@angular/common/http';
+// @ts-ignore
+import type { Observable, OperatorFunction } from 'rxjs';
 
-export type IAngularRequestShape = {
-  headers: Record<string, string>;
-  url: URL;
-  body?: unknown;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
-};
+import { IRemoteService } from './common';
 
-export type IAngularService = {
+export interface IAngularService extends IRemoteService {
   client: HttpClient;
-  basePath: string;
-  routePath: string;
-  headers: Record<string, string>;
+  transform: <T>() => OperatorFunction<T, T>;
   withCredentials?: boolean;
-};
+}
 
 export type IAngularServiceConfig = Partial<Omit<IAngularService, 'routePath' | 'client'>>;
-
-export type ParamConfig = {
-  location: 'header' | 'body' | 'path' | 'query';
-  array?: boolean;
-  binary?: boolean;
-  name: string;
-  key?: string;
-  complex?: boolean;
-};
 
 export class Configuration implements IAngularServiceConfig {
   constructor(cfg: IAngularServiceConfig) {
     Object.assign(this, cfg);
   }
 }
+
+export type AngularResponse<T> = Observable<T> & { events: Observable<HttpEvent<T>>, response: Observable<HttpResponse<T>> };

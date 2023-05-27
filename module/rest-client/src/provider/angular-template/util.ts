@@ -1,106 +1,32 @@
 /// <reference lib="dom" />
-
-
-import { IAngularRequestShape, IAngularService, ParamConfig } from './types';
-
-// @ts-ignore
-import type { HttpResponse, HttpEvent } from '@angular/common/http';
-// @ts-ignore
-import type { Observable } from 'rxjs';
-import { CommonUtil } from './common';
+import { CommonUtil, RequestShape, RequestBuildOptions } from './common';
+import { AngularResponse, IAngularService } from './types';
 
 type Chunk = { name: string, blob: Blob };
-
-type RequestOptions = {
-  svc: IAngularService;
-  method: IAngularRequestShape['method'];
-  endpointPath: string;
-  params: unknown[];
-  paramConfig: ParamConfig[] | (readonly ParamConfig[]);
-};
 
 /**
  * Fetch utilities
  */
 export class AngularRequestUtil {
 
-  static buildRequestShape(
-    cfg: IAngularService,
-    method: IAngularRequestShape['method'],
-    endpointPath: string,
-    params: unknown[],
-    paramConfigs: ParamConfig[] | (readonly ParamConfig[])
-  ): IAngularRequestShape {
-    let resolvedPath = `${cfg.basePath}/${cfg.routePath}/${endpointPath || ''}`.replace(/[\/]+/g, '/').replace(/[\/]$/, '');
-    const query: Record<string, string> = {};
-    const headers: Record<string, string> = { ...cfg.headers };
-    const bodyIdxs: number[] = [];
-    for (let i = 0; i < paramConfigs.length; i++) {
-      const loc = paramConfigs[i].location;
-      if ((loc === 'header' || loc === 'query') && params[i] !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const sub = CommonUtil.flattenPaths(params[i] as string, paramConfigs[i].complex ? paramConfigs[i].key : paramConfigs[i].name);
-        if (loc === 'header') {
-          Object.assign(headers, sub);
-        } else {
-          Object.assign(query, sub);
-        }
-      } else if (loc === 'path') {
-        resolvedPath = resolvedPath.replace(`:${paramConfigs[i].name}`, `${params[i]}`);
-      } else if (loc === 'body') {
-        if (params[i] !== undefined) {
-          bodyIdxs.push(i);
-        }
-      }
-    }
-
-    const url = new URL(resolvedPath);
-    for (const [k, v] of Object.entries(query)) {
-      url.searchParams.set(k, `${v}`);
-    }
-
-    let body: unknown | undefined;
-
-    if (bodyIdxs.length) {
-      const parts: Chunk[] = [];
-
-      for (const bodyIdx of bodyIdxs) {
-        const bodyParam = paramConfigs[bodyIdx];
-        const pName = bodyParam.name;
-        if (bodyParam.binary) {
-          if (bodyParam.array) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            parts.push(...(params[bodyIdx] as Blob[]).map((uc, i) => ({
-              name: `${pName}[${i}]`,
-              blob: uc
-            })));
+  static buildRequestShape(cfg: RequestBuildOptions<IAngularService>): RequestShape<unknown, IAngularService> {
+    return CommonUtil.buildRequest<IAngularService, unknown, Blob, Chunk>({
+      ...cfg, multipart: {
+        addItem: (name, blob) => ({ name, blob }),
+        addJson: (name, json) => ({ name, blob: new Blob([JSON.stringify(json)], { type: 'application/json' }) }),
+        finalize(items) {
+          if (items.length === 1) {
+            return items[0].blob;
           } else {
-            parts.push({
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              blob: params[bodyIdx] as Blob,
-              name: pName
-            });
+            const form = new FormData();
+            for (const { name, blob } of items) {
+              form.append(name, blob, 'name' in blob && typeof blob.name === 'string' ? blob.name : undefined);
+            }
+            return form;
           }
-        } else {
-          parts.push({
-            blob: new Blob([
-              JSON.stringify(params[bodyIdx])
-            ], { type: 'application/json' }),
-            name: pName
-          });
-        }
+        },
       }
-      if (parts.length === 1) {
-        body = parts[0].blob;
-      } else {
-        const form = body = new FormData();
-        for (const { name, blob } of parts) {
-          form.append(name, blob, 'name' in blob && typeof blob.name === 'string' ? blob.name : undefined);
-        }
-      }
-    }
-
-    return { headers, url, body, method };
+    });
   }
 
   static getError(err: Error | Response): Error {
@@ -119,36 +45,25 @@ export class AngularRequestUtil {
     }
   }
 
-  static makeRequest<K extends 'response' | 'events' | 'body'>(
-    observe: K, {
-      svc, method,
-      endpointPath, params, paramConfig
-    }: RequestOptions): Observable<unknown> {
-    const obj = this.buildRequestShape(svc, method, endpointPath, params, paramConfig);
+  static callClient<T>(req: RequestShape<unknown, IAngularService>, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
+    const svc = req.svc;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const res = svc.client.request(method.toLowerCase() as 'get', obj.url.toString(), {
-      headers: obj.headers,
-      reportProgress: observe === 'events',
+    return svc.client.request(req.method.toLowerCase() as 'get', req.url.toString(), {
+      observe, reportProgress: observe === 'events',
       withCredentials: svc.withCredentials,
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      observe,
-      body: obj.body,
+      headers: req.headers, body: req.body,
+    }).pipe(svc.transform<T>()) as AngularResponse<T>;
+  }
+
+  static makeRequest<T>(opts: RequestBuildOptions<IAngularService>): AngularResponse<T> {
+    const req = this.buildRequestShape(opts);
+    const res = this.callClient<T>(req, 'body');
+    Object.defineProperties(res, {
+      events: { get: () => this.callClient(req, 'events'), configurable: false },
+      response: { get: () => this.callClient(req, 'response'), configurable: false }
     });
-    return res;
-  }
 
-  static makeRequestResponse<T>(opts: RequestOptions): Observable<HttpResponse<T>> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.makeRequest('response', opts) as Observable<HttpResponse<T>>;
-  }
-
-  static makeRequestBody<T>(opts: RequestOptions): Observable<T> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.makeRequest('body', opts) as Observable<T>;
-  }
-
-  static makeRequestEvents<T>(opts: RequestOptions): Observable<HttpEvent<T>> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.makeRequest('events', opts) as Observable<HttpEvent<T>>;
+    return res as AngularResponse<T>;
   }
 }

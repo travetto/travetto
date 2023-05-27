@@ -1,7 +1,7 @@
 import fetch, { BodyInit, Response } from 'node-fetch';
 
-import { FetchRequestShape, IFetchService, ParamConfig, UploadContent } from './types';
-import { CommonUtil } from './common';
+import { FetchRequestShape, IFetchService, UploadContent } from './types';
+import { CommonUtil, RequestBuildOptions } from './common';
 
 type MultiPart = UploadContent & { name: string };
 
@@ -10,14 +10,8 @@ type MultiPart = UploadContent & { name: string };
  */
 export class FetchRequestUtil {
 
-  static uuid(): string {
-    return `${Date.now()}-${Math.random()}-${process.pid}`.replace(/[.]/, '-');
-  }
-
   static getMultipartRequest(chunks: MultiPart[]): { body: Buffer, headers: Record<string, string> } {
-    const boundary = `-------------------------multipart-${this.uuid()}`;
-
-
+    const boundary = `-------------------------multipart-${Date.now()}-${Math.random()}-${process.pid}`.replace(/[.]/, '-');
     const nl = '\r\n';
 
     const header = (flag: boolean, key: string, ...values: (string | number | undefined)[]): string | Buffer =>
@@ -45,84 +39,27 @@ export class FetchRequestUtil {
     return { body, headers };
   }
 
-  static buildRequestShape(
-    cfg: IFetchService,
-    method: FetchRequestShape['method'],
-    endpointPath: string,
-    params: unknown[],
-    paramConfigs: ParamConfig[] | (readonly ParamConfig[])
-  ): FetchRequestShape {
-    let resolvedPath = `${cfg.basePath}/${cfg.routePath}/${endpointPath || ''}`.replace(/[\/]+/g, '/').replace(/[\/]$/, '');
-    const query: Record<string, string> = {};
-    const headers: Record<string, string> = { ...cfg.headers };
-    const bodyIdxs: number[] = [];
-    for (let i = 0; i < paramConfigs.length; i++) {
-      const loc = paramConfigs[i].location;
-      if ((loc === 'header' || loc === 'query') && params[i] !== undefined) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const sub = CommonUtil.flattenPaths(params[i] as string, paramConfigs[i].complex ? paramConfigs[i].key : paramConfigs[i].name);
-        if (loc === 'header') {
-          Object.assign(headers, sub);
-        } else {
-          Object.assign(query, sub);
-        }
-      } else if (loc === 'path') {
-        resolvedPath = resolvedPath.replace(`:${paramConfigs[i].name}`, `${params[i]}`);
-      } else if (loc === 'body') {
-        if (params[i] !== undefined) {
-          bodyIdxs.push(i);
-        }
-      }
-    }
-
-    const url = new URL(resolvedPath);
-    for (const [k, v] of Object.entries(query)) {
-      url.searchParams.set(k, `${v}`);
-    }
-
-    let body: BodyInit | undefined;
-
-    if (bodyIdxs.length) {
-      const parts: MultiPart[] = [];
-
-      for (const bodyIdx of bodyIdxs) {
-        const bodyParam = paramConfigs[bodyIdx];
-        const pName = bodyParam.name;
-        if (bodyParam.binary) {
-          if (bodyParam.array) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            parts.push(...(params[bodyIdx] as UploadContent[]).map((uc, i) => ({
-              ...uc,
-              name: `${pName}[${i}]`
-            })));
+  static buildRequestShape(cfg: RequestBuildOptions<IFetchService>): FetchRequestShape {
+    return CommonUtil.buildRequest<IFetchService, BodyInit, UploadContent, MultiPart>({
+      ...cfg, multipart: {
+        addItem: (name, item) => ({ ...item, name, }),
+        addJson: (name, obj) => ({
+          buffer: Buffer.from(JSON.stringify(obj)),
+          type: 'application/json',
+          name
+        }),
+        finalize: (items, req) => {
+          if (items.length === 1) {
+            req.headers['Content-Type'] = items[0].type!;
+            return items[0].buffer;
           } else {
-            parts.push({
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              ...params[bodyIdx] as UploadContent,
-              name: pName
-            });
+            const { body, headers } = this.getMultipartRequest(items);
+            Object.assign(req.headers, headers);
+            return body;
           }
-        } else {
-          parts.push({
-            buffer: Buffer.from(JSON.stringify(params[bodyIdx])),
-            type: 'application/json',
-            name: pName
-          });
         }
       }
-      if (parts.length === 1) {
-        if (parts[0].type) {
-          headers['Content-Type'] = parts[0].type;
-        }
-        body = parts[0].buffer;
-      } else {
-        const sub = this.getMultipartRequest(parts);
-        body = sub.body;
-        Object.assign(headers, sub.headers);
-      }
-    }
-
-    return { headers, url, body, method };
+    });
   }
 
   static async getError(err: Error | Response): Promise<Error | unknown> {
@@ -150,23 +87,22 @@ export class FetchRequestUtil {
     }
   }
 
-  static async callFetch<T>(svc: IFetchService, req: FetchRequestShape): Promise<T> {
+  static async callFetch<T>(req: FetchRequestShape): Promise<T> {
     try {
-      for (const el of svc.preRequestHandlers) {
+      for (const el of req.svc.preRequestHandlers) {
         req = await el(req) ?? req;
       }
 
       let resolved = await fetch(req.url, req);
 
-      for (const el of svc.postResponseHandlers) {
+      for (const el of req.svc.postResponseHandlers) {
         resolved = await el(resolved) ?? resolved;
       }
 
       if (resolved.ok) {
         if (resolved.headers.get('content-type') === 'application/json') {
-          const res = await resolved.json();
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          return res as Promise<T>;
+          const text = await resolved.text();
+          return CommonUtil.parseJSON<T>(text);
         } else {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           return undefined as unknown as Promise<T>;
@@ -174,7 +110,8 @@ export class FetchRequestUtil {
       } else {
         let res;
         if (resolved.headers.get('content-type') === 'application/json') {
-          res = await resolved.json();
+          const text = await resolved.text();
+          res = CommonUtil.parseJSON<Error>(text);
         } else {
           res = resolved;
         }
@@ -189,13 +126,7 @@ export class FetchRequestUtil {
     }
   }
 
-  static async makeRequest<T>(
-    svc: IFetchService,
-    method: FetchRequestShape['method'],
-    endpointPath: string,
-    params: unknown[],
-    paramConfigs: ParamConfig[] | (readonly ParamConfig[])
-  ): Promise<T> {
-    return this.callFetch(svc, this.buildRequestShape(svc, method, endpointPath, params, paramConfigs));
+  static async makeRequest<T>(cfg: RequestBuildOptions<IFetchService>): Promise<T> {
+    return this.callFetch(this.buildRequestShape(cfg));
   }
 }

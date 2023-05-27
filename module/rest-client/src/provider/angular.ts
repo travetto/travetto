@@ -26,10 +26,7 @@ export class AngularClientGenerator extends ClientGenerator {
   }
 
   renderEndpoint(endpoint: EndpointConfig, controller: ControllerConfig): RenderContent {
-    const out: (string | Imp)[] = [];
-    const httpEvent = { classId: '_ev', file: '@angular/common/http', name: 'HttpEvent' };
-    const httpResponse = { classId: '_res', file: '@angular/common/http', name: 'HttpResponse' };
-    const observable = { classId: '_obs', file: 'rxjs', name: 'Observable' };
+    const response = { classId: '_res', file: './types.ts', name: 'AngularResponse' };
     const util = { classId: AngularRequestUtil.Ⲑid, file: './utils.ts', name: AngularRequestUtil.name };
 
     const {
@@ -38,41 +35,25 @@ export class AngularClientGenerator extends ClientGenerator {
 
     imports.push(util);
 
-    const buildBody = (type: string): (string | Imp)[] => [
-      `    return `, util, '.', AngularRequestUtil.makeRequest.name, `${type}<`, ...returnType, `>({\n`,
-      `      svc: this, method: '${method}', endpointPath: '${endpoint.path}',\n`,
-      `      params: ${paramNameArr}, paramConfig: this.${paramConfigField}\n`,
-      `    });\n`,
-    ];
-
-    out.push(
+    const content = [
       `  ${paramConfigField} = ${paramConfig} as const;\n\n`,
       doc,
       `  ${endpoint.handlerName} (\n`,
       ...paramInputs,
-      `  ): `, observable, `<`, ...returnType, `>{\n`,
-      ...buildBody('Body'),
+      `  ): `, response, `<`, ...returnType, `> {\n`,
+      `    return `, util, '.', AngularRequestUtil.makeRequest.name, `<`, ...returnType, `>({\n`,
+      `      svc: this, method: '${method}', endpointPath: '${endpoint.path}',\n`,
+      `      params: ${paramNameArr}, paramConfigs: this.${paramConfigField}\n`,
+      `    });\n`,
       `  }\n\n`,
-      doc,
-      `  ${endpoint.handlerName}WithResponse (\n`,
-      ...paramInputs, `
-        ): `, observable, `<`, httpResponse, '<', ...returnType, `>>{\n`,
-      ...buildBody('Response'),
-      `  }\n\n`,
-      doc,
-      `  ${endpoint.handlerName}WithEvents (\n`,
-      ...paramInputs,
-      `  ): `, observable, `<`, httpEvent, '<', ...returnType, `>>{\n`,
-      ...buildBody('Events'),
-      `  }\n\n`,
-    );
+    ];
 
     return {
       imports,
       classId: '',
       name: endpoint.handlerName,
       file: '',
-      content: out
+      content
     };
   }
 
@@ -83,18 +64,24 @@ export class AngularClientGenerator extends ClientGenerator {
 
     const results = endpoints.map(x => this.renderEndpoint(x, controller));
 
-    const base: Imp = { name: BaseAngularService.name, file: './base-service.ts', classId: '_' };
+    const base: Imp = { name: BaseAngularService.name, file: './base-service.ts', classId: BaseAngularService.Ⲑid };
+    const common: Imp = { name: CommonUtil.name, file: './common.ts', classId: CommonUtil.Ⲑid };
 
     const httpClient = { classId: '_client', file: '@angular/common/http', name: 'HttpClient' };
     const injectable = { classId: '_inj', file: '@angular/core', name: 'Injectable' };
     const optional = { classId: '_inj', file: '@angular/core', name: 'Optional' };
     const options = { classId: '_opts', file: './types.ts', name: 'Configuration' };
+    const map = { classId: '_map', file: 'rxjs', name: 'map' };
+
+    const imports = [base, httpClient, injectable, optional, options, ...results.flatMap(x => x.imports)];
 
     const contents = [
       `\n`,
       `@`, injectable, `({ providedIn: 'root' })\n`,
       `export class ${service}Service extends `, base, `{\n\n`,
-      `  routePath = '${controller.basePath}';\n\n`,
+      `  routePath = '${controller.basePath}';\n`,
+      `  transform = <T>() => `, map, `(o => `, common, `.`, CommonUtil.parseJSON.name, `<T>(JSON.stringify(o)));\n`,
+      `\n`,
       `  constructor(public client: `, httpClient, `, @`, optional, `() options: `, options, `) {\n`,
       `    super(options);\n`,
       `  }\n`,
@@ -107,7 +94,7 @@ export class AngularClientGenerator extends ClientGenerator {
       classId: controller.class.Ⲑid,
       name: service,
       content: contents,
-      imports: [base, ...results.flatMap(x => x.imports)]
+      imports
     };
   }
 

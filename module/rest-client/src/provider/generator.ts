@@ -256,10 +256,8 @@ export abstract class ClientGenerator implements ControllerVisitor {
     await fs.mkdir(this.#output, { recursive: true });
     for (const [file, cls] of this.commonFiles) {
       const base = path.resolve(this.#output, file);
-      if (!(await fs.stat(base).catch(() => false))) {
-        const baseSource = RootIndex.getFunctionMetadata(cls)!.source;
-        await fs.copyFile(baseSource, base);
-      }
+      const baseSource = RootIndex.getFunctionMetadata(cls)!.source;
+      await fs.copyFile(baseSource, base);
     }
 
     const files = [...this.#files.values()].reduce<Record<string, RenderContent[]>>((acc, x) => {

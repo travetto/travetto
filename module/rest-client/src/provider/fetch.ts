@@ -40,8 +40,10 @@ export class FetchClientGenerator extends ClientGenerator {
       `  ${endpoint.handlerName} (\n`,
       ...paramInputs,
       `  ): Promise<`, ...returnType, `>{\n`,
-      `    return `, util, '.', FetchRequestUtil.makeRequest.name, '<', ...returnType, `>(this, 
-        '${method}', '${endpoint.path}', ${paramNameArr}, this.${paramConfigField});\n`,
+      `    return `, util, '.', FetchRequestUtil.makeRequest.name, '<', ...returnType, `>({\n`,
+      `      svc: this, method: '${method}', endpointPath: '${endpoint.path}',\n`,
+      `      params: ${paramNameArr}, paramConfigs: this.${paramConfigField}\n`,
+      `    });\n`,
       `  }\n\n`,
     );
 
