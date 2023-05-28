@@ -8,6 +8,7 @@ export type PreRequestHandler = (req: FetchRequestOptions) => FetchRequestOption
 export type PostResponseHandler = (res: Response) => Response | undefined | void | Promise<Response | undefined | void>;
 
 export interface IFetchService extends IRemoteService {
+  debug?: boolean;
   preRequestHandlers: PreRequestHandler[];
   postResponseHandlers: PostResponseHandler[];
 }

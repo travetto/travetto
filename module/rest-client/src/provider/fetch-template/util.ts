@@ -91,6 +91,10 @@ export class FetchRequestUtil {
         req = await el(req) ?? req;
       }
 
+      if (req.svc.debug) {
+        console.debug('Making request', req);
+      }
+
       let resolved = await fetch(req.url, req);
 
       for (const el of req.svc.postResponseHandlers) {
@@ -113,9 +117,15 @@ export class FetchRequestUtil {
         } else {
           res = resolved;
         }
+        if (req.svc.debug) {
+          console.debug('Error in making request', res);
+        }
         throw await this.getError(res);
       }
     } catch (err) {
+      if (req.svc.debug) {
+        console.debug('Error in initiating request', err);
+      }
       if (err instanceof Error) {
         throw await this.getError(err);
       } else {
