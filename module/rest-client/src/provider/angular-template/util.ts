@@ -10,21 +10,19 @@ type Chunk = { name: string, blob: Blob };
 export class AngularRequestUtil {
 
   static buildRequestShape(params: unknown[], cfg: RequestOptions<IAngularService>): RawRequestOptions<IAngularService> {
-    return CommonUtil.buildRequest<IAngularService, unknown, Blob, Chunk>(params, {
-      ...cfg, multipart: {
-        addItem: (name, blob) => ({ name, blob }),
-        addJson: (name, json) => ({ name, blob: new Blob([JSON.stringify(json)], { type: 'application/json' }) }),
-        finalize(items) {
-          if (items.length === 1) {
-            return items[0].blob;
-          } else {
-            const form = new FormData();
-            for (const { name, blob } of items) {
-              form.append(name, blob, 'name' in blob && typeof blob.name === 'string' ? blob.name : undefined);
-            }
-            return form;
+    return CommonUtil.buildRequest<IAngularService, unknown, Blob, Chunk>(params, cfg, {
+      addItem: (name, blob) => ({ name, blob }),
+      addJson: (name, json) => ({ name, blob: new Blob([JSON.stringify(json)], { type: 'application/json' }) }),
+      finalize(items) {
+        if (items.length === 1) {
+          return items[0].blob;
+        } else {
+          const form = new FormData();
+          for (const { name, blob } of items) {
+            form.append(name, blob, 'name' in blob && typeof blob.name === 'string' ? blob.name : undefined);
           }
-        },
+          return form;
+        }
       }
     });
   }

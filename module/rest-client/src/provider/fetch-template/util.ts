@@ -40,23 +40,21 @@ export class FetchRequestUtil {
   }
 
   static buildRequestShape(params: unknown[], cfg: RequestOptions<IFetchService>): FetchRequestOptions {
-    return CommonUtil.buildRequest<IFetchService, BodyInit, UploadContent, MultiPart>(params, {
-      ...cfg, multipart: {
-        addItem: (name, item) => ({ ...item, name, }),
-        addJson: (name, obj) => ({
-          buffer: Buffer.from(JSON.stringify(obj)),
-          type: 'application/json',
-          name
-        }),
-        finalize: (items, req) => {
-          if (items.length === 1) {
-            req.headers['Content-Type'] = items[0].type!;
-            return items[0].buffer;
-          } else {
-            const { body, headers } = this.getMultipartRequest(items);
-            Object.assign(req.headers, headers);
-            return body;
-          }
+    return CommonUtil.buildRequest<IFetchService, BodyInit, UploadContent, MultiPart>(params, cfg, {
+      addItem: (name, item) => ({ ...item, name, }),
+      addJson: (name, obj) => ({
+        buffer: Buffer.from(JSON.stringify(obj)),
+        type: 'application/json',
+        name
+      }),
+      finalize: (items, req) => {
+        if (items.length === 1) {
+          req.headers['Content-Type'] = items[0].type!;
+          return items[0].buffer;
+        } else {
+          const { body, headers } = this.getMultipartRequest(items);
+          Object.assign(req.headers, headers);
+          return body;
         }
       }
     });

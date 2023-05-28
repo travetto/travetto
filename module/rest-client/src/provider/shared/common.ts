@@ -16,12 +16,10 @@ export type RequestOptions<S extends IRemoteService = IRemoteService> = {
   paramConfigs: ParamConfig[] | (readonly ParamConfig[]);
 };
 
-export type RequestOptionsWithMultipart<S extends IRemoteService, T, B, P> = RequestOptions<S> & {
-  multipart: {
-    addJson: (name: string, obj: unknown) => P;
-    addItem: (name: string, item: B) => P;
-    finalize: (items: P[], request: RawRequestOptions<S, T>) => T;
-  };
+export type MultipartHandler<S extends IRemoteService, T, B, P> = {
+  addJson: (name: string, obj: unknown) => P;
+  addItem: (name: string, item: B) => P;
+  finalize: (items: P[], request: RawRequestOptions<S, T>) => T;
 };
 
 export type RawRequestOptions<S extends IRemoteService = IRemoteService, T = unknown> = {
@@ -92,7 +90,8 @@ export class CommonUtil {
 
   static buildRequest<S extends IRemoteService, T, B, P>(
     params: unknown[],
-    { svc, method, endpointPath, paramConfigs, multipart }: RequestOptionsWithMultipart<S, T, B, P>,
+    { svc, method, endpointPath, paramConfigs }: RequestOptions<S>,
+    multipart: MultipartHandler<S, T, B, P>
   ): RawRequestOptions<S, T> {
     let resolvedPath = `${svc.basePath}/${svc.routePath}/${endpointPath || ''}`.replace(/[\/]+/g, '/').replace(/[\/]$/, '');
     const query: Record<string, string> = {};
