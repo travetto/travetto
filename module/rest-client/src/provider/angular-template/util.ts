@@ -9,8 +9,8 @@ type Chunk = { name: string, blob: Blob };
  */
 export class AngularRequestUtil {
 
-  static buildRequestShape(params: unknown[], cfg: RequestOptions<IAngularService>): RawRequestOptions<IAngularService> {
-    return CommonUtil.buildRequest<IAngularService, unknown, Blob, Chunk>(params, cfg, {
+  static buildRequestShape(svc: IAngularService, params: unknown[], cfg: RequestOptions): RawRequestOptions {
+    return CommonUtil.buildRequest<IAngularService, unknown, Blob, Chunk>(svc, params, cfg, {
       addItem: (name, blob) => ({ name, blob }),
       addJson: (name, json) => ({ name, blob: new Blob([JSON.stringify(json)], { type: 'application/json' }) }),
       finalize(items) {
@@ -43,8 +43,7 @@ export class AngularRequestUtil {
     }
   }
 
-  static invoke<T>(req: RawRequestOptions<IAngularService>, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
-    const svc = req.svc;
+  static invoke<T>(svc: IAngularService, req: RawRequestOptions, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return svc.client.request(req.method.toLowerCase() as 'get', req.url.toString(), {
       observe, reportProgress: observe === 'events',
@@ -53,12 +52,12 @@ export class AngularRequestUtil {
     }).pipe(svc.transform<T>()) as AngularResponse<T>;
   }
 
-  static makeRequest<T>(params: unknown[], opts: RequestOptions<IAngularService>): AngularResponse<T> {
-    const req = this.buildRequestShape(params, opts);
-    const res = this.invoke<T>(req, 'body');
+  static makeRequest<T>(svc: IAngularService, params: unknown[], opts: RequestOptions): AngularResponse<T> {
+    const req = this.buildRequestShape(svc, params, opts);
+    const res = this.invoke<T>(svc, req, 'body');
     Object.defineProperties(res, {
-      events: { get: () => this.invoke(req, 'events'), configurable: false },
-      response: { get: () => this.invoke(req, 'response'), configurable: false }
+      events: { get: () => this.invoke(svc, req, 'events'), configurable: false },
+      response: { get: () => this.invoke(svc, req, 'response'), configurable: false }
     });
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

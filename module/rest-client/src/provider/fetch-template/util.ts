@@ -39,8 +39,8 @@ export class FetchRequestUtil {
     return { body, headers };
   }
 
-  static buildRequestShape(params: unknown[], cfg: RequestOptions<IFetchService>): FetchRequestOptions {
-    return CommonUtil.buildRequest<IFetchService, BodyInit, UploadContent, MultiPart>(params, cfg, {
+  static buildRequestShape(svc: IFetchService, params: unknown[], cfg: RequestOptions): FetchRequestOptions {
+    return CommonUtil.buildRequest<IFetchService, BodyInit, UploadContent, MultiPart>(svc, params, cfg, {
       addItem: (name, item) => ({ ...item, name, }),
       addJson: (name, obj) => ({
         buffer: Buffer.from(JSON.stringify(obj)),
@@ -85,19 +85,19 @@ export class FetchRequestUtil {
     }
   }
 
-  static async invoke<T>(req: FetchRequestOptions): Promise<T> {
+  static async invoke<T>(svc: IFetchService, req: FetchRequestOptions): Promise<T> {
     try {
-      for (const el of req.svc.preRequestHandlers) {
+      for (const el of svc.preRequestHandlers) {
         req = await el(req) ?? req;
       }
 
-      if (req.svc.debug) {
+      if (svc.debug) {
         console.debug('Making request', req);
       }
 
       let resolved = await fetch(req.url, req);
 
-      for (const el of req.svc.postResponseHandlers) {
+      for (const el of svc.postResponseHandlers) {
         resolved = await el(resolved) ?? resolved;
       }
 
@@ -117,13 +117,13 @@ export class FetchRequestUtil {
         } else {
           res = resolved;
         }
-        if (req.svc.debug) {
+        if (svc.debug) {
           console.debug('Error in making request', res);
         }
         throw await this.getError(res);
       }
     } catch (err) {
-      if (req.svc.debug) {
+      if (svc.debug) {
         console.debug('Error in initiating request', err);
       }
       if (err instanceof Error) {
@@ -134,7 +134,7 @@ export class FetchRequestUtil {
     }
   }
 
-  static async makeRequest<T>(params: unknown[], cfg: RequestOptions<IFetchService>): Promise<T> {
-    return this.invoke(this.buildRequestShape(params, cfg));
+  static async makeRequest<T>(svc: IFetchService, params: unknown[], cfg: RequestOptions): Promise<T> {
+    return this.invoke(svc, this.buildRequestShape(svc, params, cfg));
   }
 }

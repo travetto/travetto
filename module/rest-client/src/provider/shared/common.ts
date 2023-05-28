@@ -9,21 +9,19 @@ export type ParamConfig = {
 
 type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'head' | 'options' | 'patch';
 
-export type RequestOptions<S extends IRemoteService = IRemoteService> = {
-  svc: S;
+export type RequestOptions = {
   method: HttpMethod;
   endpointPath: string;
   paramConfigs: ParamConfig[] | (readonly ParamConfig[]);
 };
 
-export type MultipartHandler<S extends IRemoteService, T, B, P> = {
+export type MultipartHandler<T, B, P> = {
   addJson: (name: string, obj: unknown) => P;
   addItem: (name: string, item: B) => P;
-  finalize: (items: P[], request: RawRequestOptions<S, T>) => T;
+  finalize: (items: P[], request: RawRequestOptions<T>) => T;
 };
 
-export type RawRequestOptions<S extends IRemoteService = IRemoteService, T = unknown> = {
-  svc: S;
+export type RawRequestOptions<T = unknown> = {
   headers: Record<string, string>;
   url: URL;
   body?: T;
@@ -31,7 +29,7 @@ export type RawRequestOptions<S extends IRemoteService = IRemoteService, T = unk
 };
 
 export type IRemoteService = {
-  basePath: string;
+  baseUrl: string;
   routePath: string;
   headers: Record<string, string>;
 };
@@ -89,11 +87,9 @@ export class CommonUtil {
   }
 
   static buildRequest<S extends IRemoteService, T, B, P>(
-    params: unknown[],
-    { svc, method, endpointPath, paramConfigs }: RequestOptions<S>,
-    multipart: MultipartHandler<S, T, B, P>
-  ): RawRequestOptions<S, T> {
-    let resolvedPath = `${svc.basePath}/${svc.routePath}/${endpointPath || ''}`.replace(/[\/]+/g, '/').replace(/[\/]$/, '');
+    svc: S, params: unknown[], { endpointPath, paramConfigs, method }: RequestOptions, multipart: MultipartHandler<T, B, P>
+  ): RawRequestOptions<T> {
+    let resolvedPath = `${svc.baseUrl}/${svc.routePath}/${endpointPath || ''}`.replace(/[\/]+/g, '/').replace(/[\/]$/, '');
     const query: Record<string, string> = {};
     const headers: Record<string, string> = { ...svc.headers };
     const bodyIdxs: number[] = [];
@@ -123,7 +119,7 @@ export class CommonUtil {
 
     let body: T | undefined;
 
-    const req: RawRequestOptions<S, T> = { headers, url, body, method, svc };
+    const req: RawRequestOptions<T> = { headers, url, body, method };
 
     if (bodyIdxs.length) {
       const parts: P[] = [];

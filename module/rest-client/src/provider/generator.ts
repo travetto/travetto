@@ -181,7 +181,6 @@ export abstract class ClientGenerator implements ControllerVisitor {
     const { imports, paramInputs, paramConfigs, returnType } = this.describeEndpoint(endpoint, controller);
     const requestField = `#${endpoint.handlerName}Request`;
     const requestShape = JSON.stringify({
-      svc: 'this',
       method: endpoint.method === 'all' ? 'post' : endpoint.method,
       endpointPath: endpoint.path,
       paramConfigs
@@ -202,10 +201,10 @@ export abstract class ClientGenerator implements ControllerVisitor {
       method: [
         endpoint.title ? `  /** ${endpoint.title}\n${endpoint.description ?? ''}*/\n` : '',
         `  ${endpoint.handlerName} (`, ...paramInputs, `  ): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
-        `    return `, ...this.requestFunction, `<`, ...returnType, `>(${paramNameArr}, this.${requestField});\n`,
+        `    return `, ...this.requestFunction, `<`, ...returnType, `>(this, ${paramNameArr}, this.${requestField});\n`,
         `  }\n\n`,
       ],
-      config: [`  ${requestField}:`, opts, `<typeof this> = ${requestShape.trimEnd()};\n\n`,]
+      config: [`  ${requestField}:`, opts, ` = ${requestShape.trimEnd()};\n\n`,]
     };
   }
 

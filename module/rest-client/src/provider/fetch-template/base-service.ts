@@ -2,7 +2,7 @@ import { IFetchService, IFetchServiceConfig, PostResponseHandler, PreRequestHand
 
 export abstract class BaseFetchService implements IFetchService {
 
-  basePath: string;
+  baseUrl: string;
   preRequestHandlers: PreRequestHandler[];
   postResponseHandlers: PostResponseHandler[];
   headers: Record<string, string>;
@@ -10,7 +10,7 @@ export abstract class BaseFetchService implements IFetchService {
   abstract get routePath(): string;
 
   constructor(cfg: IFetchServiceConfig) {
-    this.basePath = cfg.basePath ?? 'http://localhost';
+    this.baseUrl = cfg.baseUrl ?? 'http://localhost';
     this.postResponseHandlers = cfg.postResponseHandlers ?? [];
     this.preRequestHandlers = cfg.preRequestHandlers ?? [];
     this.headers = cfg.headers ?? {};
