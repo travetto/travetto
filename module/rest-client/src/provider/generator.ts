@@ -157,7 +157,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
     const paramInputs = paramsWithSchemas.flatMap(({ param: ep, schema: x }) => {
       const rendered = this.renderField(ep.name!, x);
       imports.push(...rendered.imports);
-      return [`    `, ...rendered.content, ',\n'];
+      return [...rendered.content, ','];
     });
 
     const paramConfigs = paramsWithSchemas.map(({ param: x, schema: s }) => ({
@@ -201,9 +201,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
       imports,
       method: [
         endpoint.title ? `  /** ${endpoint.title}\n${endpoint.description ?? ''}*/\n` : '',
-        `  ${endpoint.handlerName} (\n`,
-        ...paramInputs,
-        `  ): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
+        `  ${endpoint.handlerName} (`, ...paramInputs, `  ): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
         `    return `, ...this.requestFunction, `<`, ...returnType, `>(${paramNameArr}, this.${requestField});\n`,
         `  }\n\n`,
       ],
