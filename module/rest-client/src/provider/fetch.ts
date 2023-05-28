@@ -13,7 +13,7 @@ import { CommonUtil } from './shared/common';
 
 export class FetchClientGenerator extends ClientGenerator {
 
-  subFolder = 'src';
+  get subFolder(): string { return 'src'; }
 
   get commonFiles(): [string, Class][] {
     return [
