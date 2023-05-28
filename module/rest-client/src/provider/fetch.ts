@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/quotes */
 
 import { Class } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 import { ControllerConfig, EndpointConfig } from '@travetto/rest';
 
 import { ClientGenerator, Imp, RenderContent } from './generator';
@@ -9,9 +10,10 @@ import { BaseFetchService } from './fetch-template/base-service';
 import { FetchRequestUtil } from './fetch-template/util';
 import { placeholder } from './fetch-template/types';
 import { CommonUtil } from './shared/common';
-import { RootIndex } from '@travetto/manifest';
 
 export class FetchClientGenerator extends ClientGenerator {
+
+  subFolder = 'src';
 
   get commonFiles(): [string, Class][] {
     return [
@@ -23,11 +25,10 @@ export class FetchClientGenerator extends ClientGenerator {
   }
 
   init(): void {
-    const file = this.subFolder === '.' ? './package.json' : '../package.json';
-    this.registerContent(file, {
+    this.registerContent('_pkgId', {
       imports: [],
       classId: '',
-      file,
+      file: 'package.json',
       name: '',
       content: [
         `{\n`,

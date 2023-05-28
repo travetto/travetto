@@ -39,27 +39,25 @@ export abstract class ClientGenerator implements ControllerVisitor {
   #files = new Map<string, RenderContent>();
 
   abstract get commonFiles(): [string, Class][];
-
+  abstract get subFolder(): string;
   abstract renderController(cfg: ControllerConfig): RenderContent;
 
   moduleName: string;
-  subFolder: string;
 
-  constructor(output: string, moduleName?: string, subFolder?: string) {
+  constructor(output: string, moduleName?: string) {
     this.#output = output;
     this.moduleName = moduleName ?? `${RootIndex.mainModule.name}-client`;
-    this.subFolder = subFolder ?? '.';
     this.init?.();
   }
 
   init?(): void;
 
-  registerContent(file: string, content: RenderContent): void {
-    this.#files.set(file, content);
+  registerContent(classId: string, content: RenderContent): void {
+    this.#files.set(classId, content);
   }
 
   async renderContent(file: string, content: RenderContent[]): Promise<void> {
-    const output = path.resolve(this.#output, this.subFolder, file);
+    const output = path.resolve(this.#output, file.startsWith('.') ? this.subFolder : '.', file);
     const text: string[] = [];
     const imports: Record<string, string[]> = {};
 
@@ -257,7 +255,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
   }
 
   async finalize(): Promise<void> {
-    await fs.mkdir(this.#output, { recursive: true });
+    await fs.mkdir(path.resolve(this.#output, this.subFolder), { recursive: true });
     for (const [file, cls] of this.commonFiles) {
       const base = path.resolve(this.#output, this.subFolder, file);
       const baseSource = RootIndex.getFunctionMetadata(cls)!.source;

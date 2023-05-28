@@ -12,6 +12,8 @@ import { CommonUtil } from './shared/common';
 
 export class AngularClientGenerator extends ClientGenerator {
 
+  subFolder = '.';
+
   get commonFiles(): [string, Class][] {
     return [
       ['./base-service.ts', BaseAngularService],

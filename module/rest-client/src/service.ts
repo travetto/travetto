@@ -35,7 +35,7 @@ export class RestClientGeneratorService implements AutoCreate {
 
       switch (x.type) {
         case 'angular': return new AngularClientGenerator(x.output, x.moduleName);
-        case 'fetch': return new FetchClientGenerator(x.output, x.moduleName, 'src');
+        case 'fetch': return new FetchClientGenerator(x.output, x.moduleName);
       }
     }).filter(x => !!x);
 

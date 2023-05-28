@@ -45,7 +45,7 @@ export class CliRestClientCommand implements CliCommandShape {
       }
       case 'fetch': {
         const { FetchClientGenerator } = await import('../src/provider/fetch.js');
-        await genService.renderProvider(new FetchClientGenerator(output!, 'src'));
+        await genService.renderProvider(new FetchClientGenerator(output!));
         console.log!(`Generated fetch client at ${output}`);
         break;
       }
