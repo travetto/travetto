@@ -1,5 +1,5 @@
 /// <reference lib="dom" />
-import { CommonUtil, RequestShape, RequestBuildOptions } from './common';
+import { CommonUtil, RawRequestOptions, RequestOptions } from './common';
 import { AngularResponse, IAngularService } from './types';
 
 type Chunk = { name: string, blob: Blob };
@@ -9,8 +9,8 @@ type Chunk = { name: string, blob: Blob };
  */
 export class AngularRequestUtil {
 
-  static buildRequestShape(cfg: RequestBuildOptions<IAngularService>): RequestShape<unknown, IAngularService> {
-    return CommonUtil.buildRequest<IAngularService, unknown, Blob, Chunk>({
+  static buildRequestShape(params: unknown[], cfg: RequestOptions<IAngularService>): RawRequestOptions<IAngularService> {
+    return CommonUtil.buildRequest<IAngularService, unknown, Blob, Chunk>(params, {
       ...cfg, multipart: {
         addItem: (name, blob) => ({ name, blob }),
         addJson: (name, json) => ({ name, blob: new Blob([JSON.stringify(json)], { type: 'application/json' }) }),
@@ -45,7 +45,7 @@ export class AngularRequestUtil {
     }
   }
 
-  static callClient<T>(req: RequestShape<unknown, IAngularService>, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
+  static invoke<T>(req: RawRequestOptions<IAngularService>, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
     const svc = req.svc;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return svc.client.request(req.method.toLowerCase() as 'get', req.url.toString(), {
@@ -55,12 +55,12 @@ export class AngularRequestUtil {
     }).pipe(svc.transform<T>()) as AngularResponse<T>;
   }
 
-  static makeRequest<T>(opts: RequestBuildOptions<IAngularService>): AngularResponse<T> {
-    const req = this.buildRequestShape(opts);
-    const res = this.callClient<T>(req, 'body');
+  static makeRequest<T>(params: unknown[], opts: RequestOptions<IAngularService>): AngularResponse<T> {
+    const req = this.buildRequestShape(params, opts);
+    const res = this.invoke<T>(req, 'body');
     Object.defineProperties(res, {
-      events: { get: () => this.callClient(req, 'events'), configurable: false },
-      response: { get: () => this.callClient(req, 'response'), configurable: false }
+      events: { get: () => this.invoke(req, 'events'), configurable: false },
+      response: { get: () => this.invoke(req, 'response'), configurable: false }
     });
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

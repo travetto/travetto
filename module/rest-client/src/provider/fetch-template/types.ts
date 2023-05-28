@@ -1,10 +1,10 @@
 import { BodyInit, Response } from 'node-fetch';
-import { IRemoteService, RequestShape } from './common';
+import { IRemoteService, RawRequestOptions } from './common';
 
 export type UploadContent = { type?: string, buffer: Buffer, filename?: string, size?: number };
 
-export type FetchRequestShape = RequestShape<BodyInit, IFetchService>;
-export type PreRequestHandler = (req: FetchRequestShape) => FetchRequestShape | undefined | void | Promise<FetchRequestShape | undefined | void>;
+export type FetchRequestOptions = RawRequestOptions<IFetchService, BodyInit>;
+export type PreRequestHandler = (req: FetchRequestOptions) => FetchRequestOptions | undefined | void | Promise<FetchRequestOptions | undefined | void>;
 export type PostResponseHandler = (res: Response) => Response | undefined | void | Promise<Response | undefined | void>;
 
 export interface IFetchService extends IRemoteService {

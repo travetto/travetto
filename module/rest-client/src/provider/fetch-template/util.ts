@@ -1,7 +1,7 @@
 import fetch, { BodyInit, Response } from 'node-fetch';
 
-import { FetchRequestShape, IFetchService, UploadContent } from './types';
-import { CommonUtil, RequestBuildOptions } from './common';
+import { FetchRequestOptions, IFetchService, UploadContent } from './types';
+import { CommonUtil, RequestOptions } from './common';
 
 type MultiPart = UploadContent & { name: string };
 
@@ -39,8 +39,8 @@ export class FetchRequestUtil {
     return { body, headers };
   }
 
-  static buildRequestShape(cfg: RequestBuildOptions<IFetchService>): FetchRequestShape {
-    return CommonUtil.buildRequest<IFetchService, BodyInit, UploadContent, MultiPart>({
+  static buildRequestShape(params: unknown[], cfg: RequestOptions<IFetchService>): FetchRequestOptions {
+    return CommonUtil.buildRequest<IFetchService, BodyInit, UploadContent, MultiPart>(params, {
       ...cfg, multipart: {
         addItem: (name, item) => ({ ...item, name, }),
         addJson: (name, obj) => ({
@@ -87,7 +87,7 @@ export class FetchRequestUtil {
     }
   }
 
-  static async callFetch<T>(req: FetchRequestShape): Promise<T> {
+  static async invoke<T>(req: FetchRequestOptions): Promise<T> {
     try {
       for (const el of req.svc.preRequestHandlers) {
         req = await el(req) ?? req;
@@ -102,7 +102,7 @@ export class FetchRequestUtil {
       if (resolved.ok) {
         if (resolved.headers.get('content-type') === 'application/json') {
           const text = await resolved.text();
-          return CommonUtil.parseJSON<T>(text);
+          return CommonUtil.consumeJSON<T>(text);
         } else {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           return undefined as unknown as Promise<T>;
@@ -111,7 +111,7 @@ export class FetchRequestUtil {
         let res;
         if (resolved.headers.get('content-type') === 'application/json') {
           const text = await resolved.text();
-          res = CommonUtil.parseJSON<Error>(text);
+          res = CommonUtil.consumeJSON<Error>(text);
         } else {
           res = resolved;
         }
@@ -126,7 +126,7 @@ export class FetchRequestUtil {
     }
   }
 
-  static async makeRequest<T>(cfg: RequestBuildOptions<IFetchService>): Promise<T> {
-    return this.callFetch(this.buildRequestShape(cfg));
+  static async makeRequest<T>(params: unknown[], cfg: RequestOptions<IFetchService>): Promise<T> {
+    return this.invoke(this.buildRequestShape(params, cfg));
   }
 }

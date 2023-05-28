@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/quotes */
 
 import { Class } from '@travetto/base';
-import { ControllerConfig, EndpointConfig } from '@travetto/rest';
+import { ControllerConfig } from '@travetto/rest';
 
 import { ClientGenerator, Imp, RenderContent } from './generator';
 
@@ -12,8 +12,8 @@ import { CommonUtil } from './shared/common';
 
 export class AngularClientGenerator extends ClientGenerator {
 
-  subFolder = '.';
-
+  get subFolder(): string { return '.'; }
+  get uploadType(): string { return 'Blob'; }
   get commonFiles(): [string, Class][] {
     return [
       ['./base-service.ts', BaseAngularService],
@@ -23,81 +23,18 @@ export class AngularClientGenerator extends ClientGenerator {
     ];
   }
 
-  getUploadType(): string {
-    return 'Blob';
+  get endpointResponseWrapper(): (string | Imp)[] {
+    return [{ classId: '_res', file: './types.ts', name: 'AngularResponse' }];
   }
 
-  renderEndpoint(endpoint: EndpointConfig, controller: ControllerConfig): RenderContent {
-    const response = { classId: '_res', file: './types.ts', name: 'AngularResponse' };
+  get requestFunction(): (string | Imp)[] {
     const util = { classId: AngularRequestUtil.Ⲑid, file: './utils.ts', name: AngularRequestUtil.name };
-
-    const {
-      imports, method, paramConfigField, paramConfig, paramInputs, paramNameArr, returnType, doc
-    } = this.describeEndpoint(endpoint, controller);
-
-    imports.push(util);
-
-    const content = [
-      `  ${paramConfigField} = ${paramConfig} as const;\n\n`,
-      doc,
-      `  ${endpoint.handlerName} (\n`,
-      ...paramInputs,
-      `  ): `, response, `<`, ...returnType, `> {\n`,
-      `    return `, util, '.', AngularRequestUtil.makeRequest.name, `<`, ...returnType, `>({\n`,
-      `      svc: this, method: '${method}', endpointPath: '${endpoint.path}',\n`,
-      `      params: ${paramNameArr}, paramConfigs: this.${paramConfigField}\n`,
-      `    });\n`,
-      `  }\n\n`,
-    ];
-
-    return {
-      imports,
-      classId: '',
-      name: endpoint.handlerName,
-      file: '',
-      content
-    };
+    return [util, '.', AngularRequestUtil.makeRequest.name];
   }
 
-  renderController(controller: ControllerConfig): RenderContent {
-    const service = controller.class.name.replace(/(Controller|Rest|Service)$/, '');
-
-    const endpoints = controller.endpoints;
-
-    const results = endpoints.map(x => this.renderEndpoint(x, controller));
-
-    const base: Imp = { name: BaseAngularService.name, file: './base-service.ts', classId: BaseAngularService.Ⲑid };
-    const common: Imp = { name: CommonUtil.name, file: './common.ts', classId: CommonUtil.Ⲑid };
-
-    const httpClient = { classId: '_client', file: '@angular/common/http', name: 'HttpClient' };
-    const injectable = { classId: '_inj', file: '@angular/core', name: 'Injectable' };
-    const optional = { classId: '_inj', file: '@angular/core', name: 'Optional' };
-    const options = { classId: '_opts', file: './types.ts', name: 'Configuration' };
-    const map = { classId: '_map', file: 'rxjs', name: 'map' };
-
-    const imports = [base, httpClient, injectable, optional, options, ...results.flatMap(x => x.imports)];
-
-    const contents = [
-      `\n`,
-      `@`, injectable, `({ providedIn: 'root' })\n`,
-      `export class ${service}Service extends `, base, `{\n\n`,
-      `  routePath = '${controller.basePath}';\n`,
-      `  transform = <T>() => `, map, `(o => `, common, `.`, CommonUtil.parseJSON.name, `<T>(JSON.stringify(o)));\n`,
-      `\n`,
-      `  constructor(public client: `, httpClient, `, @`, optional, `() options: `, options, `) {\n`,
-      `    super(options);\n`,
-      `  }\n`,
-      ...results.flatMap(f => f.content),
-      `}\n`
-    ];
-
-    return {
-      file: './api.ts',
-      classId: controller.class.Ⲑid,
-      name: service,
-      content: contents,
-      imports
-    };
+  init(): void {
+    const content = this.renderModule();
+    this.registerContent(content.file, content);
   }
 
   renderModule(): RenderContent {
@@ -137,8 +74,48 @@ export class AngularClientGenerator extends ClientGenerator {
     };
   }
 
-  init(): void {
-    const content = this.renderModule();
-    this.registerContent(content.file, content);
+  renderController(controller: ControllerConfig): RenderContent {
+    const service = controller.class.name.replace(/(Controller|Rest|Service)$/, '');
+
+    const endpoints = controller.endpoints;
+
+    const results = endpoints.map(x => this.renderEndpoint(x, controller));
+
+    const base: Imp = { name: BaseAngularService.name, file: './base-service.ts', classId: BaseAngularService.Ⲑid };
+    const common: Imp = { name: CommonUtil.name, file: './common.ts', classId: CommonUtil.Ⲑid };
+
+    const httpClient = { classId: '_client', file: '@angular/common/http', name: 'HttpClient' };
+    const injectable = { classId: '_inj', file: '@angular/core', name: 'Injectable' };
+    const optional = { classId: '_inj', file: '@angular/core', name: 'Optional' };
+    const options = { classId: '_opts', file: './types.ts', name: 'Configuration' };
+    const map = { classId: '_map', file: 'rxjs', name: 'map' };
+    const operatorFn = { classId: '_map', file: 'rxjs', name: 'OperatorFunction' };
+
+    const imports = [base, httpClient, injectable, optional, options, ...results.flatMap(x => x.imports)];
+
+    const contents = [
+      `\n`,
+      `@`, injectable, `({ providedIn: 'root' })\n`,
+      `export class ${service}Service extends `, base, `{\n\n`,
+      `  routePath = '${controller.basePath}';\n`,
+      ...results.flatMap(f => f.config),
+      `\n`,
+      `  constructor(public client: `, httpClient, `, @`, optional, `() options: `, options, `) {\n`,
+      `    super(options);\n`,
+      `  }\n`,
+      `\n`,
+      `  transform = <T>():`, operatorFn, `<T, T> => `, map, `(o => `, common, `.`, CommonUtil.consumeJSON.name, `<T>(o));\n`,
+      `\n`,
+      ...results.flatMap(f => f.method),
+      `}\n`
+    ];
+
+    return {
+      file: './api.ts',
+      classId: controller.class.Ⲑid,
+      name: service,
+      content: contents,
+      imports
+    };
   }
 }

@@ -7,28 +7,29 @@ export type ParamConfig = {
   complex?: boolean;
 };
 
-export type RequestBuildOptions<S extends IRemoteService = IRemoteService> = {
+type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'head' | 'options' | 'patch';
+
+export type RequestOptions<S extends IRemoteService = IRemoteService> = {
   svc: S;
-  method: RequestShape['method'];
+  method: HttpMethod;
   endpointPath: string;
-  params: unknown[];
   paramConfigs: ParamConfig[] | (readonly ParamConfig[]);
 };
 
-export type RequestBuildOptionsWithMultipart<T, B, P, S extends IRemoteService> = RequestBuildOptions<S> & {
+export type RequestOptionsWithMultipart<S extends IRemoteService, T, B, P> = RequestOptions<S> & {
   multipart: {
     addJson: (name: string, obj: unknown) => P;
     addItem: (name: string, item: B) => P;
-    finalize: (items: P[], request: RequestShape<T>) => T;
+    finalize: (items: P[], request: RawRequestOptions<S, T>) => T;
   };
 };
 
-export type RequestShape<T = unknown, S extends IRemoteService = IRemoteService> = {
+export type RawRequestOptions<S extends IRemoteService = IRemoteService, T = unknown> = {
   svc: S;
   headers: Record<string, string>;
   url: URL;
   body?: T;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'PATCH';
+  method: HttpMethod;
 };
 
 export type IRemoteService = {
@@ -76,7 +77,10 @@ export class CommonUtil {
     return out;
   }
 
-  static parseJSON<T>(text: string): T {
+  static consumeJSON<T>(text: string | unknown): T {
+    if (typeof text !== 'string') {
+      return this.consumeJSON(JSON.stringify(text));
+    }
     return JSON.parse(text, (key, value) => {
       if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}[.]\d{3}Z/.test(value)) {
         return new Date(value);
@@ -87,8 +91,9 @@ export class CommonUtil {
   }
 
   static buildRequest<S extends IRemoteService, T, B, P>(
-    { svc, method, endpointPath, params, paramConfigs, multipart }: RequestBuildOptionsWithMultipart<T, B, P, S>
-  ): RequestShape<T, S> {
+    params: unknown[],
+    { svc, method, endpointPath, paramConfigs, multipart }: RequestOptionsWithMultipart<S, T, B, P>,
+  ): RawRequestOptions<S, T> {
     let resolvedPath = `${svc.basePath}/${svc.routePath}/${endpointPath || ''}`.replace(/[\/]+/g, '/').replace(/[\/]$/, '');
     const query: Record<string, string> = {};
     const headers: Record<string, string> = { ...svc.headers };
@@ -119,7 +124,7 @@ export class CommonUtil {
 
     let body: T | undefined;
 
-    const req: RequestShape<T, S> = { headers, url, body, method, svc };
+    const req: RawRequestOptions<S, T> = { headers, url, body, method, svc };
 
     if (bodyIdxs.length) {
       const parts: P[] = [];

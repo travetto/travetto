@@ -2,7 +2,7 @@
 
 import { Class } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
-import { ControllerConfig, EndpointConfig } from '@travetto/rest';
+import { ControllerConfig } from '@travetto/rest';
 
 import { ClientGenerator, Imp, RenderContent } from './generator';
 
@@ -14,7 +14,12 @@ import { CommonUtil } from './shared/common';
 export class FetchClientGenerator extends ClientGenerator {
 
   get subFolder(): string { return 'src'; }
-
+  get uploadType(): string | Imp { return { name: 'UploadContent', file: './types.ts', classId: '_' }; }
+  get endpointResponseWrapper(): string[] { return ['Promise']; }
+  get requestFunction(): (string | Imp)[] {
+    const util = { classId: FetchRequestUtil.Ⲑid, file: './utils.ts', name: FetchRequestUtil.name };
+    return [util, '.', FetchRequestUtil.makeRequest.name,];
+  }
   get commonFiles(): [string, Class][] {
     return [
       ['./base-service.ts', BaseFetchService],
@@ -44,35 +49,6 @@ export class FetchClientGenerator extends ClientGenerator {
     });
   }
 
-  getUploadType(): string | Imp {
-    return { name: 'UploadContent', file: './types.ts', classId: '_' };
-  }
-
-  renderEndpoint(endpoint: EndpointConfig, controller: ControllerConfig): RenderContent {
-    const {
-      imports, method, paramConfigField, paramConfig, paramInputs, paramNameArr, returnType, doc
-    } = this.describeEndpoint(endpoint, controller);
-    const classId = `${controller.class.Ⲑid}_${endpoint.handlerName}`;
-
-    const util = { classId: FetchRequestUtil.Ⲑid, file: './utils.ts', name: FetchRequestUtil.name };
-    imports.push(util);
-
-    const content = [
-      `  ${paramConfigField} = ${paramConfig} as const;\n\n`,
-      doc,
-      `  ${endpoint.handlerName} (\n`,
-      ...paramInputs,
-      `  ): Promise<`, ...returnType, `>{\n`,
-      `    return `, util, '.', FetchRequestUtil.makeRequest.name, '<', ...returnType, `>({\n`,
-      `      svc: this, method: '${method}', endpointPath: '${endpoint.path}',\n`,
-      `      params: ${paramNameArr}, paramConfigs: this.${paramConfigField}\n`,
-      `    });\n`,
-      `  }\n\n`,
-    ];
-
-    return { imports, classId, name: endpoint.handlerName, file: '', content };
-  }
-
   renderController(controller: ControllerConfig): RenderContent {
     const service = controller.class.name.replace(/(Controller|Rest|Service)$/, '');
     const endpoints = controller.endpoints;
@@ -81,8 +57,9 @@ export class FetchClientGenerator extends ClientGenerator {
 
     const contents = [
       `export class ${service}Api extends `, baseFetchService, `{\n\n`,
+      ...results.flatMap(f => f.config),
       `  routePath = '${controller.basePath}';\n\n`,
-      ...results.flatMap(f => f.content),
+      ...results.flatMap(f => f.method),
       `}\n`
     ];
 

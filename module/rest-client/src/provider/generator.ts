@@ -7,6 +7,8 @@ import { ControllerConfig, ControllerRegistry, ControllerVisitor, EndpointConfig
 import { ClassConfig, FieldConfig, SchemaRegistry } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
+import { ParamConfig } from './shared/common';
+
 export type Imp = { name: string, file: string, classId: string };
 
 export const TYPE_MAPPING: Record<string, string> = {
@@ -23,14 +25,10 @@ export type RenderContent = Imp & {
 };
 
 type EndpointDesc = {
-  method: string;
   returnType: (string | Imp)[];
   paramInputs: (string | Imp)[];
-  paramConfigField: string;
-  paramNameArr: string;
+  paramConfigs: ParamConfig[];
   imports: Imp[];
-  paramConfig: string;
-  doc: string;
 };
 
 export abstract class ClientGenerator implements ControllerVisitor {
@@ -40,6 +38,10 @@ export abstract class ClientGenerator implements ControllerVisitor {
 
   abstract get commonFiles(): [string, Class][];
   abstract get subFolder(): string;
+  abstract get endpointResponseWrapper(): (string | Imp)[];
+  abstract get requestFunction(): (string | Imp)[];
+  abstract get uploadType(): string | Imp;
+
   abstract renderController(cfg: ControllerConfig): RenderContent;
 
   moduleName: string;
@@ -86,7 +88,18 @@ export abstract class ClientGenerator implements ControllerVisitor {
     text.unshift(
       ...Object.entries(imports)
         .filter(x => !!x[0])
-        .map(([f, vals]) => `import { ${vals.join(', ')} } from '${f.replace(/[.]ts$/, '')}';\n`),
+        .sort(([a], [b]) =>
+          a.charAt(0) === b.charAt(0) ?
+            a.localeCompare(b) :
+            a.startsWith('.') ? 1 : a.localeCompare(b)
+        )
+        .map(([f, vals]) => {
+          if (vals.join(', ').length > 60) {
+            return `import {\n  ${vals.join(',\n  ')}\n} from '${f.replace(/[.]ts$/, '')}';\n`;
+          } else {
+            return `import { ${vals.join(', ')} } from '${f.replace(/[.]ts$/, '')}';\n`;
+          }
+        }),
       '\n\n',
     );
 
@@ -109,8 +122,6 @@ export abstract class ClientGenerator implements ControllerVisitor {
     }
   }
 
-  abstract getUploadType(): string | Imp;
-
   renderField(name: string, field: FieldConfig): RenderContent {
     const imports: Imp[] = [];
 
@@ -119,7 +130,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
     if (SchemaRegistry.has(field.type)) {
       type = this.renderSchema(SchemaRegistry.get(field.type));
     } else if (field.specifiers?.includes('file')) {
-      type = this.getUploadType();
+      type = this.uploadType;
     } else {
       if (field.enum) {
         type = `(${field.enum.values.map(v => typeof v === 'string' ? `'${v}'` : `${v}`).join(' | ')})`;
@@ -149,10 +160,9 @@ export abstract class ClientGenerator implements ControllerVisitor {
       return [`    `, ...rendered.content, ',\n'];
     });
 
-    const paramNames = paramsWithSchemas.map(x => x.param.name!);
-    const paramConfig = paramsWithSchemas.map(({ param: x, schema: s }) => ({
-      location: x.location,
-      name: x.name,
+    const paramConfigs = paramsWithSchemas.map(({ param: x, schema: s }) => ({
+      location: x.location as 'body',
+      name: x.name!,
       ...(SchemaRegistry.has(s.type) ? { complex: true } : {}),
       ...(s.array ? { array: true } : {}),
       ...(s.specifiers?.includes('file') ? { binary: true } : {}),
@@ -163,28 +173,41 @@ export abstract class ClientGenerator implements ControllerVisitor {
       imports.push(resolvedReturn);
     }
 
-    const returnType = [
-      resolvedReturn,
-      endpoint.responseType?.array ? '[]' : ''
-    ];
-    const method = endpoint.method === 'all' ? 'GET' : endpoint.method.toUpperCase();
-    const paramNameArr = JSON.stringify(paramNames).replaceAll(`"`, '');
-    const paramConfigField = `#${endpoint.handlerName}Params`;
+    const returnType = [resolvedReturn, endpoint.responseType?.array ? '[]' : ''];
+    return { returnType, imports, paramInputs, paramConfigs };
+  }
 
-    const doc = endpoint.title ? `  /** ${endpoint.title}\n${endpoint.description ?? ''}*/\n` : '';
+  renderEndpoint(endpoint: EndpointConfig, controller: ControllerConfig,): { imports: Imp[], method: (string | Imp)[], config: (string | Imp)[] } {
+    const { imports, paramInputs, paramConfigs, returnType } = this.describeEndpoint(endpoint, controller);
+    const requestField = `#${endpoint.handlerName}Request`;
+    const requestShape = JSON.stringify({
+      svc: 'this',
+      method: endpoint.method === 'all' ? 'post' : endpoint.method,
+      endpointPath: endpoint.path,
+      paramConfigs
+    })
+      .replace('"this"', `this`)
+      .replaceAll('"', `'`)
+      .replace(/'([^']+)':/gms, (_, v) => `${v}:`)
+      .replace(/(\[|(?:\},?))/g, _ => `${_}\n`);
+
+    const paramNames = paramConfigs.map(x => x.name!);
+    const paramNameArr = JSON.stringify(paramNames).replaceAll(`"`, '');
+
+    imports.push(...[...this.endpointResponseWrapper, ...this.requestFunction].filter((x): x is Imp => typeof x !== 'string'));
+    const opts: Imp = { name: 'RequestOptions', file: './common.ts', classId: '_common' };
 
     return {
-      doc,
-      method,
-      returnType,
       imports,
-      paramNameArr,
-      paramConfigField,
-      paramInputs,
-      paramConfig: JSON.stringify(paramConfig)
-        .replaceAll('"', `'`)
-        .replace(/'([^']+)':/gms, (_, v) => `${v}:`)
-        .replace(/(\[|(?:\},?))/g, _ => `${_}\n`)
+      method: [
+        endpoint.title ? `  /** ${endpoint.title}\n${endpoint.description ?? ''}*/\n` : '',
+        `  ${endpoint.handlerName} (\n`,
+        ...paramInputs,
+        `  ): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
+        `    return `, ...this.requestFunction, `<`, ...returnType, `>(${paramNameArr}, this.${requestField});\n`,
+        `  }\n\n`,
+      ],
+      config: [`  ${requestField}:`, opts, `<typeof this> = ${requestShape.trimEnd()};\n\n`,]
     };
   }
 
