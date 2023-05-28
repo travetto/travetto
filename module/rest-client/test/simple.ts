@@ -39,6 +39,7 @@ export class SimpleSuite {
     await svc.renderProvider(gen);
 
     assert(await exists('package.json'));
+    assert(JSON.parse(await fs.readFile(path.resolve(root, 'package.json'), 'utf8')).main === 'src/index.ts');
     assert(await exists('src/index.ts'));
     assert(await exists('src/base-service.ts'));
     assert(await exists('src/utils.ts'));
