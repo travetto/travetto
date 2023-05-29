@@ -17,6 +17,7 @@
   },
   "files": [
     "__index__.ts",
+    "resources/email",
     "src"
   ],
   "main": "__index__.ts",

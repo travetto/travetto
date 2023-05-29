@@ -43,14 +43,14 @@ export class CenterComponentTest {
     </Center>;
 
     const expected = <center>
-      <table class="menu float-center" align="center">
+      <table align="center" class="float-center menu">
         <tbody>
           <tr>
             <td>
               <table>
                 <tbody>
                   <tr>
-                    <th class="menu-item float-center">
+                    <th class="float-center menu-item">
                       <a href="#"></a>
                     </th>
                   </tr>

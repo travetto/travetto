@@ -21,8 +21,7 @@ class CalloutComponentTest {
           <th class="expander"></th>
         </tr>
       </tbody>
-    </table>
-      ;
+    </table>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
@@ -33,14 +32,13 @@ class CalloutComponentTest {
     const expected = <table class="callout">
       <tbody>
         <tr>
-          <th class="callout-inner primary">
+          <th class="primary callout-inner ">
             Callout
           </th>
           <th class="expander"></th>
         </tr>
       </tbody>
-    </table>
-      ;
+    </table>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }

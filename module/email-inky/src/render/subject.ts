@@ -6,7 +6,9 @@ const empty = async (): Promise<string> => '';
 const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<string> => recurse();
 
 export const Subject: RenderProvider<RenderContext> = {
-  finalize: text => text,
+  finalize: text => text
+    .replace(/[\[]{2}([^\]]+)[\]]{2}/gm, (_, t) => `{{${t}}}`),
+
   For: async ({ recurse, props }) => `{{#${props.value}}}${await recurse()}{{/${props.value}}}`,
   If: async ({ recurse, props }) => `{{#${props.value}}}${await recurse()}{{/${props.value}}}`,
   Unless: async ({ recurse, props }) => `{{^${props.value}}}${await recurse()}{{/${props.value}}}`,

@@ -71,6 +71,10 @@ export const MOD_MAPPING = {
     name: '@travetto/email', folder: '@travetto/email', displayName: 'Email',
     description: 'Email transmission module.'
   },
+  EmailInky: {
+    name: '@travetto/email-inky', folder: '@travetto/email-inky', displayName: 'Email Inky Templates',
+    description: 'Email Inky templating module'
+  },
   EmailNodemailer: {
     name: '@travetto/email-nodemailer', folder: '@travetto/email-nodemailer', displayName: 'Email Nodemailer Support',
     description: 'Email transmission module.'

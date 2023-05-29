@@ -15,7 +15,7 @@ class SpacerComponentTest {
     const expected = <table class="spacer">
       <tbody>
         <tr>
-          <td height="10px" style="font-size:10px;line-height:10px;">&nbsp;</td>
+          <td height="10px" style="font-size:10px;line-height:10px;">{'&nbsp;'}</td>
         </tr>
       </tbody>
     </table>;
@@ -29,7 +29,7 @@ class SpacerComponentTest {
     const expected = <table class="spacer">
       <tbody>
         <tr>
-          <td height="16px" style="font-size:16px;line-height:16px;">&nbsp;</td>
+          <td height="16px" style="font-size:16px;line-height:16px;">{'&nbsp;'}</td>
         </tr>
       </tbody>
     </table>;
@@ -39,11 +39,11 @@ class SpacerComponentTest {
 
   @Test('creates a spacer element for small screens with correct size')
   async testSmall() {
-    const input = <Spacer size-sm="10"></Spacer>;
+    const input = <Spacer small={10}></Spacer>;
     const expected = <table class="spacer hide-for-large">
       <tbody>
         <tr>
-          <td height="10px" style="font-size:10px;line-height:10px;">&nbsp;</td>
+          <td height="10px" style="font-size:10px;line-height:10px;">{'&nbsp;'}</td>
         </tr>
       </tbody>
     </table>;
@@ -57,7 +57,7 @@ class SpacerComponentTest {
     const expected = <table class="spacer show-for-large">
       <tbody>
         <tr>
-          <td height="20px" style="font-size:20px;line-height:20px;">&nbsp;</td>
+          <td height="20px" style="font-size:20px;line-height:20px;">{'&nbsp;'}</td>
         </tr>
       </tbody>
     </table>;
@@ -72,14 +72,14 @@ class SpacerComponentTest {
       <table class="spacer hide-for-large">
         <tbody>
           <tr>
-            <td height="10px" style="font-size:10px;line-height:10px;">&nbsp;</td>
+            <td height="10px" style="font-size:10px;line-height:10px;">{'&nbsp;'}</td>
           </tr>
         </tbody>
       </table>
       <table class="spacer show-for-large">
         <tbody>
           <tr>
-            <td height="20px" style="font-size:20px;line-height:20px;">&nbsp;</td>
+            <td height="20px" style="font-size:20px;line-height:20px;">{'&nbsp;'}</td>
           </tr>
         </tbody>
       </table>
@@ -91,10 +91,10 @@ class SpacerComponentTest {
   @Test('copies classes to the final spacer HTML')
   async testClasses() {
     const input = <Spacer size={10} class="bgcolor"></Spacer>;
-    const expected = <table class="spacer bgcolor">
+    const expected = <table class="bgcolor spacer">
       <tbody>
         <tr>
-          <td height="10px" style="font-size:10px;line-height:10px;">&nbsp;</td>
+          <td height="10px" style="font-size:10px;line-height:10px;">{'&nbsp;'}</td>
         </tr>
       </tbody>
     </table>;

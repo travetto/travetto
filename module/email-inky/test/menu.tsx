@@ -64,7 +64,7 @@ class MenuComponentTest {
   @Test('creates a menu with classes')
   async testClasses() {
     const input = <Menu class="vertical"></Menu>;
-    const expected = <table class="menu vertical">
+    const expected = <table class="vertical menu">
       <tbody>
         <tr>
           <td>
