@@ -1,15 +1,40 @@
 import { FileQueryProvider } from '@travetto/base';
+import { MessageCompilationSource, MessageCompiled } from '@travetto/email';
+import { RootIndex, path } from '@travetto/manifest';
 
 /**
  * Resource management for email templating
  */
 export class EmailTemplateResource extends FileQueryProvider {
   static PATH_PREFIX = /.*\/resources\//;
-  static EXT = /[.]email[.]html$/;
-  ext = EmailTemplateResource.EXT;
+  static EXT = /[.]email[.][jt]sx$/;
+
+  get ext(): RegExp {
+    return EmailTemplateResource.EXT;
+  }
 
   constructor(paths: string[] = ['@travetto/email-template#support/resources']) {
     super({ paths, includeCommon: true });
+  }
+
+  buildOutputPath(file: string, suffix: string, prefix?: string): string {
+    let res = file.replace(/.*(support|src)\//, '').replace(this.ext, suffix);
+    if (prefix) {
+      res = path.join(prefix, res);
+    }
+    return res;
+  }
+
+  /**
+   * Get the different parts from the file name
+   * @returns
+   */
+  getOutputs(file: string, prefix?: string): MessageCompiled {
+    return {
+      html: this.buildOutputPath(file, '.compiled.html', prefix),
+      subject: this.buildOutputPath(file, '.compiled.subject', prefix),
+      text: this.buildOutputPath(file, '.compiled.text', prefix),
+    };
   }
 
   /**
@@ -20,39 +45,38 @@ export class EmailTemplateResource extends FileQueryProvider {
   }
 
   /**
-   * Grab list of all available templates
+   * Get the sending email key from a template file
+   * @param file
    */
-  async findAllTemplates(): Promise<{ rel: string, key: string }[]> {
-    const all: { rel: string, key: string }[] = [];
-    for await (const entry of this.query(f => this.ext.test(f))) {
-      const { path } = await this.describe(entry);
-      all.push({
-        rel: path.replace(EmailTemplateResource.PATH_PREFIX, ''),
-        key: entry.replace(this.ext, '')
-      });
-    }
-    return all.sort((a, b) => a.rel.localeCompare(b.rel));
+  async templateFileToKey(file: string): Promise<string> {
+    return this.buildOutputPath(file, '');
+  }
+
+  async loadTemplate(imp: string): Promise<MessageCompilationSource> {
+    const root = (await import(imp)).default;
+    return { ...root, file: RootIndex.getFromImport(imp)!.sourceFile };
   }
 
   /**
-   * Get the different parts from the file name
-   * @param rel
-   * @returns
+   * Grab list of all available templates
    */
-  getOutputs(rel: string): { html: string, text: string, subject: string } {
-    return {
-      html: rel.replace(this.ext, '.compiled.html'),
-      subject: rel.replace(this.ext, '.compiled.subject'),
-      text: rel.replace(this.ext, '.compiled.text'),
-    };
+  async findAllTemplates(): Promise<MessageCompilationSource[]> {
+    const items = RootIndex.findSupport({
+      filter: (f) => /email[.][tj]sx$/.test(f)
+    });
+    const out: Promise<MessageCompilationSource>[] = [];
+    for (const item of items) {
+      out.push(this.loadTemplate(item.import));
+    }
+    return Promise.all(out);
   }
+
 
   /**
    * Run through text and match/resolve resource urls, producing tokens
    *
    * @param text
    * @param patterns
-   * @param baseRel
    * @returns
    */
   async tokenizeResources(
