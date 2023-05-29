@@ -59,3 +59,18 @@ export interface MessageOptions {
 export type SentMessage = {
   messageId?: string;
 };
+
+export type MessageCompiled = { html: string, text: string, subject: string };
+
+export type MessageCompilationSource = {
+  file?: string;
+  styles?: {
+    search: string[];
+    global?: string;
+  };
+  inlineImages?: boolean;
+  inlineStyles?: boolean;
+  html: () => Promise<string> | string;
+  text: () => Promise<string> | string;
+  subject: () => Promise<string> | string;
+};

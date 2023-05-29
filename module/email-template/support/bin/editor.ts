@@ -2,8 +2,6 @@ import { TemplateManager } from './template';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
 
-import { EmailTemplateResource } from '../../src/resource';
-
 type InboundMessage =
   { type: 'configure' } |
   { type: 'redraw', file: string } |
@@ -79,7 +77,7 @@ export class EditorState {
     const cfg = await EditorConfig.get();
     const to = msg.to || cfg.to;
     const from = msg.from || cfg.from;
-    const key = msg.file.replace(EmailTemplateResource.EXT, '');
+    const key = msg.file.replace(this.#template.resources.ext, '');
     try {
       const url = await this.#sender.sendEmail(key, from, to, await EditorConfig.getContext());
       this.response({ type: 'sent', to, file: msg.file, ...url });
@@ -97,9 +95,6 @@ export class EditorState {
    */
   async init(): Promise<void> {
     process.on('message', (msg: InboundMessage) => {
-      if ('file' in msg) {
-        msg.file = msg.file.replace(EmailTemplateResource.PATH_PREFIX, '');
-      }
       switch (msg.type) {
         case 'configure': this.onConfigure(msg); break;
         case 'redraw': this.#onRedraw(msg); break;

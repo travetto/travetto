@@ -1,21 +1,13 @@
 import fs from 'fs/promises';
 import util from 'util';
-import { createRequire } from 'module';
+import { decode as decodeEntities } from 'html-entities';
 
 import { ImageConverter } from '@travetto/image';
-import { path } from '@travetto/manifest';
+import { RootIndex, path } from '@travetto/manifest';
 import { StreamUtil } from '@travetto/base';
-import type { MailTemplateEngine } from '@travetto/email';
-import { DependencyRegistry } from '@travetto/di';
-import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
+import { MessageCompilationSource, MessageCompiled } from '@travetto/email';
 
-import { Inky } from './inky/service';
-import { MarkdownUtil } from './markdown';
 import { EmailTemplateResource } from './resource';
-
-export type Compilation = { html: string, text: string, subject: string };
-
-const req = createRequire(path.resolve('node_modules'));
 
 /**
  * Utilities for templating
@@ -27,13 +19,17 @@ export class EmailTemplateCompiler {
     /(?<pre>background(?:-image)?:\s*url[(]['"]?)(?<src>[^"')]+)/g
   ];
 
+  static async readText(text: Promise<string> | string): Promise<string> {
+    return decodeEntities((await text).replace(/&#xA0;/g, ' '));
+  }
+
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
-  static async compileSass(file: string, roots: string[]): Promise<string> {
+  static async compileSass(src: { data: string } | { file: string }, roots: string[]): Promise<string> {
     const sass = await import('sass');
     const result = await util.promisify(sass.render)({
-      file,
+      ...src,
       sourceMap: false,
       includePaths: roots
     });
@@ -99,60 +95,77 @@ export class EmailTemplateCompiler {
   /**
    * Compile all
    */
-  async compileAll(persist = false): Promise<Compilation[]> {
+  async compileAll(persist = false): Promise<MessageCompiled[]> {
     const keys = await this.resources.findAllTemplates();
-    return Promise.all(keys.map(({ rel }) => this.compile(rel, persist)));
+    return Promise.all(keys.map(src => this.compile(src, persist)));
   }
 
   /**
    * Compile template
    */
-  async compile(rel: string, persist = false): Promise<Compilation> {
-    let tpl = await this.resources.read(rel);
+  async compile(src: string | MessageCompilationSource, persist = false): Promise<MessageCompiled> {
+    if (typeof src === 'string') {
+      src = await this.resources.loadTemplate(src);
+    }
 
-    const engine = await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget);
+    const subject = await EmailTemplateCompiler.readText(src.subject());
+    const text = await EmailTemplateCompiler.readText(src.text());
 
-    // Wrap with body
-    tpl = (await this.resources.read('/email/wrapper.html')).replace('<!-- BODY -->', tpl);
+    let html = (await src.html())
+      .replace(/<(meta|img|link|hr|br)[^>]*>/g, a => a.replace('>', '/>')) // Fix self closing
+      .replace(/&apos;/g, '&#39;'); // Fix apostrophes, as outlook hates them
 
-    // Resolve mustache partials
-    tpl = await engine.resolveNested(tpl);
+    if (src.inlineStyles !== false) {
+      const styles: string[] = [];
 
-    // Transform inky markup
-    let html = Inky.render(tpl);
+      if (src.styles?.global) {
+        styles.push(src.styles.global);
+      }
 
-    // Get Subject
-    const [, subject] = html.match(/<title>(.*?)<\/title>/) ?? [];
+      const main = await this.resources.read('/email/main.scss').then(d => d, () => '');
+      if (main) {
+        styles.push(main);
+      }
 
-    // Apply styles
-    html = await this.inlineCss(html,
-      await EmailTemplateCompiler.compileSass(
-        (await this.resources.describe('/email/main.scss')).path,
-        [
-          path.dirname(req.resolve('foundation-emails/scss/_global.scss')),
-          ...this.resources.getAllPaths()
-        ]
-      )
-    );
+      if (styles.length) {
+        styles.push(await EmailTemplateCompiler.compileSass(
+          { data: styles.join('\n') },
+          [...src.styles?.search ?? [], ...this.resources.getAllPaths()])
+        );
+        // Apply styles
+        html = await this.inlineCss(html, styles.join('\n'));
+      }
+    }
 
-    // Inline Images
-    html = await this.inlineImageSource(html);
+    // Fix up style behaviors
+    html = html
+      .replace(/(background(?:-color)?:\s*)([#0-9a-fA-F]+)([^>]+)>/g,
+        (all, p, col, rest) => `${p}${col}${rest} bgcolor="${col}">`) // Inline bg-color
+      .replace(/<([^>]+vertical-align:\s*(top|bottom|middle)[^>]+)>/g,
+        (a, tag, valign) => tag.indexOf('valign') ? `<${tag}>` : `<${tag} valign="${valign}">`) // Vertically align if it has the style
+      .replace(/<(table[^>]+expand[^>]+width:\s*)(100%\s+!important)([^>]+)>/g,
+        (a, left, size, right) => `<${left}100%${right}>`); // Drop important as a fix for outlook
 
-    // Generate text version
-    const text = await MarkdownUtil.htmlToMarkdown(tpl);
+    if (src.inlineImages !== false) {
+      // Inline Images
+      html = await this.inlineImageSource(html);
+    }
 
     // Write to disk, if desired
     if (persist) {
-      const outs = this.resources.getOutputs((await this.resources.describe(rel)).path);
+      const outs = this.resources.getOutputs(src.file!, path.join(RootIndex.mainModule.sourcePath, 'resources'));
       await Promise.all([
         [outs.text, text],
         [outs.html, html],
         [outs.subject, subject]
-      ].map(([file, content]) =>
-        content ?
-          fs.writeFile(file, content, { encoding: 'utf8' }) :
-          fs.unlink(file).catch(() => { }) // Remove file if data not provided
-      ));
+      ].map(async ([file, content]) => {
+        if (content) {
+          await fs.mkdir(path.dirname(file), { recursive: true });
+          await fs.writeFile(file, content, { encoding: 'utf8' });
+        } else {
+          await fs.unlink(file).catch(() => { }); // Remove file if data not provided
+        }
+      }));
     }
 
     return { html, text, subject };

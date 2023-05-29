@@ -1,14 +1,13 @@
 import { GlobalEnv } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
-import { MessageOptions, SentMessage } from './types';
+import { MessageCompiled, MessageOptions, SentMessage } from './types';
 import { MailTransport } from './transport';
 import { MailTemplateEngine } from './template';
 import { MailUtil } from './util';
 import { EmailResource } from './resource';
 
-type Compiled = { html: string, text?: string, subject: string };
-type MessageWithoutBody = Omit<MessageOptions, keyof Compiled>;
+type MessageWithoutBody = Omit<MessageOptions, keyof MessageCompiled>;
 
 /**
  * Email service for sending and templating emails
@@ -16,7 +15,7 @@ type MessageWithoutBody = Omit<MessageOptions, keyof Compiled>;
 @Injectable()
 export class MailService {
 
-  #compiled = new Map<string, Compiled>();
+  #compiled = new Map<string, MessageCompiled>();
   #transport: MailTransport;
   #tplEngine: MailTemplateEngine;
   #resources: EmailResource;
@@ -34,11 +33,11 @@ export class MailService {
   /**
    * Get compiled content by key
    */
-  async getCompiled(key: string): Promise<Compiled> {
+  async getCompiled(key: string): Promise<MessageCompiled> {
     if (GlobalEnv.dynamic || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         this.#resources.read(`${key}.compiled.html`),
-        this.#resources.read(`${key}.compiled.text`).catch(() => ''),
+        this.#resources.read(`${key}.compiled.text`),
         this.#resources.read(`${key}.compiled.subject`)
       ]);
 
@@ -53,16 +52,16 @@ export class MailService {
    * @param ctx
    * @returns
    */
-  async templateMessage(keyOrMessage: string | Compiled, ctx: Record<string, unknown>): Promise<Compiled> {
+  async templateMessage(keyOrMessage: string | MessageCompiled, ctx: Record<string, unknown>): Promise<MessageCompiled> {
     const tpl = (typeof keyOrMessage === 'string' ? await this.getCompiled(keyOrMessage) : keyOrMessage);
 
     const [html, text, subject] = await Promise.all([
-      tpl.html ? this.#tplEngine!.template(tpl.html, ctx) : undefined,
-      tpl.text ? this.#tplEngine!.template(tpl.text, ctx) : undefined,
-      tpl.subject ? this.#tplEngine!.template(tpl.subject, ctx) : undefined
+      this.#tplEngine!.template(tpl.html, ctx),
+      this.#tplEngine!.template(tpl.text, ctx),
+      this.#tplEngine!.template(tpl.subject, ctx)
     ]);
 
-    return { html: html!, text, subject: subject! };
+    return { html, text, subject };
   }
 
   /**
@@ -84,7 +83,7 @@ export class MailService {
     const keyOrMessage = key ?? ('html' in message ? message : '') ?? '';
     const context = ctx ?? (('context' in message) ? message.context : {}) ?? {};
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const compiled = await this.templateMessage(keyOrMessage as Compiled, context);
+    const compiled = await this.templateMessage(keyOrMessage as MessageCompiled, context);
 
     const final = { ...base, ...message, ...compiled, context };
 
