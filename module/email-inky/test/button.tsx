@@ -10,7 +10,7 @@ import { renderJSX } from './util';
 const SPACER_16 = <table class="spacer">
   <tbody>
     <tr>
-      <td height="16px" style="font-size:16px;line-height:16px;">&nbsp;</td>
+      <td height="16px" style="font-size:16px;line-height:16px;">{'&nbsp;'}</td>
     </tr>
   </tbody>
 </table>;
@@ -77,7 +77,7 @@ class ButtonComponentTest {
     const input = <Button class="small alert" href="http://zurb.com">Button</Button>;
     const expected =
       <>
-        <table class="button small alert">
+        <table class="small alert button">
           <tbody>
             <tr>
               <td>
@@ -102,9 +102,10 @@ class ButtonComponentTest {
 
   @Test('creates a correct expanded button')
   async testExpanded() {
-    const input = <Button class="expand" href="http://zurb.com">Button</Button>;
+
+    const input = <Button expanded={true} href="http://zurb.com">Button</Button>;
     const expected = <>
-      <table class="button expand">
+      <table class="expand button">
         <tbody>
           <tr>
             <td>

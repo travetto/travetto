@@ -5,11 +5,14 @@ import { Html } from '../src/render/html';
 
 export function cleanseOutput(output: string) {
   return output.trim()
-    .replace(/>[ \n]+</gm, '><')
-    .replace(/>/g, '>\n')
-    .replace(/^[ ]+/gm, '')
-    .replace(/^\s+[\n]/gm, '')
-    .replace(/&zwj;</g, '&zwj;\n<');
+    .replace(/\s*<!--\s*[$]:([^ -]+)\s*-->\s*(<\/[^>]+>)/g, (_, suf, tag) => `${tag}${suf}`)
+    .replace(/(<[^\/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, pre) => `${pre}${tag}`)
+    .replace(/[ ]+>/g, '>')
+    .replaceAll('<', '\n<')
+    .replaceAll('>', '>\n')
+    .replaceAll('\n', '%%')
+    .replace(/\s*%%\s*/gm, '%%')
+    .replaceAll(/%%+/gm, '\n');
 }
 
 export async function renderJSX(element: JSXElement): Promise<string> {

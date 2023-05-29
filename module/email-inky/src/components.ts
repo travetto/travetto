@@ -3,7 +3,13 @@ import { TypedObject } from '@travetto/base';
 
 const EMPTY: JSXElement = { type: '', key: '', props: {} };
 
-export const Column: CompFn<{ valign?: string, align?: string, small?: number, large?: number, noExpander?: boolean }> = () => EMPTY;
+export const Column: CompFn<{
+  valign?: string;
+  align?: string;
+  small?: number; smallOffset?: number; hideSmall?: boolean;
+  large?: number; largeOffset?: number; hideLarge?: boolean;
+  noExpander?: boolean;
+}> = () => EMPTY;
 export const Title: CompFn<{}> = () => EMPTY;
 export const Summary: CompFn<{}> = () => EMPTY;
 export const HLine: CompFn<{}> = () => EMPTY;

@@ -6,12 +6,11 @@ const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<str
 const ignore = async ({ recurse: _ }: RenderState<JSXElement, RenderContext>): Promise<string> => '';
 
 export const Markdown: RenderProvider<RenderContext> = {
-  finalize: (text, context) => {
-    const cleaned = text
-      .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, v) => v === 's' ? _ : `${link} ${v}`)
-      .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`);
-    return cleaned;
-  },
+  finalize: (text, context) => text
+    .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, v) => v === 's' ? _ : `${link} ${v}`)
+    .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`)
+    .replace(/[\[]{2}([^\]]+)[\]]{2}/gm, (_, t) => `{{${t}}}`),
+
   For: async ({ recurse, props }) => `{{#${props.value}}}${await recurse()}{{/${props.value}}}`,
   If: async ({ recurse, props }) => `{{#${props.value}}}${await recurse()}{{/${props.value}}}`,
   Unless: async ({ recurse, props }) => `{{^${props.value}}}${await recurse()}{{/${props.value}}}`,

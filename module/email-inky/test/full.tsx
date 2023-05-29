@@ -34,6 +34,7 @@ class ContainerTest {
       <Title>My Title</Title>
       <Summary>My Summary</Summary>
       <Container>
+        [[amount]]
         <If value='paid'>
           Payment!
         </If>
@@ -46,5 +47,6 @@ class ContainerTest {
     const output = await input.html();
     assert(/[{]{2}#paid[}]{2}\s*Payment!\s*[{]{2}\/paid[}]{2}/gsm.test(output));
     assert(/[{]{2}[^]unpaid[}]{2}\s*No Payment!\s*[{]{2}\/unpaid[}]{2}/gsm.test(output));
+    assert(/[{]{2}amount[}]{2}/gsm.test(output));
   }
 }

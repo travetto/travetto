@@ -20,8 +20,9 @@ export class InkyRenderer {
       return '';
     } else if (Array.isArray(node)) {
       const out: string[] = [];
+      const nextStack = [...stack, { key: '', props: { children: node }, type: 'Fragment' }];
       for (const el of node) {
-        out.push(await this.#render(ctx, renderer, el, stack));
+        out.push(await this.#render(ctx, renderer, el, nextStack));
       }
       return out.join('');
     } else if (isJSXElement(node)) {
@@ -34,7 +35,7 @@ export class InkyRenderer {
       }
 
       if (final.type === createFragment || final.type === JSXFragmentType) {
-        return this.#render(ctx, renderer, final.props.children ?? []);
+        return this.#render(ctx, renderer, final.props.children ?? [], stack);
       }
 
       if (Array.isArray(final)) {
@@ -49,7 +50,7 @@ export class InkyRenderer {
           el: final, props: final.props, recurse, stack, context: ctx
         };
         // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-        state.createState = (key, props) => this.createState(ctx, state, key, props);
+        state.createState = (key, props) => this.createState(ctx, renderer, state, key, props);
         // @ts-expect-error
         return renderer[name](state);
       } else {
@@ -63,13 +64,15 @@ export class InkyRenderer {
 
   static createState<K extends keyof typeof c>(
     ctx: RenderContext,
+    renderer: RenderProvider<RenderContext>,
     state: RenderState<JSXElement, RenderContext>,
     key: K,
-    props: JSXElementByFn<K>['props']
+    props: JSXElementByFn<K>['props'],
     // @ts-expect-error
   ): RenderState<JSXElementByFn<K>, RenderContext> {
     const el = ctx.createElement(key, props);
-    return { ...state, el, props: el.props };
+    const newStack = [...state.stack, el] as JSXElement[];
+    return { ...state, el, props: el.props, recurse: () => this.#render(ctx, renderer, el.props.children ?? [], newStack) };
   }
 
   /**
@@ -78,11 +81,12 @@ export class InkyRenderer {
    */
   static async render(root: DocumentShape, provider: RenderProvider<RenderContext>): Promise<string> {
     const ctx = new RenderContext();
-    const text = await this.#render(ctx, provider, root.text); // Skip parent
+    const par = { props: { children: Array.isArray(root.text) ? root.text : [root.text] }, type: '', key: '' };
+    const text = await this.#render(ctx, provider, root.text, [par]);
 
     let cleaned = `${text.replace(/\n{3,100}/msg, '\n\n').trim()}\n`;
     if (root.wrap) {
-      cleaned = root.wrap?.(cleaned);
+      cleaned = await root.wrap?.(cleaned);
     }
     return provider.finalize(cleaned, ctx);
   }

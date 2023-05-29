@@ -1,7 +1,10 @@
-import { JSXElement } from '@travetto/email-inky/jsx-runtime';
+import { JSXElement, isJSXElement } from '@travetto/email-inky/jsx-runtime';
+import { EmailResource } from '@travetto/email';
 
 import { RenderProvider, RenderState } from '../types';
 import { RenderContext } from './context';
+
+const isOfType = (el: JSXElement, type: string): boolean => typeof el.type === 'function' && el.type.name === type;
 
 export const SUMMARY_STYLE = Object.entries({
   display: 'none',
@@ -13,15 +16,6 @@ export const SUMMARY_STYLE = Object.entries({
   opacity: '0',
   overflow: 'hidden'
 }).map(([k, v]) => `${k}: ${v}`).join('; ');
-
-const stdInline = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
-  `<${el.type}>${await recurse()}</${el.type}>`;
-
-const std = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
-  `<${el.type}>${await recurse()}</${el.type}>\n`;
-
-const stdFull = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
-  `\n<${el.type}>${await recurse()}</${el.type}>\n`;
 
 const classStr = (existing: string | undefined, ...toAdd: string[]): string => {
   const out = [];
@@ -41,24 +35,33 @@ const classStr = (existing: string | undefined, ...toAdd: string[]): string => {
   return out.join(' ');
 };
 
-const allowedProps = new Set(['id', 'class', 'href', 'target', 'title', 'align', 'valign', 'width', 'height', 'src']);
+
+const allowedProps = new Set([
+  'class', 'id', 'dir', 'name', 'src',
+  'alt', 'href', 'title', 'height', 'target',
+  'width', 'style', 'align', 'valign'
+]);
 
 const propsToStr = (props: Record<string, unknown>, ...addClasses: string[]): string => {
-  const out = { class: '', ...props };
-  out.class = classStr(out.class, ...addClasses);
-  if (!out.class) {
-    // @ts-expect-error
-    delete out.class;
-  }
-  return Object.entries(out).filter(([k]) => allowedProps.has(k)).map(([k, v]) => `${k}="${v}"`).join(' ');
+  const out = { ...props, class: classStr(props.class as string, ...addClasses) };
+  return Object.entries(out)
+    .filter(([k, v]) => allowedProps.has(k) && v !== undefined && v !== null && v !== '')
+    .map(([k, v]) => `${k}="${v}"`).join(' ');
 };
 
+const stdInline = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
+  `<${el.type} ${propsToStr(el.props)}>${await recurse()}</${el.type}>`;
+
+const std = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `${await stdInline(state)}\n`;
+const stdFull = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `\n${await stdInline(state)}\n`;
+
 const getKids = (el: JSXElement): JSXElement[] => {
-  const kids = el.props.children;
+  const kids = el?.props?.children;
+  let result: unknown[] = [];
   if (kids) {
-    return !Array.isArray(kids) ? [kids] : kids;
+    result = !Array.isArray(kids) ? [kids] : kids;
   }
-  return [];
+  return result.filter(isJSXElement);
 };
 
 const visit = (el: JSXElement, onVisit: (fn: JSXElement) => boolean | undefined | void, depth = 0): boolean | undefined => {
@@ -79,7 +82,9 @@ const visit = (el: JSXElement, onVisit: (fn: JSXElement) => boolean | undefined 
 export const Html: RenderProvider<RenderContext> = {
   finalize: (html, context) => html
     .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, v) => `${tag} ${v}`)
-    .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`),
+    .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`)
+    .replace(/[\[]{2}([^\]]+)[\]]{2}/gm, (_, t) => `{{${t}}}`),
+
   For: async ({ recurse, props }) => `{{#${props.value}}}${await recurse()}{{/${props.value}}}`,
   If: async ({ recurse, props }) => `{{#${props.value}}}${await recurse()}{{/${props.value}}}`,
   Unless: async ({ recurse, props }) => `{{^${props.value}}}${await recurse()}{{/${props.value}}}`,
@@ -96,26 +101,37 @@ export const Html: RenderProvider<RenderContext> = {
   Title: async ({ recurse, el }) => `<title>${await recurse()}</title>`,
   Summary: async ({ recurse, el }) => `<span id="summary" style="${SUMMARY_STYLE}">${await recurse()}</span>`,
 
-  Column: async ({ props, recurse, el, context }): Promise<string> => {
+  Column: async ({ props, recurse, stack, el, context }): Promise<string> => {
 
     recurse();
 
     let expander = '';
 
     const kids = getKids(el);
-    const colCount = kids.length;
+    const colCount = kids.length || 1;
+
+    const parent = stack[stack.length - 1];
+    const pProps = parent.props as { columnVisited: boolean };
+    if (!pProps.columnVisited) {
+      pProps.columnVisited = true;
+      const sibs = getKids(parent).filter(x => isOfType(x, 'Column'));
+      if (sibs.length) {
+        sibs[0].props.class = classStr(sibs[0].props.class ?? '', 'first');
+        sibs[sibs.length - 1].props.class = classStr(sibs[sibs.length - 1].props.class ?? '', 'last');
+      }
+
+    }
 
     // Check for sizes. If no attribute is provided, default to small-12. Divide evenly for large columns
-    const smallSize = el.props.small ?? colCount;
+    const smallSize = el.props.small ?? context.columnCount;
     const largeSize = el.props.large ?? el.props.small ?? Math.trunc(context.columnCount / colCount);
 
     // If the column contains a nested row, the .expander class should not be used
     if (largeSize === context.columnCount && !props.noExpander) {
       let hasRow = false;
       visit(el, (node) => {
-        if (node.type === 'Row') {
-          hasRow = true;
-          return true;
+        if (isOfType(node, 'Row')) {
+          return hasRow = true;
         }
       });
       if (!hasRow) {
@@ -123,9 +139,23 @@ export const Html: RenderProvider<RenderContext> = {
       }
     }
 
+    const classes: string[] = [`small-${smallSize}`, `large-${largeSize}`, 'columns'];
+    if (props.smallOffset) {
+      classes.push(`small-offset-${props.smallOffset}`);
+    }
+    if (props.hideSmall) {
+      classes.push('hide-for-small');
+    }
+    if (props.largeOffset) {
+      classes.push(`large-offset-${props.smallOffset}`);
+    }
+    if (props.hideLarge) {
+      classes.push('hide-for-large');
+    }
+
     // Final HTML output
     return `
-<th ${propsToStr(el.props, `small-${smallSize}`, `large-${largeSize}`, 'columns')}>
+<th ${propsToStr(el.props, ...classes)}>
   <table>
     <tbody>
       <tr>
@@ -136,9 +166,11 @@ export const Html: RenderProvider<RenderContext> = {
 </th>`;
   },
 
-  HLine: async ({ recurse, el }) => `
-<table class="${classStr(el.props.class, 'h-line')}">
-  <tr><th>&nbsp;</th></tr>
+  HLine: async ({ props }) => `
+<table ${propsToStr(props, 'h-line')}>
+  <tbody>
+    <tr><th>&nbsp;</th></tr>
+  </tbody>
 </table>`,
 
   Row: async ({ recurse, el }): Promise<string> => `
@@ -149,25 +181,29 @@ export const Html: RenderProvider<RenderContext> = {
 <!-- $:&zwj; --></table>`,
 
   Button: async ({ recurse, el, props, createState }): Promise<string> => {
-    const { href, target, expanded, ...rest } = props;
+    const { href, target, ...rest } = props;
     let inner = await recurse();
     let expander = '';
 
     // If we have the href attribute we can create an anchor for the inner of the button;
     if (href) {
-      inner = `<a ${propsToStr({ href, target })}>${inner}</a>`;
+      const linkProps = { href, target };
+      if (props.expanded) {
+        Object.assign(linkProps, { align: 'center', class: 'float-center' });
+      }
+      inner = `<a ${propsToStr(linkProps)}>${inner}</a>`;
     }
 
     // If the button is expanded, it needs a <center> tag around the content
-    if (expanded) {
-      const centered = await Html.Center(createState('Center', { children: ['X'] }));
-      inner = centered.replace('X', inner);
+    if (props.expanded) {
+      inner = await Html.Center(createState('Center', { children: [inner] }));
+      rest.class = classStr(rest.class ?? '', 'expand');
       expander = '\n<td class="expander"></td>';
     }
 
     // The .button class is always there, along with any others on the <button> element
     return `
-<table ${propsToStr(rest, 'button')}">
+<table ${propsToStr(rest, 'button')}>
   <tbody>
     <tr>
       <td>
@@ -202,17 +238,18 @@ export const Html: RenderProvider<RenderContext> = {
 </table>`,
 
   Menu: async ({ recurse, el, props }): Promise<string> => {
-    let hasTableCell = false;
-    const kids = getKids(el);
+    let hasItem = false;
     visit(el, (child) => {
-      if (child.type === 'td' || child.type === 'th') {
-        return hasTableCell = true;
+      if (isOfType(child, 'Item')) {
+        return hasItem = true;
+      } else if ((child.type === 'td' || child.type === 'th') && child.props.class?.includes('menu-item')) {
+        return hasItem = true;
       }
     });
 
     let inner = await recurse();
 
-    if (!hasTableCell && kids.length) {
+    if (!hasItem && inner) {
       inner = `<th class="menu-item">${inner}</th>`;
     }
 
@@ -242,26 +279,23 @@ export const Html: RenderProvider<RenderContext> = {
        </th>`;
   },
 
-  Center: async ({ recurse, el }): Promise<string> => {
-    const kids = getKids(el);
-    for (const kid of kids) {
-      if (typeof kid.type === 'function') { // We have a component
-        Object.assign(kid.props, {
-          align: 'center',
-          class: classStr(kid.props.class, 'float-center')
-        });
-      }
+  Center: async ({ props, recurse, el }): Promise<string> => {
+    for (const kid of getKids(el)) {
+      Object.assign(kid.props, {
+        align: 'center',
+        class: classStr(kid.props.class, 'float-center')
+      });
     }
 
     visit(el, child => {
-      if (child.type === 'Item') {
+      if (isOfType(child, 'Item')) {
         child.props.class = classStr(child.props.class, 'float-center');
       }
       return;
     });
 
     return `
-<center>
+<center ${propsToStr(props)}>
   ${await recurse()}
 </center>
     `;
@@ -273,7 +307,7 @@ export const Html: RenderProvider<RenderContext> = {
     delete props.class;
 
     return `
-<table ${propsToStr(props), 'callout'}>
+<table ${propsToStr(props, 'callout')}>
   <tbody>
     <tr>
       <th ${propsToStr(innerProps, 'callout-inner')}>
@@ -328,32 +362,17 @@ export const Html: RenderProvider<RenderContext> = {
 
 };
 
-export const HtmlWrap = (content: string): string => {
-  let final = `<!doctype html>
-<html>
-
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <meta name="viewport" content="width=device-width" />
-</head>
-
-<body>
-  <table class="body">
-    <tr>
-      <td class="float-center" align="center" valign="top">
-        ${content}
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+export const HtmlWrap = async (content: string): Promise<string> => {
+  const wrapper = await new EmailResource(['@', '@travetto/email-inky/resources'])
+    .read('/email/inky.wrapper.html');
 
   // Get Subject
   const headerTop: string[] = [];
   const bodyTop: string[] = [];
 
   // Force summary to top, and title to head
-  final = final
+  let final = wrapper
+    .replace('<!-- BODY -->', content)
     .replace(/<title>.*?<\/title>/, a => { headerTop.push(a); return ''; })
     .replace(/<span[^>]+id="summary"[^>]*>(.*?)<\/span>/sm, a => { bodyTop.push(a); return ''; })
     .replace(/<head( [^>]*)?>/, t => `${t}\n${headerTop.join('\n')}`)
@@ -361,7 +380,7 @@ export const HtmlWrap = (content: string): string => {
 
   // Allow tag suffixes/prefixes via comments
   final = final
-    .replace(/\s*<!--\s*[$]:([^ ]+)\s*-->\s*(<\/[^>]+>)/g, (_, suf, tag) => `${tag}${suf}`)
+    .replace(/\s*<!--\s*[$]:([^ -]+)\s*-->\s*(<\/[^>]+>)/g, (_, suf, tag) => `${tag}${suf}`)
     .replace(/(<[^\/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, pre) => `${pre}${tag}`);
 
   return final;

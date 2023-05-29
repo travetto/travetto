@@ -19,6 +19,7 @@ class ContainerTest {
         </tr>
       </tbody>
     </table>;
+
     assert(await renderJSX(input) === await renderJSX(expected));
   }
 }

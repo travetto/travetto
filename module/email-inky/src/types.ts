@@ -8,7 +8,7 @@ export type Wrapper = Record<string, (cnt: string) => string>;
  */
 export interface DocumentShape {
   text: JSXChild | JSXChild[] | undefined | null;
-  wrap?: (content: string) => string;
+  wrap?: (content: string) => string | Promise<string>;
 }
 
 export type RenderState<T extends JSXElement, C> = {

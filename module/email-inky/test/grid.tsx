@@ -6,6 +6,8 @@ import { Suite, Test } from '@travetto/test';
 import { renderJSX } from './util';
 import { Row, Column, BlockGrid } from '../src/components';
 
+const ZWJ = <>{'&zwj;'}</>;
+
 @Suite('Grid')
 class GridTest {
 
@@ -17,7 +19,7 @@ class GridTest {
         <tbody>
           <tr></tr>
         </tbody>
-      </table>&zwj;
+      </table>{ZWJ}
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -26,7 +28,7 @@ class GridTest {
   @Test('creates a single column with first and last classes')
   async testSingleColumn() {
     const input = <Column large={12} small={12}>One</Column>;
-    const expected = <th class="small-12 large-12 columns first last">
+    const expected = <th class="first last small-12 large-12 columns">
       <table>
         <tbody>
           <tr>
@@ -42,8 +44,8 @@ class GridTest {
 
   @Test('creates a single column with first and last classes with no-expander')
   async testNoExpanderImplicit() {
-    const input = <Column large={12} small={12} no-expander>One</Column>;
-    const expected = <th class="small-12 large-12 columns first last">
+    const input = <Column large={12} small={12} noExpander={true}>One</Column>;
+    const expected = <th class="first last small-12 large-12 columns">
       <table>
         <tbody>
           <tr>
@@ -58,8 +60,8 @@ class GridTest {
 
   @Test('creates a single column with first and last classes with no-expander="false"')
   async testWithExpander() {
-    const input = <Column large={12} small={12} no-expander="false">One</Column>;
-    const expected = <th class="small-12 large-12 columns first last">
+    const input = <Column large={12} small={12} noExpander={false}>One</Column>;
+    const expected = <th class="first last small-12 large-12 columns">
       <table>
         <tbody>
           <tr>
@@ -75,8 +77,8 @@ class GridTest {
 
   @Test('creates a single column with first and last classes with no-expander="true"')
   async testNoExpanderExplicit() {
-    const input = <Column large={12} small={12} no-expander="true">One</Column>;
-    const expected = <th class="small-12 large-12 columns first last">
+    const input = <Column large={12} small={12} noExpander={true}>One</Column>;
+    const expected = <th class="first last small-12 large-12 columns">
       <table>
         <tbody>
           <tr>
@@ -96,7 +98,7 @@ class GridTest {
       <Column large={6} small={12}>Two</Column>
     </>;
     const expected = <>
-      <th class="small-12 large-6 columns first">
+      <th class="first small-12 large-6 columns">
         <table>
           <tbody>
             <tr>
@@ -105,7 +107,7 @@ class GridTest {
           </tbody>
         </table>
       </th>
-      <th class="small-12 large-6 columns last">
+      <th class="last small-12 large-6 columns">
         <table>
           <tbody>
             <tr>
@@ -127,7 +129,7 @@ class GridTest {
       <Column large={4} small={12}>Three</Column>
     </>;
     const expected = <>
-      <th class="small-12 large-4 columns first">
+      <th class="first small-12 large-4 columns">
         <table>
           <tbody>
             <tr>
@@ -145,7 +147,7 @@ class GridTest {
           </tbody>
         </table>
       </th>
-      <th class="small-12 large-4 columns last">
+      <th class="last small-12 large-4 columns">
         <table>
           <tbody>
             <tr>
@@ -161,8 +163,8 @@ class GridTest {
 
   @Test('transfers classes to the final HTML')
   async testClasses() {
-    const input = <Column class="small-offset-8 hide-for-small">One</Column>;
-    const expected = <th class="small-12 large-12 columns small-offset-8 hide-for-small first last">
+    const input = <Column smallOffset={8} hideSmall={true}>One</Column>;
+    const expected = <th class="first last small-12 large-12 columns small-offset-8 hide-for-small">
       <table>
         <tbody>
           <tr>
@@ -183,7 +185,7 @@ class GridTest {
       <Column small={8}>Two</Column>
     </>;
     const expected = <>
-      <th class="small-4 large-4 columns first">
+      <th class="first small-4 large-4 columns">
         <table>
           <tbody>
             <tr>
@@ -192,7 +194,7 @@ class GridTest {
           </tbody>
         </table>
       </th>
-      <th class="small-8 large-8 columns last">
+      <th class="last small-8 large-8 columns">
         <table>
           <tbody>
             <tr>
@@ -213,7 +215,7 @@ class GridTest {
       <Column large={8}>Two</Column>
     </>;
     const expected = <>
-      <th class="small-12 large-4 columns first">
+      <th class="first small-12 large-4 columns">
         <table>
           <tbody>
             <tr>
@@ -222,7 +224,7 @@ class GridTest {
           </tbody>
         </table>
       </th>
-      <th class="small-12 large-8 columns last">
+      <th class="last small-12 large-8 columns">
         <table>
           <tbody>
             <tr>
@@ -243,7 +245,7 @@ class GridTest {
       <table class="row">
         <tbody>
           <tr>
-            <th class="small-12 large-12 columns first last">
+            <th class="first last small-12 large-12 columns">
               <table>
                 <tbody>
                   <tr>
@@ -252,7 +254,7 @@ class GridTest {
                         <tbody>
                           <tr></tr>
                         </tbody>
-                      </table>&zwj;
+                      </table>{ZWJ}
                     </th>
                   </tr>
                 </tbody>
@@ -260,7 +262,7 @@ class GridTest {
             </th>
           </tr>
         </tbody>
-      </table> &zwj;
+      </table>{ZWJ}
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -270,10 +272,10 @@ class GridTest {
   async testAttributes() {
     const input = <Row dir="rtl"><Column dir="rtl" valign="middle" align="center">One</Column></Row>;
     const expected = <>
-      <table class="row" dir="rtl">
+      <table dir="rtl" class="row">
         <tbody>
           <tr>
-            <th align="center" class="small-12 large-12 columns first last" dir="rtl" valign="middle">
+            <th dir="rtl" valign="middle" align="center" class="first last small-12 large-12 columns">
               <table>
                 <tbody>
                   <tr>
@@ -285,7 +287,7 @@ class GridTest {
             </th>
           </tr>
         </tbody>
-      </table >&zwj;
+      </table>{ZWJ}
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -306,7 +308,7 @@ class GridTest {
   @Test('copies classes to the final HTML output for block grid')
   async testBlockGridClasses() {
     const input = <BlockGrid up={4} class="show-for-large"></BlockGrid>;
-    const expected = <table class="block-grid up-4 show-for-large">
+    const expected = <table class="show-for-large block-grid up-4 ">
       <tbody>
         <tr></tr>
       </tbody>
