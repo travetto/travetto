@@ -34,7 +34,7 @@ class ContainerTest {
       <Title>My Title</Title>
       <Summary>My Summary</Summary>
       <Container>
-        [[amount]]
+        {'{{amount}}'}
         <Value attr='amount-two' />
         <If attr='paid'>
           Payment!

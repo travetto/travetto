@@ -9,7 +9,7 @@ export default inkyTpl(<>
     <If attr='person'>
       <Row>
         <Column small={5}>
-          <Button href='https://google.com/?[[search]]'>Hello World</Button>
+          <Button href='https://google.com/?{{search}}'>Hello World</Button>
         </Column>
       </Row>
     </If>

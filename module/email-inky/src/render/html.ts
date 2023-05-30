@@ -82,8 +82,7 @@ const visit = (el: JSXElement, onVisit: (fn: JSXElement) => boolean | undefined 
 export const Html: RenderProvider<RenderContext> = {
   finalize: (html, context) => html
     .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, v) => `${tag} ${v}`)
-    .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`)
-    .replace(/@@([^@]+)@@/gm, (_, t) => `{{${t}}}`),
+    .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`),
 
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
