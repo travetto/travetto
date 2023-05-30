@@ -7,7 +7,7 @@ const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<str
 
 export const Subject: RenderProvider<RenderContext> = {
   finalize: text => text
-    .replace(/[\[]{2}([^\]]+)[\]]{2}/gm, (_, t) => `{{${t}}}`),
+    .replace(/@@([^@]+)@@/gm, (_, t) => `{{${t}}}`),
 
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,

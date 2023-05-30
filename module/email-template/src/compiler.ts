@@ -128,12 +128,11 @@ export class EmailTemplateCompiler {
       }
 
       if (styles.length) {
-        styles.push(await EmailTemplateCompiler.compileSass(
+        const compiled = await EmailTemplateCompiler.compileSass(
           { data: styles.join('\n') },
-          [...src.styles?.search ?? [], ...this.resources.getAllPaths()])
-        );
+          [...src.styles?.search ?? [], ...this.resources.getAllPaths()]);
         // Apply styles
-        html = await this.inlineCss(html, styles.join('\n'));
+        html = await this.inlineCss(html, compiled);
       }
     }
 
