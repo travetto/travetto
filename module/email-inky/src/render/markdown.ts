@@ -11,9 +11,11 @@ export const Markdown: RenderProvider<RenderContext> = {
     .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`)
     .replace(/[\[]{2}([^\]]+)[\]]{2}/gm, (_, t) => `{{${t}}}`),
 
-  For: async ({ recurse, props }) => `{{#${props.value}}}${await recurse()}{{/${props.value}}}`,
-  If: async ({ recurse, props }) => `{{#${props.value}}}${await recurse()}{{/${props.value}}}`,
-  Unless: async ({ recurse, props }) => `{{^${props.value}}}${await recurse()}{{/${props.value}}}`,
+  For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
+  If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
+  Unless: async ({ recurse, props }) => `{{^${props.attr}}}${await recurse()}{{/${props.attr}}}`,
+  Value: async ({ props }) => `{{${props.attr}}}`,
+
   strong: async ({ recurse }) => `**${await recurse()}**`,
   hr: async () => '\n------------------\n',
   HLine: async () => '\n------------------\n',

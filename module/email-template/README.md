@@ -13,33 +13,25 @@ npm install @travetto/email-template
 yarn add @travetto/email-template
 ```
 
-This is primarily a set of command line tools for compiling and developing templates.  The primary input into this process is a `.email.html` under the `resources/email` folder.  This template drives the generation of the `html` and `text` outputs, as well as the `subject` file.
+This is primarily a set of command line tools for compiling and developing templates.  The inputs are compiled files, generally under the `support/` folder, that represents the necessary input for the email compilation.  [Email Inky Templates](https://github.com/travetto/travetto/tree/main/module/email-inky#readme "Email Inky templating module") shows this pattern by leveraging [JSX](https://en.wikipedia.org/wiki/JSX_(JavaScript)) bindings for the [inky](https://github.com/zurb/inky) framework, allowing for compile-time checked templates.
 
 ## Asset Management
 The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying asset paths, with the following paths (in order of precedence):
    1. `%ROOT%/resources/email`
-   1. `@travetto/email-template/resources/email`
-   1. `foundation-emails/scss` (specifically for [sass](https://github.com/sass/dart-sass) files)
+   1. `@travetto/email-{engine}/resources/email`
 When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process will convert `.email.html` files into `.compiled.html`, `.compiled.text` and `.compiled.subject` suffixes to generate the outputs respectively.
 
-## Template Extension Points
+## Template Extension
 The template extension points are defined at:
-   1. `email/wrapper.html` - This is the wrapping chrome for the email
    1. `email/main.scss` - The entry point for adding, and overriding any [sass](https://github.com/sass/dart-sass)
-In addition to the overrides, you can find the list of available settings at [Github](https://github.com/foundation/foundation-emails/blob/develop/scss/settings/_settings.scss)
+   1. `email/{engine}.wrapper.html` - The html wrapper for the specific templating engine implementation.
 
 ## Template Compilation
 The general process is as follows:
-   1. Load in a general wrapper for email, located at `/resources/email/wrapper.html`.
-   1. Load in the general stylings as [sass](https://github.com/sass/dart-sass), from `/resources/email/main.scss`.
-   1. Resolving all mustache partial templates, at `/resources/email/**/*.email.html`.
-   1. Render the [inky](https://github.com/zurb/inky) directives into the final `html` output.
-   1. Extract the subject from the `html`'s `<title>` tag, if present.
-   1. Inline and optimize all images for email transmission.
-   1. Generate markdown version of email to support the alternate `text` format.
-
-## Reusable Email Elements
-In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. `{{{> email/common-element }}}`.  All paths are relative to the `resource` folder, which precludes the use of paths like `../file.html`
+   1. Load in the email template.
+   1. Resolve any associated stylings for said template.
+   1. Render template into html, text, and subject outputs.
+   1. Inline and optimize all images for html email transmission.
 
 ## Images
 When referencing an image from the `resources` folder in a template, e.g.
@@ -78,96 +70,3 @@ In addition to command line tools, the [VSCode plugin](https://marketplace.visua
    *  real-time rendering of changes visually
    *  ability to send test emails during development
    *  ability to define custom context for template rendering
-
-## Supporting Libraries
-Templating emails is achieved through a combination of multiple libraries, specifically:
-   *  [inky](https://github.com/zurb/inky) is a email rendering framework that aims to provide a standard set of constructs for building visually appealing emails.  The version of inky being used is a complete rewrite to optimize for size and performance.
-   *  [sass](https://github.com/sass/dart-sass) used for styles compilation.
-   *  [mustache](https://github.com/janl/mustache.js/) allows for interpolation of variables for personalized emails.
-
-## Templating Example
-
-**Code: Example inky template with mustache support**
-```html
-<row>
-  <columns large="{{left}}">Bob</columns>
-  <columns large="{{right}}"> </columns>
-</row>
-```
-
-which will then interpolate the context to replace `left` and `right`, and compile to a final html output. When using [mustache](https://github.com/janl/mustache.js/) expressions, make sure to use `{{{ }}}`, triple braces on complex text, to prevent [mustache](https://github.com/janl/mustache.js/) from escaping any characters.
-
-## Example inky template with partials
-Given two files, `resources/email/welcome.html` and `resources/email/footer.hml`
-
-**Code: resources/email/welcome.html**
-```html
-<row>
-  <row>
-    <columns large="{{left}}">Bob</columns>
-    <columns large="{{right}}"> </columns>
-  </row>
-  {{{> email/footer }}}
-</row>
-```
-
-**Code: resources/email/footer.html**
-```html
-<row>
-  This is a footer
-  <a href="{{salesLink}}">Sales Link</a>
-</row>
-```
-
-The final template will render as:
-
-**Terminal: Final Output, with styling removed**
-```bash
-$ trv main doc/render.ts
-
-<!DOCTYPE html><html>
-
-<body>
-
-  <table class="body">
-    <tbody><tr>
-      <td class="float-center" align="center" valign="top">
-        <table class="row">
-      <tbody>
-        <tr>
-  </tr></tbody></table><table class="row">
-      <tbody>
-        <tr>
-    <th class="small-12 large-12 columns first">
-        <table>
-          <tbody>
-            <tr>
-              <th>Bob</th>
-<th class="expander"></th>
-            </tr>
-          </tbody>
-        </table>
-      </th>
-    <th class="small-12 large-12 columns last">
-        <table>
-          <tbody>
-            <tr>
-              <th> </th>
-<th class="expander"></th>
-            </tr>
-          </tbody>
-        </table>
-      </th>
-  </tr>
-      </tbody></table>‍<a href="{{salesLink}}">Sales Link</a><table class="row">
-      <tbody>
-        <tr>
-</tr>
-      </tbody></table>‍
-
-      </td>
-    </tr>
-  </tbody></table>
-
-</body></html>
-```

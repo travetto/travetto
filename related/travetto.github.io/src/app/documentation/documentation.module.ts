@@ -70,6 +70,7 @@ import { EslintComponent } from './gen/eslint/eslint.component';
 import { RepoComponent } from './gen/repo/repo.component';
 import { AuthRestJwtComponent } from './gen/auth-rest-jwt/auth-rest-jwt.component';
 import { RestClientComponent } from './gen/rest-client/rest-client/rest-client.component';
+import { EmailInkyComponent } from './gen/email-inky/email-inky.component';
 
 @NgModule({
   imports: [
@@ -152,7 +153,8 @@ import { RestClientComponent } from './gen/rest-client/rest-client/rest-client.c
     EslintComponent,
     RepoComponent,
     AuthRestJwtComponent,
-    RestClientComponent
+    RestClientComponent,
+    EmailInkyComponent
   ]
 })
 export class DocumentationModule { }
