@@ -17,6 +17,7 @@
   },
   "files": [
     "__index__.ts",
+    "jsx-runtime.ts",
     "resources/email/inky.wrapper.html",
     "src"
   ],

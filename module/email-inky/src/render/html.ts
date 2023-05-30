@@ -92,7 +92,7 @@ export const Html: RenderProvider<RenderContext> = {
 
   br: async () => '<br>\n',
   hr: async (el) => `<table ${propsToStr(el.props)}><th></th></table>`,
-  strong: stdInline, em: stdInline,
+  strong: stdInline, em: stdInline, p: stdFull,
   h1: stdFull, h2: stdFull, h3: stdFull, h4: stdFull,
   li: std, ol: stdFull, ul: stdFull,
   table: stdFull, thead: std, tr: std, td: std, th: std, tbody: std, center: std, img: stdInline,
