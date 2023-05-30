@@ -17,7 +17,7 @@
   },
   "files": [
     "__index__.ts",
-    "resources/email",
+    "resources/email/inky.wrapper.html",
     "src"
   ],
   "main": "__index__.ts",

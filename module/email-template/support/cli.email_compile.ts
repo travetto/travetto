@@ -2,15 +2,23 @@ import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 
 import { TemplateManager } from './bin/template';
+import { GlobalEnvConfig } from '@travetto/base';
 
 /**
  * CLI Entry point for running the email server
  */
-@CliCommand()
+@CliCommand({ fields: ['module'] })
 export class EmailCompileCommand implements CliCommandShape {
 
   /** Compile in watch mode */
   watch?: boolean;
+
+  envInit(): GlobalEnvConfig {
+    return {
+      debug: false,
+      dynamic: this.watch
+    };
+  }
 
   async main(): Promise<void> {
     await RootRegistry.init();

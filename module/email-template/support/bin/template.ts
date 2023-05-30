@@ -1,12 +1,15 @@
 import type { MailTemplateEngine, MessageCompiled } from '@travetto/email';
 import { TypedObject } from '@travetto/base';
 import { DependencyRegistry } from '@travetto/di';
+import { RootIndex, WatchEvent, WatchStream } from '@travetto/manifest';
+
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
+import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
 import type { EmailTemplateCompiler } from '../../src/compiler';
 import type { EmailTemplateResource } from '../../src/resource';
 
-const VALID_FILE = (file: string): boolean => /[.](html|scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
+const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
 
 /**
  *
@@ -73,9 +76,20 @@ export class TemplateManager {
    * Watch compilation
    */
   async * watchCompile(): AsyncIterable<string> {
-    const stream = this.resources.watchFiles();
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const stream = this.resources.watchFiles() as (
+      WatchStream & {
+        add(item: WatchEvent | WatchEvent[]): void;
+      }
+    );
+    DynamicFileLoader.onLoadEvent((ev) => {
+      const src = RootIndex.getEntry(ev.file);
+      if (src && this.resources.isTemplateFile(src.sourceFile)) {
+        stream.add({ ...ev, file: src.sourceFile });
+      }
+    });
     for await (const { file, action } of stream) {
-      if (action === 'delete' || !VALID_FILE(file)) {
+      if (action === 'delete') {
         continue;
       }
 
@@ -83,7 +97,7 @@ export class TemplateManager {
         if (this.resources.isTemplateFile(file)) {
           await this.compiler.compile(file, true);
           yield file;
-        } else {
+        } else if (VALID_FILE(file)) {
           await this.compiler.compileAll(true);
           for (const el of await this.resources.findAllTemplates()) {
             yield el.file!;
