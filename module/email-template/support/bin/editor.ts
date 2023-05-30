@@ -77,7 +77,7 @@ export class EditorState {
     const cfg = await EditorConfig.get();
     const to = msg.to || cfg.to;
     const from = msg.from || cfg.from;
-    const key = msg.file.replace(this.#template.resources.ext, '');
+    const key = this.#template.resources.buildOutputPath(msg.file, '');
     try {
       const url = await this.#sender.sendEmail(key, from, to, await EditorConfig.getContext());
       this.response({ type: 'sent', to, file: msg.file, ...url });

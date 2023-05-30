@@ -171,24 +171,6 @@
         "category": "Travetto"
       }
     ],
-    "languages": [
-      {
-        "id": "travetto-email-inky",
-        "extensions": [
-          ".email.html"
-        ],
-        "aliases": [
-          "Travetto Inky Template"
-        ]
-      }
-    ],
-    "grammars": [
-      {
-        "language": "travetto-email-inky",
-        "scopeName": "source.travetto.email-template.inky",
-        "path": "./syntaxes/html.tmLanguage.json"
-      }
-    ],
     "menus": {
       "editor/title": [
         {
