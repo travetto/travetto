@@ -14,7 +14,7 @@ import { Content, EmailTemplateCommand, EmailTemplateEvent } from './types';
 export class EmailTemplateFeature extends BaseFeature {
 
   static isTemplate(f?: string): boolean {
-    return /resources\/.*[.]email[.]html$/.test(f ?? '');
+    return /[.]email[.]tsx$/.test(f ?? '');
   }
 
   #server: ProcessServer<EmailTemplateCommand, EmailTemplateEvent>;
@@ -68,7 +68,6 @@ export class EmailTemplateFeature extends BaseFeature {
       return;
     }
     if (file !== this.#activeFile || force) {
-      file = file?.replace(/.*\/resources\//, '');
       this.#activeFile = file;
       this.setActiveContent(undefined);
       if (file) {
