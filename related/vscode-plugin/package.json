@@ -171,6 +171,17 @@
         "category": "Travetto"
       }
     ],
+    "languages": [
+      {
+        "id": "travetto-email-inky",
+        "extensions": [
+          ".email.tsx"
+        ],
+        "aliases": [
+          "Travetto Inky Template"
+        ]
+      }
+    ],
     "menus": {
       "editor/title": [
         {
