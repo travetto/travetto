@@ -3,7 +3,7 @@
 import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Container, If, Unless, Summary, Title, inkyTpl } from '../__index__';
+import { Container, If, Unless, Summary, Title, inkyTpl, Value } from '../__index__';
 
 @Suite('InkyTemplate')
 class ContainerTest {
@@ -35,18 +35,21 @@ class ContainerTest {
       <Summary>My Summary</Summary>
       <Container>
         [[amount]]
-        <If value='paid'>
+        <Value attr='amount-two' />
+        <If attr='paid'>
           Payment!
         </If>
-        <Unless value='unpaid'>
+        <Unless attr='unpaid'>
           No Payment!
         </Unless>
       </Container>
     </>);
 
+
     const output = await input.html();
     assert(/[{]{2}#paid[}]{2}\s*Payment!\s*[{]{2}\/paid[}]{2}/gsm.test(output));
     assert(/[{]{2}[^]unpaid[}]{2}\s*No Payment!\s*[{]{2}\/unpaid[}]{2}/gsm.test(output));
     assert(/[{]{2}amount[}]{2}/gsm.test(output));
+    assert(/[{]{2}amount-two[}]{2}/gsm.test(output));
   }
 }

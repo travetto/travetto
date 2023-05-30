@@ -24,15 +24,16 @@ export const Callout: CompFn<{}> = () => EMPTY;
 export const Spacer: CompFn<{ small?: number, large?: number, size?: number }> = () => EMPTY;
 export const Wrapper: CompFn<{}> = () => EMPTY;
 
-export const If: CompFn<{ value: string }> = () => EMPTY;
-export const Unless: CompFn<{ value: string }> = () => EMPTY;
-export const For: CompFn<{ value: string }> = () => EMPTY;
+export const If: CompFn<{ attr: string }> = () => EMPTY;
+export const Value: CompFn<{ attr: string }> = () => EMPTY;
+export const Unless: CompFn<{ attr: string }> = () => EMPTY;
+export const For: CompFn<{ attr: string }> = () => EMPTY;
 
 export const c = {
   Wrapper, Container,
   Column, Title, Summary, HLine, Row, Button,
   BlockGrid, Menu, Item, Center, Callout, Spacer,
-  If, Unless, For
+  If, Unless, For, Value
 } as const;
 
 type C = typeof c;

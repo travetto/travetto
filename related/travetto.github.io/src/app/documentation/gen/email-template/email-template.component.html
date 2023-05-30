@@ -15,39 +15,30 @@
 <span class="token function">yarn</span> <span class="token function">add</span> @travetto/email-template</code></pre>
   </figure>
 
-This is primarily a set of command line tools for compiling and developing templates.  The primary input into this process is a <code class="item path">.email.html</code> under the <code class="item path">resources/email</code> folder.  This template drives the generation of the <code class="item input">html</code> and <code class="item input">text</code> outputs, as well as the <code class="item input">subject</code> file.
+This is primarily a set of command line tools for compiling and developing templates.  The inputs are compiled files, generally under the <code class="item path">support/</code> folder, that represents the necessary input for the email compilation.  <a class="module-link" routerLink="/docs/email-inky" title="Email Inky templating module">Email Inky Templates</a> shows this pattern by leveraging <a target="_blank" class="external-link" href="https://en.wikipedia.org/wiki/JSX_(JavaScript)">JSX</a> bindings for the <a target="_blank" class="external-link" href="https://github.com/zurb/inky">inky</a> framework, allowing for compile-time checked templates.
 <h2 id="asset-management">Asset Management</h2>
 
 The templating process involves loading various assets (html, css, images), and so there is provision for asset management and loading.  The templating config allows for specifying asset paths, with the following paths (in order of precedence):
 <ol> <li><code class="item path">%ROOT%/resources/email</code></li>
-<li><code class="item path">@travetto/email-template/resources/email</code></li>
-<li><code class="item path">foundation-emails/scss</code> (specifically for <a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a> files)</li>
+<li><code class="item path">@travetto/email-{{'{'}}engine{{'}'}}/resources/email</code></li>
 </ol>
 When looking up a resources, every asset folder is consulted, in order, and the first to resolve an asset wins.  This allows for overriding of default templating resources, as needed.  The compilation process will convert <code class="item path">.email.html</code> files into <code class="item path">.compiled.html</code>, <code class="item path">.compiled.text</code> and <code class="item path">.compiled.subject</code> suffixes to generate the outputs respectively.
 
-<h2 id="template-extension-points">Template Extension Points</h2>
+<h2 id="template-extension">Template Extension</h2>
 
 The template extension points are defined at:
-<ol> <li><code class="item path">email/wrapper.html</code> - This is the wrapping chrome for the email</li>
-<li><code class="item path">email/main.scss</code> - The entry point for adding, and overriding any <a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a></li>
+<ol> <li><code class="item path">email/main.scss</code> - The entry point for adding, and overriding any <a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a></li>
+<li><code class="item path">email/{{'{'}}engine{{'}'}}.wrapper.html</code> - The html wrapper for the specific templating engine implementation.</li>
 </ol>
-In addition to the overrides, you can find the list of available settings at <a target="_blank" class="source-link" href="https://github.com/foundation/foundation-emails/blob/develop/scss/settings/_settings.scss">Github</a>
 
 <h2 id="template-compilation">Template Compilation</h2>
 
 The general process is as follows:
-<ol> <li>Load in a general wrapper for email, located at <code class="item path">/resources/email/wrapper.html</code>.</li>
-<li>Load in the general stylings as <a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a>, from <code class="item path">/resources/email/main.scss</code>.</li>
-<li>Resolving all mustache partial templates, at <code class="item path">/resources/email/**/*.email.html</code>.</li>
-<li>Render the <a target="_blank" class="external-link" href="https://github.com/zurb/inky">inky</a> directives into the final <code class="item input">html</code> output.</li>
-<li>Extract the subject from the <code class="item input">html</code>'s <code class="item input">&lt;title&gt;</code> tag, if present.</li>
-<li>Inline and optimize all images for email transmission.</li>
-<li>Generate markdown version of email to support the alternate <code class="item input">text</code> format.</li>
+<ol> <li>Load in the email template.</li>
+<li>Resolve any associated stylings for said template.</li>
+<li>Render template into html, text, and subject outputs.</li>
+<li>Inline and optimize all images for html email transmission.</li>
 </ol>
-
-<h2 id="reusable-email-elements">Reusable Email Elements</h2>
-
-In building out emails, you may have common elements that you want to repeat.  If you have a common block, put that in a separate file and pull it in using partial notation, e.g. <code class="item input">{{'{'}}{{'{'}}{{'{'}}&gt; email/common-element {{'}'}}{{'}'}}{{'}'}}</code>.  All paths are relative to the <code class="item path">resource</code> folder, which precludes the use of paths like <code class="item path">../file.html</code>
 
 <h2 id="images">Images</h2>
 
@@ -97,110 +88,3 @@ In addition to command line tools, the <a target="_blank" class="external-link" 
 <li>ability to send test emails during development</li>
 <li>ability to define custom context for template rendering</li>
 </ul>
-
-<h2 id="supporting-libraries">Supporting Libraries</h2>
-
-Templating emails is achieved through a combination of multiple libraries, specifically:
-<ul> <li><a target="_blank" class="external-link" href="https://github.com/zurb/inky">inky</a> is a email rendering framework that aims to provide a standard set of constructs for building visually appealing emails.  The version of inky being used is a complete rewrite to optimize for size and performance.</li>
-<li><a target="_blank" class="external-link" href="https://github.com/sass/dart-sass">sass</a> used for styles compilation.</li>
-<li><a target="_blank" class="external-link" href="https://github.com/janl/mustache.js/">mustache</a> allows for interpolation of variables for personalized emails.</li>
-</ul>
-
-<h2 id="templating-example">Templating Example</h2>
-
-  <figure class="code">
-    <figcaption class="code">Example inky template with mustache support
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/email-template/doc/email/example.email.html">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}left{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Bob<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}right{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre>
-  </figure>
-
-which will then interpolate the context to replace <code class="item input">left</code> and <code class="item input">right</code>, and compile to a final html output. When using <a target="_blank" class="external-link" href="https://github.com/janl/mustache.js/">mustache</a> expressions, make sure to use <code class="item input">{{'{'}}{{'{'}}{{'{'}} {{'}'}}{{'}'}}{{'}'}}</code>, triple braces on complex text, to prevent <a target="_blank" class="external-link" href="https://github.com/janl/mustache.js/">mustache</a> from escaping any characters.
-
-<h2 id="example-inky-template-with-partials">Example inky template with partials</h2>
-
-Given two files, <code class="item path">resources/email/welcome.html</code> and <code class="item path">resources/email/footer.hml</code>
-
-  <figure class="code">
-    <figcaption class="code">resources/email/welcome.html
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/email-template/doc/email/welcome.email.html">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}left{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Bob<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
-    <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>columns</span> <span class="token attr-name">large</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}right{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span> <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>columns</span><span class="token punctuation">></span></span>
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span>
-  {{'{'}}{{'{'}}{{'{'}}> email/footer {{'}'}}{{'}'}}{{'}'}}
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre>
-  </figure>
-
-  <figure class="code">
-    <figcaption class="code">resources/email/footer.html
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/email-template/doc/email/footer.html">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-html"><span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>row</span><span class="token punctuation">></span></span>
-  This is a footer
-  <span class="token tag"><span class="token tag"><span class="token punctuation">&lt;</span>a</span> <span class="token attr-name">href</span><span class="token attr-value"><span class="token punctuation attr-equals">=</span><span class="token punctuation">"</span>{{'{'}}{{'{'}}salesLink{{'}'}}{{'}'}}<span class="token punctuation">"</span></span><span class="token punctuation">></span></span>Sales Link<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>a</span><span class="token punctuation">></span></span>
-<span class="token tag"><span class="token tag"><span class="token punctuation">&lt;/</span>row</span><span class="token punctuation">></span></span></code></pre>
-  </figure>
-
-The final template will render as:
-
-  <figure class="terminal">
-    <figcaption class="terminal">Final Output, with styling removed
-
-</figcaption>
-    <pre><code class="language-bash">$ trv main doc/render.ts
-
-<span class="token operator">&lt;</span><span class="token operator">!</span>DOCTYPE html<span class="token operator">></span><span class="token operator">&lt;</span>html<span class="token operator">></span>
-
-<span class="token operator">&lt;</span>body<span class="token operator">></span>
-
-  <span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"body"</span><span class="token operator">></span>
-    <span class="token operator">&lt;</span>tbody<span class="token operator">></span><span class="token operator">&lt;</span>tr<span class="token operator">></span>
-      <span class="token operator">&lt;</span>td <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"float-center"</span> <span class="token assign-left variable">align</span><span class="token operator">=</span><span class="token string">"center"</span> <span class="token assign-left variable">valign</span><span class="token operator">=</span><span class="token string">"top"</span><span class="token operator">></span>
-        <span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"row"</span><span class="token operator">></span>
-      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
-        <span class="token operator">&lt;</span>tr<span class="token operator">></span>
-  <span class="token operator">&lt;</span>/tr<span class="token operator">></span><span class="token operator">&lt;</span>/tbody<span class="token operator">></span><span class="token operator">&lt;</span>/table<span class="token operator">></span><span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"row"</span><span class="token operator">></span>
-      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
-        <span class="token operator">&lt;</span>tr<span class="token operator">></span>
-    <span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"small-12 large-12 columns first"</span><span class="token operator">></span>
-        <span class="token operator">&lt;</span>table<span class="token operator">></span>
-          <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
-            <span class="token operator">&lt;</span>tr<span class="token operator">></span>
-              <span class="token operator">&lt;</span>th<span class="token operator">></span>Bob<span class="token operator">&lt;</span>/th<span class="token operator">></span>
-<span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"expander"</span><span class="token operator">></span><span class="token operator">&lt;</span>/th<span class="token operator">></span>
-            <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
-          <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
-        <span class="token operator">&lt;</span>/table<span class="token operator">></span>
-      <span class="token operator">&lt;</span>/th<span class="token operator">></span>
-    <span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"small-12 large-12 columns last"</span><span class="token operator">></span>
-        <span class="token operator">&lt;</span>table<span class="token operator">></span>
-          <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
-            <span class="token operator">&lt;</span>tr<span class="token operator">></span>
-              <span class="token operator">&lt;</span>th<span class="token operator">></span> <span class="token operator">&lt;</span>/th<span class="token operator">></span>
-<span class="token operator">&lt;</span>th <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"expander"</span><span class="token operator">></span><span class="token operator">&lt;</span>/th<span class="token operator">></span>
-            <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
-          <span class="token operator">&lt;</span>/tbody<span class="token operator">></span>
-        <span class="token operator">&lt;</span>/table<span class="token operator">></span>
-      <span class="token operator">&lt;</span>/th<span class="token operator">></span>
-  <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
-      <span class="token operator">&lt;</span>/tbody<span class="token operator">></span><span class="token operator">&lt;</span>/table<span class="token operator">></span>‍<span class="token operator">&lt;</span>a <span class="token assign-left variable">href</span><span class="token operator">=</span><span class="token string">"{{'{'}}{{'{'}}salesLink{{'}'}}{{'}'}}"</span><span class="token operator">></span>Sales Link<span class="token operator">&lt;</span>/a<span class="token operator">></span><span class="token operator">&lt;</span>table <span class="token assign-left variable">class</span><span class="token operator">=</span><span class="token string">"row"</span><span class="token operator">></span>
-      <span class="token operator">&lt;</span>tbody<span class="token operator">></span>
-        <span class="token operator">&lt;</span>tr<span class="token operator">></span>
-<span class="token operator">&lt;</span>/tr<span class="token operator">></span>
-      <span class="token operator">&lt;</span>/tbody<span class="token operator">></span><span class="token operator">&lt;</span>/table<span class="token operator">></span>‍
-
-      <span class="token operator">&lt;</span>/td<span class="token operator">></span>
-    <span class="token operator">&lt;</span>/tr<span class="token operator">></span>
-  <span class="token operator">&lt;</span>/tbody<span class="token operator">></span><span class="token operator">&lt;</span>/table<span class="token operator">></span>
-
-<span class="token operator">&lt;</span>/body<span class="token operator">></span><span class="token operator">&lt;</span>/html<span class="token operator">></span></code></pre>
-  </figure>

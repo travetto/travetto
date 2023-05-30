@@ -55,6 +55,7 @@ import { ManifestComponent } from './gen/manifest/manifest.component';
 import { TerminalComponent } from './gen/terminal/terminal.component';
 import { EslintComponent } from './gen/eslint/eslint.component';
 import { RestClientComponent } from './gen/rest-client/rest-client/rest-client.component';
+import { EmailInkyComponent } from './gen/email-inky/email-inky.component';
 
 export const PAGES = [
   {
@@ -114,7 +115,8 @@ export const PAGES = [
   {
     path: 'email', title: 'Email', component: EmailComponent, subs: [
       { path: 'email-template', title: 'Template', component: EmailTemplateComponent },
-      { path: 'email-nodemailer', title: 'Nodemailer', component: EmailNodemailerComponent }
+      { path: 'email-nodemailer', title: 'Nodemailer', component: EmailNodemailerComponent },
+      { path: 'email-inky', title: 'Inky', component: EmailInkyComponent }
     ]
   },
   {
