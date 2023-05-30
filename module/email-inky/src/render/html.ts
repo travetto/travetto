@@ -97,7 +97,7 @@ export const Html: RenderProvider<RenderContext> = {
   li: std, ol: stdFull, ul: stdFull,
   table: stdFull, thead: std, tr: std, td: std, th: std, tbody: std, center: std, img: stdInline,
   title: std,
-  div: std, span: stdInline,
+  div: std, span: stdInline, small: stdInline,
   a: async ({ recurse, props }) => `<a ${propsToStr(props)}>${await recurse()}</a>`,
 
   Title: async ({ recurse, el }) => `<title>${await recurse()}</title>`,
