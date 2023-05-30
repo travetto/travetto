@@ -1,4 +1,4 @@
-import { createElement } from '@travetto/doc/jsx-runtime';
+import { createElement } from '@travetto/email-inky/jsx-runtime';
 
 import { JSXElementByFn, c } from '../components';
 
