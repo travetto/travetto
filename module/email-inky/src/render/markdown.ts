@@ -20,6 +20,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   hr: async () => '\n------------------\n',
   HLine: async () => '\n------------------\n',
   br: async () => '\n\n',
+  p: async ({ recurse }) => `${await recurse()}\n\n`,
   em: async ({ recurse }) => `*${await recurse()}*`,
   ul: async ({ recurse }) => `\n${await recurse()}`,
   ol: async ({ recurse }) => `\n${await recurse()}`,
