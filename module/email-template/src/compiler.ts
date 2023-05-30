@@ -81,13 +81,14 @@ export class EmailTemplateCompiler {
   async inlineCss(html: string, css: string): Promise<string> {
     // Inline css
     const { default: inlineCss } = await import('inline-css');
+    html = html.replace('</head>', `<style>${css}</style></head>`);
+    // Style needs to be in head to preserve media queries
     html = (await inlineCss(html, {
       url: 'https://app.dev',
       preserveMediaQueries: true,
       removeStyleTags: true,
       removeLinkTags: true,
       applyStyleTags: true,
-      extraCss: css
     }));
     return html;
   }
@@ -131,6 +132,9 @@ export class EmailTemplateCompiler {
         const compiled = await EmailTemplateCompiler.compileSass(
           { data: styles.join('\n') },
           [...src.styles?.search ?? [], ...this.resources.getAllPaths()]);
+
+        console.log(compiled);
+
         // Apply styles
         html = await this.inlineCss(html, compiled);
       }
@@ -138,7 +142,7 @@ export class EmailTemplateCompiler {
 
     // Fix up style behaviors
     html = html
-      .replace(/(background(?:-color)?:\s*)([#0-9a-fA-F]+)([^>]+)>/g,
+      .replace(/(background(?:-color)?:\s*)([#0-9a-f]{6,8})([^>.#,]+)>/ig,
         (all, p, col, rest) => `${p}${col}${rest} bgcolor="${col}">`) // Inline bg-color
       .replace(/<([^>]+vertical-align:\s*(top|bottom|middle)[^>]+)>/g,
         (a, tag, valign) => tag.indexOf('valign') ? `<${tag}>` : `<${tag} valign="${valign}">`) // Vertically align if it has the style
