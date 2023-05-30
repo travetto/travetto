@@ -9,7 +9,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   finalize: (text, context) => text
     .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, v) => v === 's' ? _ : `${link} ${v}`)
     .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`)
-    .replace(/[\[]{2}([^\]]+)[\]]{2}/gm, (_, t) => `{{${t}}}`),
+    .replace(/@@([^@]+)@@/gm, (_, t) => `{{${t}}}`),
 
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,

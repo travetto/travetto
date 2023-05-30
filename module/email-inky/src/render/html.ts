@@ -83,7 +83,7 @@ export const Html: RenderProvider<RenderContext> = {
   finalize: (html, context) => html
     .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, v) => `${tag} ${v}`)
     .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`)
-    .replace(/[\[]{2}([^\]]+)[\]]{2}/gm, (_, t) => `{{${t}}}`),
+    .replace(/@@([^@]+)@@/gm, (_, t) => `{{${t}}}`),
 
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
@@ -365,7 +365,7 @@ export const Html: RenderProvider<RenderContext> = {
 };
 
 export const HtmlWrap = async (content: string): Promise<string> => {
-  const wrapper = await new EmailResource(['@', '@travetto/email-inky/resources'])
+  const wrapper = await new EmailResource(['@', '@travetto/email-inky#resources'])
     .read('/email/inky.wrapper.html');
 
   // Get Subject

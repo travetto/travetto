@@ -22,7 +22,7 @@ export const text = <>
 
     This means this module, while showing {d.library('Inky')} components, will ultimately produce HTML/markdown that is {d.library('Mustache')} compatible. The syntax used by {d.library('Mustache')} and the syntax used by {d.library('JSX')} are in conflict due to both of the tools relying on the uniqueness of {d.input('{}')} brackets.<br />
 
-    To that end, the module introduces additional components ({IfLink}, {UnlessLink}, and {ForLink}) to assist with control flow logic.  When it comes to variable substitution, and a desire to intermingle seamlessly with component properties, {d.input('[]')} are used to represent variable expressions.  A more formal version can be found in the {ValueLink} component, but this cannot be integrated into properties (e.g. an href)
+    To that end, the module introduces additional components ({IfLink}, {UnlessLink}, and {ForLink}) to assist with control flow logic.  When it comes to variable substitution, and a desire to intermingle seamlessly with component properties, {d.input('@@VALUE@@')} are used to represent variable expressions.  A more formal version can be found in the {ValueLink} component, but this cannot be integrated into properties (e.g. an href)
 
   </c.Section>
 
