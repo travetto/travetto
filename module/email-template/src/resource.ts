@@ -53,8 +53,12 @@ export class EmailTemplateResource extends FileQueryProvider {
   }
 
   async loadTemplate(imp: string): Promise<MessageCompilationSource> {
-    const root = (await import(imp)).default;
-    return { ...root, file: RootIndex.getFromImport(imp)!.sourceFile };
+    const entry = RootIndex.getEntry(imp) ?? RootIndex.getFromImport(imp);
+    if (!entry) {
+      throw new Error();
+    }
+    const root = (await import(entry.outputFile)).default;
+    return { ...root, file: entry.sourceFile };
   }
 
   /**
@@ -62,7 +66,7 @@ export class EmailTemplateResource extends FileQueryProvider {
    */
   async findAllTemplates(): Promise<MessageCompilationSource[]> {
     const items = RootIndex.findSupport({
-      filter: (f) => /email[.][tj]sx$/.test(f)
+      filter: (f) => this.ext.test(f)
     });
     const out: Promise<MessageCompilationSource>[] = [];
     for (const item of items) {
