@@ -8,8 +8,7 @@ const ignore = async ({ recurse: _ }: RenderState<JSXElement, RenderContext>): P
 export const Markdown: RenderProvider<RenderContext> = {
   finalize: (text, context) => text
     .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, v) => v === 's' ? _ : `${link} ${v}`)
-    .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`)
-    .replace(/@@([^@]+)@@/gm, (_, t) => `{{${t}}}`),
+    .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`),
 
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,

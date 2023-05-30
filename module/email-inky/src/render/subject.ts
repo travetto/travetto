@@ -6,8 +6,7 @@ const empty = async (): Promise<string> => '';
 const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<string> => recurse();
 
 export const Subject: RenderProvider<RenderContext> = {
-  finalize: text => text
-    .replace(/@@([^@]+)@@/gm, (_, t) => `{{${t}}}`),
+  finalize: text => text,
 
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,

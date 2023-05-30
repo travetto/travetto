@@ -18,11 +18,11 @@ export const text = <>
   Please see the {d.library('Inky')} documentation for more information on the <c.Anchor title='component specifications' href='https://get.foundation/emails/docs/inky.html'>component specifications.</c.Anchor>
 
   <c.Section title='Conditionals and Substitutions'>
-    The underlying {d.mod('Email')} module is built on {d.library('Mustache')}, which provides enough flexibility to enable sufficient power with minimal complexity and overhead.   <br />
+    The underlying {d.mod('Email')} module is built on {d.library('Mustache')}, which provides enough flexibility to enable sufficient power with minimal complexity and overhead.<br />
 
     This means this module, while showing {d.library('Inky')} components, will ultimately produce HTML/markdown that is {d.library('Mustache')} compatible. The syntax used by {d.library('Mustache')} and the syntax used by {d.library('JSX')} are in conflict due to both of the tools relying on the uniqueness of {d.input('{}')} brackets.<br />
 
-    To that end, the module introduces additional components ({IfLink}, {UnlessLink}, and {ForLink}) to assist with control flow logic.  When it comes to variable substitution, and a desire to intermingle seamlessly with component properties, {d.input('@@VALUE@@')} are used to represent variable expressions.  A more formal version can be found in the {ValueLink} component, but this cannot be integrated into properties (e.g. an href)
+    To that end, the module introduces additional components ({IfLink}, {UnlessLink}, and {ForLink}) to assist with control flow logic.  When it comes to variable substitution, and a desire to intermingle seamlessly with component properties, {d.input('{{value}}')} can be used within a string value. To leverage substitutions outside of string contexts, a more formal version can be found in the {ValueLink} component, but this cannot be integrated into properties (e.g. an href).
 
   </c.Section>
 
