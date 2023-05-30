@@ -17,7 +17,7 @@ export class EmailTestCommand implements CliCommandShape {
   }
 
   async main(file: string, to: string): Promise<void> {
-    file = path.resolve(file).split('resources/')[1];
+    file = path.resolve(file);
     await RootRegistry.init();
     const template = await TemplateManager.createInstance();
     await template.compiler.compile(file, true);
