@@ -15,7 +15,7 @@ export const Subject: RenderProvider<RenderContext> = {
   Value: async ({ props }) => `{{${props.attr}}}`,
   Title: visit,
 
-  title: visit, span: visit, strong: visit, center: visit, em: visit, p: visit,
+  title: visit, span: visit, strong: visit, center: visit, em: visit, p: visit, small: visit,
 
   Summary: empty, Button: empty,
   Callout: empty, Center: empty, HLine: empty,

@@ -55,5 +55,5 @@ export const Markdown: RenderProvider<RenderContext> = {
 
   Summary: ignore, Title: ignore,
   img: ignore,
-  div: visit, title: visit, span: visit, center: visit, table: visit, tbody: visit,
+  div: visit, title: visit, span: visit, center: visit, table: visit, tbody: visit, small: visit
 };

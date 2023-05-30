@@ -24,7 +24,7 @@ export interface JSXElement<
 export type ValidHtmlTags =
   'strong' | 'em' | 'br' | 'hr' | 'a' |
   'li' | 'ul' | 'ol' | 'img' | 'p' |
-  'h1' | 'h2' | 'h3' | 'h4' |
+  'h1' | 'h2' | 'h3' | 'h4' | 'small' |
   'td' | 'tr' | 'th' | 'table' | 'thead' | 'tbody' |
   'span' | 'div' | 'center' | 'title';
 
