@@ -32,6 +32,7 @@ export const text = <>
 
     <ol>
       <li>{d.path('email/main.scss')} - The entry point for adding, and overriding any {d.library('Sass')}</li>
+      <li>{d.path('email/inky.variables.scss')} - Allows for specifying any variables that should be defined before {d.library('Inky')}'s styles are loaded.</li>
       <li>{d.path('email/inky.wrapper.html')} - Provides direct access to override the entire base HTML document for all HTML emails.</li>
     </ol>
 

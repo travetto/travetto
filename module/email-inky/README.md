@@ -48,5 +48,6 @@ To that end, the module introduces additional components ([If Component](https:/
 ## Template Extension Points
 The template extension points are defined at:
    1. `email/main.scss` - The entry point for adding, and overriding any [sass](https://github.com/sass/dart-sass)
+   1. `email/inky.variables.scss` - Allows for specifying any variables that should be defined before [inky](https://github.com/zurb/inky)'s styles are loaded.
    1. `email/inky.wrapper.html` - Provides direct access to override the entire base HTML document for all HTML emails.
 In addition to the overrides, you can find the list of available settings at [Github](https://github.com/foundation/foundation-emails/blob/develop/scss/settings/_settings.scss)
