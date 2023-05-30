@@ -19,8 +19,9 @@ export const inkyTpl = (content: JSXElement | JSXElement[]): MessageCompilationS
   styles: {
     search: [path.dirname(req.resolve('foundation-emails/scss/_global.scss'))],
     global: `
-@import 'settings/_settings.scss';    
-@import 'foundation-emails.scss';
+@import 'email/inky.variables';
+@import '_global';
+@import 'foundation-emails';
 `
   }
 });
