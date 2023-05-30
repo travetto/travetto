@@ -121,6 +121,26 @@ class GridTest {
     assert(await renderJSX(input) === await renderJSX(expected));
   }
 
+  @Test('creates one columns, with offset')
+  async testColumnOffset() {
+    const input = <>
+      <Column large={6} largeOffset={6}>One</Column>
+    </>;
+    const expected = <>
+      <th class="first last small-12 large-6 columns large-offset-6">
+        <table>
+          <tbody>
+            <tr>
+              <th>One</th>
+            </tr>
+          </tbody>
+        </table>
+      </th>
+    </>;
+
+    assert(await renderJSX(input) === await renderJSX(expected));
+  }
+
   @Test('creates 3+ columns, first is first, last is last')
   async testThreeColumn() {
     const input = <>

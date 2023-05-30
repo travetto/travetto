@@ -81,7 +81,12 @@ export class InkyRenderer {
    */
   static async render(root: DocumentShape, provider: RenderProvider<RenderContext>): Promise<string> {
     const ctx = new RenderContext();
-    const par = { props: { children: Array.isArray(root.text) ? root.text : [root.text] }, type: '', key: '' };
+    let par: JSXElement;
+    if (isJSXElement(root.text)) {
+      par = root.text;
+    } else {
+      par = { props: { children: Array.isArray(root.text) ? root.text : [] }, type: '', key: '' };
+    }
     const text = await this.#render(ctx, provider, root.text, [par]);
 
     let cleaned = `${text.replace(/\n{3,100}/msg, '\n\n').trim()}\n`;

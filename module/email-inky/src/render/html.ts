@@ -115,12 +115,12 @@ export const Html: RenderProvider<RenderContext> = {
     const pProps = parent.props as { columnVisited: boolean };
     if (!pProps.columnVisited) {
       pProps.columnVisited = true;
+
       const sibs = getKids(parent).filter(x => isOfType(x, 'Column'));
       if (sibs.length) {
         sibs[0].props.class = classStr(sibs[0].props.class ?? '', 'first');
         sibs[sibs.length - 1].props.class = classStr(sibs[sibs.length - 1].props.class ?? '', 'last');
       }
-
     }
 
     // Check for sizes. If no attribute is provided, default to small-12. Divide evenly for large columns
@@ -148,7 +148,7 @@ export const Html: RenderProvider<RenderContext> = {
       classes.push('hide-for-small');
     }
     if (props.largeOffset) {
-      classes.push(`large-offset-${props.smallOffset}`);
+      classes.push(`large-offset-${props.largeOffset}`);
     }
     if (props.hideLarge) {
       classes.push('hide-for-large');
