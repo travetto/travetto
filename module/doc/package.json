@@ -1,6 +1,6 @@
 {
   "name": "@travetto/doc",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "description": "Documentation support for the Travetto framework",
   "keywords": [
     "docs",
@@ -29,7 +29,7 @@
     "prismjs": "^1.29.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.1.6"
+    "@travetto/cli": "^3.1.7"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
