@@ -5,15 +5,15 @@ import { RootIndex, path } from '@travetto/manifest';
 /**
  * Resource management for email templating
  */
-export class EmailTemplateResource extends FileQueryProvider {
+export class EmailCompilerResource extends FileQueryProvider {
   static PATH_PREFIX = /.*\/resources\//;
   static EXT = /[.]email[.][jt]sx$/;
 
   get ext(): RegExp {
-    return EmailTemplateResource.EXT;
+    return EmailCompilerResource.EXT;
   }
 
-  constructor(paths: string[] = ['@travetto/email-template#support/resources']) {
+  constructor(paths: string[] = ['@travetto/email-compiler#support/resources']) {
     super({ paths, includeCommon: true });
   }
 

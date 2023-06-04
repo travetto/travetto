@@ -7,12 +7,12 @@ import { RootIndex, path } from '@travetto/manifest';
 import { StreamUtil } from '@travetto/base';
 import { MessageCompilationSource, MessageCompiled } from '@travetto/email';
 
-import { EmailTemplateResource } from './resource';
+import { EmailCompilerResource } from './resource';
 
 /**
  * Utilities for templating
  */
-export class EmailTemplateCompiler {
+export class EmailCompiler {
 
   static HTML_CSS_IMAGE_URLS = [
     /(?<pre><img[^>]src=\s*["'])(?<src>[^"]+)/g,
@@ -36,9 +36,9 @@ export class EmailTemplateCompiler {
     return result!.css.toString();
   }
 
-  resources: EmailTemplateResource;
+  resources: EmailCompilerResource;
 
-  constructor(resources: EmailTemplateResource) {
+  constructor(resources: EmailCompilerResource) {
     this.resources = resources;
   }
 
@@ -46,7 +46,7 @@ export class EmailTemplateCompiler {
    * Inline image sources
    */
   async inlineImageSource(html: string): Promise<string> {
-    const { tokens, finalize } = await this.resources.tokenizeResources(html, EmailTemplateCompiler.HTML_CSS_IMAGE_URLS);
+    const { tokens, finalize } = await this.resources.tokenizeResources(html, EmailCompiler.HTML_CSS_IMAGE_URLS);
     const pendingImages: Promise<[token: string, content: string]>[] = [];
 
     for (const [token, src] of tokens) {
@@ -76,6 +76,16 @@ export class EmailTemplateCompiler {
     const imageMap = new Map(await Promise.all(pendingImages));
 
     return finalize(token => imageMap.get(token)!);
+  }
+
+  async pruneCss(html: string, css: string): Promise<string> {
+    const { PurgeCSS } = await import('purgecss');
+    const purge = new PurgeCSS();
+    const result = await purge.purge({
+      content: [html],
+      css: [css]
+    });
+    return result[0].css;
   }
 
   async inlineCss(html: string, css: string): Promise<string> {
@@ -109,8 +119,8 @@ export class EmailTemplateCompiler {
       src = await this.resources.loadTemplate(src);
     }
 
-    const subject = await EmailTemplateCompiler.readText(src.subject());
-    const text = await EmailTemplateCompiler.readText(src.text());
+    const subject = await EmailCompiler.readText(src.subject());
+    const text = await EmailCompiler.readText(src.text());
 
     let html = (await src.html())
       .replace(/<(meta|img|link|hr|br)[^>]*>/g, a => a.replace('>', '/>')) // Fix self closing
@@ -129,14 +139,14 @@ export class EmailTemplateCompiler {
       }
 
       if (styles.length) {
-        const compiled = await EmailTemplateCompiler.compileSass(
+        const compiled = await EmailCompiler.compileSass(
           { data: styles.join('\n') },
           [...src.styles?.search ?? [], ...this.resources.getAllPaths()]);
 
-        console.log(compiled);
+        const finalStyles = await this.pruneCss(html, compiled);
 
         // Apply styles
-        html = await this.inlineCss(html, compiled);
+        html = await this.inlineCss(html, finalStyles);
       }
     }
 

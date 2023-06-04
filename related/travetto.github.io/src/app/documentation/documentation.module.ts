@@ -19,7 +19,7 @@ import { LogComponent } from './gen/log/log.component';
 import { RegistryComponent } from './gen/registry/registry.component';
 import { DiComponent } from './gen/di/di.component';
 import { EmailComponent } from './gen/email/email.component';
-import { EmailTemplateComponent } from './gen/email-template/email-template.component';
+import { EmailCompilerComponent } from './gen/email-compiler/email-compiler.component';
 import { ImageComponent } from './gen/image/image.component';
 import { TransformerComponent } from './gen/transformer/transformer.component';
 import { SchemaComponent } from './gen/schema/schema.component';
@@ -104,7 +104,7 @@ import { EmailInkyComponent } from './gen/email-inky/email-inky.component';
     RegistryComponent,
     DiComponent,
     EmailComponent,
-    EmailTemplateComponent,
+    EmailCompilerComponent,
     SchemaComponent,
     ModelComponent,
     ModelElasticsearchComponent,

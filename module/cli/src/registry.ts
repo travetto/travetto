@@ -19,7 +19,7 @@ const COMMAND_PACKAGE = [
   [/^lint(:register)?$/, 'lint', true],
   [/^model:(install|export)$/, 'model', true],
   [/^openapi:(spec|client)$/, 'openapi', true],
-  [/^email:(compile|editor)$/, 'email-template', false],
+  [/^email:(compile|editor)$/, 'email-compiler', false],
   [/^pack(:zip|:docker)?$/, 'pack', false],
 ] as const;
 

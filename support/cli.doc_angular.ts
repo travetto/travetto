@@ -1,24 +1,12 @@
 import fs from 'fs/promises';
 
-import { ExecUtil, FileQueryProvider } from '@travetto/base';
+import { ExecUtil } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
 
 
 const page = (f: string): string => path.resolve('related/travetto.github.io/src', f);
-
-const copyPluginImages = async (): Promise<void> => {
-  console.log('Copying Plugin images');
-  for await (const file of FileQueryProvider.query({
-    paths: ['related/vscode-plugin/images'],
-    filter: f => /[.](gif|jpe?g|png)/i.test(f)
-  })) {
-    const target = page(`assets/images/vscode-plugin${file.split('vscode-plugin/images')[1]}`);
-    await fs.mkdir(path.dirname(target), { recursive: true });
-    await fs.copyFile(file, target);
-  }
-};
 
 /**
  * Generate documentation into the angular webapp under related/travetto.github.io
@@ -54,9 +42,6 @@ export class DocAngularCommand {
     }
 
     for (const mod of mods) {
-      if (mod.sourceFolder.endsWith('vscode-plugin')) {
-        await copyPluginImages();
-      }
       const modName = mod.name.endsWith('mono-repo') ? 'overview' : mod.name.split('/')[1];
       try {
         let html = await fs.readFile(path.resolve(mod.sourcePath, 'DOC.html'), 'utf8');

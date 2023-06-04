@@ -71,6 +71,10 @@ export const MOD_MAPPING = {
     name: '@travetto/email', folder: '@travetto/email', displayName: 'Email',
     description: 'Email transmission module.'
   },
+  EmailCompiler: {
+    name: '@travetto/email-compiler', folder: '@travetto/email-compiler', displayName: 'Email Compilation Support',
+    description: 'Email compiling module'
+  },
   EmailInky: {
     name: '@travetto/email-inky', folder: '@travetto/email-inky', displayName: 'Email Inky Templates',
     description: 'Email Inky templating module'
@@ -78,10 +82,6 @@ export const MOD_MAPPING = {
   EmailNodemailer: {
     name: '@travetto/email-nodemailer', folder: '@travetto/email-nodemailer', displayName: 'Email Nodemailer Support',
     description: 'Email transmission module.'
-  },
-  EmailTemplate: {
-    name: '@travetto/email-template', folder: '@travetto/email-template', displayName: 'Email Templating',
-    description: 'Email templating module'
   },
   Eslint: {
     name: '@travetto/eslint', folder: '@travetto/eslint', displayName: 'ES Linting Rules',

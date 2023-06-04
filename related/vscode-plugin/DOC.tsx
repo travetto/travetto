@@ -84,15 +84,15 @@ export const text = <>
 
   <c.Section title='Email Template Development'>
 
-    While using the {d.mod('EmailTemplate')} module, the desire to visual inspect output, as well as quickly test changes is paramount.  To that end, the plugin supports the ability to compile, view, and send email templates all from within the plugin. <br />
+    While developing emails, the desire to visual inspect output, as well as quickly test changes is paramount.  To that end, the plugin supports the ability to compile, view, and send email templates all from within the plugin. <br />
 
     The plugin exposes this functionality as a command, to allow you to debug these applications directly from the editor.
 
     <c.Image title='Editing' href='https://travetto.dev/assets/images/vscode-plugin/email-editing.gif' />
 
-    Any file that ends with {d.input('.tpl.html')} is assumed to be an email template, and will trigger background compilation upon editing the file.  All of the following commmands require the user to be actively editing the {d.input('.tpl.html')} file to be available. <br />
+    Any file that ends with {d.input('.email.tsx')} is assumed to be an email template, and will trigger background compilation upon editing the file.  All of the following commands require the user to be actively editing the {d.input('.email.tsx')} file to be available. <br />
 
-    Additional, for rendering the email, a context may be needed to exercise the various logic paths. The plugin picks up {d.path('resources/email-dev-context.json')} by default, and if its not found, then an empty object is provided.
+    Additional, for rendering the email, a context may be needed to exercise the various logic paths. The plugin picks up {d.path('resources/email/dev.yml')} by default, and if its not found, then an empty object is provided.
 
     <c.SubSection title='Commands'>
 

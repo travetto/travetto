@@ -9,7 +9,7 @@ const ValueLink = <c.CodeLink src='./src/components.ts' startRe={/const Value/} 
 export const text = <>
   <c.StdHeader />
 
-  This module provides {d.library('Inky')} support via {d.library('JSX')} tags for integration with the {d.mod('EmailTemplate')} engine.
+  This module provides {d.library('Inky')} support via {d.library('JSX')} tags for integration with the {d.mod('EmailCompiler')} engine.
 
   <c.Code src='doc/sample.email.tsx' title='Sample Inky Template'>
 

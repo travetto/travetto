@@ -29,7 +29,7 @@ import { WorkerComponent } from './gen/worker/worker.component';
 import { AssetRestComponent } from './gen/asset-rest/asset-rest.component';
 import { AuthRestComponent } from './gen/auth-rest/auth-rest.component';
 import { JwtComponent } from './gen/jwt/jwt.component';
-import { EmailTemplateComponent } from './gen/email-template/email-template.component';
+import { EmailCompilerComponent } from './gen/email-compiler/email-compiler.component';
 import { YamlComponent } from './gen/yaml/yaml.component';
 import { TransformerComponent } from './gen/transformer/transformer.component';
 import { ImageComponent } from './gen/image/image.component';
@@ -114,7 +114,7 @@ export const PAGES = [
   },
   {
     path: 'email', title: 'Email', component: EmailComponent, subs: [
-      { path: 'email-template', title: 'Template', component: EmailTemplateComponent },
+      { path: 'email-compiler', title: 'Compiler', component: EmailCompilerComponent },
       { path: 'email-nodemailer', title: 'Nodemailer', component: EmailNodemailerComponent },
       { path: 'email-inky', title: 'Inky', component: EmailInkyComponent }
     ]

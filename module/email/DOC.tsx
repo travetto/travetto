@@ -21,6 +21,6 @@ export const text = <>
       <li>{d.input('resources/<key>.compiled.text')}</li>
       <li>{d.input('resources/<key>.compiled.subject')}</li>
     </ul>
-    With {d.input('.html')} being the only required field.  The {d.mod('EmailTemplate')} module supports this format, and will generate files accordingly. Also, note that {d.input('<key>')} can include slashes, allowing for nesting folders.
+    With {d.input('.html')} being the only required field.  The {d.mod('EmailCompiler')} module supports this format, and will generate files accordingly. Also, note that {d.input('<key>')} can include slashes, allowing for nesting folders.
   </c.Section>
 </>;

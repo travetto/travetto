@@ -5,19 +5,19 @@ import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
 
 import { BaseFeature } from '../../base';
-import { Content, EmailTemplateCommand, EmailTemplateEvent } from './types';
+import { Content, EmailCompilerCommand, EmailCompilerEvent } from './types';
 
 /**
  * Email Template Feature
  */
-@Activatible('@travetto/email-template', 'develop')
-export class EmailTemplateFeature extends BaseFeature {
+@Activatible('@travetto/email-compiler', 'develop')
+export class EmailCompilerFeature extends BaseFeature {
 
   static isTemplate(f?: string): boolean {
     return /[.]email[.]tsx$/.test(f ?? '');
   }
 
-  #server: ProcessServer<EmailTemplateCommand, EmailTemplateEvent>;
+  #server: ProcessServer<EmailCompilerCommand, EmailCompilerEvent>;
   #format?: 'text' | 'html';
   #active = new Set<string>();
   #activeFile?: string;
@@ -64,7 +64,7 @@ export class EmailTemplateFeature extends BaseFeature {
   }
 
   setActiveFile(file: string | undefined, force = false): void {
-    if (!EmailTemplateFeature.isTemplate(file)) {
+    if (!EmailCompilerFeature.isTemplate(file)) {
       return;
     }
     if (file !== this.#activeFile || force) {
@@ -85,7 +85,7 @@ export class EmailTemplateFeature extends BaseFeature {
   }
 
   trackFile(file: vscode.TextDocument, open: boolean): void {
-    if (!EmailTemplateFeature.isTemplate(file.fileName)) {
+    if (!EmailCompilerFeature.isTemplate(file.fileName)) {
       return;
     }
     if (open) {
@@ -104,7 +104,7 @@ export class EmailTemplateFeature extends BaseFeature {
   async openPreview(format: 'html' | 'text'): Promise<void> {
     const active = vscode.window.activeTextEditor;
     const file = active?.document.fileName;
-    if (!EmailTemplateFeature.isTemplate(file ?? '')) {
+    if (!EmailCompilerFeature.isTemplate(file ?? '')) {
       return;
     }
 
@@ -151,7 +151,7 @@ export class EmailTemplateFeature extends BaseFeature {
     vscode.workspace.onDidCloseTextDocument(x => this.trackFile(x, false), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.setActiveFile(vscode.window.activeTextEditor?.document.fileName), null, context.subscriptions);
 
-    this.#emitter.on('render', ({ file, content }: EmailTemplateEvent & { type: 'changed' }) => {
+    this.#emitter.on('render', ({ file, content }: EmailCompilerEvent & { type: 'changed' }) => {
       if (file === this.#activeFile) {
         this.setActiveContent(content);
       }

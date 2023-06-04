@@ -48,7 +48,12 @@
     "docBaseUrl": "https://github.com/travetto/travetto/tree/main",
     "globalModules": [
       "@travetto/doc",
+      "@travetto/test",
       "@travetto/cli"
+    ],
+    "docOutputs": [
+      "README.md",
+      "DOC.html"
     ]
   },
   "engines": {
@@ -64,7 +69,7 @@
   ],
   "activationEvents": [
     "workspaceContains:node_modules/@travetto",
-    "onView:travetto.email-template.context"
+    "onView:travetto.email-compiler.context"
   ],
   "icon": "images/logo.png",
   "galleryBanner": {
@@ -139,7 +144,7 @@
           "light": "images/icons/baseline_vertical_split_black_24dp.png",
           "dark": "images/icons/baseline_vertical_split_white_24dp.png"
         },
-        "command": "travetto.email-template.develop:preview-html",
+        "command": "travetto.email-compiler.develop:preview-html",
         "title": "Preview Email HTML",
         "category": "Travetto"
       },
@@ -148,7 +153,7 @@
           "light": "images/icons/baseline_text_snippet_black_24dp.png",
           "dark": "images/icons/baseline_text_snippet_white_24dp.png"
         },
-        "command": "travetto.email-template.develop:preview-text",
+        "command": "travetto.email-compiler.develop:preview-text",
         "title": "Preview Email Text",
         "category": "Travetto"
       },
@@ -157,7 +162,7 @@
           "light": "images/icons/baseline_email_black_24dp.png",
           "dark": "images/icons/baseline_email_white_24dp.png"
         },
-        "command": "travetto.email-template.develop:send",
+        "command": "travetto.email-compiler.develop:send",
         "title": "Send Email Template",
         "category": "Travetto"
       },
@@ -166,14 +171,14 @@
           "light": "images/icons/baseline_settings_black_24dp.png",
           "dark": "images/icons/baseline_settings_white_24dp.png"
         },
-        "command": "travetto.email-template.develop:preview-context",
+        "command": "travetto.email-compiler.develop:preview-context",
         "title": "Email Template Context",
         "category": "Travetto"
       }
     ],
     "languages": [
       {
-        "id": "travetto-email-inky",
+        "id": "travetto-email",
         "extensions": [
           ".email.tsx"
         ],
@@ -185,24 +190,24 @@
     "menus": {
       "editor/title": [
         {
-          "command": "travetto.email-template.develop:send",
+          "command": "travetto.email-compiler.develop:send",
           "group": "navigation",
-          "when": "travetto.email-template && editorLangId == travetto-email-inky"
+          "when": "travetto.email-compiler && editorLangId == travetto-email"
         },
         {
-          "command": "travetto.email-template.develop:preview-text",
+          "command": "travetto.email-compiler.develop:preview-text",
           "group": "navigation",
-          "when": "travetto.email-template && editorLangId == travetto-email-inky"
+          "when": "travetto.email-compiler && editorLangId == travetto-email"
         },
         {
-          "command": "travetto.email-template.develop:preview-html",
+          "command": "travetto.email-compiler.develop:preview-html",
           "group": "navigation",
-          "when": "travetto.email-template && editorLangId == travetto-email-inky"
+          "when": "travetto.email-compiler && editorLangId == travetto-email"
         },
         {
-          "command": "travetto.email-template.develop:preview-context",
+          "command": "travetto.email-compiler.develop:preview-context",
           "group": "navigation",
-          "when": "travetto.email-template && editorLangId == travetto-email-inky"
+          "when": "travetto.email-compiler && editorLangId == travetto-email"
         }
       ],
       "commandPalette": [
@@ -247,20 +252,20 @@
           "when": "travetto.cli"
         },
         {
-          "command": "travetto.email-template.develop:preview-html",
-          "when": "travetto.email-template && editorLangId == travetto-email-inky"
+          "command": "travetto.email-compiler.develop:preview-html",
+          "when": "travetto.email-compiler && editorLangId == travetto-email"
         },
         {
-          "command": "travetto.email-template.develop:preview-text",
-          "when": "travetto.email-template && editorLangId == travetto-email-inky"
+          "command": "travetto.email-compiler.develop:preview-text",
+          "when": "travetto.email-compiler && editorLangId == travetto-email"
         },
         {
-          "command": "travetto.email-template.develop:preview-context",
-          "when": "travetto.email-template && editorLangId == travetto-email-inky"
+          "command": "travetto.email-compiler.develop:preview-context",
+          "when": "travetto.email-compiler && editorLangId == travetto-email"
         },
         {
-          "command": "travetto.email-template.develop:send",
-          "when": "travetto.email-template && editorLangId == travetto-email-inky"
+          "command": "travetto.email-compiler.develop:send",
+          "when": "travetto.email-compiler && editorLangId == travetto-email"
         }
       ]
     },

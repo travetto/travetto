@@ -49,7 +49,11 @@ export class AssetUtil {
   static async detectFileType(filePath: string): Promise<{ ext: string, mime: string } | undefined> {
     const { default: fileType } = await import('file-type');
     const buffer = await this.readChunk(filePath, 4100);
-    return fileType.fromBuffer(buffer);
+    const matched = await fileType.fromBuffer(buffer);
+    if (matched?.mime === 'video/mp4' && filePath.endsWith('.m4a')) {
+      return { ext: '.m4a', mime: 'audio/mpeg' };
+    }
+    return matched;
   }
 
   /**
@@ -59,7 +63,8 @@ export class AssetUtil {
   static async ensureFileExtension(filePath: string): Promise<string> {
     const type = await this.resolveFileType(filePath);
     const ext = mime.getExtension(type);
-    const newFile = filePath.replace(/[.][^.]+$/, ext!);
+    const baseName = path.basename(filePath, path.extname(filePath));
+    const newFile = `${baseName}.${ext}`;
 
     if (filePath !== newFile) {
       await fs.rename(filePath, newFile);
@@ -73,16 +78,15 @@ export class AssetUtil {
    * Read content type from location on disk
    */
   static async resolveFileType(pth: string): Promise<string> {
-    let contentType = path.extname(pth);
     const detected = await this.detectFileType(pth);
+    let contentType: string | undefined | null = undefined;
 
-    if (detected) {
-      contentType = detected.mime;
+    if (!detected || detected.mime === 'application/octet-stream') {
+      contentType = mime.getType(pth);
     } else {
-      contentType = mime.getType(pth) ?? contentType;
+      contentType = detected.mime;
     }
-
-    return contentType;
+    return contentType ?? 'application/octet-stream';
   }
 
   /**
@@ -97,7 +101,8 @@ export class AssetUtil {
 
     if (!filename) {
       filename = path.basename(file);
-      if (!filename.includes('.')) {
+      const extName = path.extname(file);
+      if (!extName) {
         const ext = mime.getExtension(contentType);
         if (ext) {
           filename = `${filename}.${ext}`;

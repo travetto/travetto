@@ -130,9 +130,9 @@ module/context
 module/di
 module/doc
 module/email
+module/email-compiler
 module/email-inky
 module/email-nodemailer
-module/email-template
 module/eslint
 module/image
 module/jwt
@@ -229,9 +229,9 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
                      module/di <workspace-root>/module/di
                     module/doc <workspace-root>/module/doc
                   module/email <workspace-root>/module/email
+         module/email-compiler <workspace-root>/module/email-compiler
              module/email-inky <workspace-root>/module/email-inky
        module/email-nodemailer <workspace-root>/module/email-nodemailer
-         module/email-template <workspace-root>/module/email-template
                  module/eslint <workspace-root>/module/eslint
                   module/image <workspace-root>/module/image
                     module/jwt <workspace-root>/module/jwt

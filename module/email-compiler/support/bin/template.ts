@@ -6,8 +6,8 @@ import { RootIndex, WatchEvent, WatchStream } from '@travetto/manifest';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
 import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
-import type { EmailTemplateCompiler } from '../../src/compiler';
-import type { EmailTemplateResource } from '../../src/resource';
+import type { EmailCompiler } from '../../src/compiler';
+import type { EmailCompilerResource } from '../../src/resource';
 
 const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
 
@@ -17,8 +17,8 @@ const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)
 export class TemplateManager {
 
   static async createInstance(): Promise<TemplateManager> {
-    const { EmailTemplateCompiler: Compiler } = await import('../../src/compiler.js');
-    const { EmailTemplateResource: Res } = await import('../../src/resource.js');
+    const { EmailCompiler: Compiler } = await import('../../src/compiler.js');
+    const { EmailCompilerResource: Res } = await import('../../src/resource.js');
 
     return new TemplateManager(
       await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget),
@@ -26,15 +26,15 @@ export class TemplateManager {
     );
   }
 
-  compiler: EmailTemplateCompiler;
+  compiler: EmailCompiler;
   engine: MailTemplateEngine;
 
-  constructor(engine: MailTemplateEngine, compiler: EmailTemplateCompiler) {
+  constructor(engine: MailTemplateEngine, compiler: EmailCompiler) {
     this.engine = engine;
     this.compiler = compiler;
   }
 
-  get resources(): EmailTemplateResource {
+  get resources(): EmailCompilerResource {
     return this.compiler.resources;
   }
 

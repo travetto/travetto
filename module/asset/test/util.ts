@@ -32,6 +32,17 @@ export class UtilTest {
 
   @Test()
   async resolveFileType() {
+    const { path: file } = await this.fixture.describe('/empty');
+    const result = await AssetUtil.resolveFileType(file);
+    assert(result === 'application/octet-stream');
+
+    const { path: file2 } = await this.fixture.describe('/empty.m4a');
+    const result2 = await AssetUtil.resolveFileType(file2);
+    assert(result2 === 'audio/mp4');
+  }
+
+  @Test()
+  async resolveFileTypeByExt() {
     const { path: file } = await this.fixture.describe('/logo.png');
     await fs.copyFile(file, file.replace(/[.]png$/, ''));
     const { path: png } = await this.fixture.describe('/logo');
