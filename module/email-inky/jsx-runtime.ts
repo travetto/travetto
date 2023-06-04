@@ -59,12 +59,25 @@ export function createElement<T extends string | ConcreteClass | JSXComponentFun
   return { [JSXRuntimeTag]: { id: (id += 1) }, key: '', type, props };
 }
 
+export function createRootElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
+  type: T, props: P & JSXProps
+): JSXElement<T, P> {
+  const res: JSXElement<T, P> = { [JSXRuntimeTag]: { id: (id += 1) }, key: '', type, props };
+  // @ts-expect-error
+  res.wrap = async (): Promise<unknown> => {
+    const { wrap } = await import('@travetto/email-inky');
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return wrap(res as JSXElement);
+  };
+  return res;
+}
+
 export function createFragment<P extends {}>(props: P & JSXProps): JSXElement<typeof JSXFragmentType, P> {
   return createElement(JSXFragmentType, props);
 }
 
 export const jsx = createElement;
-export const jsxs = createElement;
+export const jsxs = createRootElement;
 export const Fragment = createFragment;
 export function isJSXElement(el: unknown): el is JSXElement {
   return el !== undefined && el !== null && typeof el === 'object' && JSXRuntimeTag in el;

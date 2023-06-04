@@ -24,9 +24,9 @@ This module provides <a target="_blank" class="external-link" href="https://gith
 </figcaption>
     <pre><code class="language-typescript"><span class="token comment">/** @jsxImportSource @travetto/email-inky */</span>
 
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Title<span class="token punctuation">,</span> Container<span class="token punctuation">,</span> Summary<span class="token punctuation">,</span> Row<span class="token punctuation">,</span> Column<span class="token punctuation">,</span> If<span class="token punctuation">,</span> inkyTpl<span class="token punctuation">,</span> Button<span class="token punctuation">,</span> Value <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email-inky'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Title<span class="token punctuation">,</span> Container<span class="token punctuation">,</span> Summary<span class="token punctuation">,</span> Row<span class="token punctuation">,</span> Column<span class="token punctuation">,</span> If<span class="token punctuation">,</span> Button<span class="token punctuation">,</span> Value<span class="token punctuation">,</span> InkyTemplate <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/email-inky'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token function">inkyTpl</span><span class="token punctuation">(</span><span class="token operator">&lt;</span><span class="token operator">></span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token operator">&lt;</span>InkyTemplate<span class="token operator">></span>
   <span class="token operator">&lt;</span>Title<span class="token operator">></span>Test Email<span class="token operator">&lt;</span><span class="token operator">/</span>Title<span class="token operator">></span>
   <span class="token operator">&lt;</span>Summary<span class="token operator">></span>Email Summary<span class="token operator">&lt;</span><span class="token operator">/</span>Summary<span class="token operator">></span>
   <span class="token operator">&lt;</span>Container<span class="token operator">></span>
@@ -38,7 +38,7 @@ This module provides <a target="_blank" class="external-link" href="https://gith
       <span class="token operator">&lt;</span><span class="token operator">/</span>Row<span class="token operator">></span>
     <span class="token operator">&lt;</span><span class="token operator">/</span>If<span class="token operator">></span>
   <span class="token operator">&lt;</span><span class="token operator">/</span>Container<span class="token operator">></span>
-<span class="token operator">&lt;</span><span class="token operator">/</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
+<span class="token operator">&lt;</span><span class="token operator">/</span>InkyTemplate<span class="token operator">></span><span class="token punctuation">;</span></code></pre>
   </figure>
 
 Please see the <a target="_blank" class="external-link" href="https://github.com/zurb/inky">inky</a> documentation for more information on the <a class="anchor-link" routerLink="." fragment="https-get-foundation-emails-docs-inky-html">component specifications</a>

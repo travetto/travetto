@@ -30,6 +30,7 @@ The template extension points are defined at:
 The general process is as follows:
    1. Load in the email template.
    1. Resolve any associated stylings for said template.
+   1. Optimize styles against provided html, removing all unused stylings
    1. Render template into html, text, and subject outputs.
    1. Inline and optimize all images for html email transmission.
 

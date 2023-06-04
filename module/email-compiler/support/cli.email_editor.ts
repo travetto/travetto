@@ -4,7 +4,7 @@ import { RootIndex } from '@travetto/manifest';
 import { RootRegistry } from '@travetto/registry';
 
 import { EditorState } from './bin/editor';
-import { TemplateManager } from './bin/template';
+import { EmailCompilationManager } from './bin/manager';
 
 /** The email editor compilation service and output serving */
 @CliCommand()
@@ -19,7 +19,7 @@ export class EmailEditorCommand {
 
   async main(): Promise<void> {
     await RootRegistry.init();
-    const editor = new EditorState(await TemplateManager.createInstance());
+    const editor = new EditorState(await EmailCompilationManager.createInstance());
     await editor.init();
     if (process.send) {
       process.on('disconnect', () => ShutdownManager.execute());

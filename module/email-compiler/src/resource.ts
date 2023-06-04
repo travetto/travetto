@@ -58,7 +58,7 @@ export class EmailCompilerResource extends FileQueryProvider {
       throw new Error();
     }
     const root = (await import(entry.outputFile)).default;
-    return { ...root, file: entry.sourceFile };
+    return { ...await root.wrap(), file: entry.sourceFile };
   }
 
   /**

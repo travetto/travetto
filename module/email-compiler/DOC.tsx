@@ -35,6 +35,7 @@ export const text = <>
     <ol>
       <li>Load in the email template.</li>
       <li>Resolve any associated stylings for said template.</li>
+      <li>Optimize styles against provided html, removing all unused stylings</li>
       <li>Render template into html, text, and subject outputs.</li>
       <li>Inline and optimize all images for html email transmission.</li>
     </ol >

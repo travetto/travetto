@@ -71,6 +71,7 @@ export class InkyRenderer {
     // @ts-expect-error
   ): RenderState<JSXElementByFn<K>, RenderContext> {
     const el = ctx.createElement(key, props);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const newStack = [...state.stack, el] as JSXElement[];
     return { ...state, el, props: el.props, recurse: () => this.#render(ctx, renderer, el.props.children ?? [], newStack) };
   }
@@ -82,6 +83,8 @@ export class InkyRenderer {
   static async render(root: DocumentShape, provider: RenderProvider<RenderContext>): Promise<string> {
     const ctx = new RenderContext();
     let par: JSXElement;
+
+    // We are at the root element
     if (isJSXElement(root.text)) {
       par = root.text;
     } else {

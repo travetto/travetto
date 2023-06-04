@@ -1,7 +1,7 @@
 import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 
-import { TemplateManager } from './bin/template';
+import { EmailCompilationManager } from './bin/manager';
 import { GlobalEnvConfig } from '@travetto/base';
 
 /**
@@ -23,7 +23,7 @@ export class EmailCompileCommand implements CliCommandShape {
   async main(): Promise<void> {
     await RootRegistry.init();
 
-    const template = await TemplateManager.createInstance();
+    const template = await EmailCompilationManager.createInstance();
 
     // Let the engine template
     const all = await template.compiler.compileAll(true);

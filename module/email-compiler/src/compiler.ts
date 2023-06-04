@@ -82,8 +82,8 @@ export class EmailCompiler {
     const { PurgeCSS } = await import('purgecss');
     const purge = new PurgeCSS();
     const result = await purge.purge({
-      content: [html],
-      css: [css]
+      content: [{ raw: html, extension: 'html' }],
+      css: [{ raw: css }],
     });
     return result[0].css;
   }
@@ -143,6 +143,7 @@ export class EmailCompiler {
           { data: styles.join('\n') },
           [...src.styles?.search ?? [], ...this.resources.getAllPaths()]);
 
+        // Remove all unused styles
         const finalStyles = await this.pruneCss(html, compiled);
 
         // Apply styles

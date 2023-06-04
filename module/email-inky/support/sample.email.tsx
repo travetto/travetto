@@ -1,8 +1,8 @@
 /** @jsxImportSource @travetto/email-inky */
 
-import { Title, Container, Summary, Row, Column, If, inkyTpl, Button } from '@travetto/email-inky';
+import { Title, Container, Summary, Row, Column, If, Button, InkyTemplate } from '@travetto/email-inky';
 
-export default inkyTpl(<>
+export default <InkyTemplate>
   <Title>Test Email</Title>
   <Summary>Email Summary</Summary>
   <Container>
@@ -14,4 +14,4 @@ export default inkyTpl(<>
       </Row>
     </If>
   </Container>
-</>);
+</InkyTemplate>;

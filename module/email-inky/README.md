@@ -19,9 +19,9 @@ This module provides [inky](https://github.com/zurb/inky) support via [JSX](http
 ```typescript
 /** @jsxImportSource @travetto/email-inky */
 
-import { Title, Container, Summary, Row, Column, If, inkyTpl, Button, Value } from '@travetto/email-inky';
+import { Title, Container, Summary, Row, Column, If, Button, Value, InkyTemplate } from '@travetto/email-inky';
 
-export default inkyTpl(<>
+export default <InkyTemplate>
   <Title>Test Email</Title>
   <Summary>Email Summary</Summary>
   <Container>
@@ -33,7 +33,7 @@ export default inkyTpl(<>
       </Row>
     </If>
   </Container>
-</>);
+</InkyTemplate>;
 ```
 
 Please see the [inky](https://github.com/zurb/inky) documentation for more information on the [component specifications](#https-get-foundation-emails-docs-inky-html)

@@ -43,6 +43,7 @@ const allowedProps = new Set([
 ]);
 
 const propsToStr = (props: Record<string, unknown>, ...addClasses: string[]): string => {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   const out = { ...props, class: classStr(props.class as string, ...addClasses) };
   return Object.entries(out)
     .filter(([k, v]) => allowedProps.has(k) && v !== undefined && v !== null && v !== '')
@@ -112,6 +113,7 @@ export const Html: RenderProvider<RenderContext> = {
     const colCount = kids.length || 1;
 
     const parent = stack[stack.length - 1];
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const pProps = parent.props as { columnVisited: boolean };
     if (!pProps.columnVisited) {
       pProps.columnVisited = true;

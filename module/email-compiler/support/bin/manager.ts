@@ -14,13 +14,13 @@ const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)
 /**
  *
  */
-export class TemplateManager {
+export class EmailCompilationManager {
 
-  static async createInstance(): Promise<TemplateManager> {
+  static async createInstance(): Promise<EmailCompilationManager> {
     const { EmailCompiler: Compiler } = await import('../../src/compiler.js');
     const { EmailCompilerResource: Res } = await import('../../src/resource.js');
 
-    return new TemplateManager(
+    return new EmailCompilationManager(
       await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget),
       new Compiler(new Res())
     );

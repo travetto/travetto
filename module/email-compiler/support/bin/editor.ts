@@ -1,4 +1,4 @@
-import { TemplateManager } from './template';
+import { EmailCompilationManager } from './manager';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
 
@@ -21,9 +21,9 @@ export class EditorState {
 
   #lastFile = '';
   #sender: EditorSendService;
-  #template: TemplateManager;
+  #template: EmailCompilationManager;
 
-  constructor(template: TemplateManager) {
+  constructor(template: EmailCompilationManager) {
     this.#template = template;
     this.#sender = new EditorSendService();
   }
