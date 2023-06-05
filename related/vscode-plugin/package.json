@@ -176,38 +176,27 @@
         "category": "Travetto"
       }
     ],
-    "languages": [
-      {
-        "id": "travetto-email",
-        "extensions": [
-          ".email.tsx"
-        ],
-        "aliases": [
-          "Travetto Inky Template"
-        ]
-      }
-    ],
     "menus": {
       "editor/title": [
         {
           "command": "travetto.email-compiler.develop:send",
           "group": "navigation",
-          "when": "travetto.email-compiler && editorLangId == travetto-email"
+          "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
           "command": "travetto.email-compiler.develop:preview-text",
           "group": "navigation",
-          "when": "travetto.email-compiler && editorLangId == travetto-email"
+          "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
           "command": "travetto.email-compiler.develop:preview-html",
           "group": "navigation",
-          "when": "travetto.email-compiler && editorLangId == travetto-email"
+          "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
           "command": "travetto.email-compiler.develop:preview-context",
           "group": "navigation",
-          "when": "travetto.email-compiler && editorLangId == travetto-email"
+          "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         }
       ],
       "commandPalette": [
@@ -253,19 +242,19 @@
         },
         {
           "command": "travetto.email-compiler.develop:preview-html",
-          "when": "travetto.email-compiler && editorLangId == travetto-email"
+          "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
           "command": "travetto.email-compiler.develop:preview-text",
-          "when": "travetto.email-compiler && editorLangId == travetto-email"
+          "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
           "command": "travetto.email-compiler.develop:preview-context",
-          "when": "travetto.email-compiler && editorLangId == travetto-email"
+          "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
           "command": "travetto.email-compiler.develop:send",
-          "when": "travetto.email-compiler && editorLangId == travetto-email"
+          "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         }
       ]
     },

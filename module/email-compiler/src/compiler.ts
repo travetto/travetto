@@ -128,6 +128,7 @@ export class EmailCompiler {
       try {
         if (EmailCompileUtil.isTemplateFile(file)) {
           await this.compile(file, true);
+          console.log(`Successfully compiled ${1} templates`, { changed: [file] });
           yield file;
         } else if (VALID_FILE(file)) {
           const rootFile = file.replace(/\/resources.*/, '/package.json');

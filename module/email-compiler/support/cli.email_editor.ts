@@ -13,6 +13,7 @@ export class EmailEditorCommand {
   envInit(): GlobalEnvConfig {
     return {
       envName: 'dev',
+      dynamic: true,
       resourcePaths: [`${RootIndex.getModule('@travetto/email-compiler')!.sourcePath}/resources`]
     };
   }
