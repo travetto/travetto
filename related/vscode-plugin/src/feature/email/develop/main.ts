@@ -71,7 +71,7 @@ export class EmailCompilerFeature extends BaseFeature {
       this.#activeFile = file;
       this.setActiveContent(undefined);
       if (file) {
-        this.#server.sendMessage({ type: 'redraw', file: this.#activeFile });
+        this.#server.sendMessage({ type: 'redraw', file: this.#activeFile! });
       }
     }
   }
@@ -122,7 +122,7 @@ export class EmailCompilerFeature extends BaseFeature {
   }
 
   async openPreviewContext(): Promise<void> {
-    const { file } = await this.#server.sendMessageAndWaitFor({ type: 'configure' }, 'configured');
+    const { file } = await this.#server.sendMessageAndWaitFor({ type: 'configure', file: this.#activeFile! }, 'configured');
     const doc = await vscode.workspace.openTextDocument(file);
     await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
   }
@@ -135,7 +135,7 @@ export class EmailCompilerFeature extends BaseFeature {
           cancellable: false,
           title: 'Sending email'
         },
-        () => this.#server.sendMessageAndWaitFor({ type: 'send', file: this.#activeFile }, 'sent', 'sent-failed').then(console.log)
+        () => this.#server.sendMessageAndWaitFor({ type: 'send', file: this.#activeFile! }, 'sent', 'sent-failed').then(console.log)
           .catch(err => {
             vscode.window.showErrorMessage(err.message);
           })

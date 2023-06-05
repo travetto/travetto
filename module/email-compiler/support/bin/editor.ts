@@ -1,3 +1,5 @@
+import { ShutdownManager } from '@travetto/base';
+
 import { EmailCompilationManager } from './manager';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
@@ -6,7 +8,7 @@ import { EmailCompiler } from '../../src/compiler';
 import { EmailCompileUtil } from '../../src/util';
 
 type InboundMessage =
-  { type: 'configure' } |
+  { type: 'configure', file: string } |
   { type: 'redraw', file: string } |
   { type: 'send', file: string, from?: string, to?: string };
 
@@ -23,12 +25,10 @@ type OutboundMessage =
 export class EditorState {
 
   #lastFile = '';
-  #sender: EditorSendService;
   #template: EmailCompilationManager;
 
   constructor(template: EmailCompilationManager) {
     this.#template = template;
-    this.#sender = new EditorSendService();
   }
 
   async renderFile(file: string): Promise<void> {
@@ -36,7 +36,7 @@ export class EditorState {
     if (file) {
       try {
         const content = await this.#template.resolveCompiledTemplate(
-          file, await EditorConfig.getContext()
+          file, await EditorConfig.getContext(file)
         );
         this.response({
           type: 'changed',
@@ -60,7 +60,7 @@ export class EditorState {
   }
 
   async onConfigure(msg: InboundMessage & { type: 'configure' }): Promise<void> {
-    this.response({ type: 'configured', file: await EditorConfig.ensureConfig() });
+    this.response({ type: 'configured', file: await EditorConfig.ensureConfig(msg.file) });
   }
 
   async #onRedraw(msg: InboundMessage & { type: 'redraw' }): Promise<void> {
@@ -77,15 +77,15 @@ export class EditorState {
   }
 
   async onSend(msg: InboundMessage & { type: 'send' }): Promise<void> {
-    const cfg = await EditorConfig.get();
+    const cfg = await EditorConfig.get(msg.file);
     const to = msg.to || cfg.to;
     const from = msg.from || cfg.from;
     const content = await this.#template.resolveCompiledTemplate(
-      msg.file!, await EditorConfig.getContext()
+      msg.file, await EditorConfig.getContext(msg.file)
     );
 
     try {
-      const url = await this.#sender.sendEmail({ from, to, ...content, });
+      const url = await EditorSendService.sendEmail(msg.file, { from, to, ...content, });
       this.response({ type: 'sent', to, file: msg.file, ...url });
     } catch (err) {
       if (err && err instanceof Error) {
@@ -107,6 +107,10 @@ export class EditorState {
         case 'send': this.onSend(msg); break;
       }
     });
+
+    process.on('disconnect', () => ShutdownManager.execute());
+    process.send?.('ready');
+
     for await (const f of EmailCompiler.watchCompile()) {
       await this.renderFile(f);
     }

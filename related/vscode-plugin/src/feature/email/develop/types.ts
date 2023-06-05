@@ -1,9 +1,9 @@
 export type Content = { html: string, text: string, subject: string };
 
 export type EmailCompilerCommand =
-  { type: 'redraw', file?: string } |
-  { type: 'send', file?: string } |
-  { type: 'configure' };
+  { type: 'redraw', file: string } |
+  { type: 'send', file: string } |
+  { type: 'configure', file: string };
 
 export type EmailCompilerEvent =
   { type: 'changed', file: string, content?: Content } |

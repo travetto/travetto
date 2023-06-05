@@ -58,6 +58,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       setTimeout(reject, READY_WAIT_WINDOW);
       const readyHandler = (msg: unknown): void => {
         if (msg === 'ready') {
+          this.#log.info('Service is ready');
           state.process.off('message', readyHandler);
           resolve();
         }
@@ -65,6 +66,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       state.process.on('message', readyHandler);
     }).catch(() => {
       state.process.kill('SIGKILL');
+      this.#log.info('Service Timed out');
       throw new Error('Timeout');
     });
 
@@ -177,7 +179,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
 
   /**
    * Force start, even from a non-active state
-   * @returns 
+   * @returns
    */
   start(forceActive = false): Promise<void> {
     if (forceActive) {
@@ -201,7 +203,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
 
   /**
    * Force stop, to an inactive state
-   * @returns 
+   * @returns
    */
   stop(forceInactive = false): Promise<void> {
     if (forceInactive) {

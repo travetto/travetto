@@ -25,10 +25,9 @@ export class EmailTestCommand implements CliCommandShape {
     await EmailCompiler.compile(file, true);
 
     const mgr = await EmailCompilationManager.createInstance();
-    const send = new EditorSendService();
-    const cfg = await EditorConfig.get();
+    const cfg = await EditorConfig.get(file);
+    const content = await mgr.resolveCompiledTemplate(file, await EditorConfig.getContext(file));
 
-    const content = await mgr.resolveCompiledTemplate(file!, await EditorConfig.getContext());
-    await send.sendEmail({ from: cfg.from, to, ...content, });
+    await EditorSendService.sendEmail(file, { from: cfg.from, to, ...content, });
   }
 }

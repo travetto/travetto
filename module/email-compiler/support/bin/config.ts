@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/manifest';
+import { RootIndex, path } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {
@@ -22,7 +22,7 @@ interface ConfigType {
  */
 export class $EditorConfig {
 
-  #configFile = path.resolve('resources/email/dev.yml');
+  #configFile: Record<string, string> = {};
   #defaultConfig = {
     to: 'my-email@gmail.com',
     from: 'from-email@gmail.com',
@@ -42,9 +42,10 @@ export class $EditorConfig {
   /**
    *
    */
-  async get(): Promise<ConfigType> {
+  async get(file: string): Promise<ConfigType> {
     try {
-      const content = await fs.readFile(this.#configFile, 'utf8');
+      const mod = RootIndex.getModuleFromSource(file)!.name;
+      const content = await fs.readFile(this.#configFile[mod], 'utf8');
       return YamlUtil.parse<ConfigType>(content);
     } catch {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -52,13 +53,13 @@ export class $EditorConfig {
     }
   }
 
-  async getContext(): Promise<Exclude<ConfigType['context'], undefined>> {
-    const conf = await this.get();
+  async getContext(file: string): Promise<Exclude<ConfigType['context'], undefined>> {
+    const conf = await this.get(file);
     return conf.context ?? {};
   }
 
-  async getSenderConfig(): Promise<Exclude<ConfigType['sender'], undefined>> {
-    const conf = await this.get();
+  async getSenderConfig(file: string): Promise<Exclude<ConfigType['sender'], undefined>> {
+    const conf = await this.get(file);
     return conf.sender ?? {};
   }
 
@@ -66,13 +67,15 @@ export class $EditorConfig {
     return YamlUtil.serialize(this.#defaultConfig);
   }
 
-  async ensureConfig(): Promise<string> {
-    const file = this.#configFile;
-    if (!(await fs.stat(file).catch(() => { }))) {
-      await fs.mkdir(path.dirname(file), { recursive: true });
-      await fs.writeFile(file, this.getDefaultConfig(), { encoding: 'utf8' });
+  async ensureConfig(file: string): Promise<string> {
+    console.log('Ensuring config', file);
+    const mod = RootIndex.getModuleFromSource(file)!;
+    const resolved = this.#configFile[mod.name] ??= path.resolve(mod.sourcePath, 'resources/email/dev.yml');
+    if (!(await fs.stat(resolved).catch(() => { }))) {
+      await fs.mkdir(path.dirname(resolved), { recursive: true });
+      await fs.writeFile(resolved, this.getDefaultConfig(), { encoding: 'utf8' });
     }
-    return file;
+    return resolved;
   }
 }
 
