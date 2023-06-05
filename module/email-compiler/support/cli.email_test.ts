@@ -4,7 +4,10 @@ import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { GlobalEnvConfig } from '@travetto/base';
 
 import { EmailCompilationManager } from './bin/manager';
-import { EditorState } from './bin/editor';
+import { EditorConfig } from './bin/config';
+import { EditorSendService } from './bin/send';
+
+import { EmailCompiler } from '../src/compiler';
 
 /**
  * CLI Entry point for running the email server
@@ -19,10 +22,13 @@ export class EmailTestCommand implements CliCommandShape {
   async main(file: string, to: string): Promise<void> {
     file = path.resolve(file);
     await RootRegistry.init();
-    const template = await EmailCompilationManager.createInstance();
-    await template.compiler.compile(file, true);
-    const editor = new EditorState(await EmailCompilationManager.createInstance());
-    await editor.onConfigure({ type: 'configure' });
-    await editor.onSend({ type: 'send', file, to });
+    await EmailCompiler.compile(file, true);
+
+    const mgr = await EmailCompilationManager.createInstance();
+    const send = new EditorSendService();
+    const cfg = await EditorConfig.get();
+
+    const content = await mgr.resolveCompiledTemplate(file!, await EditorConfig.getContext());
+    await send.sendEmail({ from: cfg.from, to, ...content, });
   }
 }

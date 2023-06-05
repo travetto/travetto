@@ -1,12 +1,11 @@
-import fs from 'fs/promises';
 import util from 'util';
 import { Readable } from 'stream';
 
-import { ResourceProvider, StreamUtil } from '@travetto/base';
-import { MessageCompilationSource, MessageCompilationStyles, MessageCompiled } from '@travetto/email';
-import { RootIndex, path } from '@travetto/manifest';
+import { FileResourceProvider, StreamUtil } from '@travetto/base';
+import { MessageCompilationImages, MessageCompilationSource, MessageCompilationStyles, MessageCompiled } from '@travetto/email';
 import { ImageConverter } from '@travetto/image';
-import { EmailCompilerResource } from './resource';
+import { path } from '@travetto/manifest';
+
 
 type Tokenized = {
   text: string;
@@ -15,18 +14,40 @@ type Tokenized = {
 };
 
 /**
- * Standard email compilation utilities
+ * Email compile tools
  */
-export class EmailCompilerUtil {
-
-  static #EXT = /[.]email[.]tsx$/;
+export class EmailCompileUtil {
   static #HTML_CSS_IMAGE_URLS = [
     /(?<pre><img[^>]src=\s*["'])(?<src>[^"]+)/g,
     /(?<pre>background(?:-image)?:\s*url[(]['"]?)(?<src>[^"')]+)/g
   ];
 
+  static #EXT = /[.]email[.]tsx$/;
+
+  /**
+   * Is file a template?
+   */
   static isTemplateFile(file: string): boolean {
     return this.#EXT.test(file);
+  }
+
+  /**
+   * Generate singular output path given a file
+   */
+  static buildOutputPath(file: string, suffix: string, prefix?: string): string {
+    const res = file.replace(/.*(support|src)\//, '').replace(this.#EXT, suffix);
+    return prefix ? path.join(prefix, res) : res;
+  }
+
+  /**
+   * Get the different parts from the file name
+   */
+  static getOutputs(file: string, prefix?: string): MessageCompiled {
+    return {
+      html: this.buildOutputPath(file, '.compiled.html', prefix),
+      subject: this.buildOutputPath(file, '.compiled.subject', prefix),
+      text: this.buildOutputPath(file, '.compiled.text', prefix),
+    };
   }
 
   /**
@@ -52,25 +73,6 @@ export class EmailCompilerUtil {
     const finalize = (onToken: (token: string) => string): string => text.replace(/@@[^@]+@@/g, t => onToken(t));
 
     return { text, tokens, finalize };
-  }
-
-  /** Load Template */
-  static async loadTemplate(imp: string): Promise<MessageCompilationSource> {
-    const entry = RootIndex.getEntry(imp) ?? RootIndex.getFromImport(imp);
-    if (!entry) {
-      throw new Error();
-    }
-    const root = (await import(entry.outputFile)).default;
-    return { ...await root.wrap(), file: entry.sourceFile };
-  }
-
-  /**
-   * Grab list of all available templates
-   */
-  static findAllTemplates(): string[] {
-    return RootIndex
-      .findSupport({ filter: f => this.isTemplateFile(f) })
-      .map(x => x.import);
   }
 
   /**
@@ -123,21 +125,23 @@ export class EmailCompilerUtil {
    * @param text
    */
   static async simplifiedText(text: string): Promise<string> {
-    const { decode: decodeEntities } = await import('html-entities');
-    return decodeEntities(text.replace(/&#xA0;/g, ' '));
+    const { decode } = await import('html-entities');
+    return decode(text.replace(/&#xA0;/g, ' '));
   }
 
   /**
    * Inline image sources
    */
-  static async inlineImages(html: string, resources: ResourceProvider): Promise<string> {
+  static async inlineImages(html: string, opts: MessageCompilationImages): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, this.#HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Readable | Promise<Readable>][] = [];
+    const resources = new FileResourceProvider(opts.search ?? []);
 
     for (const [token, src] of tokens) {
       const ext = path.extname(src);
       const stream = await resources.readStream(src);
-      pendingImages.push([token, ext, /^[.](jpe?g|png)$/.test(ext) ? ImageConverter.optimize(ext === '.png' ? 'png' : 'jpeg', stream) : stream]);
+      pendingImages.push([token, ext, /^[.](jpe?g|png)$/.test(ext) ?
+        ImageConverter.optimize(ext === '.png' ? 'png' : 'jpeg', stream) : stream]);
     }
 
     const imageMap = new Map(await Promise.all(pendingImages.map(async ([token, ext, stream]) => {
@@ -163,69 +167,20 @@ export class EmailCompilerUtil {
         (a, left, size, right) => `<${left}100%${right}>`); // Drop important as a fix for outlook
   }
 
-  /**
-   * Generate singular output path given a file
-   */
-  static buildOutputPath(file: string, suffix: string, prefix?: string): string {
-    let res = file.replace(/.*(support|src)\//, '').replace(this.#EXT, suffix);
-    if (prefix) {
-      res = path.join(prefix, res);
-    }
-    return res;
-  }
-
-  /**
-   * Get the different parts from the file name
-   */
-  static getOutputs(file: string, prefix?: string): MessageCompiled {
-    return {
-      html: this.buildOutputPath(file, '.compiled.html', prefix),
-      subject: this.buildOutputPath(file, '.compiled.subject', prefix),
-      text: this.buildOutputPath(file, '.compiled.text', prefix),
-    };
-  }
-
-  /**
-   * Get the sending email key from a template file
-   */
-  static async templateFileToKey(file: string): Promise<string> {
-    return this.buildOutputPath(file, '');
-  }
-
-  /**
-   * Write template to file
-   */
-  static async writeTemplate(file: string, { text, html, subject }: MessageCompiled): Promise<void> {
-    // Write to disk, if desired
-    const entry = RootIndex.getEntry(file)!;
-    const mod = RootIndex.getModule(entry.module)!;
-    const outs = this.getOutputs(file, path.join(mod.sourcePath, 'resources'));
-
-    await Promise.all([
-      [outs.text, text],
-      [outs.html, html],
-      [outs.subject, subject]
-    ].map(async ([output, content]) => {
-      if (content) {
-        await fs.mkdir(path.dirname(output), { recursive: true });
-        await fs.writeFile(output, content, { encoding: 'utf8' });
-      } else {
-        await fs.unlink(output).catch(() => { }); // Remove file if data not provided
-      }
-    }));
-  }
 
   /**
    * Apply styles into a given html document
    */
-  static async applyStyles(html: string, opts: MessageCompilationStyles, resource: EmailCompilerResource): Promise<string> {
+  static async applyStyles(html: string, opts: MessageCompilationStyles): Promise<string> {
     const styles: string[] = [];
 
     if (opts.global) {
       styles.push(opts.global);
     }
 
+    const resource = new FileResourceProvider(opts.search ?? []);
     const main = await resource.read('/email/main.scss').then(d => d, () => '');
+
     if (main) {
       styles.push(main);
     }
@@ -233,7 +188,7 @@ export class EmailCompilerUtil {
     if (styles.length) {
       const compiled = await this.compileSass(
         { data: styles.join('\n') },
-        [...opts.search ?? [], ...resource.getAllPaths()]);
+        [...opts.search ?? []]);
 
       // Remove all unused styles
       const finalStyles = await this.pruneCss(html, compiled);
@@ -245,31 +200,22 @@ export class EmailCompilerUtil {
     return html;
   }
 
-  /**
-   * Compile a file given a resource provider
-   */
-  static async compile(file: string, resource: EmailCompilerResource, persist: boolean = false): Promise<MessageCompiled> {
-    const src = await this.loadTemplate(file);
+  static async compile(src: MessageCompilationSource): Promise<MessageCompiled> {
     const subject = await this.simplifiedText(await src.subject());
     const text = await this.simplifiedText(await src.text());
 
     let html = await src.html();
 
     if (src.styles?.inline !== false) {
-      html = await this.applyStyles(html, src.styles ?? {}, resource);
+      html = await this.applyStyles(html, src.styles!);
     }
 
     // Fix up html edge cases
     html = this.handleHtmlEdgeCases(html);
 
     if (src.images?.inline !== false) {
-      html = await this.inlineImages(html, resource);
+      html = await this.inlineImages(html, src.images!);
     }
-
-    if (persist) {
-      await this.writeTemplate(file, { html, text, subject });
-    }
-
-    return { html, text, subject };
+    return { html, subject, text };
   }
 }

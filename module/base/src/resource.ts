@@ -84,6 +84,10 @@ export class FileResourceProvider implements ResourceProvider {
     throw new AppError(`Unable to find: ${file}, searched=${this.#paths.join(',')}`, 'notfound');
   }
 
+  get paths(): string[] {
+    return this.#paths.slice(0);
+  }
+
   async describe(file: string): Promise<ResourceDescription> {
     file = await this.#getPath(file);
     const stat = await fs.stat(file);

@@ -44,7 +44,7 @@ export class EmailCompilerFeature extends BaseFeature {
           this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
         }
       })
-      .onFail(err => vscode.window.showErrorMessage(`Email Template Preview: ${err.message}`));
+      .onFail(err => vscode.window.showErrorMessage(`Email Compilation: ${err.message}`));
   }
 
   getPanel(): vscode.WebviewPanel {

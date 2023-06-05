@@ -14,23 +14,12 @@ export class FileQueryProvider extends FileResourceProvider {
 
   maxDepth = 1000;
 
-  #paths: string[];
-
-  constructor(cfg: FileResourceConfig | string[]) {
-    super(cfg);
-    this.#paths = FileResourceProvider.resolvePaths(cfg);
-  }
-
-  getAllPaths(): string[] {
-    return this.#paths.slice(0);
-  }
-
   /**
    * Query using a simple predicate, looking for files recursively
    */
   async * query(filter: (file: string) => boolean, hidden = false, maxDepth = this.maxDepth): AsyncIterable<string> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const search = [...this.getAllPaths().map(x => [x, x, 0] as [string, string, number])];
+    const search = [...this.paths.map(x => [x, x, 0] as [string, string, number])];
     const seen = new Set();
     while (search.length) {
       const [folder, root, depth] = search.shift()!;
@@ -61,7 +50,7 @@ export class FileQueryProvider extends FileResourceProvider {
    * @param filter
    */
   watchFiles(config?: Omit<WatchFolder, 'src' | 'target'>): WatchStream {
-    console.log('Watching', this.getAllPaths());
-    return watchFolders(this.getAllPaths(), config);
+    console.log('Watching', this.paths);
+    return watchFolders(this.paths, config);
   }
 }

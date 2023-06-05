@@ -1,13 +1,13 @@
 import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-
-import { EmailCompilationManager } from './bin/manager';
 import { GlobalEnvConfig } from '@travetto/base';
+
+import { EmailCompiler } from '../src/compiler';
 
 /**
  * CLI Entry point for running the email server
  */
-@CliCommand({ fields: ['module'] })
+@CliCommand()
 export class EmailCompileCommand implements CliCommandShape {
 
   /** Compile in watch mode */
@@ -23,14 +23,16 @@ export class EmailCompileCommand implements CliCommandShape {
   async main(): Promise<void> {
     await RootRegistry.init();
 
-    const template = await EmailCompilationManager.createInstance();
-
     // Let the engine template
-    const all = await template.compiler.compileAll(true);
+    const all = await EmailCompiler.compileAll();
     console!.log(cliTpl`Successfully compiled ${{ param: `${all.length}` }} templates`);
+    for (const el of all) {
+      console!.log(cliTpl`  * ${{ param: el }}`);
+    }
 
     if (this.watch) {
-      for await (const _ of template.watchCompile()) {
+
+      for await (const _ of EmailCompiler.watchCompile()) {
         // Iterate until done
       }
     }

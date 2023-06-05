@@ -2,7 +2,8 @@ import { EmailCompilationManager } from './manager';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
 
-import { EmailCompilerUtil } from '../../src/util';
+import { EmailCompiler } from '../../src/compiler';
+import { EmailCompileUtil } from '../../src/util';
 
 type InboundMessage =
   { type: 'configure' } |
@@ -31,7 +32,7 @@ export class EditorState {
   }
 
   async renderFile(file: string): Promise<void> {
-    file = EmailCompilerUtil.isTemplateFile(file) ? file : this.#lastFile;
+    file = EmailCompileUtil.isTemplateFile(file) ? file : this.#lastFile;
     if (file) {
       try {
         const content = await this.#template.resolveCompiledTemplate(
@@ -64,7 +65,7 @@ export class EditorState {
 
   async #onRedraw(msg: InboundMessage & { type: 'redraw' }): Promise<void> {
     try {
-      await this.#template.compiler.compile(msg.file, true);
+      await EmailCompiler.compile(msg.file, true);
       await this.renderFile(msg.file);
     } catch (err) {
       if (err && err instanceof Error) {
@@ -79,9 +80,12 @@ export class EditorState {
     const cfg = await EditorConfig.get();
     const to = msg.to || cfg.to;
     const from = msg.from || cfg.from;
-    const key = EmailCompilerUtil.buildOutputPath(msg.file, '');
+    const content = await this.#template.resolveCompiledTemplate(
+      msg.file!, await EditorConfig.getContext()
+    );
+
     try {
-      const url = await this.#sender.sendEmail(key, from, to, await EditorConfig.getContext());
+      const url = await this.#sender.sendEmail({ from, to, ...content, });
       this.response({ type: 'sent', to, file: msg.file, ...url });
     } catch (err) {
       if (err && err instanceof Error) {
@@ -103,7 +107,7 @@ export class EditorState {
         case 'send': this.onSend(msg); break;
       }
     });
-    for await (const f of this.#template.watchCompile()) {
+    for await (const f of EmailCompiler.watchCompile()) {
       await this.renderFile(f);
     }
   }

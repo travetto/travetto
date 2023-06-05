@@ -1,4 +1,4 @@
-import { MailService, SentMessage } from '@travetto/email';
+import { MailService, MessageOptions, SentMessage } from '@travetto/email';
 import { MailTransportTarget } from '@travetto/email/src/internal/types';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -47,9 +47,10 @@ ${EditorConfig.getDefaultConfig()}`.trim();
   /**
    * Resolve template
    */
-  async sendEmail(key: string, from: string, to: string, context: Record<string, unknown>): Promise<{
+  async sendEmail(message: MessageOptions): Promise<{
     url?: string | false;
   }> {
+    const to = message.to!;
     try {
       console.log('Sending email', { to });
       // Let the engine template
@@ -58,11 +59,12 @@ ${EditorConfig.getDefaultConfig()}`.trim();
         throw new Error('Node mailer support is missing');
       }
 
-      const info = await svc.send<{ host?: string } & SentMessage>({ to, from }, key, context);
+      const info = await svc.send<{ host?: string } & SentMessage>(message);
       console.log('Sent email', { to });
 
       const senderConfig = await EditorConfig.getSenderConfig();
       return senderConfig.host?.includes('ethereal.email') ? {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any
         url: (await import('nodemailer')).getTestMessageUrl(info as any)
       } : {};
     } catch (err) {

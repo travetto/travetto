@@ -1,16 +1,11 @@
+import fs from 'fs/promises';
+
 import type { MailTemplateEngine, MessageCompiled } from '@travetto/email';
-import { TypedObject } from '@travetto/base';
 import { DependencyRegistry } from '@travetto/di';
-import { RootIndex, WatchEvent, WatchStream } from '@travetto/manifest';
-
+import { TypedObject } from '@travetto/base';
 import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
-import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
-import type { EmailCompiler } from '../../src/compiler';
-import { EmailCompilerResource } from '../../src/resource';
-import { EmailCompilerUtil } from '../../src/util';
-
-const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
+import { EmailCompiler } from '../../src/compiler';
 
 /**
  *
@@ -18,41 +13,31 @@ const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)
 export class EmailCompilationManager {
 
   static async createInstance(): Promise<EmailCompilationManager> {
-    const { EmailCompiler: Compiler } = await import('../../src/compiler.js');
-    const { EmailCompilerResource: Res } = await import('../../src/resource.js');
-
     return new EmailCompilationManager(
       await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget),
-      new Compiler(new Res())
     );
   }
 
-  compiler: EmailCompiler;
   engine: MailTemplateEngine;
 
-  constructor(engine: MailTemplateEngine, compiler: EmailCompiler) {
+  constructor(engine: MailTemplateEngine) {
     this.engine = engine;
-    this.compiler = compiler;
-  }
-
-  get resources(): EmailCompilerResource {
-    return this.compiler.resources;
   }
 
   /**
    * Resolve template
    */
   async resolveTemplateParts(file: string): Promise<MessageCompiled> {
-    const files = EmailCompilerUtil.getOutputs(file);
-    const missing = await Promise.all(Object.values(files).map(x => this.resources.describe(x).catch(() => { })));
+    const files = EmailCompiler.getOutputFiles(file);
+    const missing = await Promise.all(Object.values(files).map(x => fs.stat(file).catch(() => { })));
 
     if (missing.some(x => x === undefined)) {
-      await this.compiler.compile(file, true);
+      await EmailCompiler.compile(file, true);
     }
 
     const parts = await Promise.all(
       TypedObject.entries(files).map(
-        ([key, subRel]) => this.resources.read(subRel)
+        ([key, partFile]) => fs.readFile(partFile, 'utf8')
           .then(content => [key, content] as const)
       )
     );
@@ -73,40 +58,4 @@ export class EmailCompilationManager {
     };
   }
 
-  /**
-   * Watch compilation
-   */
-  async * watchCompile(): AsyncIterable<string> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const stream = this.resources.watchFiles() as (
-      WatchStream & {
-        add(item: WatchEvent | WatchEvent[]): void;
-      }
-    );
-    DynamicFileLoader.onLoadEvent((ev) => {
-      const src = RootIndex.getEntry(ev.file);
-      if (src && EmailCompilerUtil.isTemplateFile(src.sourceFile)) {
-        stream.add({ ...ev, file: src.sourceFile });
-      }
-    });
-    for await (const { file, action } of stream) {
-      if (action === 'delete') {
-        continue;
-      }
-
-      try {
-        if (EmailCompilerUtil.isTemplateFile(file)) {
-          await this.compiler.compile(file, true);
-          yield file;
-        } else if (VALID_FILE(file)) {
-          await this.compiler.compileAll(true);
-          for (const el of await EmailCompilerUtil.findAllTemplates()) {
-            yield el.file!;
-          }
-        }
-      } catch (err) {
-        console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
-      }
-    }
-  }
 }

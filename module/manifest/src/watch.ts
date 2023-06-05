@@ -45,7 +45,7 @@ export type WatchFolder = {
   includeHidden?: boolean;
 };
 
-export type WatchStream = AsyncIterable<WatchEvent> & { close: () => Promise<void> };
+export type WatchStream = AsyncIterable<WatchEvent> & { close: () => Promise<void>, add: (item: WatchEvent | WatchEvent[]) => void };
 
 const DEDUPE_THRESHOLD = 50;
 

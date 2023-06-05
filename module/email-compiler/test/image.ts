@@ -2,8 +2,7 @@ import assert from 'assert';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { EmailCompilerResource } from '../src/resource';
-import { EmailCompilerUtil } from '../src/util';
+import { EmailCompileUtil } from '../src/util';
 
 @Suite()
 class ImageUtilTest {
@@ -20,8 +19,9 @@ class ImageUtilTest {
 <div style="background: url('/red.gif')"></div>
 `;
 
-    const resource = new EmailCompilerResource(['@travetto/email-compiler#test/fixtures']);
-    const output = await EmailCompilerUtil.inlineImages(text, resource);
+    const output = await EmailCompileUtil.inlineImages(text, {
+      search: this.fixture.paths
+    });
 
     assert(!output.includes('red.gif'));
     assert(!output.includes('blue.gif'));

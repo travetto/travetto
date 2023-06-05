@@ -69,6 +69,7 @@ export type MessageCompilationStyles = {
 };
 
 export type MessageCompilationImages = {
+  search?: string[];
   inline?: boolean;
 };
 
