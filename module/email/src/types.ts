@@ -62,14 +62,20 @@ export type SentMessage = {
 
 export type MessageCompiled = { html: string, text: string, subject: string };
 
+export type MessageCompilationStyles = {
+  search?: string[];
+  global?: string;
+  inline?: boolean;
+};
+
+export type MessageCompilationImages = {
+  inline?: boolean;
+};
+
 export type MessageCompilationSource = {
   file?: string;
-  styles?: {
-    search: string[];
-    global?: string;
-  };
-  inlineImages?: boolean;
-  inlineStyles?: boolean;
+  styles?: MessageCompilationStyles;
+  images?: MessageCompilationImages;
   html: () => Promise<string> | string;
   text: () => Promise<string> | string;
   subject: () => Promise<string> | string;

@@ -2,6 +2,8 @@ import { EmailCompilationManager } from './manager';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
 
+import { EmailCompilerUtil } from '../../src/util';
+
 type InboundMessage =
   { type: 'configure' } |
   { type: 'redraw', file: string } |
@@ -29,7 +31,7 @@ export class EditorState {
   }
 
   async renderFile(file: string): Promise<void> {
-    file = this.#template.resources.isTemplateFile(file) ? file : this.#lastFile;
+    file = EmailCompilerUtil.isTemplateFile(file) ? file : this.#lastFile;
     if (file) {
       try {
         const content = await this.#template.resolveCompiledTemplate(
@@ -77,7 +79,7 @@ export class EditorState {
     const cfg = await EditorConfig.get();
     const to = msg.to || cfg.to;
     const from = msg.from || cfg.from;
-    const key = this.#template.resources.buildOutputPath(msg.file, '');
+    const key = EmailCompilerUtil.buildOutputPath(msg.file, '');
     try {
       const url = await this.#sender.sendEmail(key, from, to, await EditorConfig.getContext());
       this.response({ type: 'sent', to, file: msg.file, ...url });

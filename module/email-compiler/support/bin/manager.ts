@@ -7,7 +7,8 @@ import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
 import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
 import type { EmailCompiler } from '../../src/compiler';
-import type { EmailCompilerResource } from '../../src/resource';
+import { EmailCompilerResource } from '../../src/resource';
+import { EmailCompilerUtil } from '../../src/util';
 
 const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
 
@@ -42,7 +43,7 @@ export class EmailCompilationManager {
    * Resolve template
    */
   async resolveTemplateParts(file: string): Promise<MessageCompiled> {
-    const files = this.resources.getOutputs(file);
+    const files = EmailCompilerUtil.getOutputs(file);
     const missing = await Promise.all(Object.values(files).map(x => this.resources.describe(x).catch(() => { })));
 
     if (missing.some(x => x === undefined)) {
@@ -84,7 +85,7 @@ export class EmailCompilationManager {
     );
     DynamicFileLoader.onLoadEvent((ev) => {
       const src = RootIndex.getEntry(ev.file);
-      if (src && this.resources.isTemplateFile(src.sourceFile)) {
+      if (src && EmailCompilerUtil.isTemplateFile(src.sourceFile)) {
         stream.add({ ...ev, file: src.sourceFile });
       }
     });
@@ -94,12 +95,12 @@ export class EmailCompilationManager {
       }
 
       try {
-        if (this.resources.isTemplateFile(file)) {
+        if (EmailCompilerUtil.isTemplateFile(file)) {
           await this.compiler.compile(file, true);
           yield file;
         } else if (VALID_FILE(file)) {
           await this.compiler.compileAll(true);
-          for (const el of await this.resources.findAllTemplates()) {
+          for (const el of await EmailCompilerUtil.findAllTemplates()) {
             yield el.file!;
           }
         }

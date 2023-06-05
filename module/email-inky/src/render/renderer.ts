@@ -1,9 +1,8 @@
-import { isJSXElement, JSXElement, createFragment, JSXFragmentType } from '@travetto/email-inky/jsx-runtime';
+import { isJSXElement, JSXElement, createFragment, JSXFragmentType, JSXChild } from '@travetto/email-inky/jsx-runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../components';
 import { DocumentShape, RenderProvider, RenderState } from '../types';
 import { RenderContext } from './context';
-import { JSXChild } from '../../jsx-runtime';
 
 /**
  * Inky Renderer

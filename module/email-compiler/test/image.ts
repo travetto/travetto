@@ -2,8 +2,8 @@ import assert from 'assert';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 
-import { EmailCompiler } from '../src/compiler';
 import { EmailCompilerResource } from '../src/resource';
+import { EmailCompilerUtil } from '../src/util';
 
 @Suite()
 class ImageUtilTest {
@@ -21,10 +21,7 @@ class ImageUtilTest {
 `;
 
     const resource = new EmailCompilerResource(['@travetto/email-compiler#test/fixtures']);
-
-    const compiler = new EmailCompiler(resource);
-
-    const output = await compiler.inlineImageSource(text);
+    const output = await EmailCompilerUtil.inlineImages(text, resource);
 
     assert(!output.includes('red.gif'));
     assert(!output.includes('blue.gif'));

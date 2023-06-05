@@ -16,8 +16,8 @@ export interface JSXElement<
   P extends {} = {},
 > {
   [JSXRuntimeTag]?: { id: number };
-  key: string;
   type: T;
+  key: string;
   props: P & JSXProps;
 }
 
@@ -56,7 +56,7 @@ declare global {
 export function createElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
-  return { [JSXRuntimeTag]: { id: (id += 1) }, key: '', type, props };
+  return { [JSXRuntimeTag]: { id: (id += 1) }, type, key: '', props };
 }
 
 export function createRootElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
