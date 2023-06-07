@@ -1,3 +1,4 @@
+import { EventEmitter } from 'events';
 import fs from 'fs/promises';
 
 import { path } from '@travetto/manifest';
@@ -22,6 +23,7 @@ export class TestCommand implements CliCommandShape {
   mode: TestMode = 'standard';
 
   envInit(): GlobalEnvConfig {
+    EventEmitter.defaultMaxListeners = 1000;
     return { test: true };
   }
 

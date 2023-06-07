@@ -1,3 +1,5 @@
+import { EventEmitter } from 'events';
+
 import { GlobalEnvConfig, ShutdownManager } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
@@ -5,6 +7,7 @@ import { CliCommand } from '@travetto/cli';
 @CliCommand({ hidden: true })
 export class TestChildWorkerCommand {
   envInit(): GlobalEnvConfig {
+    EventEmitter.defaultMaxListeners = 1000;
     return { test: true, set: { FORCE_COLOR: 0 } };
   }
 
