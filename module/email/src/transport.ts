@@ -1,4 +1,4 @@
-import { MessageOptions, SentMessage } from './types';
+import { EmailOptions, SentEmail } from './types';
 
 /**
  * Default mail transport
@@ -6,14 +6,14 @@ import { MessageOptions, SentMessage } from './types';
  * @concrete ./internal/types:MailTransportTarget
  */
 export interface MailTransport {
-  send<S extends SentMessage = SentMessage>(mail: MessageOptions): Promise<S>;
+  send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S>;
 }
 
 /**
  * Transport that consumes messages without sending
  */
 export class NullTransport implements MailTransport {
-  async send<S extends SentMessage = SentMessage>(mail: MessageOptions): Promise<S> {
+  async send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return {} as S;
   }

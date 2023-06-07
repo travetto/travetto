@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { FileQueryProvider, TypedObject } from '@travetto/base';
-import { MessageTemplate, MessageCompiled, MessageCompilationContext, MailUtil } from '@travetto/email';
+import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
 import { RootIndex, path } from '@travetto/manifest';
 import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
@@ -15,18 +15,17 @@ const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)
 export class EmailCompiler {
 
   /** Load Template */
-  static async loadTemplate(file: string): Promise<MessageCompilationContext> {
+  static async loadTemplate(file: string): Promise<EmailCompileContext> {
     const entry = RootIndex.getEntry(file);
     if (!entry) {
       throw new Error(`Unable to find template for ${file}`);
     }
     const root = (await import(entry.outputFile)).default;
-    const og: MessageTemplate = await root.wrap();
+    const og: EmailCompileSource = await root.wrap();
     const res = {
       file: entry.sourceFile,
       module: entry.module,
-      config: og.config,
-      generators: og.generators
+      ...og
     };
 
     const mod = RootIndex.getModule(entry.module)!;
@@ -36,10 +35,10 @@ export class EmailCompiler {
       path.resolve(RootIndex.manifest.workspacePath, 'resources')
     ];
 
-    const styles = res.config.styles ??= {};
+    const styles = res.styles ??= {};
     (styles.search ??= []).push(...resourcePaths);
 
-    const images = res.config.images ??= {};
+    const images = res.images ??= {};
     (images.search ??= []).push(...resourcePaths);
 
     return res;
@@ -58,7 +57,7 @@ export class EmailCompiler {
   /**
    * Get output files
    */
-  static getOutputFiles(file: string): MessageCompiled {
+  static getOutputFiles(file: string): EmailCompiled {
     const entry = RootIndex.getEntry(file)!;
     const mod = RootIndex.getModule(entry.module)!;
     return EmailCompileUtil.getOutputs(file, path.join(mod.sourcePath, 'resources'));
@@ -74,7 +73,7 @@ export class EmailCompiler {
   /**
    * Write template to file
    */
-  static async writeTemplate(file: string, msg: MessageCompiled): Promise<void> {
+  static async writeTemplate(file: string, msg: EmailCompiled): Promise<void> {
     const outs = this.getOutputFiles(file);
     await Promise.all(TypedObject.keys(outs).map(async k => {
       if (msg[k]) {
@@ -89,7 +88,7 @@ export class EmailCompiler {
   /**
    * Compile a file given a resource provider
    */
-  static async compile(file: string, persist: boolean = false): Promise<MessageCompiled> {
+  static async compile(file: string, persist: boolean = false): Promise<EmailCompiled> {
     const src = await this.loadTemplate(file);
     const compiled = await EmailCompileUtil.compile(src);
     if (persist) {

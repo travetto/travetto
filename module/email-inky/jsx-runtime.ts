@@ -38,7 +38,7 @@ declare global {
       id?: string;
       dir?: string;
       name?: string;
-      src?: string;
+      src?: string | Function;
       alt?: string;
       href?: string;
       title?: string;

@@ -12,7 +12,7 @@ export class OpenApiSuite {
     await RootRegistry.init();
     const svc = await DependencyRegistry.getInstance(OpenApiService);
 
-    const spec = await svc.spec;
+    const spec = await svc.getSpec();
 
     assert.deepStrictEqual(
       [...Object.keys(spec.paths)].sort(),

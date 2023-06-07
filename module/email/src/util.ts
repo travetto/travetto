@@ -1,6 +1,6 @@
 import { RootIndex } from '@travetto/manifest';
 
-import { Attachment } from './types';
+import { EmailAttachment } from './types';
 
 /**
  * Utilities for email
@@ -26,9 +26,9 @@ export class MailUtil {
    *
    * @param html
    */
-  static async extractImageAttachments(html: string): Promise<{ html: string, attachments: Attachment[] }> {
+  static async extractImageAttachments(html: string): Promise<{ html: string, attachments: EmailAttachment[] }> {
     let idx = 0;
-    const attachments: Attachment[] = [];
+    const attachments: EmailAttachment[] = [];
     const contentMap = new Map<string, string>();
 
     html = html.replace(/data:(image\/[^;]+);base64,([^"']+)/g, (__, contentType, content) => {

@@ -4,7 +4,7 @@ import { Url } from 'url';
 /**
  * An address
  */
-export interface Address {
+export interface EmailAddress {
   name: string;
   address: string;
 }
@@ -20,7 +20,7 @@ interface AttachmentLike {
 /**
  * A full attachment
  */
-export interface Attachment extends AttachmentLike {
+export interface EmailAttachment extends AttachmentLike {
   filename?: string | false;
   cid?: string;
   encoding?: string;
@@ -31,62 +31,54 @@ export interface Attachment extends AttachmentLike {
   raw?: string | Buffer | Readable | AttachmentLike;
 }
 
+type EmailContentType = 'html' | 'text' | 'subject';
+
 /**
  * Full message options
  */
-export interface MessageOptions {
+export interface EmailOptions {
   html: string;
   text?: string;
-  subject?: string;
+  subject: string;
   context?: Record<string, unknown>; // For templating
 
-  from?: string | Address;
-  sender?: string | Address;
-  to?: string | Address | (string | Address)[];
-  cc?: string | Address | (string | Address)[];
-  bcc?: string | Address | (string | Address)[];
-  replyTo?: string | Address;
-  inReplyTo?: string | Address;
+  from?: string | EmailAddress;
+  sender?: string | EmailAddress;
+  to?: string | EmailAddress | (string | EmailAddress)[];
+  cc?: string | EmailAddress | (string | EmailAddress)[];
+  bcc?: string | EmailAddress | (string | EmailAddress)[];
+  replyTo?: string | EmailAddress;
+  inReplyTo?: string | EmailAddress;
   references?: string | string[];
   headers?: Record<string, string | string[]>;
-  attachments?: Attachment[];
-  alternatives?: Attachment[];
+  attachments?: EmailAttachment[];
+  alternatives?: EmailAttachment[];
   messageId?: string;
   date?: Date | string;
   encoding?: string;
 }
 
-export type SentMessage = {
+export type SentEmail = {
   messageId?: string;
 };
 
-export type MessageCompiled = { html: string, text: string, subject: string };
+export type EmailCompiled = Record<EmailContentType, string>;
 
-export type MessageTemplateStyleConfig = {
-  search?: string[];
-  global?: string;
-  inline?: boolean;
-};
-
-export type MessageTemplateImageConfig = {
+// Compilation support, defined here to allow for templates to not have a direct dependency on the compiler
+type BaseTemplateConfig = {
   search?: string[];
   inline?: boolean;
 };
 
-export type MessageCompilationConfig = {
-  styles?: MessageTemplateStyleConfig;
-  images?: MessageTemplateImageConfig;
+export type EmailTemplateStyleConfig = BaseTemplateConfig & { global?: string };
+export type EmailTemplateImageConfig = BaseTemplateConfig & {};
+
+export type EmailTemplateConfig = {
+  styles?: EmailTemplateStyleConfig;
+  images?: EmailTemplateImageConfig;
 };
 
-export type MessageTemplateGenerators = {
-  html: (ctx: MessageCompilationContext) => Promise<string> | string;
-  text: (ctx: MessageCompilationContext) => Promise<string> | string;
-  subject: (ctx: MessageCompilationContext) => Promise<string> | string;
-};
-
-export type MessageTemplate = {
-  config: MessageCompilationConfig;
-  generators: MessageTemplateGenerators;
-};
-
-export type MessageCompilationContext = { file: string, module: string } & MessageTemplate;
+export type EmailTemplateLocation = { file: string, module: string };
+export type EmailRenderer = (ctx: EmailTemplateLocation & EmailTemplateConfig) => Promise<string> | string;
+export type EmailCompileSource = EmailTemplateConfig & Record<EmailContentType, EmailRenderer>;
+export type EmailCompileContext = EmailTemplateLocation & EmailCompileSource;

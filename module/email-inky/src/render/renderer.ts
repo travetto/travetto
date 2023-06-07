@@ -1,5 +1,5 @@
 import { isJSXElement, JSXElement, createFragment, JSXFragmentType, JSXChild } from '@travetto/email-inky/jsx-runtime';
-import { MessageCompilationContext } from '@travetto/email';
+import { EmailTemplateLocation } from '@travetto/email';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../components';
 import { RenderProvider, RenderState } from '../types';
@@ -20,7 +20,7 @@ export class InkyRenderer {
       return '';
     } else if (Array.isArray(node)) {
       const out: string[] = [];
-      const nextStack = [...stack, { key: '', props: { children: node }, type: 'Fragment' }];
+      const nextStack = [...stack, { key: '', props: { children: node }, type: JSXFragmentType }];
       for (const el of node) {
         out.push(await this.#render(ctx, renderer, el, nextStack));
       }
@@ -28,7 +28,7 @@ export class InkyRenderer {
     } else if (isJSXElement(node)) {
       let final: JSXElement = node;
       // Render simple element if needed
-      if (typeof node.type === 'function') {
+      if (typeof node.type === 'function' && node.type !== JSXFragmentType) {
         // @ts-expect-error
         const out = node.type(node.props);
         final = out !== EMPTY_ELEMENT ? out : final;
@@ -81,13 +81,14 @@ export class InkyRenderer {
    * @param renderer
    */
   static async render(
-    root: JSXChild | JSXChild[],
+    root: JSXElement,
     provider: RenderProvider<RenderContext>,
-    compileCtx: MessageCompilationContext
+    sourceLoc: EmailTemplateLocation,
+    isRoot = true
   ): Promise<string> {
-    const ctx = new RenderContext(compileCtx.file, compileCtx.module);
-    const par: JSXElement = isJSXElement(root) ? root : { props: { children: root }, type: '', key: '' };
-    const text = await this.#render(ctx, provider, root, [par]);
-    return provider.finalize(text, ctx, true);
+    const ctx = new RenderContext(sourceLoc.file, sourceLoc.module);
+    const par: JSXElement = root.type === JSXFragmentType ? root : { props: { children: [root] }, type: JSXFragmentType, key: '' };
+    const text = await this.#render(ctx, provider, par, []);
+    return provider.finalize(text, ctx, isRoot);
   }
 }

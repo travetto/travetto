@@ -3,8 +3,8 @@ import { Readable } from 'stream';
 
 import { FileResourceProvider, StreamUtil } from '@travetto/base';
 import {
-  MessageTemplateImageConfig, MessageTemplateStyleConfig,
-  MessageCompiled, MessageCompilationContext
+  EmailTemplateImageConfig, EmailTemplateStyleConfig,
+  EmailCompiled, EmailCompileContext
 } from '@travetto/email';
 import { ImageConverter } from '@travetto/image';
 import { path } from '@travetto/manifest';
@@ -44,7 +44,7 @@ export class EmailCompileUtil {
   /**
    * Get the different parts from the file name
    */
-  static getOutputs(file: string, prefix?: string): MessageCompiled {
+  static getOutputs(file: string, prefix?: string): EmailCompiled {
     return {
       html: this.buildOutputPath(file, '.compiled.html', prefix),
       subject: this.buildOutputPath(file, '.compiled.subject', prefix),
@@ -134,7 +134,7 @@ export class EmailCompileUtil {
   /**
    * Inline image sources
    */
-  static async inlineImages(html: string, opts: MessageTemplateImageConfig): Promise<string> {
+  static async inlineImages(html: string, opts: EmailTemplateImageConfig): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, this.#HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Readable | Promise<Readable>][] = [];
     const resources = new FileResourceProvider(opts.search ?? []);
@@ -176,7 +176,7 @@ export class EmailCompileUtil {
   /**
    * Apply styles into a given html document
    */
-  static async applyStyles(html: string, opts: MessageTemplateStyleConfig): Promise<string> {
+  static async applyStyles(html: string, opts: EmailTemplateStyleConfig): Promise<string> {
     const styles: string[] = [];
 
     if (opts.global) {
@@ -205,21 +205,21 @@ export class EmailCompileUtil {
     return html;
   }
 
-  static async compile(src: MessageCompilationContext): Promise<MessageCompiled> {
-    const subject = await this.simplifiedText(await src.generators.subject(src));
-    const text = await this.simplifiedText(await src.generators.text(src));
+  static async compile(src: EmailCompileContext): Promise<EmailCompiled> {
+    const subject = await this.simplifiedText(await src.subject(src));
+    const text = await this.simplifiedText(await src.text(src));
 
-    let html = await src.generators.html(src);
+    let html = await src.html(src);
 
-    if (src.config.styles?.inline !== false) {
-      html = await this.applyStyles(html, src.config.styles!);
+    if (src.styles?.inline !== false) {
+      html = await this.applyStyles(html, src.styles!);
     }
 
     // Fix up html edge cases
     html = this.handleHtmlEdgeCases(html);
 
-    if (src.config.images?.inline !== false) {
-      html = await this.inlineImages(html, src.config.images!);
+    if (src.images?.inline !== false) {
+      html = await this.inlineImages(html, src.images!);
     }
 
     return { html, subject, text };

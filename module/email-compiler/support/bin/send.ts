@@ -1,4 +1,4 @@
-import { MailService, MessageOptions, SentMessage } from '@travetto/email';
+import { MailService, EmailOptions, SentEmail } from '@travetto/email';
 import { MailTransportTarget } from '@travetto/email/src/internal/types';
 import { DependencyRegistry } from '@travetto/di';
 
@@ -50,7 +50,7 @@ ${EditorConfig.getDefaultConfig()}`.trim();
   /**
    * Resolve template
    */
-  static async sendEmail(file: string, message: MessageOptions): Promise<{
+  static async sendEmail(file: string, message: EmailOptions): Promise<{
     url?: string | false;
   }> {
     const to = message.to!;
@@ -62,7 +62,7 @@ ${EditorConfig.getDefaultConfig()}`.trim();
         throw new Error('Node mailer support is missing');
       }
 
-      const info = await svc.send<{ host?: string } & SentMessage>(message);
+      const info = await svc.send<{ host?: string } & SentEmail>(message);
       console.log('Sent email', { to });
 
       const senderConfig = await EditorConfig.getSenderConfig(file);

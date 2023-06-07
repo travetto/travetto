@@ -24,6 +24,7 @@ class EmailSuite {
   @Test('Send email')
   async sendEmail() {
     const opts = await this.instance.send({
+      subject: 'Hello',
       html: 'Message'
     });
     assert(opts);

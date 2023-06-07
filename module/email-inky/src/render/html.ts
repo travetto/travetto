@@ -85,16 +85,14 @@ export const Html: RenderProvider<RenderContext> = {
 
     let expander = '';
 
-    const kids = getKids(el);
-    const colCount = kids.length || 1;
-
     const parent = stack[stack.length - 1];
+    const sibs = getKids(parent).filter(x => isOfType(x, 'Column'));
+    const colCount = sibs.length || 1;
+
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const pProps = parent.props as { columnVisited: boolean };
     if (!pProps.columnVisited) {
       pProps.columnVisited = true;
-
-      const sibs = getKids(parent).filter(x => isOfType(x, 'Column'));
       if (sibs.length) {
         sibs[0].props.class = classStr(sibs[0].props.class ?? '', 'first');
         sibs[sibs.length - 1].props.class = classStr(sibs[sibs.length - 1].props.class ?? '', 'last');

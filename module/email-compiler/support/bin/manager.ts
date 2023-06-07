@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { type MailInterpolator, type MessageCompiled } from '@travetto/email';
+import { type MailInterpolator, type EmailCompiled } from '@travetto/email';
 import { DependencyRegistry } from '@travetto/di';
 import { TypedObject } from '@travetto/base';
 import { MailInterpolatorTarget } from '@travetto/email/src/internal/types';
@@ -27,7 +27,7 @@ export class EmailCompilationManager {
   /**
    * Resolve template
    */
-  async resolveTemplateParts(file: string): Promise<MessageCompiled> {
+  async resolveTemplateParts(file: string): Promise<EmailCompiled> {
     const files = EmailCompiler.getOutputFiles(file);
     const missing = await Promise.all(Object.values(files).map(x => fs.stat(file).catch(() => { })));
 
@@ -41,14 +41,14 @@ export class EmailCompilationManager {
           .then(content => [key, content] as const)
       )
     );
-    return TypedObject.fromEntries<keyof MessageCompiled, string>(parts);
+    return TypedObject.fromEntries<keyof EmailCompiled, string>(parts);
   }
 
   /**
    * Render
    * @param rel
    */
-  async resolveCompiledTemplate(rel: string, context: Record<string, unknown>): Promise<MessageCompiled> {
+  async resolveCompiledTemplate(rel: string, context: Record<string, unknown>): Promise<EmailCompiled> {
     const { MailUtil } = await import('@travetto/email');
     const { html, text, subject } = await this.resolveTemplateParts(rel);
 

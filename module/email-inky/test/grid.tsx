@@ -126,7 +126,7 @@ class GridTest {
     const input = <>
       <Column large={6} largeOffset={6}>One</Column>
     </>;
-    const expected = <>
+    const expected =
       <th class="first last small-12 large-6 columns large-offset-6">
         <table>
           <tbody>
@@ -135,8 +135,7 @@ class GridTest {
             </tr>
           </tbody>
         </table>
-      </th>
-    </>;
+      </th>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }

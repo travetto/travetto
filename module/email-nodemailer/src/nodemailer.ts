@@ -4,7 +4,7 @@ import type smtp from 'nodemailer/lib/smtp-transport';
 import type ses from 'nodemailer/lib/ses-transport';
 import type sendmail from 'nodemailer/lib/sendmail-transport';
 
-import { MailTransport, MessageOptions, SentMessage } from '@travetto/email';
+import { MailTransport, EmailOptions, SentEmail } from '@travetto/email';
 
 type Transport = TransportType | json.Options | smtp.Options | ses.Options | sendmail.Options;
 
@@ -17,7 +17,7 @@ export class NodemailerTransport implements MailTransport {
   /**
    * Force content into alternative slots
    */
-  #forceContentToAlternative(msg: MessageOptions): MessageOptions {
+  #forceContentToAlternative(msg: EmailOptions): EmailOptions {
     for (const [key, mime] of [['text', 'text/plain'], ['html', 'text/html']] as const) {
       if (msg[key]) {
         (msg.alternatives ??= []).push({
@@ -33,7 +33,7 @@ export class NodemailerTransport implements MailTransport {
     this.#transport = createTransport(transportFactory);
   }
 
-  async send<S extends SentMessage = SentMessage>(mail: MessageOptions): Promise<S> {
+  async send<S extends SentEmail = SentEmail>(mail: EmailOptions): Promise<S> {
 
     mail = this.#forceContentToAlternative(mail);
 
