@@ -80,7 +80,7 @@ class $ParamExtractor {
     const params = BindUtil.coerceMethodParams(cls, method, routed, true);
 
     try {
-      await SchemaValidator.validateMethod(cls, method, params);
+      await SchemaValidator.validateMethod(cls, method, params, route.params.map(x => x.prefix));
     } catch (err) {
       if (err instanceof ValidationResultError) {
         for (const el of err.errors) {

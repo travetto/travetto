@@ -56,8 +56,16 @@ export class SchemaValidator {
    * @param relative The relative path of object traversal
    */
   static #validateFieldSchema(fieldSchema: FieldConfig, val: unknown, relative: string = ''): ValidationError[] {
-    const path = `${relative}${relative && '.'}${fieldSchema.name}`;
+    return this.#validateFieldSchemaRaw(fieldSchema, val, `${relative}${relative ? '.' : ''}${fieldSchema.name}`);
+  }
 
+  /**
+   * Validate a single field config against a passed in value
+   * @param fieldSchema The field schema configuration
+   * @param val The raw value, could be an array or not
+   * @param path The current path of validation traversal
+   */
+  static #validateFieldSchemaRaw(fieldSchema: FieldConfig, val: unknown, path: string = ''): ValidationError[] {
     const hasValue = !(val === undefined || val === null || (typeof val === 'string' && val === '') || (Array.isArray(val) && val.length === 0));
 
     if (!hasValue) {
@@ -316,10 +324,10 @@ export class SchemaValidator {
    * @param method The method being invoked
    * @param params The params to validate
    */
-  static async validateMethod<T>(cls: Class<T>, method: string, params: unknown[]): Promise<void> {
+  static async validateMethod<T>(cls: Class<T>, method: string, params: unknown[], prefixes: (string | undefined)[] = []): Promise<void> {
     const errors: ValidationError[] = [];
     for (const field of SchemaRegistry.getMethodSchema(cls, method)) {
-      errors.push(...this.#validateFieldSchema(field, params[field.index!]));
+      errors.push(...this.#validateFieldSchemaRaw(field, params[field.index!], prefixes[field.index!]));
     }
     if (errors.length) {
       throw new ValidationResultError(errors);

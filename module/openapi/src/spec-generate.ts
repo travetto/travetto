@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 import type {
   SchemaObject, SchemasObject, ParameterObject, OperationObject,
-  RequestBodyObject, TagObject, PathsObject
+  RequestBodyObject, TagObject, PathsObject, PathItemObject
 } from 'openapi3-ts';
 
 import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
@@ -20,7 +20,7 @@ function isFieldConfig(val: object): val is FieldConfig {
 
 type GeneratedSpec = {
   tags: TagObject[];
-  paths: PathsObject;
+  paths: Record<string, PathItemObject>;
   components: {
     schemas: SchemasObject;
   };
@@ -297,7 +297,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
           requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, this.#getHeaderValue(ep, 'accepts'))
         };
       } else if (field.type && SchemaRegistry.has(field.type) && (param.location === 'query' || param.location === 'header')) {
-        return { parameters: this.#schemaToDotParams(param.location, field) };
+        return { parameters: this.#schemaToDotParams(param.location, field, param.prefix ? `${param.prefix}.` : '') };
       } else if (param.location !== 'context') {
         const epParam: ParameterObject = {
           in: param.location,

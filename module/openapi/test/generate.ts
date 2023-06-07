@@ -3,12 +3,17 @@ import { ParameterObject } from 'openapi3-ts/src/model/OpenApi';
 import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Put, Undocumented } from '@travetto/rest';
+import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Put, QuerySchema, Undocumented } from '@travetto/rest';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { OpenapiVisitor } from '../src/spec-generate';
 import { TestUser } from './model';
 
+
+interface UserSearch {
+  name?: string;
+  age?: number;
+}
 
 @Controller('/test')
 class TestCont {
@@ -18,6 +23,16 @@ class TestCont {
   }
   @Get('/users')
   async getUsers(name: string) {
+    return [new TestUser()];
+  }
+
+  @Get('/user-search')
+  async search(search: UserSearch) {
+    return [new TestUser()];
+  }
+
+  @Get('/user-search-prefix')
+  async searchPrefix(@QuerySchema({ prefix: 'search' }) search: UserSearch) {
     return [new TestUser()];
   }
 
@@ -75,7 +90,7 @@ export class GenerateSuite {
   async verifyGeneral() {
     const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
     assert(config);
-    assert(Object.keys(config.paths).length === 7);
+    assert(Object.keys(config.paths).length === 9);
     assert(Object.keys(config.components.schemas).length >= 2);
   }
 
@@ -168,13 +183,13 @@ export class GenerateSuite {
       content: {
         'application/json': {
           schema: {
-            $ref: '#/components/schemas/who_29_31'
+            $ref: '#/components/schemas/who_44_31'
           }
         }
       },
       description: '__type'
     });
-    assert.deepStrictEqual(config.components.schemas['who_29_31'], {
+    assert.deepStrictEqual(config.components.schemas['who_44_31'], {
       description: '__type',
       example: undefined,
       properties: {
@@ -315,5 +330,37 @@ export class GenerateSuite {
   async verifyUndocumented() {
     const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
     assert(!config.paths['/test/random']);
+  }
+
+  @Test()
+  async querySchema() {
+    const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
+    assert(config.paths['/test/user-search']);
+    assert(config.paths['/test/user-search'].get);
+    assert(config.paths['/test/user-search'].get.parameters);
+    assert(config.paths['/test/user-search'].get.parameters.length === 2);
+    assert('in' in config.paths['/test/user-search'].get.parameters[0]);
+    assert(config.paths['/test/user-search'].get.parameters[0].in === 'query');
+    assert(config.paths['/test/user-search'].get.parameters[0].name === 'name');
+
+    assert('in' in config.paths['/test/user-search'].get.parameters[1]);
+    assert(config.paths['/test/user-search'].get.parameters[1].in === 'query');
+    assert(config.paths['/test/user-search'].get.parameters[1].name === 'age');
+  }
+
+  @Test()
+  async querySchemaPrefix() {
+    const config = await ControllerVisitUtil.visit(new OpenapiVisitor({}));
+    assert(config.paths['/test/user-search-prefix']);
+    assert(config.paths['/test/user-search-prefix'].get);
+    assert(config.paths['/test/user-search-prefix'].get.parameters);
+    assert(config.paths['/test/user-search-prefix'].get.parameters.length === 2);
+    assert('in' in config.paths['/test/user-search-prefix'].get.parameters[0]);
+    assert(config.paths['/test/user-search-prefix'].get.parameters[0].in === 'query');
+    assert(config.paths['/test/user-search-prefix'].get.parameters[0].name === 'search.name');
+
+    assert('in' in config.paths['/test/user-search-prefix'].get.parameters[1]);
+    assert(config.paths['/test/user-search-prefix'].get.parameters[1].in === 'query');
+    assert(config.paths['/test/user-search-prefix'].get.parameters[1].name === 'search.age');
   }
 }

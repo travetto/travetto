@@ -161,8 +161,10 @@ export abstract class ClientGenerator implements ControllerVisitor {
     });
 
     const paramConfigs = paramsWithSchemas.map(({ param: x, schema: s }) => ({
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       location: x.location as 'body',
       name: x.name!,
+      ...(x.prefix ? { prefix: x.prefix } : {}),
       ...(SchemaRegistry.has(s.type) ? { complex: true } : {}),
       ...(s.array ? { array: true } : {}),
       ...(s.specifiers?.includes('file') ? { binary: true } : {}),

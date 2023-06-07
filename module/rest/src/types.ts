@@ -49,6 +49,10 @@ export interface ParamConfig {
    * @param res The response
    */
   extract?(config: ParamConfig, req?: Request, res?: Response): unknown;
+  /**
+   * Input prefix for parameter
+   */
+  prefix?: string;
 }
 
 /**

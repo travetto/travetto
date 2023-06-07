@@ -3,7 +3,7 @@ export type ParamConfig = {
   array?: boolean;
   binary?: boolean;
   name: string;
-  key?: string;
+  prefix?: string;
   complex?: boolean;
 };
 
@@ -96,8 +96,9 @@ export class CommonUtil {
     for (let i = 0; i < paramConfigs.length; i++) {
       const loc = paramConfigs[i].location;
       if ((loc === 'header' || loc === 'query') && params[i] !== undefined) {
+        const prefix = paramConfigs[i].prefix ?? (!paramConfigs[i].complex ? paramConfigs[i].name : '');
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const sub = this.flattenPaths(params[i] as string, paramConfigs[i].complex ? paramConfigs[i].key : paramConfigs[i].name);
+        const sub = this.flattenPaths(params[i] as string, prefix);
         if (loc === 'header') {
           Object.assign(headers, sub);
         } else {

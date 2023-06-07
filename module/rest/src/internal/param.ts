@@ -9,15 +9,15 @@ declare global {
   }
 }
 
-export function querySchemaParamConfig(config: Partial<ParamConfig> & { view?: string, key?: string } = {}): ParamConfig {
+export function querySchemaParamConfig(config: Partial<ParamConfig> & { view?: string } = {}): ParamConfig {
   return {
     ...config,
     location: 'query',
     resolve: ({ req }): void => {
       const val = BindUtil.expandPaths(req.query);
       req[QuerySchemaⲐ] ??= {};
-      req[QuerySchemaⲐ][config.name!] = (config.key && config.key !== '_') ? val[config.key] : val;
+      req[QuerySchemaⲐ][config.name!] = config.prefix ? val[config.prefix] : val;
     },
-    extract: (c, req) => req![QuerySchemaⲐ][c.name!]
+    extract: (c, req) => req![QuerySchemaⲐ][c.name!],
   };
 }
