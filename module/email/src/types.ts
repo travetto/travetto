@@ -62,22 +62,31 @@ export type SentMessage = {
 
 export type MessageCompiled = { html: string, text: string, subject: string };
 
-export type MessageCompilationStyles = {
+export type MessageTemplateStyleConfig = {
   search?: string[];
   global?: string;
   inline?: boolean;
 };
 
-export type MessageCompilationImages = {
+export type MessageTemplateImageConfig = {
   search?: string[];
   inline?: boolean;
 };
 
-export type MessageCompilationSource = {
-  file?: string;
-  styles?: MessageCompilationStyles;
-  images?: MessageCompilationImages;
-  html: () => Promise<string> | string;
-  text: () => Promise<string> | string;
-  subject: () => Promise<string> | string;
+export type MessageCompilationConfig = {
+  styles?: MessageTemplateStyleConfig;
+  images?: MessageTemplateImageConfig;
 };
+
+export type MessageTemplateGenerators = {
+  html: (ctx: MessageCompilationContext) => Promise<string> | string;
+  text: (ctx: MessageCompilationContext) => Promise<string> | string;
+  subject: (ctx: MessageCompilationContext) => Promise<string> | string;
+};
+
+export type MessageTemplate = {
+  config: MessageCompilationConfig;
+  generators: MessageTemplateGenerators;
+};
+
+export type MessageCompilationContext = { file: string, module: string } & MessageTemplate;

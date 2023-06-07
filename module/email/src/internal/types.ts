@@ -1,2 +1,2 @@
-export class MailTemplateEngineTarget { }
+export class MailInterpolatorTarget { }
 export class MailTransportTarget { }

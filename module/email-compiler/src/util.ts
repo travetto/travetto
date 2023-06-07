@@ -2,10 +2,12 @@ import util from 'util';
 import { Readable } from 'stream';
 
 import { FileResourceProvider, StreamUtil } from '@travetto/base';
-import { MessageCompilationImages, MessageCompilationSource, MessageCompilationStyles, MessageCompiled } from '@travetto/email';
+import {
+  MessageTemplateImageConfig, MessageTemplateStyleConfig,
+  MessageCompiled, MessageCompilationContext
+} from '@travetto/email';
 import { ImageConverter } from '@travetto/image';
 import { path } from '@travetto/manifest';
-
 
 type Tokenized = {
   text: string;
@@ -132,7 +134,7 @@ export class EmailCompileUtil {
   /**
    * Inline image sources
    */
-  static async inlineImages(html: string, opts: MessageCompilationImages): Promise<string> {
+  static async inlineImages(html: string, opts: MessageTemplateImageConfig): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, this.#HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Readable | Promise<Readable>][] = [];
     const resources = new FileResourceProvider(opts.search ?? []);
@@ -157,6 +159,7 @@ export class EmailCompileUtil {
    */
   static handleHtmlEdgeCases(html: string): string {
     return html
+      .replace(/\n{3,100}/msg, '\n\n')
       .replace(/<(meta|img|link|hr|br)[^>]*>/g, a => a.replace('>', '/>')) // Fix self closing
       .replace(/&apos;/g, '&#39;') // Fix apostrophes, as outlook hates them
       .replace(/(background(?:-color)?:\s*)([#0-9a-f]{6,8})([^>.#,]+)>/ig,
@@ -164,14 +167,16 @@ export class EmailCompileUtil {
       .replace(/<([^>]+vertical-align:\s*(top|bottom|middle)[^>]+)>/g,
         (a, tag, valign) => tag.indexOf('valign') ? `<${tag}>` : `<${tag} valign="${valign}">`) // Vertically align if it has the style
       .replace(/<(table[^>]+expand[^>]+width:\s*)(100%\s+!important)([^>]+)>/g,
-        (a, left, size, right) => `<${left}100%${right}>`); // Drop important as a fix for outlook
+        (a, left, size, right) => `<${left}100%${right}>`) // Drop important as a fix for outlook
+      .trim()
+      .concat('\n');
   }
 
 
   /**
    * Apply styles into a given html document
    */
-  static async applyStyles(html: string, opts: MessageCompilationStyles): Promise<string> {
+  static async applyStyles(html: string, opts: MessageTemplateStyleConfig): Promise<string> {
     const styles: string[] = [];
 
     if (opts.global) {
@@ -200,22 +205,23 @@ export class EmailCompileUtil {
     return html;
   }
 
-  static async compile(src: MessageCompilationSource): Promise<MessageCompiled> {
-    const subject = await this.simplifiedText(await src.subject());
-    const text = await this.simplifiedText(await src.text());
+  static async compile(src: MessageCompilationContext): Promise<MessageCompiled> {
+    const subject = await this.simplifiedText(await src.generators.subject(src));
+    const text = await this.simplifiedText(await src.generators.text(src));
 
-    let html = await src.html();
+    let html = await src.generators.html(src);
 
-    if (src.styles?.inline !== false) {
-      html = await this.applyStyles(html, src.styles!);
+    if (src.config.styles?.inline !== false) {
+      html = await this.applyStyles(html, src.config.styles!);
     }
 
     // Fix up html edge cases
     html = this.handleHtmlEdgeCases(html);
 
-    if (src.images?.inline !== false) {
-      html = await this.inlineImages(html, src.images!);
+    if (src.config.images?.inline !== false) {
+      html = await this.inlineImages(html, src.config.images!);
     }
+
     return { html, subject, text };
   }
 }

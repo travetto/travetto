@@ -1,10 +1,9 @@
-import { JSXElement, isJSXElement } from '@travetto/email-inky/jsx-runtime';
+import { JSXElement } from '@travetto/email-inky/jsx-runtime';
 import { EmailResource } from '@travetto/email';
 
 import { RenderProvider, RenderState } from '../types';
 import { RenderContext } from './context';
-
-const isOfType = (el: JSXElement, type: string): boolean => typeof el.type === 'function' && el.type.name === type;
+import { classStr, combinePropsToStr, getKids, isOfType, visit } from './common';
 
 export const SUMMARY_STYLE = Object.entries({
   display: 'none',
@@ -17,38 +16,13 @@ export const SUMMARY_STYLE = Object.entries({
   overflow: 'hidden'
 }).map(([k, v]) => `${k}: ${v}`).join('; ');
 
-const classStr = (existing: string | undefined, ...toAdd: string[]): string => {
-  const out = [];
-  const seen = new Set<string>();
-  for (const item of existing?.split(/\s+/) ?? []) {
-    if (item && !seen.has(item)) {
-      out.push(item);
-      seen.add(item);
-    }
-  }
-  for (const item of toAdd) {
-    if (item && !seen.has(item)) {
-      out.push(item);
-      seen.add(item);
-    }
-  }
-  return out.join(' ');
-};
-
-
 const allowedProps = new Set([
   'class', 'id', 'dir', 'name', 'src',
   'alt', 'href', 'title', 'height', 'target',
   'width', 'style', 'align', 'valign'
 ]);
 
-const propsToStr = (props: Record<string, unknown>, ...addClasses: string[]): string => {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const out = { ...props, class: classStr(props.class as string, ...addClasses) };
-  return Object.entries(out)
-    .filter(([k, v]) => allowedProps.has(k) && v !== undefined && v !== null && v !== '')
-    .map(([k, v]) => `${k}="${v}"`).join(' ');
-};
+const propsToStr = combinePropsToStr.bind(null, allowedProps);
 
 const stdInline = async ({ recurse, el }: RenderState<JSXElement, RenderContext>): Promise<string> =>
   `<${el.type} ${propsToStr(el.props)}>${await recurse()}</${el.type}>`;
@@ -56,34 +30,36 @@ const stdInline = async ({ recurse, el }: RenderState<JSXElement, RenderContext>
 const std = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `${await stdInline(state)}\n`;
 const stdFull = async (state: RenderState<JSXElement, RenderContext>): Promise<string> => `\n${await stdInline(state)}\n`;
 
-const getKids = (el: JSXElement): JSXElement[] => {
-  const kids = el?.props?.children;
-  let result: unknown[] = [];
-  if (kids) {
-    result = !Array.isArray(kids) ? [kids] : kids;
-  }
-  return result.filter(isJSXElement);
-};
-
-const visit = (el: JSXElement, onVisit: (fn: JSXElement) => boolean | undefined | void, depth = 0): boolean | undefined => {
-  if (depth > 0) {
-    const res = onVisit(el);
-    if (res === true) {
-      return true;
-    }
-  }
-  for (const item of getKids(el)) {
-    const res = visit(item, onVisit, depth + 1);
-    if (res) {
-      return;
-    }
-  }
-};
-
 export const Html: RenderProvider<RenderContext> = {
-  finalize: (html, context) => html
-    .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, v) => `${tag} ${v}`)
-    .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`),
+  finalize: async (html, context, isRoot = false) => {
+    html = html
+      .replace(/(<[/](?:a)>)([A-Za-z0-9$])/g, (_, tag, v) => `${tag} ${v}`)
+      .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`);
+
+    if (isRoot) {
+      const wrapper = await new EmailResource([`${context.module}#resources`, '@travetto/email-inky#resources'])
+        .read('/email/inky.wrapper.html');
+
+      // Get Subject
+      const headerTop: string[] = [];
+      const bodyTop: string[] = [];
+
+      // Force summary to top, and title to head
+      const final = wrapper
+        .replace('<!-- BODY -->', html)
+        .replace(/<title>.*?<\/title>/, a => { headerTop.push(a); return ''; })
+        .replace(/<span[^>]+id="summary"[^>]*>(.*?)<\/span>/sm, a => { bodyTop.push(a); return ''; })
+        .replace(/<head( [^>]*)?>/, t => `${t}\n${headerTop.join('\n')}`)
+        .replace(/<body[^>]*>/, t => `${t}\n${bodyTop.join('\n')}`);
+
+      // Allow tag suffixes/prefixes via comments
+      html = final
+        .replace(/\s*<!--\s*[$]:([^ -]+)\s*-->\s*(<\/[^>]+>)/g, (_, suf, tag) => `${tag}${suf}`)
+        .replace(/(<[^\/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, pre) => `${pre}${tag}`);
+    }
+
+    return html;
+  },
 
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
@@ -362,29 +338,4 @@ export const Html: RenderProvider<RenderContext> = {
     </tr>
   </tbody>
 </table>`
-
-};
-
-export const HtmlWrap = async (content: string): Promise<string> => {
-  const wrapper = await new EmailResource(['@', '@travetto/email-inky#resources'])
-    .read('/email/inky.wrapper.html');
-
-  // Get Subject
-  const headerTop: string[] = [];
-  const bodyTop: string[] = [];
-
-  // Force summary to top, and title to head
-  let final = wrapper
-    .replace('<!-- BODY -->', content)
-    .replace(/<title>.*?<\/title>/, a => { headerTop.push(a); return ''; })
-    .replace(/<span[^>]+id="summary"[^>]*>(.*?)<\/span>/sm, a => { bodyTop.push(a); return ''; })
-    .replace(/<head( [^>]*)?>/, t => `${t}\n${headerTop.join('\n')}`)
-    .replace(/<body[^>]*>/, t => `${t}\n${bodyTop.join('\n')}`);
-
-  // Allow tag suffixes/prefixes via comments
-  final = final
-    .replace(/\s*<!--\s*[$]:([^ -]+)\s*-->\s*(<\/[^>]+>)/g, (_, suf, tag) => `${tag}${suf}`)
-    .replace(/(<[^\/][^>]+>)\s*<!--\s*[#]:([^ ]+)\s*-->\s*/g, (_, tag, pre) => `${pre}${tag}`);
-
-  return final;
 };

@@ -1,9 +1,26 @@
+import { RootIndex } from '@travetto/manifest';
+
 import { Attachment } from './types';
 
 /**
  * Utilities for email
  */
 export class MailUtil {
+  /** Remove brand from text */
+  static purgeBrand(text: string): string {
+    return text.replace(/<!-- WARNING:[^\n]*\n/m, '');
+  }
+
+  /** Add brand to text */
+  static buildBrand(file: string, content: string, compile?: string): string {
+    const out = [
+      'WARNING: Do not modify.',
+      `File is generated from "${file.replace(RootIndex.manifest.workspacePath, '.')}"`,
+      compile ? `Run \`${compile.replaceAll('\n', ' ')}\` to regenerate` : ''
+    ];
+    return `<!-- ${out.join(' ').trim()}   -->\n${content}`;
+  }
+
   /**
    * Extract images from html as attachments
    *

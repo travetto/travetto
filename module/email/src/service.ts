@@ -3,7 +3,7 @@ import { Injectable } from '@travetto/di';
 
 import { MessageCompiled, MessageOptions, SentMessage } from './types';
 import { MailTransport } from './transport';
-import { MailTemplateEngine } from './template';
+import { MailInterpolator } from './template';
 import { MailUtil } from './util';
 import { EmailResource } from './resource';
 
@@ -17,15 +17,15 @@ export class MailService {
 
   #compiled = new Map<string, MessageCompiled>();
   #transport: MailTransport;
-  #tplEngine: MailTemplateEngine;
+  #interpolator: MailInterpolator;
   #resources: EmailResource;
 
   constructor(
     transport: MailTransport,
-    tplEngine: MailTemplateEngine,
+    interpolator: MailInterpolator,
     resources: EmailResource
   ) {
-    this.#tplEngine = tplEngine;
+    this.#interpolator = interpolator;
     this.#transport = transport;
     this.#resources = resources;
   }
@@ -39,7 +39,7 @@ export class MailService {
         this.#resources.read(`${key}.compiled.html`),
         this.#resources.read(`${key}.compiled.text`),
         this.#resources.read(`${key}.compiled.subject`)
-      ]);
+      ].map(x => x.then(MailUtil.purgeBrand)));
 
       this.#compiled.set(key, { html, text, subject });
     }
@@ -52,13 +52,13 @@ export class MailService {
    * @param ctx
    * @returns
    */
-  async templateMessage(keyOrMessage: string | MessageCompiled, ctx: Record<string, unknown>): Promise<MessageCompiled> {
+  async renderMessage(keyOrMessage: string | MessageCompiled, ctx: Record<string, unknown>): Promise<MessageCompiled> {
     const tpl = (typeof keyOrMessage === 'string' ? await this.getCompiled(keyOrMessage) : keyOrMessage);
 
     const [html, text, subject] = await Promise.all([
-      this.#tplEngine!.template(tpl.html, ctx),
-      this.#tplEngine!.template(tpl.text, ctx),
-      this.#tplEngine!.template(tpl.subject, ctx)
+      this.#interpolator.render(tpl.html, ctx),
+      this.#interpolator.render(tpl.text, ctx),
+      this.#interpolator.render(tpl.subject, ctx)
     ]);
 
     return { html, text, subject };
@@ -83,7 +83,7 @@ export class MailService {
     const keyOrMessage = key ?? ('html' in message ? message : '') ?? '';
     const context = ctx ?? (('context' in message) ? message.context : {}) ?? {};
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const compiled = await this.templateMessage(keyOrMessage as MessageCompiled, context);
+    const compiled = await this.renderMessage(keyOrMessage as MessageCompiled, context);
 
     const final = { ...base, ...message, ...compiled, context };
 

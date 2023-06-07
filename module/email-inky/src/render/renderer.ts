@@ -1,7 +1,8 @@
 import { isJSXElement, JSXElement, createFragment, JSXFragmentType, JSXChild } from '@travetto/email-inky/jsx-runtime';
+import { MessageCompilationContext } from '@travetto/email';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../components';
-import { DocumentShape, RenderProvider, RenderState } from '../types';
+import { RenderProvider, RenderState } from '../types';
 import { RenderContext } from './context';
 
 /**
@@ -79,22 +80,14 @@ export class InkyRenderer {
    * Render a context given a specific renderer
    * @param renderer
    */
-  static async render(root: DocumentShape, provider: RenderProvider<RenderContext>): Promise<string> {
-    const ctx = new RenderContext();
-    let par: JSXElement;
-
-    // We are at the root element
-    if (isJSXElement(root.text)) {
-      par = root.text;
-    } else {
-      par = { props: { children: Array.isArray(root.text) ? root.text : [] }, type: '', key: '' };
-    }
-    const text = await this.#render(ctx, provider, root.text, [par]);
-
-    let cleaned = `${text.replace(/\n{3,100}/msg, '\n\n').trim()}\n`;
-    if (root.wrap) {
-      cleaned = await root.wrap?.(cleaned);
-    }
-    return provider.finalize(cleaned, ctx);
+  static async render(
+    root: JSXChild | JSXChild[],
+    provider: RenderProvider<RenderContext>,
+    compileCtx: MessageCompilationContext
+  ): Promise<string> {
+    const ctx = new RenderContext(compileCtx.file, compileCtx.module);
+    const par: JSXElement = isJSXElement(root) ? root : { props: { children: root }, type: '', key: '' };
+    const text = await this.#render(ctx, provider, root, [par]);
+    return provider.finalize(text, ctx, true);
   }
 }

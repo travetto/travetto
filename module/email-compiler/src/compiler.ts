@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { FileQueryProvider, TypedObject } from '@travetto/base';
-import { MessageCompilationSource, MessageCompiled } from '@travetto/email';
+import { MessageTemplate, MessageCompiled, MessageCompilationContext, MailUtil } from '@travetto/email';
 import { RootIndex, path } from '@travetto/manifest';
 import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
@@ -15,13 +15,20 @@ const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)
 export class EmailCompiler {
 
   /** Load Template */
-  static async loadTemplate(file: string): Promise<MessageCompilationSource> {
+  static async loadTemplate(file: string): Promise<MessageCompilationContext> {
     const entry = RootIndex.getEntry(file);
     if (!entry) {
       throw new Error(`Unable to find template for ${file}`);
     }
     const root = (await import(entry.outputFile)).default;
-    const res: MessageCompilationSource = { ...await root.wrap(), file: entry.sourceFile };
+    const og: MessageTemplate = await root.wrap();
+    const res = {
+      file: entry.sourceFile,
+      module: entry.module,
+      config: og.config,
+      generators: og.generators
+    };
+
     const mod = RootIndex.getModule(entry.module)!;
 
     const resourcePaths = [
@@ -29,10 +36,10 @@ export class EmailCompiler {
       path.resolve(RootIndex.manifest.workspacePath, 'resources')
     ];
 
-    const styles = res.styles ??= {};
+    const styles = res.config.styles ??= {};
     (styles.search ??= []).push(...resourcePaths);
 
-    const images = res.images ??= {};
+    const images = res.config.images ??= {};
     (images.search ??= []).push(...resourcePaths);
 
     return res;
@@ -72,7 +79,7 @@ export class EmailCompiler {
     await Promise.all(TypedObject.keys(outs).map(async k => {
       if (msg[k]) {
         await fs.mkdir(path.dirname(outs[k]), { recursive: true });
-        await fs.writeFile(outs[k], msg[k], { encoding: 'utf8' });
+        await fs.writeFile(outs[k], MailUtil.buildBrand(file, msg[k], 'trv email:compile'), { encoding: 'utf8' });
       } else {
         await fs.unlink(outs[k]).catch(() => { }); // Remove file if data not provided
       }

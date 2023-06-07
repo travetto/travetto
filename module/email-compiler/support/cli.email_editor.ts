@@ -10,7 +10,11 @@ import { EmailCompilationManager } from './bin/manager';
 export class EmailEditorCommand {
 
   envInit(): GlobalEnvConfig {
-    return { envName: 'dev', dynamic: true };
+    return {
+      envName: 'dev',
+      dynamic: true,
+      profiles: ['email-dev']
+    };
   }
 
   async main(): Promise<void> {

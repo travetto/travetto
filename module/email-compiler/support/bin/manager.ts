@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 
-import type { MailTemplateEngine, MessageCompiled } from '@travetto/email';
+import { type MailInterpolator, type MessageCompiled } from '@travetto/email';
 import { DependencyRegistry } from '@travetto/di';
 import { TypedObject } from '@travetto/base';
-import { MailTemplateEngineTarget } from '@travetto/email/src/internal/types';
+import { MailInterpolatorTarget } from '@travetto/email/src/internal/types';
 
 import { EmailCompiler } from '../../src/compiler';
 
@@ -14,13 +14,13 @@ export class EmailCompilationManager {
 
   static async createInstance(): Promise<EmailCompilationManager> {
     return new EmailCompilationManager(
-      await DependencyRegistry.getInstance<MailTemplateEngine>(MailTemplateEngineTarget),
+      await DependencyRegistry.getInstance<MailInterpolator>(MailInterpolatorTarget),
     );
   }
 
-  engine: MailTemplateEngine;
+  engine: MailInterpolator;
 
-  constructor(engine: MailTemplateEngine) {
+  constructor(engine: MailInterpolator) {
     this.engine = engine;
   }
 
@@ -49,13 +49,12 @@ export class EmailCompilationManager {
    * @param rel
    */
   async resolveCompiledTemplate(rel: string, context: Record<string, unknown>): Promise<MessageCompiled> {
+    const { MailUtil } = await import('@travetto/email');
     const { html, text, subject } = await this.resolveTemplateParts(rel);
 
-    return {
-      html: await this.engine.template(html, context),
-      text: await this.engine.template(text, context),
-      subject: await this.engine.template(subject, context),
-    };
-  }
+    const get = (input: string): Promise<string> =>
+      Promise.resolve(this.engine.render(input, context)).then(MailUtil.purgeBrand);
 
+    return { html: await get(html), text: await get(text), subject: await get(subject) };
+  }
 }

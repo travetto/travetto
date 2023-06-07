@@ -5,24 +5,24 @@ import { Injectable } from '@travetto/di';
 import { EmailResource } from './resource';
 
 /**
- * Mail templating engine
+ * Mail interpolation engine
  *
- * @concrete ./internal/types:MailTemplateEngineTarget
+ * @concrete ./internal/types:MailInterpolatorTarget
  */
-export interface MailTemplateEngine {
+export interface MailInterpolator {
   /**
   * Resolved nested templates
   */
   resolveNested(template: string): Promise<string>;
 
   /**
-   * Interpolate a string with a given context, useful for simple messages
+   * Interpolate a string with a given context
    */
-  template(text: string, ctx: Record<string, unknown>): Promise<string> | string;
+  render(text: string, ctx: Record<string, unknown>): Promise<string> | string;
 }
 
 @Injectable()
-export class MustacheTemplateEngine implements MailTemplateEngine {
+export class MustacheInterpolator implements MailInterpolator {
 
   resources = new EmailResource();
 
@@ -45,7 +45,7 @@ export class MustacheTemplateEngine implements MailTemplateEngine {
   /**
    * Interpolate text with data
    */
-  template(text: string, data: Record<string, unknown>): string {
+  render(text: string, data: Record<string, unknown>): string {
     return mustache.render(text, data);
   }
 }

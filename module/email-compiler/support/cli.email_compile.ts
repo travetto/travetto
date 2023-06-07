@@ -16,7 +16,8 @@ export class EmailCompileCommand implements CliCommandShape {
   envInit(): GlobalEnvConfig {
     return {
       debug: false,
-      dynamic: this.watch
+      dynamic: this.watch,
+      profiles: ['email-dev']
     };
   }
 

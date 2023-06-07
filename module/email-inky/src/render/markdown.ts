@@ -6,9 +6,12 @@ const visit = ({ recurse }: RenderState<JSXElement, RenderContext>): Promise<str
 const ignore = async ({ recurse: _ }: RenderState<JSXElement, RenderContext>): Promise<string> => '';
 
 export const Markdown: RenderProvider<RenderContext> = {
-  finalize: (text, context) => text
-    .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, v) => v === 's' ? _ : `${link} ${v}`)
-    .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`),
+  finalize: (text) => {
+    text = text
+      .replace(/(\[[^\]]+\]\([^)]+\))([A-Za-z0-9$]+)/g, (_, link, v) => v === 's' ? _ : `${link} ${v}`)
+      .replace(/(\S)\n(#)/g, (_, l, r) => `${l}\n\n${r}`);
+    return text;
+  },
 
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
@@ -39,6 +42,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   h2: async ({ recurse }) => `\n## ${await recurse()}\n\n`,
   h3: async ({ recurse }) => `\n### ${await recurse()}\n\n`,
   h4: async ({ recurse }) => `\n#### ${await recurse()}\n\n`,
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
   a: async ({ recurse, props }) => `\n[${await recurse()}](${(props as { href: string }).href})\n`,
   Button: async ({ recurse, props }) => `\n[${await recurse()}](${props.href})\n`,
 

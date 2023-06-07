@@ -16,7 +16,10 @@ import { EmailCompiler } from '../src/compiler';
 export class EmailTestCommand implements CliCommandShape {
 
   envInit(): GlobalEnvConfig {
-    return { envName: 'dev' };
+    return {
+      envName: 'dev',
+      profiles: ['email-dev']
+    };
   }
 
   async main(file: string, to: string): Promise<void> {

@@ -8,6 +8,13 @@ import { JSXElementByFn, c } from '../components';
 export class RenderContext {
 
   columnCount: number = 12;
+  file: string;
+  module: string;
+
+  constructor(srcFile: string, module: string) {
+    this.file = srcFile;
+    this.module = module;
+  }
 
   /**
    * Create a new element from a given JSX factory
