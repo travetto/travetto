@@ -59,9 +59,8 @@ $ trv email:compile -h
 Usage: email:compile [options]
 
 Options:
-  -w, --watch            Compile in watch mode
-  -m, --module <string>  Module to run for
-  -h, --help             display help for command
+  -w, --watch  Compile in watch mode
+  -h, --help   display help for command
 ```
 
 Will convert all `.email.html` files into the appropriate `.compiled.html`, `.compiled.text` and `.compiled.subject` files.  These will be used during the running of the application.  By default these files are added to the `.gitignore` as they are generally not intended to be saved but to be generated during the build process.

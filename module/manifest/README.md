@@ -125,7 +125,7 @@ export type WatchFolder = {
   includeHidden?: boolean;
 };
 
-export type WatchStream = AsyncIterable<WatchEvent> & { close: () => Promise<void> };
+export type WatchStream = AsyncIterable<WatchEvent> & { close: () => Promise<void>, add: (item: WatchEvent | WatchEvent[]) => void };
 ```
 
 This method allows for watching one or more folders, and registering a callback that will fire every time a file changes, and which of the registered folders it was triggered within. The return of the `watchFolders` is a cleanup method, that when invoked will remove and stop all watching behavior.

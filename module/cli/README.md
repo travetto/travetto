@@ -170,7 +170,7 @@ Options:
 $ trv basic:arg 20
 
 Execution failed:
- * Argument volume is bigger than (10)
+ * Argument  is bigger than (10)
 
 Usage: doc/cli.basic:arg [options] [volume:number]
 
@@ -233,7 +233,7 @@ $ trv basic:arglist 10 5 3 9 8 1
 $ trv basic:arglist 10 5 3 9 20 1
 
 Execution failed:
- * Argument volumes[4] is bigger than (10)
+ * Argument [4] is bigger than (10)
 
 Usage: doc/cli.basic:arglist [options] <volumes...:number>
 

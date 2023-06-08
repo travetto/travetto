@@ -6,7 +6,7 @@ import { MailConfig } from './src/config';
 
 export const text = <>
   <c.StdHeader />
-  A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the {NullTransport} which will just drop emails. The structure of the API is derived from  {d.library('NodeMailer')}, but is compatible with any library that can handle the <c.CodeLink title='MessageOptions' src='src/types.ts' startRe={/interface MessageOptions/} /> input. <br />
+  A standard API for sending and rendering emails. The mail transport must be defined to allow for mail to be sent properly.  Out of the box, the only transport available by default is the {NullTransport} which will just drop emails. The structure of the API is derived from  {d.library('NodeMailer')}, but is compatible with any library that can handle the <c.CodeLink title='EmailOptions' src='src/types.ts' startRe={/interface EmailOptions/} /> input. <br />
 
   To expose the necessary email transport, the following pattern is commonly used:
 
