@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-express-lambda",
-  "version": "3.1.10",
+  "version": "3.1.11",
   "description": "Express AWS Lambda provider for the travetto rest module.",
   "keywords": [
     "rest",
@@ -25,9 +25,9 @@
     "directory": "module/rest-express-lambda"
   },
   "dependencies": {
-    "@travetto/rest": "^3.1.10",
-    "@travetto/rest-aws-lambda": "^3.1.10",
-    "@travetto/rest-express": "^3.1.10",
+    "@travetto/rest": "^3.1.11",
+    "@travetto/rest-aws-lambda": "^3.1.11",
+    "@travetto/rest-express": "^3.1.11",
     "@vendia/serverless-express": "^4.10.3"
   },
   "travetto": {
