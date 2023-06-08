@@ -71,7 +71,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>): (target: C
     );
 
     // Register field
-    ControllerRegistry.registerEndpointParameter(target, getAll, querySchemaParamConfig(), 0);
+    ControllerRegistry.registerEndpointParameter(target, getAll, querySchemaParamConfig({ name: 'search' }), 0);
     Field(RestModelQuery)(inst, 'getAll', 0);
 
     function suggestField(this: Svc, field: ValidStringFields<T>, suggest: RestModelSuggestQuery): Promise<T[]> {
@@ -98,7 +98,7 @@ export function ModelQueryRoutes<T extends ModelType>(cls: Class<T>): (target: C
     ControllerRegistry.registerEndpointParameter(target, suggestField, { location: 'path', name: 'field' }, 0);
     Field(String, { required: { active: true } })(inst, 'suggestField', 0);
 
-    ControllerRegistry.registerEndpointParameter(target, suggestField, querySchemaParamConfig(), 1);
+    ControllerRegistry.registerEndpointParameter(target, suggestField, querySchemaParamConfig({ name: 'search' }), 1);
     Field(RestModelSuggestQuery)(inst, 'suggestField', 1);
   };
 }

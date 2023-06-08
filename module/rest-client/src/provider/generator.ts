@@ -115,7 +115,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
       if (SchemaRegistry.has(type)) {
         return this.renderSchema(SchemaRegistry.get(type));
       } else {
-        return 'void';
+        return TYPE_MAPPING[type.name];
       }
     } else {
       return 'void';
