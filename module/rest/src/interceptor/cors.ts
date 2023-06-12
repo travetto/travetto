@@ -61,7 +61,7 @@ export class CorsInterceptor implements RestInterceptor<RestCorsConfig> {
 
   intercept({ req, res, config: { resolved } }: FilterContext<RestCorsConfig>): void {
     const origin = req.header('origin');
-    if (!resolved.origins.size || (origin && resolved.origins.has(origin))) {
+    if (!resolved.origins.size || resolved.origins.has('*') || (origin && resolved.origins.has(origin))) {
       res.setHeader('Access-Control-Allow-Origin', origin || '*');
       res.setHeader('Access-Control-Allow-Credentials', `${resolved.credentials}`);
       res.setHeader('Access-Control-Allow-Methods', resolved.methods);

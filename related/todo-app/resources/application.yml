@@ -3,6 +3,7 @@ api.spec:
 
 rest:
   cors: { active : true }
+  ssl: { active: true }
 
 rest.client:
   providers:

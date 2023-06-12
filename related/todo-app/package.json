@@ -17,8 +17,8 @@
     "directory": "related/todo-app"
   },
   "scripts": {
-    "test": "npx travetto test",
-    "start": "npx travetto run"
+    "test": "npx trv test",
+    "start": "npx trv run:rest"
   },
   "dependencies": {
     "@travetto/auth-rest": "^3.1.15",
