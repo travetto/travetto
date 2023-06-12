@@ -210,11 +210,11 @@ export class SchemaTransformUtil {
     const { out, type } = this.unwrapType(anyType);
     switch (type?.key) {
       case 'managed': out.type = state.typeToIdentifier(type); break;
-      case 'shape': out.type = SchemaTransformUtil.toConcreteType(state, type, target); break;
+      case 'shape': out.type = this.toConcreteType(state, type, target); break;
       case 'literal': {
         if (type.ctor) {
           out.type = out.array ?
-            SchemaTransformUtil.toConcreteType(state, type, target) :
+            this.toConcreteType(state, type, target) :
             state.factory.createIdentifier(type.ctor.name);
         }
       }

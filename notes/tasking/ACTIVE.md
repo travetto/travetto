@@ -1,3 +1,3 @@
 Active Development (3.2.0 - RC)
 =====================================
-* Email-template, vscode changes + monorepo?
+* Union / Template Literal Type cleanup for more expressive schemas
