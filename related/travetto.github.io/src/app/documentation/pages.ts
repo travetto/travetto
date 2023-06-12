@@ -54,7 +54,7 @@ import { SchemaFakerComponent } from './gen/schema-faker/schema-faker.component'
 import { ManifestComponent } from './gen/manifest/manifest.component';
 import { TerminalComponent } from './gen/terminal/terminal.component';
 import { EslintComponent } from './gen/eslint/eslint.component';
-import { RestClientComponent } from './gen/rest-client/rest-client/rest-client.component';
+import { RestClientComponent } from './gen/rest-client/rest-client.component';
 import { EmailInkyComponent } from './gen/email-inky/email-inky.component';
 
 export const PAGES = [
