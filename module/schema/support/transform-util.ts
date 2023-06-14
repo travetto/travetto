@@ -111,7 +111,8 @@ export class SchemaTransformUtil {
     // If we have a union type
     if (typeExpr.key === 'union') {
       const values = typeExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)
-        .filter(x => x !== undefined && x !== null);
+        .filter(x => x !== undefined && x !== null)
+        .sort();
 
       if (values.length === typeExpr.subTypes.length) {
         attrs.push(state.factory.createPropertyAssignment('enum', state.fromLiteral({
