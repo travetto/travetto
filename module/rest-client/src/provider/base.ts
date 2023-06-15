@@ -7,7 +7,7 @@ import { ControllerConfig, ControllerRegistry, ControllerVisitor, EndpointConfig
 import { ClassConfig, FieldConfig, SchemaRegistry } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
-import { ParamConfig } from './shared/common';
+import { ParamConfig } from './shared/types';
 
 export type Imp = { name: string, file: string, classId: string };
 
@@ -39,7 +39,6 @@ export abstract class ClientGenerator implements ControllerVisitor {
   abstract get commonFiles(): [string, Class][];
   abstract get subFolder(): string;
   abstract get endpointResponseWrapper(): (string | Imp)[];
-  abstract get requestFunction(): (string | Imp)[];
   abstract get uploadType(): string | Imp;
 
   abstract renderController(cfg: ControllerConfig): RenderContent;
@@ -195,15 +194,15 @@ export abstract class ClientGenerator implements ControllerVisitor {
     const paramNames = paramConfigs.map(x => x.name!);
     const paramNameArr = JSON.stringify(paramNames).replaceAll(`"`, '');
 
-    imports.push(...[...this.endpointResponseWrapper, ...this.requestFunction].filter((x): x is Imp => typeof x !== 'string'));
-    const opts: Imp = { name: 'RequestOptions', file: './common.ts', classId: '_common' };
+    imports.push(...[...this.endpointResponseWrapper].filter((x): x is Imp => typeof x !== 'string'));
+    const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common' };
 
     return {
       imports,
       method: [
         endpoint.title ? `  /** ${endpoint.title}\n${endpoint.description ?? ''}*/\n` : '',
         `  ${endpoint.handlerName} (`, ...paramInputs, `  ): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
-        `    return `, ...this.requestFunction, `<`, ...returnType, `>(this, ${paramNameArr}, this.${requestField});\n`,
+        `    return this.makeRequest<`, ...returnType, `>(${paramNameArr}, this.${requestField});\n`,
         `  }\n\n`,
       ],
       config: [`  ${requestField}:`, opts, ` = ${requestShape.trimEnd()};\n\n`,]
@@ -277,11 +276,11 @@ export abstract class ClientGenerator implements ControllerVisitor {
   }
 
   async finalize(): Promise<void> {
-    await fs.mkdir(path.resolve(this.#output, this.subFolder), { recursive: true });
     for (const [file, cls] of this.commonFiles) {
-      const base = path.resolve(this.#output, this.subFolder, file);
-      const baseSource = RootIndex.getFunctionMetadata(cls)!.source;
-      await fs.copyFile(baseSource, base);
+      await ManifestUtil.writeFileWithBuffer(
+        path.resolve(this.#output, this.subFolder, file),
+        await fs.readFile(RootIndex.getFunctionMetadata(cls)!.source, 'utf8')
+      );
     }
 
     const files = [...this.#files.values()].reduce<Record<string, RenderContent[]>>((acc, x) => {

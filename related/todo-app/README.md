@@ -368,7 +368,7 @@ npx trv run:rest
       RestAuthLoginConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-      RestClientConfig: { providers: { '0': [Object] } },
+      RestClientConfig: { providers: { '0': [Object], '1': [Object] } },
       RestConfig: {
         serve: true,
         port: 3000,

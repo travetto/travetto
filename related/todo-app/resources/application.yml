@@ -8,4 +8,6 @@ rest:
 rest.client:
   providers:
     - type: fetch
-      output: ./api-client
+      output: related/todo-app/api-client
+    - type: fetch-web
+      output: related/todo-app/resources/ui/js/api-client

@@ -4,28 +4,24 @@ import { Class } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 import { ControllerConfig } from '@travetto/rest';
 
-import { ClientGenerator, Imp, RenderContent } from './generator';
+import { ClientGenerator, Imp, RenderContent } from './base';
 
-import { BaseFetchService } from './fetch-template/base-service';
-import { FetchRequestUtil } from './fetch-template/util';
-import { placeholder } from './fetch-template/types';
-import { CommonUtil } from './shared/common';
+import { BaseNodeFetchService } from './shared/fetch-node-service';
+import { CommonUtil } from './shared/util';
+import { BaseRemoteService } from './shared/types';
 
-export class FetchClientGenerator extends ClientGenerator {
+const SVC = './shared/fetch-node-service.ts';
+
+export class NodeFetchClientGenerator extends ClientGenerator {
 
   get subFolder(): string { return 'src'; }
-  get uploadType(): string | Imp { return { name: 'UploadContent', file: './types.ts', classId: '_' }; }
+  get uploadType(): string | Imp { return { name: 'UploadContent', file: SVC, classId: '_' }; }
   get endpointResponseWrapper(): string[] { return ['Promise']; }
-  get requestFunction(): (string | Imp)[] {
-    const util = { classId: FetchRequestUtil.Ⲑid, file: './utils.ts', name: FetchRequestUtil.name };
-    return [util, '.', FetchRequestUtil.makeRequest.name,];
-  }
   get commonFiles(): [string, Class][] {
     return [
-      ['./base-service.ts', BaseFetchService],
-      ['./utils.ts', FetchRequestUtil],
-      ['./types.ts', placeholder],
-      ['./common.ts', CommonUtil],
+      [SVC, BaseNodeFetchService],
+      ['./shared/types.ts', BaseRemoteService],
+      ['./shared/util.ts', CommonUtil],
     ];
   }
 
@@ -53,7 +49,7 @@ export class FetchClientGenerator extends ClientGenerator {
     const service = controller.class.name.replace(/(Controller|Rest|Service)$/, '');
     const endpoints = controller.endpoints;
     const results = endpoints.map(x => this.renderEndpoint(x, controller));
-    const baseFetchService: Imp = { name: BaseFetchService.name, file: './base-service.ts', classId: '_' };
+    const baseFetchService: Imp = { name: BaseNodeFetchService.name, file: SVC, classId: '_' };
 
     const contents = [
       `export class ${service}Api extends `, baseFetchService, `{\n\n`,

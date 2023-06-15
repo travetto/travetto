@@ -1,38 +1,18 @@
-export type ParamConfig = {
-  location: 'header' | 'body' | 'path' | 'query';
-  array?: boolean;
-  binary?: boolean;
-  name: string;
-  prefix?: string;
-  complex?: boolean;
-};
+import { IRemoteService, MultipartHandler, RequestDefinition, RequestOptions } from './types';
 
-type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'head' | 'options' | 'patch';
-
-export type RequestOptions = {
-  method: HttpMethod;
-  endpointPath: string;
-  paramConfigs: ParamConfig[] | (readonly ParamConfig[]);
+type FetchResponseLite = {
+  ok?: boolean;
+  statusText?: string;
+  status?: number;
+  headers: { get(key: string): string | null };
+  text(): Promise<string>;
 };
+type FetchLike<B, R extends FetchResponseLite> = (url: string | URL, opts: RequestOptions<B>) => R | Promise<R>;
 
-export type MultipartHandler<T, B, P> = {
-  addJson: (name: string, obj: unknown) => P;
-  addItem: (name: string, item: B) => P;
-  finalize: (items: P[], request: RawRequestOptions<T>) => T;
-};
-
-export type RawRequestOptions<T = unknown> = {
-  headers: Record<string, string>;
-  url: URL;
-  body?: T;
-  method: HttpMethod;
-};
-
-export type IRemoteService = {
-  baseUrl: string;
-  routePath: string;
-  headers: Record<string, string>;
-};
+function isResponseLite(v: unknown): v is FetchResponseLite {
+  // @ts-expect-error
+  return v && v.status && v.headers;
+}
 
 export class CommonUtil {
   static isPlainObject(obj: unknown): obj is Record<string, unknown> {
@@ -86,9 +66,9 @@ export class CommonUtil {
     });
   }
 
-  static buildRequest<S extends IRemoteService, T, B, P>(
-    svc: S, params: unknown[], { endpointPath, paramConfigs, method }: RequestOptions, multipart: MultipartHandler<T, B, P>
-  ): RawRequestOptions<T> {
+  static buildRequest<T, B, P, R = unknown>(
+    svc: IRemoteService<T, R>, params: unknown[], { endpointPath, paramConfigs, method }: RequestDefinition, multipart: MultipartHandler<T, B, P>
+  ): RequestOptions<T> {
     let resolvedPath = `${svc.baseUrl}/${svc.routePath}/${endpointPath || ''}`.replace(/[\/]+/g, '/').replace(/[\/]$/, '');
     const query: Record<string, string> = {};
     const headers: Record<string, string> = { ...svc.headers };
@@ -120,7 +100,7 @@ export class CommonUtil {
 
     let body: T | undefined;
 
-    const req: RawRequestOptions<T> = { headers, url, body, method };
+    const req: RequestOptions<T> = { headers, url, body, method };
 
     if (bodyIdxs.length) {
       const parts: P[] = [];
@@ -145,5 +125,74 @@ export class CommonUtil {
       req.body = multipart.finalize(parts, req);
     }
     return req;
+  }
+
+  static consumeError(err: Error | FetchResponseLite): Error {
+    if (err instanceof Error) {
+      return err;
+    } else if (isResponseLite(err)) {
+      const out = new Error(err.statusText);
+      Object.assign(out, { status: err.status });
+      return this.consumeError(out);
+    } else if (CommonUtil.isPlainObject(err)) {
+      const out = new Error();
+      Object.assign(out, err);
+      return this.consumeError(out);
+    } else {
+      return new Error('Unknown error');
+    }
+  }
+
+  static async fetchRequest<T, B, R extends FetchResponseLite>(
+    svc: IRemoteService<B, R>,
+    req: RequestOptions<B>,
+    fetcher: FetchLike<B, R>
+  ): Promise<T> {
+    try {
+      for (const el of svc.preRequestHandlers) {
+        req = await el(req) ?? req;
+      }
+
+      if (svc.debug) {
+        console.debug('Making request', req);
+      }
+
+      let resolved = await fetcher(req.url, req);
+
+      for (const el of svc.postResponseHandlers) {
+        resolved = await el(resolved) ?? resolved;
+      }
+
+      if (resolved.ok) {
+        if (resolved.headers.get('content-type') === 'application/json') {
+          const text = await resolved.text();
+          return svc.consumeJSON<T>(text);
+        } else {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          return undefined as unknown as Promise<T>;
+        }
+      } else {
+        let res;
+        if (resolved.headers.get('content-type') === 'application/json') {
+          const text = await resolved.text();
+          res = svc.consumeJSON<Error>(text);
+        } else {
+          res = resolved;
+        }
+        if (svc.debug) {
+          console.debug('Error in making request', res);
+        }
+        throw await svc.consumeError(res);
+      }
+    } catch (err) {
+      if (svc.debug) {
+        console.debug('Error in initiating request', err);
+      }
+      if (err instanceof Error) {
+        throw await svc.consumeError(err);
+      } else {
+        throw err;
+      }
+    }
   }
 }
