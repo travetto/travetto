@@ -375,15 +375,16 @@ npx trv run:rest
         trustProxy: false,
         hostname: 'localhost',
         bindAddress: '0.0.0.0',
-        baseUrl: 'http://localhost:3000',
-        defaultMessage: true
+        baseUrl: 'https://localhost:3000',
+        defaultMessage: true,
+        ssl: { active: true }
       },
       RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
       RestCorsConfig: {},
       RestGetCacheConfig: {},
       RestLogRoutesConfig: {},
       RestSessionConfig: {},
-      RestSslConfig: { active: false },
+      RestSslConfig: { active: true },
       SessionConfig: {
         autoCommit: true,
         maxAge: 1800000,
@@ -424,11 +425,13 @@ export async function main(key: string) {
 ```bash
 $ trv main support/create-todo.ts <key>
 
-{
-  text: 'New Todo - <key>',
-  created: '2029-03-14T04:00:01.510Z',
-  id: '<uniqueId>'
-}
+FetchError: request to http://localhost:3000/todo failed, reason: socket hang up
+    at ClientRequest.<anonymous> (<workspace-root>/node_modules/node-fetch/lib/index.js:1505:11)
+    at ClientRequest.emit (node:events:513:28)
+    at Socket.socketOnEnd (node:_http_client:519:9)
+    at Socket.emit (node:events:525:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)
 ```
 
 Now create `support/list-todo.ts` with the following contents:
@@ -447,11 +450,11 @@ export async function main(key: string) {
 ```bash
 $ trv main support/list-todo.ts <key>
 
-[
-  {
-    id: '<uniqueId>',
-    text: 'New Todo - <key>',
-    created: '2029-03-14T04:00:01.814Z'
-  }
-]
+FetchError: request to http://localhost:3000/todo?q=<key> failed, reason: socket hang up
+    at ClientRequest.<anonymous> (<workspace-root>/node_modules/node-fetch/lib/index.js:1505:11)
+    at ClientRequest.emit (node:events:513:28)
+    at Socket.socketOnEnd (node:_http_client:519:9)
+    at Socket.emit (node:events:525:35)
+    at endReadableNT (node:internal/streams/readable:1359:12)
+    at processTicksAndRejections (node:internal/process/task_queues:82:21)
 ```

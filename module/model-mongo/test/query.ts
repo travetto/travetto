@@ -8,18 +8,27 @@ class User {
   name: string;
 }
 
+class Type {
+  a: {
+    d: number;
+    b: { c: number };
+  };
+  d: { e: boolean };
+  g: { z: string[] };
+  name: number;
+  age: number;
+}
+
 @Suite()
 export class QueryTest {
 
   @Test()
   async validateQuery() {
 
-    const out = MongoUtil.extractSimple({ a: { b: { c: 5 } } });
+    const out = MongoUtil.extractSimple(User, { a: { b: { c: 5 } } });
     assert(out['a.b.c'] === 5);
 
-    type Type = { a: { d: number, b: { c: number } }, d: { e: boolean }, g: { z: string[] }, name: number, age: number };
-
-    const out2 = MongoUtil.extractWhereClause<Type>({
+    const out2 = MongoUtil.extractWhereClause(Type, {
       $and: [
         { a: { b: { c: 5 } } },
         { d: { e: true } },
@@ -54,7 +63,7 @@ export class QueryTest {
 
   @Test()
   async translateIds() {
-    const out = MongoUtil.extractWhereClause<User>({
+    const out = MongoUtil.extractWhereClause(User, {
       $and: [
         { id: { $in: ['a'.repeat(24), 'b'.repeat(24), 'c'.repeat(24)] } }
       ]
@@ -65,7 +74,7 @@ export class QueryTest {
 
   @Test()
   async translateRegex() {
-    const out = MongoUtil.extractWhereClause<User>({
+    const out = MongoUtil.extractWhereClause(User, {
       name: { $regex: '/google.$/' }
     }) as { name: { $regex: RegExp } };
 

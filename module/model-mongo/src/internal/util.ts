@@ -3,7 +3,9 @@ import * as mongo from 'mongodb';
 import { Class, DataUtil, ObjectUtil } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField } from '@travetto/model';
+import { SchemaRegistry } from '@travetto/schema';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
+import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 /**
  * Converting units to various radians
@@ -76,7 +78,7 @@ export class MongoUtil {
     const q = ModelQueryUtil.getQueryAndVerify(cls, query, checkExpiry);
     return {
       query: q,
-      filter: q.where ? this.extractWhereClause(q.where) : {}
+      filter: q.where ? this.extractWhereClause(cls, q.where) : {}
     };
   }
 
@@ -90,15 +92,15 @@ export class MongoUtil {
   /**
    * Build mongo where clause
    */
-  static extractWhereClause<T>(o: WhereClause<T>): Record<string, unknown> {
+  static extractWhereClause<T>(cls: Class<T>, o: WhereClause<T>): Record<string, unknown> {
     if (this.has$And(o)) {
-      return { $and: o.$and.map(x => this.extractWhereClause<T>(x)) };
+      return { $and: o.$and.map(x => this.extractWhereClause<T>(cls, x)) };
     } else if (this.has$Or(o)) {
-      return { $or: o.$or.map(x => this.extractWhereClause<T>(x)) };
+      return { $or: o.$or.map(x => this.extractWhereClause<T>(cls, x)) };
     } else if (this.has$Not(o)) {
-      return { $nor: [this.extractWhereClause<T>(o.$not)] };
+      return { $nor: [this.extractWhereClause<T>(cls, o.$not)] };
     } else {
-      return this.extractSimple(o);
+      return this.extractSimple(cls, o);
     }
   }
 
@@ -128,10 +130,9 @@ export class MongoUtil {
     }
   }
 
-  /**
-   * Convert `'a.b.c'` to `{ a: { b: { c: ... }}}`
-   */
-  static extractSimple<T>(o: T, path: string = '', recursive: boolean = true): Record<string, unknown> {
+  /**/
+  static extractSimple<T>(base: Class<T> | undefined, o: Record<string, unknown>, path: string = '', recursive: boolean = true): Record<string, unknown> {
+    const schema = base ? SchemaRegistry.get(base) : undefined;
     const out: Record<string, unknown> = {};
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const sub = o as Record<string, unknown>;
@@ -140,15 +141,17 @@ export class MongoUtil {
       const subpath = `${path}${key}`;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const v = sub[key] as Record<string, unknown>;
+      const subField = schema?.views[AllViewⲐ].schema[key];
 
       if (subpath === 'id') { // Handle ids directly
         out._id = this.replaceId(v);
       } else {
         const isPlain = v && ObjectUtil.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';
-        if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.Ⲑid) {
+
+        if ((isPlain && !firstKey.startsWith('$')) || v.constructor?.Ⲑid) {
           if (recursive) {
-            Object.assign(out, this.extractSimple(v, `${subpath}.`));
+            Object.assign(out, this.extractSimple(subField?.type, v, `${subpath}.`, recursive));
           } else {
             out[subpath] = v;
           }
@@ -157,15 +160,15 @@ export class MongoUtil {
             for (const [sk, sv] of Object.entries(v)) {
               v[sk] = ModelQueryUtil.resolveComparator(sv);
             }
-          } else if (firstKey === '$empty') {
-            const isEmpty = v.$empty;
-            if (isEmpty) {
+          } else if (firstKey === '$exists' && subField?.array) {
+            const exists = v.$exists;
+            if (!exists) {
+              delete v.$exists;
               v.$in = [null, []];
             } else {
               v.$exists = true;
               v.$nin = [null, []];
             }
-            delete v.$empty;
           } else if (firstKey === '$regex') {
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
             v.$regex = DataUtil.toRegex(v.$regex as string | RegExp);

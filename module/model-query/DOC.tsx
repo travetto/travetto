@@ -51,7 +51,7 @@ export const text = <>
       <ul>
         <li>{d.input('field: { $eq: T }')} to determine if a field is equal to a value</li>
         <li>{d.input('field: { $ne: T }')} to determine if a field is not equal to a value</li>
-        <li>{d.input('field: { $exists: boolean }')} to determine if a field exists or not</li>
+        <li>{d.input('field: { $exists: boolean }')} to determine if a field exists or not, or for arrays, if its empty or not</li>
         <li>{d.input('field: T')} to see if the field is equal to whatever value is passed in`</li>
       </ul>
     </c.SubSection>
@@ -82,7 +82,6 @@ export const text = <>
     <c.SubSection title='Array Fields'>
       <ul>
         <li>{d.input('field: { $all: T[]] }')} checks to see if the records value contains everything within {d.input('$all')}</li>
-        <li>{d.input('field: { $empty: boolean }')} to determine if an array is missing or is of zero length. </li>
       </ul>
     </c.SubSection>
     <c.SubSection title='String Fields'>

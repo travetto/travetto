@@ -131,7 +131,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 
    *  `field: { $eq: T }` to determine if a field is equal to a value
    *  `field: { $ne: T }` to determine if a field is not equal to a value
-   *  `field: { $exists: boolean }` to determine if a field exists or not
+   *  `field: { $exists: boolean }` to determine if a field exists or not, or for arrays, if its empty or not
    *  `field: T` to see if the field is equal to whatever value is passed in`
 
 ### General Single Valued Fields
@@ -158,7 +158,6 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 ### Array Fields
 
    *  `field: { $all: T[]] }` checks to see if the records value contains everything within `$all`
-   *  `field: { $empty: boolean }` to determine if an array is missing or is of zero length. 
 
 ### String Fields
 

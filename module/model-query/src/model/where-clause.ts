@@ -44,7 +44,6 @@ type ArrayField<T> =
   { $ne?: T | T[] } |
   { $all?: T[] } |
   { $in?: T[] } |
-  { $empty?: boolean } |
   PropWhereClause<RetainFields<T>> |
   T | T[];
 
