@@ -403,15 +403,16 @@ First we must start the application:
         trustProxy: false,
         hostname: <span class="token string">'localhost'</span>,
         bindAddress: <span class="token string">'0.0.0.0'</span>,
-        baseUrl: <span class="token string">'http://localhost:3000'</span>,
-        defaultMessage: <span class="token boolean">true</span>
+        baseUrl: <span class="token string">'https://localhost:3000'</span>,
+        defaultMessage: true,
+        ssl: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
       RestCookieConfig: <span class="token punctuation">{{'{'}}</span> signed: true, httpOnly: true, sameSite: <span class="token string">'lax'</span> <span class="token punctuation">{{'}'}}</span>,
       RestCorsConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestGetCacheConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestLogRoutesConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       RestSessionConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
-      RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">false</span> <span class="token punctuation">{{'}'}}</span>,
+      RestSslConfig: <span class="token punctuation">{{'{'}}</span> active: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       SessionConfig: <span class="token punctuation">{{'{'}}</span>
         autoCommit: true,
         maxAge: <span class="token number">1800000</span>,
@@ -456,11 +457,13 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
 </figcaption>
     <pre><code class="language-bash">$ trv main support/create-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span>
 
-<span class="token punctuation">{{'{'}}</span>
-  text: <span class="token string">'New Todo - &lt;key>'</span>,
-  created: <span class="token string">'2029-03-14T04:00:01.510Z'</span>,
-  id: <span class="token string">'&lt;uniqueId>'</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
+FetchError: request to http://localhost:3000/todo failed, reason: socket hang up
+    at ClientRequest.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/node_modules/node-fetch/lib/index.js:1505:11<span class="token punctuation">)</span>
+    at ClientRequest.emit <span class="token punctuation">(</span>node:events:513:28<span class="token punctuation">)</span>
+    at Socket.socketOnEnd <span class="token punctuation">(</span>node:_http_client:519:9<span class="token punctuation">)</span>
+    at Socket.emit <span class="token punctuation">(</span>node:events:525:35<span class="token punctuation">)</span>
+    at endReadableNT <span class="token punctuation">(</span>node:internal/streams/readable:1359:12<span class="token punctuation">)</span>
+    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:82:21<span class="token punctuation">)</span></code></pre>
   </figure>
 
 Now create <code class="item path">support/list-todo.ts</code> with the following contents:
@@ -484,11 +487,11 @@ Now create <code class="item path">support/list-todo.ts</code> with the followin
 </figcaption>
     <pre><code class="language-bash">$ trv main support/list-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span>
 
-<span class="token punctuation">[</span>
-  <span class="token punctuation">{{'{'}}</span>
-    id: <span class="token string">'&lt;uniqueId>'</span>,
-    text: <span class="token string">'New Todo - &lt;key>'</span>,
-    created: <span class="token string">'2029-03-14T04:00:01.814Z'</span>
-  <span class="token punctuation">{{'}'}}</span>
-<span class="token punctuation">]</span></code></pre>
+FetchError: request to http://localhost:3000/todo?q<span class="token operator">=</span><span class="token operator">&lt;</span>key<span class="token operator">></span> failed, reason: socket hang up
+    at ClientRequest.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/node_modules/node-fetch/lib/index.js:1505:11<span class="token punctuation">)</span>
+    at ClientRequest.emit <span class="token punctuation">(</span>node:events:513:28<span class="token punctuation">)</span>
+    at Socket.socketOnEnd <span class="token punctuation">(</span>node:_http_client:519:9<span class="token punctuation">)</span>
+    at Socket.emit <span class="token punctuation">(</span>node:events:525:35<span class="token punctuation">)</span>
+    at endReadableNT <span class="token punctuation">(</span>node:internal/streams/readable:1359:12<span class="token punctuation">)</span>
+    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:82:21<span class="token punctuation">)</span></code></pre>
   </figure>

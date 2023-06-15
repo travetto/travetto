@@ -234,7 +234,7 @@ export class MongoModelService implements
 
     let final: Record<string, unknown> = item;
 
-    const items = MongoUtil.extractSimple(final, undefined, false);
+    const items = MongoUtil.extractSimple(cls, final, undefined, false);
     final = Object
       .entries(items)
       .reduce<Record<string, unknown>>((acc, [k, v]) => {
@@ -472,7 +472,7 @@ export class MongoModelService implements
     let cursor = col.find<T>(filter, {});
     if (query.select) {
       const selectKey = Object.keys(query.select)[0];
-      const select = typeof selectKey === 'string' && selectKey.startsWith('$') ? query.select : MongoUtil.extractSimple(query.select);
+      const select = typeof selectKey === 'string' && selectKey.startsWith('$') ? query.select : MongoUtil.extractSimple(cls, query.select);
       // Remove id if not explicitly defined, and selecting fields directly
       if (!select['_id']) {
         const values = new Set([...Object.values(select)]);
@@ -484,7 +484,7 @@ export class MongoModelService implements
     }
 
     if (query.sort) {
-      cursor = cursor.sort(Object.assign({}, ...query.sort.map(x => MongoUtil.extractSimple(x))));
+      cursor = cursor.sort(Object.assign({}, ...query.sort.map(x => MongoUtil.extractSimple(cls, x))));
     }
 
     cursor = cursor.limit(Math.trunc(query.limit ?? 200));
@@ -532,7 +532,7 @@ export class MongoModelService implements
   async updateByQuery<T extends ModelType>(cls: Class<T>, query: ModelQuery<T>, data: Partial<T>): Promise<number> {
     const col = await this.getStore(cls);
 
-    const items = MongoUtil.extractSimple(data);
+    const items = MongoUtil.extractSimple(cls, data);
     const final = Object.entries(items).reduce<Record<string, unknown>>((acc, [k, v]) => {
       if (v === null || v === undefined) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

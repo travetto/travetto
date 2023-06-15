@@ -167,7 +167,7 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 
 <ul> <li><code class="item input">field: {{'{'}} $eq: T {{'}'}}</code> to determine if a field is equal to a value</li>
 <li><code class="item input">field: {{'{'}} $ne: T {{'}'}}</code> to determine if a field is not equal to a value</li>
-<li><code class="item input">field: {{'{'}} $exists: boolean {{'}'}}</code> to determine if a field exists or not</li>
+<li><code class="item input">field: {{'{'}} $exists: boolean {{'}'}}</code> to determine if a field exists or not, or for arrays, if its empty or not</li>
 <li><code class="item input">field: T</code> to see if the field is equal to whatever value is passed in`</li>
 </ul>
 
@@ -198,7 +198,6 @@ One of the complexities of abstracting multiple storage mechanisms, is providing
 <h3 id="array-fields">Array Fields</h3>
 
 <ul> <li><code class="item input">field: {{'{'}} $all: T[]] {{'}'}}</code> checks to see if the records value contains everything within <code class="item input">$all</code></li>
-<li><code class="item input">field: {{'{'}} $empty: boolean {{'}'}}</code> to determine if an array is missing or is of zero length. </li>
 </ul>
 
 <h3 id="string-fields">String Fields</h3>

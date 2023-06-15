@@ -156,13 +156,6 @@ export class ElasticsearchQueryUtil {
               items.push({ range: { [sPath]: out } });
               break;
             }
-            case '$empty': {
-              const q = {
-                exists: { field: sPath }
-              };
-              items.push(!v ? q : { bool: { ['must_not']: q } });
-              break;
-            }
             case '$regex': {
               // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
               const pattern = DataUtil.toRegex(v as string);

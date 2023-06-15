@@ -326,43 +326,43 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     let total = await service.queryCount(WithNestedLists, {
       where: {
-        names: { $empty: false }
+        names: { $exists: true }
       }
     });
     assert(total === 3);
     total = await service.queryCount(WithNestedLists, {
       where: {
-        names: { $empty: true }
+        names: { $exists: false }
       }
     });
     assert(total === 2);
 
     total = await service.queryCount(WithNestedLists, {
       where: {
-        tags: { $empty: true }
+        tags: { $exists: false }
       }
     });
     assert(total === 3);
 
     total = await service.queryCount(WithNestedLists, {
       where: {
-        tags: { $empty: false }
+        tags: { $exists: true }
       }
     });
     assert(total === 2);
 
     total = await service.queryCount(WithNestedLists, {
       where: {
-        tags: { $empty: true },
-        names: { $empty: true }
+        tags: { $exists: false },
+        names: { $exists: false }
       }
     });
     assert(total === 1);
 
     total = await service.queryCount(WithNestedLists, {
       where: {
-        tags: { $empty: false },
-        names: { $empty: false }
+        tags: { $exists: true },
+        names: { $exists: true }
       }
     });
 
@@ -397,43 +397,43 @@ export abstract class ModelQuerySuite extends BaseModelSuite<ModelQuerySupport &
 
     let total = await service.queryCount(WithNestedNestedLists, {
       where: {
-        sub: { names: { $empty: false } }
+        sub: { names: { $exists: true } }
       }
     });
     assert(total === 3);
     total = await service.queryCount(WithNestedNestedLists, {
       where: {
-        sub: { names: { $empty: true } }
+        sub: { names: { $exists: false } }
       }
     });
     assert(total === 2);
 
     total = await service.queryCount(WithNestedNestedLists, {
       where: {
-        tags: { $empty: true }
+        tags: { $exists: false }
       }
     });
     assert(total === 3);
 
     total = await service.queryCount(WithNestedNestedLists, {
       where: {
-        tags: { $empty: false }
+        tags: { $exists: true }
       }
     });
     assert(total === 2);
 
     total = await service.queryCount(WithNestedNestedLists, {
       where: {
-        tags: { $empty: true },
-        sub: { names: { $empty: true } }
+        tags: { $exists: false },
+        sub: { names: { $exists: false } }
       }
     });
     assert(total === 1);
 
     total = await service.queryCount(WithNestedNestedLists, {
       where: {
-        tags: { $empty: false },
-        sub: { names: { $empty: false } }
+        tags: { $exists: true },
+        sub: { names: { $exists: true } }
       }
     });
 

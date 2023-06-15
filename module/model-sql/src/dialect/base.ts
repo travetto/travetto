@@ -478,20 +478,23 @@ export abstract class SQLDialect implements DialectState {
               }
               break;
             }
-            case '$empty': {
-              const valueTable = this.parentTable(sStack);
-              const alias = `_all_${sStack.length}`;
-              const pPath = this.ident(this.parentPathField.name);
-              const rpPath = this.resolveName([...sStack, field, this.parentPathField]);
+            case '$exists': {
+              if (field.array) {
+                const valueTable = this.parentTable(sStack);
+                const alias = `_all_${sStack.length}`;
+                const pPath = this.ident(this.parentPathField.name);
+                const rpPath = this.resolveName([...sStack, field, this.parentPathField]);
 
-              items.push(`0 ${v ? '=' : '<>'} (
-                SELECT COUNT(${alias}.${this.ident(field.name)})
-                FROM ${valueTable} ${alias} 
-                WHERE ${alias}.${pPath} = ${rpPath}
-              )`);
+                items.push(`0 ${!v ? '=' : '<>'} (
+                  SELECT COUNT(${alias}.${this.ident(field.name)})
+                  FROM ${valueTable} ${alias} 
+                  WHERE ${alias}.${pPath} = ${rpPath}
+                )`);
+              } else {
+                items.push(`${sPath} ${v ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
+              }
               break;
             }
-            case '$exists': items.push(`${sPath} ${v ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`); break;
             case '$ne': case '$eq': {
               if (v === null || v === undefined) {
                 items.push(`${sPath} ${subKey === '$ne' ? SQL_OPS.$isNot : SQL_OPS.$is} NULL`);
