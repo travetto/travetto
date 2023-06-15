@@ -5,7 +5,9 @@
  * Code was taken, and adapted from https://github.com/tastejs/todomvc/tree/gh-pages/examples/vue
  */
 
-const fetchData = () => fetch('/todo').then(v => v.json());
+import { TodoApi } from './api-client'
+
+const api = new TodoApi({});
 
 Vue.component('app', {
   data() {
@@ -60,20 +62,20 @@ Vue.component('app', {
     </footer>
   </section>`,
   beforeMount() {
-    return fetchData().then(items => this.items = items);
+    return api.getAll({}).then(items => this.items = items);
   },
   methods: {
-    fetchData() {
-      return fetchData().then(items => this.items = items);
+    getAll() {
+      return api.getAll({}).then(items => this.items = items);
     },
     remove(id) {
-      return fetch(`/todo/${id}`, { method: 'DELETE' }).then(() => this.fetchData());
+      return api.remove(id).then(() => this.getAll());
     },
     removeCompleted() {
-      return fetch('/todo?completed=true', { method: 'DELETE' }).then(() => this.fetchData());
+      return api.deleteAllCompleted().then(() => this.getAll());
     },
     complete(item) {
-      return fetch(`/todo/${item.id}/complete?completed=${item.completed}`, { method: 'put' }).then(() => this.fetchData());
+      return api.complete(item.id).then(() => this.getAll());
     },
     startEdit(item) {
       this.ogText = item.text;
@@ -87,11 +89,7 @@ Vue.component('app', {
     },
     edit() {
       if (this.editing && this.editing.text) {
-        return fetch(`/todo/${this.editing.id}`, {
-          method: 'put',
-          body: JSON.stringify({ text: this.editing.text }),
-          headers: { 'Content-Type': 'application/json' }
-        }).then(() => {
+        return api.update(this.editing.id, { text: this.editing.text }).then(() => {
           this.editing = null;
         });
       } else {
@@ -100,11 +98,7 @@ Vue.component('app', {
     },
     create(text) {
       this.creating = '';
-      return fetch('/todo', {
-        method: 'post',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      }).then(() => this.fetchData());
+      return api.create({ text }).then(() => this.getAll());
     }
   }
 });

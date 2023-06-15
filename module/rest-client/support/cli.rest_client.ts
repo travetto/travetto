@@ -1,9 +1,12 @@
+import { path } from '@travetto/manifest';
 import { GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, CliCommandShape, CliValidationResultError } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
-import { RootIndex } from '@travetto/manifest';
 import { RootRegistry } from '@travetto/registry';
 import { Ignore } from '@travetto/schema';
+
+import type { RestClientProvider } from '../src/config';
+import { RestClientGeneratorService } from '../src/service';
 
 /**
  * Run client rest operation
@@ -18,43 +21,28 @@ export class CliRestClientCommand implements CliCommandShape {
   env: string;
 
   envInit(): GlobalEnvConfig {
-    return {
-      debug: false
-    };
+    return { debug: false };
   }
 
-  async main(type: 'fetch' | 'angular' | 'config', output?: string): Promise<void> {
-    this.module ||= RootIndex.mainModuleName;
+  get #service(): Promise<RestClientGeneratorService> {
+    return RootRegistry.init().then(() => DependencyRegistry.getInstance(RestClientGeneratorService));
+  }
 
-    if (type !== 'config' && !output) {
-      throw new CliValidationResultError([
-        { message: 'output is required when type is fetch or angular', source: 'arg' }
-      ]);
-    }
-
-    await RootRegistry.init();
-    const { RestClientGeneratorService } = await import('../src/service.js');
-    const genService = await DependencyRegistry.getInstance(RestClientGeneratorService);
-
-    switch (type) {
-      case 'config': {
-        for (const provider of genService.providers) {
-          await genService.renderProvider(provider);
-        }
-        break;
+  async main(type: RestClientProvider['type'] | 'config', output?: string): Promise<void> {
+    if (type === 'config') {
+      const svc = await this.#service;
+      for (const provider of svc.providers) {
+        await svc.renderClient(provider);
       }
-      case 'fetch': {
-        const { FetchClientGenerator } = await import('../src/provider/fetch.js');
-        await genService.renderProvider(new FetchClientGenerator(output!));
-        console.log!(`Generated fetch client at ${output}`);
-        break;
+    } else {
+      if (!output) {
+        throw new CliValidationResultError([
+          { message: 'output is required when type is not `config`', source: 'arg' }
+        ]);
       }
-      case 'angular': {
-        const { AngularClientGenerator } = await import('../src/provider/angular.js');
-        await genService.renderProvider(new AngularClientGenerator(output!));
-        console.log!(`Generated angular client at ${output}`);
-        break;
-      }
+      const svc = await this.#service;
+      output = path.resolve(output);
+      return svc.renderClient({ type, output, moduleName: this.module, })
     }
   }
 }

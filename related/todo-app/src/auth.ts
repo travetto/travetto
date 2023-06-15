@@ -9,7 +9,7 @@ import { BasicAuthⲐ } from './auth.config';
  * Auth API
  */
 @Controller('/auth')
-export class ApiController {
+export class AuthController {
 
   @Inject()
   svc: AuthService;

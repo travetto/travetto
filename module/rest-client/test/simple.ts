@@ -9,7 +9,7 @@ import { DependencyRegistry } from '@travetto/di';
 
 
 import { RestClientGeneratorService } from '../src/service';
-import { FetchClientGenerator } from '../src/provider/fetch';
+import { NodeFetchClientGenerator } from '../src/provider/fetch-node';
 import { AngularClientGenerator } from '../src/provider/angular';
 
 import './sample';
@@ -35,15 +35,15 @@ export class SimpleSuite {
     const svc = await DependencyRegistry.getInstance(RestClientGeneratorService);
 
     await fs.mkdir(root, { recursive: true });
-    const gen = new FetchClientGenerator(root);
-    await svc.renderProvider(gen);
+    const gen = new NodeFetchClientGenerator(root);
+    await svc.renderClient(gen);
 
     assert(await exists('package.json'));
     assert(JSON.parse(await fs.readFile(path.resolve(root, 'package.json'), 'utf8')).main === 'src/index.ts');
     assert(await exists('src/index.ts'));
-    assert(await exists('src/base-service.ts'));
-    assert(await exists('src/utils.ts'));
-    assert(await exists('src/common.ts'));
+    assert(await exists('src/shared/util.ts'));
+    assert(await exists('src/shared/types.ts'));
+    assert(await exists('src/shared/fetch-node-service.ts'));
   }
 
   @Test()
@@ -56,12 +56,12 @@ export class SimpleSuite {
 
     await fs.mkdir(root, { recursive: true });
     const gen = new AngularClientGenerator(root);
-    await svc.renderProvider(gen);
+    await svc.renderClient(gen);
 
     assert(!await exists('package.json'));
     assert(await exists('index.ts'));
-    assert(await exists('base-service.ts'));
-    assert(await exists('utils.ts'));
-    assert(await exists('common.ts'));
+    assert(await exists('shared/angular-service.ts'));
+    assert(await exists('shared/util.ts'));
+    assert(await exists('shared/types.ts'));
   }
 }

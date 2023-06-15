@@ -3,12 +3,13 @@
 import { Class } from '@travetto/base';
 import { ControllerConfig } from '@travetto/rest';
 
-import { ClientGenerator, Imp, RenderContent } from './generator';
+import { ClientGenerator, Imp, RenderContent } from './base';
 
-import { BaseAngularService } from './angular-template/base-service';
-import { AngularRequestUtil } from './angular-template/util';
-import { Configuration } from './angular-template/types';
-import { CommonUtil } from './shared/common';
+import { BaseAngularService, Configuration } from './shared/angular-service';
+import { CommonUtil } from './shared/util';
+import { BaseRemoteService } from './shared/types';
+
+const SVC = './shared/angular-service.ts';
 
 export class AngularClientGenerator extends ClientGenerator {
 
@@ -16,20 +17,14 @@ export class AngularClientGenerator extends ClientGenerator {
   get uploadType(): string { return 'Blob'; }
   get commonFiles(): [string, Class][] {
     return [
-      ['./base-service.ts', BaseAngularService],
-      ['./utils.ts', AngularRequestUtil],
-      ['./types.ts', Configuration],
-      ['./common.ts', CommonUtil]
+      [SVC, BaseAngularService],
+      ['./shared/util.ts', CommonUtil],
+      ['./shared/types.ts', BaseRemoteService]
     ];
   }
 
   get endpointResponseWrapper(): (string | Imp)[] {
-    return [{ classId: '_res', file: './types.ts', name: 'AngularResponse' }];
-  }
-
-  get requestFunction(): (string | Imp)[] {
-    const util = { classId: AngularRequestUtil.Ⲑid, file: './utils.ts', name: AngularRequestUtil.name };
-    return [util, '.', AngularRequestUtil.makeRequest.name];
+    return [{ classId: '_res', file: SVC, name: 'AngularResponse' }];
   }
 
   init(): void {
@@ -43,7 +38,7 @@ export class AngularClientGenerator extends ClientGenerator {
     const skipSelf: Imp = { file: '@angular/core', name: 'SkipSelf', classId: '__ngSkipSelf' };
     const optional: Imp = { file: '@angular/core', name: 'Optional', classId: '__optional' };
     const httpClient: Imp = { file: '@angular/common/http', name: 'HttpClient', classId: '_http' };
-    const config: Imp = { file: './types', name: 'Configuration', classId: Configuration.Ⲑid };
+    const config: Imp = { file: './angular-service', name: 'Configuration', classId: Configuration.Ⲑid };
     const self: Imp = { file: '', name: 'RestClientModule', classId: '_restClientMod' };
 
     return {
@@ -81,15 +76,14 @@ export class AngularClientGenerator extends ClientGenerator {
 
     const results = endpoints.map(x => this.renderEndpoint(x, controller));
 
-    const base: Imp = { name: BaseAngularService.name, file: './base-service.ts', classId: BaseAngularService.Ⲑid };
-    const common: Imp = { name: CommonUtil.name, file: './common.ts', classId: CommonUtil.Ⲑid };
+    const base: Imp = { name: BaseAngularService.name, file: SVC, classId: BaseAngularService.Ⲑid };
+    const options: Imp = { classId: '_opts', file: SVC, name: 'Configuration' };
 
-    const httpClient = { classId: '_client', file: '@angular/common/http', name: 'HttpClient' };
-    const injectable = { classId: '_inj', file: '@angular/core', name: 'Injectable' };
-    const optional = { classId: '_inj', file: '@angular/core', name: 'Optional' };
-    const options = { classId: '_opts', file: './types.ts', name: 'Configuration' };
-    const map = { classId: '_map', file: 'rxjs', name: 'map' };
-    const operatorFn = { classId: '_map', file: 'rxjs', name: 'OperatorFunction' };
+    const httpClient: Imp = { classId: '_client', file: '@angular/common/http', name: 'HttpClient' };
+    const injectable: Imp = { classId: '_inj', file: '@angular/core', name: 'Injectable' };
+    const optional: Imp = { classId: '_inj', file: '@angular/core', name: 'Optional' };
+    const map: Imp = { classId: '_map', file: 'rxjs', name: 'map' };
+    const operatorFn: Imp = { classId: '_map', file: 'rxjs', name: 'OperatorFunction' };
 
     const imports = [base, httpClient, injectable, optional, options, ...results.flatMap(x => x.imports)];
 
@@ -104,7 +98,7 @@ export class AngularClientGenerator extends ClientGenerator {
       `    super(options);\n`,
       `  }\n`,
       `\n`,
-      `  transform = <T>():`, operatorFn, `<T, T> => `, map, `(o => `, common, `.`, CommonUtil.consumeJSON.name, `<T>(o));\n`,
+      `  transform = <T>():`, operatorFn, `<T, T> => `, map, `(o => this.${CommonUtil.consumeJSON.name}<T>(o));\n`,
       `\n`,
       ...results.flatMap(f => f.method),
       `}\n`
