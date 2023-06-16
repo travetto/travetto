@@ -1,0 +1,11 @@
+[
+  {
+    "files": [
+      "**/api-client/**/*.ts"
+    ],
+    "rules": {
+      "@typescript-eslint/indent": 0,
+      "@typescript-eslint/type-annotation-spacing": 0
+    }
+  }
+]
