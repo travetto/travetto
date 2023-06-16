@@ -1,5 +1,6 @@
 // @ts-expect-error
 import * as unused from 'eslint-plugin-unused-imports';
+import { configs } from '@eslint/js';
 import * as tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import { existsSync, readFileSync } from 'fs';
 
@@ -23,7 +24,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
   const extra: (typeof STD_RULES)[] = existsSync(overrides) ? JSON.parse(readFileSync(overrides, 'utf8')) : [];
 
   const result = [
-    'eslint:recommended',
+    configs.recommended,
     { ignores: IGNORES, },
     {
       ...RULE_COMMON,
