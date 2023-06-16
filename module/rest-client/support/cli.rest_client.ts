@@ -42,7 +42,7 @@ export class CliRestClientCommand implements CliCommandShape {
       }
       const svc = await this.#service;
       output = path.resolve(output);
-      return svc.renderClient({ type, output, moduleName: this.module, })
+      return svc.renderClient({ type, output, moduleName: this.module, });
     }
   }
 }

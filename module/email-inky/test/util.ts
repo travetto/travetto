@@ -19,6 +19,6 @@ export async function renderJSX(element: JSXElement): Promise<string> {
   return cleanseOutput(await InkyRenderer.render(
     element,
     Html,
-    { file: '', config: {}, module: '', generators: {} as any }, false)
+    { file: '', module: '' }, false)
   );
 }

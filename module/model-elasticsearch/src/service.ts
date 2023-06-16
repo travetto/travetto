@@ -454,6 +454,7 @@ export class ElasticsearchModelService implements
         throw new NotFoundError(cls, id);
       }
     } catch (err) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       if (err instanceof es.errors.ResponseError && (err.body as UpdateByQueryResponse).version_conflicts) {
         throw new NotFoundError(cls, id);
       } else {
