@@ -8,8 +8,7 @@ import { RGB, TermCoord, TermQuery } from './types';
 const to256 = (x: string): number => Math.trunc(parseInt(x, 16) / (16 ** (x.length - 2)));
 const COLOR_RESPONSE = /(?<r>][0-9a-f]+)[/](?<g>[0-9a-f]+)[/](?<b>[0-9a-f]+)[/]?(?<a>[0-9a-f]+)?/i;
 
-// @ts-expect-error
-const queryScript = (function (...bytes) {
+const queryScript = (function (...bytes: number[]): void {
   const i = process.stdin;
   i.setRawMode(true);
   i.resume();
@@ -24,7 +23,7 @@ const queryScript = (function (...bytes) {
 
 const runQuery = async (input: tty.ReadStream, output: tty.WriteStream, code: string): Promise<Buffer> => {
   const script = queryScript.toString().replaceAll('\'', '"').replaceAll('\n', '');
-  const fullScript = `(${script})(${code.split('').map(x => x.charCodeAt(0))})`
+  const fullScript = `(${script})(${code.split('').map(x => x.charCodeAt(0))})`;
   const proc = spawn(process.argv0, ['-e', fullScript], { stdio: [input, output, 2, 'ipc'], detached: true });
   const text = await new Promise<string>((res, rej) => {
     proc.once('message', res);
