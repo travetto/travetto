@@ -291,12 +291,13 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     { parameters: ParameterObject[] } |
     undefined
   ) {
+    const complex = field.type && SchemaRegistry.has(field.type);
     if (param.location) {
       if (param.location === 'body') {
         return {
           requestBody: field.specifiers?.includes('file') ? this.#buildUploadBody() : this.#getEndpointBody(field, this.#getHeaderValue(ep, 'accepts'))
         };
-      } else if (field.type && SchemaRegistry.has(field.type) && (param.location === 'query' || param.location === 'header')) {
+      } else if (complex && (param.location === 'query' || param.location === 'header')) {
         return { parameters: this.#schemaToDotParams(param.location, field, param.prefix ? `${param.prefix}.` : '') };
       } else if (param.location !== 'context') {
         const epParam: ParameterObject = {

@@ -13,6 +13,7 @@ const SVC = './shared/fetch-web-service.ts';
 
 export class WebFetchClientGenerator extends ClientGenerator {
 
+  get outputExt(): '.js' { return '.js'; }
   get subFolder(): string { return '.'; }
   get uploadType(): string { return 'Blob'; }
   get endpointResponseWrapper(): string[] { return ['Promise']; }
