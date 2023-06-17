@@ -40,6 +40,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
   abstract get subFolder(): string;
   abstract get endpointResponseWrapper(): (string | Imp)[];
   abstract get uploadType(): string | Imp;
+  abstract get outputExt(): '.js' | '.ts' | '';
 
   abstract renderController(cfg: ControllerConfig): RenderContent;
 
@@ -52,6 +53,15 @@ export abstract class ClientGenerator implements ControllerVisitor {
   }
 
   init?(): void;
+
+  async writeContent(file: string, content: string | string[]): Promise<void> {
+    content = Array.isArray(content) ? content.join('') : content;
+    await ManifestUtil.writeFileWithBuffer(
+      path.resolve(this.#output, this.subFolder, file),
+      content.trim()
+        .replace(/^((?:ex|im)port[^;\n]*)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
+    );
+  }
 
   registerContent(classId: string, content: RenderContent): void {
     this.#files.set(classId, content);
@@ -94,19 +104,15 @@ export abstract class ClientGenerator implements ControllerVisitor {
         )
         .map(([f, vals]) => {
           if (vals.join(', ').length > 60) {
-            return `import {\n  ${vals.join(',\n  ')}\n} from '${f.replace(/[.]ts$/, '')}';\n`;
+            return `import {\n  ${vals.join(',\n  ')}\n} from '${f}';\n`;
           } else {
-            return `import { ${vals.join(', ')} } from '${f.replace(/[.]ts$/, '')}';\n`;
+            return `import { ${vals.join(', ')} } from '${f}';\n`;
           }
         }),
       '\n\n',
     );
 
-    if (!text.length) {
-      text.push(`export const __placeholder__${file.replace(/[^A-Z]/gi, '_')} = {};\n`);
-    }
-
-    await ManifestUtil.writeFileWithBuffer(output, text.join('').trim());
+    await this.writeContent(output, text);
   }
 
   resolveType(type?: Class): string | Imp {
@@ -277,10 +283,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
 
   async finalize(): Promise<void> {
     for (const [file, cls] of this.commonFiles) {
-      await ManifestUtil.writeFileWithBuffer(
-        path.resolve(this.#output, this.subFolder, file),
-        await fs.readFile(RootIndex.getFunctionMetadata(cls)!.source, 'utf8')
-      );
+      await this.writeContent(file, await fs.readFile(RootIndex.getFunctionMetadata(cls)!.source, 'utf8'));
     }
 
     const files = [...this.#files.values()].reduce<Record<string, RenderContent[]>>((acc, x) => {
@@ -291,11 +294,12 @@ export abstract class ClientGenerator implements ControllerVisitor {
     for (const [file, contents] of Object.entries(files)) {
       await this.renderContent(file, contents);
     }
-    await ManifestUtil.writeFileWithBuffer(path.join(this.#output, this.subFolder, 'index.ts'), [
-      ...[...Object.keys(files)]
+    await this.writeContent(
+      'index.ts',
+      Object.keys(files)
         .filter(f => !f.includes('.json'))
-        .map(f => `export * from '${f.replace(/[.]ts$/, '')}';\n`),
-    ].join(''));
+        .map(f => `export * from '${f}';\n`)
+    );
   }
 
   async onComplete(): Promise<void> {

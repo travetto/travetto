@@ -19,6 +19,6 @@
     "removeComments": true,
     "importHelpers": true,
     "noEmitHelpers": true,
-    "outDir": "build/"
+    "outDir": "build/",
   },
 }

@@ -54,7 +54,6 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
 
   @Test({ timeout: 10000 })
   async fetchNodeClient() {
-
     const tmp = path.resolve(os.tmpdir(), `rest-client-fetch-node-${Util.uuid()}`);
     try {
       await this.svc.renderClient({ type: 'fetch-node', output: tmp });
@@ -89,6 +88,80 @@ go()
       assert(body.id === '200');
       assert(body.priority === 50);
       assert(body.text === 'todo-a-b-c');
+    } finally {
+      // await fs.rm(tmp, { recursive: true });
+    }
+  }
+
+  @Test({ timeout: 10000 })
+  async fetchWebClient() {
+    const tmp = path.resolve(os.tmpdir(), `rest-client-fetch-web-${Util.uuid()}`);
+    const srcFile = path.resolve(tmp, 'main.ts');
+    const indexHtml = path.resolve(tmp, 'index.html');
+    try {
+      await this.svc.renderClient({ type: 'fetch-web', output: tmp });
+      await fs.writeFile(path.resolve(tmp, 'tsconfig.json'), JSON.stringify({
+        compilerOptions: {
+          rootDir: '.',
+          module: 'es2022',
+          target: 'esnext',
+          lib: ['es2022', 'dom'],
+          esModuleInterop: true,
+        },
+      }));
+      await fs.writeFile(srcFile, `
+import { TodoApi } from './api.js';
+const output = [];
+const log = v => output.push(v);
+const api = new TodoApi({ baseUrl: 'http://localhost:${this.port!}' });
+
+async function go() {
+  log(await api.listTodo(200, 50, ['a','b','c']));
+  document.body.innerText = output.map(v => JSON.stringify(v)).join('\\n');
+}
+
+
+window.onload = go;
+`);
+
+      await fs.writeFile(indexHtml, `
+<html>
+<head><script type="module" src="./main.js"></script>
+<body></body>
+</html>
+`);
+      await ExecUtil.spawn(TSC, ['-p', tmp]).result;
+
+      const proc = ExecUtil.spawn(
+        'google-chrome',
+        [
+          '--virtual-time-budget=10000',
+          '--disable-gpu',
+          '--allow-file-access-from-files',
+          '--run-all-compositor-stages-before-draw',
+          '--headless',
+          '--dump-dom', `file://${indexHtml}`
+        ],
+        { cwd: tmp }
+      );
+
+      const result = await proc.result;
+      console.log(result);
+      const items: Todo[] = JSON.parse(result.stdout.split(/<[/]?body>/)[1]);
+      const body = items[0];
+      assert(body.id === '200');
+      assert(body.priority === 50);
+      assert(body.text === 'todo-a-b-c');
+    } finally {
+      await fs.rm(tmp, { recursive: true });
+    }
+  }
+
+  @Test({ timeout: 10000 })
+  async angularClient() {
+    const tmp = path.resolve(os.tmpdir(), `rest-client-angular-${Util.uuid()}`);
+    try {
+      await this.svc.renderClient({ type: 'angular', output: tmp });
     } finally {
       await fs.rm(tmp, { recursive: true });
     }

@@ -14,6 +14,7 @@ const SVC = './shared/fetch-node-service.ts';
 
 export class NodeFetchClientGenerator extends ClientGenerator {
 
+  get outputExt(): '' { return ''; }
   get subFolder(): string { return 'src'; }
   get uploadType(): string | Imp { return { name: 'UploadContent', file: SVC, classId: '_' }; }
   get endpointResponseWrapper(): string[] { return ['Promise']; }

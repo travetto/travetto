@@ -13,6 +13,7 @@ const SVC = './shared/angular-service.ts';
 
 export class AngularClientGenerator extends ClientGenerator {
 
+  get outputExt(): '' { return ''; }
   get subFolder(): string { return '.'; }
   get uploadType(): string { return 'Blob'; }
   get commonFiles(): [string, Class][] {
