@@ -36,6 +36,9 @@ class ParamController {
   @Post('/array')
   async array(values: number[]) { }
 
+  @Get('/array/names')
+  async arrayNames(values?: string[]) { }
+
   @Post('/array2')
   async array2(...values: boolean[]) { }
 
@@ -206,5 +209,16 @@ export class ParameterTest {
     await assert.rejects(() => ParamExtractor.extract(ep, { params: {}, query: {} } as unknown as Request, {} as Response), ValidationResultError);
     await assert.rejects(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { age: 'blue' } } as unknown as Request, {} as Response), ValidationResultError);
     await assert.rejects(() => ParamExtractor.extract(ep, { params: { jobId: '5' }, query: { age: 9 } } as unknown as Request, {} as Response), ValidationResultError);
+  }
+
+
+  @Test()
+  async realWorldQueryArrayOptional() {
+    const ep = ParameterTest.getEndpoint('/array/names', 'get');
+    await assert.doesNotReject(() => ParamExtractor.extract(ep, { query: {} } as unknown as Request, {} as Response));
+
+    assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { values: 'no' } } as unknown as Request, {} as Response), [['no']]);
+
+    assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { values: [1, 2, 3] } } as unknown as Request, {} as Response), [['1', '2', '3']]);
   }
 }

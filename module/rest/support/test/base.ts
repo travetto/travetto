@@ -34,6 +34,10 @@ export abstract class BaseRestSuite {
     this.#handle = await this.#support.init(this.qualifier);
   }
 
+  get port(): number | undefined {
+    return this.#support instanceof CoreRestServerSupport ? this.#support.port : undefined;
+  }
+
   async getOutput<T>(t: Buffer): Promise<T | string> {
     try {
       return JSON.parse(t.toString('utf8')) as T;

@@ -273,6 +273,9 @@ export class BindUtil {
     if ((val === undefined || val === null) && applyDefaults) {
       val = field.default;
     }
+    if (!field.required && (val === undefined || val === null)) {
+      return val;
+    }
     const complex = SchemaRegistry.has(field.type);
     if (field.array) {
       const valArr = !Array.isArray(val) ? [val] : val;
