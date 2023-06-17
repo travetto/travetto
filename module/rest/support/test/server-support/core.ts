@@ -19,6 +19,10 @@ export class CoreRestServerSupport implements RestServerSupport {
     this.#port = port;
   }
 
+  get port(): number {
+    return this.#port;
+  }
+
   async init(qualifier?: symbol) {
     Object.assign(
       await DependencyRegistry.getInstance(RestCookieConfig),
