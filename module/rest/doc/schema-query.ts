@@ -1,5 +1,5 @@
 import { Schema } from '@travetto/schema';
-import { Controller, Get, QuerySchema } from '@travetto/rest';
+import { Controller, Get } from '@travetto/rest';
 
 @Schema()
 class SearchParams {
@@ -15,7 +15,7 @@ class UserController {
   };
 
   @Get('/search')
-  async search(@QuerySchema() query: SearchParams) {
+  async search(query: SearchParams) {
     return await this.service.search(query);
   }
 }

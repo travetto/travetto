@@ -1,4 +1,4 @@
-import { QuerySchema, Body, Controller, Get, Post, Put, Delete, Path } from '@travetto/rest';
+import { Body, Controller, Get, Post, Put, Delete, Path } from '@travetto/rest';
 
 import { User, UserSearch } from './model';
 
@@ -34,7 +34,7 @@ export class UserController {
    * @returns A list of users
    */
   @Get('/')
-  async getAll(@QuerySchema() search: UserSearch): Promise<User[]> {
+  async getAll(search: UserSearch): Promise<User[]> {
     return [];
   }
 

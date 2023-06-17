@@ -23,31 +23,24 @@ export class CommonUtil {
       && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
   }
 
-  static flattenPaths(data: Record<string, unknown> | string | boolean | number | Date, prefix: string = ''): Record<string, unknown> {
-    if (!this.isPlainObject(data) && !Array.isArray(data)) {
-      if (data !== undefined && data !== '' && data !== null) {
-        return { [prefix]: data };
-      } else {
-        return {};
-      }
-    }
+  static flattenPaths(data: Record<string, unknown>, prefix: string = ''): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
-      const pre = prefix ? `${prefix}.${key}` : key;
+      const pre = `${prefix}${key}`;
       if (this.isPlainObject(value)) {
-        Object.assign(out, this.flattenPaths(value, pre)
+        Object.assign(out, this.flattenPaths(value, `${pre}.`)
         );
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
           const v = value[i];
           if (this.isPlainObject(v)) {
-            Object.assign(out, this.flattenPaths(v, `${pre}[${i}]`));
-          } else if (v !== undefined && v !== '' && data !== null) {
-            out[`${pre}[${i}]`] = v;
+            Object.assign(out, this.flattenPaths(v, `${pre}[${i}].`));
+          } else {
+            out[`${pre}[${i}]`] = v ?? '';
           }
         }
-      } else if (value !== undefined && value !== '' && value !== null) {
-        out[pre] = value;
+      } else {
+        out[pre] = value ?? '';
       }
     }
     return out;
@@ -74,11 +67,14 @@ export class CommonUtil {
     const headers: Record<string, string> = { ...svc.headers };
     const bodyIdxs: number[] = [];
     for (let i = 0; i < paramConfigs.length; i++) {
-      const loc = paramConfigs[i].location;
+      const { location: loc, prefix, complex, name } = paramConfigs[i];
       if ((loc === 'header' || loc === 'query') && params[i] !== undefined) {
-        const prefix = paramConfigs[i].prefix ?? (!paramConfigs[i].complex ? paramConfigs[i].name : '');
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const sub = this.flattenPaths(params[i] as string, prefix);
+        const sub = this.flattenPaths(
+          (prefix || !complex) ?
+            { [prefix ?? name]: params[i] } :
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            params[i] as Record<string, unknown>
+        );
         if (loc === 'header') {
           Object.assign(headers, sub);
         } else {
@@ -150,7 +146,8 @@ export class CommonUtil {
   ): Promise<T> {
     try {
       for (const el of svc.preRequestHandlers) {
-        req = await el(req) ?? req;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        req = (await el(req) ?? req) as RequestOptions<B>;
       }
 
       if (svc.debug) {
@@ -160,7 +157,8 @@ export class CommonUtil {
       let resolved = await fetcher(req.url, req);
 
       for (const el of svc.postResponseHandlers) {
-        resolved = await el(resolved) ?? resolved;
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        resolved = (await el(resolved) ?? resolved) as R;
       }
 
       if (resolved.ok) {

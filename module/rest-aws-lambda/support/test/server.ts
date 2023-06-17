@@ -82,11 +82,11 @@ export class AwsLambdaRestServerSupport implements RestServerSupport {
       ...baseLambdaEvent,
       path,
       httpMethod: method,
-      queryStringParameters: query ?? {},
+      queryStringParameters: (query ?? {}) as Record<string, string>,
       headers: valuesToShape.single(headers ?? {}),
       isBase64Encoded: true,
       body: body ? body.toString('base64') : body ?? null,
-      multiValueQueryStringParameters: valuesToShape.multi(query),
+      multiValueQueryStringParameters: valuesToShape.multi((query ?? {}) as Record<string, string>),
       multiValueHeaders,
       requestContext: { ...baseLambdaContext, path, httpMethod: method },
     }, { ...baseContext }));

@@ -34,7 +34,7 @@ export class RestTransformer {
       (paramType.key === 'managed' &&
         DocUtil.readAugments(paramType.original!.symbol).some(x => x === '@travetto/rest:Context')
       ) ||
-      (pDec && !/(Path|Header|Query|Body|Param|QuerySchema)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
+      (pDec && !/(Path|Header|Query|Body|Param)/.test(DecoratorUtil.getDecoratorIdent(pDec).getText()));
 
     // Detect default behavior
     if (isContext) {
@@ -67,7 +67,7 @@ export class RestTransformer {
         }
       } else if (epDec.ident.getText() !== 'All') { // Treat all separate
         // Treat as schema, and see if endpoint supports a body for default behavior on untyped
-        detectedParamType = epDec.targets?.includes('@travetto/http:Body') ? 'Body' : 'QuerySchema';
+        detectedParamType = epDec.targets?.includes('@travetto/rest:RequestBody') ? 'Body' : 'Query';
         config.name = '';
       }
       node = SchemaTransformUtil.computeField(state, node, config);

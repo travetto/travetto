@@ -4,7 +4,7 @@ import { Request } from '@travetto/rest/src/types';
 import { ServerHandle } from '@travetto/rest';
 
 export type MakeRequestConfig<T> = {
-  query?: Record<string, string>;
+  query?: Record<string, unknown>;
   body?: T;
   headers?: Record<string, string | string[] | undefined>;
 };

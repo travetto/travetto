@@ -1,11 +1,11 @@
 import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { BindUtil, Schema, SchemaRegistry } from '@travetto/schema';
-import { Controller, Redirect, Post, Get, QuerySchema, MethodOrAll, ControllerRegistry } from '@travetto/rest';
+import { Schema, SchemaRegistry } from '@travetto/schema';
+import { Controller, Redirect, Post, Get, MethodOrAll, ControllerRegistry } from '@travetto/rest';
 
 import { BaseRestSuite } from './base';
-import { Path } from '../../src/decorator/param';
+import { Path, Query } from '../../src/decorator/param';
 import { Response } from '../../src/types';
 
 type Errors = { errors: { path: string }[], message: string };
@@ -50,16 +50,13 @@ class SchemaAPI {
   }
 
   @Get('/interface')
-  async ifUser(@QuerySchema() user: UserShape) {
+  async ifUser(user: UserShape) {
     return user;
   }
 
   @Get('/interface-prefix')
-  async ifUserPrefix(
-    @QuerySchema({ prefix: 'user2' }) user2: User,
-    @QuerySchema() user3: User
-  ) {
-    return user2;
+  async ifUserPrefix(user: User, @Query({ prefix: 'user2' }) user3: User) {
+    return user;
   }
 
   @Get('/void')
@@ -122,7 +119,7 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
 
   @Test()
   async verifyBody() {
-    const user = { id: 0, name: 'bob', age: 20, active: false };
+    const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
     const res1 = await this.request<UserShape>('post', '/test/schema/user', { body: user });
 
@@ -189,16 +186,17 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
     const user = { id: '0', name: 'bob', age: '20', active: 'false' };
 
     const res1 = await this.request<Errors>('get', '/test/schema/interface-prefix', {
-      query: { ...user },
+      query: user,
       throwOnError: false
     });
 
     assert(res1.status === 400);
     assert(/Validation errors have occurred/.test(res1.body.message));
+    console.error(res1.body);
     assert(res1.body.errors[0].path.startsWith('user2'));
 
     const res2 = await this.request<Errors>('get', '/test/schema/interface-prefix', {
-      query: BindUtil.flattenPaths(user, 'user2.') as Record<string, string>,
+      query: { user3: user },
       throwOnError: false
     });
 
@@ -208,7 +206,7 @@ export abstract class SchemaRestServerSuite extends BaseRestSuite {
     assert(!res2.body.errors[0].path.startsWith('user'));
 
     const res3 = await this.request<User>('get', '/test/schema/interface-prefix', {
-      query: { ...user, ...BindUtil.flattenPaths(user, 'user2.') as Record<string, string> },
+      query: { ...user, user2: user },
     });
 
     assert(res3.status === 200);

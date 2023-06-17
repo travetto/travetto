@@ -13,7 +13,7 @@ npm install @travetto/rest-model-query
 yarn add @travetto/rest-model-query
 ```
 
-[Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/main/module/rest-model-query/src/model-query.ts#L39). This provides listing by query as well as an endpoint to facilitate suggestion behaviors.
+[Data Model Querying](https://github.com/travetto/travetto/tree/main/module/model-query#readme "Datastore abstraction for advanced query support.") support can also be added support in the form of [ModelQueryRoutes](https://github.com/travetto/travetto/tree/main/module/rest-model-query/src/model-query.ts#L38). This provides listing by query as well as an endpoint to facilitate suggestion behaviors.
 
 **Code: ModelQueryRoutes example**
 ```typescript

@@ -55,10 +55,10 @@ export class BindUtil {
       let sub = out;
       while (parts.length > 0) {
         const part = parts.shift()!;
-        const arr = part.indexOf('[') > 0;
+        const partArr = part.indexOf('[') > 0;
         const name = part.split(/[^A-Za-z_0-9]/)[0];
-        const idx = arr ? part.split(/[\[\]]/)[1] : '';
-        const key = arr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
+        const idx = partArr ? part.split(/[\[\]]/)[1] : '';
+        const key = partArr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
 
         if (!(name in sub)) {
           sub[name] = typeof key === 'number' ? [] : {};
@@ -73,31 +73,31 @@ export class BindUtil {
         }
       }
 
-      if (last.indexOf('[') < 0) {
+      const arr = last.indexOf('[') > 0;
+
+      if (!arr) {
         if (sub[last] && ObjectUtil.isPlainObject(val)) {
           sub[last] = DataUtil.deepAssign(sub[last], val, 'coerce');
         } else {
           sub[last] = val;
         }
       } else {
-        const arr = last.indexOf('[') > 0;
         const name = last.split(/[^A-Za-z_0-9]/)[0];
-        const idx = arr ? last.split(/[\[\]]/)[1] : '';
+        const idx = last.split(/[\[\]]/)[1];
 
-        let key = arr ? (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined)) : undefined;
-        if (sub[name] === undefined) {
-          sub[name] = (typeof key === 'string') ? {} : [];
+        let key = (/^\d+$/.test(idx) ? parseInt(idx, 10) : (idx.trim() || undefined));
+        sub[name] ??= (typeof key === 'string') ? {} : [];
+
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        const arrSub = sub[name] as Record<string, unknown>;
+        if (key === undefined) {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          sub = sub[name] as Record<string, unknown>;
-          if (key === undefined) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            key = sub.length as number;
-          }
-          if (sub[key] && ObjectUtil.isPlainObject(val) && ObjectUtil.isPlainObject(sub[key])) {
-            sub[key] = DataUtil.deepAssign(sub[key], val, 'coerce');
-          } else {
-            sub[key] = val;
-          }
+          key = arrSub.length as number;
+        }
+        if (arrSub[key] && ObjectUtil.isPlainObject(val) && ObjectUtil.isPlainObject(arrSub[key])) {
+          arrSub[key] = DataUtil.deepAssign(arrSub[key], val, 'coerce');
+        } else {
+          arrSub[key] = val;
         }
       }
     }
@@ -109,8 +109,8 @@ export class BindUtil {
    * @param conf The object to flatten the paths for
    * @param val The starting prefix
    */
-  static flattenPaths(data: Record<string, unknown>, prefix: string = ''): Record<string, unknown> {
-    const out: Record<string, unknown> = {};
+  static flattenPaths<V extends string = string>(data: Record<string, unknown>, prefix: string = ''): Record<string, V> {
+    const out: Record<string, V> = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
       if (ObjectUtil.isPlainObject(value)) {
@@ -126,7 +126,8 @@ export class BindUtil {
           }
         }
       } else {
-        out[pre] = value ?? '';
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        out[pre] = (value ?? '') as V;
       }
     }
     return out;

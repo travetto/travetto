@@ -1,10 +1,18 @@
 import { Class, AppError } from '@travetto/base';
-import { BindUtil, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { EndpointConfig } from '../registry/types';
 import { ParamConfig, Request, Response } from '../types';
 
-export type ExtractFn = (c: ParamConfig, req: Request, res: Response) => unknown;
+export type ExtractFn = (c: ParamConfig, req: Request, res: Response, schema: FieldConfig) => unknown;
+
+const QueryExpandedⲐ = Symbol.for('@travetto/rest:query-expanded');
+
+declare global {
+  interface TravettoRequest {
+    [QueryExpandedⲐ]: Record<string, unknown>;
+  }
+}
 
 /**
  * Parameter utils
@@ -20,10 +28,19 @@ class $ParamExtractor {
   constructor() {
     this.defaultExtractors = {
       path: (c, r): unknown => r.params[c.name!],
-      query: (c, r): unknown => r.query[c.name!],
+      query: (c, r, _, schema): unknown => {
+        const exp = (r[QueryExpandedⲐ] ??= BindUtil.expandPaths(r.query));
+        if (c.prefix) {
+          return exp[c.prefix];
+        } else if (schema.type.Ⲑid) { // Is a complex type
+          return exp; // Return whole thing
+        } else {
+          return exp[c.name!];
+        }
+      },
       header: (c, r): unknown => r.header(c.name!),
       body: (__, r): unknown => r.body,
-      context: (c, req, res): unknown => this.getExtractor(c.contextType!)(c, req, res)
+      context: (c, req, res, schema): unknown => this.getExtractor(c.contextType!)(c, req, res, schema)
     };
   }
 
@@ -75,7 +92,9 @@ class $ParamExtractor {
   async extract(route: EndpointConfig, req: Request, res: Response): Promise<unknown[]> {
     const cls = route.class;
     const method = route.handlerName;
-    const routed = route.params.map(c => (c.extract ?? this.defaultExtractors[c.location])(c, req, res));
+
+    const methodParams = SchemaRegistry.getMethodSchema(cls, method);
+    const routed = route.params.map((c, i) => (c.extract ?? this.defaultExtractors[c.location])(c, req, res, methodParams[i]));
 
     const params = BindUtil.coerceMethodParams(cls, method, routed, true);
 

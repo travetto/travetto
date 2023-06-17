@@ -78,13 +78,13 @@ class SimpleController {
 
 ### Parameters
 Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
-   *  [@Path](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L45) - Path params
-   *  [@Query](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L51) - Query params
-   *  [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L63) - Request body (in it's entirety), with support for validation
-   *  [@QuerySchema](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L70) - Allows for mapping the query parameters to a full object
-   *  [@Header](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L57) - Header values
-   *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115), etc.)
-Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L26) can be configured to indicate:
+   *  [@Path](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L44) - Path params
+   *  [@Query](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L50) - Query params
+   *  [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62) - Request body (in it's entirety), with support for validation
+   *   - Allows for mapping the query parameters to a full object
+   *  [@Header](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L56) - Header values
+   *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115), etc.)
+Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L25) can be configured to indicate:
    *  `name` - Name of param, field name, defaults to handler parameter name if necessary
    *  `description` - Description of param, pulled from [JSDoc](http://usejsdoc.org/about-getting-started.html), or defaults to name if empty
    *  `required?` - Is the field required?, defaults to whether or not the parameter itself is optional
@@ -142,7 +142,7 @@ export class Simple {
 ### Body and QuerySchema
 The module provides high level access for [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") support, via decorators, for validating and typing request bodies. 
 
-[@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L63) provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+[@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62) provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
 **Code: Using Body for POST requests**
 ```typescript
@@ -170,12 +170,12 @@ class UserController {
 }
 ```
 
-[@QuerySchema](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L70) provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+ provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
 **Code: Using QuerySchema for GET requests**
 ```typescript
 import { Schema } from '@travetto/schema';
-import { Controller, Get, QuerySchema } from '@travetto/rest';
+import { Controller, Get } from '@travetto/rest';
 
 @Schema()
 class SearchParams {
@@ -191,17 +191,17 @@ class UserController {
   };
 
   @Get('/search')
-  async search(@QuerySchema() query: SearchParams) {
+  async search(query: SearchParams) {
     return await this.service.search(query);
   }
 }
 ```
 
-Additionally, [@QuerySchema](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L70) and [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L63) can also be used with `interface`s and `type` literals in lieu of classes. This is best suited for simple types:
+Additionally,  and [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62) can also be used with `interface`s and `type` literals in lieu of classes. This is best suited for simple types:
 
 **Code: Using QuerySchema with a type literal**
 ```typescript
-import { Controller, Get, QuerySchema } from '@travetto/rest';
+import { Controller, Get } from '@travetto/rest';
 
 type Paging = {
   page?: number;
@@ -216,7 +216,7 @@ class UserController {
   };
 
   @Get('/search')
-  async search(@QuerySchema() query: Paging = { page: 0, pageSize: 100 }) {
+  async search(query: Paging = { page: 0, pageSize: 100 }) {
     return await this.service.search(query);
   }
 }

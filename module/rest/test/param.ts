@@ -11,13 +11,9 @@ import { ControllerRegistry } from '../src/registry/controller';
 import { MethodOrAll, Request, Response } from '../src/types';
 import { ParamExtractor } from '../src/util/param';
 
-interface Wrapper<T> {
-  items: T[];
+class User {
+  name: string;
 }
-
-const OPTIONAL = { required: false };
-
-interface Complex { }
 
 @Controller('/')
 class ParamController {
@@ -73,6 +69,16 @@ class ParamController {
   */
   // @Post('/wrapper')
   // async wrapper(@Body() wrapper: Wrapper<Complex>) { }
+
+  @Get('/list/todo')
+  async listTodo(limit: number, offset: number, categories?: string[]): Promise<unknown[]> {
+    return [];
+  }
+
+  @Get('/interface-prefix')
+  async ifUserPrefix(user3: User, @Query({ prefix: 'user1' }) user2: User) {
+    return user2;
+  }
 }
 
 @Suite()
@@ -220,5 +226,55 @@ export class ParameterTest {
     assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { values: 'no' } } as unknown as Request, {} as Response), [['no']]);
 
     assert.deepStrictEqual(await ParamExtractor.extract(ep, { query: { values: [1, 2, 3] } } as unknown as Request, {} as Response), [['1', '2', '3']]);
+  }
+
+  @Test()
+  async realWorldListTodo() {
+    const ep = ParameterTest.getEndpoint('/list/todo', 'get');
+    await assert.rejects(() => ParamExtractor.extract(ep, { query: {} } as unknown as Request, {} as Response));
+
+    assert.deepStrictEqual(
+      await ParamExtractor.extract(
+        ep,
+        { query: { limit: 1, offset: 0, categories: [1, 2, 3] } } as unknown as Request, {} as Response
+      ),
+      [1, 0, ['1', '2', '3']]
+    );
+
+    assert.deepStrictEqual(
+      await ParamExtractor.extract(
+        ep,
+        { query: { limit: 1, offset: 0, categories: [] } } as unknown as Request, {} as Response),
+      [1, 0, []]
+    );
+
+    assert.deepStrictEqual(
+      await ParamExtractor.extract(
+        ep,
+        { query: { limit: 1, offset: 0 } } as unknown as Request, {} as Response),
+      [1, 0, undefined]
+    );
+  }
+
+  @Test()
+  async realWorldUserInterface() {
+    await RootRegistry.init();
+
+    const ep = ParameterTest.getEndpoint('/interface-prefix', 'get');
+    await assert.rejects(() => ParamExtractor.extract(
+      ep,
+      { query: {} } as unknown as Request,
+      {} as Response)
+    );
+
+    const extracted = await ParamExtractor.extract(
+      ep,
+      { query: { user1: { name: 'bob' }, name: 'rob' } } as unknown as Request, {} as Response
+    );
+
+    // @ts-expect-error
+    assert(extracted[0]?.name === 'rob');
+    // @ts-expect-error
+    assert(extracted[1]?.name === 'bob');
   }
 }
