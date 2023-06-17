@@ -59,7 +59,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
     await ManifestUtil.writeFileWithBuffer(
       path.resolve(this.#output, this.subFolder, file),
       content.trim()
-        .replace(/^((?:ex|im)port[^;\n]*)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
+        .replace(/^((?:ex|im)port[^;]*)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
     );
   }
 
