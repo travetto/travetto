@@ -21,7 +21,7 @@ function Endpoint(method: MethodOrAll, path: string = '/', extra: Partial<Endpoi
 /**
  * Registers for ALL HTTP verbs
  * @param path The path to route the request to
- * @augments `@travetto/http:Body`
+ * @augments `@travetto/rest:RequestBody`
  * @augments `@travetto/rest:Endpoint`
  */
 export function All(path?: string): RouteDecorator { return Endpoint('all', path); }
@@ -34,21 +34,21 @@ export function Get(path?: string): RouteDecorator { return Endpoint('get', path
 /**
  * Registers POST requests
  * @param path The path to route the request to
- * @augments `@travetto/http:Body`
+ * @augments `@travetto/rest:RequestBody`
  * @augments `@travetto/rest:Endpoint`
  */
 export function Post(path?: string): RouteDecorator { return Endpoint('post', path); }
 /**
  * Registers PUT requests
  * @param path The path to route the request to
- * @augments `@travetto/http:Body`
+ * @augments `@travetto/rest:RequestBody`
  * @augments `@travetto/rest:Endpoint`
  */
 export function Put(path?: string): RouteDecorator { return Endpoint('put', path); }
 /**
  * Registers PATCH requests
  * @param path The path to route the request to
- * @augments `@travetto/http:Body`
+ * @augments `@travetto/rest:RequestBody`
  * @augments `@travetto/rest:Endpoint`
  */
 export function Patch(path?: string): RouteDecorator { return Endpoint('patch', path); }

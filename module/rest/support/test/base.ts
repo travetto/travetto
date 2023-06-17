@@ -3,6 +3,7 @@ import { Readable } from 'stream';
 import { RootRegistry } from '@travetto/registry';
 import { StreamUtil, AppError, ConcreteClass, Util } from '@travetto/base';
 import { AfterAll, BeforeAll } from '@travetto/test';
+import { BindUtil } from '@travetto/schema';
 
 import { MethodOrAll, Request, ServerHandle } from '../../src/types';
 import { MakeRequestConfig, MakeRequestResponse, RestServerSupport } from './server-support/base';
@@ -110,6 +111,7 @@ export abstract class BaseRestSuite {
     }
 
     cfg.body = body;
+    cfg.query = BindUtil.flattenPaths(cfg.query ?? {});
 
     const resp = await this.#support.execute(method, path, { ...cfg, body: buffer });
     const out = await this.getOutput<T>(resp.body);

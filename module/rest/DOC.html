@@ -88,14 +88,14 @@ Additionally, the return type of the method will also be used to describe the <c
 <h3 id="parameters">Parameters</h3>
 
 Endpoints can be configured to describe and enforce parameter behavior.  Request parameters can be defined in five areas:
-<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L45">@Path</a> - Path params</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L51">@Query</a> - Query params</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L63">@Body</a> - Request body (in it's entirety), with support for validation</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L70">@QuerySchema</a> - Allows for mapping the query parameters to a full object</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L57">@Header</a> - Header values</li>
-<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L39">@Context</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12">TravettoRequest</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115">TravettoResponse</a>, etc.)</li>
+<ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L44">@Path</a> - Path params</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L50">@Query</a> - Query params</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62">@Body</a> - Request body (in it's entirety), with support for validation</li>
+<li> - Allows for mapping the query parameters to a full object</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L56">@Header</a> - Header values</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38">@Context</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12">TravettoRequest</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L115">TravettoResponse</a>, etc.)</li>
 </ul>
-Each <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L26">@Param</a> can be configured to indicate:
+Each <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L25">@Param</a> can be configured to indicate:
 <ul> <li><code class="item input">name</code> - Name of param, field name, defaults to handler parameter name if necessary</li>
 <li><code class="item input">description</code> - Description of param, pulled from <a target="_blank" class="external-link" href="http://usejsdoc.org/about-getting-started.html">JSDoc</a>, or defaults to name if empty</li>
 <li><code class="item input">required?</code> - Is the field required?, defaults to whether or not the parameter itself is optional</li>
@@ -157,7 +157,7 @@ Each <a target="_blank" class="source-link" href="https://github.com/travetto/tr
 <h3 id="body-and-queryschema">Body and QuerySchema</h3>
 
 The module provides high level access for <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a> support, via decorators, for validating and typing request bodies. <br><br>
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L63">@Body</a> provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62">@Body</a> provides the ability to convert the inbound request body into a schema bound object, and provide validation before the controller even receives the request.
 
   <figure class="code">
     <figcaption class="code">Using Body for POST requests
@@ -188,7 +188,7 @@ The module provides high level access for <a class="module-link" href="https://g
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L70">@QuerySchema</a> provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+ provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
   <figure class="code">
     <figcaption class="code">Using QuerySchema for GET requests
@@ -196,7 +196,7 @@ The module provides high level access for <a class="module-link" href="https://g
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Schema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/schema'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QuerySchema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">Schema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token keyword">class</span> <span class="token class-name">SearchParams</span> <span class="token punctuation">{{'{'}}</span>
@@ -212,20 +212,20 @@ The module provides high level access for <a class="module-link" href="https://g
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/search'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">search</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">QuerySchema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> query<span class="token operator">:</span> SearchParams<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">search</span><span class="token punctuation">(</span>query<span class="token operator">:</span> SearchParams<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">search</span><span class="token punctuation">(</span>query<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-Additionally, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L70">@QuerySchema</a> and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L63">@Body</a> can also be used with <code class="item input">interface</code>s and <code class="item input">type</code> literals in lieu of classes. This is best suited for simple types:
+Additionally,  and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62">@Body</a> can also be used with <code class="item input">interface</code>s and <code class="item input">type</code> literals in lieu of classes. This is best suited for simple types:
 
   <figure class="code">
     <figcaption class="code">Using QuerySchema with a type literal
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/schema-query-type.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get<span class="token punctuation">,</span> QuerySchema <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Controller<span class="token punctuation">,</span> Get <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/rest'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">type</span> <span class="token class-name">Paging</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
   page<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
@@ -240,7 +240,7 @@ Additionally, <a target="_blank" class="source-link" href="https://github.com/tr
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
 
   <span class="token decorator"><span class="token at operator">@</span><span class="token function">Get</span></span><span class="token punctuation">(</span><span class="token string">'/search'</span><span class="token punctuation">)</span>
-  <span class="token keyword">async</span> <span class="token function">search</span><span class="token punctuation">(</span><span class="token decorator"><span class="token at operator">@</span><span class="token function">QuerySchema</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span> query<span class="token operator">:</span> Paging <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> page<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> pageSize<span class="token operator">:</span> <span class="token number">100</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">search</span><span class="token punctuation">(</span>query<span class="token operator">:</span> Paging <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span> page<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> pageSize<span class="token operator">:</span> <span class="token number">100</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>service<span class="token punctuation">.</span><span class="token function">search</span><span class="token punctuation">(</span>query<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>

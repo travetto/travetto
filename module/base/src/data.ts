@@ -158,7 +158,11 @@ export class DataUtil {
       case undefined:
       case String: return `${input}`;
     }
-    throw new Error(`Unknown type ${type.name}`);
+    if (!strict || ObjectUtil.isPlainObject(input)) {
+      return input;
+    } else {
+      throw new Error(`Unknown type ${type.name}`);
+    }
   }
 
   /**

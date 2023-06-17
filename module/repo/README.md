@@ -110,6 +110,7 @@ global-test/model_cache
 global-test/model_rest-session
 global-test/openapi
 global-test/pack_app
+global-test/rest-client
 global-test/rest-session
 global-test/transformer-test
 module/asset
@@ -209,6 +210,7 @@ global-test/asset-rest <workspace-root>/global-test/asset-rest
 global-test/model_rest-session <workspace-root>/global-test/model_rest-session
            global-test/openapi <workspace-root>/global-test/openapi
           global-test/pack_app <workspace-root>/global-test/pack_app
+       global-test/rest-client <workspace-root>/global-test/rest-client
       global-test/rest-session <workspace-root>/global-test/rest-session
   global-test/transformer-test <workspace-root>/global-test/transformer-test
                   module/asset <workspace-root>/module/asset

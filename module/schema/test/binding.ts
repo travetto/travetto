@@ -264,6 +264,23 @@ class DataBinding {
     );
   }
 
+
+  @Test()
+  async validateArrayMixedBind() {
+    assert.deepStrictEqual(
+      BindUtil.expandPaths(
+        {
+          'children[0]': 1,
+          'children[1]': 2,
+          'children[2]': 3,
+        }
+      ),
+      {
+        children: [1, 2, 3]
+      }
+    );
+  }
+
   @Test('Validate bind')
   async validatePrimitiveBindToObject() {
     const person = Person.from({

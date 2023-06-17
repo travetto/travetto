@@ -3,7 +3,7 @@ import { ParameterObject } from 'openapi3-ts/src/model/OpenApi';
 import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
-import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Put, QuerySchema, Undocumented } from '@travetto/rest';
+import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Put, Query, Undocumented } from '@travetto/rest';
 import { BeforeAll, Suite, Test } from '@travetto/test';
 
 import { OpenapiVisitor } from '../src/spec-generate';
@@ -32,7 +32,7 @@ class TestCont {
   }
 
   @Get('/user-search-prefix')
-  async searchPrefix(@QuerySchema({ prefix: 'search' }) search: UserSearch) {
+  async searchPrefix(@Query({ prefix: 'search' }) search: UserSearch) {
     return [new TestUser()];
   }
 
