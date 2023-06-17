@@ -25,8 +25,8 @@ export abstract class BaseAngularService extends BaseRemoteService<BodyInit, Res
   abstract get transform(): <T>() => OperatorFunction<T, T>;
   abstract get client(): HttpClient;
 
-  consumeError = (err: Error | Response): Error => CommonUtil.consumeError(err);
-  consumeJSON = <T>(text: string): T => CommonUtil.consumeJSON(text);
+  override consumeError = (err: Error | Response): Error => CommonUtil.consumeError(err);
+  override consumeJSON = <T>(text: string | unknown): T => CommonUtil.consumeJSON(text);
 
   buildRequestShape(params: unknown[], cfg: RequestDefinition): RequestOptions {
     return CommonUtil.buildRequest<BodyInit, Blob, Chunk, Response>(this, params, cfg, {

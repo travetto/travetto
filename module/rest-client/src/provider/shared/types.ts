@@ -56,8 +56,8 @@ export abstract class BaseRemoteService<B, R> implements IRemoteService<B, R> {
   headers: Record<string, string>;
   withCredentials?: boolean;
 
-  consumeJSON: <T>(text: string) => T;
-  consumeError: (err: Error | R) => Error | Promise<Error>;
+  consumeJSON!: <T>(text: string) => T;
+  consumeError!: (err: Error | R) => Error | Promise<Error>;
 
   abstract get routePath(): string;
 
@@ -66,5 +66,6 @@ export abstract class BaseRemoteService<B, R> implements IRemoteService<B, R> {
     this.postResponseHandlers = cfg.postResponseHandlers ?? [];
     this.preRequestHandlers = cfg.preRequestHandlers ?? [];
     this.headers = cfg.headers ?? {};
+    this.withCredentials = cfg.withCredentials ?? false;
   }
 }
