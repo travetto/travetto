@@ -1,6 +1,6 @@
 {
   "name": "@travetto/rest-client",
-  "version": "3.1.26",
+  "version": "3.1.27",
   "description": "RESTful support for generating clients for controller endpoints",
   "keywords": [
     "rest",
@@ -26,9 +26,9 @@
     "directory": "module/rest-client"
   },
   "dependencies": {
-    "@travetto/config": "^3.1.8",
-    "@travetto/rest": "^3.1.11",
-    "@travetto/schema": "^3.1.8"
+    "@travetto/config": "^3.1.9",
+    "@travetto/rest": "^3.1.12",
+    "@travetto/schema": "^3.1.9"
   },
   "travetto": {
     "displayName": "RESTful Client Support"
