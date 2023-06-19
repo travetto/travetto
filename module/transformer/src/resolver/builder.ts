@@ -7,8 +7,9 @@ import { DocUtil } from '../util/doc';
 import { CoreUtil } from '../util/core';
 import { DeclarationUtil } from '../util/declaration';
 import { LiteralUtil } from '../util/literal';
+import { TemplateLiteralPart } from '../types/shared';
 
-import { Type, AnyType, UnionType, TransformResolver } from './types';
+import { Type, AnyType, UnionType, TransformResolver, TemplateType } from './types';
 import { CoerceUtil } from './coerce';
 
 /**
@@ -33,7 +34,10 @@ const GLOBAL_SIMPLE: Record<string, Function> = {
   PromiseConstructor: Promise.constructor
 };
 
-type Category = 'void' | 'undefined' | 'concrete' | 'unknown' | 'tuple' | 'shape' | 'literal' | 'managed' | 'union' | 'foreign';
+type Category =
+  'void' | 'undefined' | 'concrete' | 'unknown' |
+  'tuple' | 'shape' | 'literal' | 'template' | 'managed' |
+  'union' | 'foreign';
 
 /**
  * Type categorizer, input for builder
@@ -82,6 +86,8 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
     } else {
       return { category: 'managed', type: resolvedType };
     }
+  } else if (flags & (ts.TypeFlags.TemplateLiteral)) {
+    return { category: 'template', type };
   } else if (flags & (
     ts.TypeFlags.Boolean | ts.TypeFlags.BooleanLiteral |
     ts.TypeFlags.Number | ts.TypeFlags.NumberLiteral |
@@ -119,6 +125,36 @@ export const TypeBuilder: {
   },
   tuple: {
     build: (resolver, type) => ({ key: 'tuple', tsTupleTypes: resolver.getAllTypeArguments(type), subTypes: [] })
+  },
+  template: {
+    build: (resolver, type) => {
+      // If we are have a template literal type, we need to make our own type node
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      if (type.flags & ts.TypeFlags.TemplateLiteral) {
+        const values: TemplateLiteralPart[] = [];
+        const texts = 'texts' in type && (typeof type.texts === 'object') && Array.isArray(type.texts) ? type.texts : undefined;
+        const types = 'types' in type && (typeof type.types === 'object') && Array.isArray(type.types) ? type.types : undefined;
+        if (texts?.length && types?.length) {
+          for (let i = 0; i < texts?.length; i += 1) {
+            if (texts[i] && texts[i] !== 'undefined') {
+              values.push(texts[i]);
+            }
+            if (types[i]) {
+              switch (types[i].intrinsicName) {
+                case 'number': values.push(Number); break;
+                case 'string': values.push(String); break;
+                case 'boolean': values.push(Boolean); break;
+                case 'undefined': values.push(''); break;
+              }
+            }
+          }
+          if (values.length > 0) {
+            return ({ key: 'template', template: { op: 'and', values }, ctor: String });
+          }
+        }
+      }
+      return { key: 'literal', ctor: Object };
+    }
   },
   literal: {
     build: (resolver, type) => {
@@ -182,7 +218,16 @@ export const TypeBuilder: {
       const { undefinable, nullable, subTypes } = type;
       const [first] = subTypes;
 
-      if (subTypes.length === 1) {
+      if (first.key === 'template') {
+        return {
+          key: 'template',
+          ctor: String,
+          nullable: type.nullable,
+          undefinable: type.undefinable,
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          template: { op: 'or', values: subTypes.map(x => (x as TemplateType).template!) }
+        };
+      } else if (subTypes.length === 1) {
         return { undefinable, nullable, ...first };
       } else if (first.key === 'literal' && subTypes.every(el => el.name === first.name)) { // We have a common
         type.commonType = first;

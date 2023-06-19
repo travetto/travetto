@@ -19,6 +19,7 @@ interface Todo {
   id: string;
   text: string;
   priority?: number;
+  color?: `${'green' | 'blue'}-${number}${'-a' | '-b' | ''}`;
 }
 
 @Controller('rest/test/todo')
@@ -30,8 +31,8 @@ export class TodoController {
 
   /** Get all the todos, yay! */
   @Get()
-  async listTodo(limit?: number, offset?: number, categories?: string[]): Promise<Todo[]> {
-    return [{ text: `todo-${categories?.join('-') ?? 'none'}`, id: `${limit ?? 5}`, priority: offset }];
+  async listTodo(limit?: number, offset?: number, categories?: string[], color?: Todo['color']): Promise<Todo[]> {
+    return [{ text: `todo-${categories?.join('-') ?? 'none'}`, id: `${limit ?? 5}`, priority: offset, color }];
   }
 
   @Delete('/:id')
@@ -73,7 +74,7 @@ const log = v => console.log(JSON.stringify(v));
 const api = new TodoApi({ baseUrl: 'http://localhost:${this.port!}'});
 
 async function go() {
-  log(await api.listTodo(200, 50, ['a','b','c']));
+  log(await api.listTodo(200, 50, ['a','b','c'], 'green-2'));
 }
 
 go()
@@ -88,6 +89,7 @@ go()
       assert(body.id === '200');
       assert(body.priority === 50);
       assert(body.text === 'todo-a-b-c');
+      assert(body.color === 'green-2');
     } finally {
       // await fs.rm(tmp, { recursive: true });
     }
@@ -116,7 +118,7 @@ const log = v => output.push(v);
 const api = new TodoApi({ baseUrl: 'http://localhost:${this.port!}' });
 
 async function go() {
-  log(await api.listTodo(200, 50, ['a','b','c']));
+  log(await api.listTodo(200, 50, ['a','b','c'], 'green-2'));
   document.body.innerText = output.map(v => JSON.stringify(v)).join('\\n');
 }
 
@@ -152,6 +154,7 @@ window.onload = go;
       assert(body.id === '200');
       assert(body.priority === 50);
       assert(body.text === 'todo-a-b-c');
+      assert(body.color === 'green-2');
     } finally {
       await fs.rm(tmp, { recursive: true });
     }

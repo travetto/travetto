@@ -5,6 +5,9 @@ import { ValidatorFn } from '../validate/types';
 
 export type ClassList = Class | [Class];
 
+type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
+export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
+
 /**
  * Basic describable configuration
  */
@@ -135,7 +138,7 @@ export interface FieldConfig extends DescribableConfig {
   /**
    * Does the field expect a match
    */
-  match?: { re: RegExp, message?: string };
+  match?: { re: RegExp, message?: string, template?: TemplateLiteral };
   /**
    * Minimum value configuration
    */

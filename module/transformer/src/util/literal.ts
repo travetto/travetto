@@ -1,5 +1,7 @@
 import ts from 'typescript';
 
+import { TemplateLiteral } from '../types/shared';
+
 /**
  * Utilities for dealing with literals
  */
@@ -41,6 +43,8 @@ export class LiteralUtil {
       val = factory.createNumericLiteral(val);
     } else if (typeof val === 'boolean') {
       val = val ? factory.createTrue() : factory.createFalse();
+    } else if (val instanceof RegExp) {
+      val = factory.createRegularExpressionLiteral(`/${val.source}/${val.flags ?? ''}`);
     } else if (val === String || val === Number || val === Boolean || val === Date || val === RegExp) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       val = factory.createIdentifier((val as Function).name);
@@ -143,5 +147,32 @@ export class LiteralUtil {
       }
     }
     return undefined;
+  }
+
+  /**
+   * Flatten a template literal into a regex
+   */
+  static templateLiteralToRegex(template: TemplateLiteral, exact = true): string {
+    const out: string[] = [];
+    for (const el of template.values) {
+      if (el === Number) {
+        out.push('\\d+');
+      } else if (el === Boolean) {
+        out.push('(?:true|false)');
+      } else if (el === String) {
+        out.push('.+');
+      } else if (typeof el === 'string' || typeof el === 'number' || typeof el === 'boolean') {
+        out.push(`${el}`);
+      } else {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        out.push(`(?:${this.templateLiteralToRegex(el as TemplateLiteral, false)})`);
+      }
+    }
+    const body = out.join(template.op === 'and' ? '' : '|');
+    if (exact) {
+      return `^(?:${body})$`;
+    } else {
+      return body;
+    }
   }
 }

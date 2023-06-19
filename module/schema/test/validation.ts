@@ -10,7 +10,7 @@ import { SchemaValidator } from '../src/validate/validator';
 
 import {
   Response, Parent, MinTest, Nested, ViewSpecific, Grade, Ccccz, AllAs, Bbbbz, Aaaz,
-  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque
+  CustomValidated, StringMatches, NotRequiredUndefinable, DateTestSchema, Address, Opaque, TemplateLit
 } from './models/validation';
 import { Accessors } from './models/binding';
 
@@ -376,5 +376,50 @@ class Validation {
     await assert.doesNotReject(() =>
       SchemaValidator.validate(Accessors, { color: 'green', area: '5' } as unknown)
     );
+  }
+
+  @Test()
+  async verifyTemplateLiteral() {
+    await assert.rejects(() => SchemaValidator.validate(TemplateLit, {} as unknown),
+      err => {
+        assert(err instanceof ValidationResultError);
+        assert(err.errors.length === 1);
+        assert(err.errors[0].path === 'age');
+        assert(err.errors[0].message === 'age is required');
+      }
+    );
+
+    for (const age of ['bob', '19-s', '19-es', 'z-y', '19-y']) {
+      await assert.rejects(() => SchemaValidator.validate(TemplateLit, { age: age as '19-ys' }),
+        err => {
+          assert(err instanceof ValidationResultError);
+          assert(err.errors.length === 1);
+          assert(err.errors[0].path === 'age');
+          assert(err.errors[0].message.startsWith('age must match'));
+        }
+      );
+    }
+
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(TemplateLit, { age: '19-ys' } as unknown)
+    );
+  }
+
+  @Test()
+  async verifyTemplateLiteralArray() {
+    await assert.doesNotReject(() =>
+      SchemaValidator.validate(TemplateLit, { age: '19-ys', height: ['10ft', '9m'] } as unknown)
+    );
+
+    for (const heights of [['bob'], ['19-s'], ['19-es'], ['z-y'], ['19-y'], ['8mm', '10ft']] as unknown as ('10ft'[][])) {
+      await assert.rejects(() => SchemaValidator.validate(TemplateLit, { age: '19-ys', heights }),
+        err => {
+          assert(err instanceof ValidationResultError);
+          assert(err.errors.length === 1);
+          assert(err.errors[0].path === 'heights[0]');
+          assert(err.errors[0].message.startsWith('heights[0] must match'));
+        }
+      );
+    }
   }
 }

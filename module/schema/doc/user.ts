@@ -5,4 +5,5 @@ export class User {
   name: string;
   age: number;
   favoriteFood?: 'pizza' | 'burrito' | 'salad';
+  height?: `${number}${'m' | 'ft'}`;
 }

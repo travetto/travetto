@@ -1,3 +1,4 @@
+import { TimeUnit } from '@travetto/base';
 import {
   Schema, Float, MinLength, Match, Max, Min,
   CommonRegExp, View, Url, Required, Validator
@@ -124,4 +125,12 @@ export class Grade {
 export class Opaque {
   name: string;
   details: object;
+}
+
+type HeightUnit = 'm' | 'ft' | undefined;
+
+@Schema()
+export class TemplateLit {
+  age: `${number}-${TimeUnit}s`;
+  heights?: `${number}${HeightUnit}`[];
 }

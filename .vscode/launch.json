@@ -8,10 +8,10 @@
       "name": "Launch Compiler",
       "program": "${workspaceFolder}/.trv_compiler/node_modules/@travetto/compiler/support/compiler-entry.js",
       "env": {
-        "TRV_MANIFEST": "${workspaceFolder}/.trv_output/node_modules/@travetto/rest/manifest.json"
+        "TRV_MANIFEST": "${workspaceFolder}/.trv_output/node_modules/@travetto/schema/manifest.json"
       },
       "args": [
-        "${workspaceFolder}/module/rest/test/configure.ts"
+        "${workspaceFolder}/module/schema/test/models/validation.ts"
       ],
       "sourceMaps": true,
       "pauseForSourceMap": true,

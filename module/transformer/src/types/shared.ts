@@ -25,3 +25,8 @@ export type Import = {
   ident: ts.Identifier;
   stmt?: ts.ImportDeclaration;
 };
+
+
+/** Template Literal Types */
+export type TemplateLiteralPart = string | NumberConstructor | StringConstructor | BooleanConstructor;
+export type TemplateLiteral = { op: 'and' | 'or', values: (TemplateLiteralPart | TemplateLiteral)[] };
