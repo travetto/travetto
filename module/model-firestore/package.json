@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-firestore",
-  "version": "3.1.13",
+  "version": "3.2.0-rc.0",
   "description": "Firestore backing for the travetto model module.",
   "keywords": [
     "typescript",
@@ -26,12 +26,12 @@
   },
   "dependencies": {
     "@google-cloud/firestore": "^6.5.0",
-    "@travetto/base": "^3.1.4",
-    "@travetto/config": "^3.1.9",
-    "@travetto/model": "^3.1.15"
+    "@travetto/base": "^3.2.0-rc.0",
+    "@travetto/config": "^3.2.0-rc.0",
+    "@travetto/model": "^3.2.0-rc.0"
   },
   "peerDependencies": {
-    "@travetto/command": "^3.1.5"
+    "@travetto/command": "^3.2.0-rc.0"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {
