@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import { Class, Util } from '@travetto/base';
 import { ManifestUtil, RootIndex, path } from '@travetto/manifest';
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, EndpointConfig } from '@travetto/rest';
-import { ClassConfig, FieldConfig, SchemaRegistry } from '@travetto/schema';
+import { ClassConfig, FieldConfig, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { ParamConfig } from './shared/types';
@@ -29,6 +29,25 @@ type EndpointDesc = {
   paramInputs: (string | Imp)[];
   paramConfigs: ParamConfig[];
   imports: Imp[];
+};
+
+/**
+  * Recreate a template literal from AST
+  */
+const recreateTemplateLiteral = (template: TemplateLiteral, escape = false): string => {
+  const out: string[] = [];
+  for (const el of template.values) {
+    if (el === String || el === Boolean || el === Number) {
+      out.push(`\${${el.name.toLowerCase()}}`);
+    } else if (typeof el === 'string' || typeof el === 'number' || typeof el === 'boolean') {
+      out.push(`${el}`);
+    } else {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      out.push(`(${recreateTemplateLiteral(el as TemplateLiteral, true)})`);
+    }
+  }
+  const body = (template.op === 'or') ? out.join('|') : out.join('');
+  return escape ? `\`${body}\`` : body;
 };
 
 export abstract class ClientGenerator implements ControllerVisitor {
@@ -59,7 +78,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
     await ManifestUtil.writeFileWithBuffer(
       path.resolve(this.#output, this.subFolder, file),
       content.trim()
-        .replace(/^((?:ex|im)port[^;]*)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
+        .replace(/^((?:ex|im)port\s+[^;]*\s+from\s*[^;]+)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
     );
   }
 
@@ -137,7 +156,9 @@ export abstract class ClientGenerator implements ControllerVisitor {
     } else if (field.specifiers?.includes('file')) {
       type = this.uploadType;
     } else {
-      if (field.enum) {
+      if (field.match?.template) {
+        type = recreateTemplateLiteral(field.match.template);
+      } else if (field.enum) {
         type = `(${field.enum.values.map(v => typeof v === 'string' ? `'${v}'` : `${v}`).join(' | ')})`;
       } else {
         type = TYPE_MAPPING[field.type.name] ?? 'unknown';

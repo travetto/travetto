@@ -1,5 +1,8 @@
 import ts from 'typescript';
-import { type AnyType, DeclarationUtil, DecoratorUtil, DocUtil, ParamDocumentation, TransformerState } from '@travetto/transformer';
+import {
+  type AnyType, DeclarationUtil, LiteralUtil,
+  DecoratorUtil, DocUtil, ParamDocumentation, TransformerState
+} from '@travetto/transformer';
 
 const SCHEMA_MOD = '@travetto/schema/src/decorator/schema';
 const FIELD_MOD = '@travetto/schema/src/decorator/field';
@@ -15,6 +18,7 @@ export class SchemaTransformUtil {
       case 'pointer': return this.toConcreteType(state, type.target, node, root);
       case 'managed': return state.getOrImport(type);
       case 'tuple': return state.fromLiteral(type.subTypes.map(x => this.toConcreteType(state, x, node, root)!));
+      case 'template': return state.createIdentifier(type.ctor.name);
       case 'literal': {
         if ((type.ctor === Array) && type.typeArguments?.length) {
           return state.fromLiteral([this.toConcreteType(state, type.typeArguments[0], node, root)]);
@@ -108,18 +112,28 @@ export class SchemaTransformUtil {
       ));
     }
 
+    const primaryExpr = typeExpr.key === 'literal' && typeExpr.typeArguments?.[0] ? typeExpr.typeArguments[0] : typeExpr;
+
+    // We need to ensure we aren't being tripped up by the wrapper for arrays, sets, etc.
     // If we have a union type
-    if (typeExpr.key === 'union') {
-      const values = typeExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)
+    if (primaryExpr.key === 'union') {
+      const values = primaryExpr.subTypes.map(x => x.key === 'literal' ? x.value : undefined)
         .filter(x => x !== undefined && x !== null)
         .sort();
 
-      if (values.length === typeExpr.subTypes.length) {
+      if (values.length === primaryExpr.subTypes.length) {
         attrs.push(state.factory.createPropertyAssignment('enum', state.fromLiteral({
           values,
           message: `{path} is only allowed to be "${values.join('" or "')}"`
         })));
       }
+    } else if (primaryExpr.key === 'template' && primaryExpr.template) {
+      const re = LiteralUtil.templateLiteralToRegex(primaryExpr.template);
+      attrs.push(state.factory.createPropertyAssignment('match', state.fromLiteral({
+        re: new RegExp(re),
+        template: primaryExpr.template,
+        message: `{path} must match "${re}"`
+      })));
     }
 
     if (ts.isParameter(node)) {
@@ -212,6 +226,7 @@ export class SchemaTransformUtil {
     switch (type?.key) {
       case 'managed': out.type = state.typeToIdentifier(type); break;
       case 'shape': out.type = this.toConcreteType(state, type, target); break;
+      case 'template': out.type = state.factory.createIdentifier(type.ctor.name); break;
       case 'literal': {
         if (type.ctor) {
           out.type = out.array ?

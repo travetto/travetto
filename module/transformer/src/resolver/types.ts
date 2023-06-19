@@ -1,4 +1,5 @@
 import type ts from 'typescript';
+import { TemplateLiteral } from '../types/shared';
 
 /**
  * Base type for a simplistic type structure
@@ -100,6 +101,20 @@ export interface LiteralType extends Type<'literal'> {
 }
 
 /**
+ * A literal template type
+ */
+export interface TemplateType extends Type<'template'> {
+  /**
+   * Pointer to real type (String)
+   */
+  ctor: Function;
+  /**
+   * Type arguments
+   */
+  template?: TemplateLiteral;
+}
+
+/**
  * Union type
  */
 export interface UnionType extends Type<'union'> {
@@ -161,7 +176,9 @@ export interface ForeignType extends Type<'foreign'> {
  */
 export interface UnknownType extends Type<'unknown'> { }
 
-export type AnyType = TupleType | ShapeType | UnionType | LiteralType | ManagedType | PointerType | UnknownType | ForeignType;
+export type AnyType =
+  TupleType | ShapeType | UnionType | LiteralType |
+  ManagedType | PointerType | UnknownType | ForeignType | TemplateType;
 
 /**
  * Simple interface for checked methods
