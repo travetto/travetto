@@ -53,11 +53,40 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
   @Inject()
   svc: RestClientGeneratorService;
 
-  @Test({ timeout: 10000 })
-  async fetchNodeClient() {
+  fetchRequestBody(from: string, suffix: string): string {
+    return `
+import { TodoApi } from '${from}';
+const api = new TodoApi({ baseUrl: 'http://localhost:${this.port!}'});
+    
+async function go() {
+  const items = [];
+  const log = v => items.push(v);
+  log(await api.listTodo(200, 50, ['a','b','c'], 'green-2'));
+  log(await api.createTodo({id: '10', text:'todo', priority: 11}));
+  return JSON.stringify(items);
+}
+${suffix}
+`;
+  }
+
+  validateFetchResponses(text: string): void {
+    const items: [Todo[], Todo] = JSON.parse(text);
+    const body0 = items[0][0];
+    assert(body0.id === '200');
+    assert(body0.priority === 50);
+    assert(body0.text === 'todo-a-b-c');
+    assert(body0.color === 'green-2');
+
+    const body1 = items[1];
+    assert(body1.id === '10');
+    assert(body1.text === 'todo');
+    assert(body1.priority === 11);
+  }
+
+  async fetchNodeClient(native: boolean) {
     const tmp = path.resolve(os.tmpdir(), `rest-client-fetch-node-${Util.uuid()}`);
     try {
-      await this.svc.renderClient({ type: 'fetch-node', output: tmp });
+      await this.svc.renderClient({ type: 'fetch-node', output: tmp, options: { native } });
       await fs.writeFile(path.resolve(tmp, 'tsconfig.json'), JSON.stringify({
         compilerOptions: {
           rootDir: '.',
@@ -68,31 +97,28 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
           esModuleInterop: true
         },
       }));
-      await fs.writeFile(path.resolve(tmp, 'main.ts'), `
-import { TodoApi } from './src';
-const log = v => console.log(JSON.stringify(v));
-const api = new TodoApi({ baseUrl: 'http://localhost:${this.port!}'});
-
-async function go() {
-  log(await api.listTodo(200, 50, ['a','b','c'], 'green-2'));
-}
-
-go()
-`);
+      await fs.writeFile(
+        path.resolve(tmp, 'main.ts'),
+        this.fetchRequestBody('./src', 'go().then(console.log)')
+      );
       await ExecUtil.spawn('npm', ['i'], { cwd: tmp }).result;
       await ExecUtil.spawn(TSC, ['-p', tmp]).result;
-
       const proc = ExecUtil.spawn('node', ['./main'], { cwd: tmp });
-      const result = await proc.result;
-      const items: Todo[] = JSON.parse(result.stdout);
-      const body = items[0];
-      assert(body.id === '200');
-      assert(body.priority === 50);
-      assert(body.text === 'todo-a-b-c');
-      assert(body.color === 'green-2');
+      this.validateFetchResponses((await proc.result).stdout);
+
     } finally {
-      // await fs.rm(tmp, { recursive: true });
+      await fs.rm(tmp, { recursive: true });
     }
+  }
+
+  @Test({ timeout: 10000 })
+  async fetchNonNativeNodeClient() {
+    return this.fetchNodeClient(false);
+  }
+
+  @Test({ timeout: 10000 })
+  async fetchNativeNodeClient() {
+    return this.fetchNodeClient(true);
   }
 
   @Test({ timeout: 10000 })
@@ -111,27 +137,16 @@ go()
           esModuleInterop: true,
         },
       }));
-      await fs.writeFile(srcFile, `
-import { TodoApi } from './api.js';
-const output = [];
-const log = v => output.push(v);
-const api = new TodoApi({ baseUrl: 'http://localhost:${this.port!}' });
-
-async function go() {
-  log(await api.listTodo(200, 50, ['a','b','c'], 'green-2'));
-  document.body.innerText = output.map(v => JSON.stringify(v)).join('\\n');
-}
-
-
-window.onload = go;
-`);
+      await fs.writeFile(
+        srcFile,
+        this.fetchRequestBody('./api.js', 'window.onload = () => go().then(v => document.body.innerText = v)')
+      );
 
       await fs.writeFile(indexHtml, `
-<html>
-<head><script type="module" src="./main.js"></script>
-<body></body>
-</html>
-`);
+        <html>
+        <head><script type="module" src="./main.js"></script></head>
+        <body></body>
+        </html>`);
       await ExecUtil.spawn(TSC, ['-p', tmp]).result;
 
       const proc = ExecUtil.spawn(
@@ -146,15 +161,8 @@ window.onload = go;
         ],
         { cwd: tmp }
       );
-
       const result = await proc.result;
-      console.log(result);
-      const items: Todo[] = JSON.parse(result.stdout.split(/<[/]?body>/)[1]);
-      const body = items[0];
-      assert(body.id === '200');
-      assert(body.priority === 50);
-      assert(body.text === 'todo-a-b-c');
-      assert(body.color === 'green-2');
+      this.validateFetchResponses(result.stdout.split(/<[/]?body>/)[1]);
     } finally {
       await fs.rm(tmp, { recursive: true });
     }

@@ -76,7 +76,7 @@ $ git init .
 
 $ npm init -f
 $ npm i @travetto/{log,rest-express,model-mongo,cli}
-$ npm i -D @travetto/{eslint,compiler,test} node-fetch@^2.6.9 @types/node-fetch
+$ npm i -D @travetto/{eslint,compiler,test}
 
 $ npx trv lint:register
 `} />

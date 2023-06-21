@@ -1,18 +1,14 @@
-import { IRemoteService, MultipartHandler, RequestDefinition, RequestOptions } from './types';
+// #NODE_FETCH_ENABLE: import FormData from 'form-data';
+// #NODE_FETCH_ENABLE: import fetch, { RequestInit, Response } from 'node-fetch';
+// #NODE_FETCH_ENABLE: import Blob = require('fetch-blob');
+import { IRemoteService, ParamConfig, RequestDefinition, RequestOptions } from './types';
 
-type FetchResponseLite = {
-  ok?: boolean;
-  statusText?: string;
-  status?: number;
-  headers: { get(key: string): string | null };
-  text(): Promise<string>;
-};
-type FetchLike<B, R extends FetchResponseLite> = (url: string | URL, opts: RequestOptions<B>) => R | Promise<R>;
-
-function isResponseLite(v: unknown): v is FetchResponseLite {
+function isResponse(v: unknown): v is Response {
   // @ts-expect-error
   return v && v.status && v.headers;
 }
+
+type BodyPart = { param: unknown, config: ParamConfig };
 
 export class CommonUtil {
   static isPlainObject(obj: unknown): obj is Record<string, unknown> {
@@ -59,13 +55,47 @@ export class CommonUtil {
     });
   }
 
-  static buildRequest<T, B, P, R = unknown>(
-    svc: IRemoteService<T, R>, params: unknown[], { endpointPath, paramConfigs, method }: RequestDefinition, multipart: MultipartHandler<T, B, P>
-  ): RequestOptions<T> {
+  static requestBody<T>(body: BodyPart[]): T | undefined {
+    if (!body.length) {
+      return undefined;
+    }
+
+    const parts: { name: string, blob: Blob }[] = [];
+
+    for (const { param, config } of body) {
+      const pName = config.name;
+      if (config.binary) {
+        if (config.array) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          parts.push(...(param as Blob[]).map((uc, i) => ({ name: `${pName}[${i}]`, blob: uc })));
+        } else {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          parts.push({ name: pName, blob: param as Blob });
+        }
+      } else {
+        parts.push({ name: pName, blob: new Blob([JSON.stringify(param)], { type: 'application/json' }) });
+      }
+    }
+    if (body.length === 1) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return parts[0].blob as T;
+    } else {
+      const form = new FormData();
+      for (const { name, blob } of parts) {
+        form.append(name, blob, 'name' in blob && typeof blob.name === 'string' ? blob.name : undefined);
+      }
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return form as T;
+    }
+  }
+
+  static buildRequest<T, R = unknown>(svc: IRemoteService<T, R>, params: unknown[], def: RequestDefinition): RequestOptions<T> {
+    const { endpointPath, paramConfigs, method } = def;
+
     let resolvedPath = `${svc.baseUrl}/${svc.routePath}/${endpointPath || ''}`.replace(/[\/]+/g, '/').replace(/[\/]$/, '');
     const query: Record<string, string> = {};
     const headers: Record<string, string> = { ...svc.headers };
-    const bodyIdxs: number[] = [];
+    const body: BodyPart[] = [];
     for (let i = 0; i < paramConfigs.length; i++) {
       const { location: loc, prefix, complex, name } = paramConfigs[i];
       if ((loc === 'header' || loc === 'query') && params[i] !== undefined) {
@@ -84,7 +114,7 @@ export class CommonUtil {
         resolvedPath = resolvedPath.replace(`:${paramConfigs[i].name}`, `${params[i]}`);
       } else if (loc === 'body') {
         if (params[i] !== undefined) {
-          bodyIdxs.push(i);
+          body.push({ param: params[i], config: paramConfigs[i] });
         }
       }
     }
@@ -94,39 +124,13 @@ export class CommonUtil {
       url.searchParams.set(k, `${v}`);
     }
 
-    let body: T | undefined;
-
-    const req: RequestOptions<T> = { headers, url, body, method };
-
-    if (bodyIdxs.length) {
-      const parts: P[] = [];
-
-      for (const bodyIdx of bodyIdxs) {
-        const bodyParam = paramConfigs[bodyIdx];
-        const pName = bodyParam.name;
-        if (bodyParam.binary) {
-          if (bodyParam.array) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            parts.push(...(params[bodyIdx] as B[]).map((uc, i) =>
-              multipart.addItem(`${pName}[${i}]`, uc)
-            ));
-          } else {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            parts.push(multipart.addItem(pName, params[bodyIdx] as B));
-          }
-        } else {
-          parts.push(multipart.addJson(pName, params[bodyIdx]));
-        }
-      }
-      req.body = multipart.finalize(parts, req);
-    }
-    return req;
+    return { headers, url, method, body: this.requestBody(body) };
   }
 
-  static consumeError(err: Error | FetchResponseLite): Error {
+  static consumeError(err: Error | Response): Error {
     if (err instanceof Error) {
       return err;
-    } else if (isResponseLite(err)) {
+    } else if (isResponse(err)) {
       const out = new Error(err.statusText);
       Object.assign(out, { status: err.status });
       return this.consumeError(out);
@@ -139,10 +143,10 @@ export class CommonUtil {
     }
   }
 
-  static async fetchRequest<T, B, R extends FetchResponseLite>(
+  static async fetchRequest<T, B, R extends Response>(
     svc: IRemoteService<B, R>,
     req: RequestOptions<B>,
-    fetcher: FetchLike<B, R>
+    fetcher: (typeof fetch)
   ): Promise<T> {
     try {
       for (const el of svc.preRequestHandlers) {
@@ -154,11 +158,12 @@ export class CommonUtil {
         console.debug('Making request', req);
       }
 
-      let resolved = await fetcher(req.url, req);
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      let resolved = await fetcher(req.url, req as RequestInit);
 
       for (const el of svc.postResponseHandlers) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        resolved = (await el(resolved) ?? resolved) as R;
+        resolved = (await el(resolved as R) ?? resolved) as R;
       }
 
       if (resolved.ok) {
@@ -180,7 +185,8 @@ export class CommonUtil {
         if (svc.debug) {
           console.debug('Error in making request', res);
         }
-        throw await svc.consumeError(res);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        throw await svc.consumeError(res as R);
       }
     } catch (err) {
       if (svc.debug) {

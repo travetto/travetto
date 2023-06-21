@@ -63,9 +63,8 @@ export const LIB_MAPPING = {
   Commander: { title: 'commander', href: 'https://www.npmjs.com/package/commander' },
   Curl: { title: 'curl', href: 'https://curl.haxx.se/' },
   Fetch: { title: 'fetch', href: 'https://www.npmjs.com/package/node-fetch' },
-  ParcelWatcher: { title: 'fetch', href: 'https://www.npmjs.com/package/@parcel/watcher' },
+  ParcelWatcher: { title: '@parcel/watcher', href: 'https://www.npmjs.com/package/@parcel/watcher' },
   Preact: { title: 'preact', href: 'https://preactjs.com' },
-  PreactRenderToString: { title: 'preact', href: 'https://github.com/preactjs/preact-render-to-string' },
 
   // JWT
   JWT: { title: 'JWT', href: 'https://jwt.io/' },

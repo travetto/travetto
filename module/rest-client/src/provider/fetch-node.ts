@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/quotes */
 
 import { Class } from '@travetto/base';
-import { RootIndex } from '@travetto/manifest';
+import { Package, RootIndex } from '@travetto/manifest';
 import { ControllerConfig } from '@travetto/rest';
 
 import { ClientGenerator, Imp, RenderContent } from './base';
@@ -12,17 +12,21 @@ import { BaseRemoteService } from './shared/types';
 
 const SVC = './shared/fetch-node-service.ts';
 
-export class NodeFetchClientGenerator extends ClientGenerator {
+export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean }> {
 
+  get native(): boolean { return this.config.native !== false; }
   get outputExt(): '' { return ''; }
   get subFolder(): string { return 'src'; }
-  get uploadType(): string | Imp { return { name: 'UploadContent', file: SVC, classId: '_' }; }
+  get uploadType(): string | Imp { return this.native ? super.uploadType : 'Blob'; }
   get endpointResponseWrapper(): string[] { return ['Promise']; }
-  get commonFiles(): [string, Class][] {
+  get commonFiles(): [string, Class | string][] {
+    const extra: [string, string][] =
+      !this.native ? [] : [['./fetch.d.ts', `${RootIndex.getModule('@travetto/base')?.sourcePath}/src/fetch.d.ts`]];
     return [
       [SVC, BaseNodeFetchService],
       ['./shared/types.ts', BaseRemoteService],
       ['./shared/util.ts', CommonUtil],
+      ...extra
     ];
   }
 
@@ -32,18 +36,26 @@ export class NodeFetchClientGenerator extends ClientGenerator {
       classId: '',
       file: 'package.json',
       name: '',
-      content: [
-        `{\n`,
-        `  "name": "`, this.moduleName, `",\n`,
-        `  "version": "${RootIndex.mainModule.version}",\n`,
-        `  "main": "${this.subFolder ?? '.'}/index.ts",\n`,
-        `  "dependencies": {\n`,
-        `    "@types/node-fetch": "^2.6.2",\n`,
-        `    "node-fetch": "^2.6.9"\n`,
-        `  }\n`,
-        `}\n`
-      ]
+      content: [JSON.stringify({
+        name: this.moduleName,
+        version: RootIndex.mainModule.version,
+        main: `${this.subFolder ?? '.'}/index.ts`,
+        dependencies: this.native ? {
+          '@types/node': '^20.0.0',
+        } : {
+          '@types/node-fetch': '^2.6.2',
+          'node-fetch': '^2.6.9',
+          'fetch-blob': '^2.1.1',
+          'form-data': '^2.3.3'
+        }
+      } satisfies Package, null, 2)]
     });
+  }
+
+  writeContentFilter(text: string): string {
+    return super.writeContentFilter(text)
+      .replaceAll(/^(.*)\s*\/\/\s*#NODE_FETCH\s*$/mg, (_, p) => this.native ? '' : p)
+      .replaceAll(/^.*#NODE_FETCH_ENABLE:\s*(.*)$/mg, (_, p) => this.native ? '' : p);
   }
 
   renderController(controller: ControllerConfig): RenderContent {

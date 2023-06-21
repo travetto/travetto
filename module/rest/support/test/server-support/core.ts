@@ -1,5 +1,3 @@
-import fetch from 'node-fetch';
-
 import { DependencyRegistry } from '@travetto/di';
 import { TimeUtil } from '@travetto/base';
 
@@ -54,7 +52,8 @@ export class CoreRestServerSupport implements RestServerSupport {
 
     let q = '';
     if (query && Object.keys(query).length) {
-      q = `?${new URLSearchParams(query).toString()}`;
+      const pairs = Object.entries(query).map(([k, v]) => [k, v === null || v === undefined ? '' : `${v}`] as [string, string]);
+      q = `?${new URLSearchParams(pairs).toString()}`;
     }
     const res = await fetch(`${this.url}${path}${q}`, {
       method,

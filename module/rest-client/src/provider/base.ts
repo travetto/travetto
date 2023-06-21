@@ -50,35 +50,43 @@ const recreateTemplateLiteral = (template: TemplateLiteral, escape = false): str
   return escape ? `\`${body}\`` : body;
 };
 
-export abstract class ClientGenerator implements ControllerVisitor {
+export abstract class ClientGenerator<C = unknown> implements ControllerVisitor {
 
   #output: string;
   #files = new Map<string, RenderContent>();
 
-  abstract get commonFiles(): [string, Class][];
+  abstract get commonFiles(): [string, Class | string][];
   abstract get subFolder(): string;
   abstract get endpointResponseWrapper(): (string | Imp)[];
-  abstract get uploadType(): string | Imp;
   abstract get outputExt(): '.js' | '.ts' | '';
 
   abstract renderController(cfg: ControllerConfig): RenderContent;
 
   moduleName: string;
+  config: Partial<C> = {};
 
-  constructor(output: string, moduleName?: string) {
+  constructor(output: string, moduleName?: string, config: Partial<C> = {}) {
     this.#output = output;
     this.moduleName = moduleName ?? `${RootIndex.mainModule.name}-client`;
+    this.config = config;
     this.init?.();
   }
 
   init?(): void;
 
+  get uploadType(): string | Imp { return '(File | Blob)'; }
+
+  writeContentFilter(text: string): string {
+    return text.trim()
+      .replace(/^((?:ex|im)port\s+[^;]*\s+from\s*[^;]+)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
+      .replaceAll(/^(.*)#REMOVE.*$/mg, _ => '');
+  }
+
   async writeContent(file: string, content: string | string[]): Promise<void> {
     content = Array.isArray(content) ? content.join('') : content;
     await ManifestUtil.writeFileWithBuffer(
       path.resolve(this.#output, this.subFolder, file),
-      content.trim()
-        .replace(/^((?:ex|im)port\s+[^;]*\s+from\s*[^;]+)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
+      this.writeContentFilter(content)
     );
   }
 
@@ -304,7 +312,7 @@ export abstract class ClientGenerator implements ControllerVisitor {
 
   async finalize(): Promise<void> {
     for (const [file, cls] of this.commonFiles) {
-      await this.writeContent(file, await fs.readFile(RootIndex.getFunctionMetadata(cls)!.source, 'utf8'));
+      await this.writeContent(file, await fs.readFile(typeof cls === 'string' ? cls : RootIndex.getFunctionMetadata(cls)!.source, 'utf8'));
     }
 
     const files = [...this.#files.values()].reduce<Record<string, RenderContent[]>>((acc, x) => {

@@ -16,12 +16,6 @@ export type RequestDefinition = {
   paramConfigs: ParamConfig[] | (readonly ParamConfig[]);
 };
 
-export type MultipartHandler<T, B, P> = {
-  addJson: (name: string, obj: unknown) => P;
-  addItem: (name: string, item: B) => P;
-  finalize: (items: P[], request: RequestOptions<T>) => T;
-};
-
 type OrProm<X> = X | Promise<X>;
 
 export type RequestOptions<T = unknown> = {

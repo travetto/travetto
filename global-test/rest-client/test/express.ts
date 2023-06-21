@@ -21,6 +21,6 @@ class Config {
 }
 
 @Suite()
-export class ExpressRestSessionTest extends RestClientServerSuite {
+export class ExpressRestClientTest extends RestClientServerSuite {
   qualifier = EXPRESS;
 }

@@ -15,7 +15,6 @@ export class AngularClientGenerator extends ClientGenerator {
 
   get outputExt(): '' { return ''; }
   get subFolder(): string { return '.'; }
-  get uploadType(): string { return 'Blob'; }
   get commonFiles(): [string, Class][] {
     return [
       [SVC, BaseAngularService],
@@ -26,6 +25,10 @@ export class AngularClientGenerator extends ClientGenerator {
 
   get endpointResponseWrapper(): (string | Imp)[] {
     return [{ classId: '_res', file: SVC, name: 'AngularResponse' }];
+  }
+
+  writeContentFilter(text: string): string {
+    return super.writeContentFilter(text).replaceAll(/^.*#NODE_FETCH.*/gm, '');
   }
 
   init(): void {

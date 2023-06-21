@@ -1,5 +1,3 @@
-import fetch, { Headers } from 'node-fetch';
-
 import { Injectable } from '@travetto/di';
 import { LogEvent, Logger } from '@travetto/log';
 

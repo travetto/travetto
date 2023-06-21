@@ -1,5 +1,3 @@
-import { Headers } from 'node-fetch';
-
 import { Request } from '@travetto/rest/src/types';
 import { ServerHandle } from '@travetto/rest';
 

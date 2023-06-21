@@ -15,7 +15,6 @@ export class WebFetchClientGenerator extends ClientGenerator {
 
   get outputExt(): '.js' { return '.js'; }
   get subFolder(): string { return '.'; }
-  get uploadType(): string { return 'Blob'; }
   get endpointResponseWrapper(): string[] { return ['Promise']; }
   get commonFiles(): [string, Class][] {
     return [
@@ -23,6 +22,10 @@ export class WebFetchClientGenerator extends ClientGenerator {
       ['./shared/util.ts', CommonUtil],
       ['./shared/types.ts', BaseRemoteService],
     ];
+  }
+
+  writeContentFilter(text: string): string {
+    return super.writeContentFilter(text).replaceAll(/^.*#NODE_FETCH.*/gm, '');
   }
 
   renderController(controller: ControllerConfig): RenderContent {

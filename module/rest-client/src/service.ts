@@ -20,7 +20,7 @@ export class RestClientGeneratorService implements AutoCreate {
 
   providers: ClientGenerator[];
 
-  buildGenerator({ type, output, moduleName }: RestClientProvider): ClientGenerator {
+  buildGenerator({ type, output, moduleName, options }: RestClientProvider): ClientGenerator {
     output = path.resolve(
       RootIndex.manifest.workspacePath,
       output.startsWith('@') ? RootIndex.mainModule.sourceFolder : '.',
@@ -28,10 +28,10 @@ export class RestClientGeneratorService implements AutoCreate {
     );
 
     switch (type) {
-      case 'angular': return new AngularClientGenerator(output, moduleName);
+      case 'angular': return new AngularClientGenerator(output, moduleName, options);
       case 'fetch':
-      case 'fetch-node': return new NodeFetchClientGenerator(output, moduleName);
-      case 'fetch-web': return new WebFetchClientGenerator(output, moduleName);
+      case 'fetch-node': return new NodeFetchClientGenerator(output, moduleName, options);
+      case 'fetch-web': return new WebFetchClientGenerator(output, moduleName, options);
     }
   }
 

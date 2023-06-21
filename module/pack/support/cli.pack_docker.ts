@@ -3,6 +3,9 @@ import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli'
 
 import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
+import { GlobalEnv } from '@travetto/base';
+
+const NODE_MAJOR = GlobalEnv.nodeVersion.replace('v', '').split('.')[0];
 
 /**
  * Standard docker support for pack
@@ -12,7 +15,7 @@ export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Factory source ', short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
   dockerFactory = '@travetto/pack/support/pack.dockerfile';
   @CliFlag({ desc: 'Docker Image to extend ', short: 'di', envVars: ['PACK_DOCKER_IMAGE'] })
-  dockerImage = 'node:18-alpine3.16';
+  dockerImage = `node:${NODE_MAJOR}-alpine`;
   @CliFlag({ desc: 'Docker Image Name ', short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
   dockerName = CliUtil.monoRoot ? '<module>' : CliUtil.getSimpleModuleName();
   @CliFlag({ desc: 'Docker Image Tag ', short: 'dt', envVars: ['PACK_DOCKER_TAGS'] })
