@@ -106,7 +106,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
 
 <h2 id="file-watching">File Watching</h2>
 
-The module also leverages <a target="_blank" class="external-link" href="https://www.npmjs.com/package/@parcel/watcher">fetch</a>, to expose a single function of <code class="item method">watchFolders</code>. Only the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a> module packages <a target="_blank" class="external-link" href="https://www.npmjs.com/package/@parcel/watcher">fetch</a> as a direct dependency.  This means, that in production, by default all watch operations will fail with a missing dependency.
+The module also leverages <a target="_blank" class="external-link" href="https://www.npmjs.com/package/@parcel/watcher">@parcel/watcher</a>, to expose a single function of <code class="item method">watchFolders</code>. Only the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a> module packages <a target="_blank" class="external-link" href="https://www.npmjs.com/package/@parcel/watcher">@parcel/watcher</a> as a direct dependency.  This means, that in production, by default all watch operations will fail with a missing dependency.
 
   <figure class="code">
     <figcaption class="code">Watch Configuration

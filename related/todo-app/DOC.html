@@ -35,7 +35,7 @@ $ <span class="token function">git</span> init <span class="token builtin class-
 
 $ <span class="token function">npm</span> init <span class="token parameter variable">-f</span>
 $ <span class="token function">npm</span> i @travetto/<span class="token punctuation">{{'{'}}</span>log,rest-express,model-mongo,cli<span class="token punctuation">{{'}'}}</span>
-$ <span class="token function">npm</span> i <span class="token parameter variable">-D</span> @travetto/<span class="token punctuation">{{'{'}}</span>eslint,compiler,test<span class="token punctuation">{{'}'}}</span> node-fetch@^2.6.9 @types/node-fetch
+$ <span class="token function">npm</span> i <span class="token parameter variable">-D</span> @travetto/<span class="token punctuation">{{'{'}}</span>eslint,compiler,test<span class="token punctuation">{{'}'}}</span>
 
 $ npx trv lint:register</code></pre>
   </figure>
@@ -338,7 +338,7 @@ First we must start the application:
 
 </figcaption>
     <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@travetto/config:src/configuration.ts:141<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
-  manifest: <span class="token punctuation">{{'{'}}</span> mainModule: <span class="token string">'@travetto/todo-app'</span>, frameworkVersion: <span class="token string">'3.1.2'</span>, version: <span class="token string">'0.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
+  manifest: <span class="token punctuation">{{'{'}}</span> mainModule: <span class="token string">'@travetto/todo-app'</span>, frameworkVersion: <span class="token string">'3.2.0'</span>, version: <span class="token string">'0.0.0'</span> <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
     envName: <span class="token string">'dev'</span>,
     debug: <span class="token string">'0'</span>,
@@ -347,7 +347,7 @@ First we must start the application:
     dynamic: false,
     profiles: <span class="token punctuation">[</span> <span class="token string">'dev'</span> <span class="token punctuation">]</span>,
     resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    nodeVersion: <span class="token string">'v19.x.x'</span>
+    nodeVersion: <span class="token string">'v20.x.x'</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span>
@@ -436,9 +436,7 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/related/todo-app/doc/create-todo.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> fetch <span class="token keyword">from</span> <span class="token string">'node-fetch'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">main</span><span class="token punctuation">(</span>key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">main</span><span class="token punctuation">(</span>key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">'http://localhost:3000/todo'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
     method<span class="token operator">:</span> <span class="token string">'POST'</span><span class="token punctuation">,</span>
     body<span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> text<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">New Todo - </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>key<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
@@ -457,13 +455,13 @@ Create <code class="item path">support/create-todo.ts</code> with the following 
 </figcaption>
     <pre><code class="language-bash">$ trv main support/create-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span>
 
-FetchError: request to http://localhost:3000/todo failed, reason: socket hang up
-    at ClientRequest.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/node_modules/node-fetch/lib/index.js:1505:11<span class="token punctuation">)</span>
-    at ClientRequest.emit <span class="token punctuation">(</span>node:events:513:28<span class="token punctuation">)</span>
-    at Socket.socketOnEnd <span class="token punctuation">(</span>node:_http_client:519:9<span class="token punctuation">)</span>
-    at Socket.emit <span class="token punctuation">(</span>node:events:525:35<span class="token punctuation">)</span>
-    at endReadableNT <span class="token punctuation">(</span>node:internal/streams/readable:1359:12<span class="token punctuation">)</span>
-    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:82:21<span class="token punctuation">)</span></code></pre>
+TypeError: fetch failed
+    at Object.fetch <span class="token punctuation">(</span>node:internal/deps/undici/undici:11576:11<span class="token punctuation">)</span>
+    at Object.main <span class="token punctuation">(</span>./doc/create-todo.ts:2:15<span class="token punctuation">)</span>
+    at MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:40:46<span class="token punctuation">)</span>
+    at Function.command <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:79:20<span class="token punctuation">)</span>
+    at Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:110:9<span class="token punctuation">)</span>
+    at entry <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/entry.cli.ts:8:5<span class="token punctuation">)</span></code></pre>
   </figure>
 
 Now create <code class="item path">support/list-todo.ts</code> with the following contents:
@@ -473,9 +471,7 @@ Now create <code class="item path">support/list-todo.ts</code> with the followin
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/related/todo-app/doc/list-todo.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> fetch <span class="token keyword">from</span> <span class="token string">'node-fetch'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">main</span><span class="token punctuation">(</span>key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">main</span><span class="token punctuation">(</span>key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/todo?q=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span>key<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>r <span class="token operator">=></span> r<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token builtin">console</span><span class="token punctuation">.</span>log<span class="token operator">!</span><span class="token punctuation">(</span>res<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
@@ -487,11 +483,11 @@ Now create <code class="item path">support/list-todo.ts</code> with the followin
 </figcaption>
     <pre><code class="language-bash">$ trv main support/list-todo.ts <span class="token operator">&lt;</span>key<span class="token operator">></span>
 
-FetchError: request to http://localhost:3000/todo?q<span class="token operator">=</span><span class="token operator">&lt;</span>key<span class="token operator">></span> failed, reason: socket hang up
-    at ClientRequest.<span class="token operator">&lt;</span>anonymous<span class="token operator">></span> <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/node_modules/node-fetch/lib/index.js:1505:11<span class="token punctuation">)</span>
-    at ClientRequest.emit <span class="token punctuation">(</span>node:events:513:28<span class="token punctuation">)</span>
-    at Socket.socketOnEnd <span class="token punctuation">(</span>node:_http_client:519:9<span class="token punctuation">)</span>
-    at Socket.emit <span class="token punctuation">(</span>node:events:525:35<span class="token punctuation">)</span>
-    at endReadableNT <span class="token punctuation">(</span>node:internal/streams/readable:1359:12<span class="token punctuation">)</span>
-    at processTicksAndRejections <span class="token punctuation">(</span>node:internal/process/task_queues:82:21<span class="token punctuation">)</span></code></pre>
+TypeError: fetch failed
+    at Object.fetch <span class="token punctuation">(</span>node:internal/deps/undici/undici:11576:11<span class="token punctuation">)</span>
+    at Object.main <span class="token punctuation">(</span>./doc/list-todo.ts:2:15<span class="token punctuation">)</span>
+    at MainCommand.main <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/cli.main.ts:40:46<span class="token punctuation">)</span>
+    at Function.command <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:79:20<span class="token punctuation">)</span>
+    at Function.run <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/src/execute.ts:110:9<span class="token punctuation">)</span>
+    at entry <span class="token punctuation">(</span><span class="token operator">&lt;</span>workspace-root<span class="token operator">></span>/module/cli/support/entry.cli.ts:8:5<span class="token punctuation">)</span></code></pre>
   </figure>

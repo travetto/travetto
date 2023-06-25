@@ -29,7 +29,7 @@ $ trv repo:version -h
 Usage: repo:version [options] <level:string> [prefix:string]
 
 Options:
-  --mode <all|changed|direct>  The mode for versioning (default: "changed")
+  --mode <all|changed|direct>  The mode for versioning
   -f, --force                  Force operation, even in a dirty workspace (default: false)
   --commit, --no-commit        Produce release commit message (default: true)
   -m, --modules <string>       The module when mode is single

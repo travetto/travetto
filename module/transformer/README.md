@@ -107,7 +107,7 @@ const tslib_1 = require("tslib");
 const Ⲑ_root_index_1 = tslib_1.__importStar(require("@travetto/manifest/src/root-index.js"));
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 var ᚕf = "@travetto/transformer/doc/upper.js";
-let TEST = class TEST {
+let TEST = exports.TEST = class TEST {
     static Ⲑinit = Ⲑ_root_index_1.RootIndex.registerFunction(TEST, ᚕf, 649563175, { COMPUTEAGE: { hash: 1286718349 } }, false, false);
     NAME;
     AGE;
@@ -116,8 +116,7 @@ let TEST = class TEST {
         this['AGE'] = (Date.now() - this.DOB.getTime());
     }
 };
-TEST = tslib_1.__decorate([
+exports.TEST = TEST = tslib_1.__decorate([
     Ⲑ_decorator_1.Register()
 ], TEST);
-exports.TEST = TEST;
 ```

@@ -128,7 +128,7 @@ Options:
   -x, --eject-file <string>            Eject commands to file
   -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
   -df, --docker-factory <string>       Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
-  -di, --docker-image <string>         Docker Image to extend  (default: "node:18-alpine3.16")
+  -di, --docker-image <string>         Docker Image to extend  (default: "node:20-alpine")
   -dn, --docker-name <string>          Docker Image Name  (default: "travetto_pack")
   -dt, --docker-tag <string>           Docker Image Tag  (default: ["latest"])
   -dp, --docker-port <number>          Docker Image Port  (default: [])
@@ -230,17 +230,17 @@ cd $ROOT
 
 echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile"
 
-echo "FROM node:18-alpine3.16" > $DIST/Dockerfile
+echo "FROM node:20-alpine" > $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "COPY . ." >> $DIST/Dockerfile
 echo "" >> $DIST/Dockerfile
 echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
 
-# Pulling Docker Base Image node:18-alpine3.16 
+# Pulling Docker Base Image node:20-alpine 
 
-echo "Pulling Docker Base Image node:18-alpine3.16"
+echo "Pulling Docker Base Image node:20-alpine"
 
-docker pull node:18-alpine3.16
+docker pull node:20-alpine
 
 # Building Docker Container latest 
 

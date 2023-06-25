@@ -88,7 +88,7 @@ Once the manifest is created, the application runtime can now read this manifest
 By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up [path](https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L7) as an equivalent to [Node](https://nodejs.org)'s [http](https://nodejs.org/api/path.html) library.  This allows for consistent behavior across all file-interactions, and also allows for easy analysis if [Node](https://nodejs.org)'s [http](https://nodejs.org/api/path.html) library is ever imported.
 
 ## File Watching
-The module also leverages [fetch](https://www.npmjs.com/package/@parcel/watcher), to expose a single function of `watchFolders`. Only the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework") module packages [fetch](https://www.npmjs.com/package/@parcel/watcher) as a direct dependency.  This means, that in production, by default all watch operations will fail with a missing dependency.
+The module also leverages [@parcel/watcher](https://www.npmjs.com/package/@parcel/watcher), to expose a single function of `watchFolders`. Only the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework") module packages [@parcel/watcher](https://www.npmjs.com/package/@parcel/watcher) as a direct dependency.  This means, that in production, by default all watch operations will fail with a missing dependency.
 
 **Code: Watch Configuration**
 ```typescript

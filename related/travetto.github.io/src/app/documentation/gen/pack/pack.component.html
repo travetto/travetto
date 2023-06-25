@@ -141,7 +141,7 @@ Options:
   -x, --eject-file <span class="token operator">&lt;</span>string<span class="token operator">></span>            Eject commands to <span class="token function">file</span>
   -r, --rollup-configuration <span class="token operator">&lt;</span>string<span class="token operator">></span>  Rollup configuration <span class="token function">file</span> <span class="token punctuation">(</span>default: <span class="token string">"@travetto/pack/support/bin/rollup"</span><span class="token punctuation">)</span>
   -df, --docker-factory <span class="token operator">&lt;</span>string<span class="token operator">></span>       Docker Factory <span class="token builtin class-name">source</span>  <span class="token punctuation">(</span>default: <span class="token string">"@travetto/pack/support/pack.dockerfile"</span><span class="token punctuation">)</span>
-  -di, --docker-image <span class="token operator">&lt;</span>string<span class="token operator">></span>         Docker Image to extend  <span class="token punctuation">(</span>default: <span class="token string">"node:18-alpine3.16"</span><span class="token punctuation">)</span>
+  -di, --docker-image <span class="token operator">&lt;</span>string<span class="token operator">></span>         Docker Image to extend  <span class="token punctuation">(</span>default: <span class="token string">"node:20-alpine"</span><span class="token punctuation">)</span>
   -dn, --docker-name <span class="token operator">&lt;</span>string<span class="token operator">></span>          Docker Image Name  <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack"</span><span class="token punctuation">)</span>
   -dt, --docker-tag <span class="token operator">&lt;</span>string<span class="token operator">></span>           Docker Image Tag  <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token string">"latest"</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -dp, --docker-port <span class="token operator">&lt;</span>number<span class="token operator">></span>          Docker Image Port  <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
@@ -246,17 +246,17 @@ npx rollup <span class="token parameter variable">-c</span> <span class="token v
 
 <span class="token builtin class-name">echo</span> <span class="token string">"Generating Docker File <span class="token variable">$DIST</span>/Dockerfile @travetto/pack/support/pack.dockerfile"</span>
 
-<span class="token builtin class-name">echo</span> <span class="token string">"FROM node:18-alpine3.16"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/Dockerfile
+<span class="token builtin class-name">echo</span> <span class="token string">"FROM node:20-alpine"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"WORKDIR /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"COPY . ."</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"ENTRYPOINT [<span class="token entity" title="\&quot;">\"</span>/app/todo-app.sh<span class="token entity" title="\&quot;">\"</span>]"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 
-<span class="token comment"># Pulling Docker Base Image node:18-alpine3.16</span>
+<span class="token comment"># Pulling Docker Base Image node:20-alpine</span>
 
-<span class="token builtin class-name">echo</span> <span class="token string">"Pulling Docker Base Image node:18-alpine3.16"</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"Pulling Docker Base Image node:20-alpine"</span>
 
-<span class="token function">docker</span> pull node:18-alpine3.16
+<span class="token function">docker</span> pull node:20-alpine
 
 <span class="token comment"># Building Docker Container latest</span>
 

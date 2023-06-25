@@ -99,8 +99,6 @@ The [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/typ
 
 **Code: Custom Logger**
 ```typescript
-import fetch, { Headers } from 'node-fetch';
-
 import { Injectable } from '@travetto/di';
 import { LogEvent, Logger } from '@travetto/log';
 

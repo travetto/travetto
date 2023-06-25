@@ -24,7 +24,7 @@ Usage:  [options] [command]
 Commands:
   doc               Command line support for generating module docs.
   doc:angular       Generate documentation into the angular webapp under related/travetto.github.io
-  doc:mapping       Generate module mapping for @travetto/doc
+  doc:mapping       Generate module mapping for
   email:compile     CLI Entry point for running the email server
   email:editor      The email editor compilation service and output serving
   email:test        CLI Entry point for running the email server

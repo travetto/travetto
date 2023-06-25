@@ -32,7 +32,7 @@ $ git init .
 
 $ npm init -f
 $ npm i @travetto/{log,rest-express,model-mongo,cli}
-$ npm i -D @travetto/{eslint,compiler,test} node-fetch@^2.6.9 @types/node-fetch
+$ npm i -D @travetto/{eslint,compiler,test}
 
 $ npx trv lint:register
 ```
@@ -310,7 +310,7 @@ npx trv run:rest
 **Terminal: Application Startup**
 ```bash
 2029-03-14T04:00:00.618Z info  [@travetto/config:src/configuration.ts:141] Initialized {
-  manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.1.2', version: '0.0.0' },
+  manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.2.0', version: '0.0.0' },
   env: {
     envName: 'dev',
     debug: '0',
@@ -319,7 +319,7 @@ npx trv run:rest
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v19.x.x'
+    nodeVersion: 'v20.x.x'
   },
   config: {
     sources: [
@@ -406,8 +406,6 @@ Create `support/create-todo.ts` with the following contents:
 
 **Code: Creating Todo by fetch**
 ```typescript
-import fetch from 'node-fetch';
-
 export async function main(key: string) {
   const res = await fetch('http://localhost:3000/todo', {
     method: 'POST',
@@ -425,21 +423,19 @@ export async function main(key: string) {
 ```bash
 $ trv main support/create-todo.ts <key>
 
-FetchError: request to http://localhost:3000/todo failed, reason: socket hang up
-    at ClientRequest.<anonymous> (<workspace-root>/node_modules/node-fetch/lib/index.js:1505:11)
-    at ClientRequest.emit (node:events:513:28)
-    at Socket.socketOnEnd (node:_http_client:519:9)
-    at Socket.emit (node:events:525:35)
-    at endReadableNT (node:internal/streams/readable:1359:12)
-    at processTicksAndRejections (node:internal/process/task_queues:82:21)
+TypeError: fetch failed
+    at Object.fetch (node:internal/deps/undici/undici:11576:11)
+    at Object.main (./doc/create-todo.ts:2:15)
+    at MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:40:46)
+    at Function.command (<workspace-root>/module/cli/src/execute.ts:79:20)
+    at Function.run (<workspace-root>/module/cli/src/execute.ts:110:9)
+    at entry (<workspace-root>/module/cli/support/entry.cli.ts:8:5)
 ```
 
 Now create `support/list-todo.ts` with the following contents:
 
 **Code: Listing Todos by fetch**
 ```typescript
-import fetch from 'node-fetch';
-
 export async function main(key: string) {
   const res = await fetch(`http://localhost:3000/todo?q=${key}`).then(r => r.json());
   console.log!(res);
@@ -450,11 +446,11 @@ export async function main(key: string) {
 ```bash
 $ trv main support/list-todo.ts <key>
 
-FetchError: request to http://localhost:3000/todo?q=<key> failed, reason: socket hang up
-    at ClientRequest.<anonymous> (<workspace-root>/node_modules/node-fetch/lib/index.js:1505:11)
-    at ClientRequest.emit (node:events:513:28)
-    at Socket.socketOnEnd (node:_http_client:519:9)
-    at Socket.emit (node:events:525:35)
-    at endReadableNT (node:internal/streams/readable:1359:12)
-    at processTicksAndRejections (node:internal/process/task_queues:82:21)
+TypeError: fetch failed
+    at Object.fetch (node:internal/deps/undici/undici:11576:11)
+    at Object.main (./doc/list-todo.ts:2:15)
+    at MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:40:46)
+    at Function.command (<workspace-root>/module/cli/src/execute.ts:79:20)
+    at Function.run (<workspace-root>/module/cli/src/execute.ts:110:9)
+    at entry (<workspace-root>/module/cli/support/entry.cli.ts:8:5)
 ```
