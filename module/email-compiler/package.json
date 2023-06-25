@@ -32,10 +32,10 @@
     "@travetto/email": "^3.2.0",
     "@travetto/image": "^3.2.0",
     "@types/inline-css": "^3.0.1",
-    "html-entities": "^2.3.3",
+    "html-entities": "^2.4.0",
     "inline-css": "^4.0.2",
-    "sass": "^1.62.1",
-    "purgecss": "^5.0.0"
+    "purgecss": "^5.0.0",
+    "sass": "^1.63.6"
   },
   "peerDependencies": {
     "@travetto/cli": "^3.2.0"

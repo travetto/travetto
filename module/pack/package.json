@@ -26,10 +26,10 @@
   "dependencies": {
     "@rollup/plugin-commonjs": "^24.1.0",
     "@rollup/plugin-json": "^6.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-node-resolve": "^15.1.0",
     "@rollup/plugin-terser": "^0.4.3",
     "@travetto/base": "^3.2.0",
-    "rollup": "^3.22.0",
+    "rollup": "^3.25.2",
     "rollup-plugin-sourcemaps": "^0.6.3"
   },
   "peerDependencies": {

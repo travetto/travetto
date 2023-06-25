@@ -54,7 +54,7 @@ export class RunnerUtil {
    * @returns
    */
   static async getTestCount(patterns: string[]): Promise<number> {
-    const proc = ExecUtil.spawn('npx', ['trv', 'test:count', ...patterns], { stdio: 'pipe', catchAsResult: true });
+    const proc = ExecUtil.spawn('npx', ['trv', 'test:count', ...patterns], { stdio: 'pipe', catchAsResult: true, env: { FORCE_COLOR: '0', NO_COLOR: '1' } });
     const countRes = await proc.result;
     if (!countRes.valid) {
       throw new Error(countRes.stderr);
