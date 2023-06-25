@@ -3,11 +3,11 @@
   "version": "0.0.0",
   "dependencies": {
     "@travetto/rest-express": "^3.2.0",
-    "@travetto/rest-express-lambda": "^3.2.0",
-    "@travetto/rest-fastify": "^3.2.0",
-    "@travetto/rest-fastify-lambda": "^3.2.0",
+    "@travetto/rest-express-lambda": "^3.2.1",
+    "@travetto/rest-fastify": "^3.2.1",
+    "@travetto/rest-fastify-lambda": "^3.2.1",
     "@travetto/rest-koa": "^3.2.0",
-    "@travetto/rest-koa-lambda": "^3.2.0",
+    "@travetto/rest-koa-lambda": "^3.2.1",
     "@travetto/rest-session": "^3.2.0"
   },
   "travetto": {},

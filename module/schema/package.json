@@ -30,7 +30,7 @@
     "@travetto/registry": "^3.2.0"
   },
   "peerDependencies": {
-    "@travetto/transformer": "^3.2.0"
+    "@travetto/transformer": "^3.2.1"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {

@@ -5,8 +5,8 @@
     "@travetto/cli": "^3.2.0"
   },
   "devDependencies": {
-    "@travetto/compiler": "^3.2.0",
-    "@travetto/pack": "^3.2.0"
+    "@travetto/compiler": "^3.2.1",
+    "@travetto/pack": "^3.2.1"
   },
   "travetto": {},
   "private": true
