@@ -74,8 +74,7 @@ export class AngularClientGenerator extends ClientGenerator {
   }
 
   renderController(controller: ControllerConfig): RenderContent {
-    const service = controller.class.name.replace(/(Controller|Rest|Service)$/, '');
-
+    const service = controller.externalName;
     const endpoints = controller.endpoints;
 
     const results = endpoints.map(x => this.renderEndpoint(x, controller));

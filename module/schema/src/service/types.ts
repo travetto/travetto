@@ -86,6 +86,10 @@ export interface ClassConfig extends DescribableConfig {
    * Method parameter configs
    */
   methods: Record<string, FieldConfig[]>;
+  /**
+   * Name for consuming clients
+   */
+  externalName: string;
 }
 
 /**

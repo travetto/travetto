@@ -59,7 +59,7 @@ export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean 
   }
 
   renderController(controller: ControllerConfig): RenderContent {
-    const service = controller.class.name.replace(/(Controller|Rest|Service)$/, '');
+    const service = controller.externalName;
     const endpoints = controller.endpoints;
     const results = endpoints.map(x => this.renderEndpoint(x, controller));
     const baseFetchService: Imp = { name: BaseNodeFetchService.name, file: SVC, classId: '_' };

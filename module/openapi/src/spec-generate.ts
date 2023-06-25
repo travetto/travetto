@@ -42,22 +42,6 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   }
 
   /**
-   * Get type id
-   * @param cls
-   */
-  #getTypeId(cls: Class): string {
-    return cls.name?.replace('Ⲑsyn', '');
-  }
-
-  /**
-   * Get tag name
-   * @param cls
-   */
-  #getTypeTag(cls: Class): string {
-    return cls.name.replace(/(Rest|Controller)$/, '');
-  }
-
-  /**
    * Build response object
    */
   #getHeaderValue(ep: EndpointConfig, header: string): string | undefined {
@@ -111,7 +95,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const out: Record<string, unknown> = {};
     // Handle nested types
     if (SchemaRegistry.has(field.type)) {
-      const id = this.#getTypeId(field.type);
+      const id = SchemaRegistry.get(field.type).externalName;
       // Exposing
       this.#schemas[id] = this.#allSchemas[id];
       out.$ref = `${DEFINITION}/${id}`;
@@ -209,8 +193,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     }
 
     const cls = type.class;
-
-    const typeId = this.#getTypeId(cls);
+    const typeId = type.externalName;
 
     if (!this.#allSchemas[typeId]) {
       const config = SchemaRegistry.get(cls);
@@ -270,7 +253,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: ''
       };
     } else {
-      const typeId = this.#getTypeId(body.type);
+      const typeId = SchemaRegistry.get(body.type)?.externalName ?? body.type.name;
       const typeRef = SchemaRegistry.has(body.type) ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {
         content: {
@@ -322,7 +305,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       return;
     }
 
-    const tagName = ctrl.class.name.replace(/(Rest|Controller)$/, '');
+    const tagName = ctrl.externalName;
 
     const op: OperationObject = {
       tags: [tagName],
@@ -369,7 +352,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
       return;
     }
     this.#tags.push({
-      name: this.#getTypeTag(controller.class),
+      name: controller.externalName,
       description: controller.description || controller.title
     });
   }

@@ -290,15 +290,13 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       );
     }
 
-    const cleaned = schema.class.name.replace(/Ⲑsyn/, '');
-
     const result: RenderContent = {
       imports,
       classId: schema.class.Ⲑid,
       file: './schema.ts',
-      name: cleaned,
+      name: schema.externalName,
       content: [
-        `export interface ${cleaned}`,
+        `export interface ${schema.externalName}`,
         ...parent ? [' extends ', parent] : [], `{\n`,
         ...fields,
         `}\n`,

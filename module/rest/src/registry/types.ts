@@ -103,6 +103,10 @@ export interface ControllerConfig extends CoreConfig, DescribableConfig {
    * List of all endpoints
    */
   endpoints: EndpointConfig[];
+  /**
+   * Client name, used by consuming tools/clients
+   */
+  externalName: string;
 }
 
 /**

@@ -31,6 +31,7 @@ class $ControllerRegistry extends MetadataRegistry<ControllerConfig, EndpointCon
       headers: {},
       interceptors: [],
       basePath: '',
+      externalName: cls.name.replace(/(Controller|Rest|Service)$/, ''),
       endpoints: [],
     };
   }
