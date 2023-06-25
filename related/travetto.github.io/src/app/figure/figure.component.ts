@@ -1,5 +1,4 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
-import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 
 @Component({
   selector: 'figure',
@@ -8,7 +7,7 @@ import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack
 })
 export class FigureComponent implements OnInit {
 
-  constructor(private elementRef: ElementRef, private snackbar: MatSnackBar) { }
+  constructor(private elementRef: ElementRef) { }
 
   ngOnInit() {
     const node = this.elementRef.nativeElement as HTMLElement;
@@ -18,9 +17,6 @@ export class FigureComponent implements OnInit {
       code.addEventListener('click', () => {
         const text = code.innerText.replace(/^\s*[$]\s*/, '');
         navigator.clipboard.writeText(text);
-        this.snackbar.open('Copied to clipboard', 'dismiss', {
-          duration: 5000
-        });
       });
     }
   }

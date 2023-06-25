@@ -1,5 +1,5 @@
-export async function main(key: string) {
-  const res = await fetch('http://localhost:3000/todo', {
+export async function main(key: string, port: number) {
+  const res = await fetch(`http://localhost:${port}/todo`, {
     method: 'POST',
     body: JSON.stringify({ text: `New Todo - ${key}` }),
     headers: {

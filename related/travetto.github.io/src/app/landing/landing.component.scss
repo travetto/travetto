@@ -7,30 +7,35 @@
 .header {
   height: 400px;
   width: 100%;
-  background-color: linear-gradient(rgba(0, 0, 0, .7), rgba(0, 0, 0, 0.7));
+  background-color: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
   background-image: url(/assets/landing/bg.jpg);
   background-size: auto 400px;
   background-position: 50% 50%;
   background-repeat: repeat-x;
 
-  div.mat-display-4 {
+  h1 {
     padding: 0;
     margin: 0;
     padding-top: 140px;
+    font-size: 7rem;
+    letter-spacing: -5px;
+    line-height: 1em;
   }
 
-  div.mat-display-3 {
-    margin-top: .5em;
+  h2 {
+    margin: 0;
+    padding: 0;
+    font-size: 2.5rem;
+    line-height: 1em;
+    margin-top: 0.5em;
   }
 
-  div.mat-display-3,
-  div.mat-display-4 {
+  h2,
+  h1 {
     text-align: center;
     color: white;
-    text-shadow: -1px -1px 10px rgba(0, 0, 0, .7),
-      1px -1px 10px rgba(0, 0, 0, .7),
-      -1px 1px 10px rgba(0, 0, 0, .7),
-      1px 1px 10px rgba(0, 0, 0, .7);
+    text-shadow: -1px -1px 10px rgba(0, 0, 0, 0.7), 1px -1px 10px rgba(0, 0, 0, 0.7), -1px 1px 10px rgba(0, 0, 0, 0.7),
+      1px 1px 10px rgba(0, 0, 0, 0.7);
   }
 }
 
@@ -38,10 +43,10 @@ aside {
   padding: 1em;
   font-size: 16pt;
   text-align: center;
-  background: rgba(0, 0, 0, .1);
-  p { 
+  background: rgba(0, 0, 0, 0.1);
+  p {
     width: 100%;
-    color: #333; 
+    color: #333;
     margin: 0;
     padding: 0 !important;
     a {
@@ -75,10 +80,10 @@ section {
     background: #eee;
     max-width: 600px;
     width: 98%;
-    box-shadow: 1px 1px 10px rgba(0, 0, 0, .2);
+    box-shadow: 1px 1px 10px rgba(0, 0, 0, 0.2);
   }
 
-  div+img {
+  div + img {
     margin-left: 15px;
   }
 
@@ -89,7 +94,7 @@ section {
   &:nth-child(even) {
     flex-direction: row-reverse;
 
-    div+img {
+    div + img {
       margin-left: 0px;
       margin-right: 15px;
     }
@@ -100,14 +105,14 @@ section {
   .header {
     height: 250px;
 
-    div.mat-display-4 {
+    h1 {
       font-size: 50px;
       padding: 0;
       margin: 0;
       padding-top: 35px;
     }
 
-    div.mat-display-3 {
+    h2 {
       font-size: 25px;
     }
   }

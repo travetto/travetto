@@ -371,20 +371,20 @@ npx trv run:rest
       RestClientConfig: { providers: { '0': [Object], '1': [Object] } },
       RestConfig: {
         serve: true,
-        port: 3000,
+        port: 12555,
         trustProxy: false,
         hostname: 'localhost',
         bindAddress: '0.0.0.0',
-        baseUrl: 'https://localhost:3000',
+        baseUrl: 'http://localhost:12555',
         defaultMessage: true,
-        ssl: { active: true }
+        ssl: { active: false }
       },
       RestCookieConfig: { signed: true, httpOnly: true, sameSite: 'lax' },
       RestCorsConfig: {},
       RestGetCacheConfig: {},
       RestLogRoutesConfig: {},
       RestSessionConfig: {},
-      RestSslConfig: { active: true },
+      RestSslConfig: { active: false },
       SessionConfig: {
         autoCommit: true,
         maxAge: 1800000,
@@ -397,7 +397,7 @@ npx trv run:rest
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:196] Listening { port: 3000 }
+2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:196] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api. 
@@ -406,8 +406,8 @@ Create `support/create-todo.ts` with the following contents:
 
 **Code: Creating Todo by fetch**
 ```typescript
-export async function main(key: string) {
-  const res = await fetch('http://localhost:3000/todo', {
+export async function main(key: string, port: number) {
+  const res = await fetch(`http://localhost:${port}/todo`, {
     method: 'POST',
     body: JSON.stringify({ text: `New Todo - ${key}` }),
     headers: {
@@ -421,36 +421,34 @@ export async function main(key: string) {
 
 **Terminal: Create Output**
 ```bash
-$ trv main support/create-todo.ts <key>
+$ trv main support/create-todo.ts <key> <port>
 
-TypeError: fetch failed
-    at Object.fetch (node:internal/deps/undici/undici:11576:11)
-    at Object.main (./doc/create-todo.ts:2:15)
-    at MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:40:46)
-    at Function.command (<workspace-root>/module/cli/src/execute.ts:79:20)
-    at Function.run (<workspace-root>/module/cli/src/execute.ts:110:9)
-    at entry (<workspace-root>/module/cli/support/entry.cli.ts:8:5)
+{
+  text: 'New Todo - <key>',
+  created: '2029-03-14T04:00:01.510Z',
+  id: '<uniqueId>'
+}
 ```
 
 Now create `support/list-todo.ts` with the following contents:
 
 **Code: Listing Todos by fetch**
 ```typescript
-export async function main(key: string) {
-  const res = await fetch(`http://localhost:3000/todo?q=${key}`).then(r => r.json());
+export async function main(key: string, port: number) {
+  const res = await fetch(`http://localhost:${port}/todo?q=${key}`).then(r => r.json());
   console.log!(res);
 }
 ```
 
 **Terminal: Listing Output**
 ```bash
-$ trv main support/list-todo.ts <key>
+$ trv main support/list-todo.ts <key> <port>
 
-TypeError: fetch failed
-    at Object.fetch (node:internal/deps/undici/undici:11576:11)
-    at Object.main (./doc/list-todo.ts:2:15)
-    at MainCommand.main (<workspace-root>/module/cli/support/cli.main.ts:40:46)
-    at Function.command (<workspace-root>/module/cli/src/execute.ts:79:20)
-    at Function.run (<workspace-root>/module/cli/src/execute.ts:110:9)
-    at entry (<workspace-root>/module/cli/support/entry.cli.ts:8:5)
+[
+  {
+    id: '<uniqueId>',
+    text: 'New Todo - <key>',
+    created: '2029-03-14T04:00:01.814Z'
+  }
+]
 ```

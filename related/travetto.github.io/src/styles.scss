@@ -1,13 +1,48 @@
+@import "reset.scss";
+
 /* You can add global styles to this file, and also import other style files */
 
-@import "./theme.scss";
-
-@mixin group($r,$g,$b) {
-  background: #333 linear-gradient(315deg, rgba($r, $g, $b, .7) 20px, rgba($r, $g, $b, 1) 30px, rgba($r, $g, $b, 1) 100%);
+h1,
+h2,
+h3,
+h4,
+h5,
+.toolbar a {
+  font-weight: normal;
+  font-family: "Julius Sans One", sans-serif;
 }
 
-@mixin materialIcon($size: 20px, $lineHeight: 35px, $padding: .5em) {
-  font-family: 'Material Icons';
+* {
+  font-weight: 300;
+  font-family: "Source Sans Pro", sans-serif;
+}
+
+code {
+  font-weight: 300;
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  span {
+    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+    font-weight: 300;
+  }
+}
+
+p,
+li {
+  line-height: 1em;
+  font-size: 1.25rem;
+}
+
+p {
+  margin-top: 0;
+}
+
+@mixin group($r, $g, $b) {
+  background: #333
+    linear-gradient(315deg, rgba($r, $g, $b, 0.7) 20px, rgba($r, $g, $b, 1) 30px, rgba($r, $g, $b, 1) 100%);
+}
+
+@mixin materialIcon($size: 20px, $lineHeight: 35px, $padding: 0.5em) {
+  font-family: "Material Icons";
   font-weight: normal;
   font-style: normal;
   font-size: $size;
@@ -32,23 +67,23 @@
   -moz-osx-font-smoothing: grayscale;
 
   /* Support for IE. */
-  font-feature-settings: 'liga';
+  font-feature-settings: "liga";
 }
 
 @mixin cornered($left: true, $right: true, $radius: 15px, $invert: false) {
   position: relative;
   @if $left {
     &:before {
-      position:absolute; 
+      position: absolute;
       z-index: 100;
-      top:-1px; 
-      content:'';
+      top: -1px;
+      content: "";
       border-top: $radius solid white;
       @if $invert {
-        right:-1px; 
+        right: -1px;
         border-left: $radius solid transparent;
       } @else {
-        left:-1px; 
+        left: -1px;
         border-right: $radius solid transparent;
       }
     }
@@ -56,22 +91,21 @@
 
   @if $right {
     &:after {
-      position:absolute; 
+      position: absolute;
       z-index: 100;
-      bottom:-1px;
-      content:'';
+      bottom: -1px;
+      content: "";
       border-bottom: $radius solid white;
       @if $invert {
-        left:-1px; 
+        left: -1px;
         border-right: $radius solid transparent;
       } @else {
-        right:-1px; 
+        right: -1px;
         border-left: $radius solid transparent;
       }
     }
   }
 }
-
 
 body,
 html {
@@ -112,13 +146,15 @@ li {
         font-family: "Julius Sans One", sans-serif;
         font-weight: normal;
         border-bottom: 1px solid #333;
-        padding-left: .5rem;
-        padding-right: .5rem;
-      } 
-      td,th {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+      td,
+      th {
         vertical-align: middle;
       }
-      th:not(:first-of-type), td:not(:first-of-type) {
+      th:not(:first-of-type),
+      td:not(:first-of-type) {
         text-align: center;
         min-width: 6rem;
       }
@@ -128,14 +164,14 @@ li {
       td:first-of-type {
         border-bottom: 1px solid #eee;
       }
-      td:not(:first-of-type,:empty) {
+      td:not(:first-of-type, :empty) {
         color: transparent;
         &::after {
-          padding: .5rem;
+          padding: 0.5rem;
           color: green;
           font-weight: bold;
-          content: 'circle'; 
-          @include materialIcon($size: 1.2em, $lineHeight:1em, $padding: 0px);
+          content: "circle";
+          @include materialIcon($size: 1.2em, $lineHeight: 1em, $padding: 0px);
         }
       }
     }
@@ -173,13 +209,13 @@ li {
   }
 
   h2 {
-    margin-top: .7em;
+    margin-top: 0.7em;
     border-bottom: 1px solid #ddd;
   }
 
   h3,
   h4 {
-    margin-top: .7em;
+    margin-top: 0.7em;
     font-size: 18pt;
     color: #333;
   }
@@ -202,59 +238,59 @@ li {
 
     font-size: 1em;
     // @include group(120,120,120);
-    font-family: "Source Sans Pro", sans-serif;      
-    padding: 0 .25em;
+    font-family: "Source Sans Pro", sans-serif;
+    padding: 0 0.25em;
   }
 
   a[class$="-link"] {
-    padding-left: .1em;
+    padding-left: 0.1em;
     text-decoration: none;
     font-weight: normal;
     color: #333;
     opacity: 1;
-    transition: .5s text-decoration;
+    transition: 0.5s text-decoration;
     padding-left: 0;
 
-    &:hover  {
+    &:hover {
       text-decoration: underline;
     }
 
-    &.module-link  {
-      &::after { 
-        content: 'view_module'; 
-        color: rgba(0,128,0,.7);
-      }  
-      color: rgba(0,128,0,1);
-      text-shadow: 3px 3px 5px rgba(100,100,100,.3);
+    &.module-link {
+      &::after {
+        content: "view_module";
+        color: rgba(0, 128, 0, 0.7);
+      }
+      color: rgba(0, 128, 0, 1);
+      text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.3);
       // background: rgba(0, 128, 0, .2);
     }
 
-    &.source-link  {
-      &::after { 
-        content: 'text_snippet'; 
-        color: rgba(255,0,0,.7);  
-      }  
-      color: rgba(255,0,0,1);
-      text-shadow: 3px 3px 5px rgba(100,100,100,.3);
+    &.source-link {
+      &::after {
+        content: "text_snippet";
+        color: rgba(255, 0, 0, 0.7);
+      }
+      color: rgba(255, 0, 0, 1);
+      text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.3);
       // background: rgba(255, 0, 0, .2);
     }
 
-    &.external-link  {
-      &::after { 
-        content: 'exit_to_app'; 
-        color: rgba(50,100,180,.5);
-      }  
-      color: rgba(50,100,180, 1);
-      text-shadow: 3px 3px 5px rgba(100,100,100,.3);
+    &.external-link {
+      &::after {
+        content: "exit_to_app";
+        color: rgba(50, 100, 180, 0.5);
+      }
+      color: rgba(50, 100, 180, 1);
+      text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.3);
       // background: rgba(0, 0, 255, .2);
     }
 
     &::after {
-      @include materialIcon($size: 1.2em, $lineHeight:1em, $padding: 0px);
+      @include materialIcon($size: 1.2em, $lineHeight: 1em, $padding: 0px);
       vertical-align: middle;
       color: white;
       line-height: 1.25rem;
-    }            
+    }
   }
 
   figure {
@@ -264,7 +300,7 @@ li {
     margin-top: 1rem;
     margin-bottom: 1rem;
     overflow: hidden;
-    
+
     cite {
       font-size: 1rem;
       line-height: 1.3rem;
@@ -273,7 +309,7 @@ li {
       margin: 0px;
       padding: 0px;
       a {
-        margin-right: .5em;
+        margin-right: 0.5em;
         color: white;
         text-decoration: none;
       }
@@ -289,55 +325,63 @@ li {
       padding: 0px;
       color: white;
 
-      cite, .copy {
+      cite,
+      .copy {
         position: absolute;
         right: 10px;
         top: 0px;
         cursor: pointer;
-        border-bottom: 1px solid rgba(0,0,0,0);
-        font-size: .8em;
+        border-bottom: 1px solid rgba(0, 0, 0, 0);
+        font-size: 0.8em;
         line-height: 1.2em;
-        margin: .4em 0;
+        margin: 0.4em 0;
         &:hover {
           border-bottom: 1px solid #fff;
         }
       }
-    
+
       &::before {
         @include materialIcon;
-      }            
+      }
 
-      &.install::before { content: 'playlist_add'; }
-      &.terminal::before { content: 'call_to_action'; }
-      &.code::before { content: 'code'; }
-      &.config::before { content: 'settings'; }
+      &.install::before {
+        content: "playlist_add";
+      }
+      &.terminal::before {
+        content: "call_to_action";
+      }
+      &.code::before {
+        content: "code";
+      }
+      &.config::before {
+        content: "settings";
+      }
 
-      
       &.install {
         background-color: desaturate(darken(rgba(218, 165, 32, 1), 5%), 0%);
       }
-    
+
       &.terminal {
         background-color: desaturate(rgba(102, 102, 102, 1), 0%);
       }
-    
+
       &.code {
         background-color: desaturate(darken(rgba(0, 255, 0, 1), 20%), 0%);
       }
-    
+
       &.config {
         background-color: desaturate(darken(rgba(0, 0, 255, 1), 20%), 40%);
       }
     }
 
     pre {
-      margin:0;
+      margin: 0;
     }
 
     code {
       line-height: 1.2;
-      font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-      margin: .2em;
+      font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+      margin: 0.2em;
       white-space: pre;
       word-spacing: normal;
       word-break: normal;
@@ -361,28 +405,26 @@ li {
 
       margin: 0;
 
-      background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAAAAABXZoBIAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAHOSURBVCjPJdDBASMpDATAtWCMWkwem39sa7qFB/A9rkKo119XJ05hMFZljBg3PbGr3JDBW2WBbRV2hm76dJbHZQfsH6hsnKoYEJ6enqF6wl6n0+WqTyXoxL4ez1CoLEtbPpGdl1wu34X110ZnsJirrEYfIL4+8SvCsOPDBZmguntCrvdspzCIrD+oZbMQtrEppk/P+sSIxKqM9DTFU7+Qj5ATvPZNX4XByDCsS57IWMFQqDz/j4BYtiubfGK9Ts/+QdZdRhAZq1gZISjOe9rjIwhVBT3xFJnAEJ7XP+g6riAUGcSqGYbs9GXqctpx+nC5+q6CTDHiWzfoiV1mTGSbofoEYWCksz4hrFe6PH02Od8rZBty3Xpv7JqeyDiulj5su71+nT4ir1PzFoRVtmdMpG1L+wa7MMrwgfRVs5ygz8jLYpTVP6FIEIpdCF3fzkaXCVme+9PYEvSnZrCP6xvZ082F/R5IT8/IssD4F8vkH8gydh0uZCQy8lpgrDox+3DDuhLzzliebbRRHpxLGD76sXMN53u0XXdLCLxWpevO2MVsBGP6Kax/oFDnRWSXL5MpGMTv+oCv09kJQp2+r4QFwVjl09VlCwMT6fRdCf4HTj6GcxpsVvEAAAAASUVORK5CYII=');
+      background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABwAAAAcCAAAAABXZoBIAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAAmJLR0QA/4ePzL8AAAHOSURBVCjPJdDBASMpDATAtWCMWkwem39sa7qFB/A9rkKo119XJ05hMFZljBg3PbGr3JDBW2WBbRV2hm76dJbHZQfsH6hsnKoYEJ6enqF6wl6n0+WqTyXoxL4ez1CoLEtbPpGdl1wu34X110ZnsJirrEYfIL4+8SvCsOPDBZmguntCrvdspzCIrD+oZbMQtrEppk/P+sSIxKqM9DTFU7+Qj5ATvPZNX4XByDCsS57IWMFQqDz/j4BYtiubfGK9Ts/+QdZdRhAZq1gZISjOe9rjIwhVBT3xFJnAEJ7XP+g6riAUGcSqGYbs9GXqctpx+nC5+q6CTDHiWzfoiV1mTGSbofoEYWCksz4hrFe6PH02Od8rZBty3Xpv7JqeyDiulj5su71+nT4ir1PzFoRVtmdMpG1L+wa7MMrwgfRVs5ygz8jLYpTVP6FIEIpdCF3fzkaXCVme+9PYEvSnZrCP6xvZ082F/R5IT8/IssD4F8vkH8gydh0uZCQy8lpgrDox+3DDuhLzzliebbRRHpxLGD76sXMN53u0XXdLCLxWpevO2MVsBGP6Kax/oFDnRWSXL5MpGMTv+oCv09kJQp2+r4QFwVjl09VlCwMT6fRdCf4HTj6GcxpsVvEAAAAASUVORK5CYII=");
       background-repeat: repeat;
 
       &[class*="language-"] {
         overflow-x: auto;
         font-size: 13pt;
 
-        background: rgba(0, 0, 0, .8);
+        background: rgba(0, 0, 0, 0.8);
         color: hsl(0, 0%, 95%);
 
         &.inline {
-          background: rgba(0, 0, 0, .7);
+          background: rgba(0, 0, 0, 0.7);
           color: white;
         }
 
         .token {
-
           &.class-name,
           &.type {
             color: hsl(195, 53%, 79%);
           }
-
 
           &.meta {
             color: hsl(39, 100%, 50%);
@@ -394,13 +436,13 @@ li {
           &.cdata {
             color: hsl(30, 50%, 50%);
 
-            &>* {
+            & > * {
               color: hsl(30, 50%, 50%) !important;
             }
           }
 
           &.punctuation {
-            opacity: .7;
+            opacity: 0.7;
           }
 
           &.function {
@@ -480,22 +522,22 @@ li {
         font-size: 14pt;
         overflow: visible;
         display: inline-block;
-        padding: .2em .4em;
+        padding: 0.2em 0.4em;
       }
     }
   }
 
   code.item {
-    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
     color: #333;
-    text-shadow: 3px 3px 5px rgba(100,100,100,.3);
+    text-shadow: 3px 3px 5px rgba(100, 100, 100, 0.3);
 
     &.method {
-      color: #a60;      
+      color: #a60;
       letter-spacing: -1px;
     }
   }
-  
+
   ul {
     list-style-type: circle;
 
@@ -531,11 +573,13 @@ li {
     margin-bottom: 0;
   }
 
-  ul+h3, ol+h3 {
+  ul + h3,
+  ol + h3 {
     margin-top: 1em;
   }
 
-  ul, ol {
+  ul,
+  ol {
     margin: 0;
     padding: 0;
     list-style-position: outside;
@@ -543,17 +587,16 @@ li {
 
     li {
       font-size: 12pt;
-      padding: .2em 0;
+      padding: 0.2em 0;
       width: 100%;
       display: block;
 
-      &.active>a {
+      &.active > a {
         border-color: lighten(green, 10%);
       }
 
-
       a {
-        transition: border-color .5s;
+        transition: border-color 0.5s;
 
         &:hover {
           border-color: green;
@@ -561,15 +604,16 @@ li {
 
         color: black;
         text-decoration: none;
-        padding-right: .5em;
+        padding-right: 0.5em;
         border-right: 2px solid #aaa;
       }
 
-      ul, ol {
+      ul,
+      ol {
         background-color: #f8f8f8;
 
         li {
-          font-size: .8em;
+          font-size: 0.8em;
 
           &.active a {
             border-color: lighten(red, 10%);
@@ -580,21 +624,20 @@ li {
   }
 }
 
-
 @media (max-width: 700px) {
   html body app-root {
     .documentation {
       max-width: 700px !important;
       min-width: 300px !important;
       display: block !important;
-      padding: .25em 1em;
+      padding: 0.25em 1em;
 
       pre code {
         font-size: 10pt;
       }
     }
 
-    .wrapper>* {
+    .wrapper > * {
       display: block !important;
     }
 
@@ -607,7 +650,7 @@ li {
 
       .inner {
         width: 100%;
-        padding: .25em 1em;
+        padding: 0.25em 1em;
         box-sizing: border-box;
         margin: 0;
         text-align: left;

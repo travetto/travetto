@@ -5,19 +5,23 @@ $SMALL-HEADER-HEIGHT: 40px;
 :host {
   display: block;
   height: 100%;
+
+  .toolbar {
+    background: rgba(76, 175, 80, 1);
+  }
 }
 
-:host [href=landing] {
-  mat-toolbar {
-    background: linear-gradient(180deg, rgba(76, 175, 80, 1) 0%, rgba(76, 175, 80, .8) 100%) !important;
+:host [href="landing"] {
+  .toolbar {
+    background: linear-gradient(180deg, rgba(76, 175, 80, 1) 0%, rgba(76, 175, 80, 0.8) 100%) !important;
   }
 
-  .main-module ::ng-deep>* {
+  .main-module ::ng-deep > * {
     padding-top: 0px;
   }
 }
 
-.main-module ::ng-deep>* {
+.main-module ::ng-deep > * {
   padding-top: $HEADER-HEIGHT;
 
   .toc {
@@ -25,18 +29,24 @@ $SMALL-HEADER-HEIGHT: 40px;
   }
 }
 
-
-mat-toolbar {
+.toolbar {
   height: $HEADER-HEIGHT;
   position: fixed;
   top: 0;
-  opacity: .9;
-  z-index: 100;
+  width: 100dvw;
+  box-sizing: border-box;
+  padding: 0;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  opacity: 0.9;
+  z-index: 10000;
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
 
   img.logo {
     width: 50px;
     height: 50px;
-    display: inline-block;
     margin-right: 5px;
   }
 
@@ -50,8 +60,7 @@ mat-toolbar {
     }
 
     color: white;
-    font-family: "Julius Sans One",
-    sans-serif;
+    font-family: "Julius Sans One", sans-serif;
     font-size: 32px;
     font-weight: normal;
     line-height: 32px;
@@ -65,8 +74,22 @@ mat-toolbar {
     color: white;
     font-weight: bold;
   }
-}
 
+  .actions {
+    display: flex;
+    gap: 0rem;
+    align-items: center;
+    a {
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: 0.25s ease-in-out all;
+      padding: 0.5rem 1rem;
+      &:hover {
+        background: rgba(100, 100, 100, 0.1);
+      }
+    }
+  }
+}
 
 footer {
   display: flex;
@@ -75,7 +98,7 @@ footer {
   font-family: "Source Sans Pro", sans-serif;
 
   width: 100%;
-  background: linear-gradient(rgba(0, 0, 0, .7), rgba(0, 0, 0, 0.7)), url('/assets/landing/bg.jpg') center;
+  background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url("/assets/landing/bg.jpg") center;
   color: #eee;
 
   div {
@@ -93,11 +116,11 @@ footer {
   }
 
   .social {
-    >* {
+    > * {
       line-height: calc($FOOTER-HEIGHT/2);
       height: calc($FOOTER-HEIGHT/2);
       display: inline-block;
-      margin-right: .5em;
+      margin-right: 0.5em;
     }
 
     a {
@@ -113,8 +136,7 @@ footer {
 
 @media (min-width: 700px) {
   :host {
-
-    .main-module ::ng-deep>* {
+    .main-module ::ng-deep > * {
       min-height: calc(100vh - #{$FOOTER-HEIGHT + $HEADER-HEIGHT});
 
       p {
@@ -132,43 +154,42 @@ footer {
 
 @media (max-width: 700px) {
   :host {
-    mat-toolbar {
+    .toolbar {
       width: 100%;
+      display: grid;
+      grid-template-columns: auto auto 1fr auto;
+      padding: 0px;
+      height: $SMALL-HEADER-HEIGHT;
+      padding-left: 2px;
 
-      [mat-button] {
+      a {
         min-width: 0;
         font-size: 15px;
+        height: $SMALL-HEADER-HEIGHT;
+        line-height: $SMALL-HEADER-HEIGHT;
       }
-
-      height: $SMALL-HEADER-HEIGHT;
 
       .name {
         font-size: 25px;
       }
 
-      svg.logo {
-        display: none;
-      }
-
-      padding: 0px;
-      padding-left: 2px;
-
       img.logo {
         height: $SMALL-HEADER-HEIGHT - 4px;
-        width: auto;
-      }
-
-      a {
-        height: $SMALL-HEADER-HEIGHT;
-        line-height: $SMALL-HEADER-HEIGHT;
+        width: $SMALL-HEADER-HEIGHT - 4px;
+        display: block;
       }
 
       a[href="/landing"] {
         display: none;
       }
 
-      a[href="https://github.com/travetto"] {
+      a[href="https://github.com/travetto"]
+      {
         display: none;
+      }
+
+      .actions a {
+        padding: 0 0.5rem;
       }
     }
 
@@ -178,7 +199,7 @@ footer {
       display: block;
       padding: 10px 0;
 
-      >div {
+      > div {
         padding: 0;
         margin: 0;
       }
@@ -187,9 +208,7 @@ footer {
 }
 
 @media (max-width: 450px) {
-
-  :host mat-toolbar [mat-button],
-  :host mat-toolbar a {
+  :host .toolbar a {
     font-size: 12px;
     padding-left: 5px;
     padding-right: 5px;

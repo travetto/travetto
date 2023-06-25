@@ -1,16 +1,16 @@
 <div [attr.href]="href">
-  <mat-toolbar color="primary">
-
+  <div class="toolbar">
     <img class="logo" src="/assets/logo-inverted.png">
-
     <span class="name"><a [routerLink]="'/'">Travetto</a></span>
     <span class="spacer"></span>
-    <a mat-button [routerLink]="'/landing'" href="/">Home</a>
-    <a mat-button [routerLink]="'/guide'" href="/guide">Getting Started</a>
-    <a mat-button [routerLink]="'/docs'" href="/docs">Documentation</a>
-    <a mat-button [routerLink]="'/blog'" href="/blog">Blog</a>
-    <a mat-button href="https://github.com/travetto">Github</a>
-  </mat-toolbar>
+    <div class="actions">
+      <a [routerLink]="'/landing'" href="/">Home</a>
+      <a [routerLink]="'/guide'" href="/guide">Getting Started</a>
+      <a [routerLink]="'/docs'" href="/docs">Documentation</a>
+      <a [routerLink]="'/blog'" href="/blog">Blog</a>
+      <a href="https://github.com/travetto">Github</a>
+    </div>
+  </div>
 
   <div class="main-module">
     <router-outlet></router-outlet>

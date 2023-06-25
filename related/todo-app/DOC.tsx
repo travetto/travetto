@@ -10,13 +10,15 @@ import { ShutdownManager, Util } from '@travetto/base';
 const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 const TodoRoot = d.ref('Todo App', RootIndex.mainModule.outputPath);
 
+const port = 12555;
+
 async function init() {
   process.env.TRV_LOG_PLAIN = '0';
 
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.runBackground('trv', ['run:rest', '--port=12555'], {
-    env: { REST_LOG_PATHS: '!*' }
+  const cmd = DocRunUtil.runBackground('trv', ['run:rest'], {
+    env: { REST_LOG_PATHS: '!*', REST_PORT: `${port}`, REST_SSL: '0' }
   });
 
   ShutdownManager.onExitRequested(() => cmd.process.kill('SIGKILL'));
@@ -150,12 +152,12 @@ $ npx trv lint:register
       <c.Code title='Creating Todo by fetch' src='doc/create-todo.ts' />
 
       <c.Execution
-        title='Create Output' cmd='trv' args={['main', 'doc/create-todo.ts', key]}
+        title='Create Output' cmd='trv' args={['main', 'doc/create-todo.ts', key, `${port}`]}
         config={{
           env: { TRV_LOG_PLAIN: '1' },
           rewrite: line => line.replaceAll(key, '<key>').replace(/[0-9a-f]{32}/, '<uniqueId>'),
           formatCommand: (name, args) => [name, ...args].map(v =>
-            v.replaceAll('doc/create', 'support/create').replace(key, '<key>')
+            v.replaceAll('doc/create', 'support/create').replace(key, '<key>').replace(new RegExp(`${port}`, 'g'), '<port>')
           ).join(' ')
         }}
       />
@@ -164,11 +166,11 @@ $ npx trv lint:register
 
       <c.Code title='Listing Todos by fetch' src='doc/list-todo.ts' />
 
-      <c.Execution title='Listing Output' cmd='trv' args={['main', 'doc/list-todo.ts', key]} config={{
+      <c.Execution title='Listing Output' cmd='trv' args={['main', 'doc/list-todo.ts', key, `${port}`]} config={{
         env: { TRV_LOG_PLAIN: '1' },
         rewrite: line => line.replaceAll(key, '<key>').replace(/[0-9a-f]{32}/, '<uniqueId>'),
         formatCommand: (name, args) => [name, ...args].map(
-          v => v.replaceAll('doc/list', 'support/list').replace(key, '<key>')
+          v => v.replaceAll('doc/list', 'support/list').replace(key, '<key>').replace(new RegExp(`${port}`, 'g'), '<port>')
         ).join(' ')
       }} />
     </c.Section>

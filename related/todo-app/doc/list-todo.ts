@@ -1,4 +1,4 @@
-export async function main(key: string) {
-  const res = await fetch(`http://localhost:3000/todo?q=${key}`).then(r => r.json());
+export async function main(key: string, port: number) {
+  const res = await fetch(`http://localhost:${port}/todo?q=${key}`).then(r => r.json());
   console.log!(res);
 }

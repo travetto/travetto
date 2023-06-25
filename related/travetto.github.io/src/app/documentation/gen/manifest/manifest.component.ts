@@ -1,15 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-manifest',
   templateUrl: './manifest.component.html',
   styleUrls: ['./manifest.component.scss']
 })
-export class ManifestComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit(): void {
-  }
-
-}
+export class ManifestComponent { }

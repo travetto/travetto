@@ -78,7 +78,7 @@ import { EmailInkyComponent } from './gen/email-inky/email-inky.component';
     SharedModule,
     RouterModule.forChild([
       {
-        path: 'docs',
+        path: '',
         component: DocumentationComponent,
         children: [
           { path: '', pathMatch: 'full', redirectTo: 'overview' },

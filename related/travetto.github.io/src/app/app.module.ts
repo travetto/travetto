@@ -1,16 +1,11 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { LandingComponent } from './landing/landing.component';
-import { GuideComponent } from './documentation/gen/todo-app/todo-app.component';
-import { DocumentationModule } from './documentation/documentation.module';
 import { BlogComponent } from './blog/blog.component';
-import { SharedModule } from './shared/shared.module';
 
 const routes: Routes = [
   {
@@ -23,11 +18,15 @@ const routes: Routes = [
       },
       {
         path: 'guide',
-        component: GuideComponent
+        loadChildren: () => import('./documentation/gen/todo-app/todo-app.module').then(m => m.TodoAppModule),
       },
       {
         path: 'blog',
         component: BlogComponent
+      },
+      {
+        path: 'docs',
+        loadChildren: () => import('./documentation/documentation.module').then(m => m.DocumentationModule)
       }
     ]
   }, {
@@ -41,16 +40,11 @@ const routes: Routes = [
   declarations: [
     AppComponent,
     LandingComponent,
-    GuideComponent,
     BlogComponent,
   ],
   imports: [
     BrowserModule,
-    HttpClientModule,
-    DocumentationModule,
-    BrowserAnimationsModule,
-    RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled' }),
-    SharedModule
+    RouterModule.forRoot(routes, { scrollPositionRestoration: 'disabled' })
   ],
   providers: [],
   bootstrap: [AppComponent]

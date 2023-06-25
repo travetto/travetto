@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 
 interface Post {
   author: {
@@ -28,14 +27,15 @@ export class BlogComponent implements OnInit {
   blogId = '8362979454426216505';
   posts: Post[] = [];
 
-  constructor(private client: HttpClient) { }
+  constructor() { }
 
   ngOnInit() {
     const key = 'AIzaSyBfg2W_JaAJU4qQWSKs-Vx_zVbFh4joYos';
-    this.client.get<{ items: Post[] }>(
+
+    fetch(
       `https://www.googleapis.com/blogger/v3/blogs/${this.blogId}/posts/?key=${key}`,
-    ).subscribe(data => {
-      this.posts = data.items;
-    });
+    )
+      .then(res => res.json())
+      .then(data => this.posts = data.items.slice(0, 3));
   }
 }
