@@ -7,7 +7,7 @@ import { path } from '@travetto/manifest';
 
 import type { ExecutionState } from './exec';
 
-type All = Buffer | string | Readable | Uint8Array;
+type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream;
 
 /**
  * Utilities for managing streams/buffers/etc
@@ -28,7 +28,7 @@ export class StreamUtil {
    * Read stream to buffer
    * @param src The stream to convert to a buffer
    */
-  static async streamToBuffer(src: Readable): Promise<Buffer> {
+  static async streamToBuffer(src: Readable | NodeJS.ReadableStream): Promise<Buffer> {
     return new Promise<Buffer>((res, rej) => {
       const data: Buffer[] = [];
       src.on('data', d => data.push(d));
@@ -61,7 +61,8 @@ export class StreamUtil {
    */
   static async toStream(src: All): Promise<Readable> {
     if (typeof src !== 'string' && 'pipe' in src) {
-      return src;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return src as Readable;
     } else {
       return this.bufferToStream(await this.toBuffer(src));
     }
