@@ -24,7 +24,7 @@
     "directory": "module/doc"
   },
   "dependencies": {
-    "@travetto/base": "^3.2.0",
+    "@travetto/base": "^3.2.1",
     "@types/prismjs": "^1.26.0",
     "prismjs": "^1.29.0"
   },

@@ -25,7 +25,7 @@
     "directory": "module/command"
   },
   "dependencies": {
-    "@travetto/base": "^3.2.0"
+    "@travetto/base": "^3.2.1"
   },
   "peerDependencies": {
     "@travetto/cli": "^3.2.0"
