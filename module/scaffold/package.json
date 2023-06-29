@@ -27,7 +27,7 @@
     "trv-scaffold": "./bin/trv-scaffold.js"
   },
   "dependencies": {
-    "@travetto/base": "^3.2.2",
+    "@travetto/base": "^3.2.3",
     "@travetto/cli": "^3.2.0",
     "@travetto/compiler": "^3.2.1",
     "enquirer": "^2.3.6",
