@@ -28,7 +28,7 @@
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "@rollup/plugin-terser": "^0.4.3",
-    "@travetto/base": "^3.2.3",
+    "@travetto/base": "^3.2.4",
     "rollup": "^3.25.2",
     "rollup-plugin-sourcemaps": "^0.6.3"
   },

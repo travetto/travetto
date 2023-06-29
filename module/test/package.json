@@ -27,7 +27,7 @@
     "directory": "module/test"
   },
   "dependencies": {
-    "@travetto/base": "^3.2.3",
+    "@travetto/base": "^3.2.4",
     "@travetto/registry": "^3.2.0",
     "@travetto/terminal": "^3.2.0",
     "@travetto/worker": "^3.2.0",

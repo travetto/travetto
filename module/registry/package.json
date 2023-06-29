@@ -27,7 +27,7 @@
     "directory": "module/registry"
   },
   "dependencies": {
-    "@travetto/base": "^3.2.3"
+    "@travetto/base": "^3.2.4"
   },
   "peerDependencies": {
     "@travetto/cli": "^3.2.0",
