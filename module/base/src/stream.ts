@@ -30,7 +30,7 @@ export class StreamUtil {
             this.push(value);
           }
           if (done) {
-            this.emit('end');
+            this.push(null);
           }
         });
       },
