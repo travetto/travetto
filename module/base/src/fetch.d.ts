@@ -14,6 +14,14 @@ declare namespace _Fetch {
   type BlobPart = ArrayBuffer | ArrayBufferView | Blob | string;
   type ResponseType = 'basic' | 'cors' | 'default' | 'error' | 'opaque' | 'opaqueredirect';
 
+  interface ReadableStreamReader {
+    read(): Promise<{ value?: Uint8Array, done?: boolean }>
+  }
+
+  interface ReadableStream {
+    getReader(): ReadableStreamReader;
+  }
+
   interface Options {
     writable?: boolean;
     readable?: boolean;
@@ -53,13 +61,12 @@ declare namespace _Fetch {
     constructor(body?: any, opts?: { size?: number; timeout?: number | undefined });
     arrayBuffer(): Promise<ArrayBuffer>;
     blob(): Promise<Blob>;
-    body: NodeJS.ReadableStream;
+    formData(): FormData;
+    body: ReadableStreamReader;
     bodyUsed: boolean;
-    buffer(): Promise<Buffer>;
     json(): Promise<any>;
     size: number;
     text(): Promise<string>;
-    textConverted(): Promise<string>;
     timeout: number;
   }
 

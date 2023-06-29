@@ -6,13 +6,37 @@ import rl from 'readline';
 import { path } from '@travetto/manifest';
 
 import type { ExecutionState } from './exec';
+import type { _Fetch } from './fetch';
 
-type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream;
+type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | _Fetch.ReadableStream;
 
 /**
  * Utilities for managing streams/buffers/etc
  */
 export class StreamUtil {
+
+  /**
+   * Convert a fetch/ReadableStream into a standard node Readable
+   * @param src
+   * @returns
+   */
+  static fetchBodyToStream(src: _Fetch.ReadableStream): Readable {
+    const reader = src.getReader();
+
+    return new Readable({
+      read(): void {
+        reader.read().then(({ done, value }) => {
+          if (value) {
+            this.push(value);
+          }
+          if (done) {
+            this.emit('end');
+          }
+        });
+      },
+      emitClose: true
+    });
+  }
 
   /**
    * Convert buffer to a stream
@@ -28,7 +52,10 @@ export class StreamUtil {
    * Read stream to buffer
    * @param src The stream to convert to a buffer
    */
-  static async streamToBuffer(src: Readable | NodeJS.ReadableStream): Promise<Buffer> {
+  static async streamToBuffer(src: Readable | NodeJS.ReadableStream | _Fetch.ReadableStream): Promise<Buffer> {
+    if ('getReader' in src) {
+      return this.streamToBuffer(this.fetchBodyToStream(src));
+    }
     return new Promise<Buffer>((res, rej) => {
       const data: Buffer[] = [];
       src.on('data', d => data.push(d));
@@ -48,7 +75,7 @@ export class StreamUtil {
       return src;
     } else if (src instanceof Uint8Array) {
       return Buffer.from(src);
-    } else if (typeof src !== 'string' && 'pipe' in src) {
+    } else if (typeof src !== 'string' && ('pipe' in src || 'getReader' in src)) {
       return this.streamToBuffer(src);
     } else {
       return Buffer.from(src, src.endsWith('=') ? 'base64' : 'utf8');
@@ -63,6 +90,8 @@ export class StreamUtil {
     if (typeof src !== 'string' && 'pipe' in src) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return src as Readable;
+    } else if (typeof src !== 'string' && 'getReader' in src) {
+      return this.fetchBodyToStream(src);
     } else {
       return this.bufferToStream(await this.toBuffer(src));
     }
