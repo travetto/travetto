@@ -62,7 +62,7 @@ declare namespace _Fetch {
     arrayBuffer(): Promise<ArrayBuffer>;
     blob(): Promise<Blob>;
     formData(): FormData;
-    body: ReadableStreamReader;
+    body: ReadableStream;
     bodyUsed: boolean;
     json(): Promise<any>;
     size: number;
