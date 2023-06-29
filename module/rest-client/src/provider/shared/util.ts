@@ -55,7 +55,7 @@ export class CommonUtil {
     });
   }
 
-  static requestBody<T>(body: BodyPart[]): T | undefined {
+  static requestBody<T>(body: BodyPart[]): { body: T, headers: Record<string, string> } | undefined {
     if (!body.length) {
       return undefined;
     }
@@ -78,14 +78,21 @@ export class CommonUtil {
     }
     if (body.length === 1) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return parts[0].blob as T;
+      const blob: File | Blob = parts[0].blob;
+      return {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        body: blob as T,
+        headers: 'name' in blob ? {
+          'Content-Disposition': `inline; filename="${blob.name}"`
+        } : {}
+      };
     } else {
       const form = new FormData();
       for (const { name, blob } of parts) {
         form.append(name, blob, 'name' in blob && typeof blob.name === 'string' ? blob.name : undefined);
       }
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return form as T;
+      return { body: form as T, headers: {} };
     }
   }
 
@@ -124,7 +131,9 @@ export class CommonUtil {
       url.searchParams.set(k, `${v}`);
     }
 
-    return { headers, url, method, body: this.requestBody(body) };
+    const { headers: requestHeaders, body: requestBody } = this.requestBody<T>(body) || {};
+
+    return { headers: { ...headers, ...requestHeaders }, url, method, body: requestBody };
   }
 
   static consumeError(err: Error | Response): Error {
