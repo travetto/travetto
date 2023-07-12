@@ -56,7 +56,10 @@ const recreateTemplateLiteral = (template: TemplateLiteral, escape = false): str
 export abstract class ClientGenerator<C = unknown> implements ControllerVisitor {
 
   #output: string;
-  #files = new Map<string, RenderContent>();
+  #schemaContent = new Map<string, RenderContent>();
+  #controllerContent = new Map<string, RenderContent>();
+  #otherContent = new Map<string, RenderContent>();
+  #files = new Set<string>();
 
   abstract get commonFiles(): [string, Class | string][];
   abstract get subFolder(): string;
@@ -94,7 +97,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   }
 
   registerContent(classId: string, content: RenderContent): void {
-    this.#files.set(classId, content);
+    this.#otherContent.set(classId, content);
   }
 
   async renderContent(file: string, content: RenderContent[]): Promise<void> {
@@ -310,7 +313,8 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       ]
     };
 
-    this.#files.set(schema.class.Ⲑid, result);
+    this.#schemaContent.set(schema.class.Ⲑid, result);
+    this.#files.add(RootIndex.getFunctionMetadataFromClass(schema.class)!.source);
 
     return result;
   }
@@ -320,7 +324,11 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       await this.writeContent(file, await fs.readFile(typeof cls === 'string' ? cls : RootIndex.getFunctionMetadata(cls)!.source, 'utf8'));
     }
 
-    const files = [...this.#files.values()].reduce<Record<string, RenderContent[]>>((acc, x) => {
+    const files = [
+      ...this.#otherContent.values(),
+      ...this.#schemaContent.values(),
+      ...this.#controllerContent.values()
+    ].reduce<Record<string, RenderContent[]>>((acc, x) => {
       (acc[x.file] ??= []).push(x);
       return acc;
     }, {});
@@ -342,20 +350,22 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
 
   onControllerEnd(cfg: ControllerConfig): void {
     const result = this.renderController(cfg);
-    this.#files.set(result.classId, result);
+    this.#controllerContent.set(result.classId, result);
+    this.#files.add(RootIndex.getFunctionMetadataFromClass(cfg.class)!.source);
   }
 
   onControllerAdd(cls: Class): void {
     const result = this.renderController(ControllerRegistry.get(cls));
-    this.#files.set(result.classId, result);
+    this.#controllerContent.set(result.classId, result);
+    this.#files.add(RootIndex.getFunctionMetadataFromClass(cls)!.source);
   }
 
   onControllerRemove(cls: Class): void {
-    this.#files.delete(cls.Ⲑid);
+    this.#controllerContent.delete(cls.Ⲑid);
   }
 
   onSchemaAdd(cls: Class): boolean {
-    if (this.#files.has(cls.Ⲑid)) {
+    if (this.#schemaContent.has(cls.Ⲑid)) {
       this.renderSchema(SchemaRegistry.get(cls));
       return true;
     }
@@ -363,6 +373,10 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   }
 
   onSchemaRemove(cls: Class): boolean {
-    return this.#files.delete(cls.Ⲑid);
+    return this.#schemaContent.delete(cls.Ⲑid);
+  }
+
+  seenFile(file: string): boolean {
+    return this.#files.has(file);
   }
 }

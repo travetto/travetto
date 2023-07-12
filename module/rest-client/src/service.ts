@@ -1,8 +1,11 @@
+import { setImmediate } from 'timers/promises';
+
 import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 import { RootIndex, path } from '@travetto/manifest';
 import { ControllerRegistry, ControllerVisitUtil } from '@travetto/rest';
 import { GlobalEnv } from '@travetto/base';
+import { RootRegistry } from '@travetto/registry';
 
 import { RestClientConfig, RestClientProvider } from './config';
 
@@ -10,7 +13,6 @@ import { ClientGenerator } from './provider/base';
 import { AngularClientGenerator } from './provider/angular';
 import { NodeFetchClientGenerator } from './provider/fetch-node';
 import { WebFetchClientGenerator } from './provider/fetch-web';
-
 
 @Injectable()
 export class RestClientGeneratorService implements AutoCreate {
@@ -51,6 +53,8 @@ export class RestClientGeneratorService implements AutoCreate {
     }
 
     SchemaRegistry.on(async ev => {
+      await setImmediate();
+
       if (ev.type === 'removing') {
         for (const el of this.providers) {
           if (await el.onSchemaRemove?.(ev.prev!)) {
@@ -67,6 +71,8 @@ export class RestClientGeneratorService implements AutoCreate {
     });
 
     ControllerRegistry.on(async ev => {
+      await setImmediate();
+
       if (ev.type === 'removing') {
         for (const el of this.providers) {
           await el.onControllerRemove?.(ev.prev!);
@@ -76,6 +82,16 @@ export class RestClientGeneratorService implements AutoCreate {
         for (const el of this.providers) {
           await el.onControllerAdd?.(ev.curr!);
           await el.onComplete?.();
+        }
+      }
+    });
+
+    // If a file is changed, but doesn't emit classes, re-run whole file
+    RootRegistry.onNonClassChanges(async file => {
+      // Initial render
+      for (const p of this.providers) {
+        if (p.seenFile(file)) {
+          await this.renderClient(p);
         }
       }
     });

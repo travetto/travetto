@@ -52,11 +52,14 @@
       "outFiles": [
         "${workspaceFolder}/.trv_output/**/*.js",
       ],
-      "cwd": "${workspaceFolder}",
+      "env": {
+        "REST_PORT": "4000",
+        "TRV_MODULE": "@travetto/todo-app",
+        "TRV_DYNAMIC": "1"
+      },
+      "cwd": "${workspaceFolder}/related/todo-app",
       "args": [
         "run:rest",
-        "-m",
-        "@travetto/todo-app"
       ],
     },
     {
