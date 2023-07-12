@@ -36,6 +36,9 @@ export function Upload(
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       inst.constructor, inst[prop] as RouteHandler, RestAssetInterceptor,
       {
+        maxSize: finalConf.maxSize,
+        types: finalConf.types,
+        deleteFiles: finalConf.deleteFiles,
         files: {
           [finalConf.name ?? prop]: {
             maxSize: finalConf.maxSize,
