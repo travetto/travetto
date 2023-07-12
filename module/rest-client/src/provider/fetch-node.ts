@@ -65,11 +65,11 @@ export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean 
     const baseFetchService: Imp = { name: BaseNodeFetchService.name, file: SVC, classId: '_' };
 
     const contents = [
-      `export class ${service}Api extends `, baseFetchService, `{\n\n`,
+      `export class ${service}Api extends `, baseFetchService, ` {\n\n`,
       ...results.flatMap(f => f.config),
       `  routePath = '${controller.basePath}';\n\n`,
       ...results.flatMap(f => f.method),
-      `}\n`
+      `}\n\n`
     ];
 
     return {

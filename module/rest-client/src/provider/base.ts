@@ -50,6 +50,9 @@ const recreateTemplateLiteral = (template: TemplateLiteral, escape = false): str
   return escape ? `\`${body}\`` : body;
 };
 
+/**
+ * Base functional skeleton for generating rest client artifacts
+ */
 export abstract class ClientGenerator<C = unknown> implements ControllerVisitor {
 
   #output: string;
@@ -139,7 +142,9 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       '\n\n',
     );
 
-    await this.writeContent(output, text);
+    await this.writeContent(output,
+      text.join('').replace(/^  \}\n\n\}/smg, '  }\n}')
+    );
   }
 
   resolveType(type?: Class): string | Imp {
@@ -191,8 +196,10 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     const paramInputs = paramsWithSchemas.flatMap(({ param: ep, schema: x }) => {
       const rendered = this.renderField(ep.name!, x);
       imports.push(...rendered.imports);
-      return [...rendered.content, ','];
+      return [...rendered.content, ', '];
     });
+
+    paramInputs.pop();
 
     const paramConfigs = paramsWithSchemas.map(({ param: x, schema: s }) => ({
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -213,21 +220,22 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     return { returnType, imports, paramInputs, paramConfigs };
   }
 
-  renderEndpoint(endpoint: EndpointConfig, controller: ControllerConfig,): { imports: Imp[], method: (string | Imp)[], config: (string | Imp)[] } {
+  renderEndpoint(endpoint: EndpointConfig, controller: ControllerConfig): { imports: Imp[], method: (string | Imp)[], config: (string | Imp)[] } {
     const { imports, paramInputs, paramConfigs, returnType } = this.describeEndpoint(endpoint, controller);
     const requestField = `#${endpoint.handlerName}Request`;
     const requestShape = JSON.stringify({
       method: endpoint.method === 'all' ? 'post' : endpoint.method,
       endpointPath: endpoint.path,
       paramConfigs
-    })
+    }, null, 2)
+      .replace(/^[  ]/gm, '   ')
+      .replace(/^}/gm, '  }')
       .replace('"this"', `this`)
       .replaceAll('"', `'`)
       .replace(/'([^']+)':/gms, (_, v) => `${v}:`)
-      .replace(/(\[|(?:\},?))/g, _ => `${_}\n`);
 
     const paramNames = paramConfigs.map(x => x.name!);
-    const paramNameArr = JSON.stringify(paramNames).replaceAll(`"`, '');
+    const paramNameArr = JSON.stringify(paramNames).replaceAll(`"`, '').replace(/,/g, ', ');
 
     imports.push(...[...this.endpointResponseWrapper].filter((x): x is Imp => typeof x !== 'string'));
     const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common' };
@@ -235,12 +243,12 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     return {
       imports,
       method: [
-        endpoint.title ? `  /** ${endpoint.title}\n${endpoint.description ?? ''}*/\n` : '',
-        `  ${endpoint.handlerName} (`, ...paramInputs, `  ): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
+        endpoint.title ? `  /**\n   * ${endpoint.title}\n   * ${endpoint.description ?? ''}\n   */\n` : '',
+        `  ${endpoint.handlerName}(`, ...paramInputs, `): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
         `    return this.makeRequest<`, ...returnType, `>(${paramNameArr}, this.${requestField});\n`,
         `  }\n\n`,
       ],
-      config: [`  ${requestField}:`, opts, ` = ${requestShape.trimEnd()};\n\n`,]
+      config: [`  ${requestField}: `, opts, ` = ${requestShape.trimEnd()};\n\n`,]
     };
   }
 

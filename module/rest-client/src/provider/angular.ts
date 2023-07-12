@@ -93,7 +93,7 @@ export class AngularClientGenerator extends ClientGenerator {
     const contents = [
       `\n`,
       `@`, injectable, `({ providedIn: 'root' })\n`,
-      `export class ${service}Service extends `, base, `{\n\n`,
+      `export class ${service}Service extends `, base, ` {\n\n`,
       `  routePath = '${controller.basePath}';\n`,
       ...results.flatMap(f => f.config),
       `\n`,
@@ -104,7 +104,7 @@ export class AngularClientGenerator extends ClientGenerator {
       `  transform = <T>():`, operatorFn, `<unknown, T> => `, map, `(o => this.${CommonUtil.consumeJSON.name}<T>(o));\n`,
       `\n`,
       ...results.flatMap(f => f.method),
-      `}\n`
+      `}\n\n`
     ];
 
     return {
