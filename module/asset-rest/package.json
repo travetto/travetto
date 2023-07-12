@@ -1,6 +1,6 @@
 {
   "name": "@travetto/asset-rest",
-  "version": "3.2.2",
+  "version": "3.2.3",
   "description": "Provides integration between the travetto asset and rest module.",
   "keywords": [
     "rest",
@@ -25,14 +25,14 @@
     "directory": "module/asset-rest"
   },
   "dependencies": {
-    "@travetto/asset": "^3.2.0",
-    "@travetto/config": "^3.2.0",
-    "@travetto/rest": "^3.2.1",
+    "@travetto/asset": "^3.2.1",
+    "@travetto/config": "^3.2.1",
+    "@travetto/rest": "^3.2.2",
     "@types/busboy": "^1.5.0",
     "busboy": "^1.6.0"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.2.1"
+    "@travetto/test": "^3.2.2"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-query",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "Datastore abstraction for advanced query support.",
   "keywords": [
     "datastore",
@@ -27,12 +27,12 @@
     "directory": "module/model-query"
   },
   "dependencies": {
-    "@travetto/di": "^3.2.0",
-    "@travetto/model": "^3.2.0",
-    "@travetto/schema": "^3.2.0"
+    "@travetto/di": "^3.2.1",
+    "@travetto/model": "^3.2.1",
+    "@travetto/schema": "^3.2.1"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.2.1"
+    "@travetto/test": "^3.2.2"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
