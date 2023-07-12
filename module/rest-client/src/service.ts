@@ -57,7 +57,7 @@ export class RestClientGeneratorService implements AutoCreate {
             await el.onComplete?.();
           }
         }
-      } else if (ev.type === 'added' || ev.type === 'changed') {
+      } else if (ev.type === 'changed') {
         for (const el of this.providers) {
           if (await el.onSchemaAdd?.(ev.curr!)) {
             await el.onComplete?.();

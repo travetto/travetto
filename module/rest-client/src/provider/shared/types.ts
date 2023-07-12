@@ -1,4 +1,5 @@
 export type ParamConfig = {
+  sourceText?: string;
   location: 'header' | 'body' | 'path' | 'query';
   array?: boolean;
   binary?: boolean;

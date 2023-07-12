@@ -17,7 +17,7 @@ export class RestTransformer {
   /**
    * Handle endpoint parameter
    */
-  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, epDec: DecoratorMeta): ts.ParameterDeclaration {
+  static handleEndpointParameter(state: TransformerState, node: ts.ParameterDeclaration, epDec: DecoratorMeta, idx: number): ts.ParameterDeclaration {
     const pDec = state.findDecorator(this, node, 'Param');
     let pDecArg = DecoratorUtil.getPrimaryArgument(pDec)!;
     if (pDecArg && ts.isStringLiteral(pDecArg)) {
@@ -25,9 +25,12 @@ export class RestTransformer {
     }
 
     const paramType = state.resolveType(node);
-    const name = node.name.getText();
+    let name = node.name.getText();
+    if (/[{}\[\]]/.test(name)) { // Destructured
+      name = `param__${idx + 1}`;
+    }
 
-    let conf = state.extendObjectLiteral({ name }, pDecArg);
+    let conf = state.extendObjectLiteral({ name, sourceText: node.name.getText() }, pDecArg);
     let detectedParamType: string | undefined;
 
     const isContext =
@@ -122,8 +125,10 @@ export class RestTransformer {
     if (node.parameters.length) {
       const params: ts.ParameterDeclaration[] = [];
       // If there are parameters to process
+      let i = 0;
       for (const p of node.parameters) {
-        params.push(this.handleEndpointParameter(state, p, dec!));
+        params.push(this.handleEndpointParameter(state, p, dec!, i));
+        i += 1;
       }
 
       nParams = state.factory.createNodeArray(params);

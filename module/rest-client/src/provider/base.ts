@@ -165,17 +165,15 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     const ident = `${name}${field.required?.active !== true ? '?' : ''}`;
     let type: string | Imp;
     if (SchemaRegistry.has(field.type)) {
-      type = this.renderSchema(SchemaRegistry.get(field.type));
+      type = this.resolveType(field.type);
     } else if (field.specifiers?.includes('file')) {
       type = this.uploadType;
+    } else if (field.match?.template) {
+      type = recreateTemplateLiteral(field.match.template);
+    } else if (field.enum) {
+      type = `(${field.enum.values.map(v => typeof v === 'string' ? `'${v}'` : `${v}`).join(' | ')})`;
     } else {
-      if (field.match?.template) {
-        type = recreateTemplateLiteral(field.match.template);
-      } else if (field.enum) {
-        type = `(${field.enum.values.map(v => typeof v === 'string' ? `'${v}'` : `${v}`).join(' | ')})`;
-      } else {
-        type = TYPE_MAPPING[field.type.name] ?? 'unknown';
-      }
+      type = TYPE_MAPPING[field.type.name] ?? 'unknown';
     }
     if (typeof type !== 'string') {
       imports.push(type);
@@ -194,7 +192,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       .filter(x => x.param.location !== 'context');
 
     const paramInputs = paramsWithSchemas.flatMap(({ param: ep, schema: x }) => {
-      const rendered = this.renderField(ep.name!, x);
+      const rendered = this.renderField(ep.sourceText ?? ep.name!, x);
       imports.push(...rendered.imports);
       return [...rendered.content, ', '];
     });
@@ -205,6 +203,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       location: x.location as 'body',
       name: x.name!,
+      sourceText: x.sourceText,
       ...(x.prefix ? { prefix: x.prefix } : {}),
       ...(SchemaRegistry.has(s.type) ? { complex: true } : {}),
       ...(s.array ? { array: true } : {}),
@@ -234,8 +233,8 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       .replaceAll('"', `'`)
       .replace(/'([^']+)':/gms, (_, v) => `${v}:`)
 
-    const paramNames = paramConfigs.map(x => x.name!);
-    const paramNameArr = JSON.stringify(paramNames).replaceAll(`"`, '').replace(/,/g, ', ');
+    const paramNames = paramConfigs.map(x => x.sourceText ?? x.name!);
+    const paramArr = JSON.stringify(paramNames).replaceAll(`"`, '').replace(/,/g, ', ');
 
     imports.push(...[...this.endpointResponseWrapper].filter((x): x is Imp => typeof x !== 'string'));
     const opts: Imp = { name: 'RequestDefinition', file: './shared/types.ts', classId: '_common' };
@@ -245,7 +244,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       method: [
         endpoint.title ? `  /**\n   * ${endpoint.title}\n   * ${endpoint.description ?? ''}\n   */\n` : '',
         `  ${endpoint.handlerName}(`, ...paramInputs, `): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
-        `    return this.makeRequest<`, ...returnType, `>(${paramNameArr}, this.${requestField});\n`,
+        `    return this.makeRequest<`, ...returnType, `>(${paramArr}, this.${requestField});\n`,
         `  }\n\n`,
       ],
       config: [`  ${requestField}: `, opts, ` = ${requestShape.trimEnd()};\n\n`,]
@@ -364,10 +363,6 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   }
 
   onSchemaRemove(cls: Class): boolean {
-    if (this.#files.has(cls.Ⲑid)) {
-      this.#files.delete(cls.Ⲑid);
-      return true;
-    }
-    return false;
+    return this.#files.delete(cls.Ⲑid);
   }
 }

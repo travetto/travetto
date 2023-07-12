@@ -31,6 +31,10 @@ export interface ParamConfig {
    */
   name?: string;
   /**
+   * Raw text of parameter at source
+   */
+  sourceText?: string;
+  /**
    * Location of the parameter
    */
   location: 'path' | 'query' | 'body' | 'header' | 'context';
