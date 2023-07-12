@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import assert from 'assert';
 
 import { Test, Suite } from '@travetto/test';
@@ -60,5 +61,23 @@ export class UtilTest {
       ...items
     ]);
     assert.deepStrictEqual(ordered2.map(x => x.key), ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
+  }
+
+  @Test()
+  staticUuidVerify() {
+    const hash = crypto.createHash('sha512', { defaultEncoding: 'hex' });
+    hash.update('roger');
+    const key = hash.digest('hex');
+
+    assert(Util.staticUuid('roger') === key.substring(0, 32));
+    assert(Util.staticUuid('roger', 64) === key.substring(0, 64));
+
+    const hash2 = crypto.createHash('sha512', { defaultEncoding: 'hex' });
+    hash2.update('');
+    const unKey = hash2.digest('hex');
+
+    assert(Util.staticUuid('', 20) === unKey.substring(0, 20));
+
+    assert(Util.staticUuid('', 20) !== key.substring(0, 20));
   }
 }
