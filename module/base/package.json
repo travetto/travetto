@@ -1,6 +1,6 @@
 {
   "name": "@travetto/base",
-  "version": "3.2.5",
+  "version": "3.2.6",
   "description": "Environment config and common utilities for travetto applications.",
   "keywords": [
     "shutdown-helper",

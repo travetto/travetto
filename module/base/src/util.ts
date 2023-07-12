@@ -162,14 +162,15 @@ export class Util {
   }
 
   /**
-   * Generate a static UUID from a src value
-   * @param src The seed value to build the uuid from
-   * @param len The optional length of the uuid to generate
+   * Generate a proper hash from a src value
+   * @param src The seed value to build the hash from
+   * @param len The optional length of the hash to generate
    */
-  static staticUuid(src: string, len: number = 32): string {
+  static fullHash(src: string, len: number = -1): string {
     const hash = crypto.createHash('sha512', { defaultEncoding: 'hex' });
     hash.update(src);
-    return hash.digest('hex').substring(0, len);
+    const ret = hash.digest('hex');
+    return len > 0 ? ret.substring(0, len) : ret;
   }
 
   /**
