@@ -21,15 +21,15 @@
     "start": "npx trv run:rest"
   },
   "dependencies": {
-    "@travetto/auth-rest": "^3.2.0",
-    "@travetto/auth-rest-session": "^3.2.0",
+    "@travetto/auth-rest": "^3.2.1",
+    "@travetto/auth-rest-session": "^3.2.1",
     "@travetto/cli": "^3.2.0",
     "@travetto/log": "^3.2.0",
     "@travetto/model-mongo": "^3.2.1",
-    "@travetto/openapi": "^3.2.0",
-    "@travetto/rest-client": "^3.2.1",
-    "@travetto/rest-express": "^3.2.0",
-    "@travetto/rest-session": "^3.2.0",
+    "@travetto/openapi": "^3.2.1",
+    "@travetto/rest-client": "^3.2.2",
+    "@travetto/rest-express": "^3.2.1",
+    "@travetto/rest-session": "^3.2.1",
     "vue": "^2.7.14"
   },
   "devDependencies": {
