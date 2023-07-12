@@ -65,19 +65,19 @@ export class UtilTest {
 
   @Test()
   staticUuidVerify() {
-    const hash = crypto.createHash('sha512', { defaultEncoding: 'hex' });
+    const hash = crypto.createHash('sha512');
     hash.update('roger');
     const key = hash.digest('hex');
 
-    assert(Util.staticUuid('roger') === key.substring(0, 32));
-    assert(Util.staticUuid('roger', 64) === key.substring(0, 64));
+    assert(Util.fullHash('roger') === key.substring(0, 32));
+    assert(Util.fullHash('roger', 64) === key.substring(0, 64));
 
-    const hash2 = crypto.createHash('sha512', { defaultEncoding: 'hex' });
+    const hash2 = crypto.createHash('sha512');
     hash2.update('');
     const unKey = hash2.digest('hex');
 
-    assert(Util.staticUuid('', 20) === unKey.substring(0, 20));
+    assert(Util.fullHash('', 20) === unKey.substring(0, 20));
 
-    assert(Util.staticUuid('', 20) !== key.substring(0, 20));
+    assert(Util.fullHash('', 20) !== key.substring(0, 20));
   }
 }
