@@ -83,9 +83,13 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   get uploadType(): string | Imp { return '(File | Blob)'; }
 
   writeContentFilter(text: string): string {
-    return text.trim()
+    return text
       .replace(/^((?:ex|im)port\s+[^;]*\s+from\s*[^;]+)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
-      .replaceAll(/^(.*)#REMOVE.*$/mg, _ => '');
+      .replaceAll(/^(.*)#REMOVE.*$/mg, _ => '')
+      // eslint-disable-next-line no-regex-spaces
+      .replace(/^  \}\n\n\}/smg, '  }\n}')
+      .replace(/\n\n\n+/smg, '\n\n')
+      .trim();
   }
 
   async writeContent(file: string, content: string | string[]): Promise<void> {
@@ -145,9 +149,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       '\n\n',
     );
 
-    await this.writeContent(output,
-      text.join('').replace(/^  \}\n\n\}/smg, '  }\n}')
-    );
+    await this.writeContent(output, text.join(''));
   }
 
   resolveType(type?: Class): string | Imp {
@@ -206,6 +208,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       location: x.location as 'body',
       name: x.name!,
+      description: s.description,
       sourceText: x.sourceText,
       ...(x.prefix ? { prefix: x.prefix } : {}),
       ...(SchemaRegistry.has(s.type) ? { complex: true } : {}),
@@ -222,6 +225,26 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     return { returnType, imports, paramInputs, paramConfigs };
   }
 
+  renderEndpointDoc(endpoint: EndpointConfig, params: ParamConfig[]): string[] {
+    const paramsDocs = params
+      .filter(x => x.description)
+      .map(x => `@param ${x.name} ${x.description}`);
+    const parts = [
+      endpoint.title,
+      ((endpoint.title && endpoint.description) ? ' ' : ''),
+      endpoint.description,
+      (((endpoint.title || endpoint.description) && paramsDocs.length) ? ' ' : ''),
+      ...paramsDocs
+    ].filter(x => !!x);
+
+    return parts.length === 0 ? [] :
+      [
+        '  /**',
+        ...parts.map(x => `   * ${x}`.trimEnd()),
+        `   */`
+      ].map(x => `${x}\n`);
+  }
+
   renderEndpoint(endpoint: EndpointConfig, controller: ControllerConfig): { imports: Imp[], method: (string | Imp)[], config: (string | Imp)[] } {
     const { imports, paramInputs, paramConfigs, returnType } = this.describeEndpoint(endpoint, controller);
     const requestField = `#${endpoint.handlerName}Request`;
@@ -234,7 +257,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       .replace(/^}/gm, '  }')
       .replace('"this"', `this`)
       .replaceAll('"', `'`)
-      .replace(/'([^']+)':/gms, (_, v) => `${v}:`)
+      .replace(/'([^']+)':/gms, (_, v) => `${v}:`);
 
     const paramNames = paramConfigs.map(x => x.sourceText ?? x.name!);
     const paramArr = JSON.stringify(paramNames).replaceAll(`"`, '').replace(/,/g, ', ');
@@ -245,7 +268,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     return {
       imports,
       method: [
-        endpoint.title ? `  /**\n   * ${endpoint.title}\n   * ${endpoint.description ?? ''}\n   */\n` : '',
+        ...this.renderEndpointDoc(endpoint, paramConfigs),
         `  ${endpoint.handlerName}(`, ...paramInputs, `): `, ...this.endpointResponseWrapper, `<`, ...returnType, `> {\n`,
         `    return this.makeRequest<`, ...returnType, `>(${paramArr}, this.${requestField});\n`,
         `  }\n\n`,

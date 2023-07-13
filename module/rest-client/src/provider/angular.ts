@@ -28,7 +28,9 @@ export class AngularClientGenerator extends ClientGenerator {
   }
 
   writeContentFilter(text: string): string {
-    return super.writeContentFilter(text).replaceAll(/^.*#NODE_FETCH.*/gm, '');
+    return super.writeContentFilter(text)
+      .replaceAll(/^.*#NODE_FETCH.*/gm, '')
+      .trimStart();
   }
 
   init(): void {
@@ -101,7 +103,7 @@ export class AngularClientGenerator extends ClientGenerator {
       `    super(options);\n`,
       `  }\n`,
       `\n`,
-      `  transform = <T>():`, operatorFn, `<unknown, T> => `, map, `(o => this.${CommonUtil.consumeJSON.name}<T>(o));\n`,
+      `  transform = <T>(): `, operatorFn, `<unknown, T> => `, map, `(o => this.${CommonUtil.consumeJSON.name}<T>(o));\n`,
       `\n`,
       ...results.flatMap(f => f.method),
       `}\n\n`

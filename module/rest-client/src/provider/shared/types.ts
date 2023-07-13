@@ -6,6 +6,7 @@ export type ParamConfig = {
   name: string;
   prefix?: string;
   complex?: boolean;
+  description?: string;
 };
 
 type HttpMethod = 'get' | 'post' | 'put' | 'delete' | 'head' | 'options' | 'patch';

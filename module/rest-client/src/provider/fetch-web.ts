@@ -25,7 +25,9 @@ export class WebFetchClientGenerator extends ClientGenerator {
   }
 
   writeContentFilter(text: string): string {
-    return super.writeContentFilter(text).replaceAll(/^.*#NODE_FETCH.*/gm, '');
+    return super.writeContentFilter(text)
+      .replaceAll(/^.*#NODE_FETCH.*/gm, '')
+      .trimStart();
   }
 
   renderController(controller: ControllerConfig): RenderContent {

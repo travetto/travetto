@@ -55,7 +55,8 @@ export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean 
   writeContentFilter(text: string): string {
     return super.writeContentFilter(text)
       .replaceAll(/^(.*)\s*\/\/\s*#NODE_FETCH\s*$/mg, (_, p) => this.native ? '' : p)
-      .replaceAll(/^.*#NODE_FETCH_ENABLE:\s*(.*)$/mg, (_, p) => this.native ? '' : p);
+      .replaceAll(/^.*#NODE_FETCH_ENABLE:\s*(.*)$/mg, (_, p) => this.native ? '' : p)
+      .trimStart();
   }
 
   renderController(controller: ControllerConfig): RenderContent {
