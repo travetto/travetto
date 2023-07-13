@@ -23,7 +23,7 @@
     "directory": "module/image"
   },
   "dependencies": {
-    "@travetto/base": "^3.2.5",
+    "@travetto/base": "^3.2.7",
     "@travetto/command": "^3.2.1"
   },
   "travetto": {

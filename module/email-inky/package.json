@@ -27,7 +27,7 @@
     "directory": "module/email-inky"
   },
   "dependencies": {
-    "@travetto/base": "^3.2.5",
+    "@travetto/base": "^3.2.7",
     "@travetto/config": "^3.2.1",
     "@travetto/di": "^3.2.1",
     "@travetto/email": "^3.2.1",
