@@ -69,7 +69,7 @@ export class UtilTest {
     hash.update('roger');
     const key = hash.digest('hex');
 
-    assert(Util.fullHash('roger') === key.substring(0, 32));
+    assert(Util.shortHash('roger') === key.substring(0, 32));
     assert(Util.fullHash('roger', 64) === key.substring(0, 64));
 
     const hash2 = crypto.createHash('sha512');

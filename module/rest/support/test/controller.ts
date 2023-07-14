@@ -93,4 +93,11 @@ export class TestController {
       path: req.url.split('fun/')[1]
     };
   }
+
+  @Get('/ip')
+  getIp(req: Request) {
+    return {
+      ip: req.getIp()
+    };
+  }
 }

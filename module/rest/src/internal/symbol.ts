@@ -5,3 +5,4 @@ export const TravettoEntityⲐ: unique symbol = Symbol.for('@travetto/rest:trave
 export const HeadersAddedⲐ: unique symbol = Symbol.for('@travetto/rest:headers');
 export const InterceptorConfigsⲐ: unique symbol = Symbol.for('@travetto/rest:interceptors');
 export const SendStreamⲐ: unique symbol = Symbol.for('@travetto/rest:send-stream');
+export const ParsedType = Symbol.for('@travetto/rest:content-type');

@@ -105,6 +105,10 @@ declare global {
      * Listen for request events
      */
     on(ev: 'end' | 'close' | 'error', cb: Function): unknown;
+    /**
+     * Get the ip address for a request
+     */
+    getIp(): string | undefined;
   }
 
   /**

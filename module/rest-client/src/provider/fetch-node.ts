@@ -17,7 +17,7 @@ export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean 
   get native(): boolean { return this.config.native !== false; }
   get outputExt(): '' { return ''; }
   get subFolder(): string { return 'src'; }
-  get uploadType(): string | Imp { return this.native ? super.uploadType : 'Blob'; }
+  get uploadType(): string | Imp { return this.native ? super.uploadType : { name: 'Blob', file: 'node-fetch', classId: '_blob' }; }
   get endpointResponseWrapper(): string[] { return ['Promise']; }
   get commonFiles(): [string, Class | string][] {
     const extra: [string, string][] =

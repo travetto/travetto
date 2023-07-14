@@ -128,4 +128,13 @@ export abstract class RestServerSuite extends BaseRestSuite {
     const { body: ret } = await this.request<{ path: string }>('get', '/test/fun/1/2/3/4');
     assert(ret.path === '1/2/3/4');
   }
+
+  @Test()
+  async testGetIp() {
+    const { body: ret } = await this.request<{ ip: string | undefined }>('get', '/test/ip');
+    assert(ret.ip === '127.0.0.1');
+
+    const { body: ret2 } = await this.request<{ ip: string | undefined }>('get', '/test/ip', { headers: { 'X-Forwarded-For': 'bob' } });
+    assert(ret2.ip === 'bob');
+  }
 }

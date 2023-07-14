@@ -32,7 +32,7 @@ const baseLambdaContext = {
       validity: { notAfter: '', notBefore: '' }
     }, apiKey: '',
     cognitoAuthenticationProvider: '', cognitoAuthenticationType: '', cognitoIdentityId: '',
-    cognitoIdentityPoolId: '', principalOrgId: '', sourceIp: '', user: '',
+    cognitoIdentityPoolId: '', principalOrgId: '', sourceIp: '127.0.0.1', user: '',
     userAgent: '', userArn: ''
   },
   stage: '',

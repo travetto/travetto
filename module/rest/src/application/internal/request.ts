@@ -2,8 +2,7 @@ import { IncomingHttpHeaders } from 'http';
 
 import { Request, ContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';
-
-const ParsedType = Symbol.for('@travetto/rest:content-type');
+import { NodeEntityⲐ, ParsedType } from '../../internal/symbol';
 
 /**
  * Base Request object
@@ -53,5 +52,15 @@ export class RequestCore implements Partial<Request> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const self = (this as RequestCore);
     return self[ParsedType] ??= MimeUtil.parse(this.headerFirst('content-type'));
+  }
+
+  /**
+   * Attempt to read the remote IP address of the connection
+   */
+  getIp(): string | undefined {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const self = (this as unknown as Request);
+    const raw = self[NodeEntityⲐ];
+    return self.headerFirst('x-forwarded-for') || raw.socket.remoteAddress;
   }
 }
