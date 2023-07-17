@@ -20,9 +20,7 @@ export class CliModuleUtil {
    * @returns
    */
   static async findChangedModulesRecursive(hash?: string, transitive = true): Promise<IndexedModule[]> {
-    if (!hash) {
-      hash = await CliScmUtil.findLastRelease();
-    }
+    hash ??= await CliScmUtil.findLastRelease();
 
     if (!hash) {
       return RootIndex.getLocalModules();
@@ -48,9 +46,9 @@ export class CliModuleUtil {
    * @param transitive
    * @returns
    */
-  static async findModules(mode: 'all' | 'changed'): Promise<IndexedModule[]> {
+  static async findModules(mode: 'all' | 'changed', sinceHash?: string): Promise<IndexedModule[]> {
     return (mode === 'changed' ?
-      await this.findChangedModulesRecursive() :
+      await this.findChangedModulesRecursive(sinceHash) :
       [...RootIndex.getModuleList('all')].map(x => RootIndex.getModule(x)!)
     ).filter(x => x.sourcePath !== RootIndex.manifest.workspacePath);
   }

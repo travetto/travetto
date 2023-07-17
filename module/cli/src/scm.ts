@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { Env, ExecUtil } from '@travetto/base';
-import { IndexedModule, RootIndex, path } from '@travetto/manifest';
+import { IndexedFile, IndexedModule, RootIndex, path } from '@travetto/manifest';
 
 export class CliScmUtil {
   /**
@@ -41,21 +41,38 @@ export class CliScmUtil {
   }
 
   /**
+   * Find all source files that changed since hash
+   * @param hash
+   * @returns
+   */
+  static async findChangedFilesSince(hash: string): Promise<string[]> {
+    const ws = RootIndex.manifest.workspacePath;
+    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `HEAD..${hash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
+    const out = new Set<string>();
+    for (const line of res.stdout.split(/\n/g)) {
+      const entry = RootIndex.getEntry(path.resolve(ws, line));
+      if (entry) {
+        out.add(entry.sourceFile);
+      }
+    }
+    return [...out].sort((a, b) => a.localeCompare(b));
+  }
+
+  /**
    * Find all modules that changed since hash
    * @param hash
    * @returns
    */
   static async findChangedModulesSince(hash: string): Promise<IndexedModule[]> {
-    const ws = RootIndex.manifest.workspacePath;
-    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `HEAD..${hash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
-    const out = new Set<IndexedModule>();
-    for (const line of res.stdout.split(/\n/g)) {
-      const mod = RootIndex.getFromSource(path.resolve(ws, line));
-      if (mod) {
-        out.add(RootIndex.getModule(mod.module)!);
-      }
-    }
-    return [...out].sort((a, b) => a.name.localeCompare(b.name));
+    const files = await this.findChangedFilesSince(hash);
+    const mods = files
+      .map(x => RootIndex.getFromSource(x))
+      .filter((x): x is IndexedFile => !!x)
+      .map(x => RootIndex.getModule(x.module))
+      .filter((x): x is IndexedModule => !!x);
+
+    return [...new Set(mods)]
+      .sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /**

@@ -1,6 +1,6 @@
 import { RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
-import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliModuleUtil, CliScmUtil } from '@travetto/cli';
 
 /**
  * Command line support for linting
@@ -11,14 +11,31 @@ export class LintCommand implements CliCommandShape {
   /** Only check changed modules */
   changed = false;
 
+  /** Output format */
+  format?: string;
+
+  /** Since a specific git commit */
+  since?: string;
+
   envInit(): GlobalEnvConfig {
     return { debug: false };
   }
 
   async main(): Promise<void> {
-    const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
+    let files: string[];
+    if (this.since) {
+      files = await CliScmUtil.findChangedFilesSince(this.since);
+    } else {
+      const mods = await CliModuleUtil.findModules(this.changed ? 'changed' : 'all');
+      files = mods.filter(x => x.local).map(x => x.sourcePath);
+    }
 
-    const res = await ExecUtil.spawn('npx', ['eslint', ...mods.filter(x => x.local).map(x => x.sourcePath)], {
+
+    const res = await ExecUtil.spawn('npx', [
+      'eslint',
+      ...(this.format ? ['--format', this.format] : []),
+      ...files
+    ], {
       cwd: RootIndex.manifest.workspacePath,
       stdio: 'inherit',
       catchAsResult: true
