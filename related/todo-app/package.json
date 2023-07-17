@@ -23,7 +23,7 @@
   "dependencies": {
     "@travetto/auth-rest": "^3.2.3",
     "@travetto/auth-rest-session": "^3.2.3",
-    "@travetto/cli": "^3.2.2",
+    "@travetto/cli": "^3.2.3",
     "@travetto/log": "^3.2.2",
     "@travetto/model-mongo": "^3.2.3",
     "@travetto/openapi": "^3.2.3",
