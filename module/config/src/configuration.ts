@@ -28,7 +28,7 @@ export class Configuration {
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
   #profiles: string[] = ['application', ...GlobalEnv.profiles, 'override'];
   #sources: string[] = [];
-  #secrets: (RegExp | string)[] = [/password|private|secret|(api(-|_)?key)/i];
+  #secrets: (RegExp | string)[] = [/password|private|secret|salt|(api(-|_)?key)/i];
 
   /**
    * Get a sub tree of the config, or everything if namespace is not passed
