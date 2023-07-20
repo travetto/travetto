@@ -134,3 +134,8 @@ export class TemplateLit {
   age: `${number}-${TimeUnit}s`;
   heights?: `${number}${HeightUnit}`[];
 }
+
+@Schema()
+export class NestedShape {
+  item?: Pick<ViewSpecific, 'id' | 'name'>;
+}

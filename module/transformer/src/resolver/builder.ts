@@ -25,6 +25,8 @@ const GLOBAL_COMPLEX: Record<string, Function> = {
   TypedPropertyDescriptor: Object
 };
 
+const SHAPE_MODIFIERS = new Set(['Pick', 'Omit', 'Partial', 'Required']);
+
 /**
  * List of global types that are simple
  */
@@ -100,6 +102,9 @@ export function TypeCategorize(resolver: TransformResolver, type: ts.Type): { ca
   } else if (objectFlags & ts.ObjectFlags.Tuple) {
     return { category: 'tuple', type };
   } else if (type.isLiteral()) {
+    return { category: 'shape', type };
+  } else if (SHAPE_MODIFIERS.has(type.aliasSymbol?.escapedName!)) {
+    // Shape modifier, need to pull out root type for naming
     return { category: 'shape', type };
   }
   return { category: 'unknown', type };
