@@ -6,6 +6,6 @@ export const service: CommandService = {
   name: 's3',
   version,
   privileged: true,
-  ports: { 9090: 4566 },
+  ports: { 4566: 9090 },
   image: `adobe/s3mock:${version}`
 };
