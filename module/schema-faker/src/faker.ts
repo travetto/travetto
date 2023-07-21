@@ -10,11 +10,11 @@ const DAY_IN_MS = 24 * 60 * 60 * 1000;
  */
 export class SchemaFaker {
 
-  static #stringToReType = new Map([
+  static #stringToReType = new Map<RegExp, () => string>([
     [CommonRegExp.email, faker.internet.email],
     [CommonRegExp.url, faker.internet.url],
     [CommonRegExp.telephone, faker.phone.number],
-    [CommonRegExp.postalCode, faker.address.zipCode]
+    [CommonRegExp.postalCode, faker.location.zipCode]
   ]);
 
   /**
@@ -22,27 +22,27 @@ export class SchemaFaker {
    */
   static #namesToType = {
     string: new Map<RegExp, () => string>([
-      [/^(image|img).*url$/, faker.image.imageUrl],
+      [/^(image|img).*url$/, faker.image.url],
       [/^url$/, faker.internet.url],
       [/^email(addr(ress)?)?$/, faker.internet.email],
       [/^(tele)?phone(num|number)?$/, faker.phone.number],
-      [/^((postal|zip)code)|zip$/, faker.address.zipCode],
-      [/f(irst)?name/, faker.name.firstName],
-      [/l(ast)?name/, faker.name.lastName],
+      [/^((postal|zip)code)|zip$/, faker.location.zipCode],
+      [/f(irst)?name/, faker.person.firstName],
+      [/l(ast)?name/, faker.person.lastName],
       [/^ip(add(ress)?)?$/, faker.internet.ip],
       [/^ip(add(ress)?)?(v?)6$/, faker.internet.ipv6],
       [/^username$/, faker.internet.userName],
       [/^domain(name)?$/, faker.internet.domainName],
       [/^file(path|name)?$/, faker.system.filePath],
-      [/^street(1)?$/, faker.address.streetAddress],
-      [/^street2$/, faker.address.secondaryAddress],
-      [/^county$/, faker.address.county],
-      [/^country$/, faker.address.country],
-      [/^state$/, faker.address.state],
-      [/^lon(gitude)?$/, faker.address.longitude],
-      [/^lat(itude)?$/, faker.address.latitude],
+      [/^street(1)?$/, faker.location.streetAddress],
+      [/^street2$/, faker.location.secondaryAddress],
+      [/^county$/, faker.location.county],
+      [/^country$/, faker.location.country],
+      [/^state$/, faker.location.state],
+      [/^lon(gitude)?$/, (): string => `${faker.location.longitude()}`],
+      [/^lat(itude)?$/, (): string => `${faker.location.latitude()}`],
       [/(profile).*(image|img)/, faker.image.avatar],
-      [/(image|img)/, faker.image.image],
+      [/(image|img)/, faker.image.url],
       [/^company(name)?$/, faker.company.name],
       [/(desc|description)$/, faker.lorem.sentences.bind(null, 10)]
     ]),
@@ -54,10 +54,10 @@ export class SchemaFaker {
   };
 
   static #between(fromDays: number, toDays: number): Date {
-    return faker.date.between(
-      new Date(Date.now() + fromDays * DAY_IN_MS),
-      new Date(Date.now() + toDays * DAY_IN_MS)
-    );
+    return faker.date.between({
+      from: new Date(Date.now() + fromDays * DAY_IN_MS),
+      to: new Date(Date.now() + toDays * DAY_IN_MS)
+    });
   }
 
   /**
@@ -67,7 +67,7 @@ export class SchemaFaker {
   static #array(cfg: FieldConfig): unknown[] {
     const min = cfg.minlength ? cfg.minlength.n : 0;
     const max = cfg.maxlength ? cfg.maxlength.n : 10;
-    const size = faker.datatype.number({ min, max });
+    const size = faker.number.int({ min, max });
     const out: unknown[] = [];
     for (let i = 0; i < size; i++) {
       out.push(this.#value(cfg, true));
@@ -120,14 +120,14 @@ export class SchemaFaker {
     const max = cfg.max && typeof cfg.max.n !== 'number' ? cfg.max.n : undefined;
 
     if (min !== undefined || max !== undefined) {
-      return faker.date.between(min || new Date(Date.now() - (50 * DAY_IN_MS)), max || new Date());
+      return faker.date.between({ from: min || new Date(Date.now() - (50 * DAY_IN_MS)), to: max || new Date() });
     } else {
       for (const [re, fn] of this.#namesToType.date) {
         if (re.test(name)) {
           return fn();
         }
       }
-      return faker.date.recent(50);
+      return faker.date.recent({ days: 50 });
     }
   }
 
@@ -153,7 +153,7 @@ export class SchemaFaker {
       }
     }
 
-    return faker.random.word();
+    return faker.word.sample();
   }
 
   /**

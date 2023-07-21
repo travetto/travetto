@@ -25,20 +25,20 @@
     "deploy": "./deploy.sh"
   },
   "dependencies": {
-    "@angular/common": "^16.1.2",
-    "@angular/compiler": "^16.1.2",
-    "@angular/core": "^16.1.2",
-    "@angular/platform-browser": "^16.1.2",
-    "@angular/platform-browser-dynamic": "^16.1.2",
-    "@angular/router": "^16.1.2",
+    "@angular/common": "^16.1.6",
+    "@angular/compiler": "^16.1.6",
+    "@angular/core": "^16.1.6",
+    "@angular/platform-browser": "^16.1.6",
+    "@angular/platform-browser-dynamic": "^16.1.6",
+    "@angular/router": "^16.1.6",
     "rxjs": "^7.8.1",
-    "zone.js": "~0.13.1"
+    "zone.js": "^0.13.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^16.1.1",
-    "@angular/cli": "^16.1.1",
-    "@angular/compiler-cli": "^16.1.2",
-    "@types/node": "^20.3.1",
+    "@angular-devkit/build-angular": "^16.1.5",
+    "@angular/cli": "^16.1.5",
+    "@angular/compiler-cli": "^16.1.6",
+    "@types/node": "^20.4.2",
     "codelyzer": "^6.0.2",
     "source-map-explorer": "^2.5.3",
     "ts-node": "~10.9.1",

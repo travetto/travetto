@@ -24,7 +24,7 @@ All of the high level configurations can be found in the following structure:
 
 **Code: Config: OpenAPI Configuration**
 ```typescript
-import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
+import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas30';
 
 import { Config } from '@travetto/config';
 import { path, RootIndex } from '@travetto/manifest';

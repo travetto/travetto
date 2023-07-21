@@ -98,7 +98,7 @@ Available Services
  * mysql@8.0
  * postgresql@14.6
  * redis@7
- * s3@2.0.1
+ * s3@3.0.0
 ```
 
 A sample of all services available to the entire framework:
@@ -116,7 +116,7 @@ mongodb              6.0    Running 5513eba6734e
 mysql                8.0    Running 307bc66d442a
 postgresql          14.6    Running e78291e71040
 redis                  7    Running 77ba279b4e30
-s3                 2.0.1    Running fdacfc55b9e3
+s3                 3.0.0    Running fdacfc55b9e3
 ```
 
 ### Defining new Services

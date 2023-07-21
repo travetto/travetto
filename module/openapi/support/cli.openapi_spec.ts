@@ -25,7 +25,7 @@ export class OpenApiSpecCommand implements CliCommandShape {
     await RootRegistry.init();
 
     const instance = await DependencyRegistry.getInstance(OpenApiService);
-    const result = instance.spec;
+    const result = instance.getSpec();
 
     if (this.output === '-' || !this.output) {
       console.log!(JSON.stringify(result, null, 2));

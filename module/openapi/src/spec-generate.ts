@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 import type {
   SchemaObject, SchemasObject, ParameterObject, OperationObject,
   RequestBodyObject, TagObject, PathsObject, PathItemObject
-} from 'openapi3-ts';
+} from 'openapi3-ts/oas31';
 
 import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
 import { RootIndex } from '@travetto/manifest';

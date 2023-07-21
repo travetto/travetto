@@ -1,4 +1,4 @@
-import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts';
+import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas30';
 
 import { Config } from '@travetto/config';
 import { path, RootIndex } from '@travetto/manifest';
