@@ -149,7 +149,7 @@ export class MongoUtil {
         const isPlain = v && ObjectUtil.isPlainObject(v);
         const firstKey = isPlain ? Object.keys(v)[0] : '';
 
-        if ((isPlain && !firstKey.startsWith('$')) || v.constructor?.Ⲑid) {
+        if ((isPlain && !firstKey.startsWith('$')) || v?.constructor?.Ⲑid) {
           if (recursive) {
             Object.assign(out, this.extractSimple(subField?.type, v, `${subpath}.`, recursive));
           } else {
