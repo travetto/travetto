@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-dynamodb",
-  "version": "3.2.4",
+  "version": "3.2.5",
   "description": "DynamoDB backing for the travetto model module.",
   "keywords": [
     "typescript",

@@ -34,7 +34,7 @@
     "foundation-emails": "^2.4.0"
   },
   "devDependencies": {
-    "@travetto/email-compiler": "^3.2.4"
+    "@travetto/email-compiler": "^3.2.5"
   },
   "peerDependencies": {
     "@travetto/cli": "^3.2.3"

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model-mongo",
-  "version": "3.2.4",
+  "version": "3.2.5",
   "description": "Mongo backing for the travetto model module.",
   "keywords": [
     "mongo",

@@ -1,6 +1,6 @@
 {
   "name": "@travetto/email-compiler",
-  "version": "3.2.4",
+  "version": "3.2.5",
   "description": "Email compiling module",
   "keywords": [
     "email",
