@@ -134,6 +134,7 @@ Options:
   -dp, --docker-port <number>          Docker Image Port  (default: [])
   -dx, --docker-push                   Docker Push Tags  (default: false)
   -dr, --docker-registry <string>      Docker Registry
+  -du, --docker-runtime-user <string>  Docker Runtime user
   -m, --module <string>                Module to run for
   -h, --help                           display help for command
 ```
@@ -231,6 +232,9 @@ cd $ROOT
 echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile"
 
 echo "FROM node:20-alpine" > $DIST/Dockerfile
+echo "" >> $DIST/Dockerfile
+echo "RUN addgroup -g 2000 app && adduser -S -u 2000 app app" >> $DIST/Dockerfile
+echo "USER app" >> $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "COPY . ." >> $DIST/Dockerfile
 echo "" >> $DIST/Dockerfile

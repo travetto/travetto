@@ -25,6 +25,12 @@ export type DockerPackConfig = {
   dockerPort?: number[];
   dockerPush?: boolean;
   dockerRegistry?: string;
+  dockerRuntimeUser: {
+    user: string;
+    uid: number;
+    group: string;
+    gid: number;
+  };
 } & CommonPackConfig;
 
 

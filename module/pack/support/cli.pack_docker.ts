@@ -4,8 +4,11 @@ import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli'
 import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
 import { GlobalEnv } from '@travetto/base';
+import { Ignore } from '@travetto/schema';
 
 const NODE_MAJOR = GlobalEnv.nodeVersion.replace('v', '').split('.')[0];
+const DEFAULT_USER_ID = 2000;
+const DEFAULT_USER = 'app';
 
 /**
  * Standard docker support for pack
@@ -26,6 +29,16 @@ export class PackDockerCommand extends BasePackCommand {
   dockerPush = false;
   @CliFlag({ desc: 'Docker Registry ', short: 'dr', envVars: ['PACK_DOCKER_REGISTRY'] })
   dockerRegistry?: string;
+  @CliFlag({ desc: 'Docker Runtime user ', short: 'du', name: 'docker-runtime-user', envVars: ['PACK_DOCKER_RUNTIME_USER'] })
+  dockerRuntimeUserSrc?: string;
+
+  @Ignore()
+  dockerRuntimeUser: {
+    user: string;
+    uid: number;
+    group: string;
+    gid: number;
+  };
 
   async validate(...unknownArgs: string[]): Promise<CliValidationError[] | undefined> {
     const errs: CliValidationError[] = [];
@@ -47,6 +60,17 @@ export class PackDockerCommand extends BasePackCommand {
       this.dockerFactory = RootIndex.getFromSource(path.resolve(this.dockerFactory))?.import ?? this.dockerFactory;
     }
     this.dockerName = this.dockerName.replace('<module>', CliUtil.getSimpleModuleName(this.module ?? ''));
+
+    // Finalize user/group and ids
+    const [userOrUid, groupOrGid = userOrUid] = (this.dockerRuntimeUserSrc ?? '').split(':');
+    const groupIsNum = /^\d+$/.test(groupOrGid);
+    const userIsNum = /^\d+$/.test(userOrUid);
+
+    const uid = userIsNum ? +userOrUid : DEFAULT_USER_ID;
+    const gid = groupIsNum ? +groupOrGid : DEFAULT_USER_ID;
+    const group = (!groupIsNum ? groupOrGid : undefined) || DEFAULT_USER;
+    const user = (!userIsNum ? userOrUid : undefined) || DEFAULT_USER;
+    this.dockerRuntimeUser = { user, uid, group, gid };
   }
 
   getOperations(): PackOperationShape<this>[] {

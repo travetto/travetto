@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { ExecUtil } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
 
 import { CommonPackConfig } from './types';
@@ -88,7 +87,7 @@ export class PackOperation {
       yield bundleCommand;
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
-      await ExecUtil.spawn(bundleCommand[0], bundleCommand.slice(1), { cwd, env, stdio: ['inherit', 'pipe', 'pipe'] }).result;
+      await PackUtil.runCommand(bundleCommand, { cwd, env });
     }
   }
 
@@ -211,7 +210,7 @@ export class PackOperation {
     if (cfg.ejectFile) {
       yield [...Object.entries(env).map(([k, v]) => `${k}=${v}`), ...cmd];
     } else {
-      await ExecUtil.spawn(cmd[0], cmd.slice(1), { env, stdio: ['inherit', 'ignore', 'inherit'] }).result;
+      await PackUtil.runCommand(cmd, { env });
     }
   }
 
@@ -229,8 +228,7 @@ export class PackOperation {
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
       await fs.mkdir(path.dirname(cfg.output), { recursive: true });
-      const [cmd, ...args] = ActiveShellCommand.zip(cfg.output);
-      await ExecUtil.spawn(cmd, args, { cwd: cfg.workspace }).result;
+      await PackUtil.runCommand(ActiveShellCommand.zip(cfg.output), { cwd: cfg.workspace });
     }
   }
 }

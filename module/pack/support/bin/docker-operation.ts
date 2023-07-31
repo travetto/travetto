@@ -1,12 +1,12 @@
 import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { ExecUtil } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell';
 import { DockerPackConfig, DockerPackFactoryModule } from './types';
 import { PackOperation } from './operation';
+import { PackUtil } from './util';
 
 export class DockerPackOperation {
 
@@ -47,7 +47,7 @@ export class DockerPackOperation {
     if (cfg.ejectFile) {
       yield command;
     } else {
-      await ExecUtil.spawn(command[0], command.slice(1), {}).result;
+      await PackUtil.runCommand(command);
     }
   }
 
@@ -64,7 +64,7 @@ export class DockerPackOperation {
       yield cmd;
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
-      await ExecUtil.spawn(cmd[0], cmd.slice(1), { cwd: cfg.workspace, stdio: [0, 'pipe', 2] }).result;
+      await PackUtil.runCommand(cmd, { cwd: cfg.workspace, stdio: [0, 'pipe', 2] });
     }
   }
 
@@ -86,7 +86,7 @@ export class DockerPackOperation {
       }
     } else {
       for (const tag of tags) {
-        await ExecUtil.spawn(cmd[0], [...cmd.slice(1), tag], { stdio: [0, 'pipe', 2] }).result;
+        await PackUtil.runCommand([...cmd, tag]);
       }
     }
   }

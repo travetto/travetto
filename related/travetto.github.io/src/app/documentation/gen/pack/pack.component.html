@@ -147,6 +147,7 @@ Options:
   -dp, --docker-port <span class="token operator">&lt;</span>number<span class="token operator">></span>          Docker Image Port  <span class="token punctuation">(</span>default: <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
   -dx, --docker-push                   Docker Push Tags  <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -dr, --docker-registry <span class="token operator">&lt;</span>string<span class="token operator">></span>      Docker Registry
+  -du, --docker-runtime-user <span class="token operator">&lt;</span>string<span class="token operator">></span>  Docker Runtime user
   -m, <span class="token parameter variable">--module</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Module to run <span class="token keyword">for</span>
   -h, <span class="token parameter variable">--help</span>                           display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
   </figure>
@@ -247,6 +248,9 @@ npx rollup <span class="token parameter variable">-c</span> <span class="token v
 <span class="token builtin class-name">echo</span> <span class="token string">"Generating Docker File <span class="token variable">$DIST</span>/Dockerfile @travetto/pack/support/pack.dockerfile"</span>
 
 <span class="token builtin class-name">echo</span> <span class="token string">"FROM node:20-alpine"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/Dockerfile
+<span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
+<span class="token builtin class-name">echo</span> <span class="token string">"RUN addgroup -g 2000 app &amp;&amp; adduser -S -u 2000 app app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
+<span class="token builtin class-name">echo</span> <span class="token string">"USER app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"WORKDIR /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"COPY . ."</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
