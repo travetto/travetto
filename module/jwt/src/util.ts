@@ -89,13 +89,25 @@ export class JWTUtil {
    */
   static async verify<T>(jwt: string, options: VerifyOptions = {}): Promise<Payload & T> {
 
-    const key = await options.key;
+    const rawKey = await options.key;
+    const keys = rawKey ? Array.isArray(rawKey) ? rawKey : [rawKey] : [];
 
     const { header, signature, payload } = this.read<Payload & T>(jwt);
 
-    JWTVerifier.verifyHeader(header, signature, key, options);
+    let valid = false;
 
-    const valid = jws.verify(jwt, header.alg, key ?? '');
+    if (!keys.length || keys.length === 1) {
+      JWTVerifier.verifyHeader(header, signature, keys[0], options);
+      valid = jws.verify(jwt, header.alg, keys[0] ?? '');
+    } else {
+      for (const key of keys) {
+        JWTVerifier.verifyHeader(header, signature, key, options);
+        valid = jws.verify(jwt, header.alg, key ?? '');
+        if (valid) {
+          break;
+        }
+      }
+    }
 
     if (!valid) {
       throw new JWTError('Token has invalid signature', {}, 'permissions');

@@ -23,7 +23,7 @@ export interface SignOptions {
   /**
    * Key to use
    */
-  key?: Key;
+  key?: OrProm<KeyItem>;
   /**
    * Ignore issued
    */
@@ -87,7 +87,7 @@ export type VerifyOptions = {
   /**
    * Encryption key
    */
-  key?: Key;
+  key?: OrProm<KeyItem | KeyItem[]>;
   /**
    * Encoding
    */

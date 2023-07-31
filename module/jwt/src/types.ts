@@ -2,6 +2,8 @@ import type jws from 'jws';
 
 export type AlgType = jws.Header['alg'];
 
+type OrProm<T> = T | Promise<T>;
+
 /**
  * Root of the payload
  */
@@ -57,7 +59,7 @@ export interface TypedSig<T extends Payload = Payload> extends jws.Signature {
   payload: T;
 }
 
-export type Key = string | Buffer | Promise<string | Buffer>;
+export type KeyItem = (string | Buffer);
 
 /**
  * Verification options
@@ -100,7 +102,7 @@ export type VerifyOptions = {
   /**
    * Encryption key
    */
-  key?: Key;
+  key?: OrProm<KeyItem | KeyItem[]>;
   /**
    * Encoding
    */
@@ -133,7 +135,7 @@ export interface SignOptions {
   /**
    * Key to use
    */
-  key?: Key;
+  key?: OrProm<KeyItem>;
   /**
    * Ignore issued
    */

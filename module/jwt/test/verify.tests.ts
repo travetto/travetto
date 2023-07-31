@@ -28,6 +28,39 @@ class VerifySuite {
     assert.deepEqual(res, payload);
   }
 
+  @Test('should allow for multiple keys, anyone could succeed')
+  async multiRSAVerify() {
+    const payload = { iat: Math.floor(Date.now() / 1000) };
+    const priv = await this.fixture.read('/priv.pem', true);
+    const pub = await this.fixture.read('/pub.pem', true);
+    const expiredPub = await this.fixture.read('/invalid_pub.pem', true);
+
+    const signed = jws.sign({
+      header: { alg: 'RS256', typ: 'JWT' },
+      payload,
+      secret: priv,
+      encoding: 'utf8'
+    });
+
+    const res = await JWTUtil.verify(signed, { key: [expiredPub, pub], alg: 'RS256' });
+    assert.deepEqual(res, payload);
+  }
+
+  @Test('should allow for multiple keys, anyone could succeed')
+  async multiVerifySymmetric() {
+    const payload = { iat: Math.floor(Date.now() / 1000) };
+
+    const signed = jws.sign({
+      header: { alg: 'HS256', typ: 'JWT' },
+      payload,
+      secret: 'test',
+      encoding: 'utf8'
+    });
+
+    const res = await JWTUtil.verify(signed, { key: ['toast', 'most', 'mest', 'test'] });
+    assert.deepEqual(res, payload);
+  }
+
   @Test('should be able to validate unsigned token')
   async validateUnsigned() {
     const payload = { iat: Math.floor(Date.now() / 1000) };

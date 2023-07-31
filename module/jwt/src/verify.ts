@@ -1,7 +1,7 @@
 import type jws from 'jws';
 
 import { JWTError } from './error';
-import { VerifyOptions, Payload, AlgType } from './types';
+import { VerifyOptions, Payload, AlgType, KeyItem } from './types';
 
 const RSA: AlgType[] = ['RS256', 'RS384', 'RS512'];
 const ES: AlgType[] = ['ES256', 'ES384', 'ES512'];
@@ -118,7 +118,7 @@ export class JWTVerifier {
   /**
    * Verify header and signature
    */
-  static verifyHeader(header: jws.Header, signature: string, key: string | Buffer | undefined, options: VerifyOptions): void {
+  static verifyHeader(header: jws.Header, signature: string, key: KeyItem | undefined, options: VerifyOptions): void {
     // clone this object since we are going to mutate it.
     const headerVerify: { typ: 'JWT', alg?: jws.Algorithm | jws.Algorithm[] } = { ...(options.header ?? {}), typ: 'JWT' };
 
