@@ -1,10 +1,11 @@
 import { path, RootIndex } from '@travetto/manifest';
 import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli';
+import { GlobalEnv } from '@travetto/base';
+import { Ignore } from '@travetto/schema';
 
 import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
-import { GlobalEnv } from '@travetto/base';
-import { Ignore } from '@travetto/schema';
+import { DockerPackConfig } from './bin/types';
 
 const NODE_MAJOR = GlobalEnv.nodeVersion.replace('v', '').split('.')[0];
 const DEFAULT_USER_ID = 2000;
@@ -33,12 +34,7 @@ export class PackDockerCommand extends BasePackCommand {
   dockerRuntimeUserSrc?: string;
 
   @Ignore()
-  dockerRuntimeUser: {
-    user: string;
-    uid: number;
-    group: string;
-    gid: number;
-  };
+  dockerRuntime: DockerPackConfig['dockerRuntime'];
 
   async validate(...unknownArgs: string[]): Promise<CliValidationError[] | undefined> {
     const errs: CliValidationError[] = [];
@@ -70,7 +66,7 @@ export class PackDockerCommand extends BasePackCommand {
     const gid = groupIsNum ? +groupOrGid : DEFAULT_USER_ID;
     const group = (!groupIsNum ? groupOrGid : undefined) || DEFAULT_USER;
     const user = (!userIsNum ? userOrUid : undefined) || DEFAULT_USER;
-    this.dockerRuntimeUser = { user, uid, group, gid };
+    this.dockerRuntime = { user, uid, group, gid, folder: DEFAULT_USER };
   }
 
   getOperations(): PackOperationShape<this>[] {
