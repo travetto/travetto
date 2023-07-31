@@ -4,7 +4,6 @@ import { path, RootIndex } from '@travetto/manifest';
 import { AppError, ExecUtil, ExecutionOptions } from '@travetto/base';
 
 import { ActiveShellCommand } from './shell';
-import { DockerPackConfig } from './types';
 
 export class PackUtil {
   /**
@@ -76,24 +75,6 @@ export class PackUtil {
     if (!valid) {
       process.exitCode = code;
       throw new AppError(stderr || message || 'An unexpected error has occurred');
-    }
-  }
-
-  /**
-   * Generate a docker user creation command
-   */
-  static generateDockerUserCommand(cfg: DockerPackConfig): string {
-    const { user, group, uid, gid } = cfg.dockerRuntimeUser;
-    if (user !== 'root') {
-      return [
-        '',
-        `RUN which addgroup && \
-( addgroup -g ${gid} ${group} && adduser -S -u ${uid} ${user} ${group} ) || \
-( groupadd -g ${gid} ${group} && useradd -r -u ${uid} -g ${group} ${user} )`,
-        `USER ${user}`
-      ].join('\n');
-    } else {
-      return '';
     }
   }
 }
