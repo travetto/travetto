@@ -14,7 +14,7 @@ export class PackConfigUtil {
   }
 
   /**
-   * Generate a docker user creation command
+   * Common docker environment setup
    */
   static dockerWorkspace(cfg: DockerPackConfig): string {
     const { folder, user, group, uid, gid } = cfg.dockerRuntime;
