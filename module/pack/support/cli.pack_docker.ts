@@ -66,7 +66,7 @@ export class PackDockerCommand extends BasePackCommand {
     const gid = groupIsNum ? +groupOrGid : DEFAULT_USER_ID;
     const group = (!groupIsNum ? groupOrGid : undefined) || DEFAULT_USER;
     const user = (!userIsNum ? userOrUid : undefined) || DEFAULT_USER;
-    this.dockerRuntime = { user, uid, group, gid, folder: DEFAULT_USER };
+    this.dockerRuntime = { user, uid, group, gid, folder: `/${DEFAULT_USER}` };
   }
 
   getOperations(): PackOperationShape<this>[] {
