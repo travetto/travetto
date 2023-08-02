@@ -232,12 +232,11 @@ cd $ROOT
 echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile"
 
 echo "FROM node:20-alpine" > $DIST/Dockerfile
-echo "" >> $DIST/Dockerfile
-echo "RUN addgroup -g 2000 app && adduser -S -u 2000 app app" >> $DIST/Dockerfile
+echo "RUN which addgroup && (addgroup -g 2000 app && adduser -S -u 2000 app app) || (groupadd -g 2000 app && useradd -r -u 2000 -g app app)" >> $DIST/Dockerfile
+echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
 echo "USER app" >> $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
-echo "COPY . ." >> $DIST/Dockerfile
-echo "" >> $DIST/Dockerfile
+echo "COPY --chown=\"app:app\" . ." >> $DIST/Dockerfile
 echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
 
 # Pulling Docker Base Image node:20-alpine 

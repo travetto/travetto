@@ -1,3 +1,4 @@
+import { path } from '@travetto/manifest';
 import { FileQueryProvider } from '@travetto/base';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 
@@ -29,22 +30,17 @@ export class FileConfigSource extends FileQueryProvider implements ConfigSource 
     const parsers = await Promise.all(parserClasses.map(x => DependencyRegistry.getInstance<ConfigParser>(x.class, x.qualifier)));
 
     // Register parsers
-    this.parsers = {};
-    for (const par of parsers) {
-      for (const ext of par.ext) {
-        this.parsers[ext] = par;
-      }
-    }
+    this.parsers = Object.fromEntries(parsers.flatMap(p => p.ext.map(e => [e, p])));
 
-    this.extMatch = parsers.length ? new RegExp(`[.](${Object.keys(this.parsers).join('|')})`) : /^$/;
+    this.extMatch = parsers.length ? new RegExp(`(${Object.keys(this.parsers).join('|').replaceAll('.', '[.]')})`) : /^$/;
   }
 
   async getValues(profiles: string[]): Promise<ConfigValue[]> {
     const out: ConfigValue[] = [];
 
     for await (const file of this.query(f => this.extMatch.test(f))) {
-      const ext = file.split('.')[1];
-      const profile = file.replace(`.${ext}`, '');
+      const ext = path.extname(file);
+      const profile = path.basename(file, ext);
       if (!profiles.includes(profile) || !this.parsers[ext]) {
         continue;
       }

@@ -33,7 +33,7 @@ export class PropertiesConfigParser implements ConfigParser {
     }
   }
 
-  ext = ['properties'];
+  ext = ['.properties'];
 
   parse(text: string): ConfigData {
     const out: ConfigData = {};

@@ -4,6 +4,6 @@ import { ConfigParser } from './types';
 
 @Injectable()
 export class JSONConfigParser implements ConfigParser {
-  ext = ['json'];
+  ext = ['.json'];
   parse = JSON.parse.bind(JSON);
 }

@@ -11,11 +11,11 @@ export class DocFileUtil {
 
   static #decCache: Record<string, boolean> = {};
   static #extToLang: Record<string, string> = {
-    ts: 'typescript',
-    tsx: 'typescript',
-    js: 'javascript',
-    yml: 'yaml',
-    sh: 'bash',
+    '.ts': 'typescript',
+    '.tsx': 'typescript',
+    '.js': 'javascript',
+    '.yml': 'yaml',
+    '.sh': 'bash',
   };
 
   static isFile(src: string): boolean {
@@ -49,8 +49,8 @@ export class DocFileUtil {
   static async read(file: string): Promise<{ content: string, language: string, file: string }> {
     file = await this.resolveFile(file);
 
-    const ext = path.extname(file).replace(/^[.]/, '');
-    const language = this.#extToLang[ext] ?? ext;
+    const ext = path.extname(file);
+    const language = this.#extToLang[ext] ?? ext.replace('.', '');
 
     let text: string | undefined;
     if (language) {

@@ -90,7 +90,7 @@ export class ImportManager {
       if (name) {
         this.#ids.set(file, name);
       } else {
-        const key = path.basename(file).replace(/[.][^.]*$/, '').replace(/[^A-Za-z0-9]+/g, '_');
+        const key = path.basename(file, path.extname(file)).replace(/[^A-Za-z0-9]+/g, '_');
         this.#ids.set(file, `Ⲑ_${key}_${this.#idx[key] = (this.#idx[key] || 0) + 1}`);
       }
     }
