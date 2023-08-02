@@ -38,6 +38,12 @@ class Generic {
   props?: Record<string, unknown>;
 }
 
+@Config('props')
+class Properties {
+  multiline?: string;
+}
+
+
 class Setup {
   @InjectableFactory()
   static getMemoryConfig(): ConfigSource {
@@ -113,5 +119,12 @@ export class ManagerTest {
     assert.deepStrictEqual(res.props.jsonColor, ['2', '3', '4']);
     assert.deepStrictEqual(res.props.propsColor, '2,3,4');
     assert(res.props.superpower === 'green');
+  }
+
+  @Test()
+  async propsMultiline() {
+    const res = await this.config.bindTo(Properties, new Properties(), 'props', false);
+    assert(res.multiline);
+    assert(res.multiline === 'hello my name is bob');
   }
 }
