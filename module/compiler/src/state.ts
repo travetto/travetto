@@ -125,7 +125,7 @@ export class CompilerState implements ts.CompilerHost {
 
   registerInput(module: ManifestModule, moduleFile: string): string {
     const relativeInput = `${module.outputFolder}/${moduleFile}`;
-    const sourceFile = path.toPosix(path.resolve(this.#manifest.workspacePath, module.sourceFolder, moduleFile));
+    const sourceFile = path.resolve(this.#manifest.workspacePath, module.sourceFolder, moduleFile);
     const sourceFolder = path.dirname(sourceFile);
     const inputFile = path.resolve(this.#rootDir, relativeInput); // Ensure input is isolated
     const inputFolder = path.dirname(inputFile);

@@ -12,4 +12,17 @@ class PathTests {
     assert(pwd.includes('../../..'));
     assert(path.resolve(`${pwd}/test`) === '/test');
   }
+
+  @Test()
+  verifyPathExt() {
+    for (const file of [
+      'C:\\user\\home\\sample.2.docx',
+      'C:/user/home/sample.2.docx',
+      '/user/home/sample.2.docx'
+    ]) {
+      assert(path.basename(file) === 'sample.2.docx');
+      assert(path.extname(file) === '.docx');
+      assert(path.basename(file, path.extname(file)) === 'sample.2');
+    }
+  }
 }
