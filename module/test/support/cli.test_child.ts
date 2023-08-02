@@ -8,7 +8,7 @@ import { CliCommand } from '@travetto/cli';
 export class TestChildWorkerCommand {
   envInit(): GlobalEnvConfig {
     EventEmitter.defaultMaxListeners = 1000;
-    return { test: true, set: { FORCE_COLOR: 0 } };
+    return { envName: 'test', set: { FORCE_COLOR: 0 } };
   }
 
   async main(): Promise<void> {

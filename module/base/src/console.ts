@@ -4,6 +4,8 @@ import { RootIndex } from '@travetto/manifest';
 
 import type { ConsoleListener, ConsoleEvent, LogLevel } from './types';
 
+const FALSE_RE = /^(0|false|no|off)/i;
+
 function wrap(target: Console): ConsoleListener {
   return {
     onLog(ev: ConsoleEvent): void {
@@ -58,7 +60,6 @@ class $ConsoleManager {
 
   async register(): Promise<this> {
     this.set(console); // Init to console
-    this.setDebugFromEnv();
     await initNpmDebug(this);
     return this;
   }
@@ -79,23 +80,16 @@ class $ConsoleManager {
     }
   }
 
-  setDebugFromEnv(): void {
-    const notProd = !/prod/i.test(process.env.NODE_ENV ?? '');
-    this.setDebug(process.env.DEBUG ?? (notProd ? '@' : false));
-  }
-
   /**
    * Set logging debug level
    */
-  setDebug(debug: boolean | string): void {
-    const isSet = debug !== undefined && debug !== '';
-    const isFalse = typeof debug === 'boolean' ? !debug : /^(0|false|no|off)/i.test(debug);
+  setDebug(debugModules: string | boolean | undefined, devMode: boolean = false): void {
+    const debug = `${debugModules}` || (devMode ? '@' : '') || 'false';
 
-    if (isSet && !isFalse) {
-      const active = RootIndex.getModuleList('local', typeof debug === 'string' ? debug : '');
+    if (!FALSE_RE.test(debug)) {
+      const active = RootIndex.getModuleList('local', debug);
       active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
-
     } else {
       this.filter('debug', () => false);
     }

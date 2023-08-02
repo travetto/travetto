@@ -1,4 +1,4 @@
-import { Class, ConsoleManager } from '@travetto/base';
+import { Class, ConsoleManager, GlobalEnv } from '@travetto/base';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 import { CliCommandRegistry } from './registry';
 
@@ -57,7 +57,7 @@ export class CliCommandSchemaUtil {
       }
       SchemaRegistry.onInstall(cls, { type: 'added', curr: cls });
     } finally {
-      ConsoleManager.setDebugFromEnv();
+      ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
     }
 
     const schema = await SchemaRegistry.getViewSchema(cls);

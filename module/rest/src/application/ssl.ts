@@ -75,8 +75,8 @@ export class RestSslConfig {
       return;
     }
     if (!this.keys) {
-      if (GlobalEnv.prod) {
-        throw new AppError('Cannot use test keys in production', 'permissions');
+      if (!GlobalEnv.devMode) {
+        throw new AppError('Default ssl keys are only valid for development use, please specify a config value at rest.ssl.keys', 'permissions');
       }
       return RestSslConfig.generateSslKeyPair();
     } else {

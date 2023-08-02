@@ -260,6 +260,7 @@ export class ManifestIndex {
     const name = this.getFromImport(importName)?.module;
     return name ? this.getModule(name) : undefined;
   }
+
   /**
    * Build module list from an expression list (e.g. `@travetto/rest,-@travetto/log)
    */

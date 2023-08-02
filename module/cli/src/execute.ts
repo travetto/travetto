@@ -2,7 +2,7 @@ import { appendFile, mkdir } from 'fs/promises';
 
 import { GlobalTerminal } from '@travetto/terminal';
 import { path } from '@travetto/manifest';
-import { ConsoleManager, defineGlobalEnv, ShutdownManager } from '@travetto/base';
+import { ConsoleManager, defineGlobalEnv, ShutdownManager, GlobalEnv } from '@travetto/base';
 
 import { HelpUtil } from './help';
 import { CliCommandShape, CliValidationResultError } from './types';
@@ -16,11 +16,8 @@ export class ExecutionManager {
 
   static async #envInit(cmd: CliCommandShape): Promise<void> {
     if (cmd.envInit) {
-      defineGlobalEnv({
-        debug: process.env.DEBUG || false,
-        ...await cmd.envInit(),
-      });
-      ConsoleManager.setDebugFromEnv();
+      defineGlobalEnv(await cmd.envInit());
+      ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
     }
   }
 

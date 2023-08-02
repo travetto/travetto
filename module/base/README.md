@@ -38,17 +38,17 @@ The functionality we support for testing and retrieving environment information:
    *  `getList(key: string): string[];` - Retrieve an environmental value as a list
 
 ## Shared Global Environment State
-[GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10) is a non-cached interface to the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L4) class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.
+[GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17) is a non-cached interface to the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L4) class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.
 
 **Code: GlobalEnv Shape**
 ```typescript
 export const GlobalEnv = {
   /** Get environment name */
   get envName(): string;
-  /** Get debug value */
+  /** Get debug module expression */
   get debug(): string | undefined;
-  /** Are we in production mode */
-  get prod(): boolean;
+  /** Are we in development mode */
+  get devMode(): boolean;
   /** Is the app in dynamic mode? */
   get dynamic(): boolean;
   /** The list of the profiles */
@@ -57,7 +57,7 @@ export const GlobalEnv = {
   get resourcePaths(): string[];
   /** Is test */
   get test(): boolean;
-  /** Get node version */
+  /** Get node major version */
   get nodeVersion(): string;
   /** Export as plain object */
   toJSON(): Record<string, unknown>;
@@ -66,7 +66,7 @@ export const GlobalEnv = {
 
 The source for each field is:
    *  `envName` - This is derived from `process.env.TRV_ENV` with a fallback of `process.NODE_ENV`
-   *  `prod` - This is true if `envName` is a prod value
+   *  `devMode` - This is true if `process.env.NODE_ENV` is dev* or test
    *  `dynamic` - This is derived from `process.env.TRV_DYNAMIC`. This field reflects certain feature sets used throughout the framework.
    *  `profiles` - This is a list derived from `process.env.TRV_PROFILES`.  This can be checked at runtime to see if specific profiles are met.  This primarily used in the framework to determine if the test profile is activated.
    *  `resourcePaths` - This is a list derived from `process.env.TRV_RESOURCES`.  This points to a list of folders that the [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46) will search against, by default.
@@ -79,34 +79,29 @@ In addition to reading these values, there is a defined method for setting/updat
 export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
   const { set = {} } = cfg;
   const resources = [...cfg.resourcePaths ?? [], ...GlobalEnv.resourcePaths];
-  const test = cfg.test ?? GlobalEnv.test;
-  let debug = cfg.debug ?? GlobalEnv.debug;
-  const env = cfg.envName ?? GlobalEnv.envName;
   const profiles = new Set([...GlobalEnv.profiles, ...(cfg.profiles ?? [])]);
-  const isProd = /^prod/i.test(env);
 
-  if (test) {
-    profiles.add(TEST);
-    debug = false;
-  } else {
-    profiles.delete(!isProd ? PROD : DEV);
-    profiles.add(isProd ? PROD : DEV);
-  }
+  const envName = (cfg.envName ?? GlobalEnv.envName) || readNodeEnv();
+
+  profiles.delete(GlobalEnv.envName);
+  profiles.add(envName);
+
+  Object.assign(set, {
+    NODE_ENV: detectNodeEnv(envName),
+    DEBUG: envName !== TEST ? (cfg.debug ?? GlobalEnv.debug) : false,
+    TRV_ENV: envName,
+    TRV_DYNAMIC: cfg.dynamic ?? GlobalEnv.dynamic,
+    TRV_PROFILES: [...profiles].sort().join(','),
+    TRV_RESOURCES: resources.join(',')
+  });
 
   for (const [k, v] of Object.entries(set)) {
     (v === undefined || v === null) ? delete process.env[k] : process.env[k] = `${v}`;
   }
-
-  process.env.TRV_ENV = env;
-  process.env.NODE_ENV = isProd ? 'production' : 'development';
-  process.env.TRV_DYNAMIC = `${cfg.dynamic ?? GlobalEnv.dynamic}`;
-  process.env.DEBUG = `${debug}`;
-  process.env.TRV_PROFILES = [...profiles].sort().join(',');
-  process.env.TRV_RESOURCES = resources.join(',');
 }
 ```
 
-As you can see this method exists to update/change the `process.env` values so that the usage of [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10) reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications).
+As you can see this method exists to update/change the `process.env` values so that the usage of [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17) reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications).
 
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
@@ -136,7 +131,7 @@ export interface ResourceProvider {
 }
 ```
 
-The [ResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  This contract is fairly simple to fill out, and the predominant implementation is [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46).  This [ResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21) will utilize the [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L10)'s `resourcePaths` information on where to attempt to find a requested resource.
+The [ResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  This contract is fairly simple to fill out, and the predominant implementation is [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46).  This [ResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21) will utilize the [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17)'s `resourcePaths` information on where to attempt to find a requested resource.
 
 ### Scanning for Resources
 Beyond directly asking for a resource, there a times where it is helpful to know what resources are available at runtime. This is primarily used during development, and is a discouraged pattern for production as assumptions about the file-system may be incorrect (or change without warning).
@@ -169,7 +164,7 @@ The supported operations are:
 **Note**: All other console methods are excluded, specifically `trace`, `inspect`, `dir`, `time`/`timeEnd`
 
 ## How Logging is Instrumented
-All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L42).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L42) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev). 
+All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L44).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L44) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev). 
 
 A sample of the instrumentation would be:
 

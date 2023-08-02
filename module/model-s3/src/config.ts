@@ -58,7 +58,7 @@ export class S3ModelConfig {
     };
 
     // We are in localhost and not in prod, turn on forcePathStyle
-    if (!GlobalEnv.prod && this.endpoint.includes('localhost')) {
+    if (GlobalEnv.devMode && this.endpoint.includes('localhost')) {
       this.config.forcePathStyle ??= true;
     }
   }

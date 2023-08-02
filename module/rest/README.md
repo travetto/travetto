@@ -248,12 +248,12 @@ Initialized {
   env: {
     envName: 'dev',
     debug: '0',
-    prod: false,
+    devMode: true,
     test: false,
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v20.x.x'
+    nodeVersion: '20'
   },
   config: {
     sources: [ 'override.3 - memory://override' ],
@@ -327,12 +327,12 @@ Initialized {
   env: {
     envName: 'prod',
     debug: '0',
-    prod: true,
+    devMode: false,
     test: false,
     dynamic: false,
     profiles: [ 'prod' ],
     resourcePaths: [],
-    nodeVersion: 'v20.x.x'
+    nodeVersion: '20'
   },
   config: {
     sources: [ 'override.3 - memory://override' ],

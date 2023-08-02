@@ -1,25 +1,28 @@
 import { Env } from './env';
 
+const NODE_ENV_PROD = 'production';
+const NODE_ENV_DEV = 'development';
+const NODE_ENV_DEV_REGEX = /^dev|development|test$/i;
+
 const PROD = 'prod';
 const DEV = 'dev';
 const TEST = 'test';
+
+const readNodeEnv = (): string => Env.get('NODE_ENV', DEV).replace(NODE_ENV_PROD, PROD).replace(NODE_ENV_DEV, DEV);
+const detectNodeEnv = (val: string): string => NODE_ENV_DEV_REGEX.test(val) ? NODE_ENV_DEV : NODE_ENV_PROD;
 
 /**
  * The general app state, via env
  */
 export const GlobalEnv = {
   /** Get environment name */
-  get envName(): string {
-    return Env.get('TRV_ENV', Env.get('NODE_ENV', DEV))
-      .replace(/^(?:(production)|(development))$/i, (_, p) => p ? PROD : DEV)
-      .toLowerCase();
-  },
+  get envName(): string { return Env.get('TRV_ENV', ''); },
 
-  /** Get debug value */
+  /** Get debug module expression */
   get debug(): string | undefined { return Env.get('DEBUG'); },
 
-  /** Are we in production mode */
-  get prod(): boolean { return this.envName === PROD; },
+  /** Are we in development mode */
+  get devMode(): boolean { return Env.get('NODE_ENV', NODE_ENV_DEV) === NODE_ENV_DEV; },
 
   /** Is the app in dynamic mode? */
   get dynamic(): boolean { return Env.isTrue('TRV_DYNAMIC'); },
@@ -31,15 +34,15 @@ export const GlobalEnv = {
   get resourcePaths(): string[] { return Env.getList('TRV_RESOURCES', []); },
 
   /** Is test */
-  get test(): boolean { return this.profiles.includes('test'); },
+  get test(): boolean { return Env.get('TRV_ENV') === 'test'; },
 
-  /** Get node version */
-  get nodeVersion(): string { return process.version; },
+  /** Get node major version */
+  get nodeVersion(): string { return process.version.replace('v', '').split('.')[0]; },
 
   /** Export as plain object */
   toJSON(): Record<string, unknown> {
     return {
-      envName: this.envName, debug: this.debug, prod: this.prod, test: this.test,
+      envName: this.envName || '<unset>', debug: this.debug, devMode: this.devMode, test: this.test,
       dynamic: this.dynamic, profiles: this.profiles, resourcePaths: this.resourcePaths,
       nodeVersion: this.nodeVersion
     };
@@ -49,33 +52,28 @@ export const GlobalEnv = {
 export type GlobalEnvConfig = {
   set?: Record<string, string | number | boolean | undefined>;
   debug?: boolean | string;
-} & Partial<Omit<typeof GlobalEnv, 'prod' | 'debug'>>;
+} & Partial<Omit<typeof GlobalEnv, 'devMode' | 'debug' | 'test'>>;
 
 export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
   const { set = {} } = cfg;
   const resources = [...cfg.resourcePaths ?? [], ...GlobalEnv.resourcePaths];
-  const test = cfg.test ?? GlobalEnv.test;
-  let debug = cfg.debug ?? GlobalEnv.debug;
-  const env = cfg.envName ?? GlobalEnv.envName;
   const profiles = new Set([...GlobalEnv.profiles, ...(cfg.profiles ?? [])]);
-  const isProd = /^prod/i.test(env);
 
-  if (test) {
-    profiles.add(TEST);
-    debug = false;
-  } else {
-    profiles.delete(!isProd ? PROD : DEV);
-    profiles.add(isProd ? PROD : DEV);
-  }
+  const envName = (cfg.envName ?? GlobalEnv.envName) || readNodeEnv();
+
+  profiles.delete(GlobalEnv.envName);
+  profiles.add(envName);
+
+  Object.assign(set, {
+    NODE_ENV: detectNodeEnv(envName),
+    DEBUG: envName !== TEST ? (cfg.debug ?? GlobalEnv.debug ?? false) : false,
+    TRV_ENV: envName,
+    TRV_DYNAMIC: cfg.dynamic ?? GlobalEnv.dynamic,
+    TRV_PROFILES: [...profiles].sort().join(','),
+    TRV_RESOURCES: resources.join(',')
+  });
 
   for (const [k, v] of Object.entries(set)) {
     (v === undefined || v === null) ? delete process.env[k] : process.env[k] = `${v}`;
   }
-
-  process.env.TRV_ENV = env;
-  process.env.NODE_ENV = isProd ? 'production' : 'development';
-  process.env.TRV_DYNAMIC = `${cfg.dynamic ?? GlobalEnv.dynamic}`;
-  process.env.DEBUG = `${debug}`;
-  process.env.TRV_PROFILES = [...profiles].sort().join(',');
-  process.env.TRV_RESOURCES = resources.join(',');
 }

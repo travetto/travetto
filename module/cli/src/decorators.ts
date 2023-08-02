@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ConcreteClass, ConsoleManager, defineGlobalEnv } from '@travetto/base';
+import { Class, ClassInstance, ConcreteClass, ConsoleManager, GlobalEnv, defineGlobalEnv } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -37,9 +37,13 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
       hidden: cfg.hidden,
       runTarget: cfg.runTarget,
       preMain: (cmd: CliCommandShape & { env?: string, profile?: string[], module?: string }) => {
-        if (addEnv) { defineGlobalEnv({ envName: cmd.env }); }
-        if (addProfile) { defineGlobalEnv({ profiles: cmd.profile }); }
-        if (addEnv || addProfile) { ConsoleManager.setDebugFromEnv(); }
+        if (addEnv || addProfile) {
+          defineGlobalEnv({
+            ...addEnv ? { envName: cmd.env } : {},
+            ...addProfile ? { profiles: cmd.profile } : {}
+          });
+          ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
+        }
         if (addModule && cmd.module && cmd.module !== RootIndex.mainModuleName) { // Mono-repo support
           RootIndex.reinitForModule(cmd.module); // Reinit with specified module
         }

@@ -9,7 +9,7 @@ import { GlobalEnvConfig } from '@travetto/base';
 export class TestCountCommand {
 
   envInit(): GlobalEnvConfig {
-    return { debug: false, test: true };
+    return { debug: false, envName: 'test' };
   }
 
   async main(patterns: string[]) {

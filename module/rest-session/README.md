@@ -113,8 +113,8 @@ export class SessionConfig {
   transport: 'cookie' | 'header' = 'cookie';
 
   postConstruct(): void {
-    if (!this.secret && GlobalEnv.prod) {
-      throw new AppError('Session secret is a required value for production', 'permissions');
+    if (!this.secret && !GlobalEnv.devMode) {
+      throw new AppError('Default session secret is only valid for development use, please specify a config value at rest.session.secret', 'permissions');
     }
   }
 }

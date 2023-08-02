@@ -1,5 +1,6 @@
 import fs from 'fs';
 
+import { GlobalEnv } from '../src/global-env';
 import { ConsoleManager } from '../src/console';
 import { ShutdownManager } from '../src/shutdown';
 
@@ -36,6 +37,7 @@ export async function init(manageShutdown = true): Promise<void> {
 
   // Initialize
   await ConsoleManager.register();
+  ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
 
   // Register shutdown handler
   if (manageShutdown) {

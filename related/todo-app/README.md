@@ -314,12 +314,12 @@ npx trv run:rest
   env: {
     envName: 'dev',
     debug: '0',
-    prod: false,
+    devMode: true,
     test: false,
     dynamic: false,
     profiles: [ 'dev' ],
     resourcePaths: [],
-    nodeVersion: 'v20.x.x'
+    nodeVersion: '20'
   },
   config: {
     sources: [
@@ -339,7 +339,8 @@ npx trv run:rest
       CommonLoggerConfig: { format: 'line', output: 'console' },
       ConsoleLogAppenderConfig: { logToLevel: true },
       FileLogAppenderConfig: {
-        output: './.trv_build/logs/@travetto/todo-app.log'
+        output: './.trv_build/logs/@travetto/todo-app.log',
+        writeSync: false
       },
       FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
       JSONLogFormatterConfig: {},

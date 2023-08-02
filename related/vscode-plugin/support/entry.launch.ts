@@ -8,8 +8,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   // Check packed, then unpacked location of manifest
   let manifest: string | undefined;
   for (const loc of [
-    async () => path.resolve(context.extension.extensionPath, 'dist', 'manifest.json'),
-    async () => __dirname.replace(/support$/, 'manifest.json'),
+    async (): Promise<string> => path.resolve(context.extension.extensionPath, 'dist', 'manifest.json'),
+    async (): Promise<string> => __dirname.replace(/support$/, 'manifest.json'),
   ]) {
     try {
       const f = await loc();

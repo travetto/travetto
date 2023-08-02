@@ -11,7 +11,7 @@ export class TestDirectCommand {
   format: TestFormat = 'tap';
 
   envInit(): GlobalEnvConfig {
-    return { test: true };
+    return { envName: 'test' };
   }
 
   main(file: string, args: string[]): Promise<void> {

@@ -259,8 +259,8 @@ global-test/model_rest-session <workspace-root>/global-test/model_rest-session
         module/rest-aws-lambda <workspace-root>/module/rest-aws-lambda
             module/rest-client <workspace-root>/module/rest-client
            module/rest-express <workspace-root>/module/rest-express
-    module/rest-express-lambda <workspace-root>/module/rest-express-lambda
            module/rest-fastify <workspace-root>/module/rest-fastify
+    module/rest-express-lambda <workspace-root>/module/rest-express-lambda
     module/rest-fastify-lambda <workspace-root>/module/rest-fastify-lambda
                module/rest-koa <workspace-root>/module/rest-koa
         module/rest-koa-lambda <workspace-root>/module/rest-koa-lambda

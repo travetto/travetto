@@ -13,7 +13,7 @@ export class TestWatcherCommand {
   mode: 'all' | 'change' = 'all';
 
   envInit(): GlobalEnvConfig {
-    return { test: true, dynamic: true };
+    return { envName: 'test', dynamic: true };
   }
 
   async main(): Promise<void> {

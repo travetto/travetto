@@ -13,7 +13,7 @@ export class ModelStorageUtil {
    * Register change listener on startup
    */
   static async registerModelChangeListener(storage: ModelStorageSupport, target?: Class): Promise<void> {
-    if (!GlobalEnv.dynamic || !(storage?.config?.autoCreate ?? !GlobalEnv.prod)) {
+    if (!GlobalEnv.dynamic || !(storage?.config?.autoCreate ?? GlobalEnv.devMode)) {
       return;
     }
 

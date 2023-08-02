@@ -56,8 +56,8 @@ export class RestJWTConfig {
     this.maxAgeMs = typeof this.maxAge === 'string' ? TimeUtil.timeToMs(this.maxAge as '1y') : this.maxAge;
 
     if (!this.signingKey) {
-      if (GlobalEnv.prod) {
-        throw new AppError('The default signing key is not valid for production use, please specify a config value at rest.auth.jwt.signingKey');
+      if (!GlobalEnv.devMode) {
+        throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.jwt.signingKey');
       }
       this.signingKey = 'dummy';
     }

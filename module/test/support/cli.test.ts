@@ -24,7 +24,7 @@ export class TestCommand implements CliCommandShape {
 
   envInit(): GlobalEnvConfig {
     EventEmitter.defaultMaxListeners = 1000;
-    return { test: true };
+    return { envName: 'test' };
   }
 
   isFirstFile(first: string): Promise<boolean> {

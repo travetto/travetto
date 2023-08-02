@@ -342,12 +342,12 @@ First we must start the application:
   env: <span class="token punctuation">{{'{'}}</span>
     envName: <span class="token string">'dev'</span>,
     debug: <span class="token string">'0'</span>,
-    prod: false,
+    devMode: true,
     test: false,
     dynamic: false,
     profiles: <span class="token punctuation">[</span> <span class="token string">'dev'</span> <span class="token punctuation">]</span>,
     resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    nodeVersion: <span class="token string">'v20.x.x'</span>
+    nodeVersion: <span class="token string">'20'</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span>
@@ -367,7 +367,8 @@ First we must start the application:
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
       ConsoleLogAppenderConfig: <span class="token punctuation">{{'{'}}</span> logToLevel: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       FileLogAppenderConfig: <span class="token punctuation">{{'{'}}</span>
-        output: <span class="token string">'./.trv_build/logs/@travetto/todo-app.log'</span>
+        output: <span class="token string">'./.trv_build/logs/@travetto/todo-app.log'</span>,
+        writeSync: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
       FileModelConfig: <span class="token punctuation">{{'{'}}</span> folder: <span class="token string">'/tmp/&lt;temp-folder>'</span>, namespace: <span class="token string">'.'</span> <span class="token punctuation">{{'}'}}</span>,
       JSONLogFormatterConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
