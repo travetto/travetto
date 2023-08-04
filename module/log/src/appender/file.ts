@@ -1,4 +1,4 @@
-import { createWriteStream, WriteStream, mkdirSync } from 'fs';
+import { createWriteStream, WriteStream, mkdirSync, openSync, appendFileSync } from 'fs';
 
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
@@ -10,6 +10,8 @@ import { LogAppender, LogEvent } from '../types';
 export class FileLogAppenderConfig {
   @EnvVar('TRV_LOG_OUTPUT')
   output?: 'file' | string;
+
+  writeSync = false;
 
   postConstruct(): void {
     if (!this.output || this.output === 'file' || this.output === 'console') {
@@ -23,14 +25,23 @@ export class FileLogAppenderConfig {
  */
 @Injectable()
 export class FileLogAppender implements LogAppender {
-  stream: WriteStream;
+  stream?: WriteStream;
+  appendFd?: number;
 
   constructor(opts: FileLogAppenderConfig) {
     mkdirSync(path.dirname(opts.output!), { recursive: true });
-    this.stream = createWriteStream(opts.output!, { autoClose: true, flags: 'a' });
+    if (opts.writeSync) {
+      this.appendFd = openSync(opts.output!, 'a');
+    } else {
+      this.stream = createWriteStream(opts.output!, { autoClose: true, flags: 'a' });
+    }
   }
 
   append(ev: LogEvent, formatted: string): void {
-    this.stream.write(`${formatted}\n`);
+    if (this.stream) {
+      this.stream.write(`${formatted}\n`);
+    } else {
+      appendFileSync(this.appendFd!, `${formatted}\n`);
+    }
   }
 }
