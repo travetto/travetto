@@ -30,7 +30,7 @@
     "@travetto/base": "^3.2.8",
     "@travetto/cli": "^3.2.3",
     "@travetto/compiler": "^3.2.2",
-    "enquirer": "^2.3.6",
+    "enquirer": "^2.4.1",
     "mustache": "^4.2.0"
   },
   "devDependencies": {
