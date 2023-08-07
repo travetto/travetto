@@ -88,7 +88,7 @@ export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
 
   Object.assign(set, {
     NODE_ENV: detectNodeEnv(envName),
-    DEBUG: envName !== TEST ? (cfg.debug ?? GlobalEnv.debug) : false,
+    DEBUG: envName !== TEST ? (cfg.debug ?? GlobalEnv.debug ?? false) : false,
     TRV_ENV: envName,
     TRV_DYNAMIC: cfg.dynamic ?? GlobalEnv.dynamic,
     TRV_PROFILES: [...profiles].sort().join(','),

@@ -1,4 +1,5 @@
 import assert from 'assert';
+import * as winPath from 'path/win32';
 
 import { Suite, Test } from '@travetto/test';
 import { path } from '@travetto/manifest';
@@ -24,5 +25,20 @@ class PathTests {
       assert(path.extname(file) === '.docx');
       assert(path.basename(file, path.extname(file)) === 'sample.2');
     }
+  }
+
+  @Test()
+  verifyWin32Paths() {
+    const winResolve = (...args: string[]): string => path.toPosix(winPath.resolve(path.cwd(), ...args.map(path.toPosix)));
+    const winJoin = (root: string, ...args: string[]): string => path.toPosix(winPath.join(path.toPosix(root), ...args.map(path.toPosix)));
+
+
+    assert(winResolve('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
+    assert(winResolve('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
+    assert(winResolve('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');
+
+    assert(winJoin('C:\\Docs\\Bob', 'orange\\red.png') === 'C:/Docs/Bob/orange/red.png');
+    assert(winJoin('C:\\Docs\\Bob', 'orange/red.png') === 'C:/Docs/Bob/orange/red.png');
+    assert(winJoin('C:\\Docs\\Bob', '../red.png') === 'C:/Docs/red.png');
   }
 }

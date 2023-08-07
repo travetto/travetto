@@ -1,17 +1,35 @@
-import { extname, dirname, resolve, basename, join } from 'path/posix';
-import { sep } from 'path';
+import type * as pathMod from 'path';
+import { extname, dirname, basename, resolve, join } from 'path/posix';
+import { sep, resolve as nativeResolve, join as nativeJoin } from 'path';
 
-const posix = (file: string): string => file.replaceAll('\\', '/');
+/**
+ * Converts a given file name by replace all slashes, with forward slashes
+ */
+const toPosix = (file: string): string => file.replaceAll('\\', '/');
+/**
+ * Converts a given file name by replace all slashes, with platform dependent path separators
+ */
+const toNative = (file: string): string => file.replaceAll('/', sep);
 
-const cwd = (): string => posix(process.cwd());
+const cwd = (): string => toPosix(process.cwd());
 
-export const path = {
+type PathModType =
+  { toPosix: typeof toPosix, toNative: typeof toNative } &
+  Pick<typeof pathMod, 'basename' | 'dirname' | 'extname' | 'join' | 'resolve'> &
+  Pick<typeof process, 'cwd'>;
+
+export const path: PathModType = {
   cwd,
-  toPosix: posix,
-  basename: (file: string, suffix?: string): string => basename(posix(file), suffix),
-  extname: (file: string): string => extname(posix(file)),
-  dirname: (file: string): string => dirname(posix(file)),
-  resolve: (...args: string[]): string => resolve(cwd(), ...args.map(f => posix(f))),
-  join: (root: string, ...args: string[]): string => join(posix(root), ...args.map(f => posix(f))),
-  toNative: (file: string): string => file.replaceAll('/', sep)
+  toPosix,
+  toNative,
+  basename: (file, suffix) => basename(toPosix(file), suffix),
+  extname: file => extname(toPosix(file)),
+  dirname: file => dirname(toPosix(file)),
+  resolve: (...args) => resolve(cwd(), ...args.map(toPosix)),
+  join: (...args) => join(...args.map(toPosix)),
 };
+
+if (process.platform === 'win32') {
+  path.resolve = (...args: string[]): string => toPosix(nativeResolve(cwd(), ...args.map(toPosix)));
+  path.join = (root: string, ...args: string[]): string => toPosix(nativeJoin(toPosix(root), ...args.map(toPosix)));
+}
