@@ -164,6 +164,8 @@ li {
       td:first-of-type {
         border-bottom: 1px solid #eee;
       }
+    }
+    tbody tr {
       td:not(:first-of-type, :empty) {
         color: transparent;
         &::after {
