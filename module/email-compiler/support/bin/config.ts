@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { RootIndex, path } from '@travetto/manifest';
+import { IndexedModule, RootIndex, path } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {
@@ -39,13 +39,18 @@ export class $EditorConfig {
     },
   };
 
+  #getEmailConfig(mod: IndexedModule): string {
+    return this.#configFile[mod.name] ??= path.resolve(mod.sourcePath, 'resources/email/dev.yml');
+  }
+
   /**
    *
    */
   async get(file: string): Promise<ConfigType> {
     try {
-      const mod = RootIndex.getModuleFromSource(file)!.name;
-      const content = await fs.readFile(this.#configFile[mod], 'utf8');
+      const mod = RootIndex.getModuleFromSource(file)!;
+      const resolved = this.#getEmailConfig(mod);
+      const content = await fs.readFile(resolved, 'utf8');
       return YamlUtil.parse<ConfigType>(content);
     } catch {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -70,7 +75,7 @@ export class $EditorConfig {
   async ensureConfig(file: string): Promise<string> {
     console.log('Ensuring config', file);
     const mod = RootIndex.getModuleFromSource(file)!;
-    const resolved = this.#configFile[mod.name] ??= path.resolve(mod.sourcePath, 'resources/email/dev.yml');
+    const resolved = this.#getEmailConfig(mod);
     if (!(await fs.stat(resolved).catch(() => { }))) {
       await fs.mkdir(path.dirname(resolved), { recursive: true });
       await fs.writeFile(resolved, this.getDefaultConfig(), { encoding: 'utf8' });
