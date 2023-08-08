@@ -17,7 +17,7 @@ export const SUMMARY_STYLE = Object.entries({
 }).map(([k, v]) => `${k}: ${v}`).join('; ');
 
 const allowedProps = new Set([
-  'class', 'id', 'dir', 'name', 'src',
+  'className', 'id', 'dir', 'name', 'src',
   'alt', 'href', 'title', 'height', 'target',
   'width', 'style', 'align', 'valign'
 ]);
@@ -94,8 +94,8 @@ export const Html: RenderProvider<RenderContext> = {
     if (!pProps.columnVisited) {
       pProps.columnVisited = true;
       if (sibs.length) {
-        sibs[0].props.class = classStr(sibs[0].props.class ?? '', 'first');
-        sibs[sibs.length - 1].props.class = classStr(sibs[sibs.length - 1].props.class ?? '', 'last');
+        sibs[0].props.className = classStr(sibs[0].props.className ?? '', 'first');
+        sibs[sibs.length - 1].props.className = classStr(sibs[sibs.length - 1].props.className ?? '', 'last');
       }
     }
 
@@ -166,7 +166,7 @@ export const Html: RenderProvider<RenderContext> = {
     if (href) {
       const linkProps = { href, target };
       if (props.expanded) {
-        Object.assign(linkProps, { align: 'center', class: 'float-center' });
+        Object.assign(linkProps, { align: 'center', className: 'float-center' });
       }
       inner = `<a ${propsToStr(linkProps)}>${inner}</a>`;
     }
@@ -174,7 +174,7 @@ export const Html: RenderProvider<RenderContext> = {
     // If the button is expanded, it needs a <center> tag around the content
     if (props.expanded) {
       inner = await Html.Center(createState('Center', { children: [inner] }));
-      rest.class = classStr(rest.class ?? '', 'expand');
+      rest.className = classStr(rest.className ?? '', 'expand');
       expander = '\n<td class="expander"></td>';
     }
 
@@ -219,7 +219,7 @@ export const Html: RenderProvider<RenderContext> = {
     visit(el, (child) => {
       if (isOfType(child, 'Item')) {
         return hasItem = true;
-      } else if ((child.type === 'td' || child.type === 'th') && child.props.class?.includes('menu-item')) {
+      } else if ((child.type === 'td' || child.type === 'th') && child.props.className?.includes('menu-item')) {
         return hasItem = true;
       }
     });
@@ -260,13 +260,13 @@ export const Html: RenderProvider<RenderContext> = {
     for (const kid of getKids(el)) {
       Object.assign(kid.props, {
         align: 'center',
-        class: classStr(kid.props.class, 'float-center')
+        className: classStr(kid.props.className, 'float-center')
       });
     }
 
     visit(el, child => {
       if (isOfType(child, 'Item')) {
-        child.props.class = classStr(child.props.class, 'float-center');
+        child.props.className = classStr(child.props.className, 'float-center');
       }
       return;
     });
@@ -280,8 +280,8 @@ export const Html: RenderProvider<RenderContext> = {
 
   Callout: async ({ recurse, el, props }): Promise<string> => {
 
-    const innerProps: JSXElement['props'] = { class: props.class };
-    delete props.class;
+    const innerProps: JSXElement['props'] = { className: props.className };
+    delete props.className;
 
     return `
 <table ${propsToStr(props, 'callout')}>

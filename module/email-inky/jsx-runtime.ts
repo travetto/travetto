@@ -1,7 +1,7 @@
 import { ConcreteClass } from '@travetto/base';
 
 export type JSXChild = JSXElement | number | bigint | boolean | object | string;
-type JSXProps = { children?: JSXChild | JSXChild[] | null, class?: string, id?: string, name?: string, dir?: string };
+type JSXProps = { children?: JSXChild | JSXChild[] | null, className?: string, id?: string, name?: string, dir?: string };
 
 export type JSXComponentFunction<P extends {} = {}> = (props: P & JSXProps, ...args: unknown[]) => (JSXElement | null);
 
@@ -34,7 +34,7 @@ declare global {
   namespace JSX {
     interface Element extends JSXElement { }
     interface IntrinsicAttributes {
-      class?: string;
+      className?: string;
       id?: string;
       dir?: string;
       name?: string;

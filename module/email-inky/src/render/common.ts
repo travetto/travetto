@@ -44,9 +44,10 @@ export const classStr = (existing: string | undefined, ...toAdd: string[]): stri
 
 export const combinePropsToStr = (allowedProps: Set<string>, props: Record<string, unknown>, ...addClasses: string[]): string => {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  const out = { ...props, class: classStr(props.class as string, ...addClasses) };
+  const out = { ...props, className: classStr(props.className as string, ...addClasses) };
   return Object.entries(out)
     .filter(([k, v]) => allowedProps.has(k) && v !== undefined && v !== null && v !== '')
+    .map(([k, v]) => [k === 'className' ? 'class' : k, v])
     .map(([k, v]) => `${k}="${v}"`).join(' ');
 };
 
