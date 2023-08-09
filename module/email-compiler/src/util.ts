@@ -20,8 +20,8 @@ type Tokenized = {
  */
 export class EmailCompileUtil {
   static #HTML_CSS_IMAGE_URLS = [
-    /(?<pre><img[^>]src=\s*["'])(?<src>[^"]+)/g,
-    /(?<pre>background(?:-image)?:\s*url[(]['"]?)(?<src>[^"')]+)/g
+    /(?<pre><img[^>]src=\s*["'])(?<src>[^"{}]+)/g,
+    /(?<pre>background(?:-image)?:\s*url[(]['"]?)(?<src>[^"'){}]+)/g
   ];
 
   static #EXT = /[.]email[.]tsx$/;
@@ -148,7 +148,7 @@ export class EmailCompileUtil {
 
     const imageMap = new Map(await Promise.all(pendingImages.map(async ([token, ext, stream]) => {
       const data = await StreamUtil.streamToBuffer(await stream);
-      return [token, `data:image/${ext};base64,${data.toString('base64')}`] as const;
+      return [token, `data:image/${ext.replace('.', '')};base64,${data.toString('base64')}`] as const;
     })));
 
     return finalize(token => imageMap.get(token)!);
