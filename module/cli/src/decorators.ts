@@ -9,7 +9,7 @@ import { CliUtil } from './util';
 
 type ExtraFields = 'module' | 'profile' | 'env';
 
-const getName = (source: string): string => source.match(/cli[.](.*)[.]tsx?$/)![1].replaceAll('_', ':');
+const getName = (source: string): string => (source.match(/cli[.](.*)[.]tsx?$/)?.[1] ?? source).replaceAll('_', ':');
 const getMod = (cls: Class): string => RootIndex.getModuleFromSource(RootIndex.getFunctionMetadata(cls)!.source)!.name;
 
 /**
