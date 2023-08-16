@@ -363,10 +363,20 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     }
 
     return {
-      tags: this.#tags,
-      paths: this.#paths,
+      tags: this.#tags.sort((a, b) => a.name.localeCompare(b.name)),
+      paths: Object.fromEntries(
+        Object.entries(this.#paths)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => [k, Object.fromEntries(
+            Object.entries(v)
+              .sort(([a], [b]) => a.localeCompare(b))
+          )])
+      ),
       components: {
-        schemas: this.#schemas
+        schemas: Object.fromEntries(
+          Object.entries(this.#schemas)
+            .sort(([a], [b]) => a.localeCompare(b))
+        )
       }
     };
   }

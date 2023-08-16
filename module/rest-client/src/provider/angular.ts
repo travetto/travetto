@@ -79,7 +79,10 @@ export class AngularClientGenerator extends ClientGenerator {
     const service = controller.externalName;
     const endpoints = controller.endpoints;
 
-    const results = endpoints.map(x => this.renderEndpoint(x, controller));
+    const results = endpoints
+      .sort((a, b) => a.handlerName.localeCompare(b.handlerName))
+      .filter(v => v.documented !== false)
+      .map(x => this.renderEndpoint(x, controller));
 
     const base: Imp = { name: BaseAngularService.name, file: SVC, classId: BaseAngularService.Ⲑid };
     const options: Imp = { classId: '_opts', file: SVC, name: 'Configuration' };

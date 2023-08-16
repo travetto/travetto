@@ -111,7 +111,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
 
     const seen = new Map<string, string>();
 
-    for (const child of content) {
+    for (const child of content.sort((a, b) => a.classId.localeCompare(b.classId))) {
       for (const sub of child.content) {
         if (typeof sub === 'string') {
           text.push(sub);
@@ -362,6 +362,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     await this.writeContent(
       'index.ts',
       Object.keys(files)
+        .sort()
         .filter(f => !f.includes('.json'))
         .map(f => `export * from '${f}';\n`)
     );
@@ -372,15 +373,15 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   }
 
   onControllerEnd(cfg: ControllerConfig): void {
-    const result = this.renderController(cfg);
-    this.#controllerContent.set(result.classId, result);
-    this.#files.add(RootIndex.getFunctionMetadataFromClass(cfg.class)!.source);
+    if (cfg.documented !== false) {
+      const result = this.renderController(cfg);
+      this.#controllerContent.set(result.classId, result);
+      this.#files.add(RootIndex.getFunctionMetadataFromClass(cfg.class)!.source);
+    }
   }
 
   onControllerAdd(cls: Class): void {
-    const result = this.renderController(ControllerRegistry.get(cls));
-    this.#controllerContent.set(result.classId, result);
-    this.#files.add(RootIndex.getFunctionMetadataFromClass(cls)!.source);
+    this.onControllerEnd(ControllerRegistry.get(cls));
   }
 
   onControllerRemove(cls: Class): void {
