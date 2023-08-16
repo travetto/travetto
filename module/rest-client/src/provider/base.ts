@@ -141,9 +141,9 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
         )
         .map(([f, vals]) => {
           if (vals.join(', ').length > 60) {
-            return `import {\n  ${vals.join(',\n  ')}\n} from '${f}';\n`;
+            return `import {\n  ${vals.sort().join(',\n  ')}\n} from '${f}';\n`;
           } else {
-            return `import { ${vals.join(', ')} } from '${f}';\n`;
+            return `import { ${vals.sort().join(', ')} } from '${f}';\n`;
           }
         }),
       '\n\n',
