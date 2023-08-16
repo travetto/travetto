@@ -85,7 +85,7 @@ At it's heart, a cli command is the contract defined by what flags, and what arg
 </figcaption>
     <pre><code class="language-bash">$ trv basic <span class="token parameter variable">-h</span>
 
-Usage: doc/cli.basic <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+Usage: basic <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
   -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
@@ -129,7 +129,7 @@ The pattern is that underscores(_) translate to colons (:), and the <code class=
 </figcaption>
     <pre><code class="language-bash">$ trv basic:flag <span class="token parameter variable">-h</span>
 
-Usage: doc/cli.basic:flag <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
+Usage: basic:flag <span class="token punctuation">[</span>options<span class="token punctuation">]</span>
 
 Options:
   -l, <span class="token parameter variable">--loud</span>
@@ -183,7 +183,7 @@ The <code class="item method">main()</code> method is the entrypoint for the com
 </figcaption>
     <pre><code class="language-bash">$ trv basic:arg <span class="token parameter variable">-h</span>
 
-Usage: doc/cli.basic:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+Usage: basic:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
 Options:
   -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
@@ -198,7 +198,7 @@ Options:
 Execution failed:
  * Argument  is bigger than <span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
 
-Usage: doc/cli.basic:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+Usage: basic:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
 Options:
   -h, <span class="token parameter variable">--help</span>  display <span class="token builtin class-name">help</span> <span class="token keyword">for</span> <span class="token builtin class-name">command</span></code></pre>
@@ -249,7 +249,7 @@ Additionally, if you provide a field as an array, it will collect all valid valu
 </figcaption>
     <pre><code class="language-bash">$ trv basic:arglist <span class="token parameter variable">-h</span>
 
-Usage: doc/cli.basic:arglist <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
+Usage: basic:arglist <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
 
 Options:
   -r, <span class="token parameter variable">--reverse</span>
@@ -274,7 +274,7 @@ Options:
 Execution failed:
  * Argument <span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">]</span> is bigger than <span class="token punctuation">(</span><span class="token number">10</span><span class="token punctuation">)</span>
 
-Usage: doc/cli.basic:arglist <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
+Usage: basic:arglist <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token operator">&lt;</span>volumes<span class="token punctuation">..</span>.:number<span class="token operator">></span>
 
 Options:
   -r, <span class="token parameter variable">--reverse</span>
@@ -327,7 +327,7 @@ By default, all fields are treated as flags and all parameters of <code class="i
 </figcaption>
     <pre><code class="language-bash">$ trv custom:arg <span class="token parameter variable">-h</span>
 
-Usage: doc/cli.custom:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+Usage: custom:arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
 Options:
   -m, <span class="token parameter variable">--message</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>
@@ -388,7 +388,7 @@ In addition to standard flag overriding (e.g. <code class="item input">/** @alia
 </figcaption>
     <pre><code class="language-bash">$ trv custom:env-arg <span class="token parameter variable">-h</span>
 
-Usage: doc/cli.custom:env-arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
+Usage: custom:env-arg <span class="token punctuation">[</span>options<span class="token punctuation">]</span> <span class="token punctuation">[</span>volume:number<span class="token punctuation">]</span>
 
 Options:
   -t, <span class="token parameter variable">--text</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>  The message to send back to the user <span class="token punctuation">(</span>default: <span class="token string">"hello"</span><span class="token punctuation">)</span>

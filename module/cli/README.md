@@ -77,7 +77,7 @@ export class BasicCommand {
 ```bash
 $ trv basic -h
 
-Usage: doc/cli.basic [options]
+Usage: basic [options]
 
 Options:
   -h, --help  display help for command
@@ -114,7 +114,7 @@ export class BasicCommand {
 ```bash
 $ trv basic:flag -h
 
-Usage: doc/cli.basic:flag [options]
+Usage: basic:flag [options]
 
 Options:
   -l, --loud
@@ -159,7 +159,7 @@ export class BasicCommand {
 ```bash
 $ trv basic:arg -h
 
-Usage: doc/cli.basic:arg [options] [volume:number]
+Usage: basic:arg [options] [volume:number]
 
 Options:
   -h, --help  display help for command
@@ -172,7 +172,7 @@ $ trv basic:arg 20
 Execution failed:
  * Argument  is bigger than (10)
 
-Usage: doc/cli.basic:arg [options] [volume:number]
+Usage: basic:arg [options] [volume:number]
 
 Options:
   -h, --help  display help for command
@@ -214,7 +214,7 @@ export class BasicCommand {
 ```bash
 $ trv basic:arglist -h
 
-Usage: doc/cli.basic:arglist [options] <volumes...:number>
+Usage: basic:arglist [options] <volumes...:number>
 
 Options:
   -r, --reverse
@@ -235,7 +235,7 @@ $ trv basic:arglist 10 5 3 9 20 1
 Execution failed:
  * Argument [4] is bigger than (10)
 
-Usage: doc/cli.basic:arglist [options] <volumes...:number>
+Usage: basic:arglist [options] <volumes...:number>
 
 Options:
   -r, --reverse
@@ -280,7 +280,7 @@ export class CustomCommand {
 ```bash
 $ trv custom:arg -h
 
-Usage: doc/cli.custom:arg [options] [volume:number]
+Usage: custom:arg [options] [volume:number]
 
 Options:
   -m, --message <string>  The message to send back to the user (default: "hello")
@@ -331,7 +331,7 @@ export class CustomCommand {
 ```bash
 $ trv custom:env-arg -h
 
-Usage: doc/cli.custom:env-arg [options] [volume:number]
+Usage: custom:env-arg [options] [volume:number]
 
 Options:
   -t, --text <string>  The message to send back to the user (default: "hello")
