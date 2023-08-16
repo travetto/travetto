@@ -34,7 +34,7 @@
   },
   "peerDependencies": {
     "@travetto/command": "^3.3.0",
-    "@travetto/test": "^3.3.0"
+    "@travetto/test": "^3.3.1"
   },
   "peerDependenciesMeta": {
     "@travetto/command": {

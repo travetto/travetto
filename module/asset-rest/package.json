@@ -32,7 +32,7 @@
     "busboy": "^1.6.0"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.3.0"
+    "@travetto/test": "^3.3.1"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {
