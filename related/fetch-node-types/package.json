@@ -1,0 +1,39 @@
+{
+  "name": "@travetto/fetch-node-types",
+  "version": "1.0.0",
+  "types": "src/types.d.ts",
+  "description": "Fetch types for node",
+  "keywords": [
+    "typings",
+    "fetch"
+  ],
+  "homepage": "https://travetto.io",
+  "license": "MIT",
+  "author": {
+    "email": "travetto.framework@gmail.com",
+    "name": "Travetto Framework"
+  },
+  "files": [
+    "src"
+  ],
+  "dependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "devDependencies": {
+    "@travetto/pack": "^3.3.0",
+    "@travetto/compiler": "^3.3.0",
+    "@travetto/doc": "^3.3.0",
+    "@travetto/cli": "^3.3.0"
+  },
+  "repository": {
+    "url": "https://github.com/travetto/travetto.git",
+    "directory": "related/fetch-node-types"
+  },
+  "travetto": {
+    "isolated": true,
+    "displayName": "Fetch Node Types"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

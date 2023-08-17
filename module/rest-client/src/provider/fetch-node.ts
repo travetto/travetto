@@ -20,13 +20,10 @@ export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean 
   get uploadType(): string | Imp { return this.native ? super.uploadType : { name: 'Blob', file: 'node-fetch', classId: '_blob' }; }
   get endpointResponseWrapper(): string[] { return ['Promise']; }
   get commonFiles(): [string, Class | string][] {
-    const extra: [string, string][] =
-      !this.native ? [] : [['./fetch.d.ts', `${RootIndex.getModule('@travetto/base')?.sourcePath}/src/fetch.d.ts`]];
     return [
       [SVC, BaseNodeFetchService],
       ['./shared/types.ts', BaseRemoteService],
       ['./shared/util.ts', CommonUtil],
-      ...extra
     ];
   }
 
@@ -41,7 +38,7 @@ export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean 
         version: RootIndex.mainModule.version,
         main: `${this.subFolder ?? '.'}/index.ts`,
         dependencies: this.native ? {
-          '@types/node': '^20.0.0',
+          '@travetto/fetch-node-types': '^1.0.0',
         } : {
           '@types/node-fetch': '^2.6.2',
           'node-fetch': '^2.6.9',
