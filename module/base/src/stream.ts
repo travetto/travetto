@@ -1,42 +1,19 @@
 import fs from 'fs/promises';
 import { createWriteStream, createReadStream } from 'fs';
 import { PassThrough, Readable, Writable } from 'stream';
+import { ReadableStream as WebReadableStream } from 'stream/web';
 import rl from 'readline';
 
 import { path } from '@travetto/manifest';
 
 import type { ExecutionState } from './exec';
-import type { _Fetch } from './fetch';
 
-type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | _Fetch.ReadableStream;
+type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | WebReadableStream;
 
 /**
  * Utilities for managing streams/buffers/etc
  */
 export class StreamUtil {
-
-  /**
-   * Convert a fetch/ReadableStream into a standard node Readable
-   * @param src
-   * @returns
-   */
-  static fetchBodyToStream(src: _Fetch.ReadableStream): Readable {
-    const reader = src.getReader();
-
-    return new Readable({
-      read(): void {
-        reader.read().then(({ done, value }) => {
-          if (value) {
-            this.push(value);
-          }
-          if (done) {
-            this.push(null);
-          }
-        });
-      },
-      emitClose: true
-    });
-  }
 
   /**
    * Convert buffer to a stream
@@ -52,9 +29,9 @@ export class StreamUtil {
    * Read stream to buffer
    * @param src The stream to convert to a buffer
    */
-  static async streamToBuffer(src: Readable | NodeJS.ReadableStream | _Fetch.ReadableStream): Promise<Buffer> {
+  static async streamToBuffer(src: Readable | NodeJS.ReadableStream | WebReadableStream): Promise<Buffer> {
     if ('getReader' in src) {
-      return this.streamToBuffer(this.fetchBodyToStream(src));
+      return this.streamToBuffer(Readable.fromWeb(src));
     }
     return new Promise<Buffer>((res, rej) => {
       const data: Buffer[] = [];
@@ -91,7 +68,7 @@ export class StreamUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return src as Readable;
     } else if (typeof src !== 'string' && 'getReader' in src) {
-      return this.fetchBodyToStream(src);
+      return Readable.fromWeb(src);
     } else {
       return this.bufferToStream(await this.toBuffer(src));
     }

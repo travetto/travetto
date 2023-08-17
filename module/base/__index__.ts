@@ -1,5 +1,3 @@
-/// <reference path="./src/fetch.d.ts" />
-
 export * from './src/console';
 export * from './src/data';
 export * from './src/error';
