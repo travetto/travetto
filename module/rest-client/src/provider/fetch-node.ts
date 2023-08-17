@@ -27,6 +27,10 @@ export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean 
     ];
   }
 
+  getCommonTypes(): string[] {
+    return this.native ? ['@travetto/fetch-node-types'] : [];
+  }
+
   init(): void {
     this.registerContent('_pkgId', {
       imports: [],
@@ -51,8 +55,7 @@ export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean 
 
   writeContentFilter(text: string): string {
     return super.writeContentFilter(text)
-      .replaceAll(/^(.*)\s*\/\/\s*#NODE_FETCH\s*$/mg, (_, p) => this.native ? '' : p)
-      .replaceAll(/^.*#NODE_FETCH_ENABLE:\s*(.*)$/mg, (_, p) => this.native ? '' : p)
+      .replaceAll(/^.*#NODE_FETCH_(TRUE|FALSE):\s*(.*)$/mg, (_, flag, p) => (flag === 'TRUE' && this.native) ? '' : p)
       .trimStart();
   }
 

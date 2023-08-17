@@ -1,4 +1,4 @@
-// #NODE_FETCH_ENABLE: import fetch, { BodyInit, Response } from 'node-fetch';
+// #NODE_FETCH_TRUE: import fetch, { BodyInit, Response } from 'node-fetch';
 import { BaseRemoteService, RequestDefinition } from './types';
 import { CommonUtil } from './util';
 

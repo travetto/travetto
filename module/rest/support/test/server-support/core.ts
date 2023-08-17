@@ -1,3 +1,4 @@
+/// <reference types="@travetto/fetch-node-types" />
 import { DependencyRegistry } from '@travetto/di';
 import { TimeUtil } from '@travetto/base';
 

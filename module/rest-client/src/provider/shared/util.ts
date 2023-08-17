@@ -1,6 +1,6 @@
-// #NODE_FETCH_ENABLE: import FormData from 'form-data';
-// #NODE_FETCH_ENABLE: import fetch, { RequestInit, Response } from 'node-fetch';
-// #NODE_FETCH_ENABLE: import Blob = require('fetch-blob');
+// #NODE_FETCH_TRUE: import FormData from 'form-data';
+// #NODE_FETCH_TRUE: import fetch, { RequestInit, Response } from 'node-fetch';
+// #NODE_FETCH_TRUE: import Blob = require('fetch-blob');
 import { IRemoteService, ParamConfig, RequestDefinition, RequestOptions } from './types';
 
 function isResponse(v: unknown): v is Response {

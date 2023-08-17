@@ -82,6 +82,10 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
 
   get uploadType(): string | Imp { return '(File | Blob)'; }
 
+  getCommonTypes(): string[] {
+    return [];
+  }
+
   writeContentFilter(text: string): string {
     return text
       .replace(/^((?:ex|im)port\s+[^;]*\s+from\s*[^;]+)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
@@ -359,13 +363,14 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     for (const [file, contents] of Object.entries(files)) {
       await this.renderContent(file, contents);
     }
-    await this.writeContent(
-      'index.ts',
-      Object.keys(files)
-        .sort()
-        .filter(f => !f.includes('.json'))
-        .map(f => `export * from '${f}';\n`)
-    );
+
+    const content = Object.keys(files)
+      .sort()
+      .filter(f => !f.includes('.json'))
+      .map(f => `export * from '${f}';\n`);
+
+    const types = this.getCommonTypes().map(v => `/// <reference types="${v}" />\n`);
+    await this.writeContent('index.ts', [...types, ...content]);
   }
 
   async onComplete(): Promise<void> {
