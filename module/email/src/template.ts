@@ -1,6 +1,6 @@
 import mustache from 'mustache';
 
-import { Injectable } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 
 import { EmailResource } from './resource';
 
@@ -24,7 +24,8 @@ export interface MailInterpolator {
 @Injectable()
 export class MustacheInterpolator implements MailInterpolator {
 
-  resources = new EmailResource();
+  @Inject()
+  resources: EmailResource;
 
   /**
    * Resolved nested templates

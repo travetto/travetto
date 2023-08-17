@@ -5,10 +5,12 @@ import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
 
 import { NodeEntityⲐ } from '../internal/symbol';
-import { RouteConfig, Request, FilterContext } from '../types';
+import { RouteConfig, Request, FilterContext, FilterNext } from '../types';
 
 import { ManagedInterceptorConfig, RestInterceptor } from './types';
 import { LoggingInterceptor } from './logging';
+import { SerializeUtil } from './serialize-util';
+import { AppError } from '@travetto/base';
 
 const METHODS_WITH_BODIES = new Set(['post', 'put', 'patch', 'PUT', 'POST', 'PATCH']);
 
@@ -77,19 +79,32 @@ export class BodyParseInterceptor implements RestInterceptor<RestBodyParseConfig
     return route.method === 'all' || METHODS_WITH_BODIES.has(route.method);
   }
 
-  async intercept({ req, config }: FilterContext<RestBodyParseConfig>): Promise<unknown> {
+  async intercept({ req, res, config }: FilterContext<RestBodyParseConfig>, next: FilterNext): Promise<unknown> {
     if (!METHODS_WITH_BODIES.has(req.method) || req.body) { // If body is already set
-      return;
+      return next();
     }
 
     const parserType = this.detectParserType(req, config.parsingTypes);
 
     if (!parserType) {
       req.body = req[NodeEntityⲐ];
+      return next();
     } else {
-      const { text, raw } = await this.read(req, config.limit);
-      req.raw = raw;
-      req.body = this.parse(text, parserType);
+      let malformed: unknown;
+      try {
+        const { text, raw } = await this.read(req, config.limit);
+        req.raw = raw;
+        req.body = this.parse(text, parserType);
+      } catch (err) {
+        malformed = err;
+      }
+
+      if (!malformed) {
+        return next();
+      } else {
+        console.error('Malformed input', malformed);
+        SerializeUtil.serializeError(res, new AppError('Malformed input', 'data'));
+      }
     }
   }
 }

@@ -106,6 +106,7 @@ export class ExecutionManager {
         const action = this.#getAction(command, args);
         await this[action](command, args);
       } catch (err) {
+        process.exitCode ||= 1; // Trigger error state
         if (!(err instanceof Error)) {
           throw err;
         } else if (command && err instanceof CliValidationResultError) {
