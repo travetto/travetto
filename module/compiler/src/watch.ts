@@ -9,6 +9,9 @@ import { getManifestContext } from '@travetto/manifest/bin/context';
 import { CompilerState } from './state';
 import { CompilerUtil } from './util';
 
+type CompileWatchEvent = WatchEvent | { action: 'restart', file: string };
+const RESTART_SIGNAL = 'RESTART_SIGNAL';
+
 /**
  * Utils for watching
  */
@@ -19,7 +22,7 @@ export class CompilerWatcher {
    * @param state
    * @returns
    */
-  static watch(state: CompilerState): AsyncIterable<WatchEvent> {
+  static watch(state: CompilerState): AsyncIterable<CompileWatchEvent> {
     return new CompilerWatcher(state).watchChanges();
   }
 
@@ -74,14 +77,15 @@ export class CompilerWatcher {
  * @param handler
  * @returns
  */
-  async * watchChanges(): AsyncIterable<WatchEvent> {
+  async * watchChanges(): AsyncIterable<CompileWatchEvent> {
     const stream = this.#watchFiles();
 
     const mods = this.#getModuleMap();
     for await (const { file: sourceFile, action, folder } of stream) {
 
-      if (folder === '.trv_internal') {
-        break;
+      if (folder === RESTART_SIGNAL) {
+        yield { action: 'restart', file: sourceFile };
+        return;
       }
 
       const mod = mods[folder];
@@ -168,14 +172,27 @@ export class CompilerWatcher {
     const outputWatch = (root: string, sources: string[]): WatchFolder => {
       const valid = new Set(sources.map(src => path.resolve(root, src)));
       return {
-        src: root, target: '.trv_internal', immediate: true, includeHidden: true,
+        src: root, target: RESTART_SIGNAL, immediate: true, includeHidden: true,
         filter: ev => ev.action === 'delete' && valid.has(path.resolve(root, ev.file))
       };
     };
+
+    const topLevelFiles = (root: string, files: string[]): WatchFolder => {
+      const valid = new Set(files.map(src => path.resolve(root, src)));
+      return {
+        src: root, target: RESTART_SIGNAL, immediate: true,
+        filter: ev => valid.has(path.resolve(root, ev.file))
+      };
+    };
+
     moduleFolders.push(
       outputWatch(RootIndex.manifest.workspacePath, [
         RootIndex.manifest.outputFolder,
         RootIndex.manifest.compilerFolder
+      ]),
+      topLevelFiles(RootIndex.manifest.workspacePath, [
+        'package.json',
+        'package-lock.json'
       ])
     );
 

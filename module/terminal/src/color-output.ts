@@ -41,10 +41,11 @@ export class ColorOutputUtil {
    * Read foreground/background color if env var is set
    */
   static async readBackgroundScheme(
+    stream: tty.WriteStream,
     query: () => Promise<RGB | undefined> | RGB | undefined,
     env: string | undefined = process.env.COLORFGBG
   ): Promise<TermColorScheme | undefined> {
-    let color = await query();
+    let color = stream.isTTY ? await query() : undefined;
     if (!color && env) {
       const [, bg] = env.split(';');
       color = ColorDefineUtil.rgbFromAnsi256(+bg);

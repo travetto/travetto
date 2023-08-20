@@ -91,6 +91,7 @@ export class Terminal implements TermState {
       this.#init = (async (): Promise<void> => {
         this.#colorLevel ??= await ColorOutputUtil.readTermColorLevel(this.#output);
         this.#backgroundScheme ??= await ColorOutputUtil.readBackgroundScheme(
+          this.#output,
           () => this.interactive ? this.#query.backgroundColor() : undefined
         );
       })();

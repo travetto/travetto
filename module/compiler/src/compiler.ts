@@ -24,7 +24,7 @@ export class Compiler {
     const state = await CompilerState.get(RootIndex);
     const dirtyFiles = ManifestModuleUtil.getFileType(dirty) === 'ts' ? [dirty] : (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
     await new Compiler(state, dirtyFiles, watch === 'true').run();
-    process.exit(0);
+    process.exit();
   }
 
   #state: CompilerState;
@@ -132,19 +132,22 @@ export class Compiler {
     if (this.#watch) {
       Log.info('Watch is ready');
       for await (const { file, action } of CompilerWatcher.watch(this.#state)) {
+        if (action === 'restart') {
+          Log.info(`Triggering restart due to change in ${file}`);
+          process.send?.({ type: 'restart' });
+          return;
+        }
+        const module = file.split('node_modules/')[1];
         if (action !== 'delete') {
           const err = await emitter(file, true);
           if (err) {
             Log.info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
           } else {
-            Log.info(`Compiled ${file.split('node_modules/')[1]}`);
+            Log.info(`Compiled ${module}`);
           }
         } else {
-          Log.info(`Removed ${file.split('node_modules/')[1]}`);
+          Log.info(`Removed ${module}`);
         }
-      }
-      if (!process.exitCode) {
-        process.send?.({ type: 'restart' });
       }
     }
   }
