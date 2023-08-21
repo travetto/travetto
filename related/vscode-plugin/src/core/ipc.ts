@@ -1,4 +1,6 @@
 import { ExtensionContext } from 'vscode';
+import fs from 'fs/promises';
+import { setTimeout } from 'timers/promises';
 
 import { StreamUtil } from '@travetto/base';
 
@@ -37,7 +39,11 @@ export class IpcSupport {
       }
     } catch (e) {
       if (e instanceof Error) {
-        this.#log.error(e.message, e);
+        if (e.message.includes('Unexpected token')) {
+          throw e;
+        } else {
+          this.#log.error(e.message, e);
+        }
       } else {
         throw e;
       }
@@ -58,8 +64,14 @@ export class IpcSupport {
             await this.#handler(ev);
           }
         }
+        this.#log.info('Watching file successfully ended', file);
       } catch (err) {
+        await fs.unlink(file).catch(() => { }); // Delete file on failure
+        this.#log.error('Error in ipc watching', err);
         // Continue until deactivated
+      }
+      if (this.#active) {
+        await setTimeout(1500); // Wait 1.5 seconds before continuing
       }
     }
   }

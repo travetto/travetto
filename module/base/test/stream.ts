@@ -1,6 +1,6 @@
 import assert from 'assert';
 import fs from 'fs/promises';
-import { createReadStream } from 'fs';
+import { createReadStream, appendFileSync } from 'fs';
 import os from 'os';
 import timers from 'timers/promises';
 
@@ -94,15 +94,24 @@ export class StreamUtilTest {
     assert(file);
     const received: number[] = [];
 
-    timers.setTimeout(100).then(() => fs.unlink(file));
     await fs.mkdir(mPath.dirname(file), { recursive: true });
-    for (let i = 0; i < 10; i++) {
-      fs.appendFile(file, `${i}\n`);
-    }
-    for await (const line of StreamUtil.streamLines(file)) {
+    (async () => {
+      for (let i = 0; i < 10; i++) {
+        await timers.setTimeout(50);
+        appendFileSync(file, `${i}.${'0'.repeat(20)}\n`);
+      }
+      // Close file
+      appendFileSync(file, 'EOF\n');
+      await timers.setTimeout(10);
+      await fs.rm(file);
+    })();
+
+    for await (const line of StreamUtil.streamLines(file, true)) {
+      if (line === 'EOF') {
+        break;
+      }
       received.push(parseInt(line, 10));
     }
-
     assert.deepStrictEqual(new Set(received), new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
   }
 }

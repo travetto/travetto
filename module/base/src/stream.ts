@@ -172,7 +172,7 @@ export class StreamUtil {
       const stream = await createReadStream(file, { autoClose: true, emitClose: true, encoding: 'utf8', start: read });
       const reader = rl.createInterface(stream);
       for await (const line of reader) {
-        read += line.length;
+        read += line.length + 1; // Include newline
         if (line.trim()) {
           yield line.trim();
         }
@@ -183,8 +183,11 @@ export class StreamUtil {
 
     if (ensureEmpty) {
       await fs.truncate(file);
-    } else {
-      yield* streamFile();
+    }
+
+    const valid = yield* streamFile();
+    if (!valid) {
+      return;
     }
 
     for await (const _ of fs.watch(file, { persistent: true })) {

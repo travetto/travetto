@@ -59,8 +59,13 @@ class $ActivationManager {
 
   async onTargetEvent(event: TargetEvent): Promise<void> {
     try {
-      await this.#commandRegistry.get(event.type)?.instance?.onEvent?.(event);
-      await vscode.window.activeTerminal?.show();
+      const handler = await this.#commandRegistry.get(event.type)?.instance;
+      if (handler && handler.onEvent) {
+        await handler.onEvent(event);
+        await vscode.window.activeTerminal?.show();
+      } else {
+        this.#log.warn('Unknown event type', event.type, event);
+      }
     } catch (e) {
       this.#log.error('Unknown error', e);
     }
