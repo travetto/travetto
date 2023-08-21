@@ -67,7 +67,7 @@ export class Workspace {
   }
 
   static get #cliFile(): string {
-    return path.resolve(this.path, 'node_modules', '@travetto/compiler/bin/trv');
+    return this.#req.resolve('@travetto/compiler/bin/trv.js');
   }
 
   static #buildEnv(debug: boolean, base?: EnvDict, cliModule?: string): EnvDict {
