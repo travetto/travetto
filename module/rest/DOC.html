@@ -423,11 +423,11 @@ Listening <span class="token punctuation">{{'{'}}</span> port: <span class="toke
 Out of the box, the rest framework comes with a few interceptors, and more are contributed by other modules as needed.  The default interceptor set is:
 <h3 id="bodyparseinterceptor">BodyParseInterceptor</h3>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/body-parse.ts#L36">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/body-parse.ts#L38">BodyParseInterceptor</a> handles the inbound request, and converting the body payload into an appropriate format.Additionally it exposes the original request as the raw property on the request.
 
   <figure class="code">
     <figcaption class="code">Body Parse Config
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/body-parse.ts#L21">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/src/interceptor/body-parse.ts#L23">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RestBodyParseConfig</span> <span class="token keyword">extends</span> <span class="token class-name">ManagedInterceptorConfig</span> <span class="token punctuation">{{'{'}}</span>

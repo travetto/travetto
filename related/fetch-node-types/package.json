@@ -1,6 +1,6 @@
 {
   "name": "@travetto/fetch-node-types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "types": "src/types.d.ts",
   "description": "Fetch types for node",
   "keywords": [
@@ -28,10 +28,6 @@
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "related/fetch-node-types"
-  },
-  "travetto": {
-    "isolated": true,
-    "displayName": "Fetch Node Types"
   },
   "publishConfig": {
     "access": "public"

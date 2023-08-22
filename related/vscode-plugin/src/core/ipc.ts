@@ -2,11 +2,10 @@ import { ExtensionContext } from 'vscode';
 import fs from 'fs/promises';
 import { setTimeout } from 'timers/promises';
 
-import { StreamUtil } from '@travetto/base';
-
 import { TargetEvent } from './types';
 import { Workspace } from './workspace';
 import { Log } from './log';
+import { FileUtil } from './file';
 
 const isIpcCommand = (o: unknown): o is TargetEvent =>
   o !== null && o !== undefined && typeof o === 'object' &&
@@ -50,7 +49,6 @@ export class IpcSupport {
     }
   }
 
-
   async activate(ctx: ExtensionContext): Promise<void> {
     const file = Workspace.resolveToolFile(`ipc_${process.ppid}.ndjson`);
     ctx.environmentVariableCollection.replace('TRV_CLI_IPC', file);
@@ -58,7 +56,7 @@ export class IpcSupport {
     while (this.#active) {
       this.#log.info('Watching file', file);
       try {
-        for await (const line of StreamUtil.streamLines(file, true)) {
+        for await (const line of FileUtil.watchLines(file, true)) {
           const ev = this.#lineToEvent(line);
           if (ev) {
             await this.#handler(ev);

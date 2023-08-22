@@ -266,6 +266,11 @@ export class Workspace {
     }
   }
 
+  /**
+   * Add a breakpoint to a given editor at a specific line
+   * @param editor
+   * @param line
+   */
   static addBreakpoint(editor: vscode.TextEditor, line: number): void {
     const uri = editor.document.uri;
     const pos = new vscode.Position(line - 1, 0);
@@ -279,6 +284,13 @@ export class Workspace {
     });
   }
 
+  /**
+   * Spawn the CLI in the same form as ExecUtil.spawn
+   * @param command
+   * @param args
+   * @param opts
+   * @returns
+   */
   static spawnCli(command: string, args?: string[], opts?: ExecutionOptions & { cliModule?: string }): ExecutionState {
     const env = this.#buildEnv(false, opts?.env, opts?.cliModule);
     this.#log.debug('Spawning', this.#cliFile, command, { args, env });
@@ -288,6 +300,13 @@ export class Workspace {
     );
   }
 
+  /**
+   * Invoke the CLI as a worker thread, allows for long running processes.
+   * @param command
+   * @param args
+   * @param opts
+   * @returns
+   */
   static workerCli<T>(command: string, args?: string[], opts?: WorkerOptions & { env?: EnvDict, cliModule?: string }): WorkerResult<T> {
     return ExecUtil.worker<T>(
       this.#cliFile, [command, ...args ?? []],
@@ -295,6 +314,10 @@ export class Workspace {
     );
   }
 
+  /**
+   * Create a manual promise, useful for controlled resolution and rejection.
+   * @returns
+   */
   static manualPromise<T>(): MProm<T> {
     let ops: Pick<MProm<T>, 'reject' | 'resolve'>;
     const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });

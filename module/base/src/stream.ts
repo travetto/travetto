@@ -1,10 +1,6 @@
-import fs from 'fs/promises';
 import { createWriteStream, createReadStream } from 'fs';
 import { PassThrough, Readable, Writable } from 'stream';
 import { ReadableStream as WebReadableStream } from 'stream/web';
-import rl from 'readline';
-
-import { path } from '@travetto/manifest';
 
 import type { ExecutionState } from './exec';
 
@@ -15,7 +11,8 @@ type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | Web
  */
 export class StreamUtil {
 
-  /**
+  /**      console.log!('Received chunk', chunk);
+
    * Convert buffer to a stream
    * @param src The buffer to stream
    */
@@ -146,55 +143,35 @@ export class StreamUtil {
   }
 
   /**
-   * Stream lines from file, supporting asynchronous processing.  Will watch a file for
-   * any line changes, and produce those changes as asynchronous iterable stream.
-   *
-   * Functionally, this is equivalent to using the Unix tail operation on a file.
+   * Stream by delimiter from a file, returning the bytes read, for chunked resuming
+   * @param file The file to stream from
+   * @param options Stream options, including delimiter control
    */
-  static async * streamLines(file: string, ensureEmpty = false): AsyncIterable<string> {
-    await fs.mkdir(path.dirname(file), { recursive: true });
+  static async * streamByDelimiter(
+    file: string | Readable,
+    options: { start?: number, encoding?: BufferEncoding, includeDelimiter?: boolean, delimiter?: string } = {}
+  ): AsyncIterable<{ item: string, read: number }> {
+    let read = options.start ?? 0;
+    const stream = typeof file === 'string' ? createReadStream(file, { autoClose: true, emitClose: true, start: read }) : file;
+    const encoding = options.encoding ?? 'utf8';
+    const includeDelimiter = !!options.includeDelimiter;
+    const delimiter = options.delimiter ?? '\n';
 
-    // Ensure file
-    if (!await fs.stat(file).catch(() => false)) {
-      await fs.appendFile(file, '', 'utf8');
-    }
-
-    let read = 0;
-
-    async function* streamFile(): AsyncGenerator<string, boolean> {
-      const stat = await fs.stat(file).catch(() => undefined);
-      if (!stat || stat.size < read) {
-        return false; // Truncated or missing
-      } else if (stat.size === read) {
-        return true; // Unchanged
-      }
-
-      const stream = await createReadStream(file, { autoClose: true, emitClose: true, encoding: 'utf8', start: read });
-      const reader = rl.createInterface(stream);
-      for await (const line of reader) {
-        read += line.length + 1; // Include newline
-        if (line.trim()) {
-          yield line.trim();
-        }
-      }
-
-      return true;
-    }
-
-    if (ensureEmpty) {
-      await fs.truncate(file);
-    }
-
-    const valid = yield* streamFile();
-    if (!valid) {
-      return;
-    }
-
-    for await (const _ of fs.watch(file, { persistent: true })) {
-      const valid = yield* streamFile();
-      if (!valid) {
-        return;
+    let buffer: Buffer = Buffer.from([]);
+    for await (const chunk of stream) {
+      const chunkBuff: Buffer = typeof chunk === 'string' ? Buffer.from(chunk, encoding) : chunk;
+      buffer = Buffer.concat([buffer, chunkBuff]);
+      let pos = buffer.indexOf(delimiter);
+      while (pos >= 0) { // If we have a newline
+        const fullLength = pos + delimiter.length;
+        const outLength = pos + (includeDelimiter ? delimiter.length : 0);
+        read += fullLength;
+        yield { item: buffer.toString(encoding, 0, outLength), read };
+        buffer = Buffer.copyBytesFrom(buffer, fullLength);
+        pos = buffer.indexOf(delimiter);
       }
     }
+    // Yield on exit, in case of being called in a loop
+    await new Promise(r => setTimeout(r, 1));
   }
 }

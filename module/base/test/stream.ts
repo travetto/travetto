@@ -95,22 +95,29 @@ export class StreamUtilTest {
     const received: number[] = [];
 
     await fs.mkdir(mPath.dirname(file), { recursive: true });
+    await fs.appendFile(file, '');
+
     (async () => {
       for (let i = 0; i < 10; i++) {
         await timers.setTimeout(50);
-        appendFileSync(file, `${i}.${'0'.repeat(20)}\n`);
+        appendFileSync(file, `${i}.${'0'.repeat(20)}~~`);
       }
+
       // Close file
-      appendFileSync(file, 'EOF\n');
+      appendFileSync(file, 'EOF~~');
       await timers.setTimeout(10);
-      await fs.rm(file);
     })();
 
-    for await (const line of StreamUtil.streamLines(file, true)) {
-      if (line === 'EOF') {
-        break;
+    let offset = 0;
+    outer: for (; ;) {
+      for await (const { item, read } of StreamUtil.streamByDelimiter(file, { start: offset, delimiter: '~~' })) {
+        if (item === 'EOF') {
+          break outer;
+        }
+        offset = read;
+        received.push(parseInt(item, 10));
       }
-      received.push(parseInt(line, 10));
+      await timers.setTimeout(10);
     }
     assert.deepStrictEqual(new Set(received), new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
   }
