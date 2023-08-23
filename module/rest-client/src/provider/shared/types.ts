@@ -25,6 +25,8 @@ export type RequestOptions<T = unknown> = {
   url: URL;
   body?: T;
   method: HttpMethod;
+  timeout?: number;
+  withCredentials?: boolean;
 };
 
 export type PreRequestHandler<B> = (req: RequestOptions<B>) => OrProm<RequestOptions<B> | undefined | void>;
@@ -34,6 +36,7 @@ export type IRemoteServiceConfig<B, R> = Partial<Omit<IRemoteService<B, R>, 'rou
 
 export type IRemoteService<B, R> = {
   debug?: boolean;
+  timeout?: number;
   withCredentials?: boolean;
   baseUrl: string;
   routePath: string;
@@ -46,11 +49,13 @@ export type IRemoteService<B, R> = {
 
 export abstract class BaseRemoteService<B, R> implements IRemoteService<B, R> {
 
+  debug?: boolean;
   baseUrl: string;
   preRequestHandlers: PreRequestHandler<B>[];
   postResponseHandlers: PostResponseHandler<R>[];
   headers: Record<string, string>;
   withCredentials?: boolean;
+  timeout?: number;
 
   consumeJSON!: <T>(text: string) => T;
   consumeError!: (err: Error | R) => Error | Promise<Error>;
@@ -63,5 +68,7 @@ export abstract class BaseRemoteService<B, R> implements IRemoteService<B, R> {
     this.preRequestHandlers = cfg.preRequestHandlers ?? [];
     this.headers = cfg.headers ?? {};
     this.withCredentials = cfg.withCredentials ?? false;
+    this.timeout = cfg.timeout;
+    this.debug = cfg.debug;
   }
 }

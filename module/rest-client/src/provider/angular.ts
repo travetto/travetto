@@ -87,11 +87,12 @@ export class AngularClientGenerator extends ClientGenerator {
     const base: Imp = { name: BaseAngularService.name, file: SVC, classId: BaseAngularService.Ⲑid };
     const options: Imp = { classId: '_opts', file: SVC, name: 'Configuration' };
 
-    const httpClient: Imp = { classId: '_client', file: '@angular/common/http', name: 'HttpClient' };
-    const injectable: Imp = { classId: '_inj', file: '@angular/core', name: 'Injectable' };
-    const optional: Imp = { classId: '_inj', file: '@angular/core', name: 'Optional' };
-    const map: Imp = { classId: '_map', file: 'rxjs', name: 'map' };
-    const operatorFn: Imp = { classId: '_map', file: 'rxjs', name: 'OperatorFunction' };
+    const httpClient: Imp = { classId: '_ngHttp', file: '@angular/common/http', name: 'HttpClient' };
+    const injectable: Imp = { classId: '_ngCore', file: '@angular/core', name: 'Injectable' };
+    const optional: Imp = { classId: '_ngCore', file: '@angular/core', name: 'Optional' };
+    const map: Imp = { classId: '_rxjs', file: 'rxjs', name: 'map' };
+    const operatorFn: Imp = { classId: '_rxjs', file: 'rxjs', name: 'OperatorFunction' };
+    const timeout: Imp = { classId: '_timeout', file: 'rxjs/operators', name: 'timeout' };
 
     const imports = [base, httpClient, injectable, optional, options, ...results.flatMap(x => x.imports)];
 
@@ -107,6 +108,7 @@ export class AngularClientGenerator extends ClientGenerator {
       `  }\n`,
       `\n`,
       `  transform = <T>(): `, operatorFn, `<unknown, T> => `, map, `(o => this.${CommonUtil.consumeJSON.name}<T>(o));\n`,
+      `  timer = <T>(delay: number): `, operatorFn, `<T, T> => `, timeout, `(delay);\n`,
       `\n`,
       ...results.flatMap(f => f.method),
       `}\n\n`

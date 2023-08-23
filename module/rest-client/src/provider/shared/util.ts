@@ -133,7 +133,14 @@ export class CommonUtil {
 
     const { headers: requestHeaders, body: requestBody } = this.requestBody<T>(body) || {};
 
-    return { headers: { ...headers, ...requestHeaders }, url, method, body: requestBody };
+    return {
+      headers: { ...headers, ...requestHeaders },
+      url,
+      method,
+      body: requestBody,
+      withCredentials: svc.withCredentials,
+      timeout: svc.timeout
+    };
   }
 
   static consumeError(err: Error | Response): Error {
@@ -168,11 +175,21 @@ export class CommonUtil {
       }
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      let resolved = await fetcher(req.url, req as RequestInit);
+      const fetchInit = req as RequestInit;
+      fetchInit.credentials = req.withCredentials ? 'include' : 'same-origin';
+
+      const timeout = req.timeout;
+      if (timeout !== undefined) {
+        const aborter = new AbortController();
+        fetchInit.signal = aborter.signal;
+        setTimeout(() => aborter.abort(`Request timed out after ${timeout}ms`), timeout);
+      }
+
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      let resolved = await (fetcher(req.url, fetchInit) as Promise<R>);
 
       for (const el of svc.postResponseHandlers) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        resolved = (await el(resolved as R) ?? resolved) as R;
+        resolved = (await el(resolved) ?? resolved);
       }
 
       if (resolved.ok) {
@@ -194,8 +211,7 @@ export class CommonUtil {
         if (svc.debug) {
           console.debug('Error in making request', res);
         }
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        throw await svc.consumeError(res as R);
+        throw await svc.consumeError(res);
       }
     } catch (err) {
       if (svc.debug) {

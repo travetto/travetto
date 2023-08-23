@@ -17,20 +17,25 @@ export class Configuration implements IAngularServiceConfig {
 }
 
 export abstract class BaseAngularService extends BaseRemoteService<BodyInit, Response>  {
-
   abstract get transform(): <T>() => OperatorFunction<T, T>;
   abstract get client(): HttpClient;
+
+  abstract timer<T>(delay: number): OperatorFunction<T, T>;
 
   override consumeError = (err: Error | Response): Error => CommonUtil.consumeError(err);
   override consumeJSON = <T>(text: string | unknown): T => CommonUtil.consumeJSON(text);
 
   invoke<T>(req: RequestOptions, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
+    const pipedOps: OperatorFunction<T, T>[] = [
+      ...(req.timeout ? [this.timer<T>(req.timeout)] : []),
+      this.transform<T>()
+    ];
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return this.client.request(req.method.toLowerCase() as 'get', req.url.toString(), {
       observe, reportProgress: observe === 'events',
-      withCredentials: this.withCredentials,
+      withCredentials: req.withCredentials,
       headers: req.headers, body: req.body,
-    }).pipe(this.transform<T>()) as AngularResponse<T>;
+    }).pipe(pipedOps) as AngularResponse<T>;
   }
 
   makeRequest<T>(params: unknown[], opts: RequestDefinition): AngularResponse<T> {
