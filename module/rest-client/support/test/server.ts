@@ -46,10 +46,10 @@ export class TodoController {
     return data.length;
   }
 
-  @Get('/timeout')
+  @Post('/timeout')
   async getLong(): Promise<{ message: string }> {
     await setTimeout(200);
-    return { message: 'LONG TIME' };
+    throw new Error('LONG TIME');
   }
 }
 

@@ -174,11 +174,15 @@ export class CommonUtil {
         console.debug('Making request', req);
       }
 
+      const controller = new AbortController();
+
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const fetchInit = req as RequestInit;
       fetchInit.credentials = req.withCredentials ? 'include' : 'same-origin'; // #NOT_NODE_FETCH
+      fetchInit.signal = controller.signal;
+
       if (req.timeout) {
-        fetchInit.signal = AbortSignal.timeout(req.timeout);
+        setTimeout(() => controller.abort(), req.timeout);
       }
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
