@@ -13,6 +13,8 @@ const SVC = './shared/angular-service.ts';
 
 export class AngularClientGenerator extends ClientGenerator {
 
+  flags = {};
+
   get outputExt(): '' { return ''; }
   get subFolder(): string { return '.'; }
   get commonFiles(): [string, Class][] {

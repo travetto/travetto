@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import os from 'os';
 import assert from 'assert';
+import { setTimeout } from 'timers/promises';
 
 import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
@@ -44,10 +45,17 @@ export class TodoController {
   async upload(@Specifier('file') data: Buffer): Promise<number> {
     return data.length;
   }
+
+  @Get('/timeout')
+  async getLong(): Promise<{ message: string }> {
+    await setTimeout(200);
+    return { message: 'LONG TIME' };
+  }
 }
 
-@Suite()
+
 @InjectableSuite()
+@Suite()
 export abstract class RestClientServerSuite extends BaseRestSuite {
 
   @Inject()
@@ -56,21 +64,30 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
   fetchRequestBody(from: string, suffix: string): string {
     return `
 import { TodoApi } from '${from}';
-const api = new TodoApi({ baseUrl: 'http://localhost:${this.port!}'});
+const api = new TodoApi({ baseUrl: 'http://localhost:${this.port!}', timeout: 100 });
     
 async function go() {
   const items = [];
   const log = v => items.push(v);
   log(await api.listTodo(200, 50, ['a','b','c'], 'green-2'));
   log(await api.createTodo({id: '10', text:'todo', priority: 11}));
+  try {
+    log(await api.getLong());
+  } catch (err) {
+    log(err.message);
+  }
   return JSON.stringify(items);
 }
 ${suffix}
 `;
   }
 
+  @Test({ skip: true })
   validateFetchResponses(text: string): void {
-    const items: [Todo[], Todo] = JSON.parse(text);
+    assert(/^\[/.test(text.trim()));
+    const items: [Todo[], Todo, string] = JSON.parse(text);
+    assert(items.length === 3);
+
     const body0 = items[0][0];
     assert(body0.id === '200');
     assert(body0.priority === 50);
@@ -81,6 +98,8 @@ ${suffix}
     assert(body1.id === '10');
     assert(body1.text === 'todo');
     assert(body1.priority === 11);
+
+    assert(/abort/i.test(items[2]));
   }
 
   async fetchNodeClient(native: boolean) {
@@ -104,7 +123,7 @@ ${suffix}
       await ExecUtil.spawn('npm', ['i'], { cwd: tmp }).result;
       await ExecUtil.spawn(TSC, ['-p', tmp]).result;
       const proc = ExecUtil.spawn('node', ['./main'], { cwd: tmp });
-      this.validateFetchResponses((await proc.result).stdout);
+      return (await proc.result).stdout;
 
     } finally {
       await fs.rm(tmp, { recursive: true });
@@ -113,12 +132,14 @@ ${suffix}
 
   @Test({ timeout: 10000 })
   async fetchNonNativeNodeClient() {
-    return this.fetchNodeClient(false);
+    const result = await this.fetchNodeClient(false);
+    this.validateFetchResponses(result);
   }
 
   @Test({ timeout: 10000 })
   async fetchNativeNodeClient() {
-    return this.fetchNodeClient(true);
+    const result = await this.fetchNodeClient(true);
+    this.validateFetchResponses(result);
   }
 
   @Test({ timeout: 10000 })

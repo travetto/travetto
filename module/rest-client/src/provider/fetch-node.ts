@@ -14,6 +14,10 @@ const SVC = './shared/fetch-node-service.ts';
 
 export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean }> {
 
+  get flags(): Record<string, boolean> {
+    return { NODE_FETCH: !this.config.native };
+  }
+
   get native(): boolean { return this.config.native !== false; }
   get outputExt(): '' { return ''; }
   get subFolder(): string { return 'src'; }
@@ -51,12 +55,6 @@ export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean 
         }
       } satisfies Package, null, 2)]
     });
-  }
-
-  writeContentFilter(text: string): string {
-    return super.writeContentFilter(text)
-      .replaceAll(/^.*#NODE_FETCH_(TRUE|FALSE):\s*(.*)$/mg, (_, flag, p) => (flag === 'TRUE' && this.native) ? '' : p)
-      .trimStart();
   }
 
   renderController(controller: ControllerConfig): RenderContent {

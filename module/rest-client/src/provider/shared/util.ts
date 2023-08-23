@@ -1,6 +1,6 @@
-// #NODE_FETCH_TRUE: import FormData from 'form-data';
-// #NODE_FETCH_TRUE: import fetch, { RequestInit, Response } from 'node-fetch';
-// #NODE_FETCH_TRUE: import Blob = require('fetch-blob');
+// #IF_NODE_FETCH: import FormData from 'form-data';
+// #IF_NODE_FETCH: import fetch, { RequestInit, Response } from 'node-fetch';
+// #IF_NODE_FETCH: import Blob = require('fetch-blob');
 import { IRemoteService, ParamConfig, RequestDefinition, RequestOptions } from './types';
 
 function isResponse(v: unknown): v is Response {
@@ -176,20 +176,17 @@ export class CommonUtil {
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const fetchInit = req as RequestInit;
-      fetchInit.credentials = req.withCredentials ? 'include' : 'same-origin';
-
-      const timeout = req.timeout;
-      if (timeout !== undefined) {
-        const aborter = new AbortController();
-        fetchInit.signal = aborter.signal;
-        setTimeout(() => aborter.abort(`Request timed out after ${timeout}ms`), timeout);
+      fetchInit.credentials = req.withCredentials ? 'include' : 'same-origin'; // #NOT_NODE_FETCH
+      if (req.timeout) {
+        fetchInit.signal = AbortSignal.timeout(req.timeout);
       }
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      let resolved = await (fetcher(req.url, fetchInit) as Promise<R>);
+      let resolved: R = await (fetcher(req.url, fetchInit) as unknown as Promise<R>);
 
       for (const el of svc.postResponseHandlers) {
-        resolved = (await el(resolved) ?? resolved);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        resolved = (await el(resolved) ?? resolved) as unknown as R;
       }
 
       if (resolved.ok) {

@@ -13,6 +13,8 @@ const SVC = './shared/fetch-web-service.ts';
 
 export class WebFetchClientGenerator extends ClientGenerator {
 
+  flags = {};
+
   get outputExt(): '.js' { return '.js'; }
   get subFolder(): string { return '.'; }
   get endpointResponseWrapper(): string[] { return ['Promise']; }
@@ -22,12 +24,6 @@ export class WebFetchClientGenerator extends ClientGenerator {
       ['./shared/util.ts', CommonUtil],
       ['./shared/types.ts', BaseRemoteService],
     ];
-  }
-
-  writeContentFilter(text: string): string {
-    return super.writeContentFilter(text)
-      .replaceAll(/^.*#NODE_FETCH.*/gm, '')
-      .trimStart();
   }
 
   renderController(controller: ControllerConfig): RenderContent {

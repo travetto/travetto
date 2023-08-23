@@ -61,6 +61,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   #otherContent = new Map<string, RenderContent>();
   #files = new Set<string>();
 
+  abstract get flags(): Record<string, boolean>;
   abstract get commonFiles(): [string, Class | string][];
   abstract get subFolder(): string;
   abstract get endpointResponseWrapper(): (string | Imp)[];
@@ -78,6 +79,10 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     this.init?.();
   }
 
+  renderFlag(state: 'IF' | 'IF_NOT', flag: string, value: string): string {
+    return (state === 'IF' ? this.flags[flag] : !this.flags[flag]) ? value : '';
+  }
+
   init?(): void;
 
   get uploadType(): string | Imp { return '(File | Blob)'; }
@@ -89,7 +94,8 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   writeContentFilter(text: string): string {
     return text
       .replace(/^((?:ex|im)port\s+[^;]*\s+from\s*[^;]+)';$/gsm, (_, x) => `${x.replace(/[.]ts$/, '')}${this.outputExt}';`)
-      .replaceAll(/^(.*)#REMOVE.*$/mg, _ => '')
+      .replaceAll(/^(.*?)\s*\/\/\s*#(IF|NOT)_([A-Z_]+)(?::\s*([^\n]+)\s*)?$/mg,
+        (_, before, state, flag, after) => this.renderFlag(state, flag, after?.trim() || before))
       // eslint-disable-next-line no-regex-spaces
       .replace(/^  \}\n\n\}/smg, '  }\n}')
       .replace(/\n\n\n+/smg, '\n\n')
