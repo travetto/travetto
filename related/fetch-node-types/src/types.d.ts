@@ -71,9 +71,11 @@ declare namespace Fetch {
     method: string;
     redirect: RequestRedirect;
     referrer: string;
+    cache: RequestCache;
     url: string;
     agent?: http.RequestOptions['agent'] | ((parsedUrl: URL) => http.RequestOptions['agent']);
     compress: boolean;
+    credentials: RequestCredentials;
     counter: number;
     follow: number;
     hostname: string;
@@ -83,7 +85,7 @@ declare namespace Fetch {
     timeout: number;
   }
 
-  type RequestInit = Partial<Pick<Request, 'method' | 'redirect' | 'agent' | 'compress' | 'follow' | 'size' | 'timeout'>> & {
+  type RequestInit = Partial<Pick<Request, 'credentials' | 'method' | 'redirect' | 'agent' | 'compress' | 'follow' | 'size' | 'timeout'>> & {
     body?: BodyInit;
     headers?: HeadersInit;
     signal?: AbortSignal | null;
