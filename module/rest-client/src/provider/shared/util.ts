@@ -171,18 +171,17 @@ export class CommonUtil {
       }
 
       if (svc.debug) {
-        console.debug('Making request', req);
+        console.debug('Making request:', req.url.pathname);
       }
-
-      const controller = new AbortController();
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const fetchInit = req as RequestInit;
       fetchInit.credentials = req.withCredentials ? 'include' : 'same-origin'; // #NOT_NODE_FETCH
-      fetchInit.signal = controller.signal;
-
       if (req.timeout) {
-        setTimeout(() => controller.abort(), req.timeout);
+        const controller = new AbortController();
+        fetchInit.signal = controller.signal;
+        const timer = setTimeout(() => controller.abort(), req.timeout);
+        controller.signal.onabort = (): void => timer && clearTimeout(timer);
       }
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -210,13 +209,13 @@ export class CommonUtil {
           res = resolved;
         }
         if (svc.debug) {
-          console.debug('Error in making request', res);
+          console.debug('Error in making request:', req.url.pathname, res);
         }
         throw await svc.consumeError(res);
       }
     } catch (err) {
       if (svc.debug) {
-        console.debug('Error in initiating request', err);
+        console.debug('Error in initiating request:', req.url.pathname, err);
       }
       if (err instanceof Error) {
         throw await svc.consumeError(err);

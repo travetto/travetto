@@ -1,58 +1,22 @@
 import fs from 'fs/promises';
 import os from 'os';
 import assert from 'assert';
-import { setTimeout } from 'timers/promises';
 
-import { Controller, Get, Post, Put, Delete } from '@travetto/rest';
-import { Suite, Test } from '@travetto/test';
+import { BeforeAll, Suite, Test, TestFixtures } from '@travetto/test';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
 import { ExecUtil, Util } from '@travetto/base';
-import { Specifier } from '@travetto/schema';
 import { Inject } from '@travetto/di';
 import { RootIndex, path } from '@travetto/manifest';
 
 import { RestClientGeneratorService } from '../../src/service';
+import { Todo, fetchRequestBody } from './suite';
 
 const TSC = path.resolve(RootIndex.manifest.workspacePath, 'node_modules', '.bin', 'tsc');
 
-interface Todo {
-  id: string;
-  text: string;
-  priority?: number;
-  color?: `${'green' | 'blue'}-${number}${'-a' | '-b' | ''}`;
-}
-
-@Controller('rest/test/todo')
-export class TodoController {
-  @Post()
-  async createTodo(todo: Todo): Promise<Todo> {
-    return todo;
-  }
-
-  /** Get all the todos, yay! */
-  @Get()
-  async listTodo(limit?: number, offset?: number, categories?: string[], color?: Todo['color']): Promise<Todo[]> {
-    return [{ text: `todo-${categories?.join('-') ?? 'none'}`, id: `${limit ?? 5}`, priority: offset, color }];
-  }
-
-  @Delete('/:id')
-  async deleteTodo(id: string): Promise<number> {
-    return 1;
-  }
-
-  @Put('/upload')
-  async upload(@Specifier('file') data: Buffer): Promise<number> {
-    return data.length;
-  }
-
-  @Post('/timeout')
-  async getLong(): Promise<{ message: string }> {
-    await setTimeout(200);
-    throw new Error('LONG TIME');
-  }
-}
-
+const PUPPETEER_ROOT = path.resolve(os.tmpdir(), 'trv-puppeteer');
+const REST_CLIENT_PUPPET = path.resolve(PUPPETEER_ROOT, 'rest-client.mjs');
+const fixtures = new TestFixtures(['@travetto/rest-client']);
 
 @InjectableSuite()
 @Suite()
@@ -61,25 +25,14 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
   @Inject()
   svc: RestClientGeneratorService;
 
-  fetchRequestBody(from: string, suffix: string): string {
-    return `
-import { TodoApi } from '${from}';
-const api = new TodoApi({ baseUrl: 'http://localhost:${this.port!}', timeout: 100 });
-    
-async function go() {
-  const items = [];
-  const log = v => items.push(v);
-  log(await api.listTodo(200, 50, ['a','b','c'], 'green-2'));
-  log(await api.createTodo({id: '10', text:'todo', priority: 11}));
-  try {
-    log(await api.getLong());
-  } catch (err) {
-    log(err.message);
-  }
-  return JSON.stringify(items);
-}
-${suffix}
-`;
+  @BeforeAll()
+  async setupPuppeteer(): Promise<void> {
+    await fs.mkdir(PUPPETEER_ROOT, { recursive: true });
+    if (!await fs.stat(path.resolve(PUPPETEER_ROOT, 'package.json')).catch(() => false)) {
+      await ExecUtil.spawn('npm', ['init', '-y'], { cwd: PUPPETEER_ROOT }).result;
+      await ExecUtil.spawn('npm', ['install', 'puppeteer'], { cwd: PUPPETEER_ROOT }).result;
+    }
+    await fs.writeFile(REST_CLIENT_PUPPET, await fixtures.read('puppeteer.mjs'), 'utf8');
   }
 
   @Test({ skip: true })
@@ -118,7 +71,7 @@ ${suffix}
       }));
       await fs.writeFile(
         path.resolve(tmp, 'main.ts'),
-        this.fetchRequestBody('./src', 'go().then(console.log)')
+        fetchRequestBody('./src', 'go().then(console.log)', this.port!)
       );
       await ExecUtil.spawn('npm', ['i'], { cwd: tmp }).result;
       await ExecUtil.spawn(TSC, ['-p', tmp]).result;
@@ -142,7 +95,7 @@ ${suffix}
     this.validateFetchResponses(result);
   }
 
-  @Test({ timeout: 10000 })
+  @Test({ timeout: 20000 })
   async fetchWebClient() {
     const tmp = path.resolve(os.tmpdir(), `rest-client-fetch-web-${Util.uuid()}`);
     const srcFile = path.resolve(tmp, 'main.ts');
@@ -160,30 +113,19 @@ ${suffix}
       }));
       await fs.writeFile(
         srcFile,
-        this.fetchRequestBody('./api.js', 'window.onload = () => go().then(v => document.body.innerText = v)')
+        // eslint-disable-next-line no-template-curly-in-string
+        fetchRequestBody('./api.js', 'window.onload = () => go().then(v => document.body.innerHTML = `<output>${v}</output>`);', this.port!)
       );
 
-      await fs.writeFile(indexHtml, `
-        <html>
-        <head><script type="module" src="./main.js"></script></head>
-        <body></body>
-        </html>`);
       await ExecUtil.spawn(TSC, ['-p', tmp]).result;
 
-      const proc = ExecUtil.spawn(
-        'google-chrome',
-        [
-          '--virtual-time-budget=10000',
-          '--disable-gpu',
-          '--allow-file-access-from-files',
-          '--run-all-compositor-stages-before-draw',
-          '--headless',
-          '--dump-dom', `file://${indexHtml}`
-        ],
-        { cwd: tmp }
+      await fs.writeFile(indexHtml,
+        (await fixtures.read('test.html'))
+          .replace('<!-- CONTENT -->', await fs.readFile(path.resolve(tmp, 'main.js'), 'utf8'))
       );
-      const result = await proc.result;
-      this.validateFetchResponses(result.stdout.split(/<[/]?body>/)[1]);
+
+      const result = await ExecUtil.spawn('node', [REST_CLIENT_PUPPET, `file://${indexHtml}`], { stdio: [0, 'pipe', 'pipe'] }).result;
+      this.validateFetchResponses(result.stdout);
     } finally {
       await fs.rm(tmp, { recursive: true });
     }
