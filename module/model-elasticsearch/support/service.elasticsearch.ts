@@ -1,6 +1,6 @@
 import type { CommandService } from '@travetto/command';
 
-const version = '8.6.2';
+const version = '8.9.1';
 
 const port = 9200;
 

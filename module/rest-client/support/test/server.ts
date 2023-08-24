@@ -95,7 +95,7 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
     this.validateFetchResponses(result);
   }
 
-  @Test({ timeout: 20000 })
+  @Test({ timeout: 10000 })
   async fetchWebClient() {
     const tmp = path.resolve(os.tmpdir(), `rest-client-fetch-web-${Util.uuid()}`);
     const srcFile = path.resolve(tmp, 'main.ts');

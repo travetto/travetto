@@ -1,6 +1,6 @@
 import type { CommandService } from '@travetto/command';
 
-const version = '3.0.0';
+const version = '3.1.0';
 
 export const service: CommandService = {
   name: 's3',
