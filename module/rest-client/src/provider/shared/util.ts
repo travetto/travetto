@@ -192,13 +192,22 @@ export class CommonUtil {
         resolved = (await el(resolved) ?? resolved) as unknown as R;
       }
 
+      const contentType = resolved.headers.get('content-type');
+
       if (resolved.ok) {
-        if (resolved.headers.get('content-type') === 'application/json') {
-          const text = await resolved.text();
+        const text = await resolved.text();
+        if (contentType === 'application/json') {
           return svc.consumeJSON<T>(text);
+        } else if (contentType === 'text/plain') {
+          try {
+            return svc.consumeJSON<T>(text);
+          } catch {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            return text as unknown as Promise<T>;
+          }
         } else {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          return undefined as unknown as Promise<T>;
+          return text as unknown as Promise<T>;
         }
       } else {
         let res;

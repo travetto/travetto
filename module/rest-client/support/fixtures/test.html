@@ -1,7 +1,10 @@
 <html>
 
   <head>
-    <script type="module"><!-- CONTENT --></script>
+    <script type="module">
+      <!-- CONTENT -->
+      window.onload = () => go().then(v => document.body.innerHTML = `<output>${v}</output>`);
+    </script>
   </head>
 
   <body></body>

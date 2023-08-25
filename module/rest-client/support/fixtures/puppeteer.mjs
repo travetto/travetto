@@ -4,7 +4,7 @@ const browser = await puppeteer.launch({ headless: 'new', args: ['--allow-file-a
 const page = await browser.newPage();
 
 await page.setViewport({ width: 1080, height: 1024 });
-await page.goto(process.argv.pop());
+await page.goto(`file://${process.argv.pop()}`);
 
 const selector = await page.waitForSelector('output');
 
