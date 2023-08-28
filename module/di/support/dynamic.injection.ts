@@ -14,7 +14,6 @@ class $DynamicDependencyRegistry {
   #registryResolveTarget: <T>(target: ClassTarget<T>, qualifier?: symbol, resolution?: ResolutionType) => Resolved<T>;
   #registryOnInstallFinalize: <T>(target: Class<T>) => InjectableConfig<T>;
   #registryDestroyInstance: <T>(target: Class<T>, qualifier: symbol) => void;
-  #registryOnReset: () => void;
 
   /**
    * Proxy the created instance
@@ -86,22 +85,15 @@ class $DynamicDependencyRegistry {
     }
   }
 
-  onReset(): void {
-    this.#registryOnReset();
-    this.#proxies.clear();
-  }
-
   register(registry: typeof DependencyRegistry): void {
     this.#registry = registry;
     this.#registryCreateInstance = registry['createInstance'].bind(registry);
     this.#registryResolveTarget = registry['resolveTarget'].bind(registry);
     this.#registryOnInstallFinalize = registry['onInstallFinalize'].bind(registry);
     this.#registryDestroyInstance = registry['destroyInstance'].bind(registry);
-    this.#registryOnReset = registry['onReset'].bind(registry);
 
     this.#registry['createInstance'] = this.createInstance.bind(this);
     this.#registry['destroyInstance'] = this.destroyInstance.bind(this);
-    this.#registry['onReset'] = this.onReset.bind(this);
     this.#registry['onInstallFinalize'] = this.onInstallFinalize.bind(this);
   }
 }

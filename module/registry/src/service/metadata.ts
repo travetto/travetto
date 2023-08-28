@@ -183,15 +183,4 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
       process.nextTick(() => this.expired.delete(cls.Ⲑid));
     }
   }
-
-  /**
-   * Clear all caches
-   */
-  override onReset(): void {
-    super.onReset();
-    this.entries.clear();
-    this.pending.clear();
-    this.pendingFields.clear();
-    this.expired.clear();
-  }
 }

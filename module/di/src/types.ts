@@ -37,6 +37,10 @@ export interface Dependency<T = unknown> extends Core<T> {
  */
 export interface InjectableConfig<T = unknown> extends Core<T> {
   /**
+   * Is this injectable enabled
+   */
+  enabled: boolean | (() => boolean);
+  /**
    * Reference for the class
    */
   class: Class<T>;
@@ -65,6 +69,10 @@ export interface InjectableConfig<T = unknown> extends Core<T> {
  * Factory configuration
  */
 export interface InjectableFactoryConfig<T = unknown> extends Core<T> {
+  /**
+   * Is this injectable enabled
+   */
+  enabled: boolean | (() => boolean);
   /**
    * Src of the factory method
    */

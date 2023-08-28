@@ -195,11 +195,4 @@ export abstract class Registry implements ChangeSource<Class> {
   listen(source: ChangeSource<Class>): void {
     source.on(e => this.onEvent(e));
   }
-
-  /**
-   * On registry reset
-   */
-  onReset(): void {
-    this.#resolved = false;
-  }
 }

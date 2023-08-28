@@ -271,6 +271,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     return {
       class: cls,
+      enabled: true,
       target: cls,
       interfaces: [],
       dependencies: {
@@ -336,6 +337,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   registerClass<T>(cls: Class<T>, pConfig: Partial<InjectableConfig<T>> = {}): void {
     const config = this.getOrCreatePending(pConfig.class ?? cls);
 
+    config.enabled = pConfig.enabled ?? config.enabled;
     config.class = cls;
     config.qualifier = pConfig.qualifier ?? config.qualifier ?? Symbol.for(cls.Ⲑid);
     if (pConfig.interfaces) {
@@ -369,6 +371,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
   }): void {
     const finalConfig: Partial<InjectableConfig> = {};
 
+    finalConfig.enabled = config.enabled ?? true;
     finalConfig.factory = config.fn;
     finalConfig.target = config.target;
     finalConfig.qualifier = config.qualifier;
@@ -423,6 +426,10 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const config = this.getOrCreatePending(cls) as InjectableConfig<T>;
+
+    if (!(typeof config.enabled === 'boolean' ? config.enabled : config.enabled())) {
+      return config; // Do not setup if disabled
+    }
 
     // Allow for the factory to fulfill the target
     let parentClass = config.factory ? config.target : Object.getPrototypeOf(cls);
@@ -546,19 +553,6 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
         this.destroyInstance(cls, qualifier);
       }
     }
-  }
-
-  /**
-   * Reset registry
-   */
-  override onReset(): void {
-    super.onReset();
-    this.pendingFinalize = [];
-    this.instances.clear();
-    this.instancePromises.clear();
-    this.targetToClass.clear();
-    this.classToTarget.clear();
-    this.factories.clear();
   }
 
   /**
