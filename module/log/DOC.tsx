@@ -7,8 +7,9 @@ import { JsonLogFormatter } from './src/formatter/json';
 import { LineLogFormatter } from './src/formatter/line';
 
 const Logger = d.codeLink('Logger', 'src/types.ts', /interface Logger/);
-const Formatter = d.codeLink('LogFormatter', 'src/types.ts', /interface LogFormatter/);
-const Appender = d.codeLink('LogAppender', 'src/types.ts', /interface LogAppender/);
+const LogDecorator = d.codeLink('Logger', 'src/types.ts', /interface LogDecorator/);
+const LogFormatter = d.codeLink('LogFormatter', 'src/types.ts', /interface LogFormatter/);
+const LogAppender = d.codeLink('LogAppender', 'src/types.ts', /interface LogAppender/);
 const LogEvent = d.codeLink('LogEvent', 'src/types.ts', /interface LogEvent/);
 const ConsolEvent = d.codeLink('ConsoleEvent', '@travetto/base/src/types.ts', /type ConsoleEvent/);
 
@@ -23,11 +24,11 @@ export const text = <>
 
     <c.Code title='Standard Logging Config' src='src/common.ts' startRe={/class CommonLoggerConfig/} endRe={/^[}]/} />
 
-    In addition to these simple overrides, the {CommonLogger} can be extended by providing an implementation of either a {Formatter} or {Appender}, with the declared symbol of {d.field('LogCommonⲐ')}.
+    In addition to these simple overrides, the {CommonLogger} can be extended by providing an implementation of either a {LogFormatter} or {LogAppender}, with the declared symbol of {d.field('LogCommonⲐ')}.
 
     <c.Code title='Sample Common Formatter' src='doc/formatter.ts' />
 
-    As you can see, implementing {Formatter}/{Appender} with the appropriate symbol is all that is necessary to customize the general logging functionality.
+    As you can see, implementing {LogFormatter}/{LogAppender} with the appropriate symbol is all that is necessary to customize the general logging functionality.
   </c.Section>
 
   <c.Section title='Creating a Logger'>
@@ -49,6 +50,14 @@ export const text = <>
     <c.Code title='Custom Logger' src='doc/custom-logger.ts' />
   </c.Section>
 
+
+  <c.Section title='Creating a Decorator'>
+    In addition to being able to control the entire logging experience, there are also scenarios in which the caller may want to only add information to the log event, without affecting control of the formatting or appending. The {LogDecorator} is an interface that provides a contract that allows transforming the {LogEvent} data. A common scenario for this would be to add additional metadata data (e.g. server name, ip, code revision, CPU usage, memory usage, etc) into the log messages.
+
+    <c.Code title='Log Decorator Shape' src='src/types.ts' startRe={/interface LogDecorator/} endRe={/^[}]/} />
+
+    <c.Code title='Custom Logger' src='doc/custom-decorator.ts' />
+  </c.Section>
   <c.Section title='Logging to External Systems'>
     By default the logging functionality logs messages directly to the console, relying on the {d.method('util.inspect')} method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as {d.library('JSON')}, which is easily consumable by services like {d.library('Elasticsearch')} or {d.library('AwsCloudwatch')} if running as a lambda or in a docker container. <br />
 

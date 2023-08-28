@@ -17,6 +17,13 @@ export interface LogEvent extends ConsoleEvent {
 }
 
 /**
+ * @concrete ./internal/types:LogDecoratorTarget
+ */
+export interface LogDecorator {
+  decorate(ev: LogEvent): LogEvent;
+}
+
+/**
  * Output appender for the logger
  * @concrete ./internal/types:LogAppenderTarget
  */

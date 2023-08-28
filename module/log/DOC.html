@@ -135,6 +135,45 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
+<h2 id="creating-a-decorator">Creating a Decorator</h2>
+
+In addition to being able to control the entire logging experience, there are also scenarios in which the caller may want to only add information to the log event, without affecting control of the formatting or appending. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L45">Logger</a> is an interface that provides a contract that allows transforming the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8">LogEvent</a> data. A common scenario for this would be to add additional metadata data (e.g. server name, ip, code revision, CPU usage, memory usage, etc) into the log messages.
+
+  <figure class="code">
+    <figcaption class="code">Log Decorator Shape
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L45">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">LogDecorator</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">decorate</span><span class="token punctuation">(</span>ev<span class="token operator">:</span> LogEvent<span class="token punctuation">)</span><span class="token operator">:</span> LogEvent<span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+  <figure class="code">
+    <figcaption class="code">Custom Logger
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/doc/custom-decorator.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> os <span class="token keyword">from</span> <span class="token string">'os'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> LogDecorator<span class="token punctuation">,</span> LogEvent <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/log'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CustomDecorator</span> <span class="token keyword">implements</span> <span class="token class-name">LogDecorator</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">decorate</span><span class="token punctuation">(</span>ev<span class="token operator">:</span> LogEvent<span class="token punctuation">)</span><span class="token operator">:</span> LogEvent <span class="token punctuation">{{'{'}}</span>
+
+    <span class="token comment">// Add memory usage, and hostname</span>
+    Object<span class="token punctuation">.</span><span class="token function">assign</span><span class="token punctuation">(</span>ev<span class="token punctuation">.</span>context <span class="token operator">??=</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span>
+      memory<span class="token operator">:</span> process<span class="token punctuation">.</span>memoryUsage<span class="token punctuation">,</span>
+      hostname<span class="token operator">:</span> os<span class="token punctuation">.</span><span class="token function">hostname</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> ev<span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
 <h2 id="logging-to-external-systems">Logging to External Systems</h2>
 
 By default the logging functionality logs messages directly to the console, relying on the <code class="item method">util.inspect</code> method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as <a target="_blank" class="external-link" href="https://www.json.org">JSON</a>, which is easily consumable by services like <a target="_blank" class="external-link" href="https://elastic.co">elasticsearch</a> or <a target="_blank" class="external-link" href="https://aws.amazon.com/cloudwatch/">AWS Cloudwatch</a> if running as a lambda or in a docker container. <br><br>

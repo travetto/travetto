@@ -82,11 +82,7 @@ export class RestApplication<T = unknown>  {
    * Get the list of installed interceptors
    */
   async getInterceptors(): Promise<RestInterceptor[]> {
-    const interceptors = DependencyRegistry.getCandidateTypes(RestInterceptorTarget);
-    const instances: RestInterceptor[] = [];
-    for (const op of interceptors) {
-      instances.push(await DependencyRegistry.getInstance<RestInterceptor>(op.target, op.qualifier));
-    }
+    const instances = await DependencyRegistry.getCandidateInstances<RestInterceptor>(RestInterceptorTarget);
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const ordered = instances.map(x => ({ key: x.constructor as Class, before: x.before, after: x.after, target: x }));

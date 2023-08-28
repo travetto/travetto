@@ -113,6 +113,38 @@ export class CustomLogger implements Logger {
 }
 ```
 
+## Creating a Decorator
+In addition to being able to control the entire logging experience, there are also scenarios in which the caller may want to only add information to the log event, without affecting control of the formatting or appending. The [Logger](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L45) is an interface that provides a contract that allows transforming the [LogEvent](https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8) data. A common scenario for this would be to add additional metadata data (e.g. server name, ip, code revision, CPU usage, memory usage, etc) into the log messages.
+
+**Code: Log Decorator Shape**
+```typescript
+export interface LogDecorator {
+  decorate(ev: LogEvent): LogEvent;
+}
+```
+
+**Code: Custom Logger**
+```typescript
+import os from 'os';
+
+import { Injectable } from '@travetto/di';
+import { LogDecorator, LogEvent } from '@travetto/log';
+
+@Injectable()
+export class CustomDecorator implements LogDecorator {
+  decorate(ev: LogEvent): LogEvent {
+
+    // Add memory usage, and hostname
+    Object.assign(ev.context ??= {}, {
+      memory: process.memoryUsage,
+      hostname: os.hostname()
+    });
+
+    return ev;
+  }
+}
+```
+
 ## Logging to External Systems
 By default the logging functionality logs messages directly to the console, relying on the `util.inspect` method, as is the standard behavior.  When building distributed systems, with multiple separate logs, it is useful to rely on structured logging for common consumption.  The framework supports logging as [JSON](https://www.json.org), which is easily consumable by services like [elasticsearch](https://elastic.co) or [AWS Cloudwatch](https://aws.amazon.com/cloudwatch/) if running as a lambda or in a docker container. 
 
