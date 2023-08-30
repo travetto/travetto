@@ -22,8 +22,8 @@ export class PackConfigUtil {
       ...cfg.dockerPort?.map(x => `EXPOSE ${x}`) ?? [],
       user !== 'root' ? ifElse(
         'RUN which useradd',
-        `groupadd --gid ${gid} ${group} && useradd -r -u ${uid} -g ${group} ${user}`,
-        `addgroup -g ${gid} ${group} && adduser -D -H -G ${group} -u ${uid} ${user}`
+        `groupadd --gid ${gid} ${group} && useradd -u ${uid} -g ${group} ${user}`,
+        `addgroup -g ${gid} ${group} && adduser -D -G ${group} -u ${uid} ${user}`
       ) : '',
       `RUN mkdir ${folder} && chown ${user}:${group} ${folder}`,
       `USER ${user}`,
