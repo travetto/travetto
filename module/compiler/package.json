@@ -1,6 +1,6 @@
 {
   "name": "@travetto/compiler",
-  "version": "3.3.0",
+  "version": "3.3.1",
   "description": "The compiler infrastructure for the Travetto framework",
   "keywords": [
     "compiler",
@@ -32,11 +32,11 @@
   "dependencies": {
     "@parcel/watcher": "^2.3.0",
     "@travetto/manifest": "^3.3.1",
-    "@travetto/terminal": "^3.3.0",
-    "@travetto/transformer": "^3.3.0"
+    "@travetto/terminal": "^3.3.1",
+    "@travetto/transformer": "^3.3.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.3.2"
+    "@travetto/cli": "^3.3.3"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
