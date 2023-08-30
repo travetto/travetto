@@ -112,6 +112,36 @@ In this scenario, <code class="item input">SpecificService</code> is a valid can
 
 Given the <code class="item input">static</code> method <code class="item input">initService</code>, the function will be provided as a valid candidate for <code class="item input">CoolService</code>.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
 
+  <figure class="code">
+    <figcaption class="code">Example Conditional Dependency
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/di/doc/injectable-conditional.ts">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> GlobalEnv <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject<span class="token punctuation">,</span> Injectable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> enabled<span class="token operator">:</span> <span class="token operator">!</span>GlobalEnv<span class="token punctuation">.</span>devMode <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">ProductionLogger</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token keyword">async</span> <span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'This will only run in production'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span>
+
+<span class="token decorator"><span class="token at operator">@</span><span class="token function">Injectable</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">class</span> <span class="token class-name">RuntimeService</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token decorator"><span class="token at operator">@</span><span class="token function">Inject</span></span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  logger<span class="token operator">?</span><span class="token operator">:</span> ProductionLogger<span class="token punctuation">;</span>
+
+  <span class="token function">action</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token comment">// Only injected when available, in prod</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>logger<span class="token operator">?.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// Do work</span>
+  <span class="token punctuation">{{'}'}}</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+In this example, the enabled flag is specified in relationship to the deployment environment.  When coupled with optional properties, and optional chaining, allows for seamless inclusion of optional dependencies at runtime.
+
 <p class="note"><strong>Note</strong> Other modules are able to provide aliases to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31">@Injectable</a> that also provide additional functionality.  For example, the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/config" title="Configuration support">Configuration</a> module @Config or the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> module @Controller decorator registers the associated class as an injectable element.</p>
 
 <h2 id="injection">Injection</h2>

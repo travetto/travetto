@@ -98,6 +98,33 @@ class Config {
 
 Given the `static` method `initService`, the function will be provided as a valid candidate for `CoolService`.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
 
+**Code: Example Conditional Dependency**
+```typescript
+import { GlobalEnv } from '@travetto/base';
+import { Inject, Injectable } from '@travetto/di';
+
+@Injectable({ enabled: !GlobalEnv.devMode })
+class ProductionLogger {
+  async log() {
+    console.log('This will only run in production');
+  }
+}
+
+@Injectable()
+class RuntimeService {
+  @Inject()
+  logger?: ProductionLogger;
+
+  action(): void {
+    // Only injected when available, in prod
+    this.logger?.log();
+    // Do work
+  }
+}
+```
+
+In this example, the enabled flag is specified in relationship to the deployment environment.  When coupled with optional properties, and optional chaining, allows for seamless inclusion of optional dependencies at runtime.
+
 **Note**: Other modules are able to provide aliases to [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31) that also provide additional functionality.  For example, the [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") module @Config or the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module @Controller decorator registers the associated class as an injectable element.
 
 ## Injection

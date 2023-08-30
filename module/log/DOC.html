@@ -34,7 +34,7 @@ By default, the system ships with the <a target="_blank" class="source-link" hre
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-In addition to these simple overrides, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L11">CommonLogger</a> can be extended by providing an implementation of either a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L31">LogFormatter</a> or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L23">LogAppender</a>, with the declared symbol of <code class="item field">LogCommonⲐ</code>.
+In addition to these simple overrides, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/common.ts#L11">CommonLogger</a> can be extended by providing an implementation of either a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L38">LogFormatter</a> or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L30">LogAppender</a>, with the declared symbol of <code class="item field">LogCommonⲐ</code>.
 
   <figure class="code">
     <figcaption class="code">Sample Common Formatter
@@ -53,15 +53,15 @@ In addition to these simple overrides, the <a target="_blank" class="source-link
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As you can see, implementing <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L31">LogFormatter</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L23">LogAppender</a> with the appropriate symbol is all that is necessary to customize the general logging functionality.
+As you can see, implementing <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L38">LogFormatter</a>/<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L30">LogAppender</a> with the appropriate symbol is all that is necessary to customize the general logging functionality.
 
 <h2 id="creating-a-logger">Creating a Logger</h2>
 
-The default pattern for logging is to create a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L38">Logger</a> which simply consumes a logging event. The method is not asynchronous as ensuring the ordering of append calls will be the responsibility of the logger.  The default logger uses <code class="item method">console.log</code> and that is synchronous by default.
+The default pattern for logging is to create a <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L45">Logger</a> which simply consumes a logging event. The method is not asynchronous as ensuring the ordering of append calls will be the responsibility of the logger.  The default logger uses <code class="item method">console.log</code> and that is synchronous by default.
 
   <figure class="code">
     <figcaption class="code">Logger Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L38">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L45">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Logger</span> <span class="token punctuation">{{'{'}}</span>
@@ -137,11 +137,11 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 
 <h2 id="creating-a-decorator">Creating a Decorator</h2>
 
-In addition to being able to control the entire logging experience, there are also scenarios in which the caller may want to only add information to the log event, without affecting control of the formatting or appending. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L45">Logger</a> is an interface that provides a contract that allows transforming the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8">LogEvent</a> data. A common scenario for this would be to add additional metadata data (e.g. server name, ip, code revision, CPU usage, memory usage, etc) into the log messages.
+In addition to being able to control the entire logging experience, there are also scenarios in which the caller may want to only add information to the log event, without affecting control of the formatting or appending. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L22">Logger</a> is an interface that provides a contract that allows transforming the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L8">LogEvent</a> data. A common scenario for this would be to add additional metadata data (e.g. server name, ip, code revision, CPU usage, memory usage, etc) into the log messages.
 
   <figure class="code">
     <figcaption class="code">Log Decorator Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L45">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/log/src/types.ts#L22">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">LogDecorator</span> <span class="token punctuation">{{'{'}}</span>

@@ -398,7 +398,7 @@ npx trv run:rest
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:196] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:192] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api. 

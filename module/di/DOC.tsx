@@ -16,7 +16,6 @@ export const text = <>
 
     <c.Code title='Example Injectable with multiple targets' src='doc/injectable-multiple.ts' />
 
-
     As you can see, the {d.input('target')} field is also set, which indicates to the dependency registration process what {d.input('class')} the injectable is compatible with.  Additionally, when using {d.input('abstract')} classes, the parent {d.input('class')} is always considered as a valid candidate type.
 
     <c.Code title='Example Injectable with target via abstract class' src='doc/injectable-abstract.ts' />
@@ -26,8 +25,11 @@ export const text = <>
 
     <c.Code title='Example InjectableFactory' src='doc/injectable-factory.ts' />
 
-
     Given the {d.input('static')} method {d.input('initService')}, the function will be provided as a valid candidate for {d.input('CoolService')}.  Instead of calling the constructor of the type directly, this function will work as a factory for producing the injectable.
+
+    <c.Code title='Example Conditional Dependency' src='doc/injectable-conditional.ts' />
+
+    In this example, the enabled flag is specified in relationship to the deployment environment.  When coupled with optional properties, and optional chaining, allows for seamless inclusion of optional dependencies at runtime.
 
     <c.Note>
       Other modules are able to provide aliases to {Injectable} that also provide additional functionality.  For example, the {d.mod('Config')} module @Config or the {d.mod('Rest')} module @Controller decorator registers the associated class as an injectable element.
