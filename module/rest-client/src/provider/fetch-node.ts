@@ -12,13 +12,13 @@ import { BaseRemoteService } from './shared/types';
 
 const SVC = './shared/fetch-node-service.ts';
 
-export class NodeFetchClientGenerator extends ClientGenerator<{ native: boolean }> {
+export class NodeFetchClientGenerator extends ClientGenerator<{ legacy: boolean }> {
 
   get flags(): Record<string, boolean> {
-    return { NODE_FETCH: !this.config.native };
+    return { NODE_FETCH: !!this.config.legacy };
   }
 
-  get native(): boolean { return this.config.native !== false; }
+  get native(): boolean { return this.config.legacy !== true; }
   get outputExt(): '' { return ''; }
   get subFolder(): string { return 'src'; }
   get uploadType(): string | Imp { return this.native ? super.uploadType : { name: 'Blob', file: 'node-fetch', classId: '_blob' }; }

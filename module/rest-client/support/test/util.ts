@@ -48,7 +48,7 @@ export class RestClientTestUtil {
   static async runNodeClient(svc: RestClientGeneratorService, body: string, native = false): Promise<string> {
     const tmp = path.resolve(os.tmpdir(), `rest-client-fetch-node-${native}-${Util.uuid()}`);
     try {
-      await svc.renderClient({ type: 'fetch-node', output: tmp, options: { native } });
+      await svc.renderClient({ type: 'fetch-node', output: tmp, options: { legacy: !native } });
 
       await fs.writeFile(
         path.resolve(tmp, 'main.ts'),

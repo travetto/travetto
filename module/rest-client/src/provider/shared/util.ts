@@ -181,7 +181,7 @@ export class CommonUtil {
         const controller = new AbortController();
         fetchInit.signal = controller.signal;
         const timer = setTimeout(() => controller.abort(), req.timeout);
-        controller.signal.onabort = (): void => timer && clearTimeout(timer);
+        controller.signal.onabort = (): void => { timer && clearTimeout(timer); };
       }
 
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

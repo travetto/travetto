@@ -26,16 +26,19 @@ export abstract class BaseAngularService extends BaseRemoteService<BodyInit, Res
   override consumeJSON = <T>(text: string | unknown): T => CommonUtil.consumeJSON(text);
 
   invoke<T>(req: RequestOptions, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
-    const pipedOps: OperatorFunction<T, T>[] = [
-      ...(req.timeout ? [this.timer<T>(req.timeout)] : []),
-      this.transform<T>()
-    ];
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return this.client.request(req.method.toLowerCase() as 'get', req.url.toString(), {
+    let ngReq = this.client.request(req.method.toLowerCase() as 'get', req.url.toString(), {
       observe, reportProgress: observe === 'events',
       withCredentials: req.withCredentials,
       headers: req.headers, body: req.body,
-    }).pipe(pipedOps) as AngularResponse<T>;
+    });
+
+    if (req.timeout) {
+      ngReq = ngReq.pipe(this.timer<T>(req.timeout));
+    }
+
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return ngReq.pipe(this.transform<T>()) as AngularResponse<T>;
   }
 
   makeRequest<T>(params: unknown[], opts: RequestDefinition): AngularResponse<T> {
