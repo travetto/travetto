@@ -2,7 +2,7 @@ import { RetargettingProxy, Class, AppError, Util, GlobalEnv } from '@travetto/b
 import { RootIndex } from '@travetto/manifest';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { ChangeEvent } from '@travetto/registry';
-import { Configuration } from '@travetto/config';
+import { ConfigurationService } from '@travetto/config';
 
 import { RouteConfig, Request, ServerHandle } from '../types';
 import { RestConfig } from './config';
@@ -47,7 +47,7 @@ export class RestApplication<T = unknown>  {
     };
 
     // Log on startup, before DI finishes
-    const cfg = await DependencyRegistry.getInstance(Configuration);
+    const cfg = await DependencyRegistry.getInstance(ConfigurationService);
     await cfg.initBanner();
 
     await this.server.init();

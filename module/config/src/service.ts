@@ -13,7 +13,7 @@ import { ConfigSource, ConfigValue } from './source/types';
  * Manager for application configuration
  */
 @Injectable()
-export class Configuration {
+export class ConfigurationService {
 
   private static getSorted(configs: ConfigValue[], profiles: string[]): ConfigValue[] {
     const order = Object.fromEntries(Object.entries(profiles).map(([k, v]) => [v, +k] as const));
@@ -63,7 +63,7 @@ export class Configuration {
       })
     );
 
-    const sorted = Configuration.getSorted(configs.flat(), this.#profiles);
+    const sorted = ConfigurationService.getSorted(configs.flat(), this.#profiles);
 
     this.#sources = sorted.map(x => `${x.profile}.${x.priority} - ${x.source}`);
 
@@ -122,7 +122,9 @@ export class Configuration {
         await SchemaValidator.validate(cls, out);
       } catch (err) {
         if (err instanceof ValidationResultError) {
+          const ogMessage = err.message;
           err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
+          err.stack = err.stack?.replace(ogMessage, err.message);
           const file = RootIndex.getFunctionMetadata(cls)!.source;
           err.payload = { class: cls.Ⲑid, file, ...(err.payload ?? {}) };
         }

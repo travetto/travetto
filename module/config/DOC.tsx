@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 import { Field, Schema } from '@travetto/schema';
 
 import { Config as ConfigDec, EnvVar } from '@travetto/config/src/decorator';
-import { Configuration } from '@travetto/config/src/configuration';
+import { ConfigurationService } from '@travetto/config/src/service';
 
 export const text = <>
   <c.StdHeader />
@@ -58,17 +58,17 @@ export const text = <>
     </c.SubSection>
 
     <c.SubSection title='Custom Configuration Provider'>
-      In addition to files and environment variables, configuration sources can also be provided via the class itself.  This is useful for reading remote configurations, or dealing with complex configuration normalization.  The only caveat to this pattern, is that the these configuration sources cannot rely on the {Configuration} service for input.  This means any needed configuration will need to be accessed via specific patterns.
+      In addition to files and environment variables, configuration sources can also be provided via the class itself.  This is useful for reading remote configurations, or dealing with complex configuration normalization.  The only caveat to this pattern, is that the these configuration sources cannot rely on the {ConfigurationService} service for input.  This means any needed configuration will need to be accessed via specific patterns.
 
       <c.Code title='Custom Configuration Source' src='doc/custom-source.ts' />
     </c.SubSection>
   </c.Section>
 
   <c.Section title='Startup'>
-    At startup, the {Configuration} service will log out all the registered configuration objects.  The configuration state output is useful to determine if everything is configured properly when diagnosing runtime errors.  This service will find all configurations, and output a redacted version with all secrets removed.  The default pattern for secrets is {d.input('/password|private|secret/i')}.  More values can be added in your configuration under the path {d.field('config.secrets')}.  These values can either be simple strings (for exact match), or {d.input('/pattern/')} to create a regular expression.
+    At startup, the {ConfigurationService} service will log out all the registered configuration objects.  The configuration state output is useful to determine if everything is configured properly when diagnosing runtime errors.  This service will find all configurations, and output a redacted version with all secrets removed.  The default pattern for secrets is {d.input('/password|private|secret/i')}.  More values can be added in your configuration under the path {d.field('config.secrets')}.  These values can either be simple strings (for exact match), or {d.input('/pattern/')} to create a regular expression.
   </c.Section>
   <c.Section title='Consuming'>
-    The {Configuration} service provides injectable access to all of the loaded configuration. For simplicity, a decorator, {ConfigDec} allows for classes to automatically be bound with config information on post construction via the {d.mod('Di')} module. The decorator will install a {d.method('postConstruct')} method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+    The {ConfigurationService} service provides injectable access to all of the loaded configuration. For simplicity, a decorator, {ConfigDec} allows for classes to automatically be bound with config information on post construction via the {d.mod('Di')} module. The decorator will install a {d.method('postConstruct')} method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
     <c.SubSection title='Environment Variables'>
       Additionally there are times in which you may want to also support configuration via environment variables.  {EnvVar} supports override configuration values when environment variables are present. <br />

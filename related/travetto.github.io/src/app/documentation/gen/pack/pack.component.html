@@ -248,7 +248,7 @@ npx rollup <span class="token parameter variable">-c</span> <span class="token v
 <span class="token builtin class-name">echo</span> <span class="token string">"Generating Docker File <span class="token variable">$DIST</span>/Dockerfile @travetto/pack/support/pack.dockerfile"</span>
 
 <span class="token builtin class-name">echo</span> <span class="token string">"FROM node:20-alpine"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/Dockerfile
-<span class="token builtin class-name">echo</span> <span class="token string">"RUN which addgroup &amp;&amp; (addgroup -g 2000 app &amp;&amp; adduser -S -u 2000 app app) || (groupadd -g 2000 app &amp;&amp; useradd -r -u 2000 -g app app)"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
+<span class="token builtin class-name">echo</span> <span class="token string">"RUN which useradd &amp;&amp; (groupadd --gid 2000 app &amp;&amp; useradd -u 2000 -g app app) || (addgroup -g 2000 app &amp;&amp; adduser -D -G app -u 2000 app)"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"RUN mkdir /app &amp;&amp; chown app:app /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"USER app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"WORKDIR /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile

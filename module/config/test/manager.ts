@@ -5,7 +5,7 @@ import { ValidationResultError } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
 
-import { Configuration } from '../src/configuration';
+import { ConfigurationService } from '../src/service';
 import { Config } from '../src/decorator';
 import { ConfigSource } from '../src/source/types';
 import { MemoryConfigSource } from '../src/source/memory';
@@ -75,12 +75,12 @@ class Setup {
 @Suite()
 export class ManagerTest {
 
-  config: Configuration;
+  config: ConfigurationService;
 
   @BeforeEach()
   async before() {
     await RootRegistry.init();
-    this.config = await DependencyRegistry.getInstance(Configuration);
+    this.config = await DependencyRegistry.getInstance(ConfigurationService);
   }
 
   @Test()

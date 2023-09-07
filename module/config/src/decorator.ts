@@ -2,7 +2,7 @@ import { Class, ClassInstance } from '@travetto/base';
 import { DependencyRegistry } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 
-import { Configuration } from './configuration';
+import { ConfigurationService } from './service';
 import { ConfigTarget, ConfigOverrides, CONFIG_OVERRIDES } from './internal/types';
 
 /**
@@ -20,7 +20,7 @@ export function Config(ns: string) {
 
     target.prototype.postConstruct = async function (): Promise<void> {
       // Apply config
-      const cfg = await DependencyRegistry.getInstance(Configuration);
+      const cfg = await DependencyRegistry.getInstance(ConfigurationService);
       await cfg.bindTo(target, this, ns);
       await og?.call(this);
     };

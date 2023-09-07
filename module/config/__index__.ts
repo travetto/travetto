@@ -1,5 +1,5 @@
 export * from './src/decorator';
-export * from './src/configuration';
+export * from './src/service';
 export * from './src/source/env';
 export * from './src/source/file';
 export * from './src/parser/json';
