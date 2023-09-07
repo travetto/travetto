@@ -29,6 +29,9 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
     active: true,
     async destroy(): Promise<void> { },
     async execute(file: string): Promise<void> {
+
+      process.send?.({ type: 'log', message: `Worker Executing ${file}` });
+
       const event = buildEvent(file);
 
       const { module } = RootIndex.getEntry(event.file!)!;
@@ -68,6 +71,8 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
 
       // Kill on complete
       await channel.destroy();
+
+      process.send?.({ type: 'log', message: `Worker Finished ${file}` });
 
       // If we received an error, throw it
       if (error) {

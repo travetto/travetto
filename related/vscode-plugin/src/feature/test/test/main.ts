@@ -18,7 +18,7 @@ import { TestCommand, TestEvent } from './types';
 @Activatible('@travetto/test', 'test')
 class TestRunnerFeature extends BaseFeature {
 
-  #server: ProcessServer<TestCommand, TestEvent>;
+  #server: ProcessServer<TestCommand, TestEvent | { type: 'log', message: string }>;
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (e: void) => unknown;
 
@@ -27,9 +27,10 @@ class TestRunnerFeature extends BaseFeature {
     this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
     this.#server = new ProcessServer(this.log, 'test:watch', ['-f', 'exec', '-m', 'change'])
       .onStart(() => {
-        this.#server.onMessage(['assertion', 'suite', 'test'], ev => {
+        this.#server.onMessage(['assertion', 'suite', 'test', 'log'], ev => {
           switch (ev.type) {
-            case 'test': this.log.info('Event', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
+            case 'log': this.log.info('[Log  ]', ev.message); return;
+            case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
           }
           this.#consumer.onEvent(ev);
           this.#codeLensUpdated?.();
@@ -116,7 +117,7 @@ class TestRunnerFeature extends BaseFeature {
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', this.launchTestDebugger.bind(this));
     this.register('reload', () => this.#server.restart(true));
-    this.register('rerun', () => this.#consumer.trackEditor(vscode.window.activeTextEditor));
+    this.register('rerun', () => this.#consumer.reset(vscode.window.activeTextEditor));
 
     vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);

@@ -138,6 +138,7 @@ export class WorkspaceResultsManager {
     if (editor && editor.document) {
       try {
         this.getResults(editor.document)?.addEditor(editor);
+        this.#log.info('Tracking', editor.document.fileName);
       } catch (err) {
         if (err instanceof Error) {
           this.#log.error(err.message, err);
@@ -156,7 +157,17 @@ export class WorkspaceResultsManager {
     if (editor) {
       if (this.#results.has(editor.document.fileName)) {
         this.#results.get(editor.document.fileName)!.dispose();
+        this.#results.delete(editor.document.fileName);
+        this.#log.info('Untracking', editor.document.fileName);
       }
     }
+  }
+
+  /**
+   * Stop tracking
+   */
+  reset(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
+    this.untrackEditor(editor);
+    this.trackEditor(editor);
   }
 }

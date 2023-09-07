@@ -32,6 +32,7 @@ class PassportUtilSuite {
   async verifyUpdateKey() {
     const added = PassportUtil.addToState({ age: 20 }, Buffer.from(JSON.stringify({ name: 'bob' })).toString('base64'), 'deet');
     assert(PassportUtil.readState(added)?.name === 'bob');
-    assert(PassportUtil.readState<{ deet: { age: number } }>(added)?.deet.age === 20);
+    assert(PassportUtil.readState<{ deet: { age: number } }>(added)?.deet.age === 21);
   }
 }
+
