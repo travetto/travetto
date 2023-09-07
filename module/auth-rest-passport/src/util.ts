@@ -1,18 +1,4 @@
-import passport from 'passport';
-
 import { Request } from '@travetto/rest';
-
-import { LoginContext } from '@travetto/auth-rest';
-
-const readState = (state?: string): Record<string, unknown> | undefined => {
-  try {
-    if (state) {
-      return JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
-    }
-  } catch {
-    return;
-  }
-};
 
 /**
  * Passport utilities
@@ -20,31 +6,53 @@ const readState = (state?: string): Record<string, unknown> | undefined => {
 export class PassportUtil {
 
   /**
-   * Enhance passport options with enhanced state information
-   * @param req The travetto request,
-   * @param opts The passport auth options
+   * Read passport state string as bas64 encoded JSON value
+   * @param src The input src for a state read (string, or a request obj)
    */
-  static enhanceLoginContext(req: Request, opts: Partial<passport.AuthenticateOptions> = {}): Partial<passport.AuthenticateOptions> {
-    const state = readState(opts.state);
-    const json = JSON.stringify({ referer: req.header('referer'), ...state });
-    return {
-      state: Buffer.from(json).toString('base64'),
-    };
+  static readState<T = Record<string, unknown>>(src?: string | Request): T | undefined {
+    const state = (typeof src === 'string' ? src : (typeof src?.query.state === 'string' ? src?.query.state : ''));
+    if (state) {
+      try {
+        return JSON.parse(Buffer.from(state, 'base64').toString('utf8'));
+      } catch { }
+    }
   }
 
   /**
-   * Process request read state from query
-   * @param req The travetto request
+   * Write state value from plain object
+   * @param state
+   * @returns base64 encoded state value, if state is provided
    */
-  static getLoginContext(req: Request): LoginContext | undefined {
-    if (req.query.state) {
-      if (typeof req.query.state === 'string' && req.query.state) {
-        try {
-          return readState(req.query.state);
-        } catch {
-          console.error('Unable to process previous login state');
-        }
-      }
+  static writeState(state?: Record<string, unknown>): string | undefined {
+    if (state) {
+      return Buffer.from(JSON.stringify(state), 'utf8').toString('base64');
     }
+  }
+
+  /**
+   * Add to a given state value
+   * @param state The new state data to inject
+   * @param currentState The optional, current state/request
+   * @param key Optional location to nest new state data
+   * @returns
+   */
+  static addToState(state: string | Record<string, unknown>, current?: string | Request, key?: string): string {
+    const pre = this.readState(current) ?? {};
+    const toAdd = typeof state === 'string' ? JSON.parse(state) : state;
+    if (key) {
+      Object.assign(pre[key] ??= {}, toAdd);
+    } else {
+      Object.assign(pre, toAdd);
+    }
+    return this.writeState(pre)!;
+  }
+
+  /**
+   * Enhance passport state with additional information information
+   * @param req The travetto request,
+   * @param currentState The current state, if any
+   */
+  static enhanceState(req: Request, currentState?: string): string {
+    return this.addToState({ referrer: req.header('referer') }, currentState);
   }
 }
