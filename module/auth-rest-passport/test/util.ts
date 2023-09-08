@@ -35,4 +35,3 @@ class PassportUtilSuite {
     assert(PassportUtil.readState<{ deet: { age: number } }>(added)?.deet.age === 21);
   }
 }
-

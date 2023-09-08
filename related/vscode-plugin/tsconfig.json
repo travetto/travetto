@@ -1,1 +1,8 @@
-{"extends":"@travetto/compiler/tsconfig.trv.json"}
+{
+  "extends": "@travetto/compiler/tsconfig.trv.json",
+  "watchOptions": {
+    "excludeDirectories": [
+      "out/"
+    ]
+  }
+}

@@ -2,5 +2,11 @@
   "extends": "./module/compiler/tsconfig.trv.json",
   "compilerOptions": {
     "rootDir": ".",
+  },
+  "watchOptions": {
+    "excludeDirectories": [
+      "**/.angular",
+      "**/out"
+    ]
   }
 }

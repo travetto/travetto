@@ -158,6 +158,9 @@ async function watchFolderRecursive(queue: Queue<WatchEvent>, options: WatchFold
     await fs.mkdir(options.src, { recursive: true });
     const ignore = (await fs.readdir(options.src)).filter(x => x.startsWith('.') && x.length > 2);
     const cleanup = await lib.subscribe(options.src, async (err, events) => {
+      if (err) {
+        process.send?.({ type: 'log', message: `Watch error: ${err}` });
+      }
       for (const ev of events) {
         const finalEv = { action: ev.type, file: path.toPosix(ev.path), folder: target };
         if (ev.type !== 'delete') {

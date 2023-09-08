@@ -96,6 +96,16 @@ export class WorkspaceResultsManager {
     }
   }
 
+  updateTotals(): void {
+    const totals = this.getTotals();
+    this.setStatus(
+      totals.failed === 0 ?
+        `Passed ${totals.passed}` :
+        `Failed ${totals.failed}/${totals.failed + totals.passed}`,
+      totals.failed ? '#f33' : '#8f8'
+    );
+  }
+
   /**
    * On test event
    * @param ev
@@ -107,13 +117,7 @@ export class WorkspaceResultsManager {
       }
     } else {
       this.getResults(ev)?.onEvent(ev);
-      const totals = this.getTotals();
-      this.setStatus(
-        totals.failed === 0 ?
-          `Passed ${totals.passed}` :
-          `Failed ${totals.failed}/${totals.failed + totals.passed}`,
-        totals.failed ? '#f33' : '#8f8'
-      );
+      this.updateTotals();
     }
   }
 
@@ -154,12 +158,10 @@ export class WorkspaceResultsManager {
    */
   untrackEditor(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
     editor = Workspace.getDocumentEditor(editor);
-    if (editor) {
-      if (this.#results.has(editor.document.fileName)) {
-        this.#results.get(editor.document.fileName)!.dispose();
-        this.#results.delete(editor.document.fileName);
-        this.#log.info('Untracking', editor.document.fileName);
-      }
+    if (editor && this.#results.has(editor.document.fileName)) {
+      this.#results.get(editor.document.fileName)!.dispose();
+      this.#results.delete(editor.document.fileName);
+      this.#log.info('Untracking', editor.document.fileName);
     }
   }
 
@@ -168,6 +170,7 @@ export class WorkspaceResultsManager {
    */
   reset(editor: vscode.TextEditor | vscode.TextDocument | undefined): void {
     this.untrackEditor(editor);
+    this.updateTotals();
     this.trackEditor(editor);
   }
 }

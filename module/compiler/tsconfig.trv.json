@@ -21,4 +21,12 @@
     "noEmitHelpers": true,
     "outDir": "build/",
   },
+  "watchOptions": {
+    "excludeDirectories": [
+      "**/node_modules",
+      "**/.trv_output",
+      "**/.trv_compiler",
+      "**/.git",
+    ]
+  }
 }
