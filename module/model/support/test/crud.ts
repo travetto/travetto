@@ -46,6 +46,10 @@ class User2 {
   id: string;
   address?: Address;
   name: string;
+
+  prePersist() {
+    this.name = `${this.name}-suff`;
+  }
 }
 
 @Model()
@@ -175,6 +179,7 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     }));
 
     assert(o.address === undefined);
+    assert(o.name === 'bob-suff');
 
     await service.updatePartial(User2, User2.from({
       id: o.id,

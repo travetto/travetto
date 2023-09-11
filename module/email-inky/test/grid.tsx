@@ -317,7 +317,7 @@ class GridTest {
       <tbody>
         <tr></tr>
       </tbody>
-    </table >;
+    </table>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
@@ -325,11 +325,11 @@ class GridTest {
   @Test('copies classes to the final HTML output for block grid')
   async testBlockGridClasses() {
     const input = <BlockGrid up={4} className="show-for-large"></BlockGrid>;
-    const expected = <table className="show-for-large block-grid up-4 ">
+    const expected = <table className="show-for-large block-grid up-4">
       <tbody>
         <tr></tr>
       </tbody>
-    </table >;
+    </table>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }

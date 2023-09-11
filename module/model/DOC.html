@@ -245,18 +245,10 @@ Models are declared via the <a target="_blank" class="source-link" href="https:/
    * If not provided, will be computed on create
    */</span>
   id<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Run before saving
-   */</span>
-  prePersist<span class="token operator">?</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token operator">|</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Run after loading
-   */</span>
-  postLoad<span class="token operator">?</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token operator">|</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-All fields are optional, but the <code class="item field">id</code> and <code class="item field">type</code> are important as those field types are unable to be changed.  This may make using existing data models impossible if types other than strings are required.  Additionally, the type field, is intended to record the base model type and cannot be remapped. This is important to support polymorphism, not only in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>, but also in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>.
+The <code class="item field">id</code> is the only required field for a model, as this is a hard requirement on naming and type.  This may make using existing data models impossible if types other than strings are required.  Additionally, the <code class="item field">type</code> field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/model" title="Datastore abstraction for core operations.">Data Modeling Support</a>, but also in <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/schema" title="Data type registry for runtime validation, reflection and binding.">Schema</a>.
 
 <h2 id="implementations">Implementations</h2>
 

@@ -21,6 +21,8 @@ type IndexClauseRaw<T> = {
   T[P] extends object ? IndexClauseRaw<RetainFields<T[P]>> : 1 | -1 | true;
 };
 
+export type DataHandler<T = unknown> = (inst: T) => (Promise<T | void> | T | void);
+
 /**
  * Model options
  */
@@ -57,6 +59,14 @@ export class ModelOptions<T extends ModelType = ModelType> {
    * Auto create in development mode
    */
   autoCreate: boolean;
+  /**
+   * Pre-persist handlers
+   */
+  prePersist?: DataHandler<unknown>[];
+  /**
+   * Post-load handlers
+   */
+  postLoad?: DataHandler<unknown>[];
 }
 
 /**

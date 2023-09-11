@@ -204,3 +204,13 @@ export function Ignore(): PropertyDecorator {
  * @augments `@travetto/schema:Field`
  */
 export function Specifier(...specifiers: string[]): PropType<unknown> { return prop({ specifiers }); }
+
+/**
+ * Sets the subtype field via a property decorator
+ * @augments `@travetto/schema:Field`
+ */
+export function SubTypeField(): ((t: ClassInstance, k: string) => void) {
+  return (t: ClassInstance, k: string): void => {
+    SchemaRegistry.register(t.constructor, { subTypeField: k });
+  };
+}

@@ -79,8 +79,9 @@ export const text = <>
 
     {ModelTypeSnippet}
 
-    All fields are optional, but the {d.field('id')} and {d.field('type')} are important as those field types are unable to be changed.  This may make using existing data models impossible if types other than strings are required.  Additionally, the type field, is intended to record the base model type and cannot be remapped. This is important to support polymorphism, not only in {d.mod('Model')}, but also in {d.mod('Schema')}.
+    The {d.field('id')} is the only required field for a model, as this is a hard requirement on naming and type.  This may make using existing data models impossible if types other than strings are required.  Additionally, the {d.field('type')} field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in {d.mod('Model')}, but also in {d.mod('Schema')}.
   </c.Section>
+
   <c.Section title='Implementations'>
     <ModelImplementations />
   </c.Section>

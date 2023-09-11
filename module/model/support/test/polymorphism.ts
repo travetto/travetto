@@ -2,10 +2,10 @@ import assert from 'assert';
 import timers from 'timers/promises';
 
 import { Suite, Test } from '@travetto/test';
-import { Text, TypeMismatchError } from '@travetto/schema';
+import { SubTypeField, Text, TypeMismatchError } from '@travetto/schema';
 import {
   ModelIndexedSupport, Index, ModelCrudSupport, Model,
-  NotFoundError, SubTypeNotSupportedError
+  NotFoundError, SubTypeNotSupportedError, PersistValue
 } from '@travetto/model';
 
 import { isIndexedSupported } from '../../src/internal/service/common';
@@ -16,15 +16,14 @@ import { BaseModelSuite } from './base';
 @Model({ baseType: true })
 export class Worker {
   id: string;
-  type: string;
+  @SubTypeField()
+  _type: string;
   @Text()
   name: string;
   age?: number;
-  updatedDate?: Date;
 
-  prePersist() {
-    this.updatedDate = new Date();
-  }
+  @PersistValue(() => new Date())
+  updatedDate?: Date;
 }
 
 @Model()

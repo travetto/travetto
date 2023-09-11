@@ -93,6 +93,7 @@ This schema provides a powerful base for data binding and validation at runtime.
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L52">@Writeonly</a> defines a that field should not be exported in serialization, but that it can be bound to</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L64">@Secret</a> marks a field as being sensitive.  This is used by certain logging activities to ensure sensitive information is not logged out.</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L206">@Specifier</a> attributes additional specifiers to a field, allowing for more specification beyond just the field's type.</li>
+<li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/schema/src/decorator/field.ts#L212">@SubTypeField</a> allows for promoting a given field as the owner of the sub type discriminator (defaults to <code class="item field">type</code>).</li>
 </ul>
 Additionally, schemas can be nested to form more complex data structures that are able to bound and validated. <br><br>
 Just like the class, all fields can be defined with

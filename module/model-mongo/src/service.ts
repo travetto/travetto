@@ -228,9 +228,7 @@ export class MongoModelService implements
       await SchemaValidator.validate(cls, item, view);
     }
 
-    if (item.prePersist) {
-      await item.prePersist();
-    }
+    item = await ModelCrudUtil.prePersist(cls, item);
 
     let final: Record<string, unknown> = item;
 

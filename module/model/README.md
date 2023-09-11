@@ -216,18 +216,10 @@ export interface ModelType {
    * If not provided, will be computed on create
    */
   id: string;
-  /**
-   * Run before saving
-   */
-  prePersist?(): void | Promise<void>;
-  /**
-   * Run after loading
-   */
-  postLoad?(): void | Promise<void>;
 }
 ```
 
-All fields are optional, but the `id` and `type` are important as those field types are unable to be changed.  This may make using existing data models impossible if types other than strings are required.  Additionally, the type field, is intended to record the base model type and cannot be remapped. This is important to support polymorphism, not only in [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."), but also in [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.").
+The `id` is the only required field for a model, as this is a hard requirement on naming and type.  This may make using existing data models impossible if types other than strings are required.  Additionally, the `type` field, is intended to record the base model type, but can be remapped. This is important to support polymorphism, not only in [Data Modeling Support](https://github.com/travetto/travetto/tree/main/module/model#readme "Datastore abstraction for core operations."), but also in [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.").
 
 ## Implementations
 |Service|Basic|CRUD|Indexed|Expiry|Stream|Bulk|

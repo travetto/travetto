@@ -13,14 +13,6 @@ export interface ModelType {
    * If not provided, will be computed on create
    */
   id: string;
-  /**
-   * Run before saving
-   */
-  prePersist?(): void | Promise<void>;
-  /**
-   * Run after loading
-   */
-  postLoad?(): void | Promise<void>;
 }
 
 export type OptionalId<T extends { id: string }> = Omit<T, 'id'> & { id?: string };

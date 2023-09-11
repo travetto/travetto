@@ -48,13 +48,9 @@ class Child {
 @Index({ type: 'sorted', name: 'nameCreated', fields: [{ child: { name: 1 } }, { createdDate: 1 }] })
 class User4 {
   id: string;
-  createdDate?: Date;
+  createdDate?: Date = new Date();
   color: string;
   child: Child;
-
-  prePersist?() {
-    this.createdDate ??= new Date();
-  }
 }
 
 @Suite()
@@ -157,7 +153,7 @@ export abstract class ModelIndexedSuite extends BaseModelSuite<ModelIndexedSuppo
     await service.create(User4, User4.from({ child: { name: 'bob', age: 30 }, createdDate: TimeUtil.timeFromNow('2d'), color: 'red' }));
     await service.create(User4, User4.from({ child: { name: 'bob', age: 50 }, createdDate: TimeUtil.timeFromNow('-1d'), color: 'green' }));
 
-    const arr = await this.toArray(service.listByIndex(User4, 'nameCreated', User4.from({ child: { name: 'bob' } })));
+    const arr = await this.toArray(service.listByIndex(User4, 'nameCreated', { child: { name: 'bob' } }));
 
     assert(arr[0].color === 'green' && arr[0].child.name === 'bob' && arr[0].child.age === 50);
     assert(arr[1].color === 'red' && arr[1].child.name === 'bob' && arr[1].child.age === 30);
