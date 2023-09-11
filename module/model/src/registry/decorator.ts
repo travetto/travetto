@@ -3,7 +3,7 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { ModelType } from '../types/model';
 import { ModelRegistry } from './model';
-import { IndexConfig, ModelOptions } from './types';
+import { DataHandler, IndexConfig, ModelOptions } from './types';
 
 /**
  * Model decorator, extends `@Schema`
@@ -39,5 +39,25 @@ export function ExpiresAt() {
   return <K extends string, T extends Partial<Record<K, Date>>>(tgt: T, prop: K): void => {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     ModelRegistry.register(tgt.constructor as Class<T>, { expiresAt: prop });
+  };
+}
+
+/**
+ * Model class decorator for pre-persist behavior
+ */
+export function PerPersist<T>(handler: DataHandler<T>) {
+  return function (tgt: Class<T>): void {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    ModelRegistry.registerDataHandlers(tgt, { prePersist: [handler as DataHandler] });
+  };
+}
+
+/**
+ * Model class decorator for post-load behavior
+ */
+export function PostLoad<T>(handler: DataHandler<T>) {
+  return function (tgt: Class<T>): void {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    ModelRegistry.registerDataHandlers(tgt, { postLoad: [handler as DataHandler] });
   };
 }

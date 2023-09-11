@@ -8,6 +8,7 @@ import { ModelIdSource, ModelType, OptionalId } from '../../types/model';
 import { NotFoundError } from '../../error/not-found';
 import { ExistsError } from '../../error/exists';
 import { SubTypeNotSupportedError } from '../../error/invalid-sub-type';
+import { DataHandler } from '../../registry/types';
 
 export type ModelCrudProvider = {
   idSource: ModelIdSource;
@@ -62,10 +63,7 @@ export class ModelCrudUtil {
       }
     }
 
-    if (result.postLoad) {
-      await result.postLoad();
-    }
-    return result;
+    return this.postLoad(cls, result);
   }
 
   /**
@@ -90,9 +88,7 @@ export class ModelCrudUtil {
       SchemaRegistry.ensureInstanceTypeField(cls, item);
     }
 
-    if (item.prePersist) {
-      await item.prePersist();
-    }
+    item = await this.prePersist(cls, item);
 
     let errors: ValidationError[] = [];
     try {
@@ -141,9 +137,7 @@ export class ModelCrudUtil {
 
     item = Object.assign(existing, item);
 
-    if (item.prePersist) {
-      await item.prePersist();
-    }
+    item = await this.prePersist(cls, item);
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return item as T;
@@ -156,5 +150,29 @@ export class ModelCrudUtil {
     if (ModelRegistry.get(cls).subType) {
       throw new SubTypeNotSupportedError(cls);
     }
+  }
+
+  /**
+   * Pre persist behavior
+   */
+  static async prePersist<T>(cls: Class<T>, item: T): Promise<T> {
+    const config = ModelRegistry.get(cls);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    for (const handler of (config.prePersist ?? []) as unknown as DataHandler<T>[]) {
+      item = await handler(item) ?? item;
+    }
+    return item;
+  }
+
+  /**
+   * Post load behavior
+   */
+  static async postLoad<T>(cls: Class<T>, item: T): Promise<T> {
+    const config = ModelRegistry.get(cls);
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    for (const handler of (config.postLoad ?? []) as unknown as DataHandler<T>[]) {
+      item = await handler(item) ?? item;
+    }
+    return item;
   }
 }

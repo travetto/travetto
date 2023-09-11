@@ -4,7 +4,7 @@ import { Suite, Test } from '@travetto/test';
 import { Schema } from '@travetto/schema';
 import { TimeUtil } from '@travetto/base';
 
-import { Index, Model } from '../../src/registry/decorator';
+import { Index, Model, PerPersist } from '../../src/registry/decorator';
 import { ModelIndexedSupport } from '../../src/service/indexed';
 import { NotFoundError } from '../../src/error/not-found';
 import { IndexNotSupported } from '../../src/error/invalid-index';
@@ -46,15 +46,12 @@ class Child {
 @Model()
 @Index({ type: 'sorted', name: 'childAge', fields: [{ child: { name: 1 } }, { child: { age: 1 } }] })
 @Index({ type: 'sorted', name: 'nameCreated', fields: [{ child: { name: 1 } }, { createdDate: 1 }] })
+@PerPersist(item => { item.createdDate ??= new Date(); })
 class User4 {
   id: string;
   createdDate?: Date;
   color: string;
   child: Child;
-
-  prePersist?() {
-    this.createdDate ??= new Date();
-  }
 }
 
 @Suite()

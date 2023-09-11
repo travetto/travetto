@@ -52,7 +52,16 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
   }
 
   createPending(cls: Class): Partial<ModelOptions<ModelType>> {
-    return { class: cls, indices: [], autoCreate: true, baseType: RootIndex.getFunctionMetadata(cls)?.abstract };
+    return { class: cls, indices: [], autoCreate: true, baseType: RootIndex.getFunctionMetadata(cls)?.abstract, postLoad: [], prePersist: [] };
+  }
+
+  registerDataHandlers(cls: Class, pConfig?: Partial<ModelOptions<ModelType>>): void {
+    const cfg = this.getOrCreatePending(cls);
+    this.register(cls, {
+      ...cfg,
+      prePersist: [...cfg.prePersist ?? [], ...pConfig?.prePersist ?? []],
+      postLoad: [...cfg.postLoad ?? [], ...pConfig?.postLoad ?? []],
+    });
   }
 
   onInstallFinalize(cls: Class): ModelOptions<ModelType> {
@@ -66,6 +75,16 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     if (schema.subTypeField in view && this.getBaseModel(cls) !== cls) {
       config.subType = !!schema.subTypeName; // Copy from schema
       delete view[schema.subTypeField].required; // Allow type to be optional
+      let parent = this.getParentClass(cls);
+      let from = cls;
+      // Merge inherited prepersist/postload
+      while (parent && from !== parent) {
+        const pCfg = this.get(parent);
+        config.prePersist = [...pCfg.prePersist ?? [], ...config.prePersist ?? []];
+        config.postLoad = [...pCfg.postLoad ?? [], ...config.postLoad ?? []];
+        from = parent;
+        parent = this.getParentClass(from);
+      }
     }
     return config;
   }
