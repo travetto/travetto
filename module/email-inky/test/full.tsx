@@ -50,6 +50,7 @@ class ContainerTest {
         <Unless attr='unpaid'>
           No Payment!
         </Unless>
+        <Value attr='amount-three' raw={true} />
       </Container>
     </InkyTemplate>;
 
@@ -66,6 +67,7 @@ class ContainerTest {
     assert(/[{]{2}[^]unpaid[}]{2}\s*No Payment!\s*[{]{2}\/unpaid[}]{2}/gsm.test(output));
     assert(/[{]{2}amount[}]{2}/gsm.test(output));
     assert(/[{]{2}amount-two[}]{2}/gsm.test(output));
+    assert(/[{]{3}amount-three[}]{3}/gsm.test(output));
   }
 
   @Test('works when including raw styles')

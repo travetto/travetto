@@ -64,7 +64,7 @@ export const Html: RenderProvider<RenderContext> = {
   For: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   If: async ({ recurse, props }) => `{{#${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   Unless: async ({ recurse, props }) => `{{^${props.attr}}}${await recurse()}{{/${props.attr}}}`,
-  Value: async ({ props }) => `{{${props.attr}}}`,
+  Value: async ({ props }) => props.raw ? `{{{${props.attr}}}}` : `{{${props.attr}}}`,
 
   br: async () => '<br>\n',
   hr: async (el) => `<table ${propsToStr(el.props)}><th></th></table>`,

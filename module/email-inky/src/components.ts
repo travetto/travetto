@@ -25,7 +25,7 @@ export const Spacer: CompFn<{ small?: number, large?: number, size?: number }> =
 export const Wrapper: CompFn<{}> = () => EMPTY;
 
 export const If: CompFn<{ attr: string }> = () => EMPTY;
-export const Value: CompFn<{ attr: string }> = () => EMPTY;
+export const Value: CompFn<{ attr: string, raw?: boolean }> = () => EMPTY;
 export const Unless: CompFn<{ attr: string }> = () => EMPTY;
 export const For: CompFn<{ attr: string }> = () => EMPTY;
 
