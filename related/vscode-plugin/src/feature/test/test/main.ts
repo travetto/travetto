@@ -127,11 +127,10 @@ class TestRunnerFeature extends BaseFeature {
     vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);
 
     context.subscriptions.push(vscode.languages.registerCodeLensProvider({
-      language: 'typescript',
       pattern: {
         baseUri: Workspace.uri,
         base: Workspace.path,
-        pattern: '**/test/**'
+        pattern: '**/test/**/*.{ts,tsx}'
       }
     }, {
       provideCodeLenses: this.buildCodeLenses.bind(this),

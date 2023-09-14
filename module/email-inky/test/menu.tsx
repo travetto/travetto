@@ -14,14 +14,14 @@ class MenuComponentTest {
       <Item href="http://zurb.com">Item</Item>
     </Menu>;
 
-    const expected = <table class="menu">
+    const expected = <table className="menu">
       <tbody>
         <tr>
           <td>
             <table>
               <tbody>
                 <tr>
-                  <th class="menu-item">
+                  <th className="menu-item">
                     <a href="http://zurb.com">Item</a>
                   </th>
                 </tr>
@@ -40,14 +40,14 @@ class MenuComponentTest {
     const input = <Menu>
       <Item href="http://zurb.com" target="_blank">Item</Item>
     </Menu>;
-    const expected = <table class="menu">
+    const expected = <table className="menu">
       <tbody>
         <tr>
           <td>
             <table>
               <tbody>
                 <tr>
-                  <th class="menu-item">
+                  <th className="menu-item">
                     <a href="http://zurb.com" target="_blank">Item</a>
                   </th>
                 </tr>
@@ -63,8 +63,8 @@ class MenuComponentTest {
 
   @Test('creates a menu with classes')
   async testClasses() {
-    const input = <Menu class="vertical"></Menu>;
-    const expected = <table class="vertical menu">
+    const input = <Menu className="vertical"></Menu>;
+    const expected = <table className="vertical menu">
       <tbody>
         <tr>
           <td>
@@ -77,7 +77,7 @@ class MenuComponentTest {
           </td>
         </tr>
       </tbody>
-    </table >;
+    </table>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
@@ -85,17 +85,17 @@ class MenuComponentTest {
   @Test('works without using an item tag')
   async testWithoutItem() {
     const input = <Menu>
-      <th class="menu-item"><a href="http://zurb.com">Item 1</a></th>
+      <th className="menu-item"><a href="http://zurb.com">Item 1</a></th>
     </Menu>;
 
-    const expected = <table class="menu">
+    const expected = <table className="menu">
       <tbody>
         <tr>
           <td>
             <table>
               <tbody>
                 <tr>
-                  <th class="menu-item">
+                  <th className="menu-item">
                     <a href="http://zurb.com">Item 1</a>
                   </th>
                 </tr>

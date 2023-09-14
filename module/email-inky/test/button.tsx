@@ -7,7 +7,7 @@ import { Suite, Test } from '@travetto/test';
 import { Button } from '../src/components';
 import { renderJSX } from './util';
 
-const SPACER_16 = <table class="spacer">
+const SPACER_16 = <table className="spacer">
   <tbody>
     <tr>
       <td height="16px" style="font-size:16px;line-height:16px;">{'&nbsp;'}</td>
@@ -22,7 +22,7 @@ class ButtonComponentTest {
   async testButton() {
     const input = <Button href="http://zurb.com">Button</Button>;
     const expected = <>
-      <table class="button">
+      <table className="button">
         <tbody>
           <tr>
             <td>
@@ -49,7 +49,7 @@ class ButtonComponentTest {
   async testTarget() {
     const input = <Button href="http://zurb.com" target="_blank">Button</Button>;
     const expected = <>
-      <table class="button">
+      <table className="button">
         <tbody>
           <tr>
             <td>
@@ -74,10 +74,10 @@ class ButtonComponentTest {
 
   @Test('creates a button with classes')
   async testClasses() {
-    const input = <Button class="small alert" href="http://zurb.com">Button</Button>;
+    const input = <Button className="small alert" href="http://zurb.com">Button</Button>;
     const expected =
       <>
-        <table class="small alert button">
+        <table className="small alert button">
           <tbody>
             <tr>
               <td>
@@ -105,7 +105,7 @@ class ButtonComponentTest {
 
     const input = <Button expanded={true} href="http://zurb.com">Button</Button>;
     const expected = <>
-      <table class="expand button">
+      <table className="expand button">
         <tbody>
           <tr>
             <td>
@@ -114,14 +114,14 @@ class ButtonComponentTest {
                   <tr>
                     <td>
                       <center>
-                        <a href="http://zurb.com" align="center" class="float-center">Button</a>
+                        <a href="http://zurb.com" align="center" className="float-center">Button</a>
                       </center>
                     </td>
                   </tr>
                 </tbody>
               </table>
             </td>
-            <td class="expander"></td>
+            <td className="expander"></td>
           </tr>
         </tbody>
       </table>

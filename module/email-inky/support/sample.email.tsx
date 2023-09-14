@@ -5,7 +5,7 @@ import { Title, Container, Summary, Row, Column, If, Button, InkyTemplate } from
 export default <InkyTemplate>
   <Title>Test Email</Title>
   <Summary>Email Summary</Summary>
-  <Container>
+  <Container style={'background-image: url(/hello.gif);'}>
     <If attr='person'>
       <Row>
         <Column small={5}>

@@ -214,7 +214,7 @@
         },
         {
           "command": "travetto.test.test:line",
-          "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorIsOpen"
+          "when": "travetto.test && !inDebugMode && resourceFilename =~ /[.]tsx?$/ && editorIsOpen"
         },
         {
           "command": "travetto.test.test:reload",
@@ -222,7 +222,7 @@
         },
         {
           "command": "travetto.test.test:rerun",
-          "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorIsOpen"
+          "when": "travetto.test && !inDebugMode && resourceFilename =~ /[.]tsx?$/ && editorIsOpen"
         },
         {
           "command": "travetto.cli.run:new",
@@ -263,13 +263,13 @@
         "command": "travetto.test.test:line",
         "key": "ctrl+shift+t",
         "mac": "cmd+shift+t",
-        "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorTextFocus"
+        "when": "travetto.test && !inDebugMode && resourceFilename =~ /[.]tsx?$/ && editorTextFocus"
       },
       {
         "command": "travetto.test.test:rerun",
         "key": "ctrl+shift+r",
         "mac": "cmd+shift+r",
-        "when": "travetto.test && !inDebugMode && editorLangId == typescript && editorFocus"
+        "when": "travetto.test && !inDebugMode && resourceFilename =~ /[.]tsx?$/ && editorFocus"
       }
     ]
   }

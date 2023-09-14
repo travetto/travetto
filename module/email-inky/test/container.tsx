@@ -12,7 +12,7 @@ class ContainerTest {
   @Test('works when rendering a containers')
   async testFull() {
     const input = <Container></Container>;
-    const expected = <table align="center" class="container">
+    const expected = <table align="center" className="container">
       <tbody>
         <tr>
           <td></td>

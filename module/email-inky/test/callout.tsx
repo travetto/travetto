@@ -12,13 +12,13 @@ class CalloutComponentTest {
   @Test('creates a callout with correct syntax')
   async testCallout() {
     const input = <Callout>Callout</Callout>;
-    const expected = <table class="callout">
+    const expected = <table className="callout">
       <tbody>
         <tr>
-          <th class="callout-inner">
+          <th className="callout-inner">
             Callout
           </th>
-          <th class="expander"></th>
+          <th className="expander"></th>
         </tr>
       </tbody>
     </table>;
@@ -28,14 +28,14 @@ class CalloutComponentTest {
 
   @Test('copies classes to the final HTML')
   async testClasses() {
-    const input = <Callout class="primary">Callout</Callout>;
-    const expected = <table class="callout">
+    const input = <Callout className="primary">Callout</Callout>;
+    const expected = <table className="callout">
       <tbody>
         <tr>
-          <th class="primary callout-inner ">
+          <th className="primary callout-inner ">
             Callout
           </th>
-          <th class="expander"></th>
+          <th className="expander"></th>
         </tr>
       </tbody>
     </table>;

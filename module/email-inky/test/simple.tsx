@@ -13,11 +13,11 @@ class SimpleComponentTest {
 
   @Test('creates a wrapper that you can attach classes to')
   async testWrapper() {
-    const input = <Wrapper class="header"></Wrapper>;
-    const expected = <table align="center" class="header wrapper">
+    const input = <Wrapper className="header"></Wrapper>;
+    const expected = <table align="center" className="header wrapper">
       <tbody>
         <tr>
-          <td class="wrapper-inner">
+          <td className="wrapper-inner">
           </td>
         </tr>
       </tbody>
@@ -44,8 +44,8 @@ class SimpleComponentTest {
 
   @Test('creates a horizontal rule that you can attach classes to')
   async testHLine() {
-    const input = <HLine class="dotted"></HLine>;
-    const expected = <table class="dotted h-line">
+    const input = <HLine className="dotted"></HLine>;
+    const expected = <table className="dotted h-line">
       <tbody>
         <tr>
           <th>{'&nbsp;'}</th>

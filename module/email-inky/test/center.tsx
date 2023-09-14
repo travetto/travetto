@@ -13,7 +13,7 @@ export class CenterComponentTest {
   async testCenter() {
     const input = <Center><div></div></Center>;
     const expected = <center>
-      <div align="center" class="float-center"></div>
+      <div align="center" className="float-center"></div>
     </center>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -27,7 +27,7 @@ export class CenterComponentTest {
     </Center>;
 
     const expected = <center>
-      <center align="center" class="float-center">
+      <center align="center" className="float-center">
       </center>
     </center>;
 
@@ -43,14 +43,14 @@ export class CenterComponentTest {
     </Center>;
 
     const expected = <center>
-      <table align="center" class="float-center menu">
+      <table align="center" className="float-center menu">
         <tbody>
           <tr>
             <td>
               <table>
                 <tbody>
                   <tr>
-                    <th class="float-center menu-item">
+                    <th className="float-center menu-item">
                       <a href="#"></a>
                     </th>
                   </tr>

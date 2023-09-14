@@ -15,11 +15,11 @@ class GridTest {
   async testRow() {
     const input = <Row></Row>;
     const expected = <>
-      <table class="row">
+      <table className="row">
         <tbody>
           <tr></tr>
         </tbody>
-      </table>{ZWJ}
+      </table> {ZWJ}
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -28,16 +28,16 @@ class GridTest {
   @Test('creates a single column with first and last classes')
   async testSingleColumn() {
     const input = <Column large={12} small={12}>One</Column>;
-    const expected = <th class="first last small-12 large-12 columns">
+    const expected = <th className="first last small-12 large-12 columns">
       <table>
         <tbody>
           <tr>
             <th>One</th>
-            <th class="expander"></th>
+            <th className="expander"></th>
           </tr>
         </tbody>
-      </table>
-    </th>;
+      </table >
+    </th >;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
@@ -45,7 +45,7 @@ class GridTest {
   @Test('creates a single column with first and last classes with no-expander')
   async testNoExpanderImplicit() {
     const input = <Column large={12} small={12} noExpander={true}>One</Column>;
-    const expected = <th class="first last small-12 large-12 columns">
+    const expected = <th className="first last small-12 large-12 columns">
       <table>
         <tbody>
           <tr>
@@ -53,7 +53,7 @@ class GridTest {
           </tr>
         </tbody>
       </table>
-    </th>;
+    </th >;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
@@ -61,16 +61,16 @@ class GridTest {
   @Test('creates a single column with first and last classes with no-expander="false"')
   async testWithExpander() {
     const input = <Column large={12} small={12} noExpander={false}>One</Column>;
-    const expected = <th class="first last small-12 large-12 columns">
+    const expected = <th className="first last small-12 large-12 columns">
       <table>
         <tbody>
           <tr>
             <th>One</th>
-            <th class="expander"></th>
+            <th className="expander"></th>
           </tr>
         </tbody>
-      </table>
-    </th>;
+      </table >
+    </th >;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
@@ -78,7 +78,7 @@ class GridTest {
   @Test('creates a single column with first and last classes with no-expander="true"')
   async testNoExpanderExplicit() {
     const input = <Column large={12} small={12} noExpander={true}>One</Column>;
-    const expected = <th class="first last small-12 large-12 columns">
+    const expected = <th className="first last small-12 large-12 columns">
       <table>
         <tbody>
           <tr>
@@ -86,7 +86,7 @@ class GridTest {
           </tr>
         </tbody>
       </table>
-    </th>;
+    </th >;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
@@ -98,7 +98,7 @@ class GridTest {
       <Column large={6} small={12}>Two</Column>
     </>;
     const expected = <>
-      <th class="first small-12 large-6 columns">
+      <th className="first small-12 large-6 columns">
         <table>
           <tbody>
             <tr>
@@ -107,7 +107,7 @@ class GridTest {
           </tbody>
         </table>
       </th>
-      <th class="last small-12 large-6 columns">
+      <th className="last small-12 large-6 columns" >
         <table>
           <tbody>
             <tr>
@@ -115,7 +115,7 @@ class GridTest {
             </tr>
           </tbody>
         </table>
-      </th>
+      </th >
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -127,7 +127,7 @@ class GridTest {
       <Column large={6} largeOffset={6}>One</Column>
     </>;
     const expected =
-      <th class="first last small-12 large-6 columns large-offset-6">
+      <th className="first last small-12 large-6 columns large-offset-6">
         <table>
           <tbody>
             <tr>
@@ -135,7 +135,7 @@ class GridTest {
             </tr>
           </tbody>
         </table>
-      </th>;
+      </th >;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
@@ -148,7 +148,7 @@ class GridTest {
       <Column large={4} small={12}>Three</Column>
     </>;
     const expected = <>
-      <th class="first small-12 large-4 columns">
+      <th className="first small-12 large-4 columns">
         <table>
           <tbody>
             <tr>
@@ -157,7 +157,7 @@ class GridTest {
           </tbody>
         </table>
       </th>
-      <th class="small-12 large-4 columns">
+      <th className="small-12 large-4 columns" >
         <table>
           <tbody>
             <tr>
@@ -165,8 +165,8 @@ class GridTest {
             </tr>
           </tbody>
         </table>
-      </th>
-      <th class="last small-12 large-4 columns">
+      </th >
+      <th className="last small-12 large-4 columns" >
         <table>
           <tbody>
             <tr>
@@ -174,7 +174,7 @@ class GridTest {
             </tr>
           </tbody>
         </table>
-      </th>
+      </th >
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -183,16 +183,16 @@ class GridTest {
   @Test('transfers classes to the final HTML')
   async testClasses() {
     const input = <Column smallOffset={8} hideSmall={true}>One</Column>;
-    const expected = <th class="first last small-12 large-12 columns small-offset-8 hide-for-small">
+    const expected = <th className="first last small-12 large-12 columns small-offset-8 hide-for-small">
       <table>
         <tbody>
           <tr>
             <th>One</th>
-            <th class="expander"></th>
+            <th className="expander"></th>
           </tr>
         </tbody>
-      </table>
-    </th>;
+      </table >
+    </th >;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
@@ -204,7 +204,7 @@ class GridTest {
       <Column small={8}>Two</Column>
     </>;
     const expected = <>
-      <th class="first small-4 large-4 columns">
+      <th className="first small-4 large-4 columns">
         <table>
           <tbody>
             <tr>
@@ -213,7 +213,7 @@ class GridTest {
           </tbody>
         </table>
       </th>
-      <th class="last small-8 large-8 columns">
+      <th className="last small-8 large-8 columns" >
         <table>
           <tbody>
             <tr>
@@ -221,7 +221,7 @@ class GridTest {
             </tr>
           </tbody>
         </table>
-      </th>
+      </th >
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -234,7 +234,7 @@ class GridTest {
       <Column large={8}>Two</Column>
     </>;
     const expected = <>
-      <th class="first small-12 large-4 columns">
+      <th className="first small-12 large-4 columns">
         <table>
           <tbody>
             <tr>
@@ -243,7 +243,7 @@ class GridTest {
           </tbody>
         </table>
       </th>
-      <th class="last small-12 large-8 columns">
+      <th className="last small-12 large-8 columns" >
         <table>
           <tbody>
             <tr>
@@ -251,7 +251,7 @@ class GridTest {
             </tr>
           </tbody>
         </table>
-      </th>
+      </th >
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -261,15 +261,15 @@ class GridTest {
   async testNested() {
     const input = <Row><Column><Row></Row></Column></Row>;
     const expected = <>
-      <table class="row">
+      <table className="row">
         <tbody>
           <tr>
-            <th class="first last small-12 large-12 columns">
+            <th className="first last small-12 large-12 columns">
               <table>
                 <tbody>
                   <tr>
                     <th>
-                      <table class="row">
+                      <table className="row">
                         <tbody>
                           <tr></tr>
                         </tbody>
@@ -280,8 +280,8 @@ class GridTest {
               </table>
             </th>
           </tr>
-        </tbody>
-      </table>{ZWJ}
+        </tbody >
+      </table > {ZWJ}
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -291,22 +291,22 @@ class GridTest {
   async testAttributes() {
     const input = <Row dir="rtl"><Column dir="rtl" valign="middle" align="center">One</Column></Row>;
     const expected = <>
-      <table dir="rtl" class="row">
+      <table dir="rtl" className="row">
         <tbody>
           <tr>
-            <th dir="rtl" valign="middle" align="center" class="first last small-12 large-12 columns">
+            <th dir="rtl" valign="middle" align="center" className="first last small-12 large-12 columns">
               <table>
                 <tbody>
                   <tr>
                     <th>One</th>
-                    <th class="expander"></th>
+                    <th className="expander"></th>
                   </tr>
                 </tbody>
               </table>
             </th>
           </tr>
         </tbody>
-      </table>{ZWJ}
+      </table> {ZWJ}
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -315,23 +315,23 @@ class GridTest {
   @Test('returns the correct block grid syntax')
   async testBlockGridBasic() {
     const input = <BlockGrid up={4}></BlockGrid>;
-    const expected = <table class="block-grid up-4">
+    const expected = <table className="block-grid up-4">
       <tbody>
         <tr></tr>
       </tbody>
-    </table>;
+    </table >;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }
 
   @Test('copies classes to the final HTML output for block grid')
   async testBlockGridClasses() {
-    const input = <BlockGrid up={4} class="show-for-large"></BlockGrid>;
-    const expected = <table class="show-for-large block-grid up-4 ">
+    const input = <BlockGrid up={4} className="show-for-large"></BlockGrid>;
+    const expected = <table className="show-for-large block-grid up-4 ">
       <tbody>
         <tr></tr>
       </tbody>
-    </table>;
+    </table >;
 
     assert(await renderJSX(input) === await renderJSX(expected));
   }

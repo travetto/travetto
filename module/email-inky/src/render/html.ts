@@ -132,7 +132,7 @@ export const Html: RenderProvider<RenderContext> = {
 
     // Final HTML output
     return `
-<th ${propsToStr(el.props, ...classes)}>
+<th ${propsToStr(el.props, classes)}>
   <table>
     <tbody>
       <tr>
@@ -144,14 +144,14 @@ export const Html: RenderProvider<RenderContext> = {
   },
 
   HLine: async ({ props }) => `
-<table ${propsToStr(props, 'h-line')}>
+<table ${propsToStr(props, ['h-line'])}>
   <tbody>
     <tr><th>&nbsp;</th></tr>
   </tbody>
 </table>`,
 
   Row: async ({ recurse, el }): Promise<string> => `
-<table ${propsToStr(el.props, 'row')}>
+<table ${propsToStr(el.props, ['row'])}>
   <tbody>
     <tr>${await recurse()}</tr>
   </tbody>
@@ -180,7 +180,7 @@ export const Html: RenderProvider<RenderContext> = {
 
     // The .button class is always there, along with any others on the <button> element
     return `
-<table ${propsToStr(rest, 'button')}>
+<table ${propsToStr(rest, ['button'])}>
   <tbody>
     <tr>
       <td>
@@ -201,14 +201,14 @@ export const Html: RenderProvider<RenderContext> = {
   },
 
   Container: async ({ recurse, props }): Promise<string> => `
-<table align="center" ${propsToStr(props, 'container')}>
+<table align="center" ${propsToStr(props, ['container'])}>
   <tbody>
     <tr><td>${await recurse()}</td></tr>
   </tbody>
 </table>`,
 
   BlockGrid: async ({ recurse, props }): Promise<string> => `
-<table ${propsToStr(props, 'block-grid', props.up ? `up-${props.up}` : '')}>
+<table ${propsToStr(props, ['block-grid', props.up ? `up-${props.up}` : ''])}>
   <tbody>
     <tr>${await recurse()}</tr>
   </tbody>
@@ -231,7 +231,7 @@ export const Html: RenderProvider<RenderContext> = {
     }
 
     return `
-<table ${propsToStr(props, 'menu')}>
+<table ${propsToStr(props, ['menu'])}>
   <tbody>
     <tr>
       <td>
@@ -251,7 +251,7 @@ export const Html: RenderProvider<RenderContext> = {
   Item: async ({ recurse, props }): Promise<string> => {
     const { href, target, ...parentAttrs } = props;
     return `
-       <th ${propsToStr(parentAttrs, 'menu-item')}>
+       <th ${propsToStr(parentAttrs, ['menu-item'])}>
          <a ${propsToStr({ href, target })}>${await recurse()}</a>
        </th>`;
   },
@@ -284,10 +284,10 @@ export const Html: RenderProvider<RenderContext> = {
     delete props.className;
 
     return `
-<table ${propsToStr(props, 'callout')}>
+<table ${propsToStr(props, ['callout'])}>
   <tbody>
     <tr>
-      <th ${propsToStr(innerProps, 'callout-inner')}>
+      <th ${propsToStr(innerProps, ['callout-inner'])}>
         ${await recurse()}
       </th>
       <th class="expander"></th>
@@ -300,7 +300,7 @@ export const Html: RenderProvider<RenderContext> = {
     const html: string[] = [];
     const buildSpacer = (size: number | string, extraClass: string = ''): string =>
       `
-<table ${propsToStr(props, 'spacer', extraClass)}>
+<table ${propsToStr(props, ['spacer', extraClass])}>
   <tbody>
     <tr>
       <td height="${size}px" style="font-size:${size}px;line-height:${size}px;">&nbsp;</td>
@@ -327,7 +327,7 @@ export const Html: RenderProvider<RenderContext> = {
   },
 
   Wrapper: async ({ recurse, el }) => `
-<table align="center" ${propsToStr(el.props, 'wrapper')}>
+<table align="center" ${propsToStr(el.props, ['wrapper'])}>
   <tbody>
     <tr>
       <td class="wrapper-inner">

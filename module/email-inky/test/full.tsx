@@ -67,4 +67,21 @@ class ContainerTest {
     assert(/[{]{2}amount[}]{2}/gsm.test(output));
     assert(/[{]{2}amount-two[}]{2}/gsm.test(output));
   }
+
+  @Test('works when including raw styles')
+  async verifyStyleUrls() {
+    const input = <InkyTemplate>
+      <Title>My Title</Title>
+      <Container style={'background-image: url(/green.gif)'}>      </Container>
+    </InkyTemplate>;
+
+    const state = {
+      ...(await unwrap(input))!,
+      file: 'test',
+      module: RootIndex.mainModuleName,
+    };
+
+    const output = await state.html(state);
+    assert(/background-image: url[(][/]green.gif[)]/gsm.test(output));
+  }
 }

@@ -49,7 +49,7 @@ export class Workspace {
           file = this.#req.resolve(imp);
         } catch {
           try {
-            file = this.#req.resolve(imp.replace(/[.]js$/, '.ts'));
+            file = this.#req.resolve(imp.replace(/[.]js$/, '.ts').replace(/[.]jsx$/, '.tsx'));
           } catch { }
         }
       }
