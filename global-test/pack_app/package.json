@@ -2,11 +2,11 @@
   "name": "@travetto-test/pack_app",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/cli": "^3.3.3"
+    "@travetto/cli": "^3.3.4"
   },
   "devDependencies": {
-    "@travetto/compiler": "^3.3.1",
-    "@travetto/pack": "^3.3.3"
+    "@travetto/compiler": "^3.3.2",
+    "@travetto/pack": "^3.3.4"
   },
   "travetto": {},
   "private": true
