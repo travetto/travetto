@@ -6,8 +6,6 @@ import { Suite, Test } from '@travetto/test';
 import { renderJSX } from './util';
 import { Row, Column, BlockGrid } from '../src/components';
 
-const ZWJ = <>{'&zwj;'}</>;
-
 @Suite('Grid')
 class GridTest {
 
@@ -19,7 +17,7 @@ class GridTest {
         <tbody>
           <tr></tr>
         </tbody>
-      </table> {ZWJ}
+      </table>
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -273,7 +271,7 @@ class GridTest {
                         <tbody>
                           <tr></tr>
                         </tbody>
-                      </table>{ZWJ}
+                      </table>
                     </th>
                   </tr>
                 </tbody>
@@ -281,7 +279,7 @@ class GridTest {
             </th>
           </tr>
         </tbody >
-      </table > {ZWJ}
+      </table >
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));
@@ -306,7 +304,7 @@ class GridTest {
             </th>
           </tr>
         </tbody>
-      </table> {ZWJ}
+      </table>
     </>;
 
     assert(await renderJSX(input) === await renderJSX(expected));

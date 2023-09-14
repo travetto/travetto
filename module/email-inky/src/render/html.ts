@@ -155,7 +155,7 @@ export const Html: RenderProvider<RenderContext> = {
   <tbody>
     <tr>${await recurse()}</tr>
   </tbody>
-<!-- $:&zwj; --></table>`,
+</table>`,
 
   Button: async ({ recurse, el, props, createState }): Promise<string> => {
     const { href, target, ...rest } = props;
