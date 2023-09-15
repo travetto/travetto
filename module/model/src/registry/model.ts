@@ -75,16 +75,13 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     if (schema.subTypeField in view && this.getBaseModel(cls) !== cls) {
       config.subType = !!schema.subTypeName; // Copy from schema
       delete view[schema.subTypeField].required; // Allow type to be optional
-      let parent = this.getParentClass(cls);
-      let from = cls;
-      // Merge inherited prepersist/postload
-      while (parent && from !== parent) {
-        const pCfg = this.get(parent);
-        config.prePersist = [...pCfg.prePersist ?? [], ...config.prePersist ?? []];
-        config.postLoad = [...pCfg.postLoad ?? [], ...config.postLoad ?? []];
-        from = parent;
-        parent = this.getParentClass(from);
-      }
+    }
+
+    const parent = this.getParentClass(cls);
+    if (parent && parent !== cls) {
+      const pCfg = this.get(parent) ?? this.pending.get(MetadataRegistry.id(parent));
+      config.prePersist = [...pCfg.prePersist ?? [], ...config.prePersist ?? []];
+      config.postLoad = [...pCfg.postLoad ?? [], ...config.postLoad ?? []];
     }
     return config;
   }

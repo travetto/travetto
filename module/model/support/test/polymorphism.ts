@@ -91,6 +91,7 @@ export abstract class ModelPolymorphismSuite extends BaseModelSuite<ModelCrudSup
     const [doc, fire, eng] = await Promise.all(people.map(p => service.create(Worker, p)));
 
     assert(doc instanceof Doctor);
+    assert(doc.updatedDate !== undefined);
 
     await assert.rejects(
       () => service.get(Engineer, doc.id),
