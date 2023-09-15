@@ -1,6 +1,6 @@
 {
   "name": "@travetto/scaffold",
-  "version": "3.3.4",
+  "version": "3.3.5",
   "description": "App Scaffold for the Travetto framework",
   "keywords": [
     "generator",
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@travetto/base": "^3.3.3",
-    "@travetto/cli": "^3.3.4",
+    "@travetto/cli": "^3.3.5",
     "@travetto/compiler": "^3.3.2",
     "enquirer": "^2.4.1",
     "mustache": "^4.2.0"
