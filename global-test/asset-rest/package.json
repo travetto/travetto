@@ -2,7 +2,7 @@
   "name": "@travetto-test/asset-rest",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/asset-rest": "^3.3.4",
+    "@travetto/asset-rest": "^3.3.5",
     "@travetto/rest-express": "^3.3.4",
     "@travetto/rest-express-lambda": "^3.3.4",
     "@travetto/rest-fastify": "^3.3.4",

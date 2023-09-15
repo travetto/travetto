@@ -22,14 +22,14 @@
   },
   "dependencies": {
     "@travetto/auth-rest": "^3.3.4",
-    "@travetto/auth-rest-session": "^3.3.4",
+    "@travetto/auth-rest-session": "^3.3.5",
     "@travetto/cli": "^3.3.5",
     "@travetto/log": "^3.3.4",
-    "@travetto/model-mongo": "^3.3.4",
+    "@travetto/model-mongo": "^3.3.5",
     "@travetto/openapi": "^3.3.5",
     "@travetto/rest-client": "^3.3.7",
     "@travetto/rest-express": "^3.3.4",
-    "@travetto/rest-session": "^3.3.4",
+    "@travetto/rest-session": "^3.3.5",
     "vue": "^2.7.14"
   },
   "devDependencies": {
