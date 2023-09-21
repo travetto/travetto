@@ -11,24 +11,28 @@ export class CommonUtil {
       && Object.prototype.toString.call(obj) === '[object Object]'; // separate build-in like Math
   }
 
-  static flattenPaths(data: Record<string, unknown>, prefix: string = ''): Record<string, unknown> {
+  static flattenPaths(data: Record<string, unknown>, prefix: string = '', defaultMissing = false): Record<string, unknown> {
     const out: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(data)) {
       const pre = `${prefix}${key}`;
       if (this.isPlainObject(value)) {
-        Object.assign(out, this.flattenPaths(value, `${pre}.`)
+        Object.assign(out, this.flattenPaths(value, `${pre}.`, defaultMissing)
         );
       } else if (Array.isArray(value)) {
         for (let i = 0; i < value.length; i++) {
           const v = value[i];
           if (this.isPlainObject(v)) {
-            Object.assign(out, this.flattenPaths(v, `${pre}[${i}].`));
+            Object.assign(out, this.flattenPaths(v, `${pre}[${i}].`, defaultMissing));
           } else {
-            out[`${pre}[${i}]`] = v ?? '';
+            if ((v !== undefined && v !== null) || defaultMissing) {
+              out[`${pre}[${i}]`] = v ?? '';
+            }
           }
         }
       } else {
-        out[pre] = value ?? '';
+        if ((value !== undefined && value !== null) || defaultMissing) {
+          out[pre] = value ?? '';
+        }
       }
     }
     return out;
@@ -102,7 +106,9 @@ export class CommonUtil {
           (prefix || !complex) ?
             { [prefix ?? name]: params[i] } :
             // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            params[i] as Record<string, unknown>
+            params[i] as Record<string, unknown>,
+          '',
+          loc === 'header'
         );
         if (loc === 'header') {
           Object.assign(headers, sub);
