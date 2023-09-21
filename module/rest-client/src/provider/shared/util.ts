@@ -1,12 +1,4 @@
-// #IF_NODE_FETCH: import FormData from 'form-data';
-// #IF_NODE_FETCH: import fetch, { RequestInit, Response } from 'node-fetch';
-// #IF_NODE_FETCH: import Blob = require('fetch-blob');
 import { IRemoteService, ParamConfig, RequestDefinition, RequestOptions } from './types';
-
-function isResponse(v: unknown): v is Response {
-  // @ts-expect-error
-  return v && v.status && v.headers;
-}
 
 type BodyPart = { param: unknown, config: ParamConfig };
 
@@ -141,96 +133,5 @@ export class CommonUtil {
       withCredentials: svc.withCredentials,
       timeout: svc.timeout
     };
-  }
-
-  static consumeError(err: Error | Response): Error {
-    if (err instanceof Error) {
-      return err;
-    } else if (isResponse(err)) {
-      const out = new Error(err.statusText);
-      Object.assign(out, { status: err.status });
-      return this.consumeError(out);
-    } else if (CommonUtil.isPlainObject(err)) {
-      const out = new Error();
-      Object.assign(out, err);
-      return this.consumeError(out);
-    } else {
-      return new Error('Unknown error');
-    }
-  }
-
-  static async fetchRequest<T, B, R extends Response>(
-    svc: IRemoteService<B, R>,
-    req: RequestOptions<B>,
-    fetcher: (typeof fetch)
-  ): Promise<T> {
-    try {
-      for (const el of svc.preRequestHandlers) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        req = (await el(req) ?? req) as RequestOptions<B>;
-      }
-
-      if (svc.debug) {
-        console.debug('Making request:', req.url.pathname);
-      }
-
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const fetchInit = req as RequestInit;
-      fetchInit.credentials = req.withCredentials ? 'include' : 'same-origin'; // #NOT_NODE_FETCH
-      if (req.timeout) {
-        const controller = new AbortController();
-        fetchInit.signal = controller.signal;
-        const timer = setTimeout(() => controller.abort(), req.timeout);
-        controller.signal.onabort = (): void => { timer && clearTimeout(timer); };
-      }
-
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      let resolved: R = await (fetcher(req.url, fetchInit) as unknown as Promise<R>);
-
-      for (const el of svc.postResponseHandlers) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        resolved = (await el(resolved) ?? resolved) as unknown as R;
-      }
-
-      const contentType = resolved.headers.get('content-type')?.split(';')[0];
-
-      if (resolved.ok) {
-        const text = await resolved.text();
-        if (contentType === 'application/json') {
-          return svc.consumeJSON<T>(text);
-        } else if (contentType === 'text/plain') {
-          try {
-            return svc.consumeJSON<T>(text);
-          } catch {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            return text as unknown as Promise<T>;
-          }
-        } else {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          return text as unknown as Promise<T>;
-        }
-      } else {
-        let res;
-        if (contentType === 'application/json') {
-          const text = await resolved.text();
-          res = svc.consumeJSON<Error>(text);
-        } else {
-          res = resolved;
-        }
-        if (svc.debug) {
-          console.debug('Error in making request:', req.url.pathname, res);
-        }
-        throw await svc.consumeError(res);
-      }
-    } catch (err) {
-      if (svc.debug) {
-        console.debug('Error in initiating request:', req.url.pathname, err);
-      }
-      if (err instanceof Error) {
-        throw await svc.consumeError(err);
-      } else {
-        throw err;
-      }
-    }
   }
 }

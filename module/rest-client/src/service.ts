@@ -11,8 +11,7 @@ import { RestClientConfig, RestClientProvider } from './config';
 
 import { ClientGenerator } from './provider/base';
 import { AngularClientGenerator } from './provider/angular';
-import { NodeFetchClientGenerator } from './provider/fetch-node';
-import { WebFetchClientGenerator } from './provider/fetch-web';
+import { FetchClientGenerator } from './provider/fetch';
 
 @Injectable()
 export class RestClientGeneratorService implements AutoCreate {
@@ -32,8 +31,8 @@ export class RestClientGeneratorService implements AutoCreate {
     switch (type) {
       case 'angular': return new AngularClientGenerator(output, moduleName, options);
       case 'fetch':
-      case 'fetch-node': return new NodeFetchClientGenerator(output, moduleName, options);
-      case 'fetch-web': return new WebFetchClientGenerator(output, moduleName, options);
+      case 'fetch-node':
+      case 'fetch-web': return new FetchClientGenerator(output, moduleName, { ...options, node: !type.includes('web') });
     }
   }
 

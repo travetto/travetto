@@ -70,14 +70,8 @@ export abstract class RestClientServerSuite extends BaseRestSuite {
   }
 
   @Test({ timeout: 10000 })
-  async fetchNonNativeNodeClient() {
-    const result = await RestClientTestUtil.runNodeClient(this.svc, fetchRequestBody('./src', this.port!), false);
-    this.validateFetchResponses(result);
-  }
-
-  @Test({ timeout: 10000 })
-  async fetchNativeNodeClient() {
-    const result = await RestClientTestUtil.runNodeClient(this.svc, fetchRequestBody('./src', this.port!), true);
+  async fetchNodeClient() {
+    const result = await RestClientTestUtil.runNodeClient(this.svc, fetchRequestBody('./src', this.port!));
     this.validateFetchResponses(result);
   }
 

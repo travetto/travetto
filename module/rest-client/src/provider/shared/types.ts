@@ -29,8 +29,8 @@ export type RequestOptions<T = unknown> = {
   withCredentials?: boolean;
 };
 
-export type PreRequestHandler<B> = (req: RequestOptions<B>) => OrProm<RequestOptions<B> | undefined | void>;
-export type PostResponseHandler<R> = (res: R) => OrProm<R | undefined | void>;
+export type PreRequestHandler<B> = (req: RequestOptions<B>) => OrProm<RequestOptions<B> | undefined>;
+export type PostResponseHandler<R> = (res: R) => OrProm<R | undefined>;
 
 export type IRemoteServiceConfig<B, R> = Partial<Omit<IRemoteService<B, R>, 'routePath'>>;
 
@@ -41,9 +41,6 @@ export type IRemoteService<B, R> = {
   baseUrl: string;
   routePath: string;
   headers: Record<string, string>;
-  preRequestHandlers: PreRequestHandler<B>[];
-  postResponseHandlers: PostResponseHandler<R>[];
-  consumeError: (err: Error | R) => Error | Promise<Error>;
   consumeJSON: <T>(text: string) => T;
 };
 
@@ -51,21 +48,15 @@ export abstract class BaseRemoteService<B, R> implements IRemoteService<B, R> {
 
   debug?: boolean;
   baseUrl: string;
-  preRequestHandlers: PreRequestHandler<B>[];
-  postResponseHandlers: PostResponseHandler<R>[];
   headers: Record<string, string>;
   withCredentials?: boolean;
   timeout?: number;
-
-  consumeJSON!: <T>(text: string) => T;
-  consumeError!: (err: Error | R) => Error | Promise<Error>;
+  abstract consumeJSON<T>(text: string): T;
 
   abstract get routePath(): string;
 
   constructor(cfg: IRemoteServiceConfig<B, R>) {
     this.baseUrl = cfg.baseUrl ?? 'http://localhost';
-    this.postResponseHandlers = cfg.postResponseHandlers ?? [];
-    this.preRequestHandlers = cfg.preRequestHandlers ?? [];
     this.headers = cfg.headers ?? {};
     this.withCredentials = cfg.withCredentials ?? false;
     this.timeout = cfg.timeout;

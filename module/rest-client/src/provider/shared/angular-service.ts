@@ -22,8 +22,9 @@ export abstract class BaseAngularService extends BaseRemoteService<BodyInit, Res
 
   abstract timer<T>(delay: number): OperatorFunction<T, T>;
 
-  override consumeError = (err: Error | Response): Error => CommonUtil.consumeError(err);
-  override consumeJSON = <T>(text: string | unknown): T => CommonUtil.consumeJSON(text);
+  consumeJSON<T>(text: string | unknown): T {
+    return CommonUtil.consumeJSON(text);
+  }
 
   invoke<T>(req: RequestOptions, observe: 'response' | 'events' | 'body'): AngularResponse<T> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
