@@ -27,7 +27,7 @@
     "@travetto/log": "^3.3.4",
     "@travetto/model-mongo": "^3.3.5",
     "@travetto/openapi": "^3.3.5",
-    "@travetto/rest-client": "^3.3.8",
+    "@travetto/rest-client": "^3.3.9",
     "@travetto/rest-express": "^3.3.4",
     "@travetto/rest-session": "^3.3.5",
     "vue": "^2.7.14"
