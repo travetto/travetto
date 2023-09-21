@@ -192,7 +192,7 @@ export class CommonUtil {
         resolved = (await el(resolved) ?? resolved) as unknown as R;
       }
 
-      const contentType = resolved.headers.get('content-type');
+      const contentType = resolved.headers.get('content-type')?.split(';')[0];
 
       if (resolved.ok) {
         const text = await resolved.text();
@@ -211,7 +211,7 @@ export class CommonUtil {
         }
       } else {
         let res;
-        if (resolved.headers.get('content-type') === 'application/json') {
+        if (contentType === 'application/json') {
           const text = await resolved.text();
           res = svc.consumeJSON<Error>(text);
         } else {
