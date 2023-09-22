@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model",
-  "version": "3.3.6",
+  "version": "3.3.7",
   "description": "Datastore abstraction for core operations.",
   "keywords": [
     "datastore",
