@@ -46,7 +46,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
     const db = new Db(file, this.#config.options);
     await db.pragma('foreign_keys = ON');
     await db.pragma('journal_mode = WAL');
-    db.function('regexp', (a, b) => new RegExp(a).test(b) ? 1 : 0);
+    db.function('regexp', (a, b) => new RegExp(`${a}`).test(`${b}`) ? 1 : 0);
     return db;
   }
 
@@ -72,7 +72,8 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
       try {
         const out = await conn.prepare(query)[query.trim().startsWith('SELECT') ? 'all' : 'run']();
         if (Array.isArray(out)) {
-          const records: T[] = [...out].map(v => ({ ...v }));
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          const records: T[] = [...out as T[]].map(v => ({ ...v }));
           return { count: out.length, records };
         } else {
           return { count: out.changes, records: [] };

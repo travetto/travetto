@@ -21,6 +21,18 @@ export interface StreamMeta {
    * Filenames title, optional for elements like images, audio, videos
    */
   title?: string;
+  /**
+   * Content encoding
+   */
+  contentEncoding?: string;
+  /**
+   * Content language
+   */
+  contentLanguage?: string;
+  /**
+   * Cache control
+   */
+  cacheControl?: string;
 }
 
 export interface PartialStream {

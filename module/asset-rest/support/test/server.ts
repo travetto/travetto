@@ -43,6 +43,15 @@ class TestUploadController {
     return { ...meta, location: loc };
   }
 
+  @Post('/cached')
+  async uploadCached(@Upload() file: Asset) {
+    file.cacheControl = 'max-age=3600';
+    file.contentLanguage = 'en-GB';
+    const loc = await this.service.upsert(file);
+    const output = await this.service.get(loc);
+    return AssetRestUtil.downloadable(output);
+  }
+
   @Post('/all-named')
   async uploads(@Upload('file1') file1: Asset, @Upload('file2') file2: Asset) {
     return { hash1: file1.hash, hash2: file2.hash };
@@ -123,6 +132,15 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
     const asset = await this.getAsset('/logo.png');
     assert(res.body.hash === asset.hash);
   }
+
+  @Test()
+  async testCached() {
+    const uploads = await this.getUploads({ name: 'file', resource: 'logo.png', type: 'image/png' });
+    const res = await this.request('post', '/test/upload/cached', this.getMultipartRequest(uploads));
+    assert(this.getFirstHeader(res.headers, 'cache-control') === 'max-age=3600');
+    assert(this.getFirstHeader(res.headers, 'content-language') === 'en-GB');
+  }
+
 
   @Test()
   async testMultiUpload() {

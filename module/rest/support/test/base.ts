@@ -39,6 +39,17 @@ export abstract class BaseRestSuite {
     return this.#support instanceof CoreRestServerSupport ? this.#support.port : undefined;
   }
 
+  getFirstHeader(headers: Record<string, string | string[] | undefined>, key: string): string | undefined {
+    const v = headers[key];
+    if (v) {
+      if (typeof v === 'string') {
+        return v;
+      } else {
+        return v[0];
+      }
+    }
+  }
+
   async getOutput<T>(t: Buffer): Promise<T | string> {
     try {
       return JSON.parse(t.toString('utf8')) as T;

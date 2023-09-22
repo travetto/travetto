@@ -78,14 +78,7 @@ class TestAuthAllController {
 export abstract class AuthRestJWTServerSuite extends BaseRestSuite {
 
   getCookie(headers: Record<string, string | string[] | undefined>): string | undefined {
-    const v = headers['set-cookie'];
-    if (v) {
-      if (typeof v === 'string') {
-        return v;
-      } else {
-        return v[0];
-      }
-    }
+    return this.getFirstHeader(headers, 'set-cookie');
   }
 
   getCookieValue(headers: Record<string, string | string[] | undefined>): string | undefined {

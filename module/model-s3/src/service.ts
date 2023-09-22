@@ -14,9 +14,9 @@ import { ModelCrudUtil } from '@travetto/model/src/internal/service/crud';
 import { ModelExpirySupport } from '@travetto/model/src/service/expiry';
 import { ModelExpiryUtil } from '@travetto/model/src/internal/service/expiry';
 import { ModelStorageUtil } from '@travetto/model/src/internal/service/storage';
+import { ModelStreamUtil } from '@travetto/model/src/internal/service/stream';
 
 import { S3ModelConfig } from './config';
-import { ModelStreamUtil } from '@travetto/model/src/internal/service/stream';
 
 function isMetadataBearer(o: unknown): o is MetadataBearer {
   return !!o && typeof o === 'object' && '$metadata' in o;
@@ -28,6 +28,10 @@ function hasContentType<T>(o: T): o is T & { contenttype?: string } {
 
 const STREAM_SPACE = '@travetto/model-s3:stream';
 
+type MetaBase = Pick<s3.CreateMultipartUploadRequest,
+  'ContentType' | 'Metadata' | 'ContentEncoding' | 'ContentLanguage' | 'CacheControl' | 'ContentDisposition'
+>;
+
 /**
  * Asset source backed by S3
  */
@@ -38,6 +42,19 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   client: s3.S3;
 
   constructor(public readonly config: S3ModelConfig) { }
+
+  #getMetaBase(meta: StreamMeta): MetaBase {
+    return {
+      ContentType: meta.contentType,
+      ...(meta.contentEncoding ? { ContentEncoding: meta.contentEncoding } : {}),
+      ...(meta.contentLanguage ? { ContentLanguage: meta.contentLanguage } : {}),
+      ...(meta.cacheControl ? { CacheControl: meta.cacheControl } : {}),
+      Metadata: {
+        ...meta,
+        size: `${meta.size}`
+      }
+    };
+  }
 
   #resolveKey(cls: Class | string, id?: string): string {
     let key: string;
@@ -91,14 +108,7 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
    * Write multipart file upload, in chunks
    */
   async #writeMultipart(id: string, input: Readable, meta: StreamMeta): Promise<void> {
-    const { UploadId } = await this.client.createMultipartUpload(this.#q(STREAM_SPACE, id, {
-      ContentType: meta.contentType,
-      ContentLength: meta.size,
-      Metadata: {
-        ...meta,
-        size: `${meta.size}`
-      }
-    }));
+    const { UploadId } = await this.client.createMultipartUpload(this.#q(STREAM_SPACE, id, this.#getMetaBase(meta)));
 
     const parts: s3.CompletedPart[] = [];
     let buffers: Buffer[] = [];
@@ -276,16 +286,12 @@ export class S3ModelService implements ModelCrudSupport, ModelStreamSupport, Mod
   }
 
   async upsertStream(location: string, input: Readable, meta: StreamMeta): Promise<void> {
-    if (meta.size < this.config.chunkSize) { // If bigger than 5 mb
+    if (meta.size < this.config.chunkSize) { // If smaller than chunk size
       // Upload to s3
       await this.client.putObject(this.#q(STREAM_SPACE, location, {
         Body: await StreamUtil.toBuffer(input),
-        ContentType: meta.contentType,
         ContentLength: meta.size,
-        Metadata: {
-          ...meta,
-          size: `${meta.size}`
-        }
+        ...this.#getMetaBase(meta),
       }));
     } else {
       await this.#writeMultipart(location, input, meta);

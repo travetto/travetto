@@ -100,7 +100,17 @@ export class AssetRestUtil {
       render(res: Response): stream.Readable {
         res.setHeader('Content-Type', asset.contentType);
         res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
+        if (asset.contentEncoding) {
+          res.setHeader('Content-Encoding', asset.contentEncoding);
+        }
+        if (asset.contentLanguage) {
+          res.setHeader('Content-Language', asset.contentLanguage);
+        }
+        if (asset.cacheControl) {
+          res.setHeader('Cache-Control', asset.cacheControl);
+        }
         if (!asset.range) {
+          res.setHeader('Content-Length', `${asset.size}`);
           res.status(200);
         } else {
           const [start, end] = asset.range;
