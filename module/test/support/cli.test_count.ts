@@ -18,7 +18,11 @@ export class TestCountCommand {
 
     // Load all tests
     for (const file of files) {
-      await import(RootIndex.getFromSource(file)!.import);
+      try {
+        await import(RootIndex.getFromSource(file)!.import);
+      } catch (err) {
+        console.error('Failed to import', file, err);
+      }
     }
 
     await SuiteRegistry.init();

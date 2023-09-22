@@ -28,7 +28,7 @@
     "@travetto/config": "^3.3.4",
     "@travetto/model": "^3.3.5",
     "@travetto/model-query": "^3.3.5",
-    "mongodb": "^5.8.1"
+    "mongodb": "^6.1.0"
   },
   "peerDependencies": {
     "@travetto/command": "^3.3.3"

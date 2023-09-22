@@ -9,7 +9,7 @@ import { DependencyRegistry } from '@travetto/di';
 
 
 import { RestClientGeneratorService } from '../src/service';
-import { NodeFetchClientGenerator } from '../src/provider/fetch-node';
+import { FetchClientGenerator } from '../src/provider/fetch';
 import { AngularClientGenerator } from '../src/provider/angular';
 
 import './sample';
@@ -35,7 +35,7 @@ export class SimpleSuite {
     const svc = await DependencyRegistry.getInstance(RestClientGeneratorService);
 
     await fs.mkdir(root, { recursive: true });
-    const gen = new NodeFetchClientGenerator(root);
+    const gen = new FetchClientGenerator(root, undefined, { node: true });
     await svc.renderClient(gen);
 
     assert(await exists('package.json'));
@@ -43,7 +43,7 @@ export class SimpleSuite {
     assert(await exists('src/index.ts'));
     assert(await exists('src/shared/util.ts'));
     assert(await exists('src/shared/types.ts'));
-    assert(await exists('src/shared/fetch-node-service.ts'));
+    assert(await exists('src/shared/fetch-service.ts'));
   }
 
   @Test()
