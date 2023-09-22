@@ -14,7 +14,7 @@ import {
   PageableModelQuery, ValidStringFields, WhereClause, ModelQuerySuggestSupport
 } from '@travetto/model-query';
 
-import { ShutdownManager, type Class, AppError } from '@travetto/base';
+import { ShutdownManager, type Class, AppError, TypedObject } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { DeepPartial, FieldConfig, SchemaRegistry, SchemaValidator } from '@travetto/schema';
 
@@ -249,10 +249,11 @@ export class MongoModelService implements
       }, {});
 
     const id = item.id;
+
     const res = await store.findOneAndUpdate(
       this.getWhere<ModelType>(cls, { id }),
       final,
-      { returnDocument: 'after' }
+      { returnDocument: 'after', includeResultMetadata: true }
     );
 
     if (!res.value) {
@@ -373,14 +374,14 @@ export class MongoModelService implements
       }
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    for (const { index, _id } of res.getUpsertedIds() as { index: number, _id: mongo.ObjectId }[]) {
-      out.insertedIds.set(index, MongoUtil.idToString(_id));
+    for (const [index, _id] of TypedObject.entries(res.upsertedIds) as [number, mongo.ObjectId][]) {
+      out.insertedIds.set(+index, MongoUtil.idToString(_id));
     }
 
     if (out.counts) {
-      out.counts.delete = res.nRemoved;
+      out.counts.delete = res.deletedCount;
       out.counts.update = operations.filter(x => x.update).length;
-      out.counts.insert = res.nInserted;
+      out.counts.insert = res.insertedCount;
       out.counts.upsert = operations.filter(x => x.upsert).length;
     }
 

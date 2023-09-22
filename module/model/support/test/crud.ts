@@ -143,6 +143,12 @@ export abstract class ModelCrudSuite extends BaseModelSuite<ModelCrudSupport> {
     assert(!('street2' in o3.address));
   }
 
+  @Test('Verify update partial on missing item fails')
+  async testMissingUpdatePartial() {
+    const service = await this.service;
+    await assert.rejects(() => service.updatePartial(User2, { id: '-1' }), NotFoundError);
+  }
+
   @Test('Verify partial update with field removal and lists')
   async testPartialUpdateList() {
     const service = await this.service;
