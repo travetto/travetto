@@ -1,6 +1,6 @@
 {
   "name": "@travetto/jwt",
-  "version": "3.3.3",
+  "version": "3.3.4",
   "description": "JSON Web Token implementation",
   "keywords": [
     "jwt",
