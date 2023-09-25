@@ -219,14 +219,21 @@ export class ElasticsearchModelService implements
 
     console.debug('Partial Script', { script });
 
-    await this.client.update({
-      ...this.manager.getIdentity(cls),
-      id,
-      refresh: true,
-      body: {
-        script
+    try {
+      await this.client.update({
+        ...this.manager.getIdentity(cls),
+        id,
+        refresh: true,
+        body: {
+          script
+        }
+      });
+    } catch (err) {
+      if (err instanceof Error && /document_missing_exception/.test(err.message)) {
+        throw new NotFoundError(cls, id);
       }
-    });
+      throw err;
+    }
 
     return this.get(cls, id);
   }

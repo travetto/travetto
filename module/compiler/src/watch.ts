@@ -9,7 +9,7 @@ import { getManifestContext } from '@travetto/manifest/bin/context';
 import { CompilerState } from './state';
 import { CompilerUtil } from './util';
 
-type CompileWatchEvent = WatchEvent | { action: 'restart', file: string };
+type CompileWatchEvent = (WatchEvent & { target: string }) | { action: 'restart', file: string };
 const RESTART_SIGNAL = 'RESTART_SIGNAL';
 
 /**
@@ -28,7 +28,7 @@ export class CompilerWatcher {
 
   #sourceHashes = new Map<string, number>();
   #manifestContexts = new Map<string, ManifestContext>();
-  #dirtyFiles: { modFolder: string, mod: string, moduleFile?: string, folderKey?: ManifestModuleFolderType, type?: ManifestModuleFileType }[] = [];
+  #dirtyFiles: { remove?: boolean, modFolder: string, mod: string, moduleFile?: string, folderKey?: ManifestModuleFolderType, type?: ManifestModuleFileType }[] = [];
   #state: CompilerState;
 
   constructor(state: CompilerState) {
@@ -56,7 +56,17 @@ export class CompilerWatcher {
       for (const file of files) {
         if (file.folderKey && file.moduleFile && file.type && file.mod in newManifest.modules) {
           newManifest.modules[file.mod].files[file.folderKey] ??= [];
-          newManifest.modules[file.mod].files[file.folderKey]!.push([file.moduleFile, file.type, Date.now()]);
+          const idx = newManifest.modules[file.mod].files[file.folderKey]!.findIndex(x => x[0] === file.moduleFile);
+
+          if (!file.remove && idx < 0) {
+            newManifest.modules[file.mod].files[file.folderKey]!.push([file.moduleFile, file.type, Date.now()]);
+          } else if (idx >= 0) {
+            if (file.remove) {
+              newManifest.modules[file.mod].files[file.folderKey]!.splice(idx, 1);
+            } else {
+              newManifest.modules[file.mod].files[file.folderKey]![idx] = [file.moduleFile, file.type, Date.now()];
+            }
+          }
         }
       }
       await ManifestUtil.writeManifest(ctx, newManifest);
@@ -72,11 +82,11 @@ export class CompilerWatcher {
   }
 
   /**
- * Get a watcher for a given compiler state
- * @param state
- * @param handler
- * @returns
- */
+   * Get a watcher for a given compiler state
+   * @param state
+   * @param handler
+   * @returns
+   */
   async * watchChanges(): AsyncIterable<CompileWatchEvent> {
     const stream = this.#watchFiles();
 
@@ -92,6 +102,9 @@ export class CompilerWatcher {
       const moduleFile = mod.sourceFolder ?
         (sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile) :
         sourceFile.replace(`${this.#state.manifest.workspacePath}/`, '');
+
+      let event: CompileWatchEvent | undefined;
+
       switch (action) {
         case 'create': {
           const fileType = ManifestModuleUtil.getFileType(moduleFile);
@@ -100,27 +113,24 @@ export class CompilerWatcher {
             modFolder: folder,
             moduleFile,
             folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
-            type: ManifestModuleUtil.getFileType(moduleFile)
+            type: ManifestModuleUtil.getFileType(moduleFile),
           });
           if (CompilerUtil.validFile(fileType)) {
-            await this.#rebuildManifestsIfNeeded();
-
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
-            const input = this.#state.registerInput(mod, moduleFile);
+            const entry = this.#state.registerInput(mod, moduleFile);
             this.#sourceHashes.set(sourceFile, hash);
-            yield { action, file: input, folder };
+            event = { action, file: entry.input, folder, target: entry.output! };
           }
           break;
         }
         case 'update': {
-          await this.#rebuildManifestsIfNeeded();
           const entry = this.#state.getBySource(sourceFile);
           if (entry) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             if (this.#sourceHashes.get(sourceFile) !== hash) {
               this.#state.resetInputSource(entry.input);
               this.#sourceHashes.set(sourceFile, hash);
-              yield { action, file: entry.input, folder };
+              event = { action, file: entry.input, folder, target: entry.output! };
             }
           }
           break;
@@ -130,11 +140,15 @@ export class CompilerWatcher {
           if (entry) {
             this.#state.removeInput(entry.input);
             if (entry.output) {
-              this.#dirtyFiles.push({ mod: mod.name, modFolder: folder });
-              yield { action, file: entry.output, folder };
+              this.#dirtyFiles.push({ mod: mod.name, modFolder: folder, remove: true });
+              event = { action, file: entry.input, folder, target: entry.output! };
             }
           }
         }
+      }
+      if (event) {
+        await this.#rebuildManifestsIfNeeded();
+        yield event;
       }
     }
   }
@@ -145,11 +159,9 @@ export class CompilerWatcher {
   #watchFiles(): WatchStream {
     const idx = this.#state.manifestIndex;
     const modules = [...idx.getModuleList('all')].map(x => idx.getModule(x)!);
+    const validTypes = new Set(['ts', 'typings', 'js', 'package-json']);
     const options: Partial<WatchFolder> = {
-      filter: (ev: WatchEvent): boolean => {
-        const type = ManifestModuleUtil.getFileType(ev.file);
-        return type === 'ts' || type === 'typings' || type === 'js' || type === 'package-json';
-      },
+      filter: ev => validTypes.has(ManifestModuleUtil.getFileType(ev.file)),
       ignore: ['node_modules', '**/.trv_*'],
     };
 

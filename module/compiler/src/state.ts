@@ -123,7 +123,7 @@ export class CompilerState implements ts.CompilerHost {
     return this.#sourceToEntry.get(sourceFile);
   }
 
-  registerInput(module: ManifestModule, moduleFile: string): string {
+  registerInput(module: ManifestModule, moduleFile: string): CompileStateEntry {
     const relativeInput = `${module.outputFolder}/${moduleFile}`;
     const sourceFile = path.resolve(this.#manifest.workspacePath, module.sourceFolder, moduleFile);
     const sourceFolder = path.dirname(sourceFile);
@@ -146,7 +146,7 @@ export class CompilerState implements ts.CompilerHost {
 
     this.#inputFiles.add(inputFile);
 
-    return inputFile;
+    return entry;
   }
 
   removeInput(inputFile: string): void {

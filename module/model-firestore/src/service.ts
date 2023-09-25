@@ -91,7 +91,7 @@ export class FirestoreModelService implements ModelCrudSupport, ModelStorageSupp
     ModelCrudUtil.ensureNotSubType(cls);
     const id = item.id;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => ({} as unknown as T));
+    item = await ModelCrudUtil.naivePartialUpdate(cls, item, view, async () => this.get(cls, item.id));
     const cleaned = toSimpleObj(item, FieldValue.delete());
     await this.#getCollection(cls).doc(id).set(cleaned, { mergeFields: Object.keys(item) });
     return this.get(cls, id);

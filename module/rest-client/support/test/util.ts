@@ -20,6 +20,7 @@ export class RestClientTestUtil {
     if (!await fs.stat(path.resolve(PUPPETEER_ROOT, 'package.json')).catch(() => false)) {
       await ExecUtil.spawn('npm', ['init', '-y'], { cwd: PUPPETEER_ROOT }).result;
       await ExecUtil.spawn('npm', ['install', 'puppeteer'], { cwd: PUPPETEER_ROOT }).result;
+      await ExecUtil.spawn('npm', ['install'], { cwd: PUPPETEER_ROOT }).result;
     }
     await fs.writeFile(REST_CLIENT_PUPPET, await fixtures.read('puppeteer.mjs'), 'utf8');
   }

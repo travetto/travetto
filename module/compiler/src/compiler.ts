@@ -131,12 +131,13 @@ export class Compiler {
 
     if (this.#watch) {
       Log.info('Watch is ready');
-      for await (const { file, action } of CompilerWatcher.watch(this.#state)) {
-        if (action === 'restart') {
-          Log.info(`Triggering restart due to change in ${file}`);
+      for await (const ev of CompilerWatcher.watch(this.#state)) {
+        if (ev.action === 'restart') {
+          Log.info(`Triggering restart due to change in ${ev.file}`);
           process.send?.({ type: 'restart' });
           return;
         }
+        const { file, action, target } = ev;
         const module = file.split('node_modules/')[1];
         if (action !== 'delete') {
           const err = await emitter(file, true);
@@ -146,7 +147,9 @@ export class Compiler {
             Log.info(`Compiled ${module}`);
           }
         } else {
-          Log.info(`Removed ${module}`);
+          // Remove output
+          Log.info(`Removed ${module}, ${target}`);
+          await fs.rm(target!, { force: true }); // Ensure output is deleted
         }
       }
     }
