@@ -4,8 +4,8 @@ import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex }
 import { TransformerManager } from '@travetto/transformer';
 
 import { CompilerUtil } from './util';
-import { TranspileUtil } from '../support/transpile';
 import { CompileStateEntry } from './types';
+import { CommonUtil } from '../support/util';
 
 function folderMapper(root: string, prefix: string): { dir: string, translate: (val: string) => string } {
   let matched: string = '~~';
@@ -74,7 +74,7 @@ export class CompilerState implements ts.CompilerHost {
     this.#transformerManager = await TransformerManager.create(this.#manifestIndex);
 
     this.#compilerOptions = {
-      ...await TranspileUtil.getCompilerOptions(this.#manifest),
+      ...await CommonUtil.getCompilerOptions(this.#manifest),
       rootDir: this.#rootDir,
       outDir: this.#outputPath
     };
@@ -123,7 +123,7 @@ export class CompilerState implements ts.CompilerHost {
     return this.#sourceToEntry.get(sourceFile);
   }
 
-  registerInput(module: ManifestModule, moduleFile: string): string {
+  registerInput(module: ManifestModule, moduleFile: string): CompileStateEntry {
     const relativeInput = `${module.outputFolder}/${moduleFile}`;
     const sourceFile = path.resolve(this.#manifest.workspacePath, module.sourceFolder, moduleFile);
     const sourceFolder = path.dirname(sourceFile);
@@ -146,7 +146,7 @@ export class CompilerState implements ts.CompilerHost {
 
     this.#inputFiles.add(inputFile);
 
-    return inputFile;
+    return entry;
   }
 
   removeInput(inputFile: string): void {

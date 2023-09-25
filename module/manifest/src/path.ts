@@ -9,7 +9,7 @@ const toPosix = (file: string): string => file.replaceAll('\\', '/');
 /**
  * Converts a given file name by replace all slashes, with platform dependent path separators
  */
-const toNative = (file: string): string => file.replaceAll('/', sep);
+const toNative = (file: string): string => file.replace(/[\\\/]+/g, sep);
 
 const cwd = (): string => toPosix(process.cwd());
 

@@ -9,13 +9,13 @@ import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
 const VALID_OPS = { watch: 'watch', build: 'build', clean: 'clean', manifest: 'manifest' };
 
-const COMPILER_FILES = [...['launcher', 'transpile', 'lock', 'log', 'lock-pinger'].map(x => `support/${x}.ts`), 'package.json'];
+const COMPILER_FILES = [...['entry.trv', 'log', 'server/client', 'server/queue', 'server/runner', 'server/server', 'setup', 'util'].map(x => `support/${x}.ts`), 'package.json'];
 
 /**
  * @param {import('@travetto/manifest').ManifestContext} ctx
- * @return {Promise<import('@travetto/compiler/support/launcher').launch>}
+ * @return {Promise<import('@travetto/compiler/support/entry.trv').main>}
  */
-const $getLauncher = async (ctx) => {
+const $getTarget = async (ctx) => {
   const tsconfigFile = path.resolve(ctx.workspacePath, 'tsconfig.json');
   if (!(await fs.stat(tsconfigFile).catch(() => undefined))) {
     await fs.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
@@ -53,16 +53,21 @@ const $getLauncher = async (ctx) => {
     files.push(target);
   }
 
-  try { return require(files[0]).launch; }
-  catch { return import(files[0]).then(x => x.launch); }
+  try { return require(files[0]).main; }
+  catch { return import(files[0]).then(x => x.main); }
 };
 
 (async () => {
   const ctx = await getManifestContext();
   const [op, args] = [VALID_OPS[process.argv[2]], process.argv.slice(3)];
 
+  if (op && process.argv.some(x => x === '--stop-server' || x === '-s')) {
+    await fetch(`${ctx.compilerUrl}/close`).then(v => v.ok).catch(() => { });
+    console.log(`Stopped server ${ctx.workspacePath}: [${ctx.compilerUrl}]`);
+  }
+
   if (op === 'clean') {
-    const folders = process.argv.find(x => x === '--all' || x === '-a') ? [ctx.outputFolder, ctx.compilerFolder] : [ctx.outputFolder];
+    const folders = process.argv.some(x => x === '--all' || x === '-a') ? [ctx.outputFolder, ctx.compilerFolder] : [ctx.outputFolder];
     for (const f of folders) {
       await fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true });
     }
@@ -71,5 +76,5 @@ const $getLauncher = async (ctx) => {
 
   const rootCtx = ctx.monoRepo ? await getManifestContext(ctx.workspacePath) : ctx;
 
-  return (await $getLauncher(ctx))(ctx, rootCtx, op, args);
+  return (await $getTarget(ctx))(ctx, rootCtx, op ?? 'run', args);
 })();

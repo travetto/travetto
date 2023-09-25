@@ -5,7 +5,7 @@ import { path } from '@travetto/manifest';
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
-import { BuildStatus } from '../../../core/build';
+import { CompilerServer } from '../../../core/compiler';
 
 import { BaseFeature } from '../../base';
 
@@ -140,7 +140,7 @@ class TestRunnerFeature extends BaseFeature {
       }
     }));
 
-    BuildStatus.onBuildReady(() => { this.#server.restart(true); }); // Wait for stable build
-    BuildStatus.onBuildWaiting(() => { this.#server.stop(true); }); // On waiting, disable
+    CompilerServer.onServerConnected(() => { this.#server.restart(true); }); // Wait for stable build
+    CompilerServer.onServerDisconnected(() => { this.#server.stop(true); }); // On waiting, disable
   }
 }

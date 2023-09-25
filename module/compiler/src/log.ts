@@ -1,18 +1,17 @@
-import util from 'util';
+import type { CompilerLogLevel } from '../support/types';
+import { EventUtil } from './event';
 
-import type { CompilerLogEvent } from '../support/log';
-
-function log(level: 'info' | 'debug', message: string, ...args: unknown[]): void {
-  if (process.send) {
-    const ev: CompilerLogEvent = [level, util.format(message, ...args)];
-    process.send(ev);
-  } else {
+function log(level: CompilerLogLevel, message: string, ...args: unknown[]): void {
+  EventUtil.sendEvent('log', { level, message, args, time: Date.now(), scope: 'compiler-exec' });
+  if (!process.send) {
     // eslint-disable-next-line no-console
     console[level](message, ...args);
   }
 }
 
 export const Log = {
+  warn: log.bind(null, 'warn'),
   debug: log.bind(null, 'debug'),
-  info: log.bind(null, 'info')
+  info: log.bind(null, 'info'),
+  error: log.bind(null, 'error'),
 };

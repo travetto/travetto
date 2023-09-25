@@ -58,7 +58,6 @@ export class TodoController {
     return await this._svc.update(todo);
   }
 
-
   /**
    * Complete a todo
    * @param id Todo id

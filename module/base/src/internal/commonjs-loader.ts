@@ -1,5 +1,5 @@
 import { Module } from 'module';
-import { RootIndex } from '@travetto/manifest';
+import { RootIndex, path } from '@travetto/manifest';
 
 import { GlobalEnv } from '../global-env';
 import { RetargettingProxy } from '../proxy';
@@ -69,7 +69,7 @@ export class DynamicCommonjsLoader {
   }
 
   async unload(file: string): Promise<void> {
-    const native = file.replace(/[\\\/]+/g, process.platform === 'win32' ? '\\' : '/');
+    const native = path.toNative(file);
     if (native in require.cache) {
       delete require.cache[native]; // Remove require cached element
     }

@@ -2,16 +2,16 @@
 
 ## Compilation Flow
 1. 
-  Phase: manifest-bootstrap
-  When: Corresponding `source://boot/**/*.js` are missing or out of date
+  Phase: compiler bootstrap (compiler modules)
+  When: Corresponding `source://compiler/**/*.js` are missing or out of date
   Steps:
     -
-      Desc: Run tsc on `source://boot/{index,src/**,support/bin/**}.ts`
+      Desc: Run tsc on `source://compiler/{index,src/**,support/bin/**}.ts`
       Inputs:
-        - `source://boot/{index,src/**,support/bin/**}.ts`
+        - `source://compiler/{index,src/**,support/bin/**}.ts`
       Action: tsc
-      Output: 
-        - `source://boot/{index,src/**,support/bin/**}.js`
+      Output:
+        - `source://compiler/{index,src/**,support/bin/**}.js`
 
 2.
   Phase: manifest-state-generate

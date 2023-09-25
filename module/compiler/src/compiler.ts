@@ -2,7 +2,6 @@ import { install } from 'source-map-support';
 import ts from 'typescript';
 import fs from 'fs/promises';
 
-import { GlobalTerminal, TerminalProgressEvent } from '@travetto/terminal';
 import { ManifestModuleUtil, RootIndex } from '@travetto/manifest';
 
 import { CompilerUtil } from './util';
@@ -10,6 +9,7 @@ import { CompilerState } from './state';
 import { CompilerWatcher } from './watch';
 import { Log } from './log';
 import { CompileEmitError, CompileEmitEvent, CompileEmitter } from './types';
+import { EventUtil } from './event';
 
 /**
  * Compilation support
@@ -38,7 +38,6 @@ export class Compiler {
       dirtyFiles.map(f => this.#state.getBySource(f)!.input);
     this.#watch = watch;
   }
-
 
   /**
    * Compile in a single pass, only emitting dirty files
@@ -79,9 +78,10 @@ export class Compiler {
       yield { file: imp, i: i += 1, err, total: files.length };
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();
-        process.send?.({ type: 'status', total: files.length, idx: i });
+        EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
       }
     }
+    EventUtil.sendEvent('progress', { total: files.length, idx: files.length, message: 'Complete', operation: 'compile', complete: true });
     Log.debug(`Compiled ${i} files`);
   }
 
@@ -89,7 +89,6 @@ export class Compiler {
    * Run the compiler
    */
   async run(): Promise<void> {
-    await GlobalTerminal.init();
     install();
 
     Log.debug('Compilation started');
@@ -103,18 +102,16 @@ export class Compiler {
 
     Log.debug('Compiler loaded');
 
-    const resolveEmittedFile = ({ file, total, i, err }: CompileEmitEvent): TerminalProgressEvent => {
-      if (err) {
-        failed = true;
-        console.error(CompilerUtil.buildTranspileError(file, err));
-      }
-      return { idx: i, total, text: `Compiling [%idx/%total] -- ${file}` };
-    };
-
-    process.send?.({ type: 'start' });
+    EventUtil.sendEvent('state', { state: 'compile-start' });
 
     if (this.#dirtyFiles.length) {
-      await GlobalTerminal.trackProgress(this.emit(this.#dirtyFiles, emitter), resolveEmittedFile, { position: 'bottom', minDelay: 50 });
+      for await (const ev of this.emit(this.#dirtyFiles, emitter)) {
+        if (ev.err) {
+          failed = true;
+          const compileError = CompilerUtil.buildTranspileError(ev.file, ev.err);
+          EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
+        }
+      }
       if (failed) {
         Log.debug('Compilation failed');
         process.exit(1);
@@ -127,28 +124,45 @@ export class Compiler {
       await emitter(resolved, true);
     }
 
-    process.send?.({ type: 'complete' });
+    EventUtil.sendEvent('state', { state: 'compile-end' });
 
     if (this.#watch) {
       Log.info('Watch is ready');
-      for await (const { file, action } of CompilerWatcher.watch(this.#state)) {
-        if (action === 'restart') {
-          Log.info(`Triggering restart due to change in ${file}`);
-          process.send?.({ type: 'restart' });
+
+      EventUtil.sendEvent('state', { state: 'watch-start' });
+
+      for await (const ev of CompilerWatcher.watch(this.#state)) {
+        if (ev.action === 'restart') {
+          Log.info(`Triggering restart due to change in ${ev.file}`);
+          EventUtil.sendEvent('state', { state: 'reset' });
           return;
         }
-        const module = file.split('node_modules/')[1];
+        const { action, entry } = ev;
         if (action !== 'delete') {
-          const err = await emitter(file, true);
+          const err = await emitter(entry.input, true);
           if (err) {
-            Log.info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
+            Log.info('Compilation Error', CompilerUtil.buildTranspileError(entry.input, err));
           } else {
-            Log.info(`Compiled ${module}`);
+            Log.info(`Compiled ${entry.source}`);
           }
         } else {
-          Log.info(`Removed ${module}`);
+          // Remove output
+          Log.info(`Removed ${entry.source}, ${entry.output}`);
+          await fs.rm(entry.output!, { force: true }); // Ensure output is deleted
         }
+
+        // Send change events
+        EventUtil.sendEvent('change', {
+          action: ev.action,
+          time: Date.now(),
+          file: ev.file,
+          folder: ev.folder,
+          output: ev.entry.output!,
+          module: ev.entry.module.name
+        });
       }
+
+      EventUtil.sendEvent('state', { state: 'watch-end' });
     }
   }
 }
