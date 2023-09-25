@@ -34,11 +34,12 @@
   },
   "devDependencies": {
     "@types/node": "^18.11.9",
-    "@types/vscode": "^1.74.0",
-    "@travetto/pack": "^3.3.0"
+    "@types/vscode": "^1.83.1",
+    "@travetto/pack": "^3.3.6",
+    "@travetto/fetch-node-types": "^1.0.2"
   },
   "dependencies": {
-    "@travetto/base": "^3.3.0"
+    "@travetto/base": "^3.3.4"
   },
   "travetto": {
     "displayName": "Travetto Plugin",
@@ -57,7 +58,7 @@
     ]
   },
   "engines": {
-    "vscode": "^1.74.0"
+    "vscode": "^1.83.1"
   },
   "publishConfig": {
     "access": "restricted"

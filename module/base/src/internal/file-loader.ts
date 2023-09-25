@@ -1,15 +1,19 @@
-import { ManifestModuleUtil, RootIndex, WatchEvent, watchFolders } from '@travetto/manifest';
+import { ManifestModuleUtil, RootIndex, WatchEvent } from '@travetto/manifest';
 
 import { ObjectUtil } from '../object';
 import { ShutdownManager } from '../shutdown';
+import { fetchCompilerEvents } from './compiler-client';
 
-type WatchHandler = (ev: WatchEvent) => (void | Promise<void>);
-type ManualWatchEvent = { trigger?: boolean } & WatchEvent;
+type CompilerWatchEvent = (WatchEvent & { output: string, module: string, time: number });
+type WatchHandler = (ev: CompilerWatchEvent) => (void | Promise<void>);
+type ManualWatchEvent = { trigger?: boolean } & CompilerWatchEvent;
 interface ModuleLoader {
   init?(): Promise<void>;
   load(file: string): Promise<void>;
   unload(file: string): Promise<void>;
 }
+
+const VALID_FILE_TYPES = new Set(['js', 'ts']);
 
 function isTriggerEvent(ev: unknown): ev is ManualWatchEvent {
   return ObjectUtil.isPlainObject(ev) &&
@@ -26,14 +30,15 @@ class $DynamicFileLoader {
   #loader: ModuleLoader;
   #initialized = false;
 
-  async dispatch(ev: WatchEvent): Promise<void> {
-    if (ev.action !== 'create') {
-      await this.#loader.unload(ev.file);
-    } else {
+  async dispatch(ev: CompilerWatchEvent): Promise<void> {
+    if (ev.action === 'update' || ev.action === 'delete') {
+      await this.#loader.unload(ev.output);
+    }
+    if (ev.action === 'create' || ev.action === 'delete') {
       RootIndex.reinitForModule(RootIndex.mainModuleName);
     }
-    if (ev.action !== 'delete') {
-      await this.#loader.load(ev.file);
+    if (ev.action === 'create' || ev.action === 'update') {
+      await this.#loader.load(ev.output);
     }
 
     for (const handler of this.#handlers) {
@@ -66,7 +71,12 @@ class $DynamicFileLoader {
         }
         const found = RootIndex.getFromSource(ev.file);
         if (found) {
-          this.dispatch({ action: ev.action, file: found.outputFile, folder: RootIndex.getModule(found.module)!.sourceFolder });
+          this.dispatch({
+            action: ev.action, file: found.sourceFile, output: found.outputFile,
+            folder: RootIndex.getModule(found.module)!.sourceFolder,
+            module: found.module,
+            time: Date.now()
+          });
         }
       }
     });
@@ -78,20 +88,23 @@ class $DynamicFileLoader {
       }
     }, 0);
 
+
     // Fire off, and let it run in the bg
-    (async (): Promise<void> => {
-      // Watch local output
-      const stream = watchFolders(RootIndex.getLocalModules().map(x => x.outputPath), { createMissing: true });
+    this.#listen();
+  }
 
-      ShutdownManager.onExitRequested(stream);
-      ShutdownManager.onShutdown(this.constructor, stream);
+  async #listen(): Promise<void> {
+    const kill = new AbortController();
+    ShutdownManager.onExitRequested(() => kill.abort());
 
-      for await (const ev of stream) {
-        if (ev?.file && ManifestModuleUtil.getFileType(ev.file) === 'js') {
-          await this.dispatch(ev);
-        }
+    for await (const ev of fetchCompilerEvents<CompilerWatchEvent>('change', kill.signal)) {
+      if (ev.file && RootIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
+        await this.dispatch(ev);
       }
-    })();
+    }
+
+    // We are done
+    process.exit(200); // Exit code can trigger restart if desired
   }
 }
 

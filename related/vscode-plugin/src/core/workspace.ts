@@ -39,6 +39,10 @@ export class Workspace {
     return this.#manifestContext.workspacePath;
   }
 
+  static compilerServerUrl(rel: string): string {
+    return `${this.#manifestContext.compilerUrl}${rel}`;
+  }
+
   static async getSourceFromImport(imp: string): Promise<string | undefined> {
     if (!this.#importToFile.has(imp)) {
       let file: undefined | string;

@@ -36,8 +36,9 @@ export type ManifestContext = {
   moduleType: 'module' | 'commonjs';
   packageManager: 'yarn' | 'npm';
   frameworkVersion: string;
-  description: string;
+  description?: string;
   version: string;
+  compilerUrl: string;
 };
 
 export type ManifestRoot = ManifestContext & {
@@ -83,6 +84,7 @@ export type Package = {
     docBaseUrl?: string;
     docOutputs?: string[];
     outputFolder?: string;
+    compilerUrl?: string;
   };
   workspaces?: string[];
   private?: boolean;
