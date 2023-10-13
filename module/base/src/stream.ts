@@ -1,3 +1,4 @@
+import { watch as watchFile, stat as statFile } from 'fs/promises';
 import { createWriteStream, createReadStream } from 'fs';
 import { PassThrough, Readable, Writable } from 'stream';
 import { ReadableStream as WebReadableStream } from 'stream/web';
@@ -5,6 +6,8 @@ import { ReadableStream as WebReadableStream } from 'stream/web';
 import type { ExecutionState } from './exec';
 
 type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | WebReadableStream;
+
+type StreamOptions = { start?: number, encoding?: BufferEncoding, includeDelimiter?: boolean, delimiter?: string };
 
 /**
  * Utilities for managing streams/buffers/etc
@@ -147,10 +150,7 @@ export class StreamUtil {
    * @param file The file to stream from
    * @param options Stream options, including delimiter control
    */
-  static async * streamByDelimiter(
-    file: string | Readable,
-    options: { start?: number, encoding?: BufferEncoding, includeDelimiter?: boolean, delimiter?: string } = {}
-  ): AsyncIterable<{ item: string, read: number }> {
+  static async * streamByDelimiter(file: string | Readable, options: StreamOptions = {}): AsyncIterable<{ item: string, read: number }> {
     let read = options.start ?? 0;
     const stream = typeof file === 'string' ? createReadStream(file, { autoClose: true, emitClose: true, start: read }) : file;
     const encoding = options.encoding ?? 'utf8';
@@ -173,5 +173,34 @@ export class StreamUtil {
     }
     // Yield on exit, in case of being called in a loop
     await new Promise(r => setTimeout(r, 1));
+  }
+
+  /**
+   * Stream lines for a given file, with automatic restart after completion by using watch
+   * @param file
+   * @returns
+   */
+  static async* streamLines(file: string): AsyncIterable<string> {
+
+    let offset = 0;
+
+    if (!await statFile(file).catch(() => false)) {
+      return; // File not found to watch
+    }
+
+    for await (const { item, read } of this.streamByDelimiter(file, { start: offset, delimiter: '\n' })) {
+      yield item;
+      offset = read;
+    }
+
+    for await (const _ of watchFile(file, { persistent: true })) {
+      if (await statFile(file).then(({ size }) => size < offset, () => true)) {
+        return; // We should exit on truncation
+      }
+      for await (const { item, read } of this.streamByDelimiter(file, { start: offset, delimiter: '\n' })) {
+        yield item;
+        offset = read;
+      }
+    }
   }
 }
