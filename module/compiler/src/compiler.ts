@@ -137,20 +137,22 @@ export class Compiler {
           process.send?.({ type: 'restart' });
           return;
         }
-        const { file, action, target } = ev;
+        const { file, action, entry } = ev;
         const module = file.split('node_modules/')[1];
         if (action !== 'delete') {
-          const err = await emitter(file, true);
+          const err = await emitter(entry.input, true);
           if (err) {
-            Log.info('Compilation Error', CompilerUtil.buildTranspileError(file, err));
+            Log.info('Compilation Error', CompilerUtil.buildTranspileError(entry.input, err));
           } else {
             Log.info(`Compiled ${module}`);
           }
         } else {
           // Remove output
-          Log.info(`Removed ${module}, ${target}`);
-          await fs.rm(target!, { force: true }); // Ensure output is deleted
+          Log.info(`Removed ${module}, ${entry.output}`);
+          await fs.rm(entry.output!, { force: true }); // Ensure output is deleted
         }
+        // Track
+        Log.watchEvent({ action: ev.action, file: ev.file, folder: ev.folder, output: ev.entry.output! });
       }
     }
   }

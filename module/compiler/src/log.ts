@@ -1,6 +1,11 @@
+import fs from 'fs';
 import util from 'util';
 
+import { RootIndex, WatchEvent, path } from '@travetto/manifest';
+
 import type { CompilerLogEvent } from '../support/log';
+
+const COMPILE_LOG = path.resolve(RootIndex.manifest.toolFolder, 'events.ndjson');
 
 function log(level: 'info' | 'debug', message: string, ...args: unknown[]): void {
   if (process.send) {
@@ -14,5 +19,6 @@ function log(level: 'info' | 'debug', message: string, ...args: unknown[]): void
 
 export const Log = {
   debug: log.bind(null, 'debug'),
-  info: log.bind(null, 'info')
+  info: log.bind(null, 'info'),
+  watchEvent: (ev: WatchEvent & { output: string }): void => fs.appendFileSync(COMPILE_LOG, `${JSON.stringify(ev)}\n`, { encoding: 'utf8' })
 };

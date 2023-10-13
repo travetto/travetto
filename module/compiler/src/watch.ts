@@ -8,8 +8,9 @@ import { getManifestContext } from '@travetto/manifest/bin/context';
 
 import { CompilerState } from './state';
 import { CompilerUtil } from './util';
+import { CompileStateEntry } from './types';
 
-type CompileWatchEvent = (WatchEvent & { target: string }) | { action: 'restart', file: string };
+type CompileWatchEvent = (WatchEvent & { entry: CompileStateEntry }) | { action: 'restart', file: string };
 const RESTART_SIGNAL = 'RESTART_SIGNAL';
 
 /**
@@ -119,7 +120,7 @@ export class CompilerWatcher {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             const entry = this.#state.registerInput(mod, moduleFile);
             this.#sourceHashes.set(sourceFile, hash);
-            event = { action, file: entry.input, folder, target: entry.output! };
+            event = { action, file: entry.source, folder, entry };
           }
           break;
         }
@@ -130,7 +131,7 @@ export class CompilerWatcher {
             if (this.#sourceHashes.get(sourceFile) !== hash) {
               this.#state.resetInputSource(entry.input);
               this.#sourceHashes.set(sourceFile, hash);
-              event = { action, file: entry.input, folder, target: entry.output! };
+              event = { action, file: entry.source, folder, entry };
             }
           }
           break;
@@ -141,7 +142,7 @@ export class CompilerWatcher {
             this.#state.removeInput(entry.input);
             if (entry.output) {
               this.#dirtyFiles.push({ mod: mod.name, modFolder: folder, remove: true });
-              event = { action, file: entry.input, folder, target: entry.output! };
+              event = { action, file: entry.source, folder, entry };
             }
           }
         }
