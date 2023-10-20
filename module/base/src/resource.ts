@@ -50,7 +50,11 @@ export class FileResourceProvider implements ResourceProvider {
     const cfg = Array.isArray(cfgOrPaths) ? { paths: cfgOrPaths } : cfgOrPaths;
     const paths = cfg.paths ?? [];
     if (cfg.includeCommon) {
-      paths.unshift(...GlobalEnv.resourcePaths, path.resolve('resources'), '@#resources');
+      paths.unshift(
+        ...GlobalEnv.resourcePaths,
+        path.resolve(RootIndex.manifest.workspacePath, 'resources'),
+        '@#resources'
+      );
     }
     const found = new Set();
     return paths.map(pth => {

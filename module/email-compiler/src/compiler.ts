@@ -22,25 +22,13 @@ export class EmailCompiler {
     }
     const root = (await import(entry.outputFile)).default;
     const og: EmailCompileSource = await root.wrap();
-    const res = {
+    const res: EmailCompileContext = {
       file: entry.sourceFile,
       module: entry.module,
+      images: {},
+      styles: {},
       ...og
     };
-
-    const mod = RootIndex.getModule(entry.module)!;
-
-    const resourcePaths = [
-      path.resolve(mod.sourcePath, 'resources'),
-      path.resolve(RootIndex.manifest.workspacePath, 'resources')
-    ];
-
-    const styles = res.styles ??= {};
-    (styles.search ??= []).push(...resourcePaths);
-
-    const images = res.images ??= {};
-    (images.search ??= []).push(...resourcePaths);
-
     return res;
   }
 

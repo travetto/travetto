@@ -137,11 +137,11 @@ export class EmailCompileUtil {
   static async inlineImages(html: string, opts: EmailTemplateImageConfig): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, this.#HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Readable | Promise<Readable>][] = [];
-    const resources = new FileResourceProvider(opts.search ?? []);
+    const resource = new FileResourceProvider({ includeCommon: true, paths: opts.search ?? [] });
 
     for (const [token, src] of tokens) {
       const ext = path.extname(src);
-      const stream = await resources.readStream(src);
+      const stream = await resource.readStream(src);
       pendingImages.push([token, ext, /^[.](jpe?g|png)$/.test(ext) ?
         ImageConverter.optimize(ext === '.png' ? 'png' : 'jpeg', stream) : stream]);
     }
@@ -183,7 +183,7 @@ export class EmailCompileUtil {
       styles.push(opts.global);
     }
 
-    const resource = new FileResourceProvider(opts.search ?? []);
+    const resource = new FileResourceProvider({ includeCommon: true, paths: opts.search ?? [] });
     const main = await resource.read('/email/main.scss').then(d => d, () => '');
 
     if (main) {
@@ -191,9 +191,7 @@ export class EmailCompileUtil {
     }
 
     if (styles.length) {
-      const compiled = await this.compileSass(
-        { data: styles.join('\n') },
-        [...opts.search ?? []]);
+      const compiled = await this.compileSass({ data: styles.join('\n') }, resource.paths);
 
       // Remove all unused styles
       const finalStyles = await this.pruneCss(html, compiled);
