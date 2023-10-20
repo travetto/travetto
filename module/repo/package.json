@@ -1,6 +1,6 @@
 {
   "name": "@travetto/repo",
-  "version": "3.3.5",
+  "version": "3.3.6",
   "description": "Monorepo utilities",
   "keywords": [
     "travetto",
@@ -22,8 +22,8 @@
     "directory": "module/repo"
   },
   "dependencies": {
-    "@travetto/cli": "^3.3.5",
-    "@travetto/worker": "^3.3.3"
+    "@travetto/cli": "^3.3.6",
+    "@travetto/worker": "^3.3.4"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
