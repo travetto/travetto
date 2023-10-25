@@ -15,7 +15,7 @@ const COMPILER_FILES = [...['entry.trv', 'log', 'server/client', 'server/queue',
  * @param {import('@travetto/manifest').ManifestContext} ctx
  * @return {Promise<import('@travetto/compiler/support/entry.trv').main>}
  */
-const $getTarget = async (ctx) => {
+const $getEntry = async (ctx) => {
   const tsconfigFile = path.resolve(ctx.workspacePath, 'tsconfig.json');
   if (!(await fs.stat(tsconfigFile).catch(() => undefined))) {
     await fs.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
@@ -76,5 +76,5 @@ const $getTarget = async (ctx) => {
 
   const rootCtx = ctx.monoRepo ? await getManifestContext(ctx.workspacePath) : ctx;
 
-  return (await $getTarget(ctx))(ctx, rootCtx, op ?? 'run', args);
+  return (await $getEntry(ctx))(ctx, rootCtx, op ?? 'run', args);
 })();

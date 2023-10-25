@@ -4,30 +4,24 @@ import { Workspace } from './workspace';
 import { Log } from './log';
 
 const READY_WAIT_WINDOW = 1000 * 15;
-const HOUR_WINDOW = 1000 * 60 * 60;
 
-const KILL_WINDOW = 1000 * 60 * 2;
-const KILL_WINDOW_PRETTY = '2 minutes';
-const MAX_KILL_COUNT = 5;
+type Handler<T extends unknown[]> = (...args: T) => (void | Promise<void> | Thenable<unknown>);
+type Handlers = {
+  start: Handler<[]>[];
+  exit: Handler<[]>[];
+  fail: Handler<[Error]>[];
+};
 
 /**
  * Tracks the logic for running a process as an IPC-based server
  */
 export class ProcessServer<C extends { type: string }, E extends { type: string }> {
 
-  static getCurrentBucket(): number {
-    return Math.trunc((Date.now() % HOUR_WINDOW) / KILL_WINDOW);
-  }
-
-  #onStart: (() => (void | Promise<void>))[] = [];
-  #onExit: (() => (void | Promise<void>))[] = [];
-  #onFail: ((err: Error) => (void | Promise<void>))[] = [];
-  #active = true;
+  #handlers: Handlers;
   #state: ExecutionState | undefined;
   #command: string;
   #args: string[];
   #opts: ExecutionOptions;
-  #killCount: number[] = [];
   #log: Log;
 
   constructor(log: Log, cliCommand: string, args: string[] = [], opts: ExecutionOptions = {}) {
@@ -35,15 +29,24 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     this.#args = args;
     this.#opts = opts;
     this.#log = log;
+    this.#handlers = { start: [], exit: [], fail: [] };
 
-    const stopper = (): Promise<void> => this.#stop();
+    ShutdownManager.onExitRequested(this.stop.bind(this));
+    process.on('SIGINT', this.stop.bind(this));
+    process.on('exit', this.stop.bind(this));
+  }
 
-    ShutdownManager.onExitRequested(stopper);
-    process.on('SIGINT', stopper);
-    process.on('exit', stopper);
+  async #trigger<K extends keyof Handlers>(type: K, ...args: Parameters<Handlers[K][0]>): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    for (const fn of this.#handlers[type] as Handler<[]>[]) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      await fn(...args as []);
+    }
   }
 
   async #launchServer(command: string, args: string[], opts: ExecutionOptions = {}): Promise<[ExecutionState, Promise<void>]> {
+    this.#log.info('Starting', command, ...args);
+
     const prefix = String.fromCharCode(171);
     const state = Workspace.spawnCli(command, args, {
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
@@ -58,7 +61,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       setTimeout(reject, READY_WAIT_WINDOW);
       const readyHandler = (msg: unknown): void => {
         if (msg === 'ready') {
-          this.#log.info('Service is ready');
+          this.#log.info('Service is ready', this.#state!.process.pid);
           state.process.off('message', readyHandler);
           resolve();
         }
@@ -70,75 +73,41 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       throw new Error('Timeout');
     });
 
+    ready.then(() => this.#trigger('start'));
+
+    this.#log.info('Started', state.process.pid);
+
+    state.result.then(result => {
+      this.#log.info('Exited', this.#state?.process.pid, { exitCode: result.code, valid: result.valid });
+      this.stop();
+      this.#trigger('exit');
+      if (result.code) {
+        this.#trigger('fail', new Error(result.message!));
+      }
+    });
+
     return [state, ready];
   }
-
 
   /**
    * Start server, and indicate if this is continuing from a previous failure
    * @param fromExit
    * @returns
    */
-  async #start(fromExit?: boolean): Promise<void> {
+  async start(): Promise<void> {
     if (this.#state) {
       this.#log.info('Already started');
       return;
-    } else if (!this.#active) {
-      this.#log.info('Server should not be respawned, skipping');
-      return;
     }
-    const key = ProcessServer.getCurrentBucket();
-    if ((this.#killCount[key] ?? 0) >= MAX_KILL_COUNT) {
-      this.#active = false;
-      const msg = `Exited ${MAX_KILL_COUNT} times in ${KILL_WINDOW_PRETTY}, will not retry`;
-      this.#log.error(msg);
-      const err = new Error(msg);
-      for (const fn of this.#onFail) {
-        await fn(err);
-      }
-      return; // Give up
-    } else if (fromExit) {
-      this.#killCount[key] = (this.#killCount[key] ?? 0) + 1;
-    }
-
-    this.#log.info('Starting', this.#command, ...this.#args);
-
     const [state, ready] = await this.#launchServer(this.#command, this.#args, this.#opts);
     this.#state = state;
-
-    this.#log.info('Started', this.#state.process.pid);
-
-    ready.then(async () => {
-      this.#log.info('Ready', this.#state!.process.pid);
-      for (const fn of this.#onStart) {
-        await fn();
-      }
-    });
-
-    const kill = (): void => { this.#state?.process.kill('SIGKILL'); };
-    process.on('exit', kill);
-
-    this.#state.process.on('exit', async () => {
-      for (const fn of this.#onExit) {
-        await fn();
-      }
-      this.#log.info('Exited', this.#state?.process.pid);
-      process.removeListener('exit', kill);
-      this.#state = undefined;
-    });
-
-    this.#state.result.then(result => {
-      this.#log.info('Killed', this.#state?.process.pid, { respawn: this.#active, exitCode: result.code, valid: result.valid });
-      this.#active && this.#start(true);
-    });
-
     return ready;
   }
 
   /**
    * Stop server, and prevent respawn
    */
-  async #stop(): Promise<void> {
+  async stop(): Promise<void> {
     if (this.#state) {
       this.#log.info('Stopping');
       const proc = this.#state.process;
@@ -154,62 +123,22 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   }
 
   /**
-   * Listen for when the application starts properly
+   * Add event listener
    */
-  onStart(handler: () => void): this {
-    this.#onStart.push(handler);
+  listen<K extends keyof Handlers>(type: K, handler: Handlers[K][0]): this {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    this.#handlers[type].push(handler as Handler<[]>);
     return this;
-  }
-
-  /**
-   * Listen for when the application exits
-   */
-  onExit(handler: () => void): this {
-    this.#onExit.push(handler);
-    return this;
-  }
-
-  /**
-   * Listen for failures during the process execution
-   */
-  onFail(handler: (err: Error) => void): this {
-    this.#onFail.push(handler);
-    return this;
-  }
-
-  /**
-   * Force start, even from a non-active state
-   * @returns
-   */
-  start(forceActive = false): Promise<void> {
-    if (forceActive) {
-      this.#killCount = [];
-      this.#active = true;
-    }
-    return this.#start();
   }
 
   /**
    * Restart server
    */
-  async restart(forceActive = false): Promise<void> {
-    if (!this.#state) {
-      this.start(forceActive);
-    } else {
-      this.#killCount = []; // Clear out kill count on a forced restart
-      await this.#stop();
+  async restart(): Promise<void> {
+    if (this.#state) {
+      await this.stop();
     }
-  }
-
-  /**
-   * Force stop, to an inactive state
-   * @returns
-   */
-  stop(forceInactive = false): Promise<void> {
-    if (forceInactive) {
-      this.#active = false;
-    }
-    return this.#stop();
+    return this.start();
   }
 
   /**
