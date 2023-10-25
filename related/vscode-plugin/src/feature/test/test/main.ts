@@ -26,7 +26,7 @@ class TestRunnerFeature extends BaseFeature {
     super(module, command);
     this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
     this.#server = new ProcessServer(this.log, 'test:watch', ['-f', 'exec', '-m', 'change'])
-      .onStart(() => {
+      .listen('start', () => {
         this.#server.onMessage(['assertion', 'suite', 'test', 'log', 'removeTest'], ev => {
           switch (ev.type) {
             case 'log': this.log.info('[Log  ]', ev.message); return;
@@ -41,7 +41,7 @@ class TestRunnerFeature extends BaseFeature {
           this.onChangedActiveEditor(editor);
         }
       })
-      .onFail(err => vscode.window.showErrorMessage(`Test Server: ${err.message}`));
+      .listen('fail', err => vscode.window.showErrorMessage(`Test Server: ${err.message}`));
   }
 
   /**
@@ -116,7 +116,7 @@ class TestRunnerFeature extends BaseFeature {
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', this.launchTestDebugger.bind(this));
-    this.register('reload', () => this.#server.restart(true));
+    this.register('reload', () => this.#server.restart());
     this.register('rerun', () => {
       this.#consumer.reset(vscode.window.activeTextEditor);
       this.#server.sendMessage({ type: 'run-test', file: vscode.window.activeTextEditor!.document.fileName });
@@ -140,7 +140,7 @@ class TestRunnerFeature extends BaseFeature {
       }
     }));
 
-    CompilerServer.onServerConnected(() => { this.#server.restart(true); }); // Wait for stable build
-    CompilerServer.onServerDisconnected(() => { this.#server.stop(true); }); // On waiting, disable
+    CompilerServer.onServerConnected(() => { this.#server.restart(); }); // Wait for stable build
+    CompilerServer.onServerDisconnected(() => { this.#server.stop(); }); // On waiting, disable
   }
 }

@@ -1,11 +1,13 @@
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand } from '@travetto/cli';
+import { GlobalEnv } from '@travetto/base';
+
 import { ServerHandle } from '../src/types';
 
 /**
  * Run a rest server as an application
  */
-@CliCommand({ runTarget: true, fields: ['module', 'env', 'profile'], restartable: true })
+@CliCommand({ runTarget: true, fields: ['module', 'env', 'profile'], restartable: GlobalEnv.devMode })
 export class RunRestCommand {
 
   /** Port to run on */

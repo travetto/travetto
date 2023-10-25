@@ -248,11 +248,16 @@ export class ExecUtil {
     const maxRetries = options.maxRetriesPerMinute ?? 5;
     const restarts: number[] = [];
 
+    // If we are listening, and we become disconnected
+    if (process.send) {
+      process.on('disconnect', () => process.exit(0));
+    }
+
     for (; ;) {
       const state = this.spawn(cmd, args, { outputMode: 'raw', ...options, catchAsResult: true });
 
       const toKill = (): void => { state.process.kill('SIGKILL'); };
-      const toMessage = (v: unknown): void => { state.process.send(v!); };
+      const toMessage = (v: unknown): void => { state.process.send?.(v!); };
 
       // Proxy kill requests
       process.on('message', toMessage);
@@ -273,7 +278,7 @@ export class ExecUtil {
           }
           restarts.pop(); // Keep list short
         }
-        console.warn('Restarting...', { pid: process.pid });
+        console.error('Restarting...', { pid: process.pid });
       }
     }
   }

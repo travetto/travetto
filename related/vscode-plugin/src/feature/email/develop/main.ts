@@ -32,7 +32,7 @@ export class EmailCompilerFeature extends BaseFeature {
     super(module, command);
 
     this.#server = new ProcessServer(this.log, 'email:editor', [])
-      .onStart(() => {
+      .listen('start', () => {
         this.#server.onMessage('changed', ev => this.#emitter.emit('render', ev));
         this.#server.onMessage('changed-failed', ev => this.log.info('Email template', ev));
 
@@ -44,7 +44,7 @@ export class EmailCompilerFeature extends BaseFeature {
           this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
         }
       })
-      .onFail(err => vscode.window.showErrorMessage(`Email Compilation: ${err.message}`));
+      .listen('fail', err => vscode.window.showErrorMessage(`Email Compilation: ${err.message}`));
   }
 
   getPanel(): vscode.WebviewPanel {
@@ -90,13 +90,13 @@ export class EmailCompilerFeature extends BaseFeature {
     }
     if (open) {
       if (this.#active.size === 0) {
-        this.#server.start(true);
+        this.#server.start();
       }
       this.#active.add(file.fileName);
     } else {
       this.#active.delete(file.fileName);
       if (this.#active.size === 0) {
-        this.#server.stop(true);
+        this.#server.stop();
       }
     }
   }
@@ -109,7 +109,7 @@ export class EmailCompilerFeature extends BaseFeature {
     }
 
     await this.getPanel();
-    await this.#server.start(true);
+    await this.#server.start();
 
     this.#format = format;
 

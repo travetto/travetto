@@ -6,7 +6,7 @@ import { EditorState } from './bin/editor';
 import { EmailCompilationManager } from './bin/manager';
 
 /** The email editor compilation service and output serving */
-@CliCommand()
+@CliCommand({ restartable: true })
 export class EmailEditorCommand {
 
   envInit(): GlobalEnvConfig {

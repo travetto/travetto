@@ -6,7 +6,7 @@ import { TestFormat } from './bin/types';
 /**
  * Invoke the test watcher
  */
-@CliCommand()
+@CliCommand({ restartable: true })
 export class TestWatcherCommand {
 
   format: TestFormat = 'tap';
@@ -24,9 +24,7 @@ export class TestWatcherCommand {
 
     try {
       const { TestWatcher } = await import('../src/execute/watcher.js');
-      console.log('Starting');
       await TestWatcher.watch(this.format, this.mode === 'all');
-      console.log('Done');
     } catch (err) {
       console.error(err);
     }
