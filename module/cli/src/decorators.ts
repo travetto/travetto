@@ -3,7 +3,7 @@ import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { CliCommandShape } from './types';
-import { CliCommandRegistry } from './registry';
+import { CliCommandRegistry, CliCommandConfigOptions } from './registry';
 import { CliModuleUtil } from './module';
 import { CliUtil } from './util';
 
@@ -17,7 +17,7 @@ const getMod = (cls: Class): string => RootIndex.getModuleFromSource(RootIndex.g
  * @augments `@travetto/schema:Schema`
  * @augments `@travetto/cli:CliCommand`
  */
-export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, hidden?: boolean } = {}) {
+export function CliCommand({ fields, ...cfg }: { fields?: ExtraFields[] } & CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
     const meta = RootIndex.getFunctionMetadata(target);
     if (!meta || meta.abstract) {
@@ -25,17 +25,16 @@ export function CliCommand(cfg: { fields?: ExtraFields[], runTarget?: boolean, h
     }
 
     const name = getName(meta.source);
-    const addEnv = cfg.fields?.includes('env');
-    const addProfile = cfg.fields?.includes('profile');
-    const addModule = cfg.fields?.includes('module');
+    const addEnv = fields?.includes('env');
+    const addProfile = fields?.includes('profile');
+    const addModule = fields?.includes('module');
 
     CliCommandRegistry.registerClass({
       module: getMod(target),
       name,
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: target as ConcreteClass<T>,
-      hidden: cfg.hidden,
-      runTarget: cfg.runTarget,
+      ...cfg,
       preMain: (cmd: CliCommandShape & { env?: string, profile?: string[], module?: string }) => {
         if (addEnv || addProfile) {
           defineGlobalEnv({

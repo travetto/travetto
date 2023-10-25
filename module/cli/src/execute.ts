@@ -2,7 +2,7 @@ import { appendFile, mkdir } from 'fs/promises';
 
 import { GlobalTerminal } from '@travetto/terminal';
 import { path } from '@travetto/manifest';
-import { ConsoleManager, defineGlobalEnv, ShutdownManager, GlobalEnv } from '@travetto/base';
+import { ConsoleManager, defineGlobalEnv, ShutdownManager, GlobalEnv, ExecUtil } from '@travetto/base';
 
 import { HelpUtil } from './help';
 import { CliCommandShape, CliValidationResultError } from './types';
@@ -73,6 +73,18 @@ export class ExecutionManager {
     const cfg = CliCommandRegistry.getConfig(cmd);
     await cfg?.preMain?.(cmd);
 
+    if (cfg.restartable) {
+      if (process.env.TRV_DISABLE_RESTART !== '1') {
+        await ExecUtil.spawnWithRestart(process.argv[0], process.argv.slice(1), {
+          env: { TRV_DISABLE_RESTART: '1', TRV_DYNAMIC: process.env.TRV_DYNAMIC },
+          stdio: [0, 1, 2, 'ipc']
+        });
+        return;
+      } else {
+        delete process.env.TRV_DISABLE_RESTART;
+      }
+    }
+
     const result = await cmd.main(...known);
 
     // Listen to result if non-empty
@@ -110,7 +122,7 @@ export class ExecutionManager {
         if (!(err instanceof Error)) {
           throw err;
         } else if (command && err instanceof CliValidationResultError) {
-          console.error(await HelpUtil.renderValidationError(command, err));
+          console.error!(await HelpUtil.renderValidationError(command, err));
           console.error!(await HelpUtil.renderHelp(command));
         } else {
           console.error!(err);

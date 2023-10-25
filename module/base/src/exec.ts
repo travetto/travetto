@@ -5,6 +5,8 @@ import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 
 import { path } from '@travetto/manifest';
 
+const MINUTE = (1000 * 60);
+
 /**
  * Result of an execution
  */
@@ -93,6 +95,10 @@ export interface ExecutionOptions extends SpawnOptions {
   stdin?: string | Buffer | Readable;
 }
 
+/**
+ * Options for restartable spawn
+ */
+export type RestartExecutionOptions = Omit<ExecutionOptions, 'catchAsResult'> & { maxRetriesPerMinute?: number };
 
 type ErrorWithMeta = Error & { meta?: ExecutionResult };
 
@@ -100,6 +106,9 @@ type ErrorWithMeta = Error & { meta?: ExecutionResult };
  * Standard utilities for managing executions
  */
 export class ExecUtil {
+
+  static RESTART_EXIT_CODE = 200;
+
   /**
    * Get standard execution options
    * @param opts The options to build out
@@ -109,6 +118,7 @@ export class ExecUtil {
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       cwd: path.cwd(),
       shell: false,
+      outputMode: 'text',
       ...opts,
       env: {
         // Preserve path when isolating
@@ -160,15 +170,15 @@ export class ExecUtil {
         }
       };
 
-      switch (options.outputMode) {
+      switch (options.outputMode ?? 'text') {
         case 'binary': {
           proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
           proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
           break;
         }
         case 'text':
-        case 'text-stream':
-        default: {
+        case 'text-stream': {
+          // If pipes exists
           if (proc.stdout) {
             rl.createInterface(proc.stdout).on('line', line => {
               options.onStdOutLine?.(line);
@@ -225,12 +235,47 @@ export class ExecUtil {
    * @param options The enhancement options
    */
   static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
-    // Always register for the fork
-    const opts = this.#getOpts(options);
-    const spawnArgs = [path.resolve(file), ...args];
-    const proc = spawn(process.argv0, spawnArgs, opts);
-    const result = this.#enhanceProcess(proc, options, spawnArgs.join(' '));
-    return { process: proc, result };
+    return this.spawn(process.argv0, [path.resolve(file), ...args], options);
+  }
+
+  /**
+   * Spawn with automatic restart support
+   * @param cmd The command to run
+   * @param args The command line arguments to pass
+   * @param options The enhancement options
+   */
+  static async spawnWithRestart(cmd: string, args: string[], options: RestartExecutionOptions = {}): Promise<ExecutionResult> {
+    const maxRetries = options.maxRetriesPerMinute ?? 5;
+    const restarts: number[] = [];
+
+    for (; ;) {
+      const state = this.spawn(cmd, args, { outputMode: 'raw', ...options, catchAsResult: true });
+
+      const toKill = (): void => { state.process.kill('SIGKILL'); };
+      const toMessage = (v: unknown): void => { state.process.send(v!); };
+
+      // Proxy kill requests
+      process.on('message', toMessage);
+      process.on('SIGINT', toKill);
+      state.process.on('message', v => process.send?.(v));
+
+      const result = await state.result;
+      if (result.code !== this.RESTART_EXIT_CODE) {
+        return result;
+      } else {
+        process.off('SIGINT', toKill);
+        process.off('message', toMessage);
+        restarts.unshift(Date.now());
+        if (restarts.length === maxRetries) {
+          if ((restarts[0] - restarts[maxRetries - 1]) <= MINUTE) {
+            console.error(`Bailing, due to ${maxRetries} restarts in under a minute`);
+            return state.result;
+          }
+          restarts.pop(); // Keep list short
+        }
+        console.warn('Restarting...', { pid: process.pid });
+      }
+    }
   }
 
   /**

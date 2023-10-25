@@ -3,7 +3,7 @@ import { Readable } from 'stream';
 
 import { RootIndex } from '@travetto/manifest';
 
-export async function getCompilerInfo(): Promise<{ iteration: number, path: string } | undefined> {
+export async function getCompilerInfo(): Promise<{ iteration: number, path: string, type: 'watch' | 'build' } | undefined> {
   const res = await fetch(`${RootIndex.manifest.compilerUrl}/info`).catch(err => ({ ok: false, json: () => undefined }));
   if (res.ok) {
     return res.json();

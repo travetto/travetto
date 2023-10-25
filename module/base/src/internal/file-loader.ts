@@ -1,8 +1,9 @@
 import { ManifestModuleUtil, RootIndex, WatchEvent } from '@travetto/manifest';
 
+import { ExecUtil } from '../exec';
 import { ObjectUtil } from '../object';
 import { ShutdownManager } from '../shutdown';
-import { fetchCompilerEvents } from './compiler-client';
+import { fetchCompilerEvents, getCompilerInfo } from './compiler-client';
 
 type CompilerWatchEvent = (WatchEvent & { output: string, module: string, time: number });
 type WatchHandler = (ev: CompilerWatchEvent) => (void | Promise<void>);
@@ -97,14 +98,23 @@ class $DynamicFileLoader {
     const kill = new AbortController();
     ShutdownManager.onExitRequested(() => kill.abort());
 
+    let info = await getCompilerInfo();
+    while (info?.type !== 'watch') { // If we not are watching from the beginning, wait for the server to change
+      await new Promise(r => setTimeout(r, 1000)); // Check once a second to see when the compiler comes up
+      info = await getCompilerInfo();
+      if (info) {
+        process.exit(ExecUtil.RESTART_EXIT_CODE); // Restart, server changed (off to on)
+      }
+    }
+
     for await (const ev of fetchCompilerEvents<CompilerWatchEvent>('change', kill.signal)) {
       if (ev.file && RootIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
         await this.dispatch(ev);
       }
     }
 
-    // We are done
-    process.exit(200); // Exit code can trigger restart if desired
+    // We are done, request restart
+    process.exit(ExecUtil.RESTART_EXIT_CODE);
   }
 }
 
