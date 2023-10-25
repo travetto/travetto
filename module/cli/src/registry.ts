@@ -4,12 +4,16 @@ import { RootIndex } from '@travetto/manifest';
 import { cliTpl } from './color';
 import { CliCommandShape } from './types';
 
-type CliCommandConfig = {
+export type CliCommandConfigOptions = {
+  runTarget?: boolean;
+  hidden?: boolean;
+  restartable?: boolean;
+};
+
+export type CliCommandConfig = CliCommandConfigOptions & {
   name: string;
   module: string;
   cls: ConcreteClass<CliCommandShape>;
-  runTarget?: boolean;
-  hidden?: boolean;
   preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 };
 
