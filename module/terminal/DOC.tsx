@@ -38,9 +38,9 @@ export const text = <>
 
     This module follows the pattern {d.library('Node')} follows with respect to the environment variables: {d.field('NO_COLOR')}, {d.field('FORCE_COLOR')} and {d.field('NODE_DISABLE_COLORS')}
 
-    <c.Execution title='Node help on colors' cmd='/usr/bin/node' args={['-h']} config={{
+    <c.Execution title='Node help on colors' cmd={process.argv0} args={['-h']} config={{
       filter: line => /color/i.test(line),
-      formatCommand: (cmd, args) => `${cmd} ${args.join(' ')} | grep -i color`
+      formatCommand: (cmd, args) => `node ${args.join(' ')} | grep -i color`
     }} />
   </c.Section>
   <c.Section title='Terminal Interactions'>

@@ -35,31 +35,32 @@ In addition to the normal output, the compiler supports an environment variable 
 ```bash
 $ TRV_BUILD=debug trv build
 
-2029-03-14T04:00:00.618Z [lock           ] Acquiring build
-2029-03-14T04:00:00.837Z [precompile     ] Started
-2029-03-14T04:00:01.510Z [precompile     ] @travetto/terminal Skipped
-2029-03-14T04:00:02.450Z [precompile     ] @travetto/manifest Skipped
-2029-03-14T04:00:02.762Z [precompile     ] @travetto/transformer Skipped
-2029-03-14T04:00:02.947Z [precompile     ] @travetto/compiler Skipped
-2029-03-14T04:00:03.093Z [precompile     ] Completed
-2029-03-14T04:00:04.003Z [manifest       ] Started
-2029-03-14T04:00:04.495Z [manifest       ] Completed
-2029-03-14T04:00:05.066Z [transformers   ] Started
-2029-03-14T04:00:05.307Z [transformers   ] @travetto/base Skipped
-2029-03-14T04:00:05.952Z [transformers   ] @travetto/cli Skipped
-2029-03-14T04:00:06.859Z [transformers   ] @travetto/manifest Skipped
-2029-03-14T04:00:07.720Z [transformers   ] @travetto/registry Skipped
-2029-03-14T04:00:08.179Z [transformers   ] @travetto/schema Skipped
-2029-03-14T04:00:08.588Z [transformers   ] Completed
-2029-03-14T04:00:09.493Z [delta          ] Started
-2029-03-14T04:00:10.395Z [delta          ] Completed
-2029-03-14T04:00:10.407Z [manifest       ] Started
-2029-03-14T04:00:10.799Z [manifest       ] Wrote manifest @travetto-doc/compiler
-2029-03-14T04:00:11.013Z [manifest       ] Completed
-2029-03-14T04:00:11.827Z [compile        ] Started action=build changed=
-2029-03-14T04:00:11.894Z [compile        ] Skipped
-2029-03-14T04:00:12.133Z [lock           ] Releasing build
-2029-03-14T04:00:13.123Z [build          ] Successfully built
+2029-03-14T04:00:00.618Z info  [compiler-server] Starting server http://localhost:43392
+2029-03-14T04:00:00.837Z debug [compiler-client] Starting watch for events of type "log"
+2029-03-14T04:00:01.510Z debug [precompile     ] Started
+2029-03-14T04:00:02.450Z debug [precompile     ] Skipped @travetto/terminal
+2029-03-14T04:00:02.762Z debug [precompile     ] Skipped @travetto/manifest
+2029-03-14T04:00:02.947Z debug [precompile     ] Skipped @travetto/transformer
+2029-03-14T04:00:03.093Z debug [precompile     ] Skipped @travetto/compiler
+2029-03-14T04:00:04.003Z debug [precompile     ] Completed
+2029-03-14T04:00:04.495Z debug [manifest       ] Started
+2029-03-14T04:00:05.066Z debug [manifest       ] Completed
+2029-03-14T04:00:05.307Z debug [transformers   ] Started
+2029-03-14T04:00:05.952Z debug [transformers   ] Skipped @travetto/base
+2029-03-14T04:00:06.859Z debug [transformers   ] Skipped @travetto/cli
+2029-03-14T04:00:07.720Z debug [transformers   ] Skipped @travetto/manifest
+2029-03-14T04:00:08.179Z debug [transformers   ] Skipped @travetto/registry
+2029-03-14T04:00:08.588Z debug [transformers   ] Skipped @travetto/schema
+2029-03-14T04:00:09.493Z debug [transformers   ] Completed
+2029-03-14T04:00:10.395Z debug [delta          ] Started
+2029-03-14T04:00:10.407Z debug [delta          ] Completed
+2029-03-14T04:00:10.799Z debug [manifest       ] Started
+2029-03-14T04:00:11.013Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
+2029-03-14T04:00:11.827Z debug [manifest       ] Completed
+2029-03-14T04:00:11.894Z info  [compiler-server] State changed: compile-end
+2029-03-14T04:00:12.133Z debug [compiler-exec  ] Skipped
+2029-03-14T04:00:13.123Z info  [compiler-server] Closing down server
+2029-03-14T04:00:14.014Z debug [compiler-client] Stopping watch for events of type "log"
 ```
 
 **Terminal: Sample trv output with default log level**
@@ -70,7 +71,7 @@ $ trv build
 ## Compilation Architecture
 The compiler will move through the following phases on a given compilation execution:
    *  `Bootstrapping` - Initial compilation of [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s `support/*.ts` files
-   *  `Lock Management` - Manages cross-process interaction to ensure single compiler
+   *  `Compiler Server` - Provides a simple HTTP interface to watching compiler file and state changes, and synchronizing multiple processes
    *  `Build Compiler` - Leverages [Typescript](https://typescriptlang.org) to build files needed to execute compiler
    *  `Build Manifest` - Produces the manifest for the given execution
    *  `Build Transformers` - Leverages [Typescript](https://typescriptlang.org) to compile all transformers defined in the manifest
@@ -81,11 +82,3 @@ The compiler will move through the following phases on a given compilation execu
 
 ### Bootstrapping
 Given that the framework is distributed as [Typescript](https://typescriptlang.org) only files, there is a bootstrapping problem that needs to be mitigated.  The [trv](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trv.js#L60) entrypoint, along with a small context utility in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching") are the only [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) files needed to run the project.  The [trv](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trv.js#L60) entry point will compile `@travetto/compiler/support/*` files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
-
-### Lock Management
-The compiler supports invocation from multiple locations at the same time, and provides a layer of orchestration to ensure a single process is building at a time.  For a given project, there are four main states:
-   *  No Watch - Building
-   *  Watch    - No Build
-   *  Watch    - Building
-   *  Inactive / Stale
-Depending on what state the project is in (depending on various processes), will influence what the supporting tooling should do. [LockManager](https://github.com/travetto/travetto/tree/main/module/compiler/support/lock.ts#L25) represents the majority of the logic for tracking various states, and informing what action should happen when in the above states.

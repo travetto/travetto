@@ -18,7 +18,7 @@ export class TestCommand implements CliCommandShape {
   format: TestFormat = 'tap';
   /** Number of tests to run concurrently */
   @Min(1) @Max(WorkPool.MAX_SIZE)
-  concurrency: number = WorkPool.MAX_SIZE;
+  concurrency: number = WorkPool.DEFAULT_SIZE;
   /** Test run mode */
   mode: TestMode = 'standard';
 
