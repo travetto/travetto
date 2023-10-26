@@ -1,12 +1,12 @@
 import { GlobalEnvConfig } from '@travetto/base';
-import { CliCommand } from '@travetto/cli';
+import { CliCommand, CliUtil } from '@travetto/cli';
 
 import { TestFormat } from './bin/types';
 
 /**
  * Invoke the test watcher
  */
-@CliCommand({ restartable: true })
+@CliCommand()
 export class TestWatcherCommand {
 
   format: TestFormat = 'tap';
@@ -17,6 +17,10 @@ export class TestWatcherCommand {
   }
 
   async main(): Promise<void> {
+    if (await CliUtil.runAsRestartable()) {
+      return;
+    }
+
     // Quit on parent disconnect
     if (process.send) {
       process.on('disconnect', () => process.exit(0));

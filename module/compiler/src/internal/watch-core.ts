@@ -89,7 +89,7 @@ async function watchFolderImmediate(queue: AsyncQueue<WatchEvent>, options: Watc
     }
   });
 
-  queue.registerOnClose(() => watcher.close());
+  queue.onClose().then(() => watcher.close());
 }
 
 /**
@@ -125,7 +125,7 @@ async function watchFolderRecursive(queue: AsyncQueue<WatchEvent>, options: Watc
         }
       }
     }, { ignore: [...ignore, ...options.ignore ?? []] });
-    queue.registerOnClose(() => cleanup.unsubscribe());
+    queue.onClose().then(() => cleanup.unsubscribe());
   }
 }
 
