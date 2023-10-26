@@ -9,7 +9,7 @@ import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
 const VALID_OPS = { watch: 'watch', build: 'build', clean: 'clean', manifest: 'manifest' };
 
-const COMPILER_FILES = [...['entry.trv', 'log', 'server/client', 'server/queue', 'server/runner', 'server/server', 'setup', 'util'].map(x => `support/${x}.ts`), 'package.json'];
+const COMPILER_FILES = [...['entry.trv', 'log', 'queue', 'server/client', 'server/runner', 'server/server', 'setup', 'util'].map(x => `support/${x}.ts`), 'package.json'];
 
 /**
  * @param {import('@travetto/manifest').ManifestContext} ctx

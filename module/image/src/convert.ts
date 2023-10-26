@@ -85,4 +85,24 @@ export class ImageConverter {
     }
     return await StreamUtil.execPipe(stream, image);
   }
+
+  /**
+   * Get Image Dimensions
+   * @param image
+   */
+  static async getDimensions<T extends ImageType>(image: T): Promise<{ width: number, height: number }> {
+    const { result, process: identProc } = await this.CONVERTER.exec('gm',
+      'identify',
+      '-format', '{"width":%w, "height":%h}',
+      '-'
+    );
+
+    (await StreamUtil.toStream(image)).pipe(identProc.stdin!);
+
+    await result;
+
+    const buf = await StreamUtil.toBuffer(identProc.stdout!);
+
+    return JSON.parse(buf.toString('utf8'));
+  }
 }

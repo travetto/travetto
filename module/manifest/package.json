@@ -30,14 +30,6 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/manifest"
   },
-  "peerDependencies": {
-    "@parcel/watcher": "^2.1.0"
-  },
-  "peerDependenciesMeta": {
-    "@parcel/watcher": {
-      "optional": true
-    }
-  },
   "travetto": {
     "displayName": "Manifest",
     "docBaseUrl": "https://github.com/travetto/travetto/tree/main"

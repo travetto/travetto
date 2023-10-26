@@ -1,16 +1,9 @@
 import { watch, Stats } from 'fs';
 import fs from 'fs/promises';
 
-import { path } from './path';
+import { path } from '@travetto/manifest';
 
-async function getWatcher(): Promise<typeof import('@parcel/watcher')> {
-  try {
-    return await import('@parcel/watcher');
-  } catch (err) {
-    console.error('@parcel/watcher must be installed to use watching functionality');
-    throw err;
-  }
-}
+import { AsyncQueue } from '../../support/queue';
 
 export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string, folder: string };
 
@@ -49,58 +42,10 @@ export type WatchStream = AsyncIterable<WatchEvent> & { close: () => Promise<voi
 
 const DEDUPE_THRESHOLD = 50;
 
-class Queue<X> implements AsyncIterator<X>, AsyncIterable<X> {
-  #queue: X[] = [];
-  #done = false;
-  #ready: Promise<void>;
-  #fire: (() => void);
-  #onClose: (() => (void | Promise<void>))[] = [];
-  #recentKeys = new Map<string, number>();
-
-  constructor() {
-    this.#ready = new Promise(r => this.#fire = r);
-  }
-
-  // Allow for iteration
-  [Symbol.asyncIterator](): AsyncIterator<X> { return this; }
-
-  async next(): Promise<IteratorResult<X>> {
-    while (!this.#done && !this.#queue.length) {
-      this.#recentKeys = new Map([...this.#recentKeys.entries()] // Cull before waiting
-        .filter(([, time]) => (Date.now() - time) < DEDUPE_THRESHOLD));
-      await this.#ready;
-      this.#ready = new Promise(r => this.#fire = r);
-    }
-    return { value: this.#queue.shift()!, done: this.#done };
-  }
-
-  add(item: X | X[]): void {
-    const now = Date.now();
-    for (const value of Array.isArray(item) ? item : [item]) {
-      const key = JSON.stringify(value);
-      if ((now - (this.#recentKeys.get(key) ?? 0)) > DEDUPE_THRESHOLD) {
-        this.#queue.push(value);
-        this.#recentKeys.set(key, now);
-        this.#fire();
-      }
-    }
-  }
-
-  registerOnClose(handler: () => (void | Promise<void>)): void {
-    this.#onClose.push(handler);
-  }
-
-  async close(): Promise<void> {
-    this.#done = true;
-    this.#fire();
-    await Promise.all(this.#onClose.map(x => x()));
-  }
-}
-
 /**
  * Watch immediate files for a given folder
  */
-async function watchFolderImmediate(queue: Queue<WatchEvent>, options: WatchFolder): Promise<void> {
+async function watchFolderImmediate(queue: AsyncQueue<WatchEvent>, options: WatchFolder): Promise<void> {
   const watchPath = path.resolve(options.src);
   const watcher = watch(watchPath, { persistent: true, encoding: 'utf8' });
   const lastStats: Record<string, Stats | undefined> = {};
@@ -150,8 +95,8 @@ async function watchFolderImmediate(queue: Queue<WatchEvent>, options: WatchFold
 /**
  * Watch recursive files for a given folder
  */
-async function watchFolderRecursive(queue: Queue<WatchEvent>, options: WatchFolder): Promise<void> {
-  const lib = await getWatcher();
+async function watchFolderRecursive(queue: AsyncQueue<WatchEvent>, options: WatchFolder): Promise<void> {
+  const lib = await import('@parcel/watcher');
   const target = options.target ?? options.src;
 
   if (await fs.stat(options.src).then(() => true, () => options.createMissing)) {
@@ -191,14 +136,12 @@ async function watchFolderRecursive(queue: Queue<WatchEvent>, options: WatchFold
  * @param options
  */
 export function watchFolders(
-  folders: string[] | WatchFolder[],
+  folders: WatchFolder[],
   config: Omit<WatchFolder, 'src' | 'target'> = {}
-): WatchStream {
-  const queue = new Queue<WatchEvent>();
+): AsyncQueue<WatchEvent> {
+  const queue = new AsyncQueue<WatchEvent>();
   for (const folder of folders) {
-    if (typeof folder === 'string') {
-      watchFolderRecursive(queue, { ...config, src: folder });
-    } else if (!folder.immediate) {
+    if (!folder.immediate) {
       watchFolderRecursive(queue, { ...config, ...folder });
     } else {
       watchFolderImmediate(queue, { ...config, ...folder });

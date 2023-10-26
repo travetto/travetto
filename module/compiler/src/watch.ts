@@ -2,13 +2,17 @@ import { readFileSync } from 'fs';
 
 import {
   ManifestContext, ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType,
-  ManifestModuleFileType, path, ManifestModule, watchFolders, WatchFolder, RootIndex, WatchStream
+  ManifestModuleFileType, path, ManifestModule, RootIndex
 } from '@travetto/manifest';
 import { getManifestContext } from '@travetto/manifest/bin/context';
 
+import type { CompileStateEntry } from './types';
+
 import { CompilerState } from './state';
 import { CompilerUtil } from './util';
-import { CompileWatchEvent } from './types';
+import { WatchEvent, WatchFolder, watchFolders } from './internal/watch-core';
+
+export type CompileWatchEvent = WatchEvent & { entry: CompileStateEntry };
 
 const RESTART_SIGNAL = 'RESTART_SIGNAL';
 
@@ -90,10 +94,8 @@ export class CompilerWatcher {
    * @returns
    */
   async * watchChanges(): AsyncIterable<CompileWatchEvent | RestartEvent> {
-    const stream = this.#watchFiles();
-
     const mods = this.#getModuleMap();
-    for await (const { file: sourceFile, action, folder } of stream) {
+    for await (const { file: sourceFile, action, folder } of this.#watchFiles()) {
 
       if (folder === RESTART_SIGNAL) {
         yield { action: 'restart', file: sourceFile };
@@ -158,7 +160,7 @@ export class CompilerWatcher {
   /**
    * Watch files based on root index
    */
-  #watchFiles(): WatchStream {
+  #watchFiles(): AsyncIterable<WatchEvent> {
     const idx = this.#state.manifestIndex;
     const modules = [...idx.getModuleList('all')].map(x => idx.getModule(x)!);
     const validTypes = new Set(['ts', 'typings', 'js', 'package-json']);
