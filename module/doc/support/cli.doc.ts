@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 
 import { PackageUtil, path, RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
-import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
 /**
@@ -49,6 +49,10 @@ export class DocCommand implements CliCommandShape {
   }
 
   async runWatch(): Promise<void> {
+    if (await CliUtil.runAsRestartable()) {
+      return;
+    }
+
     const args = process.argv.slice(2).filter(x => !/(-w|--watch)/.test(x));
     const { listenFileChanges } = await import('@travetto/base/src/internal/compiler-client.js');
     for await (const { action, file } of listenFileChanges()) {

@@ -4,16 +4,35 @@ import { FileQueryProvider, TypedObject } from '@travetto/base';
 import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
 import { RootIndex, path } from '@travetto/manifest';
 import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
+import { ManualAsyncIterator as Queue } from '@travetto/worker';
 
 import { EmailCompileUtil } from './util';
-import { watchFolders } from './watch';
 
 const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
+
+type WatchEvent = { action: 'create' | 'update' | 'delete', file: string, folder: string };
 
 /**
  * Email compilation support
  */
 export class EmailCompiler {
+
+  /**
+ * Watch folders as needed
+ */
+  static async #watchFolders(folders: string[]): Promise<Queue<WatchEvent>> {
+    const lib = await import('@parcel/watcher');
+    const q = new Queue<WatchEvent>();
+    for (const src of folders) {
+      const cleanup = await lib.subscribe(src, async (err, events) => {
+        for (const ev of events) {
+          q.add({ action: ev.type, file: path.toPosix(ev.path), folder: src });
+        }
+      });
+      q.onClose().then(() => cleanup.unsubscribe());
+    }
+    return q;
+  }
 
   /** Load Template */
   static async loadTemplate(file: string): Promise<EmailCompileContext> {
@@ -95,7 +114,6 @@ export class EmailCompiler {
     return keys;
   }
 
-
   /**
    * Watch compilation
    */
@@ -108,7 +126,7 @@ export class EmailCompiler {
     );
 
     // watch resources
-    const stream = await watchFolders(all.paths);
+    const stream = await this.#watchFolders(all.paths);
 
     // Watch template files
     DynamicFileLoader.onLoadEvent((ev) => {
