@@ -6,6 +6,7 @@ import { RootIndex, path } from '@travetto/manifest';
 import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
 import { EmailCompileUtil } from './util';
+import { watchFolders } from './watch';
 
 const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
 
@@ -106,14 +107,17 @@ export class EmailCompiler {
       )].map(x => path.resolve(RootIndex.getModule(x)!.sourcePath, 'resources'))
     );
 
-    const stream = all.watchFiles();
+    // watch resources
+    const stream = await watchFolders(all.paths);
 
+    // Watch template files
     DynamicFileLoader.onLoadEvent((ev) => {
       const src = RootIndex.getEntry(ev.file);
       if (src && EmailCompileUtil.isTemplateFile(src.sourceFile)) {
         stream.add({ ...ev, file: src.sourceFile });
       }
     });
+
     for await (const { file, action } of stream) {
       if (action === 'delete') {
         continue;

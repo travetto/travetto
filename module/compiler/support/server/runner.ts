@@ -6,7 +6,7 @@ import path from 'path';
 import type { ManifestContext, ManifestRoot, DeltaEvent } from '@travetto/manifest';
 
 import type { CompilerProgressEvent, CompilerServerEvent } from '../types';
-import { AsyncQueue } from './queue';
+import { AsyncQueue } from '../queue';
 import { LogUtil } from '../log';
 import { CommonUtil } from '../util';
 import { CompilerClientUtil } from './client';

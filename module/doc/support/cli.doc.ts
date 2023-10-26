@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { PackageUtil, path, RootIndex, watchFolders } from '@travetto/manifest';
+import { PackageUtil, path, RootIndex } from '@travetto/manifest';
 import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
@@ -50,8 +50,8 @@ export class DocCommand implements CliCommandShape {
 
   async runWatch(): Promise<void> {
     const args = process.argv.slice(2).filter(x => !/(-w|--watch)/.test(x));
-    const stream = watchFolders([{ src: path.dirname(this.input), immediate: true }]);
-    for await (const { action, file } of stream) {
+    const { listenFileChanges } = await import('@travetto/base/src/internal/compiler-client.js');
+    for await (const { action, file } of listenFileChanges()) {
       if (action === 'update' && file === this.input) {
         await ExecUtil.spawn('npx', ['trv', ...args], {
           cwd: RootIndex.mainModule.sourcePath,

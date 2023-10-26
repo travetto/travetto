@@ -31,6 +31,7 @@
     "@travetto/di": "^3.3.4",
     "@travetto/email": "^3.3.5",
     "@travetto/image": "^3.3.4",
+    "@travetto/worker": "^3.3.4",
     "@types/inline-css": "^3.0.1",
     "html-entities": "^2.4.0",
     "inline-css": "^4.0.2",
