@@ -7,7 +7,6 @@ import { CliCommandShape } from './types';
 export type CliCommandConfigOptions = {
   runTarget?: boolean;
   hidden?: boolean;
-  restartable?: boolean;
 };
 
 export type CliCommandConfig = CliCommandConfigOptions & {
