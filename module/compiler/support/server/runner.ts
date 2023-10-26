@@ -1,6 +1,4 @@
-import fs from 'fs/promises';
 import cp from 'child_process';
-import os from 'os';
 import path from 'path';
 
 import type { ManifestContext, ManifestRoot, DeltaEvent } from '@travetto/manifest';
@@ -51,7 +49,7 @@ export class CompilerRunner {
 
     const compiler = path.resolve(ctx.workspacePath, ctx.compilerFolder);
     const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
-    const deltaFile = path.resolve(os.tmpdir(), `manifest-delta.${process.pid}.${process.ppid}.${Date.now()}.json`);
+    const deltaFile = path.resolve(ctx.workspacePath, ctx.toolFolder, 'manifest-delta.json');
 
     const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev =>
       path.resolve(manifest.workspacePath, manifest.modules[ev.module].sourceFolder, ev.file)
@@ -60,7 +58,7 @@ export class CompilerRunner {
     let proc: cp.ChildProcess | undefined;
     let kill: (() => void) | undefined;
 
-    const queue = new AsyncQueue<CompilerServerEvent>();
+    const queue = new AsyncQueue<CompilerServerEvent>(signal);
 
     try {
       await CommonUtil.writeTextFile(deltaFile, changedFiles.join('\n'));
@@ -101,7 +99,6 @@ export class CompilerRunner {
       if (kill) {
         process.off('exit', kill);
       }
-      await fs.rm(deltaFile, { force: true });
     }
   }
 }

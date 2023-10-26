@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { WatchEvent, RootIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 import { Class, GlobalEnv } from '@travetto/base';
 import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
@@ -82,19 +82,6 @@ export class ClassSource implements ChangeSource<Class> {
   }
 
   /**
-   * Handle when a file watch event happens
-   */
-  async onLoadEvent(ev: WatchEvent): Promise<void> {
-    console.debug('Pending changes', { changes: PendingRegister.ordered.map(([, x]) => x.map(y => y.Ⲑid)) });
-    for (const [file, classes] of PendingRegister.flush()) {
-      this.#handleFileChanges(file, classes);
-    }
-    if (ev.action === 'create') {
-      this.#flush();
-    }
-  }
-
-  /**
    * Emit a change event
    */
   emit(e: ChangeEvent<Class>): void {
@@ -107,7 +94,14 @@ export class ClassSource implements ChangeSource<Class> {
    */
   async init(): Promise<void> {
     if (GlobalEnv.dynamic) {
-      DynamicFileLoader.onLoadEvent(ev => this.onLoadEvent(ev));
+      DynamicFileLoader.onLoadEvent(ev => {
+        for (const [file, classes] of PendingRegister.flush(true)) {
+          this.#handleFileChanges(file, classes);
+        }
+        if (ev.action === 'create') {
+          this.#flush();
+        }
+      });
       await DynamicFileLoader.init();
     }
 

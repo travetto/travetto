@@ -1,25 +1,22 @@
 import { readFileSync } from 'fs';
+import { setMaxListeners } from 'events';
 
 import {
-  ManifestContext, ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType,
-  ManifestModuleFileType, path, ManifestModule, RootIndex
+  ManifestContext, ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType, ManifestModuleFileType,
+  path, ManifestModule,
 } from '@travetto/manifest';
 import { getManifestContext } from '@travetto/manifest/bin/context';
 
 import type { CompileStateEntry } from './types';
-
 import { CompilerState } from './state';
 import { CompilerUtil } from './util';
-import { WatchEvent, WatchFolder, watchFolders } from './internal/watch-core';
 
-export type CompileWatchEvent = WatchEvent & { entry: CompileStateEntry };
+import { WatchEvent, fileWatchEvents } from './internal/watch-core';
 
-const RESTART_SIGNAL = 'RESTART_SIGNAL';
-
-type RestartEvent = { action: 'restart', file: string };
+type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile: string, folderKey: ManifestModuleFolderType, type: ManifestModuleFileType };
 
 /**
- * Utils for watching
+ * Watch support, based on compiler state and manifest details
  */
 export class CompilerWatcher {
 
@@ -28,13 +25,13 @@ export class CompilerWatcher {
    * @param state
    * @returns
    */
-  static watch(state: CompilerState): AsyncIterable<CompileWatchEvent | RestartEvent> {
+  static watch(state: CompilerState): AsyncIterable<WatchEvent<{ entry: CompileStateEntry }>> {
     return new CompilerWatcher(state).watchChanges();
   }
 
   #sourceHashes = new Map<string, number>();
   #manifestContexts = new Map<string, ManifestContext>();
-  #dirtyFiles: { remove?: boolean, modFolder: string, mod: string, moduleFile?: string, folderKey?: ManifestModuleFolderType, type?: ManifestModuleFileType }[] = [];
+  #dirtyFiles: DirtyFile[] = [];
   #state: CompilerState;
 
   constructor(state: CompilerState) {
@@ -54,23 +51,23 @@ export class CompilerWatcher {
       return this.#manifestContexts.get(folder)!;
     }));
 
-    const files = this.#dirtyFiles;
+    const files = this.#dirtyFiles.slice(0);
     this.#dirtyFiles = [];
 
     for (const ctx of [...contexts, this.#state.manifest]) {
       const newManifest = await ManifestUtil.buildManifest(ctx);
       for (const file of files) {
-        if (file.folderKey && file.moduleFile && file.type && file.mod in newManifest.modules) {
-          newManifest.modules[file.mod].files[file.folderKey] ??= [];
-          const idx = newManifest.modules[file.mod].files[file.folderKey]!.findIndex(x => x[0] === file.moduleFile);
+        if (file.mod in newManifest.modules) {
+          const modFiles = newManifest.modules[file.mod].files[file.folderKey] ??= [];
+          const idx = modFiles.findIndex(x => x[0] === file.moduleFile);
 
           if (!file.remove && idx < 0) {
-            newManifest.modules[file.mod].files[file.folderKey]!.push([file.moduleFile, file.type, Date.now()]);
+            modFiles.push([file.moduleFile, file.type, Date.now()]);
           } else if (idx >= 0) {
             if (file.remove) {
-              newManifest.modules[file.mod].files[file.folderKey]!.splice(idx, 1);
+              modFiles.splice(idx, 1);
             } else {
-              newManifest.modules[file.mod].files[file.folderKey]![idx] = [file.moduleFile, file.type, Date.now()];
+              modFiles[idx] = [file.moduleFile, file.type, Date.now()];
             }
           }
         }
@@ -87,131 +84,79 @@ export class CompilerWatcher {
     );
   }
 
+  #addDirtyFile(mod: ManifestModule, folder: string, moduleFile: string, remove = false): void {
+    this.#dirtyFiles.push({
+      mod: mod.name, modFolder: folder, remove, moduleFile,
+      folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
+      type: ManifestModuleUtil.getFileType(moduleFile),
+    });
+  }
+
   /**
    * Get a watcher for a given compiler state
    * @param state
    * @param handler
    * @returns
    */
-  async * watchChanges(): AsyncIterable<CompileWatchEvent | RestartEvent> {
+  async * watchChanges(): AsyncIterable<WatchEvent<{ entry: CompileStateEntry }>> {
     const mods = this.#getModuleMap();
-    for await (const { file: sourceFile, action, folder } of this.#watchFiles()) {
+    const ctrl = new AbortController();
+    setMaxListeners(1000, ctrl.signal);
 
-      if (folder === RESTART_SIGNAL) {
-        yield { action: 'restart', file: sourceFile };
+    const modules = [...this.#state.manifestIndex.getModuleList('all')].map(x => this.#state.manifestIndex.getModule(x)!);
+
+    const stream = fileWatchEvents(this.#state.manifest, modules, ctrl.signal);
+    for await (const ev of stream) {
+
+      if (ev.action === 'reset') {
+        yield ev;
+        ctrl.abort();
         return;
       }
 
+      const { action, file: sourceFile, folder } = ev;
       const mod = mods[folder];
       const moduleFile = mod.sourceFolder ?
         (sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile) :
         sourceFile.replace(`${this.#state.manifest.workspacePath}/`, '');
 
-      let event: CompileWatchEvent | undefined;
+      let entry = this.#state.getBySource(sourceFile);
 
       switch (action) {
         case 'create': {
           const fileType = ManifestModuleUtil.getFileType(moduleFile);
-          this.#dirtyFiles.push({
-            mod: mod.name,
-            modFolder: folder,
-            moduleFile,
-            folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
-            type: ManifestModuleUtil.getFileType(moduleFile),
-          });
+          this.#addDirtyFile(mod, folder, moduleFile);
           if (CompilerUtil.validFile(fileType)) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
-            const entry = this.#state.registerInput(mod, moduleFile);
+            entry = this.#state.registerInput(mod, moduleFile);
             this.#sourceHashes.set(sourceFile, hash);
-            event = { action, file: entry.source, folder, entry };
           }
           break;
         }
         case 'update': {
-          const entry = this.#state.getBySource(sourceFile);
           if (entry) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             if (this.#sourceHashes.get(sourceFile) !== hash) {
               this.#state.resetInputSource(entry.input);
               this.#sourceHashes.set(sourceFile, hash);
-              event = { action, file: entry.source, folder, entry };
             }
           }
           break;
         }
         case 'delete': {
-          const entry = this.#state.getBySource(sourceFile);
           if (entry) {
             this.#state.removeInput(entry.input);
             if (entry.output) {
-              this.#dirtyFiles.push({ mod: mod.name, modFolder: folder, remove: true });
-              event = { action, file: entry.source, folder, entry };
+              this.#addDirtyFile(mod, folder, moduleFile, true);
             }
           }
         }
       }
-      if (event) {
+
+      if (entry) {
         await this.#rebuildManifestsIfNeeded();
-        yield event;
+        yield { action, file: entry.source, folder, entry };
       }
     }
-  }
-
-  /**
-   * Watch files based on root index
-   */
-  #watchFiles(): AsyncIterable<WatchEvent> {
-    const idx = this.#state.manifestIndex;
-    const modules = [...idx.getModuleList('all')].map(x => idx.getModule(x)!);
-    const validTypes = new Set(['ts', 'typings', 'js', 'package-json']);
-    const options: Partial<WatchFolder> = {
-      filter: ev => validTypes.has(ManifestModuleUtil.getFileType(ev.file)),
-      ignore: ['node_modules', '**/.trv_*'],
-    };
-
-    const moduleFolders: WatchFolder[] = modules
-      .filter(x => !idx.manifest.monoRepo || x.sourcePath !== idx.manifest.workspacePath)
-      .map(x => ({ src: x.sourcePath, target: x.sourcePath }));
-
-    // Add monorepo folders
-    if (idx.manifest.monoRepo) {
-      const mono = modules.find(x => x.sourcePath === idx.manifest.workspacePath)!;
-      for (const folder of Object.keys(mono.files)) {
-        if (!folder.startsWith('$')) {
-          moduleFolders.push({ src: path.resolve(mono.sourcePath, folder), target: mono.sourcePath });
-        }
-      }
-      moduleFolders.push({ src: mono.sourcePath, target: mono.sourcePath, immediate: true });
-    }
-
-    // Watch output folders
-    const outputWatch = (root: string, sources: string[]): WatchFolder => {
-      const valid = new Set(sources.map(src => path.resolve(root, src)));
-      return {
-        src: root, target: RESTART_SIGNAL, immediate: true, includeHidden: true,
-        filter: ev => ev.action === 'delete' && valid.has(path.resolve(root, ev.file))
-      };
-    };
-
-    const topLevelFiles = (root: string, files: string[]): WatchFolder => {
-      const valid = new Set(files.map(src => path.resolve(root, src)));
-      return {
-        src: root, target: RESTART_SIGNAL, immediate: true,
-        filter: ev => valid.has(path.resolve(root, ev.file))
-      };
-    };
-
-    moduleFolders.push(
-      outputWatch(RootIndex.manifest.workspacePath, [
-        RootIndex.manifest.outputFolder,
-        RootIndex.manifest.compilerFolder
-      ]),
-      topLevelFiles(RootIndex.manifest.workspacePath, [
-        'package.json',
-        'package-lock.json'
-      ])
-    );
-
-    return watchFolders(moduleFolders, options);
   }
 }

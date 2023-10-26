@@ -10,7 +10,10 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
   #queue: X[] = [];
   #done = false;
   #ready = resolvablePromise();
-  #close = resolvablePromise();
+
+  constructor(signal?: AbortSignal) {
+    signal?.addEventListener('abort', () => this.close());
+  }
 
   [Symbol.asyncIterator](): AsyncIterator<X> { return this; }
 
@@ -31,13 +34,8 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
     this.#ready.resolve();
   }
 
-  onClose(): Promise<void> {
-    return this.#close;
-  }
-
   close(): void {
     this.#done = true;
     this.#ready.resolve();
-    this.#close.resolve();
   }
 }

@@ -24,7 +24,10 @@ class $PendingRegister {
   /**
    * Clear pending classes
    */
-  flush(): [string, Class[]][] {
+  flush(log?: boolean): [string, Class[]][] {
+    if (log) {
+      console.debug('Pending changes', { changes: this.ordered.map(([, x]) => x.map(y => y.Ⲑid)) });
+    }
     const out = this.ordered.slice(0);
     this.map.clear();
     this.ordered = [];
