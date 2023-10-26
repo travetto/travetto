@@ -63,7 +63,7 @@ This module follows the pattern [Node](https://nodejs.org) follows with respect 
 
 **Terminal: Node help on colors**
 ```bash
-$ /usr/bin/node -h | grep -i color
+$ node -h | grep -i color
 
 FORCE_COLOR                 when set to 'true', 1, 2, 3, or an
                             empty string causes NO_COLOR and

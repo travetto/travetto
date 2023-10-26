@@ -250,7 +250,7 @@ Initialized {
     debug: '0',
     devMode: true,
     test: false,
-    dynamic: false,
+    dynamic: true,
     profiles: [ 'dev' ],
     resourcePaths: [],
     nodeVersion: '20'

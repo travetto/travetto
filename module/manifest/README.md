@@ -19,7 +19,6 @@ This module aims to be the boundary between the file system and the code.  The m
    *  Class and Function Metadata
    *  Runtime Indexing
    *  Path Normalization
-   *  File Watching
 
 ## Project Manifesting
 The project manifest fulfills two main goals: Compile-time Support, and Runtime Knowledge of the project.
@@ -87,57 +86,6 @@ Once the manifest is created, the application runtime can now read this manifest
 ## Path Normalization
 By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up [path](https://github.com/travetto/travetto/tree/main/module/manifest/src/path.ts#L21) as an equivalent to [Node](https://nodejs.org)'s [http](https://nodejs.org/api/path.html) library.  This allows for consistent behavior across all file-interactions, and also allows for easy analysis if [Node](https://nodejs.org)'s [http](https://nodejs.org/api/path.html) library is ever imported.
 
-## File Watching
-The module also leverages [@parcel/watcher](https://www.npmjs.com/package/@parcel/watcher), to expose a single function of `watchFolders`. Only the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework") module packages [@parcel/watcher](https://www.npmjs.com/package/@parcel/watcher) as a direct dependency.  This means, that in production, by default all watch operations will fail with a missing dependency.
-
-**Code: Watch Configuration**
-```typescript
-export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string, folder: string };
-
-export type WatchFolder = {
-  /**
-   * Source folder
-   */
-  src: string;
-  /**
-   * Target folder name, useful for deconstructing
-   */
-  target?: string;
-  /**
-   * Filter events
-   */
-  filter?: (ev: WatchEvent) => boolean;
-  /**
-   * Only look at immediate folder
-   */
-  immediate?: boolean;
-  /**
-   * List of top level folders to ignore
-   */
-  ignore?: string[];
-  /**
-   * If watching a folder that doesn't exist, should it be created?
-   */
-  createMissing?: boolean;
-  /**
-   * Include files that start with '.'
-   */
-  includeHidden?: boolean;
-};
-
-export type WatchStream = AsyncIterable<WatchEvent> & { close: () => Promise<void>, add: (item: WatchEvent | WatchEvent[]) => void };
-```
-
-This method allows for watching one or more folders, and registering a callback that will fire every time a file changes, and which of the registered folders it was triggered within. The return of the `watchFolders` is a cleanup method, that when invoked will remove and stop all watching behavior.
-
-**Code: Watch Configuration**
-```typescript
-export function watchFolders(
-  folders: string[] | WatchFolder[],
-  config: Omit<WatchFolder, 'src' | 'target'> = {}
-): WatchStream {
-```
-
 ## Anatomy of a Manifest
 
 **Code: Manifest for @travetto/manifest**
@@ -155,6 +103,7 @@ export function watchFolders(
   "packageManager": "npm",
   "version": "x.x.x",
   "description": "Support for project indexing, manifesting, along with file watching",
+  "compilerUrl": "http://localhost:26112",
   "frameworkVersion": "x.x.x",
   "modules": {
     "@travetto/manifest": {
@@ -202,8 +151,7 @@ export function watchFolders(
           [ "src/root-index.ts", "ts", 1868155200000 ],
           [ "src/types.ts", "ts", 1868155200000 ],
           [ "src/typings.d.ts", "typings", 1868155200000 ],
-          [ "src/util.ts", "ts", 1868155200000 ],
-          [ "src/watch.ts", "ts", 1868155200000 ]
+          [ "src/util.ts", "ts", 1868155200000 ]
         ],
         "bin": [
           [ "bin/context.d.ts", "typings", 1868155200000 ],

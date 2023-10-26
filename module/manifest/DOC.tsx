@@ -39,7 +39,6 @@ export const text = <>
     <li>Class and Function Metadata</li>
     <li>Runtime Indexing</li>
     <li>Path Normalization</li>
-    <li>File Watching</li>
   </ul>
 
   <c.Section title='Project Manifesting'>
@@ -83,15 +82,6 @@ export const text = <>
   </c.Section>
   <c.Section title='Path Normalization' >
     By default, all paths within the framework are assumed to be in a POSIX style, and all input paths are converted to the POSIX style.  This works appropriately within a Unix and a Windows environment.  This module offers up <c.CodeLink title='path' src='./src/path.ts' startRe={/export/} /> as an equivalent to {d.library('Node')}'s {d.library('Path')} library.  This allows for consistent behavior across all file-interactions, and also allows for easy analysis if {d.library('Node')}'s {d.library('Path')} library is ever imported.
-  </c.Section>
-  <c.Section title='File Watching'>
-    The module also leverages {d.library('ParcelWatcher')}, to expose a single function of {d.method('watchFolders')}. Only the {d.mod('Compiler')} module packages {d.library('ParcelWatcher')} as a direct dependency.  This means, that in production, by default all watch operations will fail with a missing dependency.
-
-    <c.Code title='Watch Configuration' src='src/watch.ts' startRe={/export type WatchEvent/} endRe={/export type WatchStream/} />
-
-    This method allows for watching one or more folders, and registering a callback that will fire every time a file changes, and which of the registered folders it was triggered within. The return of the {d.method('watchFolders')} is a cleanup method, that when invoked will remove and stop all watching behavior.
-
-    <c.Code title='Watch Configuration' src='src/watch.ts' startRe={/function watchFolders/} endRe={/^[)]:/} />
   </c.Section>
   <c.Section title='Anatomy of a Manifest'>
 

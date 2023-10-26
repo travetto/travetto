@@ -420,7 +420,8 @@ If the goal is to run a more complex application, which may include depending on
 **Code: Simple Run Target**
 ```typescript
 import { DependencyRegistry } from '@travetto/di';
-import { CliCommand } from '@travetto/cli';
+import { CliCommand, CliUtil } from '@travetto/cli';
+
 import { ServerHandle } from '../src/types';
 
 /**
@@ -436,7 +437,11 @@ export class RunRestCommand {
     return this.port ? { REST_PORT: `${this.port}` } : {};
   }
 
-  async main(): Promise<ServerHandle> {
+  async main(): Promise<ServerHandle | void> {
+    if (await CliUtil.runAsRestartable()) {
+      return;
+    }
+
     const { RestApplication } = await import('../src/application/rest.js');
     return DependencyRegistry.runInstance(RestApplication);
   }

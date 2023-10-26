@@ -2,8 +2,6 @@
 import { d, c } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 
-import { LockManager } from './support/lock';
-
 const TrvEntry = d.codeLink('trv', 'bin/trv.js', /[(]async/);
 
 export const text = async () => {
@@ -54,7 +52,7 @@ export const text = async () => {
       The compiler will move through the following phases on a given compilation execution:
       <ul>
         <li>{d.method('Bootstrapping')} - Initial compilation of {d.mod('Compiler')}'s {d.path('support/*.ts')} files</li>
-        <li>{d.method('Lock Management')} - Manages cross-process interaction to ensure single compiler</li>
+        <li>{d.method('Compiler Server')} - Provides a simple HTTP interface to watching compiler file and state changes, and synchronizing multiple processes</li>
         <li>{d.method('Build Compiler')} - Leverages {d.library('Typescript')} to build files needed to execute compiler</li>
         <li>{d.method('Build Manifest')} - Produces the manifest for the given execution</li>
         <li>{d.method('Build Transformers')} - Leverages {d.library('Typescript')} to compile all transformers defined in the manifest</li>
@@ -67,19 +65,6 @@ export const text = async () => {
       <c.SubSection title='Bootstrapping'>
 
         Given that the framework is distributed as {d.library('Typescript')} only files, there is a bootstrapping problem that needs to be mitigated.  The {TrvEntry} entrypoint, along with a small context utility in {d.mod('Manifest')} are the only {d.library('Javascript')} files needed to run the project.  The {TrvEntry} entry point will compile {d.path('@travetto/compiler/support/*')} files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
-      </c.SubSection>
-      <c.SubSection title='Lock Management'>
-
-        The compiler supports invocation from multiple locations at the same time, and provides a layer of orchestration to ensure a single process is building at a time.  For a given project, there are four main states:
-
-        <ul>
-          <li>No Watch - Building</li>
-          <li>Watch    - No Build</li>
-          <li>Watch    - Building</li>
-          <li>Inactive / Stale</li>
-        </ul>
-
-        Depending on what state the project is in (depending on various processes), will influence what the supporting tooling should do. {LockManager} represents the majority of the logic for tracking various states, and informing what action should happen when in the above states.
       </c.SubSection>
     </c.Section>
   </>;

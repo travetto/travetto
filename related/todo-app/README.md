@@ -316,7 +316,7 @@ npx trv run:rest
     debug: '0',
     devMode: true,
     test: false,
-    dynamic: false,
+    dynamic: true,
     profiles: [ 'dev' ],
     resourcePaths: [],
     nodeVersion: '20'
@@ -325,6 +325,8 @@ npx trv run:rest
     sources: [
       'application.1 - file://./resources/application.yml',
       'dev.1 - file://./resources/dev.yml',
+      'dev.1 - file://<workspace-root>/resources/email/dev.yml',
+      'dev.1 - file://<workspace-root>/resources/resources/dev.yml',
       'override.3 - memory://override'
     ],
     active: {
@@ -332,7 +334,7 @@ npx trv run:rest
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
         output: './openapi.yml',
-        persist: false,
+        persist: true,
         skipRoutes: false,
         exposeAllSchemas: false
       },
@@ -342,7 +344,10 @@ npx trv run:rest
         output: './.trv_build/logs/@travetto/todo-app.log',
         writeSync: false
       },
-      FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
+      FileModelConfig: {
+        folder: '/tmp/<temp-folder>',
+        namespace: '.'
+      },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
