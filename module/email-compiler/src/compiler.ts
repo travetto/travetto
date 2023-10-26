@@ -18,20 +18,18 @@ type WatchEvent = { action: 'create' | 'update' | 'delete', file: string, folder
 export class EmailCompiler {
 
   /**
- * Watch folders as needed
- */
-  static async #watchFolders(folders: string[]): Promise<Queue<WatchEvent>> {
+   * Watch folders as needed
+   */
+  static async #watchFolders(folders: string[], handler: (ev: WatchEvent) => void, signal: AbortSignal): Promise<void> {
     const lib = await import('@parcel/watcher');
-    const q = new Queue<WatchEvent>();
     for (const src of folders) {
       const cleanup = await lib.subscribe(src, async (err, events) => {
         for (const ev of events) {
-          q.add({ action: ev.type, file: path.toPosix(ev.path), folder: src });
+          handler({ action: ev.type, file: path.toPosix(ev.path), folder: src });
         }
       });
-      q.onClose().then(() => cleanup.unsubscribe());
+      signal.addEventListener('abort', () => cleanup.unsubscribe());
     }
-    return q;
   }
 
   /** Load Template */
@@ -125,8 +123,11 @@ export class EmailCompiler {
       )].map(x => path.resolve(RootIndex.getModule(x)!.sourcePath, 'resources'))
     );
 
+    const ctrl = new AbortController();
+    const stream = new Queue<WatchEvent>([], ctrl.signal);
+
     // watch resources
-    const stream = await this.#watchFolders(all.paths);
+    this.#watchFolders(all.paths, ev => stream.add(ev), ctrl.signal);
 
     // Watch template files
     DynamicFileLoader.onLoadEvent((ev) => {

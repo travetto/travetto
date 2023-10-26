@@ -78,9 +78,10 @@ export class CompilerServer {
     return output;
   }
 
-  async #addListener(type: CompilerServerEventType, res: http.ServerResponse): Promise<void> {
+  async #addListener(type: string, res: http.ServerResponse): Promise<void> {
     res.writeHead(200);
-    this.#listeners.push({ res, type });
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    this.#listeners.push({ res, type: type as 'change' });
     await new Promise(resolve => res.on('close', resolve));
     this.#listeners.splice(this.#listeners.findIndex(x => x.res === res), 1);
     res.end();
@@ -108,22 +109,18 @@ export class CompilerServer {
   async #onRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     res.setHeader('Content-Type', 'application/json');
 
-    const urlPath = (req.url ?? '/')?.split(/[?#]/)[0].replace(/^[/]/, '');
-    if (urlPath.startsWith('event/')) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return await this.#addListener(urlPath.split('event/')[1] as 'change', res);
-    }
+    const [, action, subAction] = new URL(`${this.#ctx.compilerUrl}${req.url}`).pathname.split('/');
 
-    log('debug', `Receive request ${urlPath}`);
+    log('debug', `Receive request ${{ action, subAction }}`);
 
     let out: unknown;
-    switch (urlPath) {
+    switch (action) {
+      case 'event': return await this.#addListener(subAction, res);
       case 'close': return this.close();
       case 'info': out = this.info ?? {}; break;
       default: out = { error: 'Unknown request' }; res.statusCode = 404; break;
     }
-    res.write(JSON.stringify(out));
-    res.end();
+    res.end(JSON.stringify(out));
   }
 
   /**

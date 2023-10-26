@@ -1,10 +1,8 @@
-import type { WatchEvent } from '@travetto/manifest';
-
 export type BuildOp = 'build' | 'watch';
 export type MainOp = BuildOp | 'manifest' | 'run';
 
 export type CompilerStateType = 'startup' | 'compile-start' | 'compile-end' | 'watch-start' | 'watch-end' | 'reset' | 'close';
-export type CompilerChangeEvent = WatchEvent & { output: string, module: string, time: number };
+export type CompilerChangeEvent = { file: string, action: 'create' | 'update' | 'delete', folder: string, output: string, module: string, time: number };
 export type CompilerLogLevel = 'info' | 'debug' | 'warn' | 'error';
 export type CompilerLogEvent = { level: CompilerLogLevel, message: string, time: number, args?: unknown[], scope?: string };
 export type CompilerProgressEvent = { idx: number, total: number, message: string, operation: 'compile', complete?: boolean };

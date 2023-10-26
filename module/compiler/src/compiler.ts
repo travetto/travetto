@@ -132,8 +132,8 @@ export class Compiler {
       EventUtil.sendEvent('state', { state: 'watch-start' });
 
       for await (const ev of CompilerWatcher.watch(this.#state)) {
-        if (ev.action === 'restart') {
-          Log.info(`Triggering restart due to change in ${ev.file}`);
+        if (ev.action === 'reset') {
+          Log.info(`Triggering reset due to change in ${ev.file}`);
           EventUtil.sendEvent('state', { state: 'reset' });
           return;
         }
