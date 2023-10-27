@@ -111,7 +111,7 @@ export class CompilerServer {
 
     const [, action, subAction] = new URL(`${this.#ctx.compilerUrl}${req.url}`).pathname.split('/');
 
-    log('debug', `Receive request ${{ action, subAction }}`);
+    log('debug', 'Receive request', { action, subAction });
 
     let out: unknown;
     switch (action) {

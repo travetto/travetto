@@ -1,10 +1,7 @@
-import { readFileSync } from 'fs';
-import fs from 'fs/promises';
-import os from 'os';
-
 import { path } from './path';
 import { ManifestContext, ManifestRoot } from './types';
 import { ManifestModuleUtil } from './module';
+import { ManifestFileUtil } from './file';
 
 const MANIFEST_FILE = 'manifest.json';
 
@@ -12,20 +9,6 @@ const MANIFEST_FILE = 'manifest.json';
  * Manifest utils
  */
 export class ManifestUtil {
-  /**
-   * Write file and copy over when ready
-   */
-  static async writeFileWithBuffer(file: string, content: string): Promise<string> {
-    const ext = path.extname(file);
-    const tempName = `${path.basename(file, ext)}.${process.ppid}.${process.pid}.${Date.now()}.${Math.random()}${ext}`;
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    const temp = path.resolve(os.tmpdir(), tempName);
-    await fs.writeFile(temp, content, 'utf8');
-    await fs.copyFile(temp, file);
-    fs.unlink(temp);
-    return file;
-  }
-
   /**
    * Build a manifest context
    * @param folder
@@ -75,7 +58,7 @@ export class ManifestUtil {
     if (!file.endsWith('.json')) {
       file = path.resolve(file, MANIFEST_FILE);
     }
-    const manifest: ManifestRoot = JSON.parse(readFileSync(file, 'utf8'));
+    const manifest: ManifestRoot = ManifestFileUtil.readAsJsonSync(file);
     // Support packaged environments, by allowing empty outputFolder
     if (!manifest.outputFolder) {
       manifest.outputFolder = path.cwd();
@@ -88,7 +71,7 @@ export class ManifestUtil {
    * Write manifest for a given context, return location
    */
   static writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<string> {
-    return this.writeFileWithBuffer(
+    return ManifestFileUtil.bufferedFileWrite(
       path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule, MANIFEST_FILE),
       JSON.stringify(manifest)
     );
@@ -102,8 +85,7 @@ export class ManifestUtil {
       location = path.resolve(location, MANIFEST_FILE);
     }
 
-    await fs.mkdir(path.dirname(location), { recursive: true });
-    await fs.writeFile(location, JSON.stringify(manifest), 'utf8');
+    await ManifestFileUtil.bufferedFileWrite(location, JSON.stringify(manifest));
 
     return location;
   }

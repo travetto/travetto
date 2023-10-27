@@ -84,6 +84,8 @@ export type Package = {
     docBaseUrl?: string;
     docOutputs?: string[];
     outputFolder?: string;
+    toolFolder?: string;
+    compilerFolder?: string;
     compilerUrl?: string;
   };
   workspaces?: string[];

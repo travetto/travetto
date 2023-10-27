@@ -73,7 +73,7 @@ export class CommonUtil {
 
       const comp = src(controller.signal);
 
-      LogUtil.log('event-stream', [], 'debug', 'Started event stream');
+      LogUtil.log('event-stream', 'debug', 'Started event stream');
 
       // Wait for all events, close at the end
       for await (const ev of comp) {
@@ -84,7 +84,7 @@ export class CommonUtil {
         }
       }
 
-      LogUtil.log('event-stream', [], 'debug', 'Finished event stream');
+      LogUtil.log('event-stream', 'debug', 'Finished event stream');
 
       // Natural exit, we done
       if (!controller.signal.aborted) { // Shutdown source if still running

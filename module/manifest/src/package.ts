@@ -1,10 +1,9 @@
-import { readFileSync } from 'fs';
-import fs from 'fs/promises';
 import { createRequire } from 'module';
 import { execSync } from 'child_process';
 
 import { ManifestContext, Package, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 import { path } from './path';
+import { ManifestFileUtil } from './file';
 
 /**
  * Utilities for querying, traversing and reading package.json files.
@@ -99,10 +98,9 @@ export class PackageUtil {
     if (forceRead) {
       delete this.#cache[modulePath];
     }
-    const res = this.#cache[modulePath] ??= JSON.parse(readFileSync(
+    const res = this.#cache[modulePath] ??= ManifestFileUtil.readAsJsonSync(
       modulePath.endsWith('.json') ? modulePath : path.resolve(modulePath, 'package.json'),
-      'utf8'
-    ));
+    );
 
     res.name ??= 'untitled'; // If a package.json (root-only) is missing a name, allows for npx execution
 
@@ -159,11 +157,10 @@ export class PackageUtil {
    */
   static async resolveWorkspaces(ctx: ManifestContext, rootPath: string): Promise<PackageWorkspaceEntry[]> {
     if (!this.#workspaces[rootPath]) {
-      await fs.mkdir(path.resolve(ctx.workspacePath, ctx.outputFolder), { recursive: true });
       const cache = path.resolve(ctx.workspacePath, ctx.outputFolder, 'workspaces.json');
       try {
-        return JSON.parse(await fs.readFile(cache, 'utf8'));
-      } catch {
+        return await ManifestFileUtil.readAsJson(cache);
+      } catch (err) {
         let out: PackageWorkspaceEntry[];
         switch (ctx.packageManager) {
           case 'npm': {
@@ -180,7 +177,7 @@ export class PackageUtil {
 
         this.#workspaces[rootPath] = out;
 
-        await fs.writeFile(cache, JSON.stringify(out), 'utf8');
+        await ManifestFileUtil.bufferedFileWrite(cache, out);
       }
     }
     return this.#workspaces[rootPath];
