@@ -5,7 +5,6 @@ import { path } from '@travetto/manifest';
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
-import { CompilerServer } from '../../../core/compiler';
 
 import { BaseFeature } from '../../base';
 
@@ -103,6 +102,7 @@ class TestRunnerFeature extends BaseFeature {
 
   async onOpenTextDocument(doc: vscode.TextDocument): Promise<void> {
     if (doc.fileName.includes('/test/')) {
+      await this.#server.start();
       this.#consumer.trackEditor(doc);
     }
   }
@@ -116,7 +116,9 @@ class TestRunnerFeature extends BaseFeature {
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', this.launchTestDebugger.bind(this));
-    this.register('reload', () => this.#server.restart());
+    this.register('start', () => this.#server.stop());
+    this.register('stop', () => this.#server.stop());
+    this.register('restart', () => this.#server.restart());
     this.register('rerun', () => {
       this.#consumer.reset(vscode.window.activeTextEditor);
       this.#server.sendMessage({ type: 'run-test', file: vscode.window.activeTextEditor!.document.fileName });
@@ -139,8 +141,5 @@ class TestRunnerFeature extends BaseFeature {
         return { dispose: (): void => { } };
       }
     }));
-
-    CompilerServer.onServerConnected(() => { this.#server.restart(); }); // Wait for stable build
-    CompilerServer.onServerDisconnected(() => { this.#server.stop(); }); // On waiting, disable
   }
 }

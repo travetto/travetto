@@ -116,8 +116,18 @@
         "category": "Travetto"
       },
       {
-        "command": "travetto.test.test:reload",
+        "command": "travetto.test.test:restart",
         "title": "Restart Test Server",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.test.test:stop",
+        "title": "Stop Test Server",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.test.test:start",
+        "title": "Start Test Server",
         "category": "Travetto"
       },
       {
@@ -218,7 +228,15 @@
           "when": "travetto.test && !inDebugMode && resourceFilename =~ /[.]tsx?$/ && editorIsOpen"
         },
         {
-          "command": "travetto.test.test:reload",
+          "command": "travetto.test.test:restart",
+          "when": "travetto.test"
+        },
+        {
+          "command": "travetto.test.test:start",
+          "when": "travetto.test"
+        },
+        {
+          "command": "travetto.test.test:stop",
           "when": "travetto.test"
         },
         {
