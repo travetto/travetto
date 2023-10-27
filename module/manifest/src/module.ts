@@ -56,9 +56,6 @@ export class ManifestModuleUtil {
     const topFiles = new Set(mainSource ? [] : [...INDEX_FILES, 'package.json']);
     const out: string[] = [];
 
-    if (!fs.stat(folder).catch(() => false)) {
-      return out;
-    }
     const stack: [string, number][] = [[folder, 0]];
     while (stack.length) {
       const popped = stack.pop();
