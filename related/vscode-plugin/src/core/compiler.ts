@@ -18,11 +18,13 @@ async function getInfo(): Promise<{ type: string, iteration: number } | undefine
   return await fetch(Workspace.compilerServerUrl('/info'), { timeout: 100 }).then(v => v.ok ? v.json() : undefined).catch(() => undefined);
 }
 
+const clientLog = new Log('travetto.compiler-client');
+
 async function* fetchEvents<T>(type: string, signal: AbortSignal): AsyncIterable<T> {
-  const base = Workspace.compilerServerUrl('');
+  const url = Workspace.compilerServerUrl(`/event/${type}`);
   for (; ;) {
     try {
-      const stream = await fetch(`${base}/event/${type}`, { signal, timeout: 60000 });
+      const stream = await fetch(url, { signal, timeout: 60000 });
       for await (const line of rl.createInterface(Readable.fromWeb(stream.body))) {
         if (line.trim().charAt(0) === '{') {
           const val: T = JSON.parse(line);
@@ -30,10 +32,13 @@ async function* fetchEvents<T>(type: string, signal: AbortSignal): AsyncIterable
         }
       }
     } catch (err) {
-      console.error(err);
+      if (!signal.aborted) {
+        clientLog.error('Failed to stream', err);
+      }
     }
 
     if (signal?.aborted || (await getInfo() === undefined)) { // If health check fails, or aborted
+      clientLog.info(`Stopping client due to ${!!signal?.aborted}`);
       return;
     }
   }
@@ -66,7 +71,9 @@ export class CompilerServer {
       try {
         await getInfo();
         await this.connect();
-      } catch { }
+      } catch (err) {
+        this.#log.info('Failed to connect', `${err}`);
+      }
 
       this.disconnect();
       // Check every second
@@ -170,6 +177,7 @@ export class CompilerServer {
     }
     this.#connected = false;
     this.#emitter.emit('disconnect');
+    this.#log.info('Disconnecting', !!this.#controller?.signal.aborted);
     this.#controller?.abort();
   }
 }

@@ -93,7 +93,7 @@ async function $getCompilerUrl(file, provided) {
   if (!compilerUrl) {
     const fileStat = await fs.stat(file).catch(() => undefined);
     if (!fileStat) {
-      await fs.writeFile(file, `http://localhost:${(naiveHash(file) % 29000) + 20000}`, 'utf8');
+      await fs.writeFile(file, `http://127.0.0.1:${(naiveHash(file) % 29000) + 20000}`, 'utf8');
     }
     compilerUrl = (await fs.readFile(file, 'utf8')).trim();
   }
