@@ -122,9 +122,9 @@ export class WorkspaceResultsManager {
   }
 
   /**
-   * Stop runner
+   * Reset all
    */
-  async dispose(): Promise<void> {
+  async resetAll(): Promise<void> {
     // Remove all state
     this.setStatus('');
     const entries = [...this.#results.entries()];
