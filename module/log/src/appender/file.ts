@@ -15,7 +15,7 @@ export class FileLogAppenderConfig {
 
   postConstruct(): void {
     if (!this.output || this.output === 'file' || this.output === 'console') {
-      this.output = path.resolve(RootIndex.manifest.toolFolder, 'logs', `${RootIndex.manifest.mainModule}.log`);
+      this.output = RootIndex.resolveToolPath('logs', `${RootIndex.manifest.mainModule}.log`);
     }
   }
 }

@@ -9,7 +9,7 @@ import { Workspace } from './workspace';
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressEvent = { idx: number, total: number, message: string, operation: string, complete?: boolean };
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
-type StateEvent = { state: 'compile-start' | 'compile-end' | 'watch-start' | 'watch-end' | 'reset' };
+type StateEvent = { state: 'compile-start' | 'compile-end' | 'watch-start' | 'watch-end' | 'reset' | 'init' };
 type LogEvent = { level: 'info' | 'warn' | 'error' | 'debug', message: string, args: string[], scope: string, time: number };
 
 const SCOPE_MAX = 15;
@@ -38,7 +38,7 @@ async function* fetchEvents<T>(type: string, signal: AbortSignal): AsyncIterable
     }
 
     if (signal?.aborted || (await getInfo() === undefined)) { // If health check fails, or aborted
-      clientLog.info(`Stopping client due to ${!!signal?.aborted}`);
+      clientLog.info(`Stopping client due to ${signal?.aborted ? 'stopped' : 'not-running'}`);
       return;
     }
   }
@@ -69,8 +69,11 @@ export class CompilerServer {
   static async #trackConnected(): Promise<void> {
     for (; ;) {
       try {
-        await getInfo();
-        await this.connect();
+        if (await getInfo()) {
+          await this.connect();
+        } else {
+          this.#log.debug('Server not running');
+        }
       } catch (err) {
         this.#log.info('Failed to connect', `${err}`);
       }
@@ -94,7 +97,9 @@ export class CompilerServer {
       for await (const ev of fetchEvents<StateEvent>('state', this.#controller!.signal)) {
         switch (ev.state) {
           case 'reset': this.#item.text = '$(flame) Restarting'; break;
+          case 'init': this.#item.text = '$(flame) Initializing'; break;
           case 'compile-start': this.#item.text = '$(flame) Compiling'; break;
+          case 'compile-end':
           case 'watch-start': this.#item.text = '$(pass-filled) Ready'; break;
         }
       }

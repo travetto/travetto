@@ -11,7 +11,7 @@ import { ExecUtil } from '@travetto/base';
 export class OpenApiClientHelp {
 
   static async getListOfFormats(dockerImage: string): Promise<string[]> {
-    const formatCache = path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.toolFolder, 'trv-openapi-formats.json');
+    const formatCache = RootIndex.resolveToolPath('trv-openapi-formats.json');
     if (!await fs.stat(formatCache).catch(() => false)) {
       const stdout = ExecUtil.spawn('docker', ['run', '--rm', dockerImage, 'list']);
       const res = await stdout.result;

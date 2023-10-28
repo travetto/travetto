@@ -119,8 +119,7 @@ export class CompilerServer {
     switch (action) {
       case 'event': return await this.#addListener(subAction, res);
       case 'close': return this.close();
-      case 'info': out = this.info ?? {}; break;
-      default: out = { error: 'Unknown request' }; res.statusCode = 404; break;
+      default: out = this.info ?? {}; break;
     }
     res.end(JSON.stringify(out));
   }

@@ -2,7 +2,7 @@
 import fs from 'fs/promises';
 
 import { Class, Util } from '@travetto/base';
-import { ManifestUtil, RootIndex, path } from '@travetto/manifest';
+import { ManifestFileUtil, RootIndex, path } from '@travetto/manifest';
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
@@ -97,7 +97,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
 
   async writeContent(file: string, content: string | string[]): Promise<void> {
     content = Array.isArray(content) ? content.join('') : content;
-    await ManifestUtil.writeFileWithBuffer(
+    await ManifestFileUtil.bufferedFileWrite(
       path.resolve(this.#output, this.subFolder, file),
       this.writeContentFilter(content)
     );

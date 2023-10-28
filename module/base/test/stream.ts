@@ -61,7 +61,7 @@ export class StreamUtilTest {
 
   @Test()
   async writeToFile() {
-    const temp = `${os.tmpdir()}/${Date.now()}-${Math.random()}.text`;
+    const temp = mPath.resolve(os.tmpdir(), `${Date.now()}-${Math.random()}.text`);
     await StreamUtil.writeToFile('Hello World', temp);
 
     const buff = await StreamUtil.toBuffer(createReadStream(temp));

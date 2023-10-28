@@ -92,9 +92,7 @@ export class CompilerSetup {
           folders.push(resolvedInput);
         } else {
           switch (CommonUtil.getFileType(file)) {
-            case 'js':
-            case 'ts':
-              files.push(resolvedInput);
+            case 'js': case 'ts': files.push(resolvedInput);
           }
         }
       }

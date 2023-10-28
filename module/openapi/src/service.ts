@@ -1,6 +1,6 @@
 import type { OpenAPIObject } from 'openapi3-ts/oas31';
 
-import { ManifestUtil } from '@travetto/manifest';
+import { ManifestFileUtil } from '@travetto/manifest';
 import { Injectable, Inject } from '@travetto/di';
 import { ControllerRegistry, ControllerVisitUtil, RestConfig } from '@travetto/rest';
 import { SchemaRegistry } from '@travetto/schema';
@@ -80,7 +80,7 @@ export class OpenApiService {
         JSON.stringify(spec, undefined, 2) :
         YamlUtil.serialize(spec);
 
-      await ManifestUtil.writeFileWithBuffer(this.apiSpecConfig.output, output);
+      await ManifestFileUtil.bufferedFileWrite(this.apiSpecConfig.output, output);
     } catch (err) {
       console.error('Unable to persist openapi spec', err);
     }
