@@ -27,6 +27,8 @@ export class CompilerServer {
       state: 'startup',
       iteration: Date.now(),
       type: op,
+      serverPid: process.pid,
+      compilerPid: -1,
       path: ctx.workspacePath
     };
 
@@ -135,6 +137,9 @@ export class CompilerServer {
 
       if (ev.type === 'state') {
         this.info.state = ev.payload.state;
+        if (ev.payload.state === 'init' && ev.payload.extra && 'pid' in ev.payload.extra && typeof ev.payload.extra.pid === 'number') {
+          this.info.compilerPid = ev.payload.extra.pid;
+        }
         log('info', `State changed: ${this.info.state}`);
       }
       if (this.isResetEvent(ev)) {
