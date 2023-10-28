@@ -7,4 +7,5 @@ export * from './src/manifest-index';
 export * from './src/root-index';
 export * from './src/package';
 export * from './src/util';
+export * from './src/file';
 export * from './src/types';

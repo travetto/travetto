@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { existsSync, readFileSync } from 'fs';
 
 import { GlobalEnv } from '../src/global-env';
 import { ConsoleManager } from '../src/console';
@@ -27,8 +27,8 @@ export async function init(manageShutdown = true): Promise<void> {
       // Handles bug in source-map-support and ESM bundling
       retrieveFile(file) {
         file = file.trim().replace(/file:\/\/([a-z]:)/, (_, d) => d).replace(/file:\/\//, '/');
-        if (fs.existsSync(file)) {
-          return fs.readFileSync(file, 'utf8');
+        if (existsSync(file)) {
+          return readFileSync(file, 'utf8');
         }
         return null;
       }

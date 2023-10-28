@@ -49,7 +49,7 @@ export class AssetRestUtil {
           },
         }))
         .on('error', rej)
-        .pipe(createWriteStream(outputFile, { autoClose: true }))
+        .pipe(createWriteStream(outputFile))
         .on('finish', res)
         .on('error', rej);
     });

@@ -1,4 +1,4 @@
-import { createWriteStream, createReadStream } from 'fs';
+import { createReadStream, createWriteStream } from 'fs';
 import { PassThrough, Readable, Writable } from 'stream';
 import { ReadableStream as WebReadableStream } from 'stream/web';
 
@@ -11,8 +11,7 @@ type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | Web
  */
 export class StreamUtil {
 
-  /**      console.log!('Received chunk', chunk);
-
+  /**
    * Convert buffer to a stream
    * @param src The buffer to stream
    */
@@ -152,7 +151,7 @@ export class StreamUtil {
     options: { start?: number, encoding?: BufferEncoding, includeDelimiter?: boolean, delimiter?: string } = {}
   ): AsyncIterable<{ item: string, read: number }> {
     let read = options.start ?? 0;
-    const stream = typeof file === 'string' ? createReadStream(file, { autoClose: true, emitClose: true, start: read }) : file;
+    const stream = typeof file === 'string' ? createReadStream(file, { start: read }) : file;
     const encoding = options.encoding ?? 'utf8';
     const includeDelimiter = !!options.includeDelimiter;
     const delimiter = options.delimiter ?? '\n';

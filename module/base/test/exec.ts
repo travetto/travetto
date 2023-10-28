@@ -16,7 +16,7 @@ export class ExecUtilTest {
 
   @Test()
   async spawn() {
-    const proc = ExecUtil.spawn('ls', ['-lsa'], {
+    const proc = ExecUtil.spawn('ls', ['-ls'], {
       cwd: RootIndex.mainModule.outputPath
     });
     const result = await proc.result;

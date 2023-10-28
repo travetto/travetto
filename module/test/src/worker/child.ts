@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 import { ConsoleManager, ErrorUtil, TimeUtil } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
@@ -32,7 +32,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    */
   async activate(): Promise<void> {
     if (/\b@travetto[/]test\b/.test(process.env.DEBUG ?? '')) {
-      const handle = await fs.open(path.resolve(`.trv-test-worker.${process.pid}.log`), 'a');
+      const handle = await fs.open(RootIndex.resolveToolPath(`test-worker.${process.pid}.log`), 'a');
       const stdout = handle.createWriteStream();
 
       const c = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });
@@ -61,7 +61,6 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
     if (event.type === Events.INIT) { // On request to init, start initialization
       await this.#exec(() => this.onInitCommand(), Events.INIT_COMPLETE);
     } else if (event.type === Events.RUN) { // On request to run, start running
-      console.log!(process.stdout.isTTY && process.stdout.getColorDepth());
       await this.#exec(() => this.onRunCommand(event), Events.RUN_COMPLETE);
     }
 

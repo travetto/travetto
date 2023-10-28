@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { existsSync } from 'fs';
 
 import { Class } from '@travetto/base';
 
@@ -28,7 +28,7 @@ export class CumulativeSummaryConsumer implements TestConsumer {
    */
   summarizeSuite(test: TestResult): SuiteResult {
     // Was only loading to verify existence (TODO: double-check)
-    if (fs.existsSync(test.file)) {
+    if (existsSync(test.file)) {
       this.#state[test.classId] = this.#state[test.classId] ?? {};
       this.#state[test.classId][test.methodName] = test.status;
       const SuiteCls = SuiteRegistry.getClasses().find(x =>
