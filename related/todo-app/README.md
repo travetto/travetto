@@ -341,7 +341,7 @@ npx trv run:rest
       CommonLoggerConfig: { format: 'line', output: 'console' },
       ConsoleLogAppenderConfig: { logToLevel: true },
       FileLogAppenderConfig: {
-        output: './.trv_build/logs/@travetto/todo-app.log',
+        output: '<workspace-root>/.trv_build/logs/@travetto/todo-app.log',
         writeSync: false
       },
       FileModelConfig: {
@@ -361,11 +361,10 @@ npx trv run:rest
       MongoModelConfig: {
         hosts: { '0': 'localhost' },
         namespace: 'app',
-        username: '',
         port: 27017,
         connectionOptions: {},
         srvRecord: false,
-        options: {}
+        options: { waitQueueTimeoutMS: 86400000 }
       },
       RestAcceptsConfig: { types: {} },
       RestAsyncContextConfig: {},

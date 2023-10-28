@@ -372,7 +372,7 @@ First we must start the application:
       CommonLoggerConfig: <span class="token punctuation">{{'{'}}</span> format: <span class="token string">'line'</span>, output: <span class="token string">'console'</span> <span class="token punctuation">{{'}'}}</span>,
       ConsoleLogAppenderConfig: <span class="token punctuation">{{'{'}}</span> logToLevel: <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span>,
       FileLogAppenderConfig: <span class="token punctuation">{{'{'}}</span>
-        output: <span class="token string">'./.trv_build/logs/@travetto/todo-app.log'</span>,
+        output: <span class="token string">'&lt;workspace-root>/.trv_build/logs/@travetto/todo-app.log'</span>,
         writeSync: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
       FileModelConfig: <span class="token punctuation">{{'{'}}</span>
@@ -392,11 +392,10 @@ First we must start the application:
       MongoModelConfig: <span class="token punctuation">{{'{'}}</span>
         hosts: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'localhost'</span> <span class="token punctuation">{{'}'}}</span>,
         namespace: <span class="token string">'app'</span>,
-        username: <span class="token string">''</span>,
         port: <span class="token number">27017</span>,
         connectionOptions: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
         srvRecord: false,
-        options: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>
+        options: <span class="token punctuation">{{'{'}}</span> waitQueueTimeoutMS: <span class="token number">86400000</span> <span class="token punctuation">{{'}'}}</span>
       <span class="token punctuation">{{'}'}}</span>,
       RestAcceptsConfig: <span class="token punctuation">{{'{'}}</span> types: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span> <span class="token punctuation">{{'}'}}</span>,
       RestAsyncContextConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
