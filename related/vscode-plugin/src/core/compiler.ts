@@ -33,7 +33,7 @@ async function* fetchEvents<T>(type: string, signal: AbortSignal): AsyncIterable
       }
     } catch (err) {
       if (!signal.aborted) {
-        clientLog.error('Failed to stream', err);
+        clientLog.warn('Stream stopped', err);
       }
     }
 

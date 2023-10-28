@@ -116,9 +116,10 @@ class TestRunnerFeature extends BaseFeature {
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', this.launchTestDebugger.bind(this));
-    this.register('start', () => this.#server.stop());
-    this.register('stop', () => this.#server.stop());
-    this.register('restart', () => this.#server.restart());
+    this.register('start', () => this.#server.start());
+    this.register('stop', () => this.#server.stop().then(() => {
+      this.#consumer.resetAll();
+    }));
     this.register('rerun', () => {
       this.#consumer.reset(vscode.window.activeTextEditor);
       this.#server.sendMessage({ type: 'run-test', file: vscode.window.activeTextEditor!.document.fileName });
