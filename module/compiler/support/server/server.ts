@@ -1,4 +1,6 @@
 import http from 'http';
+import fs from 'fs/promises';
+import path from 'path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
@@ -105,6 +107,12 @@ export class CompilerServer {
     this.#server.closeAllConnections(); // Force reconnects
   }
 
+  async #clean(): Promise<{ clean: boolean }> {
+    await Promise.all([this.#ctx.compilerFolder, this.#ctx.outputFolder]
+      .map(f => fs.rm(path.resolve(this.#ctx.workspacePath, f), { recursive: true, force: true })));
+    return { clean: true };
+  }
+
   /**
    * Request handler
    */
@@ -119,6 +127,7 @@ export class CompilerServer {
     switch (action) {
       case 'event': return await this.#addListener(subAction, res);
       case 'close': return this.close();
+      case 'clean': out = await this.#clean(); break;
       default: out = this.info ?? {}; break;
     }
     res.end(JSON.stringify(out));

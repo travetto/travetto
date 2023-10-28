@@ -14,7 +14,7 @@ type LogEvent = { level: 'info' | 'warn' | 'error' | 'debug', message: string, a
 
 const SCOPE_MAX = 15;
 
-async function getInfo(): Promise<{ type: string, iteration: number } | undefined> {
+async function getInfo(): Promise<{ type: string, iteration: number, state: StateEvent['state'], serverPid: number, compilerPid: number } | undefined> {
   return await fetch(Workspace.compilerServerUrl('/info'), { timeout: 100 }).then(v => v.ok ? v.json() : undefined).catch(() => undefined);
 }
 
@@ -92,16 +92,22 @@ export class CompilerServer {
     this.#emitter.on('disconnect', () => handler());
   }
 
+  static #onState(ev: StateEvent): void {
+    switch (ev.state) {
+      case 'reset': this.#item.text = '$(flame) Restarting'; break;
+      case 'init': this.#item.text = '$(flame) Initializing'; break;
+      case 'compile-start': this.#item.text = '$(flame) Compiling'; break;
+      case 'compile-end':
+      case 'watch-start': this.#item.text = '$(pass-filled) Ready'; break;
+    }
+  }
+
   static async #trackState(): Promise<void> {
     try {
+      const { state } = (await getInfo())!;
+      this.#onState({ state });
       for await (const ev of fetchEvents<StateEvent>('state', this.#controller!.signal)) {
-        switch (ev.state) {
-          case 'reset': this.#item.text = '$(flame) Restarting'; break;
-          case 'init': this.#item.text = '$(flame) Initializing'; break;
-          case 'compile-start': this.#item.text = '$(flame) Compiling'; break;
-          case 'compile-end':
-          case 'watch-start': this.#item.text = '$(pass-filled) Ready'; break;
-        }
+        this.#onState(ev);
       }
     } finally {
       this.#item.text = '$(debug-pause) Disconnected';
