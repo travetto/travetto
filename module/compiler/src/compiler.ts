@@ -93,6 +93,8 @@ export class Compiler {
 
     Log.debug('Compilation started');
 
+    EventUtil.sendEvent('state', { state: 'init', extra: { pid: process.pid } });
+
     if (process.send) {
       process.on('disconnect', () => process.exit(0));
     }
