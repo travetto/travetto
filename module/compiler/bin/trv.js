@@ -67,11 +67,14 @@ const $getEntry = async (ctx) => {
   }
 
   if (op === 'clean') {
-    const folders = process.argv.some(x => x === '--all' || x === '-a') ? [ctx.outputFolder, ctx.compilerFolder] : [ctx.outputFolder];
-    for (const f of folders) {
-      await fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true });
+    if (await fetch(`${ctx.compilerUrl}/clean`).then(v => v.ok).catch(() => { })) {
+      return console.log(`Clean triggered ${ctx.workspacePath}: [${ctx.outputFolder}]`);
+    } else {
+      for (const f of [ctx.compilerFolder, ctx.outputFolder]) {
+        await fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true });
+      }
+      return console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}]`);
     }
-    return console.log(`Cleaned ${ctx.workspacePath}: [${folders.join(', ')}]`);
   }
 
   const rootCtx = ctx.monoRepo ? await getManifestContext(ctx.workspacePath) : ctx;

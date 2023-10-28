@@ -10,8 +10,8 @@ import { Workspace } from '../../../core/workspace';
 @Activatible('@travetto/compiler', true)
 export class CompilerWatchFeature extends BaseFeature {
 
-  async cleanServer(all?: boolean): Promise<void> {
-    await Workspace.spawnCli('clean', all ? ['-a'] : []).result;
+  async cleanServer(): Promise<void> {
+    await Workspace.spawnCli('clean', []).result;
   }
 
   startServer(): void {
@@ -19,7 +19,12 @@ export class CompilerWatchFeature extends BaseFeature {
   }
 
   async stopServer(): Promise<void> {
-    await Workspace.spawnCli('clean', ['-s']);
+    await Workspace.spawnCli('manifest', ['--stop-server']);
+  }
+
+  async restartServer(): Promise<void> {
+    await this.cleanServer();
+    this.startServer();
   }
 
   /**
@@ -28,8 +33,8 @@ export class CompilerWatchFeature extends BaseFeature {
   activate(context: vscode.ExtensionContext): void {
     this.register('start', () => this.startServer());
     this.register('stop', () => this.stopServer());
+    this.register('restart', () => this.restartServer());
     this.register('clean', () => this.cleanServer());
-    this.register('clean-all', () => this.cleanServer(true));
 
     this.startServer();
   }

@@ -28,7 +28,7 @@ async function build(root: ManifestContext, op: BuildOp): Promise<void> {
 export async function main(ctx: ManifestContext, root: ManifestContext, op: MainOp, args: (string | undefined)[] = []): Promise<void> {
   LogUtil.initLogs(ctx, op);
   switch (op) {
-    case 'manifest': return CompilerSetup.exportManifest(ctx, ...args);
+    case 'manifest': return CompilerSetup.exportManifest(ctx, ...args.filter(x => !x?.startsWith('-')));
     case 'watch':
     case 'build': return build(root, op);
     case 'run': {
