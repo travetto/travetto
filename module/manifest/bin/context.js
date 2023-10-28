@@ -20,6 +20,7 @@ const OUTPUT_FOLDER = '.trv_output';
  * @returns {Promise<Pkg|undefined>}
  */
 async function $readPackage(dir) {
+  dir = dir.endsWith('.json') ? path.dirname(dir) : dir;
   return await fs.readFile(path.resolve(dir, 'package.json'), 'utf8')
     .then(v => ({ ...JSON.parse(v), path: path.resolve(dir) }), () => undefined);
 }
@@ -133,9 +134,9 @@ async function $resolveModule(workspace, folder) {
 export async function getManifestContext(folder) {
   const workspace = await $resolveWorkspace(folder);
 
-  const [mod, frameworkVersion, compilerUrl] = await Promise.all([
+  const [mod, framework, compilerUrl] = await Promise.all([
     $resolveModule(workspace, folder),
-    $readPackage(workspace.resolve('@travetto/manifest/package.json')).then(p => p ? p.version : '0.0.0'),
+    $readPackage(workspace.resolve('@travetto/manifest/package.json')),
     $getCompilerUrl(workspace),
   ]);
 
@@ -148,7 +149,7 @@ export async function getManifestContext(folder) {
     toolFolder: workspace.travetto?.toolFolder ?? TOOL_FOLDER,
     compilerFolder: workspace.travetto?.compilerFolder ?? COMPILER_FOLDER,
     compilerUrl,
-    frameworkVersion,
+    frameworkVersion: framework?.version ?? '1.0.0',
     mainModule: mod.name ?? 'untitled',
     mainFolder: mod.path === workspace.path ? '' : mod.path.replace(`${workspace.path}/`, ''),
     version: mod.version,

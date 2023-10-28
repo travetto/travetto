@@ -48,7 +48,7 @@ where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/modu
 ```typescript
 import type mongo from 'mongodb';
 
-import { FileResourceProvider, TimeSpan } from '@travetto/base';
+import { FileResourceProvider, GlobalEnv, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -60,23 +60,23 @@ export class MongoModelConfig {
   /**
    * Hosts
    */
-  hosts = ['localhost'];
+  hosts?: string[];
   /**
    * Collection prefix
    */
-  namespace = 'app';
+  namespace?: string;
   /**
    * Username
    */
-  username = '';
+  username?: string;
   /**
    * Password
    */
-  password = '';
+  password?: string;
   /**
    * Server port
    */
-  port = 27017;
+  port?: number;
   /**
    * Direct mongo connection options
    */
@@ -103,26 +103,57 @@ export class MongoModelConfig {
   cullRate?: number | TimeSpan;
 
   /**
+   * Connection string
+   */
+  connectionString?: string;
+
+  /**
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
     const resources = new FileResourceProvider({ includeCommon: true });
     const resolve = (file: string): Promise<string> => resources.describe(file).then(({ path }) => path, () => file);
 
+    if (this.connectionString) {
+      const details = new URL(this.connectionString);
+      this.hosts ??= details.hostname.split(',').filter(x => !!x);
+      this.srvRecord ??= details.protocol === 'mongodb+srv:';
+      this.namespace ??= details.pathname.replace('/', '');
+      Object.assign(this.options, Object.fromEntries(details.searchParams.entries()));
+      this.port ??= +details.port;
+      this.username ??= details.username;
+      this.password ??= details.password;
+    }
+
+    // Defaults
+    if (!this.namespace) {
+      this.namespace = 'app';
+    }
+    if (!this.port || Number.isNaN(this.port)) {
+      this.port = 27017;
+    }
+    if (!this.hosts || !this.hosts.length) {
+      this.hosts = ['localhost'];
+    }
+
     const opts = this.options;
     if (opts.ssl) {
-      if (opts.sslCert) {
-        opts.tlsCertificateFile = await resolve(opts.sslCert);
+      if (opts.cert) {
+        opts.cert = await Promise.all([opts.cert].flat(2).map(f => Buffer.isBuffer(f) ? f : resolve(f)));
       }
-      if (opts.sslKey) {
-        opts.sslKey = await resolve(opts.sslKey);
+      if (opts.tlsCertificateKeyFile) {
+        opts.tlsCertificateKeyFile = await resolve(opts.tlsCertificateKeyFile);
       }
-      if (opts.sslCA) {
-        opts.sslCA = await resolve(opts.sslCA);
+      if (opts.tlsCAFile) {
+        opts.tlsCAFile = await resolve(opts.tlsCAFile);
       }
-      if (opts.sslCRL) {
-        opts.sslCRL = await resolve(opts.sslCRL);
+      if (opts.tlsCRLFile) {
+        opts.tlsCRLFile = await resolve(opts.tlsCRLFile);
       }
+    }
+
+    if (GlobalEnv.devMode) {
+      opts.waitQueueTimeoutMS ??= 1000 * 60 * 60 * 24; // Wait a day in dev mode
     }
   }
 
@@ -130,8 +161,8 @@ export class MongoModelConfig {
    * Build connection URLs
    */
   get url(): string {
-    const hosts = this.hosts
-      .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port}`)
+    const hosts = this.hosts!
+      .map(h => (this.srvRecord || h.includes(':')) ? h : `${h}:${this.port ?? 27017}`)
       .join(',');
     const opts = Object.entries(this.options).map(([k, v]) => `${k}=${v}`).join('&');
     let creds = '';

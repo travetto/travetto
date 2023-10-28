@@ -30,7 +30,7 @@ During the compilation process, the compiler needs to know every file that is el
 Additionally, once the code has been compiled (or even bundled after that), the executing process needs to know what files are available for loading, and any patterns necessary for knowing which files to load versus which ones to ignore. This allows for dynamic loading of modules/files without knowledge/access to the file system, and in a more performant manner.
 
 ## Manifest Delta
-During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The [ManifestDeltaUtil](https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L21) provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s incremental behavior to know when a file has changed and needs to be recompiled.
+During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The [ManifestDeltaUtil](https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L20) provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the [Compiler](https://github.com/travetto/travetto/tree/main/module/compiler#readme "The compiler infrastructure for the Travetto framework")'s incremental behavior to know when a file has changed and needs to be recompiled.
 
 ## Class and Function Metadata
 For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every `class` is decorated with an additional field of `Ⲑid`.  `Ⲑid` represents a computed id that is tied to the file/class combination. 
@@ -92,19 +92,19 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
 ```typescript
 {
   "generated": 1868155200000,
-  "moduleType": "commonjs",
-  "mainModule": "@travetto/manifest",
-  "mainFolder": "module/manifest",
   "workspacePath": "<generated>",
   "monoRepo": true,
+  "packageManager": "npm",
+  "moduleType": "commonjs",
   "outputFolder": ".trv_output",
   "toolFolder": ".trv_build",
   "compilerFolder": ".trv_compiler",
-  "packageManager": "npm",
+  "compilerUrl": "http://127.0.0.1:30000",
+  "frameworkVersion": "x.x.x",
+  "mainModule": "@travetto/manifest",
+  "mainFolder": "module/manifest",
   "version": "x.x.x",
   "description": "Support for project indexing, manifesting, along with file watching",
-  "compilerUrl": "http://localhost:26112",
-  "frameworkVersion": "x.x.x",
   "modules": {
     "@travetto/manifest": {
       "main": true,
@@ -144,6 +144,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
         "src": [
           [ "src/delta.ts", "ts", 1868155200000 ],
           [ "src/dependencies.ts", "ts", 1868155200000 ],
+          [ "src/file.ts", "ts", 1868155200000 ],
           [ "src/manifest-index.ts", "ts", 1868155200000 ],
           [ "src/module.ts", "ts", 1868155200000 ],
           [ "src/package.ts", "ts", 1868155200000 ],

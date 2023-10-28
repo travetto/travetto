@@ -1,8 +1,9 @@
 import { Class, ConsoleManager, GlobalEnv } from '@travetto/base';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
-import { CliCommandRegistry } from './registry';
 
-import { CliCommandInput, CliCommandSchema, CliCommandShape, CliValidationResultError } from './types';
+import { CliCommandRegistry } from './registry';
+import { CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
+import { CliValidationResultError } from './error';
 
 function fieldToInput(x: FieldConfig): CliCommandInput {
   const type = x.type === Date ? 'date' :

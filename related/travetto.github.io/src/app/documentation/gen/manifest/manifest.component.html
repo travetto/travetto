@@ -36,7 +36,7 @@ Additionally, once the code has been compiled (or even bundled after that), the 
 
 <h2 id="manifest-delta">Manifest Delta</h2>
 
-During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L21">ManifestDeltaUtil</a> provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the <a class="module-link" routerLink="/docs/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s incremental behavior to know when a file has changed and needs to be recompiled.
+During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L20">ManifestDeltaUtil</a> provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the <a class="module-link" routerLink="/docs/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s incremental behavior to know when a file has changed and needs to be recompiled.
 
 <h2 id="class-and-function-metadata">Class and Function Metadata</h2>
 
@@ -111,19 +111,19 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
 </figcaption>
     <pre><code class="language-typescript"><span class="token punctuation">{{'{'}}</span>
   <span class="token string-property property">"generated"</span><span class="token operator">:</span> <span class="token number">1868155200000</span><span class="token punctuation">,</span>
-  <span class="token string-property property">"moduleType"</span><span class="token operator">:</span> <span class="token string">"commonjs"</span><span class="token punctuation">,</span>
-  <span class="token string-property property">"mainModule"</span><span class="token operator">:</span> <span class="token string">"@travetto/manifest"</span><span class="token punctuation">,</span>
-  <span class="token string-property property">"mainFolder"</span><span class="token operator">:</span> <span class="token string">"module/manifest"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"workspacePath"</span><span class="token operator">:</span> <span class="token string">"&lt;generated>"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"monoRepo"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"packageManager"</span><span class="token operator">:</span> <span class="token string">"npm"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"moduleType"</span><span class="token operator">:</span> <span class="token string">"commonjs"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"outputFolder"</span><span class="token operator">:</span> <span class="token string">".trv_output"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"toolFolder"</span><span class="token operator">:</span> <span class="token string">".trv_build"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"compilerFolder"</span><span class="token operator">:</span> <span class="token string">".trv_compiler"</span><span class="token punctuation">,</span>
-  <span class="token string-property property">"packageManager"</span><span class="token operator">:</span> <span class="token string">"npm"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"compilerUrl"</span><span class="token operator">:</span> <span class="token string">"http://127.0.0.1:30000"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"frameworkVersion"</span><span class="token operator">:</span> <span class="token string">"x.x.x"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"mainModule"</span><span class="token operator">:</span> <span class="token string">"@travetto/manifest"</span><span class="token punctuation">,</span>
+  <span class="token string-property property">"mainFolder"</span><span class="token operator">:</span> <span class="token string">"module/manifest"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"version"</span><span class="token operator">:</span> <span class="token string">"x.x.x"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"description"</span><span class="token operator">:</span> <span class="token string">"Support for project indexing, manifesting, along with file watching"</span><span class="token punctuation">,</span>
-  <span class="token string-property property">"compilerUrl"</span><span class="token operator">:</span> <span class="token string">"http://localhost:26112"</span><span class="token punctuation">,</span>
-  <span class="token string-property property">"frameworkVersion"</span><span class="token operator">:</span> <span class="token string">"x.x.x"</span><span class="token punctuation">,</span>
   <span class="token string-property property">"modules"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token string-property property">"@travetto/manifest"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
       <span class="token string-property property">"main"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
@@ -163,6 +163,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
         <span class="token string-property property">"src"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
           <span class="token punctuation">[</span> <span class="token string">"src/delta.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
           <span class="token punctuation">[</span> <span class="token string">"src/dependencies.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
+          <span class="token punctuation">[</span> <span class="token string">"src/file.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
           <span class="token punctuation">[</span> <span class="token string">"src/manifest-index.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
           <span class="token punctuation">[</span> <span class="token string">"src/module.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>
           <span class="token punctuation">[</span> <span class="token string">"src/package.ts"</span><span class="token punctuation">,</span> <span class="token string">"ts"</span><span class="token punctuation">,</span> <span class="token number">1868155200000</span> <span class="token punctuation">]</span><span class="token punctuation">,</span>

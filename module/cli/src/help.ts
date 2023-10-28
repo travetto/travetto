@@ -2,9 +2,10 @@ import { Primitive } from '@travetto/base';
 import { stripAnsiCodes } from '@travetto/terminal';
 
 import { cliTpl } from './color';
-import { CliCommandShape, CliValidationResultError } from './types';
+import { CliCommandShape } from './types';
 import { CliCommandRegistry } from './registry';
 import { CliCommandSchemaUtil } from './schema';
+import { CliValidationResultError } from './error';
 
 const validationSourceMap = {
   custom: '',
@@ -21,7 +22,7 @@ export class HelpUtil {
    * Render command-specific help
    * @param command
    */
-  static async #renderCommandHelp(command: CliCommandShape): Promise<string> {
+  static async renderCommandHelp(command: CliCommandShape): Promise<string> {
     const commandName = CliCommandRegistry.getName(command);
 
     command.initialize?.();
@@ -93,7 +94,7 @@ export class HelpUtil {
   /**
    * Render help listing of all commands
    */
-  static async #renderAllHelp(): Promise<string> {
+  static async renderAllHelp(title?: string): Promise<string> {
     const rows: string[] = [];
     const keys = [...CliCommandRegistry.getCommandMapping().keys()].sort((a, b) => a.localeCompare(b));
     const maxWidth = keys.reduce((a, b) => Math.max(a, stripAnsiCodes(b).length), 0);
@@ -116,20 +117,20 @@ export class HelpUtil {
         }
       }
     }
-    return [
-      cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`,
-      '',
-      cliTpl`${{ title: 'Commands:' }}`,
-      ...rows,
-      ''
-    ].map(x => x.trimEnd()).join('\n');
+
+    const lines = [cliTpl`${{ title: 'Commands:' }}`, ...rows, ''];
+
+    if (title === undefined || title) {
+      lines.unshift(title ? cliTpl`${{ title }}` : cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`, '');
+    }
+    return lines.map(x => x.trimEnd()).join('\n');
   }
 
   /**
    * Render help
    */
   static async renderHelp(command?: CliCommandShape): Promise<string> {
-    return command ? this.#renderCommandHelp(command) : this.#renderAllHelp();
+    return command ? this.renderCommandHelp(command) : this.renderAllHelp();
   }
 
   /**

@@ -19,18 +19,6 @@ export type CliValidationError = {
 };
 
 /**
- * Provides a basic error wrapper for internal try/catch instanceof
- */
-export class CliValidationResultError extends Error {
-  errors: CliValidationError[];
-
-  constructor(errors: CliValidationError[]) {
-    super('');
-    this.errors = errors;
-  }
-}
-
-/**
  * CLI Command Contract
  */
 export interface CliCommandShape {

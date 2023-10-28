@@ -5,9 +5,10 @@ import { path } from '@travetto/manifest';
 import { ConsoleManager, defineGlobalEnv, ShutdownManager, GlobalEnv } from '@travetto/base';
 
 import { HelpUtil } from './help';
-import { CliCommandShape, CliValidationResultError } from './types';
+import { CliCommandShape } from './types';
 import { CliCommandRegistry } from './registry';
 import { CliCommandSchemaUtil } from './schema';
+import { CliUnknownCommandError, CliValidationResultError } from './error';
 
 /**
  * Execution manager
@@ -109,9 +110,16 @@ export class ExecutionManager {
         process.exitCode ||= 1; // Trigger error state
         if (!(err instanceof Error)) {
           throw err;
-        } else if (command && err instanceof CliValidationResultError) {
-          console.error!(await HelpUtil.renderValidationError(command, err));
+        } else if (err instanceof CliValidationResultError) {
+          console.error!(await HelpUtil.renderValidationError(command!, err));
           console.error!(await HelpUtil.renderHelp(command));
+        } else if (err instanceof CliUnknownCommandError) {
+          if (err.help) {
+            console.error!(err.help);
+          } else {
+            console.error!(err.defaultMessage, '\n');
+            console.error!(await HelpUtil.renderAllHelp(''));
+          }
         } else {
           console.error!(err);
           console.error!();
