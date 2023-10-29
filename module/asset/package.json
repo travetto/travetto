@@ -27,7 +27,7 @@
   "dependencies": {
     "@travetto/di": "^3.3.4",
     "@travetto/model": "^3.3.8",
-    "@types/mime": "^3.0.1",
+    "@types/mime": "^3.0.3",
     "file-type": "^16.5.4",
     "mime": "^3.0.0"
   },

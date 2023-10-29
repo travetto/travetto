@@ -15,7 +15,8 @@
     "start": "trv watch --clean ",
     "test": "trv test -f tap-streamed",
     "lint": "trv lint",
-    "upgrade-deps": "npm update -S"
+    "upgrade-deps": "npm update -S",
+    "reinit-deps": "rm -rf node_modules; (find module -name 'node_modules' -type d; find global-test -name 'node_modules' -type d) | grep -v '[.]trv' | xargs rm -rf; rm package-lock.json; npm i"
   },
   "travetto": {
     "globalModules": [
@@ -28,7 +29,8 @@
     "docOutputs": [
       "README.md",
       "DOC.html"
-    ]
+    ],
+    "compilerUrl": "http://localhost:30000"
   },
   "workspaces": [
     "module/*",
@@ -53,11 +55,11 @@
     }
   },
   "devDependencies": {
-    "@travetto/fetch-node-types": "^1.0.2",
-    "@travetto/repo": "^3.3.5",
-    "@types/debug": "^4.1.8",
-    "@types/node-forge": "^1.3.5",
-    "@types/vscode": "^1.82.0",
+    "@travetto/repo": "^3.3.6",
+    "@types/debug": "^4.1.10",
+    "@types/node-forge": "^1.3.8",
+    "node-forge": "^1.3.1",
+    "@types/vscode": "^1.83.1",
     "debug": "^4.3.4"
   }
 }

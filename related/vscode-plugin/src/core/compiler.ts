@@ -1,4 +1,3 @@
-/// <reference types="@travetto/fetch-node-types" />
 import vscode from 'vscode';
 import { EventEmitter, Readable } from 'stream';
 import rl from 'readline/promises';
@@ -6,16 +5,22 @@ import rl from 'readline/promises';
 import { Log } from './log';
 import { Workspace } from './workspace';
 
+type ServerInfo = { type: string, iteration: number, state: StateEvent['state'], serverPid: number, compilerPid: number };
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressEvent = { idx: number, total: number, message: string, operation: string, complete?: boolean };
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
 type StateEvent = { state: 'compile-start' | 'compile-end' | 'watch-start' | 'watch-end' | 'reset' | 'init' };
 type LogEvent = { level: 'info' | 'warn' | 'error' | 'debug', message: string, args: string[], scope: string, time: number };
 
+declare global {
+  interface RequestInit { timeout?: number }
+}
+
 const SCOPE_MAX = 15;
 
-async function getInfo(): Promise<{ type: string, iteration: number, state: StateEvent['state'], serverPid: number, compilerPid: number } | undefined> {
-  return await fetch(Workspace.compilerServerUrl('/info'), { timeout: 100 }).then(v => v.ok ? v.json() : undefined).catch(() => undefined);
+async function getInfo(): Promise<ServerInfo | undefined> {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return await fetch(Workspace.compilerServerUrl('/info')).then(v => v.ok ? v.json() as unknown as ServerInfo : undefined).catch(() => undefined);
 }
 
 const clientLog = new Log('travetto.compiler-client');
@@ -25,7 +30,7 @@ async function* fetchEvents<T>(type: string, signal: AbortSignal): AsyncIterable
   for (; ;) {
     try {
       const stream = await fetch(url, { signal, timeout: 60000 });
-      for await (const line of rl.createInterface(Readable.fromWeb(stream.body))) {
+      for await (const line of rl.createInterface(Readable.fromWeb(stream.body!))) {
         if (line.trim().charAt(0) === '{') {
           const val: T = JSON.parse(line);
           yield val;

@@ -32,19 +32,18 @@
     "@travetto/di": "^3.3.4",
     "@travetto/registry": "^3.3.4",
     "@travetto/schema": "^3.3.5",
-    "@types/cookies": "^0.7.8",
-    "@types/express-serve-static-core": "^4.17.36",
-    "@types/inflation": "^2.0.1",
+    "@types/cookies": "^0.7.9",
+    "@types/express-serve-static-core": "^4.17.39",
+    "@types/inflation": "^2.0.3",
     "cookies": "^0.8.0",
-    "inflation": "^2.0.0",
+    "inflation": "^2.1.0",
     "raw-body": "^2.5.2"
   },
   "peerDependencies": {
     "@travetto/cli": "^3.3.6",
-    "@travetto/fetch-node-types": "^1.0.0",
     "@travetto/test": "^3.3.6",
     "@travetto/transformer": "^3.3.2",
-    "@types/node-forge": "^1.3.3",
+    "@types/node-forge": "^1.3.8",
     "node-forge": "^1.3.1"
   },
   "peerDependenciesMeta": {
@@ -55,9 +54,6 @@
       "optional": true
     },
     "@travetto/test": {
-      "optional": true
-    },
-    "@travetto/fetch-node-types": {
       "optional": true
     },
     "node-forge": {

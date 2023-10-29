@@ -33,10 +33,9 @@
     "start": "npx trv watch --clean"
   },
   "devDependencies": {
-    "@types/node": "^18.11.9",
+    "@types/node": "^20.8.9",
     "@types/vscode": "^1.83.1",
-    "@travetto/pack": "^3.3.6",
-    "@travetto/fetch-node-types": "^1.0.2"
+    "@travetto/pack": "^3.3.6"
   },
   "dependencies": {
     "@travetto/base": "^3.3.4"
@@ -91,13 +90,13 @@
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:start",
+        "command": "travetto.compiler:restart",
         "title": "Restart Compiler",
         "category": "Travetto"
       },
       {
-        "command": "travetto.compiler:clean-all",
-        "title": "Clean Code + Compiler Output",
+        "command": "travetto.compiler:start",
+        "title": "Start Compiler",
         "category": "Travetto"
       },
       {
@@ -113,11 +112,6 @@
       {
         "command": "travetto.test.test:line",
         "title": "Debug Test",
-        "category": "Travetto"
-      },
-      {
-        "command": "travetto.test.test:restart",
-        "title": "Restart Test Server",
         "category": "Travetto"
       },
       {
@@ -215,21 +209,17 @@
           "command": "travetto.compiler:start"
         },
         {
+          "command": "travetto.compiler:restart"
+        },
+        {
           "command": "travetto.compiler:stop"
         },
         {
           "command": "travetto.compiler:clean"
         },
         {
-          "command": "travetto.compiler:clean-all"
-        },
-        {
           "command": "travetto.test.test:line",
           "when": "travetto.test && !inDebugMode && resourceFilename =~ /[.]tsx?$/ && editorIsOpen"
-        },
-        {
-          "command": "travetto.test.test:restart",
-          "when": "travetto.test"
         },
         {
           "command": "travetto.test.test:start",

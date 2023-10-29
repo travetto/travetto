@@ -4,6 +4,8 @@ import { Readable } from 'stream';
 import { RootIndex } from '@travetto/manifest';
 import { ShutdownManager } from '../shutdown';
 
+type ServerInfo = { iteration: number, path: string, type: 'watch' | 'build', state: string, serverPid: number, compilerPid: number };
+
 export type CompilerWatchEvent = {
   action: 'create' | 'update' | 'delete';
   file: string;
@@ -13,10 +15,11 @@ export type CompilerWatchEvent = {
   time: number;
 };
 
-export async function getCompilerInfo(): Promise<{ iteration: number, path: string, type: 'watch' | 'build' } | undefined> {
+export async function getCompilerInfo(): Promise<ServerInfo | undefined> {
   const res = await fetch(`${RootIndex.manifest.compilerUrl}/info`).catch(err => ({ ok: false, json: () => undefined }));
   if (res.ok) {
-    return res.json();
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    return (await res.json()) as ServerInfo;
   }
 }
 
@@ -29,7 +32,7 @@ export async function* fetchCompilerEvents<T>(type: string, signal: AbortSignal)
   for (; ;) {
     try {
       const stream = await fetch(`${RootIndex.manifest.compilerUrl}/event/${type}`, { signal });
-      for await (const line of rl.createInterface(Readable.fromWeb(stream.body))) {
+      for await (const line of rl.createInterface(Readable.fromWeb(stream.body!))) {
         if (line.trim().charAt(0) === '{') {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           yield JSON.parse(line) as T;

@@ -24,12 +24,14 @@ export class FetchClientGenerator extends ClientGenerator<{ node?: boolean }> {
     ];
   }
 
-  getCommonTypes(): string[] {
-    return this.config.node ? ['@travetto/fetch-node-types'] : [];
+  get uploadType(): string | Imp {
+    return this.config.node ? 'Blob' : super.uploadType;
   }
 
   async init(): Promise<void> {
     if (this.config.node) {
+      const pkg = await import('@travetto/base/package.json');
+
       this.registerContent('_pkgId', {
         imports: [],
         classId: '',
@@ -39,9 +41,7 @@ export class FetchClientGenerator extends ClientGenerator<{ node?: boolean }> {
           name: this.moduleName,
           version: RootIndex.mainModule.version,
           main: `${this.subFolder ?? '.'}/index.ts`,
-          dependencies: {
-            '@travetto/fetch-node-types': '^1.0.2',
-          }
+          dependencies: this.config.node ? { '@types/node': pkg.dependencies['@types/node'], } : {}
         } satisfies Package, null, 2)]
       });
     }

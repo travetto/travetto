@@ -33,7 +33,8 @@
     "@parcel/watcher": "^2.3.0",
     "@travetto/manifest": "^3.3.2",
     "@travetto/terminal": "^3.3.1",
-    "@travetto/transformer": "^3.3.2"
+    "@travetto/transformer": "^3.3.2",
+    "@types/node": "^20.8.9"
   },
   "peerDependencies": {
     "@travetto/cli": "^3.3.6"
