@@ -17,7 +17,7 @@ export class TestWatcherCommand {
   }
 
   async main(): Promise<void> {
-    if (await CliUtil.runAsRestartable()) {
+    if (await CliUtil.runWithRestart(this)) {
       return;
     }
 

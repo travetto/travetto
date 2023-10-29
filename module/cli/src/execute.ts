@@ -1,7 +1,4 @@
-import { appendFile, mkdir } from 'fs/promises';
-
 import { GlobalTerminal } from '@travetto/terminal';
-import { path } from '@travetto/manifest';
 import { ConsoleManager, defineGlobalEnv, ShutdownManager, GlobalEnv } from '@travetto/base';
 
 import { HelpUtil } from './help';
@@ -31,13 +28,6 @@ export class ExecutionManager {
     return known;
   }
 
-  static #getAction(cmd: CliCommandShape, args: string[]): 'help' | 'ipc' | 'command' {
-    const cfg = CliCommandRegistry.getConfig(cmd);
-    return args.find(a => /^(-h|--help)$/.test(a)) ?
-      'help' :
-      (process.env.TRV_CLI_IPC && cfg.runTarget) ? 'ipc' : 'command';
-  }
-
   /**
    * Run help
    */
@@ -45,24 +35,6 @@ export class ExecutionManager {
     await cmd.initialize?.();
     await this.#envInit(cmd);
     console.log!(await HelpUtil.renderHelp(cmd));
-  }
-
-  /**
-   * Append IPC payload to provided file
-   */
-  static async ipc(cmd: CliCommandShape, args: string[]): Promise<void> {
-    await this.#bindAndValidateArgs(cmd, args);
-    const file = process.env.TRV_CLI_IPC!;
-    const cfg = CliCommandRegistry.getConfig(cmd);
-    const payload = JSON.stringify({
-      type: '@travetto/cli:run', data: {
-        name: cfg.name,
-        module: cfg.module,
-        args: process.argv.slice(3)
-      }
-    });
-    await mkdir(path.dirname(file), { recursive: true });
-    await appendFile(file, `${payload}\n`);
   }
 
   /**
@@ -104,8 +76,11 @@ export class ExecutionManager {
       try {
         // Load a single command
         command = (await CliCommandRegistry.getInstance(cmd, true));
-        const action = this.#getAction(command, args);
-        await this[action](command, args);
+        if (args.some(a => /^(-h|--help)$/.test(a))) {
+          await this.help(command, args);
+        } else {
+          await this.command(command, args);
+        }
       } catch (err) {
         process.exitCode ||= 1; // Trigger error state
         if (!(err instanceof Error)) {

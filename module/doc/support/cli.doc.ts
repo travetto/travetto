@@ -49,7 +49,7 @@ export class DocCommand implements CliCommandShape {
   }
 
   async runWatch(): Promise<void> {
-    if (await CliUtil.runAsRestartable()) {
+    if (await CliUtil.runWithRestart(this)) {
       return;
     }
 

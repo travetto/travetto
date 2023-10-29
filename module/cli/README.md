@@ -421,6 +421,7 @@ If the goal is to run a more complex application, which may include depending on
 ```typescript
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliUtil } from '@travetto/cli';
+import { GlobalEnv } from '@travetto/base';
 
 import { ServerHandle } from '../src/types';
 
@@ -430,6 +431,12 @@ import { ServerHandle } from '../src/types';
 @CliCommand({ runTarget: true, fields: ['module', 'env', 'profile'] })
 export class RunRestCommand {
 
+  /** IPC is enabled */
+  ipc = true;
+
+  /** Should the server run in restartable mode */
+  restartable = GlobalEnv.devMode;
+
   /** Port to run on */
   port?: number;
 
@@ -438,7 +445,11 @@ export class RunRestCommand {
   }
 
   async main(): Promise<ServerHandle | void> {
-    if (await CliUtil.runAsRestartable()) {
+    if (this.ipc && await CliUtil.triggerIpc('run', this)) {
+      return;
+    }
+
+    if (this.restartable && await CliUtil.runAsRestartable()) {
       return;
     }
 

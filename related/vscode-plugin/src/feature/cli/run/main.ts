@@ -118,14 +118,15 @@ export class CliRunFeature extends BaseFeature {
   /**
    * On IPC trigger to run a target
    */
-  async onEvent(ev: TargetEvent<{ name: string, args: string[] }>): Promise<void> {
+  async onEvent(ev: TargetEvent<{ name: string, args: string[], module: string }>): Promise<void> {
     try {
       const args = ev.data.args;
       await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
         name: `[Travetto] ${ev.data.name}${args ? `: ${args.join(' ')}` : ''}`,
         useCli: true,
         main: ev.data.name,
-        args: [...args],
+        args,
+        cliModule: ev.data.module
       }));
     } catch (err) {
       vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
