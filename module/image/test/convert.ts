@@ -67,6 +67,33 @@ class ImageConverterTest {
     const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
     await StreamUtil.writeToFile(out, outFile);
     assert.ok(await fs.stat(outFile).then(() => true, () => false));
+
+    const dims = await ImageConverter.getDimensions(outFile);
+    assert(dims.height === 50);
+    assert(dims.width === 50);
+
+    await fs.unlink(outFile);
+    assert(await fs.stat(outFile).then(() => false, () => true));
+  }
+
+  @Test()
+  async resizeLooseToFile() {
+    const imgStream = await this.fixture.readStream('lincoln.jpg');
+    const out = await ImageConverter.resize(imgStream, {
+      w: 50,
+      h: 50,
+      strictResolution: false,
+      optimize: true
+    });
+
+    const outFile = path.resolve(os.tmpdir(), `temp.${Date.now()}.${Math.random()}.png`);
+    await StreamUtil.writeToFile(out, outFile);
+    assert.ok(await fs.stat(outFile).then(() => true, () => false));
+
+    const dims = await ImageConverter.getDimensions(outFile);
+    assert(dims.height === 50);
+    assert(dims.width === 37);
+
     await fs.unlink(outFile);
     assert(await fs.stat(outFile).then(() => false, () => true));
   }
