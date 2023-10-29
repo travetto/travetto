@@ -10,9 +10,9 @@ import path from 'path';
 import { createRequire } from 'module';
 
 /** @type {Record<string, Workspace>} */ const WS_ROOT = {};
-const TOOL_FOLDER = '.trv_build';
-const COMPILER_FOLDER = '.trv_compiler';
-const OUTPUT_FOLDER = '.trv_output';
+const TOOL_FOLDER = '.trv/tool';
+const COMPILER_FOLDER = '.trv/compiler';
+const OUTPUT_FOLDER = '.trv/output';
 
 /**
  * Read package.json or return undefined if missing
@@ -90,7 +90,10 @@ async function $getCompilerUrl(ws) {
     // eslint-disable-next-line no-bitwise
     const port = (Math.abs([...file].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
     out = `http://localhost:${port}`;
-    try { await fs.stat(file); } catch { await fs.writeFile(file, out, 'utf8'); }
+    try { await fs.stat(file); } catch {
+      await fs.mkdir(path.dirname(file), { recursive: true });
+      await fs.writeFile(file, out, 'utf8');
+    }
   }
   return out.replace('localhost', '127.0.0.1');
 }

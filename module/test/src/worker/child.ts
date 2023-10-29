@@ -1,6 +1,6 @@
-import fs from 'fs/promises';
+import { createWriteStream } from 'fs';
 
-import { RootIndex } from '@travetto/manifest';
+import { ManifestFileUtil, RootIndex } from '@travetto/manifest';
 import { ConsoleManager, ErrorUtil, TimeUtil } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
@@ -32,9 +32,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    */
   async activate(): Promise<void> {
     if (/\b@travetto[/]test\b/.test(process.env.DEBUG ?? '')) {
-      const handle = await fs.open(RootIndex.resolveToolPath(`test-worker.${process.pid}.log`), 'a');
-      const stdout = handle.createWriteStream();
-
+      const stdout = createWriteStream(ManifestFileUtil.toolPath(RootIndex, `test-worker.${process.pid}.log`), { flags: 'a' });
       const c = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });
       ConsoleManager.set({ onLog: (ev) => c[ev.level](process.pid, ...ev.args) });
     } else {

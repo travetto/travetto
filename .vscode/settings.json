@@ -4,15 +4,13 @@
     "direnv"
   ],
   "files.exclude": {
-    "**/.trv_compiler/**": true,
-    "**/.trv_output/**": true,
+    "**/.trv/**": true,
     ".git/**": true
   },
   "files.watcherExclude": {
     ".git/**": true,
     "**/node_modules/**": true,
-    "**/.trv_compiler/**": true,
-    "**/.trv_output/**": true,
+    "**/.trv/**": true,
     "related/vscode-plugin/out/**": true,
     "**/.angular/**": true,
   }

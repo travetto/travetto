@@ -24,8 +24,7 @@
   "watchOptions": {
     "excludeDirectories": [
       "**/node_modules",
-      "**/.trv_output",
-      "**/.trv_compiler",
+      "**/.trv",
       "**/.git",
     ]
   }

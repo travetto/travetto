@@ -7,7 +7,7 @@ Thumbs.db
 
 # Node/Framework
 node_modules/
-.trv*
+.trv/
 LICENSE
 !/LICENSE
 

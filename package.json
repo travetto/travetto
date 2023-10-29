@@ -16,7 +16,7 @@
     "test": "trv test -f tap-streamed",
     "lint": "trv lint",
     "upgrade-deps": "npm update -S",
-    "reinit-deps": "rm -rf node_modules; (find module -name 'node_modules' -type d; find global-test -name 'node_modules' -type d) | grep -v '[.]trv' | xargs rm -rf; rm package-lock.json; npm i"
+    "reinit-deps": "find . -name 'node_modules' -type d | grep -v -E '(github[.]io|vscode-plugin|[.]trv)' | xargs rm -rf; rm package-lock.json; npm i"
   },
   "travetto": {
     "globalModules": [

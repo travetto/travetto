@@ -1,7 +1,8 @@
-import Db, * as sqlite3 from 'better-sqlite3';
+import fs from 'fs/promises';
+import sqlDb, * as sqlite3 from 'better-sqlite3';
 import pool from 'generic-pool';
 
-import { path } from '@travetto/manifest';
+import { ManifestFileUtil, RootIndex, path } from '@travetto/manifest';
 import { ShutdownManager, TimeUtil } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
@@ -42,8 +43,10 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
   }
 
   async #create(): Promise<sqlite3.Database> {
-    const file = path.resolve(this.#config.options.file ?? '.trv-sqlite_db');
-    const db = new Db(file, this.#config.options);
+    const file = path.resolve(this.#config.options.file ??
+      ManifestFileUtil.toolPath(RootIndex, 'sqlite_db', true));
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    const db = new sqlDb(file, this.#config.options);
     await db.pragma('foreign_keys = ON');
     await db.pragma('journal_mode = WAL');
     db.function('regexp', (a, b) => new RegExp(`${a}`).test(`${b}`) ? 1 : 0);
@@ -88,7 +91,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
     });
   }
 
-  async acquire(): Promise<Db.Database> {
+  async acquire(): Promise<sqlDb.Database> {
     return await this.#pool.acquire();
   }
 

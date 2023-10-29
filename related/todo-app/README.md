@@ -341,7 +341,7 @@ npx trv run:rest
       CommonLoggerConfig: { format: 'line', output: 'console' },
       ConsoleLogAppenderConfig: { logToLevel: true },
       FileLogAppenderConfig: {
-        output: '<workspace-root>/.trv_build/logs/@travetto/todo-app.log',
+        output: '<workspace-root>/.trv/tool/logs/@travetto/todo-app.log',
         writeSync: false
       },
       FileModelConfig: {

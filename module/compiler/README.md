@@ -35,7 +35,7 @@ In addition to the normal output, the compiler supports an environment variable 
 ```bash
 $ TRV_BUILD=debug trv build
 
-2029-03-14T04:00:00.618Z info  [compiler-server] Starting server http://127.0.0.1:43392
+2029-03-14T04:00:00.618Z info  [compiler-server] Starting server http://127.0.0.1:29222
 2029-03-14T04:00:00.837Z debug [compiler-client] Starting watch for events of type "log"
 2029-03-14T04:00:01.510Z debug [event-stream   ] Started event stream
 2029-03-14T04:00:02.450Z debug [precompile     ] Started

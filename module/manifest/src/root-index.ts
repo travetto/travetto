@@ -71,13 +71,6 @@ class $RootIndex extends ManifestIndex {
   }
 
   /**
-   * Resolve tool path for usage
-   */
-  resolveToolPath(...rel: string[]): string {
-    return path.resolve(this.manifest.workspacePath, this.manifest.toolFolder, ...rel);
-  }
-
-  /**
   * Get source file from import location
   * @param outputFile
   */

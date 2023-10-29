@@ -1,6 +1,6 @@
 #!/bin/sh
 export DIST=/tmp/_home_tim_Code_travetto_related_todo-app
-export TRV_OUT=/home/tim/Code/travetto/.trv_output
+export TRV_OUT=/home/tim/Code/travetto/.trv/output
 export ROOT=/home/tim/Code/travetto/related/todo-app
 export MOD=@travetto/todo-app
 
