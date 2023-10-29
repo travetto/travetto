@@ -24,13 +24,15 @@ This module expands upon the <a target="_blank" class="external-link" href="http
 Beyond the <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> compiler functionality, the module provides the primary entry point into the development process.
 <h2 id="cli">CLI</h2>
 
-The cli, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L7">trvc</a> is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br><br>
-The CLI supports the following operations:
-<ul> <li><code class="item method">clean</code> - Removes the output folder, and if <code class="item input">-a</code> is also passed, will also clean out the compiler folder</li>
-<li><code class="item method">build</code> - Will attempt to build the project.  If the project is already built, will return immediately.  If the project is being built somewhere else, will wait until a build is completed.</li>
-<li><code class="item method">watch</code> - If nothing else is watching, will start the watch operation.  Otherwise will return immediately.</li>
-<li><code class="item method">manifest</code> - Will produce a manifest. If no file is passed in the command line arguments, will output to stdout.</li>
-<li><code class="item method">&lt;other&gt;</code> - Will be delegated to the <a class="module-link" routerLink="/docs/cli" title="CLI infrastructure for Travetto framework">Command Line Interface</a> entry point after a successful build.</li>
+The compiler cli, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L7">trvc</a> is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br><br>
+The compiler cli supports the following operations:
+<ul> <li><code class="item method">start|watch</code> - Run the compiler in watch mode</li>
+<li><code class="item method">stop</code> - Stop the compiler if running</li>
+<li><code class="item method">restart</code> - Restart the compiler in watch mode</li>
+<li><code class="item method">build</code> - Ensure the project is built and upto date</li>
+<li><code class="item method">clean</code> - Clean out the output and compiler caches</li>
+<li><code class="item method">info</code> - Retrieve the compiler information, if running</li>
+<li><code class="item method">manifest</code> - Generate the project manifest</li>
 </ul>
 In addition to the normal output, the compiler supports an environment variable <code class="item input">TRV_BUILD</code> that supports the following values: <code class="item input">debug</code>, <code class="item input">info</code>, <code class="item input">warn</code> or <code class="item input">none</code>.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. <code class="item method">&lt;other&gt;</code> from above), the default level is <code class="item input">warn</code>.  Otherwise the default logging level is <code class="item input">info</code>.
 

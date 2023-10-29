@@ -7,6 +7,13 @@ const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /withContext/);
 export const text = async () => {
   await DocRunUtil.run('npx', ['trvc', 'build'], { cwd: './doc-exec' });
 
+  const output =
+    (await DocRunUtil.run('npx', ['trvc', 'help']))
+      .split('\n')
+      .filter(x => x.trim().startsWith('*'))
+      .map(x => x.split(' - ') as [string, string])
+      .map(x => <li>{d.method(x[0].replace('*', '').trim())} - {x[1].trim()}</li>);
+
   return <>
     <c.StdHeader />
 
@@ -23,16 +30,12 @@ export const text = async () => {
 
     <c.Section title='CLI'>
 
-      The cli, {TrvcEntry} is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br />
+      The compiler cli, {TrvcEntry} is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br />
 
-      The CLI supports the following operations:
+      The compiler cli supports the following operations:
 
       <ul>
-        <li>{d.method('clean')} - Removes the output folder, and if {d.input('-a')} is also passed, will also clean out the compiler folder</li>
-        <li>{d.method('build')} - Will attempt to build the project.  If the project is already built, will return immediately.  If the project is being built somewhere else, will wait until a build is completed.</li>
-        <li>{d.method('watch')} - If nothing else is watching, will start the watch operation.  Otherwise will return immediately.</li>
-        <li>{d.method('manifest')} - Will produce a manifest. If no file is passed in the command line arguments, will output to stdout.</li>
-        <li>{d.method('<other>')} - Will be delegated to the {d.mod('Cli')} entry point after a successful build.</li>
+        {output}
       </ul>
 
       In addition to the normal output, the compiler supports an environment variable {d.input('TRV_BUILD')} that supports the following values: {d.input('debug')}, {d.input('info')}, {d.input('warn')} or {d.input('none')}.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. {d.method('<other>')} from above), the default level is {d.input('warn')}.  Otherwise the default logging level is {d.input('info')}.

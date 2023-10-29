@@ -9,7 +9,7 @@ import { withContext } from './common.js';
 /** @typedef {import('@travetto/manifest/src/types').ManifestContext} Ctx */
 
 const stop = async (/** @typedef {Ctx} */ ctx) => {
-  if (await fetch(`${ctx.compilerUrl}/stop}`).then(v => v.ok, () => false)) {
+  if (await fetch(`${ctx.compilerUrl}/stop`).then(v => v.ok, () => false)) {
     console.log(`Stopped server ${ctx.workspacePath}: [${ctx.compilerUrl}]`);
   } else {
     console.log(`Server not running ${ctx.workspacePath}: [${ctx.compilerUrl}]`);

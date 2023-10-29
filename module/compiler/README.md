@@ -21,14 +21,16 @@ This module expands upon the [Typescript](https://typescriptlang.org) compiler, 
 Beyond the [Typescript](https://typescriptlang.org) compiler functionality, the module provides the primary entry point into the development process.
 
 ## CLI
-The cli, [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L7) is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. 
+The compiler cli, [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L7) is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. 
 
-The CLI supports the following operations:
-   *  `clean` - Removes the output folder, and if `-a` is also passed, will also clean out the compiler folder
-   *  `build` - Will attempt to build the project.  If the project is already built, will return immediately.  If the project is being built somewhere else, will wait until a build is completed.
-   *  `watch` - If nothing else is watching, will start the watch operation.  Otherwise will return immediately.
-   *  `manifest` - Will produce a manifest. If no file is passed in the command line arguments, will output to stdout.
-   *  `<other>` - Will be delegated to the [Command Line Interface](https://github.com/travetto/travetto/tree/main/module/cli#readme "CLI infrastructure for Travetto framework") entry point after a successful build.
+The compiler cli supports the following operations:
+   *  `start|watch` - Run the compiler in watch mode
+   *  `stop` - Stop the compiler if running
+   *  `restart` - Restart the compiler in watch mode
+   *  `build` - Ensure the project is built and upto date
+   *  `clean` - Clean out the output and compiler caches
+   *  `info` - Retrieve the compiler information, if running
+   *  `manifest` - Generate the project manifest
 In addition to the normal output, the compiler supports an environment variable `TRV_BUILD` that supports the following values: `debug`, `info`, `warn` or `none`.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. `<other>` from above), the default level is `warn`.  Otherwise the default logging level is `info`.
 
 **Terminal: Sample trv output with debug logging**
