@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-
+import { createReadStream } from 'fs';
 
 import { CommandOperation } from '@travetto/command';
 import { StreamUtil } from '@travetto/base';
@@ -20,6 +20,10 @@ export interface ImageOptions {
    * Should the image be optimized?
    */
   optimize?: boolean;
+  /**
+   * Strict resolution
+   */
+  strictResolution?: boolean;
 }
 
 type ImageType = Readable | Buffer;
@@ -58,9 +62,10 @@ export class ImageConverter {
    * Resize image using imagemagick
    */
   static async resize<T extends ImageType>(image: T, options: ImageOptions): Promise<T> {
+    const dims = [options.w, options.h].map(d => (d && options.strictResolution !== false) ? `${d}!` : d).join('x');
+
     const state = await this.CONVERTER.exec(
-      'gm', 'convert', '-resize', `${options.w ?? ''}x${options.h ?? ''}`,
-      '-auto-orient',
+      'gm', 'convert', '-resize', dims, '-auto-orient',
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
       '-', '-');
 
@@ -90,19 +95,21 @@ export class ImageConverter {
    * Get Image Dimensions
    * @param image
    */
-  static async getDimensions<T extends ImageType>(image: T): Promise<{ width: number, height: number }> {
-    const { result, process: identProc } = await this.CONVERTER.exec('gm',
-      'identify',
-      '-format', '{"width":%w, "height":%h}',
-      '-'
+  static async getDimensions(image: Readable | Buffer | string): Promise<{ width: number, height: number }> {
+    const state = await this.CONVERTER.exec(
+      'gm', 'identify', '-format', '%wX%h', '-',
     );
 
-    (await StreamUtil.toStream(image)).pipe(identProc.stdin!);
+    if (typeof image === 'string') {
+      image = createReadStream(image);
+    }
 
-    await result;
+    await StreamUtil.execPipe(state, await StreamUtil.toStream(image));
 
-    const buf = await StreamUtil.toBuffer(identProc.stdout!);
+    const buf = await StreamUtil.toBuffer(state.process.stdout!);
+    const text = buf.toString('utf8');
+    const [w, h] = text.split('X').map(x => parseFloat(x));
 
-    return JSON.parse(buf.toString('utf8'));
+    return { width: w, height: h };
   }
 }
