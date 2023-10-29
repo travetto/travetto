@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import { Readable } from 'stream';
 
-import { path } from '@travetto/manifest';
+import { ManifestFileUtil, RootIndex, path } from '@travetto/manifest';
 import { Env, FileResourceProvider, StreamUtil } from '@travetto/base';
 
 import { ImageConverter } from './convert';
@@ -16,7 +16,7 @@ export class ImageOptimizingResourceProvider extends FileResourceProvider {
   constructor(paths?: string[], cacheRoot?: string) {
     super({ paths, includeCommon: true });
 
-    this.#cacheRoot = cacheRoot ?? path.resolve(Env.get('TRV_IMAGE_CACHE', '.trv_images'));
+    this.#cacheRoot = cacheRoot ?? path.resolve(Env.get('TRV_IMAGE_CACHE', ManifestFileUtil.toolPath(RootIndex, 'image_cache')));
   }
 
   async #openFile(pth: string): Promise<fs.FileHandle> {

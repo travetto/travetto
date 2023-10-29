@@ -6,9 +6,9 @@
   "configurations": [
     {
       "name": "Launch Compiler",
-      "program": "${workspaceFolder}/.trv_compiler/node_modules/@travetto/compiler/support/compiler-entry.js",
+      "program": "${workspaceFolder}/.trv/compiler/node_modules/@travetto/compiler/support/compiler-entry.js",
       "env": {
-        "TRV_MANIFEST": "${workspaceFolder}/.trv_output/node_modules/@travetto/schema/manifest.json"
+        "TRV_MANIFEST": "${workspaceFolder}/.trv/output/node_modules/@travetto/schema/manifest.json"
       },
       "args": [
         "${workspaceFolder}/module/schema/test/models/validation.ts"
@@ -16,13 +16,13 @@
       "sourceMaps": true,
       "pauseForSourceMap": true,
       "outFiles": [
-        "${workspaceFolder}/.trv_compiler/**/*.js",
+        "${workspaceFolder}/.trv/compiler/**/*.js",
       ],
       "resolveSourceMapLocations": [
-        "${workspaceFolder}/.trv_compiler/**",
+        "${workspaceFolder}/.trv/compiler/**",
       ],
       "runtimeSourcemapPausePatterns": [
-        "${workspaceFolder}/.trv_compiler/**/*.js",
+        "${workspaceFolder}/.trv/compiler/**/*.js",
       ],
       "request": "launch",
       "skipFiles": [
@@ -50,7 +50,7 @@
       "program": "${workspaceFolder}/node_modules/.bin/trv",
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/.trv_output/**/*.js",
+        "${workspaceFolder}/.trv/output/**/*.js",
       ],
       "env": {
         "REST_PORT": "4000",
@@ -72,7 +72,7 @@
       "program": "${workspaceFolder}/node_modules/.bin/trv",
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/.trv_output/**/*.js",
+        "${workspaceFolder}/.trv/output/**/*.js",
       ],
       "env": {
         "TRV_MODULE": "@travetto/mono-repo"

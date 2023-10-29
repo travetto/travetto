@@ -34,8 +34,7 @@ export async function* fetchCompilerEvents<T>(type: string, signal: AbortSignal)
       const stream = await fetch(`${RootIndex.manifest.compilerUrl}/event/${type}`, { signal });
       for await (const line of rl.createInterface(Readable.fromWeb(stream.body!))) {
         if (line.trim().charAt(0) === '{') {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          yield JSON.parse(line) as T;
+          yield JSON.parse(line);
         }
       }
     } catch (err) { }

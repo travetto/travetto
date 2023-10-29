@@ -3,6 +3,7 @@ import fs from 'fs/promises';
 import { readFileSync } from 'fs';
 
 import { path } from './path';
+import type { ManifestContext } from './types';
 
 export class ManifestFileUtil {
   /**
@@ -38,5 +39,17 @@ export class ManifestFileUtil {
    */
   static statFile(file: string): Promise<{ mtimeMs: number, ctimeMs: number } | undefined> {
     return fs.stat(file).catch(() => undefined);
+  }
+
+  /**
+   * Resolve tool path for usage
+   */
+  static toolPath(ctx: ManifestContext | { manifest: ManifestContext }, rel: string, moduleSpecific = false): string {
+    ctx = 'manifest' in ctx ? ctx.manifest : ctx;
+    const parts = [rel];
+    if (moduleSpecific) {
+      parts.unshift('node_modules', ctx.mainModule);
+    }
+    return path.resolve(ctx.workspacePath, ctx.toolFolder, ...parts);
   }
 }

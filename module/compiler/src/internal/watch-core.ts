@@ -29,7 +29,7 @@ async function watchForReset(q: AsyncQueue<WatchEvent>, root: string, files: str
 /** Watch recursive files for a given folder */
 async function watchFolder(q: AsyncQueue<WatchEvent>, src: string, target: string, signal: AbortSignal): Promise<void> {
   const lib = await import('@parcel/watcher');
-  const ignore = ['node_modules', '**/.trv_*', ...(await fs.readdir(src)).filter(x => x.startsWith('.'))];
+  const ignore = ['node_modules', '**/.trv', ...(await fs.readdir(src)).filter(x => x.startsWith('.'))];
 
   const cleanup = await lib.subscribe(src, async (err, events) => {
     if (err) {
