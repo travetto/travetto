@@ -1,6 +1,5 @@
 import assert from 'assert';
-import { Minimatch, IOptions } from 'minimatch';
-import { DefaultContextExtends } from 'koa';
+import { DefaultContextExtends, HttpError } from 'koa';
 import { EventEmitter } from 'events';
 import { Writable } from 'stream';
 
@@ -9,25 +8,28 @@ import { Suite, Test } from '@travetto/test';
 import { DependencyRegistry } from '../src/registry';
 import { Inject, Injectable, InjectableFactory } from '../__index__';
 
+class Item {
+  follow: number;
+}
+
+type HttpErrorType = ReturnType<typeof HttpError>;
+
 class Source {
   @InjectableFactory()
-  static opts(): IOptions {
-    return {
-      flipNegate: true
-    };
+  static opts(): HttpErrorType {
+    return { message: '', name: '', status: 5, statusCode: 5, expose: false };
   }
 
   @InjectableFactory()
   static extends(): DefaultContextExtends {
-    return {
-      flipNegate: false
-    };
+    return { follow: 2 };
   }
 
-
   @InjectableFactory()
-  static factory0(opts: IOptions): Minimatch {
-    return new Minimatch('', opts);
+  static async factory0(opts: HttpErrorType): Promise<Item> {
+    const item = new Item();
+    item.follow = opts.statusCode;
+    return item;
   }
 
   @InjectableFactory()
@@ -53,7 +55,7 @@ class Child {
   db: EventEmitter;
 
   @Inject()
-  match: Minimatch;
+  item: Item;
 
   @Inject(Symbol.for('custom-1'))
   stream: Writable;
@@ -74,9 +76,9 @@ class ForeignTest {
     const inst = await DependencyRegistry.getInstance(Child);
     assert(inst.db);
     assert(inst.stream);
-    assert(inst.match);
-    assert(inst.match.makeRe);
-    assert(inst.match.options.flipNegate);
+    assert(inst.item);
+    assert(inst.item.follow);
+    assert(inst.item.follow === 5);
     assert(inst.ctx);
     assert(inst.stream.writable === false);
     assert(inst.stream2.writable === true);

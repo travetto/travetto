@@ -30,7 +30,7 @@
     "@travetto/rest-client": "^3.3.12",
     "@travetto/rest-express": "^3.3.6",
     "@travetto/rest-session": "^3.3.8",
-    "vue": "^2.7.14"
+    "vue": "^3.3.7"
   },
   "devDependencies": {
     "@travetto/pack": "^3.3.6"

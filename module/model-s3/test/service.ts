@@ -41,9 +41,7 @@ export class S3StreamSuite extends ModelStreamSuite {
   serviceClass = S3ModelService;
   configClass = S3ModelConfig;
 
-  @Test({
-    timeout: 15000
-  })
+  @Test({ timeout: 15000 })
   async largeFile() {
     const service = (await this.service) as S3ModelService;
     const buffer = Buffer.alloc(1.5 * service['config'].chunkSize);

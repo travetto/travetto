@@ -6,6 +6,8 @@ function isResponse(v: unknown): v is Response {
   return v && v.status && v.headers;
 }
 
+type BodyInit = Exclude<RequestInit['body'], undefined>;
+
 export abstract class BaseFetchService extends BaseRemoteService<BodyInit, Response> {
 
   postResponseHandlers: PostResponseHandler<Response>[];

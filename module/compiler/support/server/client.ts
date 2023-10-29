@@ -6,6 +6,10 @@ import type { CompilerServerEvent, CompilerServerEventType, CompilerServerInfo, 
 
 import { LogUtil } from '../log';
 
+declare global {
+  interface RequestInit { timeout?: number }
+}
+
 const log = LogUtil.log.bind(LogUtil, 'compiler-client');
 
 function getSignal(input?: AbortSignal): AbortSignal {
@@ -55,7 +59,7 @@ export class CompilerClientUtil {
           signal: ctrl.signal,
           timeout: 1000 * 60 * 60
         });
-        for await (const line of rl.createInterface(Readable.fromWeb(stream.body))) {
+        for await (const line of rl.createInterface(Readable.fromWeb(stream.body!))) {
           if (line.trim().charAt(0) === '{') {
             const val = JSON.parse(line);
             if (until?.(val)) {

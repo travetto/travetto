@@ -32,8 +32,8 @@
     "@travetto/model": "^3.3.8",
     "@travetto/model-query": "^3.3.8",
     "@travetto/model-sql": "^3.3.8",
-    "@types/mysql": "^2.15.21",
-    "mysql2": "^3.6.1"
+    "@types/mysql": "^2.15.23",
+    "mysql2": "^3.6.2"
   },
   "peerDependencies": {
     "@travetto/command": "^3.3.4"
