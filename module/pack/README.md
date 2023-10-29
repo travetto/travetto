@@ -34,7 +34,7 @@ Options:
   -o, --output <string>                Output location
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
   -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.cli")
+  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv")
   --minify, --no-minify                Minify output (default: true)
   -sm, --sourcemap                     Bundle source maps (default: false)
   -is, --include-sources               Include source with source maps (default: false)
@@ -96,7 +96,7 @@ Options:
   -o, --output <string>                Output location (default: "travetto_pack.zip")
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
   -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.cli")
+  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv")
   --minify, --no-minify                Minify output (default: true)
   -sm, --sourcemap                     Bundle source maps (default: false)
   -is, --include-sources               Include source with source maps (default: false)
@@ -121,7 +121,7 @@ Options:
   -o, --output <string>                Output location
   --main-scripts, --no-main-scripts    Create entry scripts (default: true)
   -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.cli")
+  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv")
   --minify, --no-minify                Minify output (default: true)
   -sm, --sourcemap                     Bundle source maps (default: false)
   -is, --include-sources               Include source with source maps (default: false)
@@ -209,13 +209,13 @@ cp -r -p $ROOT/resources $DIST/resources
 
 echo "Writing Manifest manifest.json"
 
-TRV_MODULE=$MOD npx trv manifest $DIST/manifest.json prod
+TRV_MODULE=$MOD npx trvc manifest $DIST/manifest.json prod
 
-# Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.cli 
+# Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv 
 
-echo "Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.cli"
+echo "Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv"
 
-export BUNDLE_ENTRY=node_modules/@travetto/cli/support/entry.cli.js
+export BUNDLE_ENTRY=node_modules/@travetto/cli/support/entry.trv.js
 export BUNDLE_MAIN_FILE=todo-app.js
 export BUNDLE_COMPRESS=true
 export BUNDLE_SOURCEMAP=false

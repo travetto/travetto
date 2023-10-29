@@ -431,11 +431,11 @@ import { ServerHandle } from '../src/types';
 @CliCommand({ runTarget: true, fields: ['module', 'env', 'profile'] })
 export class RunRestCommand {
 
-  /** IPC is enabled */
-  ipc = true;
+  /** IPC debug is enabled */
+  debugIpc = true;
 
-  /** Should the server run in restartable mode */
-  restartable = GlobalEnv.devMode;
+  /** Should the server be able to run with restart*/
+  canRestart = GlobalEnv.devMode;
 
   /** Port to run on */
   port?: number;
@@ -445,11 +445,7 @@ export class RunRestCommand {
   }
 
   async main(): Promise<ServerHandle | void> {
-    if (this.ipc && await CliUtil.triggerIpc('run', this)) {
-      return;
-    }
-
-    if (this.restartable && await CliUtil.runAsRestartable()) {
+    if (await CliUtil.debugIfIpc(this) || await CliUtil.runWithRestart(this)) {
       return;
     }
 

@@ -31,7 +31,8 @@ export class CompilerServer {
       type: op,
       serverPid: process.pid,
       compilerPid: -1,
-      path: ctx.workspacePath
+      path: ctx.workspacePath,
+      url: ctx.compilerUrl
     };
 
     this.#server = http.createServer({
@@ -126,8 +127,9 @@ export class CompilerServer {
     let out: unknown;
     switch (action) {
       case 'event': return await this.#addListener(subAction, res);
-      case 'close': return this.close();
+      case 'stop': out = await this.close(); break;
       case 'clean': out = await this.#clean(); break;
+      case 'info':
       default: out = this.info ?? {}; break;
     }
     res.end(JSON.stringify(out));
@@ -162,15 +164,18 @@ export class CompilerServer {
   /**
    * Close server
    */
-  async close(): Promise<void> {
+  async close(): Promise<unknown> {
     log('info', 'Closing down server');
-    this.#shutdown.abort();
-    this.#emitEvent({ type: 'state', payload: { state: 'close' } });
-    this.#server.unref();
-    await new Promise(r => {
-      this.#server.close(r);
-      setImmediate(() => this.#server.closeAllConnections());
-    });
+    setTimeout(async () => {
+      this.#shutdown.abort();
+      this.#emitEvent({ type: 'state', payload: { state: 'close' } });
+      this.#server.unref();
+      await new Promise(r => {
+        this.#server.close(r);
+        setImmediate(() => this.#server.closeAllConnections());
+      });
+    }, 10);
+    return { closing: true };
   }
 
   /**

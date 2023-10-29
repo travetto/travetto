@@ -38,7 +38,7 @@ Options:
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Output location
   --main-scripts, --no-main-scripts    Create entry scripts <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -f, --main-name <span class="token operator">&lt;</span>string<span class="token operator">></span>             Main name <span class="token keyword">for</span> build artifact
-  -e, --entry-point <span class="token operator">&lt;</span>string<span class="token operator">></span>           Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
+  -e, --entry-point <span class="token operator">&lt;</span>string<span class="token operator">></span>           Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.trv"</span><span class="token punctuation">)</span>
   --minify, --no-minify                Minify output <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -sm, <span class="token parameter variable">--sourcemap</span>                     Bundle <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -is, --include-sources               Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
@@ -106,7 +106,7 @@ Options:
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Output location <span class="token punctuation">(</span>default: <span class="token string">"travetto_pack.zip"</span><span class="token punctuation">)</span>
   --main-scripts, --no-main-scripts    Create entry scripts <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -f, --main-name <span class="token operator">&lt;</span>string<span class="token operator">></span>             Main name <span class="token keyword">for</span> build artifact
-  -e, --entry-point <span class="token operator">&lt;</span>string<span class="token operator">></span>           Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
+  -e, --entry-point <span class="token operator">&lt;</span>string<span class="token operator">></span>           Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.trv"</span><span class="token punctuation">)</span>
   --minify, --no-minify                Minify output <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -sm, <span class="token parameter variable">--sourcemap</span>                     Bundle <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -is, --include-sources               Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
@@ -134,7 +134,7 @@ Options:
   -o, <span class="token parameter variable">--output</span> <span class="token operator">&lt;</span>string<span class="token operator">></span>                Output location
   --main-scripts, --no-main-scripts    Create entry scripts <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -f, --main-name <span class="token operator">&lt;</span>string<span class="token operator">></span>             Main name <span class="token keyword">for</span> build artifact
-  -e, --entry-point <span class="token operator">&lt;</span>string<span class="token operator">></span>           Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.cli"</span><span class="token punctuation">)</span>
+  -e, --entry-point <span class="token operator">&lt;</span>string<span class="token operator">></span>           Entry point <span class="token punctuation">(</span>default: <span class="token string">"@travetto/cli/support/entry.trv"</span><span class="token punctuation">)</span>
   --minify, --no-minify                Minify output <span class="token punctuation">(</span>default: <span class="token boolean">true</span><span class="token punctuation">)</span>
   -sm, <span class="token parameter variable">--sourcemap</span>                     Bundle <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
   -is, --include-sources               Include <span class="token builtin class-name">source</span> with <span class="token builtin class-name">source</span> maps <span class="token punctuation">(</span>default: <span class="token boolean">false</span><span class="token punctuation">)</span>
@@ -225,13 +225,13 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">"Writing Manifest manifest.json"</span>
 
-<span class="token assign-left variable">TRV_MODULE</span><span class="token operator">=</span><span class="token variable">$MOD</span> npx trv manifest <span class="token variable">$DIST</span>/manifest.json prod
+<span class="token assign-left variable">TRV_MODULE</span><span class="token operator">=</span><span class="token variable">$MOD</span> npx trvc manifest <span class="token variable">$DIST</span>/manifest.json prod
 
-<span class="token comment"># Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.cli</span>
+<span class="token comment"># Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv</span>
 
-<span class="token builtin class-name">echo</span> <span class="token string">"Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.cli"</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv"</span>
 
-<span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENTRY</span><span class="token operator">=</span>node_modules/@travetto/cli/support/entry.cli.js
+<span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_ENTRY</span><span class="token operator">=</span>node_modules/@travetto/cli/support/entry.trv.js
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_MAIN_FILE</span><span class="token operator">=</span>todo-app.js
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_COMPRESS</span><span class="token operator">=</span>true
 <span class="token builtin class-name">export</span> <span class="token assign-left variable">BUNDLE_SOURCEMAP</span><span class="token operator">=</span>false

@@ -39,7 +39,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
 
       const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
         ExecUtil.fork(
-          RootIndex.resolveFileImport('@travetto/cli/support/entry.cli'),
+          RootIndex.resolveFileImport('@travetto/cli/support/entry.trv'),
           ['test:child'],
           {
             cwd,

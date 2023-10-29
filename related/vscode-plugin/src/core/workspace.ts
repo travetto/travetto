@@ -71,7 +71,11 @@ export class Workspace {
   }
 
   static get #cliFile(): string {
-    return this.#req.resolve('@travetto/compiler/bin/trv.js');
+    return this.#req.resolve('@travetto/cli/bin/trv.js');
+  }
+
+  static get #compilerCliFile(): string {
+    return this.#req.resolve('@travetto/compiler/bin/trvc.js');
   }
 
   static #buildEnv(debug: boolean, base?: EnvDict, cliModule?: string): EnvDict {
@@ -197,7 +201,7 @@ export class Workspace {
   static generateLaunchConfig(config: LaunchConfig): vscode.DebugConfiguration {
     if (config.useCli) {
       config.args = [config.main, ...config.args ?? []];
-      config.main = path.resolve(this.path, 'node_modules', '@travetto/compiler/bin/trv');
+      config.main = this.#cliFile;
     }
 
     /* eslint-disable no-template-curly-in-string */
@@ -302,6 +306,17 @@ export class Workspace {
       'node', [this.#cliFile, command, ...args ?? []],
       { cwd: this.path, ...opts, env }
     );
+  }
+
+  /**
+   * Spawn the compiler cli in the same form as ExecUtil.spawn
+   * @param command
+   * @returns
+   */
+  static spawnCompiler(command: string): ExecutionState {
+    const env = this.#buildEnv(false);
+    this.#log.debug('Spawning Compiler', this.#compilerCliFile, command, { env });
+    return ExecUtil.spawn('node', [this.#compilerCliFile, command], { cwd: this.path, env });
   }
 
   /**

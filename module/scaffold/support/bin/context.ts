@@ -185,7 +185,7 @@ export class Context {
     }
 
     yield cliTpl`${{ type: 'Initial Build' }} `;
-    await this.#exec('npx', ['trv', 'build']);
+    await this.#exec('npx', ['trvc', 'build']);
     if (this.#devDependencies.includes('@travetto/eslint')) {
       yield cliTpl`${{ type: 'ESLint Registration' }} `;
       await this.#exec('npx', ['trv', 'lint:register']);

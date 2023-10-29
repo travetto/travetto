@@ -2,10 +2,10 @@
 import { d, c } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 
-const TrvEntry = d.codeLink('trv', 'bin/trv.js', /[(]async/);
+const TrvcEntry = d.codeLink('trvc', 'bin/trvc.js', /withContext/);
 
 export const text = async () => {
-  await DocRunUtil.run('npx', ['trv', 'build'], { cwd: './doc-exec' });
+  await DocRunUtil.run('npx', ['trvc', 'build'], { cwd: './doc-exec' });
 
   return <>
     <c.StdHeader />
@@ -23,7 +23,7 @@ export const text = async () => {
 
     <c.Section title='CLI'>
 
-      The cli, {TrvEntry} is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br />
+      The cli, {TrvcEntry} is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br />
 
       The CLI supports the following operations:
 
@@ -37,14 +37,14 @@ export const text = async () => {
 
       In addition to the normal output, the compiler supports an environment variable {d.input('TRV_BUILD')} that supports the following values: {d.input('debug')}, {d.input('info')}, {d.input('warn')} or {d.input('none')}.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. {d.method('<other>')} from above), the default level is {d.input('warn')}.  Otherwise the default logging level is {d.input('info')}.
 
-      <c.Execution title='Sample trv output with debug logging' cmd='trv' args={['build']} config={{
+      <c.Execution title='Sample trv output with debug logging' cmd='trvc' args={['build']} config={{
         env: { TRV_BUILD: 'debug' },
         cwd: './doc-exec',
         rewrite: val => val.replace(/pid=\d+/g, 'pid=000000'),
         formatCommand: (cmd, args) => `TRV_BUILD=debug ${cmd} ${args.join(' ')}`
       }} />
 
-      <c.Execution title='Sample trv output with default log level' cmd='trv' args={['build']} />
+      <c.Execution title='Sample trv output with default log level' cmd='trvc' args={['build']} />
     </c.Section>
 
     <c.Section title='Compilation Architecture'>
@@ -64,7 +64,7 @@ export const text = async () => {
 
       <c.SubSection title='Bootstrapping'>
 
-        Given that the framework is distributed as {d.library('Typescript')} only files, there is a bootstrapping problem that needs to be mitigated.  The {TrvEntry} entrypoint, along with a small context utility in {d.mod('Manifest')} are the only {d.library('Javascript')} files needed to run the project.  The {TrvEntry} entry point will compile {d.path('@travetto/compiler/support/*')} files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
+        Given that the framework is distributed as {d.library('Typescript')} only files, there is a bootstrapping problem that needs to be mitigated.  The {TrvcEntry} entrypoint, along with a small context utility in {d.mod('Manifest')} are the only {d.library('Javascript')} files needed to run the project.  The {TrvcEntry} entry point will compile {d.path('@travetto/compiler/support/*')} files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
       </c.SubSection>
     </c.Section>
   </>;

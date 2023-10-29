@@ -4,9 +4,9 @@ import { LogUtil } from './log';
 import { CompilerSetup } from './setup';
 import { CompilerServer } from './server/server';
 import { CompilerRunner } from './server/runner';
-import { CommonUtil } from './util';
-import type { BuildOp, MainOp } from './types';
+import type { BuildOp, EntryOp } from './types';
 import { CompilerClientUtil } from './server/client';
+import { CommonUtil } from './util';
 
 async function build(root: ManifestContext, op: BuildOp): Promise<void> {
   const server = await new CompilerServer(root, op).listen();
@@ -25,15 +25,15 @@ async function build(root: ManifestContext, op: BuildOp): Promise<void> {
 /**
  * Main entry point for trv.js
  */
-export async function main(ctx: ManifestContext, root: ManifestContext, op: MainOp, args: (string | undefined)[] = []): Promise<void> {
+export async function main(ctx: ManifestContext, root: ManifestContext, op: EntryOp, args: (string | undefined)[] = []): Promise<((mod: string) => Promise<unknown>) | undefined> {
   LogUtil.initLogs(ctx, op);
   switch (op) {
-    case 'manifest': return CompilerSetup.exportManifest(ctx, ...args.filter(x => !x?.startsWith('-')));
+    case 'manifest': await CompilerSetup.exportManifest(ctx, ...args.filter(x => !x?.startsWith('-'))); return;
     case 'watch':
-    case 'build': return build(root, op);
+    case 'build': await build(root, op); return;
     case 'run': {
       await build(root, 'build');
-      return CommonUtil.runCli(ctx);
+      return CommonUtil.moduleLoader(ctx);
     }
   }
 }

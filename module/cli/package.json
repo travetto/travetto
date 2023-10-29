@@ -7,6 +7,7 @@
     "travetto",
     "typescript"
   ],
+  "type": "module",
   "homepage": "https://travetto.io",
   "license": "MIT",
   "author": {
@@ -15,10 +16,14 @@
   },
   "files": [
     "__index__.ts",
+    "bin",
     "src",
     "support"
   ],
   "main": "__index__.ts",
+  "bin": {
+    "trv": "bin/trv.js"
+  },
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/cli"

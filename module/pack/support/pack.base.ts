@@ -40,7 +40,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
   @CliFlag({ desc: 'Entry point', short: 'e' })
   @Required(false)
-  entryPoint: string = '@travetto/cli/support/entry.cli';
+  entryPoint: string = '@travetto/cli/support/entry.trv';
 
   @CliFlag({ desc: 'Minify output' })
   minify = true;

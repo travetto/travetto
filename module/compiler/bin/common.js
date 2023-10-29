@@ -1,21 +1,18 @@
-#!/usr/bin/env node
-
 // @ts-check
+
 import fs from 'fs/promises';
 import path from 'path';
 import { createRequire } from 'module';
 
 import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
-const VALID_OPS = { watch: 'watch', build: 'build', clean: 'clean', manifest: 'manifest' };
+const COMPILER_FILES = [...['entry.trvc', 'log', 'queue', 'server/client', 'server/runner', 'server/server', 'setup', 'util'].map(x => `support/${x}.ts`), 'package.json'];
 
-const COMPILER_FILES = [...['entry.trv', 'log', 'queue', 'server/client', 'server/runner', 'server/server', 'setup', 'util'].map(x => `support/${x}.ts`), 'package.json'];
+/** @typedef {import('@travetto/manifest/src/types').ManifestContext} Ctx */
+/** @typedef {import('@travetto/compiler/support/types').EntryOp} EntryOp */
 
-/**
- * @param {import('@travetto/manifest').ManifestContext} ctx
- * @return {Promise<import('@travetto/compiler/support/entry.trv').main>}
- */
-const $getEntry = async (ctx) => {
+/** @return {Promise<import('@travetto/compiler/support/entry.trvc').main>} */
+const $getEntry = async (/** @type {Ctx} */ ctx) => {
   const tsconfigFile = path.resolve(ctx.workspacePath, 'tsconfig.json');
   if (!(await fs.stat(tsconfigFile).catch(() => undefined))) {
     await fs.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
@@ -57,27 +54,17 @@ const $getEntry = async (ctx) => {
   catch { return import(files[0]).then(x => x.main); }
 };
 
-(async () => {
+async function $compile(/** @type {Ctx} ctx*/ ctx, /** @type {EntryOp} op */ op) {
+  const rootCtx = await (ctx.monoRepo ? getManifestContext(ctx.workspacePath) : ctx);
+  return (await $getEntry(ctx))(ctx, rootCtx, op, process.argv.slice(3));
+}
+
+/**
+ * @template T
+ * @param {(ctx: Ctx, compile: typeof $compile)  => Promise<T>} fn
+ * @returns {Promise<T>}
+ */
+export async function withContext(fn) {
   const ctx = await getManifestContext();
-  const [op, args] = [VALID_OPS[process.argv[2]], process.argv.slice(3)];
-
-  if (op && process.argv.some(x => x === '--stop-server' || x === '-s')) {
-    await fetch(`${ctx.compilerUrl}/close`).then(v => v.ok).catch(() => { });
-    console.log(`Stopped server ${ctx.workspacePath}: [${ctx.compilerUrl}]`);
-  }
-
-  if (op === 'clean') {
-    if (await fetch(`${ctx.compilerUrl}/clean`).then(v => v.ok).catch(() => { })) {
-      return console.log(`Clean triggered ${ctx.workspacePath}: [${ctx.outputFolder}]`);
-    } else {
-      for (const f of [ctx.compilerFolder, ctx.outputFolder]) {
-        await fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true });
-      }
-      return console.log(`Cleaned ${ctx.workspacePath}: [${ctx.outputFolder}]`);
-    }
-  }
-
-  const rootCtx = ctx.monoRepo ? await getManifestContext(ctx.workspacePath) : ctx;
-
-  return (await $getEntry(ctx))(ctx, rootCtx, op ?? 'run', args);
-})();
+  return fn(ctx, $compile);
+}

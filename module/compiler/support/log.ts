@@ -1,5 +1,5 @@
 import type { ManifestContext } from '@travetto/manifest';
-import type { CompilerLogEvent, CompilerLogLevel, MainOp } from './types';
+import type { CompilerLogEvent, CompilerLogLevel, EntryOp } from './types';
 
 export type CompilerLogger = (level: CompilerLogLevel, message: string, ...args: unknown[]) => void;
 export type WithLogger<T> = (log: CompilerLogger) => Promise<T>;
@@ -17,7 +17,7 @@ export class LogUtil {
   /**
    * Set level for operation
    */
-  static initLogs(ctx: ManifestContext, op: MainOp): void {
+  static initLogs(ctx: ManifestContext, op: EntryOp): void {
     // Listen only if we aren't in quiet
     if ((process.env.TRV_BUILD || !process.env.TRV_QUIET) && op !== 'manifest') {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

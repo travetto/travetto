@@ -42,7 +42,7 @@ cp -r -p $ROOT/resources $DIST/resources
 
 # Writing Manifest node_modules/$MOD 
 
-TRV_MODULE=$MOD npx trv manifest $DIST/node_modules/$MOD prod
+TRV_MODULE=$MOD npx trvc manifest $DIST/node_modules/$MOD prod
 
 # Bundling Output minify=true sourcemap= entryPoint=node_modules/@travetto/cli/support/cli.js 
 

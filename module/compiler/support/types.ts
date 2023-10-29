@@ -1,5 +1,6 @@
 export type BuildOp = 'build' | 'watch';
-export type MainOp = BuildOp | 'manifest' | 'run';
+export type EntryOp = BuildOp | 'manifest' | 'run';
+export type TotalOp = EntryOp | 'stop' | 'clean' | 'info';
 
 export type CompilerStateType = 'startup' | 'init' | 'compile-start' | 'compile-end' | 'watch-start' | 'watch-end' | 'reset' | 'close';
 export type CompilerChangeEvent = { file: string, action: 'create' | 'update' | 'delete', folder: string, output: string, module: string, time: number };
@@ -23,4 +24,5 @@ export type CompilerServerInfo = {
   state: CompilerStateType;
   type: BuildOp;
   iteration: number;
+  url: string;
 };

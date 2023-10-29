@@ -95,13 +95,14 @@ export class CommonUtil {
   }
 
   /**
-   * Run cli
+   * Create a module loader given a context, and assuming build is complete
+   * @param ctx
    */
-  static async runCli(ctx: ManifestContext): Promise<void> {
-    // TODO: Externalize somehow?
-    const outputPath = path.resolve(ctx.workspacePath, ctx.outputFolder);
-    process.env.TRV_MANIFEST = path.resolve(outputPath, 'node_modules', ctx.mainModule);
-    const cliMain = path.join(outputPath, 'node_modules', '@travetto/cli/support/entry.cli.js');
-    return import(cliMain);
+  static moduleLoader(ctx: ManifestContext): (mod: string) => Promise<unknown> {
+    return (mod) => {
+      const outputRoot = path.resolve(ctx.workspacePath, ctx.outputFolder);
+      process.env.TRV_MANIFEST = path.resolve(outputRoot, 'node_modules', ctx.mainModule); // Setup for running
+      return import(path.join(outputRoot, 'node_modules', mod)); // Return function to run import on a module
+    };
   }
 }

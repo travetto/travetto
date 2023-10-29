@@ -202,7 +202,7 @@ export class PackOperation {
    */
   static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const out = path.resolve(cfg.workspace, 'manifest.json');
-    const cmd = ['npx', 'trv', 'manifest', out, 'prod'];
+    const cmd = ['npx', 'trvc', 'manifest', out, 'prod'];
     const env = { TRV_MODULE: cfg.module };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: 'manifest.json' }}`);

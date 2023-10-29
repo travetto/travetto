@@ -23,7 +23,7 @@
   ],
   "main": "__index__.ts",
   "bin": {
-    "trv": "bin/trv.js"
+    "trvc": "bin/trvc.js"
   },
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
