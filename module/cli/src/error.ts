@@ -11,7 +11,7 @@ const COMMAND_PACKAGE = [
   [/^openapi:(spec|client)$/, 'openapi', true],
   [/^email:(compile|editor)$/, 'email-compiler', false],
   [/^pack(:zip|:docker)?$/, 'pack', false],
-  [/^run(:rest)?$/, 'rest', false],
+  [/^run:rest$/, 'rest', false],
 ] as const;
 
 /**

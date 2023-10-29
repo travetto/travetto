@@ -21,8 +21,8 @@
     "bin",
     "src"
   ],
-  "main": "./dist/travetto-plugin.js",
-  "mainAlt": "./out/node_modules/travetto-plugin/support/entry.launch.js",
+  "mainAlt": "./dist/travetto-plugin.js",
+  "main": "./out/node_modules/travetto-plugin/support/entry.launch.js",
   "repository": {
     "url": "https://github.com/travetto/travetto.git",
     "directory": "related/vscode-plugin"

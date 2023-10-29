@@ -2,6 +2,7 @@ import { CliCommand } from '../src/decorators';
 import { CliCommandSchema, CliValidationError } from '../src/types';
 import { CliCommandRegistry } from '../src/registry';
 import { CliCommandSchemaUtil } from '../src/schema';
+import { CliUtil } from '../src/util';
 
 /**
  * Generates the schema for all CLI operations
@@ -24,12 +25,14 @@ export class CliSchemaCommand {
   }
 
   async main(name?: string): Promise<void> {
+    let output: unknown = undefined;
     if (name) {
-      console.log(JSON.stringify(await this.#getSchema(name), null, 2));
+      output = await this.#getSchema(name);
     } else {
       const names = [...CliCommandRegistry.getCommandMapping().keys()];
       const schemas = await Promise.all(names.map(x => this.#getSchema(x)));
-      console.log(JSON.stringify(schemas, null, 2));
+      output = schemas;
     }
+    await CliUtil.writeAndEnsureComplete(output);
   }
 }

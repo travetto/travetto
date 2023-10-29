@@ -29,8 +29,7 @@
     "docOutputs": [
       "README.md",
       "DOC.html"
-    ],
-    "compilerUrl": "http://localhost:30000"
+    ]
   },
   "workspaces": [
     "module/*",

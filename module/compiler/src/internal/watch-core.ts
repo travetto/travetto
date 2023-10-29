@@ -10,26 +10,43 @@ export type WatchEvent<T = {}> =
 
 const CREATE_THRESHOLD = 50;
 const VALID_TYPES = new Set(['ts', 'typings', 'js', 'package-json']);
+type ToWatch = { file: string, actions: string[] };
 
 /** Watch file for reset */
-async function watchForReset(q: AsyncQueue<WatchEvent>, root: string, files: string[], events: WatchEvent['action'][], signal: AbortSignal): Promise<void> {
-  const fileSet = new Set(files);
-  const eventSet = new Set(events);
-  for await (const ev of fs.watch(root, { persistent: true, encoding: 'utf8', signal })) {
-    if (fileSet.has(ev.filename!)) {
-      const stat = await fs.stat(path.resolve(root, ev.filename!)).catch(() => undefined);
-      const action = !stat ? 'delete' : ((Date.now() - stat.ctimeMs) < CREATE_THRESHOLD) ? 'create' : 'update';
-      if (eventSet.has(action)) {
-        q.add({ action: 'reset', file: ev.filename! });
+async function watchForReset(q: AsyncQueue<WatchEvent>, root: string, files: ToWatch[], signal: AbortSignal): Promise<void> {
+  const watchers: Record<string, { folder: string, files: Map<string, (ToWatch & { name: string, actionSet: Set<string> })> }> = {};
+  // Group by base path
+  for (const el of files) {
+    const full = path.resolve(root, el.file);
+    const folder = path.dirname(full);
+    const tgt = { ...el, name: path.basename(el.file), actionSet: new Set(el.actions) };
+    const watcher = (watchers[folder] ??= { folder, files: new Map() });
+    watcher.files.set(tgt.name, tgt);
+  }
+
+  // Fire them all off
+  Object.values(watchers).map(async (watcher) => {
+    for await (const ev of fs.watch(watcher.folder, { persistent: true, encoding: 'utf8', signal })) {
+      const toWatch = watcher.files.get(ev.filename!);
+      if (toWatch) {
+        const stat = await fs.stat(path.resolve(root, ev.filename!)).catch(() => undefined);
+        const action = !stat ? 'delete' : ((Date.now() - stat.ctimeMs) < CREATE_THRESHOLD) ? 'create' : 'update';
+        if (toWatch.actionSet.has(action)) {
+          q.add({ action: 'reset', file: ev.filename! });
+        }
       }
     }
-  }
+  });
 }
 
 /** Watch recursive files for a given folder */
-async function watchFolder(q: AsyncQueue<WatchEvent>, src: string, target: string, signal: AbortSignal): Promise<void> {
+async function watchFolder(ctx: ManifestContext, q: AsyncQueue<WatchEvent>, src: string, target: string, signal: AbortSignal): Promise<void> {
   const lib = await import('@parcel/watcher');
-  const ignore = ['node_modules', '**/.trv', ...(await fs.readdir(src)).filter(x => x.startsWith('.'))];
+  const ignore = [
+    'node_modules', '**/.trv',
+    ...((!ctx.monoRepo || src === ctx.workspacePath) ? [ctx.compilerFolder, ctx.outputFolder, ctx.toolFolder] : []),
+    ...(await fs.readdir(src)).filter(x => x.startsWith('.'))
+  ];
 
   const cleanup = await lib.subscribe(src, async (err, events) => {
     if (err) {
@@ -62,7 +79,7 @@ export async function* fileWatchEvents(manifest: ManifestContext, modules: Index
   const q = new AsyncQueue<WatchEvent>(signal);
 
   for (const m of modules.filter(x => !manifest.monoRepo || x.sourcePath !== manifest.workspacePath)) {
-    watchFolder(q, m.sourcePath, m.sourcePath, signal);
+    watchFolder(manifest, q, m.sourcePath, m.sourcePath, signal);
   }
 
   // Add monorepo folders
@@ -70,22 +87,18 @@ export async function* fileWatchEvents(manifest: ManifestContext, modules: Index
     const mono = modules.find(x => x.sourcePath === manifest.workspacePath)!;
     for (const folder of Object.keys(mono.files)) {
       if (!folder.startsWith('$')) {
-        watchFolder(q, path.resolve(mono.sourcePath, folder), mono.sourcePath, signal);
+        watchFolder(manifest, q, path.resolve(mono.sourcePath, folder), mono.sourcePath, signal);
       }
     }
   }
 
-  watchForReset(q, RootIndex.manifest.workspacePath,
-    [RootIndex.manifest.outputFolder, RootIndex.manifest.compilerFolder, RootIndex.manifest.toolFolder],
-    ['delete'],
-    signal
-  );
-
-  watchForReset(q, RootIndex.manifest.workspacePath,
-    ['package-lock.json', 'package.json'],
-    ['delete', 'update', 'create'],
-    signal
-  );
+  watchForReset(q, RootIndex.manifest.workspacePath, [
+    { file: RootIndex.manifest.outputFolder, actions: ['delete'] },
+    { file: RootIndex.manifest.compilerFolder, actions: ['delete'] },
+    { file: RootIndex.manifest.toolFolder, actions: ['delete'] },
+    { file: 'package-lock.json', actions: ['delete', 'update', 'create'] },
+    { file: 'package.json', actions: ['delete', 'update', 'create'] }
+  ], signal);
 
   yield* q;
 }

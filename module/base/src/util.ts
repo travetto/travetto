@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import { RootIndex, path } from '@travetto/manifest';
 
 export type TemplatePrim = string | number | boolean | Date | RegExp;
 
@@ -203,16 +202,5 @@ export class Util {
     let ops: PromiseResolver<T>;
     const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
     return Object.assign(prom, ops!);
-  }
-
-  /**
-   * Resolve tool path for usage
-   */
-  static resolveToolPath(rel: string, moduleSpecific = false): string {
-    const parts = [rel];
-    if (moduleSpecific) {
-      parts.unshift('node_modules', RootIndex.manifest.mainModule);
-    }
-    return path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.toolFolder, ...parts);
   }
 }
