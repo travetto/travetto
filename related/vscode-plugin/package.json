@@ -35,10 +35,10 @@
   "devDependencies": {
     "@types/node": "^20.8.9",
     "@types/vscode": "^1.83.1",
-    "@travetto/pack": "^3.3.6"
+    "@travetto/pack": "^3.4.0-rc.0"
   },
   "dependencies": {
-    "@travetto/base": "^3.3.4"
+    "@travetto/base": "^3.4.0-rc.0"
   },
   "travetto": {
     "displayName": "Travetto Plugin",
