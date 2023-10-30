@@ -24,7 +24,8 @@ function getFilesFromModule(m: ManifestModule): string[] {
   return [
     ...m.files.$index ?? [],
     ...m.files.src ?? [],
-    ...m.files.bin ?? [],
+    ...(m.files.bin ?? [])
+      .filter(f => !(/bin\/trv[.]js$/.test(f[0]) && m.name === '@travetto/cli')),
     ...(m.files.support ?? [])
       .filter(f => !/support\/(test|doc)/.test(f[0]))
   ]
