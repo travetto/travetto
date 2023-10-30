@@ -3,7 +3,6 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import jsonImport from '@rollup/plugin-json';
 import sourceMaps from 'rollup-plugin-sourcemaps';
-import replace from '@rollup/plugin-replace';
 import type { RollupOptions } from 'rollup';
 
 import { RootIndex } from '@travetto/manifest';
@@ -23,11 +22,6 @@ export default function buildConfig(): RollupOptions {
     output,
     plugins: [
       jsonImport(),
-      replace({
-        values: {
-          ['#!' + '/usr/bin/env node']: '' // Strip out shebang
-        }
-      }),
       commonjsRequire({
         ignore: id => NEVER_INCLUDE.has(id),
         dynamicRequireRoot: RootIndex.manifest.workspacePath,
