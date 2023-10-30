@@ -27,12 +27,12 @@
     "@travetto/log": "^3.4.0-rc.0",
     "@travetto/model-mongo": "^3.4.0-rc.1",
     "@travetto/openapi": "^3.4.0-rc.0",
-    "@travetto/rest-client": "^3.4.0-rc.0",
     "@travetto/rest-express": "^3.4.0-rc.0",
     "@travetto/rest-session": "^3.4.0-rc.1",
     "vue": "^3.3.7"
   },
   "devDependencies": {
+    "@travetto/rest-client": "^3.4.0-rc.0",
     "@travetto/pack": "^3.4.0-rc.3"
   },
   "travetto": {

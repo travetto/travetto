@@ -7,15 +7,17 @@ import type { RollupOptions } from 'rollup';
 
 import { RootIndex } from '@travetto/manifest';
 
-import { getEntry, getOutput, getTerserConfig, getFiles } from './config';
+import { getEntry, getOutput, getTerserConfig, getFiles, getIgnoredModules } from './config';
 import { travettoImportPlugin } from './rollup-esm-dynamic-import';
 
-const NEVER_INCLUDE = new Set(['@parcel/watcher']);
+const NEVER_INCLUDE = new Set<string>([]);
 
 export default function buildConfig(): RollupOptions {
   const output = getOutput();
   const entry = getEntry();
   const files = getFiles();
+  const ignore = getIgnoredModules();
+  const ignoreRe = new RegExp(`^(${ignore.join('|')})`);
 
   return {
     input: [entry],
@@ -23,8 +25,7 @@ export default function buildConfig(): RollupOptions {
     plugins: [
       jsonImport(),
       commonjsRequire({
-        exclude: ['**/@travetto/**/bin/*.js'], // Do not package any entry points
-        ignore: id => NEVER_INCLUDE.has(id),
+        ignore: id => ignoreRe.test(id) || NEVER_INCLUDE.has(id),
         dynamicRequireRoot: RootIndex.manifest.workspacePath,
         dynamicRequireTargets: (output.format === 'commonjs' ? files : [])
       }),

@@ -65,6 +65,17 @@ export function getFiles(): string[] {
     .flatMap(getFilesFromModule);
 }
 
+export function getIgnoredModules(): string[] {
+  const out = [...RootIndex.getModuleList('all')]
+    .map(x => RootIndex.manifest.modules[x])
+    .filter(m => !m.profiles.includes('std'))
+    .map(m => m.name);
+
+  out.push('@travetto/pack', '@travetto/compiler');
+
+  return out;
+}
+
 export function getTerserConfig(): Parameters<typeof terser>[0] {
   return {
     mangle: true,
