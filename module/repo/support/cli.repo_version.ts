@@ -4,6 +4,8 @@ import { RootIndex } from '@travetto/manifest';
 
 import { PackageManager, SemverLevel } from './bin/package-manager';
 
+const CHANGE_LEVELS = new Set<SemverLevel>(['prerelease', 'patch', 'prepatch']);
+
 /**
  * Version all changed dependencies
  */
@@ -28,7 +30,7 @@ export class RepoVersionCommand implements CliCommandShape {
   }
 
   async main(level: SemverLevel, prefix?: string): Promise<void> {
-    const mode = this.mode ?? (level === 'patch' || level === 'prepatch') ? 'changed' : 'all';
+    const mode = this.mode ?? CHANGE_LEVELS.has(level) ? 'changed' : 'all';
 
     const allModules = await CliModuleUtil.findModules(mode === 'changed' ? 'changed' : 'all');
 
