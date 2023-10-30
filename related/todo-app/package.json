@@ -33,7 +33,7 @@
     "vue": "^3.3.7"
   },
   "devDependencies": {
-    "@travetto/pack": "^3.4.0-rc.0"
+    "@travetto/pack": "^3.4.0-rc.1"
   },
   "travetto": {
     "displayName": "Todo Application"
