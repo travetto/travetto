@@ -57,7 +57,7 @@ export class PackageManager {
     switch (ctx.packageManager) {
       case 'npm':
       case 'yarn':
-        args = ['version', level, ...(preid ? ['--preid', preid] : []), ...mods];
+        args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...mods];
         break;
     }
     await ExecUtil.spawn(ctx.packageManager, args, { stdio: 'inherit' }).result;

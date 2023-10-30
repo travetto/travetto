@@ -24,7 +24,7 @@
     "directory": "module/rest-fastify"
   },
   "dependencies": {
-    "@fastify/compress": "^6.4.0",
+    "@fastify/compress": "^6.5.0",
     "@travetto/rest": "^3.3.6",
     "fastify": "^4.24.3"
   },
