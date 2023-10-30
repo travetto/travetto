@@ -30,7 +30,7 @@
   "scripts": {
     "vscode:prepublish": "npx trv pack -sm -e travetto-plugin/support/entry.launch -w dist",
     "package": "vsce package --no-dependencies",
-    "start": "npx trv watch --clean"
+    "start": "npx trvc start"
   },
   "devDependencies": {
     "@types/node": "^20.8.9",
