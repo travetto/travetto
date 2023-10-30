@@ -80,8 +80,8 @@ class $ModelRegistry extends MetadataRegistry<ModelOptions<ModelType>> {
     const parent = this.getParentClass(cls);
     if (parent && parent !== cls) {
       const pCfg = this.get(parent) ?? this.pending.get(MetadataRegistry.id(parent));
-      config.prePersist = [...pCfg.prePersist ?? [], ...config.prePersist ?? []];
-      config.postLoad = [...pCfg.postLoad ?? [], ...config.postLoad ?? []];
+      config.prePersist = [...pCfg?.prePersist ?? [], ...config.prePersist ?? []];
+      config.postLoad = [...pCfg?.postLoad ?? [], ...config.postLoad ?? []];
     }
     return config;
   }
