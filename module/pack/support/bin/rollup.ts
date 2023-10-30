@@ -23,6 +23,7 @@ export default function buildConfig(): RollupOptions {
     plugins: [
       jsonImport(),
       commonjsRequire({
+        exclude: ['**/@travetto/**/bin/*.js'], // Do not package any entry points
         ignore: id => NEVER_INCLUDE.has(id),
         dynamicRequireRoot: RootIndex.manifest.workspacePath,
         dynamicRequireTargets: (output.format === 'commonjs' ? files : [])
