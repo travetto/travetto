@@ -26,7 +26,7 @@ export class CliUtil {
    * Run a command as restartable, linking into self
    */
   static runWithRestart<T extends CliCommandShape & { canRestart?: boolean }>(cmd: T): Promise<unknown> | undefined {
-    if (cmd.canRestart !== false && Env.isFalse('TRV_CAN_RESTART')) {
+    if (cmd.canRestart === false || Env.isFalse('TRV_CAN_RESTART')) {
       delete process.env.TRV_CAN_RESTART;
       return;
     }
