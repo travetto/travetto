@@ -2,13 +2,13 @@ import commonjsRequire from '@rollup/plugin-commonjs';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import terser from '@rollup/plugin-terser';
 import jsonImport from '@rollup/plugin-json';
-import sourceMaps from 'rollup-plugin-sourcemaps';
 import type { RollupOptions } from 'rollup';
 
 import { RootIndex } from '@travetto/manifest';
 
 import { getEntry, getOutput, getTerserConfig, getFiles, getIgnoredModules } from './config';
 import { travettoImportPlugin } from './rollup-esm-dynamic-import';
+import { sourcemaps } from './rollup-sourcemaps';
 
 const NEVER_INCLUDE = new Set<string>([]);
 
@@ -31,7 +31,7 @@ export default function buildConfig(): RollupOptions {
       }),
       ...(output.format === 'module' ? [travettoImportPlugin(entry, files)] : []),
       nodeResolve({ preferBuiltins: true }),
-      ...(output.sourcemap !== 'hidden' && output.sourcemap !== false ? [sourceMaps({})] : []),
+      ...(output.sourcemap !== 'hidden' && output.sourcemap !== false ? [sourcemaps()] : []),
       ...(output.compact ? [terser(getTerserConfig())] : [])
     ]
   };
