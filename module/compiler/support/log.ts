@@ -1,10 +1,10 @@
 import type { ManifestContext } from '@travetto/manifest';
-import type { CompilerLogEvent, CompilerLogLevel, EntryOp } from './types';
+import type { CompilerLogEvent, CompilerLogLevel } from './types';
 
 export type CompilerLogger = (level: CompilerLogLevel, message: string, ...args: unknown[]) => void;
 export type WithLogger<T> = (log: CompilerLogger) => Promise<T>;
 
-const LEVEL_TO_PRI = Object.fromEntries((['debug', 'info', 'warn', 'error'] as const).map((x, i) => [x, i + 1]));
+const LEVEL_TO_PRI: Record<CompilerLogLevel, number> = { debug: 1, info: 2, warn: 3, error: 4 };
 
 const SCOPE_MAX = 15;
 
@@ -12,18 +12,25 @@ export class LogUtil {
 
   static root = process.cwd();
 
-  static logLevel?: CompilerLogLevel;
+  static logLevel: CompilerLogLevel = 'error';
 
   /**
    * Set level for operation
    */
-  static initLogs(ctx: ManifestContext, op: EntryOp): void {
+  static initLogs(ctx: ManifestContext, defaultLevel: CompilerLogLevel): void {
     // Listen only if we aren't in quiet
-    if ((process.env.TRV_BUILD || !process.env.TRV_QUIET) && op !== 'manifest') {
+    if ((process.env.TRV_BUILD || !process.env.TRV_QUIET)) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      this.logLevel = (process.env.TRV_BUILD as 'debug') ?? (op === 'run' ? 'warn' : 'info');
+      this.logLevel = (process.env.TRV_BUILD as 'debug') || defaultLevel;
     }
     this.root = ctx.workspacePath;
+  }
+
+  /**
+   * Is the log level active?
+   */
+  static isLevelActive(lvl: CompilerLogLevel): boolean {
+    return LEVEL_TO_PRI[this.logLevel] <= LEVEL_TO_PRI[lvl];
   }
 
   /**
@@ -46,7 +53,7 @@ export class LogUtil {
    * Compiler log event to console
    */
   static sendLogEventToConsole(ev: CompilerLogEvent): void {
-    if (this.logLevel && LEVEL_TO_PRI[this.logLevel] <= LEVEL_TO_PRI[ev.level]) {
+    if (this.isLevelActive(ev.level)) {
       const params = [ev.message, ...ev.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(LogUtil.root, '.') : x);
       if (ev.scope) {
         params.unshift(`[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`);

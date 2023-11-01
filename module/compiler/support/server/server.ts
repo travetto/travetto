@@ -4,7 +4,7 @@ import path from 'path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { BuildOp, CompilerServerEvent, CompilerServerEventType, CompilerServerInfo } from '../types';
+import type { CompilerMode, CompilerOp, CompilerServerEvent, CompilerServerEventType, CompilerServerInfo } from '../types';
 import { LogUtil } from '../log';
 import { CompilerClientUtil } from './client';
 import { CommonUtil } from '../util';
@@ -23,12 +23,12 @@ export class CompilerServer {
   signal = this.#shutdown.signal;
   info: CompilerServerInfo;
 
-  constructor(ctx: ManifestContext, op: BuildOp) {
+  constructor(ctx: ManifestContext, op: CompilerOp) {
     this.#ctx = ctx;
     this.info = {
       state: 'startup',
       iteration: Date.now(),
-      type: op,
+      mode: op === 'run' ? 'build' : op,
       serverPid: process.pid,
       compilerPid: -1,
       path: ctx.workspacePath,
@@ -45,8 +45,8 @@ export class CompilerServer {
     process.on('SIGINT', () => this.#shutdown.abort());
   }
 
-  get op(): BuildOp {
-    return this.info.type;
+  get mode(): CompilerMode {
+    return this.info.mode;
   }
 
   isResetEvent(ev: CompilerServerEvent): boolean {
@@ -60,7 +60,7 @@ export class CompilerServer {
         .on('error', async err => {
           if ('code' in err && err.code === 'EADDRINUSE') {
             const info = await CompilerClientUtil.getServerInfo(this.#ctx);
-            resolve((info && info.type === 'build' && this.op === 'watch') ? 'retry' : 'running');
+            resolve((info && info.mode === 'build' && this.mode === 'watch') ? 'retry' : 'running');
           } else {
             reject(err);
           }

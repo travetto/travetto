@@ -43,20 +43,20 @@ const help = () => [
   ' * manifest    - Generate the project manifest',
 ].join('\n');
 
-withContext(async (ctx, compile) => {
-  const op = process.argv[2];
+withContext(async (ctx, { compile, manifest }) => {
+  const [op, ...args] = process.argv.slice(2);
 
   switch (op) {
+    case undefined:
+    case 'help': return console.log(`\n${help()}\n`);
     case 'restart': return stop(ctx).then(() => compile(ctx, 'watch'));
     case 'stop': return stop(ctx);
     case 'info': return info(ctx);
     case 'clean': return clean(ctx);
-    case 'watch':
+    case 'manifest': return manifest(ctx, args);
     case 'start': return compile(ctx, 'watch');
-    case 'build':
-    case 'manifest': return compile(ctx, op);
-    case undefined:
-    case 'help': return console.log(`\n${help()}\n`);
+    case 'watch':
+    case 'build': return compile(ctx, op);
     default: console.error(`Unknown trvc operation: ${op}\n`); return console.error(help());
   }
 });

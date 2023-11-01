@@ -9,9 +9,9 @@ import { getManifestContext } from '@travetto/manifest/bin/context.js';
 const COMPILER_FILES = [...['entry.trvc', 'log', 'queue', 'server/client', 'server/runner', 'server/server', 'setup', 'util'].map(x => `support/${x}.ts`), 'package.json'];
 
 /** @typedef {import('@travetto/manifest/src/types').ManifestContext} Ctx */
-/** @typedef {import('@travetto/compiler/support/types').EntryOp} EntryOp */
+/** @typedef {import('@travetto/compiler/support/types').CompilerOp} CompilerOp */
 
-/** @return {Promise<import('@travetto/compiler/support/entry.trvc').main>} */
+/** @return {Promise<import('@travetto/compiler/support/entry.trvc')>} */
 const $getEntry = async (/** @type {Ctx} */ ctx) => {
   const tsconfigFile = path.resolve(ctx.workspacePath, 'tsconfig.json');
   if (!(await fs.stat(tsconfigFile).catch(() => undefined))) {
@@ -50,21 +50,21 @@ const $getEntry = async (/** @type {Ctx} */ ctx) => {
     files.push(target);
   }
 
-  try { return require(files[0]).main; }
-  catch { return import(files[0]).then(x => x.main); }
+  try { return require(files[0]); }
+  catch { return import(files[0]); }
 };
 
-async function $compile(/** @type {Ctx} ctx*/ ctx, /** @type {EntryOp} op */ op) {
-  const rootCtx = await (ctx.monoRepo ? getManifestContext(ctx.workspacePath) : ctx);
-  return (await $getEntry(ctx))(ctx, rootCtx, op, process.argv.slice(3));
+const OPS = {
+  compile: async (/** @type {Ctx} ctx*/ ctx, /** @type {CompilerOp} op */ op) => {
+    const rootCtx = await (ctx.monoRepo ? getManifestContext(ctx.workspacePath) : ctx);
+    return $getEntry(ctx).then(m => m.main(ctx, rootCtx, op));
+  },
+  manifest: (/** @type {Ctx} ctx*/ ctx, /** @type {string[]}*/ args) => $getEntry(ctx).then(m => m.manifest(ctx, args))
 }
 
 /**
  * @template T
- * @param {(ctx: Ctx, compile: typeof $compile)  => Promise<T>} fn
+ * @param {(ctx: Ctx, ops: typeof OPS)  => Promise<T>} fn
  * @returns {Promise<T>}
  */
-export async function withContext(fn) {
-  const ctx = await getManifestContext();
-  return fn(ctx, $compile);
-}
+export const withContext = fn => getManifestContext().then(ctx => fn(ctx, OPS));

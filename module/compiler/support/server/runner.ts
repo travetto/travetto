@@ -3,7 +3,7 @@ import path from 'path';
 
 import type { ManifestContext, ManifestRoot, DeltaEvent } from '@travetto/manifest';
 
-import type { CompilerProgressEvent, CompilerServerEvent } from '../types';
+import type { CompilerOp, CompilerProgressEvent, CompilerServerEvent } from '../types';
 import { AsyncQueue } from '../queue';
 import { LogUtil } from '../log';
 import { CommonUtil } from '../util';
@@ -35,7 +35,8 @@ export class CompilerRunner {
   /**
    * Run compile process
    */
-  static async* runProcess(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], watch: boolean, signal: AbortSignal): AsyncIterable<CompilerServerEvent> {
+  static async* runProcess(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], op: CompilerOp, signal: AbortSignal): AsyncIterable<CompilerServerEvent> {
+    const watch = op === 'watch';
     if (!changed.length && !watch) {
       yield { type: 'state', payload: { state: 'compile-end' } };
       log('debug', 'Skipped');
@@ -44,8 +45,10 @@ export class CompilerRunner {
       log('debug', `Started watch=${watch} changed=${changed.slice(0, 10).map(x => `${x.module}/${x.file}`)}`);
     }
 
-    // Track progress
-    this.trackProgress(ctx, CompilerClientUtil.fetchEvents(ctx, 'progress', signal, ev => !!ev.complete));
+    // Track progress if not in run mode
+    if (op !== 'run') {
+      this.trackProgress(ctx, CompilerClientUtil.fetchEvents(ctx, 'progress', signal, ev => !!ev.complete));
+    }
 
     const compiler = path.resolve(ctx.workspacePath, ctx.compilerFolder);
     const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/entry.compiler.js');

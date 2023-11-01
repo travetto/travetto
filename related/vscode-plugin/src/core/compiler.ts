@@ -5,7 +5,7 @@ import rl from 'readline/promises';
 import { Log } from './log';
 import { Workspace } from './workspace';
 
-type ServerInfo = { type: string, iteration: number, state: StateEvent['state'], serverPid: number, compilerPid: number };
+type ServerInfo = { mode: 'build' | 'watch', iteration: number, state: StateEvent['state'], serverPid: number, compilerPid: number };
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressEvent = { idx: number, total: number, message: string, operation: string, complete?: boolean };
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };

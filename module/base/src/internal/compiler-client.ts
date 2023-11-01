@@ -4,7 +4,7 @@ import { Readable } from 'stream';
 import { RootIndex } from '@travetto/manifest';
 import { ShutdownManager } from '../shutdown';
 
-type ServerInfo = { iteration: number, path: string, type: 'watch' | 'build', state: string, serverPid: number, compilerPid: number };
+type ServerInfo = { iteration: number, path: string, mode: 'watch' | 'build', state: string, serverPid: number, compilerPid: number };
 
 export type CompilerWatchEvent = {
   action: 'create' | 'update' | 'delete';
@@ -54,7 +54,7 @@ export async function* listenFileChanges(): AsyncIterable<CompilerWatchEvent> {
   ShutdownManager.onExitRequested(() => kill.abort());
 
   let info = await getCompilerInfo();
-  while (info?.type !== 'watch') { // If we not are watching from the beginning, wait for the server to change
+  while (info?.mode !== 'watch') { // If we not are watching from the beginning, wait for the server to change
     await new Promise(r => setTimeout(r, 1000)); // Check once a second to see when the compiler comes up
     info = await getCompilerInfo();
     if (info) {
