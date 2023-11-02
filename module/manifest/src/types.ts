@@ -5,10 +5,11 @@ export type ManifestModuleFolderType =
   'test/fixtures' | 'support/fixtures' | 'support/resources' |
   '$other' | '$transformer';
 
-export type ManifestProfile = 'compile' | 'test' | 'doc' | 'build' | 'std';
+export type ManifestFileProfile = 'test' | 'doc' | 'std';
+export type ManifestModuleProfile = ManifestFileProfile | 'compile' | 'build' | 'dev';
 export type PackageRel = 'dev' | 'prod' | 'peer' | 'opt' | 'root' | 'global';
 
-export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestProfile];
+export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestFileProfile];
 export type ManifestModuleCore = {
   name: string;
   main?: boolean;
@@ -16,7 +17,7 @@ export type ManifestModuleCore = {
   version: string;
   sourceFolder: string;
   outputFolder: string;
-  profiles: ManifestProfile[];
+  profiles: ManifestModuleProfile[];
   parents: string[];
   internal?: boolean;
 };
@@ -76,7 +77,7 @@ export type Package = {
   travetto?: {
     isolated?: boolean;
     displayName?: string;
-    profiles?: ManifestProfile[];
+    profiles?: ManifestModuleProfile[];
     globalModules?: string[];
     mainSource?: string[];
     docOutput?: string[];

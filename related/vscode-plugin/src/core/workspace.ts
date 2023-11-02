@@ -221,7 +221,6 @@ export class Workspace {
       runtimeSourcemapPausePatterns: [
         ['${workspaceFolder}', this.#manifestContext.outputFolder, '**', 'test', '**', '*.js'].join('/'),
       ],
-      stopOnEntry: true,
       skipFiles: [
         '<node_internals>/**',
         'node:internals/**',

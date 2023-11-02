@@ -55,7 +55,6 @@ with environment variables
 **Config: Environment variables**
 ```properties
 TRV_ENV = prod
-TRV_PROFILES = prod
 ```
 
 At runtime the resolved config would be:

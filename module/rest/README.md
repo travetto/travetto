@@ -242,7 +242,7 @@ $ trv run:rest
 Initialized {
   manifest: {
     mainModule: '@travetto-doc/rest',
-    frameworkVersion: '3.3.2',
+    frameworkVersion: '3.4.0',
     version: undefined
   },
   env: {
@@ -251,7 +251,6 @@ Initialized {
     devMode: true,
     test: false,
     dynamic: true,
-    profiles: [ 'dev' ],
     resourcePaths: [],
     nodeVersion: '20'
   },
@@ -321,7 +320,7 @@ CUSTOM STARTUP
 Initialized {
   manifest: {
     mainModule: '@travetto-doc/rest',
-    frameworkVersion: '3.3.2',
+    frameworkVersion: '3.4.0',
     version: undefined
   },
   env: {
@@ -330,7 +329,6 @@ Initialized {
     devMode: false,
     test: false,
     dynamic: false,
-    profiles: [ 'prod' ],
     resourcePaths: [],
     nodeVersion: '20'
   },

@@ -53,6 +53,7 @@ export class FileConfigSource extends FileQueryProvider implements ConfigSource 
         priority: this.priority
       });
     }
-    return out;
+    // Ensure more specific files are processed later
+    return out.sort((a, b) => (a.source.length - b.source.length) || a.source.localeCompare(b.source));
   }
 }

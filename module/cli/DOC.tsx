@@ -5,6 +5,8 @@ import { Max, Min, Schema, Match, Enum, Integer, Float, Precision, MinLength, Ma
 
 import { CliCommand } from './src/decorators';
 
+const GlobalEnv = d.codeLink('GlobalEnv', '@travetto/base/src/global-env.ts', /GlobalEnv/);
+
 const cfg = { cwd: './doc-exec' };
 
 export const text = <>
@@ -122,7 +124,7 @@ export const text = <>
 
       <c.Code title='Simple Run Target' src='../rest/support/cli.run_rest.ts' />
 
-      As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, {d.input('env')}, and {d.input('profile')}. These env and profile flags are directly tied to the GlobalEnv flags defined in the {d.mod('Base')} module. <br />
+      As noted in the example above, {d.input('fields')} is specified in this execution, with support for {d.input('module')}, and {d.input('env')}. These env flag is directly tied to the {GlobalEnv} flags defined in the {d.mod('Base')} module. <br />
 
       The {d.input('module')} field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
     </c.SubSection>

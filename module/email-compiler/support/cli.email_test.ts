@@ -1,6 +1,6 @@
 import { path } from '@travetto/manifest';
 import { RootRegistry } from '@travetto/registry';
-import { CliCommandShape, CliCommand } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliUtil } from '@travetto/cli';
 import { GlobalEnvConfig } from '@travetto/base';
 
 import { EmailCompilationManager } from './bin/manager';
@@ -16,13 +16,12 @@ import { EmailCompiler } from '../src/compiler';
 export class EmailTestCommand implements CliCommandShape {
 
   envInit(): GlobalEnvConfig {
-    return {
-      envName: 'dev',
-      profiles: ['email-dev']
-    };
+    return { envName: 'dev' };
   }
 
   async main(file: string, to: string): Promise<void> {
+    CliUtil.addProfiles('email-dev');
+
     file = path.resolve(file);
     await RootRegistry.init();
     await EmailCompiler.compile(file, true);

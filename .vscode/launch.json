@@ -16,13 +16,13 @@
       "sourceMaps": true,
       "pauseForSourceMap": true,
       "outFiles": [
-        "${workspaceFolder}/.trv/compiler/**/*.js",
+        "${workspaceFolder}/.trv/compiler/**/*.js"
       ],
       "resolveSourceMapLocations": [
-        "${workspaceFolder}/.trv/compiler/**",
+        "${workspaceFolder}/.trv/compiler/**"
       ],
       "runtimeSourcemapPausePatterns": [
-        "${workspaceFolder}/.trv/compiler/**/*.js",
+        "${workspaceFolder}/.trv/compiler/**/*.js"
       ],
       "request": "launch",
       "skipFiles": [
@@ -50,7 +50,7 @@
       "program": "${workspaceFolder}/node_modules/.bin/trv",
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/.trv/output/**/*.js",
+        "${workspaceFolder}/.trv/output/**/*.js"
       ],
       "env": {
         "REST_PORT": "4000",
@@ -59,8 +59,8 @@
       },
       "cwd": "${workspaceFolder}/related/todo-app",
       "args": [
-        "run:rest",
-      ],
+        "run:rest"
+      ]
     },
     {
       "type": "node",
@@ -72,7 +72,7 @@
       "program": "${workspaceFolder}/node_modules/.bin/trv",
       "sourceMaps": true,
       "outFiles": [
-        "${workspaceFolder}/.trv/output/**/*.js",
+        "${workspaceFolder}/.trv/output/**/*.js"
       ],
       "env": {
         "TRV_MODULE": "@travetto/mono-repo"
@@ -82,7 +82,7 @@
         "test",
         "-f",
         "tap-streamed"
-      ],
+      ]
     }
   ]
 }
