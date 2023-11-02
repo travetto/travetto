@@ -11,7 +11,7 @@ export type RunConfig = {
   rewrite?: (text: string) => string;
   module?: string;
   env?: Record<string, string>;
-  profiles?: string[];
+  envName?: string;
   cwd?: string;
 };
 
@@ -65,7 +65,7 @@ export class DocRunUtil {
           TRV_MANIFEST: '',
           TRV_BUILD: 'none',
           TRV_MODULE: config.module ?? '',
-          ...(config.profiles ? { TRV_PROFILES: config.profiles.join(' ') } : {}),
+          ...(config.envName ? { TRV_ENV: config.envName } : {}),
           ...(config.env ?? {})
         }
       }

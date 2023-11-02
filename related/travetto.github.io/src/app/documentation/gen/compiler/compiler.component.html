@@ -24,7 +24,7 @@ This module expands upon the <a target="_blank" class="external-link" href="http
 Beyond the <a target="_blank" class="external-link" href="https://typescriptlang.org">Typescript</a> compiler functionality, the module provides the primary entry point into the development process.
 <h2 id="cli">CLI</h2>
 
-The compiler cli, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L7">trvc</a> is a compilation aware entry point, that has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, always builds the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br><br>
+The compiler cli, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L7">trvc</a> is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. <br><br>
 The compiler cli supports the following operations:
 <ul> <li><code class="item method">start|watch</code> - Run the compiler in watch mode</li>
 <li><code class="item method">stop</code> - Stop the compiler if running</li>

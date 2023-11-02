@@ -51,8 +51,6 @@ export const GlobalEnv = {
   get devMode(): boolean;
   /** Is the app in dynamic mode? */
   get dynamic(): boolean;
-  /** The list of the profiles */
-  get profiles(): string[];
   /** Get list of resource paths */
   get resourcePaths(): string[];
   /** Is test */
@@ -68,9 +66,8 @@ The source for each field is:
    *  `envName` - This is derived from `process.env.TRV_ENV` with a fallback of `process.NODE_ENV`
    *  `devMode` - This is true if `process.env.NODE_ENV` is dev* or test
    *  `dynamic` - This is derived from `process.env.TRV_DYNAMIC`. This field reflects certain feature sets used throughout the framework.
-   *  `profiles` - This is a list derived from `process.env.TRV_PROFILES`.  This can be checked at runtime to see if specific profiles are met.  This primarily used in the framework to determine if the test profile is activated.
    *  `resourcePaths` - This is a list derived from `process.env.TRV_RESOURCES`.  This points to a list of folders that the [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46) will search against, by default.
-   *  `test` - This is true if `profiles` includes a value of `test`
+   *  `test` - This is true if `envName` is `test`
    *  `nodeVersion` - This is derived from `process.version`, and is used primarily for logging purposes
 In addition to reading these values, there is a defined method for setting/updating these values:
 
@@ -79,19 +76,14 @@ In addition to reading these values, there is a defined method for setting/updat
 export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
   const { set = {} } = cfg;
   const resources = [...cfg.resourcePaths ?? [], ...GlobalEnv.resourcePaths];
-  const profiles = new Set([...GlobalEnv.profiles, ...(cfg.profiles ?? [])]);
 
   const envName = (cfg.envName ?? GlobalEnv.envName) || readNodeEnv();
-
-  profiles.delete(GlobalEnv.envName);
-  profiles.add(envName);
 
   Object.assign(set, {
     NODE_ENV: detectNodeEnv(envName),
     DEBUG: envName !== TEST ? (cfg.debug ?? GlobalEnv.debug ?? false) : false,
     TRV_ENV: envName,
     TRV_DYNAMIC: cfg.dynamic ?? GlobalEnv.dynamic,
-    TRV_PROFILES: [...profiles].sort().join(','),
     TRV_RESOURCES: resources.join(',')
   });
 

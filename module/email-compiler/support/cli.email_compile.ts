@@ -1,5 +1,5 @@
 import { RootRegistry } from '@travetto/registry';
-import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
+import { CliCommandShape, CliCommand, cliTpl, CliUtil } from '@travetto/cli';
 import { GlobalEnvConfig } from '@travetto/base';
 
 import { EmailCompiler } from '../src/compiler';
@@ -17,11 +17,12 @@ export class EmailCompileCommand implements CliCommandShape {
     return {
       debug: false,
       dynamic: this.watch,
-      profiles: ['email-dev']
     };
   }
 
   async main(): Promise<void> {
+    CliUtil.addProfiles('email-dev');
+
     await RootRegistry.init();
 
     // Let the engine template

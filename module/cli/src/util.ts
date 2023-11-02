@@ -73,4 +73,12 @@ export class CliUtil {
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
     return await new Promise(r => process[channel].write(typeof data === 'string' ? data : JSON.stringify(data, null, 2), () => r()));
   }
+
+  /**
+   * Add profiles
+   */
+  static addProfiles(...toAdd: string[]): void {
+    const profiles = new Set([...Env.getList('TRV_PROFILES') ?? [], ...toAdd]);
+    process.env.TRV_PROFILES = [...profiles].join(',');
+  }
 }

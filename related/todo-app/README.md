@@ -310,14 +310,13 @@ npx trv run:rest
 **Terminal: Application Startup**
 ```bash
 2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:143] Initialized {
-  manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.3.2', version: '0.0.0' },
+  manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.4.0', version: '0.0.0' },
   env: {
     envName: 'dev',
     debug: '0',
     devMode: true,
     test: false,
     dynamic: true,
-    profiles: [ 'dev' ],
     resourcePaths: [],
     nodeVersion: '20'
   },

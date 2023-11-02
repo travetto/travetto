@@ -3,7 +3,7 @@ import { path } from './path';
 
 import {
   ManifestModule, ManifestModuleCore, ManifestModuleFile,
-  ManifestModuleFileType, ManifestModuleFolderType, ManifestProfile, ManifestRoot
+  ManifestModuleFileType, ManifestModuleFolderType, ManifestFileProfile, ManifestRoot, ManifestModuleProfile
 } from './types';
 
 import { ManifestUtil } from './util';
@@ -13,7 +13,7 @@ export type FindConfig = {
   folders?: ManifestModuleFolderType[];
   filter?: ScanTest;
   includeIndex?: boolean;
-  profiles?: string[];
+  profiles?: ManifestFileProfile[];
   checkProfile?: boolean;
 };
 
@@ -24,7 +24,7 @@ export type IndexedFile = {
   sourceFile: string;
   outputFile: string;
   relativeFile: string;
-  profile: ManifestProfile;
+  profile: ManifestFileProfile;
   type: ManifestModuleFileType;
 };
 
@@ -33,6 +33,8 @@ export type IndexedModule = ManifestModuleCore & {
   outputPath: string;
   files: Record<ManifestModuleFolderType, IndexedFile[]>;
 };
+
+const ENV_MAPPING: Record<string, ManifestModuleProfile> = { doc: 'doc', test: 'test', dev: 'dev', development: 'dev' };
 
 /**
  * Manifest index
@@ -154,7 +156,13 @@ export class ManifestIndex {
 
     const checkProfile = config.checkProfile ?? true;
 
-    const activeProfiles = new Set(['std', ...(config.profiles ?? process.env.TRV_PROFILES?.split(/\s*,\s*/g) ?? [])]);
+    const activeProfiles = new Set<ManifestFileProfile | ManifestModuleProfile>(['std', ...config.profiles ?? []]);
+    if (!config.profiles) {
+      const envName = ENV_MAPPING[(process.env.TRV_ENV || process.env.NODE_ENV || '').toLowerCase()];
+      if (envName) {
+        activeProfiles.add(envName);
+      }
+    }
 
     if (checkProfile) {
       idx = idx.filter(m => m.profiles.length === 0 || m.profiles.some(p => activeProfiles.has(p)));

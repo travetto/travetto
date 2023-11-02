@@ -5,6 +5,15 @@ import { CliCommandRegistry } from './registry';
 import { CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
 import { CliValidationResultError } from './error';
 
+function split(args: string[]): [core: string[], extra: string[]] {
+  const restIdx = args.indexOf('--');
+  if (restIdx >= 0) {
+    return [args.slice(0, restIdx), args.slice(restIdx + 1)];
+  } else {
+    return [args, []];
+  }
+}
+
 function fieldToInput(x: FieldConfig): CliCommandInput {
   const type = x.type === Date ? 'date' :
     x.type === Boolean ? 'boolean' :
@@ -119,10 +128,7 @@ export class CliCommandSchemaUtil {
   static async bindArgs(cmd: CliCommandShape, args: string[]): Promise<[known: unknown[], unknown: string[]]> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const cls = cmd.constructor as Class<CliCommandShape>;
-
-    const restIdx = args.indexOf('--');
-    const copy = [...args.slice(0, restIdx < 0 ? args.length : restIdx)];
-    const extra = restIdx < 0 ? [] : args.slice(restIdx);
+    const [copy, extra] = split(args);
     const schema = await this.getSchema(cmd);
     const out: unknown[] = [];
     const found: boolean[] = copy.map(x => false);
@@ -166,10 +172,8 @@ export class CliCommandSchemaUtil {
   static async bindFlags<T extends CliCommandShape>(cmd: T, args: string[]): Promise<string[]> {
     const schema = await this.getSchema(cmd);
 
-    const restIdx = args.indexOf('--');
-    const copy = [...args.slice(0, restIdx < 0 ? args.length : restIdx)]
-      .flatMap(k => (k.startsWith('--') && k.includes('=')) ? k.split('=') : [k]);
-    const extra = restIdx < 0 ? [] : args.slice(restIdx);
+    const [base, extra] = split(args);
+    const copy = base.flatMap(k => (k.startsWith('--') && k.includes('=')) ? k.split('=') : [k]);
 
     const template: Partial<T> = {};
 
@@ -223,7 +227,7 @@ export class CliCommandSchemaUtil {
     const cls = cmd.constructor as Class<CliCommandShape>;
     BindUtil.bindSchemaToObject(cls, cmd, template);
 
-    return [...out, ...extra];
+    return [...out, '--', ...extra];
   }
 
   /**

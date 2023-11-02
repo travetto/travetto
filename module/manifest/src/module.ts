@@ -4,7 +4,7 @@ import { path } from './path';
 import {
   ManifestContext,
   ManifestModule, ManifestModuleFile, ManifestModuleFileType,
-  ManifestModuleFolderType, ManifestProfile
+  ManifestModuleFolderType, ManifestFileProfile
 } from './types';
 import { ModuleDep, ModuleDependencyVisitor } from './dependencies';
 import { PackageUtil } from './package';
@@ -114,7 +114,7 @@ export class ManifestModuleUtil {
   /**
    * Get file type for a file name
    */
-  static getFileProfile(moduleFile: string): ManifestProfile | undefined {
+  static getFileProfile(moduleFile: string): ManifestFileProfile | undefined {
     if (moduleFile.startsWith('support/transform')) {
       return 'compile';
     } else if (moduleFile.startsWith('support/test/') || moduleFile.startsWith('test/')) {

@@ -36,6 +36,7 @@ export class SchemaBindingSuite {
     assert(entity.age === 30);
 
     await CliCommandSchemaUtil.bindFlags(entity, ['-g', '40']);
+    // @ts-ignore
     assert(entity.age === 40);
 
     await CliCommandSchemaUtil.bindFlags(entity, ['--age=50']);
@@ -114,7 +115,7 @@ export class SchemaBindingSuite {
     remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-g', '20', 'george', 'true', '--', '--age', '20', 'orange']);
     [found, unknown] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
     assert.deepStrictEqual(found, ['george', true, []]);
-    assert.deepStrictEqual(unknown, ['--', '--age', '20', 'orange']);
+    assert.deepStrictEqual(unknown, ['--age', '20', 'orange']);
   }
 
   @Test()

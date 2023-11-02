@@ -51,9 +51,8 @@ export const text = <>
       <li>{d.field('envName')} - This is derived from {d.field('process.env.TRV_ENV')} with a fallback of {d.field('process.NODE_ENV')}</li>
       <li>{d.field('devMode')} - This is true if {d.field('process.env.NODE_ENV')} is dev* or test</li>
       <li>{d.field('dynamic')} - This is derived from {d.field('process.env.TRV_DYNAMIC')}. This field reflects certain feature sets used throughout the framework.</li>
-      <li>{d.field('profiles')} - This is a list derived from {d.field('process.env.TRV_PROFILES')}.  This can be checked at runtime to see if specific profiles are met.  This primarily used in the framework to determine if the test profile is activated.</li>
       <li>{d.field('resourcePaths')} - This is a list derived from {d.field('process.env.TRV_RESOURCES')}.  This points to a list of folders that the {FileResourceProvider} will search against, by default.</li>
-      <li>{d.field('test')} - This is true if {d.field('profiles')} includes a value of {d.input('test')}</li>
+      <li>{d.field('test')} - This is true if {d.field('envName')} is {d.input('test')}</li>
       <li>{d.field('nodeVersion')} - This is derived from {d.field('process.version')}, and is used primarily for logging purposes</li>
     </ul>
 
