@@ -12,8 +12,7 @@ export class EmailEditorCommand {
   envInit(): GlobalEnvConfig {
     return {
       envName: 'dev',
-      dynamic: true,
-      profiles: ['email-dev']
+      dynamic: true
     };
   }
 
@@ -21,6 +20,9 @@ export class EmailEditorCommand {
     if (await CliUtil.runWithRestart(this)) {
       return;
     }
+
+    CliUtil.addProfiles('email-dev');
+
     await RootRegistry.init();
     await new EditorState(await EmailCompilationManager.createInstance()).init();
   }

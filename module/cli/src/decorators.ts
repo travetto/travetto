@@ -7,7 +7,7 @@ import { CliCommandRegistry, CliCommandConfigOptions } from './registry';
 import { CliModuleUtil } from './module';
 import { CliUtil } from './util';
 
-type ExtraFields = 'module' | 'profile' | 'env';
+type ExtraFields = 'module' | 'env';
 
 const getName = (source: string): string => (source.match(/cli[.](.*)[.]tsx?$/)?.[1] ?? source).replaceAll('_', ':');
 const getMod = (cls: Class): string => RootIndex.getModuleFromSource(RootIndex.getFunctionMetadata(cls)!.source)!.name;
@@ -26,7 +26,6 @@ export function CliCommand({ fields, ...cfg }: { fields?: ExtraFields[] } & CliC
 
     const name = getName(meta.source);
     const addEnv = fields?.includes('env');
-    const addProfile = fields?.includes('profile');
     const addModule = fields?.includes('module');
 
     CliCommandRegistry.registerClass({
@@ -35,12 +34,9 @@ export function CliCommand({ fields, ...cfg }: { fields?: ExtraFields[] } & CliC
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       cls: target as ConcreteClass<T>,
       ...cfg,
-      preMain: (cmd: CliCommandShape & { env?: string, profile?: string[], module?: string }) => {
-        if (addEnv || addProfile) {
-          defineGlobalEnv({
-            ...addEnv ? { envName: cmd.env } : {},
-            ...addProfile ? { profiles: cmd.profile } : {}
-          });
+      preMain: (cmd: CliCommandShape & { env?: string, module?: string }) => {
+        if (addEnv) {
+          defineGlobalEnv({ envName: cmd.env });
           ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
         }
         if (addModule && cmd.module && cmd.module !== RootIndex.mainModuleName) { // Mono-repo support
@@ -55,14 +51,6 @@ export function CliCommand({ fields, ...cfg }: { fields?: ExtraFields[] } & CliC
       SchemaRegistry.registerPendingFieldConfig(target, 'env', String, {
         aliases: ['e'],
         description: 'Application environment',
-        required: { active: false }
-      });
-    }
-
-    if (addProfile) {
-      SchemaRegistry.registerPendingFieldConfig(target, 'profile', [String], {
-        aliases: ['p'],
-        description: 'Additional application profiles',
         required: { active: false }
       });
     }

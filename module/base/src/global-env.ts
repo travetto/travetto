@@ -27,9 +27,6 @@ export const GlobalEnv = {
   /** Is the app in dynamic mode? */
   get dynamic(): boolean { return Env.isTrue('TRV_DYNAMIC'); },
 
-  /** The list of the profiles */
-  get profiles(): string[] { return Env.getList('TRV_PROFILES', []); },
-
   /** Get list of resource paths */
   get resourcePaths(): string[] { return Env.getList('TRV_RESOURCES', []); },
 
@@ -43,8 +40,7 @@ export const GlobalEnv = {
   toJSON(): Record<string, unknown> {
     return {
       envName: this.envName || '<unset>', debug: this.debug, devMode: this.devMode, test: this.test,
-      dynamic: this.dynamic, profiles: this.profiles, resourcePaths: this.resourcePaths,
-      nodeVersion: this.nodeVersion
+      dynamic: this.dynamic, resourcePaths: this.resourcePaths, nodeVersion: this.nodeVersion
     };
   }
 } as const;
@@ -57,19 +53,14 @@ export type GlobalEnvConfig = {
 export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
   const { set = {} } = cfg;
   const resources = [...cfg.resourcePaths ?? [], ...GlobalEnv.resourcePaths];
-  const profiles = new Set([...GlobalEnv.profiles, ...(cfg.profiles ?? [])]);
 
   const envName = (cfg.envName ?? GlobalEnv.envName) || readNodeEnv();
-
-  profiles.delete(GlobalEnv.envName);
-  profiles.add(envName);
 
   Object.assign(set, {
     NODE_ENV: detectNodeEnv(envName),
     DEBUG: envName !== TEST ? (cfg.debug ?? GlobalEnv.debug ?? false) : false,
     TRV_ENV: envName,
     TRV_DYNAMIC: cfg.dynamic ?? GlobalEnv.dynamic,
-    TRV_PROFILES: [...profiles].sort().join(','),
     TRV_RESOURCES: resources.join(',')
   });
 

@@ -1,6 +1,6 @@
 import { PackageUtil } from './package';
 import { path } from './path';
-import { ManifestContext, ManifestProfile, PackageRel, PackageVisitor, PackageVisitReq } from './types';
+import { ManifestContext, ManifestFileProfile, PackageRel, PackageVisitor, PackageVisitReq } from './types';
 
 export type ModuleDep = {
   version: string;
@@ -12,7 +12,7 @@ export type ModuleDep = {
   sourcePath: string;
   childSet: Map<string, Set<PackageRel>>;
   parentSet: Set<string>;
-  profileSet: Set<ManifestProfile>;
+  profileSet: Set<ManifestFileProfile>;
 };
 
 /**
@@ -90,7 +90,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    */
   create(req: PackageVisitReq<ModuleDep>): ModuleDep {
     const { pkg: { name, version, travetto: { profiles = [] } = {}, ...pkg }, sourcePath } = req;
-    const profileSet = new Set<ManifestProfile>([
+    const profileSet = new Set<ManifestFileProfile>([
       ...profiles ?? []
     ]);
     const main = name === this.ctx.mainModule;

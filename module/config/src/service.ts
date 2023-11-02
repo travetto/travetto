@@ -1,6 +1,6 @@
 import util from 'util';
 
-import { AppError, Class, ClassInstance, GlobalEnv, DataUtil } from '@travetto/base';
+import { AppError, Class, ClassInstance, GlobalEnv, DataUtil, Env } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootIndex } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
@@ -26,9 +26,9 @@ export class ConfigurationService {
   }
 
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
-  #profiles: string[] = ['application', ...GlobalEnv.profiles, 'override'];
+  #profiles: string[] = ['application', GlobalEnv.envName, ...Env.getList('TRV_PROFILES') ?? [], 'override'];
   #sources: string[] = [];
-  #secrets: (RegExp | string)[] = [/password|private|secret|salt|(api(-|_)?key)/i];
+  #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(api(-|_)?key)/i];
 
   /**
    * Get a sub tree of the config, or everything if namespace is not passed
