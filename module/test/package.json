@@ -47,7 +47,7 @@
   },
   "travetto": {
     "displayName": "Testing",
-    "profiles": [
+    "roles": [
       "test"
     ]
   },

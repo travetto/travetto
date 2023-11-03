@@ -30,7 +30,7 @@ export class Runner {
   async runFiles(): Promise<boolean> {
     const consumer = await RunnableTestConsumer.get(this.#state.consumer ?? this.#state.format);
 
-    const files = (await RunnerUtil.getTestFiles(this.patterns));
+    const files = (await RunnerUtil.getTestFiles(this.patterns)).map(f => f.sourceFile);
 
     console.debug('Running', { files, patterns: this.patterns });
 

@@ -149,7 +149,11 @@ export class ServiceUtil {
    */
   static async findAll(): Promise<CommandService[]> {
     return (await Promise.all(
-      RootIndex.findSupport({ filter: x => /\/service[.]/.test(x) })
+      RootIndex.find({
+        module: m => m.roles.includes('std'),
+        folder: f => f === 'support',
+        file: f => /\/service[.]/.test(f.sourceFile)
+      })
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         .map(async x => (await import(x.import)).service as CommandService)
     ))

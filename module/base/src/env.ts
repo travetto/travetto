@@ -19,6 +19,19 @@ export class Env {
   }
 
   /**
+   * Add a value to as part of a comma-separated list
+   * @param k The environment key to add to
+   */
+  static addToList(k: string, value: string): string[] {
+    const values = Env.getList(k) ?? [];
+    if (!values.includes(value)) {
+      values.push(value);
+    }
+    process.env[k] = values.join(',');
+    return values;
+  }
+
+  /**
    * Read value as a comma-separated list
    * @param k The environment key to search for
    */

@@ -8,11 +8,9 @@ import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
 const COMPILER_FILES = [...['entry.trvc', 'log', 'queue', 'server/client', 'server/runner', 'server/server', 'setup', 'util'].map(x => `support/${x}.ts`), 'package.json'];
 
-/** @typedef {import('@travetto/manifest/src/types').ManifestContext} Ctx */
-/** @typedef {import('@travetto/compiler/support/types').CompilerOp} CompilerOp */
-
-/** @return {Promise<import('@travetto/compiler/support/entry.trvc')>} */
-const $getEntry = async (/** @type {Ctx} */ ctx) => {
+/** @return {Promise<ReturnType<import('@travetto/compiler/support/entry.trvc').main>>} */
+export const getEntry = async () => {
+  const ctx = await getManifestContext();
   const tsconfigFile = path.resolve(ctx.workspacePath, 'tsconfig.json');
   if (!(await fs.stat(tsconfigFile).catch(() => undefined))) {
     await fs.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
@@ -50,21 +48,8 @@ const $getEntry = async (/** @type {Ctx} */ ctx) => {
     files.push(target);
   }
 
-  try { return require(files[0]); }
-  catch { return import(files[0]); }
+  const rootCtx = await (ctx.monoRepo ? getManifestContext(ctx.workspacePath) : ctx);
+
+  try { return require(files[0]).main(rootCtx, ctx); }
+  catch { return import(files[0]).then(v => v.main(rootCtx, ctx)); }
 };
-
-const OPS = {
-  compile: async (/** @type {Ctx} ctx*/ ctx, /** @type {CompilerOp} op */ op) => {
-    const rootCtx = await (ctx.monoRepo ? getManifestContext(ctx.workspacePath) : ctx);
-    return $getEntry(ctx).then(m => m.main(ctx, rootCtx, op));
-  },
-  manifest: (/** @type {Ctx} ctx*/ ctx, /** @type {string[]}*/ args) => $getEntry(ctx).then(m => m.manifest(ctx, args))
-}
-
-/**
- * @template T
- * @param {(ctx: Ctx, ops: typeof OPS)  => Promise<T>} fn
- * @returns {Promise<T>}
- */
-export const withContext = fn => getManifestContext().then(ctx => fn(ctx, OPS));

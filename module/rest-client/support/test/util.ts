@@ -7,22 +7,28 @@ import { TestFixtures } from '@travetto/test';
 
 import { RestClientGeneratorService } from '../../src/service';
 
-const PUPPETEER_ROOT = path.resolve(os.tmpdir(), 'trv-puppeteer');
-const REST_CLIENT_PUPPET = path.resolve(PUPPETEER_ROOT, 'rest-client.mjs');
-const TSC = path.resolve(RootIndex.manifest.workspacePath, 'node_modules', '.bin', 'tsc');
-
 const fixtures = new TestFixtures(['@travetto/rest-client']);
 
 export class RestClientTestUtil {
 
+  static get rootFolder(): string {
+    return path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.toolFolder, 'rest-client-puppeteer');
+  }
+
+  static get clientFile(): string {
+    return path.resolve(this.rootFolder, 'rest-client.mjs');
+  }
+
   static async setupPuppeteer(): Promise<void> {
-    await fs.mkdir(PUPPETEER_ROOT, { recursive: true });
-    if (!await fs.stat(path.resolve(PUPPETEER_ROOT, 'package.json')).catch(() => false)) {
-      await ExecUtil.spawn('npm', ['init', '-y'], { cwd: PUPPETEER_ROOT }).result;
-      await ExecUtil.spawn('npm', ['install', 'puppeteer'], { cwd: PUPPETEER_ROOT }).result;
-      await ExecUtil.spawn('npm', ['install'], { cwd: PUPPETEER_ROOT }).result;
+    const root = this.rootFolder;
+
+    await fs.mkdir(root, { recursive: true });
+    if (!await fs.stat(path.resolve(root, 'package.json')).catch(() => false)) {
+      await ExecUtil.spawn('npm', ['init', '-y'], { cwd: root }).result;
+      await ExecUtil.spawn('npm', ['install', 'puppeteer'], { cwd: root }).result;
+      await ExecUtil.spawn('npm', ['install'], { cwd: root }).result;
     }
-    await fs.writeFile(REST_CLIENT_PUPPET, await fixtures.read('puppeteer.mjs'), 'utf8');
+    await fs.writeFile(this.clientFile, await fixtures.read('puppeteer.mjs'), 'utf8');
   }
 
   static async compileTypescript(folder: string, web = false): Promise<void> {
@@ -36,7 +42,8 @@ export class RestClientTestUtil {
         esModuleInterop: true,
       },
     }));
-    await ExecUtil.spawn(TSC, ['-p', folder]).result;
+    const tsc = path.resolve(RootIndex.manifest.workspacePath, 'node_modules', '.bin', 'tsc');
+    await ExecUtil.spawn(tsc, ['-p', folder]).result;
   }
 
 
@@ -83,7 +90,7 @@ export class RestClientTestUtil {
           .replace('<!-- CONTENT -->', await fs.readFile(path.resolve(tmp, 'main.js'), 'utf8'))
       );
 
-      const result = await ExecUtil.spawn('node', [REST_CLIENT_PUPPET, indexHtml], { stdio: [0, 'pipe', 'pipe'] }).result;
+      const result = await ExecUtil.spawn('node', [this.clientFile, indexHtml], { stdio: [0, 'pipe', 'pipe'] }).result;
       return result.stdout;
     } finally {
       await this.cleanupFolder(tmp);

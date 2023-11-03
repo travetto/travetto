@@ -55,8 +55,11 @@ export class EmailCompiler {
    */
   static findAllTemplates(mod?: string): string[] {
     return RootIndex
-      .findSupport({ filter: f => EmailCompileUtil.isTemplateFile(f) })
-      .filter(x => !mod || x.module === mod)
+      .find({
+        module: m => !mod ? m.roles.includes('std') : mod === m.name,
+        folder: f => f === 'support',
+        file: f => EmailCompileUtil.isTemplateFile(f.sourceFile)
+      })
       .map(x => x.sourceFile);
   }
 

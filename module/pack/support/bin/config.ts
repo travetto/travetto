@@ -62,14 +62,14 @@ export function getEntry(): string {
 export function getFiles(): string[] {
   return [...RootIndex.getModuleList('all')]
     .map(x => RootIndex.manifest.modules[x])
-    .filter(m => m.profiles.includes('std'))
+    .filter(m => m.prod)
     .flatMap(getFilesFromModule);
 }
 
 export function getIgnoredModules(): string[] {
   const out = [...RootIndex.getModuleList('all')]
     .map(x => RootIndex.manifest.modules[x])
-    .filter(m => !m.profiles.includes('std'))
+    .filter(m => !m.prod)
     .map(m => m.name);
 
   out.push('@travetto/pack', '@travetto/compiler');

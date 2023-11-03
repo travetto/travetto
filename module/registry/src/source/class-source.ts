@@ -1,11 +1,20 @@
 import { EventEmitter } from 'events';
 
-import { RootIndex } from '@travetto/manifest';
+import { FindConfig, RootIndex } from '@travetto/manifest';
 import { Class, GlobalEnv } from '@travetto/base';
 import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 import { PendingRegister } from '../decorator';
+
+const moduleFindConfig: FindConfig = {
+  module: (m) =>
+    m.roles.includes('std') && (
+      GlobalEnv.devMode || m.prod ||
+      (GlobalEnv.envName === 'doc' || GlobalEnv.envName === 'test') && m.roles.includes(GlobalEnv.envName)
+    ),
+  folder: f => f === 'src' || f === '$index'
+};
 
 /**
  * A class change source. Meant to be hooked into the
@@ -106,7 +115,9 @@ export class ClassSource implements ChangeSource<Class> {
     }
 
     // Ensure everything is loaded
-    await RootIndex.loadSource();
+    for (const mod of RootIndex.find(moduleFindConfig)) {
+      await import(mod.import);
+    }
 
     // Flush all load events
     this.#flush();

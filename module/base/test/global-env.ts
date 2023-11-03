@@ -24,7 +24,7 @@ export class GlobalEnvTest {
   }
 
   @Test()
-  testProfileAndNodeEnvSep() {
+  testEnvNameAndNodeEnvSep() {
     defineGlobalEnv({ envName: 'staging' });
     assert(process.env.NODE_ENV === 'production');
     assert(process.env.TRV_ENV === 'staging');

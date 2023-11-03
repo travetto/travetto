@@ -35,7 +35,11 @@
   "devDependencies": {
     "@types/node": "^20.8.9",
     "@types/vscode": "^1.83.1",
-    "@travetto/pack": "^3.4.0-rc.0"
+    "@travetto/pack": "^3.4.0-rc.0",
+    "@travetto/compiler": "^3.4.0-rc.0",
+    "@travetto/doc": "^3.4.0-rc.0",
+    "@travetto/test": "^3.4.0-rc.0",
+    "@travetto/cli": "^3.4.0-rc.0"
   },
   "dependencies": {
     "@travetto/base": "^3.4.0-rc.0"
@@ -46,11 +50,6 @@
     "outputFolder": "out",
     "docRoot": "../..",
     "docBaseUrl": "https://github.com/travetto/travetto/tree/main",
-    "globalModules": [
-      "@travetto/doc",
-      "@travetto/test",
-      "@travetto/cli"
-    ],
     "docOutputs": [
       "README.md",
       "DOC.html"

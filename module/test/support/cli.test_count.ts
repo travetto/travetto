@@ -19,9 +19,9 @@ export class TestCountCommand {
     // Load all tests
     for (const file of files) {
       try {
-        await import(RootIndex.getFromSource(file)!.import);
+        await import(file.import);
       } catch (err) {
-        console.error('Failed to import', file, err);
+        console.error('Failed to import', file.sourceFile, err);
       }
     }
 

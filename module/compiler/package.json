@@ -34,7 +34,7 @@
     "@travetto/manifest": "^3.4.0-rc.0",
     "@travetto/terminal": "^3.4.0-rc.0",
     "@travetto/transformer": "^3.4.0-rc.0",
-    "@types/node": "^20.8.9"
+    "@types/node": "^20.8.10"
   },
   "peerDependencies": {
     "@travetto/cli": "^3.4.0-rc.1"
@@ -46,7 +46,7 @@
   },
   "travetto": {
     "displayName": "Compiler",
-    "profiles": [
+    "roles": [
       "compile"
     ]
   },

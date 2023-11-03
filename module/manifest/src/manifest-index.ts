@@ -3,18 +3,16 @@ import { path } from './path';
 
 import {
   ManifestModule, ManifestModuleCore, ManifestModuleFile,
-  ManifestModuleFileType, ManifestModuleFolderType, ManifestFileProfile, ManifestRoot, ManifestModuleProfile
+  ManifestModuleFileType, ManifestModuleFolderType, ManifestModuleRole, ManifestRoot
 } from './types';
 
 import { ManifestUtil } from './util';
 
-type ScanTest = ((full: string) => boolean) | { test: (full: string) => boolean };
 export type FindConfig = {
-  folders?: ManifestModuleFolderType[];
-  filter?: ScanTest;
-  includeIndex?: boolean;
-  profiles?: ManifestFileProfile[];
-  checkProfile?: boolean;
+  folder?: (folder: ManifestModuleFolderType) => boolean;
+  module?: (module: IndexedModule) => boolean;
+  file?: (file: IndexedFile) => boolean;
+  sourceOnly?: boolean;
 };
 
 export type IndexedFile = {
@@ -24,7 +22,7 @@ export type IndexedFile = {
   sourceFile: string;
   outputFile: string;
   relativeFile: string;
-  profile: ManifestFileProfile;
+  role: ManifestModuleRole;
   type: ManifestModuleFileType;
 };
 
@@ -34,7 +32,11 @@ export type IndexedModule = ManifestModuleCore & {
   files: Record<ManifestModuleFolderType, IndexedFile[]>;
 };
 
-const ENV_MAPPING: Record<string, ManifestModuleProfile> = { doc: 'doc', test: 'test', dev: 'dev', development: 'dev' };
+const TypedObject: {
+  keys<T = unknown, K extends keyof T = keyof T>(o: T): K[];
+  fromEntries<K extends string | symbol, V>(items: ([K, V] | readonly [K, V])[]): Record<K, V>;
+  entries<K extends Record<symbol | string, unknown>>(record: K): [keyof K, K[keyof K]][];
+} & ObjectConstructor = Object;
 
 /**
  * Manifest index
@@ -80,7 +82,7 @@ export class ManifestIndex {
   }
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {
-    return files.map(([f, type, ts, profile = 'std']) => {
+    return files.map(([f, type, ts, role = 'std']) => {
       const isSource = type === 'ts' || type === 'js';
       const sourceFile = path.resolve(this.#manifest.workspacePath, m.sourceFolder, f);
       const js = isSource ? ManifestModuleUtil.sourceToOutputExt(f) : f;
@@ -91,7 +93,7 @@ export class ManifestIndex {
         id = ManifestModuleUtil.sourceToBlankExt(id);
       }
 
-      return { id, type, sourceFile, outputFile, import: modImport, profile, relativeFile: f, module: m.name };
+      return { id, type, sourceFile, outputFile, import: modImport, role, relativeFile: f, module: m.name };
     });
   }
 
@@ -145,64 +147,27 @@ export class ManifestIndex {
 
   /**
    * Find files from the index
-   * @param folder The sub-folder to check into
-   * @param filter The filter to determine if this is a valid support file
+   * @param config The configuration for controlling the find process
    */
   find(config: FindConfig): IndexedFile[] {
-    const { filter: f, folders } = config;
-    const filter = f ? 'test' in f ? f.test.bind(f) : f : f;
-
-    let idx = this.#modules;
-
-    const checkProfile = config.checkProfile ?? true;
-
-    const activeProfiles = new Set<ManifestFileProfile | ManifestModuleProfile>(['std', ...config.profiles ?? []]);
-    if (!config.profiles) {
-      const envName = ENV_MAPPING[(process.env.TRV_ENV || process.env.NODE_ENV || '').toLowerCase()];
-      if (envName) {
-        activeProfiles.add(envName);
+    const searchSpace: IndexedFile[] = [];
+    for (const m of this.#modules) {
+      if (config.module?.(m) ?? true) {
+        for (const [folder, files] of TypedObject.entries(m.files)) {
+          if (config.folder?.(folder) ?? true) {
+            for (const file of files) {
+              if (
+                (config.file?.(file) ?? true) &&
+                (config.sourceOnly === false || file.type === 'ts')
+              ) {
+                searchSpace.push(file);
+              }
+            }
+          }
+        }
       }
     }
-
-    if (checkProfile) {
-      idx = idx.filter(m => m.profiles.length === 0 || m.profiles.some(p => activeProfiles.has(p)));
-    }
-
-    let searchSpace = folders ?
-      idx.flatMap(m => [...folders.flatMap(fo => m.files[fo] ?? []), ...(config.includeIndex ? (m.files.$index ?? []) : [])]) :
-      idx.flatMap(m => [...Object.values(m.files)].flat());
-
-    if (checkProfile) {
-      searchSpace = searchSpace.filter(fi => activeProfiles.has(fi.profile));
-    }
-
-    return searchSpace
-      .filter(({ type }) => type === 'ts')
-      .filter(({ sourceFile: source }) => filter?.(source) ?? true);
-  }
-
-  /**
-   * Find files from the index
-   * @param filter The filter to determine if this is a valid support file
-   */
-  findSupport(config: Omit<FindConfig, 'folder'>): IndexedFile[] {
-    return this.find({ ...config, folders: ['support'] });
-  }
-
-  /**
-   * Find files from the index
-   * @param filter The filter to determine if this is a valid support file
-   */
-  findSrc(config: Omit<FindConfig, 'folder'> = {}): IndexedFile[] {
-    return this.find({ ...config, includeIndex: true, folders: ['src'] });
-  }
-
-  /**
-   * Find files from the index
-   * @param filter The filter to determine if this is a valid support file
-   */
-  findTest(config: Omit<FindConfig, 'folder'>): IndexedFile[] {
-    return this.find({ ...config, folders: ['test'] });
+    return searchSpace;
   }
 
   /**

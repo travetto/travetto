@@ -37,6 +37,7 @@ export const text = <>
       <li>{d.method('getBoolean(key: string, isValue?: boolean)')} - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value</li>
       <li>{d.method('getInt(key: string, def?: number): number;')} - Retrieve an environmental value as a number</li>
       <li>{d.method('getList(key: string): string[];')} - Retrieve an environmental value as a list</li>
+      <li>{d.method('addToList(key: string, value: string): string[];')} - Add an item to an environment value, ensuring uniqueness</li>
     </ul>
   </c.Section>
 

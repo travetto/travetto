@@ -1,4 +1,4 @@
-import { Class, ConcreteClass } from '@travetto/base';
+import { Class, ConcreteClass, GlobalEnv } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 import { CliCommandShape } from './types';
@@ -37,8 +37,12 @@ class $CliCommandRegistry {
   getCommandMapping(): Map<string, string> {
     if (!this.#fileMapping) {
       const all = new Map<string, string>();
-      for (const { outputFile: output, import: imp } of RootIndex.findSupport({ filter: CLI_REGEX, checkProfile: false })) {
-        all.set(output.match(CLI_REGEX)![1].replace(/_/g, ':'), imp);
+      for (const e of RootIndex.find({
+        module: m => GlobalEnv.devMode || m.prod,
+        folder: f => f === 'support',
+        file: f => f.role === 'std' && CLI_REGEX.test(f.sourceFile)
+      })) {
+        all.set(e.outputFile.match(CLI_REGEX)![1].replace(/_/g, ':'), e.import);
       }
       this.#fileMapping = all;
     }

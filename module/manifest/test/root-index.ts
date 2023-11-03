@@ -9,7 +9,7 @@ import { RootIndex } from '../src/root-index';
 class RootIndexTests {
   @Test()
   testFind() {
-    const files = RootIndex.find({});
+    const files = RootIndex.find({ folder: f => f === 'test' });
     assert(files.some(x => x.outputFile.endsWith('test/root-index.js')));
   }
 

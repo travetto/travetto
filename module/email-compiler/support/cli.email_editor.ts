@@ -1,4 +1,4 @@
-import { GlobalEnvConfig } from '@travetto/base';
+import { Env, GlobalEnvConfig } from '@travetto/base';
 import { CliCommand, CliUtil } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 
@@ -21,7 +21,7 @@ export class EmailEditorCommand {
       return;
     }
 
-    CliUtil.addProfiles('email-dev');
+    Env.addToList('TRV_PROFILES', 'email-dev');
 
     await RootRegistry.init();
     await new EditorState(await EmailCompilationManager.createInstance()).init();
