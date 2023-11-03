@@ -1,34 +1,7 @@
 #!/usr/bin/env node
 
 // @ts-check
-import fs from 'fs/promises';
-import path from 'path';
-
-import { withContext } from './common.js';
-
-/** @typedef {import('@travetto/manifest/src/types').ManifestContext} Ctx */
-
-const stop = async (/** @typedef {Ctx} */ ctx) => {
-  if (await fetch(`${ctx.compilerUrl}/stop`).then(v => v.ok, () => false)) {
-    console.log(`Stopped server ${ctx.workspacePath}: [${ctx.compilerUrl}]`);
-  } else {
-    console.log(`Server not running ${ctx.workspacePath}: [${ctx.compilerUrl}]`);
-  }
-};
-
-const info = async (/** @typedef {Ctx} */ctx) => console.log(
-  JSON.stringify(await fetch(ctx.compilerUrl).then(v => v.json(), () => undefined) ?? { state: 'Server not running' }, null, 2)
-);
-
-const clean = async (/** @typedef {Ctx} */ctx) => {
-  const folders = [ctx.outputFolder, ctx.compilerFolder];
-  if (await fetch(`${ctx.compilerUrl}/clean`).then(v => v.ok, () => false)) {
-    return console.log(`Clean triggered ${ctx.workspacePath}:`, folders);
-  } else {
-    await Promise.all(folders.map(f => fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true })));
-    return console.log(`Cleaned ${ctx.workspacePath}:`, folders);
-  }
-};
+import { getEntry } from './common.js';
 
 const help = () => [
   'npx trvc [command]',
@@ -43,20 +16,20 @@ const help = () => [
   ' * manifest    - Generate the project manifest',
 ].join('\n');
 
-withContext(async (ctx, { compile, manifest }) => {
+getEntry().then(async (ops) => {
   const [op, ...args] = process.argv.slice(2);
 
   switch (op) {
     case undefined:
     case 'help': return console.log(`\n${help()}\n`);
-    case 'restart': return stop(ctx).then(() => compile(ctx, 'watch'));
-    case 'stop': return stop(ctx);
-    case 'info': return info(ctx);
-    case 'clean': return clean(ctx);
-    case 'manifest': return manifest(ctx, args);
-    case 'start': return compile(ctx, 'watch');
+    case 'restart': return ops.stop().then(() => ops.compile('watch'));
+    case 'stop': return ops.stop();
+    case 'info': return ops.info().then(v => console.log(JSON.stringify(v, null, 2)));
+    case 'clean': return ops.clean();
+    case 'manifest': return ops.manifest(args);
+    case 'start': return ops.compile('watch');
     case 'watch':
-    case 'build': return compile(ctx, op);
+    case 'build': return ops.compile(op);
     default: console.error(`Unknown trvc operation: ${op}\n`); return console.error(help());
   }
 });

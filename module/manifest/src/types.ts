@@ -1,3 +1,5 @@
+export type NodeModuleType = 'module' | 'commonjs';
+
 export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture' | 'md';
 export type ManifestModuleFolderType =
   '$root' | '$index' | '$package' |
@@ -5,11 +7,9 @@ export type ManifestModuleFolderType =
   'test/fixtures' | 'support/fixtures' | 'support/resources' |
   '$other' | '$transformer';
 
-export type ManifestFileProfile = 'test' | 'doc' | 'std';
-export type ManifestModuleProfile = ManifestFileProfile | 'compile' | 'build' | 'dev';
-export type PackageRel = 'dev' | 'prod' | 'peer' | 'opt' | 'root' | 'global';
+export type ManifestModuleRole = 'std' | 'test' | 'doc' | 'compile' | 'build';
 
-export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestFileProfile];
+export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestModuleRole];
 export type ManifestModuleCore = {
   name: string;
   main?: boolean;
@@ -17,7 +17,8 @@ export type ManifestModuleCore = {
   version: string;
   sourceFolder: string;
   outputFolder: string;
-  profiles: ManifestModuleProfile[];
+  prod: boolean;
+  roles: ManifestModuleRole[];
   parents: string[];
   internal?: boolean;
 };
@@ -34,7 +35,7 @@ export type ManifestContext = {
   toolFolder: string;
   compilerFolder: string;
   monoRepo?: boolean;
-  moduleType: 'module' | 'commonjs';
+  moduleType: NodeModuleType;
   packageManager: 'yarn' | 'npm';
   frameworkVersion: string;
   description?: string;
@@ -49,7 +50,7 @@ export type ManifestRoot = ManifestContext & {
 
 export type Package = {
   name: string;
-  type?: 'module' | 'commonjs';
+  type?: NodeModuleType;
   version: string;
   description?: string;
   license?: string;
@@ -77,7 +78,7 @@ export type Package = {
   travetto?: {
     isolated?: boolean;
     displayName?: string;
-    profiles?: ManifestModuleProfile[];
+    roles?: ManifestModuleRole[];
     globalModules?: string[];
     mainSource?: string[];
     docOutput?: string[];
@@ -96,7 +97,7 @@ export type Package = {
 
 type OrProm<T> = T | Promise<T>;
 
-export type PackageVisitReq<T> = { pkg: Package, rel: PackageRel, sourcePath: string, parent?: T };
+export type PackageVisitReq<T> = { pkg: Package, prod: boolean, sourcePath: string, parent?: T, topLevel?: boolean };
 export type PackageVisitor<T> = {
   init?(req: PackageVisitReq<T>): OrProm<undefined | void | PackageVisitReq<T>[]>;
   valid?(req: PackageVisitReq<T>): boolean;

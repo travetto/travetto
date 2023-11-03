@@ -1,7 +1,7 @@
 import { createRequire } from 'module';
 import { execSync } from 'child_process';
 
-import { ManifestContext, Package, PackageRel, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
+import { ManifestContext, Package, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 import { path } from './path';
 import { ManifestFileUtil } from './file';
 
@@ -59,8 +59,8 @@ export class PackageUtil {
   /**
    * Build a package visit req
    */
-  static packageReq<T>(sourcePath: string, rel: PackageRel): PackageVisitReq<T> {
-    return { pkg: this.readPackage(sourcePath), sourcePath, rel };
+  static packageReq<T>(sourcePath: string, prod: boolean, topLevel?: boolean): PackageVisitReq<T> {
+    return { pkg: this.readPackage(sourcePath), sourcePath, prod, topLevel };
   }
 
   /**
@@ -70,22 +70,13 @@ export class PackageUtil {
     const pkg = this.readPackage(modulePath);
     const children: Record<string, PackageVisitReq<T>> = {};
     const local = modulePath === rootPath && !modulePath.includes('node_modules');
-    for (const [deps, rel] of [
-      [pkg.dependencies, 'prod'],
-      [pkg.peerDependencies, 'peer'],
-      [pkg.optionalDependencies, 'opt'],
-      ...(local ? [[pkg.devDependencies, 'dev'] as const] : []),
+    for (const [deps, prod] of [
+      [pkg.dependencies, true],
+      ...(local ? [[pkg.devDependencies, false] as const] : []),
     ] as const) {
       for (const [name, version] of Object.entries(deps ?? {})) {
-        try {
-          const depPath = this.resolveVersionPath(modulePath, version) ?? this.resolvePackagePath(name);
-          children[`${name}#${version}`] = this.packageReq<T>(depPath, rel);
-        } catch (err) {
-          if (rel === 'opt' || (rel === 'peer' && !!pkg.peerDependenciesMeta?.[name].optional)) {
-            continue;
-          }
-          throw err;
-        }
+        const depPath = this.resolveVersionPath(modulePath, version) ?? this.resolvePackagePath(name);
+        children[`${name}#${version}`] = this.packageReq<T>(depPath, prod, false);
       }
     }
     return Object.values(children).sort((a, b) => a.pkg.name.localeCompare(b.pkg.name));
@@ -123,7 +114,7 @@ export class PackageUtil {
   ): Promise<Set<T>> {
 
     const root = typeof rootOrPath === 'string' ?
-      this.packageReq<T>(rootOrPath, 'root') :
+      this.packageReq<T>(rootOrPath, false, true) :
       rootOrPath;
 
     const seen = new Map<string, T>();

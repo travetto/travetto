@@ -15,7 +15,11 @@ export type PackOperationShape<T> = ((config: T) => AsyncIterable<string[]>);
 export abstract class BasePackCommand implements CliCommandShape {
 
   static get entryPoints(): string[] {
-    return RootIndex.findSupport({ filter: x => x.includes('entry.') })
+    return RootIndex.find({
+      module: m => m.prod,
+      folder: f => f === 'support',
+      file: f => f.sourceFile.includes('entry.')
+    })
       .map(x => x.import.replace(/[.][^.]+s$/, ''));
   }
 

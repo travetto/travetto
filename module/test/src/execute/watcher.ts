@@ -8,6 +8,7 @@ import { buildStandardTestManager } from '../worker/standard';
 import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
 import { RunEvent } from '../worker/types';
+import { RunnerUtil } from './util';
 
 function isRunEvent(ev: unknown): ev is RunEvent {
   return ObjectUtil.isPlainObject(ev) && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
@@ -78,7 +79,7 @@ export class TestWatcher {
     process.send?.('ready');
 
     if (runAllOnStart) {
-      for (const test of await RootIndex.findTest({})) {
+      for (const test of await RunnerUtil.getTestFiles()) {
         await import(test.import);
         itr.add(test.sourceFile);
       }

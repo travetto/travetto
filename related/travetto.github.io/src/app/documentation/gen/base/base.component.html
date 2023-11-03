@@ -40,6 +40,7 @@ The functionality we support for testing and retrieving environment information:
 <li><code class="item method">getBoolean(key: string, isValue?: boolean)</code> - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value</li>
 <li><code class="item method">getInt(key: string, def?: number): number;</code> - Retrieve an environmental value as a number</li>
 <li><code class="item method">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li>
+<li><code class="item method">addToList(key: string, value: string): string[];</code> - Add an item to an environment value, ensuring uniqueness</li>
 </ul>
 
 <h2 id="shared-global-environment-state">Shared Global Environment State</h2>

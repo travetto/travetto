@@ -108,4 +108,13 @@ export class EnvTest {
       assert(Env.getBoolean('bool', true) === true);
     }
   }
+
+  @Test()
+  testAddToList() {
+    assert.deepEqual(Env.addToList('_rnd', '0'), ['0']);
+    assert.deepEqual(Env.addToList('_rnd', '1'), ['0', '1']);
+    process.env._rnd = '1, 3, 4';
+    assert.deepEqual(Env.addToList('_rnd', '1'), ['1', '3', '4']);
+    assert.deepEqual(Env.addToList('_rnd', '11'), ['1', '3', '4', '11']);
+  }
 }

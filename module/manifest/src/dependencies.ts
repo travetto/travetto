@@ -1,8 +1,9 @@
 import { PackageUtil } from './package';
 import { path } from './path';
-import { ManifestContext, ManifestModuleProfile, PackageRel, PackageVisitor, PackageVisitReq } from './types';
+import { ManifestContext, ManifestModuleRole, PackageVisitor, PackageVisitReq, Package } from './types';
 
 export type ModuleDep = {
+  pkg: Package;
   version: string;
   name: string;
   main?: boolean;
@@ -10,9 +11,11 @@ export type ModuleDep = {
   local?: boolean;
   internal?: boolean;
   sourcePath: string;
-  childSet: Map<string, Set<PackageRel>>;
+  childSet: Set<string>;
   parentSet: Set<string>;
-  profileSet: Set<ManifestModuleProfile>;
+  roleSet: Set<ManifestModuleRole>;
+  prod: boolean;
+  topLevel?: boolean;
 };
 
 /**
@@ -60,19 +63,13 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
       ...workspaceModules.map(x => x.name)
     ]);
 
-    const globals = [
-      ...(workspacePkg.travetto?.globalModules ?? []),
-      ...(pkg.travetto?.globalModules ?? [])
-    ]
-      .map(f => PackageUtil.resolvePackagePath(f));
+    const globals = (workspacePkg.travetto?.globalModules ?? [])
+      .map(name => PackageUtil.packageReq<ModuleDep>(PackageUtil.resolvePackagePath(name), name in (workspacePkg.dependencies ?? {}), true));
 
     const workspaceModuleDeps = workspaceModules
-      .map(entry => path.resolve(req.sourcePath, entry.sourcePath));
+      .map(entry => PackageUtil.packageReq<ModuleDep>(path.resolve(req.sourcePath, entry.sourcePath), false, true));
 
-    return [
-      ...globals,
-      ...workspaceModuleDeps
-    ].map(s => PackageUtil.packageReq(s, 'global'));
+    return [...globals, ...workspaceModuleDeps];
   }
 
   /**
@@ -80,8 +77,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    */
   valid(req: PackageVisitReq<ModuleDep>): boolean {
     return req.sourcePath === this.#mainSourcePath || (
-      req.rel !== 'peer' &&
-      (!!req.pkg.travetto || req.pkg.private === true || !req.sourcePath.includes('node_modules') || req.rel === 'global')
+      (!!req.pkg.travetto || req.pkg.private === true || !req.sourcePath.includes('node_modules'))
     );
   }
 
@@ -89,18 +85,16 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    * Create dependency from request
    */
   create(req: PackageVisitReq<ModuleDep>): ModuleDep {
-    const { pkg: { name, version, travetto: { profiles = [] } = {}, ...pkg }, sourcePath } = req;
-    const profileSet = new Set<ManifestModuleProfile>([
-      ...profiles ?? []
-    ]);
+    const { pkg, sourcePath } = req;
+    const { name, version } = pkg;
     const main = name === this.ctx.mainModule;
     const mainSource = main || this.#mainPatterns.some(x => x.test(name));
     const internal = pkg.private === true;
     const local = internal || mainSource || !sourcePath.includes('node_modules');
 
     const dep = {
-      name, version, sourcePath, main, mainSource, local, internal,
-      parentSet: new Set([]), childSet: new Map(), profileSet
+      name, version, sourcePath, main, mainSource, local, internal, pkg: req.pkg,
+      parentSet: new Set([]), childSet: new Set([]), roleSet: new Set([]), prod: req.prod, topLevel: req.topLevel
     };
 
     return dep;
@@ -113,30 +107,30 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
     const { parent } = req;
     if (parent && dep.name !== this.ctx.mainModule) {
       dep.parentSet.add(parent.name);
-      const set = parent.childSet.get(dep.name) ?? new Set();
-      parent.childSet.set(dep.name, set);
-      set.add(req.rel);
+      parent.childSet.add(dep.name);
     }
   }
 
   /**
-   * Propagate profile/relationship information through graph
+   * Propagate prod, role information through graph
    */
   complete(deps: Set<ModuleDep>): Set<ModuleDep> {
-    const mapping = new Map<string, { parent: Set<string>, child: Map<string, Set<PackageRel>>, el: ModuleDep }>();
+    const mapping = new Map<string, { parent: Set<string>, child: Set<string>, el: ModuleDep }>();
     for (const el of deps) {
-      mapping.set(el.name, { parent: new Set(el.parentSet), child: new Map(el.childSet), el });
+      mapping.set(el.name, { parent: new Set(el.parentSet), child: new Set(el.childSet), el });
     }
 
     const main = mapping.get(this.ctx.mainModule)!;
 
     // Visit all direct dependencies and mark
-    for (const [name, relSet] of main.child) {
-      const childDep = mapping.get(name)!.el;
-      if (!relSet.has('dev')) {
-        childDep.profileSet.add('std');
-      } else {
-        childDep.profileSet.add('dev');
+    for (const { el } of mapping.values()) {
+      if (el.topLevel) {
+        el.roleSet = new Set(el.pkg.travetto?.roles ?? []);
+        if (!el.roleSet.size) {
+          el.roleSet.add('std');
+        }
+      } else if (!main.child.has(el.name)) { // Not a direct descendent
+        el.prod = false;
       }
     }
 
@@ -150,9 +144,10 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
         for (const c of child.keys()) {
           const { el: cDep, parent } = mapping.get(c)!;
           parent.delete(el.name); // Remove from child
-          for (const prof of el.profileSet) {
-            cDep.profileSet.add(prof);
+          for (const role of el.roleSet) {
+            cDep.roleSet.add(role);
           }
+          cDep.prod ||= el.prod; // Allow prod to trickle down as needed
         }
       }
       // Remove from mapping
@@ -161,8 +156,10 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
       }
     }
 
-    // Color the main folder as std
-    main.el.profileSet.add('std');
+    // Color parent as final step
+    main.el.prod = true;
+    main.el.roleSet.add('std');
+
     return deps;
   }
 }

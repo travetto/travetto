@@ -38,7 +38,7 @@ export class ManifestUtil {
       // If in prod mode, only include std modules
       modules: Object.fromEntries(
         Object.values(manifest.modules)
-          .filter(x => x.profiles.includes('std'))
+          .filter(x => x.prod)
           .map(m => [m.name, m])
       ),
       // Mark output folder/workspace path as portable

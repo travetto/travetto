@@ -34,7 +34,7 @@ export const GlobalEnv = {
   get test(): boolean { return Env.get('TRV_ENV') === 'test'; },
 
   /** Get node major version */
-  get nodeVersion(): string { return process.version.replace('v', '').split('.')[0]; },
+  get nodeVersion(): number { return +(process.version.replace('v', '').split('.')[0]); },
 
   /** Export as plain object */
   toJSON(): Record<string, unknown> {

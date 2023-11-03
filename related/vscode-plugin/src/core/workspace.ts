@@ -158,8 +158,8 @@ export class Workspace {
       vscode.window.onDidChangeActiveColorTheme(() => this.writeTheme())
     );
 
-    for (const ext of this.#extensionIndex.findSrc({
-      filter: f => /.*\/feature.*?\/main[.]/.test(f)
+    for (const ext of this.#extensionIndex.find({
+      file: f => /.*\/feature.*?\/main[.]/.test(f.sourceFile)
     })) {
       await import(ext.import);
     }

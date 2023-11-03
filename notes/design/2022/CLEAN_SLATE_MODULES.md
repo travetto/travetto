@@ -196,7 +196,8 @@ Primary goals:
    * Read file
    * Write file
    * List folder
-   * Stat filelisten to changes in the output .js files
+   * Stat file
+   * listen to changes in the output .js files
 * 
 * Resources will need a hybrid approach of multiple loaders
    * In-memory for bundles

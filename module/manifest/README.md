@@ -99,7 +99,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
   "outputFolder": ".trv/output",
   "toolFolder": ".trv/tool",
   "compilerFolder": ".trv/compiler",
-  "compilerUrl": "http://127.0.0.1:22154",
+  "compilerUrl": "http://127.0.0.1:26803",
   "frameworkVersion": "x.x.x",
   "mainModule": "@travetto/manifest",
   "mainFolder": "module/manifest",
@@ -114,6 +114,9 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
       "internal": false,
       "sourceFolder": "module/manifest",
       "outputFolder": "node_modules/@travetto/manifest",
+      "roles": [ "std" ],
+      "parents": [],
+      "prod": true,
       "files": {
         "$root": [
           [ "DOC.html", "unknown", 1868155200000 ],
@@ -158,9 +161,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
           [ "bin/context.d.ts", "typings", 1868155200000 ],
           [ "bin/context.js", "js", 1868155200000 ]
         ]
-      },
-      "profiles": [ "std" ],
-      "parents": []
+      }
     }
   }
 }

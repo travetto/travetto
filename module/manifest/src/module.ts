@@ -4,7 +4,8 @@ import { path } from './path';
 import {
   ManifestContext,
   ManifestModule, ManifestModuleFile, ManifestModuleFileType,
-  ManifestModuleFolderType, ManifestFileProfile
+  ManifestModuleFolderType,
+  ManifestModuleRole
 } from './types';
 import { ModuleDep, ModuleDependencyVisitor } from './dependencies';
 import { PackageUtil } from './package';
@@ -114,7 +115,7 @@ export class ManifestModuleUtil {
   /**
    * Get file type for a file name
    */
-  static getFileProfile(moduleFile: string): ManifestFileProfile | undefined {
+  static getFileRole(moduleFile: string): ManifestModuleRole | undefined {
     if (moduleFile.startsWith('support/transform')) {
       return 'compile';
     } else if (moduleFile.startsWith('support/test/') || moduleFile.startsWith('test/')) {
@@ -167,15 +168,15 @@ export class ManifestModuleUtil {
    */
   static async transformFile(moduleFile: string, full: string): Promise<ManifestModuleFile> {
     const res: ManifestModuleFile = [moduleFile, this.getFileType(moduleFile), this.#getNewest(await fs.stat(full))];
-    const profile = this.getFileProfile(moduleFile);
-    return profile ? [...res, profile] : res;
+    const role = this.getFileRole(moduleFile);
+    return role ? [...res, role] : res;
   }
 
   /**
    * Visit a module and describe files, and metadata
    */
   static async describeModule(ctx: ManifestContext, dep: ModuleDep): Promise<ManifestModule> {
-    const { main, mainSource, local, name, version, sourcePath, profileSet, parentSet, internal } = dep;
+    const { main, mainSource, local, name, version, sourcePath, roleSet, prod, parentSet, internal } = dep;
 
     const files: ManifestModule['files'] = {};
 
@@ -192,12 +193,12 @@ export class ManifestModuleUtil {
       files.$root = files.$root?.filter(([file, type]) => type !== 'ts');
     }
 
-    const profiles = [...profileSet].sort();
+    const roles = [...roleSet ?? []].sort();
     const parents = [...parentSet].sort();
     const outputFolder = `node_modules/${name}`;
     const sourceFolder = sourcePath === ctx.workspacePath ? '' : sourcePath.replace(`${ctx.workspacePath}/`, '');
 
-    const res = { main, name, version, local, internal, sourceFolder, outputFolder, files, profiles, parents, };
+    const res = { main, name, version, local, internal, sourceFolder, outputFolder, roles, parents, prod, files };
     return res;
   }
 

@@ -28,15 +28,6 @@ class $RootIndex extends ManifestIndex {
   }
 
   /**
-   * Asynchronously load all source files from manifest
-   */
-  async loadSource(): Promise<void> {
-    for (const { import: imp } of this.findSrc()) {
-      await import(imp);
-    }
-  }
-
-  /**
    * Get internal id from file name and optionally, class name
    */
   getId(filename: string, clsName?: string): string {

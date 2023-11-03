@@ -30,7 +30,7 @@
   },
   "travetto": {
     "displayName": "Transformation",
-    "profiles": [
+    "roles": [
       "compile"
     ]
   },

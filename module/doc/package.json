@@ -37,7 +37,7 @@
     }
   },
   "travetto": {
-    "profiles": [
+    "roles": [
       "doc"
     ],
     "displayName": "Documentation"

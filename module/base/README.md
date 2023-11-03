@@ -36,6 +36,7 @@ The functionality we support for testing and retrieving environment information:
    *  `getBoolean(key: string, isValue?: boolean)` - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value
    *  `getInt(key: string, def?: number): number;` - Retrieve an environmental value as a number
    *  `getList(key: string): string[];` - Retrieve an environmental value as a list
+   *  `addToList(key: string, value: string): string[];` - Add an item to an environment value, ensuring uniqueness
 
 ## Shared Global Environment State
 [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17) is a non-cached interface to the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L4) class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.

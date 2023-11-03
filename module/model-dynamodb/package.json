@@ -25,7 +25,7 @@
     "directory": "module/model-dynamodb"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.438.0",
+    "@aws-sdk/client-dynamodb": "^3.441.0",
     "@travetto/config": "^3.4.0-rc.0",
     "@travetto/model": "^3.4.0-rc.1"
   },
