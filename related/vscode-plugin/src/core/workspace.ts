@@ -170,7 +170,7 @@ export class Workspace {
    * @param ms
    */
   static sleep(ms: number): Promise<void> {
-    return new Promise(r => setTimeout(r, ms));
+    return timers.setTimeout(ms);
   }
 
   /**
