@@ -151,7 +151,6 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
       <li>{d.method('toReadable(src: Readable | Buffer | string):Promise<Readable>')} for converting a stream/buffer/filepath to a Readable</li>
       <li>{d.method('writeToFile(src: Readable, out: string):Promise<void>')} will stream a readable into a file path, and wait for completion.</li>
       <li>{d.method('waitForCompletion(src: Readable, finish:()=>Promise<any>)')} will ensure the stream remains open until the promise finish produces is satisfied.</li>
-      <li>{d.method('streamByDelimiter(file: string, options: { delimiter, start, encoding, includeDelimiter}): AsyncIterable<{item:string, read:number}>')} will watch a file for any line changes, and produce those changes as asynchronous iterable stream. Functionally, this is equivalent to using the Unix tail operation on a file</li>
     </ul>
   </c.Section>
 

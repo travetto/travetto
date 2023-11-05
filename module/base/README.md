@@ -224,7 +224,6 @@ The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/
    *  `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable
    *  `writeToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
    *  `waitForCompletion(src: Readable, finish:()=>Promise<any>)` will ensure the stream remains open until the promise finish produces is satisfied.
-   *  `streamByDelimiter(file: string, options: { delimiter, start, encoding, includeDelimiter}): AsyncIterable<{item:string, read:number}>` will watch a file for any line changes, and produce those changes as asynchronous iterable stream. Functionally, this is equivalent to using the Unix tail operation on a file
 
 ## Object Utilities
 Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [ObjectUtil](https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L10) includes:

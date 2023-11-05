@@ -1,4 +1,4 @@
-import { createReadStream, createWriteStream } from 'fs';
+import { createWriteStream } from 'fs';
 import { PassThrough, Readable, Writable } from 'stream';
 import { ReadableStream as WebReadableStream } from 'stream/web';
 
@@ -139,38 +139,5 @@ export class StreamUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return this.waitForCompletion(proc.stdout!, () => prom) as Promise<T>;
     }
-  }
-
-  /**
-   * Stream by delimiter from a file, returning the bytes read, for chunked resuming
-   * @param file The file to stream from
-   * @param options Stream options, including delimiter control
-   */
-  static async * streamByDelimiter(
-    file: string | Readable,
-    options: { start?: number, encoding?: BufferEncoding, includeDelimiter?: boolean, delimiter?: string } = {}
-  ): AsyncIterable<{ item: string, read: number }> {
-    let read = options.start ?? 0;
-    const stream = typeof file === 'string' ? createReadStream(file, { start: read }) : file;
-    const encoding = options.encoding ?? 'utf8';
-    const includeDelimiter = !!options.includeDelimiter;
-    const delimiter = options.delimiter ?? '\n';
-
-    let buffer: Buffer = Buffer.from([]);
-    for await (const chunk of stream) {
-      const chunkBuff: Buffer = typeof chunk === 'string' ? Buffer.from(chunk, encoding) : chunk;
-      buffer = Buffer.concat([buffer, chunkBuff]);
-      let pos = buffer.indexOf(delimiter);
-      while (pos >= 0) { // If we have a newline
-        const fullLength = pos + delimiter.length;
-        const outLength = pos + (includeDelimiter ? delimiter.length : 0);
-        read += fullLength;
-        yield { item: buffer.toString(encoding, 0, outLength), read };
-        buffer = Buffer.copyBytesFrom(buffer, fullLength);
-        pos = buffer.indexOf(delimiter);
-      }
-    }
-    // Yield on exit, in case of being called in a loop
-    await new Promise(r => setTimeout(r, 1));
   }
 }

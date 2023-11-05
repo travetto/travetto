@@ -1,8 +1,6 @@
 import assert from 'assert';
-import fs from 'fs/promises';
-import { createReadStream, appendFileSync } from 'fs';
+import { createReadStream } from 'fs';
 import os from 'os';
-import timers from 'timers/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { path as mPath } from '@travetto/manifest';
@@ -86,39 +84,5 @@ export class StreamUtilTest {
     ));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('process.stdin'));
-  }
-
-  @Test()
-  async tailFile() {
-    const file = mPath.resolve(os.tmpdir(), `tail-file.${Date.now()}.${Math.random()}`);
-    assert(file);
-    const received: number[] = [];
-
-    await fs.mkdir(mPath.dirname(file), { recursive: true });
-    await fs.appendFile(file, '');
-
-    (async () => {
-      for (let i = 0; i < 10; i++) {
-        await timers.setTimeout(50);
-        appendFileSync(file, `${i}.${'0'.repeat(20)}~~`);
-      }
-
-      // Close file
-      appendFileSync(file, 'EOF~~');
-      await timers.setTimeout(10);
-    })();
-
-    let offset = 0;
-    outer: for (; ;) {
-      for await (const { item, read } of StreamUtil.streamByDelimiter(file, { start: offset, delimiter: '~~' })) {
-        if (item === 'EOF') {
-          break outer;
-        }
-        offset = read;
-        received.push(parseInt(item, 10));
-      }
-      await timers.setTimeout(10);
-    }
-    assert.deepStrictEqual(new Set(received), new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]));
   }
 }

@@ -28,7 +28,7 @@ export class DocAngularCommand {
       // Build out docs
       await RepoExecUtil.execOnModules('all',
         (mod, opts) => {
-          const req = ExecUtil.spawn('trv', ['doc'], { ...opts, env: { ...opts.env ?? {}, TRV_BUILD: 'none' }, timeout: 10000 });
+          const req = ExecUtil.spawn('trv', ['doc'], { ...opts, env: { ...opts.env ?? {}, TRV_BUILD: 'none' }, timeout: 20000 });
           req.result.then(v => {
             if (!v.valid) {
               console.error(`${mod.name} - failed`);
