@@ -67,14 +67,10 @@ export function getFiles(): string[] {
 }
 
 export function getIgnoredModules(): string[] {
-  const out = [...RootIndex.getModuleList('all')]
+  return [...RootIndex.getModuleList('all')]
     .map(x => RootIndex.manifest.modules[x])
     .filter(m => !m.prod)
     .map(m => m.name);
-
-  out.push('@travetto/pack', '@travetto/compiler');
-
-  return out;
 }
 
 export function getTerserConfig(): Parameters<typeof terser>[0] {

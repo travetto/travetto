@@ -65,6 +65,8 @@ export class DockerPackOperation {
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
       await PackUtil.runCommand(cmd, { cwd: cfg.workspace, stdio: [0, 'pipe', 2] });
+      const [image] = JSON.parse(await PackUtil.runCommand(['docker', 'inspect', cfg.dockerImage]));
+      yield [cliTpl`${{ title: 'Built Docker Container  ' }} ${{ identifier: 'sizeMb' }}=${{ param: Math.trunc(image.Size / 2 ** 20) }}`];
     }
   }
 

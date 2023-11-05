@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { AppError, ExecUtil, ExecutionOptions } from '@travetto/base';
+import { AppError, ExecUtil, ExecutionOptions, ExecutionResult } from '@travetto/base';
 
 import { ActiveShellCommand } from './shell';
 
@@ -66,8 +66,8 @@ export class PackUtil {
   /**
    * Track result response
    */
-  static async runCommand(cmd: string[], opts: ExecutionOptions = {}): Promise<void> {
-    const { valid, code, stderr, message } = await ExecUtil.spawn(cmd[0], cmd.slice(1), {
+  static async runCommand(cmd: string[], opts: ExecutionOptions = {}): Promise<string> {
+    const { valid, code, stderr, message, stdout } = await ExecUtil.spawn(cmd[0], cmd.slice(1), {
       stdio: [0, 'pipe', 'pipe', 'ipc'],
       ...opts,
       catchAsResult: true
@@ -76,5 +76,6 @@ export class PackUtil {
       process.exitCode = code;
       throw new AppError(stderr || message || 'An unexpected error has occurred');
     }
+    return stdout;
   }
 }
