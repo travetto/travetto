@@ -274,24 +274,6 @@ export class Workspace {
   }
 
   /**
-   * Add a breakpoint to a given editor at a specific line
-   * @param editor
-   * @param line
-   */
-  static addBreakpoint(editor: vscode.TextEditor, line: number): void {
-    const uri = editor.document.uri;
-    const pos = new vscode.Position(line - 1, 0);
-    const loc = new vscode.Location(uri, pos);
-    const breakpoint = new vscode.SourceBreakpoint(loc, true);
-    vscode.debug.addBreakpoints([breakpoint]);
-
-    const remove = vscode.debug.onDidTerminateDebugSession(() => {
-      vscode.debug.removeBreakpoints([breakpoint]);
-      remove.dispose();
-    });
-  }
-
-  /**
    * Spawn the CLI in the same form as ExecUtil.spawn
    * @param command
    * @param args

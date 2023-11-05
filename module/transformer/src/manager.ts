@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestIndex, path, RootIndex } from '@travetto/manifest';
+import { ManifestIndex, RootIndex } from '@travetto/manifest';
 
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
@@ -19,11 +19,7 @@ export class TransformerManager {
    * @returns
    */
   static async create(manifestIndex: ManifestIndex): Promise<TransformerManager> {
-    const transformerFiles = Object.values(manifestIndex.manifest.modules).flatMap(
-      x => (x.files.$transformer ?? []).map(([f]) =>
-        path.resolve(manifestIndex.manifest.workspacePath, x.sourceFolder, f)
-      )
-    );
+    const transformerFiles = RootIndex.find({ folder: f => f === '$transformer' }).map(f => f.sourceFile);
 
     const transformers: NodeTransformer<TransformerState>[] = [];
 

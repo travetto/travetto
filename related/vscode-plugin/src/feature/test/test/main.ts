@@ -59,16 +59,15 @@ class TestRunnerFeature extends BaseFeature {
 
     file = path.toPosix(file);
 
-    if (editor && breakpoint) {
-      Workspace.addBreakpoint(editor, line);
-    }
-
     await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
       useCli: true,
       name: 'Debug Travetto',
       main: 'test:direct',
       args: [file.replace(`${Workspace.path}/`, ''), `${line}`],
-      cliModule: file
+      cliModule: file,
+      env: {
+        ...(breakpoint ? { TRV_TEST_BREAK_ENTRY: '1' } : {})
+      }
     }));
   }
 

@@ -4,10 +4,32 @@ import {
   TransformerState, DecoratorMeta, OnMethod, OnClass, CoreUtil, DecoratorUtil
 } from '@travetto/transformer';
 
+const RUN_UTIL = 'RunnerUtil';
+
+const RunUtilⲐ = Symbol.for('@travetto/test:runner');
+
+/**
+ * Annotate transformation state
+ */
+interface AnnotateState {
+  [RunUtilⲐ]?: ts.Expression;
+}
+
 /**
  * Annotate tests and suites for better diagnostics
  */
 export class AnnotationTransformer {
+
+
+  /**
+   * Initialize transformer state
+   */
+  static initState(state: TransformerState & AnnotateState): void {
+    if (!state[RunUtilⲐ]) {
+      const runUtil = state.importFile('@travetto/test/src/execute/util').ident;
+      state[RunUtilⲐ] = CoreUtil.createAccess(state.factory, runUtil, RUN_UTIL, 'tryDebugger');
+    }
+  }
 
   /**
    * Build source annotation, indicating line ranges
@@ -15,7 +37,7 @@ export class AnnotationTransformer {
    * @param node
    * @param dec
   */
-  static buildAnnotation(state: TransformerState, node: ts.Node, dec: ts.Decorator, expression: ts.CallExpression): ts.Decorator {
+  static buildAnnotation(state: TransformerState & AnnotateState, node: ts.Node, dec: ts.Decorator, expression: ts.CallExpression): ts.Decorator {
     const ogN = (CoreUtil.hasOriginal(node) ? node.original : node);
     const n = ts.isMethodDeclaration(ogN) ? ogN : undefined;
 
@@ -40,7 +62,7 @@ export class AnnotationTransformer {
   }
 
   @OnClass('Suite')
-  static annotateSuiteDetails(state: TransformerState, node: ts.ClassDeclaration, dm?: DecoratorMeta): ts.ClassDeclaration {
+  static annotateSuiteDetails(state: TransformerState & AnnotateState, node: ts.ClassDeclaration, dm?: DecoratorMeta): ts.ClassDeclaration {
     const dec = dm?.dec;
 
     if (dec && ts.isCallExpression(dec.expression)) {
@@ -57,7 +79,9 @@ export class AnnotationTransformer {
   }
 
   @OnMethod('Test')
-  static annotateTestDetails(state: TransformerState, node: ts.MethodDeclaration, dm?: DecoratorMeta): ts.MethodDeclaration {
+  static annotateTestDetails(state: TransformerState & AnnotateState, node: ts.MethodDeclaration, dm?: DecoratorMeta): ts.MethodDeclaration {
+    this.initState(state);
+
     const dec = dm?.dec;
 
     if (dec && ts.isCallExpression(dec.expression)) {
@@ -70,7 +94,11 @@ export class AnnotationTransformer {
         node.typeParameters,
         node.parameters,
         node.type,
-        node.body
+        node.body ? state.factory.updateBlock(node.body, [
+          state.factory.createIfStatement(state[RunUtilⲐ]!,
+            state.factory.createExpressionStatement(state.factory.createIdentifier('debugger'))),
+          ...node.body.statements
+        ]) : node.body
       );
     }
     return node;
