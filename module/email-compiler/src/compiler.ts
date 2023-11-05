@@ -1,9 +1,8 @@
 import fs from 'fs/promises';
 
-import { FileQueryProvider, TypedObject } from '@travetto/base';
+import { CompilerClient, FileQueryProvider, TypedObject } from '@travetto/base';
 import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
 import { RootIndex, path } from '@travetto/manifest';
-import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 import { ManualAsyncIterator as Queue } from '@travetto/worker';
 
 import { EmailCompileUtil } from './util';
@@ -133,10 +132,10 @@ export class EmailCompiler {
     this.#watchFolders(all.paths, ev => stream.add(ev), ctrl.signal);
 
     // Watch template files
-    DynamicFileLoader.onLoadEvent((ev) => {
+    new CompilerClient().onFileChange(ev => {
       const src = RootIndex.getEntry(ev.file);
       if (src && EmailCompileUtil.isTemplateFile(src.sourceFile)) {
-        stream.add({ ...ev, file: src.sourceFile });
+        setTimeout(() => stream.add({ ...ev, file: src.sourceFile }), 100); // Wait for it to be loaded
       }
     });
 

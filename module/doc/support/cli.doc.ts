@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { PackageUtil, path, RootIndex } from '@travetto/manifest';
-import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
+import { ExecUtil, GlobalEnvConfig, CompilerClient } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
@@ -54,8 +54,7 @@ export class DocCommand implements CliCommandShape {
     }
 
     const args = process.argv.slice(2).filter(x => !/(-w|--watch)/.test(x));
-    const { listenFileChanges } = await import('@travetto/base/src/internal/compiler-client.js');
-    for await (const { action, file } of listenFileChanges()) {
+    await new CompilerClient().onFileChange(async ({ action, file }) => {
       if (action === 'update' && file === this.input) {
         await ExecUtil.spawn('npx', ['trv', ...args], {
           cwd: RootIndex.mainModule.sourcePath,
@@ -63,7 +62,7 @@ export class DocCommand implements CliCommandShape {
           stdio: 'inherit', catchAsResult: true
         });
       }
-    }
+    }, true);
   }
 
   async render(): Promise<void> {

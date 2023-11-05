@@ -29,7 +29,7 @@ export class TransformerManager {
     }
 
     for (const x of transformers) {
-      process.send?.(['debug', `Loaded Transformer: ${x.key}#${x.type}`]);
+      process.send?.({ type: 'log', payload: { level: 'debug', message: `Loaded Transformer: ${x.key}#${x.type}`, scope: 'transformers' } });
     }
 
     // Prepare a new visitor factory with a given type checker

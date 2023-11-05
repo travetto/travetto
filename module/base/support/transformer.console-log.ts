@@ -7,7 +7,6 @@ import {
 
 const CONSOLE_IMPORT = '@travetto/base/src/console';
 const MANIFEST_MOD = '@travetto/manifest';
-const ENTRY_POINT = 'support/entry';
 
 type CustomState = TransformerState & {
   scope: { type: 'method' | 'class' | 'function', name: string }[];
@@ -26,7 +25,7 @@ const VALID_LEVELS: Record<string, string> = {
  * Allows for removal of debug log messages depending on whether app is running
  * in prod mode.
  */
-export class LoggerTransformer {
+export class ConsoleLogTransformer {
 
   static initState(state: CustomState): void {
     state.scope = state.scope ?? [];
@@ -77,11 +76,7 @@ export class LoggerTransformer {
 
   @OnCall()
   static onLogCall(state: CustomState, node: ts.CallExpression): typeof node | ts.Identifier {
-    if (
-      !ts.isPropertyAccessExpression(node.expression)
-      || state.importName.startsWith(MANIFEST_MOD)
-      || state.importName.includes(ENTRY_POINT)
-    ) {
+    if (!ts.isPropertyAccessExpression(node.expression) || state.importName.startsWith(MANIFEST_MOD)) {
       return node;
     }
 

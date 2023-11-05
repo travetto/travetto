@@ -2,8 +2,8 @@ import { EventEmitter } from 'events';
 
 import { FindConfig, RootIndex } from '@travetto/manifest';
 import { Class, GlobalEnv } from '@travetto/base';
-import { DynamicFileLoader } from '@travetto/base/src/internal/file-loader';
 
+import { DynamicFileLoader } from '../internal/file-loader';
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 import { PendingRegister } from '../decorator';
 

@@ -1,64 +1,24 @@
 import vscode from 'vscode';
-import { EventEmitter, Readable } from 'stream';
-import rl from 'readline/promises';
+import { EventEmitter } from 'stream';
+
+import { CompilerClient } from '@travetto/base';
 
 import { Log } from './log';
 import { Workspace } from './workspace';
 
-type ServerInfo = { mode: 'build' | 'watch', iteration: number, state: StateEvent['state'], serverPid: number, compilerPid: number };
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
-type ProgressEvent = { idx: number, total: number, message: string, operation: string, complete?: boolean };
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
-type StateEvent = { state: 'compile-start' | 'compile-end' | 'watch-start' | 'watch-end' | 'reset' | 'init' };
-type LogEvent = { level: 'info' | 'warn' | 'error' | 'debug', message: string, args: string[], scope: string, time: number };
-
-declare global {
-  interface RequestInit { timeout?: number }
-}
 
 const SCOPE_MAX = 15;
-
-async function getInfo(): Promise<ServerInfo | undefined> {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  return await fetch(Workspace.compilerServerUrl('/info')).then(v => v.ok ? v.json() as unknown as ServerInfo : undefined).catch(() => undefined);
-}
-
-const clientLog = new Log('travetto.compiler-client');
-
-async function* fetchEvents<T>(type: string, signal: AbortSignal): AsyncIterable<T> {
-  const url = Workspace.compilerServerUrl(`/event/${type}`);
-  for (; ;) {
-    try {
-      const stream = await fetch(url, { signal, timeout: 60000 });
-      for await (const line of rl.createInterface(Readable.fromWeb(stream.body!))) {
-        if (line.trim().charAt(0) === '{') {
-          const val: T = JSON.parse(line);
-          yield val;
-        }
-      }
-    } catch (err) {
-      if (!signal.aborted) {
-        clientLog.warn('Stream stopped', err);
-      }
-    }
-
-    if (signal?.aborted || (await getInfo() === undefined)) { // If health check fails, or aborted
-      clientLog.info(`Stopping client due to ${signal?.aborted ? 'stopped' : 'not-running'}`);
-      return;
-    }
-  }
-}
 
 /**
  * Represents the general build status of the workspace, allowing operations to wait for builds to be complete before running
  */
 export class CompilerServer {
 
-  static #connected: boolean = false;
   static #item: vscode.StatusBarItem;
   static #emitter = new EventEmitter();
   static #log = new Log('travetto.build-status');
-  static #controller?: AbortController;
 
   static async init(ctx: vscode.ExtensionContext): Promise<void> {
     this.#item = vscode.window.createStatusBarItem('travetto.build', vscode.StatusBarAlignment.Left, 1000);
@@ -72,10 +32,20 @@ export class CompilerServer {
   }
 
   static async #trackConnected(): Promise<void> {
+    this.#log.info('Initial connection at', Workspace.compilerServerUrl);
+    const simple = new CompilerClient({ url: Workspace.compilerServerUrl });
+
     for (; ;) {
+      const ctrl = new AbortController();
+      let connected = false;
       try {
-        if (await getInfo()) {
-          await this.connect();
+        if (await simple.getInfo()) {
+          this.#emitter.emit('connect');
+          connected = true;
+
+          const client = new CompilerClient({ url: Workspace.compilerServerUrl, signal: ctrl.signal });
+          this.#log.info('Connecting to compiler', Workspace.compilerServerUrl);
+          await Promise.race([this.#trackLog(client), this.#trackState(client), this.#trackProgress(client, ctrl.signal)]);
         } else {
           this.#log.debug('Server not running');
         }
@@ -83,7 +53,11 @@ export class CompilerServer {
         this.#log.info('Failed to connect', `${err}`);
       }
 
-      this.disconnect();
+      if (connected) {
+        this.#emitter.emit('disconnect');
+        this.#log.info('Disconnecting', !!ctrl.signal.aborted);
+      }
+      ctrl.abort();
       // Check every second
       await new Promise(r => setTimeout(r, 1000));
     }
@@ -97,8 +71,8 @@ export class CompilerServer {
     this.#emitter.on('disconnect', () => handler());
   }
 
-  static #onState(ev: StateEvent): void {
-    switch (ev.state) {
+  static #onState(state: string): void {
+    switch (state) {
       case 'reset': this.#item.text = '$(flame) Restarting'; break;
       case 'init': this.#item.text = '$(flame) Initializing'; break;
       case 'compile-start': this.#item.text = '$(flame) Compiling'; break;
@@ -107,20 +81,20 @@ export class CompilerServer {
     }
   }
 
-  static async #trackState(): Promise<void> {
+  static async #trackState(client: CompilerClient): Promise<void> {
     try {
-      const { state } = (await getInfo())!;
-      this.#onState({ state });
-      for await (const ev of fetchEvents<StateEvent>('state', this.#controller!.signal)) {
-        this.#onState(ev);
+      const info = (await client.getInfo())!;
+      this.#onState(info.state);
+      for await (const ev of client.fetchEvents('state')) {
+        this.#onState(ev.state);
       }
     } finally {
       this.#item.text = '$(debug-pause) Disconnected';
     }
   }
 
-  static async #trackLog(): Promise<void> {
-    for await (const ev of fetchEvents<LogEvent>('log', this.#controller!.signal)) {
+  static async #trackLog(client: CompilerClient): Promise<void> {
+    for await (const ev of client.fetchEvents('log')) {
       const message = ev.message.replaceAll(Workspace.path, '.');
       const params = [message, ...ev.args ?? []];
       if (ev.scope) {
@@ -130,13 +104,16 @@ export class CompilerServer {
     }
   }
 
-  static async #trackProgress(): Promise<void> {
+  static async #trackProgress(client: CompilerClient, signal: AbortSignal): Promise<void> {
     const state: Record<string, ProgressState> = {};
 
-    for await (const ev of fetchEvents<ProgressEvent>('progress', this.#controller!.signal)) {
+    for await (const ev of client.fetchEvents('progress')) {
       let pState = state[ev.operation];
 
-      if (ev.complete) {
+      const value = 100 * (ev.idx / ev.total);
+      const delta = (value - pState?.prev ?? 0);
+
+      if (ev.complete || delta < 0) {
         pState?.cleanup();
         delete state[ev.operation];
         continue;
@@ -146,12 +123,12 @@ export class CompilerServer {
         const ctrl = new AbortController();
         const complete = Workspace.manualPromise();
         const kill = ctrl.abort.bind(ctrl);
-        this.#controller?.signal.addEventListener('abort', kill);
+        signal.addEventListener('abort', kill);
 
         const st: Omit<ProgressState, 'bar'> = {
           prev: 0,
           cleanup: () => {
-            this.#controller?.signal.removeEventListener('abort', kill);
+            signal.removeEventListener('abort', kill);
             complete.resolve(null);
           }
         };
@@ -170,30 +147,8 @@ export class CompilerServer {
         };
       }
 
-      const value = 100 * (ev.idx / ev.total);
-      const delta = (value - pState.prev);
       pState.prev = value;
       pState.bar.report({ message: `${Math.trunc(value)}% (Files: ${ev.idx + 1}/${ev.total})`, increment: delta });
     }
-  }
-
-  static async connect(): Promise<void> {
-    if (this.#connected) {
-      return;
-    }
-    this.#connected = true;
-    this.#emitter.emit('connect');
-    this.#controller = new AbortController();
-    return Promise.race([this.#trackLog(), this.#trackState(), this.#trackProgress()]);
-  }
-
-  static disconnect(): void {
-    if (!this.#connected) {
-      return;
-    }
-    this.#connected = false;
-    this.#emitter.emit('disconnect');
-    this.#log.info('Disconnecting', !!this.#controller?.signal.aborted);
-    this.#controller?.abort();
   }
 }

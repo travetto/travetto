@@ -3,7 +3,7 @@
 .gitignore
 tsconfig.json
 vsc-extension-quickstart.md
-.trv_*/
+.trv/
 src/
 support/
 out/
