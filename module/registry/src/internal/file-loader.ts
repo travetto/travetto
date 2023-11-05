@@ -61,7 +61,7 @@ class $DynamicFileLoader {
 
 
     // Fire off, and let it run in the bg, restart on exit
-    await new CompilerClient().onFileChange(async ev => {
+    new CompilerClient().onFileChange(async ev => {
       if (ev.file && RootIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
         await this.dispatch(ev);
       }
