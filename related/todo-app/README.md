@@ -316,9 +316,9 @@ npx trv run:rest
     debug: '0',
     devMode: true,
     test: false,
-    dynamic: true,
+    dynamic: false,
     resourcePaths: [],
-    nodeVersion: '20'
+    nodeVersion: 20
   },
   config: {
     sources: [
@@ -333,7 +333,7 @@ npx trv run:rest
       ApiInfoConfig: { description: '', title: '@travetto/todo-app', version: '0.0.0' },
       ApiSpecConfig: {
         output: './openapi.yml',
-        persist: true,
+        persist: false,
         skipRoutes: false,
         exposeAllSchemas: false
       },

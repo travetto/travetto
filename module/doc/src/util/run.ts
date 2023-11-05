@@ -62,6 +62,8 @@ export class DocRunUtil {
         env: {
           ...process.env,
           DEBUG: '0',
+          TRV_CAN_RESTART: '0',
+          TRV_CLI_IPC: '',
           TRV_MANIFEST: '',
           TRV_BUILD: 'none',
           TRV_MODULE: config.module ?? '',

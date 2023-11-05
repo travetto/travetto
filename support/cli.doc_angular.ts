@@ -27,7 +27,15 @@ export class DocAngularCommand {
     if (mods.size > 1) {
       // Build out docs
       await RepoExecUtil.execOnModules('all',
-        (mod, opts) => ExecUtil.spawn('trv', ['doc'], { ...opts, env: { ...opts.env ?? {}, TRV_BUILD: 'none' } }),
+        (mod, opts) => {
+          const req = ExecUtil.spawn('trv', ['doc'], { ...opts, env: { ...opts.env ?? {}, TRV_BUILD: 'none' }, timeout: 10000 });
+          req.result.then(v => {
+            if (!v.valid) {
+              console.error(`${mod.name} - failed`);
+            };
+          });
+          return req;
+        },
         {
           showStdout: false,
           progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.sourceFolder ?? ''}`,

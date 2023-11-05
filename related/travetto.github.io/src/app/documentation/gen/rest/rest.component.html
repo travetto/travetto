@@ -91,7 +91,6 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
 <ul> <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L44">@Path</a> - Path params</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L50">@Query</a> - Query params</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62">@Body</a> - Request body (in it's entirety), with support for validation</li>
-<li> - Allows for mapping the query parameters to a full object</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L56">@Header</a> - Header values</li>
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38">@Context</a> - Special values exposed (e.g. <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12">TravettoRequest</a>, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L119">TravettoResponse</a>, etc.)</li>
 </ul>
@@ -188,10 +187,10 @@ The module provides high level access for <a class="module-link" routerLink="/do
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
- provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+The framework provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
   <figure class="code">
-    <figcaption class="code">Using QuerySchema for GET requests
+    <figcaption class="code">Using Query + Schema for GET requests
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/schema-query.ts">Source</a></cite>
 
 </figcaption>
@@ -218,7 +217,7 @@ The module provides high level access for <a class="module-link" routerLink="/do
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-Additionally,  and <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62">@Body</a> can also be used with <code class="item input">interface</code>s and <code class="item input">type</code> literals in lieu of classes. This is best suited for simple types:
+Additionally, schema related inputs can also be used with <code class="item input">interface</code>s and <code class="item input">type</code> literals in lieu of classes. This is best suited for simple types:
 
   <figure class="code">
     <figcaption class="code">Using QuerySchema with a type literal
@@ -280,9 +279,9 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     debug: <span class="token string">'0'</span>,
     devMode: true,
     test: false,
-    dynamic: true,
+    dynamic: false,
     resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    nodeVersion: <span class="token string">'20'</span>
+    nodeVersion: <span class="token number">20</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,
@@ -366,7 +365,7 @@ Initialized <span class="token punctuation">{{'{'}}</span>
     test: false,
     dynamic: false,
     resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    nodeVersion: <span class="token string">'20'</span>
+    nodeVersion: <span class="token number">20</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token string">'override.3 - memory://override'</span> <span class="token punctuation">]</span>,

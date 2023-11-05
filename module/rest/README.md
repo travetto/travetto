@@ -81,7 +81,6 @@ Endpoints can be configured to describe and enforce parameter behavior.  Request
    *  [@Path](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L44) - Path params
    *  [@Query](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L50) - Query params
    *  [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62) - Request body (in it's entirety), with support for validation
-   *   - Allows for mapping the query parameters to a full object
    *  [@Header](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L56) - Header values
    *  [@Context](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L38) - Special values exposed (e.g. [TravettoRequest](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L12), [TravettoResponse](https://github.com/travetto/travetto/tree/main/module/rest/src/typings.d.ts#L119), etc.)
 Each [@Param](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L25) can be configured to indicate:
@@ -170,9 +169,9 @@ class UserController {
 }
 ```
 
- provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+The framework provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
-**Code: Using QuerySchema for GET requests**
+**Code: Using Query + Schema for GET requests**
 ```typescript
 import { Schema } from '@travetto/schema';
 import { Controller, Get } from '@travetto/rest';
@@ -197,7 +196,7 @@ class UserController {
 }
 ```
 
-Additionally,  and [@Body](https://github.com/travetto/travetto/tree/main/module/rest/src/decorator/param.ts#L62) can also be used with `interface`s and `type` literals in lieu of classes. This is best suited for simple types:
+Additionally, schema related inputs can also be used with `interface`s and `type` literals in lieu of classes. This is best suited for simple types:
 
 **Code: Using QuerySchema with a type literal**
 ```typescript
@@ -250,9 +249,9 @@ Initialized {
     debug: '0',
     devMode: true,
     test: false,
-    dynamic: true,
+    dynamic: false,
     resourcePaths: [],
-    nodeVersion: '20'
+    nodeVersion: 20
   },
   config: {
     sources: [ 'override.3 - memory://override' ],
@@ -330,7 +329,7 @@ Initialized {
     test: false,
     dynamic: false,
     resourcePaths: [],
-    nodeVersion: '20'
+    nodeVersion: 20
   },
   config: {
     sources: [ 'override.3 - memory://override' ],

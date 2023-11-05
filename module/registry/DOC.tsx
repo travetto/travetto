@@ -3,7 +3,7 @@ import { d, c } from '@travetto/doc';
 
 const RootReg = d.codeLink('RootRegistry', 'src/service/root.ts', /class.*RootRegistry/);
 const MetadataReg = d.codeLink('MetadataRegistry', 'src/service/metadata.ts', /class.*MetadataRegistry/);
-const DynamicFileLoader = d.codeLink('DynamicFileLoader', '@travetto/base/src/internal/file-loader.ts', /class.*DynamicFileLoader/);
+const DynamicFileLoader = d.codeLink('DynamicFileLoader', 'src/internal/file-loader.ts', /class.*DynamicFileLoader/);
 
 export const text = <>
   <c.StdHeader />

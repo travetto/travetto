@@ -6,7 +6,7 @@ import { FileResourceProvider } from '@travetto/base';
 import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
 import { Get, Post, Put, Delete, Patch, Head, Options } from './src/decorator/endpoint';
-import { Path, Query, QuerySchema, Body, Context, Param, Header } from './src/decorator/param';
+import { Path, Query, Body, Context, Param, Header } from './src/decorator/param';
 import { BodyParseInterceptor, RestBodyParseConfig } from './src/interceptor/body-parse';
 import { CorsInterceptor, RestCorsConfig } from './src/interceptor/cors';
 import { GetCacheInterceptor } from './src/interceptor/get-cache';
@@ -78,7 +78,6 @@ export const text = <>
         <li>{Path} - Path params</li>
         <li>{Query} - Query params</li>
         <li>{Body} - Request body (in it's entirety), with support for validation</li>
-        <li>{QuerySchema} - Allows for mapping the query parameters to a full object</li>
         <li>{Header} - Header values</li>
         <li>{Context} - Special values exposed (e.g. {Request}, {Response}, etc.)</li>
       </ul>
@@ -104,11 +103,11 @@ export const text = <>
 
       <c.Code title='Using Body for POST requests' src='doc/schema-body.ts' />
 
-      {QuerySchema} provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
+      The framework provides the ability to convert the inbound request query into a schema bound object, and provide validation before the controller even receives the request.
 
-      <c.Code title='Using QuerySchema for GET requests' src='doc/schema-query.ts' />
+      <c.Code title='Using Query + Schema for GET requests' src='doc/schema-query.ts' />
 
-      Additionally, {QuerySchema} and {Body} can also be used with {d.input('interface')}s and {d.input('type')} literals in lieu of classes. This is best suited for simple types:
+      Additionally, schema related inputs can also be used with {d.input('interface')}s and {d.input('type')} literals in lieu of classes. This is best suited for simple types:
 
       <c.Code title='Using QuerySchema with a type literal' src='doc/schema-query-type.ts' />
     </c.SubSection>

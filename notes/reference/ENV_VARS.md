@@ -21,9 +21,11 @@ The common environment variables throughout the code base:
 * `TRV_TEST_PHASE_TIMEOUT` = 15s  - The default time to wait for each phase to finish.
 * `TRV_TEST_TIMEOUT` = 5s         - The default time for a single test to finish.
 * `TRV_TEST_DELAY` = 0s           - An additional wait for triggering test runs, useful for code that takes time to warm up
+* `TRV_TEST_BREAK_ENTRY`          - Should the test break on the first line of debugging
 
 ## Cli
 * `TRV_CLI_IPC`                   - Provides an IPC file location for the CLI to write supported commands to.  This facilitates cli-based invocation for external usage.
+* `TRV_CAN_RESTART`               - Determines (assuming the operation supports it), that restart behavior can trigger
 
 ## Command
 * `TRV_DOCKER` = 0|ns             - Docker support, if non-zero, acts as the docker namespace.  If `0`, disables running if docker should even be considered when running a command service, defaults to `undefined`

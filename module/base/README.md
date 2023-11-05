@@ -57,7 +57,7 @@ export const GlobalEnv = {
   /** Is test */
   get test(): boolean;
   /** Get node major version */
-  get nodeVersion(): string;
+  get nodeVersion(): number;
   /** Export as plain object */
   toJSON(): Record<string, unknown>;
 } as const;

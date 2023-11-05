@@ -74,7 +74,7 @@ The registry is a [MetadataRegistry](https://github.com/travetto/travetto/tree/m
 ### Live Flow
 At runtime, the registry is designed to listen for changes and to propagate the changes as necessary. In many cases the same file is handled by multiple registries. 
 
-As the [DynamicFileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/internal/file-loader.ts#L28) notifies that a file has been changed, the [RootRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10) will pick it up, and process it accordingly.
+As the [DynamicFileLoader](https://github.com/travetto/travetto/tree/main/module/registry/src/internal/file-loader.ts#L17) notifies that a file has been changed, the [RootRegistry](https://github.com/travetto/travetto/tree/main/module/registry/src/service/root.ts#L10) will pick it up, and process it accordingly.
 
 ## Supporting Metadata
 As mentioned in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s readme, the framework produces hashes of methods, classes, and functions, to allow for detecting changes to individual parts of the codebase. During the live flow, various registries will inspect this information to determine if action should be taken.
