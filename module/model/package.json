@@ -28,7 +28,7 @@
   "dependencies": {
     "@travetto/config": "^3.4.0-rc.1",
     "@travetto/di": "^3.4.0-rc.1",
-    "@travetto/registry": "^3.4.0-rc.1",
+    "@travetto/registry": "^3.4.0-rc.2",
     "@travetto/schema": "^3.4.0-rc.1"
   },
   "peerDependencies": {

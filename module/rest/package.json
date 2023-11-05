@@ -30,7 +30,7 @@
     "@travetto/config": "^3.4.0-rc.1",
     "@travetto/context": "^3.4.0-rc.1",
     "@travetto/di": "^3.4.0-rc.1",
-    "@travetto/registry": "^3.4.0-rc.1",
+    "@travetto/registry": "^3.4.0-rc.2",
     "@travetto/schema": "^3.4.0-rc.1",
     "@types/cookies": "^0.7.9",
     "@types/express-serve-static-core": "^4.17.39",
