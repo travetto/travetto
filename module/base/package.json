@@ -26,7 +26,7 @@
     "directory": "module/base"
   },
   "dependencies": {
-    "@travetto/manifest": "^3.4.0-rc.1",
+    "@travetto/manifest": "^3.4.0-rc.2",
     "@types/node": "^20.8.10",
     "@types/source-map-support": "^0.5.9",
     "source-map-support": "^0.5.21"

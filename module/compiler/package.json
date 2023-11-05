@@ -31,7 +31,7 @@
   },
   "dependencies": {
     "@parcel/watcher": "^2.3.0",
-    "@travetto/manifest": "^3.4.0-rc.1",
+    "@travetto/manifest": "^3.4.0-rc.2",
     "@travetto/terminal": "^3.4.0-rc.0",
     "@travetto/transformer": "^3.4.0-rc.1",
     "@types/node": "^20.8.10"
