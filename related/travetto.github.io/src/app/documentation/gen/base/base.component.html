@@ -252,7 +252,6 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <li><code class="item method">toReadable(src: Readable | Buffer | string):Promise&lt;Readable&gt;</code> for converting a stream/buffer/filepath to a Readable</li>
 <li><code class="item method">writeToFile(src: Readable, out: string):Promise&lt;void&gt;</code> will stream a readable into a file path, and wait for completion.</li>
 <li><code class="item method">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li>
-<li><code class="item method">streamByDelimiter(file: string, options: {{'{'}} delimiter, start, encoding, includeDelimiter{{'}'}}): AsyncIterable&lt;{{'{'}}item:string, read:number{{'}'}}&gt;</code> will watch a file for any line changes, and produce those changes as asynchronous iterable stream. Functionally, this is equivalent to using the Unix tail operation on a file</li>
 </ul>
 
 <h2 id="object-utilities">Object Utilities</h2>

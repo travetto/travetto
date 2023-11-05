@@ -139,6 +139,8 @@ export class CompilerWatcher {
             if (this.#sourceHashes.get(sourceFile) !== hash) {
               this.#state.resetInputSource(entry.input);
               this.#sourceHashes.set(sourceFile, hash);
+            } else {
+              entry = undefined;
             }
           }
           break;

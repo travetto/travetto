@@ -1,7 +1,5 @@
-import fs from 'fs/promises';
-
-import { Env, ExecUtil } from '@travetto/base';
-import { path, RootIndex } from '@travetto/manifest';
+import { CompilerClient, Env, ExecUtil } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 
 import { CliCommandShape } from './types';
 import { CliCommandRegistry } from './registry';
@@ -40,23 +38,43 @@ export class CliUtil {
    * Dispatch IPC payload
    */
   static async triggerIpc<T extends CliCommandShape>(action: 'run', cmd: T): Promise<boolean> {
-    const file = process.env.TRV_CLI_IPC;
-
-    if (!file) {
+    if (!process.env.TRV_CLI_IPC) {
       return false;
     }
 
+    const client = new CompilerClient({});
+
+    const info = await client.getInfo(true);
+
+    if (!info) { // Server not running
+      return false;
+    }
+
+    const defaultEnvKeys = new Set(Object.keys(info.env ?? {}));
+    defaultEnvKeys.add('PS1').add('INIT_CWD').add('COLOR').add('LANGUAGE').add('PROFILEHOME').add('_');
+
+    const env = Object.fromEntries(
+      Object.entries(process.env).filter(([k]) =>
+        !defaultEnvKeys.has(k) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(k) && !/VSCODE/.test(k)
+      )
+    );
+
     const cfg = CliCommandRegistry.getConfig(cmd);
-    const payload = JSON.stringify({
-      type: `@travetto/cli:${action}`, data: {
+    const req = {
+      type: `@travetto/cli:${action}`,
+      ipc: process.env.TRV_CLI_IPC,
+      data: {
         name: cfg.name,
         commandModule: cfg.module,
         module: RootIndex.manifest.mainModule,
-        args: process.argv.slice(3)
+        args: process.argv.slice(3),
+        env
       }
-    });
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.appendFile(file, `${payload}\n`);
+    }
+
+    console.log('Triggering IPC request', req);
+
+    await client.sendEvent('custom', req);
     return true;
   }
 

@@ -59,11 +59,13 @@ class TestRunnerFeature extends BaseFeature {
 
     file = path.toPosix(file);
 
+    const prettyFile = file.replace(`${Workspace.path}/`, '');
+
     await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
       useCli: true,
-      name: 'Debug Travetto',
+      name: `Debug Travetto Test - ${prettyFile}`,
       main: 'test:direct',
-      args: [file.replace(`${Workspace.path}/`, ''), `${line}`],
+      args: [prettyFile, `${line}`],
       cliModule: file,
       env: {
         ...(breakpoint ? { TRV_TEST_BREAK_ENTRY: '1' } : {})

@@ -6,6 +6,7 @@ import { RootIndex } from '@travetto/manifest';
 import { ShutdownManager } from './shutdown';
 import { ExecUtil } from './exec';
 import { LogLevel } from './types';
+import { AppError } from './error';
 
 type ServerInfo = {
   iteration: number;
@@ -14,6 +15,7 @@ type ServerInfo = {
   state: 'compile-start' | 'compile-end' | 'watch-start' | 'watch-end' | 'reset' | 'init';
   serverPid: number;
   compilerPid: number;
+  env: Record<string, string>;
 };
 
 type ChangeEvent = { action: 'create' | 'update' | 'delete'; file: string; folder: string; output: string; module: string; time: number; };
@@ -25,7 +27,8 @@ type CompilerEvent =
   { type: 'change', payload: ChangeEvent } |
   { type: 'log', payload: LogEvent } |
   { type: 'progress', payload: ProgressEvent } |
-  { type: 'state', payload: StateEvent };
+  { type: 'state', payload: StateEvent } |
+  { type: 'custom', payload: any };
 
 type CompilerEventType = CompilerEvent['type'];
 
@@ -59,8 +62,8 @@ export class CompilerClient {
   }
 
   /** Get compiler info */
-  async getInfo(): Promise<ServerInfo | undefined> {
-    const res = await fetch(`${this.#url}/info`, { signal: this.#kill.signal }).catch(err => ({ ok: false, json: () => undefined }));
+  async getInfo(env?: boolean): Promise<ServerInfo | undefined> {
+    const res = await fetch(`${this.#url}/info?${env ? 'env' : ''}`, { signal: this.#kill.signal }).catch(err => ({ ok: false, json: () => undefined }));
     if (res.ok) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return (await res.json()) as ServerInfo;
@@ -91,6 +94,22 @@ export class CompilerClient {
       if (this.#kill.signal?.aborted || (await this.getInfo())?.iteration !== iteration) { // If aborted, or server is not available or iteration is changed
         return;
       }
+    }
+  }
+
+  /** Send an event to the system */
+  async sendEvent<
+    V extends CompilerEventType,
+    T extends (CompilerEvent & { type: V })['payload']
+  >(type: V, payload: T, signal?: AbortSignal): Promise<void> {
+    const res = await fetch(`${this.#url}/send-event`, {
+      method: 'POST',
+      body: JSON.stringify({ type, payload }),
+      headers: { 'Content-Type': 'application/json' },
+      signal
+    });
+    if (!res.ok) {
+      throw new AppError('Unable to send event');
     }
   }
 

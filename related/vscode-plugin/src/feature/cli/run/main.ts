@@ -4,7 +4,7 @@ import { Activatible } from '../../../core/activation';
 import { ActionStorage } from '../../../core/storage';
 
 import { BaseFeature } from '../../base';
-import { TargetEvent } from '../../../core/types';
+import { EnvDict, TargetEvent } from '../../../core/types';
 import { Workspace } from '../../../core/workspace';
 
 import { RunChoice } from './types';
@@ -118,7 +118,7 @@ export class CliRunFeature extends BaseFeature {
   /**
    * On IPC trigger to run a target
    */
-  async onEvent(ev: TargetEvent<{ name: string, args: string[], module: string }>): Promise<void> {
+  async onEvent(ev: TargetEvent<{ name: string, args: string[], module: string, env: EnvDict }>): Promise<void> {
     try {
       const args = ev.data.args;
       await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
@@ -126,7 +126,8 @@ export class CliRunFeature extends BaseFeature {
         useCli: true,
         main: ev.data.name,
         args,
-        cliModule: ev.data.module
+        cliModule: ev.data.module,
+        env: ev.data.env
       }));
     } catch (err) {
       vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));

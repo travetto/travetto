@@ -16,6 +16,21 @@ const log = LogUtil.log.bind(LogUtil, 'compiler-server');
  */
 export class CompilerServer {
 
+  static readJSONRequest<T>(req: http.IncomingMessage): Promise<T> {
+    return new Promise<T>((res, rej) => {
+      const body: Buffer[] = [];
+      req.on('data', (chunk) => body.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk));
+      req.on('end', () => {
+        try {
+          res(JSON.parse(Buffer.concat(body).toString('utf8')))
+        } catch (err) {
+          rej(err);
+        }
+      });
+      req.on('error', rej);
+    });
+  }
+
   #ctx: ManifestContext;
   #server: http.Server;
   #listeners: { res: http.ServerResponse, type: CompilerServerEventType }[] = [];
@@ -126,11 +141,18 @@ export class CompilerServer {
 
     let out: unknown;
     switch (action) {
+      case 'send-event': await this.#emitEvent(await CompilerServer.readJSONRequest(req)); out = { received: true }; break;
       case 'event': return await this.#addListener(subAction, res);
       case 'stop': out = await this.close(); break;
       case 'clean': out = await this.#clean(); break;
       case 'info':
-      default: out = this.info ?? {}; break;
+      default: {
+        out = this.info ?? {};
+        if (req.url?.includes('?env')) {
+          Object.assign(out!, { env: process.env });
+        }
+        break;
+      }
     }
     res.end(JSON.stringify(out));
   }

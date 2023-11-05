@@ -24,4 +24,5 @@ export type CompilerServerInfo = {
   mode: CompilerMode,
   iteration: number;
   url: string;
+  env?: Record<string, string>;
 };
