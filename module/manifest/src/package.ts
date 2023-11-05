@@ -66,10 +66,9 @@ export class PackageUtil {
   /**
    * Extract all dependencies from a package
    */
-  static getAllDependencies<T = unknown>(modulePath: string, rootPath: string): PackageVisitReq<T>[] {
+  static getAllDependencies<T = unknown>(modulePath: string, local: boolean): PackageVisitReq<T>[] {
     const pkg = this.readPackage(modulePath);
     const children: Record<string, PackageVisitReq<T>> = {};
-    const local = modulePath === rootPath && !modulePath.includes('node_modules');
     for (const [deps, prod] of [
       [pkg.dependencies, true],
       ...(local ? [[pkg.devDependencies, false] as const] : []),
@@ -136,7 +135,15 @@ export class PackageUtil {
         out.add(dep);
         await visitor.visit?.(req, dep);
         seen.set(key, dep);
-        const children = this.getAllDependencies<T>(req.sourcePath, root.sourcePath);
+        const children = this.getAllDependencies<T>(
+          req.sourcePath,
+          // We consider a module local if its not in the node_modules
+          !req.sourcePath.includes('node_modules') && (
+            // And its the root or we are in a monorepo
+            root.sourcePath === req.sourcePath ||
+            !!root.pkg.workspaces
+          )
+        );
         queue.push(...children.map(x => ({ ...x, parent: dep })));
       }
     }
