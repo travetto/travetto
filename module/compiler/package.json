@@ -37,7 +37,7 @@
     "@types/node": "^20.8.10"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.4.0-rc.5"
+    "@travetto/cli": "^3.4.0-rc.6"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
