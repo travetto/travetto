@@ -9,7 +9,7 @@ export function buildEslintConfig(): string {
 
   const common = {
     manifest: `process.env.TRV_MANIFEST = '${path.resolve(manifestFile)}'`,
-    pluginFiles: 'const pluginFiles = RootIndex.findSupport({ filter: f => /support\\/eslint[.]/.test(f) })',
+    pluginFiles: "const pluginFiles = RootIndex.find({ folder: f => f === 'support', file: f => /support\\/eslint[.]/.test(f) })",
     build: 'const config = buildConfig(plugins)',
   };
 

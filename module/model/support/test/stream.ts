@@ -1,12 +1,13 @@
+import fs from 'fs/promises';
 import assert from 'assert';
 import crypto from 'crypto';
 import { Readable } from 'stream';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
+import { StreamUtil } from '@travetto/base';
 
 import { BaseModelSuite } from './base';
 import { ModelStreamSupport } from '../../src/service/stream';
-import { StreamUtil } from '@travetto/base';
 
 @Suite()
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
@@ -25,7 +26,8 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
   }
 
   async getStream(resource: string): Promise<readonly [{ size: number, contentType: string, hash: string, filename: string }, Readable]> {
-    const { size } = await this.fixture.describe(resource);
+    const file = await this.fixture.resolve(resource);
+    const { size } = await fs.stat(file);
     const hash = await this.getHash(await this.fixture.readStream(resource));
 
     return [

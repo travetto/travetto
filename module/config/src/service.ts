@@ -6,8 +6,13 @@ import { RootIndex } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ConfigSourceTarget, ConfigTarget } from './internal/types';
+import { ParserManager } from './parser/parser';
 import { ConfigData } from './parser/types';
-import { ConfigSource, ConfigValue } from './source/types';
+import { ConfigSource } from './source/types';
+import { FileConfigSource } from './source/file';
+import { OverrideConfigSource } from './source/override';
+
+type ConfigSpec = { source: string, priority: number, detail?: string };
 
 /**
  * Manager for application configuration
@@ -15,20 +20,22 @@ import { ConfigSource, ConfigValue } from './source/types';
 @Injectable()
 export class ConfigurationService {
 
-  private static getSorted(configs: ConfigValue[], profiles: string[]): ConfigValue[] {
-    const order = Object.fromEntries(Object.entries(profiles).map(([k, v]) => [v, +k] as const));
-
-    return configs.sort((left, right) =>
-      (order[left.profile] - order[right.profile]) ||
-      left.priority - right.priority ||
-      left.source.localeCompare(right.source)
-    );
-  }
-
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
-  #profiles: string[] = ['application', GlobalEnv.envName, ...Env.getList('TRV_PROFILES') ?? [], 'override'];
-  #sources: string[] = [];
+  #specs: ConfigSpec[] = [];
   #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(api(-|_)?key)/i];
+
+  async #toSpecPairs(cfg: ConfigSource): Promise<[ConfigSpec, ConfigData][]> {
+    const data = await cfg.getData();
+    if (!data) {
+      return [];
+    }
+    const arr = Array.isArray(data) ? data : [data];
+    return arr.map((d, i) => [{
+      priority: cfg.priority + i,
+      source: cfg.source,
+      ...(d.__ID__ ? { detail: d.__ID__?.toString() } : {})
+    }, d]);
+  }
 
   /**
    * Get a sub tree of the config, or everything if namespace is not passed
@@ -57,17 +64,24 @@ export class ConfigurationService {
     const providers = await DependencyRegistry.getCandidateTypes(ConfigSourceTarget);
 
     const configs = await Promise.all(
-      providers.map(async (el) => {
-        const inst = await DependencyRegistry.getInstance<ConfigSource>(el.class, el.qualifier);
-        return inst.getValues(this.#profiles);
-      })
+      providers.map(async (el) => await DependencyRegistry.getInstance<ConfigSource>(el.class, el.qualifier))
     );
 
-    const sorted = ConfigurationService.getSorted(configs.flat(), this.#profiles);
+    const parser = await DependencyRegistry.getInstance(ParserManager);
 
-    this.#sources = sorted.map(x => `${x.profile}.${x.priority} - ${x.source}`);
+    const specPairs = await Promise.all([
+      new FileConfigSource(parser, 'application', 100),
+      new FileConfigSource(parser, GlobalEnv.envName, 200),
+      ...(Env.getList('TRV_PROFILES') ?? []).map((p, i) => new FileConfigSource(parser, p, 300 + i * 10)),
+      ...configs,
+      new OverrideConfigSource()
+    ].map(src => this.#toSpecPairs(src)));
 
-    for (const { config: element } of sorted) {
+    const specs = specPairs.flat().sort(([a], [b]) => a.priority - b.priority);
+
+    this.#specs = specs.map(([v]) => v);
+
+    for (const [, element] of specs) {
       DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(element), 'coerce');
     }
 
@@ -88,7 +102,7 @@ export class ConfigurationService {
    * Export all active configuration, useful for displaying active state
    *   - Will not show fields marked as secret
    */
-  async exportActive(): Promise<{ sources: string[], active: ConfigData }> {
+  async exportActive(): Promise<{ sources: ConfigSpec[], active: ConfigData }> {
     const configTargets = await DependencyRegistry.getCandidateTypes(ConfigTarget);
     const configs = await Promise.all(
       configTargets
@@ -106,7 +120,7 @@ export class ConfigurationService {
       );
       out[el.class.name] = DataUtil.filterByKeys(data, this.#secrets);
     }
-    return { sources: this.#sources, active: out };
+    return { sources: this.#specs, active: out };
   }
 
   /**

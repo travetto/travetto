@@ -18,7 +18,7 @@ type ServerInfo = {
   env: Record<string, string>;
 };
 
-type ChangeEvent = { action: 'create' | 'update' | 'delete'; file: string; folder: string; output: string; module: string; time: number; };
+type ChangeEvent = { action: 'create' | 'update' | 'delete', file: string, folder: string, output: string, module: string, time: number };
 type ProgressEvent = { idx: number, total: number, message: string, operation: string, complete?: boolean };
 type StateEvent = { state: ServerInfo['state'] };
 type LogEvent = { level: LogLevel, message: string, args: string[], scope: string, time: number };
@@ -28,6 +28,7 @@ type CompilerEvent =
   { type: 'log', payload: LogEvent } |
   { type: 'progress', payload: ProgressEvent } |
   { type: 'state', payload: StateEvent } |
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   { type: 'custom', payload: any };
 
 type CompilerEventType = CompilerEvent['type'];
@@ -52,12 +53,12 @@ export class CompilerClient {
     ShutdownManager.onExitRequested(() => this.#kill.abort());
   }
 
-  replaceSignal(signal: AbortSignal) {
+  replaceSignal(signal: AbortSignal): void {
     this.#kill = new AbortController();
     signal.addEventListener('abort', () => this.#kill.abort());
   }
 
-  close() {
+  close(): void {
     this.#kill.abort();
   }
 

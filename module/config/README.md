@@ -20,10 +20,12 @@ The configuration information is comprised of:
    *  configuration files - [YAML](https://en.wikipedia.org/wiki/YAML), [JSON](https://www.json.org), and basic properties file
    *  configuration classes
 Config loading follows a defined resolution path, below is the order in increasing specificity (`ext` can be `yaml`, `yml`, `json`, `properties`):
-   1. `resources/application.<ext>` - Load the default `application.<ext>` if available.
-   1. `resources/*.<ext>` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
-   1. `resources/{env}.<ext>` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
+   1. `resources/application.<ext>` - Priority `100` - Load the default `application.<ext>` if available.
+   1. `resources/{env}.<ext>` - Priority `200` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
+   1. `resources/*.<ext>` - Priority `300` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
 By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
+
+**Note**: When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level.  The general rule is that the longest path has the highest priority.
 
 ### A Complete Example
 A more complete example setup would look like:
@@ -65,9 +67,17 @@ $ trv main doc/resolve.ts
 
 Config {
   sources: [
-    'application.1 - file://./doc/resources/application.yml',
-    'prod.1 - file://./doc/resources/prod.json',
-    'override.3 - memory://override'
+    {
+      priority: 100,
+      source: 'file://application',
+      detail: 'module/config/doc/resources/application.yml'
+    },
+    {
+      priority: 300,
+      source: 'file://prod',
+      detail: 'module/config/doc/resources/prod.json'
+    },
+    { priority: 999, source: 'memory://override' }
   ],
   active: {
     DBConfig: { host: 'prod-host-db', port: 2000, creds: { user: 'admin-user' } }
@@ -81,95 +91,84 @@ The framework provides two simple base classes that assist with existing pattern
 **Code: Memory Provider**
 ```typescript
 import { ConfigData } from '../parser/types';
-import { ConfigSource, ConfigValue } from './types';
+import { ConfigSource } from './types';
 
 /**
  * Meant to be instantiated and provided as a unique config source
  */
 export class MemoryConfigSource implements ConfigSource {
-  priority = 1;
-  data: Record<string, ConfigData>;
-  name = 'memory';
+  priority: number;
+  data: ConfigData;
+  source: string;
 
-  constructor(data: Record<string, ConfigData>, priority: number = 1) {
+  constructor(key: string, data: ConfigData, priority: number = 500) {
     this.data = data;
     this.priority = priority;
+    this.source = `memory://${key}`;
   }
 
-  getValues(profiles: string[]): ConfigValue[] {
-    const out: ConfigValue[] = [];
-    for (const profile of profiles) {
-      if (this.data[profile]) {
-        out.push({ profile, config: this.data[profile], source: `${this.name}://${profile}`, priority: this.priority });
-      }
-    }
-    return out;
+  getData(): ConfigData {
+    return this.data;
   }
 }
 ```
 
 **Code: Environment JSON Provider**
 ```typescript
-import { Env, GlobalEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 
-import { ConfigSource, ConfigValue } from './types';
+import { ConfigSource } from './types';
+import { ConfigData } from '../parser/types';
 
 /**
  * Represents the environment mapped data as a JSON blob
  */
 export class EnvConfigSource implements ConfigSource {
   priority: number;
-  name = 'env';
+  source: string;
   #envKey: string;
 
   constructor(key: string, priority: number) {
     this.#envKey = key;
     this.priority = priority;
+    this.source = `env://${this.#envKey}`;
   }
 
-  getValues(profiles: string[]): ConfigValue[] {
+  getData(): ConfigData | undefined {
     try {
       const data = JSON.parse(Env.get(this.#envKey, '{}'));
-      return [{ profile: GlobalEnv.envName, config: data, source: `${this.name}://${this.#envKey}`, priority: this.priority }];
+      return data;
     } catch (e) {
       console.error(`env.${this.#envKey} is an invalid format`, { text: Env.get(this.#envKey) });
-      return [];
     }
   }
 }
 ```
 
 ### Custom Configuration Provider
-In addition to files and environment variables, configuration sources can also be provided via the class itself.  This is useful for reading remote configurations, or dealing with complex configuration normalization.  The only caveat to this pattern, is that the these configuration sources cannot rely on the [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L16) service for input.  This means any needed configuration will need to be accessed via specific patterns.
+In addition to files and environment variables, configuration sources can also be provided via the class itself.  This is useful for reading remote configurations, or dealing with complex configuration normalization.  The only caveat to this pattern, is that the these configuration sources cannot rely on the [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L21) service for input.  This means any needed configuration will need to be accessed via specific patterns.
 
 **Code: Custom Configuration Source**
 ```typescript
-import { ConfigSource, ConfigValue } from '@travetto/config';
+import { ConfigData, ConfigSource } from '@travetto/config';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
 export class CustomConfigSource implements ConfigSource {
-  priority = 1000;
-  name = 'custom';
+  priority = 2000;
+  source = 'custom://override';
 
-  async getValues(): Promise<ConfigValue[]> {
-    return [
-      {
-        config: { user: { name: 'bob' } },
-        priority: this.priority,
-        profile: 'override',
-        source: `custom://${CustomConfigSource.name}`
-      }
-    ];
+  async getData(): Promise<ConfigData> {
+    return { user: { name: 'bob' } };
   }
 }
 ```
 
 ## Startup
-At startup, the [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L16) service will log out all the registered configuration objects.  The configuration state output is useful to determine if everything is configured properly when diagnosing runtime errors.  This service will find all configurations, and output a redacted version with all secrets removed.  The default pattern for secrets is `/password|private|secret/i`.  More values can be added in your configuration under the path `config.secrets`.  These values can either be simple strings (for exact match), or `/pattern/` to create a regular expression.
+At startup, the [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L21) service will log out all the registered configuration objects.  The configuration state output is useful to determine if everything is configured properly when diagnosing runtime errors.  This service will find all configurations, and output a redacted version with all secrets removed.  The default pattern for secrets is `/password|private|secret/i`.  More values can be added in your configuration under the path `config.secrets`.  These values can either be simple strings (for exact match), or `/pattern/` to create a regular expression.
 
 ## Consuming
-The [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L16) service provides injectable access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
+The [ConfigurationService](https://github.com/travetto/travetto/tree/main/module/config/src/service.ts#L21) service provides injectable access to all of the loaded configuration. For simplicity, a decorator, [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) allows for classes to automatically be bound with config information on post construction via the [Dependency Injection](https://github.com/travetto/travetto/tree/main/module/di#readme "Dependency registration/management and injection support.") module. The decorator will install a `postConstruct` method if not already defined, that performs the binding of configuration.  This is due to the fact that we cannot rewrite the constructor, and order of operation matters.
 
 ### Environment Variables
 Additionally there are times in which you may want to also support configuration via environment variables.  [EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L34) supports override configuration values when environment variables are present. 
@@ -228,9 +227,17 @@ $ DATABASE_PORT=200 trv main doc/dbconfig-run.ts
 
 Config {
   sources: [
-    'application.1 - file://./doc/resources/application.yml',
-    'prod.1 - file://./doc/resources/prod.json',
-    'override.3 - memory://override'
+    {
+      priority: 100,
+      source: 'file://application',
+      detail: 'module/config/doc/resources/application.yml'
+    },
+    {
+      priority: 300,
+      source: 'file://prod',
+      detail: 'module/config/doc/resources/prod.json'
+    },
+    { priority: 999, source: 'memory://override' }
   ],
   active: {
     DBConfig: { host: 'prod-host-db', port: 200, creds: { user: 'admin-user' } }

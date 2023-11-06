@@ -91,7 +91,7 @@ export abstract class AssetRestServerSuite extends BaseRestSuite {
   }
 
   async getAsset(pth: string) {
-    return AssetUtil.fileToAsset(await (await this.fixture.describe(pth)).path);
+    return AssetUtil.fileToAsset(await this.fixture.resolve(pth));
   }
 
   @BeforeAll()

@@ -27,7 +27,7 @@ export class ImageOptimizingResourceProvider extends FileResourceProvider {
    * Fetch image, compress and return as buffer
    */
   async readOptimized(rel: string): Promise<Buffer> {
-    const { path: pth } = await this.describe(rel);
+    const pth = await this.resolve(rel);
     const cachedOutput = path.resolve(this.#cacheRoot, rel);
     await fs.mkdir(path.dirname(cachedOutput), { recursive: true });
 

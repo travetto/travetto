@@ -1,19 +1,12 @@
-import { ConfigSource, ConfigValue } from '@travetto/config';
+import { ConfigData, ConfigSource } from '@travetto/config';
 import { Injectable } from '@travetto/di';
 
 @Injectable()
 export class CustomConfigSource implements ConfigSource {
-  priority = 1000;
-  name = 'custom';
+  priority = 2000;
+  source = 'custom://override';
 
-  async getValues(): Promise<ConfigValue[]> {
-    return [
-      {
-        config: { user: { name: 'bob' } },
-        priority: this.priority,
-        profile: 'override',
-        source: `custom://${CustomConfigSource.name}`
-      }
-    ];
+  async getData(): Promise<ConfigData> {
+    return { user: { name: 'bob' } };
   }
 }

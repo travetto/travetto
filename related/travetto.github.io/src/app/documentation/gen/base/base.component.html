@@ -76,7 +76,7 @@ The source for each field is:
 <ul> <li><code class="item field">envName</code> - This is derived from <code class="item field">process.env.TRV_ENV</code> with a fallback of <code class="item field">process.NODE_ENV</code></li>
 <li><code class="item field">devMode</code> - This is true if <code class="item field">process.env.NODE_ENV</code> is dev* or test</li>
 <li><code class="item field">dynamic</code> - This is derived from <code class="item field">process.env.TRV_DYNAMIC</code>. This field reflects certain feature sets used throughout the framework.</li>
-<li><code class="item field">resourcePaths</code> - This is a list derived from <code class="item field">process.env.TRV_RESOURCES</code>.  This points to a list of folders that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46">FileResourceProvider</a> will search against, by default.</li>
+<li><code class="item field">resourcePaths</code> - This is a list derived from <code class="item field">process.env.TRV_RESOURCES</code>.  This points to a list of folders that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">FileResourceProvider</a> will search against, by default.</li>
 <li><code class="item field">test</code> - This is true if <code class="item field">envName</code> is <code class="item input">test</code></li>
 <li><code class="item field">nodeVersion</code> - This is derived from <code class="item field">process.version</code>, and is used primarily for logging purposes</li>
 </ul>
@@ -111,41 +111,12 @@ As you can see this method exists to update/change the <code class="item field">
 
 <h2 id="resource-access">Resource Access</h2>
 
-The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.
-
-  <figure class="code">
-    <figcaption class="code">ResourceProvider contract
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ResourceProvider</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token comment">/**
-   * Describe the resource
-   * @param pth The path to resolve
-   */</span>
-  <span class="token function">describe</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>ResourceDescription<span class="token operator">></span><span class="token punctuation">;</span>
-
-  <span class="token comment">/**
-   * Read a resource, mimicking fs.read
-   * @param pth The path to read
-   */</span>
-  <span class="token function">read</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> binary<span class="token operator">?</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token function">read</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> binary<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Buffer<span class="token operator">></span><span class="token punctuation">;</span>
-  <span class="token function">read</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> binary<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">string</span> <span class="token operator">|</span> Buffer<span class="token operator">></span><span class="token punctuation">;</span>
-
-  <span class="token comment">/**
-   * Read a resource as a stream, mimicking fs.readStream
-   * @param pth The path to read
-   */</span>
-  <span class="token function">readStream</span><span class="token punctuation">(</span>pth<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> binary<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Readable<span class="token operator">></span><span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
-  </figure>
-
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">ResourceProvider</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> with a category of 'notfound'.  This contract is fairly simple to fill out, and the predominant implementation is <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46">FileResourceProvider</a>.  This <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">ResourceProvider</a> will utilize the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17">GlobalEnv</a>'s <code class="item field">resourcePaths</code> information on where to attempt to find a requested resource.
+The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">FileResourceProvider</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> with a category of 'notfound'.  This <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">FileResourceProvider</a> will utilize the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17">GlobalEnv</a>'s <code class="item field">resourcePaths</code> information on where to attempt to find a requested resource.
 <h3 id="scanning-for-resources">Scanning for Resources</h3>
 
 Beyond directly asking for a resource, there a times where it is helpful to know what resources are available at runtime. This is primarily used during development, and is a discouraged pattern for production as assumptions about the file-system may be incorrect (or change without warning).<br><br>
-To that end, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource-query.ts#L10">FileQueryProvider</a> exists, and is a valid <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">ResourceProvider</a>.  It also provides the <code class="item method">query</code> method, to allow for scanning/finding resources that match certain patterns.  Additionally, this class also allows for watching all the resource folders.  This again is helpful during development/compilation, but should not be used in production.
+To that end, <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource-query.ts#L10">FileQueryProvider</a> exists, and is a valid <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21">FileResourceProvider</a>.  It also provides the <code class="item method">query</code> method, to allow for scanning/finding resources that match certain patterns.  Additionally, this class also allows for watching all the resource folders.  This again is helpful during development/compilation, but should not be used in production.
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 

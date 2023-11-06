@@ -16,36 +16,11 @@ export interface FileResourceConfig {
 }
 
 /**
- * Primary contract for resource handling
+ * File-based resource provider
  */
-export interface ResourceProvider {
-  /**
-   * Describe the resource
-   * @param pth The path to resolve
-   */
-  describe(pth: string): Promise<ResourceDescription>;
+export class FileResourceProvider {
 
-  /**
-   * Read a resource, mimicking fs.read
-   * @param pth The path to read
-   */
-  read(pth: string, binary?: false): Promise<string>;
-  read(pth: string, binary: true): Promise<Buffer>;
-  read(pth: string, binary?: boolean): Promise<string | Buffer>;
-
-  /**
-   * Read a resource as a stream, mimicking fs.readStream
-   * @param pth The path to read
-   */
-  readStream(pth: string, binary?: boolean): Promise<Readable>;
-}
-
-/**
- * Simple file-based resource provider
- */
-export class FileResourceProvider implements ResourceProvider {
-
-  static resolvePaths(cfgOrPaths: FileResourceConfig | string[]): string[] {
+  static resolveSearchConfig(cfgOrPaths: FileResourceConfig | string[]): string[] {
     const main = RootIndex.manifest.mainModule;
     const cfg = Array.isArray(cfgOrPaths) ? { paths: cfgOrPaths } : cfgOrPaths;
     const paths = cfg.paths ?? [];
@@ -75,38 +50,65 @@ export class FileResourceProvider implements ResourceProvider {
   #paths: string[];
 
   constructor(cfg: FileResourceConfig | string[]) {
-    this.#paths = FileResourceProvider.resolvePaths(cfg);
+    this.#paths = FileResourceProvider.resolveSearchConfig(cfg);
   }
 
-  async #getPath(file: string): Promise<string> {
+  async #getPaths(relativePath: string, minSize = Number.MAX_SAFE_INTEGER): Promise<string[]> {
+    const out: string[] = [];
     for (const sub of this.#paths) {
-      const resolved = path.join(sub, file);
+      const resolved = path.join(sub, relativePath);
       if (await fs.stat(resolved).catch(() => false)) {
-        return resolved;
+        out.push(resolved);
+        if (out.length >= minSize) {
+          break;
+        }
       }
     }
-    throw new AppError(`Unable to find: ${file}, searched=${this.#paths.join(',')}`, 'notfound');
+    if (!out.length) {
+      throw new AppError(`Unable to find: ${relativePath}, searched=${this.#paths.join(',')}`, 'notfound');
+    }
+    return out;
   }
 
-  get paths(): string[] {
+
+  get searchPaths(): string[] {
     return this.#paths.slice(0);
   }
 
-  async describe(file: string): Promise<ResourceDescription> {
-    file = await this.#getPath(file);
-    const stat = await fs.stat(file);
-    return { size: stat.size, path: file };
+  /**
+   * Return the absolute path for the given relative path
+   * @param relativePath The path to resolve
+   */
+  async resolve(relativePath: string): Promise<string> {
+    return this.#getPaths(relativePath, 1).then(v => v[0]);
   }
 
-  async read(file: string, binary?: false): Promise<string>;
-  async read(file: string, binary: true): Promise<Buffer>;
-  async read(file: string, binary = false): Promise<string | Buffer> {
-    file = await this.#getPath(file);
+  /**
+   * Return all of the matching absolute paths for the given
+   *  relative path, if one or more found
+   * @param relativePath The path to resolve
+   */
+  async resolveAll(relativePath: string): Promise<string[]> {
+    return this.#getPaths(relativePath);
+  }
+
+  /**
+   * Read a resource, mimicking fs.read
+   * @param relativePath The path to read
+   */
+  async read(relativePath: string, binary?: false): Promise<string>;
+  async read(relativePath: string, binary: true): Promise<Buffer>;
+  async read(relativePath: string, binary = false): Promise<string | Buffer> {
+    const file = await this.resolve(relativePath);
     return fs.readFile(file, binary ? undefined : 'utf8');
   }
 
-  async readStream(file: string, binary = true): Promise<Readable> {
-    file = await this.#getPath(file);
+  /**
+   * Read a resource as a stream, mimicking fs.readStream
+   * @param relativePath The path to read
+   */
+  async readStream(relativePath: string, binary = true): Promise<Readable> {
+    const file = await this.resolve(relativePath);
     const handle = await fs.open(file);
     return handle.createReadStream({ encoding: binary ? undefined : 'utf8' });
   }

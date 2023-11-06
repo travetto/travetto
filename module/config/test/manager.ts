@@ -10,6 +10,7 @@ import { Config } from '../src/decorator';
 import { ConfigSource } from '../src/source/types';
 import { MemoryConfigSource } from '../src/source/memory';
 import { FileConfigSource } from '../src/source/file';
+import { ParserManager } from '../src/parser/parser';
 
 @Config('ignore')
 class TestConfig {
@@ -47,28 +48,26 @@ class Properties {
 class Setup {
   @InjectableFactory()
   static getMemoryConfig(): ConfigSource {
-    return new MemoryConfigSource({
-      override: {
-        test: { beta: { values: [2, 4, 5] } },
-        'test.alpha': {
-          values: [1, 2, 3]
-        },
-        nested: { user: { age: 52 } },
-        vague: {
-          name: 'bob',
-          props: {
-            person: 20,
-            age: true,
-            child: { name: [1, 2, 3] }
-          }
+    return new MemoryConfigSource('override', {
+      test: { beta: { values: [2, 4, 5] } },
+      'test.alpha': {
+        values: [1, 2, 3]
+      },
+      nested: { user: { age: 52 } },
+      vague: {
+        name: 'bob',
+        props: {
+          person: 20,
+          age: true,
+          child: { name: [1, 2, 3] }
         }
       }
-    });
+    }, 1000);
   }
 
   @InjectableFactory()
-  static getConfig(): ConfigSource {
-    return new FileConfigSource(['@#test/fixtures']);
+  static getConfig(parser: ParserManager): ConfigSource {
+    return new FileConfigSource(parser, 'application', 100, ['@#test/fixtures']);
   }
 }
 

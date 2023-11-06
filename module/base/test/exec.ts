@@ -39,7 +39,7 @@ export class ExecUtilTest {
 
   @Test()
   async fork() {
-    const proc = ExecUtil.fork((await this.fixture.describe('echo.js')).path, [], { outputMode: 'binary' });
+    const proc = ExecUtil.fork((await this.fixture.resolve('echo.js')), [], { outputMode: 'binary' });
     proc.process.stdin?.write('Hello Worldy');
     proc.process.stdin?.end();
     const result = await proc.result;

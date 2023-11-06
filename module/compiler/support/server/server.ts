@@ -22,7 +22,7 @@ export class CompilerServer {
       req.on('data', (chunk) => body.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk));
       req.on('end', () => {
         try {
-          res(JSON.parse(Buffer.concat(body).toString('utf8')))
+          res(JSON.parse(Buffer.concat(body).toString('utf8')));
         } catch (err) {
           rej(err);
         }
