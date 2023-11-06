@@ -27,8 +27,8 @@ export class FileResourceProvider {
     if (cfg.includeCommon) {
       paths.unshift(
         ...GlobalEnv.resourcePaths,
+        '@#resources',
         path.resolve(RootIndex.manifest.workspacePath, 'resources'),
-        '@#resources'
       );
     }
     const found = new Set();
@@ -85,7 +85,7 @@ export class FileResourceProvider {
 
   /**
    * Return all of the matching absolute paths for the given
-   *  relative path, if one or more found
+   *  relative path, if one or more found, in order of search path priority
    * @param relativePath The path to resolve
    */
   async resolveAll(relativePath: string): Promise<string[]> {

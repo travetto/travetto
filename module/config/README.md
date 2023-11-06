@@ -23,9 +23,14 @@ Config loading follows a defined resolution path, below is the order in increasi
    1. `resources/application.<ext>` - Priority `100` - Load the default `application.<ext>` if available.
    1. `resources/{env}.<ext>` - Priority `200` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
    1. `resources/*.<ext>` - Priority `300` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
+   1. [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31) [ConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/types.ts#L6) - Priority `???` - These are custom config sources provided by the module, and are able to define their own priorities
+   1. [OverrideConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/override.ts#L11) - Priority `999` - This is for [EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L34) overrides, and is at the top priority for all built-in config sources.
 By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
 
-**Note**: When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level.  The general rule is that the longest path has the highest priority.
+**Note**: When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level. The general priority is:
+   1. Mono-repo root
+   1. Module root
+   1. Folders for `TRV_RESOURCES`, in order
 
 ### A Complete Example
 A more complete example setup would look like:

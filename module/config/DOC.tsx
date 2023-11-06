@@ -4,6 +4,10 @@ import { Field, Schema } from '@travetto/schema';
 
 import { Config as ConfigDec, EnvVar } from '@travetto/config/src/decorator';
 import { ConfigurationService } from '@travetto/config/src/service';
+import { Injectable } from '@travetto/di';
+import { OverrideConfigSource } from './__index__';
+
+const ConfigSource = d.codeLink('ConfigSource', 'src/source/types.ts', /interface ConfigSource/);
 
 export const text = <>
   <c.StdHeader />
@@ -24,11 +28,18 @@ export const text = <>
       <li>{d.path('resources/application.<ext>')} - Priority {d.input('100')} - Load the default {d.path('application.<ext>')} if available.</li>
       <li>{d.path('resources/{env}.<ext>')} - Priority {d.input('200')} - Load environment specific profile configurations as defined by the values of {d.field('process.env.TRV_ENV')}.</li>
       <li>{d.path('resources/*.<ext>')} - Priority {d.input('300')} - Load profile specific configurations as defined by the values in {d.field('process.env.TRV_PROFILES')}</li>
+      <li>{Injectable} {ConfigSource} - Priority {d.input('???')} - These are custom config sources provided by the module, and are able to define their own priorities</li>
+      <li>{OverrideConfigSource} - Priority {d.input('999')} - This is for {EnvVar} overrides, and is at the top priority for all built-in config sources.</li>
     </ol>
 
     By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
 
-    <c.Note>When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level.  The general rule is that the longest path has the highest priority.
+    <c.Note>When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level. The general priority is:
+      <ol>
+        <li>Mono-repo root</li>
+        <li>Module root</li>
+        <li>Folders for {d.field('TRV_RESOURCES')}, in order</li>
+      </ol>
     </c.Note>
 
     <c.SubSection title='A Complete Example'>
