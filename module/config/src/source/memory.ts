@@ -1,26 +1,21 @@
 import { ConfigData } from '../parser/types';
-import { ConfigSource, ConfigValue } from './types';
+import { ConfigSource } from './types';
 
 /**
  * Meant to be instantiated and provided as a unique config source
  */
 export class MemoryConfigSource implements ConfigSource {
-  priority = 1;
-  data: Record<string, ConfigData>;
-  name = 'memory';
+  priority: number;
+  data: ConfigData;
+  source: string;
 
-  constructor(data: Record<string, ConfigData>, priority: number = 1) {
+  constructor(key: string, data: ConfigData, priority: number = 500) {
     this.data = data;
     this.priority = priority;
+    this.source = `memory://${key}`;
   }
 
-  getValues(profiles: string[]): ConfigValue[] {
-    const out: ConfigValue[] = [];
-    for (const profile of profiles) {
-      if (this.data[profile]) {
-        out.push({ profile, config: this.data[profile], source: `${this.name}://${profile}`, priority: this.priority });
-      }
-    }
-    return out;
+  getData(): ConfigData {
+    return this.data;
   }
 }

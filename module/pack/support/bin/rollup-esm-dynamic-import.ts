@@ -1,6 +1,6 @@
-import { AcornNode, Plugin } from 'rollup';
+import { AstNode, Plugin } from 'rollup';
 import { walk } from 'estree-walker';
-import MagicString from 'magic-string';
+import magicString from 'magic-string';
 
 const BRAND = '__imp';
 
@@ -23,20 +23,20 @@ export function travettoImportPlugin(entry: string, files: string[]): Plugin {
     transform(code, id) {
       const parsed = this.parse(code);
 
-      let ms: MagicString | undefined;
+      let ms: magicString | undefined;
 
       if (id.includes(entry)) {
-        (ms ??= new MagicString(code).append(DYNAMIC_IMPORT(imports)));
+        (ms ??= new magicString(code).append(DYNAMIC_IMPORT(imports)));
       }
 
       walk(parsed, {
         enter: (node) => {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const impNode = node as AcornNode & { source?: { type: string } };
+          const impNode = node as AstNode & { source?: { type: string } };
           if (impNode.type !== 'ImportExpression' || impNode.source?.type === 'Literal') {
             return;
           }
-          (ms ??= new MagicString(code)).overwrite(impNode.start, impNode.start + 6, BRAND);
+          (ms ??= new magicString(code)).overwrite(impNode.start, impNode.start + 6, BRAND);
         }
       });
 

@@ -1,59 +1,44 @@
-import { path } from '@travetto/manifest';
 import { FileQueryProvider } from '@travetto/base';
-import { DependencyRegistry, InjectableFactory } from '@travetto/di';
+import { RootIndex, path } from '@travetto/manifest';
 
-import { ConfigParserTarget } from '../internal/types';
-import { ConfigParser } from '../parser/types';
-import { ConfigSource, ConfigValue } from './types';
+import { ConfigSource } from './types';
+import { ParserManager } from '../parser/parser';
+import { ConfigData } from '../parser/types';
 
 /**
  * File-base config source, builds on common file resource provider
  */
 export class FileConfigSource extends FileQueryProvider implements ConfigSource {
 
-  @InjectableFactory()
-  static getInstance(): ConfigSource {
-    return new FileConfigSource();
-  }
+  priority = 10;
+  source: string;
+  profile: string;
+  parser: ParserManager;
 
-  depth = 1;
-  extMatch: RegExp;
-  parsers: Record<string, ConfigParser>;
-  priority = 1;
-
-  constructor(paths: string[] = []) {
+  constructor(parser: ParserManager, profile: string, priority: number, paths: string[] = []) {
     super({ includeCommon: true, paths });
+    this.priority = priority;
+    this.profile = profile;
+    this.parser = parser;
+    this.source = `file://${profile}`;
   }
 
-  async postConstruct(): Promise<void> {
-    const parserClasses = await DependencyRegistry.getCandidateTypes(ConfigParserTarget);
-    const parsers = await Promise.all(parserClasses.map(x => DependencyRegistry.getInstance<ConfigParser>(x.class, x.qualifier)));
-
-    // Register parsers
-    this.parsers = Object.fromEntries(parsers.flatMap(p => p.ext.map(e => [e, p])));
-
-    this.extMatch = parsers.length ? new RegExp(`(${Object.keys(this.parsers).join('|').replaceAll('.', '[.]')})`) : /^$/;
-  }
-
-  async getValues(profiles: string[]): Promise<ConfigValue[]> {
-    const out: ConfigValue[] = [];
-
-    for await (const file of this.query(f => this.extMatch.test(f))) {
+  async getData(): Promise<ConfigData[]> {
+    const out: { file: string, data: ConfigData }[] = [];
+    for await (const file of this.query(f => this.parser.matches(f))) {
       const ext = path.extname(file);
-      const profile = path.basename(file, ext);
-      if (!profiles.includes(profile) || !this.parsers[ext]) {
-        continue;
+      const base = path.basename(file, ext);
+      if (base === this.profile && !file.includes('/')) { // Ensures no nesting
+        for (const resolved of await this.resolveAll(file)) {
+          out.push({ file: resolved, data: await this.parser.parse(resolved) });
+        }
       }
-      const content = await this.read(file);
-      const desc = await this.describe(file);
-      out.push({
-        profile,
-        config: await this.parsers[ext].parse(content),
-        source: `file://${desc.path}`,
-        priority: this.priority
-      });
     }
+
     // Ensure more specific files are processed later
-    return out.sort((a, b) => (a.source.length - b.source.length) || a.source.localeCompare(b.source));
+    return out
+      .sort((a, b) => (a.file.length - b.file.length) || a.file.localeCompare(b.file))
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      .map(a => ({ ...a.data, __ID__: a.file.replace(`${RootIndex.manifest.workspacePath}/`, '') }));
   }
 }

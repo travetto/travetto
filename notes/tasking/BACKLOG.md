@@ -1,6 +1,5 @@
 Backlogged Requests
 ===============   
-
 Model
 ----------------------
 - [?] Look for SQL query optimization opportunities

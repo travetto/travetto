@@ -129,7 +129,7 @@ export class EmailCompiler {
     const stream = new Queue<WatchEvent>([], ctrl.signal);
 
     // watch resources
-    this.#watchFolders(all.paths, ev => stream.add(ev), ctrl.signal);
+    this.#watchFolders(all.searchPaths, ev => stream.add(ev), ctrl.signal);
 
     // Watch template files
     new CompilerClient().onFileChange(ev => {

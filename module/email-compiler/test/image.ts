@@ -20,7 +20,7 @@ class ImageUtilTest {
 `;
 
     const output = await EmailCompileUtil.inlineImages(text, {
-      search: this.fixture.paths
+      search: this.fixture.searchPaths
     });
 
     assert(!output.includes('red.gif'));

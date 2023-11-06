@@ -26,7 +26,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeBasic() {
     const service = this.assetService;
-    const { path: pth } = await this.fixture.describe('/asset.yml');
+    const pth = await this.fixture.resolve('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
 
     const out = await service.upsert(file);
@@ -37,7 +37,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeHashed() {
     const service = this.assetService;
-    const { path: pth } = await this.fixture.describe('/asset.yml');
+    const pth = await this.fixture.resolve('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const outHashed = await service.upsert(file, false, new HashNamingStrategy());
     const hash = await AssetUtil.hashFile(pth);
@@ -47,7 +47,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeAndGet() {
     const service = this.assetService;
-    const { path: pth } = await this.fixture.describe('/asset.yml');
+    const pth = await this.fixture.resolve('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     const loc = await service.upsert(file);
 
@@ -62,7 +62,7 @@ export abstract class AssetServiceSuite {
   @Test()
   async writeAndDelete() {
     const service = this.assetService;
-    const { path: pth } = await this.fixture.describe('/asset.yml');
+    const pth = await this.fixture.resolve('/asset.yml');
     const file = await AssetUtil.fileToAsset(pth);
     assert(file.filename === 'asset.yml');
     const loc = await service.upsert(file);

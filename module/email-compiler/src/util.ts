@@ -191,7 +191,7 @@ export class EmailCompileUtil {
     }
 
     if (styles.length) {
-      const compiled = await this.compileSass({ data: styles.join('\n') }, resource.paths);
+      const compiled = await this.compileSass({ data: styles.join('\n') }, resource.searchPaths);
 
       // Remove all unused styles
       const finalStyles = await this.pruneCss(html, compiled);

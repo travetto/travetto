@@ -70,7 +70,7 @@ export class CliUtil {
         args: process.argv.slice(3),
         env
       }
-    }
+    };
 
     console.log('Triggering IPC request', req);
 

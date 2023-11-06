@@ -112,7 +112,7 @@ export class MongoModelConfig {
    */
   async postConstruct(): Promise<void> {
     const resources = new FileResourceProvider({ includeCommon: true });
-    const resolve = (file: string): Promise<string> => resources.describe(file).then(({ path }) => path, () => file);
+    const resolve = (file: string): Promise<string> => resources.resolve(file).then(path => path, () => file);
 
     if (this.connectionString) {
       const details = new URL(this.connectionString);
@@ -175,4 +175,4 @@ export class MongoModelConfig {
 }
 ```
 
-Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L46) path or just a standard file path.
+Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L21) path or just a standard file path.

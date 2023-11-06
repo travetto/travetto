@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { AppError, ExecUtil, ExecutionOptions, ExecutionResult } from '@travetto/base';
+import { AppError, ExecUtil, ExecutionOptions } from '@travetto/base';
 
 import { ActiveShellCommand } from './shell';
 

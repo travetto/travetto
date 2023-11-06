@@ -21,7 +21,7 @@ export type CompilerServerInfo = {
   serverPid: number;
   compilerPid: number;
   state: CompilerStateType;
-  mode: CompilerMode,
+  mode: CompilerMode;
   iteration: number;
   url: string;
   env?: Record<string, string>;

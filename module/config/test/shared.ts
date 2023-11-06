@@ -3,6 +3,7 @@ import { InjectableFactory } from '@travetto/di';
 import { Config, EnvVar } from '../src/decorator';
 import { FileConfigSource } from '../src/source/file';
 import { ConfigSource } from '../src/source/types';
+import { ParserManager } from '../src/parser/parser';
 
 @Config('name')
 export class NameConfig {
@@ -22,8 +23,8 @@ export class TestConfig {
 
 export class Setup {
   @InjectableFactory()
-  static getConfig(): ConfigSource {
-    return new FileConfigSource(['@#test/fixtures']);
+  static getConfig(parser: ParserManager): ConfigSource {
+    return new FileConfigSource(parser, 'application', 100, ['@#test/fixtures']);
   }
 }
 

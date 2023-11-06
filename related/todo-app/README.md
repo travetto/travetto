@@ -309,7 +309,7 @@ npx trv run:rest
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:143] Initialized {
+2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:157] Initialized {
   manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.4.0', version: '0.0.0' },
   env: {
     envName: 'dev',
@@ -322,11 +322,14 @@ npx trv run:rest
   },
   config: {
     sources: [
-      'application.1 - file://./resources/application.yml',
-      'dev.1 - file://./resources/dev.yml',
-      'dev.1 - file://<workspace-root>/resources/email/dev.yml',
-      'dev.1 - file://<workspace-root>/resources/resources/dev.yml',
-      'override.3 - memory://override'
+      {
+        priority: 100,
+        source: 'file://application',
+        detail: 'related/todo-app/resources/application.yml'
+      },
+      { priority: 200, source: 'file://dev', detail: 'resources/dev.yml' },
+      { priority: 201, source: 'file://dev', detail: 'related/todo-app/resources/dev.yml' },
+      { priority: 999, source: 'memory://override' }
     ],
     active: {
       ApiHostConfig: { openapi: '3.0.0' },

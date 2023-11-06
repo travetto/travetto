@@ -64,7 +64,7 @@ export class MongoModelConfig {
    */
   async postConstruct(): Promise<void> {
     const resources = new FileResourceProvider({ includeCommon: true });
-    const resolve = (file: string): Promise<string> => resources.describe(file).then(({ path }) => path, () => file);
+    const resolve = (file: string): Promise<string> => resources.resolve(file).then(path => path, () => file);
 
     if (this.connectionString) {
       const details = new URL(this.connectionString);

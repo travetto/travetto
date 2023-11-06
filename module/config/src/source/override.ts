@@ -1,18 +1,16 @@
-import { Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { ConfigOverrides, CONFIG_OVERRIDES } from '../internal/types';
 import { ConfigData } from '../parser/types';
-import { ConfigSource, ConfigValue } from './types';
+import { ConfigSource } from './types';
 
 /**
  * Overridable config source, provides ability to override field level values, currently used by
  * - @EnvVar as a means to allow environment specific overrides
  */
-@Injectable()
 export class OverrideConfigSource implements ConfigSource {
-  priority = 3;
-  name = 'override';
+  priority = 999;
+  source = 'memory://override';
 
   #build(): ConfigData {
     const out: ConfigData = {};
@@ -28,12 +26,7 @@ export class OverrideConfigSource implements ConfigSource {
     return out;
   }
 
-  getValues(profiles: string[]): [ConfigValue] {
-    return [{
-      config: this.#build(),
-      profile: 'override',
-      source: 'memory://override',
-      priority: this.priority
-    }];
+  getData(): ConfigData {
+    return this.#build();
   }
 }

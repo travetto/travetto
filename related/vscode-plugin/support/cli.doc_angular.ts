@@ -17,7 +17,7 @@ export class CliDocAngularCommand implements CliCommandShape {
     for await (const file of provider.query(f => /[.](gif|jpe?g|png)/i.test(f))) {
       const target = page(`assets/images/${this.modName}/${file}`);
       await fs.mkdir(path.dirname(target), { recursive: true });
-      await fs.copyFile((await provider.describe(file)).path, target);
+      await fs.copyFile((await provider.resolve(file)), target);
     }
   }
 
