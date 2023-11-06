@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { TransformerState, DecoratorMeta, DecoratorUtil, AfterClass } from '@travetto/transformer';
+import { TransformerState, DecoratorMeta, AfterClass } from '@travetto/transformer';
 import { SchemaTransformUtil } from '@travetto/schema/support/transform-util';
 
 /**
@@ -29,22 +29,6 @@ export class CliCommandTransformer {
       return node;
     }
 
-    const declArgs = [...dec.expression.arguments];
-
-    // Name only, need a config object
-    if (declArgs.length === 0) {
-      declArgs.push(state.fromLiteral({}));
-    }
-
-    // Compute new declaration
-    const newDec = state.factory.createDecorator(
-      state.factory.createCallExpression(
-        dec.expression.expression,
-        dec.expression.typeArguments,
-        [...declArgs]
-      )
-    );
-
     const members = node.members.map(x => ts.isMethodDeclaration(x) && x === runMethod ?
       state.factory.updateMethodDeclaration(
         x,
@@ -59,7 +43,7 @@ export class CliCommandTransformer {
       ) : x);
 
     return state.factory.updateClassDeclaration(node,
-      DecoratorUtil.spliceDecorators(node, dec, [newDec]),
+      node.modifiers,
       node.name,
       node.typeParameters,
       node.heritageClauses,
