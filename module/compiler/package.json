@@ -1,6 +1,6 @@
 {
   "name": "@travetto/compiler",
-  "version": "3.4.0-rc.2",
+  "version": "3.4.0-rc.3",
   "description": "The compiler infrastructure for the Travetto framework",
   "keywords": [
     "compiler",
@@ -37,7 +37,7 @@
     "@types/node": "^20.8.10"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.4.0-rc.3"
+    "@travetto/cli": "^3.4.0-rc.4"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
