@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { CompilerClient, FileQueryProvider, TypedObject } from '@travetto/base';
+import { CompilerClient, FileResourceProvider, TypedObject } from '@travetto/base';
 import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
 import { RootIndex, path } from '@travetto/manifest';
 import { ManualAsyncIterator as Queue } from '@travetto/worker';
@@ -118,18 +118,15 @@ export class EmailCompiler {
    * Watch compilation
    */
   static async * watchCompile(): AsyncIterable<string> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const all = new FileQueryProvider(
-      [...new Set(this.findAllTemplates()
-        .map(x => RootIndex.getEntry(x)!.module)
-      )].map(x => path.resolve(RootIndex.getModule(x)!.sourcePath, 'resources'))
+    const all = FileResourceProvider.resolveSearchPaths(
+      this.findAllTemplates().map(x => `${RootIndex.getEntry(x)!.module}#resources`)
     );
 
     const ctrl = new AbortController();
     const stream = new Queue<WatchEvent>([], ctrl.signal);
 
     // watch resources
-    this.#watchFolders(all.searchPaths, ev => stream.add(ev), ctrl.signal);
+    this.#watchFolders(all, ev => stream.add(ev), ctrl.signal);
 
     // Watch template files
     new CompilerClient().onFileChange(ev => {

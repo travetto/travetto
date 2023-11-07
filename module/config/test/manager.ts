@@ -9,8 +9,8 @@ import { ConfigurationService } from '../src/service';
 import { Config } from '../src/decorator';
 import { ConfigSource } from '../src/source/types';
 import { MemoryConfigSource } from '../src/source/memory';
-import { FileConfigSource } from '../src/source/file';
-import { ParserManager } from '../src/parser/parser';
+
+import './test-config';
 
 @Config('ignore')
 class TestConfig {
@@ -44,7 +44,6 @@ class Properties {
   multiline?: string;
 }
 
-
 class Setup {
   @InjectableFactory()
   static getMemoryConfig(): ConfigSource {
@@ -63,11 +62,6 @@ class Setup {
         }
       }
     }, 1000);
-  }
-
-  @InjectableFactory()
-  static getConfig(parser: ParserManager): ConfigSource {
-    return new FileConfigSource(parser, 'application', 100, ['@#test/fixtures']);
   }
 }
 

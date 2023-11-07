@@ -2,16 +2,13 @@ import { SchemaRegistry } from '@travetto/schema';
 
 import { ConfigOverrides, CONFIG_OVERRIDES } from '../internal/types';
 import { ConfigData } from '../parser/types';
-import { ConfigSource } from './types';
+import { ConfigSource, ConfigSpec } from './types';
 
 /**
  * Overridable config source, provides ability to override field level values, currently used by
  * - @EnvVar as a means to allow environment specific overrides
  */
 export class OverrideConfigSource implements ConfigSource {
-  priority = 999;
-  source = 'memory://override';
-
   #build(): ConfigData {
     const out: ConfigData = {};
     for (const cls of SchemaRegistry.getClasses()) {
@@ -26,7 +23,7 @@ export class OverrideConfigSource implements ConfigSource {
     return out;
   }
 
-  getData(): ConfigData {
-    return this.#build();
+  get(): ConfigSpec {
+    return { data: this.#build(), priority: 999, source: 'memory://override' };
   }
 }

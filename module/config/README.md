@@ -23,7 +23,7 @@ Config loading follows a defined resolution path, below is the order in increasi
    1. `resources/application.<ext>` - Priority `100` - Load the default `application.<ext>` if available.
    1. `resources/{env}.<ext>` - Priority `200` - Load environment specific profile configurations as defined by the values of `process.env.TRV_ENV`.
    1. `resources/*.<ext>` - Priority `300` - Load profile specific configurations as defined by the values in `process.env.TRV_PROFILES`
-   1. [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31) [ConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/types.ts#L6) - Priority `???` - These are custom config sources provided by the module, and are able to define their own priorities
+   1. [@Injectable](https://github.com/travetto/travetto/tree/main/module/di/src/decorator.ts#L31) [ConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/types.ts#L11) - Priority `???` - These are custom config sources provided by the module, and are able to define their own priorities
    1. [OverrideConfigSource](https://github.com/travetto/travetto/tree/main/module/config/src/source/override.ts#L11) - Priority `999` - This is for [EnvVar](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L34) overrides, and is at the top priority for all built-in config sources.
 By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
 
@@ -96,24 +96,20 @@ The framework provides two simple base classes that assist with existing pattern
 **Code: Memory Provider**
 ```typescript
 import { ConfigData } from '../parser/types';
-import { ConfigSource } from './types';
+import { ConfigSource, ConfigSpec } from './types';
 
 /**
  * Meant to be instantiated and provided as a unique config source
  */
 export class MemoryConfigSource implements ConfigSource {
-  priority: number;
-  data: ConfigData;
-  source: string;
+  #spec: ConfigSpec;
 
   constructor(key: string, data: ConfigData, priority: number = 500) {
-    this.data = data;
-    this.priority = priority;
-    this.source = `memory://${key}`;
+    this.#spec = { data, priority, source: `memory://${key}` };
   }
 
-  getData(): ConfigData {
-    return this.data;
+  get(): ConfigSpec {
+    return this.#spec;
   }
 }
 ```
@@ -122,27 +118,24 @@ export class MemoryConfigSource implements ConfigSource {
 ```typescript
 import { Env } from '@travetto/base';
 
-import { ConfigSource } from './types';
-import { ConfigData } from '../parser/types';
+import { ConfigSource, ConfigSpec } from './types';
 
 /**
  * Represents the environment mapped data as a JSON blob
  */
 export class EnvConfigSource implements ConfigSource {
-  priority: number;
-  source: string;
   #envKey: string;
+  #priority: number;
 
   constructor(key: string, priority: number) {
     this.#envKey = key;
-    this.priority = priority;
-    this.source = `env://${this.#envKey}`;
+    this.#priority = priority;
   }
 
-  getData(): ConfigData | undefined {
+  get(): ConfigSpec | undefined {
     try {
       const data = JSON.parse(Env.get(this.#envKey, '{}'));
-      return data;
+      return { data, priority: this.#priority, source: `env://${this.#envKey}` };
     } catch (e) {
       console.error(`env.${this.#envKey} is an invalid format`, { text: Env.get(this.#envKey) });
     }

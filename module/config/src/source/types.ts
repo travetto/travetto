@@ -1,10 +1,13 @@
 import { ConfigData } from '../parser/types';
 
+type OrProm<T> = T | Promise<T>;
+type OneOf<T> = T[] | T | undefined;
+
+export type ConfigSpec = { data: ConfigData, priority: number, source: string, detail?: string };
+
 /**
  * @concrete ../internal/types:ConfigSourceTarget
  */
 export interface ConfigSource {
-  priority: number;
-  source: string;
-  getData(): Promise<ConfigData[] | ConfigData | undefined> | ConfigData[] | ConfigData | undefined;
+  get(): OrProm<OneOf<ConfigSpec>>;
 }
