@@ -1,4 +1,4 @@
-import { CompilerClient, Env, ExecUtil } from '@travetto/base';
+import { CompilerClient, Env, ExecUtil, GlobalEnv } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 import { CliCommandShape } from './types';
@@ -24,7 +24,9 @@ export class CliUtil {
    * Run a command as restartable, linking into self
    */
   static runWithRestart<T extends CliCommandShape & { canRestart?: boolean }>(cmd: T): Promise<unknown> | undefined {
-    if (cmd.canRestart === false || Env.isFalse('TRV_CAN_RESTART')) {
+    const canRestart = cmd.canRestart ??= GlobalEnv.devMode;
+
+    if (canRestart === false || Env.isFalse('TRV_CAN_RESTART')) {
       delete process.env.TRV_CAN_RESTART;
       return;
     }
@@ -82,7 +84,8 @@ export class CliUtil {
    * Debug if IPC available
    */
   static async debugIfIpc<T extends CliCommandShape & { debugIpc?: boolean }>(cmd: T): Promise<boolean> {
-    return cmd.debugIpc !== false && this.triggerIpc('run', cmd);
+    const canDebug = cmd.debugIpc ??= GlobalEnv.devMode;
+    return canDebug !== false && this.triggerIpc('run', cmd);
   }
 
   /**

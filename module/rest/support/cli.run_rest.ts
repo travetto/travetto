@@ -1,6 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliUtil } from '@travetto/cli';
-import { GlobalEnv } from '@travetto/base';
 
 import { ServerHandle } from '../src/types';
 
@@ -11,10 +10,10 @@ import { ServerHandle } from '../src/types';
 export class RunRestCommand {
 
   /** IPC debug is enabled */
-  debugIpc = true;
+  debugIpc?: boolean;
 
   /** Should the server be able to run with restart*/
-  canRestart = GlobalEnv.devMode;
+  canRestart?: boolean;
 
   /** Port to run on */
   port?: number;
