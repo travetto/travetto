@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util, Env, FileResourceProvider, TimeUtil, FileQueryProvider } from '@travetto/base';
+import { ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util, Env, FileResourceProvider, TimeUtil } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.codeLink('ConsoleManager', 'src/console.ts', /(class|function)\s*[$]ConsoleManager/);
@@ -67,12 +67,6 @@ export const text = <>
     The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the {d.mod('Manifest')}'s data for what resources were found at manifesting time.<br />
 
     The {FileResourceProvider} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  This {FileResourceProvider} will utilize the {GlobalEnv}'s {d.field('resourcePaths')} information on where to attempt to find a requested resource.
-
-    <c.SubSection title='Scanning for Resources'>
-      Beyond directly asking for a resource, there a times where it is helpful to know what resources are available at runtime. This is primarily used during development, and is a discouraged pattern for production as assumptions about the file-system may be incorrect (or change without warning).<br />
-
-      To that end, {FileQueryProvider} exists, and is a valid {FileResourceProvider}.  It also provides the {d.method('query')} method, to allow for scanning/finding resources that match certain patterns.  Additionally, this class also allows for watching all the resource folders.  This again is helpful during development/compilation, but should not be used in production.
-    </c.SubSection>
   </c.Section>
 
   <c.Section title='Standard Error Support'>

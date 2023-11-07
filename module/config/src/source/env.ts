@@ -1,26 +1,23 @@
 import { Env } from '@travetto/base';
 
-import { ConfigSource } from './types';
-import { ConfigData } from '../parser/types';
+import { ConfigSource, ConfigSpec } from './types';
 
 /**
  * Represents the environment mapped data as a JSON blob
  */
 export class EnvConfigSource implements ConfigSource {
-  priority: number;
-  source: string;
   #envKey: string;
+  #priority: number;
 
   constructor(key: string, priority: number) {
     this.#envKey = key;
-    this.priority = priority;
-    this.source = `env://${this.#envKey}`;
+    this.#priority = priority;
   }
 
-  getData(): ConfigData | undefined {
+  get(): ConfigSpec | undefined {
     try {
       const data = JSON.parse(Env.get(this.#envKey, '{}'));
-      return data;
+      return { data, priority: this.#priority, source: `env://${this.#envKey}` };
     } catch (e) {
       console.error(`env.${this.#envKey} is an invalid format`, { text: Env.get(this.#envKey) });
     }

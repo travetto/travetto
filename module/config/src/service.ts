@@ -1,6 +1,6 @@
 import util from 'util';
 
-import { AppError, Class, ClassInstance, GlobalEnv, DataUtil, Env } from '@travetto/base';
+import { AppError, Class, ClassInstance, GlobalEnv, DataUtil } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootIndex } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
@@ -8,11 +8,11 @@ import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from
 import { ConfigSourceTarget, ConfigTarget } from './internal/types';
 import { ParserManager } from './parser/parser';
 import { ConfigData } from './parser/types';
-import { ConfigSource } from './source/types';
+import { ConfigSource, ConfigSpec } from './source/types';
 import { FileConfigSource } from './source/file';
 import { OverrideConfigSource } from './source/override';
 
-type ConfigSpec = { source: string, priority: number, detail?: string };
+type ConfigSpecSimple = Omit<ConfigSpec, 'data'>;
 
 /**
  * Manager for application configuration
@@ -21,21 +21,8 @@ type ConfigSpec = { source: string, priority: number, detail?: string };
 export class ConfigurationService {
 
   #storage: Record<string, unknown> = {};   // Lowered, and flattened
-  #specs: ConfigSpec[] = [];
+  #specs: ConfigSpecSimple[] = [];
   #secrets: (RegExp | string)[] = [/secure(-|_|[a-z])|password|private|secret|salt|(api(-|_)?key)/i];
-
-  async #toSpecPairs(cfg: ConfigSource): Promise<[ConfigSpec, ConfigData][]> {
-    const data = await cfg.getData();
-    if (!data) {
-      return [];
-    }
-    const arr = Array.isArray(data) ? data : [data];
-    return arr.map((d, i) => [{
-      priority: cfg.priority + i,
-      source: cfg.source,
-      ...(d.__ID__ ? { detail: d.__ID__?.toString() } : {})
-    }, d]);
-  }
 
   /**
    * Get a sub tree of the config, or everything if namespace is not passed
@@ -69,21 +56,22 @@ export class ConfigurationService {
 
     const parser = await DependencyRegistry.getInstance(ParserManager);
 
-    const specPairs = await Promise.all([
-      new FileConfigSource(parser, 'application', 100),
-      new FileConfigSource(parser, GlobalEnv.envName, 200),
-      ...(Env.getList('TRV_PROFILES') ?? []).map((p, i) => new FileConfigSource(parser, p, 300 + i * 10)),
+    const possible = await Promise.all([
+      new FileConfigSource(parser),
       ...configs,
       new OverrideConfigSource()
-    ].map(src => this.#toSpecPairs(src)));
+    ].map(src => src.get()));
 
-    const specs = specPairs.flat().sort(([a], [b]) => a.priority - b.priority);
+    const specs = possible
+      .flat()
+      .filter((x): x is Exclude<typeof x, undefined> => !!x)
+      .sort((a, b) => a.priority - b.priority);
 
-    this.#specs = specs.map(([v]) => v);
-
-    for (const [, element] of specs) {
-      DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(element), 'coerce');
+    for (const spec of specs) {
+      DataUtil.deepAssign(this.#storage, BindUtil.expandPaths(spec.data), 'coerce');
     }
+
+    this.#specs = specs.map(({ data, ...v }) => v);
 
     // Initialize Secrets
     const userSpecified = (this.#get('config')?.secrets ?? []);
@@ -102,7 +90,7 @@ export class ConfigurationService {
    * Export all active configuration, useful for displaying active state
    *   - Will not show fields marked as secret
    */
-  async exportActive(): Promise<{ sources: ConfigSpec[], active: ConfigData }> {
+  async exportActive(): Promise<{ sources: ConfigSpecSimple[], active: ConfigData }> {
     const configTargets = await DependencyRegistry.getCandidateTypes(ConfigTarget);
     const configs = await Promise.all(
       configTargets
