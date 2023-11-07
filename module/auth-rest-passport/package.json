@@ -1,6 +1,6 @@
 {
   "name": "@travetto/auth-rest-passport",
-  "version": "3.4.0-rc.5",
+  "version": "3.4.0-rc.6",
   "description": "Rest authentication integration support for the Travetto framework",
   "keywords": [
     "authentication",
@@ -26,10 +26,10 @@
     "directory": "module/auth-rest-passport"
   },
   "dependencies": {
-    "@travetto/auth": "^3.4.0-rc.5",
-    "@travetto/auth-rest": "^3.4.0-rc.5",
-    "@travetto/config": "^3.4.0-rc.5",
-    "@travetto/rest": "^3.4.0-rc.5",
+    "@travetto/auth": "^3.4.0-rc.6",
+    "@travetto/auth-rest": "^3.4.0-rc.6",
+    "@travetto/config": "^3.4.0-rc.6",
+    "@travetto/rest": "^3.4.0-rc.6",
     "@types/passport": "^1.0.14",
     "passport": "^0.6.0"
   },
