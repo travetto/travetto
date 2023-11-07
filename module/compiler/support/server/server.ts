@@ -180,23 +180,27 @@ export class CompilerServer {
     }
 
     // Terminate, after letting all remaining events emit
-    setImmediate(() => this.close());
+    await this.close();
   }
 
   /**
    * Close server
    */
   async close(): Promise<unknown> {
+    if (this.signal.aborted) {
+      return;
+    }
+
     log('info', 'Closing down server');
-    setTimeout(async () => {
-      this.#shutdown.abort();
+    await new Promise(r => {
+      this.#server.close(r);
       this.#emitEvent({ type: 'state', payload: { state: 'close' } });
       this.#server.unref();
-      await new Promise(r => {
-        this.#server.close(r);
-        setImmediate(() => this.#server.closeAllConnections());
+      setImmediate(() => {
+        this.#server.closeAllConnections();
+        this.#shutdown.abort();
       });
-    }, 10);
+    });
     return { closing: true };
   }
 
