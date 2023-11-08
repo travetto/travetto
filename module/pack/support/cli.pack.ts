@@ -5,5 +5,5 @@ import { BasePackCommand } from './pack.base';
 /**
  * Standard pack support
  */
-@CliCommand({ fields: ['module'] })
+@CliCommand({ addModule: true })
 export class PackCommand extends BasePackCommand { }

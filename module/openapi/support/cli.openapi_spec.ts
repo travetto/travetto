@@ -9,7 +9,7 @@ import { path } from '@travetto/manifest';
 /**
  * CLI for outputting the open api spec to a local file
  */
-@CliCommand({ fields: ['module'] })
+@CliCommand({ addModule: true })
 export class OpenApiSpecCommand implements CliCommandShape {
 
   /** Output files */

@@ -1,12 +1,8 @@
 import { IndexedModule, RootIndex } from '@travetto/manifest';
 
 import { CliScmUtil } from './scm';
-import { CliValidationError } from './types';
-import { CliUtil } from './util';
 
 type ModuleGraphEntry = { children: Set<string>, name: string, active: Set<string>, parents?: string[] };
-
-const modError = (message: string): CliValidationError => ({ source: 'flag', message: `module: ${message}` });
 
 /**
  * Simple utilities for understanding modules for CLI use cases
@@ -90,23 +86,14 @@ export class CliModuleUtil {
   }
 
   /**
-   * Validate the module status for a given cli command
+   * Determine if module has a given dependency
    */
-  static async validateCommandModule(selfMod: string, { module: mod }: { module?: string }): Promise<CliValidationError | undefined> {
-    if (CliUtil.monoRoot && mod) {
-      if (!RootIndex.getModule(mod)) {
-        return modError(`${mod} is an unknown module`);
-      } else {
-        if (mod !== selfMod) {
-          RootIndex.reinitForModule(mod);
-        }
-
-        const mods = await this.findModules('all');
-        const graph = this.getDependencyGraph(mods);
-        if (selfMod !== mod && !graph[mod].includes(selfMod)) {
-          return modError(`${mod} does not have ${selfMod} as a dependency`);
-        }
-      }
+  static async moduleHasDependency(modName: string, depModName: string): Promise<boolean> {
+    if (modName === depModName) {
+      return true;
     }
+    const mods = await this.findModules('all');
+    const graph = this.getDependencyGraph(mods);
+    return graph[modName].includes(depModName);
   }
 }

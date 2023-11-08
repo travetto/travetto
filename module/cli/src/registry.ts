@@ -7,16 +7,22 @@ import { CliUnknownCommandError } from './error';
 export type CliCommandConfigOptions = {
   runTarget?: boolean;
   hidden?: boolean;
+  addModule?: boolean;
+  addEnv?: boolean;
+  runtimeModule?: 'current' | 'command';
+  /** @deprecated */
+  fields?: ('module' | 'env')[];
 };
 
-export type CliCommandConfig = CliCommandConfigOptions & {
+export type CliCommandConfig = {
   name: string;
-  module: string;
+  commandModule: string;
   cls: ConcreteClass<CliCommandShape>;
   preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 };
 
-const CLI_REGEX = /\/cli[.]([^.]+)[.][^.]+?$/;
+const CLI_FILE_REGEX = /\/cli[.](?<name>.*)[.]tsx?$/;
+const getName = (s: string): string => (s.match(CLI_FILE_REGEX)?.groups?.name ?? s).replaceAll('_', ':');
 
 class $CliCommandRegistry {
   #commands = new Map<Class, CliCommandConfig>();
@@ -40,9 +46,9 @@ class $CliCommandRegistry {
       for (const e of RootIndex.find({
         module: m => GlobalEnv.devMode || m.prod,
         folder: f => f === 'support',
-        file: f => f.role === 'std' && CLI_REGEX.test(f.sourceFile)
+        file: f => f.role === 'std' && CLI_FILE_REGEX.test(f.sourceFile)
       })) {
-        all.set(e.outputFile.match(CLI_REGEX)![1].replace(/_/g, ':'), e.import);
+        all.set(getName(e.sourceFile), e.import);
       }
       this.#fileMapping = all;
     }
@@ -52,8 +58,16 @@ class $CliCommandRegistry {
   /**
    * Registers a cli command
    */
-  registerClass(cfg: CliCommandConfig): void {
-    this.#commands.set(cfg.cls, cfg);
+  registerClass(cls: Class, cfg: Partial<CliCommandConfig>): CliCommandConfig {
+    const source = RootIndex.getFunctionMetadata(cls)!.source;
+    this.#commands.set(cls, {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      cls: cls as ConcreteClass,
+      name: getName(source),
+      commandModule: RootIndex.getModuleFromSource(source)!.name,
+      ...cfg,
+    });
+    return this.#commands.get(cls)!;
   }
 
   /**
@@ -68,7 +82,7 @@ class $CliCommandRegistry {
    */
   getName(cmd: CliCommandShape, withModule = false): string | undefined {
     const cfg = this.getConfig(cmd);
-    const prefix = withModule ? `${cfg.module}:` : '';
+    const prefix = withModule ? `${cfg.commandModule}:` : '';
     return `${prefix}${cfg.name}`;
   }
 

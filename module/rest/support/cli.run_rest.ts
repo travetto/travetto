@@ -6,7 +6,7 @@ import { ServerHandle } from '../src/types';
 /**
  * Run a rest server as an application
  */
-@CliCommand({ runTarget: true, fields: ['module', 'env'] })
+@CliCommand({ runTarget: true, addModule: true, addEnv: true })
 export class RunRestCommand {
 
   /** IPC debug is enabled */
