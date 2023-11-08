@@ -7,7 +7,7 @@ import { ModelCandidateUtil } from './bin/candidate';
 /**
  * Installing models
  */
-@CliCommand({ fields: ['env', 'module'] })
+@CliCommand({ addEnv: true, addModule: true })
 export class ModelInstallCommand extends BaseModelCommand {
 
   getOp(): 'createModel' { return 'createModel'; }

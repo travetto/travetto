@@ -13,7 +13,7 @@ const DEFAULT_USER = 'app';
 /**
  * Standard docker support for pack
  */
-@CliCommand({ fields: ['module'] })
+@CliCommand({ addModule: true })
 export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Factory source ', short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
   dockerFactory = '@travetto/pack/support/pack.dockerfile';

@@ -11,14 +11,11 @@ import { RestClientGeneratorService } from '../src/service';
 /**
  * Run client rest operation
  */
-@CliCommand({ fields: ['module', 'env'] })
+@CliCommand({ addModule: true, addEnv: true })
 export class CliRestClientCommand implements CliCommandShape {
 
   @Ignore()
   module: string;
-
-  @Ignore()
-  env: string;
 
   envInit(): GlobalEnvConfig {
     return { debug: false };

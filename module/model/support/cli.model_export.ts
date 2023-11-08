@@ -7,7 +7,7 @@ import { ModelCandidateUtil } from './bin/candidate';
 /**
  * Exports model schemas
  */
-@CliCommand({ fields: ['env', 'module'] })
+@CliCommand({ addEnv: true, addModule: true })
 export class ModelExportCommand extends BaseModelCommand {
 
   getOp(): 'exportModel' { return 'exportModel'; }

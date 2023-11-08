@@ -5,7 +5,7 @@ import { BasePackCommand, PackOperationShape } from '@travetto/pack/support/pack
 /**
  * Standard lambda support for pack
  */
-@CliCommand({ fields: ['module'] })
+@CliCommand({ addModule: true })
 export class PackLambdaCommand extends BasePackCommand {
 
   initialize(): void {

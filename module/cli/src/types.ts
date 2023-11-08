@@ -53,6 +53,28 @@ export interface CliCommandShape {
 }
 
 /**
+ * Command shape common fields
+ */
+export type CliCommandShapeFields = {
+  /**
+   * Environment to run in
+   */
+  env?: string;
+  /**
+   * Should the cli invocation trigger a debug session, via IPC
+   */
+  debugIpc?: boolean;
+  /**
+   * Should the invocation run with auto-restart
+   */
+  canRestart?: boolean;
+  /**
+   * The module to run the command from
+   */
+  module?: string;
+};
+
+/**
  * CLI Command argument/flag shape
  */
 export type CliCommandInput = {
@@ -74,7 +96,7 @@ export type CliCommandInput = {
 export type CliCommandSchema = {
   name: string;
   title: string;
-  module: string;
+  commandModule: string;
   runTarget?: boolean;
   description?: string;
   args: CliCommandInput[];
