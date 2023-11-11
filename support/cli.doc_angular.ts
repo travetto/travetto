@@ -32,7 +32,7 @@ export class DocAngularCommand {
           req.result.then(v => {
             if (!v.valid) {
               console.error(`${mod.name} - failed`);
-            };
+            }
           });
           return req;
         },
@@ -57,7 +57,9 @@ export class DocAngularCommand {
         html = html
           .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
           .replace(/^src="images\//g, `src="/assets/images/${modName}/`)
-          .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`);
+          .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
+          .replaceAll('@', '&#64;')
+          .replaceAll('process.env.NODE_ENV', x => x.replaceAll('.', '\u2024'));
 
         if (modName === 'todo-app') {
           html = html

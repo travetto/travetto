@@ -5,8 +5,8 @@ import { CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
 
 export type CliCommandConfigOptions = {
-  runTarget?: boolean;
   hidden?: boolean;
+  runTarget?: boolean;
   addModule?: boolean;
   addEnv?: boolean;
   runtimeModule?: 'current' | 'command';
@@ -18,6 +18,7 @@ export type CliCommandConfig = {
   name: string;
   commandModule: string;
   cls: ConcreteClass<CliCommandShape>;
+  hidden?: boolean;
   preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 };
 

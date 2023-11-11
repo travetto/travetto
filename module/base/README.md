@@ -64,7 +64,7 @@ export const GlobalEnv = {
 ```
 
 The source for each field is:
-   *  `envName` - This is derived from `process.env.TRV_ENV` with a fallback of `process.NODE_ENV`
+   *  `envName` - This is derived from `process.env.TRV_ENV` with a fallback of `process.env.NODE_ENV`
    *  `devMode` - This is true if `process.env.NODE_ENV` is dev* or test
    *  `dynamic` - This is derived from `process.env.TRV_DYNAMIC`. This field reflects certain feature sets used throughout the framework.
    *  `resourcePaths` - This is a list derived from `process.env.TRV_RESOURCES`.  This points to a list of folders that the [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L23) will search against, by default.

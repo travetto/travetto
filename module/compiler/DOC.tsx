@@ -12,6 +12,7 @@ export const text = async () => {
       .split('\n')
       .filter(x => x.trim().startsWith('*'))
       .map(x => x.split(' - ') as [string, string])
+      .filter(x => x.length > 1)
       .map(x => <li>{d.method(x[0].replace('*', '').trim())} - {x[1].trim()}</li>);
 
   return <>

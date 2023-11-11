@@ -34,13 +34,14 @@ export const text = <>
 
     By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
 
-    <c.Note>When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level. The general priority is:
+    <c.SubSection title='Mono Repo Support'>
+      When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level. The general priority is:
       <ol>
         <li>Mono-repo root</li>
         <li>Module root</li>
         <li>Folders for {d.field('TRV_RESOURCES')}, in order</li>
       </ol>
-    </c.Note>
+    </c.SubSection>
 
     <c.SubSection title='A Complete Example'>
 

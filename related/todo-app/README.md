@@ -16,8 +16,8 @@ The following tutorial wil walk you through setting up a [Travetto](https://trav
 
 ## Prerequisites
 Install
-   *  [Node](https://nodejs.org/en/download/current/) v19.x+ (recommended, but v18.x+ supported)
-   *  [Mongodb](https://docs.mongodb.com/manual/administration/install-community/) 3.6+ (required, but 4.4+ recommended)
+   *  [Node](https://nodejs.org/en/download/current/) v20.x+ (required)
+   *  [Mongodb](https://docs.mongodb.com/manual/administration/install-community/) 5.0+ (required, but 6+ recommended)
    *  [VSCode](https://code.visualstudio.com/download) (recommended)
    *  [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin) (recommended)
 
@@ -404,7 +404,7 @@ npx trv run:rest
 2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:192] Listening { port: 12555 }
 ```
 
-next, let's execute [fetch](https://www.npmjs.com/package/node-fetch) requests to interact with the new api. 
+next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 
 
 Create `support/create-todo.ts` with the following contents:
 

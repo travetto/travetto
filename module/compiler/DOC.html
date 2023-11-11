@@ -32,7 +32,7 @@ The compiler cli supports the following operations:
 <li><code class="item method">build</code> - Ensure the project is built and upto date</li>
 <li><code class="item method">clean</code> - Clean out the output and compiler caches</li>
 <li><code class="item method">info</code> - Retrieve the compiler information, if running</li>
-<li><code class="item method">manifest</code> - Generate the project manifest</li>
+<li><code class="item method">manifest [output] [prod]</code> - Generate the project manifest</li>
 </ul>
 In addition to the normal output, the compiler supports an environment variable <code class="item input">TRV_BUILD</code> that supports the following values: <code class="item input">debug</code>, <code class="item input">info</code>, <code class="item input">warn</code> or <code class="item input">none</code>.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. <code class="item method">&lt;other&gt;</code> from above), the default level is <code class="item input">warn</code>.  Otherwise the default logging level is <code class="item input">info</code>.
 

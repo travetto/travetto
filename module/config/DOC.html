@@ -30,13 +30,13 @@ Config loading follows a defined resolution path, below is the order in increasi
 <li><a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/source/override.ts#L11">OverrideConfigSource</a> - Priority <code class="item input">999</code> - This is for <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L34">EnvVar</a> overrides, and is at the top priority for all built-in config sources.</li>
 </ol>
 By default all configuration data is inert, and will only be applied when constructing an instance of a configuration class.
+<h3 id="mono-repo-support">Mono Repo Support</h3>
 
-<p class="note"><strong>Note</strong> When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level. The general priority is:
+When working in a monorepo, the parent resources folder will also be searched with a lower priority than the the module's specific resources.  This allows for shared-global configuration that can be overridden at the module level. The general priority is:
 <ol> <li>Mono-repo root</li>
 <li>Module root</li>
 <li>Folders for <code class="item field">TRV_RESOURCES</code>, in order</li>
 </ol>
-</p>
 
 <h3 id="a-complete-example">A Complete Example</h3>
 

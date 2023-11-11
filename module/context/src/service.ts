@@ -1,9 +1,8 @@
-import asyncHooks from 'async_hooks';
+import { AsyncLocalStorage } from 'async_hooks';
 
 import { Injectable } from '@travetto/di';
 import { AppError } from '@travetto/base';
 
-const { AsyncLocalStorage } = asyncHooks;
 
 type Ctx = Record<string | symbol, unknown>;
 

@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
-import { FileQueryProvider } from '@travetto/base';
 
 const page = (f: string): string => path.resolve(RootIndex.manifest.workspacePath, '..', 'travetto.github.io/src', f);
 
@@ -11,13 +10,13 @@ export class CliDocAngularCommand implements CliCommandShape {
 
   async copyPluginImages(): Promise<void> {
     console.log('Copying Plugin images');
-    const provider = new FileQueryProvider({
-      paths: ['images']
-    });
-    for await (const file of provider.query(f => /[.](gif|jpe?g|png)/i.test(f))) {
-      const target = page(`assets/images/${this.modName}/${file}`);
-      await fs.mkdir(path.dirname(target), { recursive: true });
-      await fs.copyFile((await provider.resolve(file)), target);
+    const root = RootIndex.manifest.workspacePath;
+    for await (const file of await fs.opendir(path.resolve(root, 'images'), { recursive: true })) {
+      if (/[.](gif|jpe?g|png)/i.test(file.name)) {
+        const target = page(`assets/images/${this.modName}/${file.path}`);
+        await fs.mkdir(path.dirname(target), { recursive: true });
+        await fs.copyFile((await path.resolve(root, file.path)), target);
+      }
     }
   }
 
@@ -28,7 +27,8 @@ export class CliDocAngularCommand implements CliCommandShape {
     html = html
       .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
       .replace(/^src="images\//g, `src="/assets/images/${this.modName}/`)
-      .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`);
+      .replace(/(href|src)="https?:\/\/travetto.dev\//g, (_, attr) => `${attr}="/`)
+      .replaceAll('@', '&#64;');
 
     await fs.writeFile(page(`app/documentation/gen/${this.modName}/${this.modName}.component.html`), html, 'utf8');
   }

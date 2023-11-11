@@ -42,7 +42,7 @@
     "@types/vscode": "^1.83.1"
   },
   "dependencies": {
-    "@travetto/base": "^3.4.0-rc.0",
+    "@travetto/base": "^3.4.0-rc.6",
     "@travetto/registry": "^3.4.0-rc.0"
   },
   "travetto": {

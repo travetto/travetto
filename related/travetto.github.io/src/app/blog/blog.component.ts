@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
 
 interface Post {
   author: {
@@ -19,15 +20,34 @@ interface Post {
 
 @Component({
   selector: 'app-blog',
-  templateUrl: './blog.component.html',
-  styleUrls: ['./blog.component.scss']
+  imports: [DatePipe],
+  template: `
+<div class="documentation">
+  @for (post of posts; track $index) {
+    <article>
+      <h2>
+        {{post.title}}
+      </h2>
+      <div class="meta">
+        <span class="date">
+          {{post.published | date }}
+        </span>
+        <div class="byline">
+          {{post.author.displayName}}
+        </div>
+      </div>
+      <div class="content" [innerHTML]="post.content"></div>
+    </article>
+  }
+</div>
+`,
+  styleUrls: ['./blog.component.scss'],
+  standalone: true,
 })
 export class BlogComponent implements OnInit {
 
   blogId = '8362979454426216505';
   posts: Post[] = [];
-
-  constructor() { }
 
   ngOnInit() {
     const key = 'AIzaSyBfg2W_JaAJU4qQWSKs-Vx_zVbFh4joYos';
