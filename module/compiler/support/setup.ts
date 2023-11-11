@@ -146,12 +146,12 @@ export class CompilerSetup {
   /**
    * Export manifest
    */
-  static async exportManifest(ctx: ManifestContext, output?: string, env = 'dev'): Promise<void> {
+  static async exportManifest(ctx: ManifestContext, output?: string, prod?: boolean): Promise<void> {
     const { ManifestUtil } = await this.#importManifest(ctx);
     let manifest = await ManifestUtil.buildManifest(ctx);
 
     // If in prod mode, only include std modules
-    if (/^prod/i.test(env)) {
+    if (prod) {
       manifest = ManifestUtil.createProductionManifest(manifest);
     }
     if (output) {

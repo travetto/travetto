@@ -63,9 +63,9 @@ export const main = (root: ManifestContext, ctx: ManifestContext) => {
     },
 
     /** Manifest entry point */
-    async manifest(args: (string | undefined)[] = []): Promise<void> {
+    async manifest(output?: string, prod?: boolean): Promise<void> {
       await ops.compile('run', true);
-      await CompilerSetup.exportManifest(ctx, ...args.filter(x => !x?.startsWith('-'))); return;
+      await CompilerSetup.exportManifest(ctx, output, prod); return;
     }
   };
   return ops;

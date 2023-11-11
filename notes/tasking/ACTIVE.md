@@ -1,7 +1,6 @@
 Active Development (3.5.0 - RC)
 =====================================
 
-* VSCode, setup IPC as a server, and remove custom events from the compiler
 * Move to ESM-First
   - Wait for module reloading
 * ES Decorators
