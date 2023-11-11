@@ -146,13 +146,7 @@ export class CompilerServer {
       case 'stop': out = await this.close(); break;
       case 'clean': out = await this.#clean(); break;
       case 'info':
-      default: {
-        out = this.info ?? {};
-        if (req.url?.includes('?env')) {
-          Object.assign(out!, { env: process.env });
-        }
-        break;
-      }
+      default: out = this.info ?? {}; break;
     }
     res.end(JSON.stringify(out));
   }

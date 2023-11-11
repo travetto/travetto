@@ -27,9 +27,7 @@ type CompilerEvent =
   { type: 'change', payload: ChangeEvent } |
   { type: 'log', payload: LogEvent } |
   { type: 'progress', payload: ProgressEvent } |
-  { type: 'state', payload: StateEvent } |
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  { type: 'custom', payload: any };
+  { type: 'state', payload: StateEvent };
 
 type CompilerEventType = CompilerEvent['type'];
 
@@ -51,11 +49,6 @@ export class CompilerClient {
       cfg.signal.addEventListener('abort', () => this.#kill.abort());
     }
     ShutdownManager.onExitRequested(() => this.#kill.abort());
-  }
-
-  replaceSignal(signal: AbortSignal): void {
-    this.#kill = new AbortController();
-    signal.addEventListener('abort', () => this.#kill.abort());
   }
 
   close(): void {

@@ -1,4 +1,4 @@
-import { CompilerClient, Env, ExecUtil, GlobalEnv } from '@travetto/base';
+import { Env, ExecUtil, GlobalEnv } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 import { CliCommandShape, CliCommandShapeFields } from './types';
@@ -23,7 +23,7 @@ export class CliUtil {
   /**
    * Run a command as restartable, linking into self
    */
-  static runWithRestart<T extends CliCommandShapeFields>(cmd: T): Promise<unknown> | undefined {
+  static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<unknown> | undefined {
     const canRestart = cmd.canRestart ??= GlobalEnv.devMode;
 
     if (canRestart === false || Env.isFalse('TRV_CAN_RESTART')) {
@@ -40,44 +40,42 @@ export class CliUtil {
    * Dispatch IPC payload
    */
   static async triggerIpc<T extends CliCommandShape>(action: 'run', cmd: T): Promise<boolean> {
-    if (!process.env.TRV_CLI_IPC) {
+    const ipcUrl = process.env.TRV_CLI_IPC;
+
+    if (!ipcUrl) {
       return false;
     }
 
-    const client = new CompilerClient({});
+    const info = await fetch(ipcUrl).catch(() => ({ ok: false }));
 
-    const info = await client.getInfo(true);
-
-    if (!info) { // Server not running
+    if (!info.ok) { // Server not running
       return false;
     }
 
-    const defaultEnvKeys = new Set(Object.keys(info.env ?? {}));
-    defaultEnvKeys.add('PS1').add('INIT_CWD').add('COLOR').add('LANGUAGE').add('PROFILEHOME').add('_');
+    const cfg = CliCommandRegistry.getConfig(cmd);
+    const req = {
+      type: `@travetto/cli:${action}`,
+      data: {
+        name: cfg.name,
+        commandModule: cfg.commandModule,
+        module: RootIndex.manifest.mainModule,
+        args: process.argv.slice(3),
+      }
+    };
 
+    console.log('Triggering IPC request', req);
+
+    const defaultEnvKeys = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
     const env = Object.fromEntries(
       Object.entries(process.env).filter(([k]) =>
         !defaultEnvKeys.has(k) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(k) && !/VSCODE/.test(k)
       )
     );
 
-    const cfg = CliCommandRegistry.getConfig(cmd);
-    const req = {
-      type: `@travetto/cli:${action}`,
-      ipc: process.env.TRV_CLI_IPC,
-      data: {
-        name: cfg.name,
-        commandModule: cfg.commandModule,
-        module: RootIndex.manifest.mainModule,
-        args: process.argv.slice(3),
-        env
-      }
-    };
+    Object.assign(req.data, { env });
 
-    console.log('Triggering IPC request', req);
-
-    await client.sendEvent('custom', req);
-    return true;
+    const sent = await fetch(ipcUrl, { method: 'POST', body: JSON.stringify(req) });
+    return sent.ok;
   }
 
   /**

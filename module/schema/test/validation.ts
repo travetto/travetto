@@ -91,8 +91,8 @@ class Validation {
   @Test('Nested validations should be fine')
   @ShouldThrow(ValidationResultError)
   async nestedObjectErrors() {
+    // @ts-ignore
     const obj = Nested.from({
-      // @ts-ignore
       name: 5,
       address: {
         street1: 'abc',
