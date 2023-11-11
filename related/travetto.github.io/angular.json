@@ -15,7 +15,7 @@
       },
       "architect": {
         "build": {
-          "builder": "@angular-devkit/build-angular:browser",
+          "builder": "@angular-devkit/build-angular:browser-esbuild",
           "options": {
             "outputPath": "dist",
             "index": "src/index.html",
@@ -70,10 +70,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "travetto.github.io:build:production"
+              "buildTarget": "travetto.github.io:build:production"
             },
             "development": {
-              "browserTarget": "travetto.github.io:build:development"
+              "buildTarget": "travetto.github.io:build:development"
             }
           },
           "defaultConfiguration": "development"

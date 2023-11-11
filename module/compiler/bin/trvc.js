@@ -7,14 +7,13 @@ const help = () => [
   'npx trvc [command]',
   '',
   'Available Commands:',
-  ' * start|watch - Run the compiler in watch mode',
-  ' * stop        - Stop the compiler if running',
-  ' * restart     - Restart the compiler in watch mode',
-  ' * build       - Ensure the project is built and upto date',
-  ' * clean       - Clean out the output and compiler caches',
-  ' * info        - Retrieve the compiler information, if running',
-  ' * manifest [output] [prod]',
-  '               - Generate the project manifest',
+  ' * start|watch               - Run the compiler in watch mode',
+  ' * stop                      - Stop the compiler if running',
+  ' * restart                   - Restart the compiler in watch mode',
+  ' * build                     - Ensure the project is built and upto date',
+  ' * clean                     - Clean out the output and compiler caches',
+  ' * info                      - Retrieve the compiler information, if running',
+  ' * manifest [output] [prod]  - Generate the project manifest',
 ].join('\n');
 
 getEntry().then(async (ops) => {

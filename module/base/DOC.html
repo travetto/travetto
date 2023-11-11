@@ -73,7 +73,7 @@ The functionality we support for testing and retrieving environment information:
   </figure>
 
 The source for each field is:
-<ul> <li><code class="item field">envName</code> - This is derived from <code class="item field">process.env.TRV_ENV</code> with a fallback of <code class="item field">process.NODE_ENV</code></li>
+<ul> <li><code class="item field">envName</code> - This is derived from <code class="item field">process.env.TRV_ENV</code> with a fallback of <code class="item field">process.env.NODE_ENV</code></li>
 <li><code class="item field">devMode</code> - This is true if <code class="item field">process.env.NODE_ENV</code> is dev* or test</li>
 <li><code class="item field">dynamic</code> - This is derived from <code class="item field">process.env.TRV_DYNAMIC</code>. This field reflects certain feature sets used throughout the framework.</li>
 <li><code class="item field">resourcePaths</code> - This is a list derived from <code class="item field">process.env.TRV_RESOURCES</code>.  This points to a list of folders that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L23">FileResourceProvider</a> will search against, by default.</li>

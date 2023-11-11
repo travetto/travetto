@@ -16,8 +16,8 @@ The following tutorial wil walk you through setting up a <a target="_blank" clas
 <h2 id="prerequisites">Prerequisites</h2>
 
 Install
-<ul> <li><a target="_blank" class="external-link" href="https://nodejs.org/en/download/current/">Node</a> v19.x+ (recommended, but v18.x+ supported)</li>
-<li><a target="_blank" class="external-link" href="https://docs.mongodb.com/manual/administration/install-community/">Mongodb</a> 3.6+ (required, but 4.4+ recommended)</li>
+<ul> <li><a target="_blank" class="external-link" href="https://nodejs.org/en/download/current/">Node</a> v20.x+ (required)</li>
+<li><a target="_blank" class="external-link" href="https://docs.mongodb.com/manual/administration/install-community/">Mongodb</a> 5.0+ (required, but 6+ recommended)</li>
 <li><a target="_blank" class="external-link" href="https://code.visualstudio.com/download">VSCode</a> (recommended)</li>
 <li><a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a> (recommended)</li>
 </ul>
@@ -432,7 +432,7 @@ First we must start the application:
 <span class="token number">2029</span>-03-14T04:00:00.837Z info  <span class="token punctuation">[</span>@travetto/rest:src/application/rest.ts:192<span class="token punctuation">]</span> Listening <span class="token punctuation">{{'{'}}</span> port: <span class="token number">12555</span> <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-next, let's execute <a target="_blank" class="external-link" href="https://www.npmjs.com/package/node-fetch">fetch</a> requests to interact with the new api. <br><br>
+next, let's execute <a target="_blank" class="external-link" href="https://nodejs.org/api/globals.html#fetch">fetch</a> requests to interact with the new api. <br><br>
 Create <code class="item path">support/create-todo.ts</code> with the following contents:
 
   <figure class="code">

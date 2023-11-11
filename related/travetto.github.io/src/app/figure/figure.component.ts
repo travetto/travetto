@@ -2,8 +2,17 @@ import { Component, OnInit, ElementRef } from '@angular/core';
 
 @Component({
   selector: 'figure',
-  templateUrl: './figure.component.html',
-  styleUrls: ['./figure.component.scss']
+  template: '<ng-content></ng-content>',
+  styles: [`
+  :host ::ng-deep * {
+  user-select: none;
+}
+
+:host ::ng-deep code {
+  cursor: pointer;
+}
+`],
+  standalone: true
 })
 export class FigureComponent implements OnInit {
 

@@ -23,6 +23,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     const runtimeModule = cfg.runtimeModule ?? (cfg.addModule ? 'current' : undefined);
     const addEnv = cfg.addEnv ?? cfg.fields?.includes('env');
     const { commandModule } = CliCommandRegistry.registerClass(target, {
+      hidden: cfg.hidden,
       preMain: async (cmd) => {
         if (addEnv && 'env' in cmd && typeof cmd.env === 'string') {
           defineGlobalEnv({ envName: cmd.env });

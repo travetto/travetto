@@ -62,7 +62,7 @@ export const LIB_MAPPING = {
   Yeoman: { title: 'yeoman', href: 'http://yeoman.io' },
   Commander: { title: 'commander', href: 'https://www.npmjs.com/package/commander' },
   Curl: { title: 'curl', href: 'https://curl.haxx.se/' },
-  Fetch: { title: 'fetch', href: 'https://www.npmjs.com/package/node-fetch' },
+  Fetch: { title: 'fetch', href: 'https://nodejs.org/api/globals.html#fetch' },
   ParcelWatcher: { title: '@parcel/watcher', href: 'https://www.npmjs.com/package/@parcel/watcher' },
   Preact: { title: 'preact', href: 'https://preactjs.com' },
 

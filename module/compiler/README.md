@@ -30,7 +30,7 @@ The compiler cli supports the following operations:
    *  `build` - Ensure the project is built and upto date
    *  `clean` - Clean out the output and compiler caches
    *  `info` - Retrieve the compiler information, if running
-   *  `manifest` - Generate the project manifest
+   *  `manifest [output] [prod]` - Generate the project manifest
 In addition to the normal output, the compiler supports an environment variable `TRV_BUILD` that supports the following values: `debug`, `info`, `warn` or `none`.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. `<other>` from above), the default level is `warn`.  Otherwise the default logging level is `info`.
 
 **Terminal: Sample trv output with debug logging**
