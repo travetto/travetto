@@ -48,7 +48,7 @@ where the [MongoModelConfig](https://github.com/travetto/travetto/tree/main/modu
 ```typescript
 import type mongo from 'mongodb';
 
-import { FileResourceProvider, GlobalEnv, TimeSpan } from '@travetto/base';
+import { ResourceLoader, GlobalEnv, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -111,8 +111,8 @@ export class MongoModelConfig {
    * Load all the ssl certs as needed
    */
   async postConstruct(): Promise<void> {
-    const resources = new FileResourceProvider({ includeCommon: true });
-    const resolve = (file: string): Promise<string> => resources.resolve(file).then(path => path, () => file);
+    const resources = new ResourceLoader();
+    const resolve = (file: string): Promise<string> => resources.resolve(file).then(v => v, () => file);
 
     if (this.connectionString) {
       const details = new URL(this.connectionString);
@@ -175,4 +175,4 @@ export class MongoModelConfig {
 }
 ```
 
-Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L23) path or just a standard file path.
+Additionally, you can see that the class is registered with the [@Config](https://github.com/travetto/travetto/tree/main/module/config/src/decorator.ts#L13) annotation, and so these values can be overridden using the standard [Configuration](https://github.com/travetto/travetto/tree/main/module/config#readme "Configuration support") resolution paths.The SSL file options in `clientOptions` will automatically be resolved to files when given a path.  This path can be a [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9) path or just a standard file path.

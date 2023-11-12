@@ -5,6 +5,7 @@ export * from './src/error';
 export * from './src/error-util';
 export * from './src/exec';
 export * from './src/env';
+export * from './src/file-loader';
 export * from './src/global-env';
 export * from './src/resource';
 export * from './src/shutdown';

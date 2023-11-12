@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util, Env, FileResourceProvider, TimeUtil } from '@travetto/base';
+import { ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util, Env, FileLoader, TimeUtil, ResourceLoader } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.codeLink('ConsoleManager', 'src/console.ts', /(class|function)\s*[$]ConsoleManager/);
@@ -51,14 +51,14 @@ export const text = <>
       <li>{d.field('envName')} - This is derived from {d.field('process.env.TRV_ENV')} with a fallback of {d.field('process.env.NODE_ENV')}</li>
       <li>{d.field('devMode')} - This is true if {d.field('process.env.NODE_ENV')} is dev* or test</li>
       <li>{d.field('dynamic')} - This is derived from {d.field('process.env.TRV_DYNAMIC')}. This field reflects certain feature sets used throughout the framework.</li>
-      <li>{d.field('resourcePaths')} - This is a list derived from {d.field('process.env.TRV_RESOURCES')}.  This points to a list of folders that the {FileResourceProvider} will search against, by default.</li>
+      <li>{d.field('resourcePaths')} - This is a list derived from {d.field('process.env.TRV_RESOURCES')}.  This points to a list of folders that the {ResourceLoader} will search against.</li>
       <li>{d.field('test')} - This is true if {d.field('envName')} is {d.input('test')}</li>
       <li>{d.field('nodeVersion')} - This is derived from {d.field('process.version')}, and is used primarily for logging purposes</li>
     </ul>
 
     In addition to reading these values, there is a defined method for setting/updating these values:
 
-    <c.Code title='GlobalEnv Update' src='@travetto/base/src/global-env.ts' startRe={/export function defineGlobal/} endRe={/^[}]/} />
+    <c.Code title='GlobalEnv Update' src='@travetto/base/src/global-env.ts' startRe={/export function defineEnv/} endRe={/^[}]/} />
 
     As you can see this method exists to update/change the {d.field('process.env')} values so that the usage of {GlobalEnv} reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications).
   </c.Section>
@@ -66,7 +66,9 @@ export const text = <>
   <c.Section title='Resource Access'>
     The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the {d.mod('Manifest')}'s data for what resources were found at manifesting time.<br />
 
-    The {FileResourceProvider} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  This {FileResourceProvider} will utilize the {GlobalEnv}'s {d.field('resourcePaths')} information on where to attempt to find a requested resource.
+    The {FileLoader} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  <br />
+
+    The {ResourceLoader} extends {FileLoader} and utilizes the {GlobalEnv}'s {d.field('resourcePaths')} information on where to attempt to find a requested resource.
   </c.Section>
 
   <c.Section title='Standard Error Support'>

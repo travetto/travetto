@@ -21,7 +21,7 @@ export abstract class AssetServiceSuite {
 
   serviceClass: Class;
   configClass: Class;
-  fixture = new TestFixtures(['@travetto/asset#support/fixtures']);
+  fixture = new TestFixtures(['@travetto/asset']);
 
   @Test()
   async writeBasic() {

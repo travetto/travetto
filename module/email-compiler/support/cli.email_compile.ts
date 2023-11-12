@@ -14,6 +14,8 @@ export class EmailCompileCommand implements CliCommandShape {
   watch?: boolean;
 
   envInit(): GlobalEnvConfig {
+    Env.addToList('TRV_PROFILES', 'email-dev');
+
     return {
       debug: false,
       dynamic: this.watch,
@@ -21,8 +23,6 @@ export class EmailCompileCommand implements CliCommandShape {
   }
 
   async main(): Promise<void> {
-    Env.addToList('TRV_PROFILES', 'email-dev');
-
     await RootRegistry.init();
 
     // Let the engine template

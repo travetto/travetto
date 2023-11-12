@@ -10,6 +10,8 @@ import { EmailCompilationManager } from './bin/manager';
 export class EmailEditorCommand {
 
   envInit(): GlobalEnvConfig {
+    Env.addToList('TRV_PROFILES', 'email-dev');
+
     return {
       envName: 'dev',
       dynamic: true
@@ -20,8 +22,6 @@ export class EmailEditorCommand {
     if (await CliUtil.runWithRestart(this)) {
       return;
     }
-
-    Env.addToList('TRV_PROFILES', 'email-dev');
 
     await RootRegistry.init();
     await new EditorState(await EmailCompilationManager.createInstance()).init();

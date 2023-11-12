@@ -1,4 +1,4 @@
-import { FileResourceProvider } from '@travetto/base';
+import { ResourceLoader } from '@travetto/base';
 import { Config } from '@travetto/config';
 
 @Config('model.firestore')
@@ -21,7 +21,7 @@ export class FirestoreModelConfig {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
     if (this.credentialsFile && !this.credentials) {
-      const resources = new FileResourceProvider({ includeCommon: true });
+      const resources = new ResourceLoader();
       this.credentials = JSON.parse(await resources.read(this.credentialsFile));
     }
   }

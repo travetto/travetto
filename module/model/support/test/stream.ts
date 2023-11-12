@@ -12,7 +12,7 @@ import { ModelStreamSupport } from '../../src/service/stream';
 @Suite()
 export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport> {
 
-  fixture = new TestFixtures(['@travetto/model#support/fixtures']);
+  fixture = new TestFixtures(['@travetto/model']);
 
   async getHash(stream: Readable): Promise<string> {
     const hash = crypto.createHash('sha1');

@@ -1,4 +1,4 @@
-import { FileResourceProvider } from '@travetto/base';
+import { FileLoader } from '@travetto/base';
 
 /**
  * Presets utility for openapi client command
@@ -6,7 +6,7 @@ import { FileResourceProvider } from '@travetto/base';
 export class OpenApiClientPresets {
 
   static #presets: Record<string, [string, object] | [string]>;
-  static #resources = new FileResourceProvider(['@travetto/openapi#support/resources']);
+  static #resources = new FileLoader(['@travetto/openapi#support/resources']);
 
   static async getPresets(): Promise<Record<string, [string, object] | [string]>> {
     if (!this.#presets) {

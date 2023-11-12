@@ -1,13 +1,13 @@
 import { Readable } from 'stream';
 
 import { Controller, Get, Produces, Request, Undocumented } from '@travetto/rest';
-import { FileResourceProvider } from '@travetto/base';
+import { ResourceLoader } from '@travetto/base';
 
 @Controller('/ui')
 @Undocumented()
 export class UIController {
 
-  resources = new FileResourceProvider({ includeCommon: true });
+  resources = new ResourceLoader();
 
   @Get('/')
   @Produces('text/html')

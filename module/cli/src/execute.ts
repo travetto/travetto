@@ -1,5 +1,5 @@
 import { GlobalTerminal } from '@travetto/terminal';
-import { ConsoleManager, defineGlobalEnv, ShutdownManager, GlobalEnv } from '@travetto/base';
+import { ConsoleManager, defineEnv, ShutdownManager, GlobalEnv } from '@travetto/base';
 
 import { HelpUtil } from './help';
 import { CliCommandShape } from './types';
@@ -14,7 +14,7 @@ export class ExecutionManager {
 
   static async #envInit(cmd: CliCommandShape): Promise<void> {
     if (cmd.envInit) {
-      defineGlobalEnv(await cmd.envInit());
+      defineEnv(await cmd.envInit());
       ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
     }
   }
