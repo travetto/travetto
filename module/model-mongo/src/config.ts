@@ -36,7 +36,7 @@ export class MongoModelConfig {
   /**
    * Is using the SRV DNS record configuration
    */
-  srvRecord = false;
+  srvRecord?: boolean;
 
   /**
    * Mongo client options
