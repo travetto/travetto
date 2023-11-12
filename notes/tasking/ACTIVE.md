@@ -19,3 +19,5 @@ Active Development (3.5.0 - RC)
 * Pack and mono-repo + shared resources/config 
   - Need a way to pack in common resources if necessary?
   - May need to combine config files potentially
+
+* Omit/Pick as type shapes for schema validation
