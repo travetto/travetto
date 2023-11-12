@@ -2,13 +2,13 @@
   "name": "@travetto-test/asset-rest",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/asset-rest": "^3.4.0-rc.8",
-    "@travetto/rest-express": "^3.4.0-rc.7",
-    "@travetto/rest-express-lambda": "^3.4.0-rc.7",
-    "@travetto/rest-fastify": "^3.4.0-rc.7",
-    "@travetto/rest-fastify-lambda": "^3.4.0-rc.7",
-    "@travetto/rest-koa": "^3.4.0-rc.7",
-    "@travetto/rest-koa-lambda": "^3.4.0-rc.7"
+    "@travetto/asset-rest": "^3.4.0",
+    "@travetto/rest-express": "^3.4.0",
+    "@travetto/rest-express-lambda": "^3.4.0",
+    "@travetto/rest-fastify": "^3.4.0",
+    "@travetto/rest-fastify-lambda": "^3.4.0",
+    "@travetto/rest-koa": "^3.4.0",
+    "@travetto/rest-koa-lambda": "^3.4.0"
   },
   "travetto": {},
   "private": true

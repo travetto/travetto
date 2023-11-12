@@ -1,6 +1,6 @@
 {
   "name": "@travetto/registry",
-  "version": "3.4.0-rc.7",
+  "version": "3.4.0",
   "description": "Patterns and utilities for handling registration of metadata and functionality for run-time use",
   "keywords": [
     "ast-transformations",
@@ -27,11 +27,11 @@
     "directory": "module/registry"
   },
   "dependencies": {
-    "@travetto/base": "^3.4.0-rc.6"
+    "@travetto/base": "^3.4.0"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.4.0-rc.8",
-    "@travetto/transformer": "^3.4.0-rc.2"
+    "@travetto/cli": "^3.4.0",
+    "@travetto/transformer": "^3.4.0"
   },
   "peerDependenciesMeta": {
     "@travetto/transformer": {
