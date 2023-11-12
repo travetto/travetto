@@ -42,7 +42,7 @@ export class ModelCandidateUtil {
   static async getProviders(op?: keyof ModelStorageSupport): Promise<InjectableConfig[]> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const types = DependencyRegistry.getCandidateTypes<ModelStorageSupport>(ModelStorageSupportTarget as unknown as Class<ModelStorageSupport>);
-    return types.filter(x => !op || x.class.prototype[op]);
+    return types.filter(x => !op || x.class.prototype?.[op]);
   }
 
   /**

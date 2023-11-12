@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import os from 'os';
 
 import { ExecUtil, Env, Util } from '@travetto/base';
-import { RootIndex, path } from '@travetto/manifest';
+import { ManifestFileUtil, RootIndex, path } from '@travetto/manifest';
 import { TestFixtures } from '@travetto/test';
 
 import { RestClientGeneratorService } from '../../src/service';
@@ -12,7 +12,7 @@ const fixtures = new TestFixtures(['@travetto/rest-client']);
 export class RestClientTestUtil {
 
   static get rootFolder(): string {
-    return path.resolve(RootIndex.manifest.workspacePath, RootIndex.manifest.toolFolder, 'rest-client-puppeteer');
+    return ManifestFileUtil.toolPath(RootIndex, 'rest-client-puppeteer', false);
   }
 
   static get clientFile(): string {
@@ -31,17 +31,11 @@ export class RestClientTestUtil {
     await fs.writeFile(this.clientFile, await fixtures.read('puppeteer.mjs'), 'utf8');
   }
 
-  static async compileTypescript(folder: string, web = false): Promise<void> {
-    await fs.writeFile(path.resolve(folder, 'tsconfig.json'), JSON.stringify({
-      compilerOptions: {
-        rootDir: '.',
-        module: web ? 'es2022' : 'CommonJS',
-        ...(!web ? { moduleResolution: 'node' } : {}),
-        target: 'esnext',
-        lib: web ? ['es2022', 'dom'] : ['es2022'],
-        esModuleInterop: true,
-      },
-    }));
+  static async compileTypescript(folder: string, mode: 'web' | 'node'): Promise<void> {
+    await fs.copyFile(
+      await fixtures.resolve(`tsconfig.${mode}.json`),
+      path.resolve(folder, 'tsconfig.json'),
+    );
     const tsc = path.resolve(RootIndex.manifest.workspacePath, 'node_modules', '.bin', 'tsc');
     await ExecUtil.spawn(tsc, ['-p', folder]).result;
   }
@@ -63,7 +57,7 @@ export class RestClientTestUtil {
         `${body}\ngo().then(console.log)`
       );
       await ExecUtil.spawn('npm', ['i'], { cwd: tmp }).result;
-      await this.compileTypescript(tmp, false);
+      await this.compileTypescript(tmp, 'node');
 
       const proc = ExecUtil.spawn('node', ['./main'], { cwd: tmp });
       return (await proc.result).stdout;
@@ -82,7 +76,7 @@ export class RestClientTestUtil {
         body
       );
 
-      await this.compileTypescript(tmp, true);
+      await this.compileTypescript(tmp, 'web');
 
       const indexHtml = path.resolve(tmp, 'index.html');
       await fs.writeFile(indexHtml,

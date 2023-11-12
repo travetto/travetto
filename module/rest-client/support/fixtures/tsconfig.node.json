@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "target": "esnext",
+    "lib": [
+      "es2022"
+    ],
+    "esModuleInterop": true,
+  }
+}

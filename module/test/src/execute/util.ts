@@ -70,9 +70,6 @@ export class RunnerUtil {
    * Determine if we should invoke the debugger
    */
   static get tryDebugger(): boolean {
-    if (process.env.TRV_TEST_BREAK_ENTRY === '1') {
-      return true;
-    }
-    return false;
+    return process.env.TRV_TEST_BREAK_ENTRY === '1';
   }
 }

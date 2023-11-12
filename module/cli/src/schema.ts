@@ -237,9 +237,11 @@ export class CliCommandSchemaUtil {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const cls = cmd.constructor as Class<CliCommandShape>;
 
+    const paramNames = SchemaRegistry.getMethodSchema(cls, 'main').map(x => x.name);
+
     const validators = [
       (): Promise<void> => SchemaValidator.validate(cls, cmd).then(() => { }),
-      (): Promise<void> => SchemaValidator.validateMethod(cls, 'main', args),
+      (): Promise<void> => SchemaValidator.validateMethod(cls, 'main', args, paramNames),
       async (): Promise<void> => {
         const res = await cmd.validate?.(...args);
         if (res) {

@@ -40,7 +40,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
     await RootRegistry.init();
 
     const candidates = await ModelCandidateUtil.export(this.getOp());
-    if (!candidates.providers.includes(provider)) {
+    if (provider && !candidates.providers.includes(provider)) {
       return { message: `provider: ${provider} is not a valid provider`, source: 'arg' };
     }
     const badModel = models.find(x => x !== '*' && !candidates.models.includes(x));

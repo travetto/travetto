@@ -362,7 +362,6 @@ npx trv run:rest
         namespace: 'app',
         port: 27017,
         connectionOptions: {},
-        srvRecord: false,
         options: { waitQueueTimeoutMS: 86400000 }
       },
       RestAcceptsConfig: { types: {} },
