@@ -1,4 +1,4 @@
-import { ConsoleManager, GlobalEnvConfig } from '@travetto/base';
+import { ConsoleManager, EnvInit } from '@travetto/base';
 import { CliValidationError, CliCommandShape, cliTpl } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 
@@ -16,7 +16,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
 
   abstract getOp(): keyof ModelStorageSupport;
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     return { debug: false };
   }
 

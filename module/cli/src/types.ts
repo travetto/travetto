@@ -1,4 +1,4 @@
-import { Closeable, GlobalEnvConfig } from '@travetto/base';
+import { Closeable, EnvInit } from '@travetto/base';
 
 type OrProm<T> = T | Promise<T>;
 
@@ -29,7 +29,7 @@ export interface CliCommandShape {
   /**
    * Setup environment before command runs
    */
-  envInit?(): OrProm<GlobalEnvConfig>;
+  envInit?(): OrProm<EnvInit>;
   /**
    * Extra help
    */

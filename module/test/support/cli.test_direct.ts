@@ -1,4 +1,4 @@
-import { GlobalEnvConfig } from '@travetto/base';
+import { EnvInit } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
 import { runTests } from './bin/run';
@@ -10,7 +10,7 @@ export class TestDirectCommand {
 
   format: TestFormat = 'tap';
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     return { envName: 'test' };
   }
 

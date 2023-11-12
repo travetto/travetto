@@ -1,4 +1,4 @@
-import { GlobalEnvConfig } from '@travetto/base';
+import { EnvInit } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -7,7 +7,7 @@ import { RestApplication, RestSslConfig } from '@travetto/rest';
 @CliCommand({ runTarget: true })
 export class SampleApp {
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     return { envName: 'prod' };
   }
 

@@ -1,5 +1,5 @@
 import { path } from '@travetto/manifest';
-import { GlobalEnvConfig } from '@travetto/base';
+import { EnvInit } from '@travetto/base';
 import { CliCommand, CliCommandShape, CliValidationResultError } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -17,7 +17,7 @@ export class CliRestClientCommand implements CliCommandShape {
   @Ignore()
   module: string;
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     return { debug: false };
   }
 

@@ -37,13 +37,13 @@ export const GlobalEnv = {
   }
 } as const;
 
-export type GlobalEnvConfig = {
+export type EnvInit = {
   debug?: boolean | string;
   envName?: string;
   dynamic?: boolean;
 };
 
-export function defineEnv(cfg: GlobalEnvConfig = {}): void {
+export function defineEnv(cfg: EnvInit = {}): void {
   const envName = (cfg.envName ?? readEnvName()).toLowerCase();
   process.env.NODE_ENV = /^dev|development|test$/.test(envName) ? 'development' : 'production';
   process.env.DEBUG = `${envName !== 'test' && (cfg.debug ?? GlobalEnv.debug ?? false)}`;

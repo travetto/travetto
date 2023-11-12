@@ -1,6 +1,6 @@
 import { CliCommand, CliCommandShape } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
-import { ExecUtil, GlobalEnvConfig } from '@travetto/base';
+import { ExecUtil, EnvInit } from '@travetto/base';
 import { Max, Min } from '@travetto/schema';
 import { RepoExecUtil } from './bin/exec';
 
@@ -25,7 +25,7 @@ export class RepoExecCommand implements CliCommandShape {
   /** Show stdout */
   showStdout = true;
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     return { debug: false };
   }
 

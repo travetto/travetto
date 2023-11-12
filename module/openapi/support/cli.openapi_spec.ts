@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { GlobalEnvConfig } from '@travetto/base';
+import { EnvInit } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { path } from '@travetto/manifest';
@@ -15,7 +15,7 @@ export class OpenApiSpecCommand implements CliCommandShape {
   /** Output files */
   output?: string;
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     return { debug: false };
   }
 

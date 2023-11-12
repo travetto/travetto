@@ -284,7 +284,7 @@ To customize a REST server, you may need to construct an entry point using the [
 
 **Code: Application entry point for Rest Applications**
 ```typescript
-import { GlobalEnvConfig } from '@travetto/base';
+import { EnvInit } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -293,7 +293,7 @@ import { RestApplication, RestSslConfig } from '@travetto/rest';
 @CliCommand({ runTarget: true })
 export class SampleApp {
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     return { envName: 'prod' };
   }
 

@@ -1,6 +1,6 @@
 import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { Env, GlobalEnvConfig } from '@travetto/base';
+import { Env, EnvInit } from '@travetto/base';
 
 import { EmailCompiler } from '../src/compiler';
 
@@ -13,13 +13,9 @@ export class EmailCompileCommand implements CliCommandShape {
   /** Compile in watch mode */
   watch?: boolean;
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     Env.addToList('TRV_PROFILES', 'email-dev');
-
-    return {
-      debug: false,
-      dynamic: this.watch,
-    };
+    return { debug: false, dynamic: this.watch };
   }
 
   async main(): Promise<void> {

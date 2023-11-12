@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import fs from 'fs/promises';
 
 import { path } from '@travetto/manifest';
-import { GlobalEnvConfig } from '@travetto/base';
+import { EnvInit } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
@@ -22,7 +22,7 @@ export class TestCommand implements CliCommandShape {
   /** Test run mode */
   mode: TestMode = 'standard';
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     EventEmitter.defaultMaxListeners = 1000;
     return { envName: 'test' };
   }

@@ -1,4 +1,4 @@
-import { GlobalEnvConfig } from '@travetto/base';
+import { EnvInit } from '@travetto/base';
 import { CliCommand, CliUtil } from '@travetto/cli';
 
 import { TestFormat } from './bin/types';
@@ -12,7 +12,7 @@ export class TestWatcherCommand {
   format: TestFormat = 'tap';
   mode: 'all' | 'change' = 'all';
 
-  envInit(): GlobalEnvConfig {
+  envInit(): EnvInit {
     return { envName: 'test', dynamic: true };
   }
 

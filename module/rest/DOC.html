@@ -318,7 +318,7 @@ To customize a REST server, you may need to construct an entry point using the <
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/cli.run_rest_custom.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> GlobalEnvConfig <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EnvInit <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RootRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
@@ -327,7 +327,7 @@ To customize a REST server, you may need to construct an entry point using the <
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> runTarget<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
 
-  <span class="token function">envInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> GlobalEnvConfig <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">envInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> EnvInit <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> envName<span class="token operator">:</span> <span class="token string">'prod'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
