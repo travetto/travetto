@@ -22,15 +22,13 @@ export class DocCommand implements CliCommandShape {
   watch = false;
 
   envInit(): GlobalEnvConfig {
-    return {
-      debug: false,
-      set: {
-        TRV_CONSOLE_WIDTH: 140,
-        TRV_CLI_IPC: '',
-        FORCE_COLOR: 0,
-        TRV_LOG_PLAIN: true
-      }
-    };
+    Object.assign(process.env, {
+      TRV_CLI_IPC: '',
+      TRV_LOG_PLAIN: 'true',
+      TRV_CONSOLE_WIDTH: '140',
+      FORCE_COLOR: '0',
+    });
+    return { debug: false, };
   }
 
   finalize(): void {

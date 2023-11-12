@@ -39,7 +39,7 @@ The functionality we support for testing and retrieving environment information:
    *  `addToList(key: string, value: string): string[];` - Add an item to an environment value, ensuring uniqueness
 
 ## Shared Global Environment State
-[GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17) is a non-cached interface to the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L4) class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.
+[GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L9) is a non-cached interface to the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L4) class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.
 
 **Code: GlobalEnv Shape**
 ```typescript
@@ -67,39 +67,30 @@ The source for each field is:
    *  `envName` - This is derived from `process.env.TRV_ENV` with a fallback of `process.env.NODE_ENV`
    *  `devMode` - This is true if `process.env.NODE_ENV` is dev* or test
    *  `dynamic` - This is derived from `process.env.TRV_DYNAMIC`. This field reflects certain feature sets used throughout the framework.
-   *  `resourcePaths` - This is a list derived from `process.env.TRV_RESOURCES`.  This points to a list of folders that the [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L23) will search against, by default.
+   *  `resourcePaths` - This is a list derived from `process.env.TRV_RESOURCES`.  This points to a list of folders that the [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9) will search against.
    *  `test` - This is true if `envName` is `test`
    *  `nodeVersion` - This is derived from `process.version`, and is used primarily for logging purposes
 In addition to reading these values, there is a defined method for setting/updating these values:
 
 **Code: GlobalEnv Update**
 ```typescript
-export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
-  const { set = {} } = cfg;
-  const resources = [...cfg.resourcePaths ?? [], ...GlobalEnv.resourcePaths];
-
-  const envName = (cfg.envName ?? GlobalEnv.envName) || readNodeEnv();
-
-  Object.assign(set, {
-    NODE_ENV: detectNodeEnv(envName),
-    DEBUG: envName !== TEST ? (cfg.debug ?? GlobalEnv.debug ?? false) : false,
-    TRV_ENV: envName,
-    TRV_DYNAMIC: cfg.dynamic ?? GlobalEnv.dynamic,
-    TRV_RESOURCES: resources.join(',')
-  });
-
-  for (const [k, v] of Object.entries(set)) {
-    (v === undefined || v === null) ? delete process.env[k] : process.env[k] = `${v}`;
-  }
+export function defineEnv(cfg: GlobalEnvConfig = {}): void {
+  const envName = (cfg.envName ?? readEnvName()).toLowerCase();
+  process.env.NODE_ENV = /^dev|development|test$/.test(envName) ? 'development' : 'production';
+  process.env.DEBUG = `${envName !== 'test' && (cfg.debug ?? GlobalEnv.debug ?? false)}`;
+  process.env.TRV_ENV = envName;
+  process.env.TRV_DYNAMIC = `${cfg.dynamic ?? GlobalEnv.dynamic}`;
 }
 ```
 
-As you can see this method exists to update/change the `process.env` values so that the usage of [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17) reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications).
+As you can see this method exists to update/change the `process.env` values so that the usage of [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L9) reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications).
 
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
-The [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L23) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  This [FileResourceProvider](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L23) will utilize the [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17)'s `resourcePaths` information on where to attempt to find a requested resource.
+The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
+
+The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) and utilizes the [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L9)'s `resourcePaths` information on where to attempt to find a requested resource.
 
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 

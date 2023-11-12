@@ -9,7 +9,7 @@ import { path } from '@travetto/manifest';
 @Suite()
 export class UtilTest {
 
-  fixture = new TestFixtures(['@travetto/asset#support/fixtures']);
+  fixture = new TestFixtures();
 
   @Test()
   async hashFile() {

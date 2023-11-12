@@ -1,7 +1,7 @@
-import { FileResourceProvider } from '@travetto/base';
+import { FileLoader } from '@travetto/base';
 
-export class TestFixtures extends FileResourceProvider {
-  constructor(paths: string[] = []) {
-    super({ paths: ['@', ...paths,], moduleFolder: 'support/fixtures', mainFolder: 'test/fixtures' });
+export class TestFixtures extends FileLoader {
+  constructor(modules: string[] = []) {
+    super(['@#test/fixtures', ...['@', ...modules.flat()].map(x => `${x}#support/fixtures`)]);
   }
 }

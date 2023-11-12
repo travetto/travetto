@@ -1,4 +1,4 @@
-import { AppError, FileResourceProvider, GlobalEnv } from '@travetto/base';
+import { AppError, ResourceLoader, GlobalEnv } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
 import { RootIndex } from '@travetto/manifest';
 import { Secret } from '@travetto/schema';
@@ -81,7 +81,7 @@ export class RestSslConfig {
       return RestSslConfig.generateSslKeyPair();
     } else {
       if (this.keys.key.length < 100) {
-        const provider = new FileResourceProvider({ includeCommon: true });
+        const provider = new ResourceLoader();
         this.keys.key = (await provider.read(this.keys.key, true)).toString('utf8');
         this.keys.cert = (await provider.read(this.keys.cert, true)).toString('utf8');
       }

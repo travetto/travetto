@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 import { Field, Schema } from '@travetto/schema';
-import { FileResourceProvider } from '@travetto/base';
+import { ResourceLoader } from '@travetto/base';
 
 import { RestApplication } from './src/application/rest';
 import { Controller } from './src/decorator/controller';
@@ -241,7 +241,7 @@ export const text = <>
 
     This is useful for local development where you implicitly trust the cert. <br />
 
-    SSL support can be enabled by setting {d.input('rest.ssl.active: true')} in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the {FileResourceProvider}.
+    SSL support can be enabled by setting {d.input('rest.ssl.active: true')} in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the {ResourceLoader}.
   </c.Section>
 
   <c.Section title='Full Config'>

@@ -102,6 +102,18 @@ class $RootIndex extends ManifestIndex {
     const id = clsId === undefined ? '' : typeof clsId === 'string' ? clsId : clsId.Ⲑid;
     return this.#metadata.get(id);
   }
+
+  /**
+   * Resolve module path to folder, with support for main module and monorepo support
+   */
+  resolveModulePath(modulePath: string): string {
+    const main = this.manifest.mainModule;
+    const workspace = this.manifest.workspacePath;
+    const [base, sub] = modulePath
+      .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
+      .split('#');
+    return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
+  }
 }
 
 let index: $RootIndex | undefined;

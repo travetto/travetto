@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { Env, FileResourceProvider, GlobalEnv } from '@travetto/base';
+import { Env, GlobalEnv, ResourceLoader } from '@travetto/base';
 import { RootIndex, path } from '@travetto/manifest';
 
 import { ConfigSource, ConfigSpec } from './types';
@@ -19,7 +19,7 @@ export class FileConfigSource implements ConfigSource {
 
   constructor(parser: ParserManager, paths?: string[], profiles?: Profile[]) {
     this.#parser = parser;
-    this.#searchPaths = FileResourceProvider.resolveSearchPaths({ includeCommon: true, paths }).reverse();
+    this.#searchPaths = ResourceLoader.getSearchPaths(paths).reverse();
     this.#profiles = profiles ?? [
       ['application', 100],
       [GlobalEnv.envName, 200],

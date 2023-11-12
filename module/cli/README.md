@@ -454,7 +454,7 @@ export class RunRestCommand {
 }
 ```
 
-As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L17) flags defined in the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module. 
+As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L9) flags defined in the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module. 
 
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 

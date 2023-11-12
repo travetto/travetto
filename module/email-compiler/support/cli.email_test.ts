@@ -16,12 +16,12 @@ import { EmailCompiler } from '../src/compiler';
 export class EmailTestCommand implements CliCommandShape {
 
   envInit(): GlobalEnvConfig {
+    Env.addToList('TRV_PROFILES', 'email-dev');
+
     return { envName: 'dev' };
   }
 
   async main(file: string, to: string): Promise<void> {
-    Env.addToList('TRV_PROFILES', 'email-dev');
-
     file = path.resolve(file);
     await RootRegistry.init();
     await EmailCompiler.compile(file, true);

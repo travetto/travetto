@@ -1,15 +1,7 @@
 import { Env } from './env';
 
-const NODE_ENV_PROD = 'production';
-const NODE_ENV_DEV = 'development';
-const NODE_ENV_DEV_REGEX = /^dev|development|test$/i;
-
-const PROD = 'prod';
-const DEV = 'dev';
-const TEST = 'test';
-
-const readNodeEnv = (): string => Env.get('NODE_ENV', DEV).replace(NODE_ENV_PROD, PROD).replace(NODE_ENV_DEV, DEV);
-const detectNodeEnv = (val: string): string => NODE_ENV_DEV_REGEX.test(val) ? NODE_ENV_DEV : NODE_ENV_PROD;
+const readEnvName = (): string => Env.get('TRV_ENV', '') ||
+  Env.get('NODE_ENV', 'development').replace(/production/i, 'prod').replace(/development/i, 'dev');
 
 /**
  * The general app state, via env
@@ -22,7 +14,7 @@ export const GlobalEnv = {
   get debug(): string | undefined { return Env.get('DEBUG'); },
 
   /** Are we in development mode */
-  get devMode(): boolean { return Env.get('NODE_ENV', NODE_ENV_DEV) === NODE_ENV_DEV; },
+  get devMode(): boolean { return Env.get('NODE_ENV', 'development') === 'development'; },
 
   /** Is the app in dynamic mode? */
   get dynamic(): boolean { return Env.isTrue('TRV_DYNAMIC'); },
@@ -46,25 +38,15 @@ export const GlobalEnv = {
 } as const;
 
 export type GlobalEnvConfig = {
-  set?: Record<string, string | number | boolean | undefined>;
   debug?: boolean | string;
-} & Partial<Omit<typeof GlobalEnv, 'devMode' | 'debug' | 'test'>>;
+  envName?: string;
+  dynamic?: boolean;
+};
 
-export function defineGlobalEnv(cfg: GlobalEnvConfig = {}): void {
-  const { set = {} } = cfg;
-  const resources = [...cfg.resourcePaths ?? [], ...GlobalEnv.resourcePaths];
-
-  const envName = (cfg.envName ?? GlobalEnv.envName) || readNodeEnv();
-
-  Object.assign(set, {
-    NODE_ENV: detectNodeEnv(envName),
-    DEBUG: envName !== TEST ? (cfg.debug ?? GlobalEnv.debug ?? false) : false,
-    TRV_ENV: envName,
-    TRV_DYNAMIC: cfg.dynamic ?? GlobalEnv.dynamic,
-    TRV_RESOURCES: resources.join(',')
-  });
-
-  for (const [k, v] of Object.entries(set)) {
-    (v === undefined || v === null) ? delete process.env[k] : process.env[k] = `${v}`;
-  }
+export function defineEnv(cfg: GlobalEnvConfig = {}): void {
+  const envName = (cfg.envName ?? readEnvName()).toLowerCase();
+  process.env.NODE_ENV = /^dev|development|test$/.test(envName) ? 'development' : 'production';
+  process.env.DEBUG = `${envName !== 'test' && (cfg.debug ?? GlobalEnv.debug ?? false)}`;
+  process.env.TRV_ENV = envName;
+  process.env.TRV_DYNAMIC = `${cfg.dynamic ?? GlobalEnv.dynamic}`;
 }
