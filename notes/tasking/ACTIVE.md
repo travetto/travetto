@@ -21,3 +21,5 @@ Active Development (3.5.0 - RC)
   - May need to combine config files potentially
 
 * Omit/Pick as type shapes for schema validation
+
+* Cli, quoted params

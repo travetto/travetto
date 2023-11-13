@@ -55,7 +55,11 @@ export class DockerPackOperation {
    * Building Docker Container
    */
   static async* buildDockerContainer(cfg: DockerPackConfig): AsyncIterable<string[]> {
-    const cmd = ['docker', 'build', ...cfg.dockerBuildFlags?.split(' ') ?? [], ...DockerPackOperation.getDockerTags(cfg).flatMap(x => ['-t', x]), '.'];
+    const cmd = [
+      'docker', 'build',
+      ...(cfg.dockerBuildPlatform ? ['-platform', cfg.dockerBuildPlatform] : []),
+      ...DockerPackOperation.getDockerTags(cfg).flatMap(x => ['-t', x]), '.'
+    ];
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Building Docker Container' }} ${{ param: cfg.dockerTag?.join(',') }}`);
 

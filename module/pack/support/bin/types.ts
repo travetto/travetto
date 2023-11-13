@@ -19,7 +19,7 @@ export type CommonPackConfig = {
 
 export type DockerPackConfig = {
   dockerFactory: string;
-  dockerBuildFlags?: string;
+  dockerBuildPlatform: string;
   dockerImage: string;
   dockerName: string;
   dockerTag?: string[];
