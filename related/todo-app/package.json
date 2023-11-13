@@ -32,7 +32,7 @@
     "vue": "^3.3.7"
   },
   "devDependencies": {
-    "@travetto/pack": "^3.4.1",
+    "@travetto/pack": "^3.4.2",
     "@travetto/rest-client": "^3.4.0"
   },
   "travetto": {
