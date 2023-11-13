@@ -57,7 +57,7 @@ export class DockerPackOperation {
   static async* buildDockerContainer(cfg: DockerPackConfig): AsyncIterable<string[]> {
     const cmd = [
       'docker', 'build',
-      ...(cfg.dockerBuildPlatform ? ['-platform', cfg.dockerBuildPlatform] : []),
+      ...(cfg.dockerBuildPlatform ? ['--platform', cfg.dockerBuildPlatform] : []),
       ...DockerPackOperation.getDockerTags(cfg).flatMap(x => ['-t', x]), '.'
     ];
 
