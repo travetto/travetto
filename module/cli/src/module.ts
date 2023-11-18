@@ -11,19 +11,20 @@ export class CliModuleUtil {
 
   /**
    * Find modules that changed, and the dependent modules
-   * @param hash
+   * @param fromHash
+   * @param toHash
    * @param transitive
    * @returns
    */
-  static async findChangedModulesRecursive(hash?: string, transitive = true): Promise<IndexedModule[]> {
-    hash ??= await CliScmUtil.findLastRelease();
+  static async findChangedModulesRecursive(fromHash?: string, toHash?: string, transitive = true): Promise<IndexedModule[]> {
+    fromHash ??= await CliScmUtil.findLastRelease();
 
-    if (!hash) {
+    if (!fromHash) {
       return RootIndex.getLocalModules();
     }
 
     const out = new Map<string, IndexedModule>();
-    for (const mod of await CliScmUtil.findChangedModulesSince(hash)) {
+    for (const mod of await CliScmUtil.findChangedModules(fromHash, toHash)) {
       out.set(mod.name, mod);
       if (transitive) {
         for (const sub of await RootIndex.getDependentModules(mod)) {
@@ -42,9 +43,9 @@ export class CliModuleUtil {
    * @param transitive
    * @returns
    */
-  static async findModules(mode: 'all' | 'changed', sinceHash?: string): Promise<IndexedModule[]> {
+  static async findModules(mode: 'all' | 'changed', fromHash?: string, toHash?: string): Promise<IndexedModule[]> {
     return (mode === 'changed' ?
-      await this.findChangedModulesRecursive(sinceHash) :
+      await this.findChangedModulesRecursive(fromHash, toHash) :
       [...RootIndex.getModuleList('all')].map(x => RootIndex.getModule(x)!)
     ).filter(x => x.sourcePath !== RootIndex.manifest.workspacePath);
   }

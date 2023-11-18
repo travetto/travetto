@@ -41,13 +41,13 @@ export class CliScmUtil {
   }
 
   /**
-   * Find all source files that changed since hash
-   * @param hash
+   * Find all source files that changed between from and to hashes
+   * @param fromHash
    * @returns
    */
-  static async findChangedFilesSince(hash: string): Promise<string[]> {
+  static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
     const ws = RootIndex.manifest.workspacePath;
-    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `HEAD..${hash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
+    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
     const out = new Set<string>();
     for (const line of res.stdout.split(/\n/g)) {
       const entry = RootIndex.getEntry(path.resolve(ws, line));
@@ -59,12 +59,13 @@ export class CliScmUtil {
   }
 
   /**
-   * Find all modules that changed since hash
-   * @param hash
+   * Find all modules that changed between from and to hashes
+   * @param fromHash
+   * @param toHash
    * @returns
    */
-  static async findChangedModulesSince(hash: string): Promise<IndexedModule[]> {
-    const files = await this.findChangedFilesSince(hash);
+  static async findChangedModules(fromHash: string, toHash?: string): Promise<IndexedModule[]> {
+    const files = await this.findChangedFiles(fromHash, toHash);
     const mods = files
       .map(x => RootIndex.getFromSource(x))
       .filter((x): x is IndexedFile => !!x)
