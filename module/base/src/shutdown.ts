@@ -2,7 +2,9 @@ import { setTimeout } from 'timers/promises';
 import { parentPort } from 'worker_threads';
 
 import { RootIndex } from '@travetto/manifest';
+
 import { Env } from './env';
+import { ObjectUtil } from './object';
 
 export type Closeable = {
   close(cb?: Function): unknown;
@@ -10,10 +12,6 @@ export type Closeable = {
 
 type UnhandledHandler = (err: Error, prom?: Promise<unknown>) => boolean | undefined | void;
 type Listener = { name: string, handler: Function, final?: boolean };
-
-function isPromise(a: unknown): a is Promise<unknown> {
-  return !!a && (a instanceof Promise || (typeof a === 'object') && 'then' in a);
-}
 
 /**
  * Shutdown manager, allowing for hooks into the shutdown process.
@@ -52,7 +50,7 @@ class $ShutdownManager {
           console.debug('Starting', { name });
         }
         const res = handler();
-        if (isPromise(res)) {
+        if (ObjectUtil.isPromise(res)) {
           // If a promise, queue for handling
           promises.push(res);
           if (name) {

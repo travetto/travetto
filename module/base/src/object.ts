@@ -68,13 +68,6 @@ export class ObjectUtil {
   }
 
   /**
-   * Is an error object
-   */
-  static isError(a: unknown): a is Error {
-    return !!a && (a instanceof Error || (typeof a === 'object' && 'message' in a && 'stack' in a));
-  }
-
-  /**
    * Is a promise object
    */
   static isPromise(a: unknown): a is Promise<unknown> {

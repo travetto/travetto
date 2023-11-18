@@ -92,7 +92,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
             indices[`${prop}_sort__`] = toValue(+sort);
           }
         }
-        const query = {
+        const query: dynamodb.PutItemCommandInput = {
           TableName: this.#resolveTable(cls),
           ConditionExpression: 'attribute_not_exists(body)',
           Item: {
@@ -157,7 +157,7 @@ export class DynamoDBModelService implements ModelCrudSupport, ModelExpirySuppor
       const idxName = simpleName(idx.name);
       attributes.push({ AttributeName: `${idxName}__`, AttributeType: 'S' });
 
-      const keys = [{
+      const keys: dynamodb.KeySchemaElement[] = [{
         AttributeName: `${idxName}__`,
         KeyType: 'HASH'
       }];

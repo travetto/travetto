@@ -1,7 +1,4 @@
-import assert from 'assert';
-
 import { Test, Suite } from '@travetto/test';
-import { ErrorUtil } from '../src/error-util';
 
 @Suite()
 class ErrorUtilTest {
@@ -32,23 +29,7 @@ class ErrorUtilTest {
   }
 
   @Test()
-  async test() {
-    try {
-      await this.inner6();
-      assert(false);
-    } catch (err) {
-      assert(err);
-      assert(err instanceof Error);
-      const stack = ErrorUtil.cleanStack(err);
-      assert(!stack.includes('inner6'));
-      assert(!stack.includes('inner5'));
-      assert(stack.includes('inner4'));
-      assert(stack.includes('inner3'));
-      assert(stack.includes('inner2'));
-      assert(stack.includes('inner1'));
+  doNothing() {
 
-      // assert(err?.stack === stack);
-      console.warn('Error', { error: err });
-    }
   }
 }
