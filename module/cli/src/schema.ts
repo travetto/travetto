@@ -5,14 +5,34 @@ import { CliCommandRegistry } from './registry';
 import { CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
 import { CliValidationResultError } from './error';
 
-function split(args: string[]): [core: string[], extra: string[]] {
-  const restIdx = args.indexOf('--');
-  if (restIdx >= 0) {
-    return [args.slice(0, restIdx), args.slice(restIdx + 1)];
+const VALID_FLAG = /^-{1,2}[a-z]/i;
+const LONG_FLAG = /^--[a-z][^= ]+/i;
+const LONG_FLAG_WITH_EQ = /^--[a-z][^= ]+=\S+/i;
+const SHORT_FLAG = /^-[a-z]/i;
+
+type ParsedInput =
+  { type: 'unknown', input: string } |
+  { type: 'arg', input: string, array?: boolean } |
+  { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
+
+const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
+
+const getInput = (cfg: { field?: CliCommandInput, rawText?: string, input: string, value?: string }): ParsedInput => {
+  const { field, input, rawText = input, value } = cfg;
+  if (!field) {
+    return { type: 'unknown', input: rawText };
+  } else if (!field.flagNames?.length) {
+    return { type: 'arg', input: field ? input : rawText ?? input, array: field.array };
   } else {
-    return [args, []];
+    return {
+      type: 'flag',
+      fieldName: field.name,
+      array: field.array,
+      input: field ? input : rawText ?? input,
+      value: value ?? (isBoolFlag(field) ? !input.startsWith('--no-') : undefined)
+    };
   }
-}
+};
 
 function fieldToInput(x: FieldConfig): CliCommandInput {
   const type = x.type === Date ? 'date' :
@@ -34,12 +54,6 @@ function fieldToInput(x: FieldConfig): CliCommandInput {
   });
 }
 
-const VALID_FLAG = /^-{1,2}[a-z]/i;
-const LONG_FLAG = /^--[a-z]/i;
-const SHORT_FLAG = /^-[a-z]/i;
-
-const isBoolFlag = (x: CliCommandInput): boolean => x.type === 'boolean' && !x.array;
-
 /**
  * Allows binding describing/binding inputs for commands
  */
@@ -50,10 +64,9 @@ export class CliCommandSchemaUtil {
   /**
    * Get schema for a given command
    */
-  static async getSchema(cmd: CliCommandShape): Promise<CliCommandSchema> {
+  static async getSchema(src: Class | CliCommandShape): Promise<CliCommandSchema> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = cmd.constructor as Class<CliCommandShape>;
-
+    const cls = 'main' in src ? src.constructor as Class : src;
     if (this.#schemas.has(cls)) {
       return this.#schemas.get(cls)!;
     }
@@ -110,7 +123,7 @@ export class CliCommandSchemaUtil {
     }
 
     const fullSchema = SchemaRegistry.get(cls);
-    const { cls: _cls, preMain: _preMain, ...meta } = CliCommandRegistry.getConfig(cmd);
+    const { cls: _cls, preMain: _preMain, ...meta } = CliCommandRegistry.getByClass(cls)!;
     const cfg: CliCommandSchema = {
       ...meta,
       args: method,
@@ -123,111 +136,107 @@ export class CliCommandSchemaUtil {
   }
 
   /**
-   * Produce the arguments into the final argument set
+   * Parse inputs to command
    */
-  static async bindArgs(cmd: CliCommandShape, args: string[]): Promise<[known: unknown[], unknown: string[]]> {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const cls = cmd.constructor as Class<CliCommandShape>;
-    const [copy, extra] = split(args);
-    const schema = await this.getSchema(cmd);
-    const out: unknown[] = [];
-    const found: boolean[] = copy.map(x => false);
-    let i = 0;
+  static async parse<T extends CliCommandShape>(cls: Class<T>, inputs: string[]): Promise<ParsedInput[]> {
+    const schema = await this.getSchema(cls);
+    const flagMap = new Map<string, CliCommandInput>(
+      schema.flags.flatMap(f => (f.flagNames ?? []).map(name => [name, f]))
+    );
 
-    for (const el of schema.args) {
-      // Siphon off unrecognized flags, in order
-      while (i < copy.length && VALID_FLAG.test(copy[i])) {
-        i += 1;
-      }
+    const out: ParsedInput[] = [];
 
-      if (i >= copy.length) {
-        out.push(el.array ? [] : undefined);
-      } else if (el.array) {
-        const sub: string[] = [];
-        while (i < copy.length) {
-          if (!VALID_FLAG.test(copy[i])) {
-            sub.push(copy[i]);
-            found[i] = true;
+    // Load env vars to front
+    for (const field of schema.flags) {
+      for (const envName of field.envVars ?? []) {
+        if (envName in process.env) {
+          const value: string = process.env[envName]!;
+          if (field.array) {
+            out.push(...value.split(/\s*,\s*/g).map(v => getInput({ field, input: `env.${envName}`, value: v })));
+          } else {
+            out.push(getInput({ field, input: `env.${envName}`, value }));
           }
-          i += 1;
         }
-        out.push(sub);
-      } else {
-        out.push(copy[i]);
-        found[i] = true;
-        i += 1;
       }
     }
 
-    const final = [...copy.filter((_, idx) => !found[idx]), ...extra];
-    return [
-      BindUtil.coerceMethodParams(cls, 'main', out, true),
-      final
-    ];
+    let argIdx = 0;
+
+    for (let i = 0; i < inputs.length; i += 1) {
+      const input = inputs[i];
+
+      if (input === '--') { // Raw separator
+        out.push(...inputs.slice(i + 1).map(x => getInput({ input: x })));
+        break;
+      } else if (LONG_FLAG_WITH_EQ.test(input)) {
+        const [k, ...v] = input.split('=');
+        const field = flagMap.get(k);
+        out.push(getInput({ field, rawText: input, input: k, value: v.join('=') }));
+      } else if (VALID_FLAG.test(input)) { // Flag
+        const field = flagMap.get(input);
+        const next = inputs[i + 1];
+        if ((next && (VALID_FLAG.test(next) || next === '--')) || isBoolFlag(field)) {
+          out.push(getInput({ field, input }));
+        } else {
+          out.push(getInput({ field, input, value: next }));
+          i += 1;
+        }
+      } else {
+        const field = schema.args[argIdx];
+        out.push(getInput({ field, input }));
+        // Move argIdx along if not in a vararg situation
+        if (!field?.array) {
+          argIdx += 1;
+        }
+      }
+    }
+
+    return out;
   }
 
   /**
    * Bind arguments to command
    */
-  static async bindFlags<T extends CliCommandShape>(cmd: T, args: string[]): Promise<string[]> {
-    const schema = await this.getSchema(cmd);
-
-    const [base, extra] = split(args);
-    const copy = base.flatMap(k => (k.startsWith('--') && k.includes('=')) ? k.split('=') : [k]);
-
+  static async bindFlags<T extends CliCommandShape>(cmd: T, args: ParsedInput[]): Promise<void> {
     const template: Partial<T> = {};
 
-    const flagMap = new Map<string, CliCommandInput>();
-    for (const flag of schema.flags) {
-      for (const name of flag.flagNames ?? []) {
-        flagMap.set(name, flag);
-      }
-      for (const envName of flag.envVars ?? []) {
-        if (envName in process.env) {
-          let val: string | string[] = process.env[envName]!;
-          if (flag.array) {
-            val = val.split(/\s*,\s*/g);
-          }
+    for (const arg of args) {
+      switch (arg.type) {
+        case 'flag': {
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          template[flag.name as keyof T] = val as T[keyof T];
+          const key = arg.fieldName as keyof T;
+          const value = arg.value!;
+          if (arg.array) {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            ((template[key] as unknown[]) ??= []).push(value);
+          } else {
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            template[key] = value as unknown as T[typeof key];
+          }
         }
-      }
-    }
-
-    const out = [];
-    for (let i = 0; i < copy.length; i += 1) {
-      const arg = copy[i];
-      const next = copy[i + 1];
-
-      const input = flagMap.get(arg);
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const key = input?.name as keyof T;
-      if (!input) {
-        out.push(arg);
-      } else if (isBoolFlag(input)) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        template[key] = !arg.startsWith('--no') as T[typeof key];
-      } else if (next === undefined || VALID_FLAG.test(next)) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        template[key] = null as T[typeof key];
-      } else if (input.array) {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        const arr = template[key] ??= [] as T[typeof key];
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        (arr as unknown[]).push(next);
-        i += 1; // Skip next
-      } else {
-        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        template[key] = next as T[typeof key];
-        i += 1; // Skip next
       }
     }
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const cls = cmd.constructor as Class<CliCommandShape>;
     BindUtil.bindSchemaToObject(cls, cmd, template);
+  }
 
-    return [...out, '--', ...extra];
+  /**
+   * Produce the arguments into the final argument set
+   */
+  static async bindArgs(cmd: CliCommandShape, args: ParsedInput[]): Promise<unknown[]> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const cls = cmd.constructor as Class<CliCommandShape>;
+    const out = args.filter(x => x.type === 'arg').map(x => x.input);
+    return BindUtil.coerceMethodParams(cls, 'main', out, true);
+  }
+
+  /**
+   * Get the unused arguments
+   */
+  static getUnusedArgs(args: ParsedInput[]): string[] {
+    return args.filter(x => x.type === 'unknown').map(x => x.input);
   }
 
   /**
@@ -264,5 +273,20 @@ export class CliCommandSchemaUtil {
       throw new CliValidationResultError(errors);
     }
     return cmd;
+  }
+
+  /**
+   * Bind and validate a command with a given set of arguments
+   */
+  static async bindAndValidateArgs(cmd: CliCommandShape, args: string[]): Promise<unknown[]> {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const cls = cmd.constructor as Class;
+    await cmd.initialize?.();
+    const parsed = await this.parse(cls, args);
+    await this.bindFlags(cmd, parsed);
+    const known = await this.bindArgs(cmd, parsed);
+    await cmd.finalize?.(this.getUnusedArgs(parsed));
+    await this.validate(cmd, known);
+    return known;
   }
 }

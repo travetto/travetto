@@ -105,7 +105,7 @@ export class HelpUtil {
         if (inst) {
           const cfg = await CliCommandRegistry.getConfig(inst);
           if (!cfg.hidden) {
-            const schema = await CliCommandSchemaUtil.getSchema(inst);
+            const schema = await CliCommandSchemaUtil.getSchema(cfg.cls);
             rows.push(cliTpl`  ${{ param: cmd.padEnd(maxWidth, ' ') }} ${{ title: schema.title }}`);
           }
         }

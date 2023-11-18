@@ -19,15 +19,6 @@ export class ExecutionManager {
     }
   }
 
-  static async #bindAndValidateArgs(cmd: CliCommandShape, args: string[]): Promise<unknown[]> {
-    await cmd.initialize?.();
-    const remainingArgs = await CliCommandSchemaUtil.bindFlags(cmd, args);
-    const [known, unknown] = await CliCommandSchemaUtil.bindArgs(cmd, remainingArgs);
-    await cmd.finalize?.(unknown);
-    await CliCommandSchemaUtil.validate(cmd, known);
-    return known;
-  }
-
   /**
    * Run help
    */
@@ -41,7 +32,7 @@ export class ExecutionManager {
    * Run the given command object with the given arguments
    */
   static async command(cmd: CliCommandShape, args: string[]): Promise<void> {
-    const known = await this.#bindAndValidateArgs(cmd, args);
+    const known = await CliCommandSchemaUtil.bindAndValidateArgs(cmd, args);
     await this.#envInit(cmd);
     const cfg = CliCommandRegistry.getConfig(cmd);
     await cfg?.preMain?.(cmd);

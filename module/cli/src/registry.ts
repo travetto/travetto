@@ -29,7 +29,7 @@ class $CliCommandRegistry {
   #commands = new Map<Class, CliCommandConfig>();
   #fileMapping: Map<string, string>;
 
-  #get(cls: Class): CliCommandConfig | undefined {
+  getByClass(cls: Class): CliCommandConfig | undefined {
     return this.#commands.get(cls);
   }
 
@@ -75,7 +75,7 @@ class $CliCommandRegistry {
    * Get config for a given instance
    */
   getConfig(cmd: CliCommandShape): CliCommandConfig {
-    return this.#get(this.#getClass(cmd))!;
+    return this.getByClass(this.#getClass(cmd))!;
   }
 
   /**
@@ -97,7 +97,7 @@ class $CliCommandRegistry {
     if (found) {
       const values = Object.values<Class>(await import(found));
       for (const v of values) {
-        const cfg = this.#get(v);
+        const cfg = this.getByClass(v);
         if (cfg) {
           const inst = new cfg.cls();
           if (!inst.isActive || inst.isActive()) {

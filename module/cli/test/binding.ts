@@ -5,6 +5,7 @@ import { Suite, Test } from '@travetto/test';
 import { CliCommand, CliFlag } from '../src/decorators';
 import { CliCommandSchemaUtil } from '../src/schema';
 
+
 /**
  * My command
  */
@@ -12,6 +13,10 @@ import { CliCommandSchemaUtil } from '../src/schema';
 class Entity {
 
   ids?: number[] = [];
+
+  fun?: boolean;
+
+  long?: string[];
 
   /**
    * My color
@@ -27,45 +32,62 @@ class Entity {
   main(file: string, force: boolean, args?: string[]) { }
 }
 
+const get = (...args: string[]) => CliCommandSchemaUtil.parse(Entity, args);
+const unused = CliCommandSchemaUtil.getUnusedArgs.bind(CliCommandSchemaUtil);
+const checkArgs = async (args: string[], expected: unknown[], raw?: unknown[]) => {
+  const entity = new Entity();
+  const parsed = await get(...args);
+  await CliCommandSchemaUtil.bindFlags(entity, parsed);
+  const found = await CliCommandSchemaUtil.bindArgs(entity, parsed);
+  assert.deepStrictEqual(found, expected);
+  if (raw) {
+    assert.deepStrictEqual(unused(parsed), raw);
+  }
+};
+
 @Suite()
 export class SchemaBindingSuite {
   @Test()
   async testFlags() {
     const entity = new Entity();
-    await CliCommandSchemaUtil.bindFlags(entity, ['--age', '30']);
+    await CliCommandSchemaUtil.bindFlags(entity, await get('--age', '30'));
     assert(entity.age === 30);
 
-    await CliCommandSchemaUtil.bindFlags(entity, ['-g', '40']);
+    await CliCommandSchemaUtil.bindFlags(entity, await get('-g', '40'));
     // @ts-ignore
     assert(entity.age === 40);
 
-    await CliCommandSchemaUtil.bindFlags(entity, ['--age=50']);
+    const parsed = await get('--age=50');
+    assert(parsed[0].type === 'flag');
+    assert(parsed[0].fieldName === 'age');
+    assert(parsed[0].value === '50');
+
+    await CliCommandSchemaUtil.bindFlags(entity, await get('--age=50'));
     assert(entity.age === 50);
 
-    await CliCommandSchemaUtil.bindFlags(entity, ['--age']);
-    assert(entity.age === null);
+    await CliCommandSchemaUtil.bindFlags(entity, await get('--age'));
+    assert(entity.age === undefined);
 
-    await CliCommandSchemaUtil.bindFlags(entity, ['--age', '20', '-g', '20']);
+    await CliCommandSchemaUtil.bindFlags(entity, await get('--age', '20', '-g', '20'));
     assert(entity.age === 20);
 
-    await CliCommandSchemaUtil.bindFlags(entity, ['--age', '20', '-g']);
-    assert(entity.age === null);
+    await CliCommandSchemaUtil.bindFlags(entity, await get('--age', '20', '-g'));
+    assert(entity.age === undefined);
 
-    await CliCommandSchemaUtil.bindFlags(entity, ['--age', '20', '-g', 'red']);
+    await CliCommandSchemaUtil.bindFlags(entity, await get('--age', '20', '-g', 'red'));
     assert(isNaN(entity.age));
 
     process.env.COLOREO = '100';
-    await CliCommandSchemaUtil.bindFlags(entity, ['--color']);
-    assert(entity.color === null);
+    await CliCommandSchemaUtil.bindFlags(entity, await get('--color'));
+    assert(entity.color === undefined);
 
-    await CliCommandSchemaUtil.bindFlags(entity, []);
+    await CliCommandSchemaUtil.bindFlags(entity, await get());
     assert(entity.color === '100');
   }
 
   @Test()
   async testSchema() {
-    const entity = new Entity();
-    const schema = await CliCommandSchemaUtil.getSchema(entity);
+    const schema = await CliCommandSchemaUtil.getSchema(Entity);
     assert(schema.title === 'My command');
     const color = schema.flags.find(x => x.name === 'color')!;
     assert(color.description === 'My color');
@@ -86,53 +108,108 @@ export class SchemaBindingSuite {
 
   @Test()
   async testBindArgs() {
-    let found: unknown[] = [];
-    let unknown: string[] = [];
-    let remaining: string[] = [];
+    await checkArgs(['-g', '20', 'george'], ['george', undefined, undefined]);
+    await checkArgs(['-g', '20', '--age', 'george'], [undefined, undefined, undefined]);
+    await checkArgs(['-g', '20', 'george', '1'], ['george', true, undefined]);
+    await checkArgs(['-g', '20', 'george', 'red'], ['george', false, undefined]);
+    await checkArgs(['-g', '20', 'george', 'true', 'orange'], ['george', true, ['orange']]);
+    await checkArgs(['-g', '20', 'george', 'true', '--', '--age', '20', 'orange'],
+      ['george', true, undefined],
+      ['--age', '20', 'orange']
+    );
 
-    const entity = new Entity();
-
-    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-g', '20', 'george']);
-    [found,] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
-    assert.deepStrictEqual(found, ['george', undefined, []]);
-
-    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-g', '20', '--age', 'george']);
-    [found,] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
-    assert.deepStrictEqual(found, [undefined, undefined, []]);
-
-    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-g', '20', 'george', '1']);
-    [found,] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
-    assert.deepStrictEqual(found, ['george', true, []]);
-
-    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-g', '20', 'george', 'red']);
-    [found,] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
-    assert.deepStrictEqual(found, ['george', false, []]);
-
-    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-g', '20', 'george', 'true', 'orange']);
-    [found,] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
-    assert.deepStrictEqual(found, ['george', true, ['orange']]);
-
-    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-g', '20', 'george', 'true', '--', '--age', '20', 'orange']);
-    [found, unknown] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
-    assert.deepStrictEqual(found, ['george', true, []]);
-    assert.deepStrictEqual(unknown, ['--age', '20', 'orange']);
+    await checkArgs(['-g', '20', 'george', 'true', '-z', '--gravy', '--', '--age', '20', 'orange'],
+      ['george', true, undefined],
+      ['-z', '--gravy', '--age', '20', 'orange']
+    );
   }
 
   @Test()
   async bindNegativeNumbers() {
-    let found: unknown[] = [];
-    let remaining: string[] = [];
 
     const entity = new Entity();
+    let parsed = await get('-i', '10', '-i', '20', 'george');
 
-    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-i', '10', '-i', '20', 'george']);
-    [found,] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
-    assert.deepStrictEqual(found, ['george', undefined, []]);
+    await CliCommandSchemaUtil.bindFlags(entity, parsed);
+    let args = await CliCommandSchemaUtil.bindArgs(entity, parsed);
     assert.deepStrictEqual(entity.ids, [10, 20]);
+    assert.deepStrictEqual(args, ['george', undefined, undefined]);
 
-    remaining = await CliCommandSchemaUtil.bindFlags(entity, ['-i', '-10', '--ids', '22', 'george']);
-    [found,] = await CliCommandSchemaUtil.bindArgs(entity, remaining);
-    assert.deepStrictEqual(found, ['george', undefined, []]);
+    parsed = await get('-i', '-10', '--ids', '22', 'george', 'yes', '200');
+    assert(parsed.find(x => x.type === 'flag' && x.input === '-i' && x.value === '-10'));
+
+    await CliCommandSchemaUtil.bindFlags(entity, parsed);
+    args = await CliCommandSchemaUtil.bindArgs(entity, parsed);
+    assert.deepStrictEqual(args, ['george', true, ['200']]);
     assert.deepStrictEqual(entity.ids, [-10, 22]);
+  }
+
+  @Test()
+  async testEnv() {
+    let args = await get('george');
+    assert(args.length === 1);
+    assert(args[0].type === 'arg');
+
+    process.env.COLOREO = 'green';
+
+    args = await get('george');
+    assert(args.length === 2);
+    assert(args[0].type === 'flag');
+    assert(args[0].input === 'env.COLOREO');
+    assert(args[1].type === 'arg');
+  }
+
+  @Test()
+  async testBoolean() {
+    let args = await get('--fun');
+    assert(args.length === 1);
+
+    assert(args[0].type === 'flag');
+    assert(args[0].value === true);
+
+    args = await get('--fun=0');
+    assert(args.length === 1);
+
+    assert(args[0].type === 'flag');
+    assert(args[0].value === '0');
+
+    args = await get('-f', '0');
+    assert(args.length === 2);
+
+    assert(args[0].type === 'flag');
+    assert(args[0].value === true);
+
+    assert(args[1].type === 'arg');
+    assert(args[1].input === '0');
+
+    args = await get('--no-fun');
+    assert(args.length === 1);
+
+    assert(args[0].type === 'flag');
+    assert(args[0].value === false);
+  }
+
+  @Test()
+  async testLongArgs() {
+    let args = await get('--long=hello');
+    assert(args.length === 1);
+
+    assert(args[0].type === 'flag');
+    assert(args[0].value === 'hello');
+
+    args = await get('--long=a=b=c=d', '--long', 'goodby');
+    assert(args.length === 2);
+
+    assert(args[0].type === 'flag');
+    assert(args[0].value === 'a=b=c=d');
+
+    assert(args[1].type === 'flag');
+    assert(args[1].value === 'goodby');
+
+    args = await get('--long=--hello,--gogo');
+    assert(args.length === 1);
+
+    assert(args[0].type === 'flag');
+    assert(args[0].value === '--hello,--gogo');
   }
 }
