@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@travetto/base": "^3.4.0",
-    "@types/prismjs": "^1.26.2",
+    "@types/prismjs": "^1.26.3",
     "prismjs": "^1.29.0"
   },
   "peerDependencies": {

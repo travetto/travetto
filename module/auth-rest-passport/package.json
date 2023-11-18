@@ -30,7 +30,7 @@
     "@travetto/auth-rest": "^3.4.0",
     "@travetto/config": "^3.4.0",
     "@travetto/rest": "^3.4.0",
-    "@types/passport": "^1.0.14",
+    "@types/passport": "^1.0.15",
     "passport": "^0.6.0"
   },
   "devDependencies": {

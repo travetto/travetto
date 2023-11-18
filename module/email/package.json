@@ -26,7 +26,7 @@
     "@travetto/base": "^3.4.0",
     "@travetto/config": "^3.4.0",
     "@travetto/di": "^3.4.0",
-    "@types/mustache": "^4.2.4",
+    "@types/mustache": "^4.2.5",
     "mustache": "^4.2.0"
   },
   "travetto": {

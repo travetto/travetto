@@ -29,7 +29,7 @@
     "@travetto/openapi": "^3.4.0",
     "@travetto/rest-express": "^3.4.0",
     "@travetto/rest-session": "^3.4.0",
-    "vue": "^3.3.7"
+    "vue": "^3.3.8"
   },
   "devDependencies": {
     "@travetto/pack": "^3.4.4",

@@ -28,7 +28,7 @@
     "@travetto/asset": "^3.4.0",
     "@travetto/config": "^3.4.0",
     "@travetto/rest": "^3.4.0",
-    "@types/busboy": "^1.5.2",
+    "@types/busboy": "^1.5.3",
     "busboy": "^1.6.0"
   },
   "peerDependencies": {

@@ -32,7 +32,7 @@
     "@travetto/email": "^3.4.0",
     "@travetto/image": "^3.4.0",
     "@travetto/worker": "^3.4.0",
-    "@types/inline-css": "^3.0.2",
+    "@types/inline-css": "^3.0.3",
     "html-entities": "^2.4.0",
     "inline-css": "^4.0.2",
     "purgecss": "^5.0.0",
