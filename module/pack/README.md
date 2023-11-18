@@ -116,27 +116,28 @@ $ trv pack:docker --help
 Usage: pack:docker [options]
 
 Options:
-  -w, --workspace <string>             Workspace for building (default: "/tmp/<temp-folder>")
-  --clean, --no-clean                  Clean workspace (default: true)
-  -o, --output <string>                Output location
-  --main-scripts, --no-main-scripts    Create entry scripts (default: true)
-  -f, --main-name <string>             Main name for build artifact
-  -e, --entry-point <string>           Entry point (default: "@travetto/cli/support/entry.trv")
-  --minify, --no-minify                Minify output (default: true)
-  -sm, --sourcemap                     Bundle source maps (default: false)
-  -is, --include-sources               Include source with source maps (default: false)
-  -x, --eject-file <string>            Eject commands to file
-  -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
-  -df, --docker-factory <string>       Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
-  -di, --docker-image <string>         Docker Image to extend  (default: "node:20-alpine")
-  -dn, --docker-name <string>          Docker Image Name  (default: "travetto_pack")
-  -dt, --docker-tag <string>           Docker Image Tag  (default: ["latest"])
-  -dp, --docker-port <number>          Docker Image Port  (default: [])
-  -dx, --docker-push                   Docker Push Tags  (default: false)
-  -dr, --docker-registry <string>      Docker Registry
-  -du, --docker-runtime-user <string>  Docker Runtime user
-  -m, --module <string>                Module to run for
-  -h, --help                           display help for command
+  -w, --workspace <string>               Workspace for building (default: "/tmp/<temp-folder>")
+  --clean, --no-clean                    Clean workspace (default: true)
+  -o, --output <string>                  Output location
+  --main-scripts, --no-main-scripts      Create entry scripts (default: true)
+  -f, --main-name <string>               Main name for build artifact
+  -e, --entry-point <string>             Entry point (default: "@travetto/cli/support/entry.trv")
+  --minify, --no-minify                  Minify output (default: true)
+  -sm, --sourcemap                       Bundle source maps (default: false)
+  -is, --include-sources                 Include source with source maps (default: false)
+  -x, --eject-file <string>              Eject commands to file
+  -r, --rollup-configuration <string>    Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  -df, --docker-factory <string>         Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
+  -di, --docker-image <string>           Docker Image to extend  (default: "node:20-alpine")
+  -dn, --docker-name <string>            Docker Image Name  (default: "travetto_pack")
+  -dt, --docker-tag <string>             Docker Image Tag  (default: ["latest"])
+  -dp, --docker-port <number>            Docker Image Port  (default: [])
+  -dx, --docker-push                     Docker Push Tags  (default: false)
+  -db, --docker-build-platform <string>  Docker Build Platform
+  -dr, --docker-registry <string>        Docker Registry
+  -du, --docker-runtime-user <string>    Docker Runtime user
+  -m, --module <string>                  Module to run for
+  -h, --help                             display help for command
 ```
 
 The additional flags provided are allow for specifying the base image, the final docker image name (and tags), and which registry to push to (if  any).  Additionally, there are flags for exposing which ports the image should expect to open as well.   When using the `--eject-file`  flag, the output script will produce the entire Dockerfile output inline, so that it can be easily modified as needed. 

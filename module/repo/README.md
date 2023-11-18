@@ -90,6 +90,8 @@ Usage: repo:list [options]
 Options:
   -c, --changed                   Only show changed modules (default: false)
   -f, --format <graph|json|list>  Output format (default: "list")
+  -fh, --from-hash <string>       Start revision to check against
+  -th, --to-hash <string>         End revision to check against
   -h, --help                      display help for command
 ```
 

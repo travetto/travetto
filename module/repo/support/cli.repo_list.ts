@@ -15,10 +15,16 @@ export class ListModuleCommand implements CliCommandShape {
   /** Output format */
   format: 'graph' | 'json' | 'list' = 'list';
 
-  /** Start revision to check against */
+  /**
+   * Start revision to check against
+   * @alias fh
+   */
   fromHash?: string;
 
-  /** End revision to check against */
+  /**
+   * End revision to check against
+   * @alias th
+   */
   toHash?: string;
 
   async main(): Promise<void> {

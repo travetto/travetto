@@ -12,17 +12,17 @@ const SHORT_FLAG = /^-[a-z]/i;
 
 type ParsedInput =
   { type: 'unknown', input: string } |
-  { type: 'arg', input: string, array?: boolean } |
+  { type: 'arg', input: string, array?: boolean, index: number } |
   { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
 
 const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
 
-const getInput = (cfg: { field?: CliCommandInput, rawText?: string, input: string, value?: string }): ParsedInput => {
-  const { field, input, rawText = input, value } = cfg;
+const getInput = (cfg: { field?: CliCommandInput, rawText?: string, input: string, index?: number, value?: string }): ParsedInput => {
+  const { field, input, rawText = input, value, index } = cfg;
   if (!field) {
     return { type: 'unknown', input: rawText };
   } else if (!field.flagNames?.length) {
-    return { type: 'arg', input: field ? input : rawText ?? input, array: field.array };
+    return { type: 'arg', input: field ? input : rawText ?? input, array: field.array, index: index! };
   } else {
     return {
       type: 'flag',
@@ -183,7 +183,7 @@ export class CliCommandSchemaUtil {
         }
       } else {
         const field = schema.args[argIdx];
-        out.push(getInput({ field, input }));
+        out.push(getInput({ field, input, index: argIdx }));
         // Move argIdx along if not in a vararg situation
         if (!field?.array) {
           argIdx += 1;
@@ -225,11 +225,21 @@ export class CliCommandSchemaUtil {
   /**
    * Produce the arguments into the final argument set
    */
-  static async bindArgs(cmd: CliCommandShape, args: ParsedInput[]): Promise<unknown[]> {
+  static async bindArgs(cmd: CliCommandShape, inputs: ParsedInput[]): Promise<unknown[]> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const cls = cmd.constructor as Class<CliCommandShape>;
-    const out = args.filter(x => x.type === 'arg').map(x => x.input);
-    return BindUtil.coerceMethodParams(cls, 'main', out, true);
+    const bound: unknown[] = [];
+    for (const input of inputs) {
+      if (input.type === 'arg') {
+        if (input.array) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          ((bound[input.index] ??= []) as unknown[]).push(input.input);
+        } else {
+          bound[input.index] = input.input;
+        }
+      }
+    }
+    return BindUtil.coerceMethodParams(cls, 'main', bound, true);
   }
 
   /**

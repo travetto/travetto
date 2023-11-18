@@ -27,7 +27,7 @@ export class PackDockerCommand extends BasePackCommand {
   dockerPort: number[] = [];
   @CliFlag({ desc: 'Docker Push Tags ', short: 'dx', envVars: ['PACK_DOCKER_PUSH'] })
   dockerPush = false;
-  @CliFlag({ desc: 'Docker Build Platform ', short: 'dr', envVars: ['PACK_DOCKER_BUILD_PLATFORM'] })
+  @CliFlag({ desc: 'Docker Build Platform ', short: 'db', envVars: ['PACK_DOCKER_BUILD_PLATFORM'] })
   dockerBuildPlatform?: string;
   @CliFlag({ desc: 'Docker Registry ', short: 'dr', envVars: ['PACK_DOCKER_REGISTRY'] })
   dockerRegistry?: string;
