@@ -2,7 +2,6 @@ export * from './src/console';
 export * from './src/compiler';
 export * from './src/data';
 export * from './src/error';
-export * from './src/error-util';
 export * from './src/exec';
 export * from './src/env';
 export * from './src/file-loader';

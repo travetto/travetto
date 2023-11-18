@@ -1,11 +1,12 @@
 import { RootIndex } from '@travetto/manifest';
 import { GlobalTerminal, Terminal } from '@travetto/terminal';
-import { ErrorUtil, ObjectUtil, TimeUtil } from '@travetto/base';
+import { ObjectUtil, TimeUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
 import { TestEvent } from '../../model/event';
 import { SuitesSummary, TestConsumer } from '../types';
 import { Consumable } from '../registry';
+import { ErrorUtil } from '../error';
 import { TestResultsEnhancer, CONSOLE_ENHANCER } from '../enhancer';
 
 /**

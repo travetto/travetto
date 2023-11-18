@@ -1,9 +1,10 @@
 import { RootIndex } from '@travetto/manifest';
-import { ExecUtil, ErrorUtil } from '@travetto/base';
+import { ExecUtil } from '@travetto/base';
 import { ParentCommChannel, Worker } from '@travetto/worker';
 
 import { Events, RunEvent } from './types';
 import { TestConsumer } from '../consumer/types';
+import { ErrorUtil } from '../consumer/error';
 import { TestEvent } from '../model/event';
 
 let i = 0;

@@ -1,9 +1,10 @@
 import { createWriteStream } from 'fs';
 
 import { ManifestFileUtil, RootIndex } from '@travetto/manifest';
-import { ConsoleManager, ErrorUtil, TimeUtil } from '@travetto/base';
+import { ConsoleManager, TimeUtil } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
+import { ErrorUtil } from '../consumer/error';
 import { RunnerUtil } from '../execute/util';
 import { Runner } from '../execute/runner';
 import { Events, RunEvent } from './types';

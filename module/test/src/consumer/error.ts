@@ -1,5 +1,7 @@
-import { TypedObject } from './types';
-import { ObjectUtil } from './object';
+import { TypedObject, ObjectUtil } from '@travetto/base';
+
+import { TestEvent, } from '../model/event';
+
 
 export type SerializedError = { $?: boolean, message: string, stack?: string, name: string };
 
@@ -7,9 +9,6 @@ function isSerialized(e: unknown): e is SerializedError {
   return !!e && (typeof e === 'object') && '$' in e;
 }
 
-/**
- * Common error utilities
- */
 export class ErrorUtil {
 
   /**
@@ -54,6 +53,25 @@ export class ErrorUtil {
       return err;
     } else if (e) {
       return e;
+    }
+  }
+
+  /**
+   * Serialize all errors for a given test for transmission between parent/child
+   */
+  static serializeTestErrors(out: TestEvent): void {
+    if (out.phase === 'after') {
+      if (out.type === 'test') {
+        if (out.test.error) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          out.test.error = this.serializeError(out.test.error) as Error;
+        }
+      } else if (out.type === 'assertion') {
+        if (out.assertion.error) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          out.assertion.error = this.serializeError(out.assertion.error) as Error;
+        }
+      }
     }
   }
 }

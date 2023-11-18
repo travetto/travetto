@@ -2,7 +2,7 @@ import { ChildCommChannel } from '@travetto/worker';
 
 import { TestEvent } from '../../model/event';
 import { TestConsumer } from '../types';
-import { ConsumerUtil } from '../util';
+import { ErrorUtil } from '../error';
 import { Consumable } from '../registry';
 
 /**
@@ -13,7 +13,7 @@ export class ExecutionEmitter extends ChildCommChannel<TestEvent> implements Tes
 
   onEvent(event: TestEvent): void {
     const out = { ...event };
-    ConsumerUtil.serializeErrors(out);
+    ErrorUtil.serializeTestErrors(out);
     this.send(event.type, out);
   }
 }
