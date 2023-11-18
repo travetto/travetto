@@ -33,7 +33,7 @@
     "openapi3-ts": "^4.1.2"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.4.1",
+    "@travetto/cli": "^3.4.2",
     "@travetto/command": "^3.4.0"
   },
   "peerDependenciesMeta": {
