@@ -96,7 +96,7 @@ class $ParamExtractor {
     const methodParams = SchemaRegistry.getMethodSchema(cls, method);
     const routed = route.params.map((c, i) => (c.extract ?? this.defaultExtractors[c.location])(c, req, res, methodParams[i]));
 
-    const params = BindUtil.coerceMethodParams(cls, method, routed, true);
+    const params = BindUtil.coerceMethodParams(cls, method, routed);
 
     try {
       await SchemaValidator.validateMethod(cls, method, params, route.params.map(x => x.prefix));

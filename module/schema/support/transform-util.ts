@@ -90,7 +90,10 @@ export class SchemaTransformUtil {
       } else if (!node.questionToken && !typeExpr.undefinable && !node.initializer) {
         attrs.push(state.factory.createPropertyAssignment('required', state.fromLiteral({ active: true })));
       }
-      if (node.initializer && ts.isLiteralExpression(node.initializer)) {
+      if (node.initializer && (
+        ts.isLiteralExpression(node.initializer) ||
+        (ts.isArrayLiteralExpression(node.initializer) && node.initializer.elements.length === 0)
+      )) {
         attrs.push(state.factory.createPropertyAssignment('default', node.initializer));
       }
     } else {

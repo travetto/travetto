@@ -296,28 +296,43 @@ export class TransformerState implements State {
    */
   generateUniqueIdentifier(node: ts.Node, type: AnyType): string {
     let unique: string | undefined;
+    let name = type.name && !type.name.startsWith('_') ? type.name : '';
+    if (!name && hasEscapedName(node)) {
+      name = `${node.name.escapedText}`;
+    }
+    name ||= 'Shape';
+
     try {
       // Tie to source location if possible
       const tgt = DeclarationUtil.getPrimaryDeclarationNode(type.original!);
       const fileName = tgt.getSourceFile().fileName;
 
       if (fileName === this.source.fileName) { // if in same file suffix with location
-        unique = `${ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line}_${tgt.getEnd() - tgt.getStart()}`;
+        const route: string[] = [];
+        let child = node;
+        while (child && !ts.isSourceFile(child)) {
+          if (ts.isFunctionDeclaration(child) || ts.isMethodDeclaration(child) || ts.isClassDeclaration(child)) {
+            if (child.name) {
+              route.push(child.name.getText());
+            }
+          }
+          child = child.parent;
+        }
+        if (!route.length) { // Only filename
+          route.push(ts.getLineAndCharacterOfPosition(tgt.getSourceFile(), tgt.getStart()).line.toString());
+        }
+        route.unshift(fileName);
+        unique = SystemUtil.naiveHashString(route.join(':'), 12);
       } else {
         // Otherwise treat it as external and add nothing to it
       }
     } catch {
       // Determine type unique ident
       const imp = this.#resolver.getFileImportName(this.source.fileName);
-      unique = `${SystemUtil.naiveHash(`${imp}${type.name ?? 'unknown'}`)}`;
+      unique = SystemUtil.naiveHashString(`${imp}${type.name ?? 'unknown'}`, 12);
     }
     // Otherwise read name with uuid
-    let name = type.name && !type.name.startsWith('_') ? type.name : '';
-    if (!name && hasEscapedName(node)) {
-      name = `${node.name.escapedText}`;
-    }
-    name ||= 'Shape';
-    return unique ? `${name}_${unique}` : name;
+    return unique ? `${name}__${unique}` : name;
   }
 
   /**

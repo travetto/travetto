@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { ParameterObject } from 'openapi3-ts/src/model/OpenApi';
+import { ParameterObject } from 'openapi3-ts/oas31';
 import { Readable } from 'stream';
 
 import { RootRegistry } from '@travetto/registry';
@@ -183,13 +183,13 @@ export class GenerateSuite {
       content: {
         'application/json': {
           schema: {
-            $ref: '#/components/schemas/who_44_31'
+            $ref: '#/components/schemas/who__66424'
           }
         }
       },
       description: '__type'
     });
-    assert.deepStrictEqual(config.components.schemas['who_44_31'], {
+    assert.deepStrictEqual(config.components.schemas['who__66424'], {
       description: '__type',
       example: undefined,
       properties: {

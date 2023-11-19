@@ -189,7 +189,6 @@ class $SchemaRegistry extends MetadataRegistry<ClassConfig, FieldConfig> {
       baseType: RootIndex.getFunctionMetadata(cls)?.abstract,
       metadata: {},
       methods: {},
-      externalName: cls.name.replace('Ⲑsyn', ''),
       views: {
         [AllViewⲐ]: {
           schema: {},

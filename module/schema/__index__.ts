@@ -12,4 +12,5 @@ export * from './src/validate/validator';
 export * from './src/validate/error';
 export * from './src/validate/types';
 export * from './src/bind-util';
+export * from './src/name';
 export * from './src/types';

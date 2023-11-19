@@ -86,10 +86,6 @@ export interface ClassConfig extends DescribableConfig {
    * Method parameter configs
    */
   methods: Record<string, FieldConfig[]>;
-  /**
-   * Name for consuming clients
-   */
-  externalName: string;
 }
 
 /**
@@ -166,7 +162,7 @@ export interface FieldConfig extends DescribableConfig {
   /**
    * Default value
    */
-  default?: Primitive;
+  default?: Primitive | [];
   /**
    * Is the field readonly, or write only?, defaults to no restrictions
    */

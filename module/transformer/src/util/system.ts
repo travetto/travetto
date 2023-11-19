@@ -28,4 +28,8 @@ export class SystemUtil {
 
     return Math.abs(hash);
   }
+
+  static naiveHashString(text: string, length: number): string {
+    return this.naiveHash(text).toString().padStart(length, '0').substring(0, length);
+  }
 }

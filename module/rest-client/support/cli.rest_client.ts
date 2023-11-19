@@ -18,7 +18,7 @@ export class CliRestClientCommand implements CliCommandShape {
   module: string;
 
   envInit(): EnvInit {
-    return { debug: false };
+    return { debug: false, dynamic: true };
   }
 
   get #service(): Promise<RestClientGeneratorService> {

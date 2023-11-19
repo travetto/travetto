@@ -272,7 +272,7 @@ export class BindUtil {
    */
   static coerceField(field: FieldConfig, val: unknown, applyDefaults = false): unknown {
     if ((val === undefined || val === null) && applyDefaults) {
-      val = field.default;
+      val = Array.isArray(field.default) ? field.default.slice(0) : field.default;
     }
     if (!field.required && (val === undefined || val === null)) {
       return val;
@@ -301,7 +301,7 @@ export class BindUtil {
    * @param params
    * @returns
    */
-  static coerceFields(fields: FieldConfig[], params: unknown[], applyDefaults = false): unknown[] {
+  static coerceFields(fields: FieldConfig[], params: unknown[], applyDefaults = true): unknown[] {
     params = [...params];
     // Coerce types
     for (const el of fields) {
@@ -317,7 +317,7 @@ export class BindUtil {
    * @param params
    * @returns
    */
-  static coerceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = false): unknown[] {
+  static coerceMethodParams<T>(cls: Class<T>, method: string, params: unknown[], applyDefaults = true): unknown[] {
     return this.coerceFields(SchemaRegistry.getMethodSchema(cls, method), params, applyDefaults);
   }
 }

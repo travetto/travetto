@@ -48,7 +48,7 @@ function fieldToInput(x: FieldConfig): CliCommandInput {
     choices: x.enum?.values,
     fileExtensions: type === 'file' ? x.specifiers?.filter(s => s.startsWith('ext:')).map(s => s.split('ext:')[1]) : undefined,
     type,
-    default: x.default,
+    default: Array.isArray(x.default) ? x.default.slice(0) : x.default,
     flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),
     envVars: (x.aliases ?? []).slice(0).filter(v => v.startsWith('env.')).map(v => v.replace('env.', ''))
   });
@@ -239,7 +239,7 @@ export class CliCommandSchemaUtil {
         }
       }
     }
-    return BindUtil.coerceMethodParams(cls, 'main', bound, true);
+    return BindUtil.coerceMethodParams(cls, 'main', bound);
   }
 
   /**

@@ -4,7 +4,7 @@ import fs from 'fs/promises';
 import { Class, Util } from '@travetto/base';
 import { ManifestFileUtil, RootIndex, path } from '@travetto/manifest';
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, EndpointConfig } from '@travetto/rest';
-import { ClassConfig, FieldConfig, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
+import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { ParamConfig } from './shared/types';
@@ -60,6 +60,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   #controllerContent = new Map<string, RenderContent>();
   #otherContent = new Map<string, RenderContent>();
   #files = new Set<string>();
+  #nameResolver = new SchemaNameResolver();
 
   abstract get commonFiles(): [string, Class | string][];
   abstract get subFolder(): string;
@@ -81,10 +82,6 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
   init?(): void;
 
   get uploadType(): string | Imp { return '(File | Blob)'; }
-
-  getCommonTypes(): string[] {
-    return [];
-  }
 
   writeContentFilter(text: string): string {
     return text
@@ -280,7 +277,11 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     };
   }
 
-  renderSchema(schema: ClassConfig, visited = new Set<string>()): RenderContent {
+  renderSchema(schema: ClassConfig, force = false, visited = new Set<string>()): RenderContent {
+    if (!force && this.#schemaContent.has(schema.class.Ⲑid)) {
+      return this.#schemaContent.get(schema.class.Ⲑid)!;
+    }
+
     let parent: Imp | undefined;
     visited.add(schema.class.Ⲑid);
     const imports: Imp[] = [];
@@ -289,7 +290,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       const base = SchemaRegistry.getBaseSchema(schema.class);
       const parentSchema = SchemaRegistry.get(base);
       if (parentSchema.class !== schema.class) {
-        parent = this.renderSchema(parentSchema, visited);
+        parent = this.renderSchema(parentSchema, force, visited);
         imports.push(parent);
       }
     }
@@ -297,7 +298,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       // Render all children
       for (const el of SchemaRegistry.getSubTypesForClass(schema.class) ?? []) {
         if (el !== schema.class && !visited.has(el.Ⲑid)) {
-          this.renderSchema(SchemaRegistry.get(el), visited);
+          this.renderSchema(SchemaRegistry.get(el), force, visited);
         }
       }
     }
@@ -326,14 +327,16 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       );
     }
 
+    const name = this.#nameResolver.getName(schema);
+
     const result: RenderContent = {
       imports,
       classId: schema.class.Ⲑid,
       file: './schema.ts',
-      name: schema.externalName,
+      name,
       content: [
-        `export interface ${schema.externalName}`,
-        ...parent ? [' extends ', parent] : [], `{\n`,
+        `export interface ${name}`,
+        ...parent ? [' extends ', parent] : [], ` {\n`,
         ...fields,
         `}\n`,
       ]
@@ -368,8 +371,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
       .filter(f => !f.includes('.json'))
       .map(f => `export * from '${f}';\n`);
 
-    const types = this.getCommonTypes().map(v => `/// <reference types="${v}" />\n`);
-    await this.writeContent('index.ts', [...types, ...content]);
+    await this.writeContent('index.ts', content);
   }
 
   async onComplete(): Promise<void> {
@@ -394,7 +396,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
 
   onSchemaAdd(cls: Class): boolean {
     if (this.#schemaContent.has(cls.Ⲑid)) {
-      this.renderSchema(SchemaRegistry.get(cls));
+      this.renderSchema(SchemaRegistry.get(cls), true);
       return true;
     }
     return false;

@@ -7,7 +7,7 @@ import type {
 import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
 import { RootIndex } from '@travetto/manifest';
 import { Class } from '@travetto/base';
-import { SchemaRegistry, FieldConfig, ClassConfig } from '@travetto/schema';
+import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 
 import { ApiSpecConfig } from './config';
@@ -36,6 +36,8 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
   #paths: PathsObject = {};
 
   #config: Partial<ApiSpecConfig> = {};
+
+  #nameResolver = new SchemaNameResolver();
 
   constructor(config: Partial<ApiSpecConfig> = {}) {
     this.#config = config;
@@ -95,7 +97,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     const out: Record<string, unknown> = {};
     // Handle nested types
     if (SchemaRegistry.has(field.type)) {
-      const id = SchemaRegistry.get(field.type).externalName;
+      const id = this.#nameResolver.getName(SchemaRegistry.get(field.type));
       // Exposing
       this.#schemas[id] = this.#allSchemas[id];
       out.$ref = `${DEFINITION}/${id}`;
@@ -193,7 +195,7 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
     }
 
     const cls = type.class;
-    const typeId = type.externalName;
+    const typeId = this.#nameResolver.getName(type);
 
     if (!this.#allSchemas[typeId]) {
       const config = SchemaRegistry.get(cls);
@@ -253,8 +255,9 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         description: ''
       };
     } else {
-      const typeId = SchemaRegistry.get(body.type)?.externalName ?? body.type.name;
-      const typeRef = SchemaRegistry.has(body.type) ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
+      const cls = SchemaRegistry.get(body.type);
+      const typeId = cls ? this.#nameResolver.getName(cls) : body.type.name;
+      const typeRef = cls ? this.#getType(body.type) : { type: body.type.name.toLowerCase() };
       return {
         content: {
           [mime ?? 'application/json']: {
