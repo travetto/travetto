@@ -2,16 +2,16 @@
   "name": "@travetto-test/model_cache",
   "version": "0.0.0",
   "dependencies": {
-    "@travetto/cache": "^3.4.1",
-    "@travetto/model-dynamodb": "^3.4.1",
-    "@travetto/model-elasticsearch": "^3.4.1",
-    "@travetto/model-firestore": "^3.4.1",
-    "@travetto/model-mongo": "^3.4.1",
-    "@travetto/model-mysql": "^3.4.1",
-    "@travetto/model-postgres": "^3.4.1",
-    "@travetto/model-redis": "^3.4.1",
-    "@travetto/model-s3": "^3.4.1",
-    "@travetto/model-sqlite": "^3.4.1"
+    "@travetto/cache": "^3.4.2",
+    "@travetto/model-dynamodb": "^3.4.2",
+    "@travetto/model-elasticsearch": "^3.4.2",
+    "@travetto/model-firestore": "^3.4.2",
+    "@travetto/model-mongo": "^3.4.2",
+    "@travetto/model-mysql": "^3.4.2",
+    "@travetto/model-postgres": "^3.4.2",
+    "@travetto/model-redis": "^3.4.2",
+    "@travetto/model-s3": "^3.4.2",
+    "@travetto/model-sqlite": "^3.4.2"
   },
   "travetto": {},
   "private": true
