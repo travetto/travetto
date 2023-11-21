@@ -14,22 +14,45 @@ export class PackConfigUtil {
   }
 
   /**
-   * Common docker environment setup
+   * Setup docker ports
    */
-  static dockerWorkspace(cfg: DockerPackConfig): string {
-    const { folder, user, group, uid, gid } = cfg.dockerRuntime;
+  static dockerPorts(cfg: DockerPackConfig): string {
+    return (cfg.dockerPort?.map(x => `EXPOSE ${x}`) ?? []).join('\n');
+  }
+
+  /**
+   * Setup docker user
+   * @returns
+   */
+  static dockerUser(cfg: DockerPackConfig): string {
+    const { user, group, uid, gid } = cfg.dockerRuntime;
     return [
-      ...cfg.dockerPort?.map(x => `EXPOSE ${x}`) ?? [],
       user !== 'root' ? ifElse(
         'RUN which useradd',
         `groupadd --gid ${gid} ${group} && useradd -u ${uid} -g ${group} ${user}`,
         `addgroup -g ${gid} ${group} && adduser -D -G ${group} -u ${uid} ${user}`
       ) : '',
-      `RUN mkdir ${folder} && chown ${user}:${group} ${folder}`,
       `USER ${user}`,
-      `WORKDIR ${folder}`,
-      `COPY --chown="${user}:${group}" . .`,
     ].join('\n');
+  }
+
+  /**
+   * Common docker runtime folder
+   */
+  static dockerAppFolder(cfg: DockerPackConfig): string {
+    const { folder, user, group } = cfg.dockerRuntime;
+    return [
+      `RUN mkdir ${folder} && chown ${user}:${group} ${folder}`,
+      `WORKDIR ${folder}`,
+    ].join('\n');
+  }
+
+  /**
+   * Docker app files copied and permissioned
+   */
+  static dockerAppFiles(cfg: DockerPackConfig): string {
+    const { user, group } = cfg.dockerRuntime;
+    return `COPY --chown="${user}:${group}" . .`;
   }
 
   /**
@@ -37,5 +60,27 @@ export class PackConfigUtil {
    */
   static dockerEntrypoint(cfg: DockerPackConfig): string {
     return `ENTRYPOINT ["${cfg.dockerRuntime.folder}/${cfg.mainName}.sh"]`;
+  }
+  /**
+   * Common docker environment setup
+   */
+  static dockerWorkspace(cfg: DockerPackConfig): string {
+    return [
+      this.dockerPorts(cfg),
+      this.dockerUser(cfg),
+      this.dockerAppFolder(cfg),
+      this.dockerAppFiles(cfg),
+    ].filter(x => !!x).join('\n');
+  }
+
+  /**
+   * Common docker file setup
+   */
+  static dockerStandardFile(cfg: DockerPackConfig): string {
+    return [
+      this.dockerInit(cfg),
+      this.dockerWorkspace(cfg),
+      this.dockerEntrypoint(cfg)
+    ].join('\n');
   }
 }
