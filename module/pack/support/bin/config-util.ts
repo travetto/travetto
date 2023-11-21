@@ -32,18 +32,16 @@ export class PackConfigUtil {
         `groupadd --gid ${gid} ${group} && useradd -u ${uid} -g ${group} ${user}`,
         `addgroup -g ${gid} ${group} && adduser -D -G ${group} -u ${uid} ${user}`
       ) : '',
-      `USER ${user}`,
     ].join('\n');
   }
 
   /**
-   * Common docker runtime folder
+   * Setup docker runtime folder
    */
   static dockerAppFolder(cfg: DockerPackConfig): string {
     const { folder, user, group } = cfg.dockerRuntime;
     return [
       `RUN mkdir ${folder} && chown ${user}:${group} ${folder}`,
-      `WORKDIR ${folder}`,
     ].join('\n');
   }
 
@@ -51,15 +49,20 @@ export class PackConfigUtil {
    * Docker app files copied and permissioned
    */
   static dockerAppFiles(cfg: DockerPackConfig): string {
-    const { user, group } = cfg.dockerRuntime;
-    return `COPY --chown="${user}:${group}" . .`;
+    const { user, group, folder } = cfg.dockerRuntime;
+    return `COPY --chown="${user}:${group}" . ${folder}`;
   }
 
   /**
    * Entrypoint creation for a docker configuration
    */
   static dockerEntrypoint(cfg: DockerPackConfig): string {
-    return `ENTRYPOINT ["${cfg.dockerRuntime.folder}/${cfg.mainName}.sh"]`;
+    const { user, folder } = cfg.dockerRuntime;
+    return [
+      `USER ${user}`,
+      `WORKDIR ${folder}`,
+      `ENTRYPOINT ["${folder}/${cfg.mainName}.sh"]`,
+    ].join('\n');
   }
   /**
    * Common docker environment setup
