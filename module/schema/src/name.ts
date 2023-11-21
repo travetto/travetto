@@ -1,7 +1,7 @@
 import { RootIndex } from '@travetto/manifest';
 import { ClassConfig } from './service/types';
 
-const SYN_RE = /(__)(\d+)[^0-9]*$/;
+const SYN_RE = /(__)(\d+)Ⲑsyn$/;
 
 /**
  * Name resolver, specifically for synthetic types
@@ -26,7 +26,7 @@ export class SchemaNameResolver {
       }
       return this.#schemaIdToName.get(id)!;
     } else {
-      return schema.class.name;
+      return schema.class.name.replace('Ⲑsyn', '');
     }
   }
 }
