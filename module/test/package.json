@@ -34,7 +34,7 @@
     "@travetto/yaml": "^3.4.1"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.4.4",
+    "@travetto/cli": "^3.4.5",
     "@travetto/transformer": "^3.4.1"
   },
   "peerDependenciesMeta": {
