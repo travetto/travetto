@@ -359,6 +359,34 @@ $ MESSAGE=CuStOm trv custom:env-arg 7
 CuStOm
 ```
 
+## Flag File Support
+Sometimes its also convenient, especially with commands that support a variety of flags, to provide easy access to pre-defined sets of flags.  Flag files represent a snapshot of command line arguments and flags, as defined in a file.  When referenced, these inputs are essentially injected into the command line as if the user had typed them manually.
+
+**Code: Example Flag File**
+```bash
+--host localhost
+--port 3306
+--username app
+```
+
+As you can see in this file, it provides easy access to predefine the host, port, and user flags.
+
+**Code: Using a Flag File**
+```bash
+npx trv call:db -@base --password <custom>
+```
+
+The flag files can be included in one of a few ways:
+   *  `-@<name>` - This translates into $`<module>support/<name>.flags`, which is a convenient shorthand.
+   *  `-@<mod>/path/file.flags` - This is a path-related file that will be resolved from the module's location.
+   *  `-@/path/file.flags` - This is an absolute path that will be read from the root of the file system.
+Ultimately, after resolution, the content of these files will be injected inline within the location.
+
+**Code: Final arguments after Flag File resolution**
+```bash
+npx trv call:db --host localhost --port 3306 --username app --password <custom>
+```
+
 ## VSCode Integration
 By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") does expose a cli target `run:rest` that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the [VSCode plugin](https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin). This is achieved by setting the `runTarget` field on the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) decorator.  This means the target will be visible within the editor tooling.
 
@@ -382,19 +410,23 @@ export class RunCommand {
 
 **Code: Anatomy of a Command**
 ```typescript
-export interface CliCommandShape {
+export interface CliCommandShape<T extends unknown[] = unknown[]> {
   /**
    * Action target of the command
    */
-  main(...args: unknown[]): OrProm<RunResponse>;
+  main(...args: T): OrProm<RunResponse>;
   /**
-   * Setup environment before command runs
+   * Run before main runs
    */
-  envInit?(): OrProm<EnvInit>;
+  preMain?(): OrProm<void>;
   /**
    * Extra help
    */
   help?(): OrProm<string[]>;
+  /**
+   * Run before help is displayed
+   */
+  preHelp?(): OrProm<void>;
   /**
    * Is the command active/eligible for usage
    */
@@ -402,15 +434,15 @@ export interface CliCommandShape {
   /**
    * Run before binding occurs
    */
-  initialize?(): OrProm<void>;
+  preBind?(): OrProm<void>;
   /**
    * Run before validation occurs
    */
-  finalize?(unknownArgs: string[]): OrProm<void>;
+  preValidate?(): OrProm<void>;
   /**
    * Validation method
    */
-  validate?(...unknownArgs: unknown[]): OrProm<CliValidationError | CliValidationError[] | undefined>;
+  validate?(...args: T): OrProm<CliValidationError | CliValidationError[] | undefined>;
 }
 ```
 
@@ -420,7 +452,7 @@ If the goal is to run a more complex application, which may include depending on
 **Code: Simple Run Target**
 ```typescript
 import { DependencyRegistry } from '@travetto/di';
-import { CliCommand, CliUtil } from '@travetto/cli';
+import { CliCommand, CliCommandShape, CliUtil } from '@travetto/cli';
 
 import { ServerHandle } from '../src/types';
 
@@ -428,7 +460,7 @@ import { ServerHandle } from '../src/types';
  * Run a rest server as an application
  */
 @CliCommand({ runTarget: true, addModule: true, addEnv: true })
-export class RunRestCommand {
+export class RunRestCommand implements CliCommandShape {
 
   /** IPC debug is enabled */
   debugIpc?: boolean;
@@ -439,8 +471,10 @@ export class RunRestCommand {
   /** Port to run on */
   port?: number;
 
-  envInit(): Record<string, string | number | boolean> {
-    return this.port ? { REST_PORT: `${this.port}` } : {};
+  preMain(): void {
+    if (this.port) {
+      process.env.REST_PORT = `${this.port}`;
+    }
   }
 
   async main(): Promise<ServerHandle | void> {
@@ -479,7 +513,7 @@ A simple example of the validation can be found in the `doc` command:
 
 **Code: Simple Validation Example**
 ```typescript
-async validate(...args: unknown[]): Promise<CliValidationError | undefined> {
+async validate(): Promise<CliValidationError | undefined> {
     const docFile = path.resolve(this.input);
     if (!(await fs.stat(docFile).catch(() => false))) {
       return { message: `input: ${this.input} does not exist`, source: 'flag' };

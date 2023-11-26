@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { PackageUtil, path, RootIndex } from '@travetto/manifest';
-import { ExecUtil, EnvInit, CompilerClient } from '@travetto/base';
+import { ExecUtil, CompilerClient, defineEnv } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
@@ -21,25 +21,26 @@ export class DocCommand implements CliCommandShape {
   /** Watch? */
   watch = false;
 
-  envInit(): EnvInit {
+  preMain(): void {
     Object.assign(process.env, {
       TRV_CLI_IPC: '',
       TRV_LOG_PLAIN: 'true',
       TRV_CONSOLE_WIDTH: '140',
       FORCE_COLOR: '0',
     });
-    return { debug: false, };
+    defineEnv({ debug: false, });
   }
 
-  finalize(): void {
-    if (this.outputs.length === 0) {
-      const workspacePkg = PackageUtil.readPackage(RootIndex.manifest.workspacePath);
-      this.outputs = workspacePkg.travetto?.docOutputs ?? ['README.md'];
-    }
-    this.input = path.resolve(this.input);
+  preBind(): void {
+    const workspacePkg = PackageUtil.readPackage(RootIndex.manifest.workspacePath);
+    this.outputs = workspacePkg.travetto?.docOutputs ?? ['README.md'];
   }
 
-  async validate(...args: unknown[]): Promise<CliValidationError | undefined> {
+  preHelp(): void {
+    this.preBind();
+  }
+
+  async validate(): Promise<CliValidationError | undefined> {
     const docFile = path.resolve(this.input);
     if (!(await fs.stat(docFile).catch(() => false))) {
       return { message: `input: ${this.input} does not exist`, source: 'flag' };
@@ -84,6 +85,8 @@ export class DocCommand implements CliCommandShape {
   }
 
   main(): Promise<void> {
+    this.input = path.resolve(this.input);
+
     return this.watch ? this.runWatch() : this.render();
   }
 }

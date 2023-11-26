@@ -1,53 +1,67 @@
 import { GlobalTerminal } from '@travetto/terminal';
-import { ConsoleManager, defineEnv, ShutdownManager, GlobalEnv } from '@travetto/base';
+import { ConsoleManager, GlobalEnv } from '@travetto/base';
 
 import { HelpUtil } from './help';
-import { CliCommandShape } from './types';
+import { CliCommandShape, RunResponse } from './types';
 import { CliCommandRegistry } from './registry';
 import { CliCommandSchemaUtil } from './schema';
 import { CliUnknownCommandError, CliValidationResultError } from './error';
+import { CliParseUtil } from './parse';
+import { CliUtil } from './util';
 
 /**
  * Execution manager
  */
 export class ExecutionManager {
 
-  static async #envInit(cmd: CliCommandShape): Promise<void> {
-    if (cmd.envInit) {
-      defineEnv(await cmd.envInit());
-      ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
-    }
-  }
-
-  /**
-   * Run help
-   */
-  static async help(cmd: CliCommandShape, args: string[]): Promise<void> {
-    await cmd.initialize?.();
-    await this.#envInit(cmd);
-    console.log!(await HelpUtil.renderHelp(cmd));
-  }
-
   /**
    * Run the given command object with the given arguments
    */
-  static async command(cmd: CliCommandShape, args: string[]): Promise<void> {
-    const known = await CliCommandSchemaUtil.bindAndValidateArgs(cmd, args);
-    await this.#envInit(cmd);
+  static async #runCommand(cmd: CliCommandShape, args: string[]): Promise<RunResponse> {
+    const schema = await CliCommandSchemaUtil.getSchema(cmd);
+    const state = await CliParseUtil.parse(schema, args);
     const cfg = CliCommandRegistry.getConfig(cmd);
-    await cfg?.preMain?.(cmd);
 
-    const result = await cmd.main(...known);
+    CliParseUtil.setState(cmd, state);
 
-    // Listen to result if non-empty
-    if (result !== undefined && result !== null) {
-      if ('close' in result) {
-        ShutdownManager.onShutdown(result, result); // Tie shutdown into app close
+    await cmd.preBind?.();
+    const known = await CliCommandSchemaUtil.bindInput(cmd, state);
+
+    await cmd.preValidate?.();
+    await CliCommandSchemaUtil.validate(cmd, known);
+
+    await cfg.preMain?.(cmd);
+    await cmd.preMain?.();
+    ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
+    return cmd.main(...known);
+  }
+
+  /**
+   * On error, handle response
+   */
+  static async #onError(command: CliCommandShape | undefined, err: unknown): Promise<void> {
+    process.exitCode ||= 1; // Trigger error state
+    switch (true) {
+      case !(err instanceof Error): {
+        throw err;
       }
-      if ('wait' in result) {
-        await result.wait(); // Wait for close signal
-      } else if ('on' in result) {
-        await new Promise<void>(res => result.on('close', res)); // Wait for callback
+      case command && err instanceof CliValidationResultError: {
+        console.error!(await HelpUtil.renderValidationError(command, err));
+        console.error!(await HelpUtil.renderCommandHelp(command));
+        break;
+      }
+      case err instanceof CliUnknownCommandError: {
+        if (err.help) {
+          console.error!(err.help);
+        } else {
+          console.error!(err.defaultMessage, '\n');
+          console.error!(await HelpUtil.renderAllHelp(''));
+        }
+        break;
+      }
+      default: {
+        console.error!(err);
+        console.error!();
       }
     }
   }
@@ -59,38 +73,25 @@ export class ExecutionManager {
   static async run(argv: string[]): Promise<void> {
     await GlobalTerminal.init();
 
-    const [, , cmd, ...args] = argv;
-    if (!cmd || /^(-h|--help)$/.test(cmd)) {
-      console.info!(await HelpUtil.renderHelp());
-    } else {
-      let command: CliCommandShape | undefined;
-      try {
-        // Load a single command
-        command = (await CliCommandRegistry.getInstance(cmd, true));
-        if (args.some(a => /^(-h|--help)$/.test(a))) {
-          await this.help(command, args);
-        } else {
-          await this.command(command, args);
-        }
-      } catch (err) {
-        process.exitCode ||= 1; // Trigger error state
-        if (!(err instanceof Error)) {
-          throw err;
-        } else if (err instanceof CliValidationResultError) {
-          console.error!(await HelpUtil.renderValidationError(command!, err));
-          console.error!(await HelpUtil.renderHelp(command));
-        } else if (err instanceof CliUnknownCommandError) {
-          if (err.help) {
-            console.error!(err.help);
-          } else {
-            console.error!(err.defaultMessage, '\n');
-            console.error!(await HelpUtil.renderAllHelp(''));
-          }
-        } else {
-          console.error!(err);
-          console.error!();
-        }
+    const { cmd, args, help } = await CliParseUtil.getArgs(argv);
+
+    if (!cmd) {
+      console.info!(await HelpUtil.renderAllHelp());
+      return;
+    }
+
+    let command: CliCommandShape | undefined;
+    try {
+      // Load a single command
+      command = await CliCommandRegistry.getInstance(cmd, true);
+      if (help) {
+        console.log!(await HelpUtil.renderCommandHelp(command));
+      } else {
+        const result = await this.#runCommand(command, args);
+        await CliUtil.listenForResponse(result);
       }
+    } catch (err) {
+      await this.#onError(command, err);
     }
   }
 }

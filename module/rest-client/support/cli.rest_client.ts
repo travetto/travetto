@@ -1,5 +1,5 @@
 import { path } from '@travetto/manifest';
-import { EnvInit } from '@travetto/base';
+import { defineEnv } from '@travetto/base';
 import { CliCommand, CliCommandShape, CliValidationResultError } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -17,8 +17,8 @@ export class CliRestClientCommand implements CliCommandShape {
   @Ignore()
   module: string;
 
-  envInit(): EnvInit {
-    return { debug: false, dynamic: true };
+  preMain(): void {
+    defineEnv({ debug: false, dynamic: true });
   }
 
   get #service(): Promise<RestClientGeneratorService> {

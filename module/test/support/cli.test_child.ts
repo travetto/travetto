@@ -1,15 +1,15 @@
 import { EventEmitter } from 'events';
 
-import { EnvInit, ShutdownManager } from '@travetto/base';
+import { defineEnv, ShutdownManager } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
 /** Test child worker target */
 @CliCommand({ hidden: true })
 export class TestChildWorkerCommand {
-  envInit(): EnvInit {
+  preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;
     process.env.FORCE_COLOR = '0';
-    return { envName: 'test' };
+    defineEnv({ envName: 'test' });
   }
 
   async main(): Promise<void> {

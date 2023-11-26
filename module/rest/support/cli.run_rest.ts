@@ -1,5 +1,5 @@
 import { DependencyRegistry } from '@travetto/di';
-import { CliCommand, CliUtil } from '@travetto/cli';
+import { CliCommand, CliCommandShape, CliUtil } from '@travetto/cli';
 
 import { ServerHandle } from '../src/types';
 
@@ -7,7 +7,7 @@ import { ServerHandle } from '../src/types';
  * Run a rest server as an application
  */
 @CliCommand({ runTarget: true, addModule: true, addEnv: true })
-export class RunRestCommand {
+export class RunRestCommand implements CliCommandShape {
 
   /** IPC debug is enabled */
   debugIpc?: boolean;
@@ -18,8 +18,10 @@ export class RunRestCommand {
   /** Port to run on */
   port?: number;
 
-  envInit(): Record<string, string | number | boolean> {
-    return this.port ? { REST_PORT: `${this.port}` } : {};
+  preMain(): void {
+    if (this.port) {
+      process.env.REST_PORT = `${this.port}`;
+    }
   }
 
   async main(): Promise<ServerHandle | void> {

@@ -8,10 +8,16 @@ import { BasePackCommand, PackOperationShape } from '@travetto/pack/support/pack
 @CliCommand({ addModule: true })
 export class PackLambdaCommand extends BasePackCommand {
 
-  initialize(): void {
-    this.entryPoint = '@travetto/rest-aws-lambda/support/entry.handler';
-    this.output = CliUtil.monoRoot ? '<module>.zip' : `${CliUtil.getSimpleModuleName()}.zip`;
+  preMain(): void {
+    this.entryPoint ??= '@travetto/rest-aws-lambda/support/entry.handler';
+    this.output ??= CliUtil.getSimpleModuleName('<module>.zip', this.module);
     this.mainScripts = false;
+  }
+
+  preHelp(): void {
+    this.output = undefined!;
+    this.entryPoint = undefined!;
+    this.preMain();
   }
 
   getOperations(): PackOperationShape<this>[] {

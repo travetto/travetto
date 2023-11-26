@@ -97,7 +97,7 @@ Usage: doc [options]
 
 Options:
   -i, --input <string>    Input File (default: "DOC.tsx")
-  -o, --outputs <string>  Outputs (default: [])
+  -o, --outputs <string>  Outputs (default: ["README.md"])
   -w, --watch             Watch? (default: false)
   -h, --help              display help for command
 ```

@@ -25,7 +25,7 @@ export class RepoVersionCommand implements CliCommandShape {
    */
   modules?: string[];
 
-  async validate(...args: unknown[]): Promise<CliValidationError | undefined> {
+  async validate(): Promise<CliValidationError | undefined> {
     if (!this.force && await CliScmUtil.isWorkspaceDirty()) {
       return { message: 'Cannot update versions with uncommitted changes' };
     }

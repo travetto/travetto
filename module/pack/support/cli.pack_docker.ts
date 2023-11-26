@@ -1,7 +1,7 @@
 import { path, RootIndex } from '@travetto/manifest';
 import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli';
 import { GlobalEnv } from '@travetto/base';
-import { Ignore } from '@travetto/schema';
+import { Ignore, Required } from '@travetto/schema';
 
 import { DockerPackOperation } from './bin/docker-operation';
 import { BasePackCommand, PackOperationShape } from './pack.base';
@@ -20,7 +20,8 @@ export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Image to extend ', short: 'di', envVars: ['PACK_DOCKER_IMAGE'] })
   dockerImage = `node:${GlobalEnv.nodeVersion}-alpine`;
   @CliFlag({ desc: 'Docker Image Name ', short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
-  dockerName = CliUtil.monoRoot ? '<module>' : CliUtil.getSimpleModuleName();
+  @Required(false)
+  dockerName: string;
   @CliFlag({ desc: 'Docker Image Tag ', short: 'dt', envVars: ['PACK_DOCKER_TAGS'] })
   dockerTag: string[] = ['latest'];
   @CliFlag({ desc: 'Docker Image Port ', short: 'dp', envVars: ['PACK_DOCKER_PORT'] })
@@ -37,7 +38,7 @@ export class PackDockerCommand extends BasePackCommand {
   @Ignore()
   dockerRuntime: DockerPackConfig['dockerRuntime'];
 
-  async validate(...unknownArgs: string[]): Promise<CliValidationError[] | undefined> {
+  async validate(...args: string[]): Promise<CliValidationError[] | undefined> {
     const errs: CliValidationError[] = [];
     if (this.dockerPort?.length) {
       for (let i = 0; i < this.dockerPort.length; i++) {
@@ -51,12 +52,11 @@ export class PackDockerCommand extends BasePackCommand {
     return errs;
   }
 
-  finalize(unknownArgs: string[]): void {
-    super.finalize(unknownArgs);
+  preMain(): void {
     if (this.dockerFactory.startsWith('.')) {
       this.dockerFactory = RootIndex.getFromSource(path.resolve(this.dockerFactory))?.import ?? this.dockerFactory;
     }
-    this.dockerName = this.dockerName.replace('<module>', CliUtil.getSimpleModuleName(this.module ?? ''));
+    this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module || undefined);
 
     // Finalize user/group and ids
     const [userOrUid, groupOrGid = userOrUid] = (this.dockerRuntimeUserSrc ?? '').split(':');
@@ -68,6 +68,10 @@ export class PackDockerCommand extends BasePackCommand {
     const group = (!groupIsNum ? groupOrGid : undefined) || DEFAULT_USER;
     const user = (!userIsNum ? userOrUid : undefined) || DEFAULT_USER;
     this.dockerRuntime = { user, uid, group, gid, folder: `/${DEFAULT_USER}` };
+  }
+
+  preHelp(): void {
+    this.dockerName = CliUtil.getSimpleModuleName('<module>');
   }
 
   getOperations(): PackOperationShape<this>[] {

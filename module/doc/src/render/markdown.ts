@@ -62,7 +62,7 @@ yarn add ${el.props.pkg}
   Code: async ({ context, el }) => {
     const name = getComponentName(el.type);
     const content = await context.resolveCode(el);
-    let lang = content.language;
+    let lang = el.props.language ?? content.language;
     if (!lang) {
       if (el.type === c.Terminal) {
         lang = 'bash';

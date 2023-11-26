@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ConsoleManager, GlobalEnv, defineEnv } from '@travetto/base';
+import { Class, ClassInstance, defineEnv } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -27,7 +27,6 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       preMain: async (cmd) => {
         if (addEnv && 'env' in cmd && typeof cmd.env === 'string') {
           defineEnv({ envName: cmd.env });
-          ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
         }
       }
     });
@@ -38,6 +37,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       SchemaRegistry.registerPendingFieldConfig(target, 'env', String, {
         aliases: ['e'],
         description: 'Application environment',
+        default: 'dev',
         required: { active: false }
       });
     }
