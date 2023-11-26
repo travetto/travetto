@@ -8,12 +8,16 @@ const escape = (text: string): string =>
     .replaceAll('"', '\\"')
     .replaceAll('$', '\\$');
 
+const escapedArgs = (args: string[]): string[] => args.map(x =>
+  x.includes(' ') || x.includes('"') ? `'${x}'` : (x.includes("'") ? `"${x}"` : x)
+);
+
 export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
   win32: {
     var: (name: string) => `%${name}%`,
     scriptOpen: () => [],
     chdirScript: () => ['cd', '%~p0'],
-    callCommandWithAllArgs: (cmd, ...args) => [cmd, ...args, '%*'],
+    callCommandWithAllArgs: (cmd, ...args) => [cmd, ...escapedArgs(args), '%*'],
     createFile: (file, text) => [
       ['@echo', 'off'],
       ...text.map((line, i) =>
@@ -34,7 +38,7 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     var: (name: string) => `$${name}`,
     scriptOpen: () => ['#!/bin/sh'],
     chdirScript: () => ['cd', '$(dirname "$0")'],
-    callCommandWithAllArgs: (cmd, ...args) => [cmd, ...args, '$@'],
+    callCommandWithAllArgs: (cmd, ...args) => [cmd, ...escapedArgs(args), '$@'],
     createFile: (file, text, mode) => [
       ...text.map((line, i) =>
         ['echo', `"${escape(line)}"`, i === 0 ? '>' : '>>', file]),

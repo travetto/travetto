@@ -18,7 +18,7 @@ export class CliServiceCommand implements CliCommandShape {
       .sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  async validate(action: string, services: string[]): Promise<CliValidationError | undefined> {
+  async validate(action: ServiceAction, services: string[]): Promise<CliValidationError | undefined> {
     const all = await this.#getServices(services);
 
     if (!all.length) {

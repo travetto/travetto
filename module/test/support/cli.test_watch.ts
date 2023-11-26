@@ -1,4 +1,4 @@
-import { EnvInit } from '@travetto/base';
+import { defineEnv } from '@travetto/base';
 import { CliCommand, CliUtil } from '@travetto/cli';
 
 import { TestFormat } from './bin/types';
@@ -12,8 +12,8 @@ export class TestWatcherCommand {
   format: TestFormat = 'tap';
   mode: 'all' | 'change' = 'all';
 
-  envInit(): EnvInit {
-    return { envName: 'test', dynamic: true };
+  preMain(): void {
+    defineEnv({ envName: 'test', dynamic: true });
   }
 
   async main(): Promise<void> {

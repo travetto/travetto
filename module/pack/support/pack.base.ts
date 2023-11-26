@@ -1,6 +1,6 @@
 import os from 'os';
 
-import { CliCommandShape, CliFlag, cliTpl, CliUtil } from '@travetto/cli';
+import { CliCommandShape, CliFlag, CliParseUtil, cliTpl } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
@@ -22,8 +22,6 @@ export abstract class BasePackCommand implements CliCommandShape {
     })
       .map(x => x.import.replace(/[.][^.]+s$/, ''));
   }
-
-  #unknownArgs?: string[];
 
   @CliFlag({ desc: 'Workspace for building', short: 'w' })
   workspace: string = path.resolve(os.tmpdir(), RootIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
@@ -91,23 +89,14 @@ export abstract class BasePackCommand implements CliCommandShape {
     }
   }
 
-  finalize(unknown: string[]): void {
-    this.#unknownArgs = unknown;
-
-    this.output = this.output?.replace('<module>', CliUtil.getSimpleModuleName(this.module ?? ''));
-
-    // Resolve all files to absolute paths
-    if (this.output) {
-      this.output = path.resolve(this.output);
-    }
-    if (this.ejectFile) {
-      this.ejectFile = path.resolve(this.ejectFile);
-    }
-    this.workspace = path.resolve(this.workspace);
-  }
-
   async main(args: string[] = []): Promise<void> {
-    this.entryArguments = [...args, ...this.#unknownArgs ?? []];
+    // Resolve all files to absolute paths
+    this.output = this.output ? path.resolve(this.output) : undefined!;
+    this.ejectFile = this.ejectFile ? path.resolve(this.ejectFile) : undefined;
+    this.workspace = path.resolve(this.workspace);
+
+    // Update entry points
+    this.entryArguments = [...this.entryArguments ?? [], ...args, ...CliParseUtil.getState(this)?.unknown ?? []];
     this.module ||= RootIndex.mainModuleName;
     this.mainName ??= path.basename(this.module);
 

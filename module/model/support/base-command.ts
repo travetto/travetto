@@ -1,4 +1,4 @@
-import { ConsoleManager, EnvInit } from '@travetto/base';
+import { ConsoleManager, defineEnv } from '@travetto/base';
 import { CliValidationError, CliCommandShape, cliTpl } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 
@@ -16,8 +16,8 @@ export abstract class BaseModelCommand implements CliCommandShape {
 
   abstract getOp(): keyof ModelStorageSupport;
 
-  envInit(): EnvInit {
-    return { debug: false };
+  preMain(): void {
+    defineEnv({ debug: false });
   }
 
   async help(): Promise<string[]> {

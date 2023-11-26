@@ -1,7 +1,7 @@
-import { Env, ExecUtil, GlobalEnv } from '@travetto/base';
-import { RootIndex } from '@travetto/manifest';
+import { Env, ExecUtil, GlobalEnv, ShutdownManager } from '@travetto/base';
+import { RootIndex, path } from '@travetto/manifest';
 
-import { CliCommandShape, CliCommandShapeFields } from './types';
+import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
 import { CliCommandRegistry } from './registry';
 
 export class CliUtil {
@@ -16,8 +16,15 @@ export class CliUtil {
    * Get a simplified version of a module name
    * @returns
    */
-  static getSimpleModuleName(name = RootIndex.mainModuleName): string {
-    return name.replace(/[\/]/, '_').replace(/@/, '');
+  static getSimpleModuleName(placeholder: string, module?: string): string {
+    const simple = (module ?? RootIndex.mainModuleName).replace(/[\/]/, '_').replace(/@/, '');
+    if (!simple) {
+      return placeholder;
+    } else if (!module && this.monoRoot) {
+      return placeholder;
+    } else {
+      return placeholder.replace('<module>', simple);
+    }
   }
 
   /**
@@ -91,5 +98,22 @@ export class CliUtil {
    */
   static async writeAndEnsureComplete(data: unknown, channel: 'stdout' | 'stderr' = 'stdout'): Promise<void> {
     return await new Promise(r => process[channel].write(typeof data === 'string' ? data : JSON.stringify(data, null, 2), () => r()));
+  }
+
+  /**
+   * Listen for a run response to finish
+   */
+  static async listenForResponse(result: RunResponse): Promise<void> {
+    // Listen to result if non-empty
+    if (result !== undefined && result !== null) {
+      if ('close' in result) {
+        ShutdownManager.onShutdown(result, result); // Tie shutdown into app close
+      }
+      if ('wait' in result) {
+        await result.wait(); // Wait for close signal
+      } else if ('on' in result) {
+        await new Promise<void>(res => result.on('close', res)); // Wait for callback
+      }
+    }
   }
 }

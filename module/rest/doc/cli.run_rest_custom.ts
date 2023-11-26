@@ -1,4 +1,4 @@
-import { EnvInit } from '@travetto/base';
+import { defineEnv } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -7,8 +7,8 @@ import { RestApplication, RestSslConfig } from '@travetto/rest';
 @CliCommand({ runTarget: true })
 export class SampleApp {
 
-  envInit(): EnvInit {
-    return { envName: 'prod' };
+  preMain(): void {
+    defineEnv({ envName: 'prod' });
   }
 
   async main() {

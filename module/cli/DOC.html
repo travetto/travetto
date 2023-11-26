@@ -422,6 +422,43 @@ CUSTOM</code></pre>
 CuStOm</code></pre>
   </figure>
 
+<h2 id="flag-file-support">Flag File Support</h2>
+
+Sometimes its also convenient, especially with commands that support a variety of flags, to provide easy access to pre-defined sets of flags.  Flag files represent a snapshot of command line arguments and flags, as defined in a file.  When referenced, these inputs are essentially injected into the command line as if the user had typed them manually.
+
+  <figure class="code">
+    <figcaption class="code">Example Flag File
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/doc/base.flags">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-bash"><span class="token parameter variable">--host</span> localhost
+<span class="token parameter variable">--port</span> <span class="token number">3306</span>
+<span class="token parameter variable">--username</span> app</code></pre>
+  </figure>
+
+As you can see in this file, it provides easy access to predefine the host, port, and user flags.
+
+  <figure class="code">
+    <figcaption class="code">Using a Flag File
+
+</figcaption>
+    <pre><code class="language-bash">npx trv call:db -@base <span class="token parameter variable">--password</span> <span class="token operator">&lt;</span>custom<span class="token operator">></span></code></pre>
+  </figure>
+
+The flag files can be included in one of a few ways:
+<ul> <li><code class="item input">-@&lt;name&gt;</code> - This translates into $<code class="item input">&lt;module&gt;support/&lt;name&gt;.flags</code>, which is a convenient shorthand.</li>
+<li><code class="item input">-@&lt;mod&gt;/path/file.flags</code> - This is a path-related file that will be resolved from the module's location.</li>
+<li><code class="item input">-@/path/file.flags</code> - This is an absolute path that will be read from the root of the file system.</li>
+</ul>
+Ultimately, after resolution, the content of these files will be injected inline within the location.
+
+  <figure class="code">
+    <figcaption class="code">Final arguments after Flag File resolution
+
+</figcaption>
+    <pre><code class="language-bash">npx trv call:db <span class="token parameter variable">--host</span> localhost <span class="token parameter variable">--port</span> <span class="token number">3306</span> <span class="token parameter variable">--username</span> app <span class="token parameter variable">--password</span> <span class="token operator">&lt;</span>custom<span class="token operator">></span></code></pre>
+  </figure>
+
 <h2 id="vscode-integration">VSCode Integration</h2>
 
 By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/rest" title="Declarative api for RESTful APIs with support for the dependency injection module.">RESTful API</a> does expose a cli target <code class="item input">run:rest</code> that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the <a target="_blank" class="external-link" href="https://marketplace.visualstudio.com/items?itemName=arcsine.travetto-plugin">VSCode plugin</a>. This is achieved by setting the <code class="item input">runTarget</code> field on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15">@CliCommand</a> decorator.  This means the target will be visible within the editor tooling.
@@ -452,19 +489,23 @@ By default, cli commands do not expose themselves to the VSCode extension, as th
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L24">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliCommandShape</span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliCommandShape<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
    * Action target of the command
    */</span>
-  <span class="token function">main</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span>RunResponse<span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token function">main</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span>RunResponse<span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
-   * Setup environment before command runs
+   * Run before main runs
    */</span>
-  envInit<span class="token operator">?</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span>EnvInit<span class="token operator">></span><span class="token punctuation">;</span>
+  preMain<span class="token operator">?</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Extra help
    */</span>
   help<span class="token operator">?</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Run before help is displayed
+   */</span>
+  preHelp<span class="token operator">?</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Is the command active/eligible for usage
    */</span>
@@ -472,15 +513,15 @@ By default, cli commands do not expose themselves to the VSCode extension, as th
   <span class="token comment">/**
    * Run before binding occurs
    */</span>
-  initialize<span class="token operator">?</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  preBind<span class="token operator">?</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Run before validation occurs
    */</span>
-  finalize<span class="token operator">?</span><span class="token punctuation">(</span>unknownArgs<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
+  preValidate<span class="token operator">?</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Validation method
    */</span>
-  validate<span class="token operator">?</span><span class="token punctuation">(</span><span class="token operator">...</span>unknownArgs<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span>CliValidationError <span class="token operator">|</span> CliValidationError<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span><span class="token punctuation">;</span>
+  validate<span class="token operator">?</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token operator">:</span> <span class="token constant">T</span><span class="token punctuation">)</span><span class="token operator">:</span> OrProm<span class="token operator">&lt;</span>CliValidationError <span class="token operator">|</span> CliValidationError<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span><span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
@@ -494,7 +535,7 @@ If the goal is to run a more complex application, which may include depending on
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand<span class="token punctuation">,</span> CliUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand<span class="token punctuation">,</span> CliCommandShape<span class="token punctuation">,</span> CliUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ServerHandle <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types'</span><span class="token punctuation">;</span>
 
@@ -502,7 +543,7 @@ If the goal is to run a more complex application, which may include depending on
  * Run a rest server as an application
  */</span>
 <span class="token decorator"><span class="token at operator">@</span><span class="token function">CliCommand</span></span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> runTarget<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> addModule<span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> addEnv<span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span>
-<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RunRestCommand</span> <span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">RunRestCommand</span> <span class="token keyword">implements</span> <span class="token class-name">CliCommandShape</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token comment">/** IPC debug is enabled */</span>
   debugIpc<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
@@ -513,8 +554,10 @@ If the goal is to run a more complex application, which may include depending on
   <span class="token comment">/** Port to run on */</span>
   port<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
 
-  <span class="token function">envInit</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token builtin">boolean</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token operator">?</span> <span class="token punctuation">{{'{'}}</span> <span class="token constant">REST_PORT</span><span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span> <span class="token punctuation">{{'}'}}</span> <span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>
+  <span class="token function">preMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
+      process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">REST_PORT</span> <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>ServerHandle <span class="token operator">|</span> <span class="token keyword">void</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
@@ -556,10 +599,10 @@ A simple example of the validation can be found in the <code class="item input">
 
   <figure class="code">
     <figcaption class="code">Simple Validation Example
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/doc/support/cli.doc.ts#L42">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/doc/support/cli.doc.ts#L43">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">async</span> <span class="token function">validate</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token operator">:</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>CliValidationError <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
+    <pre><code class="language-typescript"><span class="token keyword">async</span> <span class="token function">validate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>CliValidationError <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>
   <span class="token keyword">const</span> docFile <span class="token operator">=</span> path<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>input<span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token punctuation">(</span><span class="token keyword">await</span> fs<span class="token punctuation">.</span><span class="token function">stat</span><span class="token punctuation">(</span>docFile<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">return</span> <span class="token punctuation">{{'{'}}</span> message<span class="token operator">:</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">input: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>input<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string"> does not exist</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> source<span class="token operator">:</span> <span class="token string">'flag'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span>

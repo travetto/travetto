@@ -25,7 +25,7 @@ export class HelpUtil {
   static async renderCommandHelp(command: CliCommandShape): Promise<string> {
     const commandName = CliCommandRegistry.getName(command);
 
-    command.initialize?.();
+    await command.preHelp?.();
 
     // Ensure finalized
     const { flags, args } = await CliCommandSchemaUtil.getSchema(command);
@@ -124,13 +124,6 @@ export class HelpUtil {
       lines.unshift(title ? cliTpl`${{ title }}` : cliTpl`${{ title: 'Usage:' }}  ${{ param: '[options]' }} ${{ param: '[command]' }}`, '');
     }
     return lines.map(x => x.trimEnd()).join('\n');
-  }
-
-  /**
-   * Render help
-   */
-  static async renderHelp(command?: CliCommandShape): Promise<string> {
-    return command ? this.renderCommandHelp(command) : this.renderAllHelp();
   }
 
   /**

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { ShutdownManager } from '@travetto/base';
-import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
+import { CliCommandShape, CliCommand, CliValidationError, CliParseUtil } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 
 /**
@@ -9,8 +9,6 @@ import { path, RootIndex } from '@travetto/manifest';
  */
 @CliCommand({ hidden: true })
 export class MainCommand implements CliCommandShape {
-
-  #unknownArgs?: string[];
 
   async #getImport(fileOrImport: string): Promise<string | undefined> {
     // If referenced file exists
@@ -29,15 +27,12 @@ export class MainCommand implements CliCommandShape {
     }
   }
 
-  finalize(unknownArgs?: string[] | undefined): void | Promise<void> {
-    this.#unknownArgs = unknownArgs;
-  }
-
   async main(fileOrImport: string, args: string[] = []): Promise<void> {
     try {
       const imp = await this.#getImport(fileOrImport);
       const mod = await import(imp!);
-      await ShutdownManager.exitWithResponse(await mod.main(...args, ...this.#unknownArgs ?? []));
+
+      await ShutdownManager.exitWithResponse(await mod.main(...args, ...CliParseUtil.getState(this)?.unknown ?? []));
     } catch (err) {
       await ShutdownManager.exitWithResponse(err, true);
     }

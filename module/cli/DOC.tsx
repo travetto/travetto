@@ -109,6 +109,27 @@ export const text = <>
     }} />
   </c.Section>
 
+  <c.Section title='Flag File Support'>
+    Sometimes its also convenient, especially with commands that support a variety of flags, to provide easy access to pre-defined sets of flags.  Flag files represent a snapshot of command line arguments and flags, as defined in a file.  When referenced, these inputs are essentially injected into the command line as if the user had typed them manually.
+
+    <c.Code language='bash' title='Example Flag File' src='doc/base.flags' />
+
+    As you can see in this file, it provides easy access to predefine the host, port, and user flags.
+
+    <c.Code language='bash' title='Using a Flag File' src='npx trv call:db -@base --password <custom>' />
+
+    The flag files can be included in one of a few ways:
+    <ul>
+      <li>{d.input('-@<name>')} - This translates into ${d.input('<module>support/<name>.flags')}, which is a convenient shorthand.</li>
+      <li>{d.input('-@<mod>/path/file.flags')} - This is a path-related file that will be resolved from the module's location.</li>
+      <li>{d.input('-@/path/file.flags')} - This is an absolute path that will be read from the root of the file system.</li>
+    </ul>
+
+    Ultimately, after resolution, the content of these files will be injected inline within the location.
+
+    <c.Code language='bash' title='Final arguments after Flag File resolution' src='npx trv call:db --host localhost --port 3306 --username app --password <custom>' />
+  </c.Section>
+
   <c.Section title='VSCode Integration'>
     By default, cli commands do not expose themselves to the VSCode extension, as the majority of them are not intended for that sort of operation.  {d.mod('Rest')} does expose a cli target {d.input('run:rest')} that will show up, to help run/debug a rest application.  Any command can mark itself as being a run target, and will be eligible for running from within the {d.library('TravettoPlugin')}. This is achieved by setting the {d.input('runTarget')} field on the {CliCommand} decorator.  This means the target will be visible within the editor tooling.
 

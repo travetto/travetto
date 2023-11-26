@@ -1,4 +1,4 @@
-import { EnvInit } from '@travetto/base';
+import { defineEnv } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
 import { runTests } from './bin/run';
@@ -10,8 +10,8 @@ export class TestDirectCommand {
 
   format: TestFormat = 'tap';
 
-  envInit(): EnvInit {
-    return { envName: 'test' };
+  preMain(): void {
+    defineEnv({ envName: 'test' });
   }
 
   main(file: string, args: string[]): Promise<void> {

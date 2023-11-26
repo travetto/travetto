@@ -1,5 +1,5 @@
 import { RootIndex } from '@travetto/manifest';
-import { ExecUtil, EnvInit } from '@travetto/base';
+import { ExecUtil, defineEnv } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliModuleUtil, CliScmUtil } from '@travetto/cli';
 
 /**
@@ -17,8 +17,8 @@ export class LintCommand implements CliCommandShape {
   /** Since a specific git commit */
   since?: string;
 
-  envInit(): EnvInit {
-    return { debug: false };
+  preMain(): void {
+    defineEnv({ debug: false });
   }
 
   async main(): Promise<void> {

@@ -1,8 +1,8 @@
-import { Closeable, EnvInit } from '@travetto/base';
+import { Closeable } from '@travetto/base';
 
 type OrProm<T> = T | Promise<T>;
 
-type RunResponse = { wait(): Promise<unknown> } | { on(event: 'close', cb: Function): unknown } | Closeable | void | undefined;
+export type RunResponse = { wait(): Promise<unknown> } | { on(event: 'close', cb: Function): unknown } | Closeable | void | undefined;
 
 /**
  * Constrained version of Schema's Validation Error
@@ -21,19 +21,23 @@ export type CliValidationError = {
 /**
  * CLI Command Contract
  */
-export interface CliCommandShape {
+export interface CliCommandShape<T extends unknown[] = unknown[]> {
   /**
    * Action target of the command
    */
-  main(...args: unknown[]): OrProm<RunResponse>;
+  main(...args: T): OrProm<RunResponse>;
   /**
-   * Setup environment before command runs
+   * Run before main runs
    */
-  envInit?(): OrProm<EnvInit>;
+  preMain?(): OrProm<void>;
   /**
    * Extra help
    */
   help?(): OrProm<string[]>;
+  /**
+   * Run before help is displayed
+   */
+  preHelp?(): OrProm<void>;
   /**
    * Is the command active/eligible for usage
    */
@@ -41,15 +45,15 @@ export interface CliCommandShape {
   /**
    * Run before binding occurs
    */
-  initialize?(): OrProm<void>;
+  preBind?(): OrProm<void>;
   /**
    * Run before validation occurs
    */
-  finalize?(unknownArgs: string[]): OrProm<void>;
+  preValidate?(): OrProm<void>;
   /**
    * Validation method
    */
-  validate?(...unknownArgs: unknown[]): OrProm<CliValidationError | CliValidationError[] | undefined>;
+  validate?(...args: T): OrProm<CliValidationError | CliValidationError[] | undefined>;
 }
 
 /**

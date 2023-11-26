@@ -1,7 +1,8 @@
-import { CliCommand, CliCommandShape } from '@travetto/cli';
+import { CliCommand, CliCommandShape, CliParseUtil } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
-import { ExecUtil, EnvInit } from '@travetto/base';
+import { ExecUtil, defineEnv } from '@travetto/base';
 import { Max, Min } from '@travetto/schema';
+
 import { RepoExecUtil } from './bin/exec';
 
 /**
@@ -9,8 +10,6 @@ import { RepoExecUtil } from './bin/exec';
  */
 @CliCommand()
 export class RepoExecCommand implements CliCommandShape {
-
-  #unknownArgs?: string[];
 
   /** Only changed modules */
   changed = false;
@@ -25,16 +24,12 @@ export class RepoExecCommand implements CliCommandShape {
   /** Show stdout */
   showStdout = true;
 
-  envInit(): EnvInit {
-    return { debug: false };
-  }
-
-  finalize(unknownArgs?: string[] | undefined): void | Promise<void> {
-    this.#unknownArgs = unknownArgs;
+  preMain(): void {
+    defineEnv({ debug: false });
   }
 
   async main(cmd: string, args: string[] = []): Promise<void> {
-    const finalArgs = [...args, ...this.#unknownArgs ?? []];
+    const finalArgs = [...args, ...CliParseUtil.getState(this)?.unknown ?? []];
 
     await RepoExecUtil.execOnModules(
       this.changed ? 'changed' : 'all',
