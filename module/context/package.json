@@ -29,7 +29,7 @@
     "@travetto/di": "^3.4.1"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.4.1"
+    "@travetto/test": "^3.4.2"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

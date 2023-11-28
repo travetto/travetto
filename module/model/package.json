@@ -1,6 +1,6 @@
 {
   "name": "@travetto/model",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "description": "Datastore abstraction for core operations.",
   "keywords": [
     "datastore",
@@ -32,8 +32,8 @@
     "@travetto/schema": "^3.4.3"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.4.5",
-    "@travetto/test": "^3.4.1"
+    "@travetto/cli": "^3.4.6",
+    "@travetto/test": "^3.4.2"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {

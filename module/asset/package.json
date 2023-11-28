@@ -1,6 +1,6 @@
 {
   "name": "@travetto/asset",
-  "version": "3.4.3",
+  "version": "3.4.4",
   "description": "Modular library for storing and retrieving binary assets",
   "keywords": [
     "assets",
@@ -26,13 +26,13 @@
   },
   "dependencies": {
     "@travetto/di": "^3.4.1",
-    "@travetto/model": "^3.4.3",
+    "@travetto/model": "^3.4.4",
     "@types/mime": "^3.0.4",
     "file-type": "^16.5.4",
     "mime": "^3.0.0"
   },
   "peerDependencies": {
-    "@travetto/test": "^3.4.1"
+    "@travetto/test": "^3.4.2"
   },
   "peerDependenciesMeta": {
     "@travetto/test": {

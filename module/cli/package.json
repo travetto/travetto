@@ -1,6 +1,6 @@
 {
   "name": "@travetto/cli",
-  "version": "3.4.5",
+  "version": "3.4.6",
   "description": "CLI infrastructure for Travetto framework",
   "keywords": [
     "cli",
