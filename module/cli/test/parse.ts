@@ -24,7 +24,7 @@ export class ParseSuite {
     assert.deepStrictEqual(CliParseUtil.readToken("'hello world'", 0), { value: 'hello world', next: 13 });
     assert.deepStrictEqual(
       await CliParseUtil.getArgs(
-        ['bob', 'hello world', '-@/test/fixtures/random.flags']
+        ['bob', 'hello world', '+=@/test/fixtures/random.flags']
       ),
       { cmd: 'bob', args: ['hello world', '--hello', "goodbye's moon", '-b', '20'], help: false }
     );

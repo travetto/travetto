@@ -6,6 +6,7 @@ import { CliCommandShape, CliCommandShapeFields } from './types';
 import { CliCommandRegistry, CliCommandConfigOptions } from './registry';
 import { CliModuleUtil } from './module';
 import { CliUtil } from './util';
+import { CliParseUtil } from './parse';
 
 /**
  * Decorator to register a CLI command
@@ -44,7 +45,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
 
     if (addModule) {
       SchemaRegistry.registerPendingFieldConfig(target, 'module', String, {
-        aliases: ['m', 'env.TRV_MODULE'],
+        aliases: ['m', CliParseUtil.toEnvField('TRV_MODULE')],
         description: 'Module to run for',
         required: { active: CliUtil.monoRoot }
       });
@@ -86,7 +87,7 @@ export function CliFlag(cfg: { name?: string, short?: string, desc?: string, fil
       aliases.push(cfg.short.startsWith('-') ? cfg.short : `-${cfg.short}`);
     }
     if (cfg.envVars) {
-      aliases.push(...cfg.envVars.map(v => `env.${v}`));
+      aliases.push(...cfg.envVars.map(CliParseUtil.toEnvField));
     }
     if (typeof prop === 'string') {
       SchemaRegistry.registerPendingFieldFacet(target.constructor, prop, {

@@ -232,7 +232,7 @@ Per the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module supports typing requests and request bodies for run-time validation of requests.
 
 ## Running an App
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) for [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19) that will follow default behaviors, and spin up the REST server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L16) for [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19) that will follow default behaviors, and spin up the REST server.
 
 **Terminal: Standard application**
 ```bash
@@ -280,7 +280,7 @@ Listening { port: 3000 }
 ```
 
 ### Creating a Custom CLI Entry Point
-To customize a REST server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L15) decorator. This could look like:
+To customize a REST server, you may need to construct an entry point using the [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L16) decorator. This could look like:
 
 **Code: Application entry point for Rest Applications**
 ```typescript

@@ -116,13 +116,13 @@ export const text = <>
 
     As you can see in this file, it provides easy access to predefine the host, port, and user flags.
 
-    <c.Code language='bash' title='Using a Flag File' src='npx trv call:db -@base --password <custom>' />
+    <c.Code language='bash' title='Using a Flag File' src='npx trv call:db +=base --password <custom>' />
 
     The flag files can be included in one of a few ways:
     <ul>
-      <li>{d.input('-@<name>')} - This translates into ${d.input('<module>support/<name>.flags')}, which is a convenient shorthand.</li>
-      <li>{d.input('-@<mod>/path/file.flags')} - This is a path-related file that will be resolved from the module's location.</li>
-      <li>{d.input('-@/path/file.flags')} - This is an absolute path that will be read from the root of the file system.</li>
+      <li>{d.input('+=<name>')} - This translates into ${d.input('<mod>/support/<name>.flags')}, which is a convenient shorthand.</li>
+      <li>{d.input('+=<mod>/path/file.flags')} - This is a path-related file that will be resolved from the module's location.</li>
+      <li>{d.input('+=/path/file.flags')} - This is an absolute path that will be read from the root of the file system.</li>
     </ul>
 
     Ultimately, after resolution, the content of these files will be injected inline within the location.

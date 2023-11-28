@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { RootIndex } from '@travetto/manifest';
+import { RootIndex, path } from '@travetto/manifest';
 import { CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
 
 type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
@@ -15,10 +15,14 @@ export type ParsedState = {
   unknown: string[];
 };
 
+const RAW_SEP = '--';
 const VALID_FLAG = /^-{1,2}[a-z]/i;
 const HELP_FLAG = /^-h|--help$/;
 const LONG_FLAG_WITH_EQ = /^--[a-z][^= ]+=\S+/i;
-const CONFIG_ARG = /^-{1,2}(@[^ ]+)$/;
+const CONFIG_PRE = '+=';
+const ENV_PRE = 'env.';
+const ParsedⲐ = Symbol.for('@travetto/cli:parsed');
+const SPACE = new Set([32, 7, 13, 10]);
 
 const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
 
@@ -39,14 +43,14 @@ const getInput = (cfg: { field?: CliCommandInput, rawText?: string, input: strin
   }
 };
 
-const ParsedⲐ = Symbol.for('@travetto/cli:parsed');
-
-const SPACE = new Set([32, 7, 13, 10]);
-
 /**
  * Parsing support for the cli
  */
 export class CliParseUtil {
+
+  static toEnvField(k: string): string {
+    return `${ENV_PRE}${k}`;
+  }
 
   static readToken(text: string, start = 0): { next: number, value?: string } {
     const collected: number[] = [];
@@ -87,17 +91,22 @@ export class CliParseUtil {
    * Read configuration file given flag
    */
   static async readFlagFile(flag: string, moduleName?: string): Promise<string[]> {
-    const key = flag.replace(/^-{1,2}/, '');
-    const mod = RootIndex.getModule(moduleName ?? RootIndex.mainModuleName);
-
-    if (!mod) {
-      throw new Error(`Unknown module file: ${flag}, unable to proceed`);
-    }
+    const key = flag.replace(CONFIG_PRE, '');
+    const mod = moduleName ?? RootIndex.mainModuleName;
 
     // We have a file
-    const file = (/^@{1,2}\//.test(key) ? key : `@/support/pack.${key.replace('@', '')}.flags`)
+    const rel = (key.includes('/') ? key : `@/support/pack.${key}.flags`)
       .replace('@@/', `${RootIndex.manifest.workspacePath}/`)
-      .replace('@/', `${mod.sourcePath}/`);
+      .replace('@/', `${mod}/`)
+      .replace(/^(@[^\/]+\/[^\/]+)/, (_, imp) => {
+        const val = RootIndex.getModule(imp);
+        if (!val) {
+          throw new Error(`Unknown module file: ${flag}, unable to proceed`);
+        }
+        return val.sourcePath;
+      });
+
+    const file = path.resolve(rel);
 
     if (!await fs.stat(file).catch(() => false)) {
       throw new Error(`Missing flag file: ${flag}, unable to proceed`);
@@ -125,13 +134,13 @@ export class CliParseUtil {
       offset = 2;
     }
     const out = argv.slice(offset);
-    const max = out.includes('--') ? out.indexOf('--') : out.length;
+    const max = out.includes(RAW_SEP) ? out.indexOf(RAW_SEP) : out.length;
     const valid = out.slice(0, max);
     const cmd = valid.length > 0 && !valid[0].startsWith('-') ? valid[0] : undefined;
     const helpIdx = valid.findIndex(x => HELP_FLAG.test(x));
     const args = [];
     for (const item of out.slice(cmd ? 1 : 0)) {
-      if (CONFIG_ARG.test(item)) {
+      if (item.startsWith(CONFIG_PRE)) {
         args.push(...await this.readFlagFile(item));
       } else {
         args.push(item);
@@ -158,9 +167,9 @@ export class CliParseUtil {
         if (envName in process.env) {
           const value: string = process.env[envName]!;
           if (field.array) {
-            out.push(...value.split(/\s*,\s*/g).map(v => getInput({ field, input: `env.${envName}`, value: v })));
+            out.push(...value.split(/\s*,\s*/g).map(v => getInput({ field, input: `${ENV_PRE}${envName}`, value: v })));
           } else {
-            out.push(getInput({ field, input: `env.${envName}`, value }));
+            out.push(getInput({ field, input: `${ENV_PRE}${envName}`, value }));
           }
         }
       }
@@ -171,7 +180,7 @@ export class CliParseUtil {
     for (let i = 0; i < inputs.length; i += 1) {
       const input = inputs[i];
 
-      if (input === '--') { // Raw separator
+      if (input === RAW_SEP) { // Raw separator
         out.push(...inputs.slice(i + 1).map(x => getInput({ input: x })));
         break;
       } else if (LONG_FLAG_WITH_EQ.test(input)) {
@@ -181,7 +190,7 @@ export class CliParseUtil {
       } else if (VALID_FLAG.test(input)) { // Flag
         const field = flagMap.get(input);
         const next = inputs[i + 1];
-        if ((next && (VALID_FLAG.test(next) || next === '--')) || isBoolFlag(field)) {
+        if ((next && (VALID_FLAG.test(next) || next === RAW_SEP)) || isBoolFlag(field)) {
           out.push(getInput({ field, input }));
         } else {
           out.push(getInput({ field, input, value: next }));
