@@ -39,7 +39,7 @@
     "sass": "^1.69.5"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.4.7"
+    "@travetto/cli": "^3.4.8"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
