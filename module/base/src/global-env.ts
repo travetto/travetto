@@ -45,7 +45,7 @@ export type EnvInit = {
 
 export function defineEnv(cfg: EnvInit = {}): void {
   const envName = (cfg.envName ?? readEnvName()).toLowerCase();
-  process.env.NODE_ENV = /^dev|development|test$/.test(envName) ? 'development' : 'production';
+  process.env.NODE_ENV = /^(dev|development|test)$/.test(envName) ? 'development' : 'production';
   process.env.DEBUG = `${envName !== 'test' && (cfg.debug ?? GlobalEnv.debug ?? false)}`;
   process.env.TRV_ENV = envName;
   process.env.TRV_DYNAMIC = `${cfg.dynamic ?? GlobalEnv.dynamic}`;

@@ -90,9 +90,9 @@ export class CliParseUtil {
   /**
    * Read configuration file given flag
    */
-  static async readFlagFile(flag: string, moduleName?: string): Promise<string[]> {
+  static async readFlagFile(flag: string): Promise<string[]> {
     const key = flag.replace(CONFIG_PRE, '');
-    const mod = moduleName ?? RootIndex.mainModuleName;
+    const mod = RootIndex.mainModuleName;
 
     // We have a file
     const rel = (key.includes('/') ? key : `@/support/pack.${key}.flags`)
@@ -101,7 +101,7 @@ export class CliParseUtil {
       .replace(/^(@[^\/]+\/[^\/]+)/, (_, imp) => {
         const val = RootIndex.getModule(imp);
         if (!val) {
-          throw new Error(`Unknown module file: ${flag}, unable to proceed`);
+          throw new Error(`Unknown module file: ${key}, unable to proceed`);
         }
         return val.sourcePath;
       });
@@ -109,7 +109,7 @@ export class CliParseUtil {
     const file = path.resolve(rel);
 
     if (!await fs.stat(file).catch(() => false)) {
-      throw new Error(`Missing flag file: ${flag}, unable to proceed`);
+      throw new Error(`Missing flag file: ${key}, unable to proceed`);
     }
 
     const data = await fs.readFile(file, 'utf8');

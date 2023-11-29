@@ -73,15 +73,15 @@ export class ExecutionManager {
   static async run(argv: string[]): Promise<void> {
     await GlobalTerminal.init();
 
-    const { cmd, args, help } = await CliParseUtil.getArgs(argv);
-
-    if (!cmd) {
-      console.info!(await HelpUtil.renderAllHelp());
-      return;
-    }
-
     let command: CliCommandShape | undefined;
     try {
+      const { cmd, args, help } = await CliParseUtil.getArgs(argv);
+
+      if (!cmd) {
+        console.info!(await HelpUtil.renderAllHelp());
+        return;
+      }
+
       // Load a single command
       command = await CliCommandRegistry.getInstance(cmd, true);
       if (help) {
