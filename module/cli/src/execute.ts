@@ -19,13 +19,11 @@ export class ExecutionManager {
    */
   static async #runCommand(cmd: CliCommandShape, args: string[]): Promise<RunResponse> {
     const schema = await CliCommandSchemaUtil.getSchema(cmd);
-    const state = await CliParseUtil.parse(schema, args);
+    cmd._parsed = await CliParseUtil.parse(schema, args);
     const cfg = CliCommandRegistry.getConfig(cmd);
 
-    CliParseUtil.setState(cmd, state);
-
     await cmd.preBind?.();
-    const known = await CliCommandSchemaUtil.bindInput(cmd, state);
+    const known = await CliCommandSchemaUtil.bindInput(cmd, cmd._parsed);
 
     await cmd.preValidate?.();
     await CliCommandSchemaUtil.validate(cmd, known);

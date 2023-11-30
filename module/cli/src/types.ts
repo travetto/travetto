@@ -4,6 +4,18 @@ type OrProm<T> = T | Promise<T>;
 
 export type RunResponse = { wait(): Promise<unknown> } | { on(event: 'close', cb: Function): unknown } | Closeable | void | undefined;
 
+type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
+type ParsedArg = { type: 'arg', input: string, array?: boolean, index: number };
+type ParsedUnknown = { type: 'unknown', input: string };
+type ParsedInput = ParsedUnknown | ParsedFlag | ParsedArg;
+
+export type ParsedState = {
+  inputs: string[];
+  all: ParsedInput[];
+  flags: ParsedFlag[];
+  unknown: string[];
+};
+
 /**
  * Constrained version of Schema's Validation Error
  */
@@ -22,6 +34,10 @@ export type CliValidationError = {
  * CLI Command Contract
  */
 export interface CliCommandShape<T extends unknown[] = unknown[]> {
+  /**
+   * Parsed state
+   */
+  _parsed?: ParsedState;
   /**
    * Action target of the command
    */

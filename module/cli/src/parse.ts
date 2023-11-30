@@ -1,19 +1,9 @@
 import fs from 'fs/promises';
 
 import { RootIndex, path } from '@travetto/manifest';
-import { CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
+import { CliCommandInput, CliCommandSchema, ParsedState } from './types';
 
-type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
-type ParsedArg = { type: 'arg', input: string, array?: boolean, index: number };
-type ParsedUnknown = { type: 'unknown', input: string };
-type ParsedInput = ParsedUnknown | ParsedFlag | ParsedArg;
-
-export type ParsedState = {
-  inputs: string[];
-  all: ParsedInput[];
-  flags: ParsedFlag[];
-  unknown: string[];
-};
+type ParsedInput = ParsedState['all'][number];
 
 const RAW_SEP = '--';
 const VALID_FLAG = /^-{1,2}[a-z]/i;
@@ -21,8 +11,21 @@ const HELP_FLAG = /^-h|--help$/;
 const LONG_FLAG_WITH_EQ = /^--[a-z][^= ]+=\S+/i;
 const CONFIG_PRE = '+=';
 const ENV_PRE = 'env.';
-const ParsedⲐ = Symbol.for('@travetto/cli:parsed');
 const SPACE = new Set([32, 7, 13, 10]);
+const MODULE_FLAG = '--module';
+const MODULE_SHORT = '-m';
+
+const getModuleValue = (arr: string[]): string => {
+  for (let i = 0; i < arr.length; i += 1) {
+    const x = arr[i];
+    if (x.startsWith(`${MODULE_FLAG}=`)) {
+      return x.split('=')[1];
+    } else if (!x.startsWith('-') && (arr[i - 1] === MODULE_SHORT || arr[i - 1] === MODULE_FLAG)) {
+      return x;
+    }
+  }
+  return process.env.TRV_MODULE || RootIndex.mainModuleName;
+};
 
 const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
 
@@ -90,20 +93,19 @@ export class CliParseUtil {
   /**
    * Read configuration file given flag
    */
-  static async readFlagFile(flag: string): Promise<string[]> {
+  static async readFlagFile(flag: string, mod: string): Promise<string[]> {
     const key = flag.replace(CONFIG_PRE, '');
-    const mod = RootIndex.mainModuleName;
 
     // We have a file
     const rel = (key.includes('/') ? key : `@/support/pack.${key}.flags`)
       .replace('@@/', `${RootIndex.manifest.workspacePath}/`)
       .replace('@/', `${mod}/`)
-      .replace(/^(@[^\/]+\/[^\/]+)/, (_, imp) => {
+      .replace(/^(@[^\/]+\/[^\/]+)(\/.*)$/, (_, imp, rest) => {
         const val = RootIndex.getModule(imp);
         if (!val) {
-          throw new Error(`Unknown module file: ${key}, unable to proceed`);
+          throw new Error(`Unknown module file: ${_}, unable to proceed`);
         }
-        return val.sourcePath;
+        return `${val.sourcePath}${rest}`;
       });
 
     const file = path.resolve(rel);
@@ -136,12 +138,13 @@ export class CliParseUtil {
     const out = argv.slice(offset);
     const max = out.includes(RAW_SEP) ? out.indexOf(RAW_SEP) : out.length;
     const valid = out.slice(0, max);
+    const mod = getModuleValue(valid);
     const cmd = valid.length > 0 && !valid[0].startsWith('-') ? valid[0] : undefined;
     const helpIdx = valid.findIndex(x => HELP_FLAG.test(x));
     const args = [];
     for (const item of out.slice(cmd ? 1 : 0)) {
       if (item.startsWith(CONFIG_PRE)) {
-        args.push(...await this.readFlagFile(item));
+        args.push(...await this.readFlagFile(item, mod));
       } else {
         args.push(item);
       }
@@ -210,22 +213,8 @@ export class CliParseUtil {
     return {
       inputs,
       all: out,
-      unknown: out.filter((x): x is ParsedUnknown => x.type === 'unknown').map(x => x.input),
-      flags: out.filter((x): x is ParsedFlag => x.type === 'flag')
+      unknown: out.filter(x => x.type === 'unknown').map(x => x.input),
+      flags: out.filter((x): x is ParsedInput & { type: 'flag' } => x.type === 'flag')
     };
-  }
-
-  /**
-   * Get parse state from the command
-   */
-  static getState(cmd: CliCommandShape & { [ParsedⲐ]?: ParsedState }): ParsedState | undefined {
-    return cmd[ParsedⲐ];
-  }
-
-  /**
-   * Set state for a command
-   */
-  static setState(cmd: CliCommandShape & { [ParsedⲐ]?: ParsedState }, state: ParsedState): void {
-    cmd[ParsedⲐ] = state;
   }
 }

@@ -1,6 +1,6 @@
 import os from 'os';
 
-import { CliCommandShape, CliFlag, CliParseUtil, cliTpl } from '@travetto/cli';
+import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
@@ -22,6 +22,9 @@ export abstract class BasePackCommand implements CliCommandShape {
     })
       .map(x => x.import.replace(/[.][^.]+s$/, ''));
   }
+
+  @Ignore()
+  _parsed: ParsedState;
 
   @CliFlag({ desc: 'Workspace for building', short: 'w' })
   workspace: string = path.resolve(os.tmpdir(), RootIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
@@ -96,7 +99,7 @@ export abstract class BasePackCommand implements CliCommandShape {
     this.workspace = path.resolve(this.workspace);
 
     // Update entry points
-    this.entryArguments = [...this.entryArguments ?? [], ...args, ...CliParseUtil.getState(this)?.unknown ?? []];
+    this.entryArguments = [...this.entryArguments ?? [], ...args, ...this._parsed.unknown];
     this.module ||= RootIndex.mainModuleName;
     this.mainName ??= path.basename(this.module);
 

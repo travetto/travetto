@@ -22,6 +22,36 @@ export class ParseSuite {
     assert.deepStrictEqual(CliParseUtil.readToken('hello world'), { value: 'hello', next: 6 });
     assert.deepStrictEqual(CliParseUtil.readToken('hello world', 1), { value: 'ello', next: 6 });
     assert.deepStrictEqual(CliParseUtil.readToken("'hello world'", 0), { value: 'hello world', next: 13 });
+
+    assert.deepStrictEqual(
+      await CliParseUtil.getArgs(
+        ['bob', 'hello world', '+=@travetto/cli/test/fixtures/random.flags']
+      ),
+      { cmd: 'bob', args: ['hello world', '--hello', "goodbye's moon", '-b', '20'], help: false }
+    );
+
+    assert.deepStrictEqual(
+      await CliParseUtil.getArgs(
+        ['bob', 'hello world', '--module', '@travetto/cli', '+=@/test/fixtures/random.flags']
+      ),
+      { cmd: 'bob', args: ['hello world', '--module', '@travetto/cli', '--hello', "goodbye's moon", '-b', '20'], help: false }
+    );
+
+    assert.deepStrictEqual(
+      await CliParseUtil.getArgs(
+        ['bob', 'hello world', '--module=@travetto/cli', '+=@/test/fixtures/random.flags']
+      ),
+      { cmd: 'bob', args: ['hello world', '--module=@travetto/cli', '--hello', "goodbye's moon", '-b', '20'], help: false }
+    );
+
+    assert.deepStrictEqual(
+      await CliParseUtil.getArgs(
+        ['bob', 'hello world', '-m', '@travetto/cli', '+=@/test/fixtures/random.flags']
+      ),
+      { cmd: 'bob', args: ['hello world', '-m', '@travetto/cli', '--hello', "goodbye's moon", '-b', '20'], help: false }
+    );
+
+    process.env.TRV_MODULE = '@travetto/cli';
     assert.deepStrictEqual(
       await CliParseUtil.getArgs(
         ['bob', 'hello world', '+=@/test/fixtures/random.flags']
