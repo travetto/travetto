@@ -23,7 +23,7 @@
   "dependencies": {
     "@travetto/auth-rest": "^3.4.5",
     "@travetto/auth-rest-session": "^3.4.5",
-    "@travetto/cli": "^3.4.8",
+    "@travetto/cli": "^3.4.9",
     "@travetto/log": "^3.4.4",
     "@travetto/model-mongo": "^3.4.5",
     "@travetto/openapi": "^3.4.5",
@@ -32,7 +32,7 @@
     "vue": "^3.3.8"
   },
   "devDependencies": {
-    "@travetto/pack": "^3.4.9",
+    "@travetto/pack": "^3.4.10",
     "@travetto/rest-client": "^3.4.5"
   },
   "travetto": {
