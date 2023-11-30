@@ -19,6 +19,7 @@ export class ExecutionManager {
    */
   static async #runCommand(cmd: CliCommandShape, args: string[]): Promise<RunResponse> {
     const schema = await CliCommandSchemaUtil.getSchema(cmd);
+    args = await CliParseUtil.expandArgs(schema, args);
     cmd._parsed = await CliParseUtil.parse(schema, args);
     const cfg = CliCommandRegistry.getConfig(cmd);
 
@@ -73,7 +74,7 @@ export class ExecutionManager {
 
     let command: CliCommandShape | undefined;
     try {
-      const { cmd, args, help } = await CliParseUtil.getArgs(argv);
+      const { cmd, args, help } = CliParseUtil.getArgs(argv);
 
       if (!cmd) {
         console.info!(await HelpUtil.renderAllHelp());

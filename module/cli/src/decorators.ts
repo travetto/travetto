@@ -26,8 +26,9 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     const { commandModule } = CliCommandRegistry.registerClass(target, {
       hidden: cfg.hidden,
       preMain: async (cmd) => {
-        if (addEnv && 'env' in cmd && typeof cmd.env === 'string') {
-          defineEnv({ envName: cmd.env });
+        if (addEnv) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          defineEnv({ envName: (cmd as { env?: string }).env ?? 'dev' });
         }
       }
     });
@@ -47,6 +48,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       SchemaRegistry.registerPendingFieldConfig(target, 'module', String, {
         aliases: ['m', CliParseUtil.toEnvField('TRV_MODULE')],
         description: 'Module to run for',
+        specifiers: ['module'],
         required: { active: CliUtil.monoRoot }
       });
     }

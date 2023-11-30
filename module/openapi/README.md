@@ -124,7 +124,7 @@ Usage: openapi:spec [options]
 
 Options:
   -o, --output <string>  Output files
-  -m, --module <string>  Module to run for
+  -m, --module <module>  Module to run for
   -h, --help             display help for command
 ```
 

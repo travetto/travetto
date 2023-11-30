@@ -35,6 +35,6 @@ Options:
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
   -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
-  -m, --module <string>                Module to run for
+  -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```

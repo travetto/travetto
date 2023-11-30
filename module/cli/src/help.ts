@@ -6,6 +6,7 @@ import { CliCommandShape } from './types';
 import { CliCommandRegistry } from './registry';
 import { CliCommandSchemaUtil } from './schema';
 import { CliValidationResultError } from './error';
+import { isBoolFlag } from './parse';
 
 const validationSourceMap = {
   custom: '',
@@ -47,7 +48,7 @@ export class HelpUtil {
       const flagVal = command[key] as unknown as Exclude<Primitive, Error>;
 
       let aliases = flag.flagNames ?? [];
-      if (flag.type === 'boolean' && !flag.array) {
+      if (isBoolFlag(flag)) {
         if (flagVal === true) {
           aliases = (flag.flagNames ?? []).filter(x => !/^[-][^-]/.test(x));
         } else {
@@ -55,7 +56,7 @@ export class HelpUtil {
         }
       }
       const param = [cliTpl`${{ param: aliases.join(', ') }}`];
-      if (!(flag.type === 'boolean' && !flag.array)) {
+      if (!isBoolFlag(flag)) {
         const type = flag.type === 'string' && flag.choices && flag.choices.length <= 3 ? flag.choices?.join('|') : flag.type;
         param.push(cliTpl`${{ type: `<${type}>` }}`);
       }

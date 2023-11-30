@@ -2,34 +2,44 @@ import { Class, ConsoleManager, GlobalEnv } from '@travetto/base';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { CliCommandRegistry } from './registry';
-import { CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
+import { ParsedState, CliCommandInput, CliCommandSchema, CliCommandShape } from './types';
 import { CliValidationResultError } from './error';
-import { ParsedState } from './parse';
 
 const LONG_FLAG = /^--[a-z][^= ]+/i;
 const SHORT_FLAG = /^-[a-z]/i;
 
 const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
 
-function fieldToInput(x: FieldConfig): CliCommandInput {
-  const type = x.type === Date ? 'date' :
-    x.type === Boolean ? 'boolean' :
-      x.type === String ? (x.specifiers?.includes('file') ? 'file' : 'string') :
-        x.type === Number ? 'number' :
-          x.type === RegExp ? 'regex' : 'string';
-  return ({
-    name: x.name,
-    description: x.description,
-    array: x.array,
-    required: x.required?.active,
-    choices: x.enum?.values,
-    fileExtensions: type === 'file' ? x.specifiers?.filter(s => s.startsWith('ext:')).map(s => s.split('ext:')[1]) : undefined,
-    type,
-    default: Array.isArray(x.default) ? x.default.slice(0) : x.default,
-    flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),
-    envVars: (x.aliases ?? []).slice(0).filter(v => v.startsWith('env.')).map(v => v.replace('env.', ''))
-  });
+function baseType(x: FieldConfig): Pick<CliCommandInput, 'type' | 'fileExtensions'> {
+  switch (x.type) {
+    case Date: return { type: 'date' };
+    case Boolean: return { type: 'boolean' };
+    case Number: return { type: 'number' };
+    case RegExp: return { type: 'regex' };
+    case String: {
+      switch (true) {
+        case x.specifiers?.includes('module'): return { type: 'module' };
+        case x.specifiers?.includes('file'): return {
+          type: 'file',
+          fileExtensions: x.specifiers?.map(s => s.split('ext:')[1]).filter(s => !!s)
+        };
+      }
+    }
+  }
+  return { type: 'string' };
 }
+
+const fieldToInput = (x: FieldConfig): CliCommandInput => ({
+  ...baseType(x),
+  name: x.name,
+  description: x.description,
+  array: x.array,
+  required: x.required?.active,
+  choices: x.enum?.values,
+  default: Array.isArray(x.default) ? x.default.slice(0) : x.default,
+  flagNames: (x.aliases ?? []).slice(0).filter(v => !v.startsWith('env.')),
+  envVars: (x.aliases ?? []).slice(0).filter(v => v.startsWith('env.')).map(v => v.replace('env.', ''))
+});
 
 /**
  * Allows binding describing/binding inputs for commands

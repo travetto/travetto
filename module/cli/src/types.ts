@@ -100,7 +100,7 @@ export type CliCommandShapeFields = {
 export type CliCommandInput = {
   name: string;
   description?: string;
-  type: 'string' | 'file' | 'number' | 'boolean' | 'date' | 'regex';
+  type: 'string' | 'file' | 'number' | 'boolean' | 'date' | 'regex' | 'module';
   fileExtensions?: string[];
   choices?: unknown[];
   required?: boolean;

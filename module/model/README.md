@@ -382,7 +382,7 @@ Usage: model:export [options] <provider:string> <models...:string>
 
 Options:
   -e, --env <string>     Application environment
-  -m, --module <string>  Module to run for
+  -m, --module <module>  Module to run for
   -h, --help             display help for command
 
 Providers
@@ -405,7 +405,7 @@ Usage: model:install [options] <provider:string> <models...:string>
 
 Options:
   -e, --env <string>     Application environment
-  -m, --module <string>  Module to run for
+  -m, --module <module>  Module to run for
   -h, --help             display help for command
 
 Providers

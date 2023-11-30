@@ -12,22 +12,8 @@ const LONG_FLAG_WITH_EQ = /^--[a-z][^= ]+=\S+/i;
 const CONFIG_PRE = '+=';
 const ENV_PRE = 'env.';
 const SPACE = new Set([32, 7, 13, 10]);
-const MODULE_FLAG = '--module';
-const MODULE_SHORT = '-m';
 
-const getModuleValue = (arr: string[]): string => {
-  for (let i = 0; i < arr.length; i += 1) {
-    const x = arr[i];
-    if (x.startsWith(`${MODULE_FLAG}=`)) {
-      return x.split('=')[1];
-    } else if (!x.startsWith('-') && (arr[i - 1] === MODULE_SHORT || arr[i - 1] === MODULE_FLAG)) {
-      return x;
-    }
-  }
-  return process.env.TRV_MODULE || RootIndex.mainModuleName;
-};
-
-const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
+export const isBoolFlag = (x?: CliCommandInput): boolean => x?.type === 'boolean' && !x.array;
 
 const getInput = (cfg: { field?: CliCommandInput, rawText?: string, input: string, index?: number, value?: string }): ParsedInput => {
   const { field, input, rawText = input, value, index } = cfg;
@@ -45,6 +31,7 @@ const getInput = (cfg: { field?: CliCommandInput, rawText?: string, input: strin
     };
   }
 };
+
 
 /**
  * Parsing support for the cli
@@ -130,7 +117,7 @@ export class CliParseUtil {
    * Parse args to extract command from argv along with other params.  Will skip
    * argv[0] and argv[1] if equal to process.argv[0:2]
    */
-  static async getArgs(argv: string[]): Promise<{ cmd?: string, args: string[], help?: boolean }> {
+  static getArgs(argv: string[]): { cmd?: string, args: string[], help?: boolean } {
     let offset = 0;
     if (argv[0] === process.argv[0] && argv[1] === process.argv[1]) {
       offset = 2;
@@ -138,20 +125,28 @@ export class CliParseUtil {
     const out = argv.slice(offset);
     const max = out.includes(RAW_SEP) ? out.indexOf(RAW_SEP) : out.length;
     const valid = out.slice(0, max);
-    const mod = getModuleValue(valid);
     const cmd = valid.length > 0 && !valid[0].startsWith('-') ? valid[0] : undefined;
     const helpIdx = valid.findIndex(x => HELP_FLAG.test(x));
-    const args = [];
-    for (const item of out.slice(cmd ? 1 : 0)) {
-      if (item.startsWith(CONFIG_PRE)) {
-        args.push(...await this.readFlagFile(item, mod));
-      } else {
-        args.push(item);
-      }
-    }
-    args.push(...out.slice(max));
+    const args = out.slice(cmd ? 1 : 0);
     const res = { cmd, args, help: helpIdx >= 0 };
     return res;
+  }
+
+  /**
+   * Expand flag arguments into full argument list
+   */
+  static async expandArgs(schema: CliCommandSchema, args: string[]): Promise<string[]> {
+    const SEP = args.includes(RAW_SEP) ? args.indexOf(RAW_SEP) : args.length;
+    const input = schema.flags.find(x => x.type === 'module');
+    const ENV_KEY = input?.flagNames?.filter(x => x.startsWith(ENV_PRE)).map(x => x.replace(ENV_PRE, ''))[0] ?? '';
+    const flags = new Set(input?.flagNames ?? []);
+    const check = (k?: string, v?: string): string | undefined => flags.has(k!) ? v : undefined;
+    const mod = args.reduce(
+      (m, x, i, arr) =>
+        (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? m,
+      process.env[ENV_KEY] || RootIndex.mainModuleName
+    );
+    return (await Promise.all(args.map((x, i) => x.startsWith(CONFIG_PRE) && (i < SEP || SEP < 0) ? this.readFlagFile(x, mod) : x))).flat();
   }
 
   /**

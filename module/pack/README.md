@@ -40,7 +40,7 @@ Options:
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
   -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
-  -m, --module <string>                Module to run for
+  -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```
 
@@ -102,7 +102,7 @@ Options:
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
   -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
-  -m, --module <string>                Module to run for
+  -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```
 
@@ -136,7 +136,7 @@ Options:
   -db, --docker-build-platform <string>  Docker Build Platform
   -dr, --docker-registry <string>        Docker Registry
   -du, --docker-runtime-user <string>    Docker Runtime user
-  -m, --module <string>                  Module to run for
+  -m, --module <module>                  Module to run for
   -h, --help                             display help for command
 ```
 

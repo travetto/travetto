@@ -42,6 +42,6 @@ Usage: rest:client [options] <type:angular|config|fetch|fetch-node|fetch-web> [o
 
 Options:
   -e, --env <string>     Application environment
-  -m, --module <string>  Module to run for
+  -m, --module <module>  Module to run for
   -h, --help             display help for command
 ```
