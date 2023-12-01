@@ -37,7 +37,7 @@
     "@travetto/email-compiler": "^3.4.5"
   },
   "peerDependencies": {
-    "@travetto/cli": "^3.4.9"
+    "@travetto/cli": "^3.4.10"
   },
   "peerDependenciesMeta": {
     "@travetto/cli": {
