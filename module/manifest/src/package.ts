@@ -180,4 +180,16 @@ export class PackageUtil {
     }
     return this.#workspaces[rootPath];
   }
+
+  /**
+   * Get an install command for a given npm module
+   */
+  static getInstallCommand(ctx: ManifestContext, pkg: string, prod = false): string {
+    let install: string;
+    switch (ctx.packageManager) {
+      case 'npm': install = `npm i ${prod ? '' : '--save-dev '}${pkg}`; break;
+      case 'yarn': install = `yarn add ${prod ? '' : '--dev '}${pkg}`; break;
+    }
+    return install;
+  }
 }

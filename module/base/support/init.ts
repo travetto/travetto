@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'fs';
 
-import { GlobalEnv } from '../src/global-env';
+import { Runtime } from '../src/runtime';
 import { ConsoleManager } from '../src/console';
 import { ShutdownManager } from '../src/shutdown';
 
@@ -37,7 +37,7 @@ export async function init(manageShutdown = true): Promise<void> {
 
   // Initialize
   await ConsoleManager.register();
-  ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
+  ConsoleManager.setup(Runtime.debug);
 
   // Register shutdown handler
   if (manageShutdown) {

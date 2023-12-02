@@ -1,6 +1,6 @@
 import type mongo from 'mongodb';
 
-import { ResourceLoader, GlobalEnv, TimeSpan } from '@travetto/base';
+import { ResourceLoader, Runtime, TimeSpan } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Field } from '@travetto/schema';
 
@@ -104,7 +104,7 @@ export class MongoModelConfig {
       }
     }
 
-    if (GlobalEnv.devMode) {
+    if (!Runtime.production) {
       opts.waitQueueTimeoutMS ??= 1000 * 60 * 60 * 24; // Wait a day in dev mode
     }
   }

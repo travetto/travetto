@@ -1,7 +1,7 @@
-import { Class, ConcreteClass, GlobalEnv } from '@travetto/base';
+import { Class, ConcreteClass, Runtime } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
-import { CliCommandShape } from './types';
+import { CliCommandConfig, CliCommandShape } from './types';
 import { CliUnknownCommandError } from './error';
 
 export type CliCommandConfigOptions = {
@@ -12,14 +12,6 @@ export type CliCommandConfigOptions = {
   runtimeModule?: 'current' | 'command';
   /** @deprecated */
   fields?: ('module' | 'env')[];
-};
-
-export type CliCommandConfig = {
-  name: string;
-  commandModule: string;
-  cls: ConcreteClass<CliCommandShape>;
-  hidden?: boolean;
-  preMain?: (cmd: CliCommandShape) => void | Promise<void>;
 };
 
 const CLI_FILE_REGEX = /\/cli[.](?<name>.*)[.]tsx?$/;
@@ -45,7 +37,7 @@ class $CliCommandRegistry {
     if (!this.#fileMapping) {
       const all = new Map<string, string>();
       for (const e of RootIndex.find({
-        module: m => GlobalEnv.devMode || m.prod,
+        module: m => !Runtime.production || m.prod,
         folder: f => f === 'support',
         file: f => f.role === 'std' && CLI_FILE_REGEX.test(f.sourceFile)
       })) {
@@ -101,6 +93,7 @@ class $CliCommandRegistry {
         if (cfg) {
           const inst = new cfg.cls();
           if (!inst.isActive || inst.isActive()) {
+            inst._cfg = this.getConfig(inst);
             return inst;
           }
         }

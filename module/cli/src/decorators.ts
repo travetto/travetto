@@ -1,4 +1,4 @@
-import { Class, ClassInstance, defineEnv } from '@travetto/base';
+import { Class, ClassInstance, Env, Runtime } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -25,10 +25,9 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     const addEnv = cfg.addEnv ?? cfg.fields?.includes('env');
     const { commandModule } = CliCommandRegistry.registerClass(target, {
       hidden: cfg.hidden,
-      preMain: async (cmd) => {
+      preMain: async (cmd: CliCommandShape & { env?: string }) => {
         if (addEnv) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          defineEnv({ envName: (cmd as { env?: string }).env ?? 'dev' });
+          Env.set({ TRV_ENV: cmd.env || Runtime.env });
         }
       }
     });

@@ -1,6 +1,6 @@
-import { AppError, ResourceLoader, GlobalEnv } from '@travetto/base';
+import { AppError, ResourceLoader, Runtime } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
-import { RootIndex } from '@travetto/manifest';
+import { PackageUtil, RootIndex } from '@travetto/manifest';
 import { Secret } from '@travetto/schema';
 
 @Config('rest.ssl')
@@ -15,11 +15,7 @@ export class RestSslConfig {
     try {
       forge = (await import('node-forge')).default;
     } catch {
-      let install: string;
-      switch (RootIndex.manifest.packageManager) {
-        case 'npm': install = 'npm i --save-dev node-forge'; break;
-        case 'yarn': install = 'yarn add --dev node-forge'; break;
-      }
+      const install = PackageUtil.getInstallCommand(RootIndex.manifest, 'node-forge');
       throw new Error(`In order to generate SSL keys, you must install node-forge, "${install}"`);
     }
 
@@ -35,7 +31,7 @@ export class RestSslConfig {
     cert.validity.notAfter = new Date();
     cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1);
 
-    const attrs = [...Object.entries(subj)].map(([shortName, value]) => ({ shortName, value }));
+    const attrs = Object.entries(subj).map(([shortName, value]) => ({ shortName, value }));
 
     // here we set subject and issuer as the same one
     cert.setSubject(attrs);
@@ -75,7 +71,7 @@ export class RestSslConfig {
       return;
     }
     if (!this.keys) {
-      if (!GlobalEnv.devMode) {
+      if (Runtime.production) {
         throw new AppError('Default ssl keys are only valid for development use, please specify a config value at rest.ssl.keys', 'permissions');
       }
       return RestSslConfig.generateSslKeyPair();

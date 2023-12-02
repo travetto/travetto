@@ -1,4 +1,4 @@
-import { defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -8,7 +8,7 @@ import { RestApplication, RestSslConfig } from '@travetto/rest';
 export class SampleApp {
 
   preMain(): void {
-    defineEnv({ envName: 'prod' });
+    Env.set({ TRV_ENV: 'prod', NODE_ENV: 'production' });
   }
 
   async main() {

@@ -1,3 +1,4 @@
+/// <reference path="./src/_env.d.ts" />
 export * from './src/decorator';
 export * from './src/service';
 export * from './src/source/env';

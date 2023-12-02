@@ -232,7 +232,7 @@ Per the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme
 Additionally, the [Schema](https://github.com/travetto/travetto/tree/main/module/schema#readme "Data type registry for runtime validation, reflection and binding.") module supports typing requests and request bodies for run-time validation of requests.
 
 ## Running an App
-By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L16) for [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L19) that will follow default behaviors, and spin up the REST server.
+By default, the framework provides a default [@CliCommand](https://github.com/travetto/travetto/tree/main/module/cli/src/decorators.ts#L16) for [RestApplication](https://github.com/travetto/travetto/tree/main/module/rest/src/application/rest.ts#L18) that will follow default behaviors, and spin up the REST server.
 
 **Terminal: Standard application**
 ```bash
@@ -240,18 +240,18 @@ $ trv run:rest
 
 Initialized {
   manifest: {
-    mainModule: '@travetto-doc/rest',
+    workspacePath: './doc-exec',
+    moduleType: 'commonjs',
     frameworkVersion: '3.4.0',
-    version: undefined
+    mainModule: '@travetto-doc/rest'
   },
-  env: {
-    envName: 'dev',
-    debug: '0',
-    devMode: true,
-    test: false,
-    dynamic: false,
+  runtime: {
+    nodeVersion: 20,
+    env: 'dev',
     resourcePaths: [],
-    nodeVersion: 20
+    debug: undefined,
+    production: false,
+    dynamic: false
   },
   config: {
     sources: [ { priority: 999, source: 'memory://override' } ],
@@ -284,7 +284,7 @@ To customize a REST server, you may need to construct an entry point using the [
 
 **Code: Application entry point for Rest Applications**
 ```typescript
-import { defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -294,7 +294,7 @@ import { RestApplication, RestSslConfig } from '@travetto/rest';
 export class SampleApp {
 
   preMain(): void {
-    defineEnv({ envName: 'prod' });
+    Env.set({ TRV_ENV: 'prod', NODE_ENV: 'production' });
   }
 
   async main() {
@@ -318,18 +318,18 @@ $ trv run:rest:custom
 CUSTOM STARTUP
 Initialized {
   manifest: {
-    mainModule: '@travetto-doc/rest',
+    workspacePath: './doc-exec',
+    moduleType: 'commonjs',
     frameworkVersion: '3.4.0',
-    version: undefined
+    mainModule: '@travetto-doc/rest'
   },
-  env: {
-    envName: 'prod',
-    debug: '0',
-    devMode: false,
-    test: false,
-    dynamic: false,
+  runtime: {
+    nodeVersion: 20,
+    env: 'prod',
     resourcePaths: [],
-    nodeVersion: 20
+    debug: undefined,
+    production: true,
+    dynamic: false
   },
   config: {
     sources: [ { priority: 999, source: 'memory://override' } ],

@@ -45,7 +45,7 @@ import type s3 from '@aws-sdk/client-s3';
 
 import { Config, EnvVar } from '@travetto/config';
 import { Field, Required } from '@travetto/schema';
-import { GlobalEnv } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 
 /**
  * S3 Support as an Asset Source
@@ -100,7 +100,7 @@ export class S3ModelConfig {
     };
 
     // We are in localhost and not in prod, turn on forcePathStyle
-    if (GlobalEnv.devMode && this.endpoint.includes('localhost')) {
+    if (!Runtime.production && this.endpoint.includes('localhost')) {
       this.config.forcePathStyle ??= true;
     }
   }

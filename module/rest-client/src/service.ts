@@ -4,7 +4,7 @@ import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
 import { RootIndex, path } from '@travetto/manifest';
 import { ControllerRegistry, ControllerVisitUtil } from '@travetto/rest';
-import { GlobalEnv } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 
 import { RestClientConfig, RestClientProvider } from './config';
@@ -41,7 +41,7 @@ export class RestClientGeneratorService implements AutoCreate {
   }
 
   async postConstruct(): Promise<void> {
-    if (!GlobalEnv.dynamic || !this.config.providers.length) {
+    if (!Runtime.dynamic || !this.config.providers.length) {
       return;
     }
 

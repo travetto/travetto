@@ -309,16 +309,21 @@ npx trv run:rest
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:145] Initialized {
-  manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.4.0', version: '0.0.0' },
-  env: {
-    envName: 'dev',
-    debug: '0',
-    devMode: true,
-    test: false,
-    dynamic: false,
+2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:150] Initialized {
+  manifest: {
+    workspacePath: '<workspace-root>',
+    moduleType: 'commonjs',
+    frameworkVersion: '3.4.0',
+    mainModule: '@travetto/todo-app',
+    version: '0.0.0'
+  },
+  runtime: {
+    nodeVersion: 20,
+    env: 'dev',
     resourcePaths: [],
-    nodeVersion: 20
+    debug: undefined,
+    production: false,
+    dynamic: false
   },
   config: {
     sources: [
@@ -400,7 +405,7 @@ npx trv run:rest
     }
   }
 }
-2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:192] Listening { port: 12555 }
+2029-03-14T04:00:00.837Z info  [@travetto/rest:src/application/rest.ts:187] Listening { port: 12555 }
 ```
 
 next, let's execute [fetch](https://nodejs.org/api/globals.html#fetch) requests to interact with the new api. 

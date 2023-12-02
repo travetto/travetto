@@ -1,7 +1,7 @@
 import { createReadStream } from 'fs';
 import readline from 'readline';
 
-import { ExecUtil, ShutdownManager, TimeUtil } from '@travetto/base';
+import { Env, ExecUtil, ShutdownManager, TimeUtil } from '@travetto/base';
 import { IndexedFile, RootIndex } from '@travetto/manifest';
 
 /**
@@ -70,6 +70,6 @@ export class RunnerUtil {
    * Determine if we should invoke the debugger
    */
   static get tryDebugger(): boolean {
-    return process.env.TRV_TEST_BREAK_ENTRY === '1';
+    return Env.isTrue('TRV_TEST_BREAK_ENTRY');
   }
 }

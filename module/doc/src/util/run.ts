@@ -66,6 +66,7 @@ export class DocRunUtil {
           TRV_CLI_IPC: '',
           TRV_MANIFEST: '',
           TRV_BUILD: 'none',
+          TRV_ROLE: '',
           TRV_MODULE: config.module ?? '',
           ...(config.envName ? { TRV_ENV: config.envName } : {}),
           ...(config.env ?? {})

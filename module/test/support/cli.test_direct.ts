@@ -1,4 +1,4 @@
-import { defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
 import { runTests } from './bin/run';
@@ -11,7 +11,7 @@ export class TestDirectCommand {
   format: TestFormat = 'tap';
 
   preMain(): void {
-    defineEnv({ envName: 'test' });
+    Env.set({ TRV_ROLE: 'test', TRV_ENV: 'test', TRV_LOG_PLAIN: true, TRV_LOG_TIME: undefined });
   }
 
   main(file: string, args: string[]): Promise<void> {

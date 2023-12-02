@@ -1,4 +1,4 @@
-import { Class, ConsoleManager, GlobalEnv } from '@travetto/base';
+import { Class } from '@travetto/base';
 import { BindUtil, FieldConfig, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { CliCommandRegistry } from './registry';
@@ -59,16 +59,11 @@ export class CliCommandSchemaUtil {
     }
 
     // Ensure finalized
-    try {
-      ConsoleManager.setDebug(false);
-      const parent = SchemaRegistry.getParentClass(cls);
-      if (parent?.Ⲑid) {
-        SchemaRegistry.onInstall(parent, { type: 'added', curr: parent });
-      }
-      SchemaRegistry.onInstall(cls, { type: 'added', curr: cls });
-    } finally {
-      ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
+    const parent = SchemaRegistry.getParentClass(cls);
+    if (parent?.Ⲑid) {
+      SchemaRegistry.onInstall(parent, { type: 'added', curr: parent });
     }
+    SchemaRegistry.onInstall(cls, { type: 'added', curr: cls });
 
     const schema = await SchemaRegistry.getViewSchema(cls);
     const flags = Object.values(schema.schema).map(fieldToInput);

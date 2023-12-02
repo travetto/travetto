@@ -28,7 +28,13 @@ export class EnvTest {
     assert(Env.getInt('age2', -1) === -1);
 
     process.env.age = '-a';
-    assert(isNaN(Env.getInt('age', -1)));
+    assert(Env.getInt('age', -1) === -1);
+
+    assert(Env.getInt('missing', -1) === -1);
+    assert(Env.getInt('missing') === undefined);
+    process.env.missing = '';
+    assert(Env.getInt('missing', -1) === -1);
+    assert(Env.getInt('missing') === undefined);
   }
 
   @Test()
@@ -111,10 +117,14 @@ export class EnvTest {
 
   @Test()
   testAddToList() {
-    assert.deepEqual(Env.addToList('_rnd', '0'), ['0']);
-    assert.deepEqual(Env.addToList('_rnd', '1'), ['0', '1']);
-    process.env._rnd = '1, 3, 4';
-    assert.deepEqual(Env.addToList('_rnd', '1'), ['1', '3', '4']);
-    assert.deepEqual(Env.addToList('_rnd', '11'), ['1', '3', '4', '11']);
+    Env.set({ $_rnd: '0' });
+    assert.deepEqual(Env.getList('_rnd'), ['0']);
+    Env.set({ $_rnd: '1' });
+    assert.deepEqual(Env.getList('_rnd'), ['0', '1']);
+    Env.set({ _rnd: '1, 3, 4' });
+    Env.set({ $_rnd: '1' });
+    assert.deepEqual(Env.getList('_rnd'), ['1', '3', '4']);
+    Env.set({ $_rnd: '11' });
+    assert.deepEqual(Env.getList('_rnd'), ['1', '3', '4', '11']);
   }
 }

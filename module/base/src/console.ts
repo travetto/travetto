@@ -4,8 +4,6 @@ import { RootIndex } from '@travetto/manifest';
 
 import type { ConsoleListener, ConsoleEvent, LogLevel } from './types';
 
-const FALSE_RE = /^(0|false|no|off)/i;
-
 function wrap(target: Console): ConsoleListener {
   return {
     onLog(ev: ConsoleEvent): void {
@@ -83,11 +81,9 @@ class $ConsoleManager {
   /**
    * Set logging debug level
    */
-  setDebug(debugModules: string | boolean | undefined, devMode: boolean = false): void {
-    const debug = `${debugModules}` || (devMode ? '@' : '') || 'false';
-
-    if (!FALSE_RE.test(debug)) {
-      const active = RootIndex.getModuleList('local', debug);
+  setup(cfg: false | string | undefined): void {
+    if (cfg) {
+      const active = RootIndex.getModuleList('local', cfg);
       active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
     } else {

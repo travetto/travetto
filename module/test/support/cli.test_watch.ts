@@ -1,4 +1,4 @@
-import { defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CliCommand, CliUtil } from '@travetto/cli';
 
 import { TestFormat } from './bin/types';
@@ -13,7 +13,7 @@ export class TestWatcherCommand {
   mode: 'all' | 'change' = 'all';
 
   preMain(): void {
-    defineEnv({ envName: 'test', dynamic: true });
+    Env.set({ TRV_ROLE: 'test', TRV_ENV: 'test', TRV_DYNAMIC: true });
   }
 
   async main(): Promise<void> {

@@ -416,6 +416,10 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
    */
   _parsed?: ParsedState;
   /**
+   * Config
+   */
+  _cfg?: CliCommandConfig;
+  /**
    * Action target of the command
    */
   main(...args: T): OrProm<RunResponse>;
@@ -457,6 +461,7 @@ If the goal is to run a more complex application, which may include depending on
 ```typescript
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape, CliUtil } from '@travetto/cli';
+import { Env } from '@travetto/base';
 
 import { ServerHandle } from '../src/types';
 
@@ -477,7 +482,7 @@ export class RunRestCommand implements CliCommandShape {
 
   preMain(): void {
     if (this.port) {
-      process.env.REST_PORT = `${this.port}`;
+      Env.set({ REST_PORT: this.port });
     }
   }
 
@@ -492,12 +497,12 @@ export class RunRestCommand implements CliCommandShape {
 }
 ```
 
-As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L9) flags defined in the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module. 
+As noted in the example above, `fields` is specified in this execution, with support for `module`, and `env`. These env flag is directly tied to the [Runtime](https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L9) flags defined in the [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.") module. 
 
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 ### Custom Validation
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L22) errors that are returned will be shared with the user, and fail to invoke the `main` method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L33) errors that are returned will be shared with the user, and fail to invoke the `main` method.
 
 **Code: CliValidationError**
 ```typescript

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { PackageUtil, path, RootIndex } from '@travetto/manifest';
-import { ExecUtil, CompilerClient, defineEnv } from '@travetto/base';
+import { ExecUtil, CompilerClient, Env } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
@@ -22,13 +22,13 @@ export class DocCommand implements CliCommandShape {
   watch = false;
 
   preMain(): void {
-    Object.assign(process.env, {
-      TRV_CLI_IPC: '',
-      TRV_LOG_PLAIN: 'true',
-      TRV_CONSOLE_WIDTH: '140',
-      FORCE_COLOR: '0',
+    Env.set({
+      DEBUG: false,
+      TRV_ROLE: 'doc',
+      TRV_CLI_IPC: undefined,
+      TRV_LOG_PLAIN: true,
+      FORCE_COLOR: false
     });
-    defineEnv({ debug: false, });
   }
 
   preBind(): void {

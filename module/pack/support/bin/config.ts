@@ -34,7 +34,8 @@ function getFilesFromModule(m: ManifestModule): string[] {
 }
 
 export function getOutput(): OutputOptions {
-  const format: Package['type'] = Env.get('BUNDLE_FORMAT', 'commonjs');
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const format = Env.get('BUNDLE_FORMAT', 'commonjs') as Exclude<Package['type'], undefined>;
   const dir = Env.get('BUNDLE_OUTPUT')!;
   const mainFile = Env.get('BUNDLE_MAIN_FILE')!;
   return {

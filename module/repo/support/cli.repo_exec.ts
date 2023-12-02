@@ -1,6 +1,6 @@
 import { CliCommand, CliCommandShape, ParsedState } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
-import { ExecUtil, defineEnv } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { Ignore, Max, Min } from '@travetto/schema';
 
 import { RepoExecUtil } from './bin/exec';
@@ -28,7 +28,7 @@ export class RepoExecCommand implements CliCommandShape {
   showStdout = true;
 
   preMain(): void {
-    defineEnv({ debug: false });
+    Env.set({ DEBUG: false });
   }
 
   async main(cmd: string, args: string[] = []): Promise<void> {

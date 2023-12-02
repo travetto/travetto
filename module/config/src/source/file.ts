@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { Env, GlobalEnv, ResourceLoader } from '@travetto/base';
+import { Env, ResourceLoader, Runtime } from '@travetto/base';
 import { RootIndex, path } from '@travetto/manifest';
 
 import { ConfigSource, ConfigSpec } from './types';
@@ -22,8 +22,8 @@ export class FileConfigSource implements ConfigSource {
     this.#searchPaths = ResourceLoader.getSearchPaths(paths).reverse();
     this.#profiles = profiles ?? [
       ['application', 100],
-      [GlobalEnv.envName, 200],
-      ...(Env.getList('TRV_PROFILES') ?? [])
+      [Runtime.env, 200],
+      ...(Env.getList('TRV_PROFILES', []))
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         .map((p, i) => [p, 300 + i * 10] as [string, number])
     ];

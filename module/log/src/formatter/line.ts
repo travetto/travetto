@@ -3,7 +3,6 @@ import util from 'util';
 import { GlobalTerminal } from '@travetto/terminal';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
-import { GlobalEnv } from '@travetto/base';
 import { Ignore } from '@travetto/schema';
 
 import { LogEvent, LogFormatter } from '../types';
@@ -49,10 +48,6 @@ export class LineLogFormatterConfig {
   timestamp?: 's' | 'ms';
 
   postConstruct(): void {
-    if (GlobalEnv.test) {
-      this.plain = true;
-      this.time = undefined;
-    }
     this.time ??= (!this.plain ? 'ms' : undefined);
     this.plain ??= GlobalTerminal.colorLevel === 0;
     this.colorize ??= !this.plain;

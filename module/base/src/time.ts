@@ -1,6 +1,8 @@
 import timers from 'timers/promises';
-
 import { Env } from './env';
+
+type EnvTime = { [K in keyof TrvEnv]: Extract<TrvEnv[K], number | `${number}|${TimeUnit}`> extends never ? never : K }[keyof TrvEnv];
+
 
 const MIN = 1000 * 60;
 const DAY = 24 * MIN * 60;
@@ -52,6 +54,19 @@ export class TimeUtil {
   }
 
   /**
+   * Resolve time or span to possible time
+   */
+  static resolveInput(value: number | string | undefined): number | undefined {
+    if (value === undefined) {
+      return value;
+    }
+    const val = (typeof value === 'string' && /\d+[a-z]+$/i.test(value)) ?
+      (this.isTimeSpan(value) ? this.timeToMs(value) : undefined) :
+      (typeof value === 'string' ? parseInt(value, 10) : value);
+    return Number.isNaN(val) ? undefined : val;
+  }
+
+  /**
    * Returns a new date with `amount` units into the future
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
@@ -68,21 +83,16 @@ export class TimeUtil {
   }
 
   /**
-   * Get environment variable as time
+   * Get value as time duration
    * @param key env key
    * @param def backup value if not valid or found
    */
-  static getEnvTime(key: string, def?: number | TimeSpan): number {
-    const val = Env.get(key);
-    let ms: number | undefined;
-    if (val) {
-      if (this.isTimeSpan(val)) {
-        ms = this.timeToMs(val);
-      } else if (!Number.isNaN(+val)) {
-        ms = +val;
-      }
-    }
-    return ms ?? (def ? this.timeToMs(def) : NaN);
+  static getEnvTime(key: EnvTime, def: number | TimeSpan): number;
+  static getEnvTime(key: EnvTime): number | undefined;
+  static getEnvTime(key: string, def: number | TimeSpan): number;
+  static getEnvTime(key: string): number | undefined;
+  static getEnvTime(key: string | EnvTime, def?: number | TimeSpan): number | undefined {
+    return this.resolveInput(Env.get(key)) ?? this.resolveInput(def);
   }
 
   /**

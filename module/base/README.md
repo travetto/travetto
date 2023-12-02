@@ -33,64 +33,47 @@ The functionality we support for testing and retrieving environment information:
    *  `isFalse(key: string): boolean;` - Test whether or not an environment flag is set and is false
    *  `isSet(key:string): boolean;` - Test whether or not an environment value is set (excludes: `null`, `''`, and `undefined`)
    *  `get(key: string, def?: string): string;` - Retrieve an environmental value with a potential default
-   *  `getBoolean(key: string, isValue?: boolean)` - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value
+   *  `getBoolean(key: string, isValue?: boolean): boolean;` - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value
    *  `getInt(key: string, def?: number): number;` - Retrieve an environmental value as a number
+   *  `getTime(key: string, def?: number): number;` - Retrieve an environmental value, interpreted as a time value, e.g. `1m`
    *  `getList(key: string): string[];` - Retrieve an environmental value as a list
-   *  `addToList(key: string, value: string): string[];` - Add an item to an environment value, ensuring uniqueness
+   *  `set(inputs: Record<string, string[]|string|number|boolean|...): void;` - Update the environment with key-value pairs, with support typed support for framework provided values. Additionally, arrays will be joined on commas to produce a single value that can be read using the `Env.getList` method. 
 
-## Shared Global Environment State
-[GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L9) is a non-cached interface to the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L4) class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.
+## Runtime State
+[Runtime](https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L9) is a non-cached interface to [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L12), the root [ManifestContext](https://github.com/travetto/travetto/tree/main/module/manifest/src/types.ts#L30), and [child_process](https://nodejs.org/api/process.html).  It provides access to common patterns used at runtime within the framework.
 
-**Code: GlobalEnv Shape**
+**Code: Runtime Shape**
 ```typescript
-export const GlobalEnv = {
+export const Runtime = {
+  /** Get Node version */
+  get nodeVersion(): number;
   /** Get environment name */
-  get envName(): string;
+  get env(): string;
+  /** Get Resource paths used for ResourceLoader */
+  get resourcePaths(): string[];
   /** Get debug module expression */
   get debug(): string | undefined;
   /** Are we in development mode */
-  get devMode(): boolean;
+  get production(): boolean;
   /** Is the app in dynamic mode? */
   get dynamic(): boolean;
-  /** Get list of resource paths */
-  get resourcePaths(): string[];
-  /** Is test */
-  get test(): boolean;
-  /** Get node major version */
-  get nodeVersion(): number;
-  /** Export as plain object */
-  toJSON(): Record<string, unknown>;
 } as const;
 ```
 
 The source for each field is:
-   *  `envName` - This is derived from `process.env.TRV_ENV` with a fallback of `process.env.NODE_ENV`
-   *  `devMode` - This is true if `process.env.NODE_ENV` is dev* or test
+   *  `nodeVersion` - This is derived from `process.version`, and is used primarily for logging purposes
+   *  `env` - This is derived from `process.env.TRV_ENV` with a fallback of `process.env.NODE_ENV`
+   *  `production` - This is true if `process.env.NODE_ENV` equals `production`
+   *  `debug` - This is derived from `process.env.DEBUG`. When not set, and running outside of production, defaults to `@`.
    *  `dynamic` - This is derived from `process.env.TRV_DYNAMIC`. This field reflects certain feature sets used throughout the framework.
    *  `resourcePaths` - This is a list derived from `process.env.TRV_RESOURCES`.  This points to a list of folders that the [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9) will search against.
-   *  `test` - This is true if `envName` is `test`
-   *  `nodeVersion` - This is derived from `process.version`, and is used primarily for logging purposes
-In addition to reading these values, there is a defined method for setting/updating these values:
-
-**Code: GlobalEnv Update**
-```typescript
-export function defineEnv(cfg: EnvInit = {}): void {
-  const envName = (cfg.envName ?? readEnvName()).toLowerCase();
-  process.env.NODE_ENV = /^(dev|development|test)$/.test(envName) ? 'development' : 'production';
-  process.env.DEBUG = `${envName !== 'test' && (cfg.debug ?? GlobalEnv.debug ?? false)}`;
-  process.env.TRV_ENV = envName;
-  process.env.TRV_DYNAMIC = `${cfg.dynamic ?? GlobalEnv.dynamic}`;
-}
-```
-
-As you can see this method exists to update/change the `process.env` values so that the usage of [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L9) reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications).
 
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
 
-The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) and utilizes the [GlobalEnv](https://github.com/travetto/travetto/tree/main/module/base/src/global-env.ts#L9)'s `resourcePaths` information on where to attempt to find a requested resource.
+The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) and utilizes the [Runtime](https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L9)'s `resourcePaths` information on where to attempt to find a requested resource.
 
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
@@ -118,7 +101,7 @@ The supported operations are:
 **Note**: All other console methods are excluded, specifically `trace`, `inspect`, `dir`, `time`/`timeEnd`
 
 ## How Logging is Instrumented
-All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L44).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L44) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev). 
+All of the logging instrumentation occurs at transpilation time.  All `console.*` methods are replaced with a call to a globally defined variable that delegates to the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L42).  This module, hooks into the [ConsoleManager](https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L42) and receives all logging events from all files compiled by the [Travetto](https://travetto.dev). 
 
 A sample of the instrumentation would be:
 
@@ -223,7 +206,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 ```
 
 ## Time Utilities
-[TimeUtil](https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L23) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L25) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
 **Code: Time Utilities**
 ```typescript
@@ -240,6 +223,10 @@ export class TimeUtil {
    */
   static timeToMs(amount: number | TimeSpan, unit?: TimeUnit): number;
   /**
+   * Resolve time or span to possible time
+   */
+  static resolveInput(value: number | string | undefined): number | undefined;
+  /**
    * Returns a new date with `amount` units into the future
    * @param amount Number of units to extend
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
@@ -250,11 +237,11 @@ export class TimeUtil {
    */
   static wait(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Promise<void>;
   /**
-   * Get environment variable as time
+   * Get value as time duration
    * @param key env key
    * @param def backup value if not valid or found
    */
-  static getEnvTime(key: string, def?: number | TimeSpan): number;
+  static getEnvTime(key: EnvTime, def: number | TimeSpan): number;
   /**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */

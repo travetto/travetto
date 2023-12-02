@@ -1,8 +1,7 @@
-import { Env, ExecUtil, GlobalEnv, ShutdownManager } from '@travetto/base';
-import { RootIndex, path } from '@travetto/manifest';
+import { Env, ExecUtil, Runtime, ShutdownManager } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 
 import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
-import { CliCommandRegistry } from './registry';
 
 export class CliUtil {
   /**
@@ -31,9 +30,7 @@ export class CliUtil {
    * Run a command as restartable, linking into self
    */
   static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<unknown> | undefined {
-    const canRestart = cmd.canRestart ??= GlobalEnv.devMode;
-
-    if (canRestart === false || Env.isFalse('TRV_CAN_RESTART')) {
+    if (Env.isFalse('TRV_CAN_RESTART') || !(cmd.canRestart ?? !Runtime.production)) {
       delete process.env.TRV_CAN_RESTART;
       return;
     }
@@ -59,12 +56,11 @@ export class CliUtil {
       return false;
     }
 
-    const cfg = CliCommandRegistry.getConfig(cmd);
     const req = {
       type: `@travetto/cli:${action}`,
       data: {
-        name: cfg.name,
-        commandModule: cfg.commandModule,
+        name: cmd._cfg!.name,
+        commandModule: cmd._cfg!.commandModule,
         module: RootIndex.manifest.mainModule,
         args: process.argv.slice(3),
       }
@@ -89,8 +85,7 @@ export class CliUtil {
    * Debug if IPC available
    */
   static async debugIfIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<boolean> {
-    const canDebug = cmd.debugIpc ??= GlobalEnv.devMode;
-    return canDebug !== false && this.triggerIpc('run', cmd);
+    return (cmd.debugIpc ?? !Runtime.production) && this.triggerIpc('run', cmd);
   }
 
   /**

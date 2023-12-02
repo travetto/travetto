@@ -1,6 +1,6 @@
 import util from 'util';
 
-import { AppError, Class, ClassInstance, GlobalEnv, DataUtil } from '@travetto/base';
+import { AppError, Class, ClassInstance, Runtime, DataUtil, TypedObject } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootIndex } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
@@ -142,9 +142,16 @@ export class ConfigurationService {
   async initBanner(): Promise<void> {
     const og = util.inspect.defaultOptions.depth;
     util.inspect.defaultOptions.depth = 100;
+
+    const MANIFEST_FIELDS = new Set<keyof typeof RootIndex['manifest']>([
+      'mainModule', 'moduleType', 'version', 'frameworkVersion', 'workspacePath'
+    ]);
+
     console.log('Initialized', {
-      manifest: RootIndex.manifestDigest(),
-      env: GlobalEnv.toJSON(),
+      manifest: Object.fromEntries(
+        TypedObject.entries(RootIndex.manifest).filter(([k]) => MANIFEST_FIELDS.has(k))
+      ),
+      runtime: { ...Runtime },
       config: await this.exportActive()
     });
     util.inspect.defaultOptions.depth = og;

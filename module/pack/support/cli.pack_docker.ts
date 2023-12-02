@@ -1,6 +1,6 @@
 import { path, RootIndex } from '@travetto/manifest';
 import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli';
-import { GlobalEnv } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 import { Ignore, Required } from '@travetto/schema';
 
 import { DockerPackOperation } from './bin/docker-operation';
@@ -18,7 +18,7 @@ export class PackDockerCommand extends BasePackCommand {
   @CliFlag({ desc: 'Docker Factory source ', short: 'df', envVars: ['PACK_DOCKER_FACTORY'] })
   dockerFactory = '@travetto/pack/support/pack.dockerfile';
   @CliFlag({ desc: 'Docker Image to extend ', short: 'di', envVars: ['PACK_DOCKER_IMAGE'] })
-  dockerImage = `node:${GlobalEnv.nodeVersion}-alpine`;
+  dockerImage = `node:${Runtime.nodeVersion}-alpine`;
   @CliFlag({ desc: 'Docker Image Name ', short: 'dn', envVars: ['PACK_DOCKER_IMAGE'] })
   @Required(false)
   dockerName: string;

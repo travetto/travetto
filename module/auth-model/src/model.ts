@@ -1,4 +1,4 @@
-import { AppError, Util, Class, TimeUtil, GlobalEnv } from '@travetto/base';
+import { AppError, Util, Class, TimeUtil, Runtime } from '@travetto/base';
 import { ModelCrudSupport, ModelType, NotFoundError, OptionalId } from '@travetto/model';
 import { AuthUtil, Principal, Authenticator, Authorizer } from '@travetto/auth';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
@@ -92,7 +92,7 @@ export class ModelAuthService<T extends ModelType> implements
   }
 
   async postConstruct(): Promise<void> {
-    if (isStorageSupported(this.#modelService) && GlobalEnv.dynamic) {
+    if (isStorageSupported(this.#modelService) && Runtime.dynamic) {
       await this.#modelService.createModel?.(this.#cls);
     }
   }

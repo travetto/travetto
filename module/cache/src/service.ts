@@ -1,7 +1,7 @@
 import { ExpiresAt, Model, ModelExpirySupport, NotFoundError } from '@travetto/model';
 import { Text } from '@travetto/schema';
 import { Inject, Injectable } from '@travetto/di';
-import { GlobalEnv } from '@travetto/base';
+import { Runtime } from '@travetto/base';
 import { isStorageSupported } from '@travetto/model/src/internal/service/common';
 
 import { CacheError } from './error';
@@ -35,7 +35,7 @@ export class CacheService {
   }
 
   async postConstruct(): Promise<void> {
-    if (isStorageSupported(this.#modelService) && GlobalEnv.dynamic) {
+    if (isStorageSupported(this.#modelService) && Runtime.dynamic) {
       await this.#modelService.createModel?.(CacheRecord);
     }
   }

@@ -3,7 +3,7 @@ import { parentPort } from 'worker_threads';
 
 import { RootIndex } from '@travetto/manifest';
 
-import { Env } from './env';
+import { TimeUtil } from './time';
 import { ObjectUtil } from './object';
 
 export type Closeable = {
@@ -95,7 +95,7 @@ class $ShutdownManager {
 
       // Run them all, with the ability for the shutdown to preempt
       if (promises.length) {
-        const waitTime = Env.getInt('TRV_SHUTDOWN_WAIT', 2000);
+        const waitTime = TimeUtil.getEnvTime('TRV_SHUTDOWN_WAIT', '2s');
         const finalRun = Promise.race([
           ...promises,
           setTimeout(waitTime).then(() => { throw new Error('Timeout on shutdown'); })

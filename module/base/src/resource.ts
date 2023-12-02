@@ -1,7 +1,7 @@
 import { RootIndex } from '@travetto/manifest';
 
-import { GlobalEnv } from './global-env';
 import { FileLoader } from './file-loader';
+import { Runtime } from './runtime';
 
 /**
  * File-based resource loader
@@ -11,7 +11,7 @@ export class ResourceLoader extends FileLoader {
   static getSearchPaths(paths: string[] = []): string[] {
     return [
       ...(paths ?? []).flat(),
-      ...GlobalEnv.resourcePaths,
+      ...Runtime.resourcePaths,
       '@#resources', // Module root
       ...(RootIndex.manifest.monoRepo ? ['@@#resources'] : []) // Monorepo root
     ].map(x => RootIndex.resolveModulePath(x));

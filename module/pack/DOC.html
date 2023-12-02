@@ -188,7 +188,8 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">"Writing .env.js"</span>
 
-<span class="token builtin class-name">echo</span> <span class="token string">"process.env.TRV_MANIFEST = 'manifest.json';"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/.env.js
+<span class="token builtin class-name">echo</span> <span class="token string">"process.env.NODE_ENV = 'production';"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/.env.js
+<span class="token builtin class-name">echo</span> <span class="token string">"process.env.TRV_MANIFEST = 'manifest.json';"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env.js
 <span class="token builtin class-name">echo</span> <span class="token string">"process.env.TRV_MODULE = '<span class="token variable">$MOD</span>';"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env.js
 <span class="token builtin class-name">echo</span> <span class="token string">"process.env.TRV_CLI_IPC = '';"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env.js
 

@@ -1,7 +1,7 @@
 import os from 'os';
 import gp from 'generic-pool';
 
-import { GlobalEnv, ShutdownManager, TimeUtil } from '@travetto/base';
+import { Runtime, ShutdownManager, TimeUtil } from '@travetto/base';
 
 import { WorkSet } from './input/types';
 import { ManualAsyncIterator } from '../src/input/async-iterator';
@@ -86,7 +86,7 @@ export class WorkPool<X> {
       this.shutdown();
     });
 
-    this.#trace = !!GlobalEnv.debug?.includes('@travetto/worker');
+    this.#trace = !!Runtime.debug?.includes('@travetto/worker');
   }
 
   /**

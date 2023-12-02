@@ -23,7 +23,7 @@ The [JWTPrincipalEncoder](https://github.com/travetto/travetto/tree/main/module/
 ```typescript
 import { Principal } from '@travetto/auth';
 import { AuthService, PrincipalEncoder } from '@travetto/auth-rest';
-import { AppError, GlobalEnv, TimeUtil } from '@travetto/base';
+import { AppError, Runtime, TimeUtil } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Inject, Injectable } from '@travetto/di';
 import { FilterContext } from '@travetto/rest';
@@ -56,7 +56,7 @@ export class RestJWTConfig {
     this.maxAgeMs = typeof this.maxAge === 'string' ? TimeUtil.timeToMs(this.maxAge as '1y') : this.maxAge;
 
     if (!this.signingKey) {
-      if (!GlobalEnv.devMode) {
+      if (Runtime.production) {
         throw new AppError('The default signing key is only valid for development use, please specify a config value at rest.auth.jwt.signingKey');
       }
       this.signingKey = 'dummy';

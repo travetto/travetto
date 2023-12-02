@@ -1,3 +1,11 @@
+/// <reference path="./_env.d.ts" />
+
+type EnvKey = keyof TrvEnv;
+type EnvList = { [K in keyof TrvEnv]: TrvEnv[K] extends unknown[] ? K : never }[keyof TrvEnv];
+type EnvBool = { [K in keyof TrvEnv]: Extract<TrvEnv[K], boolean> extends never ? never : K }[keyof TrvEnv];
+type EnvNumber = { [K in keyof TrvEnv]: Extract<TrvEnv[K], number> extends never ? never : K }[keyof TrvEnv];
+type EnvBasic = Record<string, string[] | number | boolean | string | undefined>;
+
 /**
  * Basic utils for reading environment variables
  */
@@ -8,36 +16,23 @@ export class Env {
    * @param k The environment key to search for
    * @param def The default value if the key isn't found
    */
-  static get<K extends string = string>(k: string, def: K): K;
-  static get<K extends string = string>(k: string, def?: K): K | undefined;
-  static get<K extends string = string>(k: string, def?: K | undefined): K | undefined {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (process.env[k] ??
-      process.env[k.toUpperCase()] ??
-      process.env[k.toLowerCase()] ??
-      def) as K;
-  }
-
-  /**
-   * Add a value to as part of a comma-separated list
-   * @param k The environment key to add to
-   */
-  static addToList(k: string, value: string): string[] {
-    const values = Env.getList(k) ?? [];
-    if (!values.includes(value)) {
-      values.push(value);
-    }
-    process.env[k] = values.join(',');
-    return values;
+  static get(k: EnvKey, def: string): string;
+  static get(k: EnvKey, def?: string): string | undefined;
+  static get(k: string, def: string): string;
+  static get(k: string, def?: string): string | undefined;
+  static get(k: string | EnvKey, def?: string | undefined): string | undefined {
+    return (process.env[k] ?? process.env[k.toUpperCase()] ?? process.env[k.toLowerCase()]) || def;
   }
 
   /**
    * Read value as a comma-separated list
    * @param k The environment key to search for
    */
+  static getList(k: EnvList, def: string[]): string[];
+  static getList(k: EnvList, def?: string[] | undefined): string[] | undefined;
   static getList(k: string, def: string[]): string[];
   static getList(k: string, def?: string[] | undefined): string[] | undefined;
-  static getList(k: string, def?: string[] | undefined): string[] | undefined {
+  static getList(k: EnvList | string, def?: string[] | undefined): string[] | undefined {
     const val = this.get(k);
     return (val === undefined || val === '') ?
       def : ([...val.split(/[, ]+/g)]
@@ -50,17 +45,25 @@ export class Env {
    * @param k The environment key to search for
    * @param def The default value if the key isn't found
    */
-  static getInt(k: string, def: number | string): number {
-    return parseInt(this.get(k, `${def}`) ?? '', 10);
+  static getInt(k: EnvNumber, def: number): number;
+  static getInt(k: string, def: number): number;
+  static getInt(k: EnvNumber): number | undefined;
+  static getInt(k: string): number | undefined;
+  static getInt(k: EnvNumber | string, def?: number): number | undefined {
+    const v = this.get(k, '');
+    const vi = parseInt(v, 10);
+    return Number.isNaN(vi) ? def : vi;
   }
 
   /**
    * Read value as boolean
    * @param k The environment key to search for
    */
+  static getBoolean(k: EnvBool, isValue: boolean): boolean;
+  static getBoolean(k: EnvBool): boolean | undefined;
   static getBoolean(k: string, isValue: boolean): boolean;
   static getBoolean(k: string): boolean | undefined;
-  static getBoolean(k: string, isValue?: boolean): boolean | undefined {
+  static getBoolean(k: EnvBool | string, isValue?: boolean): boolean | undefined {
     const val = this.get(k);
     if (val === undefined || val === '') {
       return isValue ? false : undefined;
@@ -73,7 +76,9 @@ export class Env {
    * Determine if value is set explicitly
    * @param k The environment key to search for
    */
-  static isSet(k: string): boolean {
+  static isSet(k: EnvKey): boolean;
+  static isSet(k: string): boolean;
+  static isSet(k: string | EnvKey): boolean {
     const val = this.get(k);
     return val !== undefined && val !== '';
   }
@@ -82,7 +87,9 @@ export class Env {
    * Read value as true
    * @param k The environment key to search for
    */
-  static isTrue(k: string): boolean {
+  static isTrue(k: EnvBool): boolean;
+  static isTrue(k: string): boolean;
+  static isTrue(k: EnvBool | string): boolean {
     return this.getBoolean(k, true);
   }
 
@@ -90,7 +97,25 @@ export class Env {
    * Read value as false
    * @param k The environment key to search for
    */
-  static isFalse(k: string): boolean {
+  static isFalse(k: EnvBool): boolean;
+  static isFalse(k: string): boolean;
+  static isFalse(k: EnvBool | string): boolean {
     return this.getBoolean(k, false);
+  }
+
+  /**
+   * Set all, coercing values to string, and deleting env vars when
+   * the value is undefined
+   */
+  static set(env: Partial<TrvEnv> & EnvBasic = {}): void {
+    for (const [key, value] of Object.entries(env)) {
+      if (value === undefined || value === null) {
+        delete process.env[key];
+      } else if (Array.isArray(value)) {
+        process.env[key] = `${value.join(',')}`;
+      } else {
+        process.env[key] = `${value}`;
+      }
+    }
   }
 }

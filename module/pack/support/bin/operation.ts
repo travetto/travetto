@@ -121,6 +121,7 @@ export class PackOperation {
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = '.env.js';
     const env = {
+      NODE_ENV: 'production',
       TRV_MANIFEST: 'manifest.json',
       TRV_MODULE: cfg.module,
       TRV_CLI_IPC: ''

@@ -1,5 +1,6 @@
 import { DependencyRegistry } from '@travetto/di';
 import { CliCommand, CliCommandShape, CliUtil } from '@travetto/cli';
+import { Env } from '@travetto/base';
 
 import { ServerHandle } from '../src/types';
 
@@ -20,7 +21,7 @@ export class RunRestCommand implements CliCommandShape {
 
   preMain(): void {
     if (this.port) {
-      process.env.REST_PORT = `${this.port}`;
+      Env.set({ REST_PORT: this.port });
     }
   }
 
