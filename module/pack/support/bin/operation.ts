@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
+import { Env } from '@travetto/base';
 
 import { CommonPackConfig } from './types';
 import { PackUtil } from './util';
@@ -60,19 +61,21 @@ export class PackOperation {
 
     const entryPointFile = RootIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RootIndex.manifest.outputFolder}/`)[1];
 
-    const env = Object.fromEntries(([
-      ['BUNDLE_ENTRY', entryPointFile],
-      ['BUNDLE_MAIN_FILE', `${cfg.mainName}.js`],
-      ['BUNDLE_COMPRESS', cfg.minify],
-      ['BUNDLE_SOURCEMAP', cfg.sourcemap],
-      ['BUNDLE_SOURCES', cfg.includeSources],
-      ['BUNDLE_OUTPUT', cfg.workspace],
-      ['BUNDLE_FORMAT', RootIndex.manifest.moduleType],
-      ['TRV_MANIFEST', RootIndex.getModule(cfg.module)!.outputPath]
-    ] as const)
-      .filter(x => x[1] === false || x[1])
-      .map(x => [x[0], `${x[1]}`])
-    );
+    const env = {
+      ...Object.fromEntries(([
+        ['BUNDLE_ENTRY', entryPointFile],
+        ['BUNDLE_MAIN_FILE', `${cfg.mainName}.js`],
+        ['BUNDLE_COMPRESS', cfg.minify],
+        ['BUNDLE_SOURCEMAP', cfg.sourcemap],
+        ['BUNDLE_SOURCES', cfg.includeSources],
+        ['BUNDLE_OUTPUT', cfg.workspace],
+        ['BUNDLE_FORMAT', RootIndex.manifest.moduleType],
+      ] as const)
+        .filter(x => x[1] === false || x[1])
+        .map(x => [x[0], `${x[1]}`])
+      ),
+      ...Env.TRV_MANIFEST.export(RootIndex.getModule(cfg.module)!.outputPath),
+    };
 
     const props = (['minify', 'sourcemap', 'entryPoint'] as const)
       .map(k => cliTpl`${{ subtitle: k }}=${{ param: cfg[k] }}`).join(' ');
@@ -121,9 +124,10 @@ export class PackOperation {
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = '.env.js';
     const env = {
-      TRV_MANIFEST: 'manifest.json',
-      TRV_MODULE: cfg.module,
-      TRV_CLI_IPC: ''
+      ...Env.NODE_ENV.export('production'),
+      ...Env.TRV_MANIFEST.export('manifest.json'),
+      ...Env.TRV_MODULE.export(cfg.module),
+      ...Env.TRV_CLI_IPC.export('')
     };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
@@ -205,7 +209,7 @@ export class PackOperation {
   static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const out = path.resolve(cfg.workspace, 'manifest.json');
     const cmd = ['npx', 'trvc', 'manifest', out, 'prod'];
-    const env = { TRV_MODULE: cfg.module };
+    const env = { ...Env.TRV_MODULE.export(cfg.module) };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: 'manifest.json' }}`);
 

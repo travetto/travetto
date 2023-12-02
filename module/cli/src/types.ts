@@ -1,4 +1,4 @@
-import { Closeable } from '@travetto/base';
+import { Closeable, ConcreteClass } from '@travetto/base';
 
 type OrProm<T> = T | Promise<T>;
 
@@ -8,6 +8,17 @@ type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: str
 type ParsedArg = { type: 'arg', input: string, array?: boolean, index: number };
 type ParsedUnknown = { type: 'unknown', input: string };
 type ParsedInput = ParsedUnknown | ParsedFlag | ParsedArg;
+
+/**
+ * Command configuration
+ */
+export type CliCommandConfig = {
+  name: string;
+  commandModule: string;
+  cls: ConcreteClass<CliCommandShape>;
+  hidden?: boolean;
+  preMain?: (cmd: CliCommandShape) => void | Promise<void>;
+};
 
 export type ParsedState = {
   inputs: string[];
@@ -38,6 +49,10 @@ export interface CliCommandShape<T extends unknown[] = unknown[]> {
    * Parsed state
    */
   _parsed?: ParsedState;
+  /**
+   * Config
+   */
+  _cfg?: CliCommandConfig;
   /**
    * Action target of the command
    */

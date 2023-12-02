@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import fs from 'fs/promises';
 
 import { path } from '@travetto/manifest';
-import { defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
 import { Max, Min } from '@travetto/schema';
@@ -24,7 +24,11 @@ export class TestCommand implements CliCommandShape {
 
   preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;
-    defineEnv({ envName: 'test' });
+    Env.TRV_ROLE.set('test');
+    Env.TRV_ENV.set('test');
+    Env.DEBUG.set(false);
+    Env.TRV_LOG_PLAIN.set(true);
+    Env.TRV_LOG_TIME.clear();
   }
 
   isFirstFile(first: string): Promise<boolean> {

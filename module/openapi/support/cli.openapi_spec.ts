@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 import { path } from '@travetto/manifest';
@@ -16,7 +16,7 @@ export class OpenApiSpecCommand implements CliCommandShape {
   output?: string;
 
   preMain(): void {
-    defineEnv({ debug: false });
+    Env.DEBUG.set(false);
   }
 
   async main(): Promise<void> {

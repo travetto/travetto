@@ -1,7 +1,7 @@
-import { GlobalEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Inject, Injectable } from '@travetto/di';
 
-@Injectable({ enabled: !GlobalEnv.devMode })
+@Injectable({ enabled: Env.production })
 class ProductionLogger {
   async log() {
     console.log('This will only run in production');

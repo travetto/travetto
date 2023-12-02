@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { ExecUtil } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { path, RootIndex } from '@travetto/manifest';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
@@ -28,7 +28,14 @@ export class DocAngularCommand {
       // Build out docs
       await RepoExecUtil.execOnModules('all',
         (mod, opts) => {
-          const req = ExecUtil.spawn('trv', ['doc'], { ...opts, env: { ...opts.env ?? {}, TRV_BUILD: 'none' }, timeout: 20000 });
+          const req = ExecUtil.spawn('trv', ['doc'], {
+            ...opts,
+            timeout: 20000,
+            env: {
+              ...opts.env ?? {},
+              ...Env.TRV_BUILD.export('none')
+            }
+          });
           req.result.then(v => {
             if (!v.valid) {
               console.error(`${mod.name} - failed`);
@@ -42,10 +49,13 @@ export class DocAngularCommand {
           progressPosition: 'bottom',
           filter: mod => mods.has(mod)
         });
-      await ExecUtil.spawn('trv', ['doc'], { env: { TRV_MANIFEST: '' }, cwd: RootIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
+      await ExecUtil.spawn('trv', ['doc'], { env: { ...Env.TRV_MANIFEST.export('') }, cwd: RootIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
       mods.add(RootIndex.mainModule);
     } else {
-      const opts = { env: { TRV_MANIFEST: '', TRV_BUILD: 'none' }, cwd: [...mods][0].sourcePath, stdio: 'inherit' } as const;
+      const opts = {
+        env: { ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },
+        cwd: [...mods][0].sourcePath, stdio: 'inherit'
+      } as const;
       await ExecUtil.spawn('trv', ['doc'], opts).result;
     }
 

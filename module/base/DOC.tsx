@@ -1,10 +1,13 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
-import { ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util, Env, FileLoader, TimeUtil, ResourceLoader } from '@travetto/base';
+import {
+  ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util,
+  FileLoader, TimeUtil, ResourceLoader, EnvProp
+} from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.codeLink('ConsoleManager', 'src/console.ts', /(class|function)\s*[$]ConsoleManager/);
-const GlobalEnv = d.codeLink('GlobalEnv', 'src/global-env.ts', /export/);
+const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
 
 export const text = <>
   <c.StdHeader />
@@ -13,7 +16,7 @@ export const text = <>
 
   <ul>
     <li>Environment Support</li>
-    <li>Shared Global Environment State</li>
+    <li>Runtime Flags</li>
     <li>Console Management</li>
     <li>Resource Access</li>
     <li>Standard Error Support</li>
@@ -27,40 +30,20 @@ export const text = <>
   </ul>
 
   <c.Section title='Environment Support'>
-    The functionality we support for testing and retrieving environment information:
-    <ul>
-      <li>{d.method('isTrue(key: string): boolean;')} - Test whether or not an environment flag is set and is true</li>
-      <li>{d.method('isFalse(key: string): boolean;')} - Test whether or not an environment flag is set and is false</li>
-      <li>{d.method('isSet(key:string): boolean;')} - Test whether or not an environment value is set (excludes: {d.input('null')}, {d.input("''")}, and {d.input('undefined')})</li>
-      <li>{d.method('get(key: string, def?: string): string;')} - Retrieve an environmental value with a potential default</li>
-      <li>{d.method('getBoolean(key: string, isValue?: boolean)')} - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value</li>
-      <li>{d.method('getInt(key: string, def?: number): number;')} - Retrieve an environmental value as a number</li>
-      <li>{d.method('getList(key: string): string[];')} - Retrieve an environmental value as a list</li>
-      <li>{d.method('addToList(key: string, value: string): string[];')} - Add an item to an environment value, ensuring uniqueness</li>
-    </ul>
-  </c.Section>
+    The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the {EnvLink} object, and will return a scoped {EnvProp}, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports {d.input('true')} or {d.input('false')}
 
-  <c.Section title='Shared Global Environment State'>
-    {GlobalEnv} is a non-cached interface to the {Env} class with specific patterns defined.  It provides access to common patterns used at runtime within the framework.
+    <c.Code title='Base Known Environment Flags' src='./src/_env.d.ts' startRe={/TrvEnv/} endRe={/[}]/}></c.Code>
 
-    <c.Code title='GlobalEnv Shape' src='@travetto/base/src/global-env.ts' startRe={/export/} endRe={/^[}] as const/} outline={true} />
+    <c.SubSection title='Environment Property'>
+      For a given {EnvProp}, we support the ability to access different properties as a means to better facilitate environment variable usage.
+      <c.Code title='EnvProp Shape' src='@travetto/base/src/env.ts' startRe={/export class EnvProp/} endRe={/^[}]/} outline={true} />
+    </c.SubSection>
 
-    The source for each field is:
+    <c.SubSection title='Runtime Flags'>
+      {EnvLink} also provides some convenience methods for common flags used at runtime within the framework. These are wrappers around direct access to {d.field('process.env')} values with a little bit of logic sprinkled in.
 
-    <ul>
-      <li>{d.field('envName')} - This is derived from {d.field('process.env.TRV_ENV')} with a fallback of {d.field('process.env.NODE_ENV')}</li>
-      <li>{d.field('devMode')} - This is true if {d.field('process.env.NODE_ENV')} is dev* or test</li>
-      <li>{d.field('dynamic')} - This is derived from {d.field('process.env.TRV_DYNAMIC')}. This field reflects certain feature sets used throughout the framework.</li>
-      <li>{d.field('resourcePaths')} - This is a list derived from {d.field('process.env.TRV_RESOURCES')}.  This points to a list of folders that the {ResourceLoader} will search against.</li>
-      <li>{d.field('test')} - This is true if {d.field('envName')} is {d.input('test')}</li>
-      <li>{d.field('nodeVersion')} - This is derived from {d.field('process.version')}, and is used primarily for logging purposes</li>
-    </ul>
-
-    In addition to reading these values, there is a defined method for setting/updating these values:
-
-    <c.Code title='GlobalEnv Update' src='@travetto/base/src/global-env.ts' startRe={/export function defineEnv/} endRe={/^[}]/} />
-
-    As you can see this method exists to update/change the {d.field('process.env')} values so that the usage of {GlobalEnv} reflects these changes.  This is primarily used in testing, or custom environment setups (e.g. CLI invocations for specific applications).
+      <c.Code title='Provided Flags' src='./src/env.ts' startRe={/const Env/} endRe={/[}][)]/}></c.Code>
+    </c.SubSection>
   </c.Section>
 
   <c.Section title='Resource Access'>
@@ -68,7 +51,7 @@ export const text = <>
 
     The {FileLoader} allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <c.Class name='Readable' /> stream.  If a file is not found, it will throw an {AppError} with a category of 'notfound'.  <br />
 
-    The {ResourceLoader} extends {FileLoader} and utilizes the {GlobalEnv}'s {d.field('resourcePaths')} information on where to attempt to find a requested resource.
+    The {ResourceLoader} extends {FileLoader} and utilizes the {EnvLink}'s {d.field('TRV_RESOURCES')} information on where to attempt to find a requested resource.
   </c.Section>
 
   <c.Section title='Standard Error Support'>

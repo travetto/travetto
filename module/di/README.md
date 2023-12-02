@@ -100,10 +100,10 @@ Given the `static` method `initService`, the function will be provided as a vali
 
 **Code: Example Conditional Dependency**
 ```typescript
-import { GlobalEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Inject, Injectable } from '@travetto/di';
 
-@Injectable({ enabled: !GlobalEnv.devMode })
+@Injectable({ enabled: Env.production })
 class ProductionLogger {
   async log() {
     console.log('This will only run in production');

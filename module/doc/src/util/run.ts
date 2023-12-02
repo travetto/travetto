@@ -1,7 +1,7 @@
 import os from 'os';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
+import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { stripAnsiCodes } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
@@ -61,13 +61,14 @@ export class DocRunUtil {
         shell: '/bin/bash',
         env: {
           ...process.env,
-          DEBUG: '0',
-          TRV_CAN_RESTART: '0',
-          TRV_CLI_IPC: '',
-          TRV_MANIFEST: '',
-          TRV_BUILD: 'none',
-          TRV_MODULE: config.module ?? '',
-          ...(config.envName ? { TRV_ENV: config.envName } : {}),
+          ...Env.DEBUG.export(false),
+          ...Env.TRV_CAN_RESTART.export(false),
+          ...Env.TRV_CLI_IPC.export(undefined),
+          ...Env.TRV_MANIFEST.export(''),
+          ...Env.TRV_BUILD.export('none'),
+          ...Env.TRV_ROLE.export(undefined),
+          ...Env.TRV_MODULE.export(config.module ?? ''),
+          ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
           ...(config.env ?? {})
         }
       }

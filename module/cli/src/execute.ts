@@ -1,8 +1,8 @@
 import { GlobalTerminal } from '@travetto/terminal';
-import { ConsoleManager, GlobalEnv } from '@travetto/base';
+import { ConsoleManager, Env } from '@travetto/base';
 
 import { HelpUtil } from './help';
-import { CliCommandShape, RunResponse } from './types';
+import { CliCommandShape } from './types';
 import { CliCommandRegistry } from './registry';
 import { CliCommandSchemaUtil } from './schema';
 import { CliUnknownCommandError, CliValidationResultError } from './error';
@@ -15,13 +15,12 @@ import { CliUtil } from './util';
 export class ExecutionManager {
 
   /**
-   * Run the given command object with the given arguments
+   * Prepare command for execution
    */
-  static async #runCommand(cmd: CliCommandShape, args: string[]): Promise<RunResponse> {
+  static async #prepareAndBind(cmd: CliCommandShape, args: string[]): Promise<unknown[]> {
     const schema = await CliCommandSchemaUtil.getSchema(cmd);
     args = await CliParseUtil.expandArgs(schema, args);
     cmd._parsed = await CliParseUtil.parse(schema, args);
-    const cfg = CliCommandRegistry.getConfig(cmd);
 
     await cmd.preBind?.();
     const known = await CliCommandSchemaUtil.bindInput(cmd, cmd._parsed);
@@ -29,10 +28,10 @@ export class ExecutionManager {
     await cmd.preValidate?.();
     await CliCommandSchemaUtil.validate(cmd, known);
 
-    await cfg.preMain?.(cmd);
+    await cmd._cfg!.preMain?.(cmd);
     await cmd.preMain?.();
-    ConsoleManager.setDebug(GlobalEnv.debug, GlobalEnv.devMode);
-    return cmd.main(...known);
+
+    return known;
   }
 
   /**
@@ -71,6 +70,7 @@ export class ExecutionManager {
    */
   static async run(argv: string[]): Promise<void> {
     await GlobalTerminal.init();
+    ConsoleManager.setup(false);
 
     let command: CliCommandShape | undefined;
     try {
@@ -86,7 +86,9 @@ export class ExecutionManager {
       if (help) {
         console.log!(await HelpUtil.renderCommandHelp(command));
       } else {
-        const result = await this.#runCommand(command, args);
+        const known = await this.#prepareAndBind(command, args);
+        ConsoleManager.setup(Env.debug);
+        const result = await command.main(...known);
         await CliUtil.listenForResponse(result);
       }
     } catch (err) {

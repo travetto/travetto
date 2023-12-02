@@ -39,6 +39,7 @@ export const LIB_MAPPING = {
   UUID: { title: 'UUID', href: 'https://en.wikipedia.org/wiki/Universally_unique_identifier' },
 
   // Node
+  Process: { title: 'process', href: 'https://nodejs.org/api/process.html' },
   ChildProcess: { title: 'child_process', href: 'https://nodejs.org/api/child_process.html' },
   AsyncHooks: { title: 'async_hooks', href: 'https://nodejs.org/api/async_hooks.html' },
   Http: { title: 'http', href: 'https://nodejs.org/api/http.html' },

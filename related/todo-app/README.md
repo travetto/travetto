@@ -309,16 +309,24 @@ npx trv run:rest
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:145] Initialized {
-  manifest: { mainModule: '@travetto/todo-app', frameworkVersion: '3.4.0', version: '0.0.0' },
+2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:146] Initialized {
+  manifest: {
+    mainModule: '@travetto/todo-app',
+    frameworkVersion: '3.4.0',
+    version: '0.0.0',
+    moduleType: 'commonjs',
+    workspacePath: '<workspace-root>'
+  },
   env: {
-    envName: 'dev',
-    debug: '0',
-    devMode: true,
-    test: false,
+    name: 'local',
+    debug: false,
+    production: false,
     dynamic: false,
-    resourcePaths: [],
-    nodeVersion: 20
+    resourcePaths: [
+      './resources',
+      '<workspace-root>/resources'
+    ],
+    profiles: []
   },
   config: {
     sources: [
@@ -327,8 +335,12 @@ npx trv run:rest
         source: 'file://application',
         detail: 'related/todo-app/resources/application.yml'
       },
-      { priority: 200, source: 'file://dev', detail: 'resources/dev.yml' },
-      { priority: 201, source: 'file://dev', detail: 'related/todo-app/resources/dev.yml' },
+      { priority: 200, source: 'file://local', detail: 'resources/local.yml' },
+      {
+        priority: 201,
+        source: 'file://local',
+        detail: 'related/todo-app/resources/local.yml'
+      },
       { priority: 999, source: 'memory://override' }
     ],
     active: {

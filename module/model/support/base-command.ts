@@ -1,4 +1,4 @@
-import { ConsoleManager, defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CliValidationError, CliCommandShape, cliTpl } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 
@@ -17,7 +17,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
   abstract getOp(): keyof ModelStorageSupport;
 
   preMain(): void {
-    defineEnv({ debug: false });
+    Env.DEBUG.set(false);
   }
 
   async help(): Promise<string[]> {
@@ -36,7 +36,6 @@ export abstract class BaseModelCommand implements CliCommandShape {
   }
 
   async validate(provider: string, models: string[]): Promise<CliValidationError | undefined> {
-    ConsoleManager.setDebug(false);
     await RootRegistry.init();
 
     const candidates = await ModelCandidateUtil.export(this.getOp());

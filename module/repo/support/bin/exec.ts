@@ -42,7 +42,10 @@ export class RepoExecUtil {
       outputMode: 'text',
       catchAsResult: true,
       cwd: folder,
-      env: { TRV_MANIFEST: '', TRV_MODULE: mod.name },
+      env: {
+        ...Env.TRV_MANIFEST.export(''),
+        ...Env.TRV_MODULE.export(mod.name)
+      },
     };
 
     if (config.showStdout) {
@@ -74,7 +77,7 @@ export class RepoExecUtil {
     config: ModuleRunConfig<T> = {}
   ): Promise<Map<IndexedModule, T>> {
 
-    config.showStdout = config.showStdout ?? (Env.isSet('DEBUG') && !Env.isFalse('DEBUG'));
+    config.showStdout = config.showStdout ?? (Env.DEBUG.isSet && !Env.DEBUG.isFalse);
     config.showStderr = config.showStderr ?? true;
 
     const workerCount = config.workerCount ?? WorkPool.DEFAULT_SIZE;

@@ -1,5 +1,5 @@
 import { RootIndex } from '@travetto/manifest';
-import { ExecUtil, defineEnv } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliModuleUtil, CliScmUtil } from '@travetto/cli';
 
 /**
@@ -18,7 +18,7 @@ export class LintCommand implements CliCommandShape {
   since?: string;
 
   preMain(): void {
-    defineEnv({ debug: false });
+    Env.DEBUG.set(false);
   }
 
   async main(): Promise<void> {

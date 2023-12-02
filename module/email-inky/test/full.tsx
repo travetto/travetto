@@ -3,8 +3,8 @@
 import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { Container, If, Unless, Summary, Title, Value, InkyTemplate, unwrap } from '../__index__';
 import { RootIndex } from '@travetto/manifest';
+import { Container, If, Unless, Summary, Title, Value, InkyTemplate, unwrap } from '../__index__';
 
 @Suite('InkyTemplate')
 class ContainerTest {

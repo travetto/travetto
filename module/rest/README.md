@@ -242,16 +242,17 @@ Initialized {
   manifest: {
     mainModule: '@travetto-doc/rest',
     frameworkVersion: '3.4.0',
-    version: undefined
+    version: undefined,
+    moduleType: 'commonjs',
+    workspacePath: './doc-exec'
   },
   env: {
-    envName: 'dev',
-    debug: '0',
-    devMode: true,
-    test: false,
+    name: 'local',
+    debug: false,
+    production: false,
     dynamic: false,
-    resourcePaths: [],
-    nodeVersion: 20
+    resourcePaths: [ './doc-exec/resources' ],
+    profiles: []
   },
   config: {
     sources: [ { priority: 999, source: 'memory://override' } ],
@@ -284,7 +285,7 @@ To customize a REST server, you may need to construct an entry point using the [
 
 **Code: Application entry point for Rest Applications**
 ```typescript
-import { defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -294,7 +295,8 @@ import { RestApplication, RestSslConfig } from '@travetto/rest';
 export class SampleApp {
 
   preMain(): void {
-    defineEnv({ envName: 'prod' });
+    Env.TRV_ENV.set('prod');
+    Env.NODE_ENV.set('production');
   }
 
   async main() {
@@ -320,16 +322,17 @@ Initialized {
   manifest: {
     mainModule: '@travetto-doc/rest',
     frameworkVersion: '3.4.0',
-    version: undefined
+    version: undefined,
+    moduleType: 'commonjs',
+    workspacePath: './doc-exec'
   },
   env: {
-    envName: 'prod',
-    debug: '0',
-    devMode: false,
-    test: false,
+    name: 'prod',
+    debug: false,
+    production: true,
     dynamic: false,
-    resourcePaths: [],
-    nodeVersion: 20
+    resourcePaths: [ './doc-exec/resources' ],
+    profiles: []
   },
   config: {
     sources: [ { priority: 999, source: 'memory://override' } ],

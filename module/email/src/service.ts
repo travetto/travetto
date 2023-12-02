@@ -1,4 +1,4 @@
-import { GlobalEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { EmailCompiled, EmailOptions, SentEmail } from './types';
@@ -34,7 +34,7 @@ export class MailService {
    * Get compiled content by key
    */
   async getCompiled(key: string): Promise<EmailCompiled> {
-    if (GlobalEnv.dynamic || !this.#compiled.has(key)) {
+    if (Env.dynamic || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
         this.#resources.read(`${key}.compiled.html`),
         this.#resources.read(`${key}.compiled.text`),

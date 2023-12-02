@@ -1,5 +1,4 @@
-import { RootIndex } from '@travetto/manifest';
-
+import { PackageUtil, RootIndex } from '@travetto/manifest';
 import { cliTpl } from './color';
 import { CliValidationError } from './types';
 
@@ -23,11 +22,7 @@ export class CliUnknownCommandError extends Error {
     const matchedCfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
     if (matchedCfg) {
       const [, pkg, prod] = matchedCfg;
-      let install: string;
-      switch (RootIndex.manifest.packageManager) {
-        case 'npm': install = `npm i ${prod ? '' : '--save-dev '}@travetto/${pkg}`; break;
-        case 'yarn': install = `yarn add ${prod ? '' : '--dev '}@travetto/${pkg}`; break;
-      }
+      const install = PackageUtil.getInstallCommand(RootIndex.manifest, `@travetto/${pkg}`, prod);
       return cliTpl`
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
 ${{ identifier: install }}

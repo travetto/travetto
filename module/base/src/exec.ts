@@ -5,6 +5,8 @@ import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 
 import { path } from '@travetto/manifest';
 
+import { Env } from './env';
+
 const MINUTE = (1000 * 60);
 
 /**
@@ -123,7 +125,7 @@ export class ExecUtil {
       env: {
         // Preserve path when isolating
         ...(opts.isolatedEnv ? { PATH: process.env.PATH } : process.env),
-        TRV_DYNAMIC: '0', // Force dynamic to not cascade
+        ...Env.TRV_DYNAMIC.export(false), // Force dynamic to not cascade
         ...(opts.env ?? {})
       }
     };

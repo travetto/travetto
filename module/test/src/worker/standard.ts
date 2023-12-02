@@ -1,5 +1,5 @@
 import { RootIndex } from '@travetto/manifest';
-import { ExecUtil } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { ParentCommChannel, Worker } from '@travetto/worker';
 
 import { Events, RunEvent } from './types';
@@ -44,7 +44,10 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
           ['test:child'],
           {
             cwd,
-            env: { TRV_MANIFEST: RootIndex.getModule(module)!.outputPath, TRV_QUIET: '1' },
+            env: {
+              ...Env.TRV_MANIFEST.export(RootIndex.getModule(module)!.outputPath),
+              ...Env.TRV_QUIET.export(false)
+            },
             stdio: ['ignore', 'ignore', 2, 'ipc']
           }
         )

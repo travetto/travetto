@@ -272,16 +272,17 @@ Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
     mainModule: <span class="token string">'@travetto-doc/rest'</span>,
     frameworkVersion: <span class="token string">'3.4.0'</span>,
-    version: undefined
+    version: undefined,
+    moduleType: <span class="token string">'commonjs'</span>,
+    workspacePath: <span class="token string">'./doc-exec'</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
-    envName: <span class="token string">'dev'</span>,
-    debug: <span class="token string">'0'</span>,
-    devMode: true,
-    test: false,
+    name: <span class="token string">'local'</span>,
+    debug: false,
+    production: false,
     dynamic: false,
-    resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    nodeVersion: <span class="token number">20</span>
+    resourcePaths: <span class="token punctuation">[</span> <span class="token string">'./doc-exec/resources'</span> <span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
@@ -318,7 +319,7 @@ To customize a REST server, you may need to construct an entry point using the <
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/rest/doc/cli.run_rest_custom.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> defineEnv <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> RootRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/registry'</span><span class="token punctuation">;</span>
@@ -328,7 +329,8 @@ To customize a REST server, you may need to construct an entry point using the <
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token function">preMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
-    <span class="token function">defineEnv</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> envName<span class="token operator">:</span> <span class="token string">'prod'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Env<span class="token punctuation">.</span><span class="token constant">TRV_ENV</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'prod'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Env<span class="token punctuation">.</span><span class="token constant">NODE_ENV</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'production'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -356,16 +358,17 @@ Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
     mainModule: <span class="token string">'@travetto-doc/rest'</span>,
     frameworkVersion: <span class="token string">'3.4.0'</span>,
-    version: undefined
+    version: undefined,
+    moduleType: <span class="token string">'commonjs'</span>,
+    workspacePath: <span class="token string">'./doc-exec'</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
-    envName: <span class="token string">'prod'</span>,
-    debug: <span class="token string">'0'</span>,
-    devMode: false,
-    test: false,
+    name: <span class="token string">'prod'</span>,
+    debug: false,
+    production: true,
     dynamic: false,
-    resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    nodeVersion: <span class="token number">20</span>
+    resourcePaths: <span class="token punctuation">[</span> <span class="token string">'./doc-exec/resources'</span> <span class="token punctuation">]</span>,
+    profiles: <span class="token punctuation">[</span><span class="token punctuation">]</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,

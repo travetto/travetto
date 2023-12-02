@@ -3,8 +3,8 @@ import { __importStar } from 'tslib';
 
 import type terser from '@rollup/plugin-terser';
 
-import { Env } from '@travetto/base';
-import { ManifestModule, ManifestModuleUtil, Package, path, RootIndex } from '@travetto/manifest';
+import { ManifestModule, ManifestModuleUtil, NodeModuleType, path, RootIndex } from '@travetto/manifest';
+import { EnvProp } from '@travetto/base';
 
 const makeIntro = (doImport: (name: string) => string, ...extra: string[]): string => [
   `try { globalThis.crypto = ${doImport('crypto')}; } catch {}`,
@@ -34,20 +34,18 @@ function getFilesFromModule(m: ManifestModule): string[] {
 }
 
 export function getOutput(): OutputOptions {
-  const format: Package['type'] = Env.get('BUNDLE_FORMAT', 'commonjs');
-  const dir = Env.get('BUNDLE_OUTPUT')!;
-  const mainFile = Env.get('BUNDLE_MAIN_FILE')!;
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  const format = (process.env.BUNDLE_FORMAT ?? 'commonjs') as NodeModuleType;
+  const dir = process.env.BUNDLE_OUTPUT!;
+  const mainFile = process.env.BUNDLE_MAIN_FILE!;
   return {
     format,
     intro: INTRO[format],
     sourcemapPathTransform: (src, map): string =>
       path.resolve(path.dirname(map), src).replace(`${RootIndex.manifest.workspacePath}/`, ''),
-    sourcemap:
-      Env.getBoolean('BUNDLE_SOURCEMAP') ?? false,
-    sourcemapExcludeSources:
-      !(Env.getBoolean('BUNDLE_SOURCES') ?? false),
-    compact:
-      Env.getBoolean('BUNDLE_COMPRESS') ?? true,
+    sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,
+    sourcemapExcludeSources: !(new EnvProp('BUNDLE_SOURCES').bool ?? false),
+    compact: new EnvProp('BUNDLE_COMPRESS').bool ?? true,
     file: path.resolve(dir, mainFile),
     ...(format === 'commonjs' ? {} : {
       inlineDynamicImports: true
@@ -56,7 +54,7 @@ export function getOutput(): OutputOptions {
 }
 
 export function getEntry(): string {
-  return Env.get('BUNDLE_ENTRY')!;
+  return process.env.BUNDLE_ENTRY!;
 }
 
 export function getFiles(): string[] {

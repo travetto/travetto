@@ -1,7 +1,6 @@
-import { Env } from '@travetto/base';
 import type { CommandService } from '@travetto/command';
 
-const version = Env.get('FIRESTORE_VERSION', 'latest');
+const version = process.env.FIRESTORE_VERSION || 'latest';
 
 export const service: CommandService = {
   name: 'firestore',

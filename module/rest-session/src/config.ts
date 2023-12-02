@@ -1,4 +1,4 @@
-import { AppError, GlobalEnv } from '@travetto/base';
+import { AppError, Env } from '@travetto/base';
 import { Config } from '@travetto/config';
 import { Secret } from '@travetto/schema';
 
@@ -42,7 +42,7 @@ export class SessionConfig {
   transport: 'cookie' | 'header' = 'cookie';
 
   postConstruct(): void {
-    if (!this.secret && !GlobalEnv.devMode) {
+    if (!this.secret && Env.production) {
       throw new AppError('Default session secret is only valid for development use, please specify a config value at rest.session.secret', 'permissions');
     }
   }

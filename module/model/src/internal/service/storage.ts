@@ -1,4 +1,4 @@
-import { Class, GlobalEnv } from '@travetto/base';
+import { Class, Env } from '@travetto/base';
 import { SchemaChangeListener } from '@travetto/schema';
 
 import { ModelRegistry } from '../../registry/model';
@@ -13,7 +13,7 @@ export class ModelStorageUtil {
    * Register change listener on startup
    */
   static async registerModelChangeListener(storage: ModelStorageSupport, target?: Class): Promise<void> {
-    if (!GlobalEnv.dynamic || !(storage?.config?.autoCreate ?? GlobalEnv.devMode)) {
+    if (!Env.dynamic || !(storage?.config?.autoCreate ?? !Env.production)) {
       return;
     }
 

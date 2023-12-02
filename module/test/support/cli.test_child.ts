@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { defineEnv, ShutdownManager } from '@travetto/base';
+import { Env, ShutdownManager } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
 /** Test child worker target */
@@ -8,8 +8,11 @@ import { CliCommand } from '@travetto/cli';
 export class TestChildWorkerCommand {
   preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;
-    process.env.FORCE_COLOR = '0';
-    defineEnv({ envName: 'test' });
+    Env.TRV_ROLE.set('test');
+    Env.TRV_ENV.set('test');
+    Env.FORCE_COLOR.set(false);
+    Env.TRV_LOG_PLAIN.set(true);
+    Env.TRV_LOG_TIME.clear();
   }
 
   async main(): Promise<void> {

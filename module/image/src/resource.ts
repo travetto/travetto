@@ -16,7 +16,7 @@ export class ImageOptimizingResourceLoader extends ResourceLoader {
   constructor(paths: string[] = [], cacheRoot?: string) {
     super(paths);
 
-    this.#cacheRoot = cacheRoot ?? path.resolve(Env.get('TRV_IMAGE_CACHE', ManifestFileUtil.toolPath(RootIndex, 'image_cache')));
+    this.#cacheRoot = cacheRoot ?? path.resolve(Env.TRV_IMAGE_CACHE.val || ManifestFileUtil.toolPath(RootIndex, 'image_cache'));
   }
 
   async #openFile(pth: string): Promise<fs.FileHandle> {

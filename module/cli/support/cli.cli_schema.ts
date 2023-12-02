@@ -1,5 +1,7 @@
+import { Env } from '@travetto/base';
+
 import { CliCommand } from '../src/decorators';
-import { CliCommandSchema, CliValidationError } from '../src/types';
+import { CliCommandSchema, CliCommandShape, CliValidationError } from '../src/types';
 import { CliCommandRegistry } from '../src/registry';
 import { CliCommandSchemaUtil } from '../src/schema';
 import { CliUtil } from '../src/util';
@@ -8,7 +10,7 @@ import { CliUtil } from '../src/util';
  * Generates the schema for all CLI operations
  */
 @CliCommand({ hidden: true })
-export class CliSchemaCommand {
+export class CliSchemaCommand implements CliCommandShape {
 
   async #getSchema(name: string): Promise<CliCommandSchema> {
     const inst = await CliCommandRegistry.getInstance(name);
@@ -22,6 +24,10 @@ export class CliSchemaCommand {
         message: `name: ${name} is not a valid cli command`
       };
     }
+  }
+
+  preMain(): void {
+    Env.DEBUG.set(false);
   }
 
   async main(name?: string): Promise<void> {

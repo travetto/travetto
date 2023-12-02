@@ -26,6 +26,7 @@ dist/
 
 # Email
 *.compiled.*
+local.yml
 dev.yml
 email-dev-context.json
 

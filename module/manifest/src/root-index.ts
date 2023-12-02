@@ -1,6 +1,6 @@
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, ManifestContext } from './types';
+import { FunctionMetadata } from './types';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
@@ -48,17 +48,6 @@ class $RootIndex extends ManifestIndex {
    */
   get mainModule(): IndexedModule {
     return this.getModule(this.mainModuleName)!;
-  }
-
-  /**
-   * Digest manifest
-   */
-  manifestDigest(): Pick<ManifestContext, 'mainModule' | 'frameworkVersion' | 'version'> {
-    return {
-      mainModule: this.manifest.mainModule,
-      frameworkVersion: this.manifest.frameworkVersion,
-      version: this.manifest.version,
-    };
   }
 
   /**
@@ -121,7 +110,7 @@ let index: $RootIndex | undefined;
 try {
   index = new $RootIndex(process.env.TRV_MANIFEST!);
 } catch (err) {
-  if (/prod/i.test(process.env.NODE_ENV ?? '')) {
+  if (process.env.NODE_ENV === 'production') {
     throw err;
   }
 }

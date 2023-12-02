@@ -1,4 +1,4 @@
-import { Class, ClassInstance, ConcreteClass, GlobalEnv } from '@travetto/base';
+import { Class, ClassInstance, ConcreteClass, Env } from '@travetto/base';
 import { MetadataRegistry, RootRegistry, ChangeEvent } from '@travetto/registry';
 import { RootIndex } from '@travetto/manifest';
 
@@ -237,7 +237,7 @@ class $DependencyRegistry extends MetadataRegistry<InjectableConfig> {
 
   override async init(): Promise<void> {
     await super.init();
-    if (GlobalEnv.dynamic) {
+    if (Env.dynamic) {
       const { DependencyRegistration } = await import('../support/dynamic.injection.js');
       DependencyRegistration.init(this);
     }

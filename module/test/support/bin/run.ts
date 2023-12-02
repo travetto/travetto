@@ -1,15 +1,6 @@
-import { ShutdownManager, TimeUtil } from '@travetto/base';
+import { Env, ShutdownManager, TimeUtil } from '@travetto/base';
 
 import type { RunState } from '../../src/execute/types';
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace NodeJS {
-    interface ProcessEnv {
-      TRV_TEST_DELAY?: '2s';
-    }
-  }
-}
 
 /**
  * Run tests given the input state
@@ -21,9 +12,7 @@ export async function runTests(opts: RunState): Promise<void> {
 
   RunnerUtil.registerCleanup('runner');
 
-  if (process.env.TRV_TEST_DELAY) {
-    await TimeUtil.wait(process.env.TRV_TEST_DELAY);
-  }
+  await TimeUtil.wait(Env.TRV_TEST_DELAY.time ?? 0);
 
   try {
     const res = await new Runner(opts).run();

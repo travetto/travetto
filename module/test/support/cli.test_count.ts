@@ -1,6 +1,6 @@
 import { CliCommand } from '@travetto/cli';
 import { RootIndex } from '@travetto/manifest';
-import { defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 
 import { SuiteRegistry } from '../src/registry/suite';
 import { RunnerUtil } from '../src/execute/util';
@@ -9,7 +9,9 @@ import { RunnerUtil } from '../src/execute/util';
 export class TestCountCommand {
 
   preMain(): void {
-    defineEnv({ debug: false, envName: 'test' });
+    Env.TRV_ROLE.set('test');
+    Env.TRV_ENV.set('test');
+    Env.DEBUG.set(false);
   }
 
   async main(patterns: string[]) {

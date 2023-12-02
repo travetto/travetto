@@ -1,7 +1,7 @@
 import { Module } from 'module';
 
 import { RootIndex, path } from '@travetto/manifest';
-import { RetargettingProxy, GlobalEnv } from '@travetto/base';
+import { RetargettingProxy, Env } from '@travetto/base';
 
 declare module 'module' {
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -30,7 +30,7 @@ export class DynamicCommonjsLoader {
         mod = moduleLoad.apply(null, [request, parent]);
       } catch (err: unknown) {
         const name = Module._resolveFilename!(request, parent);
-        if (err instanceof Error && GlobalEnv.dynamic && !name.startsWith('test/')) {
+        if (err instanceof Error && Env.dynamic && !name.startsWith('test/')) {
           const errMsg = err.message;
           console.debug(`Unable to load ${name}: stubbing out with error proxy.`, errMsg);
           const e = (): never => { throw new Error(errMsg); };

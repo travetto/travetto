@@ -1,7 +1,7 @@
 import timers from 'timers/promises';
 
 import { path, RootIndex } from '@travetto/manifest';
-import { TimeUtil, Util } from '@travetto/base';
+import { Env, Util } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
 import { SuiteRegistry } from '../registry/suite';
@@ -15,7 +15,7 @@ import { TestPhaseManager } from './phase';
 import { PromiseCapture } from './promise';
 import { AssertUtil } from '../assert/util';
 
-const TEST_TIMEOUT = TimeUtil.getEnvTime('TRV_TEST_TIMEOUT', '5s');
+const TEST_TIMEOUT = Env.TRV_TEST_TIMEOUT.time ?? 5000;
 
 /**
  * Support execution of the tests

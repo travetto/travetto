@@ -1,3 +1,4 @@
+import { Env } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 
@@ -9,10 +10,10 @@ import { LogAppender, LogFormatter, LogEvent, LogCommonⲐ, Logger } from './typ
 
 @Config('log')
 export class CommonLoggerConfig {
-  @EnvVar('TRV_LOG_FORMAT')
+  @EnvVar(Env.TRV_LOG_FORMAT.key)
   format: 'line' | 'json' = 'line';
 
-  @EnvVar('TRV_LOG_OUTPUT')
+  @EnvVar(Env.TRV_LOG_OUTPUT.key)
   output: 'console' | 'file' | string = 'console';
 }
 

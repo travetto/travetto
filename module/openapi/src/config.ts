@@ -2,7 +2,7 @@ import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas
 
 import { Config } from '@travetto/config';
 import { path, RootIndex } from '@travetto/manifest';
-import { GlobalEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
 /**
@@ -73,7 +73,7 @@ export class ApiSpecConfig {
       this.persist = false;
     } else {
       this.output = path.resolve(RootIndex.mainModule.sourcePath, this.output);
-      this.persist ??= GlobalEnv.dynamic;
+      this.persist ??= Env.dynamic;
     }
     if (this.persist) {
       if (!/[.](json|ya?ml)$/.test(this.output)) { // Assume a folder

@@ -1,9 +1,9 @@
 import util from 'util';
 
+import { Env } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
-import { GlobalEnv } from '@travetto/base';
 import { Ignore } from '@travetto/schema';
 
 import { LogEvent, LogFormatter } from '../types';
@@ -34,10 +34,10 @@ export interface LineFormatterOpts {
 
 @Config('log')
 export class LineLogFormatterConfig {
-  @EnvVar('TRV_LOG_PLAIN')
+  @EnvVar(Env.TRV_LOG_PLAIN.key)
   plain?: boolean;
 
-  @EnvVar('TRV_LOG_TIME')
+  @EnvVar(Env.TRV_LOG_TIME.key)
   time?: 's' | 'ms' | string;
 
   colorize?: boolean;
@@ -49,10 +49,6 @@ export class LineLogFormatterConfig {
   timestamp?: 's' | 'ms';
 
   postConstruct(): void {
-    if (GlobalEnv.test) {
-      this.plain = true;
-      this.time = undefined;
-    }
     this.time ??= (!this.plain ? 'ms' : undefined);
     this.plain ??= GlobalTerminal.colorLevel === 0;
     this.colorize ??= !this.plain;

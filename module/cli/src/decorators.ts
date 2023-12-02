@@ -1,4 +1,4 @@
-import { Class, ClassInstance, defineEnv } from '@travetto/base';
+import { Class, ClassInstance, Env } from '@travetto/base';
 import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
@@ -25,10 +25,9 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     const addEnv = cfg.addEnv ?? cfg.fields?.includes('env');
     const { commandModule } = CliCommandRegistry.registerClass(target, {
       hidden: cfg.hidden,
-      preMain: async (cmd) => {
+      preMain: async (cmd: CliCommandShape & { env?: string }) => {
         if (addEnv) {
-          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          defineEnv({ envName: (cmd as { env?: string }).env ?? 'dev' });
+          Env.TRV_ENV.set(cmd.env || Env.name);
         }
       }
     });
@@ -37,7 +36,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
 
     if (addEnv) {
       SchemaRegistry.registerPendingFieldConfig(target, 'env', String, {
-        aliases: ['e', CliParseUtil.toEnvField('TRV_ENV')],
+        aliases: ['e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],
         description: 'Application environment',
         default: 'dev',
         required: { active: false }
@@ -46,7 +45,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
 
     if (addModule) {
       SchemaRegistry.registerPendingFieldConfig(target, 'module', String, {
-        aliases: ['m', CliParseUtil.toEnvField('TRV_MODULE')],
+        aliases: ['m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
         description: 'Module to run for',
         specifiers: ['module'],
         required: { active: CliUtil.monoRoot }

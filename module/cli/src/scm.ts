@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { Env, ExecUtil } from '@travetto/base';
+import { ExecUtil } from '@travetto/base';
 import { IndexedFile, IndexedModule, RootIndex, path } from '@travetto/manifest';
 
 export class CliScmUtil {
@@ -23,7 +23,7 @@ export class CliScmUtil {
       await ExecUtil.spawn('git', ['config', 'user.email']).result,
     ]);
     return {
-      name: (name.valid ? name.stdout.trim() : '') || Env.get('USER'),
+      name: (name.valid ? name.stdout.trim() : '') || process.env.USER,
       email: email.stdout.trim()
     };
   }

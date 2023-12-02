@@ -133,9 +133,9 @@ Options:
   -dt, --docker-tag <string>             Docker Image Tag  (default: ["latest"])
   -dp, --docker-port <number>            Docker Image Port  (default: [])
   -dx, --docker-push                     Docker Push Tags  (default: false)
-  -db, --docker-build-platform <string>  Docker Build Platform
-  -dr, --docker-registry <string>        Docker Registry
-  -du, --docker-runtime-user <string>    Docker Runtime user
+  -db, --docker-build-platform <string>  Docker Build Platform 
+  -dr, --docker-registry <string>        Docker Registry 
+  -du, --docker-runtime-user <string>    Docker Runtime user 
   -m, --module <module>                  Module to run for
   -h, --help                             display help for command
 ```
@@ -172,7 +172,8 @@ mkdir -p $DIST
 
 echo "Writing .env.js"
 
-echo "process.env.TRV_MANIFEST = 'manifest.json';" > $DIST/.env.js
+echo "process.env.NODE_ENV = 'production';" > $DIST/.env.js
+echo "process.env.TRV_MANIFEST = 'manifest.json';" >> $DIST/.env.js
 echo "process.env.TRV_MODULE = '$MOD';" >> $DIST/.env.js
 echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js
 

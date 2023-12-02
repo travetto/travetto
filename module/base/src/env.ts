@@ -1,96 +1,128 @@
-/**
- * Basic utils for reading environment variables
- */
-export class Env {
+/// <reference path="./_env.d.ts" />
 
-  /**
-   * Get, check for key as passed, as all upper and as all lowercase
-   * @param k The environment key to search for
-   * @param def The default value if the key isn't found
-   */
-  static get<K extends string = string>(k: string, def: K): K;
-  static get<K extends string = string>(k: string, def?: K): K | undefined;
-  static get<K extends string = string>(k: string, def?: K | undefined): K | undefined {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return (process.env[k] ??
-      process.env[k.toUpperCase()] ??
-      process.env[k.toLowerCase()] ??
-      def) as K;
-  }
+import { RootIndex } from '@travetto/manifest';
+import { TimeSpan, TimeUtil } from './time';
 
-  /**
-   * Add a value to as part of a comma-separated list
-   * @param k The environment key to add to
-   */
-  static addToList(k: string, value: string): string[] {
-    const values = Env.getList(k) ?? [];
-    if (!values.includes(value)) {
-      values.push(value);
+const IS_TRUE = /^(true|yes|on|1)$/i;
+const IS_FALSE = /^(false|no|off|0)$/i;
+
+export class EnvProp<T> {
+  constructor(public readonly key: string) { }
+
+  /** Set value according to prop type */
+  set(val: T | undefined | null): void {
+    if (val === undefined || val === null) {
+      delete process.env[this.key];
+    } else {
+      process.env[this.key] = Array.isArray(val) ? `${val.join(',')}` : `${val}`;
     }
-    process.env[k] = values.join(',');
-    return values;
   }
 
-  /**
-   * Read value as a comma-separated list
-   * @param k The environment key to search for
-   */
-  static getList(k: string, def: string[]): string[];
-  static getList(k: string, def?: string[] | undefined): string[] | undefined;
-  static getList(k: string, def?: string[] | undefined): string[] | undefined {
-    const val = this.get(k);
+  /** Remove value */
+  clear(): void {
+    this.set(null);
+  }
+
+  /** Export value */
+  export(val: T | undefined): Record<string, string> {
+    return val === undefined || val === '' ? { [this.key]: '' } : { [this.key]: Array.isArray(val) ? `${val.join(',')}` : `${val}` };
+  }
+
+  /** Read value as string */
+  get val(): string | undefined { return process.env[this.key] || undefined; }
+
+  /** Read value as list */
+  get list(): string[] | undefined {
+    const val = this.val;
     return (val === undefined || val === '') ?
-      def : ([...val.split(/[, ]+/g)]
-        .map(x => x.trim())
-        .filter(x => !!x));
+      undefined : val.split(/[, ]+/g).map(x => x.trim()).filter(x => !!x);
   }
 
-  /**
-   * Read value as an integer
-   * @param k The environment key to search for
-   * @param def The default value if the key isn't found
-   */
-  static getInt(k: string, def: number | string): number {
-    return parseInt(this.get(k, `${def}`) ?? '', 10);
+  /** Read value as int  */
+  get int(): number | undefined {
+    const vi = parseInt(this.val ?? '', 10);
+    return Number.isNaN(vi) ? undefined : vi;
   }
 
-  /**
-   * Read value as boolean
-   * @param k The environment key to search for
-   */
-  static getBoolean(k: string, isValue: boolean): boolean;
-  static getBoolean(k: string): boolean | undefined;
-  static getBoolean(k: string, isValue?: boolean): boolean | undefined {
-    const val = this.get(k);
-    if (val === undefined || val === '') {
-      return isValue ? false : undefined;
-    }
-    const match = val.match(/^((?<TRUE>true|yes|1|on)|false|no|off|0)$/i);
-    return isValue === undefined ? !!match?.groups?.TRUE : !!match?.groups?.TRUE === isValue;
+  /** Read value as boolean */
+  get bool(): boolean | undefined {
+    const val = this.val;
+    return (val === undefined || val === '') ? undefined : IS_TRUE.test(val);
   }
 
-  /**
-   * Determine if value is set explicitly
-   * @param k The environment key to search for
-   */
-  static isSet(k: string): boolean {
-    const val = this.get(k);
+  /** Read value as a time value */
+  get time(): number | undefined {
+    return TimeUtil.resolveInput(this.val);
+  }
+
+  /** Determine if the underlying value is truthy */
+  get isTrue(): boolean {
+    return IS_TRUE.test(this.val ?? '');
+  }
+
+  /** Determine if the underlying value is falsy */
+  get isFalse(): boolean {
+    return IS_FALSE.test(this.val ?? '');
+  }
+
+  /** Determine if the underlying value is set */
+  get isSet(): boolean {
+    const val = this.val;
     return val !== undefined && val !== '';
   }
-
-  /**
-   * Read value as true
-   * @param k The environment key to search for
-   */
-  static isTrue(k: string): boolean {
-    return this.getBoolean(k, true);
-  }
-
-  /**
-   * Read value as false
-   * @param k The environment key to search for
-   */
-  static isFalse(k: string): boolean {
-    return this.getBoolean(k, false);
-  }
 }
+
+type AllType = {
+  [K in keyof TrvEnv]: Pick<EnvProp<TrvEnv[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
+    (TrvEnv[K] extends unknown[] ? 'list' : never) |
+    (Extract<TrvEnv[K], number> extends never ? never : 'int') |
+    (Extract<TrvEnv[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse') |
+    (Extract<TrvEnv[K], TimeSpan> extends never ? never : 'time')
+  >
+};
+
+function delegate<T extends object>(base: T): AllType & T {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return new Proxy(base as AllType & T, {
+    get(target, prop): unknown {
+      return typeof prop !== 'string' ? undefined :
+        // @ts-expect-error
+        (prop in base ? base[prop] : target[prop] ??= new EnvProp(prop));
+    }
+  });
+}
+
+const prod = (): boolean => process.env.NODE_ENV === 'production';
+
+
+/** Basic utils for reading known environment variables */
+export const Env = delegate({
+  /** Get name */
+  get name(): string | undefined {
+    return process.env.TRV_ENV || (!prod() ? 'local' : undefined);
+  },
+
+  /** Are we in development mode */
+  get production(): boolean {
+    return prod();
+  },
+
+  /** Is the app in dynamic mode? */
+  get dynamic(): boolean {
+    return IS_TRUE.test(process.env.TRV_DYNAMIC!);
+  },
+
+  /** Get debug value */
+  get debug(): false | string {
+    const val = process.env.DEBUG ?? '';
+    return (!val && prod()) || IS_FALSE.test(val) ? false : val;
+  },
+  /** Get resource paths */
+  get resourcePaths(): string[] {
+    return [
+      ...Env.TRV_RESOURCES.list ?? [],
+      '@#resources', // Module root
+      ...(RootIndex.manifest.monoRepo ? ['@@#resources'] : []) // Monorepo root
+    ];
+  }
+});

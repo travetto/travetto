@@ -1,5 +1,6 @@
 import { createWriteStream, WriteStream, mkdirSync, openSync, appendFileSync } from 'fs';
 
+import { Env } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { ManifestFileUtil, path, RootIndex } from '@travetto/manifest';
@@ -8,7 +9,7 @@ import { LogAppender, LogEvent } from '../types';
 
 @Config('log')
 export class FileLogAppenderConfig {
-  @EnvVar('TRV_LOG_OUTPUT')
+  @EnvVar(Env.TRV_LOG_OUTPUT.key)
   output?: 'file' | string;
 
   writeSync = false;

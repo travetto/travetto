@@ -1,8 +1,7 @@
-import { Env, ExecUtil, GlobalEnv, ShutdownManager } from '@travetto/base';
-import { RootIndex, path } from '@travetto/manifest';
+import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
+import { RootIndex } from '@travetto/manifest';
 
 import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
-import { CliCommandRegistry } from './registry';
 
 export class CliUtil {
   /**
@@ -31,14 +30,15 @@ export class CliUtil {
    * Run a command as restartable, linking into self
    */
   static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<unknown> | undefined {
-    const canRestart = cmd.canRestart ??= GlobalEnv.devMode;
-
-    if (canRestart === false || Env.isFalse('TRV_CAN_RESTART')) {
-      delete process.env.TRV_CAN_RESTART;
+    if (Env.TRV_CAN_RESTART.isFalse || !(cmd.canRestart ?? !Env.production)) {
+      Env.TRV_CAN_RESTART.clear();
       return;
     }
     return ExecUtil.spawnWithRestart(process.argv0, process.argv.slice(1), {
-      env: { TRV_DYNAMIC: '1', TRV_CAN_RESTART: '0' },
+      env: {
+        ...Env.TRV_DYNAMIC.export(true),
+        ...Env.TRV_CAN_RESTART.export(false)
+      },
       stdio: [0, 1, 2, 'ipc']
     });
   }
@@ -47,7 +47,7 @@ export class CliUtil {
    * Dispatch IPC payload
    */
   static async triggerIpc<T extends CliCommandShape>(action: 'run', cmd: T): Promise<boolean> {
-    const ipcUrl = process.env.TRV_CLI_IPC;
+    const ipcUrl = Env.TRV_CLI_IPC.val;
 
     if (!ipcUrl) {
       return false;
@@ -59,12 +59,11 @@ export class CliUtil {
       return false;
     }
 
-    const cfg = CliCommandRegistry.getConfig(cmd);
     const req = {
       type: `@travetto/cli:${action}`,
       data: {
-        name: cfg.name,
-        commandModule: cfg.commandModule,
+        name: cmd._cfg!.name,
+        commandModule: cmd._cfg!.commandModule,
         module: RootIndex.manifest.mainModule,
         args: process.argv.slice(3),
       }
@@ -89,8 +88,7 @@ export class CliUtil {
    * Debug if IPC available
    */
   static async debugIfIpc<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<boolean> {
-    const canDebug = cmd.debugIpc ??= GlobalEnv.devMode;
-    return canDebug !== false && this.triggerIpc('run', cmd);
+    return (cmd.debugIpc ?? !Env.production) && this.triggerIpc('run', cmd);
   }
 
   /**

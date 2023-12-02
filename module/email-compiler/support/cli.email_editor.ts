@@ -1,4 +1,4 @@
-import { Env, defineEnv } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CliCommand, CliUtil } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 
@@ -10,8 +10,9 @@ import { EmailCompilationManager } from './bin/manager';
 export class EmailEditorCommand {
 
   preMain(): void {
-    Env.addToList('TRV_PROFILES', 'email-dev');
-    defineEnv({ envName: 'dev', dynamic: true });
+    Env.TRV_ENV.set('dev');
+    Env.TRV_DYNAMIC.set(true);
+    Env.TRV_PROFILES.set(['email-dev']);
   }
 
   async main(): Promise<void> {
