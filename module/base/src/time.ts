@@ -1,8 +1,4 @@
 import timers from 'timers/promises';
-import { Env } from './env';
-
-type EnvTime = { [K in keyof TrvEnv]: Extract<TrvEnv[K], number | `${number}|${TimeUnit}`> extends never ? never : K }[keyof TrvEnv];
-
 
 const MIN = 1000 * 60;
 const DAY = 24 * MIN * 60;
@@ -80,19 +76,6 @@ export class TimeUtil {
    */
   static wait(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Promise<void> {
     return timers.setTimeout(this.timeToMs(amount, unit));
-  }
-
-  /**
-   * Get value as time duration
-   * @param key env key
-   * @param def backup value if not valid or found
-   */
-  static getEnvTime(key: EnvTime, def: number | TimeSpan): number;
-  static getEnvTime(key: EnvTime): number | undefined;
-  static getEnvTime(key: string, def: number | TimeSpan): number;
-  static getEnvTime(key: string): number | undefined;
-  static getEnvTime(key: string | EnvTime, def?: number | TimeSpan): number | undefined {
-    return this.resolveInput(Env.get(key)) ?? this.resolveInput(def);
   }
 
   /**

@@ -240,18 +240,19 @@ $ trv run:rest
 
 Initialized {
   manifest: {
-    workspacePath: './doc-exec',
-    moduleType: 'commonjs',
+    mainModule: '@travetto-doc/rest',
     frameworkVersion: '3.4.0',
-    mainModule: '@travetto-doc/rest'
+    version: undefined,
+    moduleType: 'commonjs',
+    workspacePath: './doc-exec'
   },
   runtime: {
-    nodeVersion: 20,
     env: 'dev',
-    resourcePaths: [],
-    debug: undefined,
+    debug: false,
     production: false,
-    dynamic: false
+    dynamic: false,
+    resourcePaths: [],
+    nodeVersion: 20
   },
   config: {
     sources: [ { priority: 999, source: 'memory://override' } ],
@@ -294,7 +295,8 @@ import { RestApplication, RestSslConfig } from '@travetto/rest';
 export class SampleApp {
 
   preMain(): void {
-    Env.set({ TRV_ENV: 'prod', NODE_ENV: 'production' });
+    Env.TRV_ENV.set('prod');
+    Env.NODE_ENV.set('production');
   }
 
   async main() {
@@ -318,18 +320,19 @@ $ trv run:rest:custom
 CUSTOM STARTUP
 Initialized {
   manifest: {
-    workspacePath: './doc-exec',
-    moduleType: 'commonjs',
+    mainModule: '@travetto-doc/rest',
     frameworkVersion: '3.4.0',
-    mainModule: '@travetto-doc/rest'
+    version: undefined,
+    moduleType: 'commonjs',
+    workspacePath: './doc-exec'
   },
   runtime: {
-    nodeVersion: 20,
     env: 'prod',
-    resourcePaths: [],
-    debug: undefined,
+    debug: false,
     production: true,
-    dynamic: false
+    dynamic: false,
+    resourcePaths: [],
+    nodeVersion: 20
   },
   config: {
     sources: [ { priority: 999, source: 'memory://override' } ],

@@ -1,6 +1,6 @@
 import util from 'util';
 
-import { AppError, Class, ClassInstance, Runtime, DataUtil, TypedObject } from '@travetto/base';
+import { AppError, Class, ClassInstance, Runtime, DataUtil, Env } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RootIndex } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
@@ -143,17 +143,25 @@ export class ConfigurationService {
     const og = util.inspect.defaultOptions.depth;
     util.inspect.defaultOptions.depth = 100;
 
-    const MANIFEST_FIELDS = new Set<keyof typeof RootIndex['manifest']>([
-      'mainModule', 'moduleType', 'version', 'frameworkVersion', 'workspacePath'
-    ]);
-
     console.log('Initialized', {
-      manifest: Object.fromEntries(
-        TypedObject.entries(RootIndex.manifest).filter(([k]) => MANIFEST_FIELDS.has(k))
-      ),
-      runtime: { ...Runtime },
+      manifest: {
+        mainModule: RootIndex.manifest.mainModule,
+        frameworkVersion: RootIndex.manifest.frameworkVersion,
+        version: RootIndex.manifest.version,
+        moduleType: RootIndex.manifest.moduleType,
+        workspacePath: RootIndex.manifest.workspacePath
+      },
+      runtime: {
+        env: Env.TRV_ENV.val ?? '<unset>',
+        debug: (Env.DEBUG.val === 'false' ? false : Env.DEBUG.val) ?? false,
+        production: Runtime.production,
+        dynamic: Runtime.dynamic,
+        resourcePaths: Env.TRV_RESOURCES.list ?? [],
+        nodeVersion: parseInt(process.version.match(/\d+/)?.[0] ?? '-1', 10),
+      },
       config: await this.exportActive()
     });
+
     util.inspect.defaultOptions.depth = og;
   }
 }

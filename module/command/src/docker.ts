@@ -12,7 +12,7 @@ import { Env, ShutdownManager, ExecUtil, ExecutionState, ExecutionResult, DataUt
 export class DockerContainer {
 
   static #getNamespace(image: string): string {
-    return Env.isTrue('TRV_DOCKER') ? image : Env.get('TRV_DOCKER', image);
+    return Env.TRV_DOCKER.isTrue ? image : Env.TRV_DOCKER.val ?? image;
   }
 
   static #getContainerName(image: string, container?: string): string {

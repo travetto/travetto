@@ -16,7 +16,8 @@ import { EmailCompiler } from '../src/compiler';
 export class EmailTestCommand implements CliCommandShape {
 
   preMain(): void {
-    Env.set({ TRV_ENV: 'dev', TRV_PROFILES: ['email-dev'] });
+    Env.TRV_ENV.set('dev');
+    Env.TRV_PROFILES.set(['email-dev']);
   }
 
   async main(file: string, to: string): Promise<void> {

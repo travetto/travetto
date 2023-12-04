@@ -24,7 +24,11 @@ export class TestCommand implements CliCommandShape {
 
   preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;
-    Env.set({ TRV_ROLE: 'test', TRV_ENV: 'test', DEBUG: false, TRV_LOG_PLAIN: true, TRV_LOG_TIME: undefined });
+    Env.TRV_ROLE.set('test');
+    Env.TRV_ENV.set('test');
+    Env.DEBUG.set(false);
+    Env.TRV_LOG_PLAIN.set(true);
+    Env.TRV_LOG_TIME.clear();
   }
 
   isFirstFile(first: string): Promise<boolean> {

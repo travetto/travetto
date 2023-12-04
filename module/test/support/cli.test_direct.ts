@@ -11,7 +11,10 @@ export class TestDirectCommand {
   format: TestFormat = 'tap';
 
   preMain(): void {
-    Env.set({ TRV_ROLE: 'test', TRV_ENV: 'test', TRV_LOG_PLAIN: true, TRV_LOG_TIME: undefined });
+    Env.TRV_ROLE.set('test');
+    Env.TRV_ENV.set('test');
+    Env.TRV_LOG_PLAIN.set(true);
+    Env.TRV_LOG_TIME.clear();
   }
 
   main(file: string, args: string[]): Promise<void> {

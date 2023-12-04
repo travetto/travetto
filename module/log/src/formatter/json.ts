@@ -1,11 +1,10 @@
 import { Injectable } from '@travetto/di';
-import { Config, EnvVar } from '@travetto/config';
+import { Config } from '@travetto/config';
 
 import { LogEvent, LogFormatter } from '../types';
 
 @Config('log')
 export class JSONLogFormatterConfig {
-  @EnvVar('TRV_LOG_JSON_INDENT')
   jsonIndent?: number;
 }
 

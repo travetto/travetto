@@ -1,7 +1,6 @@
-import { Env } from '@travetto/base';
 import type { CommandService } from '@travetto/command';
 
-const version = Env.get('POSTGRESQL_VERSION', '15.4');
+const version = process.env.POSTGRESQL_VERSION || '15.4';
 
 export const service: CommandService = {
   name: 'postgresql',

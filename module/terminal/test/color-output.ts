@@ -2,7 +2,7 @@ import tty from 'tty';
 import assert from 'assert';
 
 import { Test, Suite, BeforeEach } from '@travetto/test';
-import { Util } from '@travetto/base';
+import { Env, Util } from '@travetto/base';
 
 import { ColorOutputUtil } from '../src/color-output';
 import { Terminal } from '../src/terminal';
@@ -12,9 +12,9 @@ export class ColorOutputUtilTest {
 
   @BeforeEach()
   reset() {
-    delete process.env.NO_COLOR;
-    delete process.env.NODE_DISABLE_COLORS;
-    delete process.env.FORCE_COLOR;
+    Env.NO_COLOR.clear();
+    Env.NODE_DISABLE_COLORS.clear();
+    Env.FORCE_COLOR.clear();
   }
 
   @Test()
@@ -30,8 +30,7 @@ export class ColorOutputUtilTest {
 
   @Test()
   async noColor() {
-    process.env.NO_COLOR = '1';
-    delete process.env.FORCE_COLOR;
+    Env.NO_COLOR.set(true);
 
     const term = new Terminal({ output: new tty.WriteStream(2) });
     assert(term.colorLevel === 0);
@@ -94,23 +93,23 @@ export class ColorOutputUtilTest {
   async verifyForceColor() {
     const output = new tty.WriteStream(2);
 
-    for (const el of [0, 1, 2, 3]) {
-      process.env.FORCE_COLOR = `${el}`;
+    for (const el of [0, 1, 2, 3] as const) {
+      Env.FORCE_COLOR.set(el);
       assert(await ColorOutputUtil.readTermColorLevel(output) === el);
     }
 
-    process.env.FORCE_COLOR = 'true';
+    Env.FORCE_COLOR.set(true);
     assert(await ColorOutputUtil.readTermColorLevel(output) === 1);
   }
 
   @Test()
   async verifyNoColor() {
-    process.env.COLORTERM = 'truecolor';
+    Env.COLORTERM.set('truecolor');
 
     const output = new tty.WriteStream(2);
 
     assert(await ColorOutputUtil.readTermColorLevel(output) > 0);
-    process.env.NO_COLOR = '1';
+    Env.NO_COLOR.set(true);
     assert(await ColorOutputUtil.readTermColorLevel(output) === 0);
   }
 }

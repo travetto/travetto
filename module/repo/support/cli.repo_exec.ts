@@ -28,7 +28,7 @@ export class RepoExecCommand implements CliCommandShape {
   showStdout = true;
 
   preMain(): void {
-    Env.set({ DEBUG: false });
+    Env.DEBUG.set(false);
   }
 
   async main(cmd: string, args: string[] = []): Promise<void> {

@@ -81,13 +81,13 @@ class $ConsoleManager {
   /**
    * Set logging debug level
    */
-  setup(cfg: false | string | undefined): void {
-    if (cfg) {
-      const active = RootIndex.getModuleList('local', cfg);
+  setup(debug: false | string | undefined, production: boolean = false): void {
+    if (debug === false || (!debug && production) || /^(0|false|off|no)$/i.test(debug ?? '')) {
+      this.filter('debug', () => false);
+    } else {
+      const active = RootIndex.getModuleList('local', debug || '@');
       active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
-    } else {
-      this.filter('debug', () => false);
     }
   }
 

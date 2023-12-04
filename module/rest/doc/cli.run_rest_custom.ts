@@ -8,7 +8,8 @@ import { RestApplication, RestSslConfig } from '@travetto/rest';
 export class SampleApp {
 
   preMain(): void {
-    Env.set({ TRV_ENV: 'prod', NODE_ENV: 'production' });
+    Env.TRV_ENV.set('prod');
+    Env.NODE_ENV.set('production');
   }
 
   async main() {

@@ -30,12 +30,15 @@ export class CliUtil {
    * Run a command as restartable, linking into self
    */
   static runWithRestart<T extends CliCommandShapeFields & CliCommandShape>(cmd: T): Promise<unknown> | undefined {
-    if (Env.isFalse('TRV_CAN_RESTART') || !(cmd.canRestart ?? !Runtime.production)) {
-      delete process.env.TRV_CAN_RESTART;
+    if (Env.TRV_CAN_RESTART.isFalse || !(cmd.canRestart ?? !Runtime.production)) {
+      Env.TRV_CAN_RESTART.clear();
       return;
     }
     return ExecUtil.spawnWithRestart(process.argv0, process.argv.slice(1), {
-      env: { TRV_DYNAMIC: '1', TRV_CAN_RESTART: '0' },
+      env: {
+        ...Env.TRV_DYNAMIC.export(true),
+        ...Env.TRV_CAN_RESTART.export(false)
+      },
       stdio: [0, 1, 2, 'ipc']
     });
   }
@@ -44,7 +47,7 @@ export class CliUtil {
    * Dispatch IPC payload
    */
   static async triggerIpc<T extends CliCommandShape>(action: 'run', cmd: T): Promise<boolean> {
-    const ipcUrl = process.env.TRV_CLI_IPC;
+    const ipcUrl = Env.TRV_CLI_IPC.val;
 
     if (!ipcUrl) {
       return false;

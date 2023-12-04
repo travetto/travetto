@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import os from 'os';
 
-import { ExecUtil, Env, Util } from '@travetto/base';
+import { ExecUtil, Util } from '@travetto/base';
 import { ManifestFileUtil, RootIndex, path } from '@travetto/manifest';
 import { TestFixtures } from '@travetto/test';
 
@@ -42,7 +42,7 @@ export class RestClientTestUtil {
 
 
   static async cleanupFolder(dir: string): Promise<void> {
-    if (!Env.isTrue('KEEP_TEMP')) {
+    if (process.env.KEEP_TEMP !== '1') {
       await fs.rm(dir, { recursive: true });
     }
   }

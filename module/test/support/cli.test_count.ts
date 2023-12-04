@@ -9,7 +9,9 @@ import { RunnerUtil } from '../src/execute/util';
 export class TestCountCommand {
 
   preMain(): void {
-    Env.set({ TRV_DEBUG: false, TRV_ROLE: 'test', TRV_ENV: 'test' });
+    Env.TRV_ROLE.set('test');
+    Env.TRV_ENV.set('test');
+    Env.DEBUG.set(false);
   }
 
   async main(patterns: string[]) {

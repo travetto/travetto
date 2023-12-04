@@ -27,7 +27,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       hidden: cfg.hidden,
       preMain: async (cmd: CliCommandShape & { env?: string }) => {
         if (addEnv) {
-          Env.set({ TRV_ENV: cmd.env || Runtime.env });
+          Env.TRV_ENV.set(cmd.env || Env.TRV_ENV.val || (Runtime.production ? 'prod' : 'dev'));
         }
       }
     });
@@ -36,7 +36,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
 
     if (addEnv) {
       SchemaRegistry.registerPendingFieldConfig(target, 'env', String, {
-        aliases: ['e', CliParseUtil.toEnvField('TRV_ENV')],
+        aliases: ['e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],
         description: 'Application environment',
         default: 'dev',
         required: { active: false }
@@ -45,7 +45,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
 
     if (addModule) {
       SchemaRegistry.registerPendingFieldConfig(target, 'module', String, {
-        aliases: ['m', CliParseUtil.toEnvField('TRV_MODULE')],
+        aliases: ['m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
         description: 'Module to run for',
         specifiers: ['module'],
         required: { active: CliUtil.monoRoot }

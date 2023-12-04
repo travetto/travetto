@@ -17,5 +17,10 @@ declare global {
      * @default text
      */
     TRV_LOG_FORMAT: 'json' | 'text';
+    /**
+     * Log output location
+     * @default console
+     */
+    TRV_LOG_OUTPUT: 'console' | 'file' | string;
   }
 }

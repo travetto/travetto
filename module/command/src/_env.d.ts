@@ -7,6 +7,6 @@ declare global {
      * If 0, disables running if docker should even be considered when running a command service
      * @default undefined
      */
-    TRV_DOCKER: boolean | string;
+    TRV_DOCKER: boolean | string | undefined;
   }
 }

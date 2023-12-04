@@ -1,5 +1,5 @@
 import { GlobalTerminal } from '@travetto/terminal';
-import { ConsoleManager, Runtime } from '@travetto/base';
+import { ConsoleManager, Env, Runtime } from '@travetto/base';
 
 import { HelpUtil } from './help';
 import { CliCommandShape } from './types';
@@ -87,7 +87,7 @@ export class ExecutionManager {
         console.log!(await HelpUtil.renderCommandHelp(command));
       } else {
         const known = await this.#prepareAndBind(command, args);
-        ConsoleManager.setup(Runtime.debug);
+        ConsoleManager.setup(Env.DEBUG.val, Runtime.production);
         const result = await command.main(...known);
         await CliUtil.listenForResponse(result);
       }

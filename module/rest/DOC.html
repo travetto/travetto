@@ -270,18 +270,19 @@ By default, the framework provides a default <a target="_blank" class="source-li
 
 Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
-    workspacePath: <span class="token string">'./doc-exec'</span>,
-    moduleType: <span class="token string">'commonjs'</span>,
+    mainModule: <span class="token string">'@travetto-doc/rest'</span>,
     frameworkVersion: <span class="token string">'3.4.0'</span>,
-    mainModule: <span class="token string">'@travetto-doc/rest'</span>
+    version: undefined,
+    moduleType: <span class="token string">'commonjs'</span>,
+    workspacePath: <span class="token string">'./doc-exec'</span>
   <span class="token punctuation">{{'}'}}</span>,
   runtime: <span class="token punctuation">{{'{'}}</span>
-    nodeVersion: <span class="token number">20</span>,
     env: <span class="token string">'dev'</span>,
-    resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    debug: undefined,
+    debug: false,
     production: false,
-    dynamic: <span class="token boolean">false</span>
+    dynamic: false,
+    resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
+    nodeVersion: <span class="token number">20</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,
@@ -328,7 +329,8 @@ To customize a REST server, you may need to construct an entry point using the <
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">SampleApp</span> <span class="token punctuation">{{'{'}}</span>
 
   <span class="token function">preMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
-    Env<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> <span class="token constant">TRV_ENV</span><span class="token operator">:</span> <span class="token string">'prod'</span><span class="token punctuation">,</span> <span class="token constant">NODE_ENV</span><span class="token operator">:</span> <span class="token string">'production'</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Env<span class="token punctuation">.</span><span class="token constant">TRV_ENV</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'prod'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    Env<span class="token punctuation">.</span><span class="token constant">NODE_ENV</span><span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'production'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 
   <span class="token keyword">async</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
@@ -354,18 +356,19 @@ And using the pattern established in the <a class="module-link" href="https://gi
 CUSTOM STARTUP
 Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
-    workspacePath: <span class="token string">'./doc-exec'</span>,
-    moduleType: <span class="token string">'commonjs'</span>,
+    mainModule: <span class="token string">'@travetto-doc/rest'</span>,
     frameworkVersion: <span class="token string">'3.4.0'</span>,
-    mainModule: <span class="token string">'@travetto-doc/rest'</span>
+    version: undefined,
+    moduleType: <span class="token string">'commonjs'</span>,
+    workspacePath: <span class="token string">'./doc-exec'</span>
   <span class="token punctuation">{{'}'}}</span>,
   runtime: <span class="token punctuation">{{'{'}}</span>
-    nodeVersion: <span class="token number">20</span>,
     env: <span class="token string">'prod'</span>,
-    resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
-    debug: undefined,
+    debug: false,
     production: true,
-    dynamic: <span class="token boolean">false</span>
+    dynamic: false,
+    resourcePaths: <span class="token punctuation">[</span><span class="token punctuation">]</span>,
+    nodeVersion: <span class="token number">20</span>
   <span class="token punctuation">{{'}'}}</span>,
   config: <span class="token punctuation">{{'{'}}</span>
     sources: <span class="token punctuation">[</span> <span class="token punctuation">{{'{'}}</span> priority: <span class="token number">999</span>, source: <span class="token string">'memory://override'</span> <span class="token punctuation">{{'}'}}</span> <span class="token punctuation">]</span>,

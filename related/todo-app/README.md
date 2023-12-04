@@ -309,21 +309,21 @@ npx trv run:rest
 
 **Terminal: Application Startup**
 ```bash
-2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:150] Initialized {
+2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:146] Initialized {
   manifest: {
-    workspacePath: '<workspace-root>',
-    moduleType: 'commonjs',
-    frameworkVersion: '3.4.0',
     mainModule: '@travetto/todo-app',
-    version: '0.0.0'
+    frameworkVersion: '3.4.0',
+    version: '0.0.0',
+    moduleType: 'commonjs',
+    workspacePath: '<workspace-root>'
   },
   runtime: {
-    nodeVersion: 20,
     env: 'dev',
-    resourcePaths: [],
-    debug: undefined,
+    debug: false,
     production: false,
-    dynamic: false
+    dynamic: false,
+    resourcePaths: [],
+    nodeVersion: 20
   },
   config: {
     sources: [

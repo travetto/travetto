@@ -15,7 +15,7 @@ yarn add @travetto/base
 
 Base is the foundation of all [Travetto](https://travetto.dev) applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
    *  Environment Support
-   *  Shared Global Environment State
+   *  Runtime Flags
    *  Console Management
    *  Resource Access
    *  Standard Error Support
@@ -28,52 +28,133 @@ Base is the foundation of all [Travetto](https://travetto.dev) applications.  It
    *  Shutdown Management
 
 ## Environment Support
-The functionality we support for testing and retrieving environment information:
-   *  `isTrue(key: string): boolean;` - Test whether or not an environment flag is set and is true
-   *  `isFalse(key: string): boolean;` - Test whether or not an environment flag is set and is false
-   *  `isSet(key:string): boolean;` - Test whether or not an environment value is set (excludes: `null`, `''`, and `undefined`)
-   *  `get(key: string, def?: string): string;` - Retrieve an environmental value with a potential default
-   *  `getBoolean(key: string, isValue?: boolean): boolean;` - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value
-   *  `getInt(key: string, def?: number): number;` - Retrieve an environmental value as a number
-   *  `getTime(key: string, def?: number): number;` - Retrieve an environmental value, interpreted as a time value, e.g. `1m`
-   *  `getList(key: string): string[];` - Retrieve an environmental value as a list
-   *  `set(inputs: Record<string, string[]|string|number|boolean|...): void;` - Update the environment with key-value pairs, with support typed support for framework provided values. Additionally, arrays will be joined on commas to produce a single value that can be read using the `Env.getList` method. 
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L95) object, and will return a scoped [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8), that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports `true` or `false`
 
-## Runtime State
-[Runtime](https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L9) is a non-cached interface to [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L12), the root [ManifestContext](https://github.com/travetto/travetto/tree/main/module/manifest/src/types.ts#L30), and [child_process](https://nodejs.org/api/process.html).  It provides access to common patterns used at runtime within the framework.
+**Code: Base Known Environment Flags**
+```typescript
+interface TrvEnv {
+    /**
+     * Flag for node to disable colors
+     */
+    NODE_DISABLE_COLORS: boolean;
+    /** 
+     * The node environment we are running in
+     * @default development
+     */
+    NODE_ENV: 'development' | 'production';
+    /** 
+     * Enables color, even if `tty` is not available 
+     * @default false
+     */
+    FORCE_COLOR: boolean | 0 | 1 | 2 | 3;
+    /** 
+     * Disables color even if `tty` is available
+     * @default false
+     */
+    NO_COLOR: boolean;
+    /**
+     * Determines terminal color level
+     */
+    COLORTERM: string;
+    /** 
+     * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 
+     */
+    DEBUG: boolean | string;
+    /** 
+     * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.  
+     */
+    TRV_ENV: string;
+    /** 
+     * Special role to run as, used to access additional files from the manifest during runtime.  
+     */
+    TRV_ROLE: Role;
+    /** 
+     * Whether or not to run the program in dynamic mode, allowing for real-time updates  
+     */
+    TRV_DYNAMIC: boolean;
+    /** 
+     * The folders to use for resource lookup
+     */
+    TRV_RESOURCES: string[];
+    /** 
+     * The max time to wait for shutdown to finish after initial SIGINT, 
+     * @default 2s
+     */
+    TRV_SHUTDOWN_WAIT: TimeSpan | number;
+    /**
+     * The desired runtime module 
+     */
+    TRV_MODULE: string;
+    /**
+     * The location of the manifest file
+     * @default undefined
+     */
+    TRV_MANIFEST: string;
+    /**
+     * trvc log level
+     */
+    TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn',
+    /**
+     * Cli operation mode, false means simple output
+     */
+    TRV_QUIET: boolean;
+  }
+```
+
+### Environment Property
+For a given [EnvProp](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8), we support the ability to access different properties as a means to better facilitate environment variable usage.
+
+**Code: EnvProp Shape**
+```typescript
+export class EnvProp<T> {
+  constructor(public readonly key: string) { }
+  /** Remove value */
+  clear(): void;
+  /** Export value */
+  export(val: T | undefined): Record<string, string>;
+  /** Read value as string */
+  get val(): string | undefined;
+  /** Read/write value as list */
+  get list(): string[] | undefined;
+  /** Read value as int  */
+  get int(): number | undefined;
+  /** Read value as boolean */
+  get bool(): boolean | undefined;
+  /** Read value as a time value */
+  get time(): number | undefined;
+  /** Determine if the underlying value is truthy */
+  get isTrue(): boolean;
+  /** Determine if the underlying value is falsy */
+  get isFalse(): boolean;
+  /** Determine if the underlying value is set */
+  get isSet(): boolean;
+}
+```
+
+## Runtime Flags
+[Runtime](https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L6) is a non-cached interface to `process.ENV`.  It provides access to common flags used at runtime within the framework.
 
 **Code: Runtime Shape**
 ```typescript
 export const Runtime = {
-  /** Get Node version */
-  get nodeVersion(): number;
-  /** Get environment name */
-  get env(): string;
-  /** Get Resource paths used for ResourceLoader */
-  get resourcePaths(): string[];
-  /** Get debug module expression */
-  get debug(): string | undefined;
   /** Are we in development mode */
-  get production(): boolean;
-  /** Is the app in dynamic mode? */
-  get dynamic(): boolean;
-} as const;
-```
+  get production(): boolean {
+    return process.env.NODE_ENV === 'production';
+  },
 
-The source for each field is:
-   *  `nodeVersion` - This is derived from `process.version`, and is used primarily for logging purposes
-   *  `env` - This is derived from `process.env.TRV_ENV` with a fallback of `process.env.NODE_ENV`
-   *  `production` - This is true if `process.env.NODE_ENV` equals `production`
-   *  `debug` - This is derived from `process.env.DEBUG`. When not set, and running outside of production, defaults to `@`.
-   *  `dynamic` - This is derived from `process.env.TRV_DYNAMIC`. This field reflects certain feature sets used throughout the framework.
-   *  `resourcePaths` - This is a list derived from `process.env.TRV_RESOURCES`.  This points to a list of folders that the [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9) will search against.
+  /** Is the app in dynamic mode? */
+  get dynamic(): boolean {
+    return TRUE.has(process.env.TRV_DYNAMIC!);
+  },
+};
+```
 
 ## Resource Access
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching")'s data for what resources were found at manifesting time.
 
 The [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a `Readable` stream.  If a file is not found, it will throw an [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) with a category of 'notfound'.  
 
-The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) and utilizes the [Runtime](https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L9)'s `resourcePaths` information on where to attempt to find a requested resource.
+The [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9) extends [FileLoader](https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12) and utilizes the [Env](https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L95)'s `TRV_RESOURCES` information on where to attempt to find a requested resource.
 
 ## Standard Error Support
 While the framework is 100 % compatible with standard `Error` instances, there are cases in which additional functionality is desired. Within the framework we use [AppError](https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13) (or its derivatives) to represent framework errors. This class is available for use in your own projects. Some of the additional benefits of using this class is enhanced error reporting, as well as better integration with other modules (e.g. the [RESTful API](https://github.com/travetto/travetto/tree/main/module/rest#readme "Declarative api for RESTful APIs with support for the dependency injection module.") module and HTTP status codes). 
@@ -206,7 +287,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 ```
 
 ## Time Utilities
-[TimeUtil](https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L25) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L21) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
 **Code: Time Utilities**
 ```typescript
@@ -237,12 +318,6 @@ export class TimeUtil {
    */
   static wait(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Promise<void>;
   /**
-   * Get value as time duration
-   * @param key env key
-   * @param def backup value if not valid or found
-   */
-  static getEnvTime(key: EnvTime, def: number | TimeSpan): number;
-  /**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */
   static prettyDeltaSinceTime(time: number, unit?: TimeUnit): string;
@@ -255,7 +330,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L108) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L110) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
 
 A simple example would be:
 

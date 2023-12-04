@@ -1,4 +1,4 @@
-import { ShutdownManager, TimeUtil } from '@travetto/base';
+import { Env, ShutdownManager, TimeUtil } from '@travetto/base';
 
 import type { RunState } from '../../src/execute/types';
 
@@ -12,7 +12,7 @@ export async function runTests(opts: RunState): Promise<void> {
 
   RunnerUtil.registerCleanup('runner');
 
-  await TimeUtil.wait(TimeUtil.getEnvTime('TRV_TEST_DELAY', 0));
+  await TimeUtil.wait(Env.TRV_TEST_DELAY.time ?? 0);
 
   try {
     const res = await new Runner(opts).run();

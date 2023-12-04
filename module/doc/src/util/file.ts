@@ -2,7 +2,8 @@ import fs from 'fs/promises';
 
 import { ManifestModuleUtil, path, RootIndex } from '@travetto/manifest';
 
-const ESLINT_PATTERN = /\s*\/\/ eslint.*$/;
+const ESLINT_PATTERN = /\s*\/\/ eslint.*$/g;
+const ENV_KEY = /Env[.]([^.]+)[.]key/g;
 
 /**
  * Standard file utilities
@@ -57,12 +58,10 @@ export class DocFileUtil {
       text = await fs.readFile(file, 'utf8');
 
       text = text.split(/\n/)
-        .map(x => {
-          if (ESLINT_PATTERN.test(x)) {
-            x = x.replace(ESLINT_PATTERN, '');
-          }
-          return x;
-        })
+        .map(x => x
+          .replace(ESLINT_PATTERN, '')
+          .replace(ENV_KEY, (_, k) => `'${k}'`)
+        )
         .filter(x => !x.includes('@doc-exclude'))
         .join('\n');
     }

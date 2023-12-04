@@ -5,7 +5,7 @@ import { RootIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
-import { ShutdownManager, Util } from '@travetto/base';
+import { Env, ShutdownManager, Util } from '@travetto/base';
 
 const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 const TodoRoot = d.ref('Todo App', RootIndex.mainModule.outputPath);
@@ -13,7 +13,7 @@ const TodoRoot = d.ref('Todo App', RootIndex.mainModule.outputPath);
 const port = 12555;
 
 async function init() {
-  process.env.TRV_LOG_PLAIN = '0';
+  Env.TRV_LOG_PLAIN.set(false);
 
   const startupBuffer: Buffer[] = [];
 

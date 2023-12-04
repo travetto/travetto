@@ -9,7 +9,7 @@ import { PendingRegister } from '../decorator';
 
 const moduleFindConfig: FindConfig = {
   module: (m) => {
-    const role = Env.get('TRV_ROLE');
+    const role = Env.TRV_ROLE.val;
     return m.roles.includes('std') && (
       !Runtime.production || m.prod ||
       ((role === 'doc' || role === 'test') && m.roles.includes(role))

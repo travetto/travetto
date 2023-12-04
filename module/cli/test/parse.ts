@@ -1,6 +1,7 @@
 import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
+import { Env } from '@travetto/base';
 
 import { CliCommand, CliCommandSchemaUtil, CliParseUtil } from '../__index__';
 
@@ -60,7 +61,7 @@ export class ParseSuite {
       ['hello world', '-m', '@travetto/cli', '--hello', "goodbye's moon", '-b', '20']
     );
 
-    process.env.TRV_MODULE = '@travetto/cli';
+    Env.TRV_MODULE.set('@travetto/cli');
     assert.deepStrictEqual(
       await expand(['bob', 'hello world', '+=@/test/fixtures/random.flags']),
       ['hello world', '--hello', "goodbye's moon", '-b', '20']

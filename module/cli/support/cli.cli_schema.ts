@@ -27,7 +27,7 @@ export class CliSchemaCommand implements CliCommandShape {
   }
 
   preMain(): void {
-    Env.set({ DEBUG: false });
+    Env.DEBUG.set(false);
   }
 
   async main(name?: string): Promise<void> {

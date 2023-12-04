@@ -8,13 +8,11 @@ import { CliCommand } from '@travetto/cli';
 export class TestChildWorkerCommand {
   preMain(): void {
     EventEmitter.defaultMaxListeners = 1000;
-    Env.set({
-      TRV_ROLE: 'test',
-      TRV_ENV: 'test',
-      FORCE_COLOR: false,
-      TRV_LOG_PLAIN: true,
-      TRV_LOG_TIME: undefined
-    });
+    Env.TRV_ROLE.set('test');
+    Env.TRV_ENV.set('test');
+    Env.FORCE_COLOR.set(false);
+    Env.TRV_LOG_PLAIN.set(true);
+    Env.TRV_LOG_TIME.clear();
   }
 
   async main(): Promise<void> {

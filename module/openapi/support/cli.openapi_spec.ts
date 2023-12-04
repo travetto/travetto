@@ -16,7 +16,7 @@ export class OpenApiSpecCommand implements CliCommandShape {
   output?: string;
 
   preMain(): void {
-    Env.set({ DEBUG: false });
+    Env.DEBUG.set(false);
   }
 
   async main(): Promise<void> {

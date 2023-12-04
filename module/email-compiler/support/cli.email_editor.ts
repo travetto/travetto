@@ -10,7 +10,9 @@ import { EmailCompilationManager } from './bin/manager';
 export class EmailEditorCommand {
 
   preMain(): void {
-    Env.set({ TRV_ENV: 'dev', TRV_DYNAMIC: true, TRV_PROFILES: ['email-dev'] });
+    Env.TRV_ENV.set('dev');
+    Env.TRV_DYNAMIC.set(true);
+    Env.TRV_PROFILES.set(['email-dev']);
   }
 
   async main(): Promise<void> {

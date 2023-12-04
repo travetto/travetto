@@ -22,13 +22,11 @@ export class DocCommand implements CliCommandShape {
   watch = false;
 
   preMain(): void {
-    Env.set({
-      DEBUG: false,
-      TRV_ROLE: 'doc',
-      TRV_CLI_IPC: undefined,
-      TRV_LOG_PLAIN: true,
-      FORCE_COLOR: false
-    });
+    Env.DEBUG.set(false);
+    Env.TRV_ROLE.set('doc');
+    Env.TRV_CLI_IPC.clear();
+    Env.TRV_LOG_PLAIN.set(true);
+    Env.FORCE_COLOR.set(false);
   }
 
   preBind(): void {
@@ -57,7 +55,7 @@ export class DocCommand implements CliCommandShape {
       if (action === 'update' && file === this.input) {
         await ExecUtil.spawn('npx', ['trv', ...args], {
           cwd: RootIndex.mainModule.sourcePath,
-          env: { TRV_QUIET: '1' },
+          env: { ...Env.TRV_QUIET.export(false) },
           stdio: 'inherit', catchAsResult: true
         });
       }

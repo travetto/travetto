@@ -1,5 +1,3 @@
-import { Env } from '@travetto/base';
-
 import { ConfigSource, ConfigSpec } from './types';
 
 /**
@@ -16,10 +14,10 @@ export class EnvConfigSource implements ConfigSource {
 
   get(): ConfigSpec | undefined {
     try {
-      const data = JSON.parse(Env.get(this.#envKey, '{}'));
+      const data = JSON.parse(process.env[this.#envKey] || '{}');
       return { data, priority: this.#priority, source: `env://${this.#envKey}` };
     } catch (e) {
-      console.error(`env.${this.#envKey} is an invalid format`, { text: Env.get(this.#envKey) });
+      console.error(`env.${this.#envKey} is an invalid format`, { text: process.env[this.#envKey] });
     }
   }
 }

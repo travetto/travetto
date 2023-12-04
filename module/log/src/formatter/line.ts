@@ -1,5 +1,6 @@
 import util from 'util';
 
+import { Env } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
@@ -33,10 +34,10 @@ export interface LineFormatterOpts {
 
 @Config('log')
 export class LineLogFormatterConfig {
-  @EnvVar('TRV_LOG_PLAIN')
+  @EnvVar(Env.TRV_LOG_PLAIN.key)
   plain?: boolean;
 
-  @EnvVar('TRV_LOG_TIME')
+  @EnvVar(Env.TRV_LOG_TIME.key)
   time?: 's' | 'ms' | string;
 
   colorize?: boolean;

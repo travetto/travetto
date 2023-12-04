@@ -544,7 +544,6 @@ If the goal is to run a more complex application, which may include depending on
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> DependencyRegistry <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/di'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CliCommand<span class="token punctuation">,</span> CliCommandShape<span class="token punctuation">,</span> CliUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/cli'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Env <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ServerHandle <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'../src/types'</span><span class="token punctuation">;</span>
 
@@ -565,7 +564,7 @@ If the goal is to run a more complex application, which may include depending on
 
   <span class="token function">preMain</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-      Env<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span> <span class="token constant">REST_PORT</span><span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>port <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">REST_PORT</span> <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token keyword">this</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
     <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>
 
@@ -580,7 +579,7 @@ If the goal is to run a more complex application, which may include depending on
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 
-As noted in the example above, <code class="item input">fields</code> is specified in this execution, with support for <code class="item input">module</code>, and <code class="item input">env</code>. These env flag is directly tied to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L9">Runtime</a> flags defined in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/base" title="Environment config and common utilities for travetto applications.">Base</a> module. <br><br>
+As noted in the example above, <code class="item input">fields</code> is specified in this execution, with support for <code class="item input">module</code>, and <code class="item input">env</code>. These env flag is directly tied to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L6">Runtime</a> flags defined in the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/base" title="Environment config and common utilities for travetto applications.">Base</a> module. <br><br>
 The <code class="item input">module</code> field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 <h3 id="custom-validation">Custom Validation</h3>
@@ -608,7 +607,7 @@ A simple example of the validation can be found in the <code class="item input">
 
   <figure class="code">
     <figcaption class="code">Simple Validation Example
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/doc/support/cli.doc.ts#L43">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/doc/support/cli.doc.ts#L41">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">async</span> <span class="token function">validate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>CliValidationError <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token operator">></span> <span class="token punctuation">{{'{'}}</span>

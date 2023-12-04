@@ -17,7 +17,7 @@ export abstract class BaseModelCommand implements CliCommandShape {
   abstract getOp(): keyof ModelStorageSupport;
 
   preMain(): void {
-    Env.set({ DEBUG: false });
+    Env.DEBUG.set(false);
   }
 
   async help(): Promise<string[]> {

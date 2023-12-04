@@ -18,7 +18,8 @@ export class CliRestClientCommand implements CliCommandShape {
   module: string;
 
   preMain(): void {
-    Env.set({ DEBUG: false, TRV_DYNAMIC: true });
+    Env.DEBUG.set(false);
+    Env.TRV_DYNAMIC.set(true);
   }
 
   get #service(): Promise<RestClientGeneratorService> {

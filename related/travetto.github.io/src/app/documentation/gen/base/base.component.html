@@ -17,7 +17,7 @@
 
 Base is the foundation of all <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a> applications.  It is intended to be a minimal application set, as well as support for commonly shared functionality. It has support for the following key areas:
 <ul> <li>Environment Support</li>
-<li>Shared Global Environment State</li>
+<li>Runtime Flags</li>
 <li>Console Management</li>
 <li>Resource Access</li>
 <li>Standard Error Support</li>
@@ -32,57 +32,143 @@ Base is the foundation of all <a target="_blank" class="external-link" href="htt
 
 <h2 id="environment-support">Environment Support</h2>
 
-The functionality we support for testing and retrieving environment information:
-<ul> <li><code class="item method">isTrue(key: string): boolean;</code> - Test whether or not an environment flag is set and is true</li>
-<li><code class="item method">isFalse(key: string): boolean;</code> - Test whether or not an environment flag is set and is false</li>
-<li><code class="item method">isSet(key:string): boolean;</code> - Test whether or not an environment value is set (excludes: <code class="item input">null</code>, <code class="item input">''</code>, and <code class="item input">undefined</code>)</li>
-<li><code class="item method">get(key: string, def?: string): string;</code> - Retrieve an environmental value with a potential default</li>
-<li><code class="item method">getBoolean(key: string, isValue?: boolean): boolean;</code> - Retrieve an environmental value as a boolean.  If isValue is provided, determine if the environment variable matches the specified value</li>
-<li><code class="item method">getInt(key: string, def?: number): number;</code> - Retrieve an environmental value as a number</li>
-<li><code class="item method">getTime(key: string, def?: number): number;</code> - Retrieve an environmental value, interpreted as a time value, e.g. <code class="item input">1m</code></li>
-<li><code class="item method">getList(key: string): string[];</code> - Retrieve an environmental value as a list</li>
-<li><code class="item method">set(inputs: Record&lt;string, string[]|string|number|boolean|...): void;</code> - Update the environment with key-value pairs, with support typed support for framework provided values. Additionally, arrays will be joined on commas to produce a single value that can be read using the <code class="item method">Env.getList</code> method. </li>
-</ul>
+The functionality we support for testing and retrieving environment information for known environment variables. They can be accessed directly on the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L95">Env</a> object, and will return a scoped <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8">EnvProp</a>, that is compatible with the property definition.  E.g. only showing boolean related fields when the underlying flag supports <code class="item input">true</code> or <code class="item input">false</code>
 
-<h2 id="runtime-state">Runtime State</h2>
+  <figure class="code">
+    <figcaption class="code">Base Known Environment Flags
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/_env.d.ts#L8">Source</a></cite>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L9">Runtime</a> is a non-cached interface to <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L12">Env</a>, the root <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/types.ts#L30">ManifestContext</a>, and <a target="_blank" class="external-link" href="https://nodejs.org/api/process.html">child_process</a>.  It provides access to common patterns used at runtime within the framework.
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">interface</span> <span class="token class-name">TrvEnv</span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token comment">/**
+   * Flag for node to disable colors
+   */</span>
+  <span class="token constant">NODE_DISABLE_COLORS</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The node environment we are running in
+   * &#64;default development
+   */</span>
+  <span class="token constant">NODE_ENV</span><span class="token operator">:</span> <span class="token string">'development'</span> <span class="token operator">|</span> <span class="token string">'production'</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Enables color, even if `tty` is not available
+   * &#64;default false
+   */</span>
+  <span class="token constant">FORCE_COLOR</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token number">0</span> <span class="token operator">|</span> <span class="token number">1</span> <span class="token operator">|</span> <span class="token number">2</span> <span class="token operator">|</span> <span class="token number">3</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Disables color even if `tty` is available
+   * &#64;default false
+   */</span>
+  <span class="token constant">NO_COLOR</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Determines terminal color level
+   */</span>
+  <span class="token constant">COLORTERM</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod.
+   */</span>
+  <span class="token constant">DEBUG</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Environment to deploy, defaults to `NODE_ENV` if not `TRV_ENV` is not specified.
+   */</span>
+  <span class="token constant">TRV_ENV</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Special role to run as, used to access additional files from the manifest during runtime.
+   */</span>
+  <span class="token constant">TRV_ROLE</span><span class="token operator">:</span> Role<span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Whether or not to run the program in dynamic mode, allowing for real-time updates
+   */</span>
+  <span class="token constant">TRV_DYNAMIC</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The folders to use for resource lookup
+   */</span>
+  <span class="token constant">TRV_RESOURCES</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The max time to wait for shutdown to finish after initial SIGINT,
+   * &#64;default 2s
+   */</span>
+  <span class="token constant">TRV_SHUTDOWN_WAIT</span><span class="token operator">:</span> TimeSpan <span class="token operator">|</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The desired runtime module
+   */</span>
+  <span class="token constant">TRV_MODULE</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * The location of the manifest file
+   * &#64;default undefined
+   */</span>
+  <span class="token constant">TRV_MANIFEST</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * trvc log level
+   */</span>
+  <span class="token constant">TRV_BUILD</span><span class="token operator">:</span> <span class="token string">'none'</span> <span class="token operator">|</span> <span class="token string">'info'</span> <span class="token operator">|</span> <span class="token string">'debug'</span> <span class="token operator">|</span> <span class="token string">'error'</span> <span class="token operator">|</span> <span class="token string">'warn'</span><span class="token punctuation">,</span>
+  <span class="token comment">/**
+   * Cli operation mode, false means simple output
+   */</span>
+  <span class="token constant">TRV_QUIET</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+<h3 id="environment-property">Environment Property</h3>
+
+For a given <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8">EnvProp</a>, we support the ability to access different properties as a means to better facilitate environment variable usage.
+
+  <figure class="code">
+    <figcaption class="code">EnvProp Shape
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L8">Source</a></cite>
+
+</figcaption>
+    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">EnvProp<span class="token operator">&lt;</span><span class="token constant">T</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token keyword">public</span> <span class="token keyword">readonly</span> key<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
+  <span class="token comment">/** Remove value */</span>
+  <span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Export value */</span>
+  <span class="token keyword">export</span><span class="token punctuation">(</span>val<span class="token operator">:</span> <span class="token constant">T</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">)</span><span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">string</span><span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token comment">/** Read value as string */</span>
+  <span class="token keyword">get</span> <span class="token function">val</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Read/write value as list */</span>
+  <span class="token keyword">get</span> <span class="token function">list</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Read value as int  */</span>
+  <span class="token keyword">get</span> <span class="token function">int</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Read value as boolean */</span>
+  <span class="token keyword">get</span> <span class="token function">bool</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Read value as a time value */</span>
+  <span class="token keyword">get</span> <span class="token function">time</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Determine if the underlying value is truthy */</span>
+  <span class="token keyword">get</span> <span class="token function">isTrue</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Determine if the underlying value is falsy */</span>
+  <span class="token keyword">get</span> <span class="token function">isFalse</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+  <span class="token comment">/** Determine if the underlying value is set */</span>
+  <span class="token keyword">get</span> <span class="token function">isSet</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
+<span class="token punctuation">{{'}'}}</span></code></pre>
+  </figure>
+
+<h2 id="runtime-flags">Runtime Flags</h2>
+
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L6">Runtime</a> is a non-cached interface to <code class="item field">process.ENV</code>.  It provides access to common flags used at runtime within the framework.
 
   <figure class="code">
     <figcaption class="code">Runtime Shape
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L9">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L6">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">const</span> Runtime <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token comment">/** Get Node version */</span>
-  <span class="token keyword">get</span> <span class="token function">nodeVersion</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  <span class="token comment">/** Get environment name */</span>
-  <span class="token keyword">get</span> <span class="token function">env</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
-  <span class="token comment">/** Get Resource paths used for ResourceLoader */</span>
-  <span class="token keyword">get</span> <span class="token function">resourcePaths</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
-  <span class="token comment">/** Get debug module expression */</span>
-  <span class="token keyword">get</span> <span class="token function">debug</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
   <span class="token comment">/** Are we in development mode */</span>
-  <span class="token keyword">get</span> <span class="token function">production</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token comment">/** Is the app in dynamic mode? */</span>
-  <span class="token keyword">get</span> <span class="token function">dynamic</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span> <span class="token keyword">as</span> <span class="token keyword">const</span><span class="token punctuation">;</span></code></pre>
-  </figure>
+  <span class="token keyword">get</span> <span class="token function">production</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">NODE_ENV</span> <span class="token operator">===</span> <span class="token string">'production'</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
 
-The source for each field is:
-<ul> <li><code class="item field">nodeVersion</code> - This is derived from <code class="item field">process.version</code>, and is used primarily for logging purposes</li>
-<li><code class="item field">env</code> - This is derived from <code class="item field">process.env.TRV_ENV</code> with a fallback of <code class="item field">process․env․NODE_ENV</code></li>
-<li><code class="item field">production</code> - This is true if <code class="item field">process․env․NODE_ENV</code> equals <code class="item input">production</code></li>
-<li><code class="item field">debug</code> - This is derived from <code class="item field">process.env.DEBUG</code>. When not set, and running outside of production, defaults to <code class="item input">&#64;</code>.</li>
-<li><code class="item field">dynamic</code> - This is derived from <code class="item field">process.env.TRV_DYNAMIC</code>. This field reflects certain feature sets used throughout the framework.</li>
-<li><code class="item field">resourcePaths</code> - This is a list derived from <code class="item field">process.env.TRV_RESOURCES</code>.  This points to a list of folders that the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9">ResourceLoader</a> will search against.</li>
-</ul>
+  <span class="token comment">/** Is the app in dynamic mode? */</span>
+  <span class="token keyword">get</span> <span class="token function">dynamic</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token punctuation">{{'{'}}</span>
+    <span class="token keyword">return</span> <span class="token constant">TRUE</span><span class="token punctuation">.</span><span class="token function">has</span><span class="token punctuation">(</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">TRV_DYNAMIC</span><span class="token operator">!</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
+<span class="token punctuation">{{'}'}}</span><span class="token punctuation">;</span></code></pre>
+  </figure>
 
 <h2 id="resource-access">Resource Access</h2>
 
 The primary access patterns for resources, is to directly request a file, and to resolve that file either via file-system look up or leveraging the <a class="module-link" routerLink="/docs/manifest" title="Support for project indexing, manifesting, along with file watching">Manifest</a>'s data for what resources were found at manifesting time.<br><br>
 The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12">FileLoader</a> allows for accessing information about the resources, and subsequently reading the file as text/binary or to access the resource as a <code class="item class">Readable</code> stream.  If a file is not found, it will throw an <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/error.ts#L13">AppError</a> with a category of 'notfound'.  <br><br>
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9">ResourceLoader</a> extends <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12">FileLoader</a> and utilizes the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/runtime.ts#L9">Runtime</a>'s <code class="item field">resourcePaths</code> information on where to attempt to find a requested resource.
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9">ResourceLoader</a> extends <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/file-loader.ts#L12">FileLoader</a> and utilizes the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/env.ts#L95">Env</a>'s <code class="item field">TRV_RESOURCES</code> information on where to attempt to find a requested resource.
 
 <h2 id="standard-error-support">Standard Error Support</h2>
 
@@ -238,11 +324,11 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="time-utilities">Time Utilities</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L25">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L21">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
   <figure class="code">
     <figcaption class="code">Time Utilities
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L25">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L21">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TimeUtil</span> <span class="token punctuation">{{'{'}}</span>
@@ -272,12 +358,6 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
    */</span>
   <span class="token keyword">static</span> <span class="token function">wait</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
-   * Get value as time duration
-   * &#64;param key env key
-   * &#64;param def backup value if not valid or found
-   */</span>
-  <span class="token keyword">static</span> <span class="token function">getEnvTime</span><span class="token punctuation">(</span>key<span class="token operator">:</span> EnvTime<span class="token punctuation">,</span> def<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */</span>
   <span class="token keyword">static</span> <span class="token function">prettyDeltaSinceTime</span><span class="token punctuation">(</span>time<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">,</span> unit<span class="token operator">?</span><span class="token operator">:</span> TimeUnit<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
@@ -291,7 +371,7 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="process-execution">Process Execution</h2>
 
-Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L108">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.<br><br>
+Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L110">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.<br><br>
 A simple example would be:
 
   <figure class="code">
@@ -312,7 +392,7 @@ As you can see, the call returns not only the child process information, but the
 
   <figure class="code">
     <figcaption class="code">Execution Options
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L60">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L62">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ExecutionOptions</span> <span class="token keyword">extends</span> <span class="token class-name">SpawnOptions</span> <span class="token punctuation">{{'{'}}</span>
