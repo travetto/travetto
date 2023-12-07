@@ -48,7 +48,7 @@ export class CompilerClient {
     if (cfg.signal) {
       cfg.signal.addEventListener('abort', () => this.close());
     }
-    ShutdownManager.onExitRequested(() => this.close());
+    ShutdownManager.onGracefulShutdown(async () => this.close(), this);
   }
 
   close(): void {
@@ -158,7 +158,7 @@ export class CompilerClient {
 
     if (restartOnExit) {
       // We are done, request restart
-      process.exit(ExecUtil.RESTART_EXIT_CODE);
+      await ShutdownManager.gracefulShutdown(ExecUtil.RESTART_EXIT_CODE);
     }
   }
 

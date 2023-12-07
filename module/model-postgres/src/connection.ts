@@ -45,7 +45,7 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
     );
 
     // Close postgres
-    ShutdownManager.onShutdown(this, () => this.#pool.end());
+    ShutdownManager.onGracefulShutdown(() => this.#pool.end(), this);
   }
 
   async execute<T = unknown>(conn: pg.PoolClient, query: string): Promise<{ count: number, records: T[] }> {
@@ -53,7 +53,7 @@ export class PostgreSQLConnection extends Connection<pg.PoolClient> {
     try {
       const out = await conn.query(query);
       const records: T[] = [...out.rows].map(v => ({ ...v }));
-      return { count: out.rowCount, records };
+      return { count: out.rowCount!, records };
     } catch (err) {
       if (err instanceof Error && err.message.includes('duplicate key value')) {
         throw new ExistsError('query', query);

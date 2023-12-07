@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { ShutdownManager } from '@travetto/base';
+import { ExecUtil } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, ParsedState } from '@travetto/cli';
 import { path, RootIndex } from '@travetto/manifest';
 import { Ignore } from '@travetto/schema';
@@ -36,9 +36,9 @@ export class MainCommand implements CliCommandShape {
       const imp = await this.#getImport(fileOrImport);
       const mod = await import(imp!);
 
-      await ShutdownManager.exitWithResponse(await mod.main(...args, ...this._parsed.unknown));
+      ExecUtil.sendResponse(await mod.main(...args, ...this._parsed.unknown));
     } catch (err) {
-      await ShutdownManager.exitWithResponse(err, true);
+      ExecUtil.sendResponse(err, true);
     }
   }
 }

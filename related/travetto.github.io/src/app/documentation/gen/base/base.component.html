@@ -455,7 +455,7 @@ As you can see, the call returns not only the child process information, but the
 
 <h2 id="shutdown-management">Shutdown Management</h2>
 
-Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides <code class="item method">process.exit</code> to properly handle <code class="item input">SIGKILL</code> and <code class="item input">SIGINT</code>, with a default threshold of 3 seconds. In the advent of a <code class="item input">SIGTERM</code> signal, the code exits immediately without any cleanup.<br><br>
+Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on graceful shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code intercepts <code class="item input">SIGTERM</code> and <code class="item input">SIGUSR2</code>, with a default threshold of 2 seconds. These events will start the shutdown process, but also clear out the pending queue. If a kill signal is sent again, it will complete immediately. <br><br>
 As a registered shutdown handler, you can do.
 
   <figure class="code">
@@ -466,7 +466,7 @@ As a registered shutdown handler, you can do.
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ShutdownManager <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/base'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">registerShutdownHandler</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  ShutdownManager<span class="token punctuation">.</span><span class="token function">onShutdown</span><span class="token punctuation">(</span><span class="token string">'handler-name'</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
+  ShutdownManager<span class="token punctuation">.</span><span class="token function">onGracefulShutdown</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{{'{'}}</span>
     <span class="token comment">// Do important work, the framework will wait until all async</span>
     <span class="token comment">//   operations are completed before finishing shutdown</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>

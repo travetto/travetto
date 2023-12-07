@@ -1,4 +1,4 @@
-import { ShutdownManager, type Class } from '@travetto/base';
+import type { Class } from '@travetto/base';
 import type { ModelStorageSupport } from '@travetto/model/src/service/storage';
 import type { ModelType } from '@travetto/model/src/types/model';
 
@@ -11,6 +11,5 @@ export class ModelInstallUtil {
       console.log('Installing', { name: m.Ⲑid });
       await provider.createModel(m);
     }
-    ShutdownManager.execute(-1); // Release database
   }
 }

@@ -501,7 +501,7 @@ As noted in the example above, `fields` is specified in this execution, with sup
 The `module` field is slightly more complex, but is geared towards supporting commands within a monorepo context.  This flag ensures that a module is specified if running from the root of the monorepo, and that the module provided is real, and can run the desired command.  When running from an explicit module folder in the monorepo, the module flag is ignored.
 
 ### Custom Validation
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L33) errors that are returned will be shared with the user, and fail to invoke the `main` method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any [CliValidationError](https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L36) errors that are returned will be shared with the user, and fail to invoke the `main` method.
 
 **Code: CliValidationError**
 ```typescript

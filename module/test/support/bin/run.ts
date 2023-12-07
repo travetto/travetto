@@ -1,4 +1,4 @@
-import { Env, ShutdownManager, TimeUtil } from '@travetto/base';
+import { Env, TimeUtil } from '@travetto/base';
 
 import type { RunState } from '../../src/execute/types';
 
@@ -16,9 +16,9 @@ export async function runTests(opts: RunState): Promise<void> {
 
   try {
     const res = await new Runner(opts).run();
-    return ShutdownManager.exit(res ? 0 : 1);
+    process.exitCode = res ? 0 : 1;
   } catch (err) {
     console.error('Test Worker Failed', { error: err });
-    return ShutdownManager.exit(1);
+    process.exitCode = 1;
   }
 }

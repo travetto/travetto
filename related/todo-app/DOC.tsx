@@ -21,7 +21,7 @@ async function init() {
     env: { REST_LOG_PATHS: '!*', REST_PORT: `${port}`, REST_SSL: '0' }
   });
 
-  ShutdownManager.onExitRequested(() => cmd.process.kill('SIGKILL'));
+  ShutdownManager.onGracefulShutdown(async () => { cmd.process.kill('SIGKILL'); });
 
   cmd.process.stdout?.on('data', v =>
     startupBuffer.push(Buffer.from(v)));

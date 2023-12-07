@@ -1,227 +1,60 @@
-import { setTimeout } from 'timers/promises';
-import { parentPort } from 'worker_threads';
-
-import { RootIndex } from '@travetto/manifest';
-
-import { ObjectUtil } from './object';
 import { Env } from './env';
-
-export type Closeable = {
-  close(cb?: Function): unknown;
-};
-
-type UnhandledHandler = (err: Error, prom?: Promise<unknown>) => boolean | undefined | void;
-type Listener = { name: string, handler: Function, final?: boolean };
+import { TimeUtil } from './time';
 
 /**
- * Shutdown manager, allowing for hooks into the shutdown process.
- *
- * On a normal shutdown signal (SIGINT, SIGTERM), the shutdown manager
- * will start a timer, and begin executing the shutdown handlers.
- *
- * The handlers should be synchronous and fast, as once a threshold timeout
- * has been hit, the application will force kill itself.
- *
- * If the application receives another SIGTERM/SIGINT while shutting down,
- * it will shutdown immediately.
+ * Shutdown manager, allowing for listening for graceful shutdowns
  */
-class $ShutdownManager {
-  #listeners: Listener[] = [];
-  #shutdownCode = -1;
-  #unhandled: UnhandledHandler[] = [];
-  #exit = process.exit;
-  #exitRequestHandlers: (() => (void | Promise<void>))[] = [];
+export class ShutdownManager {
 
-  async #getAvailableListeners(exitCode: number): Promise<unknown[]> {
-    const promises: Promise<unknown>[] = [];
+  static #registered = false;
+  static #handlers: { name?: string, handler: () => Promise<void> }[] = [];
 
-    // Get valid listeners depending on lifecycle
-    const listeners = this.#listeners.filter(x => exitCode >= 0 || !x.final);
+  /**
+   * On Shutdown requested
+   * @param name name to log for
+   * @param handler synchronous or asynchronous handler
+   */
+  static onGracefulShutdown(handler: () => Promise<void>, name?: string | { constructor: { Ⲑid: string } }): () => void {
+    if (!this.#registered) {
+      this.#registered = true;
+      const done = (): void => { this.gracefulShutdown(0); };
+      process.on('SIGUSR2', done).on('SIGTERM', done).on('SIGINT', done);
+    }
+    this.#handlers.push({ handler, name: typeof name === 'string' ? name : name?.constructor.Ⲑid });
+    return () => {
+      const idx = this.#handlers.findIndex(x => x.handler === handler);
+      if (idx >= 0) {
+        this.#handlers.splice(idx, 1);
+      }
+    };
+  }
 
-    // Retain unused listeners for final attempt, if needed
-    this.#listeners = this.#listeners.filter(x => exitCode < 0 && x.final);
+  /**
+   * Wait for graceful shutdown to run and complete
+   */
+  static async gracefulShutdown(code?: number): Promise<void> {
+    if (this.#handlers.length) {
+      console.debug('Graceful shutdown: started');
 
-    // Handle each listener
-    for (const listener of listeners) {
-      const { name, handler } = listener;
-
-      try {
+      const items = this.#handlers.splice(0, this.#handlers.length);
+      const handlers = Promise.all(items.map(({ name, handler }) => {
         if (name) {
-          console.debug('Starting', { name });
+          console.debug('Stopping', { name });
         }
-        const res = handler();
-        if (ObjectUtil.isPromise(res)) {
-          // If a promise, queue for handling
-          promises.push(res);
-          if (name) {
-            res.then(() => console.debug('Completed', { name }));
-          }
-          res.catch((err: unknown) => console.error('Failed', { error: err, name }));
-        } else {
-          if (name) {
-            console.debug('Completed', { name });
-          }
-        }
-      } catch (err) {
-        console.error('Failed', { name, error: err });
-      }
+        return handler().catch(err => {
+          console.error('Error shutting down', { name, err });
+        });
+      }));
+
+      await Promise.race([
+        TimeUtil.wait(Env.TRV_SHUTDOWN_WAIT.time ?? 2000), // Wait 2s and then force finish
+        handlers,
+      ]);
+
+      console.debug('Graceful shutdown: completed');
     }
-
-    return promises;
-  }
-
-  async executeAsync(exitCode: number = 0, exitErr?: unknown): Promise<void> {
-
-    if (this.#shutdownCode > 0) { // Killed twice
-      if (exitCode > 0) { // Handle force kill
-        this.#exit(exitCode);
-      } else {
-        return;
-      }
-    } else {
-      this.#shutdownCode = exitCode;
+    if (code !== undefined) {
+      process.exit(code);
     }
-
-    const name = RootIndex.mainModuleName;
-
-    try {
-      // If the err is not an exit code
-      if (exitErr && typeof exitErr !== 'number' && exitErr !== 'SIGTERM' && exitErr !== 'SIGKILL') {
-        console.warn('Error on shutdown', { package: name, error: exitErr });
-      }
-
-      // Get list of all pending listeners
-      const promises = await this.#getAvailableListeners(exitCode);
-
-      // Run them all, with the ability for the shutdown to preempt
-      if (promises.length) {
-        const waitTime = Env.TRV_SHUTDOWN_WAIT.time ?? 2000;
-        const finalRun = Promise.race([
-          ...promises,
-          setTimeout(waitTime).then(() => { throw new Error('Timeout on shutdown'); })
-        ]);
-        await finalRun;
-      }
-
-    } catch (err) {
-      console.warn('Error on shutdown', { package: name, error: err });
-    }
-
-    if (this.#shutdownCode >= 0) {
-      this.#exit(this.#shutdownCode);
-    }
-  }
-
-  /**
-   * Begin shutdown process with a given exit code and possible error
-   */
-  execute(exitCode: number = 0, err?: unknown): void {
-    this.executeAsync(exitCode, err); // Fire and forget
-  }
-
-  /**
-   * Execute unhandled behavior
-   */
-  executeUnhandled(err: Error, value?: Promise<unknown>): void {
-    for (const handler of this.#unhandled) {
-      if (handler(err, value)) {
-        return;
-      }
-    }
-    this.execute(1, err);
-  }
-
-  /**
-   * Hook into the process to override the shutdown behavior
-   */
-  register(): void {
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    process.exit = this.execute.bind(this) as (() => never); // NOTE: We do not actually throw an error the first time, to allow for graceful shutdown
-    process.on('SIGINT', this.execute.bind(this, 130));
-    process.on('SIGTERM', this.execute.bind(this, 143));
-    process.on('SIGUSR2', this.requestExit.bind(this));
-    process.on('uncaughtException', this.executeUnhandled.bind(this));
-    process.on('unhandledRejection', this.executeUnhandled.bind(this));
-  }
-
-  /**
-   * Register a shutdown handler
-   * @param name  Class/Function to log for
-   * @param handler Handler or Closeable
-   * @param final If this should be run an attempt to shutdown or only on the final shutdown
-   */
-  onShutdown(src: undefined | string | Function | { constructor: Function }, handler: Function | Closeable, final: boolean = false): () => void {
-    if ('close' in handler) {
-      handler = handler.close.bind(handler);
-    }
-    const name = typeof src === 'undefined' ? '' : (typeof src === 'string' ? src : ('Ⲑid' in src ? src.Ⲑid : src.constructor.Ⲑid));
-    this.#listeners.push({ name, handler, final });
-    return () => this.#listeners.splice(this.#listeners.findIndex(e => e.handler === handler), 1);
-  }
-
-  /**
-   * Listen for unhandled exceptions
-   * @param handler Listener for all uncaught exceptions if valid
-   * @param position Handler list priority
-   */
-  onUnhandled(handler: UnhandledHandler, position = -1): () => void {
-    if (position < 0) {
-      this.#unhandled.push(handler);
-    } else {
-      this.#unhandled.splice(position, 0, handler);
-    }
-    return this.removeUnhandledHandler.bind(this, handler);
-  }
-
-  /**
-   * Remove handler for unhandled exceptions
-   * @param handler The handler to remove
-   */
-  removeUnhandledHandler(handler: UnhandledHandler): void {
-    const index = this.#unhandled.indexOf(handler);
-    if (index >= 0) {
-      this.#unhandled.splice(index, 1);
-    }
-  }
-
-  /**
-   * Trigger exit based on a code or a passed in error
-   */
-  exit(codeOrError: number | Error & { code?: number }): Promise<void> {
-    const code = typeof codeOrError === 'number' ? codeOrError : (codeOrError?.code ?? 1);
-    return this.executeAsync(code);
-  }
-
-  /**
-   * Trigger shutdown, and return response as requested
-   */
-  exitWithResponse(res: unknown, failure = false): Promise<void> {
-    parentPort?.postMessage(res);
-    process.send?.(res);
-    if (res !== undefined) {
-      const msg = typeof res === 'string' ? res : (res instanceof Error ? res.stack : JSON.stringify(res));
-      process[!failure ? 'stdout' : 'stderr'].write(`${msg}\n`);
-    }
-    return this.exit(!failure ? 0 : (res && res instanceof Error ? res : 1));
-  }
-
-  /**
-   * Listen for request for graceful exit
-   */
-  onExitRequested(handler: Closeable | (() => void)): void {
-    if ('close' in handler) {
-      handler = handler.close.bind(handler);
-    }
-    this.#exitRequestHandlers.push(handler);
-  }
-
-  /**
-   * Indicates the program is over, allowing cleanup of any resources that could block process exit
-   */
-  async requestExit(): Promise<void> {
-    await Promise.all(this.#exitRequestHandlers.map(x => x()));
-    await this.exit(process.exitCode ?? 0);
   }
 }
-
-export const ShutdownManager = new $ShutdownManager();

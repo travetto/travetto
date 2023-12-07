@@ -4,7 +4,7 @@ import { rmSync, mkdirSync } from 'fs';
 
 
 import { path } from '@travetto/manifest';
-import { Env, ShutdownManager, ExecUtil, ExecutionState, ExecutionResult, DataUtil } from '@travetto/base';
+import { Env, ExecUtil, ExecutionState, ExecutionResult, DataUtil } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container
@@ -117,7 +117,7 @@ export class DockerContainer {
    * Force destroy of container when the app shuts down
    */
   forceDestroyOnShutdown(): this {
-    ShutdownManager.onShutdown(this.#container, () => this.forceDestroy());
+    process.on('exit', () => this.forceDestroy());
     return this;
   }
 

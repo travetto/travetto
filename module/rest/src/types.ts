@@ -1,4 +1,4 @@
-import type { Closeable, Class } from '@travetto/base';
+import type { Class } from '@travetto/base';
 
 import type { RestInterceptor } from './interceptor/types';
 
@@ -17,7 +17,7 @@ export type RouteHandler = (...args: any[]) => any;
 export type FilterContext<C = unknown> = { req: Request, res: Response, config: C };
 export type Filter<C = unknown> = (context: FilterContext<C>, next: FilterNext) => FilterReturn;
 export type RequestResponseHandler = (req: Request, res: Response) => FilterReturn;
-export type ServerHandle = Closeable & { on(type: 'close', callback: () => void): unknown | void };
+export type ServerHandle = { close(): (void | Promise<void>), on(type: 'close', callback: () => void): unknown | void };
 
 export type ContentType = { type: string, subtype: string, full: string, parameters: Record<string, string> };
 

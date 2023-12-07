@@ -56,9 +56,10 @@ class $ConsoleManager {
    */
   #filters: Partial<Record<LogLevel, (x: ConsoleEvent) => boolean>> = {};
 
-  async register(): Promise<this> {
+  async register(debug: false | string): Promise<this> {
     this.set(console); // Init to console
     await initNpmDebug(this);
+    this.setup(debug);
     return this;
   }
 

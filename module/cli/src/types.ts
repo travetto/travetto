@@ -1,8 +1,11 @@
-import { Closeable, ConcreteClass } from '@travetto/base';
+import { ConcreteClass } from '@travetto/base';
 
 type OrProm<T> = T | Promise<T>;
 
-export type RunResponse = { wait(): Promise<unknown> } | { on(event: 'close', cb: Function): unknown } | Closeable | void | undefined;
+export type RunResponse =
+  { wait(): Promise<unknown> } |
+  { on(event: 'close', cb: Function): unknown } |
+  { close: () => (void | Promise<void>) } | void | undefined;
 
 type ParsedFlag = { type: 'flag', input: string, array?: boolean, fieldName: string, value?: unknown };
 type ParsedArg = { type: 'arg', input: string, array?: boolean, index: number };

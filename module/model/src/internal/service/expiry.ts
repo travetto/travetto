@@ -36,12 +36,8 @@ export class ModelExpiryUtil {
       let running = true;
       const cullInterval = TimeUtil.timeToMs(svc.config?.cullRate ?? '10m');
 
-      ShutdownManager.onShutdown(this, {
-        close(cb) {
-          running = false;
-          cb?.();
-        }
-      });
+      ShutdownManager.onGracefulShutdown(async () => { running = false; }, this);
+
       (async (): Promise<void> => {
         await TimeUtil.wait('1s');  // Wait a second to start culling
         while (running) {
