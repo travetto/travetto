@@ -105,7 +105,7 @@ export class CliUtil {
     // Listen to result if non-empty
     if (result !== undefined && result !== null) {
       if ('close' in result) {
-        ShutdownManager.onShutdown(result, result); // Tie shutdown into app close
+        ShutdownManager.onGracefulShutdown(async () => result.close()); // Tie shutdown into app close
       }
       if ('wait' in result) {
         await result.wait(); // Wait for close signal

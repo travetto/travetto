@@ -13,7 +13,7 @@ export class ParentCommChannel<U = unknown> extends ProcessCommChannel<ChildProc
 
   constructor(state: ExecutionState) {
     super(state.process);
-    ShutdownManager.onShutdown(this, { close: () => this.destroy() });
+    ShutdownManager.onGracefulShutdown(() => this.destroy(), this);
     this.#complete = state.result
       .finally(() => { this.proc = undefined; });
   }

@@ -1,5 +1,4 @@
 import { path } from '@travetto/manifest';
-import { ShutdownManager } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliFlag } from '@travetto/cli';
 import { DockerContainer } from '@travetto/command';
 
@@ -76,7 +75,7 @@ export class OpenApiClientCommand implements CliCommandShape {
 
     const result = await res;
     if (!result.valid) {
-      ShutdownManager.exit(1);
+      process.exitCode = 1;
     }
   }
 }

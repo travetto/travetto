@@ -1,4 +1,4 @@
-import { Env } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { CliCommand, CliUtil } from '@travetto/cli';
 
 import { TestFormat } from './bin/types';
@@ -23,10 +23,7 @@ export class TestWatcherCommand {
       return;
     }
 
-    // Quit on parent disconnect
-    if (process.send) {
-      process.on('disconnect', () => process.exit(0));
-    }
+    ExecUtil.exitOnDisconnect();
 
     try {
       const { TestWatcher } = await import('../src/execute/watcher.js');

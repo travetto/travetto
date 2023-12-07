@@ -200,7 +200,7 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
   </c.Section>
   <c.Section title='Shutdown Management'>
 
-    Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides {d.method('process.exit')} to properly handle {d.input('SIGKILL')} and {d.input('SIGINT')}, with a default threshold of 3 seconds. In the advent of a {d.input('SIGTERM')} signal, the code exits immediately without any cleanup.<br />
+    Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on graceful shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code intercepts {d.input('SIGTERM')} and {d.input('SIGUSR2')}, with a default threshold of 2 seconds. These events will start the shutdown process, but also clear out the pending queue. If a kill signal is sent again, it will complete immediately. <br />
 
     As a registered shutdown handler, you can do.
     <c.Code title='Registering a shutdown handler' src='doc/shutdown.ts' />

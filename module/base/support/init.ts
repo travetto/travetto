@@ -6,7 +6,7 @@ import { ShutdownManager } from '../src/shutdown';
 
 // Setup everything
 let initialized = false;
-export async function init(manageShutdown = true): Promise<void> {
+export async function init(): Promise<void> {
   if (initialized) {
     return;
   }
@@ -36,15 +36,9 @@ export async function init(manageShutdown = true): Promise<void> {
   } catch { } // Register source maps
 
   // Initialize
-  await ConsoleManager.register();
-  ConsoleManager.setup(Env.debug);
-
-  // Register shutdown handler
-  if (manageShutdown) {
-    ShutdownManager.register();
-  }
+  await ConsoleManager.register(Env.debug);
 }
 
 export async function cleanup(): Promise<void> {
-  await ShutdownManager.requestExit();
+  await ShutdownManager.gracefulShutdown(process.exitCode);
 }

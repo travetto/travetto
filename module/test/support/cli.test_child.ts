@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { Env, ShutdownManager } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';
 
 /** Test child worker target */
@@ -16,10 +16,7 @@ export class TestChildWorkerCommand {
   }
 
   async main(): Promise<void> {
-    if (process.send) {
-      // Shutdown when ipc bridge is closed
-      process.on('disconnect', () => ShutdownManager.execute());
-    }
+    ExecUtil.exitOnDisconnect();
     const { TestChildWorker } = await import('../src/worker/child.js');
     return new TestChildWorker().activate();
   }

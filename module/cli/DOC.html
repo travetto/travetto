@@ -486,7 +486,7 @@ By default, cli commands do not expose themselves to the VSCode extension, as th
 
   <figure class="code">
     <figcaption class="code">Anatomy of a Command
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L47">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L50">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">CliCommandShape<span class="token operator">&lt;</span><span class="token constant">T</span> <span class="token keyword">extends</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token builtin">unknown</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">></span></span> <span class="token punctuation">{{'{'}}</span>
@@ -584,11 +584,11 @@ The <code class="item input">module</code> field is slightly more complex, but i
 
 <h3 id="custom-validation">Custom Validation</h3>
 
-In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L33">CliValidationError</a> errors that are returned will be shared with the user, and fail to invoke the <code class="item method">main</code> method.
+In addition to dependency injection, the command contract also allows for a custom validation function, which will have access to bound command (flags, and args) as well as the unknown arguments. When a command implements this method, any <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L36">CliValidationError</a> errors that are returned will be shared with the user, and fail to invoke the <code class="item method">main</code> method.
 
   <figure class="code">
     <figcaption class="code">CliValidationError
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L33">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/types.ts#L36">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">type</span> <span class="token class-name">CliValidationError</span> <span class="token operator">=</span> <span class="token punctuation">{{'{'}}</span>

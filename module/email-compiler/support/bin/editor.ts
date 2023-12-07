@@ -1,4 +1,4 @@
-import { ShutdownManager } from '@travetto/base';
+import { ExecUtil } from '@travetto/base';
 
 import { EmailCompilationManager } from './manager';
 import { EditorSendService } from './send';
@@ -108,7 +108,7 @@ export class EditorState {
       }
     });
 
-    process.on('disconnect', () => ShutdownManager.execute());
+    ExecUtil.exitOnDisconnect();
     process.send?.('ready');
 
     for await (const f of EmailCompiler.watchCompile()) {

@@ -1,7 +1,7 @@
 import rl from 'readline';
 import { ChildProcess, spawn, SpawnOptions } from 'child_process';
 import { Readable } from 'stream';
-import { SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
+import { parentPort, SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
 
 import { path } from '@travetto/manifest';
 
@@ -250,10 +250,7 @@ export class ExecUtil {
     const maxRetries = options.maxRetriesPerMinute ?? 5;
     const restarts: number[] = [];
 
-    // If we are listening, and we become disconnected
-    if (process.send) {
-      process.on('disconnect', () => process.exit(0));
-    }
+    this.exitOnDisconnect();
 
     for (; ;) {
       const state = this.spawn(cmd, args, { outputMode: 'raw', ...options, catchAsResult: true });
@@ -352,6 +349,30 @@ export class ExecUtil {
       proc.kill();
     } else {
       proc.kill('SIGTERM');
+    }
+  }
+
+  /**
+   * Send response to caller
+   */
+  static sendResponse(res: unknown, failure?: boolean): void {
+    parentPort?.postMessage(res);
+    process.send?.(res);
+    if (res !== undefined) {
+      const msg = typeof res === 'string' ? res : (res instanceof Error ? res.stack : JSON.stringify(res));
+      process[!failure ? 'stdout' : 'stderr'].write(`${msg}\n`);
+    }
+    process.exitCode ??= !failure ? 0 : 1;
+  }
+
+  /**
+   * Exit child process on disconnect, in ipc setting
+   */
+  static exitOnDisconnect(): void {
+    // If we are listening, and we become disconnected
+    if (process.send) {
+      // Shutdown when ipc bridge is closed
+      process.on('disconnect', () => process.kill(process.pid, 'SIGTERM'));
     }
   }
 }

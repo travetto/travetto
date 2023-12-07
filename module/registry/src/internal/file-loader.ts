@@ -1,5 +1,5 @@
 import { ManifestModuleUtil, RootIndex } from '@travetto/manifest';
-import { ShutdownManager, CompilerClient } from '@travetto/base';
+import { CompilerClient } from '@travetto/base';
 
 type WatchHandler = Parameters<CompilerClient['onFileChange']>[0];
 type CompilerWatchEvent = Parameters<WatchHandler>[0];
@@ -52,13 +52,15 @@ class $DynamicFileLoader {
 
     await this.#loader.init?.();
 
-    ShutdownManager.onUnhandled(err => {
+    const handle = (err: Error): void => {
       if (err && (err.message ?? '').includes('Cannot find module')) { // Handle module reloading
         console.error('Cannot find module', { error: err });
-        return true;
       }
-    }, 0);
+    };
 
+    process
+      .on('unhandledRejection', handle)
+      .on('uncaughtException', handle);
 
     // Fire off, and let it run in the bg. Restart on exit
     new CompilerClient().onFileChange(async ev => {

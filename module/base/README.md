@@ -408,7 +408,7 @@ export interface ExecutionOptions extends SpawnOptions {
 ```
 
 ## Shutdown Management
-Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code overrides `process.exit` to properly handle `SIGKILL` and `SIGINT`, with a default threshold of 3 seconds. In the advent of a `SIGTERM` signal, the code exits immediately without any cleanup.
+Another key lifecycle is the process of shutting down. The framework provides centralized functionality for running operations on graceful shutdown. Primarily used by the framework for cleanup operations, this provides a clean interface for registering shutdown handlers. The code intercepts `SIGTERM` and `SIGUSR2`, with a default threshold of 2 seconds. These events will start the shutdown process, but also clear out the pending queue. If a kill signal is sent again, it will complete immediately. 
 
 As a registered shutdown handler, you can do.
 
@@ -417,7 +417,7 @@ As a registered shutdown handler, you can do.
 import { ShutdownManager } from '@travetto/base';
 
 export function registerShutdownHandler() {
-  ShutdownManager.onShutdown('handler-name', async () => {
+  ShutdownManager.onGracefulShutdown(async () => {
     // Do important work, the framework will wait until all async
     //   operations are completed before finishing shutdown
   });

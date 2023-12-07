@@ -12,7 +12,7 @@ export class RunnerUtil {
    * Add 50 ms to the shutdown to allow for buffers to output properly
    */
   static registerCleanup(scope: string): void {
-    ShutdownManager.onShutdown(`test.${scope}.bufferOutput`, () => TimeUtil.wait(50));
+    ShutdownManager.onGracefulShutdown(() => TimeUtil.wait(50), `test.${scope}.bufferOutput`);
   }
 
   /**

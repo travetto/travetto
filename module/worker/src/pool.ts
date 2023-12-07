@@ -81,10 +81,10 @@ export class WorkPool<X> {
       validate: async (x: Worker<X>) => x.active
     }, args);
 
-    this.#shutdownCleanup = ShutdownManager.onShutdown(`worker.pool.${this.constructor.name}`, () => {
+    this.#shutdownCleanup = ShutdownManager.onGracefulShutdown(async () => {
       this.#shutdownCleanup = undefined;
       this.shutdown();
-    });
+    }, `worker.pool.${this.constructor.name}`);
 
     this.#trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
   }
@@ -107,7 +107,7 @@ export class WorkPool<X> {
     } catch (err) {
       if (this.#createErrors++ > opts.max!) { // If error count is bigger than pool size, we broke
         console.error('Failed in creating pool', { error: err });
-        await ShutdownManager.exit(1);
+        await ShutdownManager.gracefulShutdown(1);
       }
       throw err;
     } finally {
