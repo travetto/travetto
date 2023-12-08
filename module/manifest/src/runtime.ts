@@ -1,21 +1,26 @@
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, ManifestContext, ManifestRoot } from './types';
+import { FunctionMetadata, ManifestContext, ManifestModule, ManifestRoot } from './types';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
 
-class $RuntimeManifest implements Omit<ManifestContext, 'compilerUrl' | `${string}Folder`> {
+class $RuntimeContext implements ManifestContext {
   #raw: ManifestRoot;
   private update(manifest: ManifestRoot): void { this.#raw = manifest; }
   get mainModule(): string { return this.#raw.mainModule; }
   get version(): string { return this.#raw.version; }
-  get description(): string { return this.#raw.description ?? ''; }
+  get description(): string | undefined { return this.#raw.description; }
   get workspacePath(): string { return this.#raw.workspacePath; }
   get frameworkVersion(): string { return this.#raw.frameworkVersion; }
   get monoRepo(): boolean { return !!this.#raw.monoRepo; }
   get moduleType(): ManifestRoot['moduleType'] { return this.#raw.moduleType; }
   get packageManager(): ManifestRoot['packageManager'] { return this.#raw.packageManager; }
+  get compilerUrl(): string { return this.#raw.compilerUrl; }
+  get compilerFolder(): string { return this.#raw.compilerFolder; }
+  get outputFolder(): string { return this.#raw.outputFolder; }
+  get toolFolder(): string { return this.#raw.toolFolder; }
+  get mainFolder(): string { return this.#raw.mainFolder; }
   /**
    * Produce a workspace relative path
    * @param rel The relative path
@@ -25,7 +30,7 @@ class $RuntimeManifest implements Omit<ManifestContext, 'compilerUrl' | `${strin
   }
 }
 
-export const RuntimeManifest = new $RuntimeManifest();
+export const RuntimeContext = new $RuntimeContext();
 
 /**
  * Extended manifest index geared for application execution
@@ -40,7 +45,7 @@ class $RuntimeIndex extends ManifestIndex {
    */
   reinitForModule(module: string): void {
     this.init(`${this.outputRoot}/node_modules/${module}`);
-    RuntimeManifest['update'](this.manifest);
+    RuntimeContext['update'](this.manifest);
   }
 
   /**
@@ -112,13 +117,20 @@ class $RuntimeIndex extends ManifestIndex {
       .split('#');
     return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
   }
+
+  /**
+   * Get manifest module by name
+   */
+  getManifestModule(mod: string): ManifestModule {
+    return this.manifest.modules[mod];
+  }
 }
 
 let index: $RuntimeIndex | undefined;
 
 try {
   index = new $RuntimeIndex(process.env.TRV_MANIFEST!);
-  RuntimeManifest['update'](index.manifest);
+  RuntimeContext['update'](index.manifest);
 } catch (err) {
   if (process.env.NODE_ENV === 'production') {
     throw err;

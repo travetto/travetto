@@ -2,7 +2,7 @@ import { createRequire } from 'module';
 
 import { EmailCompileSource } from '@travetto/email';
 import { JSXComponentFunction, JSXElement, JSXFragmentType } from '@travetto/email-inky/jsx-runtime';
-import { RuntimeManifest, path } from '@travetto/manifest';
+import { RuntimeContext, path } from '@travetto/manifest';
 
 import { InkyRenderer } from './render/renderer';
 import { Html } from './render/html';
@@ -10,7 +10,7 @@ import { Markdown } from './render/markdown';
 import { Subject } from './render/subject';
 
 export const wrap = (content: JSXElement): EmailCompileSource => {
-  const req = createRequire(`${RuntimeManifest.workspacePath}/node_modules`);
+  const req = createRequire(`${RuntimeContext.workspacePath}/node_modules`);
   const finalContent = { ...content, key: '', type: JSXFragmentType };
 
   return {
