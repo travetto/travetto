@@ -1,4 +1,4 @@
-process.env.TRV_MANIFEST = './.trv/output/node_modules/@travetto/eslint';
+process.env.TRV_MANIFEST = './.trv/output/node_modules/@travetto/mono-repo';
 const { buildConfig } = require('./.trv/output/node_modules/@travetto/eslint/support/bin/eslint-config.js');
 const { RootIndex } = require('./.trv/output/node_modules/@travetto/manifest/__index__.js');
 const pluginFiles = RootIndex.find({ folder: f => f === 'support', file: f => /support\/eslint[.]/.test(f) });
