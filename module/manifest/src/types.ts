@@ -52,7 +52,7 @@ export type ManifestContext = {
   description?: string;
   /** Version of the main module */
   version: string;
-  /** URL for the compiler servier */
+  /** URL for the compiler server */
   compilerUrl: string;
 };
 

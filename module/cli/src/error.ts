@@ -1,4 +1,4 @@
-import { PackageUtil, RuntimeManifest } from '@travetto/manifest';
+import { PackageUtil, RuntimeContext } from '@travetto/manifest';
 import { cliTpl } from './color';
 import { CliValidationError } from './types';
 
@@ -22,7 +22,7 @@ export class CliUnknownCommandError extends Error {
     const matchedCfg = COMMAND_PACKAGE.find(([re]) => re.test(cmd));
     if (matchedCfg) {
       const [, pkg, prod] = matchedCfg;
-      const install = PackageUtil.getInstallCommand(RuntimeManifest, `@travetto/${pkg}`, prod);
+      const install = PackageUtil.getInstallCommand(RuntimeContext, `@travetto/${pkg}`, prod);
       return cliTpl`
 ${{ title: 'Missing Package' }}\n${'-'.repeat(20)}\nTo use ${{ input: cmd }} please run:\n
 ${{ identifier: install }}

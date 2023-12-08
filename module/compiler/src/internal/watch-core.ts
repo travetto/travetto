@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { IndexedModule, ManifestContext, ManifestModuleUtil, RuntimeManifest, path } from '@travetto/manifest';
+import { IndexedModule, ManifestContext, ManifestModuleUtil, RuntimeContext, path } from '@travetto/manifest';
 
 import { AsyncQueue } from '../../support/queue';
 
@@ -92,10 +92,10 @@ export async function* fileWatchEvents(manifest: ManifestContext, modules: Index
     }
   }
 
-  watchForReset(q, RuntimeManifest.workspacePath, [
-    { file: RuntimeManifest.outputFolder, actions: ['delete'] },
-    { file: RuntimeManifest.compilerFolder, actions: ['delete'] },
-    { file: RuntimeManifest.toolFolder, actions: ['delete'] },
+  watchForReset(q, RuntimeContext.workspacePath, [
+    { file: RuntimeContext.outputFolder, actions: ['delete'] },
+    { file: RuntimeContext.compilerFolder, actions: ['delete'] },
+    { file: RuntimeContext.toolFolder, actions: ['delete'] },
     { file: 'package-lock.json', actions: ['delete', 'update', 'create'] },
     { file: 'package.json', actions: ['delete', 'update', 'create'] }
   ], signal);

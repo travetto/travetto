@@ -1,5 +1,5 @@
 import { Class, ClassInstance, Env } from '@travetto/base';
-import { RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { CliCommandShape, CliCommandShapeFields } from './types';
@@ -56,10 +56,10 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       (pendingCls.validators ??= []).push(async item => {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const { module: mod } = item as CliCommandShapeFields;
-        const runModule = (runtimeModule === 'command' ? commandModule : mod) || RuntimeManifest.mainModule;
+        const runModule = (runtimeModule === 'command' ? commandModule : mod) || RuntimeContext.mainModule;
 
         // If we need to run as a specific module
-        if (runModule !== RuntimeManifest.mainModule) {
+        if (runModule !== RuntimeContext.mainModule) {
           try {
             RuntimeIndex.reinitForModule(runModule);
           } catch (err) {

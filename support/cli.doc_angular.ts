@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { Env, ExecUtil } from '@travetto/base';
-import { path, RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
+import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
 
@@ -14,7 +14,7 @@ const page = (f: string): string => path.resolve('related/travetto.github.io/src
 @CliCommand()
 export class DocAngularCommand {
   async main(target?: string): Promise<void> {
-    const root = RuntimeManifest.workspacePath;
+    const root = RuntimeContext.workspacePath;
 
     if (target && target.startsWith(root)) {
       target = target.replace(root, '').split('/').pop()!;
