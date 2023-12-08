@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
 import { Env } from '@travetto/base';
 
@@ -55,11 +55,11 @@ export class PackOperation {
    * Invoke bundler (rollup) to produce output in workspace folder
    */
   static async * bundle(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const cwd = RootIndex.outputRoot;
+    const cwd = RuntimeIndex.outputRoot;
 
-    const bundleCommand = ['npx', 'rollup', '-c', RootIndex.resolveFileImport(cfg.rollupConfiguration)];
+    const bundleCommand = ['npx', 'rollup', '-c', RuntimeIndex.resolveFileImport(cfg.rollupConfiguration)];
 
-    const entryPointFile = RootIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RootIndex.manifest.outputFolder}/`)[1];
+    const entryPointFile = RuntimeIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RuntimeContext.outputFolder}/`)[1];
 
     const env = {
       ...Object.fromEntries(([
@@ -69,12 +69,12 @@ export class PackOperation {
         ['BUNDLE_SOURCEMAP', cfg.sourcemap],
         ['BUNDLE_SOURCES', cfg.includeSources],
         ['BUNDLE_OUTPUT', cfg.workspace],
-        ['BUNDLE_FORMAT', RootIndex.manifest.moduleType],
+        ['BUNDLE_FORMAT', RuntimeContext.moduleType],
       ] as const)
         .filter(x => x[1] === false || x[1])
         .map(x => [x[0], `${x[1]}`])
       ),
-      ...Env.TRV_MANIFEST.export(RootIndex.getModule(cfg.module)!.outputPath),
+      ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(cfg.module)!.outputPath),
     };
 
     const props = (['minify', 'sourcemap', 'entryPoint'] as const)
@@ -101,7 +101,7 @@ export class PackOperation {
    */
   static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = 'package.json';
-    const pkg = { type: RootIndex.manifest.moduleType, main: `${cfg.mainName}.js` };
+    const pkg = { type: RuntimeContext.moduleType, main: `${cfg.mainName}.js` };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 
@@ -184,8 +184,8 @@ export class PackOperation {
    */
   static async * copyResources(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const resources = {
-      count: RootIndex.mainModule.files.resources?.length ?? 0,
-      src: path.resolve(RootIndex.mainModule.sourcePath, 'resources'),
+      count: RuntimeIndex.mainModule.files.resources?.length ?? 0,
+      src: path.resolve(RuntimeIndex.mainModule.sourcePath, 'resources'),
       dest: path.resolve(cfg.workspace, 'resources')
     };
 

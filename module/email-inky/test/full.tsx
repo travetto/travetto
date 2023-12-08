@@ -3,7 +3,7 @@
 import assert from 'assert';
 
 import { Suite, Test } from '@travetto/test';
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 import { Container, If, Unless, Summary, Title, Value, InkyTemplate, unwrap } from '../__index__';
 
 @Suite('InkyTemplate')
@@ -22,7 +22,7 @@ class ContainerTest {
     const state = {
       ...(await unwrap(input))!,
       file: 'test',
-      module: RootIndex.mainModuleName,
+      module: RuntimeContext.mainModule,
     };
 
     assert(input);
@@ -57,7 +57,7 @@ class ContainerTest {
     const state = {
       ...(await unwrap(input))!,
       file: 'test',
-      module: RootIndex.mainModuleName,
+      module: RuntimeContext.mainModule,
     };
 
     assert(state);
@@ -80,7 +80,7 @@ class ContainerTest {
     const state = {
       ...(await unwrap(input))!,
       file: 'test',
-      module: RootIndex.mainModuleName,
+      module: RuntimeContext.mainModule,
     };
 
     const output = await state.html(state);

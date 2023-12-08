@@ -1,6 +1,6 @@
 import { Module } from 'module';
 
-import { RootIndex, path } from '@travetto/manifest';
+import { RuntimeIndex, path } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 
 import { RetargettingProxy } from '../proxy';
@@ -44,7 +44,7 @@ export class DynamicCommonjsLoader {
 
       const fileName = Module._resolveFilename!(request, parent);
       // Only proxy local modules
-      if (RootIndex.getModuleFromSource(fileName)?.local) {
+      if (RuntimeIndex.getModuleFromSource(fileName)?.local) {
         return proxyModuleLoad ? proxyModuleLoad(fileName, mod) : mod;
       } else {
         return mod;

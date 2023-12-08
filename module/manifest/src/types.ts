@@ -1,4 +1,5 @@
 export type NodeModuleType = 'module' | 'commonjs';
+export type NodePackageManager = 'yarn' | 'npm';
 
 export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture' | 'md';
 export type ManifestModuleFolderType =
@@ -28,18 +29,31 @@ export type ManifestModule = ManifestModuleCore & {
 };
 
 export type ManifestContext = {
+  /** Main module for manifest */
   mainModule: string;
+  /** Folder, relative to workspace for main module */
   mainFolder: string;
+  /** Workspace path for module */
   workspacePath: string;
+  /** Code output folder, relative to workspace */
   outputFolder: string;
+  /** Tooling folder, relative to workspace */
   toolFolder: string;
+  /** Compiler folder, relative to workspace */
   compilerFolder: string;
+  /** Is the manifest for a module in a monorepo? */
   monoRepo?: boolean;
+  /** The module type of the workspace */
   moduleType: NodeModuleType;
-  packageManager: 'yarn' | 'npm';
+  /** The package manager of the workspace */
+  packageManager: NodePackageManager;
+  /** The version of the framework being used */
   frameworkVersion: string;
+  /** Description of the main module */
   description?: string;
+  /** Version of the main module */
   version: string;
+  /** URL for the compiler server */
   compilerUrl: string;
 };
 

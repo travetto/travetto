@@ -9,16 +9,16 @@ const MANIFEST_MOD = '@travetto/manifest';
 const MANIFEST_IDX = `${MANIFEST_MOD}/__index__`;
 const ENTRY_POINT = 'support/entry';
 
-const ROOT_IDX_IMPORT = `${MANIFEST_MOD}/src/root-index`;
-const ROOT_IDX_CLS = 'RootIndex';
+const RUNTIME_IDX_IMPORT = `${MANIFEST_MOD}/src/runtime`;
+const RUNTIME_IDX_CLS = 'RuntimeIndex';
 
 const methods = Symbol.for(`${MANIFEST_MOD}:methods`);
 const cls = Symbol.for(`${MANIFEST_MOD}:class`);
 const fn = Symbol.for(`${MANIFEST_MOD}:function`);
-const rootIdx = Symbol.for(`${MANIFEST_MOD}:rootIndex`);
+const runtimeIdx = Symbol.for(`${MANIFEST_MOD}:runtimeIndex`);
 
 interface MetadataInfo {
-  [rootIdx]?: Import;
+  [runtimeIdx]?: Import;
   [methods]?: {
     [key: string]: { hash: number };
   };
@@ -72,8 +72,8 @@ export class RegisterTransformer {
       return node;
     }
 
-    state[rootIdx] ??= state.importFile(ROOT_IDX_IMPORT);
-    const ident = state.createAccess(state[rootIdx].ident, ROOT_IDX_CLS);
+    state[runtimeIdx] ??= state.importFile(RUNTIME_IDX_IMPORT);
+    const ident = state.createAccess(state[runtimeIdx].ident, RUNTIME_IDX_CLS);
 
     const name = node.name?.escapedText.toString() ?? '';
 
@@ -117,8 +117,8 @@ export class RegisterTransformer {
 
     if (ts.isFunctionDeclaration(node) && node.name && node.parent && ts.isSourceFile(node.parent)) {
       // If we have a class like function
-      state[rootIdx] ??= state.importFile(ROOT_IDX_IMPORT);
-      const ident = state.createAccess(state[rootIdx].ident, ROOT_IDX_CLS);
+      state[runtimeIdx] ??= state.importFile(RUNTIME_IDX_IMPORT);
+      const ident = state.createAccess(state[runtimeIdx].ident, RUNTIME_IDX_CLS);
       const meta = state.factory.createCallExpression(
         state.createAccess(ident, 'registerFunction'),
         [],

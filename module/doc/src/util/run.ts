@@ -1,6 +1,6 @@
 import os from 'os';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { stripAnsiCodes } from '@travetto/terminal';
 
@@ -51,7 +51,7 @@ export class DocRunUtil {
   static #docState = new DocState();
 
   static runState(cmd: string, args: string[], config: RunConfig = {}): RunState {
-    const cwd = config.cwd ?? (config.module ? RootIndex.getModule(config.module)! : RootIndex.mainModule).sourcePath;
+    const cwd = config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : RuntimeIndex.mainModule).sourcePath;
     args = [...args];
     return {
       cmd,
@@ -79,11 +79,11 @@ export class DocRunUtil {
    * Clean run output
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
-    const cwd = path.toPosix((cfg.module ? RootIndex.getModule(cfg.module)! : RootIndex.mainModule).sourcePath);
+    const cwd = path.toPosix((cfg.module ? RuntimeIndex.getModule(cfg.module)! : RuntimeIndex.mainModule).sourcePath);
     text = stripAnsiCodes(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
-      .replaceAll(RootIndex.manifest.workspacePath, '<workspace-root>')
+      .replaceAll(RuntimeContext.workspacePath, '<workspace-root>')
       .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
       .replace(/^(\s*framework:\s*')(\d+[.]\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x${post}`)
       .replace(/^(\s*nodeVersion:\s*'v)(\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x.x${post}`)

@@ -74,11 +74,17 @@ export class ManifestIndex {
   }
 
   init(manifestInput: string): void {
-    const { manifest, file } = ManifestUtil.readManifestSync(manifestInput);
-    this.#manifest = manifest;
-    this.#manifestFile = file;
-    this.#outputRoot = path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
-    this.#index();
+    try {
+      const { manifest, file } = ManifestUtil.readManifestSync(manifestInput);
+      this.#manifest = manifest;
+      this.#manifestFile = file;
+      this.#outputRoot = path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
+      this.#index();
+    } catch (err) {
+      if (process.env.NODE_ENV === 'production') {
+        throw err;
+      }
+    }
   }
 
   #moduleFiles(m: ManifestModule, files: ManifestModuleFile[]): IndexedFile[] {

@@ -1,6 +1,6 @@
 import util from 'util';
 
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import type { ConsoleListener, ConsoleEvent, LogLevel } from './types';
 
@@ -84,7 +84,7 @@ class $ConsoleManager {
    */
   setup(debug: false | string): void {
     if (debug !== false) {
-      const active = RootIndex.getModuleList('local', debug || '@');
+      const active = RuntimeIndex.getModuleList('local', debug || '@');
       active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
     } else {
@@ -97,8 +97,8 @@ class $ConsoleManager {
    */
   invoke(ev: ConsoleEvent): void {
     // Resolve input to source file
-    const source = ev.source ? RootIndex.getSourceFile(ev.source) : RootIndex.mainModule.outputPath;
-    const mod = RootIndex.getModuleFromSource(source);
+    const source = ev.source ? RuntimeIndex.getSourceFile(ev.source) : RuntimeIndex.mainModule.outputPath;
+    const mod = RuntimeIndex.getModuleFromSource(source);
     const outEv = {
       ...ev,
       timestamp: new Date(),

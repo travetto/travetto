@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 
 import { ExecUtil } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, ParsedState } from '@travetto/cli';
-import { path, RootIndex } from '@travetto/manifest';
+import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Ignore } from '@travetto/schema';
 
 /**
@@ -18,10 +18,10 @@ export class MainCommand implements CliCommandShape {
     // If referenced file exists
     let file = fileOrImport;
     if (await (fs.stat(path.resolve(fileOrImport)).then(() => true, () => false))) {
-      file = path.join(RootIndex.manifest.mainModule, fileOrImport);
+      file = path.join(RuntimeContext.mainModule, fileOrImport);
     }
 
-    return RootIndex.getFromImport(file)?.import;
+    return RuntimeIndex.getFromImport(file)?.import;
   }
 
   async validate(fileOrImport: string): Promise<CliValidationError | undefined> {

@@ -2,7 +2,7 @@ import assert from 'assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { ExecUtil } from '@travetto/base';
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import { WorkPool } from '../src/pool';
 import { IterableWorkSet } from '../src/input/iterable';
@@ -27,7 +27,7 @@ export class PoolExecTest {
 
     const pool = new WorkPool(() =>
       WorkUtil.spawnedWorker<{ data: string }, string>(
-        () => ExecUtil.fork(launcher, [], { cwd: RootIndex.outputRoot }),
+        () => ExecUtil.fork(launcher, [], { cwd: RuntimeIndex.outputRoot }),
         ch => ch.once('ready'),
         async (channel, inp: string) => {
           const res = channel.once('response');

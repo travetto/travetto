@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { ExecUtil } from '@travetto/base';
-import { IndexedFile, IndexedModule, RootIndex, path } from '@travetto/manifest';
+import { IndexedFile, IndexedModule, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
 
 export class CliScmUtil {
   /**
@@ -33,8 +33,7 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string | undefined> {
-    const root = await RootIndex.manifest;
-    const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: root.workspacePath });
+    const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspacePath });
     return (await result).stdout
       .split(/\n/)
       .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
@@ -46,11 +45,11 @@ export class CliScmUtil {
    * @returns
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
-    const ws = RootIndex.manifest.workspacePath;
+    const ws = RuntimeContext.workspacePath;
     const res = await ExecUtil.spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
     const out = new Set<string>();
     for (const line of res.stdout.split(/\n/g)) {
-      const entry = RootIndex.getEntry(path.resolve(ws, line));
+      const entry = RuntimeIndex.getEntry(path.resolve(ws, line));
       if (entry) {
         out.add(entry.sourceFile);
       }
@@ -67,9 +66,9 @@ export class CliScmUtil {
   static async findChangedModules(fromHash: string, toHash?: string): Promise<IndexedModule[]> {
     const files = await this.findChangedFiles(fromHash, toHash);
     const mods = files
-      .map(x => RootIndex.getFromSource(x))
+      .map(x => RuntimeIndex.getFromSource(x))
       .filter((x): x is IndexedFile => !!x)
-      .map(x => RootIndex.getModule(x.module))
+      .map(x => RuntimeIndex.getModule(x.module))
       .filter((x): x is IndexedModule => !!x);
 
     return [...new Set(mods)]

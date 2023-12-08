@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { ManifestFileUtil, path, RootIndex } from '@travetto/manifest';
+import { ManifestFileUtil, path, RuntimeIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
 import { OpenApiClientPresets } from './presets';
 import { ExecUtil } from '@travetto/base';
@@ -11,7 +11,7 @@ import { ExecUtil } from '@travetto/base';
 export class OpenApiClientHelp {
 
   static async getListOfFormats(dockerImage: string): Promise<string[]> {
-    const formatCache = ManifestFileUtil.toolPath(RootIndex, 'openapi-formats.json');
+    const formatCache = ManifestFileUtil.toolPath(RuntimeIndex, 'openapi-formats.json');
     if (!await fs.stat(formatCache).catch(() => false)) {
       const stdout = ExecUtil.spawn('docker', ['run', '--rm', dockerImage, 'list']);
       const res = await stdout.result;
