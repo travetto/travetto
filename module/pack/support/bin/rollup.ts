@@ -4,7 +4,7 @@ import terser from '@rollup/plugin-terser';
 import jsonImport from '@rollup/plugin-json';
 import type { RollupOptions } from 'rollup';
 
-import { RuntimeIndex } from '@travetto/manifest';
+import { RuntimeManifest } from '@travetto/manifest';
 
 import { getEntry, getOutput, getTerserConfig, getFiles, getIgnoredModules } from './config';
 import { travettoImportPlugin } from './rollup-esm-dynamic-import';
@@ -26,7 +26,7 @@ export default function buildConfig(): RollupOptions {
       jsonImport(),
       commonjsRequire({
         ignore: id => ignoreRe.test(id) || NEVER_INCLUDE.has(id),
-        dynamicRequireRoot: RuntimeIndex.manifest.workspacePath,
+        dynamicRequireRoot: RuntimeManifest.workspacePath,
         dynamicRequireTargets: (output.format === 'commonjs' ? files : [])
       }),
       ...(output.format === 'module' ? [travettoImportPlugin(entry, files)] : []),

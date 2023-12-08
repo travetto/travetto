@@ -5,7 +5,7 @@ import os from 'os';
 
 import { Readable } from 'stream';
 
-import { path, RuntimeIndex } from '@travetto/manifest';
+import { path, RuntimeManifest } from '@travetto/manifest';
 import { StreamUtil, Class, TimeSpan } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config } from '@travetto/config';
@@ -37,7 +37,7 @@ export class FileModelConfig {
   cullRate?: number | TimeSpan;
 
   async postConstruct(): Promise<void> {
-    this.folder ??= path.resolve(os.tmpdir(), `trv_file_${RuntimeIndex.manifest.mainModule.replace(/[^a-z]/ig, '_')}`);
+    this.folder ??= path.resolve(os.tmpdir(), `trv_file_${RuntimeManifest.mainModule.replace(/[^a-z]/ig, '_')}`);
   }
 }
 

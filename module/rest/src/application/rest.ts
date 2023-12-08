@@ -1,4 +1,4 @@
-import { RuntimeIndex } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
 import { Class, AppError, Util, Env } from '@travetto/base';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
@@ -41,8 +41,8 @@ export class RestApplication<T = unknown>  {
 
   async postConstruct(): Promise<void> {
     this.info = {
-      module: RuntimeIndex.manifest.mainModule,
-      version: RuntimeIndex.manifest.version,
+      module: RuntimeManifest.mainModule,
+      version: RuntimeManifest.version,
       env: Env.name
     };
 
