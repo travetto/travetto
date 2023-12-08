@@ -5,7 +5,7 @@ import type {
 } from 'openapi3-ts/oas31';
 
 import { EndpointConfig, ControllerConfig, ParamConfig, EndpointIOType, ControllerVisitor } from '@travetto/rest';
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { Class } from '@travetto/base';
 import { SchemaRegistry, FieldConfig, ClassConfig, SchemaNameResolver } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
@@ -218,11 +218,11 @@ export class OpenapiVisitor implements ControllerVisitor<GeneratedSpec> {
         }
 
         const extra: Record<string, unknown> = {};
-        if (RootIndex.getFunctionMetadata(cls)?.abstract) {
+        if (RuntimeIndex.getFunctionMetadata(cls)?.abstract) {
           const map = SchemaRegistry.getSubTypesForClass(cls);
           if (map) {
             extra.oneOf = map
-              .filter(x => !RootIndex.getFunctionMetadata(x)?.abstract)
+              .filter(x => !RuntimeIndex.getFunctionMetadata(x)?.abstract)
               .map(c => {
                 this.onSchema(SchemaRegistry.get(c));
                 return this.#getType(c);

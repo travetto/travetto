@@ -4,7 +4,7 @@ import {
   ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util,
   FileLoader, TimeUtil, ResourceLoader, EnvProp
 } from '@travetto/base';
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 const ConsoleManager = d.codeLink('ConsoleManager', 'src/console.ts', /(class|function)\s*[$]ConsoleManager/);
 const EnvLink = d.codeLink('Env', 'src/env.ts', /export const Env/);
@@ -96,7 +96,7 @@ export const text = <>
 
     <c.Code title='Sample logging at various levels' src='doc/transpile.ts' />
 
-    <c.Code title='Sample After Transpilation' src={RootIndex.resolveFileImport('@travetto/base/doc/transpile.ts')} language='javascript' />
+    <c.Code title='Sample After Transpilation' src={RuntimeIndex.resolveFileImport('@travetto/base/doc/transpile.ts')} language='javascript' />
 
     <c.SubSection title='Filtering Debug'>
 

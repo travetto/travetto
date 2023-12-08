@@ -4,7 +4,7 @@ import { configs } from '@eslint/js';
 import * as tsEslintPlugin from '@typescript-eslint/eslint-plugin';
 import { existsSync, readFileSync } from 'fs';
 
-import { path, RootIndex } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 
 import { IGNORES, RULE_COMMON } from './eslint-common';
 import { STD_RULES } from './eslint-std-rules';
@@ -19,7 +19,7 @@ export function buildConfig(pluginMaps: Record<string, TrvEslintPlugin>[]): read
     }
   }
 
-  const overrides = path.resolve(RootIndex.manifest.workspacePath, 'eslint-overrides.json');
+  const overrides = RuntimeContext.workspaceRelative('eslint-overrides.json');
 
   const extra: (typeof STD_RULES)[] = existsSync(overrides) ? JSON.parse(readFileSync(overrides, 'utf8')) : [];
 

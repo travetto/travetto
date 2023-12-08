@@ -1,6 +1,6 @@
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata } from './types';
+import { FunctionMetadata, ManifestContext, ManifestModule } from './types';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
@@ -8,7 +8,7 @@ type Metadated = { [METADATA]: FunctionMetadata };
 /**
  * Extended manifest index geared for application execution
  */
-class $RootIndex extends ManifestIndex {
+class $RuntimeIndex extends ManifestIndex {
 
   #metadata = new Map<string, FunctionMetadata>();
 
@@ -21,13 +21,6 @@ class $RootIndex extends ManifestIndex {
   }
 
   /**
-   * Determines if the manifest root is the root for a monorepo
-   */
-  isMonoRepoRoot(): boolean {
-    return !!this.manifest.monoRepo && !this.manifest.mainFolder;
-  }
-
-  /**
    * Get internal id from file name and optionally, class name
    */
   getId(filename: string, clsName?: string): string {
@@ -37,17 +30,10 @@ class $RootIndex extends ManifestIndex {
   }
 
   /**
-   * Get main module name
-   */
-  get mainModuleName(): string {
-    return this.manifest.mainModule;
-  }
-
-  /**
    * Get main module for manifest
    */
   get mainModule(): IndexedModule {
-    return this.getModule(this.mainModuleName)!;
+    return this.getModule(this.manifest.mainModule)!;
   }
 
   /**
@@ -103,16 +89,42 @@ class $RootIndex extends ManifestIndex {
       .split('#');
     return path.resolve(this.hasModule(base) ? this.getModule(base)!.sourcePath : base, sub ?? '.');
   }
-}
 
-let index: $RootIndex | undefined;
+  /**
+   * Get manifest module by name
+   */
+  getManifestModule(mod: string): ManifestModule {
+    return this.manifest.modules[mod];
+  }
 
-try {
-  index = new $RootIndex(process.env.TRV_MANIFEST!);
-} catch (err) {
-  if (process.env.NODE_ENV === 'production') {
-    throw err;
+  /**
+   * Get manifest modules
+   */
+  getManifestModules(): ManifestModule[] {
+    return Object.values(this.manifest.modules);
   }
 }
 
-export const RootIndex: $RootIndex = index!;
+export const RuntimeIndex = new $RuntimeIndex(process.env.TRV_MANIFEST!);
+
+const build = <T extends object>(inp: T, props: (keyof ManifestContext)[]): T & ManifestContext => {
+  for (const prop of props) {
+    Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
+  }
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return inp as T & ManifestContext;
+};
+
+export const RuntimeContext = build({
+  /**
+   * Produce a workspace relative path
+   * @param rel The relative path
+   */
+  workspaceRelative(...rel: string[]): string {
+    return path.resolve(RuntimeIndex.manifest.workspacePath, ...rel);
+  }
+}, [
+  'mainModule', 'version', 'description', 'workspacePath', 'frameworkVersion',
+  'monoRepo', 'moduleType', 'packageManager', 'compilerUrl', 'compilerFolder',
+  'outputFolder', 'toolFolder', 'mainFolder',
+]);

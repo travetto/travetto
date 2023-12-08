@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { ManifestModuleUtil, path, RootIndex } from '@travetto/manifest';
+import { ManifestModuleUtil, path, RuntimeIndex } from '@travetto/manifest';
 
 const ESLINT_PATTERN = /\s*\/\/ eslint.*$/g;
 const ENV_KEY = /Env.([^.]+)[.]key/g;
@@ -32,7 +32,7 @@ export class DocFileUtil {
     let resolved = path.resolve(file);
     if (!(await fs.stat(resolved).catch(() => false))) {
       if (ManifestModuleUtil.getFileType(file) === 'ts') {
-        resolved = RootIndex.getSourceFile(file);
+        resolved = RuntimeIndex.getSourceFile(file);
       }
       if (!(await fs.stat(resolved).catch(() => false))) {
         throw new Error(`Unknown file to resolve: ${file}`);

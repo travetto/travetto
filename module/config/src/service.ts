@@ -2,7 +2,7 @@ import util from 'util';
 
 import { AppError, Class, ClassInstance, DataUtil, Env, ResourceLoader } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ConfigSourceTarget, ConfigTarget } from './internal/types';
@@ -127,7 +127,7 @@ export class ConfigurationService {
           const ogMessage = err.message;
           err.message = `Failed to construct ${cls.Ⲑid} as validation errors have occurred`;
           err.stack = err.stack?.replace(ogMessage, err.message);
-          const file = RootIndex.getFunctionMetadata(cls)!.source;
+          const file = RuntimeIndex.getFunctionMetadata(cls)!.source;
           err.payload = { class: cls.Ⲑid, file, ...(err.payload ?? {}) };
         }
         throw err;
@@ -145,11 +145,11 @@ export class ConfigurationService {
 
     console.log('Initialized', {
       manifest: {
-        mainModule: RootIndex.manifest.mainModule,
-        frameworkVersion: RootIndex.manifest.frameworkVersion,
-        version: RootIndex.manifest.version,
-        moduleType: RootIndex.manifest.moduleType,
-        workspacePath: RootIndex.manifest.workspacePath
+        mainModule: RuntimeContext.mainModule,
+        frameworkVersion: RuntimeContext.frameworkVersion,
+        version: RuntimeContext.version,
+        moduleType: RuntimeContext.moduleType,
+        workspacePath: RuntimeContext.workspacePath
       },
       env: {
         name: Env.name,

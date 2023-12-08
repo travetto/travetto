@@ -2,15 +2,15 @@
 import { readFileSync } from 'fs';
 
 import { d, c } from '@travetto/doc';
-import { ManifestRoot, path, RootIndex } from '@travetto/manifest';
+import { ManifestRoot, path, RuntimeIndex } from '@travetto/manifest';
 import { COMMON_DATE } from '@travetto/doc/src/util/run';
 
-const RootIndexRef = d.codeLink('RootIndex', 'src/root-index.ts', /class .*RootIndex/);
+const RuntimeIndexRef = d.codeLink('RuntimeIndex', 'src/runtime.ts', /class .*RuntimeIndex/);
 const DeltaRef = d.codeLink('ManifestDeltaUtil', 'src/delta.ts', /class ManifestDeltaUtil/);
 
 
 const manifest = () => {
-  const obj: ManifestRoot = JSON.parse(readFileSync(path.resolve(RootIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json'), 'utf8'));
+  const obj: ManifestRoot = JSON.parse(readFileSync(path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json'), 'utf8'));
   const modules = Object.fromEntries(Object.entries(obj.modules).filter(([k]) => k === '@travetto/manifest'));
   // @ts-expect-error
   delete obj.modules;
@@ -60,11 +60,11 @@ export const text = <>
 
     For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every {d.input('class')} is decorated with an additional field of {d.input('Ⲑid')}.  {d.input('Ⲑid')} represents a computed id that is tied to the file/class combination. <br />
 
-    {d.input('Ⲑid')} is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the {RootIndexRef} using the {d.method('getFunctionMetadata')} method.
+    {d.input('Ⲑid')} is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the {RuntimeIndexRef} using the {d.method('getFunctionMetadata')} method.
 
     <c.Code title='Test Class' src='./doc/test-class.ts' />
 
-    <c.Code title='Test Class Compiled' src={RootIndex.getFromImport('@travetto/manifest/doc/test-class')!.outputFile} />
+    <c.Code title='Test Class Compiled' src={RuntimeIndex.getFromImport('@travetto/manifest/doc/test-class')!.outputFile} />
 
     <c.Execution title='Index Lookup at Runtime' cmd='trv' args={['main', './doc/lookup.ts']} />
   </c.Section>
