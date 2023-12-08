@@ -1,4 +1,5 @@
 import assert from 'assert';
+import timers from 'timers/promises';
 
 import { Suite, Test } from '@travetto/test';
 import { TimeSpan, TimeUnit, TimeUtil } from '@travetto/base';
@@ -22,7 +23,7 @@ export abstract class ModelExpirySuite extends BaseModelSuite<ModelExpirySupport
   delayFactor: number = 1;
 
   async wait(n: number | TimeSpan) {
-    await TimeUtil.wait(TimeUtil.timeToMs(n) * this.delayFactor);
+    await timers.setTimeout(TimeUtil.timeToMs(n) * this.delayFactor);
   }
 
   timeFromNow(v: number | TimeSpan, unit?: TimeUnit) {

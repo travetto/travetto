@@ -1,6 +1,5 @@
 import assert from 'assert';
-
-import { TimeUtil } from '@travetto/base';
+import timers from 'timers/promises';
 
 import { Test } from '../src/decorator/test';
 import { Suite, BeforeAll, AfterEach, AfterAll, BeforeEach } from '../src/decorator/suite';
@@ -60,7 +59,7 @@ class Simple {
 
   @Test()
   async test1d() {
-    await TimeUtil.wait(100);
+    await timers.setTimeout(100);
     assert(1 === a);
   }
 

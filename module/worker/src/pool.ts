@@ -1,7 +1,8 @@
 import os from 'os';
 import gp from 'generic-pool';
+import timers from 'timers/promises';
 
-import { Env, ShutdownManager, TimeUtil } from '@travetto/base';
+import { Env, ShutdownManager } from '@travetto/base';
 
 import { WorkSet } from './input/types';
 import { ManualAsyncIterator } from '../src/input/async-iterator';
@@ -203,7 +204,7 @@ export class WorkPool<X> {
     this.#shutdownCleanup?.();
 
     while (this.#pendingAcquires) {
-      await TimeUtil.wait(10);
+      await timers.setTimeout(10);
     }
     await this.#pool.drain();
     await this.#pool.clear();

@@ -1,4 +1,6 @@
-import { Env, TimeUtil } from '@travetto/base';
+import timers from 'timers/promises';
+
+import { Env } from '@travetto/base';
 
 import type { RunState } from '../../src/execute/types';
 
@@ -12,7 +14,7 @@ export async function runTests(opts: RunState): Promise<void> {
 
   RunnerUtil.registerCleanup('runner');
 
-  await TimeUtil.wait(Env.TRV_TEST_DELAY.time ?? 0);
+  await timers.setTimeout(Env.TRV_TEST_DELAY.time ?? 0);
 
   try {
     const res = await new Runner(opts).run();

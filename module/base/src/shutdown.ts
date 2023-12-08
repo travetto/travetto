@@ -1,5 +1,6 @@
+import timers from 'timers/promises';
+
 import { Env } from './env';
-import { TimeUtil } from './time';
 
 /**
  * Shutdown manager, allowing for listening for graceful shutdowns
@@ -47,7 +48,7 @@ export class ShutdownManager {
       }));
 
       await Promise.race([
-        TimeUtil.wait(Env.TRV_SHUTDOWN_WAIT.time ?? 2000), // Wait 2s and then force finish
+        timers.setTimeout(Env.TRV_SHUTDOWN_WAIT.time ?? 2000), // Wait 2s and then force finish
         handlers,
       ]);
 

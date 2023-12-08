@@ -1,6 +1,6 @@
-import { DependencyRegistry } from '@travetto/di';
-import { TimeUtil } from '@travetto/base';
+import timers from 'timers/promises';
 
+import { DependencyRegistry } from '@travetto/di';
 import { type Request, RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '@travetto/rest';
 
 import { RestServerSupport, MakeRequestConfig, headerToShape } from './base';
@@ -41,7 +41,7 @@ export class CoreRestServerSupport implements RestServerSupport {
         await fetch(this.url);
         break; // We good
       } catch {
-        await TimeUtil.wait(100);
+        await timers.setTimeout(100);
       }
     }
 

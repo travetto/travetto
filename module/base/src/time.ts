@@ -1,5 +1,3 @@
-import timers from 'timers/promises';
-
 const MIN = 1000 * 60;
 const DAY = 24 * MIN * 60;
 const TIME_UNITS = {
@@ -69,13 +67,6 @@ export class TimeUtil {
    */
   static timeFromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date {
     return new Date(Date.now() + this.timeToMs(amount, unit));
-  }
-
-  /**
-   * Wait for 'amount' units of time
-   */
-  static wait(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Promise<void> {
-    return timers.setTimeout(this.timeToMs(amount, unit));
   }
 
   /**

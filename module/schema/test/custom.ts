@@ -1,8 +1,8 @@
 import assert from 'assert';
+import timers from 'timers/promises';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
-import { TimeUtil } from '@travetto/base';
 
 import { Schema, Validator } from '../src/decorator/schema';
 import { SchemaValidator } from '../src/validate/validator';
@@ -32,7 +32,7 @@ class User {
   const hasNum = /\d/.test(p);
   const hasSpecial = /[!@#$%%^&*()<>?/,.;':"']/.test(p);
   const noRepeat = !/(.)(\1)/.test(p);
-  await TimeUtil.wait(10);
+  await timers.setTimeout(10);
   if (!hasNum || !hasSpecial || !noRepeat) {
     return {
       kind: 'password-rules',

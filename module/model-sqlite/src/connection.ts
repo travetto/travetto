@@ -1,9 +1,10 @@
 import fs from 'fs/promises';
+import timers from 'timers/promises';
 import sqlDb, * as sqlite3 from 'better-sqlite3';
 import pool from 'generic-pool';
 
 import { ManifestFileUtil, RootIndex, path } from '@travetto/manifest';
-import { ShutdownManager, TimeUtil } from '@travetto/base';
+import { ShutdownManager } from '@travetto/base';
 import { AsyncContext, WithAsyncContext } from '@travetto/context';
 import { ExistsError } from '@travetto/model';
 import { SQLModelConfig, Connection } from '@travetto/model-sql';
@@ -33,7 +34,7 @@ export class SqliteConnection extends Connection<sqlite3.Database> {
       } catch (err) {
         if (err instanceof Error && retries > 1 && err.message.includes('database is locked')) {
           console.error('Failed, and waiting', retries);
-          await TimeUtil.wait(delay);
+          await timers.setTimeout(delay);
           retries -= 1;
         } else {
           throw err;

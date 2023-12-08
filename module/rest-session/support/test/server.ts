@@ -1,11 +1,11 @@
 import assert from 'assert';
+import timers from 'timers/promises';
 
 import { Controller, Get, Body, Post, Put, Request } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';
 import { InjectableSuite } from '@travetto/di/support/test/suite';
 import { BaseRestSuite } from '@travetto/rest/support/test/base';
-import { TimeUtil } from '@travetto/base';
 
 import { SessionData } from '../../src/session';
 import { SessionConfig } from '../../src/config';
@@ -173,7 +173,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
 
-    await TimeUtil.wait(100 * this.timeScale);
+    await timers.setTimeout(100 * this.timeScale);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
@@ -197,7 +197,7 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     assert(res.body.payload === payload);
     assert(res.body.age === 1);
 
-    await TimeUtil.wait(100 * this.timeScale);
+    await timers.setTimeout(100 * this.timeScale);
 
     res = await this.request('get', '/test/session', { headers: { Cookie: cookie } });
     assert(res.body.payload === undefined);
@@ -215,18 +215,18 @@ export abstract class RestSessionServerSuite extends BaseRestSuite {
     let res = await this.request<Aged>('post', '/test/session/complex', { body: payload });
     let header = res.headers[key];
 
-    await TimeUtil.wait(50 * this.timeScale);
+    await timers.setTimeout(50 * this.timeScale);
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
 
     assert(res.body.payload === payload);
-    await TimeUtil.wait(50 * this.timeScale);
+    await timers.setTimeout(50 * this.timeScale);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
 
     assert(res.body.payload === payload);
-    await TimeUtil.wait(50 * this.timeScale);
+    await timers.setTimeout(50 * this.timeScale);
 
     res = await this.request('get', '/test/session', { headers: { [key]: header } });
     header = res.headers[key] ?? header;
