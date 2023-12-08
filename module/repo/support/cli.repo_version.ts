@@ -1,8 +1,7 @@
 import fs from 'fs/promises';
 
-import { CliCommandShape, CliCommand, CliScmUtil, CliValidationError } from '@travetto/cli';
-import { CliModuleUtil } from '@travetto/cli/src/module';
-import { RuntimeContext, path } from '@travetto/manifest';
+import { CliModuleUtil, CliCommandShape, CliCommand, CliScmUtil, CliValidationError } from '@travetto/cli';
+import { RuntimeContext } from '@travetto/manifest';
 
 import { PackageManager, SemverLevel } from './bin/package-manager';
 
@@ -50,7 +49,7 @@ export class RepoVersionCommand implements CliCommandShape {
       const commitMessage = `Publish ${modules.map(x => `${x.name}#${versions[x.name]?.replace('^', '') ?? x.version}`).join(',')}`;
       console.log!(await CliScmUtil.createCommit(commitMessage));
       // Touch package when done to trigger restart of compiler
-      await fs.utimes(path.resolve(RuntimeContext.workspacePath, 'package.json'), Date.now(), Date.now());
+      await fs.utimes(RuntimeContext.workspaceRelative('package.json'), Date.now(), Date.now());
     }
   }
 }

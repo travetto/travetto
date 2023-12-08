@@ -10,7 +10,7 @@ import { Markdown } from './render/markdown';
 import { Subject } from './render/subject';
 
 export const wrap = (content: JSXElement): EmailCompileSource => {
-  const req = createRequire(`${RuntimeContext.workspacePath}/node_modules`);
+  const req = createRequire(RuntimeContext.workspaceRelative('node_modules'));
   const finalContent = { ...content, key: '', type: JSXFragmentType };
 
   return {
