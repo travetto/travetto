@@ -1,5 +1,5 @@
 import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 const write = (line: string): Promise<void> => new Promise(r => process.stdout.write(`${line}\n`, () => r()));
 
@@ -39,14 +39,14 @@ export class ListModuleCommand implements CliCommandShape {
       }
       case 'json': {
         const outputMap = CliModuleUtil.getDependencyGraph(mods);
-        await write(JSON.stringify(Object.entries(outputMap).map(([name, children]) => ({ name, children, local: RootIndex.getModule(name)?.local })), null, 2));
+        await write(JSON.stringify(Object.entries(outputMap).map(([name, children]) => ({ name, children, local: RuntimeIndex.getModule(name)?.local })), null, 2));
         break;
       }
       case 'graph': {
         await write('digraph g {');
         for (const el of mods) {
           for (const dep of el.parents) {
-            if (dep !== RootIndex.mainModuleName) {
+            if (dep !== RuntimeIndex.mainModuleName) {
               await write(`  "${dep}" -> "${el.name}";`);
             }
           }

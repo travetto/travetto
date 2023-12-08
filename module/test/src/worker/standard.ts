@@ -1,4 +1,4 @@
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/base';
 import { ParentCommChannel, Worker } from '@travetto/worker';
 
@@ -35,17 +35,17 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
 
       const event = buildEvent(file);
 
-      const { module } = RootIndex.getEntry(event.file!)!;
-      const cwd = RootIndex.getModule(module)!.sourcePath;
+      const { module } = RuntimeIndex.getEntry(event.file!)!;
+      const cwd = RuntimeIndex.getModule(module)!.sourcePath;
 
       const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
         ExecUtil.fork(
-          RootIndex.resolveFileImport('@travetto/cli/support/entry.trv'),
+          RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'),
           ['test:child'],
           {
             cwd,
             env: {
-              ...Env.TRV_MANIFEST.export(RootIndex.getModule(module)!.outputPath),
+              ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(module)!.outputPath),
               ...Env.TRV_QUIET.export(false)
             },
             stdio: ['ignore', 'ignore', 2, 'ipc']

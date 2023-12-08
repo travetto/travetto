@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { FindConfig, RootIndex } from '@travetto/manifest';
+import { FindConfig, RuntimeIndex } from '@travetto/manifest';
 import { Class, Env } from '@travetto/base';
 
 import { DynamicFileLoader } from '../internal/file-loader';
@@ -38,7 +38,7 @@ export class ClassSource implements ChangeSource<Class> {
       }
       this.#classes.set(file, new Map());
       for (const cls of classes) {
-        const src = RootIndex.getFunctionMetadata(cls)!.source;
+        const src = RuntimeIndex.getFunctionMetadata(cls)!.source;
         this.#classes.get(src)!.set(cls.Ⲑid, cls);
         this.emit({ type: 'added', curr: cls });
       }
@@ -78,8 +78,8 @@ export class ClassSource implements ChangeSource<Class> {
           changes += 1;
           this.emit({ type: 'added', curr: next.get(k)! });
         } else {
-          const prevMeta = RootIndex.getFunctionMetadataFromClass(prev.get(k));
-          const nextMeta = RootIndex.getFunctionMetadataFromClass(next.get(k));
+          const prevMeta = RuntimeIndex.getFunctionMetadataFromClass(prev.get(k));
+          const nextMeta = RuntimeIndex.getFunctionMetadataFromClass(next.get(k));
           if (prevMeta?.hash !== nextMeta?.hash) {
             changes += 1;
             this.emit({ type: 'changed', curr: next.get(k)!, prev: prev.get(k) });
@@ -117,7 +117,7 @@ export class ClassSource implements ChangeSource<Class> {
     }
 
     // Ensure everything is loaded
-    for (const mod of RootIndex.find(moduleFindConfig)) {
+    for (const mod of RuntimeIndex.find(moduleFindConfig)) {
       await import(mod.import);
     }
 

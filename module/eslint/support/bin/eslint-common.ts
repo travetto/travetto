@@ -1,11 +1,11 @@
 import * as parser from '@typescript-eslint/parser';
 
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 export const RULE_COMMON = {
   languageOptions: {
     ecmaVersion: 'latest',
-    sourceType: RootIndex.manifest.moduleType,
+    sourceType: RuntimeIndex.manifest.moduleType,
     globals: {
       AbortController: false,
       AbortSignal: false,

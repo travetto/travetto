@@ -1,5 +1,5 @@
 import fs from 'fs/promises';
-import { PackageUtil, RootIndex } from '@travetto/manifest';
+import { PackageUtil, RuntimeIndex } from '@travetto/manifest';
 
 import { RenderProvider } from '../types';
 import { c, getComponentName } from '../jsx';
@@ -108,8 +108,8 @@ ${context.cleanText(content.text)}
   Header: async ({ props }) => `# ${props.title}\n${props.description ? `## ${props.description}\n` : ''}\n`,
 
   StdHeader: async state => {
-    const mod = state.el.props.mod ?? RootIndex.mainModuleName;
-    const pkg = PackageUtil.readPackage(RootIndex.getModule(mod)!.sourcePath);
+    const mod = state.el.props.mod ?? RuntimeIndex.mainModuleName;
+    const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(mod)!.sourcePath);
     const title = pkg.travetto?.displayName ?? pkg.name;
     const desc = pkg.description;
     let install = '';

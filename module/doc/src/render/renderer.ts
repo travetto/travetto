@@ -1,4 +1,4 @@
-import { ManifestRoot, PackageUtil, path, RootIndex } from '@travetto/manifest';
+import { ManifestRoot, PackageUtil, path, RuntimeIndex } from '@travetto/manifest';
 
 import { isJSXElement, JSXElement, createFragment, JSXFragmentType } from '@travetto/doc/jsx-runtime';
 
@@ -18,7 +18,7 @@ const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
 export class DocRenderer {
 
   static async get(file: string, manifest: ManifestRoot): Promise<DocRenderer> {
-    const mod = RootIndex.getFromSource(file)?.import;
+    const mod = RuntimeIndex.getFromSource(file)?.import;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const res = await import(mod!) as DocumentShape;
 
@@ -91,7 +91,7 @@ export class DocRenderer {
         case 'bigint':
         case 'boolean': return `${node}`;
         default: {
-          const meta = (typeof node === 'function' ? RootIndex.getFunctionMetadata(node) : undefined);
+          const meta = (typeof node === 'function' ? RuntimeIndex.getFunctionMetadata(node) : undefined);
           if (meta && typeof node === 'function') {
             const title = (await DocFileUtil.isDecorator(node.name, meta.source)) ? `@${node.name}` : node.name;
             const el = this.#support.createElement('CodeLink', {

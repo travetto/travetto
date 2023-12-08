@@ -1,4 +1,4 @@
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { Util } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
 
@@ -149,7 +149,7 @@ export class ServiceUtil {
    */
   static async findAll(): Promise<CommandService[]> {
     return (await Promise.all(
-      RootIndex.find({
+      RuntimeIndex.find({
         module: m => m.roles.includes('std'),
         folder: f => f === 'support',
         file: f => /\/service[.]/.test(f.sourceFile)

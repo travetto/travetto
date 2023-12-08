@@ -1,4 +1,4 @@
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import { FileLoader } from './file-loader';
 import { Env } from './env';
@@ -9,7 +9,7 @@ import { Env } from './env';
 export class ResourceLoader extends FileLoader {
 
   static getSearchPaths(paths: string[] = []): string[] {
-    return [...paths, ...Env.resourcePaths].map(x => RootIndex.resolveModulePath(x));
+    return [...paths, ...Env.resourcePaths].map(x => RuntimeIndex.resolveModulePath(x));
   }
 
   constructor(paths: string[] = []) {

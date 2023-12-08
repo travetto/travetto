@@ -1,4 +1,4 @@
-import { ManifestModuleUtil, RootIndex } from '@travetto/manifest';
+import { ManifestModuleUtil, RuntimeIndex } from '@travetto/manifest';
 import { CompilerClient } from '@travetto/base';
 
 type WatchHandler = Parameters<CompilerClient['onFileChange']>[0];
@@ -24,7 +24,7 @@ class $DynamicFileLoader {
       await this.#loader.unload(ev.output);
     }
     if (ev.action === 'create' || ev.action === 'delete') {
-      RootIndex.reinitForModule(RootIndex.mainModuleName);
+      RuntimeIndex.reinitForModule(RuntimeIndex.mainModuleName);
     }
     if (ev.action === 'create' || ev.action === 'update') {
       await this.#loader.load(ev.output);
@@ -64,7 +64,7 @@ class $DynamicFileLoader {
 
     // Fire off, and let it run in the bg. Restart on exit
     new CompilerClient().onFileChange(async ev => {
-      if (ev.file && RootIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
+      if (ev.file && RuntimeIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
         await this.dispatch(ev);
       }
     }, true);

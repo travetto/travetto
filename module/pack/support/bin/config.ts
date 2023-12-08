@@ -3,7 +3,7 @@ import { __importStar } from 'tslib';
 
 import type terser from '@rollup/plugin-terser';
 
-import { ManifestModule, ManifestModuleUtil, NodeModuleType, path, RootIndex } from '@travetto/manifest';
+import { ManifestModule, ManifestModuleUtil, NodeModuleType, path, RuntimeIndex } from '@travetto/manifest';
 import { EnvProp } from '@travetto/base';
 
 const makeIntro = (doImport: (name: string) => string, ...extra: string[]): string => [
@@ -42,7 +42,7 @@ export function getOutput(): OutputOptions {
     format,
     intro: INTRO[format],
     sourcemapPathTransform: (src, map): string =>
-      path.resolve(path.dirname(map), src).replace(`${RootIndex.manifest.workspacePath}/`, ''),
+      path.resolve(path.dirname(map), src).replace(`${RuntimeIndex.manifest.workspacePath}/`, ''),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,
     sourcemapExcludeSources: !(new EnvProp('BUNDLE_SOURCES').bool ?? false),
     compact: new EnvProp('BUNDLE_COMPRESS').bool ?? true,
@@ -58,15 +58,15 @@ export function getEntry(): string {
 }
 
 export function getFiles(): string[] {
-  return [...RootIndex.getModuleList('all')]
-    .map(x => RootIndex.manifest.modules[x])
+  return [...RuntimeIndex.getModuleList('all')]
+    .map(x => RuntimeIndex.manifest.modules[x])
     .filter(m => m.prod)
     .flatMap(getFilesFromModule);
 }
 
 export function getIgnoredModules(): string[] {
-  return [...RootIndex.getModuleList('all')]
-    .map(x => RootIndex.manifest.modules[x])
+  return [...RuntimeIndex.getModuleList('all')]
+    .map(x => RuntimeIndex.manifest.modules[x])
     .filter(m => !m.prod)
     .map(m => m.name);
 }

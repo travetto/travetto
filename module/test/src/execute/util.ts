@@ -3,7 +3,7 @@ import readline from 'readline';
 import timers from 'timers/promises';
 
 import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
-import { IndexedFile, RootIndex } from '@travetto/manifest';
+import { IndexedFile, RuntimeIndex } from '@travetto/manifest';
 
 /**
  * Simple Test Utilities
@@ -38,7 +38,7 @@ export class RunnerUtil {
    * Find all valid test files given the globs
    */
   static async getTestFiles(globs?: RegExp[]): Promise<IndexedFile[]> {
-    const files = RootIndex.find({
+    const files = RuntimeIndex.find({
       module: m => m.roles.includes('test') || m.roles.includes('std'),
       folder: f => f === 'test',
       file: f => f.role === 'test'

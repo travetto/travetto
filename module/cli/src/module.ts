@@ -1,4 +1,4 @@
-import { IndexedModule, RootIndex } from '@travetto/manifest';
+import { IndexedModule, RuntimeIndex } from '@travetto/manifest';
 
 import { CliScmUtil } from './scm';
 
@@ -20,14 +20,14 @@ export class CliModuleUtil {
     fromHash ??= await CliScmUtil.findLastRelease();
 
     if (!fromHash) {
-      return RootIndex.getLocalModules();
+      return RuntimeIndex.getLocalModules();
     }
 
     const out = new Map<string, IndexedModule>();
     for (const mod of await CliScmUtil.findChangedModules(fromHash, toHash)) {
       out.set(mod.name, mod);
       if (transitive) {
-        for (const sub of await RootIndex.getDependentModules(mod)) {
+        for (const sub of await RuntimeIndex.getDependentModules(mod)) {
           out.set(sub.name, sub);
         }
       }
@@ -46,8 +46,8 @@ export class CliModuleUtil {
   static async findModules(mode: 'all' | 'changed', fromHash?: string, toHash?: string): Promise<IndexedModule[]> {
     return (mode === 'changed' ?
       await this.findChangedModulesRecursive(fromHash, toHash) :
-      [...RootIndex.getModuleList('all')].map(x => RootIndex.getModule(x)!)
-    ).filter(x => x.sourcePath !== RootIndex.manifest.workspacePath);
+      [...RuntimeIndex.getModuleList('all')].map(x => RuntimeIndex.getModule(x)!)
+    ).filter(x => x.sourcePath !== RuntimeIndex.manifest.workspacePath);
   }
 
   /**

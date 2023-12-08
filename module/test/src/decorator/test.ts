@@ -1,5 +1,5 @@
 import { ClassInstance } from '@travetto/base';
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import { SuiteRegistry } from '../registry/suite';
 import { TestConfig } from '../model/test';
@@ -32,7 +32,7 @@ export function Test(description?: string | Partial<TestConfig>, ...rest: Partia
   return (inst: ClassInstance, prop: string | symbol, descriptor: PropertyDescriptor) => {
     SuiteRegistry.registerField(inst.constructor, descriptor.value, {
       ...extra,
-      file: RootIndex.getFunctionMetadata(inst.constructor)!.source,
+      file: RuntimeIndex.getFunctionMetadata(inst.constructor)!.source,
       description: descriptionString
     });
     return descriptor;
