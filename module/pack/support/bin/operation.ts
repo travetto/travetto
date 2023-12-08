@@ -59,7 +59,7 @@ export class PackOperation {
 
     const bundleCommand = ['npx', 'rollup', '-c', RuntimeIndex.resolveFileImport(cfg.rollupConfiguration)];
 
-    const entryPointFile = RuntimeIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RuntimeManifest.outputFolder}/`)[1];
+    const entryPointFile = RuntimeIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RuntimeIndex.manifest.outputFolder}/`)[1];
 
     const env = {
       ...Object.fromEntries(([

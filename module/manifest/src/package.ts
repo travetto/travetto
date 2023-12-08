@@ -1,7 +1,7 @@
 import { createRequire } from 'module';
 import { execSync } from 'child_process';
 
-import { ManifestContext, Package, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
+import type { ManifestContext, Package, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
 import { path } from './path';
 import { ManifestFileUtil } from './file';
 
@@ -184,7 +184,7 @@ export class PackageUtil {
   /**
    * Get an install command for a given npm module
    */
-  static getInstallCommand(ctx: ManifestContext, pkg: string, prod = false): string {
+  static getInstallCommand(ctx: { packageManager: ManifestContext['packageManager'] }, pkg: string, prod = false): string {
     let install: string;
     switch (ctx.packageManager) {
       case 'npm': install = `npm i ${prod ? '' : '--save-dev '}${pkg}`; break;

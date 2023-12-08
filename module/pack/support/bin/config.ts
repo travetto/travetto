@@ -59,14 +59,14 @@ export function getEntry(): string {
 
 export function getFiles(): string[] {
   return [...RuntimeIndex.getModuleList('all')]
-    .map(x => RuntimeManifest.modules[x])
+    .map(x => RuntimeIndex.manifest.modules[x])
     .filter(m => m.prod)
     .flatMap(getFilesFromModule);
 }
 
 export function getIgnoredModules(): string[] {
   return [...RuntimeIndex.getModuleList('all')]
-    .map(x => RuntimeManifest.modules[x])
+    .map(x => RuntimeIndex.manifest.modules[x])
     .filter(m => !m.prod)
     .map(m => m.name);
 }
