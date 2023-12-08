@@ -1,7 +1,9 @@
 import { Module } from 'module';
 
 import { RootIndex, path } from '@travetto/manifest';
-import { RetargettingProxy, Env } from '@travetto/base';
+import { Env } from '@travetto/base';
+
+import { RetargettingProxy } from '../proxy';
 
 declare module 'module' {
   // eslint-disable-next-line @typescript-eslint/naming-convention

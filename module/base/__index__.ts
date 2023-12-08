@@ -12,5 +12,4 @@ export * from './src/stream';
 export * from './src/time';
 export * from './src/types';
 export * from './src/object';
-export * from './src/proxy';
 export * from './src/util';

@@ -1,7 +1,7 @@
 import { RootIndex } from '@travetto/manifest';
-import { RetargettingProxy, Class, AppError, Util, Env } from '@travetto/base';
+import { Class, AppError, Util, Env } from '@travetto/base';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
-import { ChangeEvent } from '@travetto/registry';
+import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
 
 import { RouteConfig, Request, ServerHandle } from '../types';
