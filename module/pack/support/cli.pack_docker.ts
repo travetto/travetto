@@ -1,4 +1,4 @@
-import { path, RootIndex } from '@travetto/manifest';
+import { path, RuntimeIndex } from '@travetto/manifest';
 import { CliCommand, CliFlag, CliUtil, CliValidationError } from '@travetto/cli';
 import { Ignore, Required } from '@travetto/schema';
 
@@ -54,7 +54,7 @@ export class PackDockerCommand extends BasePackCommand {
 
   preMain(): void {
     if (this.dockerFactory.startsWith('.')) {
-      this.dockerFactory = RootIndex.getFromSource(path.resolve(this.dockerFactory))?.import ?? this.dockerFactory;
+      this.dockerFactory = RuntimeIndex.getFromSource(path.resolve(this.dockerFactory))?.import ?? this.dockerFactory;
     }
     this.dockerName ??= CliUtil.getSimpleModuleName('<module>', this.module || undefined);
 

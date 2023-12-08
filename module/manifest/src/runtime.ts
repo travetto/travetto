@@ -8,7 +8,7 @@ type Metadated = { [METADATA]: FunctionMetadata };
 /**
  * Extended manifest index geared for application execution
  */
-class $RootIndex extends ManifestIndex {
+class $RuntimeIndex extends ManifestIndex {
 
   #metadata = new Map<string, FunctionMetadata>();
 
@@ -105,14 +105,14 @@ class $RootIndex extends ManifestIndex {
   }
 }
 
-let index: $RootIndex | undefined;
+let index: $RuntimeIndex | undefined;
 
 try {
-  index = new $RootIndex(process.env.TRV_MANIFEST!);
+  index = new $RuntimeIndex(process.env.TRV_MANIFEST!);
 } catch (err) {
   if (process.env.NODE_ENV === 'production') {
     throw err;
   }
 }
 
-export const RootIndex: $RootIndex = index!;
+export const RuntimeIndex: $RuntimeIndex = index!;

@@ -1,4 +1,4 @@
-import { RootIndex } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { GlobalTerminal, Terminal } from '@travetto/terminal';
 import { ObjectUtil, TimeUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
@@ -71,7 +71,7 @@ export class TapEmitter implements TestConsumer {
             this.#enhancer.assertNumber(++subCount),
             '-',
             this.#enhancer.assertDescription(text),
-            `${this.#enhancer.assertFile(asrt.file.replace(RootIndex.mainModule.sourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
+            `${this.#enhancer.assertFile(asrt.file.replace(RuntimeIndex.mainModule.sourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
           ].join(' ');
 
           if (asrt.error) {

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { Env, ResourceLoader } from '@travetto/base';
-import { RootIndex, path } from '@travetto/manifest';
+import { RuntimeIndex, path } from '@travetto/manifest';
 
 import { ConfigSource, ConfigSpec } from './types';
 import { ParserManager } from '../parser/parser';
@@ -42,7 +42,7 @@ export class FileConfigSource implements ConfigSource {
               data,
               priority: priority + i++,
               source: `file://${profile}`,
-              detail: full.replace(`${RootIndex.manifest.workspacePath}/`, '')
+              detail: full.replace(`${RuntimeIndex.manifest.workspacePath}/`, '')
             })));
           }
         }
