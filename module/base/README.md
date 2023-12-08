@@ -162,7 +162,7 @@ export const Env = delegate({
     return [
       ...Env.TRV_RESOURCES.list ?? [],
       '@#resources', // Module root
-      ...(RuntimeIndex.manifest.monoRepo ? ['@@#resources'] : []) // Monorepo root
+      ...(RuntimeManifest.monoRepo ? ['@@#resources'] : []) // Monorepo root
     ];
   }
 });
