@@ -5,7 +5,7 @@ import { d, c } from '@travetto/doc';
 import { ManifestRoot, path, RuntimeIndex } from '@travetto/manifest';
 import { COMMON_DATE } from '@travetto/doc/src/util/run';
 
-const RootIndexRef = d.codeLink('RootIndex', 'src/root-index.ts', /class .*RootIndex/);
+const RootIndexRef = d.codeLink('RuntimeIndex', 'src/runtime.ts', /class .*RuntimeIndex/);
 const DeltaRef = d.codeLink('ManifestDeltaUtil', 'src/delta.ts', /class ManifestDeltaUtil/);
 
 
