@@ -1,6 +1,6 @@
 import timers from 'timers/promises';
 
-import { path, RuntimeIndex } from '@travetto/manifest';
+import { path, RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
 import { Env, Util } from '@travetto/base';
 import { Barrier, ExecutionError } from '@travetto/worker';
 
@@ -109,7 +109,7 @@ export class TestExecutor {
 
     const result: TestResult = {
       methodName: test.methodName,
-      module: RuntimeIndex.manifest.mainModule,
+      module: RuntimeManifest.mainModule,
       description: test.description,
       classId: test.classId,
       lines: { ...test.lines },

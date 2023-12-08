@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import os from 'os';
 
 import { ExecUtil, Util } from '@travetto/base';
-import { ManifestFileUtil, RuntimeIndex, path } from '@travetto/manifest';
+import { ManifestFileUtil, RuntimeIndex, RuntimeManifest, path } from '@travetto/manifest';
 import { TestFixtures } from '@travetto/test';
 
 import { RestClientGeneratorService } from '../../src/service';
@@ -36,7 +36,7 @@ export class RestClientTestUtil {
       await fixtures.resolve(`tsconfig.${mode}.json`),
       path.resolve(folder, 'tsconfig.json'),
     );
-    const tsc = path.resolve(RuntimeIndex.manifest.workspacePath, 'node_modules', '.bin', 'tsc');
+    const tsc = path.resolve(RuntimeManifest.workspacePath, 'node_modules', '.bin', 'tsc');
     await ExecUtil.spawn(tsc, ['-p', folder]).result;
   }
 
