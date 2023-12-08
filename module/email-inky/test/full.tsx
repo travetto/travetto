@@ -22,7 +22,7 @@ class ContainerTest {
     const state = {
       ...(await unwrap(input))!,
       file: 'test',
-      module: RuntimeIndex.mainModuleName,
+      module: RuntimeIndex.manifest.mainModule,
     };
 
     assert(input);
@@ -57,7 +57,7 @@ class ContainerTest {
     const state = {
       ...(await unwrap(input))!,
       file: 'test',
-      module: RuntimeIndex.mainModuleName,
+      module: RuntimeIndex.manifest.mainModule,
     };
 
     assert(state);
@@ -80,7 +80,7 @@ class ContainerTest {
     const state = {
       ...(await unwrap(input))!,
       file: 'test',
-      module: RuntimeIndex.mainModuleName,
+      module: RuntimeIndex.manifest.mainModule,
     };
 
     const output = await state.html(state);

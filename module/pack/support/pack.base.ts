@@ -100,7 +100,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
     // Update entry points
     this.entryArguments = [...this.entryArguments ?? [], ...args, ...this._parsed.unknown];
-    this.module ||= RuntimeIndex.mainModuleName;
+    this.module ||= RuntimeIndex.manifest.mainModule;
     this.mainName ??= path.basename(this.module);
 
     const stream = this.runOperations();
