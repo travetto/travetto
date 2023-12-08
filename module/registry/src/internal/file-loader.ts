@@ -24,7 +24,7 @@ class $DynamicFileLoader {
       await this.#loader.unload(ev.output);
     }
     if (ev.action === 'create' || ev.action === 'delete') {
-      RuntimeIndex.reinitForModule(RuntimeIndex.mainModuleName);
+      RuntimeIndex.reinitForModule(RuntimeIndex.manifest.mainModule);
     }
     if (ev.action === 'create' || ev.action === 'update') {
       await this.#loader.load(ev.output);

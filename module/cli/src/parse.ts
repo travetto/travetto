@@ -144,7 +144,7 @@ export class CliParseUtil {
     const mod = args.reduce(
       (m, x, i, arr) =>
         (i < SEP ? check(arr[i - 1], x) ?? check(...x.split('=')) : undefined) ?? m,
-      process.env[ENV_KEY] || RuntimeIndex.mainModuleName
+      process.env[ENV_KEY] || RuntimeIndex.manifest.mainModule
     );
     return (await Promise.all(args.map((x, i) =>
       x.startsWith(CONFIG_PRE) && (i < SEP || SEP < 0) ? this.readFlagFile(x, mod) : x))).flat();
