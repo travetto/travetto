@@ -27,7 +27,7 @@ All of the high level configurations can be found in the following structure:
 import type { ServerObject, ContactObject, LicenseObject } from 'openapi3-ts/oas31';
 
 import { Config } from '@travetto/config';
-import { path, RootIndex } from '@travetto/manifest';
+import { path, RuntimeIndex } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 import { Required } from '@travetto/schema';
 
@@ -50,7 +50,7 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    const info = RootIndex.manifest;
+    const info = RuntimeIndex.manifest;
     this.title ??= info.mainModule;
     this.version ??= info.version;
     this.description ??= info.description;
@@ -98,7 +98,7 @@ export class ApiSpecConfig {
     if (!this.output || this.output === '-') {
       this.persist = false;
     } else {
-      this.output = path.resolve(RootIndex.mainModule.sourcePath, this.output);
+      this.output = path.resolve(RuntimeIndex.mainModule.sourcePath, this.output);
       this.persist ??= Env.dynamic;
     }
     if (this.persist) {

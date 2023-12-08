@@ -35,7 +35,7 @@ During the compilation process, it is helpful to know how the output content dif
 ## Class and Function Metadata
 For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every `class` is decorated with an additional field of `Ⲑid`.  `Ⲑid` represents a computed id that is tied to the file/class combination. 
 
-`Ⲑid` is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the [RootIndex](https://github.com/travetto/travetto/tree/main/module/manifest/src/root-index.ts#L11) using the `getFunctionMetadata` method.
+`Ⲑid` is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the [RuntimeIndex](https://github.com/travetto/travetto/tree/main/module/manifest/src/runtime.ts#L11) using the `getFunctionMetadata` method.
 
 **Code: Test Class**
 ```typescript
@@ -50,10 +50,10 @@ export class TestClass {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TestClass = void 0;
 const tslib_1 = require("tslib");
-const Ⲑ_root_index_1 = tslib_1.__importStar(require("@travetto/manifest/src/root-index.js"));
+const Ⲑ_runtime_1 = tslib_1.__importStar(require("@travetto/manifest/src/runtime.js"));
 var ᚕf = "@travetto/manifest/doc/test-class.js";
 class TestClass {
-    static Ⲑinit = Ⲑ_root_index_1.RootIndex.registerFunction(TestClass, ᚕf, 197152026, { doStuff: { hash: 51337554 } }, false, false);
+    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(TestClass, ᚕf, 197152026, { doStuff: { hash: 51337554 } }, false, false);
     async doStuff() { }
 }
 exports.TestClass = TestClass;
@@ -136,7 +136,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
         ],
         "test": [
           [ "test/path.ts", "ts", 1868155200000, "test" ],
-          [ "test/root-index.ts", "ts", 1868155200000, "test" ]
+          [ "test/runtime.ts", "ts", 1868155200000, "test" ]
         ],
         "test/fixtures": [
           [ "test/fixtures/simple.ts", "fixture", 1868155200000, "test" ]
@@ -152,7 +152,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
           [ "src/module.ts", "ts", 1868155200000 ],
           [ "src/package.ts", "ts", 1868155200000 ],
           [ "src/path.ts", "ts", 1868155200000 ],
-          [ "src/root-index.ts", "ts", 1868155200000 ],
+          [ "src/runtime.ts", "ts", 1868155200000 ],
           [ "src/types.ts", "ts", 1868155200000 ],
           [ "src/typings.d.ts", "typings", 1868155200000 ],
           [ "src/util.ts", "ts", 1868155200000 ]
