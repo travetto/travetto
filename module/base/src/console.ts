@@ -42,6 +42,8 @@ class $ConsoleManager {
   async register(cfg: { debug?: false | string, overwriteNpmDebug?: boolean }): Promise<this> {
     this.debug(cfg.debug ?? false);
 
+    Error.stackTraceLimit = 50;
+
     // Commandeer debug
     if (cfg.overwriteNpmDebug ?? true) {
       try {

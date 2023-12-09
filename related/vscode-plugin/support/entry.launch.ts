@@ -2,8 +2,6 @@ import fs from 'fs/promises';
 import path from 'path';
 import type vscode from 'vscode';
 
-let cleanup: Function | undefined = undefined;
-
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   // Check packed, then unpacked location of manifest
   let manifest: string | undefined;
@@ -19,12 +17,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   }
 
   process.env.TRV_MANIFEST = manifest;
-  const { init, cleanup: clean } = await import('@travetto/base/support/init.js');
-  await init(false);
-  cleanup = clean;
   return (await import('../src/extension.js')).activate(context);
 }
 
 export async function deactivate(): Promise<void> {
-  return (await import('../src/extension.js')).deactivate().finally(() => cleanup?.());
+  return (await import('../src/extension.js')).deactivate();
 }
