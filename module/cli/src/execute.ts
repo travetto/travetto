@@ -74,13 +74,14 @@ export class ExecutionManager {
 
       if (!cmd) {
         console.info!(await HelpUtil.renderAllHelp());
-        process.exit(1);
+        process.exit(0);
       }
 
       const command = await this.#getCommand(cmd);
 
       if (help) {
         console.log!(await HelpUtil.renderCommandHelp(command));
+        process.exit(0);
       } else {
         const known = await this.#prepareAndBind(command, args);
         ConsoleManager.debug(Env.debug);

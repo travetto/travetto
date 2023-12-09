@@ -172,7 +172,8 @@ mkdir -p $DIST
 
 echo "Writing .env.js"
 
-echo "process.env.NODE_ENV = 'production';" > $DIST/.env.js
+echo "process.env.NODE_OPTIONS = '--disable-proto=delete';" > $DIST/.env.js
+echo "process.env.NODE_ENV = 'production';" >> $DIST/.env.js
 echo "process.env.TRV_MANIFEST = 'manifest.json';" >> $DIST/.env.js
 echo "process.env.TRV_MODULE = '$MOD';" >> $DIST/.env.js
 echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js

@@ -64,7 +64,7 @@ While docker containers provide a high level of flexibility, performance can be 
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/command/doc/service.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> createWriteStream<span class="token punctuation">,</span> createReadStream <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'fs'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> createWriteStream<span class="token punctuation">,</span> createReadStream <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node:fs'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> CommandOperation <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/command'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">ImageCompressor</span> <span class="token punctuation">{{'{'}}</span>

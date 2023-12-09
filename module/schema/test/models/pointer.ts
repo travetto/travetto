@@ -1,5 +1,5 @@
 /**
- * @concrete SpecialTypeTarget
+ * @concrete #SpecialTypeTarget
  */
 export type SpecialType = string | number | true;
 

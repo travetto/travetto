@@ -314,7 +314,7 @@ This feature is meant to allow for simple Typescript types to be able to be back
 import { DataUtil } from '@travetto/base';
 
 /**
- * @concrete .:PointImpl
+ * @concrete #PointImpl
  */
 export type Point = [number, number];
 

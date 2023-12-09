@@ -136,8 +136,8 @@ The <a target="_blank" class="source-link" href="https://github.com/travetto/tra
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/auth/src/util.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> crypto <span class="token keyword">from</span> <span class="token string">'crypto'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> util <span class="token keyword">from</span> <span class="token string">'util'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> crypto <span class="token keyword">from</span> <span class="token string">'node:crypto'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> util <span class="token keyword">from</span> <span class="token string">'node:util'</span><span class="token punctuation">;</span>
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> AppError<span class="token punctuation">,</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> pbkdf2 <span class="token operator">=</span> util<span class="token punctuation">.</span><span class="token function">promisify</span><span class="token punctuation">(</span>crypto<span class="token punctuation">.</span>pbkdf2<span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token comment">/**

@@ -265,8 +265,8 @@ It is also possible to directly reference external types, and they will be conve
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/di/doc/injectable-foreign.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EventEmitter <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'events'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Writable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'stream'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> EventEmitter <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node:events'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Writable <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node:stream'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Inject<span class="token punctuation">,</span> Injectable<span class="token punctuation">,</span> InjectableFactory <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/di'</span><span class="token punctuation">;</span>
 
@@ -331,7 +331,7 @@ Additionally, support for interfaces (over class inheritance) is provided, but r
 <span class="token keyword">class</span> <span class="token class-name">TargetConcrete</span> <span class="token punctuation">{{'{'}}</span> <span class="token punctuation">{{'}'}}</span>
 
 <span class="token comment">/**
- * &#64;concrete .:TargetConcrete
+ * &#64;concrete #TargetConcrete
  */</span>
 <span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ServiceContract</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token function">deleteUser</span><span class="token punctuation">(</span>userId<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
