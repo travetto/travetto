@@ -27,9 +27,7 @@
   },
   "dependencies": {
     "@travetto/manifest": "^3.4.0",
-    "@types/node": "^20.10.3",
-    "@types/source-map-support": "^0.5.10",
-    "source-map-support": "^0.5.21"
+    "@types/node": "^20.10.3"
   },
   "peerDependencies": {
     "@travetto/transformer": "^3.4.2"

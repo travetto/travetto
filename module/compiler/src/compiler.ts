@@ -1,4 +1,3 @@
-import { install } from 'source-map-support';
 import ts from 'typescript';
 import fs from 'fs/promises';
 
@@ -89,8 +88,6 @@ export class Compiler {
    * Run the compiler
    */
   async run(): Promise<void> {
-    install();
-
     Log.debug('Compilation started');
 
     EventUtil.sendEvent('state', { state: 'init', extra: { pid: process.pid } });
