@@ -1,36 +1,9 @@
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, ManifestContext, ManifestModule, ManifestRoot, NodeModuleType, NodePackageManager } from './types';
+import { FunctionMetadata, ManifestContext, ManifestModule } from './types';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
-
-class $RuntimeContext implements ManifestContext {
-  #raw: ManifestRoot;
-  private update(manifest: ManifestRoot): void { this.#raw = manifest; }
-  get mainModule(): string { return this.#raw.mainModule; }
-  get version(): string { return this.#raw.version; }
-  get description(): string | undefined { return this.#raw.description; }
-  get workspacePath(): string { return this.#raw.workspacePath; }
-  get frameworkVersion(): string { return this.#raw.frameworkVersion; }
-  get monoRepo(): boolean { return !!this.#raw.monoRepo; }
-  get moduleType(): NodeModuleType { return this.#raw.moduleType; }
-  get packageManager(): NodePackageManager { return this.#raw.packageManager; }
-  get compilerUrl(): string { return this.#raw.compilerUrl; }
-  get compilerFolder(): string { return this.#raw.compilerFolder; }
-  get outputFolder(): string { return this.#raw.outputFolder; }
-  get toolFolder(): string { return this.#raw.toolFolder; }
-  get mainFolder(): string { return this.#raw.mainFolder; }
-  /**
-   * Produce a workspace relative path
-   * @param rel The relative path
-   */
-  workspaceRelative(...rel: string[]): string {
-    return path.resolve(this.#raw.workspacePath, ...rel);
-  }
-}
-
-export const RuntimeContext = new $RuntimeContext();
 
 /**
  * Extended manifest index geared for application execution
@@ -45,7 +18,6 @@ class $RuntimeIndex extends ManifestIndex {
    */
   reinitForModule(module: string): void {
     this.init(`${this.outputRoot}/node_modules/${module}`);
-    RuntimeContext['update'](this.manifest);
   }
 
   /**
@@ -133,15 +105,26 @@ class $RuntimeIndex extends ManifestIndex {
   }
 }
 
-let index: $RuntimeIndex | undefined;
+export const RuntimeIndex = new $RuntimeIndex(process.env.TRV_MANIFEST!);
 
-try {
-  index = new $RuntimeIndex(process.env.TRV_MANIFEST!);
-  RuntimeContext['update'](index.manifest);
-} catch (err) {
-  if (process.env.NODE_ENV === 'production') {
-    throw err;
+const build = <T extends object>(inp: T, props: (keyof ManifestContext)[]): T & ManifestContext => {
+  for (const prop of props) {
+    Object.defineProperty(inp, prop, { configurable: false, get: () => RuntimeIndex.manifest[prop] });
   }
-}
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  return inp as T & ManifestContext;
+};
 
-export const RuntimeIndex: $RuntimeIndex = index!;
+export const RuntimeContext = build({
+  /**
+   * Produce a workspace relative path
+   * @param rel The relative path
+   */
+  workspaceRelative(...rel: string[]): string {
+    return path.resolve(RuntimeIndex.manifest.workspacePath, ...rel);
+  }
+}, [
+  'mainModule', 'version', 'description', 'workspacePath', 'frameworkVersion',
+  'monoRepo', 'moduleType', 'packageManager', 'compilerUrl', 'compilerFolder',
+  'outputFolder', 'toolFolder', 'mainFolder',
+]);
