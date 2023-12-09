@@ -124,6 +124,7 @@ export class PackOperation {
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = '.env.js';
     const env = {
+      NODE_OPTIONS: '--disable-proto=delete', // Security enforcement
       ...Env.NODE_ENV.export('production'),
       ...Env.TRV_MANIFEST.export('manifest.json'),
       ...Env.TRV_MODULE.export(cfg.module),

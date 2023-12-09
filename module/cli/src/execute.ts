@@ -70,7 +70,7 @@ export class ExecutionManager {
    */
   static async run(argv: string[]): Promise<void> {
     await GlobalTerminal.init();
-    ConsoleManager.setup(false);
+    ConsoleManager.debug(false);
 
     let command: CliCommandShape | undefined;
     try {
@@ -87,7 +87,7 @@ export class ExecutionManager {
         console.log!(await HelpUtil.renderCommandHelp(command));
       } else {
         const known = await this.#prepareAndBind(command, args);
-        ConsoleManager.setup(Env.debug);
+        ConsoleManager.debug(Env.debug);
         const result = await command.main(...known);
         await CliUtil.listenForResponse(result);
       }

@@ -12,27 +12,6 @@ function wrap(target: Console): ConsoleListener {
   };
 }
 
-// TODO: Externalize?
-/**
- * Registers handler for `debug` module in npm ecosystem
- * @param mgr
- */
-async function initNpmDebug(mgr: $ConsoleManager): Promise<void> {
-  try {
-    const { default: debug } = await import('debug');
-    debug.formatArgs = function (args: string[]): void {
-      args.unshift(this.namespace);
-      args.push(debug.humanize(this.diff));
-    };
-    debug.log = (modulePath, ...args: string[]): void => mgr.invoke({
-      level: 'debug', module: '@npm:debug', modulePath,
-      args: [util.format(...args)], line: 0, source: '', timestamp: new Date()
-    });
-  } catch (err) {
-    // Do nothing
-  }
-}
-
 /**
  * Provides a general abstraction against the console.* methods to allow for easier capture and redirection.
  *
@@ -56,10 +35,32 @@ class $ConsoleManager {
    */
   #filters: Partial<Record<LogLevel, (x: ConsoleEvent) => boolean>> = {};
 
-  async register(debug: false | string): Promise<this> {
-    this.set(console); // Init to console
-    await initNpmDebug(this);
-    this.setup(debug);
+  /**
+   * Register as primary listener for entire app
+   * @private
+   */
+  async register(cfg: { debug?: false | string, overwriteNpmDebug?: boolean }): Promise<this> {
+    this.debug(cfg.debug ?? false);
+
+    // Commandeer debug
+    if (cfg.overwriteNpmDebug ?? true) {
+      try {
+        const { default: debug } = await import('debug');
+        debug.formatArgs = function (args: string[]): void {
+          args.unshift(this.namespace);
+          args.push(debug.humanize(this.diff));
+        };
+        debug.log = (modulePath, ...args: string[]): void => this.invoke({
+          level: 'debug', module: '@npm:debug', modulePath,
+          args: [util.format(...args)], line: 0, source: '', timestamp: new Date()
+        });
+      } catch (err) {
+        // Do nothing
+      }
+    }
+
+    // Take ownership of console
+    this.set(console, true);
     return this;
   }
 
@@ -82,9 +83,9 @@ class $ConsoleManager {
   /**
    * Set logging debug level
    */
-  setup(debug: false | string): void {
-    if (debug !== false) {
-      const active = RuntimeIndex.getModuleList('local', debug || '@');
+  debug(value: false | string): void {
+    if (value !== false) {
+      const active = RuntimeIndex.getModuleList('local', value || '@');
       active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
     } else {
