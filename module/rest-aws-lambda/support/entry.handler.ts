@@ -5,8 +5,8 @@ import type { AwsLambdaHandler } from '../src/server';
 type HandleFunction = (event: LambdaAPIGatewayProxyEvent, context: LambdaContext) => Promise<LambdaAPIGatewayProxyResult>;
 
 async function buildApp(): Promise<{ handle: HandleFunction }> {
-  const { init } = await import('@travetto/base/support/init');
-  await init();
+  const { Env, ConsoleManager } = await import('@travetto/base');
+  await ConsoleManager.register({ debug: Env.debug });
 
   const { RootRegistry } = await import('@travetto/registry');
   await RootRegistry.init();

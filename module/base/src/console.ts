@@ -85,10 +85,12 @@ class $ConsoleManager {
    */
   debug(value: false | string): void {
     if (value !== false) {
+      Error.stackTraceLimit = 50;
       const active = RuntimeIndex.getModuleList('local', value || '@');
       active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
     } else {
+      Error.stackTraceLimit = 10;
       this.filter('debug', () => false);
     }
   }
