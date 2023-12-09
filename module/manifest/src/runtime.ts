@@ -1,6 +1,6 @@
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, ManifestContext, ManifestModule, ManifestRoot } from './types';
+import { FunctionMetadata, ManifestContext, ManifestModule, ManifestRoot, NodeModuleType, NodePackageManager } from './types';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
@@ -14,8 +14,8 @@ class $RuntimeContext implements ManifestContext {
   get workspacePath(): string { return this.#raw.workspacePath; }
   get frameworkVersion(): string { return this.#raw.frameworkVersion; }
   get monoRepo(): boolean { return !!this.#raw.monoRepo; }
-  get moduleType(): ManifestRoot['moduleType'] { return this.#raw.moduleType; }
-  get packageManager(): ManifestRoot['packageManager'] { return this.#raw.packageManager; }
+  get moduleType(): NodeModuleType { return this.#raw.moduleType; }
+  get packageManager(): NodePackageManager { return this.#raw.packageManager; }
   get compilerUrl(): string { return this.#raw.compilerUrl; }
   get compilerFolder(): string { return this.#raw.compilerFolder; }
   get outputFolder(): string { return this.#raw.outputFolder; }

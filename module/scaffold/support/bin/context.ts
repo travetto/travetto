@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import mustache from 'mustache';
 
 import { cliTpl } from '@travetto/cli';
-import { ManifestContext, path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { path, RuntimeIndex, RuntimeContext, NodePackageManager } from '@travetto/manifest';
 import { ExecUtil, ExecutionResult } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
 
@@ -40,7 +40,7 @@ export class Context {
   #peerDependencies: string[] = [];
   #featureContexts: Record<string, unknown>[] = [];
 
-  packageManager: ManifestContext['packageManager'] = 'npm';
+  packageManager: NodePackageManager = 'npm';
 
   readonly name: string;
 
