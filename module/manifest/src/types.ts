@@ -1,5 +1,4 @@
 export type NodeModuleType = 'module' | 'commonjs';
-export type NodePackageManager = 'yarn' | 'npm';
 
 export type ManifestModuleFileType = 'typings' | 'ts' | 'js' | 'json' | 'package-json' | 'unknown' | 'fixture' | 'md';
 export type ManifestModuleFolderType =
@@ -46,7 +45,7 @@ export type ManifestContext = {
   /** The module type of the workspace */
   moduleType: NodeModuleType;
   /** The package manager of the workspace */
-  packageManager: NodePackageManager;
+  packageManager: 'yarn' | 'npm';
   /** The version of the framework being used */
   frameworkVersion: string;
   /** Description of the main module */
