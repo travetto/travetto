@@ -37,7 +37,7 @@ export class FileModelConfig {
   cullRate?: number | TimeSpan;
 
   async postConstruct(): Promise<void> {
-    this.folder ??= path.resolve(os.tmpdir(), `trv_file_${RuntimeIndex.manifest.mainModule.replace(/[^a-z]/ig, '_')}`);
+    this.folder ??= path.resolve(os.tmpdir(), `trv_file_${RuntimeIndex.mainModuleName.replace(/[^a-z]/ig, '_')}`);
   }
 }
 

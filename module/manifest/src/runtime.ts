@@ -1,11 +1,9 @@
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, ManifestRoot } from './types';
+import { FunctionMetadata } from './types';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
-
-let manifest: ManifestRoot;
 
 /**
  * Extended manifest index geared for application execution
@@ -20,7 +18,13 @@ class $RuntimeIndex extends ManifestIndex {
    */
   reinitForModule(module: string): void {
     this.init(`${this.outputRoot}/node_modules/${module}`);
-    Object.assign(manifest, this.manifest);
+  }
+
+  /**
+   * Determines if the manifest root is the root for a monorepo
+   */
+  isMonoRepoRoot(): boolean {
+    return !!this.manifest.monoRepo && !this.manifest.mainFolder;
   }
 
   /**
@@ -33,10 +37,17 @@ class $RuntimeIndex extends ManifestIndex {
   }
 
   /**
+   * Get main module name
+   */
+  get mainModuleName(): string {
+    return this.manifest.mainModule;
+  }
+
+  /**
    * Get main module for manifest
    */
   get mainModule(): IndexedModule {
-    return this.getModule(this.manifest.mainModule)!;
+    return this.getModule(this.mainModuleName)!;
   }
 
   /**
@@ -98,7 +109,6 @@ let index: $RuntimeIndex | undefined;
 
 try {
   index = new $RuntimeIndex(process.env.TRV_MANIFEST!);
-  manifest = index.manifest;
 } catch (err) {
   if (process.env.NODE_ENV === 'production') {
     throw err;
@@ -106,4 +116,3 @@ try {
 }
 
 export const RuntimeIndex: $RuntimeIndex = index!;
-export const RuntimeManifest: ManifestRoot = manifest!;
