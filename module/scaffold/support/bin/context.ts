@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import mustache from 'mustache';
 
 import { cliTpl } from '@travetto/cli';
-import { ManifestContext, path, RuntimeIndex } from '@travetto/manifest';
+import { ManifestContext, path, RootIndex } from '@travetto/manifest';
 import { ExecUtil, ExecutionResult } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
 
@@ -62,7 +62,7 @@ export class Context {
   }
 
   get selfPath(): string {
-    return RuntimeIndex.getModule('@travetto/scaffold')!.sourcePath;
+    return RootIndex.getModule('@travetto/scaffold')!.sourcePath;
   }
 
   source(file?: string): string {
@@ -105,7 +105,7 @@ export class Context {
     const moduleNames = [...Object.keys(modules)];
 
     const context = Object.assign({
-      frameworkVersion: RuntimeIndex.manifest.frameworkVersion.replace(/[.]\d+$/, '.0'),
+      frameworkVersion: RootIndex.manifest.frameworkVersion.replace(/[.]\d+$/, '.0'),
       name: this.name,
       modules,
       moduleNames,

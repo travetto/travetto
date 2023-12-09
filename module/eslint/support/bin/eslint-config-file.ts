@@ -1,11 +1,11 @@
 import path from 'path';
 
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 export function buildEslintConfig(): string {
-  const rulesImp = RuntimeIndex.resolveFileImport('@travetto/eslint/support/bin/eslint-config.ts');
-  const manifestImp = RuntimeIndex.resolveFileImport('@travetto/manifest/__index__.ts');
-  const manifestFile = RuntimeIndex.mainModule.outputPath;
+  const rulesImp = RootIndex.resolveFileImport('@travetto/eslint/support/bin/eslint-config.ts');
+  const manifestImp = RootIndex.resolveFileImport('@travetto/manifest/__index__.ts');
+  const manifestFile = RootIndex.mainModule.outputPath;
 
   const common = {
     manifest: `process.env.TRV_MANIFEST = '${path.resolve(manifestFile)}'`,
@@ -13,7 +13,7 @@ export function buildEslintConfig(): string {
     build: 'const config = buildConfig(plugins)',
   };
 
-  const lines = RuntimeIndex.manifest.moduleType === 'commonjs' ?
+  const lines = RootIndex.manifest.moduleType === 'commonjs' ?
     [
       common.manifest,
       `const { buildConfig } = require('${rulesImp}')`,

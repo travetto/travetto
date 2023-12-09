@@ -1,7 +1,7 @@
 import { createWriteStream } from 'fs';
 import timers from 'timers/promises';
 
-import { ManifestFileUtil, RuntimeIndex } from '@travetto/manifest';
+import { ManifestFileUtil, RootIndex } from '@travetto/manifest';
 import { ConsoleManager, Env, TimeUtil } from '@travetto/base';
 import { ChildCommChannel } from '@travetto/worker';
 
@@ -34,7 +34,7 @@ export class TestChildWorker extends ChildCommChannel<RunEvent> {
    */
   async activate(): Promise<void> {
     if (/\b@travetto[/]test\b/.test(Env.DEBUG.val ?? '')) {
-      const stdout = createWriteStream(ManifestFileUtil.toolPath(RuntimeIndex, `test-worker.${process.pid}.log`), { flags: 'a' });
+      const stdout = createWriteStream(ManifestFileUtil.toolPath(RootIndex, `test-worker.${process.pid}.log`), { flags: 'a' });
       const c = new console.Console({ stdout, inspectOptions: { depth: 4, colors: false } });
       ConsoleManager.set({ onLog: (ev) => c[ev.level](process.pid, ...ev.args) });
     } else {

@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 import { Suite } from './src/decorator/suite';
 import { Test } from './src/decorator/test';
@@ -33,7 +33,7 @@ export const text = <>
 
     would translate to:
 
-    <c.Code title='Transpiled test Code' src={RuntimeIndex.resolveFileImport('@travetto/test/doc/assert-example.ts')} language='javascript' />
+    <c.Code title='Transpiled test Code' src={RootIndex.resolveFileImport('@travetto/test/doc/assert-example.ts')} language='javascript' />
 
     This would ultimately produce the error like:
 

@@ -3,11 +3,11 @@ import { d, c } from '@travetto/doc';
 import { InjectableFactory } from '@travetto/di';
 import { Context } from '@travetto/rest';
 import { AuthService, Authenticate, Unauthenticated, Authenticated } from '@travetto/auth-rest';
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 const Principal = d.codeLink('Principal', '@travetto/auth/src/types/principal.ts', /interface Principal/);
-const Request = d.codeLink('TravettoRequest', `${RuntimeIndex.getModule('@travetto/rest')?.sourcePath}/src/typings.d.ts`, /interface TravettoRequest/);
-const Response = d.codeLink('TravettoResponse', `${RuntimeIndex.getModule('@travetto/rest')?.sourcePath}/src/typings.d.ts`, /interface TravettoResponse/);
+const Request = d.codeLink('TravettoRequest', `${RootIndex.getModule('@travetto/rest')?.sourcePath}/src/typings.d.ts`, /interface TravettoRequest/);
+const Response = d.codeLink('TravettoResponse', `${RootIndex.getModule('@travetto/rest')?.sourcePath}/src/typings.d.ts`, /interface TravettoResponse/);
 const Authenticator = d.codeLink('Authenticator', '@travetto/auth/src/types/authenticator.ts', /interface Authenticator/);
 
 export const text = <>

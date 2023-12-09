@@ -1,7 +1,7 @@
 import assert from 'assert';
 
 import { ExecUtil } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 import { Suite, Test } from '@travetto/test';
 
 @Suite()
@@ -12,7 +12,7 @@ export class PackAppSuite {
     const tag = `tag-${Math.random()}`.replace(/[0][.]/, '');
     const imageName = 'travetto-test_pack_app';
     const res = ExecUtil.spawn('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
-      cwd: RuntimeIndex.mainModule.sourcePath,
+      cwd: RootIndex.mainModule.sourcePath,
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       catchAsResult: true,
       isolatedEnv: true

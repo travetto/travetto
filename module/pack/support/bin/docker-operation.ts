@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path, RuntimeIndex } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
 
 import { ActiveShellCommand } from './shell';
@@ -20,7 +20,7 @@ export class DockerPackOperation {
   static async* writeDockerFile(cfg: DockerPackConfig): AsyncIterable<string[]> {
     const dockerFile = path.resolve(cfg.workspace, 'Dockerfile');
 
-    const factory = RuntimeIndex.getFromImport(cfg.dockerFactory);
+    const factory = RootIndex.getFromImport(cfg.dockerFactory);
     if (!factory) {
       throw new Error(`Unable to resolve docker factory at ${cfg.dockerFactory}`);
     }

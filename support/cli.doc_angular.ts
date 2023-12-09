@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { Env, ExecUtil } from '@travetto/base';
-import { path, RuntimeIndex } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
 
@@ -14,7 +14,7 @@ const page = (f: string): string => path.resolve('related/travetto.github.io/src
 @CliCommand()
 export class DocAngularCommand {
   async main(target?: string): Promise<void> {
-    const root = RuntimeIndex.manifest.workspacePath;
+    const root = RootIndex.manifest.workspacePath;
 
     if (target && target.startsWith(root)) {
       target = target.replace(root, '').split('/').pop()!;
@@ -49,8 +49,8 @@ export class DocAngularCommand {
           progressPosition: 'bottom',
           filter: mod => mods.has(mod)
         });
-      await ExecUtil.spawn('trv', ['doc'], { env: { ...Env.TRV_MANIFEST.export('') }, cwd: RuntimeIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
-      mods.add(RuntimeIndex.mainModule);
+      await ExecUtil.spawn('trv', ['doc'], { env: { ...Env.TRV_MANIFEST.export('') }, cwd: RootIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
+      mods.add(RootIndex.mainModule);
     } else {
       const opts = {
         env: { ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },

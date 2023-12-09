@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { IndexedModule, RuntimeIndex, path } from '@travetto/manifest';
+import { IndexedModule, RootIndex, path } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {
@@ -48,7 +48,7 @@ export class $EditorConfig {
    */
   async get(file: string): Promise<ConfigType> {
     try {
-      const mod = RuntimeIndex.getModuleFromSource(file)!;
+      const mod = RootIndex.getModuleFromSource(file)!;
       const resolved = this.#getEmailConfig(mod);
       const content = await fs.readFile(resolved, 'utf8');
       return YamlUtil.parse<ConfigType>(content);
@@ -74,7 +74,7 @@ export class $EditorConfig {
 
   async ensureConfig(file: string): Promise<string> {
     console.log('Ensuring config', file);
-    const mod = RuntimeIndex.getModuleFromSource(file)!;
+    const mod = RootIndex.getModuleFromSource(file)!;
     const resolved = this.#getEmailConfig(mod);
     if (!(await fs.stat(resolved).catch(() => { }))) {
       await fs.mkdir(path.dirname(resolved), { recursive: true });

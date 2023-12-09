@@ -1,6 +1,6 @@
 import assert from 'assert';
 
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 import { ObjectUtil, AppError, ClassInstance, Class } from '@travetto/base';
 
 import { ThrowableError, TestConfig, Assertion } from '../model/test';
@@ -30,7 +30,7 @@ export class AssertCheck {
    * @param args The arguments passed in
    */
   static check(assertion: CaptureAssert, positive: boolean, ...args: unknown[]): void {
-    assertion.file = RuntimeIndex.getSourceFile(assertion.file);
+    assertion.file = RootIndex.getSourceFile(assertion.file);
 
     let fn = assertion.operator;
     assertion.operator = ASSERT_FN_OPERATOR[fn];
@@ -227,7 +227,7 @@ export class AssertCheck {
   ): void {
     let missed: Error | undefined;
 
-    assertion.file = RuntimeIndex.getSourceFile(assertion.file);
+    assertion.file = RootIndex.getSourceFile(assertion.file);
 
     try {
       action();
@@ -261,7 +261,7 @@ export class AssertCheck {
   ): Promise<void> {
     let missed: Error | undefined;
 
-    assertion.file = RuntimeIndex.getSourceFile(assertion.file);
+    assertion.file = RootIndex.getSourceFile(assertion.file);
 
     try {
       if ('then' in action) {

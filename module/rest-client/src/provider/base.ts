@@ -2,7 +2,7 @@
 import fs from 'fs/promises';
 
 import { Class, Util } from '@travetto/base';
-import { ManifestFileUtil, RuntimeIndex, path } from '@travetto/manifest';
+import { ManifestFileUtil, RootIndex, path } from '@travetto/manifest';
 import { ControllerConfig, ControllerRegistry, ControllerVisitor, EndpointConfig } from '@travetto/rest';
 import { ClassConfig, FieldConfig, SchemaNameResolver, SchemaRegistry, TemplateLiteral } from '@travetto/schema';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
@@ -74,7 +74,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
 
   constructor(output: string, moduleName?: string, config: Partial<C> = {}) {
     this.#output = output;
-    this.moduleName = moduleName ?? `${RuntimeIndex.mainModule.name}-client`;
+    this.moduleName = moduleName ?? `${RootIndex.mainModule.name}-client`;
     this.config = config;
     this.init?.();
   }
@@ -343,14 +343,14 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     };
 
     this.#schemaContent.set(schema.class.Ⲑid, result);
-    this.#files.add(RuntimeIndex.getFunctionMetadataFromClass(schema.class)!.source);
+    this.#files.add(RootIndex.getFunctionMetadataFromClass(schema.class)!.source);
 
     return result;
   }
 
   async finalize(): Promise<void> {
     for (const [file, cls] of this.commonFiles) {
-      await this.writeContent(file, await fs.readFile(typeof cls === 'string' ? cls : RuntimeIndex.getFunctionMetadata(cls)!.source, 'utf8'));
+      await this.writeContent(file, await fs.readFile(typeof cls === 'string' ? cls : RootIndex.getFunctionMetadata(cls)!.source, 'utf8'));
     }
 
     const files = [
@@ -382,7 +382,7 @@ export abstract class ClientGenerator<C = unknown> implements ControllerVisitor 
     if (cfg.documented !== false) {
       const result = this.renderController(cfg);
       this.#controllerContent.set(result.classId, result);
-      this.#files.add(RuntimeIndex.getFunctionMetadataFromClass(cfg.class)!.source);
+      this.#files.add(RootIndex.getFunctionMetadataFromClass(cfg.class)!.source);
     }
   }
 

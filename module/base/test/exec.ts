@@ -3,7 +3,7 @@ import os from 'os';
 import fs from 'fs/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { RootIndex, path } from '@travetto/manifest';
 
 import { ExecUtil } from '../src/exec';
 import { StreamUtil } from '../src/stream';
@@ -17,7 +17,7 @@ export class ExecUtilTest {
   @Test()
   async spawn() {
     const proc = ExecUtil.spawn('ls', ['-ls'], {
-      cwd: RuntimeIndex.mainModule.outputPath
+      cwd: RootIndex.mainModule.outputPath
     });
     const result = await proc.result;
     assert(result.stdout.includes('package.json'));
@@ -28,7 +28,7 @@ export class ExecUtilTest {
   @Test()
   async spawnBad() {
     const proc = ExecUtil.spawn('ls', ['xxxx'], {
-      cwd: RuntimeIndex.mainModule.outputPath,
+      cwd: RootIndex.mainModule.outputPath,
       catchAsResult: true
     });
     const result = await proc.result;

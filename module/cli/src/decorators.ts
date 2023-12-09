@@ -1,5 +1,5 @@
 import { Class, ClassInstance, Env } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 import { SchemaRegistry } from '@travetto/schema';
 
 import { CliCommandShape, CliCommandShapeFields } from './types';
@@ -15,7 +15,7 @@ import { CliParseUtil } from './parse';
  */
 export function CliCommand(cfg: CliCommandConfigOptions = {}) {
   return function <T extends CliCommandShape>(target: Class<T>): void {
-    const meta = RuntimeIndex.getFunctionMetadata(target);
+    const meta = RootIndex.getFunctionMetadata(target);
     if (!meta || meta.abstract) {
       return;
     }
@@ -56,12 +56,12 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       (pendingCls.validators ??= []).push(async item => {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const { module: mod } = item as CliCommandShapeFields;
-        const runModule = (runtimeModule === 'command' ? commandModule : mod) || RuntimeIndex.mainModuleName;
+        const runModule = (runtimeModule === 'command' ? commandModule : mod) || RootIndex.mainModuleName;
 
         // If we need to run as a specific module
-        if (runModule !== RuntimeIndex.mainModuleName) {
+        if (runModule !== RootIndex.mainModuleName) {
           try {
-            RuntimeIndex.reinitForModule(runModule);
+            RootIndex.reinitForModule(runModule);
           } catch (err) {
             return { source: 'flag', message: `${runModule} is an unknown module`, kind: 'custom', path: '.' };
           }

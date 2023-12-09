@@ -1,4 +1,4 @@
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 import { ClassConfig } from './service/types';
 
 const SYN_RE = /(__)(\d+)Ⲑsyn$/;
@@ -19,7 +19,7 @@ export class SchemaNameResolver {
 
   getName(schema: ClassConfig): string {
     const id = schema.class.Ⲑid;
-    if (RuntimeIndex.getFunctionMetadataFromClass(schema.class)?.synthetic && SYN_RE.test(schema.class.name)) {
+    if (RootIndex.getFunctionMetadataFromClass(schema.class)?.synthetic && SYN_RE.test(schema.class.name)) {
       if (!this.#schemaIdToName.has(id)) {
         const name = schema.class.name.replace(SYN_RE, (_, pref, uid) => `__${(+uid % this.#base).toString().padStart(this.#digits, '0')}`);
         this.#schemaIdToName.set(id, name);

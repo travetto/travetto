@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 
 import { CompilerClient, TypedObject } from '@travetto/base';
 import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { RootIndex, path } from '@travetto/manifest';
 import { ManualAsyncIterator as Queue } from '@travetto/worker';
 
 import { EmailCompileUtil } from './util';
@@ -33,7 +33,7 @@ export class EmailCompiler {
 
   /** Load Template */
   static async loadTemplate(file: string): Promise<EmailCompileContext> {
-    const entry = RuntimeIndex.getEntry(file);
+    const entry = RootIndex.getEntry(file);
     if (!entry) {
       throw new Error(`Unable to find template for ${file}`);
     }
@@ -53,7 +53,7 @@ export class EmailCompiler {
    * Grab list of all available templates
    */
   static findAllTemplates(mod?: string): string[] {
-    return RuntimeIndex
+    return RootIndex
       .find({
         module: m => !mod ? m.roles.includes('std') : mod === m.name,
         folder: f => f === 'support',
@@ -66,8 +66,8 @@ export class EmailCompiler {
    * Get output files
    */
   static getOutputFiles(file: string): EmailCompiled {
-    const entry = RuntimeIndex.getEntry(file)!;
-    const mod = RuntimeIndex.getModule(entry.module)!;
+    const entry = RootIndex.getEntry(file)!;
+    const mod = RootIndex.getModule(entry.module)!;
     return EmailCompileUtil.getOutputs(file, path.join(mod.sourcePath, 'resources'));
   }
 
@@ -119,7 +119,7 @@ export class EmailCompiler {
    */
   static async * watchCompile(): AsyncIterable<string> {
     const all = this.findAllTemplates()
-      .map(x => RuntimeIndex.resolveModulePath(`${RuntimeIndex.getEntry(x)!.module}#resources`))
+      .map(x => RootIndex.resolveModulePath(`${RootIndex.getEntry(x)!.module}#resources`))
       .reduce<{ set: Set<string>, arr: string[] }>((a, v) => {
         if (!a.set.has(v)) {
           a.set.add(v);
@@ -136,7 +136,7 @@ export class EmailCompiler {
 
     // Watch template files
     new CompilerClient().onFileChange(ev => {
-      const src = RuntimeIndex.getEntry(ev.file);
+      const src = RootIndex.getEntry(ev.file);
       if (src && EmailCompileUtil.isTemplateFile(src.sourceFile)) {
         setTimeout(() => stream.add({ ...ev, file: src.sourceFile }), 100); // Wait for it to be loaded
       }
@@ -154,7 +154,7 @@ export class EmailCompiler {
           yield file;
         } else if (VALID_FILE(file)) {
           const rootFile = file.replace(/\/resources.*/, '/package.json');
-          const mod = RuntimeIndex.getFromSource(rootFile)!.module;
+          const mod = RootIndex.getFromSource(rootFile)!.module;
           const changed = await this.compileAll(mod);
           console.log(`Successfully compiled ${changed.length} templates`, { changed, file });
           yield* changed;

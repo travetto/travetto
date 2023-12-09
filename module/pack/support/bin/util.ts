@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path, RuntimeIndex } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { AppError, ExecUtil, ExecutionOptions } from '@travetto/base';
 
 import { ActiveShellCommand } from './shell';
@@ -34,7 +34,7 @@ export class PackUtil {
    * Finalize eject output
    */
   static async writeEjectOutput(workspace: string, module: string, output: AsyncIterable<string>, file: string): Promise<void> {
-    const vars = { DIST: workspace, TRV_OUT: RuntimeIndex.outputRoot, ROOT: path.cwd(), MOD: module };
+    const vars = { DIST: workspace, TRV_OUT: RootIndex.outputRoot, ROOT: path.cwd(), MOD: module };
 
     const replaceArgs = (text: string): string => Object.entries(vars)
       .reduce((str, [k, v]) => str.replaceAll(v, ActiveShellCommand.var(k)), text);

@@ -2,7 +2,7 @@ import { createReadStream } from 'fs';
 import { Readable } from 'stream';
 import fs from 'fs/promises';
 
-import { path, RuntimeIndex } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 
 import { AppError } from './error';
 
@@ -14,7 +14,7 @@ export class FileLoader {
   #searchPaths: string[];
 
   constructor(paths: string[]) {
-    this.#searchPaths = paths.flat().map(x => RuntimeIndex.resolveModulePath(x));
+    this.#searchPaths = paths.flat().map(x => RootIndex.resolveModulePath(x));
   }
 
   get searchPaths(): string[] {

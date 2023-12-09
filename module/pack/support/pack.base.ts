@@ -1,7 +1,7 @@
 import os from 'os';
 
 import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
-import { path, RuntimeIndex } from '@travetto/manifest';
+import { path, RootIndex } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
 import { Ignore, Required, Schema } from '@travetto/schema';
@@ -15,7 +15,7 @@ export type PackOperationShape<T> = ((config: T) => AsyncIterable<string[]>);
 export abstract class BasePackCommand implements CliCommandShape {
 
   static get entryPoints(): string[] {
-    return RuntimeIndex.find({
+    return RootIndex.find({
       module: m => m.prod,
       folder: f => f === 'support',
       file: f => f.sourceFile.includes('entry.')
@@ -27,7 +27,7 @@ export abstract class BasePackCommand implements CliCommandShape {
   _parsed: ParsedState;
 
   @CliFlag({ desc: 'Workspace for building', short: 'w' })
-  workspace: string = path.resolve(os.tmpdir(), RuntimeIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
+  workspace: string = path.resolve(os.tmpdir(), RootIndex.mainModule.sourcePath.replace(/[\/\\: ]/g, '_'));
 
   @CliFlag({ desc: 'Clean workspace' })
   clean = true;
@@ -100,7 +100,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
     // Update entry points
     this.entryArguments = [...this.entryArguments ?? [], ...args, ...this._parsed.unknown];
-    this.module ||= RuntimeIndex.mainModuleName;
+    this.module ||= RootIndex.mainModuleName;
     this.mainName ??= path.basename(this.module);
 
     const stream = this.runOperations();

@@ -3,7 +3,7 @@ import { MailTransportTarget } from '@travetto/email/src/internal/types';
 import { DependencyRegistry } from '@travetto/di';
 
 import { EditorConfig } from './config';
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 /**
  * Util for sending emails
@@ -16,7 +16,7 @@ export class EditorSendService {
    * Get mail service
    */
   static async getMailService(file: string): Promise<MailService> {
-    const mod = RuntimeIndex.getModuleFromSource(file)!.name;
+    const mod = RootIndex.getModuleFromSource(file)!.name;
 
     if (!this.#svc[mod]) {
       const senderConfig = await EditorConfig.getSenderConfig(file);

@@ -2,11 +2,11 @@
 import fs from 'fs/promises';
 
 import { d, c } from '@travetto/doc';
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 export const text = async () => {
 
-  const output = (await fs.readFile(RuntimeIndex.getFromImport('@travetto/transformer/doc/upper')!.outputFile, 'utf8'))
+  const output = (await fs.readFile(RootIndex.getFromImport('@travetto/transformer/doc/upper')!.outputFile, 'utf8'))
     .replace(/\b(Test|name|age|dob|computeAge)\b/g, p => p.toUpperCase());
 
   return <>

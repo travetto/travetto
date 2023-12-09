@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
 
 import { Class } from '@travetto/base';
-import { RuntimeIndex } from '@travetto/manifest';
+import { RootIndex } from '@travetto/manifest';
 
 import { ChangeSource, ChangeEvent, ChangeHandler } from '../types';
 
@@ -30,8 +30,8 @@ export class MethodSource implements ChangeSource<[Class, Function]> {
    * On a class being emitted, check methods
    */
   onClassEvent(e: ChangeEvent<Class>): void {
-    const next = RuntimeIndex.getFunctionMetadataFromClass(e.curr!)?.methods ?? {};
-    const prev = RuntimeIndex.getFunctionMetadataFromClass(e.prev!)?.methods ?? {};
+    const next = RootIndex.getFunctionMetadataFromClass(e.curr!)?.methods ?? {};
+    const prev = RootIndex.getFunctionMetadataFromClass(e.prev!)?.methods ?? {};
 
     /**
      * Go through each method, comparing hashes.  To see added/removed and changed

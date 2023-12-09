@@ -1,6 +1,6 @@
 import ts from 'typescript';
 
-import { ManifestIndex, RuntimeIndex } from '@travetto/manifest';
+import { ManifestIndex, RootIndex } from '@travetto/manifest';
 
 import { NodeTransformer } from './types/visitor';
 import { VisitorFactory } from './visitor';
@@ -19,12 +19,12 @@ export class TransformerManager {
    * @returns
    */
   static async create(manifestIndex: ManifestIndex): Promise<TransformerManager> {
-    const transformerFiles = RuntimeIndex.find({ folder: f => f === '$transformer' }).map(f => f.sourceFile);
+    const transformerFiles = RootIndex.find({ folder: f => f === '$transformer' }).map(f => f.sourceFile);
 
     const transformers: NodeTransformer<TransformerState>[] = [];
 
     for (const file of transformerFiles) { // Exclude based on blacklist
-      const entry = RuntimeIndex.getEntry(file)!;
+      const entry = RootIndex.getEntry(file)!;
       transformers.push(...getAllTransformers(await import(entry.import), entry.module));
     }
 

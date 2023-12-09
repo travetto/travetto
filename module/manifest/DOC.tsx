@@ -2,7 +2,7 @@
 import { readFileSync } from 'fs';
 
 import { d, c } from '@travetto/doc';
-import { ManifestRoot, path, RuntimeIndex } from '@travetto/manifest';
+import { ManifestRoot, path, RootIndex } from '@travetto/manifest';
 import { COMMON_DATE } from '@travetto/doc/src/util/run';
 
 const RootIndexRef = d.codeLink('RootIndex', 'src/root-index.ts', /class .*RootIndex/);
@@ -10,7 +10,7 @@ const DeltaRef = d.codeLink('ManifestDeltaUtil', 'src/delta.ts', /class Manifest
 
 
 const manifest = () => {
-  const obj: ManifestRoot = JSON.parse(readFileSync(path.resolve(RuntimeIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json'), 'utf8'));
+  const obj: ManifestRoot = JSON.parse(readFileSync(path.resolve(RootIndex.getModule('@travetto/manifest')!.outputPath, 'manifest.json'), 'utf8'));
   const modules = Object.fromEntries(Object.entries(obj.modules).filter(([k]) => k === '@travetto/manifest'));
   // @ts-expect-error
   delete obj.modules;
@@ -64,7 +64,7 @@ export const text = <>
 
     <c.Code title='Test Class' src='./doc/test-class.ts' />
 
-    <c.Code title='Test Class Compiled' src={RuntimeIndex.getFromImport('@travetto/manifest/doc/test-class')!.outputFile} />
+    <c.Code title='Test Class Compiled' src={RootIndex.getFromImport('@travetto/manifest/doc/test-class')!.outputFile} />
 
     <c.Execution title='Index Lookup at Runtime' cmd='trv' args={['main', './doc/lookup.ts']} />
   </c.Section>
