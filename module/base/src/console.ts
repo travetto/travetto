@@ -42,6 +42,8 @@ class $ConsoleManager {
   async register(cfg: { debug?: false | string, overwriteNpmDebug?: boolean }): Promise<this> {
     this.debug(cfg.debug ?? false);
 
+    Error.stackTraceLimit = 50;
+
     // Commandeer debug
     if (cfg.overwriteNpmDebug ?? true) {
       try {
@@ -85,12 +87,10 @@ class $ConsoleManager {
    */
   debug(value: false | string): void {
     if (value !== false) {
-      Error.stackTraceLimit = 50;
       const active = RuntimeIndex.getModuleList('local', value || '@');
       active.add('@npm:debug');
       this.filter('debug', ctx => active.has(ctx.module));
     } else {
-      Error.stackTraceLimit = 10;
       this.filter('debug', () => false);
     }
   }
