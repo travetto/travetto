@@ -1,8 +1,8 @@
 import fs from 'fs/promises';
 import { CliCommand, CliCommandShape } from '@travetto/cli';
-import { path, RootIndex } from '@travetto/manifest';
+import { path, RuntimeContext } from '@travetto/manifest';
 
-const page = (f: string): string => path.resolve(RootIndex.manifest.workspacePath, '..', 'travetto.github.io/src', f);
+const page = (f: string): string => path.resolve(RuntimeContext.workspacePath, '..', 'travetto.github.io/src', f);
 
 @CliCommand()
 export class CliDocAngularCommand implements CliCommandShape {
@@ -10,7 +10,7 @@ export class CliDocAngularCommand implements CliCommandShape {
 
   async copyPluginImages(): Promise<void> {
     console.log('Copying Plugin images');
-    const root = RootIndex.manifest.workspacePath;
+    const root = RuntimeContext.workspacePath;
     for await (const file of await fs.opendir(path.resolve(root, 'images'), { recursive: true })) {
       if (/[.](gif|jpe?g|png)/i.test(file.name)) {
         const target = page(`assets/images/${this.modName}/${file.path}`);
@@ -23,7 +23,7 @@ export class CliDocAngularCommand implements CliCommandShape {
   async main(): Promise<void> {
     await this.copyPluginImages();
 
-    let html = await fs.readFile(path.resolve(RootIndex.manifest.workspacePath, 'DOC.html'), 'utf8');
+    let html = await fs.readFile(path.resolve(RuntimeContext.workspacePath, 'DOC.html'), 'utf8');
     html = html
       .replace(/href="[^"]+travetto\/tree\/[^/]+\/module\/([^/"]+)"/g, (_, ref) => `routerLink="/docs/${ref}"`)
       .replace(/^src="images\//g, `src="/assets/images/${this.modName}/`)

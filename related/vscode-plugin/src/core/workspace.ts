@@ -226,10 +226,8 @@ export class Workspace {
         'node:internals/**',
         'internal/**',
         '**/@travetto/base/src/console.*',
-        '**/@travetto/base/src/proxy.*',
-        '**/@travetto/log/src/service.*',
-        '**/@travetto/log/src/common.*',
-        '**/@travetto/log/src/appender/console.*',
+        '**/@travetto/registry/src/proxy.*',
+        '**/@travetto/log/**',
         '**/@travetto/context/src/service.*',
         '**/@travetto/rest/src/util/route.*',
         '**/tslib/**'
