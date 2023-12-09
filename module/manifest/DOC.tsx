@@ -5,7 +5,7 @@ import { d, c } from '@travetto/doc';
 import { ManifestRoot, path, RuntimeIndex } from '@travetto/manifest';
 import { COMMON_DATE } from '@travetto/doc/src/util/run';
 
-const RuntimeIndexRef = d.codeLink('RuntimeIndex', 'src/runtime.ts', /class .*RuntimeIndex/);
+const RootIndexRef = d.codeLink('RuntimeIndex', 'src/runtime.ts', /class .*RuntimeIndex/);
 const DeltaRef = d.codeLink('ManifestDeltaUtil', 'src/delta.ts', /class ManifestDeltaUtil/);
 
 
@@ -60,7 +60,7 @@ export const text = <>
 
     For the framework to work properly, metadata needs to be collected about files, classes and functions to uniquely identify them, with support for detecting changes during live reloads.  To achieve this, every {d.input('class')} is decorated with an additional field of {d.input('Ⲑid')}.  {d.input('Ⲑid')} represents a computed id that is tied to the file/class combination. <br />
 
-    {d.input('Ⲑid')} is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the {RuntimeIndexRef} using the {d.method('getFunctionMetadata')} method.
+    {d.input('Ⲑid')} is used heavily throughout the framework for determining which classes are owned by the framework, and being able to lookup the needed data from the {RootIndexRef} using the {d.method('getFunctionMetadata')} method.
 
     <c.Code title='Test Class' src='./doc/test-class.ts' />
 
