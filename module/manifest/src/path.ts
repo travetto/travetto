@@ -1,5 +1,5 @@
 import type * as pathMod from 'node:path';
-import { extname, dirname, basename, resolve, join } from 'path/posix';
+import { extname, dirname, basename, resolve, join } from 'node:path/posix';
 import { sep, resolve as nativeResolve, join as nativeJoin } from 'node:path';
 
 /**

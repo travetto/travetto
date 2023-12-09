@@ -2,7 +2,7 @@ import { Util } from '@travetto/base';
 import { ContextProvider } from '@travetto/rest';
 
 /**
- * @concrete ./internal/types:SessionDataTarget
+ * @concrete ./internal/types#SessionDataTarget
  * @augments `@travetto/rest:Context`
  */
 export interface SessionData {

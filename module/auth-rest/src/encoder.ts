@@ -3,7 +3,7 @@ import { FilterContext } from '@travetto/rest';
 
 /**
  * Encoder for auth context for request/response
- * @concrete ./internal/types:PrincipalEncoderTarget
+ * @concrete ./internal/types#PrincipalEncoderTarget
  */
 export interface PrincipalEncoder {
   /**

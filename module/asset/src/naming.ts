@@ -4,7 +4,7 @@ import { StreamMeta } from '@travetto/model';
 
 /**
  * Standard class for an asset naming strategy
- * @concrete ./internal/types:AssetNamingStrategyImpl
+ * @concrete ./internal/types#AssetNamingStrategyImpl
  */
 export interface AssetNamingStrategy {
   readonly prefix: string;

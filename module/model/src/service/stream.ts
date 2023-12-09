@@ -43,7 +43,7 @@ export interface PartialStream {
 /**
  * Support for Streams CRD.  Stream update is not supported.
  *
- * @concrete ../internal/service/common:ModelStreamSupportTarget
+ * @concrete ../internal/service/common#ModelStreamSupportTarget
  */
 export interface ModelStreamSupport {
 

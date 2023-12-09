@@ -1,7 +1,7 @@
 /**
  * A user principal, including permissions and details
  *
- * @concrete ../internal/types:PrincipalTarget
+ * @concrete ../internal/types#PrincipalTarget
  * @augments `@travetto/rest:Context`
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

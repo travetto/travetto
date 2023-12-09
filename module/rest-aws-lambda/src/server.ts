@@ -21,7 +21,7 @@ export class AwsLambdaRestServerTarget { }
 
 /**
  * Interface for lambda rest servers
- * @concrete .:AwsLambdaRestServerTarget
+ * @concrete #AwsLambdaRestServerTarget
  */
 export interface AwsLambdaRestServer extends RestServer, AwsLambdaHandler { }
 

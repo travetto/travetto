@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import * as winPath from 'path/win32';
+import * as winPath from 'node:path/win32';
 
 import { Suite, Test } from '@travetto/test';
 import { path } from '@travetto/manifest';

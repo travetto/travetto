@@ -1,4 +1,5 @@
 import assert from 'node:assert';
+import { Readable } from 'node:stream';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';
@@ -15,6 +16,7 @@ import { Address2 } from './models/address';
 function findError(errors: ValidationError[], path: string, message: string) {
   return errors.find(x => x.path === path && x.message.includes(message));
 }
+
 interface Address {
   street1: string;
   street2?: string;
@@ -30,6 +32,7 @@ class User {
   address: Address;
   address2?: Address2;
   address3?: Address3;
+  image?: Readable;
 }
 
 @Suite()

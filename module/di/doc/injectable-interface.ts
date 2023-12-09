@@ -3,7 +3,7 @@ import { DependencyRegistry, Inject, Injectable, InjectableFactory } from '@trav
 class TargetConcrete { }
 
 /**
- * @concrete .:TargetConcrete
+ * @concrete #TargetConcrete
  */
 export interface ServiceContract {
   deleteUser(userId: string): Promise<void>;

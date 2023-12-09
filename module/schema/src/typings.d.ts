@@ -13,7 +13,7 @@ declare global {
 
   namespace NodeJS {
     /**
-     * @concrete stream:Readable
+     * @concrete node:stream#Readable
      */
     interface ReadableStream { }
   }
@@ -21,7 +21,7 @@ declare global {
 
 declare module 'stream' {
   /**
-   * @concrete stream:Readable
+   * @concrete node:stream#Readable
    */
   interface Readable { }
 }
