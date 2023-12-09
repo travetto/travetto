@@ -1,39 +1,13 @@
-import path from 'path';
+import fs from 'fs/promises';
 
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext, RuntimeIndex, path } from '@travetto/manifest';
 
-export function buildEslintConfig(): string {
-  const rulesImp = RuntimeIndex.resolveFileImport('@travetto/eslint/support/bin/eslint-config.ts');
-  const manifestImp = RuntimeIndex.resolveFileImport('@travetto/manifest/__index__.ts');
-  const manifestFile = RuntimeIndex.mainModule.outputPath;
+export async function buildEslintConfig(): Promise<string> {
+  const root = RuntimeIndex.getModule('@travetto/eslint')!.sourcePath;
+  const ext = RuntimeContext.moduleType === 'commonjs' ? '.cjs' : '.mjs';
+  const tpl = await fs.readFile(path.resolve(root, 'resources', `eslint-config-file${ext}`), 'utf8')
 
-  const common = {
-    manifest: `process.env.TRV_MANIFEST = '${path.resolve(manifestFile)}'`,
-    pluginFiles: "const pluginFiles = RuntimeIndex.find({ folder: f => f === 'support', file: f => /support\\/eslint[.]/.test(f) })",
-    build: 'const config = buildConfig(plugins)',
-  };
-
-  const lines = RuntimeContext.moduleType === 'commonjs' ?
-    [
-      common.manifest,
-      `const { buildConfig } = require('${rulesImp}')`,
-      `const { RuntimeIndex } = require('${manifestImp}')`,
-      common.pluginFiles,
-      'const plugins = pluginFiles.map(x => require(x.outputFile))',
-      common.build,
-      'module.exports = config',
-      ''
-    ] :
-    [
-      common.manifest,
-      `const { buildConfig } = await import('${rulesImp}')`,
-      `const { RuntimeIndex } = await import('${manifestImp}')`,
-      common.pluginFiles,
-      'const plugins = await Promise.all(pluginFiles.map(x => import(x.outputFile)))',
-      common.build,
-      'export default config',
-      ''
-    ];
-
-  return lines.join(';\n');
+  return tpl
+    .replace(/'(@travetto\/[^']+)'/g, (_, v) => `'${RuntimeIndex.resolveFileImport(v)}'`)
+    .replace('%MANIFEST_FILE%', RuntimeIndex.mainModule.outputPath);
 }
