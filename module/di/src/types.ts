@@ -72,7 +72,7 @@ export interface InjectableFactoryConfig<T = unknown> extends Core<T> {
   /**
    * Is this injectable enabled
    */
-  enabled: boolean | (() => boolean);
+  enabled?: boolean | (() => boolean);
   /**
    * Src of the factory method
    */

@@ -40,7 +40,7 @@ export class $EditorConfig {
   };
 
   #getEmailConfig(mod: IndexedModule): string {
-    return this.#configFile[mod.name] ??= path.resolve(mod.sourcePath, 'resources/email/dev.yml');
+    return this.#configFile[mod.name] ??= path.resolve(mod.sourcePath, 'resources/email/local.yml');
   }
 
   /**

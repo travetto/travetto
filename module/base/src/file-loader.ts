@@ -13,8 +13,12 @@ export class FileLoader {
 
   #searchPaths: string[];
 
+  static resolvePaths(paths: string[]): string[] {
+    return [...new Set(paths.map(x => RuntimeIndex.resolveModulePath(x)))];
+  }
+
   constructor(paths: string[]) {
-    this.#searchPaths = paths.flat().map(x => RuntimeIndex.resolveModulePath(x));
+    this.#searchPaths = FileLoader.resolvePaths(paths);
   }
 
   get searchPaths(): string[] {

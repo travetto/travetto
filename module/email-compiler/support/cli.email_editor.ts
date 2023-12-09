@@ -6,13 +6,11 @@ import { EditorState } from './bin/editor';
 import { EmailCompilationManager } from './bin/manager';
 
 /** The email editor compilation service and output serving */
-@CliCommand()
+@CliCommand({ addEnv: true })
 export class EmailEditorCommand {
 
   preMain(): void {
-    Env.TRV_ENV.set('dev');
     Env.TRV_DYNAMIC.set(true);
-    Env.TRV_PROFILES.set(['email-dev']);
   }
 
   async main(): Promise<void> {

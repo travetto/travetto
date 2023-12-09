@@ -1,8 +1,7 @@
 import mustache from 'mustache';
 
-import { Inject, Injectable } from '@travetto/di';
-
-import { EmailResource } from './resource';
+import { Injectable } from '@travetto/di';
+import { ResourceLoader } from '@travetto/base';
 
 /**
  * Mail interpolation engine
@@ -24,8 +23,7 @@ export interface MailInterpolator {
 @Injectable()
 export class MustacheInterpolator implements MailInterpolator {
 
-  @Inject()
-  resources: EmailResource;
+  resources = new ResourceLoader();
 
   /**
    * Resolved nested templates

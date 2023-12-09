@@ -1,11 +1,10 @@
-import { Env } from '@travetto/base';
+import { Env, ResourceLoader } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { EmailCompiled, EmailOptions, SentEmail } from './types';
 import { MailTransport } from './transport';
 import { MailInterpolator } from './template';
 import { MailUtil } from './util';
-import { EmailResource } from './resource';
 
 type MessageWithoutBody = Omit<EmailOptions, keyof EmailCompiled>;
 
@@ -18,16 +17,14 @@ export class MailService {
   #compiled = new Map<string, EmailCompiled>();
   #transport: MailTransport;
   #interpolator: MailInterpolator;
-  #resources: EmailResource;
+  #resources: ResourceLoader = new ResourceLoader();
 
   constructor(
     transport: MailTransport,
     interpolator: MailInterpolator,
-    resources: EmailResource
   ) {
     this.#interpolator = interpolator;
     this.#transport = transport;
-    this.#resources = resources;
   }
 
   /**

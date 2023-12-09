@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { CompilerClient, TypedObject } from '@travetto/base';
+import { CompilerClient, FileLoader, TypedObject } from '@travetto/base';
 import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
 import { RuntimeIndex, path } from '@travetto/manifest';
 import { ManualAsyncIterator as Queue } from '@travetto/worker';
@@ -118,15 +118,9 @@ export class EmailCompiler {
    * Watch compilation
    */
   static async * watchCompile(): AsyncIterable<string> {
-    const all = this.findAllTemplates()
-      .map(x => RuntimeIndex.resolveModulePath(`${RuntimeIndex.getEntry(x)!.module}#resources`))
-      .reduce<{ set: Set<string>, arr: string[] }>((a, v) => {
-        if (!a.set.has(v)) {
-          a.set.add(v);
-          a.arr.push(v);
-        }
-        return a;
-      }, { set: new Set(), arr: [] }).arr;
+    const all = FileLoader.resolvePaths(
+      this.findAllTemplates().map(x => `${RuntimeIndex.getEntry(x)!.module}#resources`)
+    );
 
     const ctrl = new AbortController();
     const stream = new Queue<WatchEvent>([], ctrl.signal);

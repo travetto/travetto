@@ -1,6 +1,6 @@
 import util from 'node:util';
 
-import { AppError, Class, ClassInstance, DataUtil, Env, ResourceLoader } from '@travetto/base';
+import { AppError, Class, ClassInstance, DataUtil, Env, FileLoader } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
@@ -156,7 +156,7 @@ export class ConfigurationService {
         debug: Env.debug,
         production: Env.production,
         dynamic: Env.dynamic,
-        resourcePaths: ResourceLoader.getSearchPaths(),
+        resourcePaths: FileLoader.resolvePaths(Env.resourcePaths),
         profiles: Env.TRV_PROFILES.list ?? []
       },
       config: await this.exportActive()
