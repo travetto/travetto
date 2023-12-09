@@ -1,6 +1,6 @@
-import assert from 'assert';
-import os from 'os';
-import fs from 'fs/promises';
+import assert from 'node:assert';
+import os from 'node:os';
+import fs from 'node:fs/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { RuntimeIndex, path } from '@travetto/manifest';

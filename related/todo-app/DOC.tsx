@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc */
-import timers from 'timers/promises';
+import timers from 'node:timers/promises';
 
 import { RuntimeIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';

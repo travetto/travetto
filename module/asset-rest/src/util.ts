@@ -1,7 +1,7 @@
-import { createWriteStream } from 'fs';
-import fs from 'fs/promises';
-import os from 'os';
-import stream from 'stream';
+import { createWriteStream } from 'node:fs';
+import fs from 'node:fs/promises';
+import os from 'node:os';
+import stream from 'node:stream';
 import mime from 'mime';
 
 import { Renderable, Request, Response } from '@travetto/rest';

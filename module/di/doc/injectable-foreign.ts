@@ -1,5 +1,5 @@
-import { EventEmitter } from 'events';
-import { Writable } from 'stream';
+import { EventEmitter } from 'node:events';
+import { Writable } from 'node:stream';
 
 import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 

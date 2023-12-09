@@ -118,8 +118,8 @@ The [AuthUtil](https://github.com/travetto/travetto/tree/main/module/auth/src/ut
 
 **Code: Auth util structure**
 ```typescript
-import crypto from 'crypto';
-import util from 'util';
+import crypto from 'node:crypto';
+import util from 'node:util';
 import { AppError, Util } from '@travetto/base';
 const pbkdf2 = util.promisify(crypto.pbkdf2);
 /**

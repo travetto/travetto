@@ -1,4 +1,4 @@
-import timers from 'timers/promises';
+import timers from 'node:timers/promises';
 
 import { Env } from './env';
 

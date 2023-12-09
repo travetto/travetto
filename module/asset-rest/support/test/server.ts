@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { AssetUtil, Asset, AssetService, AssetModelⲐ } from '@travetto/asset';
 import { ObjectUtil, StreamUtil } from '@travetto/base';

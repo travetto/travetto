@@ -229,8 +229,8 @@ It is also possible to directly reference external types, and they will be conve
 
 **Code: Example External Dependencies**
 ```typescript
-import { EventEmitter } from 'events';
-import { Writable } from 'stream';
+import { EventEmitter } from 'node:events';
+import { Writable } from 'node:stream';
 
 import { Inject, Injectable, InjectableFactory } from '@travetto/di';
 

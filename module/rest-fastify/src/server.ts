@@ -1,4 +1,4 @@
-import https from 'https';
+import https from 'node:https';
 import compress from '@fastify/compress';
 
 import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';

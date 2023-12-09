@@ -1,5 +1,5 @@
 import { ExtensionContext } from 'vscode';
-import http from 'http';
+import http from 'node:http';
 
 import { TargetEvent } from './types';
 import { Log } from './log';

@@ -1,5 +1,5 @@
-import assert from 'assert';
-import timers from 'timers/promises';
+import assert from 'node:assert';
+import timers from 'node:timers/promises';
 
 import { Suite, Test, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';

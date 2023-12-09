@@ -1,5 +1,5 @@
-import { ChildProcess } from 'child_process';
-import { EventEmitter } from 'events';
+import { ChildProcess } from 'node:child_process';
+import { EventEmitter } from 'node:events';
 
 import { ExecUtil } from '@travetto/base';
 

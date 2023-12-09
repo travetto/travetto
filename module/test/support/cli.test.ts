@@ -1,5 +1,5 @@
-import { EventEmitter } from 'events';
-import fs from 'fs/promises';
+import { EventEmitter } from 'node:events';
+import fs from 'node:fs/promises';
 
 import { path } from '@travetto/manifest';
 import { Env } from '@travetto/base';

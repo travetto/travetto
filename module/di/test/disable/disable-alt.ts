@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { BeforeAll, Suite, Test } from '@travetto/test';
 import { DependencyRegistry } from '../../__index__';

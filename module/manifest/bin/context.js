@@ -5,8 +5,8 @@
  * @typedef {Pkg & { mono: boolean, manager: 'yarn'|'npm', resolve: (file:string) => string}} Workspace
  * @typedef {import('../src/types').ManifestContext} ManifestContext
  */
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { createRequire } from 'module';
 
 /** @type {Record<string, Workspace>} */ const WS_ROOT = {};

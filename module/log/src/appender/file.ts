@@ -1,4 +1,4 @@
-import { createWriteStream, WriteStream, mkdirSync, openSync, appendFileSync } from 'fs';
+import { createWriteStream, WriteStream, mkdirSync, openSync, appendFileSync } from 'node:fs';
 
 import { Env } from '@travetto/base';
 import { Injectable } from '@travetto/di';

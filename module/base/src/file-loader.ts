@@ -1,6 +1,6 @@
-import { createReadStream } from 'fs';
-import { Readable } from 'stream';
-import fs from 'fs/promises';
+import { createReadStream } from 'node:fs';
+import { Readable } from 'node:stream';
+import fs from 'node:fs/promises';
 
 import { path, RuntimeIndex } from '@travetto/manifest';
 

@@ -1,4 +1,4 @@
-import timers from 'timers/promises';
+import timers from 'node:timers/promises';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Env, Util } from '@travetto/base';

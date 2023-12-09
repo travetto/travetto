@@ -1,5 +1,5 @@
 import vscode from 'vscode';
-import util from 'util';
+import util from 'node:util';
 
 import type { TestResult, ErrorHoverAssertion, StatusUnknown, TestConfig, Assertion } from './types';
 import { Workspace } from '../../../core/workspace';

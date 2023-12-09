@@ -145,7 +145,7 @@ Now the tests should be defined at `test/service.ts`
 
 **Code: Test bed**
 ```typescript
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { Inject } from '@travetto/di';

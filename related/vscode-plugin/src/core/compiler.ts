@@ -1,5 +1,5 @@
 import vscode from 'vscode';
-import { EventEmitter } from 'stream';
+import { EventEmitter } from 'node:stream';
 
 import { CompilerClient } from '@travetto/base';
 

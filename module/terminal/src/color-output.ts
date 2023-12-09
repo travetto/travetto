@@ -1,4 +1,4 @@
-import tty from 'tty';
+import tty from 'node:tty';
 
 import { ColorDefineUtil, RGBInput } from './color-define';
 import { ANSICodes } from './codes';

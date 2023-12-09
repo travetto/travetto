@@ -1,4 +1,4 @@
-import { createReadStream } from 'fs';
+import { createReadStream } from 'node:fs';
 
 import { StreamUtil } from '@travetto/base';
 import { ImageConverter } from '@travetto/image';

@@ -239,7 +239,7 @@ In addition to the provided contracts, the module also provides common utilities
 
 **Code: Memory Service**
 ```typescript
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import { StreamUtil, Class, TimeSpan } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';
 import { Injectable } from '@travetto/di';

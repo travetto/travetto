@@ -1,5 +1,5 @@
-import crypto from 'crypto';
-import util from 'util';
+import crypto from 'node:crypto';
+import util from 'node:util';
 
 import { AppError, Util } from '@travetto/base';
 

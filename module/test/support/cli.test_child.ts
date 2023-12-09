@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 
 import { Env, ExecUtil } from '@travetto/base';
 import { CliCommand } from '@travetto/cli';

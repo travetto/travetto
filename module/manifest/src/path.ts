@@ -1,6 +1,6 @@
-import type * as pathMod from 'path';
+import type * as pathMod from 'node:path';
 import { extname, dirname, basename, resolve, join } from 'path/posix';
-import { sep, resolve as nativeResolve, join as nativeJoin } from 'path';
+import { sep, resolve as nativeResolve, join as nativeJoin } from 'node:path';
 
 /**
  * Converts a given file name by replace all slashes, with forward slashes

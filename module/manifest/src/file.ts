@@ -1,6 +1,6 @@
-import os from 'os';
-import fs from 'fs/promises';
-import { readFileSync } from 'fs';
+import os from 'node:os';
+import fs from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
 
 import { path } from './path';
 import type { ManifestContext } from './types';

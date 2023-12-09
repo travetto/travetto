@@ -1,9 +1,9 @@
-import fs from 'fs/promises';
-import { createReadStream } from 'fs';
+import fs from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
 
-import os from 'os';
+import os from 'node:os';
 
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import { path, RuntimeContext } from '@travetto/manifest';
 import { StreamUtil, Class, TimeSpan } from '@travetto/base';

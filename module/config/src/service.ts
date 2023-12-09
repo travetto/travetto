@@ -1,4 +1,4 @@
-import util from 'util';
+import util from 'node:util';
 
 import { AppError, Class, ClassInstance, DataUtil, Env, ResourceLoader } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';

@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/email-inky */
 
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { RuntimeContext } from '@travetto/manifest';

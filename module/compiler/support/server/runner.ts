@@ -1,5 +1,5 @@
-import cp from 'child_process';
-import path from 'path';
+import cp from 'node:child_process';
+import path from 'node:path';
 
 import type { ManifestContext, ManifestRoot, DeltaEvent } from '@travetto/manifest';
 

@@ -1,6 +1,6 @@
-import fs from 'fs/promises';
-import cp from 'child_process';
-import { rmSync, mkdirSync } from 'fs';
+import fs from 'node:fs/promises';
+import cp from 'node:child_process';
+import { rmSync, mkdirSync } from 'node:fs';
 
 
 import { path } from '@travetto/manifest';

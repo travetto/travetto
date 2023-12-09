@@ -1,5 +1,5 @@
 import vscode from 'vscode';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { Activatible } from '../../../core/activation';
 import { Workspace } from '../../../core/workspace';

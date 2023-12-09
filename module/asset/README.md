@@ -107,7 +107,7 @@ In addition to reading and writing, you can also retrieve information on the sav
 
 **Code: Asset Structure**
 ```typescript
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import { StreamMeta } from '@travetto/model';
 

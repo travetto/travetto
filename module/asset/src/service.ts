@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import { Inject, Injectable } from '@travetto/di';
 import { ModelStreamSupport, ExistsError, NotFoundError, StreamMeta } from '@travetto/model';

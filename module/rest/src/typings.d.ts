@@ -1,6 +1,6 @@
 import { SetOption, GetOption } from 'cookies';
-import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'http';
-import { Readable, Writable } from 'stream';
+import type { IncomingMessage, ServerResponse, IncomingHttpHeaders } from 'node:http';
+import { Readable, Writable } from 'node:stream';
 
 import { ContentType, HeaderMap } from './types';
 import { HeadersAddedⲐ, InterceptorConfigsⲐ, NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from './internal/symbol';

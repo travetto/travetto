@@ -1,7 +1,7 @@
-import https from 'https';
-import http from 'http';
-import net from 'net';
-import timers from 'timers/promises';
+import https from 'node:https';
+import http from 'node:http';
+import net from 'node:net';
+import timers from 'node:timers/promises';
 
 import { ExecUtil, ExecutionResult } from '@travetto/base';
 

@@ -1,5 +1,5 @@
 
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { ObjectUtil } from '@travetto/base';
 import { Suite, Test, TestFixtures } from '@travetto/test';

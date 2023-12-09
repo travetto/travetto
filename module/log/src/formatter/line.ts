@@ -1,4 +1,4 @@
-import util from 'util';
+import util from 'node:util';
 
 import { Env } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';

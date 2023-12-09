@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 import type {
   SchemaObject, SchemasObject, ParameterObject, OperationObject,
   RequestBodyObject, TagObject, PathsObject, PathItemObject

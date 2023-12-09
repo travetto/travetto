@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { ExecUtil } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';

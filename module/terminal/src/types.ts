@@ -1,4 +1,4 @@
-import tty from 'tty';
+import tty from 'node:tty';
 
 export type Indexed = { idx: number };
 export type DelayedConfig = { initialDelay?: number, cycleDelay?: number };

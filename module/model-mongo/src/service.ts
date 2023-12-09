@@ -1,6 +1,6 @@
 // Wildcard import needed here due to packaging issues
 import * as mongo from 'mongodb';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import {
   ModelRegistry, ModelType, OptionalId,

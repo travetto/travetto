@@ -1,4 +1,4 @@
-import util from 'util';
+import util from 'node:util';
 
 import { RootRegistry } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';

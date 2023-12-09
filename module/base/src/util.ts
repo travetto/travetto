@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 export type TemplatePrim = string | number | boolean | Date | RegExp;
 

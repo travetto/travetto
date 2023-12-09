@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
@@ -15,7 +15,7 @@ export class OpenApiSuite {
     const spec = await svc.getSpec();
 
     assert.deepStrictEqual(
-      [...Object.keys(spec.paths)].sort(),
+      [...Object.keys(spec.paths ?? {})].sort(),
       [
         '/relationship/{name}',
         '/relationship/',

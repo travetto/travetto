@@ -1,5 +1,5 @@
-import { Readable } from 'stream';
-import { Url } from 'url';
+import { Readable } from 'node:stream';
+import { Url } from 'node:url';
 
 /**
  * An address

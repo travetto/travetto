@@ -1,6 +1,6 @@
-import { createReadStream } from 'fs';
-import readline from 'readline';
-import timers from 'timers/promises';
+import { createReadStream } from 'node:fs';
+import readline from 'node:readline';
+import timers from 'node:timers/promises';
 
 import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
 import { IndexedFile, RuntimeIndex } from '@travetto/manifest';

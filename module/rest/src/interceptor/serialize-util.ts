@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import { StreamUtil, ErrorCategory, AppError, ObjectUtil } from '@travetto/base';
 

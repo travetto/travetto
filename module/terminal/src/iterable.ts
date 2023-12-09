@@ -1,4 +1,4 @@
-import timers from 'timers/promises';
+import timers from 'node:timers/promises';
 import { DelayedConfig, Indexed } from './types';
 
 export type StoppableIterable<T> = { stream: AsyncIterable<T>, stop: () => void };

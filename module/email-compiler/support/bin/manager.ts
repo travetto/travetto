@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { type MailInterpolator, type EmailCompiled } from '@travetto/email';
 import { DependencyRegistry } from '@travetto/di';

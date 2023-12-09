@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { CliCommandShape, CliCommand } from '@travetto/cli';
 import { Env } from '@travetto/base';

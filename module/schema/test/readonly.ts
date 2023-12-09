@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { RootRegistry } from '@travetto/registry';

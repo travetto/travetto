@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/quotes */
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { Class, Util } from '@travetto/base';
 import { ManifestFileUtil, RuntimeIndex, path } from '@travetto/manifest';

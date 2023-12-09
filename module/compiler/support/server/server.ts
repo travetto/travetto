@@ -1,6 +1,6 @@
-import http from 'http';
-import fs from 'fs/promises';
-import path from 'path';
+import http from 'node:http';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 

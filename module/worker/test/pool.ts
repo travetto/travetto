@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { ExecUtil } from '@travetto/base';
