@@ -1,4 +1,4 @@
-import { Writable } from 'stream';
+import { Writable } from 'node:stream';
 
 import { TestEvent } from '../../model/event';
 import { TestConsumer } from '../types';

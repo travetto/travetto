@@ -1,5 +1,5 @@
 import vscode from 'vscode';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { CliCommandInput } from '@travetto/cli';
 import { ExecUtil } from '@travetto/base';

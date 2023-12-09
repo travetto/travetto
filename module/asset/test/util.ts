@@ -1,10 +1,10 @@
-import fs from 'fs/promises';
-import assert from 'assert';
+import fs from 'node:fs/promises';
+import assert from 'node:assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
+import { path } from '@travetto/manifest';
 
 import { AssetUtil } from '../src/util';
-import { path } from '@travetto/manifest';
 
 @Suite()
 export class UtilTest {

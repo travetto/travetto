@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 
 import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';

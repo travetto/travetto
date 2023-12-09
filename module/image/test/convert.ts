@@ -1,6 +1,6 @@
-import os from 'os';
-import assert from 'assert';
-import fs from 'fs/promises';
+import os from 'node:os';
+import assert from 'node:assert';
+import fs from 'node:fs/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { StreamUtil } from '@travetto/base';

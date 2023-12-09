@@ -1,4 +1,4 @@
-import { ChildProcess } from 'child_process';
+import { ChildProcess } from 'node:child_process';
 
 import { ShutdownManager, ExecutionState } from '@travetto/base';
 

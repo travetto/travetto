@@ -1,7 +1,7 @@
-import fs from 'fs/promises';
-import assert from 'assert';
-import crypto from 'crypto';
-import { Readable } from 'stream';
+import fs from 'node:fs/promises';
+import assert from 'node:assert';
+import crypto from 'node:crypto';
+import { Readable } from 'node:stream';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { StreamUtil } from '@travetto/base';

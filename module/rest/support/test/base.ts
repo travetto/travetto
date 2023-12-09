@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import { RootRegistry } from '@travetto/registry';
 import { StreamUtil, AppError, ConcreteClass, Util } from '@travetto/base';

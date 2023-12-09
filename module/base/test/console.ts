@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 import { Suite, Test } from '@travetto/test';
 
 import { ConsoleEvent } from '../src/types';

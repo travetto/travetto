@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc */
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 
 import { RuntimeIndex } from '@travetto/manifest';
 import { d, DocJSXElementByFn, DocJSXElement } from '@travetto/doc';

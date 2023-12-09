@@ -1,6 +1,6 @@
-import fs from 'fs/promises';
-import { createReadStream } from 'fs';
-import crypto from 'crypto';
+import fs from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
+import crypto from 'node:crypto';
 import mime from 'mime';
 
 import { path } from '@travetto/manifest';

@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { RuntimeIndex } from '@travetto/manifest';
 import { c, d, DocJSXElement } from '@travetto/doc';

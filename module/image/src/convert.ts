@@ -1,5 +1,5 @@
-import { Readable } from 'stream';
-import { createReadStream } from 'fs';
+import { Readable } from 'node:stream';
+import { createReadStream } from 'node:fs';
 
 import { CommandOperation } from '@travetto/command';
 import { StreamUtil } from '@travetto/base';

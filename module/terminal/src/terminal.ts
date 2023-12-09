@@ -1,4 +1,4 @@
-import tty from 'tty';
+import tty from 'node:tty';
 
 import { IterableUtil, MapFn } from './iterable';
 import {

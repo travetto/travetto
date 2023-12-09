@@ -1,4 +1,4 @@
-import https from 'https';
+import https from 'node:https';
 import koa from 'koa';
 import kCompress from 'koa-compress';
 import kRouter from 'koa-router';

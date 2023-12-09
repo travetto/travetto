@@ -1,5 +1,5 @@
 import cookies from 'cookies';
-import { ServerResponse, IncomingMessage } from 'http';
+import { ServerResponse, IncomingMessage } from 'node:http';
 
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';

@@ -1,5 +1,5 @@
-import fs from 'fs/promises';
-import timers from 'timers/promises';
+import fs from 'node:fs/promises';
+import timers from 'node:timers/promises';
 import sqlDb, * as sqlite3 from 'better-sqlite3';
 import pool from 'generic-pool';
 

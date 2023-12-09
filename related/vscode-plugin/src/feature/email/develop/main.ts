@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 import vscode from 'vscode';
 
 import { Activatible } from '../../../core/activation';

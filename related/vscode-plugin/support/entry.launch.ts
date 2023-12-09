@@ -1,5 +1,5 @@
-import fs from 'fs/promises';
-import path from 'path';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import type vscode from 'vscode';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {

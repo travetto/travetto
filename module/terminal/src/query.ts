@@ -1,5 +1,5 @@
-import type tty from 'tty';
-import { spawn } from 'child_process';
+import type tty from 'node:tty';
+import { spawn } from 'node:child_process';
 
 import { ANSICodes } from './codes';
 import { IterableUtil } from './iterable';

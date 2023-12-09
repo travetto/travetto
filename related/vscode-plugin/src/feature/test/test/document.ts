@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import vscode from 'vscode';
 
 import { TypedObject } from '@travetto/base';

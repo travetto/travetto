@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 
 import { FindConfig, RuntimeIndex } from '@travetto/manifest';
 import { Class, Env } from '@travetto/base';

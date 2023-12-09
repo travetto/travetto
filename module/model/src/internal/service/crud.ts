@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 import { Class, ObjectUtil, Util } from '@travetto/base';
 import { SchemaRegistry, SchemaValidator, ValidationError, ValidationResultError } from '@travetto/schema';

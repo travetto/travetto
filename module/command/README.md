@@ -54,7 +54,7 @@ While docker containers provide a high level of flexibility, performance can be 
 
 **Code: Command Service example, using pngquant**
 ```typescript
-import { createWriteStream, createReadStream } from 'fs';
+import { createWriteStream, createReadStream } from 'node:fs';
 import { CommandOperation } from '@travetto/command';
 
 export class ImageCompressor {

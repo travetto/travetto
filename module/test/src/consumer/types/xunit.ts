@@ -1,4 +1,4 @@
-import { Writable } from 'stream';
+import { Writable } from 'node:stream';
 
 import { YamlUtil } from '@travetto/yaml';
 

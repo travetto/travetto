@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { AppError } from '@travetto/base';
 import { Suite, Test } from '@travetto/test';

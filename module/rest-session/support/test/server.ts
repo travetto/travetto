@@ -1,5 +1,5 @@
-import assert from 'assert';
-import timers from 'timers/promises';
+import assert from 'node:assert';
+import timers from 'node:timers/promises';
 
 import { Controller, Get, Body, Post, Put, Request } from '@travetto/rest';
 import { Suite, Test } from '@travetto/test';

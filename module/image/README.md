@@ -19,7 +19,7 @@ The utility's primary structure revolves around the [CommandOperation](https://g
 
 **Code: Simple Image Resize**
 ```typescript
-import { createReadStream } from 'fs';
+import { createReadStream } from 'node:fs';
 
 import { StreamUtil } from '@travetto/base';
 import { ImageConverter } from '@travetto/image';

@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 
 import { Injectable } from '@travetto/di';
 import { LogDecorator, LogEvent } from '@travetto/log';

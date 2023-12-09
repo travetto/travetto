@@ -1,5 +1,5 @@
-import timers from 'timers/promises';
-import assert from 'assert';
+import timers from 'node:timers/promises';
+import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { ManualAsyncIterator } from '@travetto/worker';

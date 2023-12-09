@@ -1,5 +1,5 @@
-import fs from 'fs/promises';
-import assert from 'assert';
+import fs from 'node:fs/promises';
+import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { FileLoader } from '../src/file-loader';

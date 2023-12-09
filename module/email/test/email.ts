@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
 import { Inject, InjectableFactory } from '@travetto/di';

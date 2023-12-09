@@ -1,5 +1,5 @@
-import { createWriteStream } from 'fs';
-import timers from 'timers/promises';
+import { createWriteStream } from 'node:fs';
+import timers from 'node:timers/promises';
 
 import { ManifestFileUtil, RuntimeIndex } from '@travetto/manifest';
 import { ConsoleManager, Env, TimeUtil } from '@travetto/base';

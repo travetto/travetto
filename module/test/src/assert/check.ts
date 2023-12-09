@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { RuntimeIndex } from '@travetto/manifest';
 import { ObjectUtil, AppError, ClassInstance, Class } from '@travetto/base';

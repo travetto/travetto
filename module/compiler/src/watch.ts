@@ -1,5 +1,5 @@
-import { readFileSync } from 'fs';
-import { setMaxListeners } from 'events';
+import { readFileSync } from 'node:fs';
+import { setMaxListeners } from 'node:events';
 
 import {
   ManifestContext, ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType, ManifestModuleFileType,

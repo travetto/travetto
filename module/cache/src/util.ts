@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 
 import { ObjectUtil } from '@travetto/base';
 import { CoreCacheConfig } from './types';

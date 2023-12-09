@@ -1,5 +1,5 @@
-import tty from 'tty';
-import assert from 'assert';
+import tty from 'node:tty';
+import assert from 'node:assert';
 
 import { Test, Suite, BeforeEach } from '@travetto/test';
 import { Env, Util } from '@travetto/base';

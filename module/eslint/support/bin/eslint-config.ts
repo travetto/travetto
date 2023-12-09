@@ -1,8 +1,9 @@
+import { existsSync, readFileSync } from 'node:fs';
+
 // @ts-expect-error
 import * as unused from 'eslint-plugin-unused-imports';
 import { configs } from '@eslint/js';
 import * as tsEslintPlugin from '@typescript-eslint/eslint-plugin';
-import { existsSync, readFileSync } from 'fs';
 
 import { RuntimeContext } from '@travetto/manifest';
 

@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import { StreamUtil, Class, TimeSpan } from '@travetto/base';
 import { DeepPartial } from '@travetto/schema';

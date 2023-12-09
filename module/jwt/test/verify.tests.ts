@@ -1,5 +1,5 @@
 import jws from 'jws';
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Suite, Test, ShouldThrow, TestFixtures } from '@travetto/test';
 

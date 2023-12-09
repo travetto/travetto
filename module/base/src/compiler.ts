@@ -1,5 +1,5 @@
-import rl from 'readline/promises';
-import { Readable } from 'stream';
+import rl from 'node:readline/promises';
+import { Readable } from 'node:stream';
 
 import { RuntimeContext } from '@travetto/manifest';
 

@@ -1,4 +1,4 @@
-import util from 'util';
+import util from 'node:util';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Class, ClassInstance, ObjectUtil } from '@travetto/base';

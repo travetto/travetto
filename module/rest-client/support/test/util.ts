@@ -1,5 +1,5 @@
-import fs from 'fs/promises';
-import os from 'os';
+import fs from 'node:fs/promises';
+import os from 'node:os';
 
 import { ExecUtil, Util } from '@travetto/base';
 import { ManifestFileUtil, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';

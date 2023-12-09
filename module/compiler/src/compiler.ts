@@ -1,5 +1,5 @@
 import ts from 'typescript';
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { ManifestModuleUtil, RuntimeIndex } from '@travetto/manifest';
 

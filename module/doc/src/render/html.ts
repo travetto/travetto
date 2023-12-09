@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { JSXElement } from '@travetto/doc/jsx-runtime';
 import { RuntimeIndex, PackageUtil, RuntimeContext } from '@travetto/manifest';

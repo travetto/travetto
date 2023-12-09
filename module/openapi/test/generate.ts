@@ -1,6 +1,6 @@
-import assert from 'assert';
+import assert from 'node:assert';
 import { ParameterObject } from 'openapi3-ts/oas31';
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import { RootRegistry } from '@travetto/registry';
 import { Controller, ControllerVisitUtil, Delete, Get, Head, Patch, Put, Query, Undocumented } from '@travetto/rest';

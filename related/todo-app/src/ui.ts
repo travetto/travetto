@@ -1,4 +1,4 @@
-import { Readable } from 'stream';
+import { Readable } from 'node:stream';
 
 import { Controller, Get, Produces, Request, Undocumented } from '@travetto/rest';
 import { ResourceLoader } from '@travetto/base';

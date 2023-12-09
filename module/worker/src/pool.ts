@@ -1,6 +1,6 @@
-import os from 'os';
+import os from 'node:os';
 import gp from 'generic-pool';
-import timers from 'timers/promises';
+import timers from 'node:timers/promises';
 
 import { Env, ShutdownManager } from '@travetto/base';
 

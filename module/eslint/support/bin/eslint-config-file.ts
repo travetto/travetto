@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { RuntimeContext, RuntimeIndex, path } from '@travetto/manifest';
 

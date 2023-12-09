@@ -1,6 +1,6 @@
-import assert from 'assert';
-import { createReadStream } from 'fs';
-import os from 'os';
+import assert from 'node:assert';
+import { createReadStream } from 'node:fs';
+import os from 'node:os';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { path as mPath } from '@travetto/manifest';

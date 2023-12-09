@@ -1,4 +1,4 @@
-import { setImmediate } from 'timers/promises';
+import { setImmediate } from 'node:timers/promises';
 
 import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';

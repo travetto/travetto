@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc */
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 
 import { d, c } from '@travetto/doc';
 import { ManifestRoot, path, RuntimeIndex } from '@travetto/manifest';

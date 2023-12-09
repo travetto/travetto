@@ -1,4 +1,4 @@
-import { IncomingHttpHeaders } from 'http';
+import { IncomingHttpHeaders } from 'node:http';
 
 import { Request, ContentType } from '../../types';
 import { MimeUtil } from '../../util/mime';

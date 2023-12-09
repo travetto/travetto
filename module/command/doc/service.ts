@@ -1,4 +1,4 @@
-import { createWriteStream, createReadStream } from 'fs';
+import { createWriteStream, createReadStream } from 'node:fs';
 import { CommandOperation } from '@travetto/command';
 
 export class ImageCompressor {

@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 import { PackageUtil, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 
 import { RenderProvider } from '../types';

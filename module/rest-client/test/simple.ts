@@ -1,6 +1,6 @@
-import os from 'os';
-import fs from 'fs/promises';
-import assert from 'assert';
+import os from 'node:os';
+import fs from 'node:fs/promises';
+import assert from 'node:assert';
 
 import { AfterAll, Suite, Test } from '@travetto/test';
 import { path } from '@travetto/manifest';

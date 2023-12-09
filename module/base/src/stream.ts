@@ -1,5 +1,5 @@
-import { createWriteStream } from 'fs';
-import { PassThrough, Readable, Writable } from 'stream';
+import { createWriteStream } from 'node:fs';
+import { PassThrough, Readable, Writable } from 'node:stream';
 import { ReadableStream as WebReadableStream } from 'stream/web';
 
 import type { ExecutionState } from './exec';

@@ -1,4 +1,4 @@
-import timers from 'timers/promises';
+import timers from 'node:timers/promises';
 
 import { DependencyRegistry } from '@travetto/di';
 import { type Request, RestCookieConfig, RestConfig, RestSslConfig, RestApplication } from '@travetto/rest';

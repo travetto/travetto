@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { ManifestFileUtil, path, RuntimeIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';

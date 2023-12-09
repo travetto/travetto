@@ -1,4 +1,4 @@
-import os from 'os';
+import os from 'node:os';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';

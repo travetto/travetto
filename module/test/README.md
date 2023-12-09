@@ -27,7 +27,7 @@ A simple example would be:
 
 **Code: Example Test Suite**
 ```typescript
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
@@ -58,7 +58,7 @@ A common aspect of the tests themselves are the assertions that are made.  [Node
 
 **Code: Example assertion for deep comparison**
 ```typescript
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
@@ -131,7 +131,7 @@ In addition to the standard operations, there is support for throwing/rejecting 
 
 **Code: Throws vs Does Not Throw**
 ```typescript
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
@@ -157,7 +157,7 @@ class SimpleTest {
 
 **Code: Rejects vs Does Not Reject**
 ```typescript
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 
@@ -186,7 +186,7 @@ Additionally, the `throws`/`rejects` assertions take in a secondary parameter to
 
 **Code: Example of different Error matching paradigms**
 ```typescript
-import assert from 'assert';
+import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 

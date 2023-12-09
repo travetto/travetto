@@ -1,4 +1,4 @@
-import fs from 'fs/promises';
+import fs from 'node:fs/promises';
 
 import { IndexedModule, RuntimeIndex, path } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';

@@ -1,4 +1,4 @@
-import util from 'util';
+import util from 'node:util';
 
 import { ConsoleEvent, ConsoleManager } from '@travetto/base';
 
