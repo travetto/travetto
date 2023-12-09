@@ -1,31 +1,11 @@
 import { path } from './path';
 import { IndexedModule, ManifestIndex } from './manifest-index';
-import { FunctionMetadata, ManifestContext, ManifestRoot } from './types';
+import { FunctionMetadata, ManifestRoot } from './types';
 
 const METADATA = Symbol.for('@travetto/manifest:metadata');
 type Metadated = { [METADATA]: FunctionMetadata };
 
-class $RuntimeManifest implements Omit<ManifestContext, 'compilerUrl' | `${string}Folder`> {
-  #raw: ManifestRoot;
-  private update(manifest: ManifestRoot): void { this.#raw = manifest; }
-  get mainModule(): string { return this.#raw.mainModule; }
-  get version(): string { return this.#raw.version; }
-  get description(): string { return this.#raw.description ?? ''; }
-  get workspacePath(): string { return this.#raw.workspacePath; }
-  get frameworkVersion(): string { return this.#raw.frameworkVersion; }
-  get monoRepo(): boolean { return !!this.#raw.monoRepo; }
-  get moduleType(): ManifestRoot['moduleType'] { return this.#raw.moduleType; }
-  get packageManager(): ManifestRoot['packageManager'] { return this.#raw.packageManager; }
-  /**
-   * Produce a workspace relative path
-   * @param rel The relative path
-   */
-  workspaceRelative(rel: string): string {
-    return path.resolve(this.#raw.workspacePath, rel);
-  }
-}
-
-export const RuntimeManifest = new $RuntimeManifest();
+let manifest: ManifestRoot;
 
 /**
  * Extended manifest index geared for application execution
@@ -40,7 +20,7 @@ class $RuntimeIndex extends ManifestIndex {
    */
   reinitForModule(module: string): void {
     this.init(`${this.outputRoot}/node_modules/${module}`);
-    RuntimeManifest['update'](this.manifest);
+    Object.assign(manifest, this.manifest);
   }
 
   /**
@@ -118,7 +98,7 @@ let index: $RuntimeIndex | undefined;
 
 try {
   index = new $RuntimeIndex(process.env.TRV_MANIFEST!);
-  RuntimeManifest['update'](index.manifest);
+  manifest = index.manifest;
 } catch (err) {
   if (process.env.NODE_ENV === 'production') {
     throw err;
@@ -126,3 +106,4 @@ try {
 }
 
 export const RuntimeIndex: $RuntimeIndex = index!;
+export const RuntimeManifest: ManifestRoot = manifest!;

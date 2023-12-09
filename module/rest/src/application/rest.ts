@@ -1,4 +1,4 @@
-import { RuntimeManifest } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
 import { Class, AppError, Util, Env } from '@travetto/base';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';

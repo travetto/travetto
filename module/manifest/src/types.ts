@@ -28,31 +28,18 @@ export type ManifestModule = ManifestModuleCore & {
 };
 
 export type ManifestContext = {
-  /** Main module for manifest */
   mainModule: string;
-  /** Folder, relative to workspace for main module */
   mainFolder: string;
-  /** Workspace path for module */
   workspacePath: string;
-  /** Code output folder, relative to workspace */
   outputFolder: string;
-  /** Tooling folder, relative to workspace */
   toolFolder: string;
-  /** Compiler folder, relative to workspace */
   compilerFolder: string;
-  /** Is the manifest for a module in a monorepo? */
   monoRepo?: boolean;
-  /** The module type of the workspace */
   moduleType: NodeModuleType;
-  /** The package manager of the workspace */
   packageManager: 'yarn' | 'npm';
-  /** The version of the framework being used */
   frameworkVersion: string;
-  /** Description of the main module */
   description?: string;
-  /** Version of the main module */
   version: string;
-  /** URL for the compiler servier */
   compilerUrl: string;
 };
 
