@@ -25,8 +25,8 @@ class $RuntimeContext implements ManifestContext {
    * Produce a workspace relative path
    * @param rel The relative path
    */
-  workspaceRelative(...rel: string[]): string {
-    return path.resolve(this.#raw.workspacePath, ...rel);
+  workspaceRelative(rel: string): string {
+    return path.resolve(this.#raw.workspacePath, rel);
   }
 }
 
@@ -123,13 +123,6 @@ class $RuntimeIndex extends ManifestIndex {
    */
   getManifestModule(mod: string): ManifestModule {
     return this.manifest.modules[mod];
-  }
-
-  /**
-   * Get manifest modules
-   */
-  getManifestModules(): ManifestModule[] {
-    return Object.values(this.manifest.modules);
   }
 }
 

@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { RuntimeContext } from '@travetto/manifest';
+import { path, RuntimeContext } from '@travetto/manifest';
 
 import { buildEslintConfig } from './bin/eslint-config-file';
 
@@ -13,7 +13,7 @@ export class LintConfigureCommand implements CliCommandShape {
 
   async main(): Promise<void> {
     const content = buildEslintConfig();
-    const output = RuntimeContext.workspaceRelative('eslint.config.js');
+    const output = path.resolve(RuntimeContext.workspacePath, 'eslint.config.js');
     await fs.writeFile(output, content.replaceAll(RuntimeContext.workspacePath, '.').trim());
 
     console.log(`Wrote eslint config to ${output}`);

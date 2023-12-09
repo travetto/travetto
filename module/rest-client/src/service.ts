@@ -2,7 +2,7 @@ import { setImmediate } from 'timers/promises';
 
 import { AutoCreate, Inject, Injectable } from '@travetto/di';
 import { SchemaRegistry } from '@travetto/schema';
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
 import { ControllerRegistry, ControllerVisitUtil } from '@travetto/rest';
 import { Env } from '@travetto/base';
 import { RootRegistry } from '@travetto/registry';
@@ -22,7 +22,8 @@ export class RestClientGeneratorService implements AutoCreate {
   providers: ClientGenerator[];
 
   buildGenerator({ type, output, moduleName, options }: RestClientProvider): ClientGenerator {
-    output = RuntimeContext.workspaceRelative(
+    output = path.resolve(
+      RuntimeContext.workspacePath,
       output.startsWith('@') ? RuntimeIndex.mainModule.sourceFolder : '.',
       output
     );
