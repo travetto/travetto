@@ -1,6 +1,6 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeManifest } from '@travetto/manifest';
 
 export const text = <>
   <c.StdHeader />
@@ -18,6 +18,6 @@ export const text = <>
   <c.Section title='CLI - rest:client'>
     The library, in addition to generating client output at runtime, also allows for direct generation of clients, regardless of any configurations defined in the application's configuration files.
 
-    <c.Execution title='Command Service' cmd='trv' args={['rest:client', '--help']} config={{ cwd: RuntimeContext.workspacePath }} />
+    <c.Execution title='Command Service' cmd='trv' args={['rest:client', '--help']} config={{ cwd: RuntimeManifest.workspacePath }} />
   </c.Section>
 </>;

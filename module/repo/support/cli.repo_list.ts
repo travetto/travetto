@@ -1,5 +1,5 @@
 import { CliCommandShape, CliCommand, CliModuleUtil } from '@travetto/cli';
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
 
 const write = (line: string): Promise<void> => new Promise(r => process.stdout.write(`${line}\n`, () => r()));
 
@@ -46,7 +46,7 @@ export class ListModuleCommand implements CliCommandShape {
         await write('digraph g {');
         for (const el of mods) {
           for (const dep of el.parents) {
-            if (dep !== RuntimeContext.mainModule) {
+            if (dep !== RuntimeManifest.mainModule) {
               await write(`  "${dep}" -> "${el.name}";`);
             }
           }

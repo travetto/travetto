@@ -1,6 +1,6 @@
 import fs from 'fs/promises';
 
-import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { path, RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
 import { Env } from '@travetto/base';
 
@@ -59,7 +59,7 @@ export class PackOperation {
 
     const bundleCommand = ['npx', 'rollup', '-c', RuntimeIndex.resolveFileImport(cfg.rollupConfiguration)];
 
-    const entryPointFile = RuntimeIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RuntimeContext.outputFolder}/`)[1];
+    const entryPointFile = RuntimeIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RuntimeIndex.manifest.outputFolder}/`)[1];
 
     const env = {
       ...Object.fromEntries(([
@@ -69,7 +69,7 @@ export class PackOperation {
         ['BUNDLE_SOURCEMAP', cfg.sourcemap],
         ['BUNDLE_SOURCES', cfg.includeSources],
         ['BUNDLE_OUTPUT', cfg.workspace],
-        ['BUNDLE_FORMAT', RuntimeContext.moduleType],
+        ['BUNDLE_FORMAT', RuntimeManifest.moduleType],
       ] as const)
         .filter(x => x[1] === false || x[1])
         .map(x => [x[0], `${x[1]}`])
@@ -101,7 +101,7 @@ export class PackOperation {
    */
   static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = 'package.json';
-    const pkg = { type: RuntimeContext.moduleType, main: `${cfg.mainName}.js` };
+    const pkg = { type: RuntimeManifest.moduleType, main: `${cfg.mainName}.js` };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 

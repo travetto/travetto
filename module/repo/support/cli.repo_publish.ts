@@ -1,5 +1,5 @@
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeManifest } from '@travetto/manifest';
 
 import { PackageManager } from './bin/package-manager';
 import { RepoExecUtil } from './bin/exec';
@@ -14,11 +14,11 @@ export class RepoPublishCommand implements CliCommandShape {
   dryRun = true;
 
   async main(): Promise<void> {
-    const published = await RepoExecUtil.execOnModules('all', (mod, opts) => PackageManager.isPublished(RuntimeContext, mod, opts), {
+    const published = await RepoExecUtil.execOnModules('all', (mod, opts) => PackageManager.isPublished(RuntimeManifest, mod, opts), {
       filter: mod => !!mod.local && !mod.internal,
       progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
       showStderr: false,
-      transformResult: (mod, res) => PackageManager.validatePublishedResult(RuntimeContext, mod, res),
+      transformResult: (mod, res) => PackageManager.validatePublishedResult(RuntimeManifest, mod, res),
     });
 
     if (this.dryRun) {
@@ -26,7 +26,7 @@ export class RepoPublishCommand implements CliCommandShape {
     }
 
     await RepoExecUtil.execOnModules(
-      'all', (mod, opts) => PackageManager.publish(RuntimeContext, mod, this.dryRun, opts),
+      'all', (mod, opts) => PackageManager.publish(RuntimeManifest, mod, this.dryRun, opts),
       {
         progressMessage: (mod) => `Published [%idx/%total] -- ${mod?.name}`,
         showStdout: false,

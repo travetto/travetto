@@ -1,5 +1,5 @@
 /** @jsxImportSource @travetto/doc */
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeManifest } from '@travetto/manifest';
 import { d, c } from '@travetto/doc';
 
 import { CommandOperation } from '@travetto/command/src/command';
@@ -29,11 +29,11 @@ export const text = <>
 
     The module provides the ability to start/stop/restart services as {d.library('Docker')} containers.  This is meant to be used for development purposes, to minimize the effort of getting an application up and running.  Services can be targeted individually or handled as a group.
 
-    <c.Execution title='Command Service' cmd='trv' args={['service', '--help']} config={{ cwd: RuntimeContext.workspacePath }} />
+    <c.Execution title='Command Service' cmd='trv' args={['service', '--help']} config={{ cwd: RuntimeManifest.workspacePath }} />
 
     A sample of all services available to the entire framework:
 
-    <c.Execution title='All Services' cmd='trv' args={['service', 'status']} config={{ cwd: RuntimeContext.workspacePath }} />
+    <c.Execution title='All Services' cmd='trv' args={['service', 'status']} config={{ cwd: RuntimeManifest.workspacePath }} />
 
     <c.SubSection title='Defining new Services'>
       The services are defined as plain typescript files within the framework and can easily be extended:

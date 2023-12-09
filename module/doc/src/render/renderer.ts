@@ -1,4 +1,4 @@
-import { ManifestContext, PackageUtil, path, RuntimeIndex } from '@travetto/manifest';
+import { ManifestRoot, PackageUtil, path, RuntimeIndex } from '@travetto/manifest';
 
 import { isJSXElement, JSXElement, createFragment, JSXFragmentType } from '@travetto/doc/jsx-runtime';
 
@@ -17,7 +17,7 @@ const providers = { [Html.ext]: Html, [Markdown.ext]: Markdown };
  */
 export class DocRenderer {
 
-  static async get(file: string, manifest: ManifestContext): Promise<DocRenderer> {
+  static async get(file: string, manifest: ManifestRoot): Promise<DocRenderer> {
     const mod = RuntimeIndex.getFromSource(file)?.import;
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const res = await import(mod!) as DocumentShape;
