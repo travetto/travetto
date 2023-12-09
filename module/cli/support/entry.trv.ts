@@ -1,2 +1,2 @@
-import('@travetto/cli/src/execute.js')
-  .then(m => m.ExecutionManager.run(process.argv));
+import { ExecutionManager } from '@travetto/cli';
+ExecutionManager.run(process.argv);
