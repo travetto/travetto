@@ -2,7 +2,7 @@ import fs from 'fs/promises';
 import mustache from 'mustache';
 
 import { cliTpl } from '@travetto/cli';
-import { ManifestContext, path, RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
+import { ManifestContext, path, RuntimeIndex } from '@travetto/manifest';
 import { ExecUtil, ExecutionResult } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
 
@@ -105,7 +105,7 @@ export class Context {
     const moduleNames = [...Object.keys(modules)];
 
     const context = Object.assign({
-      frameworkVersion: RuntimeManifest.frameworkVersion.replace(/[.]\d+$/, '.0'),
+      frameworkVersion: RuntimeIndex.manifest.frameworkVersion.replace(/[.]\d+$/, '.0'),
       name: this.name,
       modules,
       moduleNames,

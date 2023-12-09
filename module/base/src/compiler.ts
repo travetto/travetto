@@ -1,7 +1,7 @@
 import rl from 'readline/promises';
 import { Readable } from 'stream';
 
-import { RuntimeManifest } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import { ShutdownManager } from './shutdown';
 import { ExecUtil } from './exec';
@@ -42,7 +42,7 @@ export class CompilerClient {
   #kill: AbortController;
 
   constructor(cfg: { url?: string, signal?: AbortSignal } = {}) {
-    this.#url = cfg.url ?? RuntimeManifest.compilerUrl;
+    this.#url = cfg.url ?? RuntimeIndex.manifest.compilerUrl;
 
     this.#kill = new AbortController();
     if (cfg.signal) {

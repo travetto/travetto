@@ -1,6 +1,6 @@
 /// <reference path="./_env.d.ts" />
 
-import { RuntimeManifest } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { TimeSpan, TimeUtil } from './time';
 
 const IS_TRUE = /^(true|yes|on|1)$/i;
@@ -122,7 +122,7 @@ export const Env = delegate({
     return [
       ...Env.TRV_RESOURCES.list ?? [],
       '@#resources', // Module root
-      ...(RuntimeManifest.monoRepo ? ['@@#resources'] : []) // Monorepo root
+      ...(RuntimeIndex.manifest.monoRepo ? ['@@#resources'] : []) // Monorepo root
     ];
   }
 });

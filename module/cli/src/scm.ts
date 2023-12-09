@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 
 import { ExecUtil } from '@travetto/base';
-import { IndexedFile, IndexedModule, RuntimeIndex, RuntimeManifest, path } from '@travetto/manifest';
+import { IndexedFile, IndexedModule, RuntimeIndex, path } from '@travetto/manifest';
 
 export class CliScmUtil {
   /**
@@ -33,7 +33,8 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string | undefined> {
-    const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeManifest.workspacePath });
+    const root = await RuntimeIndex.manifest;
+    const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: root.workspacePath });
     return (await result).stdout
       .split(/\n/)
       .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
@@ -45,7 +46,7 @@ export class CliScmUtil {
    * @returns
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
-    const ws = RuntimeManifest.workspacePath;
+    const ws = RuntimeIndex.manifest.workspacePath;
     const res = await ExecUtil.spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
     const out = new Set<string>();
     for (const line of res.stdout.split(/\n/g)) {

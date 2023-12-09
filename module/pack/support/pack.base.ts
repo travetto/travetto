@@ -1,7 +1,7 @@
 import os from 'os';
 
 import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
-import { path, RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
+import { path, RuntimeIndex } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
 import { GlobalTerminal } from '@travetto/terminal';
 import { Ignore, Required, Schema } from '@travetto/schema';
@@ -100,7 +100,7 @@ export abstract class BasePackCommand implements CliCommandShape {
 
     // Update entry points
     this.entryArguments = [...this.entryArguments ?? [], ...args, ...this._parsed.unknown];
-    this.module ||= RuntimeManifest.mainModule;
+    this.module ||= RuntimeIndex.manifest.mainModule;
     this.mainName ??= path.basename(this.module);
 
     const stream = this.runOperations();

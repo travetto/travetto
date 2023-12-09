@@ -1,4 +1,4 @@
-import { RuntimeManifest } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliModuleUtil, CliScmUtil } from '@travetto/cli';
 
@@ -37,7 +37,7 @@ export class LintCommand implements CliCommandShape {
       ...(this.format ? ['--format', this.format] : []),
       ...files
     ], {
-      cwd: RuntimeManifest.workspacePath,
+      cwd: RuntimeIndex.manifest.workspacePath,
       stdio: 'inherit',
       catchAsResult: true
     }).result;

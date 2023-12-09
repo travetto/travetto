@@ -1,4 +1,4 @@
-import { RuntimeManifest } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import { EmailAttachment } from './types';
 
@@ -15,7 +15,7 @@ export class MailUtil {
   static buildBrand(file: string, content: string, compile?: string): string {
     const out = [
       'WARNING: Do not modify.',
-      `File is generated from "${file.replace(RuntimeManifest.workspacePath, '.')}"`,
+      `File is generated from "${file.replace(RuntimeIndex.manifest.workspacePath, '.')}"`,
       compile ? `Run \`${compile.replaceAll('\n', ' ')}\` to regenerate` : ''
     ];
     return `<!-- ${out.join(' ').trim()}   -->\n${content}`;

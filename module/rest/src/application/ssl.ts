@@ -1,6 +1,6 @@
 import { AppError, ResourceLoader, Env } from '@travetto/base';
 import { Config, EnvVar } from '@travetto/config';
-import { PackageUtil, RuntimeManifest } from '@travetto/manifest';
+import { PackageUtil, RuntimeIndex } from '@travetto/manifest';
 import { Secret } from '@travetto/schema';
 
 @Config('rest.ssl')
@@ -15,7 +15,7 @@ export class RestSslConfig {
     try {
       forge = (await import('node-forge')).default;
     } catch {
-      const install = PackageUtil.getInstallCommand(RuntimeManifest, 'node-forge');
+      const install = PackageUtil.getInstallCommand(RuntimeIndex.manifest, 'node-forge');
       throw new Error(`In order to generate SSL keys, you must install node-forge, "${install}"`);
     }
 

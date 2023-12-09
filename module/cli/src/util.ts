@@ -1,5 +1,5 @@
 import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
-import { RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
 
@@ -8,7 +8,7 @@ export class CliUtil {
    * Are we running from a mono-root?
    */
   static get monoRoot(): boolean {
-    return !!RuntimeManifest.monoRepo && RuntimeIndex.mainModule.sourcePath === RuntimeManifest.workspacePath;
+    return !!RuntimeIndex.manifest.monoRepo && RuntimeIndex.mainModule.sourcePath === RuntimeIndex.manifest.workspacePath;
   }
 
   /**
@@ -16,7 +16,7 @@ export class CliUtil {
    * @returns
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
-    const simple = (module ?? RuntimeManifest.mainModule).replace(/[\/]/, '_').replace(/@/, '');
+    const simple = (module ?? RuntimeIndex.manifest.mainModule).replace(/[\/]/, '_').replace(/@/, '');
     if (!simple) {
       return placeholder;
     } else if (!module && this.monoRoot) {
@@ -64,7 +64,7 @@ export class CliUtil {
       data: {
         name: cmd._cfg!.name,
         commandModule: cmd._cfg!.commandModule,
-        module: RuntimeManifest.mainModule,
+        module: RuntimeIndex.manifest.mainModule,
         args: process.argv.slice(3),
       }
     };

@@ -1,6 +1,6 @@
 import os from 'os';
 
-import { path, RuntimeIndex, RuntimeManifest } from '@travetto/manifest';
+import { path, RuntimeIndex } from '@travetto/manifest';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { stripAnsiCodes } from '@travetto/terminal';
 
@@ -83,7 +83,7 @@ export class DocRunUtil {
     text = stripAnsiCodes(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
-      .replaceAll(RuntimeManifest.workspacePath, '<workspace-root>')
+      .replaceAll(RuntimeIndex.manifest.workspacePath, '<workspace-root>')
       .replace(/[/]tmp[/][a-z_A-Z0-9\/\-]+/g, '/tmp/<temp-folder>')
       .replace(/^(\s*framework:\s*')(\d+[.]\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x${post}`)
       .replace(/^(\s*nodeVersion:\s*'v)(\d+)[^']*('[,]?\s*)$/gm, (_, pre, ver, post) => `${pre}${ver}.x.x${post}`)
