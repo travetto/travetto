@@ -3,7 +3,7 @@ import { TimeSpan, Primitive } from '@travetto/base';
 /**
  * Point as [number,number] with validation and binding support
  *
- * @concrete ../internal/model/point:PointImpl
+ * @concrete ../internal/model/point#PointImpl
  */
 export type Point = [number, number];
 

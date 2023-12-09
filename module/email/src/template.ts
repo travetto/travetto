@@ -7,7 +7,7 @@ import { EmailResource } from './resource';
 /**
  * Mail interpolation engine
  *
- * @concrete ./internal/types:MailInterpolatorTarget
+ * @concrete ./internal/types#MailInterpolatorTarget
  */
 export interface MailInterpolator {
   /**

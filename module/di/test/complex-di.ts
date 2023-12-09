@@ -58,7 +58,7 @@ class PrimaryFactory {
 class PrimaryTargetClass { }
 
 /**
- * @concrete .:PrimaryTargetClass
+ * @concrete #PrimaryTargetClass
  */
 interface PrimaryTargetInterface {
   name: string;

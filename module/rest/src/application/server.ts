@@ -5,7 +5,7 @@ import { RouteConfig, ServerHandle } from '../types';
  * Defines the contract for any rest server to support the
  * framework.
  *
- * @concrete ../internal/server:RestServerTarget
+ * @concrete ../internal/server#RestServerTarget
  */
 export interface RestServer<T = unknown> {
 

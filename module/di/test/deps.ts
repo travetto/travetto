@@ -11,7 +11,7 @@ export class SpecificPattern extends BasePattern {
 export class BaseTypeTarget { }
 
 /**
- * @concrete .:BaseTypeTarget
+ * @concrete #BaseTypeTarget
  */
 export interface BaseType {
   age: number;

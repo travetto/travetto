@@ -266,19 +266,15 @@ export const TypeBuilder: {
       const [tag] = DocUtil.readDocTag(type, 'concrete');
       if (tag) {
         // eslint-disable-next-line prefer-const
-        let [importName, name] = tag.split(':');
-        if (!name) {
-          name = importName;
-          importName = '.';
-        }
+        let [importName, name] = tag.split('#');
 
         // Resolving relative to source file
-        if (importName.startsWith('.')) {
+        if (!importName || importName.startsWith('.')) {
           const rawSourceFile: string = DeclarationUtil.getDeclarations(type)
             ?.find(x => ts.getAllJSDocTags(x, (t): t is ts.JSDocTag => t.tagName.getText() === 'concrete').length)
             ?.getSourceFile().fileName ?? '';
 
-          if (importName === '.') {
+          if (!importName || importName === '.') {
             importName = resolver.getFileImportName(rawSourceFile);
           } else {
             const base = path.dirname(rawSourceFile);
