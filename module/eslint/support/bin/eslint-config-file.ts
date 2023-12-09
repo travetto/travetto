@@ -9,7 +9,7 @@ export function buildEslintConfig(): string {
 
   const common = {
     manifest: `process.env.TRV_MANIFEST = '${path.resolve(manifestFile)}'`,
-    pluginFiles: "const pluginFiles = RootIndex.find({ folder: f => f === 'support', file: f => /support\\/eslint[.]/.test(f) })",
+    pluginFiles: "const pluginFiles = RuntimeIndex.find({ folder: f => f === 'support', file: f => /support\\/eslint[.]/.test(f) })",
     build: 'const config = buildConfig(plugins)',
   };
 
@@ -17,7 +17,7 @@ export function buildEslintConfig(): string {
     [
       common.manifest,
       `const { buildConfig } = require('${rulesImp}')`,
-      `const { RootIndex } = require('${manifestImp}')`,
+      `const { RuntimeIndex } = require('${manifestImp}')`,
       common.pluginFiles,
       'const plugins = pluginFiles.map(x => require(x.outputFile))',
       common.build,
@@ -27,7 +27,7 @@ export function buildEslintConfig(): string {
     [
       common.manifest,
       `const { buildConfig } = await import('${rulesImp}')`,
-      `const { RootIndex } = await import('${manifestImp}')`,
+      `const { RuntimeIndex } = await import('${manifestImp}')`,
       common.pluginFiles,
       'const plugins = await Promise.all(pluginFiles.map(x => import(x.outputFile)))',
       common.build,
