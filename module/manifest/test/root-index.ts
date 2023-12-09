@@ -6,11 +6,11 @@ import { path } from '@travetto/manifest';
 import { RuntimeIndex } from '../src/runtime';
 
 @Suite()
-class RuntimeIndexTests {
+class RootIndexTests {
   @Test()
   testFind() {
     const files = RuntimeIndex.find({ folder: f => f === 'test' });
-    assert(files.some(x => x.outputFile.endsWith('test/runtime.js')));
+    assert(files.some(x => x.outputFile.endsWith('test/root-index.js')));
   }
 
   @Test()
@@ -20,8 +20,8 @@ class RuntimeIndexTests {
 
     const { outputPath } = location;
 
-    const modId = RuntimeIndex.getId(path.resolve(outputPath, 'test', 'runtime.js'));
-    assert(modId === '@travetto/manifest:test/runtime');
+    const modId = RuntimeIndex.getId(path.resolve(outputPath, 'test', 'root-index.js'));
+    assert(modId === '@travetto/manifest:test/root-index');
 
     const modId2 = RuntimeIndex.getId(path.resolve(RuntimeIndex.getModule('@travetto/test')!.outputPath, 'src', 'assert', 'util.js'));
     assert(modId2 === '@travetto/test:src/assert/util');

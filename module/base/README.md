@@ -162,7 +162,7 @@ export const Env = delegate({
     return [
       ...Env.TRV_RESOURCES.list ?? [],
       '@#resources', // Module root
-      ...(RuntimeIndex.manifest.monoRepo ? ['@@#resources'] : []) // Monorepo root
+      ...(RootIndex.manifest.monoRepo ? ['@@#resources'] : []) // Monorepo root
     ];
   }
 });
@@ -306,7 +306,7 @@ tpl`{{age:20}} {{name: 'bob'}}</>;
 ```
 
 ## Time Utilities
-[TimeUtil](https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L19) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+[TimeUtil](https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L21) contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
 **Code: Time Utilities**
 ```typescript
@@ -332,6 +332,10 @@ export class TimeUtil {
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */
   static timeFromNow(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Date;
+  /**
+   * Wait for 'amount' units of time
+   */
+  static wait(amount: number | TimeSpan, unit: TimeUnit = 'ms'): Promise<void>;
   /**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */

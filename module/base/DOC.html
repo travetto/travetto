@@ -177,7 +177,7 @@ For a given <a target="_blank" class="source-link" href="https://github.com/trav
     <span class="token keyword">return</span> <span class="token punctuation">[</span>
       <span class="token operator">...</span>Env<span class="token punctuation">.</span><span class="token constant">TRV_RESOURCES</span><span class="token punctuation">.</span>list <span class="token operator">??</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
       <span class="token string">'@#resources'</span><span class="token punctuation">,</span> <span class="token comment">// Module root</span>
-      <span class="token operator">...</span><span class="token punctuation">(</span>RuntimeIndex<span class="token punctuation">.</span>manifest<span class="token punctuation">.</span>monoRepo <span class="token operator">?</span> <span class="token punctuation">[</span><span class="token string">'@@#resources'</span><span class="token punctuation">]</span> <span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment">// Monorepo root</span>
+      <span class="token operator">...</span><span class="token punctuation">(</span>RootIndex<span class="token punctuation">.</span>manifest<span class="token punctuation">.</span>monoRepo <span class="token operator">?</span> <span class="token punctuation">[</span><span class="token string">'@@#resources'</span><span class="token punctuation">]</span> <span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment">// Monorepo root</span>
     <span class="token punctuation">]</span><span class="token punctuation">;</span>
   <span class="token punctuation">{{'}'}}</span>
 <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
@@ -343,11 +343,11 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="time-utilities">Time Utilities</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L19">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L21">TimeUtil</a> contains general helper methods, created to assist with time-based inputs via environment variables, command line interfaces, and other string-heavy based input.
 
   <figure class="code">
     <figcaption class="code">Time Utilities
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L19">Source</a></cite>
+<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/time.ts#L21">Source</a></cite>
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">TimeUtil</span> <span class="token punctuation">{{'{'}}</span>
@@ -372,6 +372,10 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
    * @param unit Time unit to extend ('ms', 's', 'm', 'h', 'd', 'w', 'y')
    */</span>
   <span class="token keyword">static</span> <span class="token function">timeFromNow</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> Date<span class="token punctuation">;</span>
+  <span class="token comment">/**
+   * Wait for 'amount' units of time
+   */</span>
+  <span class="token keyword">static</span> <span class="token function">wait</span><span class="token punctuation">(</span>amount<span class="token operator">:</span> <span class="token builtin">number</span> <span class="token operator">|</span> TimeSpan<span class="token punctuation">,</span> unit<span class="token operator">:</span> TimeUnit <span class="token operator">=</span> <span class="token string">'ms'</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token keyword">void</span><span class="token operator">></span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Pretty print a delta between now and `time`, with auto-detection of largest unit
    */</span>

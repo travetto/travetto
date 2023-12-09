@@ -81,13 +81,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tslib_1 = require("tslib");
 const Ⲑ_util_1 = tslib_1.__importStar(require("@travetto/test/src/execute/util.js"));
 const Ⲑ_check_1 = tslib_1.__importStar(require("@travetto/test/src/assert/check.js"));
-const Ⲑ_runtime_1 = tslib_1.__importStar(require("@travetto/manifest/src/runtime.js"));
+const Ⲑ_root_index_1 = tslib_1.__importStar(require("@travetto/manifest/src/root-index.js"));
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 var ᚕf = "@travetto/test/doc/assert-example.js";
 const assert_1 = tslib_1.__importDefault(require("assert"));
 const test_1 = require("@travetto/test");
 let SimpleTest = class SimpleTest {
-    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(SimpleTest, ᚕf, 1887908328, { test: { hash: 102834457 } }, false, false);
+    static Ⲑinit = Ⲑ_root_index_1.RootIndex.registerFunction(SimpleTest, ᚕf, 1887908328, { test: { hash: 102834457 } }, false, false);
     async test() {
         if (Ⲑ_util_1.RunnerUtil.tryDebugger)
             debugger;

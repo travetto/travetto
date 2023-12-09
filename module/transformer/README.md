@@ -104,11 +104,11 @@ export class Test {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TEST = void 0;
 const tslib_1 = require("tslib");
-const Ⲑ_runtime_1 = tslib_1.__importStar(require("@travetto/manifest/src/runtime.js"));
+const Ⲑ_root_index_1 = tslib_1.__importStar(require("@travetto/manifest/src/root-index.js"));
 const Ⲑ_decorator_1 = tslib_1.__importStar(require("@travetto/registry/src/decorator.js"));
 var ᚕf = "@travetto/transformer/doc/upper.js";
 let TEST = class TEST {
-    static Ⲑinit = Ⲑ_runtime_1.RuntimeIndex.registerFunction(TEST, ᚕf, 649563175, { COMPUTEAGE: { hash: 1286718349 } }, false, false);
+    static Ⲑinit = Ⲑ_root_index_1.RootIndex.registerFunction(TEST, ᚕf, 649563175, { COMPUTEAGE: { hash: 1286718349 } }, false, false);
     NAME;
     AGE;
     DOB;
