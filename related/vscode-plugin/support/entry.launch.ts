@@ -17,6 +17,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   }
 
   process.env.TRV_MANIFEST = manifest;
+  await import('@travetto/base').then(m => m.ConsoleManager.register());
   return (await import('../src/extension.js')).activate(context);
 }
 
