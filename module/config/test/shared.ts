@@ -1,7 +1,5 @@
 import { Config, EnvVar } from '../src/decorator';
 
-import './test-config';
-
 @Config('name')
 export class NameConfig {
   @EnvVar('NAME_ACTIVE')

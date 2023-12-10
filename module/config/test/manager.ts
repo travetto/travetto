@@ -4,13 +4,12 @@ import { Test, Suite, BeforeEach } from '@travetto/test';
 import { ValidationResultError } from '@travetto/schema';
 import { DependencyRegistry, InjectableFactory } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
+import { Env } from '@travetto/base';
 
 import { ConfigurationService } from '../src/service';
 import { Config } from '../src/decorator';
 import { ConfigSource } from '../src/source/types';
 import { MemoryConfigSource } from '../src/source/memory';
-
-import './test-config';
 
 @Config('ignore')
 class TestConfig {
@@ -72,6 +71,7 @@ export class ManagerTest {
 
   @BeforeEach()
   async before() {
+    Env.TRV_RESOURCES.add('@#test/fixtures');
     await RootRegistry.init();
     this.config = await DependencyRegistry.getInstance(ConfigurationService);
   }
