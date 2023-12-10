@@ -4,14 +4,6 @@ import { RuntimeIndex } from '@travetto/manifest';
 
 import type { ConsoleListener, ConsoleEvent, LogLevel } from './types';
 
-function wrap(target: Console): ConsoleListener {
-  return {
-    onLog(ev: ConsoleEvent): void {
-      return target[ev.level](...ev.args);
-    }
-  };
-}
-
 /**
  * Provides a general abstraction against the console.* methods to allow for easier capture and redirection.
  *
@@ -62,7 +54,7 @@ class $ConsoleManager {
     }
 
     // Take ownership of console
-    this.set(console, true);
+    this.set({ onLog: ev => { console![ev.level](...ev.args); } }, true);
     return this;
   }
 
@@ -120,8 +112,7 @@ class $ConsoleManager {
   /**
    * Set a new console listener, works as a stack to allow for nesting
    */
-  set(cons: ConsoleListener | Console, replace = false): void {
-    cons = ('onLog' in cons) ? cons : wrap(cons);
+  set(cons: ConsoleListener, replace = false): void {
     if (!replace) {
       this.#stack.unshift(cons);
     } else {

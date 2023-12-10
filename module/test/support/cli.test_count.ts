@@ -10,7 +10,6 @@ export class TestCountCommand {
 
   preMain(): void {
     Env.TRV_ROLE.set('test');
-    Env.TRV_ENV.set('test');
     Env.DEBUG.set(false);
   }
 

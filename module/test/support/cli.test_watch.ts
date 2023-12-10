@@ -14,7 +14,6 @@ export class TestWatcherCommand {
 
   preMain(): void {
     Env.TRV_ROLE.set('test');
-    Env.TRV_ENV.set('test');
     Env.TRV_DYNAMIC.set(true);
   }
 
