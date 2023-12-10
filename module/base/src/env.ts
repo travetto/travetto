@@ -6,13 +6,7 @@ const IS_TRUE = /^(true|yes|on|1)$/i;
 const IS_FALSE = /^(false|no|off|0)$/i;
 
 export class EnvProp<T> {
-  touched = 0;
-
   constructor(public readonly key: string) { }
-
-  touch(): void {
-    this.touched = Date.now();
-  }
 
   /** Set value according to prop type */
   set(val: T | undefined | null): void {
@@ -21,7 +15,6 @@ export class EnvProp<T> {
     } else {
       process.env[this.key] = Array.isArray(val) ? `${val.join(',')}` : `${val}`;
     }
-    this.touch();
   }
 
   /** Remove value */
@@ -85,7 +78,7 @@ export class EnvProp<T> {
 }
 
 type AllType = {
-  [K in keyof TrvEnv]: Pick<EnvProp<TrvEnv[K]>, 'touched' | 'touch' | 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
+  [K in keyof TrvEnv]: Pick<EnvProp<TrvEnv[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
     (TrvEnv[K] extends unknown[] ? 'list' | 'add' : never) |
     (Extract<TrvEnv[K], number> extends never ? never : 'int') |
     (Extract<TrvEnv[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse') |
@@ -128,14 +121,5 @@ export const Env = delegate({
   get debug(): false | string {
     const val = process.env.DEBUG ?? '';
     return (!val && prod()) || IS_FALSE.test(val) ? false : val;
-  },
-
-  /** Get resource paths */
-  get resourcePaths(): string[] {
-    return [
-      ...Env.TRV_RESOURCES.list ?? [],
-      '@#resources', // Module root
-      '@@#resources' // Monorepo root
-    ];
   }
 });

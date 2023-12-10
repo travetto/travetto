@@ -17,6 +17,7 @@ export class MailService {
   #compiled = new Map<string, EmailCompiled>();
   #transport: MailTransport;
   #interpolator: MailInterpolator;
+  resources = new ResourceLoader();
 
   constructor(
     transport: MailTransport,
@@ -32,9 +33,9 @@ export class MailService {
   async getCompiled(key: string): Promise<EmailCompiled> {
     if (Env.dynamic || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
-        ResourceLoader.read(`${key}.compiled.html`),
-        ResourceLoader.read(`${key}.compiled.text`),
-        ResourceLoader.read(`${key}.compiled.subject`)
+        this.resources.read(`${key}.compiled.html`),
+        this.resources.read(`${key}.compiled.text`),
+        this.resources.read(`${key}.compiled.subject`)
       ].map(x => x.then(MailUtil.purgeBrand)));
 
       this.#compiled.set(key, { html, text, subject });
