@@ -611,7 +611,7 @@ Additionally the framework supports SSL out of the box, by allowing you to speci
    *  No keys provided
 This is useful for local development where you implicitly trust the cert. 
 
-SSL support can be enabled by setting `rest.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L9).
+SSL support can be enabled by setting `rest.ssl.active: true` in your config. The key/cert can be specified as string directly in the config file/environment variables.  The key/cert can also be specified as a path to be picked up by the [ResourceLoader](https://github.com/travetto/travetto/tree/main/module/base/src/resource.ts#L10).
 
 ## Full Config
 The entire [RestConfig](https://github.com/travetto/travetto/tree/main/module/rest/src/application/config.ts#L12) which will show the full set of valid configuration parameters for the rest module.
