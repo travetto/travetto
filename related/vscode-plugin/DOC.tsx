@@ -92,7 +92,7 @@ export const text = <>
 
     Any file that ends with {d.input('.email.tsx')} is assumed to be an email template, and will trigger background compilation upon editing the file.  All of the following commands require the user to be actively editing the {d.input('.email.tsx')} file to be available. <br />
 
-    Additional, for rendering the email, a context may be needed to exercise the various logic paths. The plugin picks up {d.path('resources/email/dev.yml')} by default, and if its not found, then an empty object is provided.
+    Additional, for rendering the email, a context may be needed to exercise the various logic paths. The plugin picks up {d.path('resources/email/local.yml')} by default, and if its not found, then an empty object is provided.
 
     <c.SubSection title='Commands'>
 

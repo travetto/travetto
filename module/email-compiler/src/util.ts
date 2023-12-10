@@ -80,12 +80,12 @@ export class EmailCompileUtil {
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
-  static async compileSass(src: { data: string } | { file: string }, roots: string[]): Promise<string> {
+  static async compileSass(src: { data: string } | { file: string }, roots: string[] | readonly string[]): Promise<string> {
     const sass = await import('sass');
     const result = await util.promisify(sass.render)({
       ...src,
       sourceMap: false,
-      includePaths: roots
+      includePaths: roots.slice(0)
     });
     return result!.css.toString();
   }

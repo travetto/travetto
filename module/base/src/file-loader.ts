@@ -11,14 +11,21 @@ import { AppError } from './error';
  */
 export class FileLoader {
 
-  #searchPaths: string[];
+  #searchPaths: readonly string[];
 
-  constructor(paths: string[]) {
-    this.#searchPaths = paths.flat().map(x => RuntimeIndex.resolveModulePath(x));
+  static resolvePaths(paths: string[]): string[] {
+    return [...new Set(paths.map(x => RuntimeIndex.resolveModulePath(x)))];
   }
 
-  get searchPaths(): string[] {
-    return this.#searchPaths.slice(0);
+  constructor(paths: string[]) {
+    this.#searchPaths = Object.freeze(FileLoader.resolvePaths(paths));
+  }
+
+  /**
+   * The paths that will be searched on resolve
+   */
+  get searchPaths(): readonly string[] {
+    return this.#searchPaths;
   }
 
   /**
@@ -26,13 +33,13 @@ export class FileLoader {
    * @param relativePath The path to resolve
    */
   async resolve(relativePath: string): Promise<string> {
-    for (const sub of this.#searchPaths) {
+    for (const sub of this.searchPaths) {
       const resolved = path.join(sub, relativePath);
       if (await fs.stat(resolved).catch(() => false)) {
         return resolved;
       }
     }
-    throw new AppError(`Unable to find: ${relativePath}, searched=${this.#searchPaths.join(',')}`, 'notfound');
+    throw new AppError(`Unable to find: ${relativePath}, searched=${this.searchPaths.join(',')}`, 'notfound');
   }
 
   /**

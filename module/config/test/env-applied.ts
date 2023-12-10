@@ -3,6 +3,7 @@ import assert from 'node:assert';
 import { Test, Suite, BeforeAll } from '@travetto/test';
 import { DependencyRegistry } from '@travetto/di';
 import { RootRegistry } from '@travetto/registry';
+import { Env } from '@travetto/base';
 
 import { NameConfig, TestConfig } from './shared';
 
@@ -16,6 +17,7 @@ export class EnvConfigTest {
       DB_ANON_HOSTS: 'a,b,c,d',
       NAME_ACTIVE: 'false'
     });
+    Env.TRV_RESOURCES.add('@#test/fixtures');
     await RootRegistry.init();
   }
 

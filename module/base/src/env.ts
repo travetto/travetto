@@ -1,6 +1,5 @@
 /// <reference path="./_env.d.ts" />
 
-import { RuntimeContext } from '@travetto/manifest';
 import { TimeSpan, TimeUtil } from './time';
 
 const IS_TRUE = /^(true|yes|on|1)$/i;
@@ -36,6 +35,12 @@ export class EnvProp<T> {
     const val = this.val;
     return (val === undefined || val === '') ?
       undefined : val.split(/[, ]+/g).map(x => x.trim()).filter(x => !!x);
+  }
+
+  /** Add values to list */
+  add(...items: string[]): void {
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    this.set([...new Set([...this.list ?? [], ...items])] as T);
   }
 
   /** Read value as int  */
@@ -74,7 +79,7 @@ export class EnvProp<T> {
 
 type AllType = {
   [K in keyof TrvEnv]: Pick<EnvProp<TrvEnv[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
-    (TrvEnv[K] extends unknown[] ? 'list' : never) |
+    (TrvEnv[K] extends unknown[] ? 'list' | 'add' : never) |
     (Extract<TrvEnv[K], number> extends never ? never : 'int') |
     (Extract<TrvEnv[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse') |
     (Extract<TrvEnv[K], TimeSpan> extends never ? never : 'time')
@@ -116,13 +121,5 @@ export const Env = delegate({
   get debug(): false | string {
     const val = process.env.DEBUG ?? '';
     return (!val && prod()) || IS_FALSE.test(val) ? false : val;
-  },
-  /** Get resource paths */
-  get resourcePaths(): string[] {
-    return [
-      ...Env.TRV_RESOURCES.list ?? [],
-      '@#resources', // Module root
-      ...(RuntimeContext.monoRepo ? ['@@#resources'] : []) // Monorepo root
-    ];
   }
 });

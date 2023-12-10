@@ -16,7 +16,6 @@ export class EmailCompileCommand implements CliCommandShape {
   preMain(): void {
     Env.DEBUG.set(false);
     Env.TRV_DYNAMIC.set(this.watch);
-    Env.TRV_PROFILES.set(['email-dev']);
   }
 
   async main(): Promise<void> {

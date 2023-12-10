@@ -1,7 +1,6 @@
 import { path } from '@travetto/manifest';
 import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand } from '@travetto/cli';
-import { Env } from '@travetto/base';
 
 import { EmailCompilationManager } from './bin/manager';
 import { EditorConfig } from './bin/config';
@@ -12,13 +11,8 @@ import { EmailCompiler } from '../src/compiler';
 /**
  * CLI Entry point for running the email server
  */
-@CliCommand()
+@CliCommand({ addEnv: true })
 export class EmailTestCommand implements CliCommandShape {
-
-  preMain(): void {
-    Env.TRV_ENV.set('dev');
-    Env.TRV_PROFILES.set(['email-dev']);
-  }
 
   async main(file: string, to: string): Promise<void> {
     file = path.resolve(file);

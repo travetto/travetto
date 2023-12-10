@@ -1,11 +1,10 @@
-import { Env } from '@travetto/base';
+import { Env, RuntimeResources } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 
 import { EmailCompiled, EmailOptions, SentEmail } from './types';
 import { MailTransport } from './transport';
 import { MailInterpolator } from './template';
 import { MailUtil } from './util';
-import { EmailResource } from './resource';
 
 type MessageWithoutBody = Omit<EmailOptions, keyof EmailCompiled>;
 
@@ -18,16 +17,13 @@ export class MailService {
   #compiled = new Map<string, EmailCompiled>();
   #transport: MailTransport;
   #interpolator: MailInterpolator;
-  #resources: EmailResource;
 
   constructor(
     transport: MailTransport,
     interpolator: MailInterpolator,
-    resources: EmailResource
   ) {
     this.#interpolator = interpolator;
     this.#transport = transport;
-    this.#resources = resources;
   }
 
   /**
@@ -36,9 +32,9 @@ export class MailService {
   async getCompiled(key: string): Promise<EmailCompiled> {
     if (Env.dynamic || !this.#compiled.has(key)) {
       const [html, text, subject] = await Promise.all([
-        this.#resources.read(`${key}.compiled.html`),
-        this.#resources.read(`${key}.compiled.text`),
-        this.#resources.read(`${key}.compiled.subject`)
+        RuntimeResources.read(`${key}.compiled.html`),
+        RuntimeResources.read(`${key}.compiled.text`),
+        RuntimeResources.read(`${key}.compiled.subject`)
       ].map(x => x.then(MailUtil.purgeBrand)));
 
       this.#compiled.set(key, { html, text, subject });

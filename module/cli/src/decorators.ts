@@ -38,7 +38,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       SchemaRegistry.registerPendingFieldConfig(target, 'env', String, {
         aliases: ['e', CliParseUtil.toEnvField(Env.TRV_ENV.key)],
         description: 'Application environment',
-        default: 'dev',
+        default: 'local',
         required: { active: false }
       });
     }

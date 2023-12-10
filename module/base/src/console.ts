@@ -39,7 +39,7 @@ class $ConsoleManager {
    * Register as primary listener for entire app
    * @private
    */
-  async register(cfg: { debug?: false | string, overwriteNpmDebug?: boolean }): Promise<this> {
+  async register(cfg: { debug?: false | string, overwriteNpmDebug?: boolean } = {}): Promise<this> {
     this.debug(cfg.debug ?? false);
 
     Error.stackTraceLimit = 50;

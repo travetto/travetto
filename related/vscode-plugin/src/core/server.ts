@@ -96,7 +96,6 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
    */
   async start(): Promise<void> {
     if (this.#state) {
-      this.#log.info('Already started');
       return;
     }
     const [state, ready] = await this.#launchServer(this.#command, this.#args, this.#opts);
