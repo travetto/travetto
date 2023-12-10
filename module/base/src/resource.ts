@@ -4,7 +4,7 @@ import { FileLoader } from './file-loader';
 const RES = Env.TRV_RESOURCES;
 
 /**
- * File loader that will search for relative paths across the provided search paths
+ * File-based resource loader
  */
 export class ResourceLoader extends FileLoader {
 
