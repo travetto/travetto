@@ -2,19 +2,19 @@ import fs from 'node:fs/promises';
 import { Readable } from 'node:stream';
 
 import { ManifestFileUtil, RuntimeIndex, path } from '@travetto/manifest';
-import { Env, ResourceLoader, StreamUtil } from '@travetto/base';
+import { Env, FileLoader, StreamUtil } from '@travetto/base';
 
 import { ImageConverter } from './convert';
 
 /**
  * Resource provider for images that allows for real-time optimization
  */
-export class ImageOptimizingResourceLoader extends ResourceLoader {
+export class ImageOptimizingResourceLoader extends FileLoader {
 
   #cacheRoot: string;
 
   constructor(paths: string[] = [], cacheRoot?: string) {
-    super(paths);
+    super(paths, true);
 
     this.#cacheRoot = cacheRoot ?? path.resolve(Env.TRV_IMAGE_CACHE.val || ManifestFileUtil.toolPath(RuntimeIndex, 'image_cache'));
   }

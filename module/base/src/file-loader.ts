@@ -5,6 +5,7 @@ import fs from 'node:fs/promises';
 import { path, RuntimeIndex } from '@travetto/manifest';
 
 import { AppError } from './error';
+import { Env } from './env';
 
 /**
  * File loader that will search for relative paths across the provided search paths
@@ -17,7 +18,10 @@ export class FileLoader {
     return [...new Set(paths.map(x => RuntimeIndex.resolveModulePath(x)))];
   }
 
-  constructor(paths: string[]) {
+  constructor(paths: string[], includeResourcePaths = false) {
+    if (includeResourcePaths) {
+      paths = [...paths, ...Env.resourcePaths];
+    }
     this.#searchPaths = FileLoader.resolvePaths(paths);
   }
 

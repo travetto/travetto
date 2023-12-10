@@ -1,5 +1,5 @@
 import { JSXElement } from '@travetto/email-inky/jsx-runtime';
-import { ResourceLoader } from '@travetto/base';
+import { FileLoader } from '@travetto/base';
 
 import { RenderProvider, RenderState } from '../types';
 import { RenderContext } from './context';
@@ -37,7 +37,7 @@ export const Html: RenderProvider<RenderContext> = {
       .replace(/(<[uo]l>)(<li>)/g, (_, a, b) => `${a} ${b}`);
 
     if (isRoot) {
-      const wrapper = await new ResourceLoader([`${context.module}#resources`, '@travetto/email-inky#resources'])
+      const wrapper = await new FileLoader([`${context.module}#resources`, '@travetto/email-inky#resources'], true)
         .read('/email/inky.wrapper.html');
 
       // Get Subject

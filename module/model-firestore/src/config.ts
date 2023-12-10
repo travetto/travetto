@@ -21,8 +21,7 @@ export class FirestoreModelConfig {
       process.env.FIRESTORE_EMULATOR_HOST = this.emulator;
     }
     if (this.credentialsFile && !this.credentials) {
-      const resources = new ResourceLoader();
-      this.credentials = JSON.parse(await resources.read(this.credentialsFile));
+      this.credentials = JSON.parse(await ResourceLoader.read(this.credentialsFile));
     }
   }
 }

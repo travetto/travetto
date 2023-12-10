@@ -77,9 +77,8 @@ export class RestSslConfig {
       return RestSslConfig.generateSslKeyPair();
     } else {
       if (this.keys.key.length < 100) {
-        const provider = new ResourceLoader();
-        this.keys.key = (await provider.read(this.keys.key, true)).toString('utf8');
-        this.keys.cert = (await provider.read(this.keys.cert, true)).toString('utf8');
+        this.keys.key = (await ResourceLoader.read(this.keys.key, true)).toString('utf8');
+        this.keys.cert = (await ResourceLoader.read(this.keys.cert, true)).toString('utf8');
       }
       return this.keys;
     }
