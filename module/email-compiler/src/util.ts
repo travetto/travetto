@@ -80,12 +80,12 @@ export class EmailCompileUtil {
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
-  static async compileSass(src: { data: string } | { file: string }, roots: string[]): Promise<string> {
+  static async compileSass(src: { data: string } | { file: string }, roots: string[] | readonly string[]): Promise<string> {
     const sass = await import('sass');
     const result = await util.promisify(sass.render)({
       ...src,
       sourceMap: false,
-      includePaths: roots
+      includePaths: roots.slice(0)
     });
     return result!.css.toString();
   }
@@ -137,7 +137,7 @@ export class EmailCompileUtil {
   static async inlineImages(html: string, opts: EmailTemplateImageConfig): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, this.#HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Readable | Promise<Readable>][] = [];
-    const resource = new ResourceLoader(opts.search ?? []);
+    const resource = new ResourceLoader(opts.search);
 
     for (const [token, src] of tokens) {
       const ext = path.extname(src);
@@ -183,7 +183,7 @@ export class EmailCompileUtil {
       styles.push(opts.global);
     }
 
-    const resource = new ResourceLoader(opts.search ?? []);
+    const resource = new ResourceLoader(opts.search);
     const main = await resource.read('/email/main.scss').then(d => d, () => '');
 
     if (main) {

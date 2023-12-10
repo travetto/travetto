@@ -11,17 +11,20 @@ import { AppError } from './error';
  */
 export class FileLoader {
 
-  #searchPaths: string[];
+  #searchPaths: readonly string[];
 
   static resolvePaths(paths: string[]): string[] {
     return [...new Set(paths.map(x => RuntimeIndex.resolveModulePath(x)))];
   }
 
   constructor(paths: string[]) {
-    this.#searchPaths = FileLoader.resolvePaths(paths);
+    this.#searchPaths = Object.freeze(FileLoader.resolvePaths(paths));
   }
 
-  get searchPaths(): string[] {
+  /**
+   * The paths that will be searched on resolve
+   */
+  get searchPaths(): readonly string[] {
     return this.#searchPaths;
   }
 
@@ -36,7 +39,7 @@ export class FileLoader {
         return resolved;
       }
     }
-    throw new AppError(`Unable to find: ${relativePath}, searched=${this.#searchPaths.join(',')}`, 'notfound');
+    throw new AppError(`Unable to find: ${relativePath}, searched=${this.searchPaths.join(',')}`, 'notfound');
   }
 
   /**

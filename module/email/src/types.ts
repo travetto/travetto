@@ -66,7 +66,7 @@ export type EmailCompiled = Record<EmailContentType, string>;
 
 // Compilation support, defined here to allow for templates to not have a direct dependency on the compiler
 type BaseTemplateConfig = {
-  search?: string[];
+  search?: string[] | readonly string[];
   inline?: boolean;
 };
 
