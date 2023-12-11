@@ -212,7 +212,7 @@ The supported operations are:
 
 <h2 id="how-logging-is-instrumented">How Logging is Instrumented</h2>
 
-All of the logging instrumentation occurs at transpilation time.  All <code class="item method">console.*</code> methods are replaced with a call to a globally defined variable that delegates to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L21">ConsoleManager</a>.  This module, hooks into the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L21">ConsoleManager</a> and receives all logging events from all files compiled by the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>. <br><br>
+All of the logging instrumentation occurs at transpilation time.  All <code class="item method">console.*</code> methods are replaced with a call to a globally defined variable that delegates to the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L16">ConsoleManager</a>.  This module, hooks into the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/console.ts#L16">ConsoleManager</a> and receives all logging events from all files compiled by the <a target="_blank" class="external-link" href="https://travetto.dev">Travetto</a>. <br><br>
 A sample of the instrumentation would be:
 
   <figure class="code">

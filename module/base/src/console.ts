@@ -1,8 +1,11 @@
 import util from 'node:util';
+import debug from 'debug';
 
 import { RuntimeIndex } from '@travetto/manifest';
 
 import type { ConsoleListener, ConsoleEvent, LogLevel } from './types';
+
+const DEBUG_OG = { formatArgs: debug.formatArgs, log: debug.log };
 
 /**
  * Provides a general abstraction against the console.* methods to allow for easier capture and redirection.
@@ -27,35 +30,10 @@ class $ConsoleManager {
    */
   #filters: Partial<Record<LogLevel, (x: ConsoleEvent) => boolean>> = {};
 
-  /**
-   * Register as primary listener for entire app
-   * @private
-   */
-  async register(cfg: { debug?: false | string, overwriteNpmDebug?: boolean } = {}): Promise<this> {
-    this.debug(cfg.debug ?? false);
-
-    Error.stackTraceLimit = 50;
-
-    // Commandeer debug
-    if (cfg.overwriteNpmDebug ?? true) {
-      try {
-        const { default: debug } = await import('debug');
-        debug.formatArgs = function (args: string[]): void {
-          args.unshift(this.namespace);
-          args.push(debug.humanize(this.diff));
-        };
-        debug.log = (modulePath, ...args: string[]): void => this.invoke({
-          level: 'debug', module: '@npm:debug', modulePath,
-          args: [util.format(...args)], line: 0, source: '', timestamp: new Date()
-        });
-      } catch (err) {
-        // Do nothing
-      }
-    }
-
-    // Take ownership of console
-    this.set({ onLog: ev => { console![ev.level](...ev.args); } }, true);
-    return this;
+  constructor(listener: ConsoleListener) {
+    this.set(listener, true);
+    this.enhanceDebug(true);
+    this.debug(false);
   }
 
   /**
@@ -71,6 +49,27 @@ class $ConsoleManager {
       this.#filters[level] = filter;
     } else {
       delete this.#filters[level];
+    }
+  }
+
+  /**
+   * Enable/disable enhanced debugging
+   */
+  enhanceDebug(active: boolean): void {
+    if (active) {
+      Error.stackTraceLimit = 50;
+      debug.formatArgs = function (args: string[]): void {
+        args.unshift(this.namespace);
+        args.push(debug.humanize(this.diff));
+      };
+      debug.log = (modulePath, ...args: string[]): void => this.invoke({
+        level: 'debug', module: '@npm:debug', modulePath,
+        args: [util.format(...args)], line: 0, source: '', timestamp: new Date()
+      });
+    } else {
+      Error.stackTraceLimit = 10;
+      debug.formatArgs = DEBUG_OG.formatArgs;
+      debug.log = DEBUG_OG.log;
     }
   }
 
@@ -132,5 +131,5 @@ class $ConsoleManager {
   }
 }
 
-export const ConsoleManager = new $ConsoleManager();
+export const ConsoleManager = new $ConsoleManager({ onLog: (ev): void => { console![ev.level](...ev.args); } });
 export const log = ConsoleManager.invoke.bind(ConsoleManager);

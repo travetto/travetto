@@ -66,7 +66,6 @@ export class ExecutionManager {
    * @param args
    */
   static async run(argv: string[]): Promise<void> {
-    await ConsoleManager.register({ debug: false });
     await GlobalTerminal.init();
 
     try {

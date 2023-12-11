@@ -6,7 +6,7 @@ type HandleFunction = (event: LambdaAPIGatewayProxyEvent, context: LambdaContext
 
 async function buildApp(): Promise<{ handle: HandleFunction }> {
   const { Env, ConsoleManager } = await import('@travetto/base');
-  await ConsoleManager.register({ debug: Env.debug });
+  ConsoleManager.debug(Env.debug);
 
   const { RootRegistry } = await import('@travetto/registry');
   await RootRegistry.init();
