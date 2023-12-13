@@ -1,4 +1,4 @@
-import { GlobalTerminal, TermStyleInput, Terminal } from '@travetto/terminal';
+import { ColorOutputUtil, TermStyleInput, Terminal } from '@travetto/terminal';
 import { ManualAsyncIterator } from '@travetto/worker';
 
 import { TestEvent } from '../../model/event';
@@ -21,7 +21,7 @@ export class TapStreamedEmitter implements TestConsumer {
       { text: 'white', background: 'darkGreen' },
       { text: 'white', background: 'darkRed' }
     ];
-    const styles = palette.map(s => GlobalTerminal.colorer(s));
+    const styles = palette.map(s => ColorOutputUtil.colorer(s));
 
     return (t: TestResult, idx: number): string => {
       if (t.status === 'failed') {

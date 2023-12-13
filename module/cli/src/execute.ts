@@ -1,4 +1,3 @@
-import { GlobalTerminal } from '@travetto/terminal';
 import { ConsoleManager, Env, ShutdownManager } from '@travetto/base';
 
 import { HelpUtil } from './help';
@@ -66,8 +65,6 @@ export class ExecutionManager {
    * @param args
    */
   static async run(argv: string[]): Promise<void> {
-    await GlobalTerminal.init();
-
     try {
       const { cmd, args, help } = CliParseUtil.getArgs(argv);
 

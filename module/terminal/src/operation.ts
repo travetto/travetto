@@ -1,7 +1,7 @@
 import { IterableUtil } from './iterable';
 import { TerminalWriter } from './writer';
 import { Indexed, TerminalProgressRender, TerminalStreamingConfig, TerminalWaitingConfig, TermState } from './types';
-import { ColorOutputUtil, TermStyleInput } from './color-output';
+import { TermColorFn } from './color-types';
 
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
@@ -102,8 +102,7 @@ export class TerminalOperation {
   /**
    * Build progress par formatter for terminal progress events
    */
-  static buildProgressBar(term: TermState, style: TermStyleInput): TerminalProgressRender {
-    const color = ColorOutputUtil.colorer(term, style);
+  static buildProgressBar(term: TermState, color: TermColorFn): TerminalProgressRender {
     return ({ total, idx, text }): string => {
       text ||= total ? '%idx/%total' : '%idx';
 

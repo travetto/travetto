@@ -2,13 +2,14 @@ import tty from 'node:tty';
 
 import { IterableUtil, MapFn } from './iterable';
 import {
-  TermColorLevel, TermColorScheme, TerminalProgressEvent, TerminalTableConfig,
-  TerminalTableEvent, TerminalWaitingConfig, TermLinePosition, TermState, TermCoord
+  TerminalProgressEvent, TerminalTableConfig, TerminalTableEvent,
+  TerminalWaitingConfig, TermLinePosition, TermState, TermCoord
 } from './types';
 import { TerminalOperation } from './operation';
 import { TerminalQuerier } from './query';
 import { TerminalWriter } from './writer';
-import { ColorOutputUtil, Prim, TermColorFn, TermColorPalette, TermColorPaletteInput, TermStyleInput } from './color-output';
+import { TermStyleInput } from './color-types';
+import { ColorOutputUtil } from './color-output';
 
 type TerminalStreamPositionConfig = {
   position?: TermLinePosition;
@@ -25,19 +26,10 @@ type TerminalProgressConfig = TerminalStreamPositionConfig & {
  */
 export class Terminal implements TermState {
 
-  static async for(config: Partial<TermState>): Promise<Terminal> {
-    const term = new Terminal(config);
-    await term.init();
-    return term;
-  }
-
-  #init: Promise<void>;
   #output: tty.WriteStream;
   #input: tty.ReadStream;
   #interactive: boolean;
   #width?: number;
-  #backgroundScheme?: TermColorScheme;
-  #colorLevel?: TermColorLevel;
   #query: TerminalQuerier;
 
   constructor(config: Partial<TermState>) {
@@ -45,9 +37,8 @@ export class Terminal implements TermState {
     this.#input = config.input ?? process.stdin;
     this.#interactive = config.interactive ?? (this.#output.isTTY && !/^(true|yes|on|1)$/i.test(process.env.TRV_QUIET ?? ''));
     this.#width = config.width;
-    this.#colorLevel = config.colorLevel;
-    this.#backgroundScheme = config.backgroundScheme;
     this.#query = TerminalQuerier.for(this.#input, this.#output);
+    process.on('exit', () => this.reset());
   }
 
   get output(): tty.WriteStream {
@@ -70,34 +61,12 @@ export class Terminal implements TermState {
     return (this.#output.isTTY ? this.#output.rows : 120);
   }
 
-  get colorLevel(): TermColorLevel {
-    return this.#colorLevel ?? 0;
-  }
-
-  get backgroundScheme(): TermColorScheme {
-    return this.#backgroundScheme ?? 'dark';
-  }
-
   writer(): TerminalWriter {
     return TerminalWriter.for(this);
   }
 
   async writeLines(...text: string[]): Promise<void> {
     return this.writer().writeLines(text, this.interactive).commit();
-  }
-
-  async init(): Promise<void> {
-    if (!this.#init) {
-      this.#init = (async (): Promise<void> => {
-        this.#colorLevel ??= await ColorOutputUtil.readTermColorLevel(this.#output);
-        this.#backgroundScheme ??= await ColorOutputUtil.readBackgroundScheme(
-          this.#output,
-          () => this.interactive ? this.#query.backgroundColor() : undefined
-        );
-      })();
-      process.on('exit', () => this.reset());
-    }
-    return this.#init;
   }
 
   reset(): void {
@@ -185,23 +154,9 @@ export class Terminal implements TermState {
   async trackProgress<T, V extends TerminalProgressEvent>(
     source: AsyncIterable<T>, resolve: MapFn<T, V>, config?: TerminalProgressConfig
   ): Promise<void> {
-    const render = TerminalOperation.buildProgressBar(this, config?.style ?? { background: 'limeGreen', text: 'black' });
+    const color = ColorOutputUtil.colorer(config?.style ?? { background: 'limeGreen', text: 'black' });
+    const render = TerminalOperation.buildProgressBar(this, color);
     return this.streamToPosition(source, async (v, i) => render(await resolve(v, i)), config);
-  }
-
-  /** Creates a colorer function */
-  colorer(style: TermStyleInput | [light: TermStyleInput, dark: TermStyleInput]): TermColorFn {
-    return ColorOutputUtil.colorer(this, style);
-  }
-
-  /** Creates a color palette based on input styles */
-  palette<P extends TermColorPaletteInput>(input: P): TermColorPalette<P> {
-    return ColorOutputUtil.palette(this, input);
-  }
-
-  /** Convenience method to creates a color template function based on input styles */
-  templateFunction<P extends TermColorPaletteInput>(input: P): (key: keyof P, val: Prim) => string {
-    return ColorOutputUtil.templateFunction(this, input);
   }
 }
 

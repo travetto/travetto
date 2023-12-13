@@ -1,7 +1,7 @@
 import util from 'node:util';
 
 import { Env } from '@travetto/base';
-import { GlobalTerminal } from '@travetto/terminal';
+import { ColorOutputUtil } from '@travetto/terminal';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -11,7 +11,7 @@ import { LogEvent, LogFormatter } from '../types';
 /**
  * Level coloring
  */
-export const STYLES = GlobalTerminal.palette({
+export const STYLES = ColorOutputUtil.palette({
   info: ['yellow', 'goldenrod'],
   debug: ['lightGray', '#555555'],
   warn: ['darkOrange', 'brightMagenta'],
@@ -50,7 +50,7 @@ export class LineLogFormatterConfig {
 
   postConstruct(): void {
     this.time ??= (!this.plain ? 'ms' : undefined);
-    this.plain ??= GlobalTerminal.colorLevel === 0;
+    this.plain ??= ColorOutputUtil.readTermColorLevel() === 0;
     this.colorize ??= !this.plain;
     this.location ??= !this.plain;
     this.level ??= !this.plain;
