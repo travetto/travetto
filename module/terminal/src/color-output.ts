@@ -1,20 +1,16 @@
 import tty from 'node:tty';
 
-import { ColorDefineUtil, RGBInput } from './color-define';
+import { ColorDefineUtil } from './color-define';
 import { ANSICodes } from './codes';
-import { TermColorScheme, TermColorLevel, TermState, RGB } from './types';
+import {
+  RGBInput, TermColorFn, TermColorLevel, TermColorPalette,
+  TermColorPaletteInput, TermColorScheme, TermStyle, TermStyleInput
+} from './color-types';
 
-export type TermStyle =
-  { text?: RGBInput, background?: RGBInput, italic?: boolean, underline?: boolean, inverse?: boolean, blink?: boolean };
-
-export type TermStyleInput = TermStyle | RGBInput;
-export type Prim = string | number | boolean | Date | RegExp;
-export type TermColorPaletteInput = Record<string, TermStyleInput | [dark: TermStyleInput, light: TermStyleInput]>;
-export type TermColorFn = (text: Prim) => string;
-export type TermColorPalette<T> = Record<keyof T, TermColorFn>;
 
 const COLOR_LEVEL_MAP = { 1: 0, 4: 1, 8: 2, 24: 3 } as const;
 type ColorBits = keyof (typeof COLOR_LEVEL_MAP);
+type Prim = Parameters<TermColorFn>[0];
 
 /**
  * Utils for colorizing output
@@ -24,13 +20,13 @@ export class ColorOutputUtil {
   /**
    * Detect color level from tty information
    */
-  static async readTermColorLevel(stream: tty.WriteStream): Promise<TermColorLevel> {
+  static readTermColorLevel(stream: tty.WriteStream = process.stdout): TermColorLevel {
     const force = process.env.FORCE_COLOR;
     const disable = process.env.NO_COLOR ?? process.env.NODE_DISABLE_COLORS;
     if (force !== undefined) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return Math.max(Math.min(/^\d+$/.test(force) ? parseInt(force, 10) : 1, 3), 0) as TermColorLevel;
-    } else if (disable !== undefined && /^(1|true|yes|on)/i.test(disable)) {
+    } else if (disable !== undefined && /^(1|true|yes|on)$/i.test(disable)) {
       return 0;
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
@@ -40,13 +36,9 @@ export class ColorOutputUtil {
   /**
    * Read foreground/background color if env var is set
    */
-  static async readBackgroundScheme(
-    stream: tty.WriteStream,
-    query: () => Promise<RGB | undefined> | RGB | undefined,
-    env: string | undefined = process.env.COLORFGBG
-  ): Promise<TermColorScheme | undefined> {
-    let color = stream.isTTY ? await query() : undefined;
-    if (!color && env) {
+  static readBackgroundScheme(env: string | undefined = process.env.COLORFGBG): TermColorScheme | undefined {
+    let color = undefined;
+    if (env) {
       const [, bg] = env.split(';');
       color = ColorDefineUtil.rgbFromAnsi256(+bg);
     }
@@ -93,13 +85,15 @@ export class ColorOutputUtil {
   /**
    * Make a simple primitive colorer
    */
-  static colorer(term: TermState, style: TermStyleInput | [dark: TermStyleInput, light: TermStyleInput]): TermColorFn {
+  static colorer(style: TermStyleInput | [dark: TermStyleInput, light: TermStyleInput], term?: tty.WriteStream): TermColorFn {
     const schemes = {
       light: this.getStyledLevels(Array.isArray(style) ? style[1] ?? style[0] : style),
       dark: this.getStyledLevels(Array.isArray(style) ? style[0] : style),
     };
+    const scheme = this.readBackgroundScheme() ?? 'dark';
+    const level = this.readTermColorLevel(term);
     return (v: Prim): string => {
-      const [prefix, suffix] = schemes[term.backgroundScheme][term.colorLevel];
+      const [prefix, suffix] = schemes[scheme][level];
       return (v === undefined || v === null) ? '' : `${prefix}${v}${suffix}`;
     };
   }
@@ -107,12 +101,12 @@ export class ColorOutputUtil {
   /**
    * Creates a color palette based on input styles
    */
-  static palette<P extends TermColorPaletteInput>(term: TermState, input: P): TermColorPalette<P> {
+  static palette<P extends TermColorPaletteInput>(input: P, term?: tty.WriteStream): TermColorPalette<P> {
     // Common color support
     const out: Partial<TermColorPalette<P>> = {};
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     for (const [k, col] of Object.entries(input) as [keyof P, TermStyleInput][]) {
-      out[k] = this.colorer(term, col);
+      out[k] = this.colorer(col, term);
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     return out as TermColorPalette<P>;
@@ -121,8 +115,8 @@ export class ColorOutputUtil {
   /**
    * Convenience method to creates a color template function based on input styles
    */
-  static templateFunction<P extends TermColorPaletteInput>(term: TermState, input: P): (key: keyof P, val: Prim) => string {
-    const pal = this.palette(term, input);
+  static templateFunction<P extends TermColorPaletteInput>(input: P, term?: tty.WriteStream): (key: keyof P, val: Prim) => string {
+    const pal = this.palette(input, term);
     return (key: keyof P, val: Prim) => pal[key](val);
   }
 }

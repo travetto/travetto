@@ -25,7 +25,6 @@ export class CompilerRunner {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const { GlobalTerminal } = await import(main) as typeof import('@travetto/terminal');
 
-    await GlobalTerminal.init();
     await GlobalTerminal.trackProgress(src,
       x => ({ ...x, text: `Compiling [%idx/%total] -- ${x.message}` }),
       { position: 'bottom', minDelay: 50, staticMessage: 'Compiling' }

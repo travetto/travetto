@@ -1,10 +1,7 @@
+import { DefinedColor, RGB, RGBInput, TermColorScheme } from './color-types';
 import { NAMED_COLORS } from './named-colors';
-import { RGB, TermColorScheme } from './types';
 
 type I = number;
-type HSL = [h: I, s: I, l: I];
-export type DefinedColor = { rgb: RGB, hsl: HSL, idx16: I, idx16bg: I, idx256: I, scheme: TermColorScheme };
-export type RGBInput = I | keyof (typeof NAMED_COLORS) | `#${string}`;
 
 const _rgb = (r: I, g: I = r, b: I = g): RGB => [r, g, b];
 
@@ -106,32 +103,6 @@ export class ColorDefineUtil {
   }
 
   /**
-   * Converts [R,G,B] to [H,S,L]
-   */
-  static hsl([r, g, b]: RGB): HSL {
-    const [rf, gf, bf] = [r / 255, g / 255, b / 255];
-    const max = Math.max(rf, gf, bf), min = Math.min(rf, gf, bf);
-    let h = 0;
-    let s = 0;
-    const l = (max + min) / 2;
-
-    if (max === min) {
-      h = s = 0; // achromatic
-    } else {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case rf: h = (gf - bf) / d + (gf < bf ? 6 : 0); break;
-        case gf: h = (bf - rf) / d + 2; break;
-        case bf: h = (rf - gf) / d + 4; break;
-      }
-      h /= 6;
-    }
-    return [h, s, l];
-  }
-
-
-  /**
    * Converts input value into [R,G,B] output
    */
   static toRgb(val: RGBInput): RGB {
@@ -170,10 +141,9 @@ export class ColorDefineUtil {
       const rgb = this.toRgb(val);
       const idx16 = this.ansi16FromRgb(rgb);
       const idx256 = this.ansi256FromRgb(rgb);
-      const hsl = this.hsl(rgb);
       const idx16bg = ANSI16_TO_BG.get(idx16)!;
       const scheme = this.getScheme(rgb);
-      this.CACHE.set(val, { rgb, idx16, idx16bg, idx256, hsl, scheme });
+      this.CACHE.set(val, { rgb, idx16, idx16bg, idx256, scheme });
     }
     return this.CACHE.get(val)!;
   }

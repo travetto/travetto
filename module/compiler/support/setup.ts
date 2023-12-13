@@ -18,10 +18,16 @@ const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math
 export class CompilerSetup {
 
   /**
-   * Import a compiled manifest
+   * Import compiled manifest utilities
    */
-  static #importManifest = (ctx: ManifestContext): Promise<typeof import('@travetto/manifest')> =>
-    import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/manifest/__index__.js'));
+  static #importManifest = (ctx: ManifestContext): Promise<
+    Pick<typeof import('@travetto/manifest'), 'ManifestDeltaUtil' | 'ManifestUtil' | 'PackageUtil'>
+  > => {
+    const all = ['util', 'package', 'delta'].map(f =>
+      import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}.js`))
+    );
+    return Promise.all(all).then(props => Object.assign({}, ...props));
+  };
 
   /**  Convert a file to a given ext */
   static #sourceToExtension(inputFile: string, ext: string): string {

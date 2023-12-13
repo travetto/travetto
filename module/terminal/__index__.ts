@@ -1,6 +1,7 @@
 export * from './src/codes';
 export * from './src/color-define';
 export * from './src/color-output';
+export * from './src/color-types';
 export * from './src/iterable';
 export * from './src/named-colors';
 export * from './src/operation';

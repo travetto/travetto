@@ -3,10 +3,7 @@ import { spawn } from 'node:child_process';
 
 import { ANSICodes } from './codes';
 import { IterableUtil } from './iterable';
-import { RGB, TermCoord, TermQuery } from './types';
-
-const to256 = (x: string): number => Math.trunc(parseInt(x, 16) / (16 ** (x.length - 2)));
-const COLOR_RESPONSE = /(?<r>][0-9a-f]+)[/](?<g>[0-9a-f]+)[/](?<b>[0-9a-f]+)[/]?(?<a>[0-9a-f]+)?/i;
+import { TermCoord, TermQuery } from './types';
 
 const queryScript = (function (...bytes: number[]): void {
   const i = process.stdin;
@@ -33,14 +30,6 @@ const runQuery = async (input: tty.ReadStream, output: tty.WriteStream, code: st
 };
 
 const ANSIQueries = {
-  /** Parse xterm color response */
-  color: (field: 'background' | 'foreground'): TermQuery<RGB | undefined> => ({
-    query: (): string => ANSICodes.OSC_QUERY(`${field}Color`),
-    response: (response: Buffer): RGB | undefined => {
-      const groups = response.toString('utf8').match(COLOR_RESPONSE)?.groups ?? {};
-      return 'r' in groups ? [to256(groups.r), to256(groups.g), to256(groups.b)] : undefined;
-    }
-  }),
   /** Parse cursor query response into {x,y} */
   cursorPosition: {
     query: (): string => ANSICodes.DEVICE_STATUS_REPORT('cursorPosition'),
@@ -68,7 +57,6 @@ export class TerminalQuerier {
   #queue = IterableUtil.simpleQueue();
   #output: tty.WriteStream;
   #input: tty.ReadStream;
-  #restore?: () => void;
 
   constructor(input: tty.ReadStream, output: tty.WriteStream) {
     this.#input = input;
@@ -83,12 +71,7 @@ export class TerminalQuerier {
     return this.query(ANSIQueries.cursorPosition);
   }
 
-  backgroundColor(): Promise<RGB | undefined> {
-    return this.query(ANSIQueries.color('background'));
-  }
-
   close(): void {
-    this.#restore?.();
     this.#queue.close();
   }
 }

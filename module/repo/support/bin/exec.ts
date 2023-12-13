@@ -1,7 +1,7 @@
 import { ExecutionResult, ExecutionOptions, ExecutionState, Env, TypedObject } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
-import { ColorDefineUtil, GlobalTerminal, NAMED_COLORS, TermLinePosition, Terminal } from '@travetto/terminal';
+import { ColorOutputUtil, NAMED_COLORS, TermLinePosition, Terminal } from '@travetto/terminal';
 import { WorkPool, Worker, IterableWorkSet } from '@travetto/worker';
 
 type ModuleRunConfig<T = ExecutionResult> = {
@@ -16,9 +16,7 @@ type ModuleRunConfig<T = ExecutionResult> = {
 };
 
 const COLORS = TypedObject.keys(NAMED_COLORS)
-  .map(k => [k, ColorDefineUtil.defineColor(k).hsl] as const)
-  .filter(([, [, s, l]]) => l > .5 && l < .8 && s > .8)
-  .map(([k]) => GlobalTerminal.colorer(k));
+  .map(k => ColorOutputUtil.colorer(k));
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
 
@@ -87,8 +85,8 @@ export class RepoExecUtil {
     const processes = new Map<IndexedModule, ExecutionState>();
 
     const prefixes = config.prefixOutput !== false ? this.#buildPrefixes(mods) : {};
-    const stdoutTerm = await Terminal.for({ output: process.stdout });
-    const stderrTerm = await Terminal.for({ output: process.stderr });
+    const stdoutTerm = new Terminal({ output: process.stdout });
+    const stderrTerm = new Terminal({ output: process.stderr });
 
     let id = 1;
     const pool = new WorkPool(async () => {
