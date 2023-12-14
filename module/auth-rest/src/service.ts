@@ -14,7 +14,7 @@ const PrincipalⲐ = Symbol.for('@travetto/auth:principal');
  */
 @Injectable()
 export class AuthService {
-  #authenticators = new Map<symbol, Authenticator>();
+  #authenticators = new Map<symbol, Promise<Authenticator>>();
 
   @Inject()
   authorizer?: Authorizer;
@@ -28,7 +28,7 @@ export class AuthService {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       AuthenticatorTarget as unknown as Class<Authenticator>
     )) {
-      const dep = await DependencyRegistry.getInstance<Authenticator>(AuthenticatorTarget, source.qualifier);
+      const dep = DependencyRegistry.getInstance<Authenticator>(AuthenticatorTarget, source.qualifier);
       this.#authenticators.set(source.qualifier, dep);
     }
   }
@@ -46,7 +46,7 @@ export class AuthService {
      */
     for (const auth of authenticators) {
       try {
-        const idp = this.#authenticators.get(auth)!;
+        const idp = await this.#authenticators.get(auth)!;
         await idp.initialize?.({ req, res });
         const principal = await idp.authenticate(req.body, { req, res });
         if (!principal) { // Multi-step login process
