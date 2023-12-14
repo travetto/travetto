@@ -5,13 +5,6 @@ const ST = '\x1b\\';
 // eslint-disable-next-line no-control-regex
 export const ANSI_CODE_REGEX = /(\x1b|\x1B)[\[\]][?]?[0-9;]+[A-Za-z]/g;
 
-export const OSC_QUERY_FIELDS = {
-  backgroundColor: 11,
-  foregroundColor: 10
-};
-
-export type OSCQueryField = keyof (typeof OSC_QUERY_FIELDS);
-
 export const DEVICE_STATUS_FIELDS = {
   cursorPosition: 6,
 };
@@ -35,7 +28,6 @@ export const ANSICodes = {
   POSITION_RESTORE: (): string => `${ESC}u`,
   POSITION_SAVE: (): string => `${ESC}s`,
   DEVICE_STATUS_REPORT: (code: DeviceStatusField): string => `${ESC}${DEVICE_STATUS_FIELDS[code]}n`,
-  OSC_QUERY: (code: OSCQueryField): string => `${OSC}${OSC_QUERY_FIELDS[code]};?${ST}`,
 };
 
 export const stripAnsiCodes = (text: string): string => text.replace(ANSI_CODE_REGEX, '');

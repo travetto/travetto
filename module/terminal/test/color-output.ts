@@ -4,7 +4,7 @@ import assert from 'node:assert';
 import { Test, Suite, BeforeEach } from '@travetto/test';
 import { Env, Util } from '@travetto/base';
 
-import { ColorOutputUtil } from '../src/color-output';
+import { ColorOutputUtil } from '../src/color/color-output';
 
 @Suite()
 export class ColorOutputUtilTest {
