@@ -1,7 +1,7 @@
 import { ExecutionResult, ExecutionOptions, ExecutionState, Env, TypedObject } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
-import { ColorOutputUtil, NAMED_COLORS, TermLinePosition, Terminal } from '@travetto/terminal';
+import { ColorDefineUtil, ColorOutputUtil, NAMED_COLORS, TermLinePosition, Terminal } from '@travetto/terminal';
 import { WorkPool, Worker, IterableWorkSet } from '@travetto/worker';
 
 type ModuleRunConfig<T = ExecutionResult> = {
@@ -16,6 +16,7 @@ type ModuleRunConfig<T = ExecutionResult> = {
 };
 
 const COLORS = TypedObject.keys(NAMED_COLORS)
+  .filter(k => ColorDefineUtil.defineColor(k).scheme === 'light')
   .map(k => ColorOutputUtil.colorer(k));
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);

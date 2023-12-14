@@ -1,7 +1,7 @@
 import { IterableUtil } from './iterable';
 import { TerminalWriter } from './writer';
 import { Indexed, TerminalProgressRender, TerminalStreamingConfig, TerminalWaitingConfig, TermState } from './types';
-import { TermColorFn } from './color-types';
+import { TermColorFn } from './color/color-types';
 
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 

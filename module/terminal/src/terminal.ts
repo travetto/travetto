@@ -8,8 +8,8 @@ import {
 import { TerminalOperation } from './operation';
 import { TerminalQuerier } from './query';
 import { TerminalWriter } from './writer';
-import { TermStyleInput } from './color-types';
-import { ColorOutputUtil } from './color-output';
+import { TermStyleInput } from './color/color-types';
+import { ColorOutputUtil } from './color/color-output';
 
 type TerminalStreamPositionConfig = {
   position?: TermLinePosition;
