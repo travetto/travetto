@@ -2,7 +2,7 @@ import os from 'node:os';
 import gp from 'generic-pool';
 import timers from 'node:timers/promises';
 
-import { Env, ShutdownManager } from '@travetto/base';
+import { Env, ShutdownManager, Util } from '@travetto/base';
 
 import { WorkSet } from './input/types';
 import { ManualAsyncIterator } from '../src/input/async-iterator';
@@ -11,20 +11,20 @@ import { ManualAsyncIterator } from '../src/input/async-iterator';
  * Worker definition
  */
 export interface Worker<X, T = unknown> {
-  active: boolean;
-  id: unknown;
+  active?: boolean;
+  id?: unknown;
   init?(): Promise<unknown>;
   execute(input: X): Promise<T>;
-  destroy(): Promise<void>;
+  destroy?(): Promise<void>;
   release?(): unknown;
 }
 
 type WorkPoolProcessConfig<X, T> = {
   shutdownOnComplete?: boolean;
-  onComplete?: <T>(ev: WorkCompletionEvent<X, T>) => (void | Promise<void>);
+  onComplete?(ev: WorkCompletionEvent<X, T>): (void | Promise<void>);
 };
 
-type WorkCompletionEvent<X, T> = { idx: number, total?: number, input: X, result?: T };
+export type WorkCompletionEvent<X, T> = { idx: number, total?: number, input: X, result?: T };
 
 /**
  * Work pool support
@@ -79,7 +79,7 @@ export class WorkPool<X, T = unknown> {
     this.#pool = gp.createPool({
       create: () => this.#createAndTrack(getWorker, args),
       destroy: x => this.destroy(x),
-      validate: async (x: Worker<X, T>) => x.active
+      validate: async (x: Worker<X, T>) => x.active ?? true
     }, args);
 
     this.#shutdownCleanup = ShutdownManager.onGracefulShutdown(async () => {
@@ -97,6 +97,8 @@ export class WorkPool<X, T = unknown> {
     try {
       this.#pendingAcquires += 1;
       const res = await getWorker();
+
+      res.id ??= Util.shortHash(`${Math.random()}`);
 
       if (res.init) {
         await res.init();
@@ -123,7 +125,7 @@ export class WorkPool<X, T = unknown> {
     if (this.#trace) {
       console.debug('Destroying', { pid: process.pid, worker: worker.id });
     }
-    return worker.destroy();
+    return worker.destroy?.();
   }
 
   /**
@@ -134,7 +136,7 @@ export class WorkPool<X, T = unknown> {
       console.debug('Releasing', { pid: process.pid, worker: worker.id });
     }
     try {
-      if (worker.active) {
+      if (worker.active ?? true) {
         try {
           await worker.release?.();
         } catch { }
