@@ -9,7 +9,7 @@ import { CommonUtil } from './util';
 type ModFile = { input: string, output: string, stale: boolean };
 
 const SOURCE_SEED = ['package.json', 'index.ts', '__index__.ts', 'src', 'support', 'bin'];
-const PRECOMPILE_MODS = ['@travetto/terminal', '@travetto/manifest', '@travetto/transformer', '@travetto/compiler'];
+const PRECOMPILE_MODS = ['@travetto/manifest', '@travetto/transformer', '@travetto/compiler'];
 const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 
 /**
@@ -175,10 +175,7 @@ export class CompilerSetup {
 
     await LogUtil.withLogger('precompile', async () => {
       for (const mod of PRECOMPILE_MODS) {
-        const count = (await this.#compileIfStale(ctx, 'precompile', mod, SOURCE_SEED)).length;
-        if (mod !== '@travetto/terminal') {
-          changes += count;
-        }
+        changes += (await this.#compileIfStale(ctx, 'precompile', mod, SOURCE_SEED)).length;
       }
     });
 

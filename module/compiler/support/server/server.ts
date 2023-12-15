@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerMode, CompilerOp, CompilerServerEvent, CompilerServerEventType, CompilerServerInfo } from '../types';
+import type { CompilerMode, CompilerOp, CompilerProgressEvent, CompilerServerEvent, CompilerServerEventType, CompilerServerInfo } from '../types';
 import { LogUtil } from '../log';
 import { CompilerClientUtil } from './client';
 import { CommonUtil } from '../util';
@@ -37,6 +37,7 @@ export class CompilerServer {
   #shutdown = new AbortController();
   signal = this.#shutdown.signal;
   info: CompilerServerInfo;
+  #progressWriter = CompilerClientUtil.progressWriter();
 
   constructor(ctx: ManifestContext, op: CompilerOp) {
     this.#ctx = ctx;
@@ -143,7 +144,7 @@ export class CompilerServer {
     switch (action) {
       case 'send-event': await this.#emitEvent(await CompilerServer.readJSONRequest(req)); out = { received: true }; break;
       case 'event': return await this.#addListener(subAction, res);
-      case 'stop': out = await this.close(); break;
+      case 'stop': out = await this.close(true); break;
       case 'clean': out = await this.#clean(); break;
       case 'info':
       default: out = this.info ?? {}; break;
@@ -156,9 +157,15 @@ export class CompilerServer {
    */
   async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerServerEvent>): Promise<void> {
 
+    LogUtil.log('compiler', 'debug', 'Started, streaming logs');
+
     CompilerClientUtil.streamLogs(this.#ctx, this.signal); // Send logs to stdout
 
     for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
+      if (this.#progressWriter && ev.type === 'progress') {
+        await this.#progressWriter(ev.payload);
+      }
+
       this.#emitEvent(ev);
 
       if (ev.type === 'state') {
@@ -174,19 +181,22 @@ export class CompilerServer {
     }
 
     // Terminate, after letting all remaining events emit
-    await this.close();
+    await this.close(this.signal.aborted);
   }
 
   /**
    * Close server
    */
-  async close(): Promise<unknown> {
-    if (this.signal.aborted) {
-      return;
-    }
-
+  async close(force: boolean): Promise<unknown> {
     log('info', 'Closing down server');
     await new Promise(r => {
+
+      if (force) {
+        const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
+        this.#progressWriter?.(cancel);
+        this.#emitEvent({ type: 'progress', payload: cancel });
+      }
+
       this.#server.close(r);
       this.#emitEvent({ type: 'state', payload: { state: 'close' } });
       this.#server.unref();

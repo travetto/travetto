@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
 
 import { ManifestModuleUtil, RuntimeIndex } from '@travetto/manifest';
@@ -81,6 +82,9 @@ export class Compiler {
       }
     }
     EventUtil.sendEvent('progress', { total: files.length, idx: files.length, message: 'Complete', operation: 'compile', complete: true });
+
+    await timers.setTimeout(1);
+
     Log.debug(`Compiled ${i} files`);
   }
 
