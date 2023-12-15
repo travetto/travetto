@@ -1,8 +1,9 @@
 import rl from 'node:readline/promises';
+import timers from 'node:timers/promises';
 import { Readable } from 'node:stream';
 
 import type { ManifestContext } from '@travetto/manifest';
-import type { CompilerServerEvent, CompilerServerEventType, CompilerServerInfo, CompilerStateType } from '../types';
+import type { CompilerProgressEvent, CompilerServerEvent, CompilerServerEventType, CompilerServerInfo, CompilerStateType } from '../types';
 
 import { LogUtil } from '../log';
 
@@ -26,6 +27,46 @@ function getSignal(input?: AbortSignal): AbortSignal {
  * Compiler Client Operations
  */
 export class CompilerClientUtil {
+
+  /**
+   * Get progress writer
+   * @returns
+   */
+  static progressWriter(): ((ev: CompilerProgressEvent) => Promise<void>) | undefined {
+    if (process.env.TRV_QUIET === '1') {
+      return;
+    }
+    const out = process.stdout;
+
+    let message: string | undefined;
+
+    return async (ev: CompilerProgressEvent): Promise<void> => {
+      if (message) {
+        await new Promise<void>(r => out.clearLine(0, () => out.moveCursor(-message!.length, 0, () => r())));
+      }
+      if (!ev.complete) {
+        const pct = Math.trunc(ev.idx * 100 / ev.total);
+        message = `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${ev.idx}/${ev.total}] ${ev.message}`;
+        await new Promise<void>(r => out.write(message!, () => r()));
+      }
+    };
+  }
+
+  /**
+   * Track compiler progress
+   */
+  static async trackProgress(ctx: ManifestContext, signal?: AbortSignal): Promise<void> {
+    const writer = this.progressWriter();
+    if (!writer) {
+      return;
+    }
+
+    const src = this.fetchEvents(ctx, 'progress', signal, ev => !!ev.complete);
+
+    for await (const x of src) {
+      await writer(x);
+    }
+  }
 
   /**
    * Get server information, if server is running
@@ -63,12 +104,15 @@ export class CompilerClientUtil {
           if (line.trim().charAt(0) === '{') {
             const val = JSON.parse(line);
             if (until?.(val)) {
-              setTimeout(() => ctrl.abort(), 1);
+              await timers.setTimeout(1);
+              ctrl.abort();
             }
             yield val;
           }
         }
       } catch (err) { }
+
+      await timers.setTimeout(1);
 
       if (ctrl.signal.aborted || !(await this.getServerInfo(ctx))) { // If health check fails, or aborted
         log('debug', `Stopping watch for events of type "${type}"`);
@@ -93,7 +137,7 @@ export class CompilerClientUtil {
     // Loop until
     log('debug', `Waiting for states, ${states.join(', ')}`);
     for await (const _ of this.fetchEvents(ctx, 'state', signal, s => set.has(s.state))) { }
-    log('debug', `Found state, one of ${states.join(', ')}`);
+    log('debug', `Found state, one of ${states.join(', ')} `);
   }
 
   /**
@@ -112,6 +156,7 @@ export class CompilerClientUtil {
    * Wait for build
    */
   static async waitForBuild(ctx: ManifestContext, signal?: AbortSignal): Promise<void> {
+    this.trackProgress(ctx, signal);
     await this.waitForState(ctx, ['compile-end', 'watch-start'], signal);
     log('info', 'Successfully built');
   }
