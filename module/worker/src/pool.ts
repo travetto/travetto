@@ -10,26 +10,26 @@ import { ManualAsyncIterator } from '../src/input/async-iterator';
 /**
  * Worker definition
  */
-export interface Worker<X> {
+export interface Worker<X, T = unknown> {
   active: boolean;
   id: unknown;
   init?(): Promise<unknown>;
-  execute(input: X): Promise<unknown>;
+  execute(input: X): Promise<T>;
   destroy(): Promise<void>;
   release?(): unknown;
 }
 
-type WorkPoolProcessConfig<X> = {
+type WorkPoolProcessConfig<X, T> = {
   shutdownOnComplete?: boolean;
-  onComplete?: (ev: WorkCompletionEvent<X>) => (void | Promise<void>);
+  onComplete?: <T>(ev: WorkCompletionEvent<X, T>) => (void | Promise<void>);
 };
 
-type WorkCompletionEvent<X> = { idx: number, total?: number, value: X };
+type WorkCompletionEvent<X, T> = { idx: number, total?: number, input: X, result?: T };
 
 /**
  * Work pool support
  */
-export class WorkPool<X> {
+export class WorkPool<X, T = unknown> {
 
   static MAX_SIZE = os.cpus().length - 1;
   static DEFAULT_SIZE = Math.min(WorkPool.MAX_SIZE, 4);
@@ -37,7 +37,7 @@ export class WorkPool<X> {
   /**
    * Generic-pool pool
    */
-  #pool: gp.Pool<Worker<X>>;
+  #pool: gp.Pool<Worker<X, T>>;
   /**
    * Number of acquisitions in process
    */
@@ -67,7 +67,7 @@ export class WorkPool<X> {
    * @param getWorker Produces a new worker for the pool
    * @param opts Pool options
    */
-  constructor(getWorker: () => Promise<Worker<X>> | Worker<X>, opts?: gp.Options) {
+  constructor(getWorker: () => Promise<Worker<X, T>> | Worker<X, T>, opts?: gp.Options) {
     const args = {
       max: WorkPool.DEFAULT_SIZE,
       min: 1,
@@ -79,7 +79,7 @@ export class WorkPool<X> {
     this.#pool = gp.createPool({
       create: () => this.#createAndTrack(getWorker, args),
       destroy: x => this.destroy(x),
-      validate: async (x: Worker<X>) => x.active
+      validate: async (x: Worker<X, T>) => x.active
     }, args);
 
     this.#shutdownCleanup = ShutdownManager.onGracefulShutdown(async () => {
@@ -93,7 +93,7 @@ export class WorkPool<X> {
   /**
    * Creates and tracks new worker
    */
-  async #createAndTrack(getWorker: () => Promise<Worker<X>> | Worker<X>, opts: gp.Options): Promise<Worker<X>> {
+  async #createAndTrack(getWorker: () => Promise<Worker<X, T>> | Worker<X, T>, opts: gp.Options): Promise<Worker<X, T>> {
     try {
       this.#pendingAcquires += 1;
       const res = await getWorker();
@@ -119,7 +119,7 @@ export class WorkPool<X> {
   /**
    * Destroy the worker
    */
-  async destroy(worker: Worker<X>): Promise<void> {
+  async destroy(worker: Worker<X, T>): Promise<void> {
     if (this.#trace) {
       console.debug('Destroying', { pid: process.pid, worker: worker.id });
     }
@@ -129,7 +129,7 @@ export class WorkPool<X> {
   /**
    * Free worker on completion
    */
-  async release(worker: Worker<X>): Promise<void> {
+  async release(worker: Worker<X, T>): Promise<void> {
     if (this.#trace) {
       console.debug('Releasing', { pid: process.pid, worker: worker.id });
     }
@@ -148,13 +148,13 @@ export class WorkPool<X> {
   /**
    * Process a given input source
    */
-  async process(src: WorkSet<X>, cfg: WorkPoolProcessConfig<X> = {}): Promise<void> {
+  async process(src: WorkSet<X>, cfg: WorkPoolProcessConfig<X, T> = {}): Promise<void> {
     const pending = new Set<Promise<unknown>>();
     let count = 0;
 
     if (src.size && cfg.onComplete) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      cfg.onComplete({ value: undefined as X, idx: 0, total: src.size });
+      cfg.onComplete({ input: undefined as X, idx: 0, total: src.size });
     }
 
     while (await src.hasNext()) {
@@ -167,7 +167,10 @@ export class WorkPool<X> {
       const completion = worker.execute(nextInput)
         .catch(err => this.#errors.push(err)) // Catch error
         .finally(() => this.release(worker))
-        .finally(() => cfg.onComplete?.({ value: nextInput, idx: count += 1, total: src.size }));
+        .then(
+          v => cfg.onComplete?.({ input: nextInput, idx: count += 1, total: src.size, result: v as T }),
+          () => cfg.onComplete?.({ input: nextInput, idx: count += 1, total: src.size })
+        );
 
       completion.finally(() => pending.delete(completion));
 
@@ -190,9 +193,9 @@ export class WorkPool<X> {
   /**
    * Process a given input source as an async iterable, emitting on completion
    */
-  iterateProcess(src: WorkSet<X>, shutdownOnComplete?: boolean): AsyncIterable<WorkCompletionEvent<X>> {
-    const itr = new ManualAsyncIterator<WorkCompletionEvent<X>>();
-    const res = this.process(src, { onComplete: ev => itr.add(ev), shutdownOnComplete });
+  iterateProcess(src: WorkSet<X>, shutdownOnComplete?: boolean): AsyncIterable<WorkCompletionEvent<X, T>> {
+    const itr = new ManualAsyncIterator<WorkCompletionEvent<X, T>>();
+    const res = this.process(src, { onComplete: ev => itr.add(ev as unknown as WorkCompletionEvent<X, T>), shutdownOnComplete });
     res.finally(() => itr.close());
     return itr;
   }

@@ -129,7 +129,7 @@ export class RepoExecUtil {
 
     if (config.progressMessage) {
       const cfg = { position: config.progressPosition ?? 'bottom' } as const;
-      await stdoutTerm.trackProgress(work, ev => ({ ...ev, text: config.progressMessage!(ev.value) }), cfg);
+      await stdoutTerm.trackProgress(work, ev => ({ ...ev, text: config.progressMessage!(ev.input) }), cfg);
     } else {
       for await (const _ of work) {
         // Ensure its all consumed
