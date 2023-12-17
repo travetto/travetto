@@ -5,7 +5,6 @@ import { ExecUtil } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';
 
 import { WorkPool } from '../src/pool';
-import { IterableWorkSet } from '../src/input/iterable';
 import { WorkUtil } from '../src/util';
 
 @Suite()
@@ -16,17 +15,16 @@ export class PoolExecTest {
   @Test()
   async simple() {
 
-    // new IterableWorkSet(['a', 'b', 'c', 'd', 'e', 'f', 'g']),
-    const input = new IterableWorkSet(function* () {
+    const input = function* () {
       for (let i = 0; i < 5; i++) {
         yield `${i}-`;
       }
-    });
+    };
 
     const launcher = await this.fixtures.resolve('/simple.child.mjs');
 
-    const pool = new WorkPool(() =>
-      WorkUtil.spawnedWorker<{ data: string }, string>(
+    await WorkPool.run(
+      () => WorkUtil.spawnedWorker<{ data: string }, string>(
         () => ExecUtil.fork(launcher, [], { cwd: RuntimeIndex.outputRoot }),
         ch => ch.once('ready'),
         async (channel, inp: string) => {
@@ -37,10 +35,8 @@ export class PoolExecTest {
           console.log('Request Complete', { input: inp, output: data });
 
           assert(inp + inp === data);
-        })
+        }),
+      input()
     );
-
-    await pool.process(input);
-    await pool.shutdown();
   }
 }

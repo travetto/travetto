@@ -21,7 +21,7 @@ export const text = <>
       <li>3 - True color, 24bit color with R, G, B each getting 8-bits.  Can represent any color needed</li>
     </ul>
 
-    This module provides the ability to define color palettes using RGB or <c.CodeLink title='named colors' src='./src/named-colors.ts' startRe={/./} /> modeled after the standard HTML color names.  The module also provides the ability to specify palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. <br />
+    This module provides the ability to define color palettes using RGB or <c.CodeLink title='named colors' src='./src/color/named-colors.ts' startRe={/./} /> modeled after the standard HTML color names.  The module also provides the ability to specify palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. <br />
 
     These palettes then are usable at runtime, with the module determine light or dark palettes, as well as falling back to the closest color value based on what the existing terminal supports.  This means a color like 'olivegreen', will get the proper output in 24bit color support, a close approximation in enhanced color support, fall back to green in basic color support, and will be color less at level 0.
 

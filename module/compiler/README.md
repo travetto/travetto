@@ -38,11 +38,11 @@ In addition to the normal output, the compiler supports an environment variable 
 $ TRV_BUILD=debug trvc build
 
 2029-03-14T04:00:00.618Z info  [compiler-server] Starting server http://127.0.0.1:25539
-2029-03-14T04:00:00.837Z debug [compiler-client] Starting watch for events of type "log"
-2029-03-14T04:00:01.510Z debug [event-stream   ] Started event stream
-2029-03-14T04:00:02.450Z debug [precompile     ] Started
-2029-03-14T04:00:02.762Z debug [compiler-server] Receive request { action: 'event', subAction: 'log' }
-2029-03-14T04:00:02.947Z debug [precompile     ] Skipped @travetto/terminal
+2029-03-14T04:00:00.837Z debug [compiler       ] Started, streaming logs
+2029-03-14T04:00:01.510Z debug [compiler-client] Starting watch for events of type "log"
+2029-03-14T04:00:02.450Z debug [event-stream   ] Started event stream
+2029-03-14T04:00:02.762Z debug [precompile     ] Started
+2029-03-14T04:00:02.947Z debug [compiler-server] Receive request { action: 'event', subAction: 'log' }
 2029-03-14T04:00:03.093Z debug [precompile     ] Skipped @travetto/manifest
 2029-03-14T04:00:04.003Z debug [precompile     ] Skipped @travetto/transformer
 2029-03-14T04:00:04.495Z debug [precompile     ] Skipped @travetto/compiler

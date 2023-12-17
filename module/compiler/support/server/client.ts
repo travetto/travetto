@@ -33,7 +33,7 @@ export class CompilerClientUtil {
    * @returns
    */
   static progressWriter(): ((ev: CompilerProgressEvent) => Promise<void>) | undefined {
-    if (process.env.TRV_QUIET === '1') {
+    if (!LogUtil.isLevelActive('info')) {
       return;
     }
     const out = process.stdout;
@@ -42,7 +42,7 @@ export class CompilerClientUtil {
 
     return async (ev: CompilerProgressEvent): Promise<void> => {
       if (message) {
-        await new Promise<void>(r => out.clearLine(0, () => out.moveCursor(-message!.length, 0, () => r())));
+        await new Promise<void>(r => out.clearLine?.(0, () => out?.moveCursor(-message!.length, 0, () => r())) ?? r());
       }
       if (!ev.complete) {
         const pct = Math.trunc(ev.idx * 100 / ev.total);

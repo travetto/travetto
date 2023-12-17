@@ -19,7 +19,7 @@ export class LogUtil {
    */
   static initLogs(ctx: ManifestContext, defaultLevel: CompilerLogLevel): void {
     // Listen only if we aren't in quiet
-    if ((process.env.TRV_BUILD || !process.env.TRV_QUIET)) {
+    if (process.env.TRV_BUILD || !/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '')) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       this.logLevel = (process.env.TRV_BUILD as 'debug') || defaultLevel;
     }

@@ -1,6 +1,6 @@
 import { path } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
-import { WorkPool, IterableWorkSet } from '@travetto/worker';
+import { WorkPool } from '@travetto/worker';
 
 import { buildStandardTestManager } from '../worker/standard';
 import { RunnableTestConsumer } from '../consumer/types/runnable';
@@ -34,17 +34,18 @@ export class Runner {
 
     console.debug('Running', { files, patterns: this.patterns });
 
-    const manager = buildStandardTestManager;
-
-    const pool = new WorkPool(manager(consumer), {
-      idleTimeoutMillis: TimeUtil.timeToMs('10s'),
-      min: 1,
-      max: this.#state.concurrency
-    });
-
     const testCount = await RunnerUtil.getTestCount(this.#state.args);
     await consumer.onStart({ testCount });
-    await pool.process(new IterableWorkSet(files));
+    await WorkPool.run(
+      () => buildStandardTestManager(consumer),
+      files,
+      {
+        idleTimeoutMillis: TimeUtil.timeToMs('10s'),
+        min: 1,
+        max: this.#state.concurrency,
+        total: testCount
+      });
+
     return consumer.summarizeAsBoolean();
   }
 

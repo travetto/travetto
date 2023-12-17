@@ -2,7 +2,7 @@ import timers from 'node:timers/promises';
 import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
-import { ManualAsyncIterator } from '@travetto/worker';
+import { WorkQueue } from '@travetto/worker';
 
 import { IterableUtil } from '../src/iterable';
 
@@ -11,7 +11,7 @@ export class IterableUtilSuite {
 
   @Test()
   async verifyMap() {
-    const lines = new ManualAsyncIterator(['aaa', 'bbb']);
+    const lines = new WorkQueue(['aaa', 'bbb']);
 
     const indicator = IterableUtil.map(
       lines,

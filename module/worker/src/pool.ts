@@ -2,216 +2,168 @@ import os from 'node:os';
 import gp from 'generic-pool';
 import timers from 'node:timers/promises';
 
-import { Env, ShutdownManager, Util } from '@travetto/base';
+import { Env, Util } from '@travetto/base';
 
-import { WorkSet } from './input/types';
-import { ManualAsyncIterator } from '../src/input/async-iterator';
+import { WorkQueue } from './queue';
 
 /**
  * Worker definition
  */
-export interface Worker<X, T = unknown> {
+export interface Worker<I, O = unknown> {
   active?: boolean;
   id?: unknown;
   init?(): Promise<unknown>;
-  execute(input: X): Promise<T>;
+  execute(input: I): Promise<O>;
   destroy?(): Promise<void>;
   release?(): unknown;
 }
 
-type WorkPoolProcessConfig<X, T> = {
-  shutdownOnComplete?: boolean;
-  onComplete?(ev: WorkCompletionEvent<X, T>): (void | Promise<void>);
+type WorkCompletion<I, O> = { idx: number, input: I, result: O, total?: number };
+type WorkError<I> = { idx: number, input: I, error: Error, total?: number };
+type WorkerInput<I, O> = (() => Worker<I, O>) | ((input: I) => Promise<O>);
+type ItrSource<I> = Iterable<I> | AsyncIterable<I>;
+
+const isWorkerFactory = <I, O>(o: WorkerInput<I, O>): o is (() => Worker<I, O>) => o.length === 0;
+
+type WorkPoolStreamConfig<I, O> = gp.Options & {
+  onError?(ev: WorkError<I>): (unknown | Promise<unknown>);
+  shutdown?: AbortSignal;
+  total?: number;
 };
 
-export type WorkCompletionEvent<X, T> = { idx: number, total?: number, input: X, result?: T };
+type WorkPoolConfig<I, O> = WorkPoolStreamConfig<I, O> & {
+  onComplete?: (ev: WorkCompletion<I, O>) => void;
+};
+
 
 /**
  * Work pool support
  */
-export class WorkPool<X, T = unknown> {
+export class WorkPool {
 
   static MAX_SIZE = os.cpus().length - 1;
   static DEFAULT_SIZE = Math.min(WorkPool.MAX_SIZE, 4);
 
-  /**
-   * Generic-pool pool
-   */
-  #pool: gp.Pool<Worker<X, T>>;
-  /**
-   * Number of acquisitions in process
-   */
-  #pendingAcquires = 0;
-  /**
-   * List of errors during processing
-   */
-  #errors: Error[] = [];
+  /** Build worker pool */
+  static #buildPool<I, O>(worker: WorkerInput<I, O>, opts?: WorkPoolConfig<I, O>): gp.Pool<Worker<I, O>> {
+    let pendingAcquires = 0;
 
-  /**
-   * Error count during creation
-   */
-  #createErrors = 0;
+    const trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
 
-  /**
-   * Are we tracing
-   */
-  #trace: boolean;
+    // Create the pool
+    const pool = gp.createPool({
+      async create() {
+        try {
+          pendingAcquires += 1;
+          const res = isWorkerFactory(worker) ? await worker() : { execute: worker };
 
-  /**
-   * Cleanup for shutdown
-   */
-  #shutdownCleanup?: () => void;
+          res.id ??= Util.shortHash(`${Math.random()}`);
 
-  /**
-   *
-   * @param getWorker Produces a new worker for the pool
-   * @param opts Pool options
-   */
-  constructor(getWorker: () => Promise<Worker<X, T>> | Worker<X, T>, opts?: gp.Options) {
-    const args = {
+          if (res.init) {
+            await res.init();
+          }
+
+          return res;
+        } finally {
+          pendingAcquires -= 1;
+        }
+      },
+      async destroy(x) {
+        if (trace) {
+          console.debug('Destroying', { pid: process.pid, worker: x.id });
+        }
+        return x.destroy?.();
+      },
+      validate: async (x: Worker<I, O>) => x.active ?? true
+    }, {
       max: WorkPool.DEFAULT_SIZE,
       min: 1,
       evictionRunIntervalMillis: 5000,
       ...(opts ?? {}),
-    };
+    });
 
-    // Create the pool
-    this.#pool = gp.createPool({
-      create: () => this.#createAndTrack(getWorker, args),
-      destroy: x => this.destroy(x),
-      validate: async (x: Worker<X, T>) => x.active ?? true
-    }, args);
 
-    this.#shutdownCleanup = ShutdownManager.onGracefulShutdown(async () => {
-      this.#shutdownCleanup = undefined;
-      this.shutdown();
-    }, `worker.pool.${this.constructor.name}`);
-
-    this.#trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
-  }
-
-  /**
-   * Creates and tracks new worker
-   */
-  async #createAndTrack(getWorker: () => Promise<Worker<X, T>> | Worker<X, T>, opts: gp.Options): Promise<Worker<X, T>> {
-    try {
-      this.#pendingAcquires += 1;
-      const res = await getWorker();
-
-      res.id ??= Util.shortHash(`${Math.random()}`);
-
-      if (res.init) {
-        await res.init();
+    // Listen for shutdown
+    opts?.shutdown?.addEventListener('abort', async () => {
+      while (pendingAcquires) {
+        await timers.setTimeout(10);
       }
+      await pool.drain();
+      await pool.clear();
+    });
 
-      this.#createErrors = 0; // Reset errors on success
-
-      return res;
-    } catch (err) {
-      if (this.#createErrors++ > opts.max!) { // If error count is bigger than pool size, we broke
-        console.error('Failed in creating pool', { error: err });
-        await ShutdownManager.gracefulShutdown(1);
-      }
-      throw err;
-    } finally {
-      this.#pendingAcquires -= 1;
-    }
+    return pool;
   }
 
   /**
-   * Destroy the worker
+   * Process a given input source and worker, and fire on completion
    */
-  async destroy(worker: Worker<X, T>): Promise<void> {
-    if (this.#trace) {
-      console.debug('Destroying', { pid: process.pid, worker: worker.id });
-    }
-    return worker.destroy?.();
-  }
+  static async run<I, O>(workerFactory: WorkerInput<I, O>, src: ItrSource<I>, opts: WorkPoolConfig<I, O> = {}): Promise<void> {
 
-  /**
-   * Free worker on completion
-   */
-  async release(worker: Worker<X, T>): Promise<void> {
-    if (this.#trace) {
-      console.debug('Releasing', { pid: process.pid, worker: worker.id });
-    }
-    try {
-      if (worker.active ?? true) {
-        try {
-          await worker.release?.();
-        } catch { }
-        await this.#pool.release(worker);
-      } else {
-        await this.#pool.destroy(worker);
-      }
-    } catch { }
-  }
-
-  /**
-   * Process a given input source
-   */
-  async process(src: WorkSet<X>, cfg: WorkPoolProcessConfig<X, T> = {}): Promise<void> {
+    const trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
     const pending = new Set<Promise<unknown>>();
-    let count = 0;
+    const errors: Error[] = [];
+    let idx = 0;
 
-    if (src.size && cfg.onComplete) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      cfg.onComplete({ input: undefined as X, idx: 0, total: src.size });
-    }
+    const pool = this.#buildPool(workerFactory, opts);
 
-    while (await src.hasNext()) {
-      const worker = (await this.#pool.acquire())!;
-      if (this.#trace) {
+    for await (const nextInput of src) {
+      const worker = await pool.acquire()!;
+
+      if (trace) {
         console.debug('Acquired', { pid: process.pid, worker: worker.id });
       }
-      const nextInput = await src.next();
 
       const completion = worker.execute(nextInput)
-        .catch(err => this.#errors.push(err)) // Catch error
-        .finally(() => this.release(worker))
-        .then(
-          v => cfg.onComplete?.({ input: nextInput, idx: count += 1, total: src.size, result: v as T }),
-          () => cfg.onComplete?.({ input: nextInput, idx: count += 1, total: src.size })
-        );
+        .then(v => opts.onComplete?.({ input: nextInput, idx: idx += 1, result: v, total: opts?.total }))
+        .catch(err => {
+          errors.push(err);
+          opts?.onError?.({ input: nextInput, idx: idx += 1, error: err, total: opts?.total });
+        }) // Catch error
+        .finally(async () => {
+          if (trace) {
+            console.debug('Releasing', { pid: process.pid, worker: worker.id });
+          }
+          try {
+            if (worker.active ?? true) {
+              try {
+                await worker.release?.();
+              } catch { }
+              await pool.release(worker);
+            } else {
+              await pool.destroy(worker);
+            }
+          } catch { }
+        });
 
       completion.finally(() => pending.delete(completion));
-
       pending.add(completion);
     }
 
-    try {
-      await Promise.all(Array.from(pending));
+    await Promise.all(Array.from(pending));
 
-      if (this.#errors.length) {
-        throw this.#errors[0];
-      }
-    } finally {
-      if (cfg.shutdownOnComplete !== false) {
-        await this.shutdown();
-      }
+    if (errors.length) {
+      throw errors[0];
     }
   }
 
   /**
-   * Process a given input source as an async iterable, emitting on completion
+   * Process a given input source as an async iterable
    */
-  iterateProcess(src: WorkSet<X>, shutdownOnComplete?: boolean): AsyncIterable<WorkCompletionEvent<X, T>> {
-    const itr = new ManualAsyncIterator<WorkCompletionEvent<X, T>>();
-    const res = this.process(src, { onComplete: ev => itr.add(ev as unknown as WorkCompletionEvent<X, T>), shutdownOnComplete });
+  static runStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, opts?: WorkPoolStreamConfig<I, O>): AsyncIterable<O> {
+    const itr = new WorkQueue<O>();
+    const res = this.run(worker, input, { ...opts, onComplete: ev => itr.add(ev.result) });
     res.finally(() => itr.close());
     return itr;
   }
 
   /**
-   * Shutdown pool
+   * Process a given input source as an async iterable, with progress information
    */
-  async shutdown(): Promise<void> {
-    this.#shutdownCleanup?.();
-
-    while (this.#pendingAcquires) {
-      await timers.setTimeout(10);
-    }
-    await this.#pool.drain();
-    await this.#pool.clear();
+  static runProgressStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, opts?: WorkPoolStreamConfig<I, O>): AsyncIterable<WorkCompletion<I, O>> {
+    const itr = new WorkQueue<WorkCompletion<I, O>>();
+    const res = this.run(worker, input, { ...opts, onComplete: ev => itr.add(ev) });
+    res.finally(() => itr.close());
+    return itr;
   }
 }
