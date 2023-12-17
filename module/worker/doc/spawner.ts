@@ -1,9 +1,9 @@
 import { ExecUtil } from '@travetto/base';
-import { WorkPool, WorkUtil, IterableWorkSet } from '@travetto/worker';
+import { WorkPool, WorkUtil } from '@travetto/worker';
 
 export async function main(): Promise<void> {
-  const pool = new WorkPool(() =>
-    WorkUtil.spawnedWorker<{ data: number }, number>(
+  await WorkPool.run(
+    () => WorkUtil.spawnedWorker<{ data: number }, number>(
       () => ExecUtil.spawn('trv', ['main', '@travetto/worker/doc/spawned.ts']),
       ch => ch.once('ready'), // Wait for child to indicate it is ready
       async (channel, inp) => {
@@ -18,7 +18,5 @@ export async function main(): Promise<void> {
           throw new Error(`Did not get the double: inp=${inp}, data=${data}`);
         }
       }
-    )
-  );
-  await pool.process(new IterableWorkSet([1, 2, 3, 4, 5]));
+    ), [1, 2, 3, 4, 5]);
 }

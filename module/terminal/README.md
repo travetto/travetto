@@ -23,16 +23,16 @@ Oddly enough, colorizing output in a terminal is a fairly complex process.  The 
    *  1 - Basic color support, 16 colors
    *  2 - Enhanced color support, 225 colors, providing a fair representation of most colors
    *  3 - True color, 24bit color with R, G, B each getting 8-bits.  Can represent any color needed
-This module provides the ability to define color palettes using RGB or [named colors](https://github.com/travetto/travetto/tree/main/module/terminal/src/named-colors.ts#L1) modeled after the standard HTML color names.  The module also provides the ability to specify palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. 
+This module provides the ability to define color palettes using RGB or [named colors](https://github.com/travetto/travetto/tree/main/module/terminal/src/color/named-colors.ts#L1) modeled after the standard HTML color names.  The module also provides the ability to specify palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. 
 
 These palettes then are usable at runtime, with the module determine light or dark palettes, as well as falling back to the closest color value based on what the existing terminal supports.  This means a color like 'olivegreen', will get the proper output in 24bit color support, a close approximation in enhanced color support, fall back to green in basic color support, and will be color less at level 0.
 
 **Code: CLI Color Palette**
 ```typescript
 import { Util } from '@travetto/base';
-import { GlobalTerminal } from '@travetto/terminal';
+import { ColorOutputUtil } from '@travetto/terminal';
 
-const tplFn = GlobalTerminal.templateFunction({
+const tplFn = ColorOutputUtil.templateFunction({
   input: 'oliveDrab',
   output: 'pink',
   path: 'teal',

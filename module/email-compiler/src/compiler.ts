@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import { CompilerClient, FileLoader, TypedObject } from '@travetto/base';
 import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
 import { RuntimeIndex, path } from '@travetto/manifest';
-import { ManualAsyncIterator as Queue } from '@travetto/worker';
+import { WorkQueue } from '@travetto/worker';
 
 import { EmailCompileUtil } from './util';
 
@@ -123,7 +123,7 @@ export class EmailCompiler {
     );
 
     const ctrl = new AbortController();
-    const stream = new Queue<WatchEvent>([], ctrl.signal);
+    const stream = new WorkQueue<WatchEvent>([], ctrl.signal);
 
     // watch resources
     this.#watchFolders(all, ev => stream.add(ev), ctrl.signal);

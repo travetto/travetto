@@ -21,11 +21,11 @@ function buildEvent(ev: string): RunEvent {
 /**
  *  Produce a handler for the child worker
  */
-export function buildStandardTestManager(consumer: TestConsumer): () => Worker<string> {
+export function buildStandardTestManager(consumer: TestConsumer): Worker<string> {
   /**
    * Spawn a child
    */
-  return () => ({
+  return {
     id: i += 1,
     active: true,
     async destroy(): Promise<void> { },
@@ -46,7 +46,7 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
             cwd,
             env: {
               ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(module)!.outputPath),
-              ...Env.TRV_QUIET.export(false)
+              ...Env.TRV_QUIET.export(true)
             },
             stdio: ['ignore', 'ignore', 2, 'ipc']
           }
@@ -83,5 +83,5 @@ export function buildStandardTestManager(consumer: TestConsumer): () => Worker<s
         throw ErrorUtil.deserializeError(error);
       }
     },
-  });
+  };
 }

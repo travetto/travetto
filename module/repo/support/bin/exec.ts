@@ -2,7 +2,7 @@ import { ExecutionResult, ExecutionOptions, ExecutionState, Env, TypedObject } f
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
 import { ColorDefineUtil, ColorOutputUtil, NAMED_COLORS, TermLinePosition, Terminal } from '@travetto/terminal';
-import { WorkPool, Worker, IterableWorkSet } from '@travetto/worker';
+import { WorkPool, Worker } from '@travetto/worker';
 
 type ModuleRunConfig<T = ExecutionResult> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
@@ -89,42 +89,34 @@ export class RepoExecUtil {
     const stdoutTerm = new Terminal({ output: process.stdout });
     const stderrTerm = new Terminal({ output: process.stderr });
 
-    let id = 1;
-    const pool = new WorkPool(async () => {
-      const worker: Worker<IndexedModule> & { mod?: IndexedModule } = {
-        id: id += 1,
-        mod: undefined,
-        active: false,
-        async destroy() {
-          this.active = false;
-          processes.get(this.mod!)?.process.kill('SIGKILL');
-        },
-        async execute(mod: IndexedModule) {
-          try {
-            this.mod = mod;
-            this.active = true;
+    const work = WorkPool.runProgressStream((): Worker<IndexedModule, unknown> & { mod?: IndexedModule } => ({
+      active: false,
+      async destroy(): Promise<void> {
+        this.active = false;
+        processes.get(this.mod!)?.process.kill('SIGKILL');
+      },
+      async execute(mod: IndexedModule): Promise<void> {
+        try {
+          this.mod = mod;
+          this.active = true;
 
-            if (await config.filter?.(mod) === false) {
-              this.active = false;
-            } else {
-              const opts = RepoExecUtil.#buildExecutionOptions(mod, config, prefixes, stdoutTerm, stderrTerm);
-
-              const result = await operation(mod, opts).result;
-
-              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-              const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;
-              results.set(mod, output);
-            }
-          } finally {
+          if (await config.filter?.(mod) === false) {
             this.active = false;
-            delete this.mod;
-          }
-        },
-      };
-      return worker;
-    }, { max: workerCount, min: workerCount });
+          } else {
+            const opts = RepoExecUtil.#buildExecutionOptions(mod, config, prefixes, stdoutTerm, stderrTerm);
 
-    const work = pool.iterateProcess(new IterableWorkSet(mods));
+            const result = await operation(mod, opts).result;
+
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+            const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;
+            results.set(mod, output);
+          }
+        } finally {
+          this.active = false;
+          delete this.mod;
+        }
+      }
+    }), mods, { max: workerCount, min: workerCount, total: mods.length });
 
     if (config.progressMessage) {
       const cfg = { position: config.progressPosition ?? 'bottom' } as const;

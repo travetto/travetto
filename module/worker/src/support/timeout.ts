@@ -1,3 +1,4 @@
+import { clearTimeout } from 'node:timers';
 import { TimeSpan, TimeUtil, Util } from '@travetto/base';
 import { ExecutionError } from './error';
 
@@ -6,7 +7,7 @@ import { ExecutionError } from './error';
  */
 export class Timeout extends ExecutionError {
 
-  #id: NodeJS.Timer | undefined;
+  #id: ReturnType<typeof setTimeout> | undefined;
   #promise = Util.resolvablePromise();
   #duration: number;
 

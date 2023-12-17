@@ -1,9 +1,9 @@
 import { Util } from '@travetto/base';
 
 /**
- * Manual async iterator.  Items are added manually, and consumed asynchronously
+ * WorkQueue, a manual async iterator.  Items are added manually, and consumed asynchronously
  */
-export class ManualAsyncIterator<X> implements AsyncIterator<X>, AsyncIterable<X> {
+export class WorkQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
 
   #queue: X[] = [];
   #done = false;
@@ -39,14 +39,22 @@ export class ManualAsyncIterator<X> implements AsyncIterator<X>, AsyncIterable<X
    * Queue next event to fire
    * @param {boolean} immediate Determines if item(s) should be append or prepended to the queue
    */
-  add(item: X | X[], immediate = false): void {
-    item = Array.isArray(item) ? item : [item];
+  add(item: X, immediate = false): void {
+    return this.addAll([item], immediate);
+  }
+
+  /**
+   * Queue a list of data to stream
+   * @param {boolean} immediate Determines if item(s) should be append or prepended to the queue
+   */
+  addAll(items: Iterable<X>, immediate?: boolean): void {
+    const copy = [...items];
     if (!immediate) {
-      this.#queue.push(...item);
+      this.#queue.push(...copy);
     } else {
-      this.#queue.unshift(...item);
+      this.#queue.unshift(...copy);
     }
-    this.#size += item.length;
+    this.#size += copy.length;
     this.#ready.resolve();
   }
 

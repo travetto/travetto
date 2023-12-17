@@ -1,5 +1,5 @@
 import { RootRegistry, MethodSource } from '@travetto/registry';
-import { WorkPool, IterableWorkSet, ManualAsyncIterator } from '@travetto/worker';
+import { WorkPool, WorkQueue } from '@travetto/worker';
 import { RuntimeIndex } from '@travetto/manifest';
 import { ObjectUtil } from '@travetto/base';
 
@@ -27,18 +27,12 @@ export class TestWatcher {
   static async watch(format: string, runAllOnStart = true): Promise<void> {
     console.debug('Listening for changes');
 
-    const itr = new ManualAsyncIterator<string>();
-    const src = new IterableWorkSet(itr);
+    const itr = new WorkQueue<string>();
 
     await SuiteRegistry.init();
     SuiteRegistry.listen(RootRegistry);
 
     const consumer = new CumulativeSummaryConsumer(await TestConsumerRegistry.getInstance(format));
-    const pool = new WorkPool(buildStandardTestManager(consumer), {
-      idleTimeoutMillis: 120000,
-      min: 2,
-      max: WorkPool.DEFAULT_SIZE
-    });
 
     new MethodSource(RootRegistry).on(e => {
       const [cls, method] = (e.prev ?? e.curr ?? []);
@@ -85,6 +79,14 @@ export class TestWatcher {
       }
     }
 
-    await pool.process(src);
+    await WorkPool.run(
+      () => buildStandardTestManager(consumer),
+      itr,
+      {
+        idleTimeoutMillis: 120000,
+        min: 2,
+        max: WorkPool.DEFAULT_SIZE
+      }
+    );
   }
 }

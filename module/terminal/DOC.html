@@ -28,7 +28,7 @@ Oddly enough, colorizing output in a terminal is a fairly complex process.  The 
 <li>2 - Enhanced color support, 225 colors, providing a fair representation of most colors</li>
 <li>3 - True color, 24bit color with R, G, B each getting 8-bits.  Can represent any color needed</li>
 </ul>
-This module provides the ability to define color palettes using RGB or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/terminal/src/named-colors.ts#L1">named colors</a> modeled after the standard HTML color names.  The module also provides the ability to specify palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. <br><br>
+This module provides the ability to define color palettes using RGB or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/terminal/src/color/named-colors.ts#L1">named colors</a> modeled after the standard HTML color names.  The module also provides the ability to specify palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. <br><br>
 These palettes then are usable at runtime, with the module determine light or dark palettes, as well as falling back to the closest color value based on what the existing terminal supports.  This means a color like 'olivegreen', will get the proper output in 24bit color support, a close approximation in enhanced color support, fall back to green in basic color support, and will be color less at level 0.
 
   <figure class="code">
@@ -37,9 +37,9 @@ These palettes then are usable at runtime, with the module determine light or da
 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> GlobalTerminal <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/terminal'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ColorOutputUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/terminal'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">const</span> tplFn <span class="token operator">=</span> GlobalTerminal<span class="token punctuation">.</span><span class="token function">templateFunction</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">const</span> tplFn <span class="token operator">=</span> ColorOutputUtil<span class="token punctuation">.</span><span class="token function">templateFunction</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
   input<span class="token operator">:</span> <span class="token string">'oliveDrab'</span><span class="token punctuation">,</span>
   output<span class="token operator">:</span> <span class="token string">'pink'</span><span class="token punctuation">,</span>
   path<span class="token operator">:</span> <span class="token string">'teal'</span><span class="token punctuation">,</span>

@@ -1,5 +1,5 @@
 import { ColorOutputUtil, TermStyleInput, Terminal } from '@travetto/terminal';
-import { ManualAsyncIterator } from '@travetto/worker';
+import { WorkQueue } from '@travetto/worker';
 
 import { TestEvent } from '../../model/event';
 import { TestResult } from '../../model/test';
@@ -39,7 +39,7 @@ export class TapStreamedEmitter implements TestConsumer {
   }
 
   #terminal: Terminal;
-  #results = new ManualAsyncIterator<TestResult>();
+  #results = new WorkQueue<TestResult>();
   #progress: Promise<unknown> | undefined;
   #consumer: TapEmitter;
 

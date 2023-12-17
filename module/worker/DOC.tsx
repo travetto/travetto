@@ -1,21 +1,14 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import {
-  WorkPool, IterableWorkSet, ManualAsyncIterator,
-  ChildCommChannel, ParentCommChannel, WorkUtil
-} from '@travetto/worker';
-
-const WorkSet = d.codeLink('WorkSet', 'src/input/types.ts', /interface WorkSet/);
+import { WorkPool, WorkQueue, ChildCommChannel, ParentCommChannel, WorkUtil } from '@travetto/worker';
 
 export const text = <>
   <c.StdHeader />
   This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.
 
   <c.Section title='Execution Pools'>
-    With respect to managing multiple executions, {WorkPool} is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, there are various {WorkSet} implementation that allow for a wide range of use cases. <br />
-
-    The only provided {WorkSet} is the {IterableWorkSet} which supports all {d.input('Iterable')} and {d.input('Iterator')} sources.  Additionally, the module provides {ManualAsyncIterator} which allows for manual control of iteration, which is useful for event driven work loads. <br />
+    With respect to managing multiple executions, {WorkPool} is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, {WorkQueue} is provided to support a wide range of use cases. {WorkQueue} allows for manual control of iteration, which is useful for event driven work loads. <br />
 
     Below is a pool that will convert images on demand, while queuing as needed.
 
