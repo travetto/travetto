@@ -122,7 +122,7 @@ export class PackOperation {
    * Define .env.js file to control manifest location
    */
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const file = '.env.js';
+    const file = 'config.env';
     const env = {
       NODE_OPTIONS: [
         '--disable-proto=delete',  // Security enforcement
@@ -139,12 +139,12 @@ export class PackOperation {
     if (cfg.ejectFile) {
       yield* ActiveShellCommand.createFile(
         path.resolve(cfg.workspace, file),
-        PackUtil.buildEnvJS(env)
+        PackUtil.buildEnvConfig(env)
       );
     } else {
       await writeRawFile(
         path.resolve(cfg.workspace, file),
-        PackUtil.buildEnvJS(env).join('\n')
+        PackUtil.buildEnvConfig(env).join('\n')
       );
     }
   }
@@ -166,7 +166,7 @@ export class PackOperation {
         text: [
           ShellCommands[type].scriptOpen(),
           ShellCommands[type].chdirScript(),
-          ShellCommands[type].callCommandWithAllArgs('node', `${cfg.mainName}.js`, ...cfg.entryArguments),
+          ShellCommands[type].callCommandWithAllArgs('node', '--env-file', 'config.env', `${cfg.mainName}.js`, ...cfg.entryArguments),
         ].map(x => x.join(' '))
       }));
 

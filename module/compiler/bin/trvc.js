@@ -1,4 +1,4 @@
-#!/usr/bin/env -S NODE_OPTIONS='--enable-source-maps --disable-proto=delete' node
+#!/usr/bin/env -S NODE_OPTIONS='--enable-source-maps' '--disable-proto=delete' node
 
 // @ts-check
 import { getEntry } from './common.js';
