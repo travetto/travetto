@@ -8,7 +8,6 @@ import { EnvProp } from '@travetto/base';
 
 const makeIntro = (doImport: (name: string) => string, ...extra: string[]): string => [
   `try { globalThis.crypto = ${doImport('crypto')}; } catch {}`,
-  `try { ${doImport('./.env.js')} } catch {}`,
   ...extra
 ].map(x => x.trim()).join('\n');
 

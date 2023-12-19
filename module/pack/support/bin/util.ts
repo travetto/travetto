@@ -9,11 +9,8 @@ export class PackUtil {
   /**
    * Generate env.js
    */
-  static buildEnvJS(env: Record<string, string | number | boolean | undefined>): string[] {
-    const entries = Object.entries(env)
-      .filter(([k, v]) => (v !== undefined))
-      .map(([k, v]) => [k, `${v}`]);
-    return entries.map(([k, v]) => `process.env.${k} = '${v}';`);
+  static buildEnvConfig(env: Record<string, string | number | boolean | undefined>): string[] {
+    return Object.entries(env).filter(([k, v]) => (v !== undefined)).map(([k, v]) => `${k}=${v}`);
   }
 
   /**
