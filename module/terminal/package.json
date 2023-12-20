@@ -23,6 +23,10 @@
     "url": "https://github.com/travetto/travetto.git",
     "directory": "module/terminal"
   },
+  "dependencies": {
+    "@travetto/base": "^3.4.2",
+    "chalk": "^4.1.2"
+  },
   "travetto": {
     "displayName": "Terminal"
   },

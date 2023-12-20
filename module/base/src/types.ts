@@ -5,7 +5,7 @@ export type ClassInstance<T = any> = T & {
   constructor: ConcreteClass<T> & { Ⲑid: string };
 };
 
-export type Primitive = number | boolean | string | Date | Error;
+export type Primitive = number | boolean | string | Date;
 
 export type LogLevel = 'info' | 'warn' | 'debug' | 'error';
 

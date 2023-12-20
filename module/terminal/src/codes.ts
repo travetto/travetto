@@ -2,12 +2,7 @@ const ESC = '\x1b[';
 const OSC = '\x1b]';
 const ST = '\x1b\\';
 
-// eslint-disable-next-line no-control-regex
-export const ANSI_CODE_REGEX = /(\x1b|\x1B)[\[\]][?]?[0-9;]+[A-Za-z]/g;
-
-export const DEVICE_STATUS_FIELDS = {
-  cursorPosition: 6,
-};
+export const DEVICE_STATUS_FIELDS = { cursorPosition: 6 };
 
 export type DeviceStatusField = keyof (typeof DEVICE_STATUS_FIELDS);
 
@@ -29,5 +24,3 @@ export const ANSICodes = {
   POSITION_SAVE: (): string => `${ESC}s`,
   DEVICE_STATUS_REPORT: (code: DeviceStatusField): string => `${ESC}${DEVICE_STATUS_FIELDS[code]}n`,
 };
-
-export const stripAnsiCodes = (text: string): string => text.replace(ANSI_CODE_REGEX, '');

@@ -1,5 +1,5 @@
 import { path } from '@travetto/manifest';
-import { stripAnsiCodes } from '@travetto/terminal';
+import { ColorUtil } from '@travetto/terminal';
 
 import { ShellCommandImpl } from './types';
 
@@ -30,8 +30,8 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     mkdir: (dest) => ['md', dest],
     export: (key, value) => ['set', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
-    comment: (message) => ['\nREM', stripAnsiCodes(message), '\n'],
-    echo: (message) => ['echo', `"${escape(stripAnsiCodes(message))}"\n`],
+    comment: (message) => ['\nREM', ColorUtil.removeColor(message), '\n'],
+    echo: (message) => ['echo', `"${escape(ColorUtil.removeColor(message))}"\n`],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile]
   },
   posix: {
@@ -50,8 +50,8 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     mkdir: (dest) => ['mkdir', '-p', dest],
     export: (key, value) => ['export', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
-    comment: (message) => ['\n#', stripAnsiCodes(message), '\n'],
-    echo: (message) => ['echo', `"${escape(stripAnsiCodes(message))}"\n`],
+    comment: (message) => ['\n#', ColorUtil.removeColor(message), '\n'],
+    echo: (message) => ['echo', `"${escape(ColorUtil.removeColor(message))}"\n`],
     zip: (outputFile) => ['zip', '-r', outputFile, '.']
   },
 };

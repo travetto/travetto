@@ -1,5 +1,5 @@
 import { Primitive } from '@travetto/base';
-import { stripAnsiCodes } from '@travetto/terminal';
+import { ColorUtil } from '@travetto/terminal';
 
 import { cliTpl } from './color';
 import { CliCommandShape } from './types';
@@ -45,7 +45,7 @@ export class HelpUtil {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       const key = flag.name as keyof CliCommandShape;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      const flagVal = command[key] as unknown as Exclude<Primitive, Error>;
+      const flagVal = command[key] as unknown as Primitive;
 
       let aliases = flag.flagNames ?? [];
       if (isBoolFlag(flag)) {
@@ -69,8 +69,8 @@ export class HelpUtil {
       descs.push(desc.join(' '));
     }
 
-    const paramWidths = params.map(x => stripAnsiCodes(x).length);
-    const descWidths = descs.map(x => stripAnsiCodes(x).length);
+    const paramWidths = params.map(x => ColorUtil.removeColor(x).length);
+    const descWidths = descs.map(x => ColorUtil.removeColor(x).length);
 
     const paramWidth = Math.max(...paramWidths);
     const descWidth = Math.max(...descWidths);
@@ -98,7 +98,7 @@ export class HelpUtil {
   static async renderAllHelp(title?: string): Promise<string> {
     const rows: string[] = [];
     const keys = [...CliCommandRegistry.getCommandMapping().keys()].sort((a, b) => a.localeCompare(b));
-    const maxWidth = keys.reduce((a, b) => Math.max(a, stripAnsiCodes(b).length), 0);
+    const maxWidth = keys.reduce((a, b) => Math.max(a, ColorUtil.removeColor(b).length), 0);
 
     for (const cmd of keys) {
       try {

@@ -2,7 +2,7 @@ import os from 'node:os';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
-import { stripAnsiCodes } from '@travetto/terminal';
+import { ColorUtil } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
 
@@ -80,7 +80,7 @@ export class DocRunUtil {
    */
   static cleanRunOutput(text: string, cfg: RunConfig): string {
     const cwd = path.toPosix((cfg.module ? RuntimeIndex.getModule(cfg.module)! : RuntimeIndex.mainModule).sourcePath);
-    text = stripAnsiCodes(text.trim())
+    text = ColorUtil.removeColor(text.trim())
       .replaceAll(cwd, '.')
       .replaceAll(os.tmpdir(), '/tmp')
       .replaceAll(RuntimeContext.workspacePath, '<workspace-root>')
@@ -120,7 +120,7 @@ export class DocRunUtil {
       if (!res.valid) {
         throw new Error(res.stderr);
       }
-      final = stripAnsiCodes(res.stdout.toString()).trim() || stripAnsiCodes(res.stderr.toString()).trim();
+      final = ColorUtil.removeColor(res.stdout.toString()).trim() || ColorUtil.removeColor(res.stderr.toString()).trim();
     } catch (err) {
       if (err instanceof Error) {
         final = err.message;
