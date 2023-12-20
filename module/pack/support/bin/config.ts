@@ -6,17 +6,9 @@ import type terser from '@rollup/plugin-terser';
 import { ManifestModule, ManifestModuleUtil, NodeModuleType, path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { EnvProp } from '@travetto/base';
 
-const makeIntro = (doImport: (name: string) => string, ...extra: string[]): string => [
-  `try { globalThis.crypto = ${doImport('crypto')}; } catch {}`,
-  ...extra
-].map(x => x.trim()).join('\n');
-
 const INTRO = {
-  commonjs: makeIntro(
-    v => `require('${v}')`,
-    __importStar.toString().replace(/function([^(]+)/, 'function __importStar'),
-  ),
-  module: makeIntro(v => `await import('${v}')`)
+  commonjs: __importStar.toString().replace(/function([^(]+)/, 'function __importStar'),
+  module: ''
 };
 
 function getFilesFromModule(m: ManifestModule): string[] {
