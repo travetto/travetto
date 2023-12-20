@@ -1,7 +1,6 @@
 import { IterableUtil } from './iterable';
 import { TerminalWriter } from './writer';
-import { Indexed, TerminalProgressRender, TerminalStreamingConfig, TerminalWaitingConfig, TermState } from './types';
-import { TermColorFn } from './color/color-types';
+import { Indexed, TerminalStreamingConfig, TerminalWaitingConfig, TermState } from './types';
 
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
@@ -97,27 +96,6 @@ export class TerminalOperation {
 
     const final = this.streamToPosition(term, indicator, config);
     return async () => { stop(); return final; };
-  }
-
-  /**
-   * Build progress par formatter for terminal progress events
-   */
-  static buildProgressBar(term: TermState, color: TermColorFn): TerminalProgressRender {
-    return ({ total, idx, text }): string => {
-      text ||= total ? '%idx/%total' : '%idx';
-
-      const totalStr = `${total ?? ''}`;
-      const idxStr = `${idx}`.padStart(totalStr.length);
-      const pct = total === undefined ? 0 : (idx / total);
-      const line = text
-        .replace(/%idx/, idxStr)
-        .replace(/%total/, totalStr)
-        .replace(/%pct/, `${Math.trunc(pct * 100)}`);
-      const full = this.truncateIfNeeded(term, ` ${line}`.padEnd(term.width));
-      const mid = Math.trunc(pct * term.width);
-      const [l, r] = [full.substring(0, mid), full.substring(mid)];
-      return `${color(l)}${r}`;
-    };
   }
 
   /**

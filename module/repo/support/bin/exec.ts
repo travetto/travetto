@@ -1,8 +1,8 @@
 import { ExecutionResult, ExecutionOptions, ExecutionState, Env, TypedObject } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
-import { ColorDefineUtil, ColorOutputUtil, NAMED_COLORS, TermLinePosition, Terminal } from '@travetto/terminal';
-import { WorkPool, Worker } from '@travetto/worker';
+import { ColorDefineUtil, ColorOutputUtil, NAMED_COLORS, TermLinePosition, Terminal, TerminalOperation } from '@travetto/terminal';
+import { WorkPool } from '@travetto/worker';
 
 type ModuleRunConfig<T = ExecutionResult> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
@@ -89,38 +89,37 @@ export class RepoExecUtil {
     const stdoutTerm = new Terminal({ output: process.stdout });
     const stderrTerm = new Terminal({ output: process.stderr });
 
-    const work = WorkPool.runProgressStream((): Worker<IndexedModule, unknown> & { mod?: IndexedModule } => ({
-      active: false,
-      async destroy(): Promise<void> {
-        this.active = false;
-        processes.get(this.mod!)?.process.kill('SIGKILL');
-      },
-      async execute(mod: IndexedModule): Promise<void> {
-        try {
-          this.mod = mod;
-          this.active = true;
+    const work = WorkPool.runStream(async (mod, idx) => {
+      try {
+        if (!(await config.filter?.(mod) === false)) {
+          const opts = RepoExecUtil.#buildExecutionOptions(mod, config, prefixes, stdoutTerm, stderrTerm);
 
-          if (await config.filter?.(mod) === false) {
-            this.active = false;
-          } else {
-            const opts = RepoExecUtil.#buildExecutionOptions(mod, config, prefixes, stdoutTerm, stderrTerm);
+          const result = await operation(mod, opts).result;
 
-            const result = await operation(mod, opts).result;
-
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;
-            results.set(mod, output);
-          }
-        } finally {
-          this.active = false;
-          delete this.mod;
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;
+          results.set(mod, output);
         }
+        return { idx, total: mods.length, text: config.progressMessage?.(mod) ?? mod.name };
+      } finally {
+        processes.get(mod!)?.process.kill('SIGKILL');
       }
-    }), mods, { max: workerCount, min: workerCount, total: mods.length });
+    }, mods, { max: workerCount, min: workerCount });
 
     if (config.progressMessage) {
       const cfg = { position: config.progressPosition ?? 'bottom' } as const;
-      await stdoutTerm.trackProgress(work, ev => ({ ...ev, text: config.progressMessage!(ev.input) }), cfg);
+      const theme = ColorOutputUtil.colorer('limeGreen');
+      await stdoutTerm.streamToPosition(work, ({ total, idx, text }) => {
+        text ||= total ? '%idx/%total' : '%idx';
+        const pct = total === undefined ? 0 : (idx / total);
+        const width = Math.trunc(Math.ceil(Math.log10(total ?? 10000)));
+        const state: Record<string, string> = { total: `${total}`, idx: `${idx}`.padStart(width), pct: `${Math.trunc(pct * 100)}` };
+        const line = text.replace(/^[%](idx|total|pct)g/, (_, k) => state[k]);
+        const full = TerminalOperation.truncateIfNeeded(stdoutTerm, ` ${line}`.padEnd(stdoutTerm.width));
+        const mid = Math.trunc(pct * stdoutTerm.width);
+        const [l, r] = [full.substring(0, mid), full.substring(mid)];
+        return `${theme(l)}${r}`;
+      }, cfg);
     } else {
       for await (const _ of work) {
         // Ensure its all consumed

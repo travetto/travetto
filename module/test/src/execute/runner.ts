@@ -43,7 +43,6 @@ export class Runner {
         idleTimeoutMillis: TimeUtil.timeToMs('10s'),
         min: 1,
         max: this.#state.concurrency,
-        total: testCount
       });
 
     return consumer.summarizeAsBoolean();

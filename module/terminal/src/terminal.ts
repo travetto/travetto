@@ -2,23 +2,17 @@ import tty from 'node:tty';
 
 import { IterableUtil, MapFn } from './iterable';
 import {
-  TerminalProgressEvent, TerminalTableConfig, TerminalTableEvent,
+  TerminalTableConfig, TerminalTableEvent,
   TerminalWaitingConfig, TermLinePosition, TermState, TermCoord
 } from './types';
 import { TerminalOperation } from './operation';
 import { TerminalQuerier } from './query';
 import { TerminalWriter } from './writer';
-import { TermStyleInput } from './color/color-types';
-import { ColorOutputUtil } from './color/color-output';
 
 type TerminalStreamPositionConfig = {
   position?: TermLinePosition;
   staticMessage?: string;
   minDelay?: number;
-};
-
-type TerminalProgressConfig = TerminalStreamPositionConfig & {
-  style?: TermStyleInput;
 };
 
 /**
@@ -81,18 +75,6 @@ export class Terminal implements TermState {
   }
 
   /**
-   * Waiting message with a callback to end
-   */
-  async withWaiting<T>(message: string, work: Promise<T> | (() => Promise<T>), config: TerminalWaitingConfig = {}): Promise<T> {
-    const res = (typeof work === 'function' ? work() : work);
-    if (!this.interactive) {
-      await this.writeLines(`${message}...`);
-      return res;
-    }
-    return res.finally(TerminalOperation.streamWaiting(this, message, config));
-  }
-
-  /**
    * Stream line output, showing a waiting indicator for each line until the next one occurs
    *
    * @param lines
@@ -146,17 +128,6 @@ export class Terminal implements TermState {
       return;
     }
     return TerminalOperation.streamToPosition(this, IterableUtil.map(source, resolve), config);
-  }
-
-  /**
-   * Track progress of an asynchronous iterator, allowing the showing of a progress bar if the stream produces idx and total
-   */
-  async trackProgress<T, V extends TerminalProgressEvent>(
-    source: AsyncIterable<T>, resolve: MapFn<T, V>, config?: TerminalProgressConfig
-  ): Promise<void> {
-    const color = ColorOutputUtil.colorer(config?.style ?? { background: 'limeGreen', text: 'black' });
-    const render = TerminalOperation.buildProgressBar(this, color);
-    return this.streamToPosition(source, async (v, i) => render(await resolve(v, i)), config);
   }
 }
 
