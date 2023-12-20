@@ -3,7 +3,7 @@ import os from 'node:os';
 import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
-import { GlobalTerminal } from '@travetto/terminal';
+import { GlobalTerminal, TerminalOperation } from '@travetto/terminal';
 import { Ignore, Required, Schema } from '@travetto/schema';
 
 import { PackOperation } from './bin/operation';
@@ -111,13 +111,18 @@ export abstract class BasePackCommand implements CliCommandShape {
     } else {
       const start = Date.now();
 
-      await GlobalTerminal.streamLinesWithWaiting(stream, {
-        initialDelay: 0,
-        cycleDelay: 100,
-        end: false,
-        position: 'inline',
-        committedPrefix: String.fromCharCode(171)
-      });
+      if (!GlobalTerminal.interactive) {
+        await TerminalOperation.writeLinesPlain(GlobalTerminal, stream, x => `> ${x}`);
+      } else {
+        await TerminalOperation.streamLinesWithWaiting(GlobalTerminal, stream, {
+          initialDelay: 0,
+          cycleDelay: 100,
+          end: false,
+          position: 'inline',
+          committedPrefix: String.fromCharCode(171)
+        });
+      }
+
       let msg = cliTpl`${{ success: 'Success' }} (${{ identifier: TimeUtil.prettyDeltaSinceTime(start) }}) ${{ subtitle: 'module' }}=${{ param: this.module }}`;
       if (this.output) {
         msg = cliTpl`${msg} ${{ subtitle: 'output' }}=${{ path: this.output }}`;

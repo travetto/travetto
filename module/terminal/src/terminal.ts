@@ -1,19 +1,8 @@
 import tty from 'node:tty';
 
-import { IterableUtil, MapFn } from './iterable';
-import {
-  TerminalTableConfig, TerminalTableEvent,
-  TerminalWaitingConfig, TermLinePosition, TermState, TermCoord
-} from './types';
-import { TerminalOperation } from './operation';
+import { TermState, TermCoord } from './types';
 import { TerminalQuerier } from './query';
 import { TerminalWriter } from './writer';
-
-type TerminalStreamPositionConfig = {
-  position?: TermLinePosition;
-  staticMessage?: string;
-  minDelay?: number;
-};
 
 /**
  * An enhanced tty write stream
@@ -72,62 +61,6 @@ export class Terminal implements TermState {
 
   getCursorPosition(): Promise<TermCoord> {
     return this.#query.cursorPosition();
-  }
-
-  /**
-   * Stream line output, showing a waiting indicator for each line until the next one occurs
-   *
-   * @param lines
-   * @param config
-   * @returns
-   */
-  async streamLinesWithWaiting(lines: AsyncIterable<string | undefined>, config: TerminalWaitingConfig): Promise<void> {
-    if (!this.interactive) {
-      for await (const line of lines) {
-        if (line !== undefined) {
-          const out = config.committedPrefix ? `${config.committedPrefix} ${line}` : line;
-          await this.writeLines(out);
-        }
-      }
-    } else {
-      return TerminalOperation.streamLinesWithWaiting(this, lines, { position: 'bottom', ...config });
-    }
-  }
-
-  /**
-   * Consumes a stream, of events, tied to specific list indices, and updates in place
-   */
-  async streamList<T>(source: AsyncIterable<T>, resolve: MapFn<T, TerminalTableEvent>, config: TerminalTableConfig = {}): Promise<void> {
-    const resolved = IterableUtil.map(source, resolve);
-
-    await this.writeLines(...(config.header ?? []));
-
-    if (!this.interactive) {
-      const isDone = IterableUtil.filter(resolved, ev => !!ev.done);
-      if (config.forceNonInteractiveOrder) {
-        await this.writeLines(...(await IterableUtil.drain(isDone)).map(x => x.text), '');
-      } else {
-        await IterableUtil.drain(IterableUtil.map(isDone, ev => this.writeLines(ev.text)));
-        await this.writeLines('');
-      }
-      return;
-    }
-
-    await TerminalOperation.streamList(this, resolved);
-  }
-
-  /**
-   * Streams an iterable to a specific location, with support for non-interactive ttys
-   */
-  async streamToPosition<T>(source: AsyncIterable<T>, resolve: MapFn<T, string>, config?: TerminalStreamPositionConfig): Promise<void> {
-    if (!this.interactive) {
-      if (config?.staticMessage) {
-        await this.writeLines(config.staticMessage);
-      }
-      await IterableUtil.drain(source);
-      return;
-    }
-    return TerminalOperation.streamToPosition(this, IterableUtil.map(source, resolve), config);
   }
 }
 
