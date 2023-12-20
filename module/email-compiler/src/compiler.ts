@@ -20,14 +20,17 @@ export class EmailCompiler {
    * Watch folders as needed
    */
   static async #watchFolders(folders: string[], handler: (ev: WatchEvent) => void, signal: AbortSignal): Promise<void> {
-    const lib = await import('@parcel/watcher');
     for (const src of folders) {
-      const cleanup = await lib.subscribe(src, async (err, events) => {
-        for (const ev of events) {
-          handler({ action: ev.type, file: path.toPosix(ev.path), folder: src });
+      (async (): Promise<void> => {
+        for await (const ev of fs.watch(src, {
+          recursive: true,
+          signal,
+          persistent: false
+        })) {
+          const exists = ev.filename ? await fs.stat(ev.filename).catch(() => false) : false;
+          handler({ action: !!exists ? 'create' : 'delete', file: path.toPosix(ev.filename!), folder: src });
         }
-      });
-      signal.addEventListener('abort', () => cleanup.unsubscribe());
+      })();
     }
   }
 
