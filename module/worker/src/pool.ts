@@ -1,10 +1,12 @@
-import os from 'node:os';
 import gp from 'generic-pool';
+import os from 'node:os';
 import timers from 'node:timers/promises';
 
 import { Env, Util } from '@travetto/base';
 
 import { WorkQueue } from './queue';
+
+type ItrSource<I> = Iterable<I> | AsyncIterable<I>;
 
 /**
  * Worker definition
@@ -13,28 +15,19 @@ export interface Worker<I, O = unknown> {
   active?: boolean;
   id?: unknown;
   init?(): Promise<unknown>;
-  execute(input: I): Promise<O>;
+  execute(input: I, idx: number): Promise<O>;
   destroy?(): Promise<void>;
   release?(): unknown;
 }
 
-type WorkCompletion<I, O> = { idx: number, input: I, result: O, total?: number };
-type WorkError<I> = { idx: number, input: I, error: Error, total?: number };
-type WorkerInput<I, O> = (() => Worker<I, O>) | ((input: I) => Promise<O>);
-type ItrSource<I> = Iterable<I> | AsyncIterable<I>;
+type WorkerInput<I, O> = (() => Worker<I, O>) | ((input: I, idx: number) => Promise<O>);
+type WorkPoolConfig<I, O> = gp.Options & {
+  onComplete?: (output: O, input: I, idx: number) => void;
+  onError?(ev: Error, input: I, idx: number): (unknown | Promise<unknown>);
+  shutdown?: AbortSignal;
+};
 
 const isWorkerFactory = <I, O>(o: WorkerInput<I, O>): o is (() => Worker<I, O>) => o.length === 0;
-
-type WorkPoolStreamConfig<I, O> = gp.Options & {
-  onError?(ev: WorkError<I>): (unknown | Promise<unknown>);
-  shutdown?: AbortSignal;
-  total?: number;
-};
-
-type WorkPoolConfig<I, O> = WorkPoolStreamConfig<I, O> & {
-  onComplete?: (ev: WorkCompletion<I, O>) => void;
-};
-
 
 /**
  * Work pool support
@@ -56,7 +49,6 @@ export class WorkPool {
         try {
           pendingAcquires += 1;
           const res = isWorkerFactory(worker) ? await worker() : { execute: worker };
-
           res.id ??= Util.shortHash(`${Math.random()}`);
 
           if (res.init) {
@@ -114,11 +106,11 @@ export class WorkPool {
         console.debug('Acquired', { pid: process.pid, worker: worker.id });
       }
 
-      const completion = worker.execute(nextInput)
-        .then(v => opts.onComplete?.({ input: nextInput, idx: idx += 1, result: v, total: opts?.total }))
+      const completion = worker.execute(nextInput, idx += 1)
+        .then(v => opts.onComplete?.(v, nextInput, idx))
         .catch(err => {
           errors.push(err);
-          opts?.onError?.({ input: nextInput, idx: idx += 1, error: err, total: opts?.total });
+          opts?.onError?.(err, nextInput, idx);
         }) // Catch error
         .finally(async () => {
           if (trace) {
@@ -150,19 +142,15 @@ export class WorkPool {
   /**
    * Process a given input source as an async iterable
    */
-  static runStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, opts?: WorkPoolStreamConfig<I, O>): AsyncIterable<O> {
+  static runStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, opts?: WorkPoolConfig<I, O>): AsyncIterable<O> {
     const itr = new WorkQueue<O>();
-    const res = this.run(worker, input, { ...opts, onComplete: ev => itr.add(ev.result) });
-    res.finally(() => itr.close());
-    return itr;
-  }
-
-  /**
-   * Process a given input source as an async iterable, with progress information
-   */
-  static runProgressStream<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, opts?: WorkPoolStreamConfig<I, O>): AsyncIterable<WorkCompletion<I, O>> {
-    const itr = new WorkQueue<WorkCompletion<I, O>>();
-    const res = this.run(worker, input, { ...opts, onComplete: ev => itr.add(ev) });
+    const res = this.run(worker, input, {
+      ...opts,
+      onComplete: (ev, inp, idx) => {
+        itr.add(ev);
+        opts?.onComplete?.(ev, inp, idx);
+      }
+    });
     res.finally(() => itr.close());
     return itr;
   }
