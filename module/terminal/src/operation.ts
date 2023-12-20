@@ -32,13 +32,14 @@ export class TerminalOperation {
   static async streamToPosition(term: TermState, source: AsyncIterable<string>, config: TerminalStreamingConfig = {}): Promise<void> {
     const curPos = config.at ?? { ...await term.getCursorPosition() };
     const pos = config.position ?? 'inline';
+    const writer = TerminalWriter.for(term);
 
     const writePos = pos === 'inline' ?
       { ...curPos, x: 0 } :
       { x: 0, y: pos === 'top' ? 0 : -1 };
 
     try {
-      const batch = TerminalWriter.for(term).hideCursor();
+      const batch = writer.hideCursor();
       if (pos !== 'inline') {
         batch.storePosition().scrollRange(pos === 'top' ? { start: 2 } : { end: -2 }).restorePosition();
         if (pos === 'top' && curPos.y === 0) {
@@ -59,21 +60,21 @@ export class TerminalOperation {
         line = text;
         if ((Date.now() - start) >= minDelay) {
           start = Date.now();
-          await TerminalWriter.for(term).setPosition(writePos).write(line).clearLine(1).commit(true);
+          await writer.setPosition(writePos).write(line).clearLine(1).commit(true);
           line = '';
         }
       }
 
       if (line) {
-        await TerminalWriter.for(term).setPosition(writePos).write(line).clearLine(1).commit(true);
+        await writer.setPosition(writePos).write(line).clearLine(1).commit(true);
       }
 
       if (config.clearOnFinish ?? true) {
-        await TerminalWriter.for(term).setPosition(writePos).clearLine().commit(true);
+        await writer.setPosition(writePos).clearLine().commit(true);
       }
     } finally {
       const finalCursor = await term.getCursorPosition();
-      await TerminalWriter.for(term).scrollRangeClear().setPosition(finalCursor).showCursor().commit();
+      await writer.scrollRangeClear().setPosition(finalCursor).showCursor().commit();
     }
   }
 
@@ -81,9 +82,9 @@ export class TerminalOperation {
     const isDone = IterableUtil.filter(source, ev => !!ev.done);
     const writer = TerminalWriter.for(term);
     if (!process.stdout.isTTY) {
-      await writer.writeLines([...(await IterableUtil.drain(isDone)).map(x => x.text), '']);
+      await writer.writeLines([...(await IterableUtil.drain(isDone)).map(x => x.text), '']).commit();
     } else {
-      await IterableUtil.drain(IterableUtil.map(isDone, ev => writer.writeLines([ev.text])));
+      await IterableUtil.drain(IterableUtil.map(isDone, ev => writer.writeLines([ev.text]).commit()));
     }
   }
 
@@ -92,14 +93,15 @@ export class TerminalOperation {
    */
   static async streamList(term: TermState, source: AsyncIterable<Indexed & { text: string }>): Promise<void> {
     let max = 0;
+    const writer = TerminalWriter.for(term);
     try {
-      await TerminalWriter.for(term).hideCursor().commit();
+      await writer.hideCursor().commit();
       for await (const { idx, text } of source) {
         max = Math.max(idx, max);
-        await TerminalWriter.for(term).write('\n'.repeat(idx)).rewriteLine(text).clearLine(1).changePosition({ y: -idx }).commit();
+        await writer.write('\n'.repeat(idx)).rewriteLine(text).clearLine(1).changePosition({ y: -idx }).commit();
       }
     } finally {
-      await TerminalWriter.for(term).changePosition({ y: max + 1 }).writeLine('\n').showCursor().commit();
+      await writer.changePosition({ y: max + 1 }).writeLine('\n').showCursor().commit();
     }
   }
 

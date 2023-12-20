@@ -42,6 +42,10 @@ interface TrvEnv {
      * @default development
      */
     NODE_ENV: 'development' | 'production';
+    /**
+     * Terminal colors provided as ansi 256 color schemes
+     */
+    COLORFGBG: string;
     /** 
      * Enables color, even if `tty` is not available 
      * @default false

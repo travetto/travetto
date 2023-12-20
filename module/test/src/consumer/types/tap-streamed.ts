@@ -1,4 +1,6 @@
-import { ColorOutputUtil, IterableUtil, TermStyleInput, Terminal, TerminalOperation } from '@travetto/terminal';
+import chalk from 'chalk';
+
+import { IterableUtil, Terminal, TerminalOperation } from '@travetto/terminal';
 import { WorkQueue } from '@travetto/worker';
 
 import { TestEvent } from '../../model/event';
@@ -17,12 +19,10 @@ export class TapStreamedEmitter implements TestConsumer {
 
   static makeProgressBar(term: Terminal, total: number): (t: TestResult, idx: number) => string {
     let failed = 0;
-    const palette: TermStyleInput[] = [
-      { text: 'white', background: 'darkGreen' },
-      { text: 'white', background: 'darkRed' }
+    const palette: ((text: string) => string)[] = [
+      chalk.bgHex('#013220').white,
+      chalk.bgHex('#8B0000').white,
     ];
-    const styles = palette.map(s => ColorOutputUtil.colorer(s));
-
     return (t: TestResult, idx: number): string => {
       if (t.status === 'failed') {
         failed += 1;
@@ -33,7 +33,7 @@ export class TapStreamedEmitter implements TestConsumer {
       const paddedFailed = `${failed}`.padStart(digits);
       const line = `Tests ${paddedI}/${total} [${paddedFailed} failed] -- ${t.classId}`.padEnd(term.width);
       const pos = Math.trunc(line.length * (i / total));
-      const colorer = styles[Math.min(failed, styles.length - 1)];
+      const colorer = palette[Math.min(failed, palette.length - 1)];
       return `${colorer(line.substring(0, pos))}${line.substring(pos)}`;
     };
   }

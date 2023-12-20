@@ -19,6 +19,7 @@
     "reinit-deps": "find . -name 'node_modules' -type d | grep -v -E '(github[.]io|vscode-plugin|[.]trv)' | xargs rm -rf; rm package-lock.json; npm i"
   },
   "travetto": {
+    "compilerUrl": "http://localhost:26803",
     "globalModules": [
       "@travetto/test",
       "@travetto/cli",

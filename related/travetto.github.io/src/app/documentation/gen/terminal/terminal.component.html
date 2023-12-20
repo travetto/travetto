@@ -16,71 +16,8 @@
   </figure>
 
 This module provides basic support for interacting with the terminal, and provides the basis for output colorization and the basic command line interactions.  The functionality can be broken down into:
-<ul> <li>Output Colorization</li>
-<li>Terminal Interactions</li>
+<ul> <li>Terminal Interactions</li>
 </ul>
-
-<h2 id="output-colorization">Output Colorization</h2>
-
-Oddly enough, colorizing output in a terminal is a fairly complex process.  The standards are somewhat inconsistent and detection can be a tricky process. For terminals, <a target="_blank" class="external-link" href="https://nodejs.org">Node</a> supports 4 different levels of coloring:
-<ul> <li>0 - One color, essentially uncolored output</li>
-<li>1 - Basic color support, 16 colors</li>
-<li>2 - Enhanced color support, 225 colors, providing a fair representation of most colors</li>
-<li>3 - True color, 24bit color with R, G, B each getting 8-bits.  Can represent any color needed</li>
-</ul>
-This module provides the ability to define color palettes using RGB or <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/terminal/src/color/named-colors.ts#L1">named colors</a> modeled after the standard HTML color names.  The module also provides the ability to specify palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. <br><br>
-These palettes then are usable at runtime, with the module determine light or dark palettes, as well as falling back to the closest color value based on what the existing terminal supports.  This means a color like 'olivegreen', will get the proper output in 24bit color support, a close approximation in enhanced color support, fall back to green in basic color support, and will be color less at level 0.
-
-  <figure class="code">
-    <figcaption class="code">CLI Color Palette
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/color.ts">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> Util <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/base'</span><span class="token punctuation">;</span>
-<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ColorOutputUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/terminal'</span><span class="token punctuation">;</span>
-
-<span class="token keyword">const</span> tplFn <span class="token operator">=</span> ColorOutputUtil<span class="token punctuation">.</span><span class="token function">templateFunction</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
-  input<span class="token operator">:</span> <span class="token string">'oliveDrab'</span><span class="token punctuation">,</span>
-  output<span class="token operator">:</span> <span class="token string">'pink'</span><span class="token punctuation">,</span>
-  path<span class="token operator">:</span> <span class="token string">'teal'</span><span class="token punctuation">,</span>
-  success<span class="token operator">:</span> <span class="token string">'green'</span><span class="token punctuation">,</span>
-  failure<span class="token operator">:</span> <span class="token string">'red'</span><span class="token punctuation">,</span>
-  param<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'yellow'</span><span class="token punctuation">,</span> <span class="token string">'goldenrod'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  type<span class="token operator">:</span> <span class="token string">'cyan'</span><span class="token punctuation">,</span>
-  description<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'white'</span><span class="token punctuation">,</span> <span class="token string">'gray'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  title<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'brightWhite'</span><span class="token punctuation">,</span> <span class="token string">'black'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  identifier<span class="token operator">:</span> <span class="token string">'dodgerBlue'</span><span class="token punctuation">,</span>
-  subtitle<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">'lightGray'</span><span class="token punctuation">,</span> <span class="token string">'darkGray'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  subsubtitle<span class="token operator">:</span> <span class="token string">'darkGray'</span>
-<span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-
-<span class="token keyword">export</span> <span class="token keyword">const</span> cliTpl <span class="token operator">=</span> Util<span class="token punctuation">.</span><span class="token function">makeTemplate</span><span class="token punctuation">(</span>tplFn<span class="token punctuation">)</span><span class="token punctuation">;</span></code></pre>
-  </figure>
-
-When the color palette is combined with <a class="module-link" routerLink="/docs/base" title="Environment config and common utilities for travetto applications.">Base</a>'s Util.makeTemplate, you produce a string template function that will automatically colorize:
-
-  <figure class="code">
-    <figcaption class="code">Sample Template Usage
-
-</figcaption>
-    <pre><code class="language-typescript">cliTpl<span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Build finished: status=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token punctuation">{{'{'}}</span>success<span class="token operator">:</span> <span class="token string">"complete"</span><span class="token punctuation">{{'}'}}</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token string">, output=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${{'{'}}</span><span class="token punctuation">{{'{'}}</span>path<span class="token operator">:</span> <span class="token string">"/build.zip"</span><span class="token punctuation">{{'}'}}</span><span class="token interpolation-punctuation punctuation">{{'}'}}</span></span><span class="token template-punctuation string">`</span></span></code></pre>
-  </figure>
-
-This would then produce colorized output based on the palette, and the terminal capabilities. <br><br>
-This module follows the pattern <a target="_blank" class="external-link" href="https://nodejs.org">Node</a> follows with respect to the environment variables: <code class="item field">NO_COLOR</code>, <code class="item field">FORCE_COLOR</code> and <code class="item field">NODE_DISABLE_COLORS</code>
-
-  <figure class="terminal">
-    <figcaption class="terminal">Node help on colors
-
-</figcaption>
-    <pre><code class="language-bash">$ <span class="token function">node</span> <span class="token parameter variable">-h</span> <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-i</span> color
-
-FORCE_COLOR                 when <span class="token builtin class-name">set</span> to <span class="token string">'true'</span>, <span class="token number">1</span>, <span class="token number">2</span>, <span class="token number">3</span>, or an
-                            empty string causes NO_COLOR and
-                            NODE_DISABLE_COLORS to be ignored.
-NO_COLOR                    Alias <span class="token keyword">for</span> NODE_DISABLE_COLORS
-NODE_DISABLE_COLORS         <span class="token builtin class-name">set</span> to <span class="token number">1</span> to disable colors <span class="token keyword">in</span> the REPL</code></pre>
-  </figure>
 
 <h2 id="terminal-interactions">Terminal Interactions</h2>
 

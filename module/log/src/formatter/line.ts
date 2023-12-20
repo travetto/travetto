@@ -1,7 +1,7 @@
 import util from 'node:util';
+import chalk from 'chalk';
 
-import { Env } from '@travetto/base';
-import { ColorOutputUtil } from '@travetto/terminal';
+import { ColorUtil, Env } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
@@ -11,13 +11,13 @@ import { LogEvent, LogFormatter } from '../types';
 /**
  * Level coloring
  */
-export const STYLES = ColorOutputUtil.palette({
-  info: ['yellow', 'goldenrod'],
-  debug: ['lightGray', '#555555'],
-  warn: ['darkOrange', 'brightMagenta'],
-  error: ['darkRed', { text: 'brightCyan', inverse: true }],
-  timestamp: ['white', 'black'],
-  location: ['lightBlue', 'purple']
+export const STYLES = ColorUtil.palette({
+  info: [chalk.hex('#ffff00'), chalk.hex('#ff5733')], // Yellow / goldenrod
+  debug: [chalk.hex('#d3d3d3'), chalk.hex('#555555')], // Light gray / dark gray
+  warn: [chalk.hex('#ff8c00'), chalk.magentaBright], // Dark orange / bright magenta
+  error: [chalk.hex('#8b0000'), chalk.cyanBright.inverse], // Dark red / bright cyan inverted
+  timestamp: [chalk.white, chalk.black],
+  location: [chalk.hex('#add8e6'), chalk.hex('#800080')] // Light blue / purple
 });
 
 /**
@@ -50,7 +50,7 @@ export class LineLogFormatterConfig {
 
   postConstruct(): void {
     this.time ??= (!this.plain ? 'ms' : undefined);
-    this.plain ??= ColorOutputUtil.readTermColorLevel() === 0;
+    this.plain ??= chalk.level === 0;
     this.colorize ??= !this.plain;
     this.location ??= !this.plain;
     this.level ??= !this.plain;
@@ -58,6 +58,10 @@ export class LineLogFormatterConfig {
     if (this.time !== undefined && this.time === 'ms' || this.time === 's') {
       this.timestamp = this.time;
     }
+    Object.assign(util.inspect.defaultOptions, {
+      breakLength: Math.max(util.inspect.defaultOptions.breakLength ?? 0, 100),
+      depth: Math.max(util.inspect.defaultOptions.depth ?? 0, 4)
+    });
   }
 }
 
@@ -76,9 +80,7 @@ export class LineLogFormatter implements LogFormatter {
   pretty(ev: LogEvent, o: unknown): string {
     return util.inspect(o, {
       showHidden: ev.level === 'debug',
-      depth: 4,
       colors: this.opts.colorize !== false,
-      breakLength: 100
     });
   }
 
@@ -94,7 +96,7 @@ export class LineLogFormatter implements LogFormatter {
         timestamp = timestamp.replace(/[.]\d{3}/, '');
       }
       if (this.opts.colorize) {
-        timestamp = STYLES.timestamp(timestamp);
+        timestamp = STYLES('timestamp', timestamp);
       }
       out.push(timestamp);
     }
@@ -105,7 +107,7 @@ export class LineLogFormatter implements LogFormatter {
         level = level.padEnd(5, ' ');
       }
       if (this.opts.colorize) {
-        level = STYLES[ev.level](level);
+        level = STYLES(ev.level, level);
       }
       out.push(level);
     }
@@ -114,7 +116,7 @@ export class LineLogFormatter implements LogFormatter {
       const ns = `${ev.module}:${ev.modulePath}`;
       let loc = ev.line ? `${ns}:${ev.line}` : ns;
       if (this.opts.colorize) {
-        loc = STYLES.location(loc);
+        loc = STYLES('location', loc);
       }
       out.push(`[${loc}]`);
     }

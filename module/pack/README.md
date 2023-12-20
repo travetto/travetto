@@ -133,9 +133,9 @@ Options:
   -dt, --docker-tag <string>             Docker Image Tag  (default: ["latest"])
   -dp, --docker-port <number>            Docker Image Port  (default: [])
   -dx, --docker-push                     Docker Push Tags  (default: false)
-  -db, --docker-build-platform <string>  Docker Build Platform 
-  -dr, --docker-registry <string>        Docker Registry 
-  -du, --docker-runtime-user <string>    Docker Runtime user 
+  -db, --docker-build-platform <string>  Docker Build Platform
+  -dr, --docker-registry <string>        Docker Registry
+  -du, --docker-runtime-user <string>    Docker Runtime user
   -m, --module <module>                  Module to run for
   -h, --help                             display help for command
 ```
@@ -168,15 +168,15 @@ echo "Cleaning Output $DIST"
 rm -rf $DIST
 mkdir -p $DIST
 
-# Writing .env.js 
+# Writing config.env 
 
-echo "Writing .env.js"
+echo "Writing config.env"
 
-echo "process.env.NODE_OPTIONS = '--disable-proto=delete';" > $DIST/.env.js
-echo "process.env.NODE_ENV = 'production';" >> $DIST/.env.js
-echo "process.env.TRV_MANIFEST = 'manifest.json';" >> $DIST/.env.js
-echo "process.env.TRV_MODULE = '$MOD';" >> $DIST/.env.js
-echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js
+echo "NODE_OPTIONS=--disable-proto=delete" > $DIST/config.env
+echo "NODE_ENV=production" >> $DIST/config.env
+echo "TRV_MANIFEST=manifest.json" >> $DIST/config.env
+echo "TRV_MODULE=$MOD" >> $DIST/config.env
+echo "TRV_CLI_IPC=" >> $DIST/config.env
 
 # Writing package.json 
 
@@ -190,7 +190,7 @@ echo "Writing entry scripts todo-app.sh args=(run:rest)"
 
 echo "#!/bin/sh" > $DIST/todo-app.sh
 echo "cd \$(dirname \"\$0\")" >> $DIST/todo-app.sh
-echo "node todo-app.js run:rest \$@" >> $DIST/todo-app.sh
+echo "node --env-file config.env todo-app.js run:rest \$@" >> $DIST/todo-app.sh
 chmod 755 $DIST/todo-app.sh
 
 # Writing entry scripts todo-app.cmd args=(run:rest) 
@@ -199,7 +199,7 @@ echo "Writing entry scripts todo-app.cmd args=(run:rest)"
 
 echo "" > $DIST/todo-app.cmd
 echo "cd %~p0" >> $DIST/todo-app.cmd
-echo "node todo-app.js run:rest %*" >> $DIST/todo-app.cmd
+echo "node --env-file config.env todo-app.js run:rest %*" >> $DIST/todo-app.cmd
 chmod 755 $DIST/todo-app.cmd
 
 # Copying over resources 

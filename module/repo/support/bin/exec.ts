@@ -1,8 +1,12 @@
-import { ExecutionResult, ExecutionOptions, ExecutionState, Env, TypedObject } from '@travetto/base';
+import chalk from 'chalk';
+
+import { ExecutionResult, ExecutionOptions, ExecutionState, Env, ColorUtil } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
-import { ColorDefineUtil, ColorOutputUtil, IterableUtil, NAMED_COLORS, TermLinePosition, Terminal, TerminalOperation } from '@travetto/terminal';
+import { IterableUtil, TermLinePosition, Terminal, TerminalOperation } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
+
+const COLORS = [...ColorUtil.VERY_LIGHT_ANSI_256].map(x => chalk.ansi256(x));
 
 type ModuleRunConfig<T = ExecutionResult> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
@@ -14,10 +18,6 @@ type ModuleRunConfig<T = ExecutionResult> = {
   showStdout?: boolean;
   showStderr?: boolean;
 };
-
-const COLORS = TypedObject.keys(NAMED_COLORS)
-  .filter(k => ColorDefineUtil.defineColor(k).scheme === 'light')
-  .map(k => ColorOutputUtil.colorer(k));
 
 const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.length](val);
 
@@ -108,7 +108,7 @@ export class RepoExecUtil {
 
     if (config.progressMessage && stdoutTerm.interactive) {
       const cfg = { position: config.progressPosition ?? 'bottom' } as const;
-      const theme = ColorOutputUtil.colorer('limeGreen');
+      const theme = chalk.hex('#32cd32');
       await TerminalOperation.streamToPosition(stdoutTerm, IterableUtil.map(work, ({ total, idx, text }) => {
         text ||= total ? '%idx/%total' : '%idx';
         const pct = total === undefined ? 0 : (idx / total);
