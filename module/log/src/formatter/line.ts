@@ -1,23 +1,23 @@
 import util from 'node:util';
-import chalk from 'chalk';
 
-import { ColorUtil, Env } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
+import { ColorUtil } from '@travetto/terminal';
 
 import { LogEvent, LogFormatter } from '../types';
 
 /**
  * Level coloring
  */
-export const STYLES = ColorUtil.palette({
-  info: [chalk.hex('#ffff00'), chalk.hex('#ff5733')], // Yellow / goldenrod
-  debug: [chalk.hex('#d3d3d3'), chalk.hex('#555555')], // Light gray / dark gray
-  warn: [chalk.hex('#ff8c00'), chalk.magentaBright], // Dark orange / bright magenta
-  error: [chalk.hex('#8b0000'), chalk.cyanBright.inverse], // Dark red / bright cyan inverted
-  timestamp: [chalk.white, chalk.black],
-  location: [chalk.hex('#add8e6'), chalk.hex('#800080')] // Light blue / purple
+export const STYLES = ColorUtil.styleMap({
+  info: ['#ffff00', '#ff5733'], // Yellow / goldenrod
+  debug: ['#d3d3d3', '#555555'], // Light gray / dark gray
+  warn: ['#ff8c00', '#ff00ff'], // Dark orange / bright magenta
+  error: ['#8b0000', { text: '#00ffff', inverse: true }], // Dark red / bright cyan inverted
+  timestamp: ['#e5e5e5', '#000000'], // White /black
+  location: ['#add8e6', '#800080'] // Light blue / purple
 });
 
 /**
@@ -50,7 +50,7 @@ export class LineLogFormatterConfig {
 
   postConstruct(): void {
     this.time ??= (!this.plain ? 'ms' : undefined);
-    this.plain ??= chalk.level === 0;
+    this.plain ??= ColorUtil.level === 0;
     this.colorize ??= !this.plain;
     this.location ??= !this.plain;
     this.level ??= !this.plain;
@@ -96,7 +96,7 @@ export class LineLogFormatter implements LogFormatter {
         timestamp = timestamp.replace(/[.]\d{3}/, '');
       }
       if (this.opts.colorize) {
-        timestamp = STYLES('timestamp', timestamp);
+        timestamp = STYLES.timestamp(timestamp);
       }
       out.push(timestamp);
     }
@@ -107,7 +107,7 @@ export class LineLogFormatter implements LogFormatter {
         level = level.padEnd(5, ' ');
       }
       if (this.opts.colorize) {
-        level = STYLES(ev.level, level);
+        level = STYLES[ev.level](level);
       }
       out.push(level);
     }
@@ -116,7 +116,7 @@ export class LineLogFormatter implements LogFormatter {
       const ns = `${ev.module}:${ev.modulePath}`;
       let loc = ev.line ? `${ns}:${ev.line}` : ns;
       if (this.opts.colorize) {
-        loc = STYLES('location', loc);
+        loc = STYLES.location(loc);
       }
       out.push(`[${loc}]`);
     }

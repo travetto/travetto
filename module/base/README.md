@@ -288,11 +288,12 @@ Data utilities for binding values, and type conversion. Currently [DataUtil](htt
    *  `filterByKeys<T>(obj: T, exclude: (string | RegExp)[]): T` will filter a given object, and return a plain object (if applicable) with fields excluded using the values in the `exclude` input
 
 ## Common Utilities
-Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L14) includes:
+Common utilities used throughout the framework. Currently [Util](https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L10) includes:
    *  `uuid(len: number)` generates a simple uuid for use within the application.
    *  `allowDenyMatcher(rules[])` builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.
    *  `naiveHash(text: string)` produces a fast, and simplistic hash.  No guarantees are made, but performs more than adequately for framework purposes.
-   *  `makeTemplate<T extends string>(wrap: (key: T, val: TemplatePrim) => string)` produces a template function tied to the distinct string values that `key` supports.
+   *  `shortHash(text: string)` produces a sha512 hash and returns the first 32 characters.
+   *  `fullHash(text: string, size?: number)` produces a full sha512 hash.
    *  `resolvablePromise()` produces a `Promise` instance with the `resolve` and `reject` methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.
 
 **Code: Sample makeTemplate Usage**

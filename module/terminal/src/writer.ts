@@ -38,7 +38,13 @@ export class TerminalWriter {
       q.unshift(ANSICodes.POSITION_SAVE());
       q.push(ANSICodes.POSITION_RESTORE());
     }
-    return q.length ? new Promise(r => this.#term.output.write(q.join(''), () => r())) : Promise.resolve();
+    if (q.length) {
+      const done = this.#term.output.write(q.join(''));
+      if (!done) {
+        return new Promise(r => this.#term.output.once('drain', () => r()));
+      }
+    }
+    return Promise.resolve();
   }
 
   write(...text: (string | number)[]): this {

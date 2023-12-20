@@ -29,6 +29,7 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@travetto/base": "^3.4.2",
+    "@travetto/terminal": "^3.4.0",
     "rollup": "^4.6.1"
   },
   "peerDependencies": {

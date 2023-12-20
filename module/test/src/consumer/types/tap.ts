@@ -36,7 +36,7 @@ export class TapEmitter implements TestConsumer {
    */
   onStart(): void {
     this.#start = Date.now();
-    this.log(this.#enhancer('suiteName', 'TAP version 13')!);
+    this.log(this.#enhancer.suiteName('TAP version 13')!);
   }
 
   /**
@@ -46,7 +46,7 @@ export class TapEmitter implements TestConsumer {
     const lineLength = GlobalTerminal.width - 5;
     let body = YamlUtil.serialize(obj, { wordwrap: lineLength });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
-    this.log(`---\n${this.#enhancer('objectInspect', body)}\n...`);
+    this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);
   }
 
   /**
@@ -55,45 +55,45 @@ export class TapEmitter implements TestConsumer {
   onEvent(e: TestEvent): void {
     if (e.type === 'test' && e.phase === 'after') {
       const { test } = e;
-      const suiteId = this.#enhancer('suiteName', test.classId);
-      let header = `${suiteId} - ${this.#enhancer('testName', test.methodName)}`;
+      const suiteId = this.#enhancer.suiteName(test.classId);
+      let header = `${suiteId} - ${this.#enhancer.testName(test.methodName)}`;
       if (test.description) {
-        header += `: ${this.#enhancer('testDescription', test.description)}`;
+        header += `: ${this.#enhancer.testDescription(test.description)}`;
       }
-      this.log(`# ${header} `);
+      this.log(`# ${header}`);
 
       // Handle each assertion
       if (test.assertions.length) {
         let subCount = 0;
         for (const asrt of test.assertions) {
-          const text = asrt.message ? `${asrt.text} (${this.#enhancer('failure', asrt.message)})` : asrt.text;
+          const text = asrt.message ? `${asrt.text} (${this.#enhancer.failure(asrt.message)})` : asrt.text;
           let subMessage = [
-            this.#enhancer('assertNumber', ++subCount),
+            this.#enhancer.assertNumber(++subCount),
             '-',
-            this.#enhancer('assertDescription', text),
-            `${this.#enhancer('assertFile', asrt.file.replace(RuntimeIndex.mainModule.sourcePath, '.'))}:${this.#enhancer('assertLine', asrt.line)}`
+            this.#enhancer.assertDescription(text),
+            `${this.#enhancer.assertFile(asrt.file.replace(RuntimeIndex.mainModule.sourcePath, '.'))}:${this.#enhancer.assertLine(asrt.line)}`
           ].join(' ');
 
           if (asrt.error) {
-            subMessage = `${this.#enhancer('failure', 'not ok')} ${subMessage}`;
+            subMessage = `${this.#enhancer.failure('not ok')} ${subMessage}`;
           } else {
-            subMessage = `${this.#enhancer('success', 'ok')} ${subMessage}`;
+            subMessage = `${this.#enhancer.success('ok')} ${subMessage}`;
           }
-          this.log(`    ${subMessage} `);
+          this.log(`    ${subMessage}`);
 
           if (asrt.message && asrt.message.length > 100) {
             this.logMeta({ message: asrt.message.replace(/\\n/g, '\n') });
           }
         }
-        this.log(`    ${this.#enhancer('assertNumber', 1)}..${this.#enhancer('assertNumber', subCount)} `);
+        this.log(`    ${this.#enhancer.assertNumber(1)}..${this.#enhancer.assertNumber(subCount)}`);
       }
 
       // Track test result
-      let status = `${this.#enhancer('testNumber', ++this.#count)} `;
+      let status = `${this.#enhancer.testNumber(++this.#count)} `;
       switch (test.status) {
         case 'skipped': status += ' # SKIP'; break;
-        case 'failed': status = `${this.#enhancer('failure', 'not ok')} ${status}`; break;
-        default: status = `${this.#enhancer('success', 'ok')} ${status}`;
+        case 'failed': status = `${this.#enhancer.failure('not ok')} ${status}`; break;
+        default: status = `${this.#enhancer.success('ok')} ${status}`;
       }
       status += header;
 
@@ -122,25 +122,25 @@ export class TapEmitter implements TestConsumer {
    * Summarize all results
    */
   onSummary(summary: SuitesSummary): void {
-    this.log(`${this.#enhancer('testNumber', 1)}..${this.#enhancer('testNumber', summary.total)} `);
+    this.log(`${this.#enhancer.testNumber(1)}..${this.#enhancer.testNumber(summary.total)}`);
 
     if (summary.errors.length) {
       this.log('---\n');
       for (const err of summary.errors) {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-        this.log(this.#enhancer('failure', ObjectUtil.hasToJSON(err) ? err.toJSON() as string : `${err} `));
+        this.log(this.#enhancer.failure(ObjectUtil.hasToJSON(err) ? err.toJSON() as string : `${err}`));
       }
     }
 
     const allPassed = summary.failed === 0;
 
     this.log([
-      this.#enhancer(allPassed ? 'success' : 'failure', 'Results'),
-      `${this.#enhancer('total', summary.passed)}/${this.#enhancer('total', summary.total)}, `,
-      allPassed ? 'failed' : this.#enhancer('failure', 'failed'),
-      `${this.#enhancer('total', summary.failed)}`,
+      this.#enhancer[allPassed ? 'success' : 'failure']('Results'),
+      `${this.#enhancer.total(summary.passed)}/${this.#enhancer.total(summary.total)},`,
+      allPassed ? 'failed' : this.#enhancer.failure('failed'),
+      `${this.#enhancer.total(summary.failed)}`,
       'skipped',
-      this.#enhancer('total', summary.skipped),
+      this.#enhancer.total(summary.skipped),
       `# (Total Test Time: ${TimeUtil.prettyDelta(summary.duration)}, Total Run Time: ${TimeUtil.prettyDeltaSinceTime(this.#start)})`
     ].join(' '));
   }

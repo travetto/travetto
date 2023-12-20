@@ -20,10 +20,10 @@ export interface Worker<I, O = unknown> {
   release?(): unknown;
 }
 
-type WorkerInput<I, O> = (() => Worker<I, O>) | ((input: I, idx: number) => Promise<O>);
+type WorkerInput<I, O> = (() => Worker<I, O>) | ((input: I, inputIdx: number) => Promise<O>);
 type WorkPoolConfig<I, O> = gp.Options & {
-  onComplete?: (output: O, input: I, idx: number) => void;
-  onError?(ev: Error, input: I, idx: number): (unknown | Promise<unknown>);
+  onComplete?: (output: O, input: I, finishIdx: number) => void;
+  onError?(ev: Error, input: I, finishIdx: number): (unknown | Promise<unknown>);
   shutdown?: AbortSignal;
 };
 
@@ -95,7 +95,8 @@ export class WorkPool {
     const trace = /@travetto\/worker/.test(Env.DEBUG.val ?? '');
     const pending = new Set<Promise<unknown>>();
     const errors: Error[] = [];
-    let idx = 0;
+    let inputIdx = 0;
+    let finishIdx = 0;
 
     const pool = this.#buildPool(workerFactory, opts);
 
@@ -106,11 +107,11 @@ export class WorkPool {
         console.debug('Acquired', { pid: process.pid, worker: worker.id });
       }
 
-      const completion = worker.execute(nextInput, idx += 1)
-        .then(v => opts.onComplete?.(v, nextInput, idx))
+      const completion = worker.execute(nextInput, inputIdx += 1)
+        .then(v => opts.onComplete?.(v, nextInput, finishIdx += 1))
         .catch(err => {
           errors.push(err);
-          opts?.onError?.(err, nextInput, idx);
+          opts?.onError?.(err, nextInput, finishIdx += 1);
         }) // Catch error
         .finally(async () => {
           if (trace) {
@@ -146,9 +147,29 @@ export class WorkPool {
     const itr = new WorkQueue<O>();
     const res = this.run(worker, input, {
       ...opts,
-      onComplete: (ev, inp, idx) => {
+      onComplete: (ev, inp, finishIdx) => {
         itr.add(ev);
-        opts?.onComplete?.(ev, inp, idx);
+        opts?.onComplete?.(ev, inp, finishIdx);
+      }
+    });
+    res.finally(() => itr.close());
+    return itr;
+  }
+
+  /**
+   * Process a given input source as an async iterable with progress information
+   */
+  static runStreamProgress<I, O>(worker: WorkerInput<I, O>, input: ItrSource<I>, total: number, opts?: WorkPoolConfig<I, O>): AsyncIterable<{
+    idx: number;
+    value: O;
+    total: number;
+  }> {
+    const itr = new WorkQueue<{ idx: number, value: O, total: number }>();
+    const res = this.run(worker, input, {
+      ...opts,
+      onComplete: (ev, inp, finishIdx) => {
+        itr.add({ value: ev, idx: finishIdx, total });
+        opts?.onComplete?.(ev, inp, finishIdx);
       }
     });
     res.finally(() => itr.close());

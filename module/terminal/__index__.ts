@@ -1,4 +1,5 @@
 export * from './src/codes';
+export * from './src/color';
 export * from './src/iterable';
 export * from './src/operation';
 export * from './src/query';

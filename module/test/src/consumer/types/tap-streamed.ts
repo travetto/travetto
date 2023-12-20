@@ -1,6 +1,4 @@
-import chalk from 'chalk';
-
-import { IterableUtil, Terminal, TerminalOperation } from '@travetto/terminal';
+import { ColorUtil, IterableUtil, Terminal, TerminalOperation } from '@travetto/terminal';
 import { WorkQueue } from '@travetto/worker';
 
 import { TestEvent } from '../../model/event';
@@ -20,8 +18,8 @@ export class TapStreamedEmitter implements TestConsumer {
   static makeProgressBar(term: Terminal, total: number): (t: TestResult, idx: number) => string {
     let failed = 0;
     const palette: ((text: string) => string)[] = [
-      chalk.bgHex('#013220').white,
-      chalk.bgHex('#8B0000').white,
+      ColorUtil.fromStyle({ text: '#e5e5e5', background: '#013220' }), // White on dark green
+      ColorUtil.fromStyle({ text: '#e5e5e5', background: '#8b0000' }), // White on dark red
     ];
     return (t: TestResult, idx: number): string => {
       if (t.status === 'failed') {

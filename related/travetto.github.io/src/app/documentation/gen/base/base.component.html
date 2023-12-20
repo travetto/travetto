@@ -321,11 +321,12 @@ Data utilities for binding values, and type conversion. Currently <a target="_bl
 
 <h2 id="common-utilities">Common Utilities</h2>
 
-Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L14">Util</a> includes:
+Common utilities used throughout the framework. Currently <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/util.ts#L10">Util</a> includes:
 <ul> <li><code class="item method">uuid(len: number)</code> generates a simple uuid for use within the application.</li>
 <li><code class="item method">allowDenyMatcher(rules[])</code> builds a matching function that leverages the rules as an allow/deny list, where order of the rules matters.  Negative rules are prefixed by '!'.</li>
 <li><code class="item method">naiveHash(text: string)</code> produces a fast, and simplistic hash.  No guarantees are made, but performs more than adequately for framework purposes.</li>
-<li><code class="item method">makeTemplate&lt;T extends string&gt;(wrap: (key: T, val: TemplatePrim) =&gt; string)</code> produces a template function tied to the distinct string values that <code class="item input">key</code> supports.</li>
+<li><code class="item method">shortHash(text: string)</code> produces a sha512 hash and returns the first 32 characters.</li>
+<li><code class="item method">fullHash(text: string, size?: number)</code> produces a full sha512 hash.</li>
 <li><code class="item method">resolvablePromise()</code> produces a <code class="item class">Promise</code> instance with the <code class="item method">resolve</code> and <code class="item method">reject</code> methods attached to the instance.  This is extremely useful for integrating promises into async iterations, or any other situation in which the promise creation and the execution flow don't always match up.</li>
 </ul>
 

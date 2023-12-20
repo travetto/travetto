@@ -1,9 +1,5 @@
 import crypto from 'node:crypto';
 
-export type TemplatePrim = string | number | boolean | Date | RegExp;
-
-export type TemplateType<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
-
 type PromiseResolver<T> = { resolve: (v: T) => void, reject: (err?: unknown) => void };
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
@@ -112,40 +108,6 @@ export class Util {
 
     const inputMap = new Map(items.map(x => [x.key, x]));
     return keys.map(k => inputMap.get(k)!);
-  }
-
-  /**
-   * Creates a template function with ability to wrap values
-   * @example
-   * ```
-   * const tpl = Util.makeTemplate((key: 'title'|'subtitle', val:TemplatePrim) => `||${val}||`)
-   * tpl`${{title: 'Main Title'}} is ${{subtitle: 'Sub Title'}}`
-   * ```
-   */
-  static makeTemplate<T extends string>(wrap: (key: T, val: TemplatePrim) => string): TemplateType<T> {
-    return (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => {
-      if (keys.length === 0) {
-        return values[0];
-      } else {
-        const out = keys.map((el, i) => {
-          let final = el;
-          if (typeof el !== 'string') {
-            const subKeys = Object.keys(el);
-            if (subKeys.length !== 1) {
-              throw new Error('Invalid template variable, one and only one key should be specified');
-            }
-            const [k] = subKeys;
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            final = wrap(k as T, el[k as T]!)!;
-          }
-          return `${values[i] ?? ''}${final ?? ''}`;
-        });
-        if (values.length > keys.length) {
-          out.push(values[values.length - 1]);
-        }
-        return out.join('');
-      }
-    };
   }
 
   /**

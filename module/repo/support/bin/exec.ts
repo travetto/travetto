@@ -1,12 +1,15 @@
-import chalk from 'chalk';
-
-import { ExecutionResult, ExecutionOptions, ExecutionState, Env, ColorUtil } from '@travetto/base';
+import { ExecutionResult, ExecutionOptions, ExecutionState, Env } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
-import { IterableUtil, TermLinePosition, Terminal, TerminalOperation } from '@travetto/terminal';
+import { ColorUtil, IterableUtil, TermLinePosition, Terminal, TerminalOperation } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
-const COLORS = [...ColorUtil.VERY_LIGHT_ANSI_256].map(x => chalk.ansi256(x));
+const COLORS = ([
+  '#8787ff', '#87afff', '#87d7ff', '#87ff87', '#87ffaf', '#87ffd7', '#87ffff', '#af87ff', '#afafd7', '#afafff', '#afd7af', '#afd7d7', '#afd7ff', '#afff87', '#afffaf',
+  '#afffd7', '#afffff', '#d787ff', '#d7afaf', '#d7afd7', '#d7afff', '#d7d7af', '#d7d7d7', '#d7d7ff', '#d7ff87', '#d7ffaf', '#d7ffd7', '#d7ffff', '#ff8787', '#ff87af',
+  '#ff87d7', '#ff87ff', '#ffaf87', '#ffafaf', '#ffafd7', '#ffafff', '#ffd787', '#ffd7af', '#ffd7d7', '#ffd7ff', '#ffff87', '#ffffaf', '#ffffd7', '#ffffff', '#bcbcbc',
+  '#c6c6c6', '#d0d0d0', '#dadada', '#e4e4e4', '#eeeeee'
+] as const).map(x => ColorUtil.fromStyle(x));
 
 type ModuleRunConfig<T = ExecutionResult> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
@@ -89,7 +92,7 @@ export class RepoExecUtil {
     const stdoutTerm = new Terminal({ output: process.stdout });
     const stderrTerm = new Terminal({ output: process.stderr });
 
-    const work = WorkPool.runStream(async (mod, idx) => {
+    const work = WorkPool.runStreamProgress(async (mod) => {
       try {
         if (!(await config.filter?.(mod) === false)) {
           const opts = RepoExecUtil.#buildExecutionOptions(mod, config, prefixes, stdoutTerm, stderrTerm);
@@ -100,21 +103,21 @@ export class RepoExecUtil {
           const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;
           results.set(mod, output);
         }
-        return { idx, total: mods.length, text: config.progressMessage?.(mod) ?? mod.name };
+        return config.progressMessage?.(mod) ?? mod.name;
       } finally {
         processes.get(mod!)?.process.kill('SIGKILL');
       }
-    }, mods, { max: workerCount, min: workerCount });
+    }, mods, mods.length, { max: workerCount, min: workerCount });
 
     if (config.progressMessage && stdoutTerm.interactive) {
       const cfg = { position: config.progressPosition ?? 'bottom' } as const;
-      const theme = chalk.hex('#32cd32');
-      await TerminalOperation.streamToPosition(stdoutTerm, IterableUtil.map(work, ({ total, idx, text }) => {
-        text ||= total ? '%idx/%total' : '%idx';
-        const pct = total === undefined ? 0 : (idx / total);
-        const width = Math.trunc(Math.ceil(Math.log10(total ?? 10000)));
-        const state: Record<string, string> = { total: `${total}`, idx: `${idx}`.padStart(width), pct: `${Math.trunc(pct * 100)}` };
-        const line = text.replace(/^[%](idx|total|pct)g/, (_, k) => state[k]);
+      const theme = ColorUtil.fromStyle({ background: '#32cd32', text: '#ffffff' });
+      await TerminalOperation.streamToPosition(stdoutTerm, IterableUtil.map(work, ev => {
+        const text = ev.value ?? (ev.total ? '%idx/%total' : '%idx');
+        const pct = ev.total === undefined ? 0 : (ev.idx / ev.total);
+        const width = Math.trunc(Math.ceil(Math.log10(ev.total ?? 10000)));
+        const state: Record<string, string> = { total: `${ev.total}`, idx: `${ev.idx}`.padStart(width), pct: `${Math.trunc(pct * 100)}` };
+        const line = text.replace(/[%](idx|total|pct)/g, (_, k) => state[k]);
         const full = TerminalOperation.truncateIfNeeded(stdoutTerm, ` ${line}`.padEnd(stdoutTerm.width));
         const mid = Math.trunc(pct * stdoutTerm.width);
         const [l, r] = [full.substring(0, mid), full.substring(mid)];
