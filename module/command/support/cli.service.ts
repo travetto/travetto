@@ -1,5 +1,5 @@
 import { CliCommandShape, CliCommand, cliTpl, CliValidationError } from '@travetto/cli';
-import { GlobalTerminal } from '@travetto/terminal';
+import { GlobalTerminal, IterableUtil, TerminalOperation } from '@travetto/terminal';
 
 import { CommandService } from '../src/types';
 
@@ -41,20 +41,22 @@ export class CliServiceCommand implements CliCommandShape {
     const maxVersion = Math.max(...all.map(x => `${x.version}`.length), 'Version'.length) + 3;
     const maxStatus = 20;
 
-    await GlobalTerminal.streamList(
-      ServiceUtil.triggerServices(action, all),
-      ({ svc, statusText, status, idx }) => ({
-        idx,
-        text: cliTpl`${{ identifier: svc.name.padEnd(maxName) }} ${{ type: `${svc.version}`.padStart(maxVersion - 3).padEnd(maxVersion) }} ${statusText}`,
-        done: status === 'started'
-      }),
-      {
-        header: [
-          '',
-          cliTpl`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
-          ''.padEnd(maxName + maxVersion + maxStatus + 3, '-')
-        ],
-        forceNonInteractiveOrder: !process.stdout.isTTY
-      });
+    const resolved = IterableUtil.map(ServiceUtil.triggerServices(action, all), ({ svc, statusText, status, idx }) => ({
+      idx,
+      text: cliTpl`${{ identifier: svc.name.padEnd(maxName) }} ${{ type: `${svc.version}`.padStart(maxVersion - 3).padEnd(maxVersion) }} ${statusText}`,
+      done: status === 'started'
+    }));
+
+    await GlobalTerminal.writeLines(...[
+      '',
+      cliTpl`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
+      ''.padEnd(maxName + maxVersion + maxStatus + 3, '-')
+    ]);
+
+    if (!GlobalTerminal.interactive) {
+      await TerminalOperation.streamListPlain(GlobalTerminal, resolved);
+    } else {
+      await TerminalOperation.streamList(GlobalTerminal, resolved);
+    }
   }
 }

@@ -1,7 +1,7 @@
 import { ExecutionResult, ExecutionOptions, ExecutionState, Env, TypedObject } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
-import { ColorDefineUtil, ColorOutputUtil, NAMED_COLORS, TermLinePosition, Terminal, TerminalOperation } from '@travetto/terminal';
+import { ColorDefineUtil, ColorOutputUtil, IterableUtil, NAMED_COLORS, TermLinePosition, Terminal, TerminalOperation } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
 type ModuleRunConfig<T = ExecutionResult> = {
@@ -106,10 +106,10 @@ export class RepoExecUtil {
       }
     }, mods, { max: workerCount, min: workerCount });
 
-    if (config.progressMessage) {
+    if (config.progressMessage && stdoutTerm.interactive) {
       const cfg = { position: config.progressPosition ?? 'bottom' } as const;
       const theme = ColorOutputUtil.colorer('limeGreen');
-      await stdoutTerm.streamToPosition(work, ({ total, idx, text }) => {
+      await TerminalOperation.streamToPosition(stdoutTerm, IterableUtil.map(work, ({ total, idx, text }) => {
         text ||= total ? '%idx/%total' : '%idx';
         const pct = total === undefined ? 0 : (idx / total);
         const width = Math.trunc(Math.ceil(Math.log10(total ?? 10000)));
@@ -119,7 +119,7 @@ export class RepoExecUtil {
         const mid = Math.trunc(pct * stdoutTerm.width);
         const [l, r] = [full.substring(0, mid), full.substring(mid)];
         return `${theme(l)}${r}`;
-      }, cfg);
+      }), cfg);
     } else {
       for await (const _ of work) {
         // Ensure its all consumed

@@ -16,6 +16,16 @@ export class TerminalOperation {
     return text;
   }
 
+  static async writeLinesPlain(term: TermState, source: Iterable<string | undefined> | AsyncIterable<string | undefined>, map?: (text: string) => string): Promise<void> {
+    const writer = TerminalWriter.for(term);
+    for await (const line of source) {
+      const text = (map && line !== undefined) ? map(line) : line;
+      if (text !== undefined) {
+        await writer.writeLines([text]);
+      }
+    }
+  }
+
   /**
    * Allows for writing at top, bottom, or current position while new text is added
    */
@@ -64,6 +74,16 @@ export class TerminalOperation {
     } finally {
       const finalCursor = await term.getCursorPosition();
       await TerminalWriter.for(term).scrollRangeClear().setPosition(finalCursor).showCursor().commit();
+    }
+  }
+
+  static async streamListPlain(term: TermState, source: AsyncIterable<Indexed & { text: string, done?: boolean }>): Promise<void> {
+    const isDone = IterableUtil.filter(source, ev => !!ev.done);
+    const writer = TerminalWriter.for(term);
+    if (!process.stdout.isTTY) {
+      await writer.writeLines([...(await IterableUtil.drain(isDone)).map(x => x.text), '']);
+    } else {
+      await IterableUtil.drain(IterableUtil.map(isDone, ev => writer.writeLines([ev.text])));
     }
   }
 

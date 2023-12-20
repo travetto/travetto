@@ -2,7 +2,7 @@ import enquirer from 'enquirer';
 
 import { path } from '@travetto/manifest';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { GlobalTerminal } from '@travetto/terminal';
+import { GlobalTerminal, TerminalOperation } from '@travetto/terminal';
 
 import { Context } from './bin/context';
 import { Feature, FEATURES } from './bin/features';
@@ -99,11 +99,18 @@ export class ScaffoldCommand implements CliCommandShape {
 
     console.log(cliTpl`\n${{ title: 'Creating Application' }}\n${'-'.repeat(30)}`);
 
-    await GlobalTerminal.streamLinesWithWaiting(ctx.install(), {
-      position: 'inline',
-      end: false,
-      committedPrefix: '>',
-      cycleDelay: 100
-    });
+    const stream = ctx.install();
+
+    if (!GlobalTerminal.interactive) {
+      await TerminalOperation.writeLinesPlain(GlobalTerminal, stream, x => `> ${x}`);
+    } else {
+      await TerminalOperation.streamLinesWithWaiting(GlobalTerminal, stream, {
+        initialDelay: 0,
+        position: 'inline',
+        end: false,
+        committedPrefix: '>',
+        cycleDelay: 100
+      });
+    }
   }
 }

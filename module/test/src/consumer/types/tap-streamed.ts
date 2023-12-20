@@ -1,4 +1,4 @@
-import { ColorOutputUtil, TermStyleInput, Terminal } from '@travetto/terminal';
+import { ColorOutputUtil, IterableUtil, TermStyleInput, Terminal, TerminalOperation } from '@travetto/terminal';
 import { WorkQueue } from '@travetto/worker';
 
 import { TestEvent } from '../../model/event';
@@ -51,8 +51,9 @@ export class TapStreamedEmitter implements TestConsumer {
   async onStart(state: TestRunState): Promise<void> {
     this.#consumer.onStart();
 
-    this.#progress = this.#terminal.streamToPosition(this.#results,
-      TapStreamedEmitter.makeProgressBar(this.#terminal, state.testCount ?? 0),
+    this.#progress = TerminalOperation.streamToPosition(
+      this.#terminal,
+      IterableUtil.map(this.#results, TapStreamedEmitter.makeProgressBar(this.#terminal, state.testCount ?? 0)),
       { position: 'bottom', minDelay: 100 }
     );
   }
