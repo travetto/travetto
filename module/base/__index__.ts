@@ -1,5 +1,6 @@
 /// <reference path="./src/_env.d.ts" />
 export * from './src/console';
+export * from './src/color';
 export * from './src/compiler';
 export * from './src/data';
 export * from './src/error';

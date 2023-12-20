@@ -16,7 +16,7 @@ yarn add @travetto/worker
 This module provides the necessary primitives for handling dependent workers.  A worker can be an individual actor or could be a pool of workers. Node provides ipc (inter-process communication) functionality out of the box. This module builds upon that by providing enhanced event management, richer process management, as well as constructs for orchestrating a conversation between two processes.
 
 ## Execution Pools
-With respect to managing multiple executions, [WorkPool](https://github.com/travetto/travetto/tree/main/module/worker/src/pool.ts#L37) is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, [WorkQueue](https://github.com/travetto/travetto/tree/main/module/worker/src/queue.ts#L6) is provided to support a wide range of use cases. [WorkQueue](https://github.com/travetto/travetto/tree/main/module/worker/src/queue.ts#L6) allows for manual control of iteration, which is useful for event driven work loads. 
+With respect to managing multiple executions, [WorkPool](https://github.com/travetto/travetto/tree/main/module/worker/src/pool.ts#L35) is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, [WorkQueue](https://github.com/travetto/travetto/tree/main/module/worker/src/queue.ts#L6) is provided to support a wide range of use cases. [WorkQueue](https://github.com/travetto/travetto/tree/main/module/worker/src/queue.ts#L6) allows for manual control of iteration, which is useful for event driven work loads. 
 
 Below is a pool that will convert images on demand, while queuing as needed.
 
@@ -55,7 +55,7 @@ export class ImageCompressor {
   pendingImages = new WorkQueue<string>();
 
   begin(): void {
-    this.changes ??= WorkPool.stream(() => new ImageProcessor(), this.pendingImages);
+    this.changes ??= WorkPool.runStream(() => new ImageProcessor(), this.pendingImages);
   }
 
   convert(...images: string[]): void {
@@ -70,7 +70,7 @@ Once a pool is constructed, it can be shutdown by calling the `.shutdown()` meth
 Within the `comm` package, there is support for two primary communication elements: [ChildCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/child.ts#L6) and [ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L10).  Usually [ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L10) indicates it is the owner of the sub process. [ChildCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/child.ts#L6) indicates that it has been created/spawned/forked by the parent and will communicate back to it's parent. This generally means that a [ParentCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/parent.ts#L10) can be destroyed (i.e. killing the subprocess) where a [ChildCommChannel](https://github.com/travetto/travetto/tree/main/module/worker/src/comm/child.ts#L6) can only exit the process, but the channel cannot be destroyed.
 
 ### IPC as a Worker
-A common pattern is to want to model a sub process as a worker, to be a valid candidate in a [WorkPool](https://github.com/travetto/travetto/tree/main/module/worker/src/pool.ts#L37).  The [WorkUtil](https://github.com/travetto/travetto/tree/main/module/worker/src/util.ts#L14) class provides a utility to facilitate this desire.
+A common pattern is to want to model a sub process as a worker, to be a valid candidate in a [WorkPool](https://github.com/travetto/travetto/tree/main/module/worker/src/pool.ts#L35).  The [WorkUtil](https://github.com/travetto/travetto/tree/main/module/worker/src/util.ts#L14) class provides a utility to facilitate this desire.
 
 **Code: Spawned Worker**
 ```typescript
@@ -119,7 +119,7 @@ import { ExecUtil } from '@travetto/base';
 import { WorkPool, WorkUtil } from '@travetto/worker';
 
 export async function main(): Promise<void> {
-  await WorkPool.process(
+  await WorkPool.run(
     () => WorkUtil.spawnedWorker<{ data: number }, number>(
       () => ExecUtil.spawn('trv', ['main', '@travetto/worker/doc/spawned.ts']),
       ch => ch.once('ready'), // Wait for child to indicate it is ready

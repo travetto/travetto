@@ -30,7 +30,8 @@
   },
   "dependencies": {
     "@travetto/schema": "^3.4.4",
-    "@travetto/terminal": "^3.4.0"
+    "@travetto/terminal": "^3.4.0",
+    "chalk": "^4.1.2"
   },
   "travetto": {
     "displayName": "Command Line Interface"

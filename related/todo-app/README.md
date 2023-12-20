@@ -358,7 +358,10 @@ npx trv run:rest
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
-      FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
+      FileModelConfig: {
+        folder: '/tmp/<temp-folder>',
+        namespace: '.'
+      },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,
@@ -383,7 +386,12 @@ npx trv run:rest
       RestAuthLoginConfig: {},
       RestAuthVerifyConfig: { permissions: {} },
       RestBodyParseConfig: { limit: '100kb', parsingTypes: {} },
-      RestClientConfig: { providers: { '0': [Object], '1': [Object] } },
+      RestClientConfig: {
+        providers: {
+          '0': { type: 'fetch', output: 'related/todo-app/api-client' },
+          '1': { type: 'fetch-web', output: 'related/todo-app/resources/ui/js/api-client' }
+        }
+      },
       RestConfig: {
         serve: true,
         port: 12555,
