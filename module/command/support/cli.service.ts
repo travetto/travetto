@@ -47,16 +47,12 @@ export class CliServiceCommand implements CliCommandShape {
       done: status === 'started'
     }));
 
-    await GlobalTerminal.writeLines(...[
+    await TerminalOperation.writeLinesPlain(GlobalTerminal, [
       '',
       cliTpl`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
       ''.padEnd(maxName + maxVersion + maxStatus + 3, '-')
     ]);
 
-    if (!GlobalTerminal.interactive) {
-      await TerminalOperation.streamListPlain(GlobalTerminal, resolved);
-    } else {
-      await TerminalOperation.streamList(GlobalTerminal, resolved);
-    }
+    await TerminalOperation.streamList(GlobalTerminal, resolved);
   }
 }

@@ -18,7 +18,7 @@ export class TapStreamedEmitter implements TestConsumer {
   static makeProgressBar(term: Terminal, total: number): (t: TestResult, idx: number) => string {
     let failed = 0;
     const palette: ((text: string) => string)[] = [
-      ColorUtil.fromStyle({ text: '#e5e5e5', background: '#013220' }), // White on dark green
+      ColorUtil.fromStyle({ text: '#e5e5e5', background: '#026020' }), // White on dark green
       ColorUtil.fromStyle({ text: '#e5e5e5', background: '#8b0000' }), // White on dark red
     ];
     return (t: TestResult, idx: number): string => {
@@ -52,7 +52,7 @@ export class TapStreamedEmitter implements TestConsumer {
     this.#progress = TerminalOperation.streamToPosition(
       this.#terminal,
       IterableUtil.map(this.#results, TapStreamedEmitter.makeProgressBar(this.#terminal, state.testCount ?? 0)),
-      { position: 'bottom', minDelay: 100 }
+      { minDelay: 100 }
     );
   }
 
