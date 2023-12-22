@@ -2,7 +2,7 @@ import enquirer from 'enquirer';
 
 import { path } from '@travetto/manifest';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
-import { GlobalTerminal, TerminalOperation } from '@travetto/terminal';
+import { GlobalTerminal, IterableUtil, TerminalOperation } from '@travetto/terminal';
 
 import { Context } from './bin/context';
 import { Feature, FEATURES } from './bin/features';
@@ -102,15 +102,9 @@ export class ScaffoldCommand implements CliCommandShape {
     const stream = ctx.install();
 
     if (!GlobalTerminal.interactive) {
-      await TerminalOperation.writeLinesPlain(GlobalTerminal, stream, x => `> ${x}`);
+      await TerminalOperation.writeLinesPlain(GlobalTerminal, IterableUtil.map(stream, x => `> ${x}`));
     } else {
-      await TerminalOperation.streamLinesWithWaiting(GlobalTerminal, stream, {
-        initialDelay: 0,
-        position: 'inline',
-        end: false,
-        committedPrefix: '>',
-        cycleDelay: 100
-      });
+      await TerminalOperation.streamToPosition(GlobalTerminal, IterableUtil.map(stream, x => `%WAIT% ${x}`), { outputStreamToMain: true });
     }
   }
 }

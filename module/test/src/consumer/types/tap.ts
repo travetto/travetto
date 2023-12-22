@@ -1,5 +1,5 @@
 import { RuntimeIndex } from '@travetto/manifest';
-import { GlobalTerminal, Terminal } from '@travetto/terminal';
+import { GlobalTerminal, Terminal, TerminalOperation } from '@travetto/terminal';
 import { ObjectUtil, TimeUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
@@ -28,7 +28,7 @@ export class TapEmitter implements TestConsumer {
   }
 
   log(message: string): void {
-    this.#terminal.writeLines(message);
+    TerminalOperation.writeLinesPlain(this.#terminal, [message]);
   }
 
   /**

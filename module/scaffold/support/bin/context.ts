@@ -4,7 +4,7 @@ import mustache from 'mustache';
 import { cliTpl } from '@travetto/cli';
 import { path, RuntimeIndex, RuntimeContext, NodePackageManager } from '@travetto/manifest';
 import { ExecUtil, ExecutionResult } from '@travetto/base';
-import { GlobalTerminal } from '@travetto/terminal';
+import { GlobalTerminal, TerminalOperation } from '@travetto/terminal';
 
 import { Feature } from './features';
 
@@ -55,7 +55,7 @@ export class Context {
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
       isolatedEnv: true,
-      onStdErrorLine: line => GlobalTerminal.writeLines(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`)
+      onStdErrorLine: line => TerminalOperation.writeLinesPlain(GlobalTerminal, [cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`])
     }).result;
 
     return res;

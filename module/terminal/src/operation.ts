@@ -1,6 +1,10 @@
+import timers from 'node:timers/promises';
+
 import { IterableUtil } from './iterable';
 import { TerminalWriter } from './writer';
-import { Indexed, TerminalStreamingConfig, TerminalWaitingConfig, TermState } from './types';
+import { TerminalStreamingConfig, TermState } from './types';
+
+type Coord = { x: number, y: number };
 
 const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
 
@@ -9,6 +13,30 @@ const STD_WAIT_STATES = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'.split('');
  */
 export class TerminalOperation {
 
+  /** Write line without wait */
+  static async writeWithoutWait(writer: TerminalWriter, l: string, pos?: Coord, sub = ''): Promise<void> {
+    let out = l.replace('%WAIT%', sub);
+    if (!sub) {
+      out = out.trim();
+    }
+    if (pos) {
+      return writer.setPosition(pos).write(out).clearLine(1).commit(true);
+    } else {
+      return writer.writeLine(out).commit();
+    }
+  }
+
+  /** Show waiting indicator */
+  static async showWaitingIndicator(writer: TerminalWriter, pos: Coord, signal: AbortSignal): Promise<void> {
+    let done = false;
+    signal.addEventListener('abort', () => done = true);
+    let i = 0;
+    while (!done) {
+      await writer.setPosition(pos).write(STD_WAIT_STATES[i++ % STD_WAIT_STATES.length]).commit(true);
+      await timers.setTimeout(100);
+    }
+  }
+
   static truncateIfNeeded(term: TermState, text: string, suffix = '...'): string {
     if (text.length > term.width) {
       return `${text.substring(0, term.width - suffix.length)}${suffix}`;
@@ -16,12 +44,11 @@ export class TerminalOperation {
     return text;
   }
 
-  static async writeLinesPlain(term: TermState, source: Iterable<string | undefined> | AsyncIterable<string | undefined>, map?: (text: string) => string): Promise<void> {
+  static async writeLinesPlain(term: TermState, source: Iterable<string | undefined> | AsyncIterable<string | undefined>): Promise<void> {
     const writer = TerminalWriter.for(term);
     for await (const line of source) {
-      const text = (map && line !== undefined) ? map(line) : line;
-      if (text !== undefined) {
-        await writer.writeLines([text]);
+      if (line !== undefined) {
+        await writer.writeLines([line]).commit();
       }
     }
   }
@@ -29,71 +56,66 @@ export class TerminalOperation {
   /**
    * Allows for writing at top, bottom, or current position while new text is added
    */
-  static async streamToPosition(term: TermState, source: AsyncIterable<string>, config: TerminalStreamingConfig = {}): Promise<void> {
-    const curPos = config.at ?? { ...await term.getCursorPosition() };
-    const pos = config.position ?? 'inline';
+  static async streamToPosition(term: TermState, source: AsyncIterable<string | undefined>, config: TerminalStreamingConfig = {}): Promise<void> {
     const writer = TerminalWriter.for(term);
+    const writePos = { x: 0, y: -1 };
+    const minDelay = config.minDelay ?? 0;
 
-    const writePos = pos === 'inline' ?
-      { ...curPos, x: 0 } :
-      { x: 0, y: pos === 'top' ? 0 : -1 };
+    let prev: string | undefined;
+    let stop: AbortController | undefined;
+    let start = Date.now();
 
     try {
-      const batch = writer.hideCursor();
-      if (pos !== 'inline') {
-        batch.storePosition().scrollRange(pos === 'top' ? { start: 2 } : { end: -2 }).restorePosition();
-        if (pos === 'top' && curPos.y === 0) {
-          batch.changePosition({ y: 1 }).write('');
-        } else if (pos === 'bottom' && curPos.y === term.height - 1) {
-          batch.changePosition({ y: -1 }).write('\n');
+      await writer.hideCursor()
+        .storePosition().scrollRange({ end: -2 }).restorePosition()
+        .changePosition({ y: -1 }).write('\n')
+        .commit();
+
+      for await (const line of source) {
+        // Previous line
+        if (prev && config.outputStreamToMain) {
+          await this.writeWithoutWait(writer, prev);
         }
-      } else {
-        batch.write('\n'); // Move past line
-      }
-      await batch.commit();
 
-      let start = Date.now();
-      const minDelay = config.minDelay ?? 0;
-
-      let line: string = '';
-      for await (const text of source) {
-        line = text;
-        if ((Date.now() - start) >= minDelay) {
+        if (line && (Date.now() - start) >= minDelay) {
           start = Date.now();
-          await writer.setPosition(writePos).write(line).clearLine(1).commit(true);
-          line = '';
+          stop?.abort();
+          await this.writeWithoutWait(writer, line, writePos, ' ');
+
+          const idx = line.indexOf('%WAIT%');
+          if (idx >= 0) {
+            stop = new AbortController();
+            this.showWaitingIndicator(writer, { y: writePos.y, x: idx }, stop.signal);
+          }
         }
+
+        prev = line;
       }
 
-      if (line) {
-        await writer.setPosition(writePos).write(line).clearLine(1).commit(true);
+      stop?.abort();
+      if (prev !== undefined && config.outputStreamToMain) {
+        await this.writeWithoutWait(writer, prev);
       }
 
-      if (config.clearOnFinish ?? true) {
-        await writer.setPosition(writePos).clearLine().commit(true);
-      }
+      await writer.setPosition(writePos).clearLine().commit(true);
     } finally {
-      const finalCursor = await term.getCursorPosition();
-      await writer.scrollRangeClear().setPosition(finalCursor).showCursor().commit();
-    }
-  }
-
-  static async streamListPlain(term: TermState, source: AsyncIterable<Indexed & { text: string, done?: boolean }>): Promise<void> {
-    const isDone = IterableUtil.filter(source, ev => !!ev.done);
-    const writer = TerminalWriter.for(term);
-    if (!process.stdout.isTTY) {
-      await writer.writeLines([...(await IterableUtil.drain(isDone)).map(x => x.text), '']).commit();
-    } else {
-      await IterableUtil.drain(IterableUtil.map(isDone, ev => writer.writeLines([ev.text]).commit()));
+      await writer.softReset().commit();
     }
   }
 
   /**
    * Consumes a stream, of events, tied to specific list indices, and updates in place
    */
-  static async streamList(term: TermState, source: AsyncIterable<Indexed & { text: string }>): Promise<void> {
-    let max = 0;
+  static async streamList(term: TermState, source: AsyncIterable<{ idx: number, text: string, done?: boolean }>): Promise<void> {
     const writer = TerminalWriter.for(term);
+
+    if (!term.interactive) {
+      const isDone = IterableUtil.filter(source, ev => !!ev.done);
+      await IterableUtil.drain(IterableUtil.map(isDone, ev => writer.writeLines([ev.text]).commit()));
+      return;
+    }
+
+    let max = 0;
     try {
       await writer.hideCursor().commit();
       for await (const { idx, text } of source) {
@@ -103,55 +125,5 @@ export class TerminalOperation {
     } finally {
       await writer.changePosition({ y: max + 1 }).writeLine('\n').showCursor().commit();
     }
-  }
-
-  /**
-   * Waiting indicator, streamed to a specific position, can be canceled
-   */
-  static streamWaiting(term: TermState, message: string, config: TerminalWaitingConfig = {}): () => Promise<void> {
-    const { stop, stream } = IterableUtil.cycle(STD_WAIT_STATES);
-    const indicator = IterableUtil.map(
-      stream,
-      IterableUtil.DELAY(config),
-      (ch, i) => config.end ? `${message} ${ch}` : `${ch} ${message}`
-    );
-
-    const final = this.streamToPosition(term, indicator, config);
-    return async () => { stop(); return final; };
-  }
-
-  /**
-   * Stream lines with a waiting indicator
-   */
-  static async streamLinesWithWaiting(term: TermState, lines: AsyncIterable<string | undefined>, cfg: TerminalWaitingConfig = {}): Promise<void> {
-    let writer: (() => Promise<unknown>) | undefined;
-    let line: string | undefined;
-
-    let pos = await term.getCursorPosition();
-
-
-    const commitLine = async (): Promise<void> => {
-      await writer?.();
-      if (line) {
-        const msg = cfg.committedPrefix ? `${cfg.committedPrefix} ${line}` : line;
-        if (cfg.position === 'inline') {
-          await TerminalWriter.for(term).setPosition(pos).write(msg).commit(true);
-        } else {
-          await TerminalWriter.for(term).writeLine(msg).commit();
-        }
-        line = undefined;
-      }
-    };
-
-    for await (let msg of lines) {
-      await commitLine();
-      if (msg !== undefined) {
-        msg = msg.replace(/\n$/, '');
-        pos = await term.getCursorPosition();
-        writer = this.streamWaiting(term, this.truncateIfNeeded(term, msg), { ...cfg, at: pos, clearOnFinish: false });
-        line = msg;
-      }
-    }
-    await commitLine();
   }
 }

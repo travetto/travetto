@@ -1,7 +1,7 @@
 import { ExecutionResult, ExecutionOptions, ExecutionState, Env } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
-import { ColorUtil, IterableUtil, TermLinePosition, Terminal, TerminalOperation } from '@travetto/terminal';
+import { ColorUtil, IterableUtil, Terminal, TerminalOperation } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
 const COLORS = ([
@@ -16,7 +16,6 @@ type ModuleRunConfig<T = ExecutionResult> = {
   filter?: (mod: IndexedModule) => boolean | Promise<boolean>;
   transformResult?: (mod: IndexedModule, result: ExecutionResult) => T;
   workerCount?: number;
-  progressPosition?: TermLinePosition;
   prefixOutput?: boolean;
   showStdout?: boolean;
   showStderr?: boolean;
@@ -51,10 +50,10 @@ export class RepoExecUtil {
     };
 
     if (config.showStdout) {
-      opts.onStdOutLine = (line: string): unknown => stdoutTerm.writeLines(`${prefixes[folder] ?? ''}${line}`);
+      opts.onStdOutLine = (line: string): unknown => TerminalOperation.writeLinesPlain(stdoutTerm, [`${prefixes[folder] ?? ''}${line}`]);
     }
     if (config.showStderr) {
-      opts.onStdErrorLine = (line: string): unknown => stderrTerm.writeLines(`${prefixes[folder] ?? ''}${line}`);
+      opts.onStdErrorLine = (line: string): unknown => TerminalOperation.writeLinesPlain(stderrTerm, [`${prefixes[folder] ?? ''}${line}`]);
     }
     return opts;
   }
@@ -110,7 +109,7 @@ export class RepoExecUtil {
     }, mods, mods.length, { max: workerCount, min: workerCount });
 
     if (config.progressMessage && stdoutTerm.interactive) {
-      const cfg = { position: config.progressPosition ?? 'bottom' } as const;
+      const cfg = {} as const;
       const theme = ColorUtil.fromStyle({ background: '#32cd32', text: '#ffffff' });
       await TerminalOperation.streamToPosition(stdoutTerm, IterableUtil.map(work, ev => {
         const text = ev.value ?? (ev.total ? '%idx/%total' : '%idx');
@@ -118,10 +117,10 @@ export class RepoExecUtil {
         const width = Math.trunc(Math.ceil(Math.log10(ev.total ?? 10000)));
         const state: Record<string, string> = { total: `${ev.total}`, idx: `${ev.idx}`.padStart(width), pct: `${Math.trunc(pct * 100)}` };
         const line = text.replace(/[%](idx|total|pct)/g, (_, k) => state[k]);
-        const full = TerminalOperation.truncateIfNeeded(stdoutTerm, ` ${line}`.padEnd(stdoutTerm.width));
+        const full = TerminalOperation.truncateIfNeeded(stdoutTerm, `${line}`.padEnd(stdoutTerm.width - 2));
         const mid = Math.trunc(pct * stdoutTerm.width);
         const [l, r] = [full.substring(0, mid), full.substring(mid)];
-        return `${theme(l)}${r}`;
+        return `%WAIT% ${theme(l)}${r}`;
       }), cfg);
     } else {
       for await (const _ of work) {

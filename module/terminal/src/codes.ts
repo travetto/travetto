@@ -1,13 +1,7 @@
 const ESC = '\x1b[';
-const OSC = '\x1b]';
-const ST = '\x1b\\';
-
-export const DEVICE_STATUS_FIELDS = { cursorPosition: 6 };
-
-export type DeviceStatusField = keyof (typeof DEVICE_STATUS_FIELDS);
 
 export const ANSICodes = {
-  DEBUG: (text: string): string => text.replaceAll(ESC, '<ESC>').replaceAll(OSC, '<OSC>').replaceAll('\n', '<NL>').replaceAll(ST, '<ST>'),
+  DEBUG: (text: string): string => text.replaceAll(ESC, '<ESC>').replaceAll('\n', '<NL>'),
   CURSOR_DY: (row: number): string => `${ESC}${Math.abs(row)}${row < 0 ? 'A' : 'B'}`,
   CURSOR_DX: (col: number): string => `${ESC}${Math.abs(col)}${col < 0 ? 'D' : 'C'}`,
   COLUMN_SET: (col: number): string => `${ESC}${col}G`,
@@ -22,5 +16,5 @@ export const ANSICodes = {
   SCROLL_WINDOW: (rows: number): string => `${ESC}${Math.abs(rows)}${rows < 0 ? 'S' : 'T'}`,
   POSITION_RESTORE: (): string => `${ESC}u`,
   POSITION_SAVE: (): string => `${ESC}s`,
-  DEVICE_STATUS_REPORT: (code: DeviceStatusField): string => `${ESC}${DEVICE_STATUS_FIELDS[code]}n`,
+  SOFT_RESET_CODES: (): string => `${ESC}!p`
 };

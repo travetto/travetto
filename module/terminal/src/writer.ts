@@ -1,5 +1,7 @@
 import { ANSICodes } from './codes';
-import { TermCoord, TermState } from './types';
+import { TermState } from './types';
+
+type TermCoord = { x: number, y: number };
 
 const boundIndex = (v: number, size: number): number => {
   if (v < 0) {
@@ -142,17 +144,7 @@ export class TerminalWriter {
   }
 
   /** Reset */
-  reset(): this {
-    return this.write(this.resetCommands());
-  }
-
-  /** Reset Commands */
-  resetCommands(): string {
-    return [
-      ANSICodes.POSITION_SAVE(),
-      ANSICodes.SHOW_CURSOR(),
-      ANSICodes.SCROLL_RANGE_CLEAR(),
-      ANSICodes.POSITION_RESTORE()
-    ].join('');
+  softReset(): this {
+    return this.write(ANSICodes.SOFT_RESET_CODES());
   }
 }
