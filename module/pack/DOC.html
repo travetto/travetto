@@ -184,15 +184,14 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 <span class="token function">rm</span> <span class="token parameter variable">-rf</span> <span class="token variable">$DIST</span>
 <span class="token function">mkdir</span> <span class="token parameter variable">-p</span> <span class="token variable">$DIST</span>
 
-<span class="token comment"># Writing config.env</span>
+<span class="token comment"># Writing .env.js</span>
 
-<span class="token builtin class-name">echo</span> <span class="token string">"Writing config.env"</span>
+<span class="token builtin class-name">echo</span> <span class="token string">"Writing .env.js"</span>
 
-<span class="token builtin class-name">echo</span> <span class="token string">"NODE_OPTIONS=--disable-proto=delete"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/config.env
-<span class="token builtin class-name">echo</span> <span class="token string">"NODE_ENV=production"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/config.env
-<span class="token builtin class-name">echo</span> <span class="token string">"TRV_MANIFEST=manifest.json"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/config.env
-<span class="token builtin class-name">echo</span> <span class="token string">"TRV_MODULE=<span class="token variable">$MOD</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/config.env
-<span class="token builtin class-name">echo</span> <span class="token string">"TRV_CLI_IPC="</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/config.env
+<span class="token builtin class-name">echo</span> <span class="token string">"process.env.NODE_ENV = 'production';"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/.env.js
+<span class="token builtin class-name">echo</span> <span class="token string">"process.env.TRV_MANIFEST = 'manifest.json';"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env.js
+<span class="token builtin class-name">echo</span> <span class="token string">"process.env.TRV_MODULE = '<span class="token variable">$MOD</span>';"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env.js
+<span class="token builtin class-name">echo</span> <span class="token string">"process.env.TRV_CLI_IPC = '';"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/.env.js
 
 <span class="token comment"># Writing package.json</span>
 
@@ -206,7 +205,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">"#!/bin/sh"</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/todo-app.sh
 <span class="token builtin class-name">echo</span> <span class="token string">"cd \<span class="token variable"><span class="token variable">$(</span><span class="token function">dirname</span> <span class="token punctuation">\</span>"<span class="token punctuation">\</span>$0<span class="token punctuation">\</span>"<span class="token variable">)</span></span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.sh
-<span class="token builtin class-name">echo</span> <span class="token string">"node --env-file config.env todo-app.js run:rest \<span class="token variable">$@</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.sh
+<span class="token builtin class-name">echo</span> <span class="token string">"node todo-app.js run:rest \<span class="token variable">$@</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.sh
 <span class="token function">chmod</span> <span class="token number">755</span> <span class="token variable">$DIST</span>/todo-app.sh
 
 <span class="token comment"># Writing entry scripts todo-app.cmd args=(run:rest)</span>
@@ -215,7 +214,7 @@ As indicated, any of the pack operations can be ejected, and produce an output t
 
 <span class="token builtin class-name">echo</span> <span class="token string">""</span> <span class="token operator">></span> <span class="token variable">$DIST</span>/todo-app.cmd
 <span class="token builtin class-name">echo</span> <span class="token string">"cd %~p0"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
-<span class="token builtin class-name">echo</span> <span class="token string">"node --env-file config.env todo-app.js run:rest %*"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
+<span class="token builtin class-name">echo</span> <span class="token string">"node todo-app.js run:rest %*"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/todo-app.cmd
 <span class="token function">chmod</span> <span class="token number">755</span> <span class="token variable">$DIST</span>/todo-app.cmd
 
 <span class="token comment"># Copying over resources</span>
@@ -254,6 +253,7 @@ npx rollup <span class="token parameter variable">-c</span> <span class="token v
 <span class="token builtin class-name">echo</span> <span class="token string">"RUN which useradd &amp;&amp; (groupadd --gid 2000 app &amp;&amp; useradd -u 2000 -g app app) || (addgroup -g 2000 app &amp;&amp; adduser -D -G app -u 2000 app)"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"RUN mkdir /app &amp;&amp; chown app:app /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"COPY --chown=<span class="token entity" title="\&quot;">\"</span>app:app<span class="token entity" title="\&quot;">\"</span> . /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
+<span class="token builtin class-name">echo</span> <span class="token string">"ENV NODE_OPTIONS=<span class="token entity" title="\&quot;">\"</span>--disable-proto=delete<span class="token entity" title="\&quot;">\"</span>"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"USER app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"WORKDIR /app"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile
 <span class="token builtin class-name">echo</span> <span class="token string">"ENTRYPOINT [<span class="token entity" title="\&quot;">\"</span>/app/todo-app.sh<span class="token entity" title="\&quot;">\"</span>]"</span> <span class="token operator">>></span> <span class="token variable">$DIST</span>/Dockerfile

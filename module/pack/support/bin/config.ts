@@ -7,8 +7,13 @@ import { ManifestModule, ManifestModuleUtil, NodeModuleType, path, RuntimeIndex,
 import { EnvProp } from '@travetto/base';
 
 const INTRO = {
-  commonjs: __importStar.toString().replace(/function([^(]+)/, 'function __importStar'),
-  module: ''
+  commonjs: [
+    "try { require('./.env.js')} } catch {}",
+    __importStar.toString().replace(/function([^(]+)/, 'function __importStar')
+  ],
+  module: [
+    "try { await import('./.env.js')} } catch {}",
+  ]
 };
 
 function getFilesFromModule(m: ManifestModule): string[] {
@@ -31,7 +36,7 @@ export function getOutput(): OutputOptions {
   const mainFile = process.env.BUNDLE_MAIN_FILE!;
   return {
     format,
-    intro: INTRO[format],
+    intro: INTRO[format].join('\n'),
     sourcemapPathTransform: (src, map): string =>
       path.resolve(path.dirname(map), src).replace(`${RuntimeContext.workspacePath}/`, ''),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,

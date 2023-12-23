@@ -14,7 +14,60 @@ yarn add @travetto/terminal
 ```
 
 This module provides basic support for interacting with the terminal, and provides the basis for output colorization and the basic command line interactions.  The functionality can be broken down into:
+   *  Output Colorization
    *  Terminal Interactions
+
+## Output Colorization
+Oddly enough, colorizing output in a terminal is a fairly complex process.  The standards are somewhat inconsistent and detection can be a tricky process. For terminals, [Node](https://nodejs.org) supports 4 different levels of coloring:
+   *  0 - One color, essentially uncolored output
+   *  1 - Basic color support, 16 colors
+   *  2 - Enhanced color support, 225 colors, providing a fair representation of most colors
+   *  3 - True color, 24bit color with R, G, B each getting 8-bits.  Can represent any color needed
+This module provides the ability to define color palettes using RGB colors, and additionally provides support for palettes based on a dark or light background for a given terminal.  Support for this is widespread, but when it fails, it will gracefully assume a dark background. 
+
+These palettes then are usable at runtime, with the module determining light or dark palettes, as well as falling back to the closest color value based on what the existing terminal supports.  This means a color like 'olivegreen', will get the proper output in 24bit color support, a close approximation in enhanced color support, fall back to green in basic color support, and will be color less at level 0.
+
+**Code: CLI Color Palette**
+```typescript
+import { ColorUtil } from '@travetto/terminal';
+
+export const cliTpl = ColorUtil.makeTemplate({
+  input: '#6b8e23', // Olive drab
+  output: '#ffc0cb', // Pink
+  path: '#008080', // Teal
+  success: '#00ff00', // Green
+  failure: '#ff0000', // Red
+  param: ['#ffff00', '#daa520'], // Yellow / Goldenrod
+  type: '#00ffff', // Teal
+  description: ['#e5e5e5', '#808080'], // White / Gray
+  title: ['#ffffff', '#000000'], // Bright white / black
+  identifier: '#1e90ff', // Dodger blue
+  subtitle: ['#d3d3d3', '#a9a9a9'], // Light gray / Dark Gray
+  subsubtitle: '#a9a9a9' // Dark gray
+});
+```
+
+When the color palette is combined with [Base](https://github.com/travetto/travetto/tree/main/module/base#readme "Environment config and common utilities for travetto applications.")'s Util.makeTemplate, you produce a string template function that will automatically colorize:
+
+**Code: Sample Template Usage**
+```typescript
+cliTpl`Build finished: status=${{success: "complete"}}, output=${{path: "/build.zip"}}`
+```
+
+This would then produce colorized output based on the palette, and the terminal capabilities. 
+
+This module follows the pattern [Node](https://nodejs.org) follows with respect to the environment variables: `NO_COLOR`, `FORCE_COLOR` and `NODE_DISABLE_COLORS`
+
+**Terminal: Node help on colors**
+```bash
+$ node -h | grep -i color
+
+FORCE_COLOR                 when set to 'true', 1, 2, 3, or an
+                            empty string causes NO_COLOR and
+                            NODE_DISABLE_COLORS to be ignored.
+NO_COLOR                    Alias for NODE_DISABLE_COLORS
+NODE_DISABLE_COLORS         set to 1 to disable colors in the REPL
+```
 
 ## Terminal Interactions
 Within the [Travetto](https://travetto.dev) framework, there are plenty of command line interactions that are enhanced with additional interactivity.  This mainly revolves around indicating progress while a program is executing.  The module provides support for:

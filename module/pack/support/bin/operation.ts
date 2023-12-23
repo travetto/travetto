@@ -122,12 +122,8 @@ export class PackOperation {
    * Define .env.js file to control manifest location
    */
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const file = 'config.env';
+    const file = '.env.js';
     const env = {
-      NODE_OPTIONS: [
-        '--disable-proto=delete',  // Security enforcement
-        ...(cfg.sourcemap ? ['--enable-source-maps'] : []),
-      ].join(' '),
       ...Env.NODE_ENV.export('production'),
       ...Env.TRV_MANIFEST.export('manifest.json'),
       ...Env.TRV_MODULE.export(cfg.module),
@@ -139,12 +135,12 @@ export class PackOperation {
     if (cfg.ejectFile) {
       yield* ActiveShellCommand.createFile(
         path.resolve(cfg.workspace, file),
-        PackUtil.buildEnvConfig(env)
+        PackUtil.buildEnvJS(env)
       );
     } else {
       await writeRawFile(
         path.resolve(cfg.workspace, file),
-        PackUtil.buildEnvConfig(env).join('\n')
+        PackUtil.buildEnvJS(env).join('\n')
       );
     }
   }
@@ -166,7 +162,7 @@ export class PackOperation {
         text: [
           ShellCommands[type].scriptOpen(),
           ShellCommands[type].chdirScript(),
-          ShellCommands[type].callCommandWithAllArgs('node', '--env-file', 'config.env', `${cfg.mainName}.js`, ...cfg.entryArguments),
+          ShellCommands[type].callCommandWithAllArgs('node', `${cfg.mainName}.js`, ...cfg.entryArguments),
         ].map(x => x.join(' '))
       }));
 

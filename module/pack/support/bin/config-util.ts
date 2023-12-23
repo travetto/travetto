@@ -22,7 +22,6 @@ export class PackConfigUtil {
 
   /**
    * Setup docker user
-   * @returns
    */
   static dockerUser(cfg: DockerPackConfig): string {
     const { user, group, uid, gid } = cfg.dockerRuntime;
@@ -32,6 +31,18 @@ export class PackConfigUtil {
         `groupadd --gid ${gid} ${group} && useradd -u ${uid} -g ${group} ${user}`,
         `addgroup -g ${gid} ${group} && adduser -D -G ${group} -u ${uid} ${user}`
       ) : '',
+    ].join('\n');
+  }
+
+  /**
+   * Setup Env Vars for NODE_OPTIONS and other standard environment variables
+   */
+  static dockerEnvVars(cfg: DockerPackConfig): string {
+    return [
+      `ENV NODE_OPTIONS="${[
+        '--disable-proto=delete',  // Security enforcement
+        ...(cfg.sourcemap ? ['--enable-source-maps'] : []),
+      ].join(' ')}"`,
     ].join('\n');
   }
 
@@ -73,6 +84,7 @@ export class PackConfigUtil {
       this.dockerUser(cfg),
       this.dockerAppFolder(cfg),
       this.dockerAppFiles(cfg),
+      this.dockerEnvVars(cfg),
     ].filter(x => !!x).join('\n');
   }
 

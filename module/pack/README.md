@@ -168,15 +168,14 @@ echo "Cleaning Output $DIST"
 rm -rf $DIST
 mkdir -p $DIST
 
-# Writing config.env 
+# Writing .env.js 
 
-echo "Writing config.env"
+echo "Writing .env.js"
 
-echo "NODE_OPTIONS=--disable-proto=delete" > $DIST/config.env
-echo "NODE_ENV=production" >> $DIST/config.env
-echo "TRV_MANIFEST=manifest.json" >> $DIST/config.env
-echo "TRV_MODULE=$MOD" >> $DIST/config.env
-echo "TRV_CLI_IPC=" >> $DIST/config.env
+echo "process.env.NODE_ENV = 'production';" > $DIST/.env.js
+echo "process.env.TRV_MANIFEST = 'manifest.json';" >> $DIST/.env.js
+echo "process.env.TRV_MODULE = '$MOD';" >> $DIST/.env.js
+echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js
 
 # Writing package.json 
 
@@ -190,7 +189,7 @@ echo "Writing entry scripts todo-app.sh args=(run:rest)"
 
 echo "#!/bin/sh" > $DIST/todo-app.sh
 echo "cd \$(dirname \"\$0\")" >> $DIST/todo-app.sh
-echo "node --env-file config.env todo-app.js run:rest \$@" >> $DIST/todo-app.sh
+echo "node todo-app.js run:rest \$@" >> $DIST/todo-app.sh
 chmod 755 $DIST/todo-app.sh
 
 # Writing entry scripts todo-app.cmd args=(run:rest) 
@@ -199,7 +198,7 @@ echo "Writing entry scripts todo-app.cmd args=(run:rest)"
 
 echo "" > $DIST/todo-app.cmd
 echo "cd %~p0" >> $DIST/todo-app.cmd
-echo "node --env-file config.env todo-app.js run:rest %*" >> $DIST/todo-app.cmd
+echo "node todo-app.js run:rest %*" >> $DIST/todo-app.cmd
 chmod 755 $DIST/todo-app.cmd
 
 # Copying over resources 
@@ -238,6 +237,7 @@ echo "FROM node:20-alpine" > $DIST/Dockerfile
 echo "RUN which useradd && (groupadd --gid 2000 app && useradd -u 2000 -g app app) || (addgroup -g 2000 app && adduser -D -G app -u 2000 app)" >> $DIST/Dockerfile
 echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
 echo "COPY --chown=\"app:app\" . /app" >> $DIST/Dockerfile
+echo "ENV NODE_OPTIONS=\"--disable-proto=delete\"" >> $DIST/Dockerfile
 echo "USER app" >> $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
