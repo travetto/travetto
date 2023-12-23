@@ -1,4 +1,5 @@
-import { ColorUtil, IterableUtil, Terminal, TerminalOperation } from '@travetto/terminal';
+import { Util } from '@travetto/base';
+import { ColorUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkQueue } from '@travetto/worker';
 
 import { TestEvent } from '../../model/event';
@@ -15,33 +16,12 @@ import { TapEmitter } from './tap';
 @Consumable('tap-streamed')
 export class TapStreamedEmitter implements TestConsumer {
 
-  static makeProgressBar(term: Terminal, total: number): (t: TestResult, idx: number) => string {
-    let failed = 0;
-    const palette: ((text: string) => string)[] = [
-      ColorUtil.fromStyle({ text: '#e5e5e5', background: '#026020' }), // White on dark green
-      ColorUtil.fromStyle({ text: '#e5e5e5', background: '#8b0000' }), // White on dark red
-    ];
-    return (t: TestResult, idx: number): string => {
-      if (t.status === 'failed') {
-        failed += 1;
-      }
-      const i = idx + 1;
-      const digits = total.toString().length;
-      const paddedI = `${i}`.padStart(digits);
-      const paddedFailed = `${failed}`.padStart(digits);
-      const line = `Tests ${paddedI}/${total} [${paddedFailed} failed] -- ${t.classId}`.padEnd(term.width);
-      const pos = Math.trunc(line.length * (i / total));
-      const colorer = palette[Math.min(failed, palette.length - 1)];
-      return `${colorer(line.substring(0, pos))}${line.substring(pos)}`;
-    };
-  }
-
   #terminal: Terminal;
   #results = new WorkQueue<TestResult>();
   #progress: Promise<unknown> | undefined;
   #consumer: TapEmitter;
 
-  constructor(terminal: Terminal = new Terminal({ output: process.stderr })) {
+  constructor(terminal: Terminal = new Terminal(process.stderr)) {
     this.#terminal = terminal;
     this.#consumer = new TapEmitter(this.#terminal);
   }
@@ -49,9 +29,18 @@ export class TapStreamedEmitter implements TestConsumer {
   async onStart(state: TestRunState): Promise<void> {
     this.#consumer.onStart();
 
-    this.#progress = TerminalOperation.streamToPosition(
-      this.#terminal,
-      IterableUtil.map(this.#results, TapStreamedEmitter.makeProgressBar(this.#terminal, state.testCount ?? 0)),
+    let failed = 0;
+    const succ = ColorUtil.fromStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
+    const fail = ColorUtil.fromStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
+    this.#progress = this.#terminal.streamToBottom(
+      Util.mapAsyncItr(
+        this.#results,
+        (value, idx) => {
+          failed += (value.status === 'failed' ? 1 : 0);
+          return { value: `Tests %idx/%total [${failed} failed] -- ${value.classId}`, total: state.testCount, idx };
+        },
+        TerminalUtil.progressBarUpdater(this.#terminal, { style: () => ({ complete: failed ? fail : succ }) })
+      ),
       { minDelay: 100 }
     );
   }

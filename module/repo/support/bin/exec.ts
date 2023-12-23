@@ -1,7 +1,7 @@
-import { ExecutionResult, ExecutionOptions, ExecutionState, Env } from '@travetto/base';
+import { ExecutionResult, ExecutionOptions, ExecutionState, Env, Util } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
-import { ColorUtil, IterableUtil, Terminal, TerminalOperation } from '@travetto/terminal';
+import { ColorUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
 const COLORS = ([
@@ -9,7 +9,8 @@ const COLORS = ([
   '#afffd7', '#afffff', '#d787ff', '#d7afaf', '#d7afd7', '#d7afff', '#d7d7af', '#d7d7d7', '#d7d7ff', '#d7ff87', '#d7ffaf', '#d7ffd7', '#d7ffff', '#ff8787', '#ff87af',
   '#ff87d7', '#ff87ff', '#ffaf87', '#ffafaf', '#ffafd7', '#ffafff', '#ffd787', '#ffd7af', '#ffd7d7', '#ffd7ff', '#ffff87', '#ffffaf', '#ffffd7', '#ffffff', '#bcbcbc',
   '#c6c6c6', '#d0d0d0', '#dadada', '#e4e4e4', '#eeeeee'
-] as const).map(x => ColorUtil.fromStyle(x));
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+]).sort((a, b) => Math.random() < .5 ? -1 : 1).map(x => ColorUtil.fromStyle(x as `#${string}`));
 
 type ModuleRunConfig<T = ExecutionResult> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;
@@ -27,10 +28,11 @@ const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.lengt
  * Tools for running commands across all modules of the monorepo
  */
 export class RepoExecUtil {
+
   /**
    * Generate execution options for running on modules
    */
-  static #buildExecutionOptions<T = ExecutionState>(
+  static #buildExecutionOptions <T = ExecutionState>(
     mod: IndexedModule,
     config: ModuleRunConfig<T>,
     prefixes: Record<string, string>,
@@ -50,10 +52,10 @@ export class RepoExecUtil {
     };
 
     if (config.showStdout) {
-      opts.onStdOutLine = (line: string): unknown => TerminalOperation.writeLinesPlain(stdoutTerm, [`${prefixes[folder] ?? ''}${line}`]);
+      opts.onStdOutLine = (line: string): unknown => stdoutTerm.writer.write(`${prefixes[folder] ?? ''}${line}`).commit();
     }
     if (config.showStderr) {
-      opts.onStdErrorLine = (line: string): unknown => TerminalOperation.writeLinesPlain(stderrTerm, [`${prefixes[folder] ?? ''}${line}`]);
+      opts.onStdErrorLine = (line: string): unknown => stderrTerm.writer.write(`${prefixes[folder] ?? ''}${line}`).commit();
     }
     return opts;
   }
@@ -88,8 +90,8 @@ export class RepoExecUtil {
     const processes = new Map<IndexedModule, ExecutionState>();
 
     const prefixes = config.prefixOutput !== false ? this.#buildPrefixes(mods) : {};
-    const stdoutTerm = new Terminal({ output: process.stdout });
-    const stderrTerm = new Terminal({ output: process.stderr });
+    const stdoutTerm = new Terminal(process.stdout);
+    const stderrTerm = new Terminal(process.stderr);
 
     const work = WorkPool.runStreamProgress(async (mod) => {
       try {
@@ -109,19 +111,7 @@ export class RepoExecUtil {
     }, mods, mods.length, { max: workerCount, min: workerCount });
 
     if (config.progressMessage && stdoutTerm.interactive) {
-      const cfg = {} as const;
-      const theme = ColorUtil.fromStyle({ background: '#32cd32', text: '#ffffff' });
-      await TerminalOperation.streamToPosition(stdoutTerm, IterableUtil.map(work, ev => {
-        const text = ev.value ?? (ev.total ? '%idx/%total' : '%idx');
-        const pct = ev.total === undefined ? 0 : (ev.idx / ev.total);
-        const width = Math.trunc(Math.ceil(Math.log10(ev.total ?? 10000)));
-        const state: Record<string, string> = { total: `${ev.total}`, idx: `${ev.idx}`.padStart(width), pct: `${Math.trunc(pct * 100)}` };
-        const line = text.replace(/[%](idx|total|pct)/g, (_, k) => state[k]);
-        const full = TerminalOperation.truncateIfNeeded(stdoutTerm, `${line}`.padEnd(stdoutTerm.width - 2));
-        const mid = Math.trunc(pct * stdoutTerm.width);
-        const [l, r] = [full.substring(0, mid), full.substring(mid)];
-        return `%WAIT% ${theme(l)}${r}`;
-      }), cfg);
+      await stdoutTerm.streamToBottom(Util.mapAsyncItr(work, TerminalUtil.progressBarUpdater(stdoutTerm, { withWaiting: true })));
     } else {
       for await (const _ of work) {
         // Ensure its all consumed

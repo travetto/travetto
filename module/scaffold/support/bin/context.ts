@@ -4,7 +4,7 @@ import mustache from 'mustache';
 import { cliTpl } from '@travetto/cli';
 import { path, RuntimeIndex, RuntimeContext, NodePackageManager } from '@travetto/manifest';
 import { ExecUtil, ExecutionResult } from '@travetto/base';
-import { GlobalTerminal, TerminalOperation } from '@travetto/terminal';
+import { Terminal } from '@travetto/terminal';
 
 import { Feature } from './features';
 
@@ -51,11 +51,12 @@ export class Context {
   }
 
   #exec(cmd: string, args: string[]): Promise<ExecutionResult> {
+    const term = new Terminal();
     const res = ExecUtil.spawn(cmd, args, {
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
       isolatedEnv: true,
-      onStdErrorLine: line => TerminalOperation.writeLinesPlain(GlobalTerminal, [cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`])
+      onStdErrorLine: line => term.writer.write(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`).commit()
     }).result;
 
     return res;
