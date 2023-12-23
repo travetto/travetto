@@ -53,7 +53,6 @@ export class CliServiceCommand implements CliCommandShape {
       '',
       cliTpl`${{ title: 'Service'.padEnd(maxName) }} ${{ title: 'Version'.padEnd(maxVersion) }} ${{ title: 'Status' }}`,
       ''.padEnd(maxName + maxVersion + maxStatus + 3, '-'),
-      ''
     ]).commit();
 
     await term.streamList(resolved);
