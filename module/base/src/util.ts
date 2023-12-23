@@ -3,6 +3,7 @@ import crypto from 'node:crypto';
 type PromiseResolver<T> = { resolve: (v: T) => void, reject: (err?: unknown) => void };
 type List<T> = T[] | readonly T[];
 type OrderedState<T> = { after?: List<T>, before?: List<T>, key: T };
+type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
 
 /**
  * Grab bag of common utilities
@@ -164,5 +165,26 @@ export class Util {
     let ops: PromiseResolver<T>;
     const prom = new Promise<T>((resolve, reject) => ops = { resolve, reject });
     return Object.assign(prom, ops!);
+  }
+
+  /**
+   * Map an async iterable with various mapping functions
+   */
+  static mapAsyncItr<T, U, V, W>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>, fn3: MapFn<V, W>): AsyncIterable<W>;
+  static mapAsyncItr<T, U, V>(source: AsyncIterable<T>, fn1: MapFn<T, U>, fn2: MapFn<U, V>): AsyncIterable<V>;
+  static mapAsyncItr<T, U>(source: AsyncIterable<T>, fn: MapFn<T, U>): AsyncIterable<U>;
+  static async * mapAsyncItr<T>(source: AsyncIterable<T>, ...fns: MapFn<unknown, unknown>[]): AsyncIterable<unknown> {
+    let idx = -1;
+    for await (const el of source) {
+      if (el !== undefined) {
+        idx += 1;
+        let m = el;
+        for (const fn of fns) {
+          // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+          m = (await fn(m, idx)) as typeof m;
+        }
+        yield m;
+      }
+    }
   }
 }

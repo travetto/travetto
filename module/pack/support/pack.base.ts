@@ -3,7 +3,7 @@ import os from 'node:os';
 import { CliCommandShape, CliFlag, ParsedState, cliTpl } from '@travetto/cli';
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { TimeUtil } from '@travetto/base';
-import { GlobalTerminal, IterableUtil, TerminalOperation } from '@travetto/terminal';
+import { Terminal } from '@travetto/terminal';
 import { Ignore, Required, Schema } from '@travetto/schema';
 
 import { PackOperation } from './bin/operation';
@@ -110,18 +110,15 @@ export abstract class BasePackCommand implements CliCommandShape {
       await PackUtil.writeEjectOutput(this.workspace, this.module, stream, this.ejectFile);
     } else {
       const start = Date.now();
+      const term = new Terminal();
 
-      if (!GlobalTerminal.interactive) {
-        await TerminalOperation.writeLinesPlain(GlobalTerminal, IterableUtil.map(stream, x => `> ${x}`));
-      } else {
-        await TerminalOperation.streamToPosition(GlobalTerminal, IterableUtil.map(stream, x => `%WAIT% ${x}`), { outputStreamToMain: true });
-      }
+      await term.streamLines(stream);
 
       let msg = cliTpl`${{ success: 'Success' }} (${{ identifier: TimeUtil.prettyDeltaSinceTime(start) }}) ${{ subtitle: 'module' }}=${{ param: this.module }}`;
       if (this.output) {
         msg = cliTpl`${msg} ${{ subtitle: 'output' }}=${{ path: this.output }}`;
       }
-      await TerminalOperation.writeLinesPlain(GlobalTerminal, [msg]);
+      await term.writer.writeLine(msg).commit();
     }
   }
 }

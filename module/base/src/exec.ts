@@ -183,7 +183,7 @@ export class ExecUtil {
           // If pipes exists
           if (proc.stdout) {
             rl.createInterface(proc.stdout).on('line', line => {
-              options.onStdOutLine?.(line);
+              options.onStdOutLine?.(`${line}\n`);
               if (options.outputMode !== 'text-stream') {
                 stdout.push(Buffer.from(line), Buffer.from('\n'));
               }
@@ -191,7 +191,7 @@ export class ExecUtil {
           }
           if (proc.stderr) {
             rl.createInterface(proc.stderr).on('line', line => {
-              options.onStdErrorLine?.(line);
+              options.onStdErrorLine?.(`${line}\n`);
               if (options.outputMode !== 'text-stream') {
                 stderr.push(Buffer.from(line), Buffer.from('\n'));
               }

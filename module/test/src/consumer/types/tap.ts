@@ -1,5 +1,5 @@
 import { RuntimeIndex } from '@travetto/manifest';
-import { GlobalTerminal, Terminal, TerminalOperation } from '@travetto/terminal';
+import { Terminal } from '@travetto/terminal';
 import { ObjectUtil, TimeUtil } from '@travetto/base';
 import { YamlUtil } from '@travetto/yaml';
 
@@ -20,7 +20,7 @@ export class TapEmitter implements TestConsumer {
   #start: number;
 
   constructor(
-    terminal = new Terminal({ output: process.stdout }),
+    terminal = new Terminal(),
     enhancer: TestResultsEnhancer = CONSOLE_ENHANCER
   ) {
     this.#terminal = terminal;
@@ -28,7 +28,7 @@ export class TapEmitter implements TestConsumer {
   }
 
   log(message: string): void {
-    TerminalOperation.writeLinesPlain(this.#terminal, [message]);
+    this.#terminal.writer.writeLine(message).commit();
   }
 
   /**
@@ -43,7 +43,7 @@ export class TapEmitter implements TestConsumer {
    * Output supplemental data (e.g. logs)
    */
   logMeta(obj: Record<string, unknown>): void {
-    const lineLength = GlobalTerminal.width - 5;
+    const lineLength = this.#terminal.width - 5;
     let body = YamlUtil.serialize(obj, { wordwrap: lineLength });
     body = body.split('\n').map(x => `  ${x}`).join('\n');
     this.log(`---\n${this.#enhancer.objectInspect(body)}\n...`);

@@ -2,6 +2,7 @@ import crypto from 'node:crypto';
 import assert from 'node:assert';
 
 import { Test, Suite } from '@travetto/test';
+import { WorkQueue } from '@travetto/worker';
 
 import { Util } from '../src/util';
 
@@ -79,5 +80,22 @@ export class UtilTest {
     assert(Util.fullHash('', 20) === unKey.substring(0, 20));
 
     assert(Util.fullHash('', 20) !== key.substring(0, 20));
+  }
+
+  @Test()
+  async verifyMap() {
+    const lines = new WorkQueue(['aaa', 'bbb']);
+
+    const values: string[] = [];
+    let j = 0;
+    for await (const el of Util.mapAsyncItr(lines, (text, i) => `${text} = ${i}`)) {
+      values.push(el);
+      if ((j += 1) === 2) {
+        break;
+      }
+    }
+
+    assert(values[0] === 'aaa = 0');
+    assert(values[1] === 'bbb = 1');
   }
 }

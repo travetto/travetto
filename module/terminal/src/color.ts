@@ -4,10 +4,10 @@ import { Env, TypedObject, Primitive } from '@travetto/base';
 
 type TemplatePrim = Primitive | RegExp;
 type Color = `#${string}`;
-type StyleInput = Color | { text: Color, background?: Color, inverse?: boolean, bold?: boolean, italic?: boolean, underline?: boolean };
-type StylePairInput = StyleInput | [StyleInput, StyleInput];
-type StyleFn = (input: TemplatePrim) => string;
-type StyledTemplate<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
+export type TermStyleInput = Color | { text: Color, background?: Color, inverse?: boolean, bold?: boolean, italic?: boolean, underline?: boolean };
+type TermStylePairInput = TermStyleInput | [dark: TermStyleInput, light: TermStyleInput];
+export type TermStyleFn = (input: TemplatePrim) => string;
+type TermStyledTemplate<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
 
 // eslint-disable-next-line no-control-regex
 const ANSI_CODE_REGEX = /(\x1b|\x1B)[\[\]][?]?[0-9;]+[A-Za-z]/g;
@@ -25,7 +25,7 @@ export class ColorUtil {
   /**
    * Create text render function from style input using current color levels
    */
-  static fromStyle(input: StyleInput): StyleFn {
+  static fromStyle(input: TermStyleInput): TermStyleFn {
     if (typeof input === 'string') {
       return chalk.hex(input);
     } else {
@@ -60,10 +60,10 @@ export class ColorUtil {
   /**
    * Create renderer from input source
    */
-  static fromInput(input: StylePairInput): StyleFn {
-    const all = (Array.isArray(input) ? input : [input, input]);
-    const dark = this.isBackgroundDark();
-    return dark ? this.fromStyle(all[0]) : this.fromStyle(all[1]);
+  static fromInput(input: TermStylePairInput): TermStyleFn {
+    const [dark, light] = (Array.isArray(input) ? input : [input]);
+    const isDark = this.isBackgroundDark();
+    return isDark ? this.fromStyle(dark) : this.fromStyle(light ?? dark);
   }
 
   /**
@@ -76,7 +76,7 @@ export class ColorUtil {
   /**
    * Build color palette, with support for background-color awareness
    */
-  static styleMap<K extends string>(inp: Record<K, StylePairInput>): Record<K, StyleFn> {
+  static styleMap<K extends string>(inp: Record<K, TermStylePairInput>): Record<K, TermStyleFn> {
     return TypedObject.fromEntries(
       TypedObject.entries(inp).map(([k, v]) => [k, this.fromInput(v)]));
   }
@@ -84,7 +84,7 @@ export class ColorUtil {
   /**
    * Make a template function based on the input set
    */
-  static makeTemplate<K extends string>(input: Record<K, StylePairInput>): StyledTemplate<K> {
+  static makeTemplate<K extends string>(input: Record<K, TermStylePairInput>): TermStyledTemplate<K> {
     const palette = this.styleMap(input);
 
     return (values: TemplateStringsArray, ...keys: (Partial<Record<K, TemplatePrim>> | string)[]) => {
