@@ -30,7 +30,7 @@ export class Workspace {
   static #log = new Log('travetto.vscode.workspace');
 
   static #resolveImport(imp: string): string {
-    return PackageUtil.resolveImport(imp, this.#manifestContext);
+    return PackageUtil.resolveImport(imp, this.#manifestContext.workspacePath);
   }
 
   static get isMonoRepo(): boolean {

@@ -58,10 +58,7 @@ export class LogUtil {
       if (ev.scope) {
         params.unshift(`[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`);
       }
-      params.unshift(`${ev.level.padEnd(5)}`);
-      if (!/(0|false|off|no)$/i.test(process.env.TRV_LOG_TIME ?? '')) {
-        params.unshift(new Date().toISOString());
-      }
+      params.unshift(new Date().toISOString(), `${ev.level.padEnd(5)}`);
       // eslint-disable-next-line no-console
       console[ev.level]!(...params);
     }

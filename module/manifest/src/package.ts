@@ -31,8 +31,8 @@ export class PackageUtil {
   /**
    * Resolve import given a manifest context
    */
-  static resolveImport(imp: string, ctx?: ManifestContext): string {
-    const loc = path.resolve(ctx?.workspacePath ?? '.', 'node_modules');
+  static resolveImport(imp: string, root?: string): string {
+    const loc = path.resolve(root ?? '.', 'node_modules');
     return (this.#resolvers[loc] ??= createRequire(loc).resolve.bind(null))(imp);
   }
 
@@ -50,12 +50,12 @@ export class PackageUtil {
   /**
    * Find package.json folder for a given dependency
    */
-  static resolvePackagePath(name: string): string {
+  static resolvePackagePath(name: string, root?: string): string {
     try {
-      return path.dirname(this.resolveImport(`${name}/package.json`));
+      return path.dirname(this.resolveImport(`${name}/package.json`, root));
     } catch {
       try {
-        const resolved = this.resolveImport(name);
+        const resolved = this.resolveImport(name, root);
         return path.join(resolved.split(name)[0], name);
       } catch { }
     }

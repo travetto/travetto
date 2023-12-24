@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import fs from 'node:fs/promises';
 
 import { type DeltaEvent, type ManifestContext, type ManifestRoot, type Package } from '@travetto/manifest';
@@ -11,6 +12,7 @@ type ModFile = { input: string, output: string, stale: boolean };
 const SOURCE_SEED = ['package.json', 'index.ts', '__index__.ts', 'src', 'support', 'bin'];
 const PRECOMPILE_MODS = ['@travetto/manifest', '@travetto/transformer', '@travetto/compiler'];
 const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
+const REQ = createRequire(path.resolve('node_modules')).resolve.bind(null);
 
 /**
  * Compiler Setup Utilities
@@ -74,11 +76,9 @@ export class CompilerSetup {
    * Scan directory to find all project sources for comparison
    */
   static async #getModuleSources(ctx: ManifestContext, module: string, seed: string[]): Promise<ModFile[]> {
-    const { PackageUtil } = await this.#importManifest(ctx);
-
     const inputFolder = (ctx.mainModule === module) ?
       process.cwd() :
-      PackageUtil.resolveImport(module, ctx);
+      path.dirname(REQ(`${module}/package.json`));
 
     const folders = seed.filter(x => !/[.]/.test(x)).map(x => path.resolve(inputFolder, x));
     const files = seed.filter(x => /[.]/.test(x)).map(x => path.resolve(inputFolder, x));

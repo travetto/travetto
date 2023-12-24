@@ -440,7 +440,8 @@ export abstract class SQLDialect implements DialectState {
               break;
             }
             case '$all': {
-              const arr = [...new Set(Array.isArray(v) ? v : [v])].map(el => resolve(el));
+              const set = new Set();
+              const arr = [v].flat().filter(x => !set.has(x) && !!set.add(x)).map(el => resolve(el));
               const valueTable = this.parentTable(sStack);
               const alias = `_all_${sStack.length}`;
               const pPath = this.ident(this.parentPathField.name);

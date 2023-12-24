@@ -100,6 +100,7 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
   "toolFolder": ".trv/tool",
   "compilerFolder": ".trv/compiler",
   "compilerUrl": "http://127.0.0.1:26803",
+  "compilerModuleFolder": "module/compiler",
   "frameworkVersion": "x.x.x",
   "mainModule": "@travetto/manifest",
   "mainFolder": "module/manifest",

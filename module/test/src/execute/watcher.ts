@@ -66,6 +66,7 @@ export class TestWatcher {
 
     process.on('message', ev => {
       if (isRunEvent(ev)) {
+        console.debug('Manually triggered', ev);
         itr.add([ev.file, ev.class, ev.method].filter(x => !!x).join('#'), true);
       }
     });

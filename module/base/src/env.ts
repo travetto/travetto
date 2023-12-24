@@ -40,7 +40,7 @@ export class EnvProp<T> {
   /** Add values to list */
   add(...items: string[]): void {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    this.set([...new Set([...this.list ?? [], ...items])] as T);
+    this.set([... new Set([...this.list ?? [], ...items])] as T);
   }
 
   /** Read value as int  */
