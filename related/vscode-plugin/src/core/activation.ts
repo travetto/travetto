@@ -31,7 +31,7 @@ class $ActivationManager {
   async init(): Promise<void> {
     for (const entry of [...this.#registry.values()]) {
       const { module, command, cls } = entry;
-      if (command === true || (await Workspace.isInstalled(module))) {
+      if (command === true || Workspace.isInstalled(module)) {
         const inst = entry.instance = new cls(module, command === true ? undefined : command);
         await vscode.commands.executeCommand('setContext', inst.moduleBase, true);
         if (typeof command === 'string') {

@@ -186,9 +186,9 @@ export class Workspace {
    * See if module is installed
    * @param mod
    */
-  static async isInstalled(mod: string): Promise<boolean> {
+  static isInstalled(mod: string): boolean {
     try {
-      this.#resolveImport(`${mod}/package.json`);
+      this.#resolveImport(mod);
       return true;
     } catch {
       return false;
