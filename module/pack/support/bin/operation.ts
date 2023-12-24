@@ -8,10 +8,6 @@ import { CommonPackConfig } from './types';
 import { PackUtil } from './util';
 import { ActiveShellCommand, ShellCommands } from './shell';
 
-async function writeRawFile(file: string, contents: string, mode?: string): Promise<void> {
-  await fs.writeFile(file, contents, { encoding: 'utf8', mode });
-}
-
 /**
  * General pack operations
  */
@@ -64,12 +60,13 @@ export class PackOperation {
     const env = {
       ...Object.fromEntries(([
         ['BUNDLE_ENTRY', entryPointFile],
-        ['BUNDLE_MAIN_FILE', `${cfg.mainName}.js`],
+        ['BUNDLE_MAIN_FILE', cfg.mainFile],
         ['BUNDLE_COMPRESS', cfg.minify],
         ['BUNDLE_SOURCEMAP', cfg.sourcemap],
         ['BUNDLE_SOURCES', cfg.includeSources],
         ['BUNDLE_OUTPUT', cfg.workspace],
         ['BUNDLE_FORMAT', RuntimeContext.moduleType],
+        ['BUNDLE_ENV_FILE', cfg.envFile]
       ] as const)
         .filter(x => x[1] === false || x[1])
         .map(x => [x[0], `${x[1]}`])
@@ -91,7 +88,7 @@ export class PackOperation {
       yield ActiveShellCommand.chdir(path.cwd());
     } else {
       await PackUtil.runCommand(bundleCommand, { cwd, env });
-      const stat = await fs.stat(path.resolve(cfg.workspace, `${cfg.mainName}.js`));
+      const stat = await fs.stat(path.resolve(cfg.workspace, cfg.mainFile));
       yield [cliTpl`${{ title: 'Bundled Output ' }} ${{ identifier: 'sizeKb' }}=${{ param: Math.trunc(stat.size / 2 ** 10) }}`];
     }
   }
@@ -101,7 +98,7 @@ export class PackOperation {
    */
   static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = 'package.json';
-    const pkg = { type: RuntimeContext.moduleType, main: `${cfg.mainName}.js` };
+    const pkg = { type: RuntimeContext.moduleType, main: cfg.mainFile };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 
@@ -111,9 +108,9 @@ export class PackOperation {
         [JSON.stringify(pkg)]
       );
     } else {
-      await writeRawFile(
+      await PackUtil.writeRawFile(
         path.resolve(cfg.workspace, file),
-        JSON.stringify(pkg, null, 2)
+        [JSON.stringify(pkg, null, 2)]
       );
     }
   }
@@ -122,12 +119,11 @@ export class PackOperation {
    * Define .env.js file to control manifest location
    */
   static async * writeEnv(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const file = '.env.js';
+    const file = path.resolve(cfg.workspace, cfg.envFile);
     const env = {
       ...Env.NODE_ENV.export('production'),
-      ...Env.TRV_MANIFEST.export('manifest.json'),
+      ...Env.TRV_MANIFEST.export(cfg.manifestFile),
       ...Env.TRV_MODULE.export(cfg.module),
-      ...Env.TRV_CLI_IPC.export('')
     };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
@@ -135,12 +131,12 @@ export class PackOperation {
     if (cfg.ejectFile) {
       yield* ActiveShellCommand.createFile(
         path.resolve(cfg.workspace, file),
-        PackUtil.buildEnvJS(env)
+        PackUtil.buildEnvFile(env)
       );
     } else {
-      await writeRawFile(
+      await PackUtil.writeRawFile(
         path.resolve(cfg.workspace, file),
-        PackUtil.buildEnvJS(env).join('\n')
+        PackUtil.buildEnvFile(env)
       );
     }
   }
@@ -162,7 +158,7 @@ export class PackOperation {
         text: [
           ShellCommands[type].scriptOpen(),
           ShellCommands[type].chdirScript(),
-          ShellCommands[type].callCommandWithAllArgs('node', `${cfg.mainName}.js`, ...cfg.entryArguments),
+          ShellCommands[type].callCommandWithAllArgs('node', `--env-file=${cfg.envFile}`, cfg.mainFile, ...cfg.entryArguments),
         ].map(x => x.join(' '))
       }));
 
@@ -174,7 +170,7 @@ export class PackOperation {
     } else {
       for (const { fileTitle, text, file } of files) {
         yield* PackOperation.title(cfg, fileTitle);
-        await writeRawFile(path.resolve(cfg.workspace, file), text.join('\n'), '755');
+        await PackUtil.writeRawFile(path.resolve(cfg.workspace, file), text, '755');
       }
     }
   }
@@ -207,11 +203,11 @@ export class PackOperation {
    * Produce the output manifest, only including prod dependencies
    */
   static async * writeManifest(cfg: CommonPackConfig): AsyncIterable<string[]> {
-    const out = path.resolve(cfg.workspace, 'manifest.json');
-    const cmd = ['npx', 'trvc', 'manifest', out, 'prod'];
+    const out = path.resolve(cfg.workspace, cfg.manifestFile);
+    const cmd = ['npx', 'trvc', 'manifest', '--prod', out];
     const env = { ...Env.TRV_MODULE.export(cfg.module) };
 
-    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: 'manifest.json' }}`);
+    yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing Manifest' }} ${{ path: cfg.manifestFile }}`);
 
     if (cfg.ejectFile) {
       yield [...Object.entries(env).map(([k, v]) => `${k}=${v}`), ...cmd];

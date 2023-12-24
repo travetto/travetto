@@ -62,8 +62,17 @@ export abstract class BasePackCommand implements CliCommandShape {
   @CliFlag({ desc: 'Rollup configuration file', short: 'r' })
   rollupConfiguration = '@travetto/pack/support/bin/rollup';
 
+  @CliFlag({ desc: 'Env Flag File Name' })
+  envFile = '.env';
+
+  @CliFlag({ desc: 'Manifest File Name' })
+  manifestFile = 'manifest.json';
+
   @Ignore()
   module: string;
+
+  @Ignore()
+  mainFile: string;
 
   /** Entry arguments */
   @Ignore()
@@ -102,6 +111,7 @@ export abstract class BasePackCommand implements CliCommandShape {
     this.entryArguments = [...this.entryArguments ?? [], ...args, ...this._parsed.unknown];
     this.module ||= RuntimeContext.mainModule;
     this.mainName ??= path.basename(this.module);
+    this.mainFile = `${this.mainName}.js`;
 
     const stream = this.runOperations();
 

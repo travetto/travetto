@@ -14,12 +14,13 @@ const help = () => [
   ' * build                     - Ensure the project is built and upto date',
   ' * clean                     - Clean out the output and compiler caches',
   ' * info                      - Retrieve the compiler information, if running',
-  ' * manifest [output] [prod]  - Generate the project manifest',
+  ' * manifest --prod [output]  - Generate the project manifest',
 ].join('\n');
 
 getEntry().then(async (ops) => {
-  const [op, ...args] = process.argv.slice(2);
-  const baseArgs = args.filter(x => !x.startsWith('-'));
+  const [op, ...all] = process.argv.slice(2);
+  const args = all.filter(x => !x.startsWith('-'));
+  const flags = all.filter(x => x.startsWith('-'));
 
   switch (op) {
     case undefined:
@@ -28,7 +29,7 @@ getEntry().then(async (ops) => {
     case 'stop': return ops.stop();
     case 'info': return ops.info().then(v => console.log(JSON.stringify(v, null, 2)));
     case 'clean': return ops.clean();
-    case 'manifest': return ops.manifest(baseArgs[0], /prod/i.test(baseArgs[1] ?? ''));
+    case 'manifest': return ops.manifest(args[0], flags.some(x => x === '--prod'));
     case 'start': return ops.compile('watch');
     case 'watch':
     case 'build': return ops.compile(op);

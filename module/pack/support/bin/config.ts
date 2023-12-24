@@ -1,20 +1,27 @@
+import type fs from 'node:fs';
 import type { OutputOptions } from 'rollup';
-import { __importStar } from 'tslib';
 
 import type terser from '@rollup/plugin-terser';
 
 import { ManifestModule, ManifestModuleUtil, NodeModuleType, path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { EnvProp } from '@travetto/base';
 
-const INTRO = {
-  commonjs: [
-    "try { require('./.env.js')} } catch {}",
-    __importStar.toString().replace(/function([^(]+)/, 'function __importStar')
-  ],
-  module: [
-    "try { await import('./.env.js')} } catch {}",
-  ]
-};
+// eslint-disable-next-line @typescript-eslint/naming-convention
+function __envImport(mod: typeof fs, file: string): void {
+  if (process.env.TRV_MODULE) { return; }
+  try {
+    mod.readFileSync(file, 'utf8')
+      .split('\n')
+      .map(x => x.match(/\s*(?<key>[^ =]+)\s*=\s*(?<value>\S+)/)?.groups)
+      .filter((x): x is Exclude<typeof x, null | undefined> => !!x)
+      .forEach(x => process.env[x.key] = x.value);
+  } catch { }
+}
+
+const INTRO = (envFile: string | undefined): Record<NodeModuleType, string[]> => ({
+  commonjs: !envFile ? [] : [`(${__envImport.toString()})(require('node:fs'), '${envFile}')`],
+  module: !envFile ? [] : [`(${__envImport.toString()})(await import('node:fs'), '${envFile}')`]
+});
 
 function getFilesFromModule(m: ManifestModule): string[] {
   return [
@@ -36,7 +43,8 @@ export function getOutput(): OutputOptions {
   const mainFile = process.env.BUNDLE_MAIN_FILE!;
   return {
     format,
-    intro: INTRO[format].join('\n'),
+    interop: format === 'commonjs' ? 'auto' : undefined,
+    intro: INTRO(new EnvProp('BUNDLE_ENV_FILE').val)[format].join(';\n'),
     sourcemapPathTransform: (src, map): string =>
       path.resolve(path.dirname(map), src).replace(`${RuntimeContext.workspacePath}/`, ''),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,

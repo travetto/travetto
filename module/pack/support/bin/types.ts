@@ -4,8 +4,11 @@ export type CommonPackConfig = {
   clean: boolean;
   ejectFile?: string;
   mainName: string;
+  mainFile: string;
   mainScripts?: boolean;
   module: string;
+  envFile: string;
+  manifestFile: string;
 
   // Bundle
   rollupConfiguration: string;

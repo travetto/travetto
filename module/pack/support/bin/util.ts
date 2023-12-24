@@ -7,13 +7,12 @@ import { ActiveShellCommand } from './shell';
 
 export class PackUtil {
   /**
-   * Generate env.js
+   * Generate .env file
    */
-  static buildEnvJS(env: Record<string, string | number | boolean | undefined>): string[] {
-    const entries = Object.entries(env)
+  static buildEnvFile(env: Record<string, string | number | boolean | undefined>): string[] {
+    return Object.entries(env)
       .filter(([k, v]) => (v !== undefined))
-      .map(([k, v]) => [k, `${v}`]);
-    return entries.map(([k, v]) => `process.env.${k} = '${v}';`);
+      .map(([k, v]) => `${k}=${v}`);
   }
 
   /**
@@ -77,5 +76,12 @@ export class PackUtil {
       throw new AppError(stderr || message || 'An unexpected error has occurred');
     }
     return stdout;
+  }
+
+  /**
+   * Write a file directly
+   */
+  static async writeRawFile(file: string, contents: string[], mode?: string): Promise<void> {
+    await fs.writeFile(file, contents.join('\n'), { encoding: 'utf8', mode });
   }
 }
