@@ -1,7 +1,7 @@
 import rl from 'node:readline';
 import { ChildProcess, spawn, SpawnOptions } from 'node:child_process';
 import { Readable } from 'node:stream';
-import { parentPort, SHARE_ENV, Worker, WorkerOptions } from 'worker_threads';
+import { parentPort, SHARE_ENV, Worker, WorkerOptions } from 'node:worker_threads';
 
 import { path } from '@travetto/manifest';
 

@@ -1,8 +1,6 @@
-import { createRequire } from 'module';
-
 import { EmailCompileSource } from '@travetto/email';
 import { JSXComponentFunction, JSXElement, JSXFragmentType } from '@travetto/email-inky/jsx-runtime';
-import { RuntimeContext, path } from '@travetto/manifest';
+import { PackageUtil, path } from '@travetto/manifest';
 
 import { InkyRenderer } from './render/renderer';
 import { Html } from './render/html';
@@ -10,12 +8,11 @@ import { Markdown } from './render/markdown';
 import { Subject } from './render/subject';
 
 export const wrap = (content: JSXElement): EmailCompileSource => {
-  const req = createRequire(RuntimeContext.workspaceRelative('node_modules'));
   const finalContent = { ...content, key: '', type: JSXFragmentType };
 
   return {
     styles: {
-      search: [path.dirname(req.resolve('foundation-emails/scss/_global.scss'))],
+      search: [path.dirname(PackageUtil.resolveImport('foundation-emails/scss/_global.scss'))],
       global: `
   @import 'email/inky.variables';
   @import '_global';

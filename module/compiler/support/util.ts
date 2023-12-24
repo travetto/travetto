@@ -1,13 +1,11 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createRequire } from 'module';
 
 import type { ManifestContext } from '@travetto/manifest';
 
 import { LogUtil } from './log';
 
 const OPT_CACHE: Record<string, import('typescript').CompilerOptions> = {};
-const SRC_REQ = createRequire(path.resolve('node_modules'));
 
 export class CommonUtil {
   /**
@@ -18,7 +16,7 @@ export class CommonUtil {
       let tsconfig = path.resolve(ctx.workspacePath, 'tsconfig.json');
 
       if (!await fs.stat(tsconfig).then(_ => true, _ => false)) {
-        tsconfig = SRC_REQ.resolve('@travetto/compiler/tsconfig.trv.json');
+        tsconfig = path.resolve(ctx.workspacePath, ctx.compilerModuleFolder, 'tsconfig.trv.json');
       }
 
       const ts = (await import('typescript')).default;
@@ -38,13 +36,6 @@ export class CommonUtil {
       };
     }
     return OPT_CACHE[ctx.workspacePath];
-  }
-
-  /**
-   * Resolve module location
-   */
-  static resolveModuleFolder(mod: string): string {
-    return path.dirname(SRC_REQ.resolve(`${mod}/package.json`));
   }
 
   /**

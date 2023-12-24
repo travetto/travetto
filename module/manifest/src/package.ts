@@ -1,4 +1,4 @@
-import { createRequire } from 'module';
+import { createRequire } from 'node:module';
 import { execSync } from 'node:child_process';
 
 import type { ManifestContext, NodePackageManager, Package, PackageVisitor, PackageVisitReq, PackageWorkspaceEntry } from './types';
@@ -10,7 +10,7 @@ import { ManifestFileUtil } from './file';
  */
 export class PackageUtil {
 
-  static #req = createRequire(path.resolve('node_modules'));
+  static #resolvers: Record<string, (imp: string) => string> = {};
   static #cache: Record<string, Package> = {};
   static #workspaces: Record<string, PackageWorkspaceEntry[]> = {};
 
@@ -28,7 +28,13 @@ export class PackageUtil {
     this.#workspaces = {};
   }
 
-  static resolveImport = (library: string): string => this.#req.resolve(library);
+  /**
+   * Resolve import given a manifest context
+   */
+  static resolveImport(imp: string, ctx?: ManifestContext): string {
+    const loc = path.resolve(ctx?.workspacePath ?? '.', 'node_modules');
+    return (this.#resolvers[loc] ??= createRequire(loc).resolve.bind(null))(imp);
+  }
 
   /**
    * Resolve version path, if file: url

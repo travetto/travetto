@@ -2,7 +2,6 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createRequire } from 'module';
 
 import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
@@ -15,12 +14,11 @@ export const getEntry = async () => {
   if (!(await fs.stat(tsconfigFile).catch(() => undefined))) {
     await fs.writeFile(tsconfigFile, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
   }
-  const compMod = path.dirname(createRequire(path.resolve(ctx.workspacePath, 'node_modules')).resolve('@travetto/compiler/package.json'));
   const files = [];
 
   for (const file of COMPILER_FILES) {
     const target = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/compiler', file).replace(/[.]tsx?$/, '.js');
-    const src = path.resolve(compMod, file);
+    const src = path.resolve(ctx.workspacePath, ctx.compilerModuleFolder, file);
 
     const targetTime = await fs.stat(target).then(s => Math.max(s.mtimeMs, s.ctimeMs)).catch(() => 0);
     const srcTime = await fs.stat(src).then(s => Math.max(s.mtimeMs, s.ctimeMs));

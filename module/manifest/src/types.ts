@@ -41,6 +41,8 @@ export type ManifestContext = {
   toolFolder: string;
   /** Compiler folder, relative to workspace */
   compilerFolder: string;
+  /** Compiler module folder */
+  compilerModuleFolder: string;
   /** Is the manifest for a module in a monorepo? */
   monoRepo?: boolean;
   /** The module type of the workspace */

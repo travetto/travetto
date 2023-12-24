@@ -1,4 +1,4 @@
-import { AsyncLocalStorage } from 'async_hooks';
+import { AsyncLocalStorage } from 'node:async_hooks';
 
 import { Injectable } from '@travetto/di';
 import { AppError } from '@travetto/base';

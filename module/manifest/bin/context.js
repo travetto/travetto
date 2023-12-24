@@ -7,7 +7,7 @@
  */
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { createRequire } from 'module';
+import { createRequire } from 'node:module';
 
 /** @type {Record<string, Workspace>} */ const WS_ROOT = {};
 const TOOL_FOLDER = '.trv/tool';
@@ -152,6 +152,7 @@ export async function getManifestContext(folder) {
     toolFolder: workspace.travetto?.toolFolder ?? TOOL_FOLDER,
     compilerFolder: workspace.travetto?.compilerFolder ?? COMPILER_FOLDER,
     compilerUrl,
+    compilerModuleFolder: path.dirname(workspace.resolve('@travetto/compiler/package.json')).replace(`${workspace.path}/`, ''),
     frameworkVersion: framework?.version ?? '1.0.0',
     mainModule: mod.name ?? 'untitled',
     mainFolder: mod.path === workspace.path ? '' : mod.path.replace(`${workspace.path}/`, ''),

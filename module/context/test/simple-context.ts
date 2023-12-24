@@ -1,5 +1,5 @@
 import assert from 'node:assert';
-import asyncHooks from 'async_hooks';
+import asyncHooks from 'node:async_hooks';
 import timers from 'node:timers/promises';
 
 import { BeforeEach, Suite, Test } from '@travetto/test';

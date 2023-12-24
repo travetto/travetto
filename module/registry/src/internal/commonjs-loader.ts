@@ -1,4 +1,4 @@
-import { Module } from 'module';
+import { Module } from 'node:module';
 
 import { RuntimeIndex, path } from '@travetto/manifest';
 import { Env } from '@travetto/base';

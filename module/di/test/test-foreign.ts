@@ -1,7 +1,7 @@
 import assert from 'node:assert';
-import { DefaultContextExtends, HttpError } from 'koa';
 import { EventEmitter } from 'node:events';
 import { Writable } from 'node:stream';
+import { DefaultContextExtends, HttpError } from 'koa';
 
 import { Suite, Test } from '@travetto/test';
 

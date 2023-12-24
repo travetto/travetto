@@ -18,10 +18,10 @@ export class LogUtil {
    * Set level for operation
    */
   static initLogs(ctx: ManifestContext, defaultLevel: CompilerLogLevel): void {
-    // Listen only if we aren't in quiet
-    if (process.env.TRV_BUILD || !/^(1|true|on|yes)$/i.test(process.env.TRV_QUIET ?? '')) {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      this.logLevel = (process.env.TRV_BUILD as 'debug') || defaultLevel;
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+    const build = process.env.TRV_BUILD as CompilerLogLevel | 'none';
+    if (build !== 'none' && process.env.TRV_QUIET !== 'true') {
+      this.logLevel = build || defaultLevel;
     }
     this.root = ctx.workspacePath;
   }

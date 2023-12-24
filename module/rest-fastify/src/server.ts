@@ -1,7 +1,7 @@
 import https from 'node:https';
 import compress from '@fastify/compress';
 
-import { FastifyInstance, fastify, FastifyServerOptions, FastifyHttpsOptions } from 'fastify';
+import { FastifyInstance, fastify, FastifyHttpsOptions } from 'fastify';
 
 import { Request, Response, RestConfig, RouteConfig, RestServer } from '@travetto/rest';
 import { Inject, Injectable } from '@travetto/di';
@@ -21,7 +21,7 @@ declare module 'fastify' {
   }
 }
 
-function isHttps(ssl: boolean | undefined, cfg: FastifyServerOptions): cfg is FastifyHttpsOptions<https.Server> {
+function isHttps(ssl: boolean | undefined, cfg: https.ServerOptions): cfg is FastifyHttpsOptions<https.Server> {
   return !!ssl;
 }
 
@@ -69,10 +69,8 @@ export class FastifyRestServer implements RestServer<FastifyInstance> {
     }
     for (const route of routes) {
       let sub = path;
-      if (typeof route.path === 'string') {
+      if (route.path) {
         sub = `${path}/${route.path}`;
-      } else {
-        sub = `${path}/${route.path.source}`;
       }
       sub = sub.replace(/\/+/g, '/').replace(/\/+$/, '');
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions

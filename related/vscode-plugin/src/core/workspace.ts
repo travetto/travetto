@@ -1,10 +1,9 @@
 import timers from 'node:timers/promises';
+import { WorkerOptions } from 'node:worker_threads';
 import vscode from 'vscode';
-import { WorkerOptions } from 'worker_threads';
-import module from 'module';
 
 import { ExecUtil, ExecutionOptions, ExecutionState, WorkerResult } from '@travetto/base';
-import { ManifestContext, ManifestIndex, path } from '@travetto/manifest';
+import { ManifestContext, ManifestIndex, PackageUtil, path } from '@travetto/manifest';
 
 import { EnvDict, LaunchConfig } from './types';
 import { Log } from './log';
@@ -24,9 +23,12 @@ export class Workspace {
   static readonly folder: vscode.WorkspaceFolder;
   static #extensionIndex: ManifestIndex;
   static #manifestContext: ManifestContext;
-  static #req: ReturnType<typeof module['createRequire']>;
   static #importToFile = new Map<string, string | undefined>();
   static #log = new Log('travetto.vscode.workspace');
+
+  static #resolveImport(imp: string): string {
+    return PackageUtil.resolveImport(imp, this.#manifestContext);
+  }
 
   static get isMonoRepo(): boolean {
     return !!this.#manifestContext.monoRepo;
@@ -50,10 +52,10 @@ export class Workspace {
         file = path.resolve(this.path, imp.replace(this.#manifestContext.mainModule, '.'));
       } else {
         try {
-          file = this.#req.resolve(imp);
+          file = this.#resolveImport(imp);
         } catch {
           try {
-            file = this.#req.resolve(imp.replace(/[.]js$/, '.ts').replace(/[.]jsx$/, '.tsx'));
+            file = this.#resolveImport(imp.replace(/[.]js$/, '.ts').replace(/[.]jsx$/, '.tsx'));
           } catch { }
         }
       }
@@ -71,11 +73,11 @@ export class Workspace {
   }
 
   static get #cliFile(): string {
-    return this.#req.resolve('@travetto/cli/bin/trv.js');
+    return this.#resolveImport('@travetto/cli/bin/trv.js');
   }
 
   static get #compilerCliFile(): string {
-    return this.#req.resolve('@travetto/compiler/bin/trvc.js');
+    return this.#resolveImport('@travetto/compiler/bin/trvc.js');
   }
 
   static #buildEnv(debug: boolean, base?: EnvDict, cliModule?: string): EnvDict {
@@ -149,7 +151,6 @@ export class Workspace {
     this.context = context;
     this.#extensionIndex = extensionIndex;
     this.#manifestContext = manifestContext;
-    this.#req = module.createRequire(path.resolve(manifestContext.workspacePath, 'node_modules'));
 
     await this.writeTheme();
 
@@ -187,7 +188,7 @@ export class Workspace {
    */
   static async isInstalled(mod: string): Promise<boolean> {
     try {
-      this.#req.resolve(`${mod}/package.json`);
+      this.#resolveImport(`${mod}/package.json`);
       return true;
     } catch {
       return false;

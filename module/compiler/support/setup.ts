@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import { type DeltaEvent, type ManifestContext, type ManifestRoot, Package } from '@travetto/manifest';
+import { type DeltaEvent, type ManifestContext, type ManifestRoot, type Package } from '@travetto/manifest';
 
 import { LogUtil } from './log';
 import { CommonUtil } from './util';
@@ -74,9 +74,11 @@ export class CompilerSetup {
    * Scan directory to find all project sources for comparison
    */
   static async #getModuleSources(ctx: ManifestContext, module: string, seed: string[]): Promise<ModFile[]> {
+    const { PackageUtil } = await this.#importManifest(ctx);
+
     const inputFolder = (ctx.mainModule === module) ?
       process.cwd() :
-      CommonUtil.resolveModuleFolder(module);
+      PackageUtil.resolveImport(module, ctx);
 
     const folders = seed.filter(x => !/[.]/.test(x)).map(x => path.resolve(inputFolder, x));
     const files = seed.filter(x => /[.]/.test(x)).map(x => path.resolve(inputFolder, x));

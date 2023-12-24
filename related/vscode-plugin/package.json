@@ -33,11 +33,12 @@
     "start": "npx trvc start"
   },
   "devDependencies": {
-    "@travetto/cli": "^3.4.0-rc.0",
-    "@travetto/compiler": "^3.4.0-rc.0",
-    "@travetto/doc": "^3.4.0-rc.0",
-    "@travetto/pack": "^3.4.0-rc.0",
-    "@travetto/test": "^3.4.0-rc.0",
+    "@travetto/cli": "^3.4.0",
+    "@travetto/compiler": "^3.4.0",
+    "@travetto/doc": "^3.4.0",
+    "@travetto/pack": "^3.4.0",
+    "@travetto/log": "^3.4.0",
+    "@travetto/test": "^3.4.0",
     "@types/node": "^20.8.10",
     "@types/vscode": "^1.83.1"
   },

@@ -1,4 +1,5 @@
-import { ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
+import { Env, ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
+import type { } from '@travetto/log';
 
 import { Workspace } from './workspace';
 import { Log } from './log';
@@ -31,9 +32,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     this.#log = log;
     this.#handlers = { start: [], exit: [], fail: [] };
 
-    ShutdownManager.onExitRequested(this.stop.bind(this));
-    process.on('SIGINT', this.stop.bind(this));
-    process.on('exit', this.stop.bind(this));
+    ShutdownManager.onGracefulShutdown(this.stop.bind(this));
   }
 
   async #trigger<K extends keyof Handlers>(type: K, ...args: Parameters<Handlers[K][0]>): Promise<void> {
@@ -51,7 +50,12 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     const state = Workspace.spawnCli(command, args, {
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
       ...opts,
-      env: { NO_COLOR: '1', TRV_QUIET: '1', TRV_LOG_TIME: 'false', ...opts.env },
+      env: {
+        ...Env.NO_COLOR.export(true),
+        ...Env.TRV_QUIET.export(true),
+        ...Env.TRV_LOG_TIME.export(false),
+        ...opts.env
+      },
       catchAsResult: true,
       onStdOutLine: line => this.#log.info(prefix, line),
       onStdErrorLine: line => this.#log.error(prefix, line)
