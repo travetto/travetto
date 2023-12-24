@@ -1,7 +1,7 @@
 import { ExecutionResult, ExecutionOptions, ExecutionState, Env, Util } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
-import { ColorUtil, Terminal, TerminalUtil } from '@travetto/terminal';
+import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkPool } from '@travetto/worker';
 
 const COLORS = ([
@@ -10,7 +10,7 @@ const COLORS = ([
   '#ff87d7', '#ff87ff', '#ffaf87', '#ffafaf', '#ffafd7', '#ffafff', '#ffd787', '#ffd7af', '#ffd7d7', '#ffd7ff', '#ffff87', '#ffffaf', '#ffffd7', '#ffffff', '#bcbcbc',
   '#c6c6c6', '#d0d0d0', '#dadada', '#e4e4e4', '#eeeeee'
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-]).sort((a, b) => Math.random() < .5 ? -1 : 1).map(x => ColorUtil.fromStyle(x as `#${string}`));
+]).sort((a, b) => Math.random() < .5 ? -1 : 1).map(x => StyleUtil.getStyle(x as `#${string}`));
 
 type ModuleRunConfig<T = ExecutionResult> = {
   progressMessage?: (mod: IndexedModule | undefined) => string;

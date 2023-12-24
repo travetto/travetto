@@ -13,7 +13,7 @@ export type ColorLevel = 0 | 1 | 2 | 3;
 // eslint-disable-next-line no-control-regex
 const ANSI_CODE_REGEX = /(\x1b|\x1B)[\[\]][?]?[0-9;]+[A-Za-z]/g;
 
-export class ColorUtil {
+export class StyleUtil {
 
   static #darkAnsi256 = new Set([
     0, 1, 2, 3, 4, 5, 6, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 28, 29, 30, 31, 32, 34, 35, 36, 37, 38, 40, 41, 42, 43, 44, 52, 53, 54,
@@ -26,7 +26,7 @@ export class ColorUtil {
   /**
    * Create text render function from style input using current color levels
    */
-  static fromStyle(input: TermStyleInput): TermStyleFn {
+  static getStyle(input: TermStyleInput): TermStyleFn {
     if (typeof input === 'string') {
       return chalk.hex(input);
     } else {
@@ -61,32 +61,32 @@ export class ColorUtil {
   /**
    * Create renderer from input source
    */
-  static fromInput(input: TermStylePairInput): TermStyleFn {
+  static getThemedStyle(input: TermStylePairInput): TermStyleFn {
     const [dark, light] = (Array.isArray(input) ? input : [input]);
     const isDark = this.isBackgroundDark();
-    return isDark ? this.fromStyle(dark) : this.fromStyle(light ?? dark);
+    return isDark ? this.getStyle(dark) : this.getStyle(light ?? dark);
   }
 
   /**
-   * Get the current color level
+   * Is styling currently enabled
    */
-  static get level(): ColorLevel {
-    return chalk.level;
+  static get enabled(): boolean {
+    return chalk.level > 0;
   }
 
   /**
-   * Build color palette, with support for background-color awareness
+   * Build style palette, with support for background theme awareness
    */
-  static styleMap<K extends string>(inp: Record<K, TermStylePairInput>): Record<K, TermStyleFn> {
+  static getPalette<K extends string>(inp: Record<K, TermStylePairInput>): Record<K, TermStyleFn> {
     return TypedObject.fromEntries(
-      TypedObject.entries(inp).map(([k, v]) => [k, this.fromInput(v)]));
+      TypedObject.entries(inp).map(([k, v]) => [k, this.getThemedStyle(v)]));
   }
 
   /**
    * Make a template function based on the input set
    */
-  static makeTemplate<K extends string>(input: Record<K, TermStylePairInput>): TermStyledTemplate<K> {
-    const palette = this.styleMap(input);
+  static getTemplate<K extends string>(input: Record<K, TermStylePairInput>): TermStyledTemplate<K> {
+    const palette = this.getPalette(input);
 
     return (values: TemplateStringsArray, ...keys: (Partial<Record<K, TemplatePrim>> | string)[]) => {
       if (keys.length === 0) {
@@ -114,9 +114,9 @@ export class ColorUtil {
   }
 
   /**
-   * Remove color escape sequences
+   * Remove style escape sequences
    */
-  static removeColor(text: string): string {
+  static cleanText(text: string): string {
     return text.replace(ANSI_CODE_REGEX, '');
   }
 }

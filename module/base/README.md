@@ -38,15 +38,6 @@ interface TrvEnv {
      * @default development
      */
     NODE_ENV: 'development' | 'production';
-    /**
-     * Terminal colors provided as ansi 256 color schemes
-     */
-    COLORFGBG: string;
-    /** 
-     * Enables color, even if `tty` is not available 
-     * @default undefined
-     */
-    FORCE_COLOR: boolean | 0 | 1 | 2 | 3;
     /** 
      * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 
      */
@@ -85,10 +76,6 @@ interface TrvEnv {
      * trvc log level
      */
     TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn',
-    /**
-     * Cli operation mode, false means simple output
-     */
-    TRV_QUIET: boolean;
   }
 ```
 

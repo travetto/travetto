@@ -4,14 +4,14 @@ import { Env } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
 import { Ignore } from '@travetto/schema';
-import { ColorUtil } from '@travetto/terminal';
+import { StyleUtil } from '@travetto/terminal';
 
 import { LogEvent, LogFormatter } from '../types';
 
 /**
  * Level coloring
  */
-export const STYLES = ColorUtil.styleMap({
+export const STYLES = StyleUtil.getPalette({
   info: ['#ffff00', '#ff5733'], // Yellow / goldenrod
   debug: ['#d3d3d3', '#555555'], // Light gray / dark gray
   warn: ['#ff8c00', '#ff00ff'], // Dark orange / bright magenta
@@ -50,7 +50,7 @@ export class LineLogFormatterConfig {
 
   postConstruct(): void {
     this.time ??= (!this.plain ? 'ms' : undefined);
-    this.plain ??= ColorUtil.level === 0;
+    this.plain ??= !StyleUtil.enabled;
     this.colorize ??= !this.plain;
     this.location ??= !this.plain;
     this.level ??= !this.plain;

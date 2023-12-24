@@ -1,5 +1,5 @@
 import { Util } from '@travetto/base';
-import { ColorUtil, Terminal, TerminalUtil } from '@travetto/terminal';
+import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
 import { WorkQueue } from '@travetto/worker';
 
 import { TestEvent } from '../../model/event';
@@ -30,8 +30,8 @@ export class TapStreamedEmitter implements TestConsumer {
     this.#consumer.onStart();
 
     let failed = 0;
-    const succ = ColorUtil.fromStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
-    const fail = ColorUtil.fromStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
+    const succ = StyleUtil.getStyle({ text: '#e5e5e5', background: '#026020' }); // White on dark green
+    const fail = StyleUtil.getStyle({ text: '#e5e5e5', background: '#8b0000' }); // White on dark red
     this.#progress = this.#terminal.streamToBottom(
       Util.mapAsyncItr(
         this.#results,

@@ -1,5 +1,5 @@
 import { path } from '@travetto/manifest';
-import { ColorUtil } from '@travetto/terminal';
+import { StyleUtil } from '@travetto/terminal';
 
 import { ShellCommandImpl } from './types';
 
@@ -30,8 +30,8 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     mkdir: (dest) => ['md', dest],
     export: (key, value) => ['set', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
-    comment: (message) => ['\nREM', ColorUtil.removeColor(message), '\n'],
-    echo: (message) => ['echo', `"${escape(ColorUtil.removeColor(message))}"\n`],
+    comment: (message) => ['\nREM', StyleUtil.cleanText(message), '\n'],
+    echo: (message) => ['echo', `"${escape(StyleUtil.cleanText(message))}"\n`],
     zip: (outputFile) => ['powershell', 'Compress-Archive', '-Path', '.', '-DestinationPath', outputFile]
   },
   posix: {
@@ -50,8 +50,8 @@ export const ShellCommands: Record<'win32' | 'posix', ShellCommandImpl> = {
     mkdir: (dest) => ['mkdir', '-p', dest],
     export: (key, value) => ['export', `${key}=${value}`],
     chdir: (dest) => ['cd', dest],
-    comment: (message) => ['\n#', ColorUtil.removeColor(message), '\n'],
-    echo: (message) => ['echo', `"${escape(ColorUtil.removeColor(message))}"\n`],
+    comment: (message) => ['\n#', StyleUtil.cleanText(message), '\n'],
+    echo: (message) => ['echo', `"${escape(StyleUtil.cleanText(message))}"\n`],
     zip: (outputFile) => ['zip', '-r', outputFile, '.']
   },
 };

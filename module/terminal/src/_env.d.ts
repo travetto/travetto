@@ -1,4 +1,4 @@
-import type { ColorLevel } from './color';
+import type { ColorLevel } from './style';
 
 declare global {
   interface TrvEnv {

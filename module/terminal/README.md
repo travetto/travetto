@@ -29,9 +29,9 @@ These palettes then are usable at runtime, with the module determining light or 
 
 **Code: CLI Color Palette**
 ```typescript
-import { ColorUtil } from '@travetto/terminal';
+import { StyleUtil } from '@travetto/terminal';
 
-export const cliTpl = ColorUtil.makeTemplate({
+export const cliTpl = StyleUtil.getTemplate({
   input: '#6b8e23', // Olive drab
   output: '#ffc0cb', // Pink
   path: '#008080', // Teal

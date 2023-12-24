@@ -1,4 +1,4 @@
-import { ColorUtil, TermStyleFn, TermStyleInput } from './color';
+import { StyleUtil, TermStyleFn, TermStyleInput } from './style';
 import { Terminal, WAIT_TOKEN } from './terminal';
 
 type ProgressEvent<T> = { total?: number, idx: number, value: T };
@@ -17,8 +17,8 @@ export class TerminalUtil {
     }
   ): (ev: ProgressEvent<string>) => string {
     const styleBase = typeof cfg?.style !== 'function' ? {
-      complete: ColorUtil.fromStyle(cfg?.style?.complete ?? { background: '#32cd32', text: '#ffffff' }),
-      incomplete: cfg?.style?.incomplete ? ColorUtil.fromStyle(cfg.style.incomplete) : undefined,
+      complete: StyleUtil.getStyle(cfg?.style?.complete ?? { background: '#32cd32', text: '#ffffff' }),
+      incomplete: cfg?.style?.incomplete ? StyleUtil.getStyle(cfg.style.incomplete) : undefined,
     } : undefined;
 
     const style = typeof cfg?.style === 'function' ? cfg.style : (): ProgressStyle => styleBase!;

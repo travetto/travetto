@@ -36,9 +36,9 @@ These palettes then are usable at runtime, with the module determining light or 
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/cli/src/color.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ColorUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/terminal'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> StyleUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'&#64;travetto/terminal'</span><span class="token punctuation">;</span>
 
-<span class="token keyword">export</span> <span class="token keyword">const</span> cliTpl <span class="token operator">=</span> ColorUtil<span class="token punctuation">.</span><span class="token function">makeTemplate</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> cliTpl <span class="token operator">=</span> StyleUtil<span class="token punctuation">.</span><span class="token function">getTemplate</span><span class="token punctuation">(</span><span class="token punctuation">{{'{'}}</span>
   input<span class="token operator">:</span> <span class="token string">'#6b8e23'</span><span class="token punctuation">,</span> <span class="token comment">// Olive drab</span>
   output<span class="token operator">:</span> <span class="token string">'#ffc0cb'</span><span class="token punctuation">,</span> <span class="token comment">// Pink</span>
   path<span class="token operator">:</span> <span class="token string">'#008080'</span><span class="token punctuation">,</span> <span class="token comment">// Teal</span>
