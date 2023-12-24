@@ -1,7 +1,7 @@
 import '@travetto/base';
 
 declare global {
-  interface TrvEnv {
+  interface TravettoEnv {
     /** 
      * Determines whether or not to augment console log information
      * @default false

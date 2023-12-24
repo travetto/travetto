@@ -5,7 +5,7 @@ import type { TimeSpan } from './time';
 type Role = Exclude<ManifestModuleRole, 'std' | 'compile'>;
 
 declare global {
-  interface TrvEnv {
+  interface TravettoEnv {
     /** 
      * The node environment we are running in
      * @default development

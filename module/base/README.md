@@ -32,7 +32,7 @@ The functionality we support for testing and retrieving environment information 
 
 **Code: Base Known Environment Flags**
 ```typescript
-interface TrvEnv {
+interface TravettoEnv {
     /** 
      * The node environment we are running in
      * @default development

@@ -1,7 +1,7 @@
 import type { ColorLevel } from './style';
 
 declare global {
-  interface TrvEnv {
+  interface TravettoEnv {
     /**
      * Flag for node to disable colors
      */

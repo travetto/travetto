@@ -1,4 +1,4 @@
-/// <reference path="./src/_env.d.ts" />
+/// <reference path="./src/trv.d.ts" />
 export * from './src/style';
 export * from './src/terminal';
 export * from './src/writer';

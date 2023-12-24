@@ -1,7 +1,7 @@
 import { TimeSpan } from '@travetto/base';
 
 declare global {
-  interface TrvEnv {
+  interface TravettoEnv {
     /**
      * The default time to wait for each phase to finish.
      * @default 15s

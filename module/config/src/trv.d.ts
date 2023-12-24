@@ -1,7 +1,7 @@
 import '@travetto/base';
 
 declare global {
-  interface TrvEnv {
+  interface TravettoEnv {
     /** 
      * Configuration profiles, in addition to TRV_ENV
      */

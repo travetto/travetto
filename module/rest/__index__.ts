@@ -1,4 +1,4 @@
-/// <reference path="./src/typings.d.ts" />
+/// <reference path="./src/trv.d.ts" />
 
 export * from './src/application/rest';
 export * from './src/application/server';

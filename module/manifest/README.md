@@ -148,13 +148,13 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
           [ "src/delta.ts", "ts", 1868155200000 ],
           [ "src/dependencies.ts", "ts", 1868155200000 ],
           [ "src/file.ts", "ts", 1868155200000 ],
+          [ "src/global.d.ts", "typings", 1868155200000 ],
           [ "src/manifest-index.ts", "ts", 1868155200000 ],
           [ "src/module.ts", "ts", 1868155200000 ],
           [ "src/package.ts", "ts", 1868155200000 ],
           [ "src/path.ts", "ts", 1868155200000 ],
           [ "src/runtime.ts", "ts", 1868155200000 ],
           [ "src/types.ts", "ts", 1868155200000 ],
-          [ "src/typings.d.ts", "typings", 1868155200000 ],
           [ "src/util.ts", "ts", 1868155200000 ]
         ],
         "bin": [

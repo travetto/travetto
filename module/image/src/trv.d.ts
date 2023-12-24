@@ -1,7 +1,7 @@
 import '@travetto/base';
 
 declare global {
-  interface TrvEnv {
+  interface TravettoEnv {
     /** 
      * Where should optimized images be stored by default
      * @default undefined

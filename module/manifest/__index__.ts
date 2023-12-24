@@ -1,4 +1,4 @@
-/// <reference path="./src/typings.d.ts" />
+/// <reference path="./src/global.d.ts" />
 
 export * from './src/path';
 export * from './src/module';

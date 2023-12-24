@@ -1,7 +1,7 @@
 import '@travetto/base';
 
 declare global {
-  interface TrvEnv {
+  interface TravettoEnv {
     /** 
      * Provides an IPC http url for the CLI to communicate with. 
      * This facilitates cli-based invocation for external usage.

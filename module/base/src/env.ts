@@ -1,4 +1,4 @@
-/// <reference path="./_env.d.ts" />
+/// <reference path="./trv.d.ts" />
 
 import { TimeSpan, TimeUtil } from './time';
 
@@ -78,11 +78,11 @@ export class EnvProp<T> {
 }
 
 type AllType = {
-  [K in keyof TrvEnv]: Pick<EnvProp<TrvEnv[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
-    (TrvEnv[K] extends unknown[] ? 'list' | 'add' : never) |
-    (Extract<TrvEnv[K], number> extends never ? never : 'int') |
-    (Extract<TrvEnv[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse') |
-    (Extract<TrvEnv[K], TimeSpan> extends never ? never : 'time')
+  [K in keyof TravettoEnv]: Pick<EnvProp<TravettoEnv[K]>, 'key' | 'export' | 'val' | 'set' | 'clear' | 'isSet' |
+    (TravettoEnv[K] extends unknown[] ? 'list' | 'add' : never) |
+    (Extract<TravettoEnv[K], number> extends never ? never : 'int') |
+    (Extract<TravettoEnv[K], boolean> extends never ? never : 'bool' | 'isTrue' | 'isFalse') |
+    (Extract<TravettoEnv[K], TimeSpan> extends never ? never : 'time')
   >
 };
 

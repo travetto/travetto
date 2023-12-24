@@ -1,4 +1,4 @@
-/// <reference path="./src/_env.d.ts" />
+/// <reference path="./src/trv.d.ts" />
 export * from './src/service';
 export * from './src/formatter/json';
 export * from './src/formatter/line';
