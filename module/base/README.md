@@ -33,10 +33,6 @@ The functionality we support for testing and retrieving environment information 
 **Code: Base Known Environment Flags**
 ```typescript
 interface TrvEnv {
-    /**
-     * Flag for node to disable colors
-     */
-    NODE_DISABLE_COLORS: boolean;
     /** 
      * The node environment we are running in
      * @default development
@@ -48,18 +44,9 @@ interface TrvEnv {
     COLORFGBG: string;
     /** 
      * Enables color, even if `tty` is not available 
-     * @default false
+     * @default undefined
      */
     FORCE_COLOR: boolean | 0 | 1 | 2 | 3;
-    /** 
-     * Disables color even if `tty` is available
-     * @default false
-     */
-    NO_COLOR: boolean;
-    /**
-     * Determines terminal color level
-     */
-    COLORTERM: string;
     /** 
      * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 
      */

@@ -3,6 +3,10 @@ import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 
 import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
 
+const IPC_ALLOWED_ENV = new Set(['NODE_OPTIONS']);
+const IPC_INVALID_ENV = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
+const validEnv = (k: string): boolean => IPC_ALLOWED_ENV.has(k) || (!IPC_INVALID_ENV.has(k) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(k) && !/VSCODE/.test(k));
+
 export class CliUtil {
   /**
    * Are we running from a mono-root?
@@ -47,40 +51,30 @@ export class CliUtil {
    * Dispatch IPC payload
    */
   static async triggerIpc<T extends CliCommandShape>(action: 'run', cmd: T): Promise<boolean> {
-    const ipcUrl = Env.TRV_CLI_IPC.val;
-
-    if (!ipcUrl) {
+    if (!Env.TRV_CLI_IPC.isSet) {
       return false;
     }
 
-    const info = await fetch(ipcUrl).catch(() => ({ ok: false }));
+    const info = await fetch(Env.TRV_CLI_IPC.val!).catch(() => ({ ok: false }));
 
     if (!info.ok) { // Server not running
       return false;
     }
 
+    const env: Record<string, string> = {};
     const req = {
       type: `@travetto/cli:${action}`,
       data: {
-        name: cmd._cfg!.name,
+        name: cmd._cfg!.name, env,
         commandModule: cmd._cfg!.commandModule,
         module: RuntimeContext.mainModule,
         args: process.argv.slice(3),
       }
     };
-
     console.log('Triggering IPC request', req);
 
-    const defaultEnvKeys = new Set(['PS1', 'INIT_CWD', 'COLOR', 'LANGUAGE', 'PROFILEHOME', '_']);
-    const env = Object.fromEntries(
-      Object.entries(process.env).filter(([k]) =>
-        !defaultEnvKeys.has(k) && !/^(npm_|GTK|GDK|TRV|NODE|GIT|TERM_)/.test(k) && !/VSCODE/.test(k)
-      )
-    );
-
-    Object.assign(req.data, { env });
-
-    const sent = await fetch(ipcUrl, { method: 'POST', body: JSON.stringify(req) });
+    Object.entries(process.env).forEach(([k, v]) => validEnv(k) && (env[k] = v!));
+    const sent = await fetch(Env.TRV_CLI_IPC.val!, { method: 'POST', body: JSON.stringify(req) });
     return sent.ok;
   }
 

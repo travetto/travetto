@@ -124,6 +124,7 @@ export class PackOperation {
       ...Env.NODE_ENV.export('production'),
       ...Env.TRV_MANIFEST.export(cfg.manifestFile),
       ...Env.TRV_MODULE.export(cfg.module),
+      ...Env.TRV_CLI_IPC.export(undefined)
     };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);

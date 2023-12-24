@@ -40,6 +40,8 @@ Options:
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
   -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  --env-file <string>                  Env Flag File Name (default: ".env")
+  --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```
@@ -102,6 +104,8 @@ Options:
   -is, --include-sources               Include source with source maps (default: false)
   -x, --eject-file <string>            Eject commands to file
   -r, --rollup-configuration <string>  Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  --env-file <string>                  Env Flag File Name (default: ".env")
+  --manifest-file <string>             Manifest File Name (default: "manifest.json")
   -m, --module <module>                Module to run for
   -h, --help                           display help for command
 ```
@@ -127,6 +131,8 @@ Options:
   -is, --include-sources                 Include source with source maps (default: false)
   -x, --eject-file <string>              Eject commands to file
   -r, --rollup-configuration <string>    Rollup configuration file (default: "@travetto/pack/support/bin/rollup")
+  --env-file <string>                    Env Flag File Name (default: ".env")
+  --manifest-file <string>               Manifest File Name (default: "manifest.json")
   -df, --docker-factory <string>         Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
   -di, --docker-image <string>           Docker Image to extend  (default: "node:20-alpine")
   -dn, --docker-name <string>            Docker Image Name  (default: "travetto_pack")
@@ -168,14 +174,14 @@ echo "Cleaning Output $DIST"
 rm -rf $DIST
 mkdir -p $DIST
 
-# Writing .env.js 
+# Writing $DIST/.env 
 
-echo "Writing .env.js"
+echo "Writing $DIST/.env"
 
-echo "process.env.NODE_ENV = 'production';" > $DIST/.env.js
-echo "process.env.TRV_MANIFEST = 'manifest.json';" >> $DIST/.env.js
-echo "process.env.TRV_MODULE = '$MOD';" >> $DIST/.env.js
-echo "process.env.TRV_CLI_IPC = '';" >> $DIST/.env.js
+echo "NODE_ENV=production" > $DIST/.env
+echo "TRV_MANIFEST=manifest.json" >> $DIST/.env
+echo "TRV_MODULE=$MOD" >> $DIST/.env
+echo "TRV_CLI_IPC=" >> $DIST/.env
 
 # Writing package.json 
 
@@ -189,7 +195,7 @@ echo "Writing entry scripts todo-app.sh args=(run:rest)"
 
 echo "#!/bin/sh" > $DIST/todo-app.sh
 echo "cd \$(dirname \"\$0\")" >> $DIST/todo-app.sh
-echo "node todo-app.js run:rest \$@" >> $DIST/todo-app.sh
+echo "node --env-file=.env todo-app.js run:rest \$@" >> $DIST/todo-app.sh
 chmod 755 $DIST/todo-app.sh
 
 # Writing entry scripts todo-app.cmd args=(run:rest) 
@@ -198,7 +204,7 @@ echo "Writing entry scripts todo-app.cmd args=(run:rest)"
 
 echo "" > $DIST/todo-app.cmd
 echo "cd %~p0" >> $DIST/todo-app.cmd
-echo "node todo-app.js run:rest %*" >> $DIST/todo-app.cmd
+echo "node --env-file=.env todo-app.js run:rest %*" >> $DIST/todo-app.cmd
 chmod 755 $DIST/todo-app.cmd
 
 # Copying over resources 
@@ -211,7 +217,7 @@ cp -r -p $ROOT/resources $DIST/resources
 
 echo "Writing Manifest manifest.json"
 
-TRV_MODULE=$MOD npx trvc manifest $DIST/manifest.json prod
+TRV_MODULE=$MOD npx trvc manifest --prod $DIST/manifest.json
 
 # Bundling Output minify=true sourcemap=false entryPoint=@travetto/cli/support/entry.trv 
 
@@ -224,6 +230,7 @@ export BUNDLE_SOURCEMAP=false
 export BUNDLE_SOURCES=false
 export BUNDLE_OUTPUT=$DIST
 export BUNDLE_FORMAT=commonjs
+export BUNDLE_ENV_FILE=.env
 export TRV_MANIFEST=$TRV_OUT/node_modules/$MOD
 cd $TRV_OUT
 npx rollup -c $TRV_OUT/node_modules/@travetto/pack/support/bin/rollup.js

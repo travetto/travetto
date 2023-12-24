@@ -6,33 +6,11 @@ type Role = Exclude<ManifestModuleRole, 'std' | 'compile'>;
 
 declare global {
   interface TrvEnv {
-    /**
-     * Flag for node to disable colors
-     */
-    NODE_DISABLE_COLORS: boolean;
     /** 
      * The node environment we are running in
      * @default development
      */
     NODE_ENV: 'development' | 'production';
-    /**
-     * Terminal colors provided as ansi 256 color schemes
-     */
-    COLORFGBG: string;
-    /** 
-     * Enables color, even if `tty` is not available 
-     * @default false
-     */
-    FORCE_COLOR: boolean | 0 | 1 | 2 | 3;
-    /** 
-     * Disables color even if `tty` is available
-     * @default false
-     */
-    NO_COLOR: boolean;
-    /**
-     * Determines terminal color level
-     */
-    COLORTERM: string;
     /** 
      * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod. 
      */
@@ -71,9 +49,5 @@ declare global {
      * trvc log level
      */
     TRV_BUILD: 'none' | 'info' | 'debug' | 'error' | 'warn',
-    /**
-     * Cli operation mode, false means simple output
-     */
-    TRV_QUIET: boolean;
   }
 }

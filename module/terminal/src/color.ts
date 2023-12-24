@@ -8,6 +8,7 @@ export type TermStyleInput = Color | { text: Color, background?: Color, inverse?
 type TermStylePairInput = TermStyleInput | [dark: TermStyleInput, light: TermStyleInput];
 export type TermStyleFn = (input: TemplatePrim) => string;
 type TermStyledTemplate<T extends string> = (values: TemplateStringsArray, ...keys: (Partial<Record<T, TemplatePrim>> | string)[]) => string;
+export type ColorLevel = 0 | 1 | 2 | 3;
 
 // eslint-disable-next-line no-control-regex
 const ANSI_CODE_REGEX = /(\x1b|\x1B)[\[\]][?]?[0-9;]+[A-Za-z]/g;
@@ -69,7 +70,7 @@ export class ColorUtil {
   /**
    * Get the current color level
    */
-  static get level(): 0 | 1 | 2 | 3 {
+  static get level(): ColorLevel {
     return chalk.level;
   }
 

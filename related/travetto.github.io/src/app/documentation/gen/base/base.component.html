@@ -41,10 +41,6 @@ The functionality we support for testing and retrieving environment information 
 </figcaption>
     <pre><code class="language-typescript"><span class="token keyword">interface</span> <span class="token class-name">TrvEnv</span> <span class="token punctuation">{{'{'}}</span>
   <span class="token comment">/**
-   * Flag for node to disable colors
-   */</span>
-  <span class="token constant">NODE_DISABLE_COLORS</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
    * The node environment we are running in
    * &#64;default development
    */</span>
@@ -55,18 +51,9 @@ The functionality we support for testing and retrieving environment information 
   <span class="token constant">COLORFGBG</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Enables color, even if `tty` is not available
-   * &#64;default false
+   * &#64;default undefined
    */</span>
   <span class="token constant">FORCE_COLOR</span><span class="token operator">:</span> <span class="token builtin">boolean</span> <span class="token operator">|</span> <span class="token number">0</span> <span class="token operator">|</span> <span class="token number">1</span> <span class="token operator">|</span> <span class="token number">2</span> <span class="token operator">|</span> <span class="token number">3</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Disables color even if `tty` is available
-   * &#64;default false
-   */</span>
-  <span class="token constant">NO_COLOR</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Determines terminal color level
-   */</span>
-  <span class="token constant">COLORTERM</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>
   <span class="token comment">/**
    * Outputs all console.debug messages, defaults to `local` in dev, and `off` in prod.
    */</span>
