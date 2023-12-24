@@ -1,6 +1,9 @@
 import { ExtensionContext } from 'vscode';
 import http from 'node:http';
 
+import { Env } from '@travetto/base';
+import type { } from '@travetto/cli';
+
 import { TargetEvent } from './types';
 import { Log } from './log';
 
@@ -54,7 +57,7 @@ export class IpcSupport {
         });
         const addr = server.address();
         if (addr && typeof addr !== 'string') {
-          ctx.environmentVariableCollection.replace('TRV_CLI_IPC', `http://127.0.0.1:${addr.port}`);
+          ctx.environmentVariableCollection.replace(Env.TRV_CLI_IPC.key, `http://127.0.0.1:${addr.port}`);
         }
         resolve();
       });

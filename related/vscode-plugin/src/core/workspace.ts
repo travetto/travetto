@@ -2,13 +2,16 @@ import timers from 'node:timers/promises';
 import { WorkerOptions } from 'node:worker_threads';
 import vscode from 'vscode';
 
-import { ExecUtil, ExecutionOptions, ExecutionState, WorkerResult } from '@travetto/base';
+import { Env, ExecUtil, ExecutionOptions, ExecutionState, WorkerResult } from '@travetto/base';
 import { ManifestContext, ManifestIndex, PackageUtil, path } from '@travetto/manifest';
 
 import { EnvDict, LaunchConfig } from './types';
 import { Log } from './log';
 
 type MProm<T> = Promise<T> & { resolve: (val: T) => void, reject: (err?: Error) => void };
+
+// eslint-disable-next-line no-template-curly-in-string
+const WORKSPACE = '${workspaceFolder}';
 
 /**
  * Standard set of workspace utilities
@@ -81,17 +84,13 @@ export class Workspace {
   }
 
   static #buildEnv(debug: boolean, base?: EnvDict, cliModule?: string): EnvDict {
-    const res: EnvDict = {
+    return {
       ...this.#baseEnv,
-      ...(debug ? { TRV_DYNAMIC: '1', } : { TRV_QUIET: '1' }),
+      ...(debug ? Env.TRV_DYNAMIC.export(true) : Env.TRV_QUIET.export(true)),
       ...base,
-      TRV_MANIFEST: '',
-      TRV_MODULE: cliModule ?? this.#manifestContext.mainModule
+      ...Env.TRV_MANIFEST.export(undefined),
+      ...Env.TRV_MODULE.export(cliModule ?? this.#manifestContext.mainModule)
     };
-    if (base && 'NO_COLOR' in base) {
-      delete res.FORCE_COLOR;
-    }
-    return res;
   }
 
   /**
@@ -131,11 +130,13 @@ export class Workspace {
   static async writeTheme(): Promise<void> {
     const theme = await this.getColorTheme();
     const color = theme.light ? '0;15' : '15;0';
-    const depth = theme?.highContrast ? '1' : '3';
-    this.#baseEnv.COLORFGBG = color;
-    this.context.environmentVariableCollection.replace('COLORFGBG', color);
-    this.#baseEnv.FORCE_COLOR = depth;
-    this.context.environmentVariableCollection.replace('FORCE_COLOR', depth);
+    const depth = theme?.highContrast ? 1 : 3;
+    Object.assign(this.#baseEnv, {
+      ...Env.COLORFGBG.export(color),
+      ...Env.FORCE_COLOR.export(depth),
+    });
+    this.context.environmentVariableCollection.replace(Env.COLORFGBG.key, color);
+    this.context.environmentVariableCollection.replace(Env.FORCE_COLOR.key, `${depth}`);
   }
 
   /**
@@ -205,22 +206,21 @@ export class Workspace {
       config.main = this.#cliFile;
     }
 
-    /* eslint-disable no-template-curly-in-string */
     const res: vscode.DebugConfiguration = {
       type: 'node',
       request: 'launch',
-      cwd: '${workspaceFolder}',
+      cwd: WORKSPACE,
       sourceMaps: true,
       pauseForSourceMap: true,
       runtimeArgs: [],
       outFiles: [
-        ['${workspaceFolder}', this.#manifestContext.outputFolder, '**', '*.js'].join('/'),
+        [WORKSPACE, this.#manifestContext.outputFolder, '**', '*.js'].join('/'),
       ],
       resolveSourceMapLocations: [
-        ['${workspaceFolder}', this.#manifestContext.outputFolder, '**'].join('/'),
+        [WORKSPACE, this.#manifestContext.outputFolder, '**'].join('/'),
       ],
       runtimeSourcemapPausePatterns: [
-        ['${workspaceFolder}', this.#manifestContext.outputFolder, '**', 'test', '**', '*.js'].join('/'),
+        [WORKSPACE, this.#manifestContext.outputFolder, '**', 'test', '**', '*.js'].join('/'),
       ],
       skipFiles: [
         '<node_internals>/**',
@@ -236,11 +236,10 @@ export class Workspace {
       console: 'internalConsole',
       internalConsoleOptions: 'openOnSessionStart',
       name: config.name,
-      program: config.main.replace(this.path, '${workspaceFolder}'),
+      program: config.main.replace(this.path, WORKSPACE),
       args: (config.args ?? []).map(x => `${x}`),
       env: this.#buildEnv(true, config.env ?? {}, config.cliModule)
     };
-    /* eslint-enable no-template-curly-in-string */
     return res;
   }
 

@@ -10,6 +10,7 @@ import { BaseFeature } from '../../base';
 
 import { WorkspaceResultsManager } from './workspace';
 import { RemoveEvent, TestCommand, TestEvent } from './types';
+import { Env } from '@travetto/base';
 
 /**
  * Test Runner Feature
@@ -68,7 +69,7 @@ class TestRunnerFeature extends BaseFeature {
       args: [prettyFile, `${line}`],
       cliModule: file,
       env: {
-        ...(breakpoint ? { TRV_TEST_BREAK_ENTRY: '1' } : {})
+        ...(breakpoint ? Env.TRV_TEST_BREAK_ENTRY.export(true) : {})
       }
     }));
   }

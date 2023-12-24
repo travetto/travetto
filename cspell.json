@@ -19,6 +19,8 @@
         "Catchable",
         "classname",
         "codegen",
+        "COLORFGBG",
+        "COLORTERM",
         "contenttype",
         "cpus",
         "creds",
