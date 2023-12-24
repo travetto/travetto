@@ -125,6 +125,7 @@ export const PAGES = [
       { path: 'config', title: 'Config ', component: ConfigComponent },
       { path: 'cli', title: 'CLI Support', component: CliComponent },
       { path: 'test', title: 'Test', component: TestComponent },
+      { path: 'terminal', title: 'Terminal', component: TerminalComponent },
       { path: 'worker', title: 'Worker', component: WorkerComponent },
       { path: 'yaml', title: 'YAML Parser', component: YamlComponent },
     ]
@@ -137,7 +138,6 @@ export const PAGES = [
       { path: 'compiler', title: 'Compiler', component: CompilerComponent },
       { path: 'transformer', title: 'Transformer', component: TransformerComponent },
       { path: 'manifest', title: 'Manifest', component: ManifestComponent },
-      { path: 'terminal', title: 'Terminal', component: TerminalComponent },
     ]
   },
   {
