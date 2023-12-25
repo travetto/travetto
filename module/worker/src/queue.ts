@@ -17,6 +17,9 @@ export class WorkQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
     this.#queue.push(...initial);
     this.#size = this.#queue.length;
     signal?.addEventListener('abort', () => this.close());
+    if (signal?.aborted) {
+      this.close();
+    }
   }
 
   // Allow for iteration
@@ -40,20 +43,18 @@ export class WorkQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
    * @param {boolean} immediate Determines if item(s) should be append or prepended to the queue
    */
   add(item: X, immediate = false): void {
-    return this.addAll([item], immediate);
+    this.#queue[immediate ? 'unshift' : 'push'](item);
+    this.#size += 1;
+    this.#ready.resolve();
   }
 
   /**
    * Queue a list of data to stream
    * @param {boolean} immediate Determines if item(s) should be append or prepended to the queue
    */
-  addAll(items: Iterable<X>, immediate?: boolean): void {
+  addAll(items: Iterable<X>): void {
     const copy = [...items];
-    if (!immediate) {
-      this.#queue.push(...copy);
-    } else {
-      this.#queue.unshift(...copy);
-    }
+    this.#queue.push(...copy);
     this.#size += copy.length;
     this.#ready.resolve();
   }
