@@ -21,14 +21,6 @@ export class PackageUtil {
   }
 
   /**
-   * Clear out cached package file reads
-   */
-  static clearCache(): void {
-    this.#cache = {};
-    this.#workspaces = {};
-  }
-
-  /**
    * Resolve import given a manifest context
    */
   static resolveImport(imp: string, root?: string): string {

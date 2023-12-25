@@ -32,22 +32,19 @@ export class CompilerClientUtil {
    * Get progress writer
    * @returns
    */
-  static progressWriter(): ((ev: CompilerProgressEvent) => Promise<void>) | undefined {
-    if (!LogUtil.isLevelActive('info')) {
+  static progressWriter(): ((ev: CompilerProgressEvent) => Promise<void> | void) | undefined {
+    const out = process.stdout;
+    if (!LogUtil.isLevelActive('info') || !out.isTTY) {
       return;
     }
-    const out = process.stdout;
 
-    let message: string | undefined;
-
-    return async (ev: CompilerProgressEvent): Promise<void> => {
-      if (message) {
-        await new Promise<void>(r => out.clearLine?.(0, () => out?.moveCursor(-message!.length, 0, () => r())) ?? r());
-      }
-      if (!ev.complete) {
-        const pct = Math.trunc(ev.idx * 100 / ev.total);
-        message = `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${ev.idx}/${ev.total}] ${ev.message}`;
-        await new Promise<void>(r => out.write(message!, () => r()));
+    return (ev: CompilerProgressEvent): Promise<void> | void => {
+      const pct = Math.trunc(ev.idx * 100 / ev.total);
+      const text = ev.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${ev.idx}/${ev.total}] ${ev.message}`;
+      // Move to 1st position, and clear after text
+      const done = out.write(`\x1b[1G${text}\x1b[0K`);
+      if (!done) {
+        return new Promise<void>(r => out.once('drain', r));
       }
     };
   }

@@ -1,5 +1,6 @@
 import cp from 'node:child_process';
 import path from 'node:path';
+import { rmSync } from 'node:fs';
 
 import type { ManifestContext, ManifestRoot, DeltaEvent } from '@travetto/manifest';
 
@@ -9,6 +10,7 @@ import { LogUtil } from '../log';
 import { CommonUtil } from '../util';
 
 const log = LogUtil.log.bind(null, 'compiler-exec');
+const isEvent = (msg: unknown): msg is CompilerServerEvent => !!msg && typeof msg === 'object' && 'type' in msg;
 
 /**
  * Running the compiler
@@ -28,58 +30,48 @@ export class CompilerRunner {
       log('debug', `Started watch=${watch} changed=${changed.slice(0, 10).map(x => `${x.module}/${x.file}`)}`);
     }
 
-    const compiler = path.resolve(ctx.workspacePath, ctx.compilerFolder);
-    const main = path.resolve(compiler, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
-    const deltaFile = path.resolve(ctx.workspacePath, ctx.toolFolder, 'manifest-delta.json');
+    const main = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
+    const deltaFile = path.resolve(ctx.workspacePath, ctx.toolFolder, `manifest-delta-${Date.now()}.json`);
 
     const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev =>
       path.resolve(manifest.workspacePath, manifest.modules[ev.module].sourceFolder, ev.file)
     );
 
-    let proc: cp.ChildProcess | undefined;
-    let cleanup: (() => void) | undefined;
-
-    const queue = new AsyncQueue<CompilerServerEvent>(signal);
+    const queue = new AsyncQueue<CompilerServerEvent>();
+    let kill: (() => void) | undefined;
 
     try {
       await CommonUtil.writeTextFile(deltaFile, changedFiles.join('\n'));
 
       log('info', 'Launching compiler');
-      proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
+      const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
         env: {
           ...process.env,
           TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
         },
-        stdio: ['pipe', 'pipe', 2, 'ipc'],
+        detached: true,
+        stdio: ['pipe', 1, 2, 'ipc'],
       })
-        .on('message', msg => {
-          if (msg && typeof msg === 'object' && 'type' in msg) {
-            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-            queue.add(msg as CompilerServerEvent);
-          }
-        })
-        .on('exit', code => {
-          if (code !== null && code > 0) {
-            log('error', 'Failed during compilation');
-          }
-          queue.close();
-        });
+        .on('message', msg => isEvent(msg) && queue.add(msg))
+        .on('exit', () => queue.close());
 
-      cleanup = (): void => {
-        if (proc && proc.killed === false) {
-          proc.kill('SIGKILL');
-        }
-        process.off('exit', cleanup!);
-      };
-      signal.addEventListener('abort', cleanup);
-      process.on('exit', cleanup);
+      kill = (): unknown => proc.kill('SIGINT');
+
+      process.once('SIGINT', kill);
+      signal.addEventListener('abort', kill);
 
       yield* queue;
 
-      log('debug', `exit code: ${proc?.exitCode}`);
+      if (!proc.killed || proc.exitCode! > 0) {
+        log('error', `Failed during compilation, code=${proc.exitCode}, killed=${proc.killed}`);
+      }
+
       log('debug', 'Finished');
     } finally {
-      cleanup?.();
+      if (kill) {
+        process.off('SIGINT', kill);
+      }
+      rmSync(deltaFile, { force: true });
     }
   }
 }

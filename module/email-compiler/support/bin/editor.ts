@@ -54,8 +54,8 @@ export class EditorState {
   }
 
   response(response: OutboundMessage): void {
-    if (process.send) {
-      process.send(response);
+    if (process.connected) {
+      process.send?.(response);
     }
   }
 

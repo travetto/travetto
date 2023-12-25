@@ -9,7 +9,7 @@ import { CommonUtil } from './util';
 
 type ModFile = { input: string, output: string, stale: boolean };
 
-const SOURCE_SEED = ['package.json', 'index.ts', '__index__.ts', 'src', 'support', 'bin'];
+const SOURCE_SEED = ['package.json', '__index__.ts', 'src', 'support', 'bin'];
 const PRECOMPILE_MODS = ['@travetto/manifest', '@travetto/transformer', '@travetto/compiler'];
 const RECENT_STAT = (stat: { ctimeMs: number, mtimeMs: number }): number => Math.max(stat.ctimeMs, stat.mtimeMs);
 const REQ = createRequire(path.resolve('node_modules')).resolve.bind(null);
@@ -23,9 +23,9 @@ export class CompilerSetup {
    * Import compiled manifest utilities
    */
   static #importManifest = (ctx: ManifestContext): Promise<
-    Pick<typeof import('@travetto/manifest'), 'ManifestDeltaUtil' | 'ManifestUtil' | 'PackageUtil'>
+    Pick<typeof import('@travetto/manifest'), 'ManifestDeltaUtil' | 'ManifestUtil'>
   > => {
-    const all = ['util', 'package', 'delta'].map(f =>
+    const all = ['util', 'delta'].map(f =>
       import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}.js`))
     );
     return Promise.all(all).then(props => Object.assign({}, ...props));
@@ -181,9 +181,7 @@ export class CompilerSetup {
       }
     });
 
-    const { ManifestUtil, ManifestDeltaUtil, PackageUtil } = await this.#importManifest(ctx);
-
-    PackageUtil.clearCache();
+    const { ManifestUtil, ManifestDeltaUtil } = await this.#importManifest(ctx);
 
     const manifest = await LogUtil.withLogger('manifest', () => ManifestUtil.buildManifest(ctx));
 

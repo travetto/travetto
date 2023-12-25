@@ -57,8 +57,7 @@ export class CompilerServer {
       keepAliveTimeout: 1000 * 60 * 60,
     }, (req, res) => this.#onRequest(req, res));
 
-    // Connect
-    process.on('SIGINT', () => this.#shutdown.abort());
+    process.once('exit', () => this.#shutdown.abort());
   }
 
   get mode(): CompilerMode {

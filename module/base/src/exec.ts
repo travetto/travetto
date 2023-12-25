@@ -357,7 +357,7 @@ export class ExecUtil {
    */
   static sendResponse(res: unknown, failure?: boolean): void {
     parentPort?.postMessage(res);
-    process.send?.(res);
+    if (process.connected && process.send) { process.send(res); }
     if (res !== undefined) {
       const msg = typeof res === 'string' ? res : (res instanceof Error ? res.stack : JSON.stringify(res));
       process[!failure ? 'stdout' : 'stderr'].write(`${msg}\n`);
@@ -369,10 +369,7 @@ export class ExecUtil {
    * Exit child process on disconnect, in ipc setting
    */
   static exitOnDisconnect(): void {
-    // If we are listening, and we become disconnected
-    if (process.send) {
-      // Shutdown when ipc bridge is closed
-      process.on('disconnect', () => process.kill(process.pid, 'SIGTERM'));
-    }
+    // Shutdown when ipc bridge is closed
+    process.once('disconnect', () => process.kill(process.pid, 'SIGTERM'));
   }
 }

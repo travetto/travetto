@@ -13,6 +13,9 @@ export class AsyncQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
 
   constructor(signal?: AbortSignal) {
     signal?.addEventListener('abort', () => this.close());
+    if (signal?.aborted) {
+      this.close();
+    }
   }
 
   [Symbol.asyncIterator](): AsyncIterator<X> { return this; }

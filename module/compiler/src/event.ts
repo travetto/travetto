@@ -2,6 +2,6 @@ import type { CompilerServerEvent, CompilerServerEventType } from '../support/ty
 
 export class EventUtil {
   static sendEvent<K extends CompilerServerEventType, T extends CompilerServerEvent & { type: K }>(type: K, payload: T['payload']): void {
-    process.send?.({ type, payload });
+    process.connected && process.send!({ type, payload });
   }
 }

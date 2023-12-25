@@ -13,7 +13,7 @@ const VALID_TYPES = new Set(['ts', 'typings', 'js', 'package-json']);
 type ToWatch = { file: string, actions: string[] };
 
 /** Watch file for reset */
-async function watchForReset(q: AsyncQueue<WatchEvent>, root: string, files: ToWatch[], signal: AbortSignal): Promise<void> {
+function watchForReset(q: AsyncQueue<WatchEvent>, root: string, files: ToWatch[], signal: AbortSignal): void {
   const watchers: Record<string, { folder: string, files: Map<string, (ToWatch & { name: string, actionSet: Set<string> })> }> = {};
   // Group by base path
   for (const el of files) {
@@ -26,15 +26,19 @@ async function watchForReset(q: AsyncQueue<WatchEvent>, root: string, files: ToW
 
   // Fire them all off
   Object.values(watchers).map(async (watcher) => {
-    for await (const ev of fs.watch(watcher.folder, { persistent: true, encoding: 'utf8', signal })) {
-      const toWatch = watcher.files.get(ev.filename!);
-      if (toWatch) {
-        const stat = await fs.stat(path.resolve(root, ev.filename!)).catch(() => undefined);
-        const action = !stat ? 'delete' : ((Date.now() - stat.ctimeMs) < CREATE_THRESHOLD) ? 'create' : 'update';
-        if (toWatch.actionSet.has(action)) {
-          q.add({ action: 'reset', file: ev.filename! });
+    try {
+      for await (const ev of fs.watch(watcher.folder, { persistent: true, encoding: 'utf8', signal })) {
+        const toWatch = watcher.files.get(ev.filename!);
+        if (toWatch) {
+          const stat = await fs.stat(path.resolve(root, ev.filename!)).catch(() => undefined);
+          const action = !stat ? 'delete' : ((Date.now() - stat.ctimeMs) < CREATE_THRESHOLD) ? 'create' : 'update';
+          if (toWatch.actionSet.has(action)) {
+            q.add({ action: 'reset', file: ev.filename! });
+          }
         }
       }
+    } catch (err) {
+      // Ignore
     }
   });
 }
@@ -79,7 +83,7 @@ export async function* fileWatchEvents(manifest: ManifestContext, modules: Index
   const q = new AsyncQueue<WatchEvent>(signal);
 
   for (const m of modules.filter(x => !manifest.monoRepo || x.sourcePath !== manifest.workspacePath)) {
-    watchFolder(manifest, q, m.sourcePath, m.sourcePath, signal);
+    await watchFolder(manifest, q, m.sourcePath, m.sourcePath, signal);
   }
 
   // Add monorepo folders
@@ -87,7 +91,7 @@ export async function* fileWatchEvents(manifest: ManifestContext, modules: Index
     const mono = modules.find(x => x.sourcePath === manifest.workspacePath)!;
     for (const folder of Object.keys(mono.files)) {
       if (!folder.startsWith('$')) {
-        watchFolder(manifest, q, path.resolve(mono.sourcePath, folder), mono.sourcePath, signal);
+        await watchFolder(manifest, q, path.resolve(mono.sourcePath, folder), mono.sourcePath, signal);
       }
     }
   }

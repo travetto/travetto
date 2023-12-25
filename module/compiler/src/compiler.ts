@@ -1,6 +1,7 @@
 import ts from 'typescript';
 import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
+import { setMaxListeners } from 'node:events';
 
 import { ManifestModuleUtil, RuntimeIndex } from '@travetto/manifest';
 
@@ -22,14 +23,16 @@ export class Compiler {
   static async main(): Promise<void> {
     const [dirty, watch] = process.argv.slice(2);
     const state = await CompilerState.get(RuntimeIndex);
+    Log.debug('Running compiler with dirty file', dirty);
     const dirtyFiles = ManifestModuleUtil.getFileType(dirty) === 'ts' ? [dirty] : (await fs.readFile(dirty, 'utf8')).split(/\n/).filter(x => !!x);
     await new Compiler(state, dirtyFiles, watch === 'true').run();
-    process.exit();
   }
 
   #state: CompilerState;
   #dirtyFiles: string[];
   #watch?: boolean;
+  #ctrl: AbortController;
+  #signal: AbortSignal;
 
   constructor(state: CompilerState, dirtyFiles: string[], watch?: boolean) {
     this.#state = state;
@@ -37,6 +40,11 @@ export class Compiler {
       this.#state.getAllFiles() :
       dirtyFiles.map(f => this.#state.getBySource(f)!.input);
     this.#watch = watch;
+
+    this.#ctrl = new AbortController();
+    this.#signal = this.#ctrl.signal;
+    setMaxListeners(1000, this.#signal);
+    process.once('disconnect', () => this.#ctrl.abort()).once('SIGINT', () => this.#ctrl.abort());
   }
 
   /**
@@ -50,6 +58,7 @@ export class Compiler {
         if (needsNewProgram) {
           program = this.#state.createProgram(program);
         }
+        await timers.setImmediate();
         const result = this.#state.writeInputFile(program, inputFile);
         if (result?.diagnostics?.length) {
           return result.diagnostics;
@@ -72,6 +81,7 @@ export class Compiler {
   async * emit(files: string[], emitter: CompileEmitter): AsyncIterable<CompileEmitEvent> {
     let i = 0;
     let lastSent = Date.now();
+
     for (const file of files) {
       const err = await emitter(file);
       const imp = file.replace(/.*node_modules\//, '');
@@ -79,6 +89,9 @@ export class Compiler {
       if ((Date.now() - lastSent) > 50) { // Limit to 1 every 50ms
         lastSent = Date.now();
         EventUtil.sendEvent('progress', { total: files.length, idx: i, message: imp, operation: 'compile' });
+      }
+      if (this.#signal.aborted) {
+        break;
       }
     }
     EventUtil.sendEvent('progress', { total: files.length, idx: files.length, message: 'Complete', operation: 'compile', complete: true });
@@ -96,10 +109,6 @@ export class Compiler {
 
     EventUtil.sendEvent('state', { state: 'init', extra: { pid: process.pid } });
 
-    if (process.send) {
-      process.on('disconnect', () => process.exit(0));
-    }
-
     const emitter = await this.getCompiler();
     let failed = false;
 
@@ -115,9 +124,12 @@ export class Compiler {
           EventUtil.sendEvent('log', { level: 'error', message: compileError.toString(), time: Date.now() });
         }
       }
-      if (failed) {
+      if (this.#signal.aborted) {
+        Log.debug('Compilation aborted');
+      } else if (failed) {
         Log.debug('Compilation failed');
-        process.exit(1);
+        process.exitCode = 1;
+        return;
       } else {
         Log.debug('Compilation succeeded');
       }
@@ -129,15 +141,16 @@ export class Compiler {
 
     EventUtil.sendEvent('state', { state: 'compile-end' });
 
-    if (this.#watch) {
+    if (this.#watch && !this.#signal.aborted) {
       Log.info('Watch is ready');
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
 
-      for await (const ev of CompilerWatcher.watch(this.#state)) {
+      for await (const ev of new CompilerWatcher(this.#state, this.#signal).watchChanges()) {
         if (ev.action === 'reset') {
           Log.info(`Triggering reset due to change in ${ev.file}`);
           EventUtil.sendEvent('state', { state: 'reset' });
+          this.#ctrl.abort();
           return;
         }
         const { action, entry } = ev;
@@ -166,6 +179,14 @@ export class Compiler {
       }
 
       EventUtil.sendEvent('state', { state: 'watch-end' });
+    }
+
+    // No longer listen to disconnect
+    process.removeAllListeners('disconnect');
+
+    if (this.#ctrl.signal.aborted) {
+      process.exitCode = 2;
+      Log.error('Shutting down manually');
     }
   }
 }

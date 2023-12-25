@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { setMaxListeners } from 'node:events';
 
 import {
   ManifestContext, ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType, ManifestModuleFileType,
@@ -20,22 +19,15 @@ type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile:
  */
 export class CompilerWatcher {
 
-  /**
-   * Watch state
-   * @param state
-   * @returns
-   */
-  static watch(state: CompilerState): AsyncIterable<WatchEvent<{ entry: CompileStateEntry }>> {
-    return new CompilerWatcher(state).watchChanges();
-  }
-
   #sourceHashes = new Map<string, number>();
   #manifestContexts = new Map<string, ManifestContext>();
   #dirtyFiles: DirtyFile[] = [];
   #state: CompilerState;
+  #signal: AbortSignal;
 
-  constructor(state: CompilerState) {
+  constructor(state: CompilerState, signal: AbortSignal) {
     this.#state = state;
+    this.#signal = signal;
   }
 
   async #rebuildManifestsIfNeeded(): Promise<void> {
@@ -99,18 +91,20 @@ export class CompilerWatcher {
    * @returns
    */
   async * watchChanges(): AsyncIterable<WatchEvent<{ entry: CompileStateEntry }>> {
+    if (this.#signal.aborted) {
+      yield* [];
+      return;
+    }
+
     const mods = this.#getModuleMap();
-    const ctrl = new AbortController();
-    setMaxListeners(1000, ctrl.signal);
 
     const modules = [...this.#state.manifestIndex.getModuleList('all')].map(x => this.#state.manifestIndex.getModule(x)!);
 
-    const stream = fileWatchEvents(this.#state.manifest, modules, ctrl.signal);
+    const stream = fileWatchEvents(this.#state.manifest, modules, this.#signal);
     for await (const ev of stream) {
 
       if (ev.action === 'reset') {
         yield ev;
-        ctrl.abort();
         return;
       }
 
