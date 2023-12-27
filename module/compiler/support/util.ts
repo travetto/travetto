@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
 
@@ -59,6 +60,7 @@ export class CommonUtil {
   static async * restartableEvents<T>(src: (signal: AbortSignal) => AsyncIterable<T>, parent: AbortSignal, shouldRestart: (item: T) => boolean): AsyncIterable<T> {
     outer: while (!parent.aborted) {
       const controller = new AbortController();
+      setMaxListeners(1000, controller.signal);
       // Chain
       parent.addEventListener('abort', () => controller.abort());
 
