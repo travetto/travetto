@@ -62,7 +62,7 @@ export class CompilerRunner {
 
       yield* queue;
 
-      if (!proc.killed || proc.exitCode! > 0) {
+      if (!proc.killed && proc.exitCode !== 0) {
         log('error', `Failed during compilation, code=${proc.exitCode}, killed=${proc.killed}`);
       }
 
