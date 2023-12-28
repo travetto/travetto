@@ -2,7 +2,7 @@ import cp from 'node:child_process';
 import path from 'node:path';
 import { rmSync } from 'node:fs';
 
-import type { ManifestContext, ManifestRoot, DeltaEvent } from '@travetto/manifest';
+import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
 import type { CompilerOp, CompilerServerEvent } from '../types';
 import { AsyncQueue } from '../queue';
@@ -20,7 +20,7 @@ export class CompilerRunner {
   /**
    * Run compile process
    */
-  static async * runProcess(ctx: ManifestContext, manifest: ManifestRoot, changed: DeltaEvent[], op: CompilerOp, signal: AbortSignal): AsyncIterable<CompilerServerEvent> {
+  static async * runProcess(ctx: ManifestContext, changed: DeltaEvent[], op: CompilerOp, signal: AbortSignal): AsyncIterable<CompilerServerEvent> {
     const watch = op === 'watch';
     if (!changed.length && !watch) {
       yield { type: 'state', payload: { state: 'compile-end' } };
@@ -33,9 +33,7 @@ export class CompilerRunner {
     const main = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
     const deltaFile = path.resolve(ctx.workspacePath, ctx.toolFolder, `manifest-delta-${Date.now()}.json`);
 
-    const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev =>
-      path.resolve(manifest.workspacePath, manifest.modules[ev.module].sourceFolder, ev.file)
-    );
+    const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev => ev.sourceFile);
 
     const queue = new AsyncQueue<CompilerServerEvent>();
     let kill: (() => void) | undefined;
@@ -47,7 +45,7 @@ export class CompilerRunner {
       const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
         env: {
           ...process.env,
-          TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule),
+          TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.workspaceModule),
         },
         detached: true,
         stdio: ['pipe', 1, 2, 'ipc'],

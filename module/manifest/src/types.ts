@@ -35,6 +35,8 @@ export type ManifestContext = {
   mainFolder: string;
   /** Workspace path for module */
   workspacePath: string;
+  /** The module name for the workspace root */
+  workspaceModule: string;
   /** Code output folder, relative to workspace */
   outputFolder: string;
   /** Tooling folder, relative to workspace */
@@ -115,6 +117,7 @@ type OrProm<T> = T | Promise<T>;
 
 export type PackageVisitReq<T> = { pkg: Package, prod: boolean, sourcePath: string, parent?: T, topLevel?: boolean };
 export type PackageVisitor<T> = {
+  rootPath: string;
   init?(req: PackageVisitReq<T>): OrProm<undefined | void | PackageVisitReq<T>[]>;
   valid?(req: PackageVisitReq<T>): boolean;
   create(req: PackageVisitReq<T>): OrProm<T>;

@@ -105,14 +105,9 @@ export class PackageUtil {
   /**
    * Visit packages with ability to track duplicates
    */
-  static async visitPackages<T>(
-    rootOrPath: PackageVisitReq<T> | string,
-    visitor: PackageVisitor<T>
-  ): Promise<Set<T>> {
+  static async visitPackages<T>(visitor: PackageVisitor<T>): Promise<Set<T>> {
 
-    const root = typeof rootOrPath === 'string' ?
-      this.packageReq<T>(rootOrPath, false, true) :
-      rootOrPath;
+    const root = this.packageReq<T>(visitor.rootPath, false, true);
 
     const seen = new Map<string, T>();
     const queue: PackageVisitReq<T>[] = [...await visitor.init?.(root) ?? [], root];

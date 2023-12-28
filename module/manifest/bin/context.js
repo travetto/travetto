@@ -137,8 +137,9 @@ async function $resolveModule(workspace, folder) {
 export async function getManifestContext(folder) {
   const workspace = await $resolveWorkspace(folder);
 
-  const [mod, framework, compilerUrl] = await Promise.all([
+  const [mod, workspaceMod, framework, compilerUrl] = await Promise.all([
     $resolveModule(workspace, folder),
+    $readPackage(workspace.path),
     $readPackage(workspace.resolve('@travetto/manifest/package.json')),
     $getCompilerUrl(workspace),
   ]);
@@ -146,6 +147,7 @@ export async function getManifestContext(folder) {
   return {
     workspacePath: workspace.path,
     monoRepo: workspace.mono,
+    workspaceModule: workspaceMod?.name ?? 'untitled',
     packageManager: workspace.manager,
     moduleType: workspace.type ?? 'commonjs',
     outputFolder: workspace.travetto?.outputFolder ?? OUTPUT_FOLDER,

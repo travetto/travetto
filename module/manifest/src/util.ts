@@ -2,6 +2,7 @@ import { path } from './path';
 import { ManifestContext, ManifestRoot } from './types';
 import { ManifestModuleUtil } from './module';
 import { ManifestFileUtil } from './file';
+import { PackageUtil } from './package';
 
 const MANIFEST_FILE = 'manifest.json';
 
@@ -70,9 +71,9 @@ export class ManifestUtil {
   /**
    * Write manifest for a given context, return location
    */
-  static writeManifest(ctx: ManifestContext, manifest: ManifestRoot): Promise<string> {
+  static writeManifest(manifest: ManifestRoot): Promise<string> {
     return ManifestFileUtil.bufferedFileWrite(
-      path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.mainModule, MANIFEST_FILE),
+      path.resolve(manifest.workspacePath, manifest.outputFolder, 'node_modules', manifest.mainModule, MANIFEST_FILE),
       JSON.stringify(manifest)
     );
   }
@@ -91,11 +92,31 @@ export class ManifestUtil {
   }
 
   /**
-   * Rewrite manifest for a given folder
+   * Produce the manifest context for the workspace module
    */
-  static async rewriteManifest(source: string): Promise<void> {
-    const subCtx = await this.buildContext(source);
-    const subManifest = await this.buildManifest(subCtx);
-    await this.writeManifest(subCtx, subManifest);
+  static getWorkspaceContext(ctx: ManifestContext): ManifestContext {
+    return ctx.monoRepo ? {
+      ...ctx,
+      mainModule: ctx.workspaceModule,
+      mainFolder: '',
+      version: '',
+      description: undefined
+    } : ctx;
+  }
+
+  /**
+   * Produce the manifest context for a given module module
+   */
+  static getModuleContext(ctx: ManifestContext, folder: string): ManifestContext {
+    const modPath = path.resolve(ctx.workspacePath, folder);
+    const pkg = PackageUtil.readPackage(modPath);
+
+    return {
+      ...ctx,
+      mainModule: pkg.name,
+      mainFolder: folder,
+      version: pkg.version,
+      description: pkg.description
+    };
   }
 }

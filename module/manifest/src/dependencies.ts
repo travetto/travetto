@@ -50,6 +50,13 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
   #mainSourcePath: string;
 
   /**
+   * Main source path for searching
+   */
+  get rootPath(): string {
+    return this.#mainSourcePath;
+  }
+
+  /**
    * Initialize visitor, and provide global dependencies
    */
   async init(req: PackageVisitReq<ModuleDep>): Promise<PackageVisitReq<ModuleDep>[]> {

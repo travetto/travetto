@@ -12,7 +12,7 @@ import { CompilerClientUtil } from './server/client';
 import { CommonUtil } from './util';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export const main = (root: ManifestContext, ctx: ManifestContext) => {
+export const main = (ctx: ManifestContext) => {
   const ops = {
     /** Stop the server */
     async stop(): Promise<void> {
@@ -44,20 +44,18 @@ export const main = (root: ManifestContext, ctx: ManifestContext) => {
     async compile(op: CompilerOp, setupOnly = false): Promise<(mod: string) => Promise<unknown>> {
       LogUtil.initLogs(ctx, op === 'run' ? 'error' : 'info');
 
-      const server = await new CompilerServer(root, op).listen();
+      const server = await new CompilerServer(ctx, op).listen();
 
       // Wait for build to be ready
       if (server) {
         await server.processEvents(async function* (signal) {
-          const { changed, manifest } = await CompilerSetup.setup(root);
+          const changed = await CompilerSetup.setup(ctx);
           if (!setupOnly) {
-            yield* CompilerRunner.runProcess(root, manifest, changed, op, signal);
-          } else {
-            yield* [];
+            yield* CompilerRunner.runProcess(ctx, changed, op, signal);
           }
         });
       } else {
-        await CompilerClientUtil.waitForBuild(root);
+        await CompilerClientUtil.waitForBuild(ctx);
       }
       return CommonUtil.moduleLoader(ctx);
     },
@@ -70,4 +68,3 @@ export const main = (root: ManifestContext, ctx: ManifestContext) => {
   };
   return ops;
 };
-

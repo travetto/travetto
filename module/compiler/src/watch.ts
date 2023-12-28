@@ -1,10 +1,8 @@
 import { readFileSync } from 'node:fs';
 
 import {
-  ManifestContext, ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType, ManifestModuleFileType,
-  path, ManifestModule,
+  ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType, ManifestModuleFileType, path, ManifestModule,
 } from '@travetto/manifest';
-import { getManifestContext } from '@travetto/manifest/bin/context';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -20,7 +18,6 @@ type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile:
 export class CompilerWatcher {
 
   #sourceHashes = new Map<string, number>();
-  #manifestContexts = new Map<string, ManifestContext>();
   #dirtyFiles: DirtyFile[] = [];
   #state: CompilerState;
   #signal: AbortSignal;
@@ -35,13 +32,9 @@ export class CompilerWatcher {
       return;
     }
     const mods = [...new Set(this.#dirtyFiles.map(x => x.modFolder))];
-    const contexts = await Promise.all(mods.map(async folder => {
-      if (!this.#manifestContexts.has(folder)) {
-        const ctx = await getManifestContext(folder);
-        this.#manifestContexts.set(folder, ctx);
-      }
-      return this.#manifestContexts.get(folder)!;
-    }));
+    const contexts = await Promise.all(mods.map(folder =>
+      ManifestUtil.getModuleContext(this.#state.manifest, folder)
+    ));
 
     const files = this.#dirtyFiles.slice(0);
     this.#dirtyFiles = [];
@@ -64,7 +57,7 @@ export class CompilerWatcher {
           }
         }
       }
-      await ManifestUtil.writeManifest(ctx, newManifest);
+      await ManifestUtil.writeManifest(newManifest);
     }
     // Reindex
     this.#state.manifestIndex.init(this.#state.manifestIndex.manifestFile);
