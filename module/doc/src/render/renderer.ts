@@ -23,8 +23,7 @@ export class DocRenderer {
     const res = await import(mod!) as DocumentShape;
 
     const pkg = PackageUtil.readPackage(manifest.workspacePath);
-    const mainPath = path.resolve(manifest.workspacePath, manifest.mainFolder);
-    const repoBaseUrl = pkg.travetto?.docBaseUrl ?? mainPath;
+    const repoBaseUrl = pkg.travetto?.docBaseUrl!;
     return new DocRenderer(res,
       new RenderContext(file, repoBaseUrl, path.resolve(pkg.travetto?.docRoot ?? manifest.workspacePath))
     );

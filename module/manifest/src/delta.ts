@@ -9,7 +9,7 @@ import { path } from './path';
 
 type DeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
 type DeltaModule = ManifestModuleCore & { files: Record<string, ManifestModuleFile> };
-export type DeltaEvent = { file: string, type: DeltaEventType, module: string };
+export type DeltaEvent = { file: string, type: DeltaEventType, module: string, sourceFile: string };
 
 const VALID_SOURCE_FOLDERS = new Set<ManifestModuleFolderType>(['bin', 'src', 'test', 'support', '$index', '$package', 'doc']);
 const VALID_SOURCE_TYPE = new Set<ManifestModuleFileType>(['js', 'ts', 'package-json']);
@@ -30,7 +30,7 @@ export class ManifestDeltaUtil {
     const out: DeltaEvent[] = [];
 
     const add = (file: string, type: DeltaEvent['type']): unknown =>
-      out.push({ file, module: left.name, type });
+      out.push({ file, module: left.name, type, sourceFile: path.resolve(ctx.workspacePath, left.sourceFolder, file) });
 
     const root = `${ctx.workspacePath}/${ctx.outputFolder}/${left.outputFolder}`;
     const right = new Set(
@@ -88,14 +88,14 @@ export class ManifestDeltaUtil {
   /**
    * Produce delta between manifest root and the output folder
    */
-  static async produceDelta(ctx: ManifestContext, manifest: ManifestRoot): Promise<DeltaEvent[]> {
+  static async produceDelta(manifest: ManifestRoot): Promise<DeltaEvent[]> {
     const deltaLeft = Object.fromEntries(
       Object.values(manifest.modules)
         .map(m => [m.name, { ...m, files: this.#flattenModuleFiles(m) }])
     );
 
     const out: DeltaEvent[] = [];
-    const outputFolder = path.resolve(ctx.workspacePath, ctx.outputFolder);
+    const outputFolder = path.resolve(manifest.workspacePath, manifest.outputFolder);
 
     for (const lMod of Object.values(deltaLeft)) {
       out.push(...await this.#deltaModules(manifest, outputFolder, lMod));

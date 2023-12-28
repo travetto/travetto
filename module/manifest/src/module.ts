@@ -207,8 +207,7 @@ export class ManifestModuleUtil {
    */
   static async produceModules(ctx: ManifestContext): Promise<Record<string, ManifestModule>> {
     const visitor = new ModuleDependencyVisitor(ctx);
-    const mainPath = path.resolve(ctx.workspacePath, ctx.mainFolder);
-    const declared = await PackageUtil.visitPackages(mainPath, visitor);
+    const declared = await PackageUtil.visitPackages(visitor);
     const sorted = [...declared].sort((a, b) => a.name.localeCompare(b.name));
     const modules = await Promise.all(sorted.map(x => this.describeModule(ctx, x)));
     return Object.fromEntries(modules.map(m => [m.name, m]));

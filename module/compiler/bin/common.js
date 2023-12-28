@@ -32,17 +32,16 @@ async function outputIfChanged(/** @type {Ctx} */ ctx, /** @type {string} */ fil
   return target;
 }
 
-/** @return {Promise<ReturnType<import('@travetto/compiler/support/entry.trvc').main>>} */
 export const getEntry = async () => {
   const ctx = await getManifestContext();
-  const rootCtx = await (ctx.monoRepo ? getManifestContext(ctx.workspacePath) : ctx);
   const entry = await outputIfChanged(ctx, 'support/entry.trvc.ts', transpile);
+  const run = (/** @type {import('@travetto/compiler/support/entry.trvc')} */ mod) => mod.main(ctx);
 
   await outputIfChanged(ctx, 'package.json', rewritePackage);
 
   await fs.readdir(path.resolve(ctx.workspacePath, ctx.compilerModuleFolder, 'support'), { recursive: true }).then(files =>
     Promise.all(files.filter(x => TS_EXT.test(x)).map(f => outputIfChanged(ctx, `support/${f}`, transpile))));
 
-  try { return require(entry).main(rootCtx, ctx); }
-  catch { return import(entry).then(v => v.main(rootCtx, ctx)); }
+  try { return run(require(entry)); }
+  catch { return import(entry).then(run); }
 };

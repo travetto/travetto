@@ -2,7 +2,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import fs from 'node:fs/promises';
 
-import { type DeltaEvent, type ManifestContext, type ManifestRoot, type Package } from '@travetto/manifest';
+import { type DeltaEvent, type ManifestContext, type Package } from '@travetto/manifest';
 
 import { LogUtil } from './log';
 import { CommonUtil } from './util';
@@ -76,9 +76,7 @@ export class CompilerSetup {
    * Scan directory to find all project sources for comparison
    */
   static async #getModuleSources(ctx: ManifestContext, module: string, seed: string[]): Promise<ModFile[]> {
-    const inputFolder = (ctx.mainModule === module) ?
-      process.cwd() :
-      path.dirname(REQ(`${module}/package.json`));
+    const inputFolder = path.dirname(REQ(`${module}/package.json`));
 
     const folders = seed.filter(x => !/[.]/.test(x)).map(x => path.resolve(inputFolder, x));
     const files = seed.filter(x => /[.]/.test(x)).map(x => path.resolve(inputFolder, x));
@@ -170,9 +168,9 @@ export class CompilerSetup {
   }
 
   /**
-   * Sets up compiler, and produces a manifest and set of changes that need to be processed
+   * Sets up compiler, and produces a set of changes that need to be processed
    */
-  static async setup(ctx: ManifestContext): Promise<{ manifest: ManifestRoot, changed: DeltaEvent[] }> {
+  static async setup(ctx: ManifestContext): Promise<DeltaEvent[]> {
     let changes = 0;
 
     await LogUtil.withLogger('precompile', async () => {
@@ -183,7 +181,8 @@ export class CompilerSetup {
 
     const { ManifestUtil, ManifestDeltaUtil } = await this.#importManifest(ctx);
 
-    const manifest = await LogUtil.withLogger('manifest', () => ManifestUtil.buildManifest(ctx));
+    const manifest = await LogUtil.withLogger('manifest', () =>
+      ManifestUtil.buildManifest(ManifestUtil.getWorkspaceContext(ctx)));
 
     await LogUtil.withLogger('transformers', async () => {
       for (const mod of Object.values(manifest.modules).filter(m => m.files.$transformer?.length)) {
@@ -194,9 +193,9 @@ export class CompilerSetup {
     const delta = await LogUtil.withLogger('delta', async log => {
       if (changes) {
         log('debug', 'Skipping, everything changed');
-        return [{ type: 'changed', file: '*', module: ctx.mainModule } as const];
+        return [{ type: 'changed', file: '*', module: ctx.workspaceModule, sourceFile: '' } as const];
       } else {
-        return ManifestDeltaUtil.produceDelta(ctx, manifest);
+        return ManifestDeltaUtil.produceDelta(manifest);
       }
     });
 
@@ -209,15 +208,17 @@ export class CompilerSetup {
 
     // Write manifest
     await LogUtil.withLogger('manifest', async log => {
-      await ManifestUtil.writeManifest(ctx, manifest);
-      log('debug', `Wrote manifest ${ctx.mainModule}`);
+      await ManifestUtil.writeManifest(manifest);
+      log('debug', `Wrote manifest ${ctx.workspaceModule}`);
 
-      // Update all manifests
-      if (delta.length && ctx.monoRepo && !ctx.mainFolder) {
+      // Update all manifests when in monoRepo
+      if (delta.length && ctx.monoRepo) {
         const names: string[] = [];
-        const mods = Object.values(manifest.modules).filter(x => x.local && x.name !== ctx.mainModule);
+        const mods = Object.values(manifest.modules).filter(x => x.local && x.name !== ctx.workspaceModule);
         for (const mod of mods) {
-          await ManifestUtil.rewriteManifest(path.resolve(ctx.workspacePath, mod.sourceFolder));
+          const modCtx = ManifestUtil.getModuleContext(ctx, mod.sourceFolder);
+          const modManifest = await ManifestUtil.buildManifest(modCtx);
+          await ManifestUtil.writeManifest(modManifest);
           names.push(mod.name);
         }
         log('debug', `Changes triggered ${delta.slice(0, 10).map(x => `${x.type}:${x.module}:${x.file}`)}`);
@@ -225,8 +226,6 @@ export class CompilerSetup {
       }
     });
 
-    const changed = delta.filter(x => x.type === 'added' || x.type === 'changed');
-
-    return { manifest, changed };
+    return delta.filter(x => x.type === 'added' || x.type === 'changed');
   }
 }
