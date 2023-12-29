@@ -311,11 +311,19 @@ npx trv run:rest
 ```bash
 2029-03-14T04:00:00.618Z info  [@travetto/config:src/service.ts:146] Initialized {
   manifest: {
-    mainModule: '@travetto/todo-app',
-    frameworkVersion: '3.4.0',
-    version: '0.0.0',
-    moduleType: 'commonjs',
-    workspacePath: '<workspace-root>'
+    main: {
+      name: '@travetto/todo-app',
+      folder: 'related/todo-app',
+      version: '0.0.0',
+      description: ''
+    },
+    workspace: {
+      name: '@travetto/mono-repo',
+      path: '<workspace-root>',
+      mono: true,
+      manager: 'npm',
+      type: 'commonjs'
+    }
   },
   env: {
     name: 'local',
@@ -358,10 +366,7 @@ npx trv run:rest
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
-      FileModelConfig: {
-        folder: '/tmp/<temp-folder>',
-        namespace: '.'
-      },
+      FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,

@@ -5,9 +5,11 @@
     "@travetto/compiler": "^3.0.0-rc.16"
   },
   "travetto": {
-    "isolated": true,
-    "mainSource": [
-      "@travetto/cli"
-    ]
+    "build": {
+      "isolated": true,
+      "withModules": {
+        "@travetto/cli": "main"
+      }
+    }
   }
 }

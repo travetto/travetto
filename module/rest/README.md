@@ -240,11 +240,14 @@ $ trv run:rest
 
 Initialized {
   manifest: {
-    mainModule: '@travetto-doc/rest',
-    frameworkVersion: '3.4.0',
-    version: undefined,
-    moduleType: 'commonjs',
-    workspacePath: './doc-exec'
+    main: { name: '@travetto-doc/rest', folder: '' },
+    workspace: {
+      name: '@travetto-doc/rest',
+      path: './doc-exec',
+      mono: false,
+      manager: 'npm',
+      type: 'commonjs'
+    }
   },
   env: {
     name: 'local',
@@ -320,11 +323,14 @@ $ trv run:rest:custom
 CUSTOM STARTUP
 Initialized {
   manifest: {
-    mainModule: '@travetto-doc/rest',
-    frameworkVersion: '3.4.0',
-    version: undefined,
-    moduleType: 'commonjs',
-    workspacePath: './doc-exec'
+    main: { name: '@travetto-doc/rest', folder: '' },
+    workspace: {
+      name: '@travetto-doc/rest',
+      path: './doc-exec',
+      mono: false,
+      manager: 'npm',
+      type: 'commonjs'
+    }
   },
   env: {
     name: 'prod',

@@ -8,35 +8,34 @@ import { CompilerSetup } from './setup';
 import { CompilerServer } from './server/server';
 import { CompilerRunner } from './server/runner';
 import type { CompilerOp, CompilerServerInfo } from './types';
-import { CompilerClientUtil } from './server/client';
+import { CompilerClient } from './server/client';
 import { CommonUtil } from './util';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {
+  const client = new CompilerClient(ctx);
+  const buildFolders = [ctx.build.outputFolder, ctx.build.compilerFolder];
+
   const ops = {
     /** Stop the server */
     async stop(): Promise<void> {
-      if (await fetch(`${ctx.compilerUrl}/stop`).then(v => v.ok, () => false)) {
-        console.log(`Stopped server ${ctx.workspacePath}: [${ctx.compilerUrl}]`);
+      if (await client.stop()) {
+        console.log(`Stopped server ${ctx.workspace.path}: [${client.url}]`);
       } else {
-        console.log(`Server not running ${ctx.workspacePath}: [${ctx.compilerUrl}]`);
+        console.log(`Server not running ${ctx.workspace.path}: [${client.url}]`);
       }
     },
 
     /** Get server info */
-    info(): Promise<CompilerServerInfo> {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return fetch(ctx.compilerUrl).then(v => v.json(), () => ({ state: 'Server not running' })) as Promise<CompilerServerInfo>;
-    },
+    info: (): Promise<CompilerServerInfo | undefined> => client.info(),
 
     /** Clean the server */
     async clean(): Promise<void> {
-      const folders = [ctx.outputFolder, ctx.compilerFolder];
-      if (await fetch(`${ctx.compilerUrl}/clean`).then(v => v.ok, () => false)) {
-        return console.log(`Clean triggered ${ctx.workspacePath}:`, folders);
+      if (await client.clean()) {
+        return console.log(`Clean triggered ${ctx.workspace.path}:`, buildFolders);
       } else {
-        await Promise.all(folders.map(f => fs.rm(path.resolve(ctx.workspacePath, f), { force: true, recursive: true })));
-        return console.log(`Cleaned ${ctx.workspacePath}:`, folders);
+        await Promise.all(buildFolders.map(f => fs.rm(path.resolve(ctx.workspace.path, f), { force: true, recursive: true })));
+        return console.log(`Cleaned ${ctx.workspace.path}:`, buildFolders);
       }
     },
 
@@ -55,7 +54,7 @@ export const main = (ctx: ManifestContext) => {
           }
         });
       } else {
-        await CompilerClientUtil.waitForBuild(ctx);
+        await client.waitForBuild();
       }
       return CommonUtil.moduleLoader(ctx);
     },

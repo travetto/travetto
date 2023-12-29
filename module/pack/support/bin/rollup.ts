@@ -26,7 +26,7 @@ export default function buildConfig(): RollupOptions {
       jsonImport(),
       commonjsRequire({
         ignore: id => ignoreRe.test(id) || NEVER_INCLUDE.has(id),
-        dynamicRequireRoot: RuntimeContext.workspacePath,
+        dynamicRequireRoot: RuntimeContext.workspace.path,
         dynamicRequireTargets: (output.format === 'commonjs' ? files : [])
       }),
       ...(output.format === 'module' ? [travettoImportPlugin(entry, files)] : []),

@@ -36,7 +36,7 @@ export class RestClientTestUtil {
       await fixtures.resolve(`tsconfig.${mode}.json`),
       path.resolve(folder, 'tsconfig.json'),
     );
-    const tsc = path.resolve(RuntimeContext.workspacePath, 'node_modules', '.bin', 'tsc');
+    const tsc = path.resolve(RuntimeContext.workspace.path, 'node_modules', '.bin', 'tsc');
     await ExecUtil.spawn(tsc, ['-p', folder]).result;
   }
 

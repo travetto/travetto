@@ -270,11 +270,14 @@ By default, the framework provides a default <a target="_blank" class="source-li
 
 Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
-    mainModule: <span class="token string">'@travetto-doc/rest'</span>,
-    frameworkVersion: <span class="token string">'3.4.0'</span>,
-    version: undefined,
-    moduleType: <span class="token string">'commonjs'</span>,
-    workspacePath: <span class="token string">'./doc-exec'</span>
+    main: <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'@travetto-doc/rest'</span>, folder: <span class="token string">''</span> <span class="token punctuation">{{'}'}}</span>,
+    workspace: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto-doc/rest'</span>,
+      path: <span class="token string">'./doc-exec'</span>,
+      mono: false,
+      manager: <span class="token string">'npm'</span>,
+      type: <span class="token string">'commonjs'</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'local'</span>,
@@ -356,11 +359,14 @@ And using the pattern established in the <a class="module-link" href="https://gi
 CUSTOM STARTUP
 Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
-    mainModule: <span class="token string">'@travetto-doc/rest'</span>,
-    frameworkVersion: <span class="token string">'3.4.0'</span>,
-    version: undefined,
-    moduleType: <span class="token string">'commonjs'</span>,
-    workspacePath: <span class="token string">'./doc-exec'</span>
+    main: <span class="token punctuation">{{'{'}}</span> name: <span class="token string">'@travetto-doc/rest'</span>, folder: <span class="token string">''</span> <span class="token punctuation">{{'}'}}</span>,
+    workspace: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto-doc/rest'</span>,
+      path: <span class="token string">'./doc-exec'</span>,
+      mono: false,
+      manager: <span class="token string">'npm'</span>,
+      type: <span class="token string">'commonjs'</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'prod'</span>,

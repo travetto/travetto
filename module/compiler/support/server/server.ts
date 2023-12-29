@@ -6,7 +6,7 @@ import type { ManifestContext } from '@travetto/manifest';
 
 import type { CompilerMode, CompilerOp, CompilerProgressEvent, CompilerServerEvent, CompilerServerEventType, CompilerServerInfo } from '../types';
 import { LogUtil } from '../log';
-import { CompilerClientUtil } from './client';
+import { CompilerClient } from './client';
 import { CommonUtil } from '../util';
 
 const log = LogUtil.log.bind(LogUtil, 'compiler-server');
@@ -37,18 +37,22 @@ export class CompilerServer {
   #shutdown = new AbortController();
   signal = this.#shutdown.signal;
   info: CompilerServerInfo;
-  #progressWriter = CompilerClientUtil.progressWriter();
+  #progressWriter = CompilerClient.progressWriter();
+  #client: CompilerClient;
+  #url: string;
 
   constructor(ctx: ManifestContext, op: CompilerOp) {
     this.#ctx = ctx;
+    this.#client = new CompilerClient(ctx);
+    this.#url = this.#client.url;
     this.info = {
       state: 'startup',
       iteration: Date.now(),
       mode: op === 'run' ? 'build' : op,
       serverPid: process.pid,
       compilerPid: -1,
-      path: ctx.workspacePath,
-      url: ctx.compilerUrl
+      path: ctx.workspace.path,
+      url: this.#url
     };
 
     this.#server = http.createServer({
@@ -74,14 +78,14 @@ export class CompilerServer {
         .on('listening', () => resolve('ok'))
         .on('error', async err => {
           if ('code' in err && err.code === 'EADDRINUSE') {
-            const info = await CompilerClientUtil.getServerInfo(this.#ctx);
+            const info = await this.#client.info();
             resolve((info && info.mode === 'build' && this.mode === 'watch') ? 'retry' : 'running');
           } else {
             reject(err);
           }
         });
 
-      const url = new URL(this.#ctx.compilerUrl);
+      const url = new URL(this.#url);
       setTimeout(() => this.#server.listen(+url.port, url.hostname), 1); // Run async
     });
 
@@ -91,7 +95,7 @@ export class CompilerServer {
       }
       log('info', 'Waiting for build to finish, before retrying');
       // Let the server finish
-      await CompilerClientUtil.waitForState(this.#ctx, ['close'], this.signal);
+      await this.#client.waitForState(['close'], this.signal);
       return this.#tryListen(attempt + 1);
     }
 
@@ -124,8 +128,8 @@ export class CompilerServer {
   }
 
   async #clean(): Promise<{ clean: boolean }> {
-    await Promise.all([this.#ctx.compilerFolder, this.#ctx.outputFolder]
-      .map(f => fs.rm(path.resolve(this.#ctx.workspacePath, f), { recursive: true, force: true })));
+    await Promise.all([this.#ctx.build.compilerFolder, this.#ctx.build.outputFolder]
+      .map(f => fs.rm(path.resolve(this.#ctx.workspace.path, f), { recursive: true, force: true })));
     return { clean: true };
   }
 
@@ -135,7 +139,7 @@ export class CompilerServer {
   async #onRequest(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
     res.setHeader('Content-Type', 'application/json');
 
-    const [, action, subAction] = new URL(`${this.#ctx.compilerUrl}${req.url}`).pathname.split('/');
+    const [, action, subAction] = new URL(`${this.#url}${req.url}`).pathname.split('/');
 
     log('debug', 'Receive request', { action, subAction });
 
@@ -158,7 +162,7 @@ export class CompilerServer {
 
     LogUtil.log('compiler', 'debug', 'Started, streaming logs');
 
-    CompilerClientUtil.streamLogs(this.#ctx, this.signal); // Send logs to stdout
+    this.#client.streamLogs(this.signal); // Send logs to stdout
 
     for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
       if (this.#progressWriter && ev.type === 'progress') {
@@ -212,7 +216,7 @@ export class CompilerServer {
    */
   async listen(): Promise<CompilerServer | undefined> {
     const running = await this.#tryListen() === 'ok';
-    log('info', running ? 'Starting server' : 'Server already running under a different process', this.#ctx.compilerUrl);
+    log('info', running ? 'Starting server' : 'Server already running under a different process', this.#url);
     return running ? this : undefined;
   }
 }

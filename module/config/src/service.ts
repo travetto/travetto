@@ -145,11 +145,8 @@ export class ConfigurationService {
 
     console.log('Initialized', {
       manifest: {
-        mainModule: RuntimeContext.mainModule,
-        frameworkVersion: RuntimeContext.frameworkVersion,
-        version: RuntimeContext.version,
-        moduleType: RuntimeContext.moduleType,
-        workspacePath: RuntimeContext.workspacePath
+        main: RuntimeContext.main,
+        workspace: RuntimeContext.workspace
       },
       env: {
         name: Env.name,

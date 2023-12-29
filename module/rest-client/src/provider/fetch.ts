@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/quotes */
-import { Package, RuntimeIndex } from '@travetto/manifest';
+import { Package, RuntimeContext } from '@travetto/manifest';
 import { Class } from '@travetto/base';
 import { ControllerConfig } from '@travetto/rest';
 
@@ -39,7 +39,7 @@ export class FetchClientGenerator extends ClientGenerator<{ node?: boolean }> {
         name: '',
         content: [JSON.stringify({
           name: this.moduleName,
-          version: RuntimeIndex.mainModule.version,
+          version: RuntimeContext.main.version,
           main: `${this.subFolder ?? '.'}/index.ts`,
           dependencies: this.config.node ? { '@types/node': pkg.dependencies['@types/node'], } : {}
         } satisfies Package, null, 2)]

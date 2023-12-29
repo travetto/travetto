@@ -37,7 +37,7 @@ export class LintCommand implements CliCommandShape {
       ...(this.format ? ['--format', this.format] : []),
       ...files
     ], {
-      cwd: RuntimeContext.workspacePath,
+      cwd: RuntimeContext.workspace.path,
       stdio: 'inherit',
       catchAsResult: true
     }).result;

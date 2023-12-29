@@ -23,7 +23,7 @@ export class LogUtil {
     if (build !== 'none' && process.env.TRV_QUIET !== 'true') {
       this.logLevel = build || defaultLevel;
     }
-    this.root = ctx.workspacePath;
+    this.root = ctx.workspace.path;
   }
 
   /**

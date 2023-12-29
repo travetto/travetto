@@ -2,7 +2,7 @@ import timers from 'node:timers/promises';
 import { WorkerOptions } from 'node:worker_threads';
 import vscode from 'vscode';
 
-import { Env, ExecUtil, ExecutionOptions, ExecutionState, WorkerResult } from '@travetto/base';
+import { CompilerClient, Env, ExecUtil, ExecutionOptions, ExecutionState, WorkerResult } from '@travetto/base';
 import { ManifestContext, ManifestIndex, PackageUtil, path } from '@travetto/manifest';
 
 import { EnvDict, LaunchConfig } from './types';
@@ -30,29 +30,29 @@ export class Workspace {
   static #log = new Log('travetto.vscode.workspace');
 
   static #resolveImport(imp: string): string {
-    return PackageUtil.resolveImport(imp, this.#manifestContext.workspacePath);
+    return PackageUtil.resolveImport(imp, this.#manifestContext.workspace.path);
   }
 
   static get isMonoRepo(): boolean {
-    return !!this.#manifestContext.monoRepo;
+    return !!this.#manifestContext.workspace.mono;
   }
 
   /**
    * Get workspace path
    */
   static get path(): string {
-    return this.#manifestContext.workspacePath;
+    return this.#manifestContext.workspace.path;
   }
 
-  static get compilerServerUrl(): string {
-    return this.#manifestContext.compilerUrl;
+  static compilerClient(signal?: AbortSignal): CompilerClient {
+    return new CompilerClient({ ctx: this.#manifestContext, signal });
   }
 
   static async getSourceFromImport(imp: string): Promise<string | undefined> {
     if (!this.#importToFile.has(imp)) {
       let file: undefined | string;
-      if (imp.startsWith(this.#manifestContext.mainModule)) {
-        file = path.resolve(this.path, imp.replace(this.#manifestContext.mainModule, '.'));
+      if (imp.startsWith(this.#manifestContext.main.name)) {
+        file = path.resolve(this.path, imp.replace(this.#manifestContext.main.name, '.'));
       } else {
         try {
           file = this.#resolveImport(imp);
@@ -65,14 +65,6 @@ export class Workspace {
       this.#importToFile.set(imp, file);
     }
     return this.#importToFile.get(imp);
-  }
-
-  static resolveOutputFile(file: string): string {
-    return path.resolve(this.#manifestContext.workspacePath, this.#manifestContext.outputFolder, file);
-  }
-
-  static resolveToolFile(file: string): string {
-    return path.resolve(this.#manifestContext.workspacePath, this.#manifestContext.toolFolder, file);
   }
 
   static get #cliFile(): string {
@@ -89,7 +81,7 @@ export class Workspace {
       ...(debug ? Env.TRV_DYNAMIC.export(true) : Env.TRV_QUIET.export(true)),
       ...base,
       ...Env.TRV_MANIFEST.export(undefined),
-      ...Env.TRV_MODULE.export(cliModule ?? this.#manifestContext.mainModule)
+      ...Env.TRV_MODULE.export(cliModule ?? this.#manifestContext.main.name)
     };
   }
 
@@ -214,13 +206,13 @@ export class Workspace {
       pauseForSourceMap: true,
       runtimeArgs: [],
       outFiles: [
-        [WORKSPACE, this.#manifestContext.outputFolder, '**', '*.js'].join('/'),
+        [WORKSPACE, this.#manifestContext.build.outputFolder, '**', '*.js'].join('/'),
       ],
       resolveSourceMapLocations: [
-        [WORKSPACE, this.#manifestContext.outputFolder, '**'].join('/'),
+        [WORKSPACE, this.#manifestContext.build.outputFolder, '**'].join('/'),
       ],
       runtimeSourcemapPausePatterns: [
-        [WORKSPACE, this.#manifestContext.outputFolder, '**', 'test', '**', '*.js'].join('/'),
+        [WORKSPACE, this.#manifestContext.build.outputFolder, '**', 'test', '**', '*.js'].join('/'),
       ],
       skipFiles: [
         '<node_internals>/**',

@@ -30,9 +30,9 @@ export class ManifestDeltaUtil {
     const out: DeltaEvent[] = [];
 
     const add = (file: string, type: DeltaEvent['type']): unknown =>
-      out.push({ file, module: left.name, type, sourceFile: path.resolve(ctx.workspacePath, left.sourceFolder, file) });
+      out.push({ file, module: left.name, type, sourceFile: path.resolve(ctx.workspace.path, left.sourceFolder, file) });
 
-    const root = `${ctx.workspacePath}/${ctx.outputFolder}/${left.outputFolder}`;
+    const root = path.resolve(ctx.workspace.path, ctx.build.outputFolder, left.outputFolder);
     const right = new Set(
       (await ManifestModuleUtil.scanFolder(root, left.main))
         .filter(x => {
@@ -95,7 +95,7 @@ export class ManifestDeltaUtil {
     );
 
     const out: DeltaEvent[] = [];
-    const outputFolder = path.resolve(manifest.workspacePath, manifest.outputFolder);
+    const outputFolder = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
 
     for (const lMod of Object.values(deltaLeft)) {
       out.push(...await this.#deltaModules(manifest, outputFolder, lMod));

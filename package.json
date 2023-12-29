@@ -19,18 +19,22 @@
     "reinit-deps": "find . -name 'node_modules' -type d | grep -v -E '(github[.]io|vscode-plugin|[.]trv)' | xargs rm -rf; rm package-lock.json; npm i"
   },
   "travetto": {
-    "compilerUrl": "http://127.0.0.1:26803",
-    "globalModules": [
-      "@travetto/test",
-      "@travetto/cli",
-      "@travetto/doc",
-      "@travetto/command"
-    ],
-    "docBaseUrl": "https://github.com/travetto/travetto/tree/main",
-    "docOutputs": [
-      "README.md",
-      "DOC.html"
-    ]
+    "build": {
+      "compilerUrl": "http://127.0.0.1:26803",
+      "withModules": {
+        "@travetto/test": true,
+        "@travetto/cli": true,
+        "@travetto/doc": true,
+        "@travetto/command": true
+      }
+    },
+    "doc": {
+      "baseUrl": "https://github.com/travetto/travetto/tree/main",
+      "outputs": [
+        "README.md",
+        "DOC.html"
+      ]
+    }
   },
   "workspaces": [
     "module/*",

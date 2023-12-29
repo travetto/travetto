@@ -48,8 +48,8 @@ export class ManifestFileUtil {
     ctx = 'manifest' in ctx ? ctx.manifest : ctx;
     const parts = [rel];
     if (moduleSpecific) {
-      parts.unshift('node_modules', ctx.mainModule);
+      parts.unshift('node_modules', ctx.main.name);
     }
-    return path.resolve(ctx.workspacePath, ctx.toolFolder, ...parts);
+    return path.resolve(ctx.workspace.path, '.trv/tool', ...parts);
   }
 }

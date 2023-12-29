@@ -1,20 +1,14 @@
 import { PackageUtil } from './package';
 import { path } from './path';
-import { ManifestContext, ManifestModuleRole, PackageVisitor, PackageVisitReq, Package } from './types';
+import { ManifestContext, ManifestModuleRole, PackageVisitor, PackageVisitReq, Package, ManifestDepCore } from './types';
 
-export type ModuleDep = {
+export type ModuleDep = ManifestDepCore & {
   pkg: Package;
-  version: string;
-  name: string;
-  main?: boolean;
-  mainSource?: boolean;
-  local?: boolean;
-  internal?: boolean;
+  mainLike?: boolean;
   sourcePath: string;
   childSet: Set<string>;
   parentSet: Set<string>;
   roleSet: Set<ManifestModuleRole>;
-  prod: boolean;
   topLevel?: boolean;
 };
 
@@ -23,30 +17,11 @@ export type ModuleDep = {
  */
 export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
 
-  /**
-   * Get main patterns for detecting if a module should be treated as main
-   */
-  static getMainPatterns(mainModule: string, mergeModules: string[]): RegExp[] {
-    const groups: Record<string, string[]> = { [mainModule]: [] };
-    for (const el of mergeModules) {
-      if (el.includes('/')) {
-        const [grp, sub] = el.split('/');
-        (groups[`${grp}/`] ??= []).push(sub);
-      } else {
-        (groups[el] ??= []);
-      }
-    }
-
-    return Object.entries(groups)
-      .map(([root, subs]) => subs.length ? `${root}(${subs.join('|')})` : root)
-      .map(x => new RegExp(`^${x.replace(/[*]/g, '.*?')}$`));
-  }
-
   constructor(public ctx: ManifestContext) {
-    this.#mainSourcePath = path.resolve(this.ctx.workspacePath, this.ctx.mainFolder);
+    this.#mainSourcePath = path.resolve(this.ctx.workspace.path, this.ctx.main.folder);
   }
 
-  #mainPatterns: RegExp[] = [];
+  #mainLikeModules = new Set<string>();
   #mainSourcePath: string;
 
   /**
@@ -61,16 +36,17 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    */
   async init(req: PackageVisitReq<ModuleDep>): Promise<PackageVisitReq<ModuleDep>[]> {
     const pkg = PackageUtil.readPackage(req.sourcePath);
-    const workspacePkg = PackageUtil.readPackage(this.ctx.workspacePath);
+    const workspacePkg = PackageUtil.readPackage(this.ctx.workspace.path);
     const workspaceModules = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(this.ctx, req.sourcePath)) : [];
 
-    this.#mainPatterns = ModuleDependencyVisitor.getMainPatterns(pkg.name, [
-      ...pkg.travetto?.mainSource ?? [],
+    this.#mainLikeModules = new Set([
+      pkg.name,
+      ...Object.entries(pkg.travetto?.build?.withModules ?? []).filter(x => x[1] === 'main').map(x => x[0]),
       // Add workspace folders, for tests and docs
       ...workspaceModules.map(x => x.name)
     ]);
 
-    const globals = (workspacePkg.travetto?.globalModules ?? [])
+    const globals = Object.keys(workspacePkg.travetto?.build?.withModules ?? [])
       .map(name => PackageUtil.packageReq<ModuleDep>(PackageUtil.resolvePackagePath(name), name in (workspacePkg.dependencies ?? {}), true));
 
     const workspaceModuleDeps = workspaceModules
@@ -94,13 +70,13 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
   create(req: PackageVisitReq<ModuleDep>): ModuleDep {
     const { pkg, sourcePath } = req;
     const { name, version } = pkg;
-    const main = name === this.ctx.mainModule;
-    const mainSource = main || this.#mainPatterns.some(x => x.test(name));
+    const main = name === this.ctx.main.name;
+    const mainLike = main || this.#mainLikeModules.has(name);
     const internal = pkg.private === true;
-    const local = internal || mainSource || !sourcePath.includes('node_modules');
+    const local = internal || mainLike || !sourcePath.includes('node_modules');
 
-    const dep = {
-      name, version, sourcePath, main, mainSource, local, internal, pkg: req.pkg,
+    const dep: ModuleDep = {
+      name, version, sourcePath, main, mainLike, local, internal, pkg: req.pkg,
       parentSet: new Set([]), childSet: new Set([]), roleSet: new Set([]), prod: req.prod, topLevel: req.topLevel
     };
 
@@ -112,7 +88,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
    */
   visit(req: PackageVisitReq<ModuleDep>, dep: ModuleDep): void {
     const { parent } = req;
-    if (parent && dep.name !== this.ctx.mainModule) {
+    if (parent && dep.name !== this.ctx.main.name) {
       dep.parentSet.add(parent.name);
       parent.childSet.add(dep.name);
     }
@@ -127,7 +103,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
       mapping.set(el.name, { parent: new Set(el.parentSet), child: new Set(el.childSet), el });
     }
 
-    const main = mapping.get(this.ctx.mainModule)!;
+    const main = mapping.get(this.ctx.main.name)!;
 
     // Visit all direct dependencies and mark
     for (const { el } of mapping.values()) {

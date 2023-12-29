@@ -18,7 +18,7 @@ export class MainCommand implements CliCommandShape {
     // If referenced file exists
     let file = fileOrImport;
     if (await (fs.stat(path.resolve(fileOrImport)).then(() => true, () => false))) {
-      file = path.join(RuntimeContext.mainModule, fileOrImport);
+      file = path.join(RuntimeContext.main.name, fileOrImport);
     }
 
     return RuntimeIndex.getFromImport(file)?.import;

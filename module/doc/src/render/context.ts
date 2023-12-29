@@ -40,7 +40,7 @@ export class RenderContext {
     this.file = path.toPosix(file);
     this.baseUrl = baseUrl;
     this.repoRoot = repoRoot;
-    this.travettoBaseUrl = repoRoot.includes('travetto.github') ? repoRoot : manifestPkg.travetto!.docBaseUrl!;
+    this.travettoBaseUrl = repoRoot.includes('travetto.github') ? repoRoot : manifestPkg.travetto!.doc!.baseUrl!;
   }
 
   /**

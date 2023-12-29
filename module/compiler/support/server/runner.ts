@@ -30,8 +30,8 @@ export class CompilerRunner {
       log('debug', `Started watch=${watch} changed=${changed.slice(0, 10).map(x => `${x.module}/${x.file}`)}`);
     }
 
-    const main = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
-    const deltaFile = path.resolve(ctx.workspacePath, ctx.toolFolder, `manifest-delta-${Date.now()}.json`);
+    const main = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler/support/entry.compiler.js');
+    const deltaFile = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, `manifest-delta-${Date.now()}.json`);
 
     const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev => ev.sourceFile);
 
@@ -45,7 +45,7 @@ export class CompilerRunner {
       const proc = cp.spawn(process.argv0, [main, deltaFile, `${watch}`], {
         env: {
           ...process.env,
-          TRV_MANIFEST: path.resolve(ctx.workspacePath, ctx.outputFolder, 'node_modules', ctx.workspaceModule),
+          TRV_MANIFEST: path.resolve(ctx.workspace.path, ctx.build.outputFolder, 'node_modules', ctx.workspace.name),
         },
         detached: true,
         stdio: ['pipe', 1, 2, 'ipc'],

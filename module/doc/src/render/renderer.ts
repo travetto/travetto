@@ -22,10 +22,10 @@ export class DocRenderer {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const res = await import(mod!) as DocumentShape;
 
-    const pkg = PackageUtil.readPackage(manifest.workspacePath);
-    const repoBaseUrl = pkg.travetto?.docBaseUrl!;
+    const pkg = PackageUtil.readPackage(manifest.workspace.path);
+    const repoBaseUrl = pkg.travetto?.doc?.baseUrl ?? manifest.workspace.path;
     return new DocRenderer(res,
-      new RenderContext(file, repoBaseUrl, path.resolve(pkg.travetto?.docRoot ?? manifest.workspacePath))
+      new RenderContext(file, repoBaseUrl, path.resolve(pkg.travetto?.doc?.root ?? manifest.workspace.path))
     );
   }
 

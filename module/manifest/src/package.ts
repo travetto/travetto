@@ -148,12 +148,12 @@ export class PackageUtil {
    */
   static async resolveWorkspaces(ctx: ManifestContext, rootPath: string): Promise<PackageWorkspaceEntry[]> {
     if (!this.#workspaces[rootPath]) {
-      const cache = path.resolve(ctx.workspacePath, ctx.outputFolder, 'workspaces.json');
+      const cache = path.resolve(ctx.workspace.path, ctx.build.outputFolder, 'workspaces.json');
       try {
         return await ManifestFileUtil.readAsJson(cache);
       } catch (err) {
         let out: PackageWorkspaceEntry[];
-        switch (ctx.packageManager) {
+        switch (ctx.workspace.manager) {
           case 'npm': {
             const res = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
             out = res.map(d => ({ sourcePath: d.location, name: d.name }));

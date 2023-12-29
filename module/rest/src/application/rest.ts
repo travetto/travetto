@@ -41,8 +41,8 @@ export class RestApplication<T = unknown>  {
 
   async postConstruct(): Promise<void> {
     this.info = {
-      module: RuntimeContext.mainModule,
-      version: RuntimeContext.version,
+      module: RuntimeContext.main.name,
+      version: RuntimeContext.main.version,
       env: Env.name
     };
 

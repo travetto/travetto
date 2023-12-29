@@ -30,8 +30,8 @@ export class DocCommand implements CliCommandShape {
   }
 
   preBind(): void {
-    const workspacePkg = PackageUtil.readPackage(RuntimeContext.workspacePath);
-    this.outputs = workspacePkg.travetto?.docOutputs ?? ['README.md'];
+    const workspacePkg = PackageUtil.readPackage(RuntimeContext.workspace.path);
+    this.outputs = workspacePkg.travetto?.doc?.outputs ?? ['README.md'];
   }
 
   preHelp(): void {

@@ -13,7 +13,7 @@ export const text = <>
   <c.StdHeader />
   The cli module represents the primary entry point for execution within the framework. One of the main goals for this module is extensibility, as adding new entry points is meant to be trivial. The framework leverages this module for exposing all executable tools and entry points.  To see a high level listing of all supported commands, invoke {d.input('trv --help')}
 
-  <c.Execution title='General Usage' cmd='trv' args={['--help']} config={{ cwd: RuntimeContext.workspacePath }} />
+  <c.Execution title='General Usage' cmd='trv' args={['--help']} config={{ cwd: RuntimeContext.workspace.path }} />
 
   This listing is from the {d.library('Travetto')} monorepo, and represents the majority of tools that can be invoked from the command line. <br />
 

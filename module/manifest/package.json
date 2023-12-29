@@ -32,7 +32,9 @@
   },
   "travetto": {
     "displayName": "Manifest",
-    "docBaseUrl": "https://github.com/travetto/travetto/tree/main"
+    "doc": {
+      "baseUrl": "https://github.com/travetto/travetto/tree/main"
+    }
   },
   "publishConfig": {
     "access": "public"

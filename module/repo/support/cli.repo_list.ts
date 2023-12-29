@@ -46,7 +46,7 @@ export class ListModuleCommand implements CliCommandShape {
         await write('digraph g {');
         for (const el of mods) {
           for (const dep of el.parents) {
-            if (dep !== RuntimeContext.mainModule) {
+            if (dep !== RuntimeContext.main.name) {
               await write(`  "${dep}" -> "${el.name}";`);
             }
           }

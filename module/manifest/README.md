@@ -92,20 +92,25 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
 ```typescript
 {
   "generated": 1868155200000,
-  "workspacePath": "<generated>",
-  "monoRepo": true,
-  "packageManager": "npm",
-  "moduleType": "commonjs",
-  "outputFolder": ".trv/output",
-  "toolFolder": ".trv/tool",
-  "compilerFolder": ".trv/compiler",
-  "compilerUrl": "http://127.0.0.1:26803",
-  "compilerModuleFolder": "module/compiler",
-  "frameworkVersion": "x.x.x",
-  "mainModule": "@travetto/manifest",
-  "mainFolder": "module/manifest",
-  "version": "x.x.x",
-  "description": "Support for project indexing, manifesting, along with file watching",
+  "workspace": {
+    "name": "@travetto/mono-repo",
+    "path": "<generated>",
+    "mono": true,
+    "manager": "npm",
+    "type": "commonjs"
+  },
+  "build": {
+    "compilerFolder": ".trv/compiler",
+    "compilerUrl": "http://127.0.0.1:26803",
+    "compilerModuleFolder": "module/compiler",
+    "outputFolder": ".trv/output"
+  },
+  "main": {
+    "name": "@travetto/manifest",
+    "folder": "module/manifest",
+    "version": "x.x.x",
+    "description": "Support for project indexing, manifesting, along with file watching"
+  },
   "modules": {
     "@travetto/manifest": {
       "main": true,
