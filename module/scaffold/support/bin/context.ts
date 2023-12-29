@@ -2,7 +2,7 @@ import fs from 'node:fs/promises';
 import mustache from 'mustache';
 
 import { cliTpl } from '@travetto/cli';
-import { path, RuntimeIndex, RuntimeContext, NodePackageManager } from '@travetto/manifest';
+import { path, RuntimeIndex, NodePackageManager, PackageUtil } from '@travetto/manifest';
 import { ExecUtil, ExecutionResult } from '@travetto/base';
 import { Terminal } from '@travetto/terminal';
 
@@ -105,8 +105,13 @@ export class Context {
       .map(x => path.basename(x)).reduce((acc, v) => ({ ...acc, [v.replace(/[-]/g, '_')]: true }), {});
     const moduleNames = [...Object.keys(modules)];
 
+    /** Get framework version at runtime */
+    const { version: frameworkVersion } = PackageUtil.readPackage(
+      PackageUtil.resolveImport('@travetto/manifest/package.json')
+    );
+
     const context = Object.assign({
-      frameworkVersion: RuntimeContext.frameworkVersion.replace(/[.]\d+$/, '.0'),
+      frameworkVersion: frameworkVersion.replace(/[.]\d+$/, '.0'),
       name: this.name,
       modules,
       moduleNames,

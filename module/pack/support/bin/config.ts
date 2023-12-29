@@ -46,7 +46,7 @@ export function getOutput(): OutputOptions {
     interop: format === 'commonjs' ? 'auto' : undefined,
     intro: INTRO(new EnvProp('BUNDLE_ENV_FILE').val)[format].join(';\n'),
     sourcemapPathTransform: (src, map): string =>
-      path.resolve(path.dirname(map), src).replace(`${RuntimeContext.workspacePath}/`, ''),
+      path.resolve(path.dirname(map), src).replace(`${RuntimeContext.workspace.path}/`, ''),
     sourcemap: new EnvProp('BUNDLE_SOURCEMAP').bool ?? false,
     sourcemapExcludeSources: !(new EnvProp('BUNDLE_SOURCES').bool ?? false),
     compact: new EnvProp('BUNDLE_COMPRESS').bool ?? true,

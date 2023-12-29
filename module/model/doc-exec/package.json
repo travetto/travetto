@@ -8,9 +8,11 @@
     "@travetto/cli": "^3.0.1"
   },
   "travetto": {
-    "isolated": true,
-    "mainSource": [
-      "@travetto/model"
-    ]
+    "build": {
+      "isolated": true,
+      "withModules": {
+        "@travetto/model": "main"
+      }
+    }
   }
 }

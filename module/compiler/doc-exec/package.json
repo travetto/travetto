@@ -5,10 +5,12 @@
     "@travetto/compiler": "^3.0.0"
   },
   "travetto": {
-    "compilerUrl": "http://localhost:25539",
-    "isolated": true,
-    "mainSource": [
-      "@travetto/cli"
-    ]
+    "build": {
+      "isolated": true,
+      "compilerUrl": "http://localhost:25539",
+      "withModules": {
+        "@travetto/cli": "main"
+      }
+    }
   }
 }

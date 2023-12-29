@@ -12,7 +12,7 @@ export class CliUtil {
    * Are we running from a mono-root?
    */
   static get monoRoot(): boolean {
-    return !!RuntimeContext.monoRepo && RuntimeIndex.mainModule.sourcePath === RuntimeContext.workspacePath;
+    return !!RuntimeContext.workspace.mono && RuntimeIndex.mainModule.sourcePath === RuntimeContext.workspace.path;
   }
 
   /**
@@ -20,7 +20,7 @@ export class CliUtil {
    * @returns
    */
   static getSimpleModuleName(placeholder: string, module?: string): string {
-    const simple = (module ?? RuntimeContext.mainModule).replace(/[\/]/, '_').replace(/@/, '');
+    const simple = (module ?? RuntimeContext.main.name).replace(/[\/]/, '_').replace(/@/, '');
     if (!simple) {
       return placeholder;
     } else if (!module && this.monoRoot) {
@@ -67,7 +67,7 @@ export class CliUtil {
       data: {
         name: cmd._cfg!.name, env,
         commandModule: cmd._cfg!.commandModule,
-        module: RuntimeContext.mainModule,
+        module: RuntimeContext.main.name,
         args: process.argv.slice(3),
       }
     };

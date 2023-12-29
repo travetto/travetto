@@ -26,7 +26,7 @@ export class CompilerSetup {
     Pick<typeof import('@travetto/manifest'), 'ManifestDeltaUtil' | 'ManifestUtil'>
   > => {
     const all = ['util', 'delta'].map(f =>
-      import(path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}.js`))
+      import(path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', `@travetto/manifest/src/${f}.js`))
     );
     return Promise.all(all).then(props => Object.assign({}, ...props));
   };
@@ -49,7 +49,7 @@ export class CompilerSetup {
   static async #transpileFile(ctx: ManifestContext, inputFile: string, outputFile: string): Promise<void> {
     const type = CommonUtil.getFileType(inputFile);
     if (type === 'js' || type === 'ts') {
-      const compilerOut = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules');
+      const compilerOut = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules');
 
       const text = (await fs.readFile(inputFile, 'utf8'))
         .replace(/from '([.][^']+)'/g, (_, i) => `from '${i.replace(/[.]js$/, '')}.js'`)
@@ -67,7 +67,7 @@ export class CompilerSetup {
       const main = pkg.main ? this.#sourceToOutputExt(pkg.main) : undefined;
       const files = pkg.files?.map(x => this.#sourceToOutputExt(x));
 
-      const content = JSON.stringify({ ...pkg, main, type: ctx.moduleType, files }, null, 2);
+      const content = JSON.stringify({ ...pkg, main, type: ctx.workspace.type, files }, null, 2);
       await CommonUtil.writeTextFile(outputFile, content);
     }
   }
@@ -104,7 +104,7 @@ export class CompilerSetup {
       }
     }
 
-    const outputFolder = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', module);
+    const outputFolder = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', module);
     const out: ModFile[] = [];
     for (const input of files) {
       const output = this.#sourceToOutputExt(input.replace(inputFolder, outputFolder));
@@ -193,7 +193,7 @@ export class CompilerSetup {
     const delta = await LogUtil.withLogger('delta', async log => {
       if (changes) {
         log('debug', 'Skipping, everything changed');
-        return [{ type: 'changed', file: '*', module: ctx.workspaceModule, sourceFile: '' } as const];
+        return [{ type: 'changed', file: '*', module: ctx.workspace.name, sourceFile: '' } as const];
       } else {
         return ManifestDeltaUtil.produceDelta(manifest);
       }
@@ -201,7 +201,7 @@ export class CompilerSetup {
 
     if (changes) {
       await LogUtil.withLogger('reset', async log => {
-        await fs.rm(path.resolve(ctx.workspacePath, ctx.outputFolder), { recursive: true, force: true });
+        await fs.rm(path.resolve(ctx.workspace.path, ctx.build.outputFolder), { recursive: true, force: true });
         log('info', 'Clearing output due to compiler changes');
       }, false);
     }
@@ -209,12 +209,12 @@ export class CompilerSetup {
     // Write manifest
     await LogUtil.withLogger('manifest', async log => {
       await ManifestUtil.writeManifest(manifest);
-      log('debug', `Wrote manifest ${ctx.workspaceModule}`);
+      log('debug', `Wrote manifest ${ctx.workspace.name}`);
 
-      // Update all manifests when in monoRepo
-      if (delta.length && ctx.monoRepo) {
+      // Update all manifests when in mono repo
+      if (delta.length && ctx.workspace.mono) {
         const names: string[] = [];
-        const mods = Object.values(manifest.modules).filter(x => x.local && x.name !== ctx.workspaceModule);
+        const mods = Object.values(manifest.modules).filter(x => x.local && x.name !== ctx.workspace.name);
         for (const mod of mods) {
           const modCtx = ManifestUtil.getModuleContext(ctx, mod.sourceFolder);
           const modManifest = await ManifestUtil.buildManifest(modCtx);

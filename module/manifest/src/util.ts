@@ -11,15 +11,6 @@ const MANIFEST_FILE = 'manifest.json';
  */
 export class ManifestUtil {
   /**
-   * Build a manifest context
-   * @param folder
-   */
-  static async buildContext(folder?: string): Promise<ManifestContext> {
-    const { getManifestContext } = await import('../bin/context.js');
-    return getManifestContext(folder);
-  }
-
-  /**
    * Produce manifest in memory
    */
   static async buildManifest(ctx: ManifestContext): Promise<ManifestRoot> {
@@ -42,9 +33,11 @@ export class ManifestUtil {
           .filter(x => x.prod)
           .map(m => [m.name, m])
       ),
-      // Mark output folder/workspace path as portable
-      outputFolder: '',
-      workspacePath: '',
+      build: {
+        ...manifest.build,
+        // Mark output folder/workspace path as portable
+        outputFolder: '$$PRODUCTION$$',
+      }
     };
   }
 
@@ -60,10 +53,10 @@ export class ManifestUtil {
       file = path.resolve(file, MANIFEST_FILE);
     }
     const manifest: ManifestRoot = ManifestFileUtil.readAsJsonSync(file);
-    // Support packaged environments, by allowing empty outputFolder
-    if (!manifest.outputFolder) {
-      manifest.outputFolder = path.cwd();
-      manifest.workspacePath = path.cwd();
+    // Support packaged environments, by allowing empty manifest.build.outputFolder
+    if (manifest.build.outputFolder === '$$PRODUCTION$$') {
+      manifest.build.outputFolder = path.cwd();
+      manifest.workspace.path = path.cwd();
     }
     return { manifest, file };
   }
@@ -73,7 +66,7 @@ export class ManifestUtil {
    */
   static writeManifest(manifest: ManifestRoot): Promise<string> {
     return ManifestFileUtil.bufferedFileWrite(
-      path.resolve(manifest.workspacePath, manifest.outputFolder, 'node_modules', manifest.mainModule, MANIFEST_FILE),
+      path.resolve(manifest.workspace.path, manifest.build.outputFolder, 'node_modules', manifest.main.name, MANIFEST_FILE),
       JSON.stringify(manifest)
     );
   }
@@ -95,12 +88,13 @@ export class ManifestUtil {
    * Produce the manifest context for the workspace module
    */
   static getWorkspaceContext(ctx: ManifestContext): ManifestContext {
-    return ctx.monoRepo ? {
+    return ctx.workspace.mono ? {
       ...ctx,
-      mainModule: ctx.workspaceModule,
-      mainFolder: '',
-      version: '',
-      description: undefined
+      main: {
+        name: ctx.workspace.name,
+        folder: '',
+        version: '0.0.0',
+      }
     } : ctx;
   }
 
@@ -108,15 +102,17 @@ export class ManifestUtil {
    * Produce the manifest context for a given module module
    */
   static getModuleContext(ctx: ManifestContext, folder: string): ManifestContext {
-    const modPath = path.resolve(ctx.workspacePath, folder);
+    const modPath = path.resolve(ctx.workspace.path, folder);
     const pkg = PackageUtil.readPackage(modPath);
 
     return {
       ...ctx,
-      mainModule: pkg.name,
-      mainFolder: folder,
-      version: pkg.version,
-      description: pkg.description
+      main: {
+        name: pkg.name,
+        folder,
+        version: pkg.version,
+        description: pkg.description
+      }
     };
   }
 }

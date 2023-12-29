@@ -11,17 +11,19 @@ export type ManifestModuleFolderType =
 export type ManifestModuleRole = 'std' | 'test' | 'doc' | 'compile' | 'build';
 
 export type ManifestModuleFile = [string, ManifestModuleFileType, number] | [string, ManifestModuleFileType, number, ManifestModuleRole];
-export type ManifestModuleCore = {
+export type ManifestDepCore = {
   name: string;
   main?: boolean;
   local?: boolean;
   version: string;
+  prod: boolean;
+  internal?: boolean;
+};
+export type ManifestModuleCore = ManifestDepCore & {
   sourceFolder: string;
   outputFolder: string;
-  prod: boolean;
   roles: ManifestModuleRole[];
   parents: string[];
-  internal?: boolean;
 };
 
 export type ManifestModule = ManifestModuleCore & {
@@ -29,36 +31,38 @@ export type ManifestModule = ManifestModuleCore & {
 };
 
 export type ManifestContext = {
-  /** Main module for manifest */
-  mainModule: string;
-  /** Folder, relative to workspace for main module */
-  mainFolder: string;
-  /** Workspace path for module */
-  workspacePath: string;
-  /** The module name for the workspace root */
-  workspaceModule: string;
-  /** Code output folder, relative to workspace */
-  outputFolder: string;
-  /** Tooling folder, relative to workspace */
-  toolFolder: string;
-  /** Compiler folder, relative to workspace */
-  compilerFolder: string;
-  /** Compiler module folder */
-  compilerModuleFolder: string;
-  /** Is the manifest for a module in a monorepo? */
-  monoRepo?: boolean;
-  /** The module type of the workspace */
-  moduleType: NodeModuleType;
-  /** The package manager of the workspace */
-  packageManager: NodePackageManager;
-  /** The version of the framework being used */
-  frameworkVersion: string;
-  /** Description of the main module */
-  description?: string;
-  /** Version of the main module */
-  version: string;
-  /** URL for the compiler server */
-  compilerUrl: string;
+  workspace: {
+    /** Workspace path for module */
+    path: string;
+    /** The module name for the workspace root */
+    name: string;
+    /** Is the workspace a monorepo? */
+    mono?: boolean;
+    /** The module type of the workspace */
+    type: NodeModuleType;
+    /** The package manager of the workspace */
+    manager: NodePackageManager;
+  };
+  build: {
+    /** Compiler folder, relative to workspace */
+    compilerFolder: string;
+    /** Compiler module folder */
+    compilerModuleFolder: string;
+    /** URL for the compiler server */
+    compilerUrl: string;
+    /** Code output folder, relative to workspace */
+    outputFolder: string;
+  };
+  main: {
+    /** Main module for manifest */
+    name: string;
+    /** Folder, relative to workspace for main module */
+    folder: string;
+    /** Description of the main module */
+    description?: string;
+    /** Version of the main module */
+    version: string;
+  };
 };
 
 export type ManifestRoot = ManifestContext & {
@@ -94,19 +98,18 @@ export type Package = {
   peerDependenciesMeta?: Record<string, { optional?: boolean }>;
   optionalDependencies?: Record<string, string>;
   travetto?: {
-    isolated?: boolean;
     displayName?: string;
     roles?: ManifestModuleRole[];
-    globalModules?: string[];
-    mainSource?: string[];
-    docOutput?: string[];
-    docRoot?: string;
-    docBaseUrl?: string;
-    docOutputs?: string[];
-    outputFolder?: string;
-    toolFolder?: string;
-    compilerFolder?: string;
-    compilerUrl?: string;
+    doc?: {
+      output?: string[];
+      root?: string;
+      baseUrl?: string;
+      outputs?: string[];
+    };
+    build?: Partial<ManifestContext['build']> & {
+      isolated?: boolean;
+      withModules?: Record<string, 'main' | true>;
+    };
   };
   workspaces?: string[];
   private?: boolean;

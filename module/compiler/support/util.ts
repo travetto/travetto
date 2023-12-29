@@ -13,30 +13,30 @@ export class CommonUtil {
    * Returns the compiler options
    */
   static async getCompilerOptions(ctx: ManifestContext): Promise<{}> {
-    if (!(ctx.workspacePath in OPT_CACHE)) {
-      let tsconfig = path.resolve(ctx.workspacePath, 'tsconfig.json');
+    if (!(ctx.workspace.path in OPT_CACHE)) {
+      let tsconfig = path.resolve(ctx.workspace.path, 'tsconfig.json');
 
       if (!await fs.stat(tsconfig).then(_ => true, _ => false)) {
-        tsconfig = path.resolve(ctx.workspacePath, ctx.compilerModuleFolder, 'tsconfig.trv.json');
+        tsconfig = path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, 'tsconfig.trv.json');
       }
 
       const ts = (await import('typescript')).default;
 
       const { options } = ts.parseJsonSourceFileConfigFileContent(
-        ts.readJsonConfigFile(tsconfig, ts.sys.readFile), ts.sys, ctx.workspacePath
+        ts.readJsonConfigFile(tsconfig, ts.sys.readFile), ts.sys, ctx.workspace.path
       );
 
-      OPT_CACHE[ctx.workspacePath] = {
+      OPT_CACHE[ctx.workspace.path] = {
         ...options,
         allowJs: true,
         resolveJsonModule: true,
-        sourceRoot: ctx.workspacePath,
-        rootDir: ctx.workspacePath,
-        outDir: path.resolve(ctx.workspacePath),
-        module: ctx.moduleType === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext,
+        sourceRoot: ctx.workspace.path,
+        rootDir: ctx.workspace.path,
+        outDir: path.resolve(ctx.workspace.path),
+        module: ctx.workspace.type === 'commonjs' ? ts.ModuleKind.CommonJS : ts.ModuleKind.ESNext,
       };
     }
-    return OPT_CACHE[ctx.workspacePath];
+    return OPT_CACHE[ctx.workspace.path];
   }
 
   /**
@@ -93,8 +93,8 @@ export class CommonUtil {
    */
   static moduleLoader(ctx: ManifestContext): (mod: string) => Promise<unknown> {
     return (mod) => {
-      const outputRoot = path.resolve(ctx.workspacePath, ctx.outputFolder);
-      process.env.TRV_MANIFEST = path.resolve(outputRoot, 'node_modules', ctx.mainModule); // Setup for running
+      const outputRoot = path.resolve(ctx.workspace.path, ctx.build.outputFolder);
+      process.env.TRV_MANIFEST = path.resolve(outputRoot, 'node_modules', ctx.main.name); // Setup for running
       return import(path.join(outputRoot, 'node_modules', mod)); // Return function to run import on a module
     };
   }

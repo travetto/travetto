@@ -50,9 +50,9 @@ export class ApiInfoConfig {
   version: string;
 
   postConstruct(): void {
-    this.title ??= RuntimeContext.mainModule;
-    this.version ??= RuntimeContext.version;
-    this.description ??= RuntimeContext.description;
+    this.title ??= RuntimeContext.main.name;
+    this.version ??= RuntimeContext.main.version;
+    this.description ??= RuntimeContext.main.description;
   }
 }
 

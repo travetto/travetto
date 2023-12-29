@@ -65,7 +65,7 @@ export class CompilerWatcher {
 
   #getModuleMap(): Record<string, ManifestModule> {
     return Object.fromEntries(
-      Object.values(this.#state.manifest.modules).map(x => [path.resolve(this.#state.manifest.workspacePath, x.sourceFolder), x])
+      Object.values(this.#state.manifest.modules).map(x => [path.resolve(this.#state.manifest.workspace.path, x.sourceFolder), x])
     );
   }
 
@@ -105,7 +105,7 @@ export class CompilerWatcher {
       const mod = mods[folder];
       const moduleFile = mod.sourceFolder ?
         (sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile) :
-        sourceFile.replace(`${this.#state.manifest.workspacePath}/`, '');
+        sourceFile.replace(`${this.#state.manifest.workspace.path}/`, '');
 
       let entry = this.#state.getBySource(sourceFile);
 

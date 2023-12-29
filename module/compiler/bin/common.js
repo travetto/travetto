@@ -10,19 +10,19 @@ import { getManifestContext } from '@travetto/manifest/bin/context.js';
 const stat = (/** @type {string}*/ file) => fs.stat(file).then(s => Math.max(s.mtimeMs, s.ctimeMs)).catch(() => 0);
 const TS_EXT = /[.]tsx?$/;
 
-const /** @type {Transform} */ transpile = async (ctx, content, tsconfig = path.resolve(ctx.workspacePath, 'tsconfig.json')) => {
+const /** @type {Transform} */ transpile = async (ctx, content, tsconfig = path.resolve(ctx.workspace.path, 'tsconfig.json')) => {
   await fs.stat(tsconfig).catch(() => fs.writeFile(tsconfig, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8'));
   const ts = (await import('typescript')).default;
-  const module = ctx.moduleType === 'module' ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS;
+  const module = ctx.workspace.moduleType === 'module' ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS;
   return ts.transpile(content, { target: ts.ScriptTarget.ES2022, module, esModuleInterop: true, allowSyntheticDefaultImports: true });
 };
 
 const /** @type {Transform} */ rewritePackage = (ctx, content) =>
-  JSON.stringify(Object.assign(JSON.parse(content), { type: ctx.moduleType }), null, 2);
+  JSON.stringify(Object.assign(JSON.parse(content), { type: ctx.workspace.moduleType }), null, 2);
 
 async function outputIfChanged(/** @type {Ctx} */ ctx, /** @type {string} */ file, /** @type {Transform} */ transform) {
-  const target = path.resolve(ctx.workspacePath, ctx.compilerFolder, 'node_modules', '@travetto/compiler', file).replace(TS_EXT, '.js');
-  const src = path.resolve(ctx.workspacePath, ctx.compilerModuleFolder, file);
+  const target = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler', file).replace(TS_EXT, '.js');
+  const src = path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, file);
 
   if (await stat(src) > await stat(target)) {
     await fs.mkdir(path.dirname(target), { recursive: true });
@@ -39,7 +39,7 @@ export const getEntry = async () => {
 
   await outputIfChanged(ctx, 'package.json', rewritePackage);
 
-  await fs.readdir(path.resolve(ctx.workspacePath, ctx.compilerModuleFolder, 'support'), { recursive: true }).then(files =>
+  await fs.readdir(path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, 'support'), { recursive: true }).then(files =>
     Promise.all(files.filter(x => TS_EXT.test(x)).map(f => outputIfChanged(ctx, `support/${f}`, transpile))));
 
   try { return run(require(entry)); }

@@ -33,7 +33,7 @@ class $RuntimeIndex extends ManifestIndex {
    * Get main module for manifest
    */
   get mainModule(): IndexedModule {
-    return this.getModule(this.manifest.mainModule)!;
+    return this.getModule(this.manifest.main.name)!;
   }
 
   /**
@@ -82,8 +82,8 @@ class $RuntimeIndex extends ManifestIndex {
    * Resolve module path to folder, with support for main module and monorepo support
    */
   resolveModulePath(modulePath: string): string {
-    const main = this.manifest.mainModule;
-    const workspace = this.manifest.workspacePath;
+    const main = this.manifest.main.name;
+    const workspace = this.manifest.workspace.path;
     const [base, sub] = modulePath
       .replace(/^(@@?)(#|$)/g, (_, v, r) => `${v === '@' ? main : workspace}${r}`)
       .split('#');
@@ -121,10 +121,6 @@ export const RuntimeContext = build({
    * @param rel The relative path
    */
   workspaceRelative(...rel: string[]): string {
-    return path.resolve(RuntimeIndex.manifest.workspacePath, ...rel);
+    return path.resolve(RuntimeIndex.manifest.workspace.path, ...rel);
   }
-}, [
-  'mainModule', 'version', 'description', 'workspacePath', 'frameworkVersion',
-  'monoRepo', 'moduleType', 'packageManager', 'compilerUrl', 'compilerFolder',
-  'outputFolder', 'toolFolder', 'mainFolder',
-]);
+}, ['main', 'workspace']);

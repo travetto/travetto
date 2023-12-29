@@ -48,14 +48,18 @@
   },
   "travetto": {
     "displayName": "Travetto Plugin",
-    "isolated": true,
-    "outputFolder": "out",
-    "docRoot": "../..",
-    "docBaseUrl": "https://github.com/travetto/travetto/tree/main",
-    "docOutputs": [
-      "README.md",
-      "DOC.html"
-    ]
+    "build": {
+      "isolated": true,
+      "outputFolder": "out"
+    },
+    "doc": {
+      "root": "../..",
+      "baseUrl": "https://github.com/travetto/travetto/tree/main",
+      "outputs": [
+        "README.md",
+        "DOC.html"
+      ]
+    }
   },
   "engines": {
     "vscode": "^1.83.1"

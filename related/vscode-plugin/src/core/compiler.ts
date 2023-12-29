@@ -32,8 +32,8 @@ export class CompilerServer {
   }
 
   static async #trackConnected(): Promise<void> {
-    this.#log.info('Initial connection at', Workspace.compilerServerUrl);
-    const simple = new CompilerClient({ url: Workspace.compilerServerUrl });
+    const simple = Workspace.compilerClient();
+    this.#log.info('Initial connection at', simple.url);
 
     for (; ;) {
       const ctrl = new AbortController();
@@ -43,8 +43,8 @@ export class CompilerServer {
           this.#emitter.emit('connect');
           connected = true;
 
-          const client = new CompilerClient({ url: Workspace.compilerServerUrl, signal: ctrl.signal });
-          this.#log.info('Connecting to compiler', Workspace.compilerServerUrl);
+          const client = Workspace.compilerClient(ctrl.signal);
+          this.#log.info('Connecting to compiler', client.url);
           await Promise.race([this.#trackLog(client), this.#trackState(client), this.#trackProgress(client, ctrl.signal)]);
         } else {
           this.#log.debug('Server not running');

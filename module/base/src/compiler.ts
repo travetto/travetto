@@ -1,7 +1,7 @@
 import rl from 'node:readline/promises';
 import { Readable } from 'node:stream';
 
-import { RuntimeContext } from '@travetto/manifest';
+import { ManifestContext, RuntimeIndex } from '@travetto/manifest';
 
 import { ShutdownManager } from './shutdown';
 import { ExecUtil } from './exec';
@@ -41,14 +41,18 @@ export class CompilerClient {
   #url: string;
   #kill: AbortController;
 
-  constructor(cfg: { url?: string, signal?: AbortSignal } = {}) {
-    this.#url = cfg.url ?? RuntimeContext.compilerUrl;
+  constructor(cfg: { url?: string, ctx?: ManifestContext, signal?: AbortSignal } = {}) {
+    this.#url = (cfg.url ?? (cfg.ctx ?? RuntimeIndex.manifest).build.compilerUrl).replace('localhost', '127.0.0.1');
 
     this.#kill = new AbortController();
     if (cfg.signal) {
       cfg.signal.addEventListener('abort', () => this.close());
     }
     ShutdownManager.onGracefulShutdown(async () => this.close(), this);
+  }
+
+  get url(): string {
+    return this.#url;
   }
 
   close(): void {

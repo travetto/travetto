@@ -14,7 +14,7 @@ const page = (f: string): string => path.resolve('related/travetto.github.io/src
 @CliCommand()
 export class DocAngularCommand {
   async main(target?: string): Promise<void> {
-    const root = RuntimeContext.workspacePath;
+    const root = RuntimeContext.workspace.path;
 
     if (target && target.startsWith(root)) {
       target = target.replace(root, '').split('/').pop()!;

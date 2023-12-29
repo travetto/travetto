@@ -144,7 +144,7 @@ yarn add ${el.props.pkg}
   Header: async ({ props }) => `<h1>${props.title} ${props.description ? `\n<small>${props.description}</small>\n` : ''}</h1>\n`,
 
   StdHeader: async state => {
-    const mod = state.el.props.mod ?? RuntimeContext.mainModule;
+    const mod = state.el.props.mod ?? RuntimeContext.main.name;
     const pkg = PackageUtil.readPackage(RuntimeIndex.getModule(mod)!.sourcePath);
     const title = pkg.travetto?.displayName ?? pkg.name;
     const desc = pkg.description;

@@ -6,9 +6,11 @@
     "@travetto/doc": "^3.0.0-rc.12"
   },
   "travetto": {
-    "isolated": true,
-    "mainSource": [
-      "@travetto/doc"
-    ]
+    "build": {
+      "isolated": true,
+      "withModules": {
+        "@travetto/doc": "main"
+      }
+    }
   }
 }

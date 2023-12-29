@@ -5,7 +5,7 @@ import { RuntimeContext } from '@travetto/manifest';
 export const RULE_COMMON = {
   languageOptions: {
     ecmaVersion: 'latest',
-    sourceType: RuntimeContext.moduleType,
+    sourceType: RuntimeContext.workspace.type,
     globals: {
       AbortController: false,
       AbortSignal: false,

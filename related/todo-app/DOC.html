@@ -339,11 +339,19 @@ First we must start the application:
 </figcaption>
     <pre><code class="language-bash"><span class="token number">2029</span>-03-14T04:00:00.618Z info  <span class="token punctuation">[</span>@travetto/config:src/service.ts:146<span class="token punctuation">]</span> Initialized <span class="token punctuation">{{'{'}}</span>
   manifest: <span class="token punctuation">{{'{'}}</span>
-    mainModule: <span class="token string">'@travetto/todo-app'</span>,
-    frameworkVersion: <span class="token string">'3.4.0'</span>,
-    version: <span class="token string">'0.0.0'</span>,
-    moduleType: <span class="token string">'commonjs'</span>,
-    workspacePath: <span class="token string">'&lt;workspace-root>'</span>
+    main: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto/todo-app'</span>,
+      folder: <span class="token string">'related/todo-app'</span>,
+      version: <span class="token string">'0.0.0'</span>,
+      description: <span class="token string">''</span>
+    <span class="token punctuation">{{'}'}}</span>,
+    workspace: <span class="token punctuation">{{'{'}}</span>
+      name: <span class="token string">'@travetto/mono-repo'</span>,
+      path: <span class="token string">'&lt;workspace-root>'</span>,
+      mono: true,
+      manager: <span class="token string">'npm'</span>,
+      type: <span class="token string">'commonjs'</span>
+    <span class="token punctuation">{{'}'}}</span>
   <span class="token punctuation">{{'}'}}</span>,
   env: <span class="token punctuation">{{'{'}}</span>
     name: <span class="token string">'local'</span>,
@@ -386,10 +394,7 @@ First we must start the application:
         output: <span class="token string">'&lt;workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log'</span>,
         writeSync: <span class="token boolean">false</span>
       <span class="token punctuation">{{'}'}}</span>,
-      FileModelConfig: <span class="token punctuation">{{'{'}}</span>
-        folder: <span class="token string">'/tmp/&lt;temp-folder>'</span>,
-        namespace: <span class="token string">'.'</span>
-      <span class="token punctuation">{{'}'}}</span>,
+      FileModelConfig: <span class="token punctuation">{{'{'}}</span> folder: <span class="token string">'/tmp/&lt;temp-folder>'</span>, namespace: <span class="token string">'.'</span> <span class="token punctuation">{{'}'}}</span>,
       JSONLogFormatterConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       LineLogFormatterConfig: <span class="token punctuation">{{'{'}}</span>
         plain: false,

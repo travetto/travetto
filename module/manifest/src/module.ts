@@ -26,6 +26,9 @@ const INDEX_FILES = new Set(
   )
 );
 
+const STD_TOP_FOLDERS = new Set(['src', 'bin', 'support']);
+const STD_TOP_FILES = new Set([...INDEX_FILES, 'package.json']);
+
 export class ManifestModuleUtil {
 
   static #scanCache: Record<string, string[]> = {};
@@ -44,8 +47,8 @@ export class ManifestModuleUtil {
   /**
    * Simple file scanning
    */
-  static async scanFolder(folder: string, mainSource = false): Promise<string[]> {
-    if (!mainSource && folder in this.#scanCache) {
+  static async scanFolder(folder: string, mainLike = false): Promise<string[]> {
+    if (!mainLike && folder in this.#scanCache) {
       return this.#scanCache[folder];
     }
 
@@ -53,8 +56,6 @@ export class ManifestModuleUtil {
       return [];
     }
 
-    const topFolders = new Set(mainSource ? [] : ['src', 'bin', 'support']);
-    const topFiles = new Set(mainSource ? [] : [...INDEX_FILES, 'package.json']);
     const out: string[] = [];
 
     const stack: [string, number][] = [[folder, 0]];
@@ -72,20 +73,21 @@ export class ManifestModuleUtil {
       }
 
       for (const sub of await fs.readdir(top)) {
+        const valid = !sub.startsWith('.') && (depth > 0 || mainLike);
         const stat = await fs.stat(`${top}/${sub}`);
         if (stat.isFile()) {
-          if (!sub.startsWith('.') && (depth > 0 || !topFiles.size || topFiles.has(sub))) {
+          if (valid || STD_TOP_FILES.has(sub)) {
             out.push(`${top}/${sub}`);
           }
         } else {
-          if (!sub.includes('node_modules') && !sub.startsWith('.') && (depth > 0 || !topFolders.size || topFolders.has(sub))) {
+          if (!sub.includes('node_modules') && (valid || STD_TOP_FOLDERS.has(sub))) {
             stack.push([`${top}/${sub}`, depth + 1]);
           }
         }
       }
     }
 
-    if (!mainSource) {
+    if (!mainLike) {
       this.#scanCache[folder] = out;
     }
 
@@ -176,11 +178,11 @@ export class ManifestModuleUtil {
    * Visit a module and describe files, and metadata
    */
   static async describeModule(ctx: ManifestContext, dep: ModuleDep): Promise<ManifestModule> {
-    const { main, mainSource, local, name, version, sourcePath, roleSet, prod, parentSet, internal } = dep;
+    const { main, mainLike, local, name, version, sourcePath, roleSet, prod, parentSet, internal } = dep;
 
     const files: ManifestModule['files'] = {};
 
-    for (const file of await this.scanFolder(sourcePath, mainSource)) {
+    for (const file of await this.scanFolder(sourcePath, mainLike)) {
       // Group by top folder
       const moduleFile = file.replace(`${sourcePath}/`, '');
       const entry = await this.transformFile(moduleFile, file);
@@ -188,17 +190,19 @@ export class ManifestModuleUtil {
       (files[key] ??= []).push(entry);
     }
 
-    // Refine non-main source
-    if (!mainSource) {
+    // Refine non-main source, remove anything in root that is source (doesn't include $index)
+    if (!mainLike) {
       files.$root = files.$root?.filter(([file, type]) => type !== 'ts');
     }
 
     const roles = [...roleSet ?? []].sort();
     const parents = [...parentSet].sort();
     const outputFolder = `node_modules/${name}`;
-    const sourceFolder = sourcePath === ctx.workspacePath ? '' : sourcePath.replace(`${ctx.workspacePath}/`, '');
+    const sourceFolder = sourcePath === ctx.workspace.path ? '' : sourcePath.replace(`${ctx.workspace.path}/`, '');
 
-    const res = { main, name, version, local, internal, sourceFolder, outputFolder, roles, parents, prod, files };
+    const res: ManifestModule = {
+      main, name, version, local, internal, sourceFolder, outputFolder, roles, parents, prod, files
+    };
     return res;
   }
 

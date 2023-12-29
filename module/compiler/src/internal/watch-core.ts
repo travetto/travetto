@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { IndexedModule, ManifestContext, ManifestModuleUtil, RuntimeContext, path } from '@travetto/manifest';
+import { IndexedModule, ManifestContext, ManifestModuleUtil, path } from '@travetto/manifest';
 
 import { AsyncQueue } from '../../support/queue';
 
@@ -48,7 +48,7 @@ async function watchFolder(ctx: ManifestContext, q: AsyncQueue<WatchEvent>, src:
   const lib = await import('@parcel/watcher');
   const ignore = [
     'node_modules', '**/.trv',
-    ...((!ctx.monoRepo || src === ctx.workspacePath) ? [ctx.compilerFolder, ctx.outputFolder, ctx.toolFolder] : []),
+    ...((!ctx.workspace.mono || src === ctx.workspace.path) ? [ctx.build.compilerFolder, ctx.build.outputFolder] : []),
     ...(await fs.readdir(src)).filter(x => x.startsWith('.'))
   ];
 
@@ -82,13 +82,13 @@ async function watchFolder(ctx: ManifestContext, q: AsyncQueue<WatchEvent>, src:
 export async function* fileWatchEvents(manifest: ManifestContext, modules: IndexedModule[], signal: AbortSignal): AsyncIterable<WatchEvent> {
   const q = new AsyncQueue<WatchEvent>(signal);
 
-  for (const m of modules.filter(x => !manifest.monoRepo || x.sourcePath !== manifest.workspacePath)) {
+  for (const m of modules.filter(x => !manifest.workspace.mono || x.sourcePath !== manifest.workspace.path)) {
     await watchFolder(manifest, q, m.sourcePath, m.sourcePath, signal);
   }
 
   // Add monorepo folders
-  if (manifest.monoRepo) {
-    const mono = modules.find(x => x.sourcePath === manifest.workspacePath)!;
+  if (manifest.workspace.mono) {
+    const mono = modules.find(x => x.sourcePath === manifest.workspace.path)!;
     for (const folder of Object.keys(mono.files)) {
       if (!folder.startsWith('$')) {
         await watchFolder(manifest, q, path.resolve(mono.sourcePath, folder), mono.sourcePath, signal);
@@ -96,10 +96,9 @@ export async function* fileWatchEvents(manifest: ManifestContext, modules: Index
     }
   }
 
-  watchForReset(q, RuntimeContext.workspacePath, [
-    { file: RuntimeContext.outputFolder, actions: ['delete'] },
-    { file: RuntimeContext.compilerFolder, actions: ['delete'] },
-    { file: RuntimeContext.toolFolder, actions: ['delete'] },
+  watchForReset(q, manifest.workspace.path, [
+    { file: manifest.build.outputFolder, actions: ['delete'] },
+    { file: manifest.build.compilerFolder, actions: ['delete'] },
     { file: 'package-lock.json', actions: ['delete', 'update', 'create'] },
     { file: 'package.json', actions: ['delete', 'update', 'create'] }
   ], signal);

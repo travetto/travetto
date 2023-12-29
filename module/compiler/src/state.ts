@@ -46,11 +46,11 @@ export class CompilerState implements ts.CompilerHost {
   async init(idx: ManifestIndex): Promise<this> {
     this.#manifestIndex = idx;
     this.#manifest = idx.manifest;
-    const mapper = folderMapper(this.#manifest.workspacePath, '##');
+    const mapper = folderMapper(this.#manifest.workspace.path, '##');
     this.#rootDir = mapper.dir;
     this.#inputPathToSource = mapper.translate;
 
-    this.#outputPath = path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder);
+    this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#modules = Object.values(this.#manifest.modules);
 
     // Register all inputs
@@ -91,7 +91,7 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   resolveOutputFile(file: string): string {
-    return path.resolve(this.#manifest.workspacePath, this.#manifest.outputFolder, file);
+    return path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder, file);
   }
 
   getArbitraryInputFile(): string {
@@ -125,7 +125,7 @@ export class CompilerState implements ts.CompilerHost {
 
   registerInput(module: ManifestModule, moduleFile: string): CompileStateEntry {
     const relativeInput = `${module.outputFolder}/${moduleFile}`;
-    const sourceFile = path.resolve(this.#manifest.workspacePath, module.sourceFolder, moduleFile);
+    const sourceFile = path.resolve(this.#manifest.workspace.path, module.sourceFolder, moduleFile);
     const sourceFolder = path.dirname(sourceFile);
     const inputFile = path.resolve(this.#rootDir, relativeInput); // Ensure input is isolated
     const inputFolder = path.dirname(inputFile);

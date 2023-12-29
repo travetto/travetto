@@ -14,10 +14,9 @@ const manifest = () => {
   const modules = Object.fromEntries(Object.entries(obj.modules).filter(([k]) => k === '@travetto/manifest'));
   // @ts-expect-error
   delete obj.modules;
-  obj.workspacePath = '<generated>';
+  obj.workspace.path = '<generated>';
   obj.generated = COMMON_DATE;
-  obj.version = 'x.x.x';
-  obj.frameworkVersion = 'x.x.x';
+  obj.main.version = 'x.x.x';
   for (const md of Object.values(modules)) {
     md.version = 'x.x.x';
     for (const files of Object.values(md.files)) {

@@ -4,7 +4,7 @@ import { RuntimeContext, RuntimeIndex, path } from '@travetto/manifest';
 
 export async function buildEslintConfig(): Promise<string> {
   const root = RuntimeIndex.getModule('@travetto/eslint')!.sourcePath;
-  const ext = RuntimeContext.moduleType === 'commonjs' ? '.cjs' : '.mjs';
+  const ext = RuntimeContext.workspace.type === 'commonjs' ? '.cjs' : '.mjs';
   const tpl = await fs.readFile(path.resolve(root, 'resources', `eslint-config-file${ext}`), 'utf8');
 
   return tpl

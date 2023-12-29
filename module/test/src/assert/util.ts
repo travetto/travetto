@@ -94,7 +94,7 @@ export class AssertUtil {
 
     const msg = error.message.split(/\n/)[0];
 
-    const core = { file, classId: suite.classId, methodName, module: RuntimeContext.mainModule };
+    const core = { file, classId: suite.classId, methodName, module: RuntimeContext.main.name };
     const coreAll = { ...core, description: msg, lines: { start: line, end: line, codeStart: line } };
 
     const assert: Assertion = {

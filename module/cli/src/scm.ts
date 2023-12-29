@@ -33,7 +33,7 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string | undefined> {
-    const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspacePath });
+    const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path });
     return (await result).stdout
       .split(/\n/)
       .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
@@ -45,7 +45,7 @@ export class CliScmUtil {
    * @returns
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
-    const ws = RuntimeContext.workspacePath;
+    const ws = RuntimeContext.workspace.path;
     const res = await ExecUtil.spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
     const out = new Set<string>();
     for (const line of res.stdout.split(/\n/g)) {

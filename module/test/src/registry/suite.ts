@@ -20,7 +20,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   createPending(cls: Class): Partial<SuiteConfig> {
     return {
       class: cls,
-      module: RuntimeContext.mainModule,
+      module: RuntimeContext.main.name,
       classId: cls.Ⲑid,
       file: RuntimeIndex.getFunctionMetadata(cls)!.source,
       tests: [],
@@ -34,7 +34,7 @@ class $SuiteRegistry extends MetadataRegistry<SuiteConfig, TestConfig> {
   override createPendingField(cls: Class, fn: Function): Partial<TestConfig> {
     return {
       class: cls,
-      module: RuntimeContext.mainModule,
+      module: RuntimeContext.main.name,
       file: RuntimeIndex.getFunctionMetadata(cls)!.source,
       methodName: fn.name
     };

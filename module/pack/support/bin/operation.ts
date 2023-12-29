@@ -52,10 +52,11 @@ export class PackOperation {
    */
   static async * bundle(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const cwd = RuntimeIndex.outputRoot;
+    const out = RuntimeIndex.manifest.build.outputFolder;
 
     const bundleCommand = ['npx', 'rollup', '-c', RuntimeIndex.resolveFileImport(cfg.rollupConfiguration)];
 
-    const entryPointFile = RuntimeIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${RuntimeContext.outputFolder}/`)[1];
+    const entryPointFile = RuntimeIndex.getFromImport(cfg.entryPoint)!.outputFile.split(`${out}/`)[1];
 
     const env = {
       ...Object.fromEntries(([
@@ -65,7 +66,7 @@ export class PackOperation {
         ['BUNDLE_SOURCEMAP', cfg.sourcemap],
         ['BUNDLE_SOURCES', cfg.includeSources],
         ['BUNDLE_OUTPUT', cfg.workspace],
-        ['BUNDLE_FORMAT', RuntimeContext.moduleType],
+        ['BUNDLE_FORMAT', RuntimeContext.workspace.type],
         ['BUNDLE_ENV_FILE', cfg.envFile]
       ] as const)
         .filter(x => x[1] === false || x[1])
@@ -98,7 +99,7 @@ export class PackOperation {
    */
   static async * writePackageJson(cfg: CommonPackConfig): AsyncIterable<string[]> {
     const file = 'package.json';
-    const pkg = { type: RuntimeContext.moduleType, main: cfg.mainFile };
+    const pkg = { type: RuntimeContext.workspace.type, main: cfg.mainFile };
 
     yield* PackOperation.title(cfg, cliTpl`${{ title: 'Writing' }} ${{ path: file }}`);
 

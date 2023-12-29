@@ -31,7 +31,7 @@ export class CompilerUtil {
    */
   static rewriteSourceMap(ctx: ManifestContext, text: string, outputToSource: OutputToSource): string {
     const data: { sourceRoot?: string, sources: string[] } = JSON.parse(text);
-    const output = ManifestModuleUtil.sourceToOutputExt(path.resolve(ctx.workspacePath, ctx.outputFolder, data.sources[0]));
+    const output = ManifestModuleUtil.sourceToOutputExt(path.resolve(ctx.workspace.path, ctx.build.outputFolder, data.sources[0]));
     const { source: file } = outputToSource(output) ?? {};
 
     if (file) {
@@ -81,7 +81,7 @@ export class CompilerUtil {
     if (pkg.main) {
       pkg.main = ManifestModuleUtil.sourceToOutputExt(pkg.main);
     }
-    pkg.type = manifest.moduleType;
+    pkg.type = manifest.workspace.type;
     for (const key of ['devDependencies', 'dependencies', 'peerDependencies'] as const) {
       if (key in pkg) {
         for (const dep of Object.keys(pkg[key] ?? {})) {

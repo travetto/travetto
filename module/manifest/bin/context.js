@@ -59,7 +59,7 @@ async function $resolveWorkspace(base = process.cwd()) {
     [prev, prevPkg] = [folder, pkg];
     pkg = await $readPackage(folder) ?? pkg;
     if (
-      (pkg && (!!pkg.workspaces || !!pkg.travetto?.isolated)) || // if we have a monorepo root, or we are isolated
+      (pkg && (!!pkg.workspaces || !!pkg.travetto?.build?.isolated)) || // if we have a monorepo root, or we are isolated
       await fs.stat(path.resolve(folder, '.git')).catch(() => { }) // we made it to the source repo root
     ) {
       break;
@@ -73,9 +73,11 @@ async function $resolveWorkspace(base = process.cwd()) {
 
   return WS_ROOT[base] = {
     ...pkg,
+    name: pkg.name ?? 'untitled',
+    type: pkg.type,
     manager: await fs.stat(path.resolve(pkg.path, 'yarn.lock')).catch(() => { }) ? 'yarn' : 'npm',
     resolve: createRequire(`${pkg.path}/node_modules`).resolve.bind(null),
-    mono: !!pkg.workspaces || (!pkg.travetto?.isolated && !!prevPkg)  // Workspaces or nested projects
+    mono: !!pkg.workspaces || (!pkg.travetto?.build?.isolated && !!prevPkg)  // Workspaces or nested projects
   };
 }
 
@@ -84,18 +86,15 @@ async function $resolveWorkspace(base = process.cwd()) {
  * @param {Workspace} ws
  */
 async function $getCompilerUrl(ws) {
-  let out = ws.travetto?.compilerUrl;
-  if (!out) {
-    const file = path.resolve(ws.path, ws.travetto?.toolFolder ?? TOOL_FOLDER, 'compiler.url');
-    // eslint-disable-next-line no-bitwise
-    const port = (Math.abs([...file].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
-    out = `http://localhost:${port}`;
-    try { await fs.stat(file); } catch {
-      await fs.mkdir(path.dirname(file), { recursive: true });
-      await fs.writeFile(file, out, 'utf8');
-    }
+  const file = path.resolve(ws.path, TOOL_FOLDER, 'build.compilerUrl');
+  // eslint-disable-next-line no-bitwise
+  const port = (Math.abs([...file].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
+  const out = `http://localhost:${port}`;
+  try { await fs.stat(file); } catch {
+    await fs.mkdir(path.dirname(file), { recursive: true });
+    await fs.writeFile(file, out, 'utf8');
   }
-  return out.replace('localhost', '127.0.0.1');
+  return out;
 }
 
 /**
@@ -136,29 +135,28 @@ async function $resolveModule(workspace, folder) {
  */
 export async function getManifestContext(folder) {
   const workspace = await $resolveWorkspace(folder);
-
-  const [mod, workspaceMod, framework, compilerUrl] = await Promise.all([
-    $resolveModule(workspace, folder),
-    $readPackage(workspace.path),
-    $readPackage(workspace.resolve('@travetto/manifest/package.json')),
-    $getCompilerUrl(workspace),
-  ]);
+  const mod = await $resolveModule(workspace, folder);
+  const build = workspace.travetto?.build ?? {};
 
   return {
-    workspacePath: workspace.path,
-    monoRepo: workspace.mono,
-    workspaceModule: workspaceMod?.name ?? 'untitled',
-    packageManager: workspace.manager,
-    moduleType: workspace.type ?? 'commonjs',
-    outputFolder: workspace.travetto?.outputFolder ?? OUTPUT_FOLDER,
-    toolFolder: workspace.travetto?.toolFolder ?? TOOL_FOLDER,
-    compilerFolder: workspace.travetto?.compilerFolder ?? COMPILER_FOLDER,
-    compilerUrl,
-    compilerModuleFolder: path.dirname(workspace.resolve('@travetto/compiler/package.json')).replace(`${workspace.path}/`, ''),
-    frameworkVersion: framework?.version ?? '1.0.0',
-    mainModule: mod.name ?? 'untitled',
-    mainFolder: mod.path === workspace.path ? '' : mod.path.replace(`${workspace.path}/`, ''),
-    version: mod.version,
-    description: mod.description
+    workspace: {
+      name: workspace.name,
+      path: workspace.path,
+      mono: workspace.mono,
+      manager: workspace.manager,
+      type: workspace.type ?? 'commonjs'
+    },
+    build: {
+      compilerFolder: build.compilerFolder ?? COMPILER_FOLDER,
+      compilerUrl: build.compilerUrl ?? await $getCompilerUrl(workspace),
+      compilerModuleFolder: path.dirname(workspace.resolve('@travetto/compiler/package.json')).replace(`${workspace.path}/`, ''),
+      outputFolder: build.outputFolder ?? OUTPUT_FOLDER,
+    },
+    main: {
+      name: mod.name ?? 'untitled',
+      folder: mod.path === workspace.path ? '' : mod.path.replace(`${workspace.path}/`, ''),
+      version: mod.version,
+      description: mod.description
+    }
   };
 }

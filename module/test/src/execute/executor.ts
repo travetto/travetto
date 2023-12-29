@@ -109,7 +109,7 @@ export class TestExecutor {
 
     const result: TestResult = {
       methodName: test.methodName,
-      module: RuntimeContext.mainModule,
+      module: RuntimeContext.main.name,
       description: test.description,
       classId: test.classId,
       lines: { ...test.lines },

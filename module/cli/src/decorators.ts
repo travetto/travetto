@@ -55,10 +55,10 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
       (pendingCls.validators ??= []).push(async item => {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         const { module: mod } = item as CliCommandShapeFields;
-        const runModule = (runtimeModule === 'command' ? commandModule : mod) || RuntimeContext.mainModule;
+        const runModule = (runtimeModule === 'command' ? commandModule : mod) || RuntimeContext.main.name;
 
         // If we need to run as a specific module
-        if (runModule !== RuntimeContext.mainModule) {
+        if (runModule !== RuntimeContext.main.name) {
           try {
             RuntimeIndex.reinitForModule(runModule);
           } catch (err) {
