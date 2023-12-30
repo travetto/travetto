@@ -8,13 +8,13 @@ export type CompilerLogEvent = { level: CompilerLogLevel, message: string, time:
 export type CompilerProgressEvent = { idx: number, total: number, message: string, operation: 'compile', complete?: boolean };
 export type CompilerStateEvent = { state: CompilerStateType, extra?: Record<string, unknown> };
 
-export type CompilerServerEvent =
+export type CompilerEvent =
   { type: 'change', payload: CompilerChangeEvent } |
   { type: 'log', payload: CompilerLogEvent } |
   { type: 'progress', payload: CompilerProgressEvent } |
   { type: 'state', payload: CompilerStateEvent };
 
-export type CompilerServerEventType = CompilerServerEvent['type'];
+export type CompilerEventType = CompilerEvent['type'];
 
 export type CompilerServerInfo = {
   path: string;

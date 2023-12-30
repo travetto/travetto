@@ -1,6 +1,5 @@
 /// <reference path="./src/trv.d.ts" />
 export * from './src/console';
-export * from './src/compiler';
 export * from './src/data';
 export * from './src/error';
 export * from './src/exec';
@@ -12,4 +11,5 @@ export * from './src/stream';
 export * from './src/time';
 export * from './src/types';
 export * from './src/object';
+export * from './src/watch';
 export * from './src/util';

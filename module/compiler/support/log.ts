@@ -1,8 +1,10 @@
 import type { ManifestContext } from '@travetto/manifest';
-import type { CompilerLogEvent, CompilerLogLevel } from './types';
+import type { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent } from './types';
 
 export type CompilerLogger = (level: CompilerLogLevel, message: string, ...args: unknown[]) => void;
 export type WithLogger<T> = (log: CompilerLogger) => Promise<T>;
+
+type ProgressWriter = (ev: CompilerProgressEvent) => (unknown | Promise<unknown>);
 
 const LEVEL_TO_PRI: Record<CompilerLogLevel, number> = { debug: 1, info: 2, warn: 3, error: 4 };
 
@@ -14,6 +16,8 @@ export class LogUtil {
 
   static logLevel: CompilerLogLevel = 'error';
 
+  static logProgress?: ProgressWriter;
+
   /**
    * Set level for operation
    */
@@ -24,6 +28,20 @@ export class LogUtil {
       this.logLevel = build || defaultLevel;
     }
     this.root = ctx.workspace.path;
+
+    if (this.isLevelActive('info') && process.stdout.isTTY) {
+      this.logProgress = this.#logProgressEvent;
+    }
+  }
+
+  static #logProgressEvent(ev: CompilerProgressEvent): Promise<void> | void {
+    const pct = Math.trunc(ev.idx * 100 / ev.total);
+    const text = ev.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${ev.idx}/${ev.total}] ${ev.message}`;
+    // Move to 1st position, and clear after text
+    const done = process.stdout.write(`\x1b[1G${text}\x1b[0K`);
+    if (!done) {
+      return new Promise<void>(r => process.stdout.once('drain', r));
+    }
   }
 
   /**
@@ -36,25 +54,12 @@ export class LogUtil {
   /**
    * Log message with filtering by level
    */
-  static log(scope: string, level: CompilerLogLevel, message: string, ...args: unknown[]): void {
-    LogUtil.sendLogEventToConsole({ level, scope, message, args, time: Date.now() });
-  }
-
-  /**
-   * With logger
-   */
-  static withLogger<T>(scope: string, op: WithLogger<T>, basic = true): Promise<T> {
-    const log = this.log.bind(null, scope);
-    basic && log('debug', 'Started');
-    return op(log).finally(() => basic && log('debug', 'Completed'));
-  }
-
-  /**
-   * Compiler log event to console
-   */
-  static sendLogEventToConsole(ev: CompilerLogEvent): void {
+  static log(event: CompilerLogEvent): void;
+  static log(scope: string, ...args: Parameters<CompilerLogger>): void;
+  static log(scopeOrEvent: string | CompilerLogEvent, level?: CompilerLogLevel, message?: string, ...args: unknown[]): void {
+    const ev = typeof scopeOrEvent === 'string' ? { scope: scopeOrEvent, level: level!, message, args } : scopeOrEvent;
     if (this.isLevelActive(ev.level)) {
-      const params = [ev.message, ...ev.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(LogUtil.root, '.') : x);
+      const params = [ev.message, ...ev.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(this.root, '.') : x);
       if (ev.scope) {
         params.unshift(`[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`);
       }
@@ -62,5 +67,36 @@ export class LogUtil {
       // eslint-disable-next-line no-console
       console[ev.level]!(...params);
     }
+  }
+
+  /**
+   * With logger
+   */
+  static withLogger<T>(scope: string, op: WithLogger<T>, basic = true): Promise<T> {
+    const log = this.scoped(scope);
+    basic && log('debug', 'Started');
+    return op(log).finally(() => basic && log('debug', 'Completed'));
+  }
+
+  /**
+   * With scope
+   */
+  static scoped(scope: string): CompilerLogger {
+    return this.log.bind(this, scope);
+  }
+
+  /**
+   * Stream Compiler log events to console
+   */
+  static async consumeLogEvents(src: AsyncIterable<CompilerLogEvent>): Promise<void> {
+    for await (const ev of src) { this.log(ev); }
+  }
+
+  /**
+   * Write all progress events if active
+   */
+  static async consumeProgressEvents(src: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {
+    if (!this.logProgress) { return; }
+    for await (const item of src()) { await this.logProgress?.(item); }
   }
 }

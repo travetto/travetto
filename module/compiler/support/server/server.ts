@@ -4,12 +4,12 @@ import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerMode, CompilerOp, CompilerProgressEvent, CompilerServerEvent, CompilerServerEventType, CompilerServerInfo } from '../types';
+import type { CompilerMode, CompilerOp, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types';
 import { LogUtil } from '../log';
 import { CompilerClient } from './client';
 import { CommonUtil } from '../util';
 
-const log = LogUtil.log.bind(LogUtil, 'compiler-server');
+const log = LogUtil.scoped('compiler-server');
 
 /**
  * Compiler Server Class
@@ -33,17 +33,16 @@ export class CompilerServer {
 
   #ctx: ManifestContext;
   #server: http.Server;
-  #listeners: { res: http.ServerResponse, type: CompilerServerEventType }[] = [];
+  #listeners: { res: http.ServerResponse, type: CompilerEventType }[] = [];
   #shutdown = new AbortController();
   signal = this.#shutdown.signal;
   info: CompilerServerInfo;
-  #progressWriter = CompilerClient.progressWriter();
   #client: CompilerClient;
   #url: string;
 
   constructor(ctx: ManifestContext, op: CompilerOp) {
     this.#ctx = ctx;
-    this.#client = new CompilerClient(ctx);
+    this.#client = new CompilerClient(ctx, LogUtil.scoped('client.server'));
     this.#url = this.#client.url;
     this.info = {
       state: 'startup',
@@ -68,7 +67,7 @@ export class CompilerServer {
     return this.info.mode;
   }
 
-  isResetEvent(ev: CompilerServerEvent): boolean {
+  isResetEvent(ev: CompilerEvent): boolean {
     return ev.type === 'state' && ev.payload.state === 'reset';
   }
 
@@ -95,7 +94,7 @@ export class CompilerServer {
       }
       log('info', 'Waiting for build to finish, before retrying');
       // Let the server finish
-      await this.#client.waitForState(['close'], this.signal);
+      await this.#client.waitForState(['close'], 'Server closed', this.signal);
       return this.#tryListen(attempt + 1);
     }
 
@@ -111,7 +110,7 @@ export class CompilerServer {
     res.end();
   }
 
-  #emitEvent(ev: CompilerServerEvent): void {
+  #emitEvent(ev: CompilerEvent): void {
     const msg = `${JSON.stringify(ev.payload)}\n`;
     for (const el of this.#listeners) {
       if (!el.res.closed && el.type === ev.type) {
@@ -158,15 +157,14 @@ export class CompilerServer {
   /**
    * Process events
    */
-  async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerServerEvent>): Promise<void> {
+  async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
 
     LogUtil.log('compiler', 'debug', 'Started, streaming logs');
-
-    this.#client.streamLogs(this.signal); // Send logs to stdout
+    LogUtil.consumeLogEvents(this.#client.fetchEvents('log', { signal: this.signal }));
 
     for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
-      if (this.#progressWriter && ev.type === 'progress') {
-        await this.#progressWriter(ev.payload);
+      if (ev.type === 'progress') {
+        await LogUtil.logProgress?.(ev.payload);
       }
 
       this.#emitEvent(ev);
@@ -196,7 +194,7 @@ export class CompilerServer {
 
       if (force) {
         const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
-        this.#progressWriter?.(cancel);
+        LogUtil.logProgress?.(cancel);
         this.#emitEvent({ type: 'progress', payload: cancel });
       }
 

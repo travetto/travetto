@@ -1,13 +1,13 @@
 import { ManifestModuleUtil, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { CompilerClient } from '@travetto/base';
+import { watchCompiler, FullWatchEvent, WatchEvent } from '@travetto/base';
 
-type WatchHandler = Parameters<CompilerClient['onFileChange']>[0];
-type CompilerWatchEvent = Parameters<WatchHandler>[0];
 interface ModuleLoader {
   init?(): Promise<void>;
   load(file: string): Promise<void>;
   unload(file: string): Promise<void>;
 }
+
+type Handler = (ev: WatchEvent) => unknown;
 
 const VALID_FILE_TYPES = new Set(['js', 'ts']);
 
@@ -15,11 +15,11 @@ const VALID_FILE_TYPES = new Set(['js', 'ts']);
  * Listens to file changes, and provides a unified interface for watching file changes, reloading files as needed
  */
 class $DynamicFileLoader {
-  #handlers: WatchHandler[] = [];
+  #handlers: Handler[] = [];
   #loader: ModuleLoader;
   #initialized = false;
 
-  async dispatch(ev: CompilerWatchEvent): Promise<void> {
+  async dispatch(ev: FullWatchEvent): Promise<void> {
     if (ev.action === 'update' || ev.action === 'delete') {
       await this.#loader.unload(ev.output);
     }
@@ -35,7 +35,7 @@ class $DynamicFileLoader {
     }
   }
 
-  onLoadEvent(handler: WatchHandler): void {
+  onLoadEvent(handler: Handler): void {
     this.#handlers.push(handler);
   }
 
@@ -63,11 +63,11 @@ class $DynamicFileLoader {
       .on('uncaughtException', handle);
 
     // Fire off, and let it run in the bg. Restart on exit
-    new CompilerClient().onFileChange(async ev => {
+    watchCompiler<FullWatchEvent>(ev => {
       if (ev.file && RuntimeIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
-        await this.dispatch(ev);
+        return this.dispatch(ev);
       }
-    }, true);
+    }, { restartOnExit: true });
   }
 }
 

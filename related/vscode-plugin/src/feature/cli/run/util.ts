@@ -3,6 +3,8 @@ import vscode from 'vscode';
 import { RunChoice, ResolvedRunChoice } from './types';
 import { Workspace } from '../../../core/workspace';
 import { ParameterSelector } from '../../../core/parameter';
+import { LaunchConfig } from '../../../core/types';
+import { RunUtil } from '../../../core/run';
 
 type PickItem = vscode.QuickPickItem & { target: RunChoice };
 
@@ -89,7 +91,7 @@ export class CliRunUtil {
   }
 
   static async getModules(): Promise<ModuleGraphItem<Set<string>>[]> {
-    const res = Workspace.spawnCli('repo:list', ['-f', 'json'], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
+    const res = RunUtil.spawnCli('repo:list', ['-f', 'json'], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
     const data = await res.result;
     if (!data.valid) {
       throw new Error(`Unable to collect module list: ${data.message}`);
@@ -106,7 +108,7 @@ export class CliRunUtil {
    * Get list of run choices
    */
   static async getChoices(): Promise<RunChoice[]> {
-    const res = Workspace.spawnCli('cli:schema', [], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
+    const res = RunUtil.spawnCli('cli:schema', [], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
     const data = await res.result;
     if (!data.valid) {
       throw new Error(`Unable to collect cli command list: ${data.message}`);
@@ -121,7 +123,7 @@ export class CliRunUtil {
     for (const choice of choices) {
       choice.inputs = [];
       const moduleFlag = choice.flags.find(x => x.name === 'module' && x.type === 'string');
-      if (Workspace.isMonoRepo && moduleFlag) {
+      if (moduleFlag?.required) {
         modules ??= await this.getModules();
         for (const module of modules.filter(m => m.local && m.children.has(choice.commandModule))) {
           output.push({
@@ -174,14 +176,14 @@ export class CliRunUtil {
    * Get full launch config
    * @param choice
    */
-  static getLaunchConfig(choice: ResolvedRunChoice): vscode.DebugConfiguration {
+  static getLaunchConfig(choice: ResolvedRunChoice): LaunchConfig {
     const args = choice.inputs.map(x => `${x}`.replace(Workspace.path, '.')).join(', ');
 
-    return Workspace.generateLaunchConfig({
+    return {
       name: `[Travetto] ${choice.name}${args ? `: ${args}` : ''}`,
       useCli: true,
       main: choice.name,
       args: [...choice.inputFlags ?? [], ...choice.inputs],
-    });
+    };
   }
 }

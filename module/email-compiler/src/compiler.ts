@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { CompilerClient, FileLoader, TypedObject } from '@travetto/base';
+import { FileLoader, TypedObject, WatchEvent, watchCompiler } from '@travetto/base';
 import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
 import { RuntimeIndex, path } from '@travetto/manifest';
 import { WorkQueue } from '@travetto/worker';
@@ -8,8 +8,6 @@ import { WorkQueue } from '@travetto/worker';
 import { EmailCompileUtil } from './util';
 
 const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
-
-type WatchEvent = { action: 'create' | 'update' | 'delete', file: string, folder: string };
 
 /**
  * Email compilation support
@@ -132,12 +130,12 @@ export class EmailCompiler {
     this.#watchFolders(all, ev => stream.add(ev), ctrl.signal);
 
     // Watch template files
-    new CompilerClient().onFileChange(ev => {
+    watchCompiler(ev => {
       const src = RuntimeIndex.getEntry(ev.file);
       if (src && EmailCompileUtil.isTemplateFile(src.sourceFile)) {
         setTimeout(() => stream.add({ ...ev, file: src.sourceFile }), 100); // Wait for it to be loaded
       }
-    });
+    }, { signal: ctrl.signal });
 
     for await (const { file, action } of stream) {
       if (action === 'delete') {

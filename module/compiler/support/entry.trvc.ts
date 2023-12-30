@@ -3,26 +3,26 @@ import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
+import type { CompilerEventType, CompilerOp, CompilerServerInfo } from './types';
 import { LogUtil } from './log';
+import { CommonUtil } from './util';
 import { CompilerSetup } from './setup';
 import { CompilerServer } from './server/server';
 import { CompilerRunner } from './server/runner';
-import type { CompilerOp, CompilerServerInfo } from './types';
 import { CompilerClient } from './server/client';
-import { CommonUtil } from './util';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {
-  const client = new CompilerClient(ctx);
+  const client = new CompilerClient(ctx, LogUtil.scoped('client.main'));
   const buildFolders = [ctx.build.outputFolder, ctx.build.compilerFolder];
 
   const ops = {
     /** Stop the server */
     async stop(): Promise<void> {
       if (await client.stop()) {
-        console.log(`Stopped server ${ctx.workspace.path}: [${client.url}]`);
+        console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
       } else {
-        console.log(`Server not running ${ctx.workspace.path}: [${client.url}]`);
+        console.log(`Server not running ${ctx.workspace.path}: ${client}`);
       }
     },
 
@@ -37,6 +37,12 @@ export const main = (ctx: ManifestContext) => {
         await Promise.all(buildFolders.map(f => fs.rm(path.resolve(ctx.workspace.path, f), { force: true, recursive: true })));
         return console.log(`Cleaned ${ctx.workspace.path}:`, buildFolders);
       }
+    },
+
+    /** Stream events */
+    events: async (type: CompilerEventType, handler: (ev: unknown) => unknown): Promise<void> => {
+      LogUtil.initLogs(ctx, 'error');
+      for await (const ev of client.fetchEvents(type)) { await handler(ev); }
     },
 
     /** Main entry point for compilation */
@@ -54,7 +60,8 @@ export const main = (ctx: ManifestContext) => {
           }
         });
       } else {
-        await client.waitForBuild();
+        LogUtil.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete }));
+        await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
       }
       return CommonUtil.moduleLoader(ctx);
     },

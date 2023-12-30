@@ -5,7 +5,7 @@ import { ActionStorage } from '../../../core/storage';
 
 import { BaseFeature } from '../../base';
 import { EnvDict, TargetEvent } from '../../../core/types';
-import { Workspace } from '../../../core/workspace';
+import { RunUtil } from '../../../core/run';
 
 import { RunChoice } from './types';
 import { CliRunUtil } from './util';
@@ -43,8 +43,7 @@ export class CliRunFeature extends BaseFeature {
         return;
       }
 
-      const config = CliRunUtil.getLaunchConfig(choice);
-
+      const config = RunUtil.buildDebugConfig(CliRunUtil.getLaunchConfig(choice));
       const launchConfig = vscode.workspace.getConfiguration('launch');
       const configurations = launchConfig['configurations'];
       configurations.push(config);
@@ -86,17 +85,13 @@ export class CliRunFeature extends BaseFeature {
 
     if (choice) {
       this.log.info('Running', choice.name, inputs);
-      try {
-        await vscode.debug.startDebugging(Workspace.folder, CliRunUtil.getLaunchConfig({
-          ...choice,
-          inputs: inputs ?? choice.inputs ?? [],
-          resolved: true,
-          key: choice.key ?? '',
-          time: choice.time ?? Date.now()
-        }));
-      } catch (err) {
-        vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
-      }
+      await RunUtil.debug(CliRunUtil.getLaunchConfig({
+        ...choice,
+        inputs: inputs ?? choice.inputs ?? [],
+        resolved: true,
+        key: choice.key ?? '',
+        time: choice.time ?? Date.now()
+      }));
     } else {
       this.log.info('No target selected');
     }
@@ -119,18 +114,14 @@ export class CliRunFeature extends BaseFeature {
    * On IPC trigger to run a target
    */
   async onEvent(ev: TargetEvent<{ name: string, args: string[], module: string, env: EnvDict }>): Promise<void> {
-    try {
-      const args = ev.data.args;
-      await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
-        name: `[Travetto] ${ev.data.name}${args ? `: ${args.join(' ')}` : ''}`,
-        useCli: true,
-        main: ev.data.name,
-        args,
-        cliModule: ev.data.module,
-        env: ev.data.env
-      }));
-    } catch (err) {
-      vscode.window.showErrorMessage(err instanceof Error ? err.message : JSON.stringify(err));
-    }
+    const args = ev.data.args;
+    await RunUtil.debug({
+      name: `[Travetto] ${ev.data.name}${args ? `: ${args.join(' ')}` : ''}`,
+      useCli: true,
+      main: ev.data.name,
+      args,
+      cliModule: ev.data.module,
+      env: ev.data.env
+    });
   }
 }
