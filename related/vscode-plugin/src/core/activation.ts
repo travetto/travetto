@@ -9,12 +9,16 @@ interface ActivationFactory<T extends ActivationTarget = ActivationTarget> {
   new(module: string, command?: string): T;
 }
 
-type ActivationConfig = { module: string, command?: string | true, cls: ActivationFactory, instance?: ActivationTarget };
+type ActivationConfig = { module: string, command?: string | true, cls: ActivationFactory, instance?: ActivationTarget, priority: number };
 
 /**
  * Activation manager
  */
 class $ActivationManager {
+
+  static #isInstalled(mod: string): boolean | undefined {
+    try { Workspace.resolveImport(mod); return true; } catch { }
+  }
 
   #registry = new Set<ActivationConfig>();
   #commandRegistry = new Map<string, ActivationConfig>();
@@ -31,7 +35,7 @@ class $ActivationManager {
   async init(): Promise<void> {
     for (const entry of [...this.#registry.values()]) {
       const { module, command, cls } = entry;
-      if (command === true || Workspace.isInstalled(module)) {
+      if (command === true || $ActivationManager.#isInstalled(module)) {
         const inst = entry.instance = new cls(module, command === true ? undefined : command);
         await vscode.commands.executeCommand('setContext', inst.moduleBase, true);
         if (typeof command === 'string') {
@@ -43,11 +47,11 @@ class $ActivationManager {
   }
 
   async activate(ctx: vscode.ExtensionContext): Promise<void> {
-    for (const { instance } of this.#registry.values()) {
+    for (const { instance } of [...this.#registry.values()].sort((a, b) => a.priority - b.priority)) {
       this.#log.info('Activating', instance?.module, instance?.command);
-      instance?.activate?.(ctx);
+      await instance?.activate?.(ctx);
     }
-    this.#ipcSupport.activate(ctx);
+    await this.#ipcSupport.activate(ctx);
   }
 
   async deactivate(): Promise<void> {
@@ -74,6 +78,6 @@ class $ActivationManager {
 
 export const ActivationManager = new $ActivationManager();
 
-export function Activatible(module: string, command?: string | true) {
-  return (cls: ActivationFactory): void => { ActivationManager.add({ module, command, cls }); };
+export function Activatible(module: string, command?: string | true, priority = 100) {
+  return (cls: ActivationFactory): void => { ActivationManager.add({ module, command, cls, priority }); };
 }

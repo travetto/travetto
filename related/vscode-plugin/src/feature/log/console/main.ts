@@ -1,6 +1,8 @@
 import vscode from 'vscode';
 import fs from 'node:fs/promises';
 
+import { path } from '@travetto/manifest';
+
 import { Activatible } from '../../../core/activation';
 import { Workspace } from '../../../core/workspace';
 import { BaseFeature } from '../../base';
@@ -18,6 +20,28 @@ const FILE_CLASS_REGEX = /([a-z_\-\/@]+)[:\/]((?:src|support|bin|test|doc)\/[a-z
  */
 @Activatible('@travetto/log', true)
 export class LogFeature extends BaseFeature {
+
+  #importToFile = new Map<string, string | undefined>();
+
+  async getSourceFromImport(imp: string): Promise<string | undefined> {
+    if (!this.#importToFile.has(imp)) {
+      let file: undefined | string;
+      if (imp.startsWith(Workspace.moduleName)) {
+        file = path.resolve(Workspace.path, imp.replace(Workspace.moduleName, '.'));
+      } else {
+        try {
+          file = Workspace.resolveImport(imp);
+        } catch {
+          try {
+            file = Workspace.resolveImport(imp.replace(/[.]js$/, '.ts').replace(/[.]jsx$/, '.tsx'));
+          } catch { }
+        }
+      }
+      this.#importToFile.set(imp, file);
+    }
+    return this.#importToFile.get(imp);
+  }
+
 
   /**
    * Handle a terminal link being clicked
@@ -41,15 +65,15 @@ export class LogFeature extends BaseFeature {
     const out: Link[] = [];
 
     for (const match of context.line.matchAll(FILE_CLASS_REGEX)) {
-      const [full, mod, path, suffix = ''] = match;
-      const sourceFile = await Workspace.getSourceFromImport(`${mod}/${path}`);
+      const [full, mod, pth, suffix = ''] = match;
+      const sourceFile = await this.getSourceFromImport(`${mod}/${pth}`);
       if (sourceFile) {
         const suffixType = suffix.includes('￮') ? 'class' : suffix.includes(':') ? 'file-numbered' : 'file';
         const type = suffixType === 'class' ? 'Class' : 'File';
         out.push({
           startIndex: context.line.indexOf(full),
           length: full.length,
-          tooltip: `Travetto ${type}: ${mod}/${path}${suffix}`,
+          tooltip: `Travetto ${type}: ${mod}/${pth}${suffix}`,
           file: sourceFile,
           line: suffixType === 'file-numbered' ? suffix.split(':')[1] : undefined,
           cls: suffixType === 'class' ? suffix.split('￮')[1] : undefined

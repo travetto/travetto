@@ -13,12 +13,12 @@ const TS_EXT = /[.]tsx?$/;
 const /** @type {Transform} */ transpile = async (ctx, content, tsconfig = path.resolve(ctx.workspace.path, 'tsconfig.json')) => {
   await fs.stat(tsconfig).catch(() => fs.writeFile(tsconfig, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8'));
   const ts = (await import('typescript')).default;
-  const module = ctx.workspace.moduleType === 'module' ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS;
+  const module = ctx.workspace.type === 'module' ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS;
   return ts.transpile(content, { target: ts.ScriptTarget.ES2022, module, esModuleInterop: true, allowSyntheticDefaultImports: true });
 };
 
 const /** @type {Transform} */ rewritePackage = (ctx, content) =>
-  JSON.stringify(Object.assign(JSON.parse(content), { type: ctx.workspace.moduleType }), null, 2);
+  JSON.stringify(Object.assign(JSON.parse(content), { type: ctx.workspace.type }), null, 2);
 
 async function outputIfChanged(/** @type {Ctx} */ ctx, /** @type {string} */ file, /** @type {Transform} */ transform) {
   const target = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler', file).replace(TS_EXT, '.js');

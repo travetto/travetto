@@ -4,13 +4,13 @@ import { rmSync } from 'node:fs';
 
 import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
-import type { CompilerOp, CompilerServerEvent } from '../types';
+import type { CompilerOp, CompilerEvent } from '../types';
 import { AsyncQueue } from '../queue';
 import { LogUtil } from '../log';
 import { CommonUtil } from '../util';
 
-const log = LogUtil.log.bind(null, 'compiler-exec');
-const isEvent = (msg: unknown): msg is CompilerServerEvent => !!msg && typeof msg === 'object' && 'type' in msg;
+const log = LogUtil.scoped('compiler-exec');
+const isEvent = (msg: unknown): msg is CompilerEvent => !!msg && typeof msg === 'object' && 'type' in msg;
 
 /**
  * Running the compiler
@@ -20,7 +20,7 @@ export class CompilerRunner {
   /**
    * Run compile process
    */
-  static async * runProcess(ctx: ManifestContext, changed: DeltaEvent[], op: CompilerOp, signal: AbortSignal): AsyncIterable<CompilerServerEvent> {
+  static async * runProcess(ctx: ManifestContext, changed: DeltaEvent[], op: CompilerOp, signal: AbortSignal): AsyncIterable<CompilerEvent> {
     const watch = op === 'watch';
     if (!changed.length && !watch) {
       yield { type: 'state', payload: { state: 'compile-end' } };
@@ -35,7 +35,7 @@ export class CompilerRunner {
 
     const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev => ev.sourceFile);
 
-    const queue = new AsyncQueue<CompilerServerEvent>();
+    const queue = new AsyncQueue<CompilerEvent>();
     let kill: (() => void) | undefined;
 
     try {

@@ -1,16 +1,17 @@
 import vscode from 'vscode';
 
 import { path } from '@travetto/manifest';
+import { Env } from '@travetto/base';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
 import { ProcessServer } from '../../../core/server';
+import { RunUtil } from '../../../core/run';
 
 import { BaseFeature } from '../../base';
 
 import { WorkspaceResultsManager } from './workspace';
 import { RemoveEvent, TestCommand, TestEvent } from './types';
-import { Env } from '@travetto/base';
 
 /**
  * Test Runner Feature
@@ -62,7 +63,7 @@ class TestRunnerFeature extends BaseFeature {
 
     const prettyFile = file.replace(`${Workspace.path}/`, '');
 
-    await vscode.debug.startDebugging(Workspace.folder, Workspace.generateLaunchConfig({
+    await RunUtil.debug({
       useCli: true,
       name: `Debug Travetto Test - ${prettyFile}`,
       main: 'test:direct',
@@ -71,12 +72,11 @@ class TestRunnerFeature extends BaseFeature {
       env: {
         ...(breakpoint ? Env.TRV_TEST_BREAK_ENTRY.export(true) : {})
       }
-    }));
+    });
   }
 
   /**
    * Build code lenses for a given document
-   * @param doc
    */
   buildCodeLenses(doc: vscode.TextDocument): vscode.CodeLens[] {
     return (this.#consumer.getResults(doc)?.getListOfTests() || [])
