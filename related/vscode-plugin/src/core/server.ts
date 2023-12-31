@@ -59,8 +59,8 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
         ...opts.env
       },
       catchAsResult: true,
-      onStdOutLine: line => this.#log.info(prefix, line),
-      onStdErrorLine: line => this.#log.error(prefix, line)
+      onStdOutLine: line => this.#log.info(prefix, line.trimEnd()),
+      onStdErrorLine: line => this.#log.error(prefix, line.trimEnd())
     });
 
     const ready = new Promise<void>((resolve, reject) => {

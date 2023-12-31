@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 
 import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent } from '@travetto/compiler/support/types';
-import { ExecUtil, ExecutionState } from '@travetto/base';
+import { Env, ExecUtil, ExecutionState } from '@travetto/base';
 
 import { BaseFeature } from '../../base';
 import { Log } from '../../../core/log';
@@ -21,7 +21,7 @@ const SCOPE_MAX = 15;
 @Activatible('@travetto/compiler', true, 1)
 export class CompilerWatchFeature extends BaseFeature {
   #status = vscode.window.createStatusBarItem('travetto.build', vscode.StatusBarAlignment.Left, 1000);
-  #log = new Log('travetto.build-status');
+  #log = new Log('travetto.compiler');
   #progress: Record<string, ProgressState> = {};
   #compilerCliFile!: string;
 
@@ -60,7 +60,15 @@ export class CompilerWatchFeature extends BaseFeature {
    */
   run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info'): ExecutionState {
     this.#log.debug('Running Compiler', this.#compilerCliFile, command);
-    return ExecUtil.spawn('node', [this.#compilerCliFile, command], { cwd: Workspace.path, isolatedEnv: true });
+    return ExecUtil.spawn('node', [this.#compilerCliFile, command], {
+      cwd: Workspace.path,
+      isolatedEnv: true,
+      ...((command === 'start' || command === 'restart') ? {
+        outputMode: 'text-stream',
+        onStdErrorLine: line => this.#log.error(`> ${line}`),
+      } : {}),
+      env: { ...Env.TRV_BUILD.export('debug') }
+    });
   }
 
   /**
@@ -179,7 +187,7 @@ export class CompilerWatchFeature extends BaseFeature {
    * On initial activation
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
-    this.#status.command = { command: 'travetto.show-log', title: 'Show Logs' };
+    this.#status.command = { command: this.commandName('show-log'), title: 'Show Logs' };
     this.#onState('close');
 
     this.#compilerCliFile = Workspace.resolveImport('@travetto/compiler/bin/trvc.js');
@@ -187,7 +195,7 @@ export class CompilerWatchFeature extends BaseFeature {
     // Start the listener
     this.#trackConnected();
 
-    await this.run('start');
+    this.run('start');
 
     for (const op of ['start', 'stop', 'restart', 'clean'] as const) {
       this.register(op, () => this.run(op));

@@ -1,31 +1,35 @@
 import vscode from 'vscode';
 
 import { Env } from '@travetto/base';
+
 import { Activatible } from '../../../core/activation';
 import { BaseFeature } from '../../base';
 import { RunUtil } from '../../../core/run';
 
-@Activatible('@travetto/terminal', 'theme')
+@Activatible('@travetto/terminal', true)
 export class TerminalThemeFeature extends BaseFeature {
 
-  /** Read theme  */
-  async #getColorTheme(): Promise<{ light: boolean, highContrast: boolean }> {
-    const kind = vscode.window.activeColorTheme.kind;
-    return {
-      light: kind === vscode.ColorThemeKind.Light || kind === vscode.ColorThemeKind.HighContrastLight,
-      highContrast: kind === vscode.ColorThemeKind.HighContrast || kind === vscode.ColorThemeKind.HighContrastLight
-    };
+  darkBackground(): boolean {
+    switch (vscode.window.activeColorTheme.kind) {
+      case vscode.ColorThemeKind.HighContrastLight:
+      case vscode.ColorThemeKind.Light: return false;
+      default: return true;
+    }
+  }
+
+  highContrast(): boolean {
+    switch (vscode.window.activeColorTheme.kind) {
+      case vscode.ColorThemeKind.Dark:
+      case vscode.ColorThemeKind.Light: return false;
+      default: return true;
+    }
   }
 
   /** Update general data for theme */
-  async #writeTheme(ctx: vscode.ExtensionContext): Promise<void> {
-    const theme = await this.#getColorTheme();
-    const color = theme.light ? '0;15' : '15;0';
-    const depth = theme?.highContrast ? 1 : 3;
-
+  #writeTheme(ctx: vscode.ExtensionContext): void {
     RunUtil.registerEnvVars(ctx, {
-      ...Env.COLORFGBG.export(color),
-      ...Env.FORCE_COLOR.export(depth),
+      ...Env.COLORFGBG.export(this.darkBackground() ? '15;0' : '0;15'),
+      ...Env.FORCE_COLOR.export(this.highContrast() ? 1 : 3),
     });
   }
 
