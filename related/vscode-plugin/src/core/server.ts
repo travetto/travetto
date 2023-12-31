@@ -1,8 +1,8 @@
 import { Env, ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
 import type { } from '@travetto/log';
 
-import { Workspace } from './workspace';
 import { Log } from './log';
+import { RunUtil } from './run';
 
 const READY_WAIT_WINDOW = 1000 * 15;
 
@@ -47,10 +47,12 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     this.#log.info('Starting', command, ...args);
 
     const prefix = String.fromCharCode(171);
-    const state = Workspace.spawnCli(command, args, {
+    const state = RunUtil.spawnCli(command, args, {
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
       ...opts,
       env: {
+        ...Env.FORCE_COLOR.export(0),
+        ...Env.NODE_DISABLE_COLORS.export(true),
         ...Env.NO_COLOR.export(true),
         ...Env.TRV_QUIET.export(true),
         ...Env.TRV_LOG_TIME.export(false),

@@ -1,4 +1,3 @@
-import timers from 'node:timers/promises';
 import vscode from 'vscode';
 
 import { Env } from '@travetto/base';
@@ -9,25 +8,12 @@ import { RunUtil } from '../../../core/run';
 @Activatible('@travetto/terminal', 'theme')
 export class TerminalThemeFeature extends BaseFeature {
 
-  /** Read theme using webview panel */
+  /** Read theme  */
   async #getColorTheme(): Promise<{ light: boolean, highContrast: boolean }> {
-    const subs: { dispose(): unknown }[] = [];
-    const panel = vscode.window.createWebviewPanel('theme-detector', '',
-      { preserveFocus: true, viewColumn: vscode.ViewColumn.Beside, },
-      { enableScripts: true, localResourceRoots: [], },
-    );
-    subs.push(panel);
-
-    const reading = new Promise<string>(res => subs.push(panel.webview.onDidReceiveMessage(res, undefined)));
-    panel.webview.html = '<body onload="acquireVsCodeApi().postMessage(document.body.className)">';
-    const final = await Promise.race([reading, timers.setTimeout(1000).then(x => undefined)]);
-    for (const sub of subs) {
-      sub.dispose();
-    }
-
+    const kind = vscode.window.activeColorTheme.kind;
     return {
-      light: (!!final && /vscode[^ ]*-light/.test(final)),
-      highContrast: /vscode-high-contrast/.test(final ?? '')
+      light: kind === vscode.ColorThemeKind.Light || kind === vscode.ColorThemeKind.HighContrastLight,
+      highContrast: kind === vscode.ColorThemeKind.HighContrast || kind === vscode.ColorThemeKind.HighContrastLight
     };
   }
 

@@ -10,9 +10,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     async (): Promise<string> => __dirname.replace(/support$/, 'manifest.json'),
   ]) {
     try {
-      const f = await loc();
-      await fs.stat(f);
-      manifest ??= f;
+      manifest ??= await loc().then(f => fs.stat(f).then(() => f));
     } catch { }
   }
 
