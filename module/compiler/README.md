@@ -30,6 +30,7 @@ The compiler cli supports the following operations:
    *  `build` - Ensure the project is built and upto date
    *  `clean` - Clean out the output and compiler caches
    *  `info` - Retrieve the compiler information, if running
+   *  `event <log|progress|state>` - Watch events in realtime as newline delimited JSON
    *  `manifest --prod [output]` - Generate the project manifest
 In addition to the normal output, the compiler supports an environment variable `TRV_BUILD` that supports the following values: `debug`, `info`, `warn` or `none`.  This provides different level of logging during the build process which is helpful to diagnose any odd behaviors.  When invoking an unknown command (e.g. `<other>` from above), the default level is `warn`.  Otherwise the default logging level is `info`.
 
@@ -39,33 +40,34 @@ $ TRV_BUILD=debug trvc build
 
 2029-03-14T04:00:00.618Z info  [compiler-server] Starting server http://127.0.0.1:25539
 2029-03-14T04:00:00.837Z debug [compiler       ] Started, streaming logs
-2029-03-14T04:00:01.510Z debug [compiler-client] Starting watch for events of type "log"
-2029-03-14T04:00:02.450Z debug [event-stream   ] Started event stream
-2029-03-14T04:00:02.762Z debug [precompile     ] Started
-2029-03-14T04:00:02.947Z debug [compiler-server] Receive request { action: 'event', subAction: 'log' }
-2029-03-14T04:00:03.093Z debug [precompile     ] Skipped @travetto/manifest
-2029-03-14T04:00:04.003Z debug [precompile     ] Skipped @travetto/transformer
-2029-03-14T04:00:04.495Z debug [precompile     ] Skipped @travetto/compiler
-2029-03-14T04:00:05.066Z debug [precompile     ] Completed
-2029-03-14T04:00:05.307Z debug [manifest       ] Started
-2029-03-14T04:00:05.952Z debug [manifest       ] Completed
-2029-03-14T04:00:06.859Z debug [transformers   ] Started
-2029-03-14T04:00:07.720Z debug [transformers   ] Skipped @travetto/base
-2029-03-14T04:00:08.179Z debug [transformers   ] Skipped @travetto/cli
-2029-03-14T04:00:08.588Z debug [transformers   ] Skipped @travetto/manifest
-2029-03-14T04:00:09.493Z debug [transformers   ] Skipped @travetto/registry
-2029-03-14T04:00:10.395Z debug [transformers   ] Skipped @travetto/schema
-2029-03-14T04:00:10.407Z debug [transformers   ] Completed
-2029-03-14T04:00:10.799Z debug [delta          ] Started
-2029-03-14T04:00:11.013Z debug [delta          ] Completed
-2029-03-14T04:00:11.827Z debug [manifest       ] Started
-2029-03-14T04:00:11.894Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
-2029-03-14T04:00:12.133Z debug [manifest       ] Completed
-2029-03-14T04:00:13.123Z info  [compiler-server] State changed: compile-end
-2029-03-14T04:00:14.014Z debug [compiler-exec  ] Skipped
-2029-03-14T04:00:14.924Z debug [event-stream   ] Finished event stream
-2029-03-14T04:00:15.690Z info  [compiler-server] Closing down server
-2029-03-14T04:00:15.865Z debug [compiler-client] Stopping watch for events of type "log"
+2029-03-14T04:00:01.510Z debug [event-stream   ] Started event stream
+2029-03-14T04:00:02.450Z debug [precompile     ] Started
+2029-03-14T04:00:02.762Z debug [compiler-server] Receive request { action: 'info', subAction: undefined }
+2029-03-14T04:00:02.947Z debug [client.server  ] Starting watch for events of type "log"
+2029-03-14T04:00:03.093Z debug [compiler-server] Receive request { action: 'event', subAction: 'log' }
+2029-03-14T04:00:04.003Z debug [precompile     ] Skipped @travetto/manifest
+2029-03-14T04:00:04.495Z debug [precompile     ] Skipped @travetto/transformer
+2029-03-14T04:00:05.066Z debug [precompile     ] Skipped @travetto/compiler
+2029-03-14T04:00:05.307Z debug [precompile     ] Completed
+2029-03-14T04:00:05.952Z debug [manifest       ] Started
+2029-03-14T04:00:06.859Z debug [manifest       ] Completed
+2029-03-14T04:00:07.720Z debug [transformers   ] Started
+2029-03-14T04:00:08.179Z debug [transformers   ] Skipped @travetto/base
+2029-03-14T04:00:08.588Z debug [transformers   ] Skipped @travetto/cli
+2029-03-14T04:00:09.493Z debug [transformers   ] Skipped @travetto/manifest
+2029-03-14T04:00:10.395Z debug [transformers   ] Skipped @travetto/registry
+2029-03-14T04:00:10.407Z debug [transformers   ] Skipped @travetto/schema
+2029-03-14T04:00:10.799Z debug [transformers   ] Completed
+2029-03-14T04:00:11.013Z debug [delta          ] Started
+2029-03-14T04:00:11.827Z debug [delta          ] Completed
+2029-03-14T04:00:11.894Z debug [manifest       ] Started
+2029-03-14T04:00:12.133Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
+2029-03-14T04:00:13.123Z debug [manifest       ] Completed
+2029-03-14T04:00:14.014Z info  [compiler-server] State changed: compile-end
+2029-03-14T04:00:14.924Z debug [compiler-exec  ] Skipped
+2029-03-14T04:00:15.690Z debug [event-stream   ] Finished event stream
+2029-03-14T04:00:15.865Z info  [compiler-server] Closing down server
+2029-03-14T04:00:16.757Z debug [client.server  ] Stopping watch for events of type "log"
 ```
 
 **Terminal: Sample trv output with default log level**

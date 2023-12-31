@@ -23,9 +23,7 @@
       "compilerUrl": "http://127.0.0.1:26803",
       "withModules": {
         "@travetto/test": true,
-        "@travetto/cli": true,
-        "@travetto/doc": true,
-        "@travetto/command": true
+        "@travetto/doc": true
       }
     },
     "doc": {
