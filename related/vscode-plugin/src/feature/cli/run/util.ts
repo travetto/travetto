@@ -122,7 +122,7 @@ export class CliRunUtil {
     const output: RunChoice[] = [];
     for (const choice of choices) {
       choice.inputs = [];
-      const moduleFlag = choice.flags.find(x => x.name === 'module' && x.type === 'string');
+      const moduleFlag = choice.flags.find(x => x.type === 'module');
       if (moduleFlag?.required) {
         modules ??= await this.getModules();
         for (const module of modules.filter(m => m.local && m.children.has(choice.commandModule))) {

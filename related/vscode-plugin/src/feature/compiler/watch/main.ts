@@ -108,8 +108,6 @@ export class CompilerWatchFeature extends BaseFeature {
           connected = true;
 
           await Promise.race([this.#trackLog(), this.#trackState(), this.#trackProgress(ctrl.signal)]);
-        } else {
-          this.#log.debug('Server not running');
         }
       } catch (err) {
         this.#log.info('Failed to connect', `${err}`);

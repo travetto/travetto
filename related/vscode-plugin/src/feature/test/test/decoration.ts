@@ -91,7 +91,7 @@ export class Decorations {
       }
       body = `\t${messages.join('  \n\t')}  `;
       bodyFirst = `${title} - ${messages.join(', ')}`;
-    } else if (assertion.expected !== undefined && assertion.actual !== undefined) {
+    } else if (!(assertion.expected === undefined && assertion.actual === undefined)) {
       title = assertion.message
         .replace(/^.*should/, 'Should');
 

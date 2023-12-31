@@ -25,6 +25,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
     const addEnv = cfg.addEnv ?? cfg.fields?.includes('env');
     const { commandModule } = CliCommandRegistry.registerClass(target, {
       hidden: cfg.hidden,
+      runTarget: cfg.runTarget,
       preMain: async (cmd: CliCommandShape & { env?: string }) => {
         if (addEnv) {
           Env.TRV_ENV.set(cmd.env || Env.name);

@@ -1,4 +1,5 @@
 import timers from 'node:timers/promises';
+import { AssertionError } from 'node:assert';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Env, Util } from '@travetto/base';
@@ -140,10 +141,14 @@ export class TestExecutor {
     let error = await this.#executeTestMethod(test);
 
     if (error) {
-      if (error instanceof ExecutionError) { // Errors that are not expected
+      if (error instanceof AssertionError) {
+        // Pass
+      } else if (error instanceof ExecutionError) { // Errors that are not expected
         AssertCheck.checkUnhandled(test, error);
       } else if (test.shouldThrow) { // Errors that are
         error = AssertCheck.checkError(test.shouldThrow!, error); // Rewrite error
+      } else if (error instanceof Error) {
+        AssertCheck.checkUnhandled(test, error);
       }
     }
 

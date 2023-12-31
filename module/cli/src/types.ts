@@ -18,6 +18,7 @@ type ParsedInput = ParsedUnknown | ParsedFlag | ParsedArg;
 export type CliCommandConfig = {
   name: string;
   commandModule: string;
+  runTarget?: boolean;
   cls: ConcreteClass<CliCommandShape>;
   hidden?: boolean;
   preMain?: (cmd: CliCommandShape) => void | Promise<void>;
