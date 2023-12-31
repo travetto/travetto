@@ -25,8 +25,8 @@ export class CompilerClient {
   #url: string;
   #log?: CompilerLogger;
 
-  constructor(url: string | ManifestContext, log?: CompilerLogger) {
-    this.#url = (typeof url === 'string' ? url : url.build.compilerUrl).replace('localhost', '127.0.0.1');
+  constructor(ctx: ManifestContext, log?: CompilerLogger) {
+    this.#url = ctx.build.compilerUrl.replace('localhost', '127.0.0.1');
     this.#log = log;
   }
 

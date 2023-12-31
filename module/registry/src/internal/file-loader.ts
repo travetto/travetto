@@ -55,6 +55,8 @@ class $DynamicFileLoader {
     const handle = (err: Error): void => {
       if (err && (err.message ?? '').includes('Cannot find module')) { // Handle module reloading
         console.error('Cannot find module', { error: err });
+      } else {
+        throw err;
       }
     };
 

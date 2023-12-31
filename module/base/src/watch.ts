@@ -1,4 +1,4 @@
-import { RuntimeContext } from '@travetto/manifest';
+import { RuntimeIndex } from '@travetto/manifest';
 
 import { ExecUtil } from './exec';
 import { ShutdownManager } from './shutdown';
@@ -10,9 +10,8 @@ export async function watchCompiler<T extends WatchEvent>(handler: (ev: T) => un
   // Load at runtime
   const { CompilerClient } = await import('@travetto/compiler/support/server/client.js');
 
-  const client = new CompilerClient(RuntimeContext, (level, message, ...args) =>
-    // eslint-disable-next-line no-console
-    console[level](message, ...args)
+  const client = new CompilerClient(RuntimeIndex.manifest, (level, message, ...args) =>
+    console.error(level, message, ...args)
   );
 
   const ctrl = new AbortController();

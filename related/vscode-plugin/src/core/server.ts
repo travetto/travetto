@@ -51,6 +51,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
       ...opts,
       env: {
+        ...Env.TRV_DYNAMIC.export(true),
         ...Env.FORCE_COLOR.export(0),
         ...Env.NODE_DISABLE_COLORS.export(true),
         ...Env.NO_COLOR.export(true),
