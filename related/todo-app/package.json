@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "@travetto/pack": "^3.4.10",
+    "@travetto/compiler": "^3.4.3",
     "@travetto/rest-client": "^3.4.5"
   },
   "travetto": {

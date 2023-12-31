@@ -107,7 +107,7 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
 
     // Visit all direct dependencies and mark
     for (const { el } of mapping.values()) {
-      if (el.topLevel) {
+      if (main.child.has(el.name)) { // Direct descendant
         el.roleSet = new Set(el.pkg.travetto?.roles ?? []);
         if (!el.roleSet.size) {
           el.roleSet.add('std');

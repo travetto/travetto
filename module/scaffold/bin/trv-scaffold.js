@@ -13,5 +13,5 @@
     }
   }
   process.argv = args;
-  await import('@travetto/compiler/bin/trv.js');
+  await import('@travetto/cli/bin/trv.js');
 })();

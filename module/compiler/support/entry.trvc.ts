@@ -60,8 +60,10 @@ export const main = (ctx: ManifestContext) => {
           }
         });
       } else {
-        LogUtil.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete }));
+        const ctrl = new AbortController();
+        LogUtil.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete, signal: ctrl.signal }));
         await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
+        ctrl.abort();
       }
       return CommonUtil.moduleLoader(ctx);
     },

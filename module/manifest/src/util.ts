@@ -65,9 +65,9 @@ export class ManifestUtil {
    * Write manifest for a given context, return location
    */
   static writeManifest(manifest: ManifestRoot): Promise<string> {
-    return ManifestFileUtil.bufferedFileWrite(
-      path.resolve(manifest.workspace.path, manifest.build.outputFolder, 'node_modules', manifest.main.name, MANIFEST_FILE),
-      JSON.stringify(manifest)
+    return this.writeManifestToFile(
+      path.resolve(manifest.workspace.path, manifest.build.outputFolder, 'node_modules', manifest.main.name),
+      manifest
     );
   }
 
