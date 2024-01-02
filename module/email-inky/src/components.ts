@@ -28,9 +28,10 @@ export const If: CompFn<{ attr: string }> = () => EMPTY;
 export const Value: CompFn<{ attr: string, raw?: boolean }> = () => EMPTY;
 export const Unless: CompFn<{ attr: string }> = () => EMPTY;
 export const For: CompFn<{ attr: string }> = () => EMPTY;
+export const InkyTemplate: CompFn<{}> = () => EMPTY;
 
 export const c = {
-  Wrapper, Container,
+  Wrapper, Container, InkyTemplate,
   Column, Title, Summary, HLine, Row, Button,
   BlockGrid, Menu, Item, Center, Callout, Spacer,
   If, Unless, For, Value

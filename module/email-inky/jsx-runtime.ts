@@ -53,22 +53,22 @@ declare global {
   }
 }
 
+let createFrag: Function | undefined = undefined;
+
 export function createElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  type = (type === createFrag ? JSXFragmentType : type) as T;
   return { [JSXRuntimeTag]: { id: (id += 1) }, type, key: '', props };
 }
 
 export function createRootElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
-  const res: JSXElement<T, P> = { [JSXRuntimeTag]: { id: (id += 1) }, key: '', type, props };
-  // @ts-expect-error
-  res.wrap = async (): Promise<unknown> => {
-    const { wrap } = await import('@travetto/email-inky');
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return wrap(res as JSXElement);
-  };
+  const res: JSXElement<T, P> & { wrap?: Function } = createElement(type, props);
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+  res.wrap = (): Promise<unknown> => import('@travetto/email-inky').then(v => v.wrap(res as JSXElement));
   return res;
 }
 
@@ -82,3 +82,5 @@ export const Fragment = createFragment;
 export function isJSXElement(el: unknown): el is JSXElement {
   return el !== undefined && el !== null && typeof el === 'object' && JSXRuntimeTag in el;
 }
+
+createFrag = Fragment;

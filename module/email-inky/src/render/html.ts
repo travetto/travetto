@@ -76,6 +76,7 @@ export const Html: RenderProvider<RenderContext> = {
   div: std, span: stdInline, small: stdInline,
   a: async ({ recurse, props }) => `<a ${propsToStr(props)}>${await recurse()}</a>`,
 
+  InkyTemplate: c => c.recurse(),
   Title: async ({ recurse, el }) => `<title>${await recurse()}</title>`,
   Summary: async ({ recurse, el }) => `<span id="summary" style="${SUMMARY_STYLE}">${await recurse()}</span>`,
 
@@ -89,14 +90,18 @@ export const Html: RenderProvider<RenderContext> = {
     const sibs = getKids(parent).filter(x => isOfType(x, 'Column'));
     const colCount = sibs.length || 1;
 
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const pProps = parent.props as { columnVisited: boolean };
-    if (!pProps.columnVisited) {
-      pProps.columnVisited = true;
-      if (sibs.length) {
-        sibs[0].props.className = classStr(sibs[0].props.className ?? '', 'first');
-        sibs[sibs.length - 1].props.className = classStr(sibs[sibs.length - 1].props.className ?? '', 'last');
+    if (parent) {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      const pProps = parent?.props as { columnVisited: boolean };
+      if (!pProps.columnVisited) {
+        pProps.columnVisited = true;
+        if (sibs.length) {
+          sibs[0].props.className = classStr(sibs[0].props.className ?? '', 'first');
+          sibs[sibs.length - 1].props.className = classStr(sibs[sibs.length - 1].props.className ?? '', 'last');
+        }
       }
+    } else {
+      props.className = classStr(props.className ?? '', 'first', 'last');
     }
 
     // Check for sizes. If no attribute is provided, default to small-12. Divide evenly for large columns

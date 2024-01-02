@@ -34,7 +34,7 @@ export class InkyRenderer {
         final = out !== EMPTY_ELEMENT ? out : final;
       }
 
-      if (final.type === createFragment || final.type === JSXFragmentType) {
+      if (final.type === JSXFragmentType) {
         return this.#render(ctx, renderer, final.props.children ?? [], stack);
       }
 
@@ -87,7 +87,7 @@ export class InkyRenderer {
     isRoot = true
   ): Promise<string> {
     const ctx = new RenderContext(sourceLoc.file, sourceLoc.module);
-    const par: JSXElement = root.type === JSXFragmentType ? root : { props: { children: [root] }, type: JSXFragmentType, key: '' };
+    const par: JSXElement = root.type === JSXFragmentType ? root : createFragment({ children: [root] });
     const text = await this.#render(ctx, provider, par, []);
     return provider.finalize(text, ctx, isRoot);
   }

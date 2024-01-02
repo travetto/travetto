@@ -1,6 +1,6 @@
 import { ManifestContext, PackageUtil, path, RuntimeIndex } from '@travetto/manifest';
 
-import { isJSXElement, JSXElement, createFragment, JSXFragmentType } from '@travetto/doc/jsx-runtime';
+import { isJSXElement, JSXElement, JSXFragmentType } from '@travetto/doc/jsx-runtime';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../jsx';
 import { DocumentShape, RenderProvider, RenderState } from '../types';
@@ -61,7 +61,7 @@ export class DocRenderer {
         final = out !== EMPTY_ELEMENT ? out : final;
       }
 
-      if (final.type === createFragment || final.type === JSXFragmentType) {
+      if (final.type === JSXFragmentType) {
         return this.#render(renderer, final.props.children ?? []);
       }
 

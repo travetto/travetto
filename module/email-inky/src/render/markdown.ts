@@ -46,6 +46,7 @@ export const Markdown: RenderProvider<RenderContext> = {
   a: async ({ recurse, props }) => `\n[${await recurse()}](${(props as { href: string }).href})\n`,
   Button: async ({ recurse, props }) => `\n[${await recurse()}](${props.href})\n`,
 
+  InkyTemplate: visit,
   Callout: visit, Center: visit, Container: visit,
   Column: visit, Wrapper: visit, Row: visit, BlockGrid: visit,
 

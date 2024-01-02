@@ -86,7 +86,7 @@ export class Decorations {
         .map(x => typeof x === 'string' ? x : x.message);
 
       suffix = `(${title}) ${messages.join(', ')}`;
-      if (suffix.length > 60) {
+      if (suffix.length > 120) {
         suffix = title;
       }
       body = `\t${messages.join('  \n\t')}  `;
@@ -98,7 +98,7 @@ export class Decorations {
       const extra = title.split(/^Should(?:\s+[a-z]+)+/)[1];
       title = title.replace(extra, '');
 
-      if (suffix.length > 50) {
+      if (suffix.length > 120) {
         suffix = title;
       }
 

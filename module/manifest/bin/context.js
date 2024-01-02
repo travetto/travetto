@@ -106,7 +106,7 @@ async function $resolveModule(workspace, folder) {
   let mod;
   if (!folder && process.env.TRV_MODULE) {
     mod = process.env.TRV_MODULE;
-    if (/[.](t|j)s$/.test(mod)) { // Rewrite from file to module
+    if (/[.](t|j)sx?$/.test(mod)) { // Rewrite from file to module
       process.env.TRV_MODULE = mod = await $findPackage(path.dirname(mod))
         .then(v => v.name, () => '');
     }

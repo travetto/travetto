@@ -4,7 +4,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { RuntimeContext } from '@travetto/manifest';
-import { Container, If, Unless, Summary, Title, Value, InkyTemplate, unwrap } from '../__index__';
+import { Container, If, Unless, Summary, Title, Value, InkyTemplate, wrap } from '../__index__';
 
 @Suite('InkyTemplate')
 class ContainerTest {
@@ -20,7 +20,7 @@ class ContainerTest {
     </InkyTemplate>;
 
     const state = {
-      ...(await unwrap(input))!,
+      ...(await wrap(input))!,
       file: 'test',
       module: RuntimeContext.main.name,
     };
@@ -55,7 +55,7 @@ class ContainerTest {
     </InkyTemplate>;
 
     const state = {
-      ...(await unwrap(input))!,
+      ...(await wrap(input))!,
       file: 'test',
       module: RuntimeContext.main.name,
     };
@@ -78,7 +78,7 @@ class ContainerTest {
     </InkyTemplate>;
 
     const state = {
-      ...(await unwrap(input))!,
+      ...(await wrap(input))!,
       file: 'test',
       module: RuntimeContext.main.name,
     };
