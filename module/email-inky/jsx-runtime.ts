@@ -68,7 +68,7 @@ export function createRootElement<T extends string | ConcreteClass | JSXComponen
 ): JSXElement<T, P> {
   const res: JSXElement<T, P> & { wrap?: Function } = createElement(type, props);
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  res.wrap = (): Promise<unknown> => import('@travetto/email-inky').then(v => v.wrap(res as JSXElement));
+  res.wrap = (): Promise<unknown> => import('@travetto/email-inky/src/wrapper.js').then(v => v.wrap(res as JSXElement));
   return res;
 }
 
