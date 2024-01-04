@@ -31,6 +31,8 @@ export class LogUtil {
 
     if (this.isLevelActive('info') && process.stdout.isTTY) {
       this.logProgress = this.#logProgressEvent;
+    } else {
+      this.logProgress = undefined;
     }
   }
 

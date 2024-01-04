@@ -47,6 +47,11 @@ export const main = (ctx: ManifestContext) => {
 
     /** Main entry point for compilation */
     async compile(op: CompilerOp, setupOnly = false): Promise<(mod: string) => Promise<unknown>> {
+      // Short circuit if we can
+      if (op === 'run' && await client.isWatching()) {
+        return CommonUtil.moduleLoader(ctx);
+      }
+
       LogUtil.initLogs(ctx, op === 'run' ? 'error' : 'info');
 
       const server = await new CompilerServer(ctx, op).listen();

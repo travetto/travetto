@@ -44,6 +44,10 @@ export class CompilerClient {
     return fetch(`${this.#url}/info`).then(v => v.json(), () => undefined) as Promise<CompilerServerInfo>;
   }
 
+  async isWatching(): Promise<boolean> {
+    return (await this.info())?.state === 'watch-start';
+  }
+
   /** Clean the server */
   clean(): Promise<boolean> {
     return fetch(`${this.#url}/clean`).then(v => v.ok, () => false);
