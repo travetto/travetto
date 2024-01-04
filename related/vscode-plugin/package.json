@@ -1,6 +1,6 @@
 {
   "name": "travetto-plugin",
-  "version": "3.4.2",
+  "version": "4.0.0",
   "displayName": "Travetto Plugin",
   "description": "VS Code plugin for interacting with the Travetto framework ",
   "keywords": [
@@ -33,18 +33,18 @@
     "start": "npx trvc start"
   },
   "devDependencies": {
-    "@travetto/cli": "^3.4.0",
-    "@travetto/compiler": "^3.4.0",
-    "@travetto/doc": "^3.4.0",
-    "@travetto/pack": "^3.4.0",
-    "@travetto/log": "^3.4.0",
-    "@travetto/test": "^3.4.0",
+    "@travetto/cli": "^4.0.0-rc.0",
+    "@travetto/compiler": "^4.0.0-rc.0",
+    "@travetto/doc": "^4.0.0-rc.0",
+    "@travetto/pack": "^4.0.0-rc.0",
+    "@travetto/log": "^4.0.0-rc.0",
+    "@travetto/test": "^4.0.0-rc.0",
     "@types/node": "^20.8.10",
     "@types/vscode": "^1.83.1"
   },
   "dependencies": {
-    "@travetto/base": "^3.4.0-rc.6",
-    "@travetto/registry": "^3.4.0-rc.0"
+    "@travetto/base": "^4.0.0-rc.0",
+    "@travetto/registry": "^4.0.0-rc.0"
   },
   "travetto": {
     "displayName": "Travetto Plugin",
