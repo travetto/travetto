@@ -33,7 +33,7 @@ export class HelpUtil {
 
     const usage: string[] = [cliTpl`${{ title: 'Usage:' }} ${{ param: commandName }} ${{ input: '[options]' }}`];
     for (const field of args) {
-      const type = field.type === 'string' && field.choices && field.choices.length <= 5 ? field.choices?.join('|') : field.type;
+      const type = field.type === 'string' && field.choices && field.choices.length <= 7 ? field.choices?.join('|') : field.type;
       const arg = `${field.name}${field.array ? '...' : ''}:${type}`;
       usage.push(cliTpl`${{ input: field.required ? `<${arg}>` : `[${arg}]` }}`);
     }
