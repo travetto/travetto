@@ -17,7 +17,7 @@ export class PackageManager {
    */
   static isPublished(ctx: ManifestContext, mod: IndexedModule, opts: ExecutionOptions): ExecutionState {
     let args: string[];
-    switch (ctx.packageManager) {
+    switch (ctx.workspace.manager) {
       case 'npm':
         args = ['show', `${mod.name}@${mod.version}`, 'version', '--json'];
         break;
@@ -25,14 +25,14 @@ export class PackageManager {
         args = ['info', `${mod.name}@${mod.version}`, 'dist.integrity', '--json'];
         break;
     }
-    return ExecUtil.spawn(ctx.packageManager, args, opts);
+    return ExecUtil.spawn(ctx.workspace.manager, args, opts);
   }
 
   /**
    * Validate published result
    */
   static validatePublishedResult(ctx: ManifestContext, mod: IndexedModule, result: ExecutionResult): boolean {
-    switch (ctx.packageManager) {
+    switch (ctx.workspace.manager) {
       case 'npm': {
         if (!result.valid && !result.stderr.includes('E404')) {
           throw new Error(result.stderr);
@@ -54,13 +54,13 @@ export class PackageManager {
   static async version(ctx: ManifestContext, modules: IndexedModule[], level: SemverLevel, preid?: string): Promise<void> {
     const mods = modules.flatMap(m => ['-w', m.sourceFolder]);
     let args: string[];
-    switch (ctx.packageManager) {
+    switch (ctx.workspace.manager) {
       case 'npm':
       case 'yarn':
         args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...mods];
         break;
     }
-    await ExecUtil.spawn(ctx.packageManager, args, { stdio: 'inherit' }).result;
+    await ExecUtil.spawn(ctx.workspace.manager, args, { stdio: 'inherit' }).result;
   }
 
   /**
@@ -68,13 +68,13 @@ export class PackageManager {
    */
   static dryRunPackaging(ctx: ManifestContext, opts: ExecutionOptions): ExecutionState {
     let args: string[];
-    switch (ctx.packageManager) {
+    switch (ctx.workspace.manager) {
       case 'npm':
       case 'yarn':
         args = ['pack', '--dry-run'];
         break;
     }
-    return ExecUtil.spawn(ctx.packageManager, args, opts);
+    return ExecUtil.spawn(ctx.workspace.manager, args, opts);
   }
 
   /**
@@ -87,13 +87,13 @@ export class PackageManager {
 
     const versionTag = mod.version.match(/^.*-(rc|alpha|beta|next)[.]\d+/)?.[1] ?? 'latest';
     let args: string[];
-    switch (ctx.packageManager) {
+    switch (ctx.workspace.manager) {
       case 'npm':
       case 'yarn':
         args = ['publish', '--tag', versionTag, '--access', 'public'];
         break;
     }
-    return ExecUtil.spawn(ctx.packageManager, args, opts);
+    return ExecUtil.spawn(ctx.workspace.manager, args, opts);
   }
 
   /**

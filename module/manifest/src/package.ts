@@ -177,9 +177,9 @@ export class PackageUtil {
   /**
    * Get an install command for a given npm module
    */
-  static getInstallCommand(ctx: { packageManager: NodePackageManager }, pkg: string, prod = false): string {
+  static getInstallCommand(ctx: { workspace: { manager: NodePackageManager } }, pkg: string, prod = false): string {
     let install: string;
-    switch (ctx.packageManager) {
+    switch (ctx.workspace.manager) {
       case 'npm': install = `npm i ${prod ? '' : '--save-dev '}${pkg}`; break;
       case 'yarn': install = `yarn add ${prod ? '' : '--dev '}${pkg}`; break;
     }
