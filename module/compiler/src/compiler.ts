@@ -185,6 +185,7 @@ export class Compiler {
 
     // No longer listen to disconnect
     process.removeAllListeners('disconnect');
+    process.removeAllListeners('message');
 
     if (this.#ctrl.signal.aborted) {
       process.exitCode = 2;
