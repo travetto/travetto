@@ -1,6 +1,5 @@
 import fs from 'node:fs/promises';
 
-import { ExecUtil } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, ParsedState } from '@travetto/cli';
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Ignore } from '@travetto/schema';
@@ -32,13 +31,20 @@ export class MainCommand implements CliCommandShape {
   }
 
   async main(fileOrImport: string, args: string[] = []): Promise<void> {
+    let res: unknown;
     try {
       const imp = await this.#getImport(fileOrImport);
       const mod = await import(imp!);
-
-      ExecUtil.sendResponse(await mod.main(...args, ...this._parsed.unknown));
+      res = await mod.main(...args, ...this._parsed.unknown);
     } catch (err) {
-      ExecUtil.sendResponse(err, true);
+      res = err;
+      process.exitCode = Math.max(process.exitCode ?? 1, 1);
+    }
+
+    if (res !== undefined) {
+      if (process.connected) { process.send?.(res); }
+      const payload = typeof res === 'string' ? res : (res instanceof Error ? res.stack : JSON.stringify(res));
+      process[process.exitCode ? 'stderr' : 'stdout'].write(`${payload}\n`);
     }
   }
 }

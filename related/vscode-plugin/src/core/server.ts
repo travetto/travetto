@@ -1,4 +1,4 @@
-import { Env, ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
+import { Env, ExecUtil, ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
 import type { } from '@travetto/log';
 
 import { Log } from './log';
@@ -75,7 +75,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       };
       state.process.on('message', readyHandler);
     }).catch(() => {
-      state.process.kill('SIGKILL');
+      ExecUtil.kill(state.process);
       this.#log.info('Service Timed out');
       throw new Error('Timeout');
     });
@@ -119,7 +119,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       const proc = this.#state.process;
       this.#state = undefined;
       const waitForKill = new Promise<void>(res => proc.on('exit', res));
-      proc.kill('SIGKILL');
+      ExecUtil.kill(proc);
       await waitForKill;
     }
   }

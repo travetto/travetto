@@ -53,7 +53,7 @@ export class CompilerRunner {
         .on('message', msg => isEvent(msg) && queue.add(msg))
         .on('exit', () => queue.close());
 
-      kill = (): unknown => proc.kill('SIGINT');
+      kill = (): unknown => (proc.connected ? proc.send('shutdown') : proc.kill());
 
       process.once('SIGINT', kill);
       signal.addEventListener('abort', kill);

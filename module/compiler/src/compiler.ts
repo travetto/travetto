@@ -44,7 +44,9 @@ export class Compiler {
     this.#ctrl = new AbortController();
     this.#signal = this.#ctrl.signal;
     setMaxListeners(1000, this.#signal);
-    process.once('disconnect', () => this.#ctrl.abort()).once('SIGINT', () => this.#ctrl.abort());
+    process
+      .once('disconnect', () => this.#ctrl.abort())
+      .on('message', ev => (ev === 'shutdown') && this.#ctrl.abort());
   }
 
   /**

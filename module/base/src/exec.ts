@@ -1,7 +1,6 @@
 import rl from 'node:readline';
 import { ChildProcess, spawn, SpawnOptions } from 'node:child_process';
 import { Readable } from 'node:stream';
-import { parentPort, SHARE_ENV, Worker, WorkerOptions } from 'node:worker_threads';
 
 import { path } from '@travetto/manifest';
 
@@ -37,15 +36,6 @@ export interface ExecutionResult {
    * Whether or not the execution was killed
    */
   killed?: boolean;
-}
-
-/**
- * Result of a worker delegation
- */
-export interface WorkerResult<T> {
-  worker: Worker;
-  message: Promise<T>;
-  result: Promise<number>;
 }
 
 /**
@@ -208,7 +198,7 @@ export class ExecUtil {
 
       if (timeout) {
         timer = setTimeout(async x => {
-          proc.kill('SIGKILL');
+          this.kill(proc);
           finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
         }, timeout);
       }
@@ -230,17 +220,6 @@ export class ExecUtil {
   }
 
   /**
-   * Run a command relative to the current node executable.  Mimics how node's
-   * fork operation is just spawn with the command set to `process.argv0`
-   * @param cmd The file to run
-   * @param args The command line arguments to pass
-   * @param options The enhancement options
-   */
-  static fork(file: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
-    return this.spawn(process.argv0, [path.resolve(file), ...args], options);
-  }
-
-  /**
    * Spawn with automatic restart support
    * @param cmd The command to run
    * @param args The command line arguments to pass
@@ -250,7 +229,7 @@ export class ExecUtil {
     const maxRetries = options.maxRetriesPerMinute ?? 5;
     const restarts: number[] = [];
 
-    this.exitOnDisconnect();
+    process.once('disconnect', () => ExecUtil.kill(process));
 
     for (; ;) {
       const state = this.spawn(cmd, args, { outputMode: 'raw', ...options, catchAsResult: true });
@@ -283,93 +262,15 @@ export class ExecUtil {
   }
 
   /**
-   * Run a file as worker thread
-   * @param file The file to run, if starts with @, will be resolved as a module
-   * @param args The arguments to pass in
-   * @param options The worker options
-   */
-  static worker<T = unknown>(file: string, args: string[] = [], options: WorkerOptions & { minimal?: boolean } = {}): WorkerResult<T> {
-    const env = {
-      ...process.env,
-      ...((options.env !== SHARE_ENV ? options.env : {}) || {}),
-    };
-    const worker = new Worker(path.resolve(file), {
-      stderr: true,
-      stdout: true,
-      stdin: false,
-      ...options,
-      env,
-      argv: args
-    });
-
-    const stderr: Buffer[] = [];
-    const stdout: Buffer[] = [];
-    worker.stdout!.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
-    worker.stderr!.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
-
-    const result = new Promise<number>((res, rej) =>
-      worker
-        .on('error', e => rej(e))
-        .on('exit', c => {
-          if (c > 0) {
-            const msg = Buffer.concat(stderr).toString();
-            if (!options.minimal) {
-              console.warn(msg);
-            } else {
-              rej(msg);
-            }
-          } else {
-            res(c);
-          }
-        })
-    );
-
-    const message = new Promise<T>((res, rej) => {
-      worker.once('message', d => result.then(() => {
-        if (d && 'stack' in d && 'message' in d) {
-          const err = new Error(d['message']);
-          err.stack = d.stack;
-          rej(err);
-        } else {
-          res(d);
-        }
-      }));
-      result.catch(rej);
-    });
-
-    return { worker, message, result };
-  }
-
-  /**
    * Kill a spawned process
    * @param proc The process to kill
    */
-  static kill(proc: { kill(sig?: string | number): void }): void {
-    if (process.platform === 'win32') {
-      proc.kill();
-    } else {
-      proc.kill('SIGTERM');
+  static kill(procOrPid?: { pid?: number } | number): void {
+    const args = process.platform === 'win32' ? [] : ['SIGTERM'];
+    if (typeof procOrPid === 'number') {
+      process.kill(procOrPid, ...args);
+    } else if (procOrPid?.pid) {
+      process.kill(procOrPid.pid, ...args);
     }
-  }
-
-  /**
-   * Send response to caller
-   */
-  static sendResponse(res: unknown, failure?: boolean): void {
-    parentPort?.postMessage(res);
-    if (process.connected && process.send) { process.send(res); }
-    if (res !== undefined) {
-      const msg = typeof res === 'string' ? res : (res instanceof Error ? res.stack : JSON.stringify(res));
-      process[!failure ? 'stdout' : 'stderr'].write(`${msg}\n`);
-    }
-    process.exitCode ??= !failure ? 0 : 1;
-  }
-
-  /**
-   * Exit child process on disconnect, in ipc setting
-   */
-  static exitOnDisconnect(): void {
-    // Shutdown when ipc bridge is closed
-    process.once('disconnect', () => process.kill(process.pid, 'SIGTERM'));
   }
 }

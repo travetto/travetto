@@ -108,7 +108,7 @@ export class EditorState {
       }
     });
 
-    ExecUtil.exitOnDisconnect();
+    process.once('disconnect', () => ExecUtil.kill(process));
     process.send?.('ready');
 
     for await (const f of EmailCompiler.watchCompile()) {

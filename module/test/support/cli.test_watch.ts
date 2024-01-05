@@ -22,7 +22,7 @@ export class TestWatcherCommand {
       return;
     }
 
-    ExecUtil.exitOnDisconnect();
+    process.once('disconnect', () => ExecUtil.kill(process));
 
     try {
       const { TestWatcher } = await import('../src/execute/watcher.js');

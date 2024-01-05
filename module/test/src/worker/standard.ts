@@ -39,9 +39,9 @@ export function buildStandardTestManager(consumer: TestConsumer): Worker<string>
       const cwd = RuntimeIndex.getModule(module)!.sourcePath;
 
       const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
-        ExecUtil.fork(
-          RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'),
-          ['test:child'],
+        ExecUtil.spawn(
+          process.argv0,
+          [RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), 'test:child'],
           {
             cwd,
             env: {

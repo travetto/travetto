@@ -1,4 +1,4 @@
-import { ExecutionResult, ExecutionOptions, ExecutionState, Env, Util } from '@travetto/base';
+import { ExecutionResult, ExecutionOptions, ExecutionState, Env, Util, ExecUtil } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
@@ -106,7 +106,7 @@ export class RepoExecUtil {
         }
         return config.progressMessage?.(mod) ?? mod.name;
       } finally {
-        processes.get(mod!)?.process.kill('SIGKILL');
+        ExecUtil.kill(processes.get(mod!)?.process);
       }
     }, mods, mods.length, { max: workerCount, min: workerCount });
 

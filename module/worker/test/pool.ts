@@ -25,7 +25,7 @@ export class PoolExecTest {
 
     await WorkPool.run(
       () => WorkUtil.spawnedWorker<{ data: string }, string>(
-        () => ExecUtil.fork(launcher, [], { cwd: RuntimeIndex.outputRoot }),
+        () => ExecUtil.spawn(process.argv0, [launcher], { cwd: RuntimeIndex.outputRoot }),
         ch => ch.once('ready'),
         async (channel, inp: string) => {
           const res = channel.once('response');

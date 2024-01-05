@@ -79,7 +79,6 @@ export class CompilerClient {
       signal = ctrl.signal;
     }
 
-
     const { iteration } = info;
 
     for (; ;) {
