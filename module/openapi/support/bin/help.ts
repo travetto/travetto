@@ -1,9 +1,10 @@
 import fs from 'node:fs/promises';
 
+import { ExecUtil } from '@travetto/base';
 import { ManifestFileUtil, path, RuntimeIndex } from '@travetto/manifest';
 import { cliTpl } from '@travetto/cli';
+
 import { OpenApiClientPresets } from './presets';
-import { ExecUtil } from '@travetto/base';
 
 /**
  * Help utility for openapi client command
