@@ -36,7 +36,7 @@ export class RestJWTConfig {
   header = 'Authorization';
   cookie = 'trv.auth';
   signingKey?: string;
-  headerPrefix = 'Bearer ';
+  headerPrefix = 'Bearer';
   maxAge: string | number = '1h';
   rollingRenew: boolean = false;
 
@@ -140,7 +140,7 @@ export class JWTPrincipalEncoder implements PrincipalEncoder {
         res.cookies.set(this.config.cookie, token, { expires: p.expiresAt });
       }
       if (this.config.headerMode) {
-        res.setHeader(this.config.header, `${this.config.headerPrefix}${token}`);
+        res.setHeader(this.config.header, [this.config.headerPrefix, token].join(' ').trimStart());
       }
     } else if (this.config.cookieMode) {
       res.cookies.set(this.config.cookie, '', { expires: new Date(Date.now() - 1000 * 60 * 60) }); // Clear out cookie

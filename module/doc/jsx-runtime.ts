@@ -34,15 +34,20 @@ declare global {
   }
 }
 
+let createFrag: Function | undefined = undefined;
+
 export function createElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
+  type = (type === createFrag ? JSXFragmentType : type) as T;
   return { [JSXRuntimeTag]: { id: (id += 1) }, type, key: '', props };
 }
 
 export function createFragment<P extends {}>(props: P & JSXProps): JSXElement<typeof JSXFragmentType, P> {
   return createElement(JSXFragmentType, props);
 }
+
+createFrag = createFragment;
 
 export const jsx = createElement;
 export const jsxs = createElement;

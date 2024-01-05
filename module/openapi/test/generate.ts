@@ -183,13 +183,13 @@ export class GenerateSuite {
       content: {
         'application/json': {
           schema: {
-            $ref: '#/components/schemas/who__66424'
+            $ref: '#/components/schemas/who__90998'
           }
         }
       },
       description: '__type'
     });
-    assert.deepStrictEqual(config.components.schemas['who__66424'], {
+    assert.deepStrictEqual(config.components.schemas['who__90998'], {
       description: '__type',
       example: undefined,
       properties: {

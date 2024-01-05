@@ -26,7 +26,7 @@ The versioning operation will find all the changed modules (and the modules that
 ```bash
 $ trv repo:version -h
 
-Usage: repo:version [options] <level:string> [prefix:string]
+Usage: repo:version [options] <level:major|minor|patch|premajor|preminor|prepatch|prerelease> [prefix:string]
 
 Options:
   --mode <all|changed|direct>  The mode for versioning

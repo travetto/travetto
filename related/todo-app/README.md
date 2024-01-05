@@ -366,7 +366,10 @@ npx trv run:rest
         output: '<workspace-root>/.trv/tool/node_modules/@travetto/todo-app/output.log',
         writeSync: false
       },
-      FileModelConfig: { folder: '/tmp/<temp-folder>', namespace: '.' },
+      FileModelConfig: {
+        folder: '/tmp/<temp-folder>',
+        namespace: '.'
+      },
       JSONLogFormatterConfig: {},
       LineLogFormatterConfig: {
         plain: false,

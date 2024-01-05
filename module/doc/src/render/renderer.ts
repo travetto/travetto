@@ -55,7 +55,7 @@ export class DocRenderer {
     } else if (isJSXElement(node)) {
       let final: JSXElement = node;
       // Render simple element if needed
-      if (typeof node.type === 'function') {
+      if (typeof node.type === 'function' && node.type !== JSXFragmentType) {
         // @ts-expect-error
         const out = node.type(node.props);
         final = out !== EMPTY_ELEMENT ? out : final;
