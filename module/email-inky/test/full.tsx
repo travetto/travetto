@@ -19,8 +19,9 @@ class ContainerTest {
       </Container>
     </InkyTemplate>;
 
+    const wrapper = wrap(input);
+
     const state = {
-      ...(await wrap(input))!,
       file: 'test',
       module: RuntimeContext.main.name,
     };
@@ -28,12 +29,12 @@ class ContainerTest {
     assert(input);
 
 
-    assert((await state.subject(state)).trim() === 'My Title');
+    assert((await wrapper.subject(state)).trim() === 'My Title');
 
-    assert((await state.html(state)).includes('My Summary'));
+    assert((await wrapper.html(state)).includes('My Summary'));
 
-    assert(/<head>.*<title>My Title<\/title>.*?<\/head>/gsm.test(((await state.html(state)))));
-    assert(/<body>\s*<span id="summary".*?My Summary<\/span>/gsm.test(((await state.html(state)))));
+    assert(/<head>.*<title>My Title<\/title>.*?<\/head>/gsm.test(((await wrapper.html(state)))));
+    assert(/<body>\s*<span id="summary".*?My Summary<\/span>/gsm.test(((await wrapper.html(state)))));
   }
 
   @Test('works when rendering an inky template with conditionals')
@@ -54,15 +55,16 @@ class ContainerTest {
       </Container>
     </InkyTemplate>;
 
+    const wrapper = wrap(input);
+
     const state = {
-      ...(await wrap(input))!,
       file: 'test',
       module: RuntimeContext.main.name,
     };
 
     assert(state);
 
-    const output = await state.html(state);
+    const output = await wrapper.html(state);
     assert(/[{]{2}#paid[}]{2}\s*Payment!\s*[{]{2}\/paid[}]{2}/gsm.test(output));
     assert(/[{]{2}[^]unpaid[}]{2}\s*No Payment!\s*[{]{2}\/unpaid[}]{2}/gsm.test(output));
     assert(/[{]{2}amount[}]{2}/gsm.test(output));
@@ -77,13 +79,14 @@ class ContainerTest {
       <Container style={'background-image: url(/green.gif)'}>      </Container>
     </InkyTemplate>;
 
+    const wrapper = wrap(input);
+
     const state = {
-      ...(await wrap(input))!,
       file: 'test',
       module: RuntimeContext.main.name,
     };
 
-    const output = await state.html(state);
+    const output = await wrapper.html(state);
     assert(/background-image: url[(][/]green.gif[)]/gsm.test(output));
   }
 }

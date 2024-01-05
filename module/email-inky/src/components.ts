@@ -37,6 +37,10 @@ export const c = {
   If, Unless, For, Value
 } as const;
 
+for (const key of TypedObject.keys(c)) {
+  Object.defineProperty(c[key], 'toString', { value: () => `<${key} />` });
+}
+
 type C = typeof c;
 
 // @ts-expect-error

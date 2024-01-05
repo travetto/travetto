@@ -13,6 +13,7 @@ export const Subject: RenderProvider<RenderContext> = {
   Unless: async ({ recurse, props }) => `{{^${props.attr}}}${await recurse()}{{/${props.attr}}}`,
   Value: async ({ props }) => `{{${props.attr}}}`,
   Title: visit,
+  InkyTemplate: visit,
 
   title: visit, span: visit, strong: visit, center: visit, em: visit, p: visit, small: visit,
 
