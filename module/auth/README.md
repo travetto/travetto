@@ -127,12 +127,6 @@ const pbkdf2 = util.promisify(crypto.pbkdf2);
  */
 export class AuthUtil {
   /**
-   * Build matcher for permissions in allow/deny fashion
-   *
-   * @param permissions Permissions to build matcher for
-   */
-  static permissionMatcher(permissions: string[]): (perms: Set<string>) => boolean;
-  /**
    * Generate a hash for a given value
    *
    * @param value Value to hash
