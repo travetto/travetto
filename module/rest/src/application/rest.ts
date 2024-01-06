@@ -1,5 +1,5 @@
 import { RuntimeContext } from '@travetto/manifest';
-import { Class, AppError, Util, Env } from '@travetto/base';
+import { Class, AppError, Env } from '@travetto/base';
 import { DependencyRegistry, Inject, Injectable } from '@travetto/di';
 import { RetargettingProxy, ChangeEvent } from '@travetto/registry';
 import { ConfigurationService } from '@travetto/config';
@@ -11,6 +11,7 @@ import { RestInterceptor } from '../interceptor/types';
 import { ControllerRegistry } from '../registry/controller';
 import { GlobalRoute, RestInterceptorTarget } from '../internal/types';
 import { RestServer } from './server';
+import { RestCommonUtil } from '../util/common';
 
 /**
  * The rest application
@@ -86,7 +87,7 @@ export class RestApplication<T = unknown>  {
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
     const ordered = instances.map(x => ({ key: x.constructor as Class, before: x.before, after: x.after, target: x }));
-    const sorted = Util.ordered(ordered).map(x => x.target);
+    const sorted = RestCommonUtil.ordered(ordered).map(x => x.target);
 
     console.debug('Sorting interceptors', { count: sorted.length, names: sorted.map(x => x.constructor.name) });
     return sorted;

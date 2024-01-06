@@ -1,11 +1,19 @@
 import { AppError } from '@travetto/base';
-import { RestInterceptor, ManagedInterceptorConfig, FilterContext } from '@travetto/rest';
+import { RestCommonUtil, RestInterceptor, ManagedInterceptorConfig, FilterContext } from '@travetto/rest';
 import { Injectable, Inject } from '@travetto/di';
 import { Config } from '@travetto/config';
-import { AuthUtil } from '@travetto/auth';
 import { Ignore } from '@travetto/schema';
 
 import { AuthReadWriteInterceptor } from './read-write';
+
+function matchPermissionSet(rule: string[], perms: Set<string>): boolean {
+  for (const el of rule) {
+    if (!perms.has(el)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 @Config('rest.auth.verify')
 export class RestAuthVerifyConfig extends ManagedInterceptorConfig {
@@ -43,7 +51,10 @@ export class AuthVerifyInterceptor implements RestInterceptor<RestAuthVerifyConf
   }
 
   finalizeConfig(config: RestAuthVerifyConfig): RestAuthVerifyConfig {
-    config.matcher = AuthUtil.permissionMatcher(config.permissions ?? []);
+    config.matcher = RestCommonUtil.allowDenyMatcher<string[], [Set<string>]>(config.permissions ?? [],
+      x => x.split('|'),
+      matchPermissionSet,
+    );
     return config;
   }
 
