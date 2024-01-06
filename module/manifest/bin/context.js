@@ -5,7 +5,7 @@
  * @typedef {Pkg & { mono: boolean, manager: 'yarn'|'npm', resolve: (file:string) => string}} Workspace
  * @typedef {import('../src/types').ManifestContext} ManifestContext
  */
-import fs from 'node:fs/promises';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 
@@ -17,24 +17,26 @@ const OUTPUT_FOLDER = '.trv/output';
 /**
  * Read package.json or return undefined if missing
  * @param {string} dir
- * @returns {Promise<Pkg|undefined>}
+ * @returns {Pkg|undefined}
  */
-async function $readPackage(dir) {
+function $readPackage(dir) {
   dir = dir.endsWith('.json') ? path.dirname(dir) : dir;
-  return await fs.readFile(path.resolve(dir, 'package.json'), 'utf8')
-    .then(v => ({ ...JSON.parse(v), path: path.resolve(dir) }), () => undefined);
+  try {
+    const v = readFileSync(path.resolve(dir, 'package.json'), 'utf8');
+    return ({ ...JSON.parse(v), path: path.resolve(dir) });
+  } catch { }
 }
 
 /**
  * Find package.json for a given folder
  * @param {string} dir
- * @return {Promise<Pkg>}
+ * @return {Pkg}
  */
-async function $findPackage(dir) {
+function $findPackage(dir) {
   let prev;
   let pkg, curr = path.resolve(dir);
   while (!pkg && curr !== prev) {
-    pkg = await $readPackage(curr);
+    pkg = $readPackage(curr);
     [prev, curr] = [curr, path.dirname(curr)];
   }
   if (!pkg) {
@@ -46,9 +48,9 @@ async function $findPackage(dir) {
 
 /**
  * Get workspace root
- * @return {Promise<Workspace>}
+ * @return {Workspace}
  */
-async function $resolveWorkspace(base = process.cwd()) {
+function $resolveWorkspace(base = process.cwd()) {
   if (base in WS_ROOT) { return WS_ROOT[base]; }
   let folder = base;
   let prev;
@@ -57,10 +59,10 @@ async function $resolveWorkspace(base = process.cwd()) {
 
   while (prev !== folder) {
     [prev, prevPkg] = [folder, pkg];
-    pkg = await $readPackage(folder) ?? pkg;
+    pkg = $readPackage(folder) ?? pkg;
     if (
       (pkg && (!!pkg.workspaces || !!pkg.travetto?.build?.isolated)) || // if we have a monorepo root, or we are isolated
-      await fs.stat(path.resolve(folder, '.git')).catch(() => { }) // we made it to the source repo root
+      existsSync(path.resolve(folder, '.git')) // we made it to the source repo root
     ) {
       break;
     }
@@ -75,7 +77,7 @@ async function $resolveWorkspace(base = process.cwd()) {
     ...pkg,
     name: pkg.name ?? 'untitled',
     type: pkg.type,
-    manager: await fs.stat(path.resolve(pkg.path, 'yarn.lock')).catch(() => { }) ? 'yarn' : 'npm',
+    manager: existsSync(path.resolve(pkg.path, 'yarn.lock')) ? 'yarn' : 'npm',
     resolve: createRequire(`${pkg.path}/node_modules`).resolve.bind(null),
     mono: !!pkg.workspaces || (!pkg.travetto?.build?.isolated && !!prevPkg)  // Workspaces or nested projects
   };
@@ -85,14 +87,14 @@ async function $resolveWorkspace(base = process.cwd()) {
  * Get Compiler url
  * @param {Workspace} ws
  */
-async function $getCompilerUrl(ws) {
+function $getCompilerUrl(ws) {
   const file = path.resolve(ws.path, TOOL_FOLDER, 'build.compilerUrl');
   // eslint-disable-next-line no-bitwise
   const port = (Math.abs([...file].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
   const out = `http://localhost:${port}`;
-  try { await fs.stat(file); } catch {
-    await fs.mkdir(path.dirname(file), { recursive: true });
-    await fs.writeFile(file, out, 'utf8');
+  if (!existsSync(file)) {
+    mkdirSync(path.dirname(file), { recursive: true });
+    writeFileSync(file, out, 'utf8');
   }
   return out;
 }
@@ -102,13 +104,16 @@ async function $getCompilerUrl(ws) {
  * @param {Workspace} workspace
  * @param {string|undefined} folder
  */
-async function $resolveModule(workspace, folder) {
+function $resolveModule(workspace, folder) {
   let mod;
   if (!folder && process.env.TRV_MODULE) {
     mod = process.env.TRV_MODULE;
     if (/[.](t|j)sx?$/.test(mod)) { // Rewrite from file to module
-      process.env.TRV_MODULE = mod = await $findPackage(path.dirname(mod))
-        .then(v => v.name, () => '');
+      try {
+        process.env.TRV_MODULE = mod = $findPackage(path.dirname(mod)).name;
+      } catch {
+        process.env.TRV_MODULE = mod = '';
+      }
     }
   }
 
@@ -116,7 +121,7 @@ async function $resolveModule(workspace, folder) {
     try {
       folder = path.dirname(workspace.resolve(`${mod}/package.json`));
     } catch {
-      const workspacePkg = await $readPackage(workspace.path);
+      const workspacePkg = $readPackage(workspace.path);
       if (workspacePkg?.name === mod) {
         folder = workspace.path;
       } else {
@@ -131,11 +136,11 @@ async function $resolveModule(workspace, folder) {
 /**
  * Gets build context
  * @param {string} [folder]
- * @return {Promise<ManifestContext>}
+ * @return {ManifestContext}
  */
-export async function getManifestContext(folder) {
-  const workspace = await $resolveWorkspace(folder);
-  const mod = await $resolveModule(workspace, folder);
+export function getManifestContext(folder) {
+  const workspace = $resolveWorkspace(folder);
+  const mod = $resolveModule(workspace, folder);
   const build = workspace.travetto?.build ?? {};
 
   return {
@@ -148,7 +153,7 @@ export async function getManifestContext(folder) {
     },
     build: {
       compilerFolder: build.compilerFolder ?? COMPILER_FOLDER,
-      compilerUrl: build.compilerUrl ?? await $getCompilerUrl(workspace),
+      compilerUrl: build.compilerUrl ?? $getCompilerUrl(workspace),
       compilerModuleFolder: path.dirname(workspace.resolve('@travetto/compiler/package.json')).replace(`${workspace.path}/`, ''),
       outputFolder: build.outputFolder ?? OUTPUT_FOLDER,
     },
