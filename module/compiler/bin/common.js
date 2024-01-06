@@ -42,6 +42,11 @@ export const getEntry = async () => {
   await fs.readdir(path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, 'support'), { recursive: true }).then(files =>
     Promise.all(files.filter(x => TS_EXT.test(x)).map(f => outputIfChanged(ctx, `support/${f}`, transpile))));
 
-  try { return run(require(entry)); }
-  catch { return import(entry).then(run); }
+  try {
+    try { return run(require(entry)); }
+    catch { return import(entry).then(run); }
+  } catch (err) {
+    console.error('Resetting due to error', err.message);
+    await fs.rm(path.resolve(ctx.workspace.path, ctx.build.compilerFolder), { recursive: true, force: true });
+  }
 };
