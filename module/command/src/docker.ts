@@ -4,7 +4,7 @@ import { rmSync, mkdirSync } from 'node:fs';
 
 
 import { path } from '@travetto/manifest';
-import { Env, ExecUtil, ExecutionState, ExecutionResult, DataUtil } from '@travetto/base';
+import { Env, ExecUtil, ExecutionState, ExecutionResult } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container
@@ -149,7 +149,7 @@ export class DockerContainer {
    * Expose a port
    */
   exposePort(port: number | string, internalPort: string | number = port): this {
-    this.#ports.set(DataUtil.coerceType(port, Number), DataUtil.coerceType(internalPort, Number));
+    this.#ports.set(+port, +internalPort);
     return this;
   }
 

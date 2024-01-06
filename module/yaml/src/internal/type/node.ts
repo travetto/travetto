@@ -1,4 +1,3 @@
-import { DataUtil } from '@travetto/base';
 import { SimpleType } from './common';
 
 export interface Node<T extends SimpleType = SimpleType> {
@@ -22,7 +21,10 @@ export class NumberNode implements Node<number> {
   value: number;
 
   constructor(token: string) {
-    this.value = DataUtil.coerceType(token, Number, true);
+    this.value = token.includes('.') ? parseFloat(token) : parseInt(token, 10);
+    if (Number.isNaN(this.value)) {
+      throw new Error(`Invalid numeric input: ${token}`);
+    }
   }
 }
 
@@ -30,7 +32,7 @@ export class BooleanNode implements Node<boolean> {
   value: boolean;
 
   constructor(token: string) {
-    this.value = DataUtil.coerceType(token, Boolean, true);
+    this.value = /^(yes|on|1|true)/i.test(token);
   }
 }
 

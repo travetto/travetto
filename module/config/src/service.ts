@@ -1,9 +1,9 @@
 import util from 'node:util';
 
-import { AppError, Class, ClassInstance, DataUtil, Env, RuntimeResources } from '@travetto/base';
+import { AppError, Class, ClassInstance, Env, RuntimeResources } from '@travetto/base';
 import { DependencyRegistry, Injectable } from '@travetto/di';
 import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { BindUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
+import { BindUtil, DataUtil, SchemaRegistry, SchemaValidator, ValidationResultError } from '@travetto/schema';
 
 import { ConfigSourceTarget, ConfigTarget } from './internal/types';
 import { ParserManager } from './parser/parser';

@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { c, d } from '@travetto/doc';
 import {
-  ExecUtil, AppError, StreamUtil, ObjectUtil, DataUtil, Util,
+  ExecUtil, AppError, StreamUtil, ObjectUtil, Util,
   FileLoader, TimeUtil, ResourceLoader, EnvProp
 } from '@travetto/base';
 import { RuntimeIndex } from '@travetto/manifest';
@@ -22,7 +22,6 @@ export const text = <>
     <li>Standard Error Support</li>
     <li>Stream Utilities</li>
     <li>Object Utilities</li>
-    <li>Data Utilities</li>
     <li>Common Utilities</li>
     <li>Time Utilities</li>
     <li>Process Execution</li>
@@ -140,24 +139,6 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
       <li>{d.method('isClass(o)')} determines if {d.input('o')} is a class constructor</li>
       <li>{d.method('isSimple(a)')} determines if {d.input('a')} is a simple value</li>
       <li>{d.method('isPromise(a)')} determines if {d.input('a')} is a promise</li>
-    </ul>
-  </c.Section>
-
-  <c.Section title='Data Utilities'>
-    Data utilities for binding values, and type conversion. Currently {DataUtil} includes:
-
-    <ul>
-      <li>
-        {d.method('deepAssign(a, b, mode ?)')} which allows for deep assignment of {d.input('b')} onto {d.input('a')}, the {d.input('mode')} determines how aggressive the assignment is, and how flexible it is.  {d.input('mode')} can have any of the following values:
-        <ul>
-          <li>{d.input('loose')}, which is the default is the most lenient. It will not error out, and overwrites will always happen</li>
-          <li>{d.input('coerce')}, will attempt to force values from {d.input('b')} to fit the types of {d.input('a')}, and if it can't it will error out</li>
-          <li>{d.input('strict')}, will error out if the types do not match</li>
-        </ul>
-      </li>
-      <li>{d.method('coerceType(input: unknown, type: Class<unknown>, strict = true)')} which allows for converting an input type into a specified {d.input('type')} instance, or throw an error if the types are incompatible.</li>
-      <li>{d.method('shallowClone<T = unknown>(a: T): T')} will shallowly clone a field</li>
-      <li>{d.method('filterByKeys<T>(obj: T, exclude: (string | RegExp)[]): T')} will filter a given object, and return a plain object (if applicable) with fields excluded using the values in the {d.input('exclude')} input</li>
     </ul>
   </c.Section>
 

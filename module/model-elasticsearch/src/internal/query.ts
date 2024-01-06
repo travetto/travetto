@@ -1,6 +1,6 @@
 import { QueryDslQueryContainer, SearchRequest, SearchResponse, Sort, SortOptions } from '@elastic/elasticsearch/lib/api/types';
 
-import { Class, DataUtil, ObjectUtil } from '@travetto/base';
+import { Class, ObjectUtil } from '@travetto/base';
 import { WhereClause, SelectClause, SortClause, Query } from '@travetto/model-query';
 import { QueryLanguageParser } from '@travetto/model-query/src/internal/query/parser';
 import { QueryVerifier } from '@travetto/model-query/src/internal/query/verifier';
@@ -8,7 +8,7 @@ import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query
 import { ModelRegistry } from '@travetto/model/src/registry/model';
 import { IndexConfig } from '@travetto/model/src/registry/types';
 import { ModelType } from '@travetto/model/src/types/model';
-import { SchemaRegistry } from '@travetto/schema';
+import { DataUtil, SchemaRegistry } from '@travetto/schema';
 
 import { EsSchemaConfig } from './types';
 

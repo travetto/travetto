@@ -1,6 +1,5 @@
 /// <reference path="./src/trv.d.ts" />
 export * from './src/console';
-export * from './src/data';
 export * from './src/error';
 export * from './src/exec';
 export * from './src/env';

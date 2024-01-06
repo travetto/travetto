@@ -7,7 +7,7 @@ import { ObjectUtil } from '@travetto/base';
 import { ControllerRegistry } from '../src/registry/controller';
 import { Controller } from '../src/decorator/controller';
 import { Patch } from '../src/decorator/endpoint';
-import { CacheControl } from '../src/decorator/common';
+import { CacheControl, SetHeaders } from '../src/decorator/common';
 
 @Controller('/test')
 class TestController {
@@ -15,6 +15,7 @@ class TestController {
   @Patch('/a')
   async patch() { }
 
+  @SetHeaders({ 'Content-Type': '20' })
   @CacheControl('500ms')
   @Patch('/b')
   async patchSmaller() { }
@@ -48,5 +49,13 @@ export class ConfigureTest {
     const expires = ControllerRegistry.get(TestController).endpoints[1].headers['expires'];
     assert(!ObjectUtil.isFunction(expires));
     assert(expires === '-1');
+  }
+
+  @Test()
+  async setMultipleHeaderS() {
+    const { headers } = ControllerRegistry.get(TestController).endpoints[1];
+    assert(headers['cache-control']);
+    assert(headers['expires']);
+    assert(headers['content-type']);
   }
 }

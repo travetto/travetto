@@ -3,9 +3,7 @@
   "version": "4.0.0-rc.0",
   "description": "Environment config and common utilities for travetto applications.",
   "keywords": [
-    "shutdown-helper",
     "console-manager",
-    "filesystem-traversal",
     "travetto",
     "typescript"
   ],

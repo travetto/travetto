@@ -1,4 +1,4 @@
-import { Class, DataUtil } from '@travetto/base';
+import { Class } from '@travetto/base';
 
 import { Registry } from '../registry';
 import { ChangeEvent } from '../types';
@@ -13,7 +13,6 @@ function id(cls: string | Class): string {
 export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, F = Function> extends Registry {
 
   static id = id;
-
   /**
    * Classes pending removal
    */
@@ -142,7 +141,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    */
   register(cls: Class, pConfig: Partial<C> = {}): void {
     const conf = this.getOrCreatePending(cls);
-    DataUtil.deepAssign(conf, pConfig);
+    Object.assign(conf, pConfig);
   }
 
   /**
@@ -150,7 +149,7 @@ export abstract class MetadataRegistry<C extends { class: Class }, M = unknown, 
    */
   registerField(cls: Class, field: F, pConfig: Partial<M>): void {
     const conf = this.getOrCreatePendingField(cls, field);
-    DataUtil.deepAssign(conf, pConfig);
+    Object.assign(conf, pConfig);
   }
 
   /**

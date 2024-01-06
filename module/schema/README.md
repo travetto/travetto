@@ -373,3 +373,14 @@ Validation Failed {
   ]
 }
 ```
+
+## Data Utilities
+Data utilities for binding values, and type conversion. Currently [DataUtil](https://github.com/travetto/travetto/tree/main/module/schema/src/data.ts#L8) includes:
+   *  `deepAssign(a, b, mode ?)` which allows for deep assignment of `b` onto `a`, the `mode` determines how aggressive the assignment is, and how flexible it is.  `mode` can have any of the following values:
+      *  `loose`, which is the default is the most lenient. It will not error out, and overwrites will always happen
+      *  `coerce`, will attempt to force values from `b` to fit the types of `a`, and if it can't it will error out
+      *  `strict`, will error out if the types do not match
+
+   *  `coerceType(input: unknown, type: Class<unknown>, strict = true)` which allows for converting an input type into a specified `type` instance, or throw an error if the types are incompatible.
+   *  `shallowClone<T = unknown>(a: T): T` will shallowly clone a field
+   *  `filterByKeys<T>(obj: T, exclude: (string | RegExp)[]): T` will filter a given object, and return a plain object (if applicable) with fields excluded using the values in the `exclude` input
