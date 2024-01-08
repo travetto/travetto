@@ -2,7 +2,7 @@ import { createReadStream } from 'node:fs';
 import readline from 'node:readline';
 import timers from 'node:timers/promises';
 
-import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
+import { Env, ShutdownManager, Spawn } from '@travetto/base';
 import { IndexedFile, RuntimeIndex } from '@travetto/manifest';
 
 /**
@@ -59,18 +59,16 @@ export class RunnerUtil {
    * @returns
    */
   static async getTestCount(patterns: string[]): Promise<number> {
-    const proc = ExecUtil.spawn('npx', ['trv', 'test:count', ...patterns],
+    const countRes = await Spawn.exec('npx', ['trv', 'test:count', ...patterns],
       {
         stdio: 'pipe',
-        catchAsResult: true,
-        env: { ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
+        env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
       }
-    );
-    const countRes = await proc.result;
+    ).result;
     if (!countRes.valid) {
       throw new Error(countRes.stderr);
     }
-    return countRes.valid ? +countRes.stdout : 0;
+    return countRes.valid ? +countRes.stdout! : 0;
   }
 
   /**

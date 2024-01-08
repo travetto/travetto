@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { ExecUtil } from '@travetto/base';
+import { ExecUtil, Spawn } from '@travetto/base';
 import { IndexedFile, IndexedModule, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
 
 export class CliScmUtil {
@@ -19,12 +19,12 @@ export class CliScmUtil {
    */
   static async getAuthor(): Promise<{ name?: string, email: string }> {
     const [name, email] = await Promise.all([
-      await ExecUtil.spawn('git', ['config', 'user.name'], { catchAsResult: true }).result,
-      await ExecUtil.spawn('git', ['config', 'user.email']).result,
+      await Spawn.exec('git', ['config', 'user.name']).result,
+      await Spawn.exec('git', ['config', 'user.email']).result,
     ]);
     return {
-      name: (name.valid ? name.stdout.trim() : '') || process.env.USER,
-      email: email.stdout.trim()
+      name: (name.valid ? name.stdout?.trim() : '') || process.env.USER,
+      email: email.stdout!.trim()
     };
   }
 

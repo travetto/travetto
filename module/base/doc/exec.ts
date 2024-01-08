@@ -1,7 +1,6 @@
-import { ExecUtil } from '@travetto/base';
+import { Spawn } from '@travetto/base';
 
 export async function executeListing() {
-  const { result } = ExecUtil.spawn('ls');
-  const final = await result;
-  console.log('Listing', { lines: final.stdout.split('\n') });
+  const { stdout } = await Spawn.exec('ls').result;
+  console.log('Listing', { lines: stdout?.split('\n') });
 }

@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 
-import { ExecUtil, Util } from '@travetto/base';
+import { ExecUtil, Spawn, Util } from '@travetto/base';
 import { ManifestFileUtil, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
 import { TestFixtures } from '@travetto/test';
 
@@ -24,9 +24,9 @@ export class RestClientTestUtil {
 
     await fs.mkdir(root, { recursive: true });
     if (!await fs.stat(path.resolve(root, 'package.json')).catch(() => false)) {
-      await ExecUtil.spawn('npm', ['init', '-y'], { cwd: root }).result;
-      await ExecUtil.spawn('npm', ['install', 'puppeteer'], { cwd: root }).result;
-      await ExecUtil.spawn('npm', ['install'], { cwd: root }).result;
+      await Spawn.exec('npm', ['init', '-y'], { cwd: root }).success;
+      await Spawn.exec('npm', ['install', 'puppeteer'], { cwd: root }).success;
+      await Spawn.exec('npm', ['install'], { cwd: root }).success;
     }
     await fs.writeFile(this.clientFile, await fixtures.read('puppeteer.mjs'), 'utf8');
   }
@@ -37,7 +37,7 @@ export class RestClientTestUtil {
       path.resolve(folder, 'tsconfig.json'),
     );
     const tsc = path.resolve(RuntimeContext.workspace.path, 'node_modules', '.bin', 'tsc');
-    await ExecUtil.spawn(tsc, ['-p', folder]).result;
+    await Spawn.exec(tsc, ['-p', folder]).success;
   }
 
 
@@ -56,11 +56,11 @@ export class RestClientTestUtil {
         path.resolve(tmp, 'main.ts'),
         `${body}\ngo().then(console.log)`
       );
-      await ExecUtil.spawn('npm', ['i'], { cwd: tmp }).result;
+      await Spawn.exec('npm', ['i'], { cwd: tmp }).success;
       await this.compileTypescript(tmp, 'node');
 
-      const proc = ExecUtil.spawn('node', ['./main'], { cwd: tmp });
-      return (await proc.result).stdout;
+      const result = await Spawn.exec('node', ['./main'], { cwd: tmp }).success;
+      return result.stdout!;
     } finally {
       await this.cleanupFolder(tmp);
     }
