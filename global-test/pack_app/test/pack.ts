@@ -21,7 +21,7 @@ export class PackAppSuite {
     const res2 = await Spawn.exec('docker', ['run', '--rm', `${imageName}:${tag}`, '30']).result;
 
     assert(await res2.stderr === '');
-    assert(res2.code === 0);
+    assert(res2.exitCode === 0);
 
     const res3 = await Spawn.exec('docker', ['image', 'rm', '--force', `${imageName}:${tag}`]).result;
 

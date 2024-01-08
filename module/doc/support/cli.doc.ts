@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { PackageUtil, path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { ExecUtil, Env, watchCompiler } from '@travetto/base';
+import { ExecUtil, Env, watchCompiler, Spawn } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 
@@ -53,11 +53,11 @@ export class DocCommand implements CliCommandShape {
     const args = process.argv.slice(2).filter(x => !/(-w|--watch)/.test(x));
     await watchCompiler(async ({ action, file }) => {
       if (action === 'update' && file === this.input) {
-        await ExecUtil.spawn('npx', ['trv', ...args], {
+        await Spawn.exec('npx', ['trv', ...args], {
           cwd: RuntimeIndex.mainModule.sourcePath,
-          env: { ...Env.TRV_QUIET.export(true) },
-          stdio: 'inherit', catchAsResult: true
-        });
+          env: { ...process.env, ...Env.TRV_QUIET.export(true) },
+          stdio: 'inherit'
+        }).result;
       }
     }, { restartOnExit: true });
   }

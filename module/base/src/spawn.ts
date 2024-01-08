@@ -9,6 +9,7 @@ export class SpawnOutput {
   #isStream: boolean | undefined;
   #isCapture: boolean | undefined;
   #done = Util.resolvablePromise();
+  #received = 0;
 
   constructor(src: Readable) {
     this.#src = src;
@@ -20,6 +21,7 @@ export class SpawnOutput {
     this.#done.then(() => this.#output.end());
 
     for await (const d of this.#src) {
+      this.#received += d.length;
       if (this.#isCapture !== false) {
         this.#captured.push(Buffer.from(d));
       }
@@ -27,6 +29,10 @@ export class SpawnOutput {
         this.#output.write(d, this.#src.readableEncoding!);
       }
     }
+  }
+
+  get received(): number {
+    return this.#received;
   }
 
   noCapture(): SpawnOutput {
@@ -40,9 +46,13 @@ export class SpawnOutput {
     return this.#isStream ? this.#output : undefined;
   }
 
+  get rawOutput(): Buffer | undefined {
+    return Buffer.concat(this.#captured);
+  }
+
   get output(): Promise<Buffer | undefined> {
     this.#isCapture ??= true;
-    return this.#done.then(v => this.#isCapture ? Buffer.concat(this.#captured) : undefined);
+    return this.#done.then(v => this.#isCapture ? this.rawOutput : undefined);
   }
 
   get outputString(): Promise<string | undefined> {
@@ -50,51 +60,51 @@ export class SpawnOutput {
   }
 }
 
-type SpawnResult = { code: number, message?: string, valid: boolean, proc: EnhancedSpawn, stdout?: string, stderr?: string };
-type EnhancedSpawn = Omit<ChildProcess, 'stderr' | 'stdout'> & {
-  channel: {
-    out?: SpawnOutput;
-    err?: SpawnOutput;
-  };
+export type SpawnResult = { exitCode: number, errMessage?: string, valid: boolean, spawn: EnhancedSpawn, stdout?: string, stderr?: string };
+export type EnhancedSpawn = {
+  stdout?: SpawnOutput;
+  stderr?: SpawnOutput;
+  raw: ChildProcess;
   result: Promise<SpawnResult>;
   success: Promise<SpawnResult>;
+  kill: () => void;
 };
 
 export class Spawn {
   static exec(cmd: string, args?: string[], opts?: SpawnOptions): EnhancedSpawn {
     const proc = spawn(cmd, args ?? [], opts ?? {});
     let res: EnhancedSpawn | undefined = undefined;
-    let out: SpawnOutput | undefined = undefined;
-    let err: SpawnOutput | undefined = undefined;
+    let stdout: SpawnOutput | undefined = undefined;
+    let stderr: SpawnOutput | undefined = undefined;
 
-    const prom = new Promise<{ code: number, message?: string }>((resolve) => {
-      proc.on('error', (e: Error) => resolve({ code: 1, message: e.message }));
-      proc.on('close', (code: number) => resolve({ code }));
+    const prom = new Promise<{ valid: Boolean, exitCode: number, errMessage?: string }>((resolve) => {
+      proc.on('error', (e: Error) => resolve({ exitCode: proc.exitCode ?? 0, valid: false, errMessage: e.message }));
+      proc.on('close', (exitCode: number) => resolve({ exitCode, valid: !exitCode }));
     }).then(async v => ({
       ...v,
-      proc: res!,
-      valid: !v.code,
-      stdout: await out?.outputString,
-      stderr: await err?.outputString
+      spawn: res!,
+      valid: !v.exitCode,
+      stdout: await stdout?.outputString,
+      stderr: await stderr?.outputString
     }));
 
-    err = proc.stderr ? new SpawnOutput(proc.stderr) : undefined;
-    out = proc.stdout ? new SpawnOutput(proc.stdout) : undefined;
+    stderr = proc.stderr ? new SpawnOutput(proc.stderr) : undefined;
+    stdout = proc.stdout ? new SpawnOutput(proc.stdout) : undefined;
 
     // eslint-disable-next-line prefer-const
-    res = Object.assign(proc, {
+    res = {
+      kill: () => process.kill(proc.pid!, ...(process.platform === 'win32' ? [] : ['SIGTERM'])),
       result: prom,
-      success: prom.then(v => {
-        if (!v.valid) { throw new Error(v.message ?? `Execution failure - ${v.code}`); }
-        else { return res!; }
-      }),
-      channel: {
-        out,
-        err,
-        get outString() { return out?.outputString; },
-        get errString() { return err?.outputString; }
-      }
-    });
+      raw: proc,
+      get success(): Promise<SpawnResult> {
+        return prom.then(v => {
+          if (!v.valid) { throw new Error(v.errMessage ?? `Execution failure - ${v.exitCode}`); }
+          else { return v; }
+        });
+      },
+      stdout,
+      stderr
+    };
 
     return res!;
   }

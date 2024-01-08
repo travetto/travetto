@@ -5,7 +5,7 @@ import { RuntimeIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
-import { Env, ExecUtil, ShutdownManager, Util } from '@travetto/base';
+import { Env, ShutdownManager, Util } from '@travetto/base';
 
 const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 const TodoRoot = d.ref('Todo App', RuntimeIndex.mainModule.outputPath);
@@ -15,24 +15,19 @@ const port = 12555;
 async function init() {
   Env.TRV_LOG_PLAIN.set(false);
 
-  const startupBuffer: Buffer[] = [];
-
   const cmd = DocRunUtil.runBackground('trv', ['run:rest'], {
     env: { REST_LOG_PATHS: '!*', REST_PORT: `${port}`, REST_SSL: '0' }
   });
 
-  ShutdownManager.onGracefulShutdown(async () => ExecUtil.kill(cmd.process));
+  ShutdownManager.onGracefulShutdown(async () => cmd.kill());
 
-  cmd.process.stdout?.on('data', v =>
-    startupBuffer.push(Buffer.from(v)));
-
-  while (startupBuffer.length === 0) {
+  while (!cmd.stdout?.received) {
     await timers.setTimeout(100);
   }
 
   await timers.setTimeout(1000);
 
-  return DocRunUtil.cleanRunOutput(Buffer.concat(startupBuffer).toString('utf8'), {});
+  return DocRunUtil.cleanRunOutput(await cmd.stdout.rawOutput!.toString('utf8'), {});
 }
 
 function TableOfContents({ root }: { root: () => DocJSXElement }) {

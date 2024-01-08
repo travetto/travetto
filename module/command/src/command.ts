@@ -1,4 +1,4 @@
-import { Env, ExecUtil, ExecutionResult, ExecutionState } from '@travetto/base';
+import { Env, ExecUtil, ExecutionResult, ExecutionState, Spawn } from '@travetto/base';
 
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
@@ -17,7 +17,7 @@ export class CommandOperation {
    */
   static async dockerAvailable(): Promise<boolean> {
     if (this.#hasDocker === undefined && !Env.TRV_DOCKER.isFalse) { // Check for docker existence
-      const { result: prom } = ExecUtil.spawn('docker', ['ps']);
+      const prom = Spawn.exec('docker', ['ps']).result;
       this.#hasDocker = (await prom).valid;
     }
     return this.#hasDocker;
@@ -44,7 +44,7 @@ export class CommandOperation {
     const { localCheck } = this.config;
 
     const useLocal = await (Array.isArray(localCheck) ?
-      ExecUtil.spawn(...localCheck).result.then(x => x.valid, () => false) :
+      Spawn.exec(...localCheck).result.then(x => x.valid, () => false) :
       localCheck());
 
     const useContainer = this.config.allowDocker && !useLocal && (await CommandOperation.dockerAvailable());

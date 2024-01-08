@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 
-import { ExecUtil, Spawn, Util } from '@travetto/base';
+import { Spawn, Util } from '@travetto/base';
 import { ManifestFileUtil, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
 import { TestFixtures } from '@travetto/test';
 
@@ -84,8 +84,8 @@ export class RestClientTestUtil {
           .replace('<!-- CONTENT -->', await fs.readFile(path.resolve(tmp, 'main.js'), 'utf8'))
       );
 
-      const result = await ExecUtil.spawn('node', [this.clientFile, indexHtml], { stdio: [0, 'pipe', 'pipe'] }).result;
-      return result.stdout;
+      const result = await Spawn.exec('node', [this.clientFile, indexHtml], { stdio: [0, 'pipe', 'pipe'] }).success;
+      return result.stdout!;
     } finally {
       await this.cleanupFolder(tmp);
     }

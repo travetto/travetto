@@ -20,7 +20,7 @@ export class CliScmUtil {
   static async getAuthor(): Promise<{ name?: string, email: string }> {
     const [name, email] = await Promise.all([
       await Spawn.exec('git', ['config', 'user.name']).result,
-      await Spawn.exec('git', ['config', 'user.email']).result,
+      await Spawn.exec('git', ['config', 'user.email']).success,
     ]);
     return {
       name: (name.valid ? name.stdout?.trim() : '') || process.env.USER,
@@ -33,8 +33,8 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string | undefined> {
-    const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path });
-    return (await result).stdout
+    const { stdout } = await Spawn.exec('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path }).success;
+    return stdout!
       .split(/\n/)
       .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
   }
@@ -46,9 +46,9 @@ export class CliScmUtil {
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
     const ws = RuntimeContext.workspace.path;
-    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
+    const res = await Spawn.exec('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).success;
     const out = new Set<string>();
-    for (const line of res.stdout.split(/\n/g)) {
+    for (const line of res.stdout!.split(/\n/g)) {
       const entry = RuntimeIndex.getEntry(path.resolve(ws, line));
       if (entry) {
         out.add(entry.sourceFile);
@@ -79,15 +79,15 @@ export class CliScmUtil {
    * Create a commit
    */
   static createCommit(message: string): Promise<string> {
-    return ExecUtil.spawn('git', ['commit', '.', '-m', message]).result.then(r => r.stdout);
+    return Spawn.exec('git', ['commit', '.', '-m', message]).success.then(r => r.stdout!);
   }
 
   /**
    * Verify if workspace is dirty
    */
   static async isWorkspaceDirty(): Promise<boolean> {
-    const res1 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code'], { catchAsResult: true }).result;
-    const res2 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code', '--cached'], { catchAsResult: true }).result;
+    const res1 = await Spawn.exec('git', ['diff', '--quiet', '--exit-code']).result;
+    const res2 = await Spawn.exec('git', ['diff', '--quiet', '--exit-code', '--cached']).result;
     return !res1.valid || !res2.valid;
   }
 }

@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import { ExecUtil, ExecutionOptions, ExecutionState, ExecutionResult } from '@travetto/base';
+import { ExecUtil, ExecutionOptions, ExecutionState, ExecutionResult, Spawn } from '@travetto/base';
 import { IndexedModule, ManifestContext, Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -60,7 +60,7 @@ export class PackageManager {
         args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...mods];
         break;
     }
-    await ExecUtil.spawn(ctx.workspace.manager, args, { stdio: 'inherit' }).result;
+    await Spawn.exec(ctx.workspace.manager, args, { stdio: 'inherit' }).success;
   }
 
   /**

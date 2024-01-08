@@ -1,7 +1,7 @@
 import os from 'node:os';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
+import { EnhancedSpawn, Env, ExecUtil, ExecutionOptions, ExecutionState, Spawn, SpawnResult } from '@travetto/base';
 import { StyleUtil } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
@@ -104,9 +104,9 @@ export class DocRunUtil {
   /**
    * Run process in the background
    */
-  static runBackground(cmd: string, args: string[], config: RunConfig = {}): ExecutionState {
+  static runBackground(cmd: string, args: string[], config: RunConfig = {}): EnhancedSpawn {
     const state = this.runState(cmd, args, config);
-    return ExecUtil.spawn(state.cmd, state.args, { ...state.opts, stdio: 'pipe' });
+    return Spawn.exec(state.cmd, state.args, { ...state.opts, stdio: 'pipe' });
   }
 
   /**
@@ -116,11 +116,11 @@ export class DocRunUtil {
     let final: string;
     try {
       const state = this.runState(cmd, args, config);
-      const res = await ExecUtil.spawn(state.cmd, state.args, { stdio: 'pipe', ...state.opts, catchAsResult: true }).result;
+      const res = await Spawn.exec(state.cmd, state.args, { stdio: 'pipe', ...state.opts }).result;
       if (!res.valid) {
         throw new Error(res.stderr);
       }
-      final = StyleUtil.cleanText(res.stdout.toString()).trim() || StyleUtil.cleanText(res.stderr.toString()).trim();
+      final = StyleUtil.cleanText(res.stdout ?? '').trim() || StyleUtil.cleanText(res.stderr ?? '').trim();
     } catch (err) {
       if (err instanceof Error) {
         final = err.message;

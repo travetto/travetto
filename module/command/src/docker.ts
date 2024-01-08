@@ -4,7 +4,7 @@ import { rmSync, mkdirSync } from 'node:fs';
 
 
 import { path } from '@travetto/manifest';
-import { Env, ExecUtil, ExecutionState, ExecutionResult, DataUtil } from '@travetto/base';
+import { Env, ExecUtil, ExecutionState, ExecutionResult, DataUtil, Spawn } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container
@@ -397,15 +397,11 @@ export class DockerContainer {
     console.debug('Destroying', { image: this.#image, container: this.#container });
     this.#runAway = this.#runAway || runAway;
 
-    try {
-      await ExecUtil.spawn(this.#dockerCmd, ['kill', this.#container]).result;
-    } catch { }
+    await Spawn.exec(this.#dockerCmd, ['kill', this.#container]).result;
 
     console.debug('Removing', { image: this.#image, container: this.#container });
 
-    try {
-      await ExecUtil.spawn(this.#dockerCmd, ['rm', '-fv', this.#container]).result;
-    } catch { }
+    await Spawn.exec(this.#dockerCmd, ['rm', '-fv', this.#container]).result;
 
     if (this.#pendingExecutions.size) {
       const results = [...this.#pendingExecutions.values()].map(x => x.result);
@@ -480,10 +476,10 @@ export class DockerContainer {
    */
   async removeDanglingVolumes(): Promise<void> {
     try {
-      const { result } = ExecUtil.spawn(this.#dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
-      const ids = (await result).stdout.trim();
+      const proc = Spawn.exec(this.#dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
+      const ids = (await proc.success).stdout?.trim();
       if (ids) {
-        await ExecUtil.spawn(this.#dockerCmd, ['volume', 'rm', ...ids.split('\n')]).result;
+        await Spawn.exec(this.#dockerCmd, ['volume', 'rm', ...ids.split('\n')]).success;
       }
     } catch {
       // ignore
