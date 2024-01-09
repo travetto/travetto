@@ -18,12 +18,12 @@ export class DockerIOTest {
     await container.create(['/bin/sh']);
     await container.start();
 
-    const { process: proc, result: prom } = await container.exec(['gm', 'convert', '-resize', '100x50', '-', '-']);
+    const spawn = await container.exec(['gm', 'convert', '-resize', '100x50', '-', '-']);
 
-    (await this.fixture.readStream('/download.jpeg')).pipe(proc.stdin!);
+    (await this.fixture.readStream('/download.jpeg')).pipe(spawn.stdin!);
 
     assert(true);
 
-    await prom;
+    await spawn.success;
   }
 }

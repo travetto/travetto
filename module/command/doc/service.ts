@@ -12,9 +12,9 @@ export class ImageCompressor {
     const out = `${img}.compressed`;
 
     // Feed into process
-    createReadStream(img).pipe(state.process.stdin!);
+    createReadStream(img).pipe(state.stdin!);
     // Feed from process to file system
-    state.process.stdout!.pipe(createWriteStream(out));
+    state.stdout!.pipe(createWriteStream(out));
 
     await state.result;
   }

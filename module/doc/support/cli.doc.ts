@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { PackageUtil, path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { ExecUtil, Env, watchCompiler, Spawn } from '@travetto/base';
+import { Env, watchCompiler, Spawn } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliValidationError, CliUtil } from '@travetto/cli';
 import { MinLength } from '@travetto/schema';
 

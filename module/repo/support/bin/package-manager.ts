@@ -1,7 +1,8 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import { SpawnOptions } from 'node:child_process';
 
-import { ExecUtil, ExecutionOptions, ExecutionState, ExecutionResult, Spawn } from '@travetto/base';
+import { Spawn, ExecutionResult } from '@travetto/base';
 import { IndexedModule, ManifestContext, Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -15,7 +16,7 @@ export class PackageManager {
   /**
    * Is a module already published
    */
-  static isPublished(ctx: ManifestContext, mod: IndexedModule, opts: ExecutionOptions): ExecutionState {
+  static isPublished(ctx: ManifestContext, mod: IndexedModule, opts: SpawnOptions): Spawn {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -25,7 +26,7 @@ export class PackageManager {
         args = ['info', `${mod.name}@${mod.version}`, 'dist.integrity', '--json'];
         break;
     }
-    return ExecUtil.spawn(ctx.workspace.manager, args, opts);
+    return Spawn.exec(ctx.workspace.manager, args, opts);
   }
 
   /**
@@ -66,7 +67,7 @@ export class PackageManager {
   /**
    * Dry-run packaging
    */
-  static dryRunPackaging(ctx: ManifestContext, opts: ExecutionOptions): ExecutionState {
+  static dryRunPackaging(ctx: ManifestContext, opts: SpawnOptions): Spawn {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -74,13 +75,13 @@ export class PackageManager {
         args = ['pack', '--dry-run'];
         break;
     }
-    return ExecUtil.spawn(ctx.workspace.manager, args, opts);
+    return Spawn.exec(ctx.workspace.manager, args, opts);
   }
 
   /**
    * Publish a module
    */
-  static publish(ctx: ManifestContext, mod: IndexedModule, dryRun: boolean | undefined, opts: ExecutionOptions): ExecutionState {
+  static publish(ctx: ManifestContext, mod: IndexedModule, dryRun: boolean | undefined, opts: SpawnOptions): Spawn {
     if (dryRun) {
       return this.dryRunPackaging(ctx, opts);
     }
@@ -93,7 +94,7 @@ export class PackageManager {
         args = ['publish', '--tag', versionTag, '--access', 'public'];
         break;
     }
-    return ExecUtil.spawn(ctx.workspace.manager, args, opts);
+    return Spawn.exec(ctx.workspace.manager, args, opts);
   }
 
   /**

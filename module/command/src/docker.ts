@@ -2,9 +2,8 @@ import fs from 'node:fs/promises';
 import cp from 'node:child_process';
 import { rmSync, mkdirSync } from 'node:fs';
 
-
 import { path } from '@travetto/manifest';
-import { Env, ExecUtil, ExecutionState, ExecutionResult, DataUtil, Spawn } from '@travetto/base';
+import { Env, ExecutionResult, DataUtil, Spawn } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container
@@ -22,7 +21,7 @@ export class DockerContainer {
   /** Command to run */
   #dockerCmd: string = 'docker';
   /** List of pending executions */
-  #pendingExecutions = new Set<ExecutionState>();
+  #pendingExecutions = new Set<Spawn>();
 
   /** Container name */
   #container: string;
@@ -77,8 +76,8 @@ export class DockerContainer {
   /**
    * Watch execution for any failed state and evict as needed
    */
-  #watchForEviction(state: ExecutionState, all = false): ExecutionState {
-    state.result = state.result.catch(err => {
+  #watchForEviction(state: Spawn, all = false): Spawn {
+    state.success.catch(err => {
       if (all || err.killed) {
         this.#evict = true;
         this.#pendingExecutions.clear();
@@ -95,8 +94,8 @@ export class DockerContainer {
   /**
    * Run a a docker command
    */
-  #runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: string[]): ExecutionState {
-    const state = ExecUtil.spawn(this.#dockerCmd, [op, ...(args ?? [])], { shell: this.#tty });
+  #runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: string[]): Spawn {
+    const state = Spawn.exec(this.#dockerCmd, [op, ...(args ?? [])], { shell: this.#tty, stdio: 'pipe' });
     return (op !== 'run' && op !== 'exec') ? this.#watchForEviction(state, true) : state;
   }
 
@@ -349,7 +348,7 @@ export class DockerContainer {
   /**
    * Exec a docker container
    */
-  exec(args?: string[], extraFlags?: string[]): ExecutionState {
+  exec(args?: string[], extraFlags?: string[]): Spawn {
     const flags = this.getRuntimeFlags(extraFlags);
     const execState = this.#runCmd('exec', ...flags, this.#container, ...(args ?? []));
     this.#pendingExecutions.add(execState);
@@ -377,7 +376,7 @@ export class DockerContainer {
 
     this.#watchForEviction(execState);
     if (this.#unref) {
-      execState.process.unref();
+      execState.raw.unref();
     }
 
     return execState.result.finally(() => this.#pendingExecutions.delete(execState));

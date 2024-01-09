@@ -1,33 +1,31 @@
+import { createInterface } from 'node:readline/promises';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
-import { PassThrough, Readable } from 'node:stream';
-import { Util } from './util';
+import { PassThrough, Readable, Writable } from 'node:stream';
 
-export class SpawnOutput {
+import type { ExecutionResult } from './exec';
+import { StreamUtil } from './stream';
+
+type Complete = { valid: Boolean, code: number, message?: string };
+
+class OutputChannel {
   #src: Readable;
   #captured: Buffer[] = [];
   #output = new PassThrough();
-  #isStream: boolean | undefined;
   #isCapture: boolean | undefined;
-  #done = Util.resolvablePromise();
   #received = 0;
 
   constructor(src: Readable) {
     this.#src = src;
-    this.#src.on('close', () => this.#done.resolve());
     this.#listen();
   }
 
   async #listen(): Promise<void> {
-    this.#done.then(() => this.#output.end());
-
     for await (const d of this.#src) {
       this.#received += d.length;
       if (this.#isCapture !== false) {
         this.#captured.push(Buffer.from(d));
       }
-      if (this.#isStream !== false) {
-        this.#output.write(d, this.#src.readableEncoding!);
-      }
+      this.#output.write(d, this.#src.readableEncoding!);
     }
   }
 
@@ -35,77 +33,115 @@ export class SpawnOutput {
     return this.#received;
   }
 
-  noCapture(): SpawnOutput {
+  noCapture(): OutputChannel {
     this.#isCapture ??= false;
     this.#captured = this.#isCapture ? this.#captured : [];
     return this;
   }
 
-  get stream(): Readable | undefined {
-    this.#isStream ??= true;
-    return this.#isStream ? this.#output : undefined;
+  get stream(): Readable {
+    return this.#output;
   }
 
   get rawOutput(): Buffer | undefined {
     return Buffer.concat(this.#captured);
   }
 
-  get output(): Promise<Buffer | undefined> {
-    this.#isCapture ??= true;
-    return this.#done.then(v => this.#isCapture ? this.rawOutput : undefined);
+  pipe(writable: Writable, opts?: { end?: boolean }): void {
+    this.stream?.pipe(writable, opts);
   }
 
-  get outputString(): Promise<string | undefined> {
-    return this.output.then(v => v?.toString('utf8'));
+  get lines(): AsyncIterable<string> {
+    return createInterface({ input: this.stream, terminal: false });
+  }
+
+  async onLine(cb: (text: string) => unknown): Promise<void> {
+    for await (const line of this.lines) {
+      await cb(line);
+    }
   }
 }
 
-export type SpawnResult = { exitCode: number, errMessage?: string, valid: boolean, spawn: EnhancedSpawn, stdout?: string, stderr?: string };
-export type EnhancedSpawn = {
-  stdout?: SpawnOutput;
-  stderr?: SpawnOutput;
-  raw: ChildProcess;
-  result: Promise<SpawnResult>;
-  success: Promise<SpawnResult>;
-  kill: () => void;
-};
+class SpawnResult implements Complete, ExecutionResult {
+
+  readonly spawn: Spawn;
+  readonly code: number;
+  readonly message?: string;
+  readonly valid: boolean;
+
+  constructor(proc: Spawn, comp: Complete) {
+    this.spawn = proc;
+    this.valid = !comp.code;
+    Object.assign(this, comp);
+  }
+
+  get stdout(): string {
+    const encoding = this.spawn.raw.stdout?.readableEncoding;
+    return this.spawn.stdout?.rawOutput?.toString(encoding ?? 'utf8') ?? '';
+  }
+  get stderr(): string {
+    const encoding = this.spawn.raw.stdout?.readableEncoding;
+    return this.spawn.stderr?.rawOutput?.toString(encoding ?? 'utf8') ?? '';
+  }
+}
 
 export class Spawn {
-  static exec(cmd: string, args?: string[], opts?: SpawnOptions): EnhancedSpawn {
-    const proc = spawn(cmd, args ?? [], opts ?? {});
-    let res: EnhancedSpawn | undefined = undefined;
-    let stdout: SpawnOutput | undefined = undefined;
-    let stderr: SpawnOutput | undefined = undefined;
+  static exec(cmd: string, args?: string[], opts?: SpawnOptions): Spawn {
+    return new Spawn(spawn(cmd, args ?? [], opts ?? {}));
+  }
 
-    const prom = new Promise<{ valid: Boolean, exitCode: number, errMessage?: string }>((resolve) => {
-      proc.on('error', (e: Error) => resolve({ exitCode: proc.exitCode ?? 0, valid: false, errMessage: e.message }));
-      proc.on('close', (exitCode: number) => resolve({ exitCode, valid: !exitCode }));
-    }).then(async v => ({
-      ...v,
-      spawn: res!,
-      valid: !v.exitCode,
-      stdout: await stdout?.outputString,
-      stderr: await stderr?.outputString
-    }));
+  #complete: Promise<Complete>;
+  #result: Promise<SpawnResult>;
+  stdout?: OutputChannel;
+  stderr?: OutputChannel;
+  stdin?: Writable;
+  raw: ChildProcess;
 
-    stderr = proc.stderr ? new SpawnOutput(proc.stderr) : undefined;
-    stdout = proc.stdout ? new SpawnOutput(proc.stdout) : undefined;
+  constructor(proc: ChildProcess) {
+    this.raw = proc;
+    this.stdin = proc.stdin!;
+    this.stderr = proc.stderr ? new OutputChannel(proc.stderr) : undefined;
+    this.stdout = proc.stdout ? new OutputChannel(proc.stdout) : undefined;
+  }
 
-    // eslint-disable-next-line prefer-const
-    res = {
-      kill: () => process.kill(proc.pid!, ...(process.platform === 'win32' ? [] : ['SIGTERM'])),
-      result: prom,
-      raw: proc,
-      get success(): Promise<SpawnResult> {
-        return prom.then(v => {
-          if (!v.valid) { throw new Error(v.errMessage ?? `Execution failure - ${v.exitCode}`); }
-          else { return v; }
-        });
-      },
-      stdout,
-      stderr
-    };
+  get done(): Promise<Complete> {
+    return this.#complete ??= new Promise<Complete>((resolve) => {
+      this.raw.on('error', (e: Error) => resolve({ code: this.raw.exitCode ?? 0, valid: false, message: e.message }));
+      this.raw.on('close', (exitCode: number) => resolve({ code: exitCode, valid: !exitCode }));
+    });
+  }
 
-    return res!;
+  get result(): Promise<SpawnResult> {
+    return this.#result ??= this.done.then(async v => new SpawnResult(this, v));
+  }
+
+  kill(): void {
+    process.kill(this.raw.pid!, ...(process.platform === 'win32' ? [] : ['SIGTERM']));
+  }
+
+  get success(): Promise<SpawnResult> {
+    return this.result.then(v => {
+      if (!v.valid) { throw new Error(v.message ?? `Execution failure - ${v.code}`); }
+      else { return v; }
+    });
+  }
+
+  /**
+   * Pipe a buffer into an execution state
+   * @param state The execution state to pipe
+   * @param input The data to input into the process
+   */
+  async execPipe<T extends Buffer | Readable>(input: T): Promise<T> {
+    (await StreamUtil.toStream(input)).pipe(this.raw.stdin!);
+
+    if (input instanceof Buffer) { // If passing buffers
+      const buf = StreamUtil.toBuffer(this.raw.stdout!);
+      await this.result;
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return buf as Promise<T>;
+    } else {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return StreamUtil.waitForCompletion(this.raw.stdout!, () => this.result) as Promise<T>;
+    }
   }
 }

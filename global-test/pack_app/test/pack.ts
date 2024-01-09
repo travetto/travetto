@@ -13,15 +13,15 @@ export class PackAppSuite {
     const imageName = 'travetto-test_pack_app';
     const res = await Spawn.exec('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
       cwd: RuntimeIndex.mainModule.sourcePath,
-      env: { PATH: process.env.PATH },
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+      env: { PATH: process.env.PATH }
     }).result;
+    assert(res.code === 0);
     assert(res.valid);
 
     const res2 = await Spawn.exec('docker', ['run', '--rm', `${imageName}:${tag}`, '30']).result;
 
     assert(await res2.stderr === '');
-    assert(res2.exitCode === 0);
+    assert(res2.code === 0);
 
     const res3 = await Spawn.exec('docker', ['image', 'rm', '--force', `${imageName}:${tag}`]).result;
 

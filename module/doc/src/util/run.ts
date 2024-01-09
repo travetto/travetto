@@ -1,7 +1,8 @@
 import os from 'node:os';
+import { SpawnOptions } from 'node:child_process';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { EnhancedSpawn, Env, ExecUtil, ExecutionOptions, ExecutionState, Spawn, SpawnResult } from '@travetto/base';
+import { Env, Spawn } from '@travetto/base';
 import { StyleUtil } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
@@ -18,7 +19,7 @@ export type RunConfig = {
 type RunState = {
   cmd: string;
   args: string[];
-  opts: ExecutionOptions;
+  opts: SpawnOptions;
 };
 
 class DocState {
@@ -104,7 +105,7 @@ export class DocRunUtil {
   /**
    * Run process in the background
    */
-  static runBackground(cmd: string, args: string[], config: RunConfig = {}): EnhancedSpawn {
+  static runBackground(cmd: string, args: string[], config: RunConfig = {}): Spawn {
     const state = this.runState(cmd, args, config);
     return Spawn.exec(state.cmd, state.args, { ...state.opts, stdio: 'pipe' });
   }
@@ -120,7 +121,7 @@ export class DocRunUtil {
       if (!res.valid) {
         throw new Error(res.stderr);
       }
-      final = StyleUtil.cleanText(res.stdout ?? '').trim() || StyleUtil.cleanText(res.stderr ?? '').trim();
+      final = StyleUtil.cleanText(res.stdout).trim() || StyleUtil.cleanText(res.stderr).trim();
     } catch (err) {
       if (err instanceof Error) {
         final = err.message;

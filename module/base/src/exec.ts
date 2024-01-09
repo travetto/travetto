@@ -32,10 +32,6 @@ export interface ExecutionResult {
    * Whether or not the execution completed successfully
    */
   valid: boolean;
-  /**
-   * Whether or not the execution was killed
-   */
-  killed?: boolean;
 }
 
 /**
@@ -199,7 +195,7 @@ export class ExecUtil {
       if (timeout) {
         timer = setTimeout(async x => {
           this.kill(proc);
-          finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
+          finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false });
         }, timeout);
       }
     });

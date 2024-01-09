@@ -2,8 +2,6 @@ import { createWriteStream } from 'node:fs';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { ReadableStream as WebReadableStream } from 'node:stream/web';
 
-import type { ExecutionState } from './exec';
-
 type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | WebReadableStream;
 
 /**
@@ -118,26 +116,5 @@ export class StreamUtil {
         .on('error', rej);
       src.pipe(dest, opts);
     });
-  }
-
-  /**
-   * Pipe a buffer into an execution state
-   * @param state The execution state to pipe
-   * @param input The data to input into the process
-   */
-  static async execPipe<T extends Buffer | Readable>(state: ExecutionState, input: T): Promise<T> {
-    const { process: proc, result: prom } = state;
-
-    (await this.toStream(input)).pipe(proc.stdin!);
-
-    if (input instanceof Buffer) { // If passing buffers
-      const buf = this.toBuffer(proc.stdout!);
-      await prom;
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return buf as Promise<T>;
-    } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return this.waitForCompletion(proc.stdout!, () => prom) as Promise<T>;
-    }
   }
 }

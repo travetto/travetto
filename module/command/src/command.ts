@@ -1,4 +1,4 @@
-import { Env, ExecUtil, ExecutionResult, ExecutionState, Spawn } from '@travetto/base';
+import { Env, ExecutionResult, Spawn } from '@travetto/base';
 
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
@@ -81,14 +81,14 @@ export class CommandOperation {
   /**
    * Execute a command, either via a docker exec or the locally installed program
    */
-  async exec(...args: string[]): Promise<ExecutionState> {
+  async exec(...args: string[]): Promise<Spawn> {
     const container = await this.getExecContainer();
     args = (container ? this.config.containerCommand : this.config.localCommand)(args);
 
     if (container) {
       return container.exec(args);
     } else {
-      return ExecUtil.spawn(args[0], args.slice(1), { shell: true });
+      return Spawn.exec(args[0], args.slice(1), { shell: true });
     }
   }
 
@@ -103,7 +103,7 @@ export class CommandOperation {
     if (container) {
       return container.setEntryPoint(cmd).run(rest);
     } else {
-      return await ExecUtil.spawn(cmd, rest, { shell: true }).result;
+      return await Spawn.exec(cmd, rest, { shell: true }).result;
     }
   }
 }

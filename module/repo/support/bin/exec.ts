@@ -1,4 +1,6 @@
-import { ExecutionResult, ExecutionOptions, ExecutionState, Env, Util, ExecUtil } from '@travetto/base';
+import { SpawnOptions } from 'node:child_process';
+
+import { ExecutionResult, Env, Util, Spawn } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
@@ -30,37 +32,6 @@ const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.lengt
 export class RepoExecUtil {
 
   /**
-   * Generate execution options for running on modules
-   */
-  static #buildExecutionOptions <T = ExecutionState>(
-    mod: IndexedModule,
-    config: ModuleRunConfig<T>,
-    prefixes: Record<string, string>,
-    stdoutTerm: Terminal,
-    stderrTerm: Terminal
-  ): ExecutionOptions {
-    const folder = mod.sourceFolder;
-    const opts: ExecutionOptions = {
-      stdio: ['ignore', 'pipe', 'pipe', 'ignore'],
-      outputMode: 'text',
-      catchAsResult: true,
-      cwd: folder,
-      env: {
-        ...Env.TRV_MANIFEST.export(''),
-        ...Env.TRV_MODULE.export(mod.name)
-      },
-    };
-
-    if (config.showStdout) {
-      opts.onStdOutLine = (line: string): unknown => stdoutTerm.writer.write(`${prefixes[folder] ?? ''}${line}`).commit();
-    }
-    if (config.showStderr) {
-      opts.onStdErrorLine = (line: string): unknown => stderrTerm.writer.write(`${prefixes[folder] ?? ''}${line}`).commit();
-    }
-    return opts;
-  }
-
-  /**
    * Build equal sized prefix labels for outputting
    * @param mods
    * @returns
@@ -76,7 +47,7 @@ export class RepoExecUtil {
    */
   static async execOnModules<T = ExecutionResult>(
     mode: 'all' | 'changed',
-    operation: (mod: IndexedModule, options: ExecutionOptions) => ExecutionState,
+    operation: (mod: IndexedModule, options: SpawnOptions) => Spawn,
     config: ModuleRunConfig<T> = {}
   ): Promise<Map<IndexedModule, T>> {
 
@@ -87,7 +58,7 @@ export class RepoExecUtil {
 
     const mods = await CliModuleUtil.findModules(mode);
     const results = new Map<IndexedModule, T>();
-    const processes = new Map<IndexedModule, ExecutionState>();
+    const processes = new Map<IndexedModule, Spawn>();
 
     const prefixes = config.prefixOutput !== false ? this.#buildPrefixes(mods) : {};
     const stdoutTerm = new Terminal(process.stdout);
@@ -96,9 +67,23 @@ export class RepoExecUtil {
     const work = WorkPool.runStreamProgress(async (mod) => {
       try {
         if (!(await config.filter?.(mod) === false)) {
-          const opts = RepoExecUtil.#buildExecutionOptions(mod, config, prefixes, stdoutTerm, stderrTerm);
+          const prefix = prefixes[mod.name];
+          const proc = operation(mod, {
+            stdio: ['ignore', 'pipe', 'pipe', 'ignore'],
+            cwd: mod.sourceFolder,
+            env: {
+              ...process.env,
+              ...Env.TRV_MANIFEST.export(''),
+              ...Env.TRV_MODULE.export(mod.name)
+            },
+          });
 
-          const result = await operation(mod, opts).result;
+          proc.stdout?.onLine(line => stdoutTerm.writer.write(`${prefix ?? ''}${line}`).commit());
+          proc.stderr?.onLine(line => stderrTerm.writer.write(`${prefix ?? ''}${line}`).commit());
+
+          processes.set(mod, proc);
+
+          const result = await proc.result;
 
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;
@@ -106,7 +91,7 @@ export class RepoExecUtil {
         }
         return config.progressMessage?.(mod) ?? mod.name;
       } finally {
-        ExecUtil.kill(processes.get(mod!)?.process);
+        processes.get(mod!)?.kill();
       }
     }, mods, mods.length, { max: workerCount, min: workerCount });
 

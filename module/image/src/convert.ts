@@ -69,7 +69,7 @@ export class ImageConverter {
       ...(options.optimize ? ['-strip', '-quality', '86'] : []),
       '-', '-');
 
-    return await StreamUtil.execPipe(state, image);
+    return await state.execPipe(image);
   }
 
   /**
@@ -88,7 +88,7 @@ export class ImageConverter {
         break;
       }
     }
-    return await StreamUtil.execPipe(stream, image);
+    return await stream.execPipe(image);
   }
 
   /**
@@ -104,9 +104,9 @@ export class ImageConverter {
       image = createReadStream(image);
     }
 
-    await StreamUtil.execPipe(state, await StreamUtil.toStream(image));
+    await state.execPipe(await StreamUtil.toStream(image));
 
-    const buf = await StreamUtil.toBuffer(state.process.stdout!);
+    const buf = await StreamUtil.toBuffer(state.stdout?.stream!);
     const text = buf.toString('utf8');
     const [w, h] = text.split('X').map(x => parseFloat(x));
 
