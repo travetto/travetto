@@ -29,9 +29,8 @@ export class ExecUtilTest {
   async spawnBad() {
     const proc = ExecUtil.spawn('ls', ['xxxx'], {
       cwd: RuntimeIndex.mainModule.outputPath,
-      catchAsResult: true
     });
-    const result = await proc.result;
+    const result = await proc.complete;
     assert(result.stderr.includes('xxxx'));
     assert(result.code > 0);
     assert(!result.valid);
@@ -39,9 +38,9 @@ export class ExecUtilTest {
 
   @Test()
   async fork() {
-    const proc = ExecUtil.spawn(process.argv0, [await this.fixture.resolve('echo.js')], { outputMode: 'binary' });
-    proc.process.stdin?.write('Hello Worldy');
-    proc.process.stdin?.end();
+    const proc = ExecUtil.spawn(process.argv0, [await this.fixture.resolve('echo.js')]);
+    proc.stdin?.write('Hello Worldy');
+    proc.stdin?.end();
     const result = await proc.result;
     assert(result.stdout === 'Hello Worldy');
   }
@@ -56,10 +55,10 @@ export class ExecUtilTest {
       '-', '-'
     ]);
 
-    StreamUtil.pipe(src, state.process.stdin!);
+    StreamUtil.pipe(src, state.stdin!);
 
     const tempFile = path.resolve(os.tmpdir(), `${Math.random()}.png`);
-    await StreamUtil.writeToFile(state.process.stdout!, tempFile);
+    await StreamUtil.writeToFile(state.stdout!.stream, tempFile);
 
     const test = await fs.stat(tempFile);
     await fs.unlink(tempFile);

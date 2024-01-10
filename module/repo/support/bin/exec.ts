@@ -1,6 +1,4 @@
-import { SpawnOptions } from 'node:child_process';
-
-import { ExecutionResult, Env, Util, Spawn } from '@travetto/base';
+import { ExecutionResult, ExecOptions, Env, Util, ExecutionState } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
@@ -47,7 +45,7 @@ export class RepoExecUtil {
    */
   static async execOnModules<T = ExecutionResult>(
     mode: 'all' | 'changed',
-    operation: (mod: IndexedModule, options: SpawnOptions) => Spawn,
+    operation: (mod: IndexedModule, options: ExecOptions) => ExecutionState,
     config: ModuleRunConfig<T> = {}
   ): Promise<Map<IndexedModule, T>> {
 
@@ -58,7 +56,7 @@ export class RepoExecUtil {
 
     const mods = await CliModuleUtil.findModules(mode);
     const results = new Map<IndexedModule, T>();
-    const processes = new Map<IndexedModule, Spawn>();
+    const processes = new Map<IndexedModule, ExecutionState>();
 
     const prefixes = config.prefixOutput !== false ? this.#buildPrefixes(mods) : {};
     const stdoutTerm = new Terminal(process.stdout);

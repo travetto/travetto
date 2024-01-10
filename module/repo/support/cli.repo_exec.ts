@@ -1,6 +1,6 @@
 import { CliCommand, CliCommandShape, ParsedState } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
-import { Env, Spawn } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { Ignore, Max, Min } from '@travetto/schema';
 
 import { RepoExecUtil } from './bin/exec';
@@ -36,7 +36,7 @@ export class RepoExecCommand implements CliCommandShape {
 
     await RepoExecUtil.execOnModules(
       this.changed ? 'changed' : 'all',
-      (mod, opts) => Spawn.exec(cmd, finalArgs, opts),
+      (mod, opts) => ExecUtil.spawn(cmd, finalArgs, opts),
       {
         progressMessage: mod => `Running '${cmd} ${finalArgs.join(' ')}' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
         showStdout: this.showStdout,

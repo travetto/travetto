@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import os from 'node:os';
 
-import { Spawn, Util } from '@travetto/base';
+import { ExecUtil, Util } from '@travetto/base';
 import { ManifestFileUtil, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
 import { TestFixtures } from '@travetto/test';
 
@@ -24,9 +24,9 @@ export class RestClientTestUtil {
 
     await fs.mkdir(root, { recursive: true });
     if (!await fs.stat(path.resolve(root, 'package.json')).catch(() => false)) {
-      await Spawn.exec('npm', ['init', '-y'], { cwd: root }).result;
-      await Spawn.exec('npm', ['install', 'puppeteer'], { cwd: root }).result;
-      await Spawn.exec('npm', ['install'], { cwd: root }).result;
+      await ExecUtil.spawn('npm', ['init', '-y'], { cwd: root }).result;
+      await ExecUtil.spawn('npm', ['install', 'puppeteer'], { cwd: root }).result;
+      await ExecUtil.spawn('npm', ['install'], { cwd: root }).result;
     }
     await fs.writeFile(this.clientFile, await fixtures.read('puppeteer.mjs'), 'utf8');
   }
@@ -37,7 +37,7 @@ export class RestClientTestUtil {
       path.resolve(folder, 'tsconfig.json'),
     );
     const tsc = path.resolve(RuntimeContext.workspace.path, 'node_modules', '.bin', 'tsc');
-    await Spawn.exec(tsc, ['-p', folder]).result;
+    await ExecUtil.spawn(tsc, ['-p', folder]).result;
   }
 
 
@@ -56,10 +56,10 @@ export class RestClientTestUtil {
         path.resolve(tmp, 'main.ts'),
         `${body}\ngo().then(console.log)`
       );
-      await Spawn.exec('npm', ['i'], { cwd: tmp }).result;
+      await ExecUtil.spawn('npm', ['i'], { cwd: tmp }).result;
       await this.compileTypescript(tmp, 'node');
 
-      const result = await Spawn.exec('node', ['./main'], { cwd: tmp }).result;
+      const result = await ExecUtil.spawn('node', ['./main'], { cwd: tmp }).result;
       return result.stdout!;
     } finally {
       await this.cleanupFolder(tmp);
@@ -84,7 +84,7 @@ export class RestClientTestUtil {
           .replace('<!-- CONTENT -->', await fs.readFile(path.resolve(tmp, 'main.js'), 'utf8'))
       );
 
-      const result = await Spawn.exec('node', [this.clientFile, indexHtml], { stdio: [0, 'pipe', 'pipe'] }).result;
+      const result = await ExecUtil.spawn('node', [this.clientFile, indexHtml], { stdio: [0, 'pipe', 'pipe'] }).result;
       return result.stdout!;
     } finally {
       await this.cleanupFolder(tmp);

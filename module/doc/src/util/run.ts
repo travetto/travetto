@@ -1,8 +1,7 @@
 import os from 'node:os';
-import { SpawnOptions } from 'node:child_process';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env, Spawn } from '@travetto/base';
+import { Env, ExecOptions, ExecUtil, ExecutionState } from '@travetto/base';
 import { StyleUtil } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
@@ -19,7 +18,7 @@ export type RunConfig = {
 type RunState = {
   cmd: string;
   args: string[];
-  opts: SpawnOptions;
+  opts: ExecOptions;
 };
 
 class DocState {
@@ -105,9 +104,9 @@ export class DocRunUtil {
   /**
    * Run process in the background
    */
-  static runBackground(cmd: string, args: string[], config: RunConfig = {}): Spawn {
+  static runBackground(cmd: string, args: string[], config: RunConfig = {}): ExecutionState {
     const state = this.runState(cmd, args, config);
-    return Spawn.exec(state.cmd, state.args, { ...state.opts, stdio: 'pipe' });
+    return ExecUtil.spawn(state.cmd, state.args, { ...state.opts, stdio: 'pipe' });
   }
 
   /**
@@ -117,7 +116,7 @@ export class DocRunUtil {
     let final: string;
     try {
       const state = this.runState(cmd, args, config);
-      const res = await Spawn.exec(state.cmd, state.args, { stdio: 'pipe', ...state.opts }).complete;
+      const res = await ExecUtil.spawn(state.cmd, state.args, { stdio: 'pipe', ...state.opts }).complete;
       if (!res.valid) {
         throw new Error(res.stderr);
       }

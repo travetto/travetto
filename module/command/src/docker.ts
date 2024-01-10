@@ -3,7 +3,7 @@ import cp from 'node:child_process';
 import { rmSync, mkdirSync } from 'node:fs';
 
 import { path } from '@travetto/manifest';
-import { Env, ExecutionResult, DataUtil, Spawn } from '@travetto/base';
+import { Env, ExecutionResult, DataUtil, ExecUtil, ExecutionState } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container
@@ -21,7 +21,7 @@ export class DockerContainer {
   /** Command to run */
   #dockerCmd: string = 'docker';
   /** List of pending executions */
-  #pendingExecutions = new Set<Spawn>();
+  #pendingExecutions = new Set<ExecutionState>();
 
   /** Container name */
   #container: string;
@@ -76,7 +76,7 @@ export class DockerContainer {
   /**
    * Watch execution for any failed state and evict as needed
    */
-  #watchForEviction(state: Spawn, all = false): Spawn {
+  #watchForEviction(state: ExecutionState, all = false): ExecutionState {
     state.result.catch(err => {
       if (all || err.killed) {
         this.#evict = true;
@@ -94,8 +94,8 @@ export class DockerContainer {
   /**
    * Run a a docker command
    */
-  #runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: string[]): Spawn {
-    const state = Spawn.exec(this.#dockerCmd, [op, ...(args ?? [])], { shell: this.#tty, stdio: 'pipe' });
+  #runCmd(op: 'create' | 'run' | 'start' | 'stop' | 'exec', ...args: string[]): ExecutionState {
+    const state = ExecUtil.spawn(this.#dockerCmd, [op, ...(args ?? [])], { shell: this.#tty, stdio: 'pipe' });
     return (op !== 'run' && op !== 'exec') ? this.#watchForEviction(state, true) : state;
   }
 
@@ -348,7 +348,7 @@ export class DockerContainer {
   /**
    * Exec a docker container
    */
-  exec(args?: string[], extraFlags?: string[]): Spawn {
+  exec(args?: string[], extraFlags?: string[]): ExecutionState {
     const flags = this.getRuntimeFlags(extraFlags);
     const execState = this.#runCmd('exec', ...flags, this.#container, ...(args ?? []));
     this.#pendingExecutions.add(execState);
@@ -396,11 +396,11 @@ export class DockerContainer {
     console.debug('Destroying', { image: this.#image, container: this.#container });
     this.#runAway = this.#runAway || runAway;
 
-    await Spawn.exec(this.#dockerCmd, ['kill', this.#container]).complete;
+    await ExecUtil.spawn(this.#dockerCmd, ['kill', this.#container]).complete;
 
     console.debug('Removing', { image: this.#image, container: this.#container });
 
-    await Spawn.exec(this.#dockerCmd, ['rm', '-fv', this.#container]).complete;
+    await ExecUtil.spawn(this.#dockerCmd, ['rm', '-fv', this.#container]).complete;
 
     if (this.#pendingExecutions.size) {
       const results = [...this.#pendingExecutions.values()].map(x => x.complete);
@@ -475,10 +475,10 @@ export class DockerContainer {
    */
   async removeDanglingVolumes(): Promise<void> {
     try {
-      const proc = Spawn.exec(this.#dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
+      const proc = ExecUtil.spawn(this.#dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
       const ids = (await proc.result).stdout?.trim();
       if (ids) {
-        await Spawn.exec(this.#dockerCmd, ['volume', 'rm', ...ids.split('\n')]).result;
+        await ExecUtil.spawn(this.#dockerCmd, ['volume', 'rm', ...ids.split('\n')]).result;
       }
     } catch {
       // ignore

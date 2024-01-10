@@ -1,4 +1,4 @@
-import { Env, ExecutionResult, Spawn } from '@travetto/base';
+import { Env, ExecutionResult, ExecUtil, ExecutionState } from '@travetto/base';
 
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
@@ -17,7 +17,7 @@ export class CommandOperation {
    */
   static async dockerAvailable(): Promise<boolean> {
     if (this.#hasDocker === undefined && !Env.TRV_DOCKER.isFalse) { // Check for docker existence
-      const prom = Spawn.exec('docker', ['ps']).complete;
+      const prom = ExecUtil.spawn('docker', ['ps']).complete;
       this.#hasDocker = (await prom).valid;
     }
     return this.#hasDocker;
@@ -44,7 +44,7 @@ export class CommandOperation {
     const { localCheck } = this.config;
 
     const useLocal = await (Array.isArray(localCheck) ?
-      Spawn.exec(...localCheck).complete.then(x => x.valid, () => false) :
+      ExecUtil.spawn(...localCheck).complete.then(x => x.valid, () => false) :
       localCheck());
 
     const useContainer = this.config.allowDocker && !useLocal && (await CommandOperation.dockerAvailable());
@@ -81,14 +81,14 @@ export class CommandOperation {
   /**
    * Execute a command, either via a docker exec or the locally installed program
    */
-  async exec(...args: string[]): Promise<Spawn> {
+  async exec(...args: string[]): Promise<ExecutionState> {
     const container = await this.getExecContainer();
     args = (container ? this.config.containerCommand : this.config.localCommand)(args);
 
     if (container) {
       return container.exec(args);
     } else {
-      return Spawn.exec(args[0], args.slice(1), { shell: true });
+      return ExecUtil.spawn(args[0], args.slice(1), { shell: true });
     }
   }
 
@@ -103,7 +103,7 @@ export class CommandOperation {
     if (container) {
       return container.setEntryPoint(cmd).run(rest);
     } else {
-      return await Spawn.exec(cmd, rest, { shell: true }).complete;
+      return await ExecUtil.spawn(cmd, rest, { shell: true }).complete;
     }
   }
 }

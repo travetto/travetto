@@ -1,5 +1,5 @@
 import { RuntimeContext } from '@travetto/manifest';
-import { Env, Spawn } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { CliCommandShape, CliCommand, CliModuleUtil, CliScmUtil } from '@travetto/cli';
 
 /**
@@ -32,7 +32,7 @@ export class LintCommand implements CliCommandShape {
     }
 
 
-    const res = await Spawn.exec('npx', [
+    const res = await ExecUtil.spawn('npx', [
       'eslint',
       ...(this.format ? ['--format', this.format] : []),
       ...files

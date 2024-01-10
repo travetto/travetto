@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { Env, ExecUtil, Spawn } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { CliCommand, CliModuleUtil } from '@travetto/cli';
 import { RepoExecUtil } from '@travetto/repo';
@@ -28,7 +28,7 @@ export class DocAngularCommand {
       // Build out docs
       await RepoExecUtil.execOnModules('all',
         (mod, opts) => {
-          const req = Spawn.exec('trv', ['doc'], {
+          const req = ExecUtil.spawn('trv', ['doc'], {
             ...opts,
             timeout: 20000,
             env: {

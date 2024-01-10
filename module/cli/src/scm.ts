@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { Spawn } from '@travetto/base';
+import { ExecUtil } from '@travetto/base';
 import { IndexedFile, IndexedModule, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
 
 export class CliScmUtil {
@@ -19,8 +19,8 @@ export class CliScmUtil {
    */
   static async getAuthor(): Promise<{ name?: string, email: string }> {
     const [name, email] = await Promise.all([
-      await Spawn.exec('git', ['config', 'user.name']).complete,
-      await Spawn.exec('git', ['config', 'user.email']).result,
+      await ExecUtil.spawn('git', ['config', 'user.name']).complete,
+      await ExecUtil.spawn('git', ['config', 'user.email']).result,
     ]);
     return {
       name: (name.valid ? name.stdout?.trim() : '') || process.env.USER,
@@ -33,7 +33,7 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string | undefined> {
-    const { stdout } = await Spawn.exec('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path }).result;
+    const { stdout } = await ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path }).result;
     return stdout!
       .split(/\n/)
       .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
@@ -46,7 +46,7 @@ export class CliScmUtil {
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
     const ws = RuntimeContext.workspace.path;
-    const res = await Spawn.exec('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
+    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
     const out = new Set<string>();
     for (const line of res.stdout!.split(/\n/g)) {
       const entry = RuntimeIndex.getEntry(path.resolve(ws, line));
@@ -79,15 +79,15 @@ export class CliScmUtil {
    * Create a commit
    */
   static createCommit(message: string): Promise<string> {
-    return Spawn.exec('git', ['commit', '.', '-m', message]).result.then(r => r.stdout!);
+    return ExecUtil.spawn('git', ['commit', '.', '-m', message]).result.then(r => r.stdout!);
   }
 
   /**
    * Verify if workspace is dirty
    */
   static async isWorkspaceDirty(): Promise<boolean> {
-    const res1 = await Spawn.exec('git', ['diff', '--quiet', '--exit-code']).complete;
-    const res2 = await Spawn.exec('git', ['diff', '--quiet', '--exit-code', '--cached']).complete;
+    const res1 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code']).complete;
+    const res2 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code', '--cached']).complete;
     return !res1.valid || !res2.valid;
   }
 }

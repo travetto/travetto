@@ -6,7 +6,7 @@ import { Test, Suite, TestFixtures } from '@travetto/test';
 import { path as mPath } from '@travetto/manifest';
 
 import { StreamUtil } from '../src/stream';
-import { Spawn } from '../src/spawn';
+import { ExecUtil } from '../src/exec';
 
 
 @Suite()
@@ -69,7 +69,7 @@ export class StreamUtilTest {
   @Test()
   async waitForCompletion() {
     const path = await this.fixture.resolve('long.js');
-    const state = Spawn.exec(process.argv0, [path, '20']);
+    const state = ExecUtil.spawn(process.argv0, [path, '20']);
     const stream = await StreamUtil.waitForCompletion(state.stdout!.stream!, () => state.complete);
     const output = (await StreamUtil.toBuffer(stream)).toString('utf8').split(/\n/g);
     assert(output.length >= 20);
@@ -78,7 +78,7 @@ export class StreamUtilTest {
   @Test()
   async pipe() {
     const echo = await this.fixture.resolve('echo.js');
-    const proc = Spawn.exec(process.argv0, [echo], { stdio: ['pipe', 'pipe', 'pipe'] });
+    const proc = ExecUtil.spawn(process.argv0, [echo], { stdio: ['pipe', 'pipe', 'pipe'] });
     const returnedStream = await proc.execPipe(createReadStream(echo));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('process.stdin'));
