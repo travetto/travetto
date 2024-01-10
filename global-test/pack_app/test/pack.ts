@@ -11,21 +11,24 @@ export class PackAppSuite {
   async testPack() {
     const tag = `tag-${Math.random()}`.replace(/[0][.]/, '');
     const imageName = 'travetto-test_pack_app';
-    const res = await ExecUtil.spawn('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
+    const res = ExecUtil.spawn('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
       cwd: RuntimeIndex.mainModule.sourcePath,
       env: { PATH: process.env.PATH }
-    }).complete;
-    assert(res.code === 0);
-    assert(res.valid);
+    });
+    const state = await res.result;
+    assert(state.valid);
 
-    const res2 = await ExecUtil.spawn('docker', ['run', '--rm', `${imageName}:${tag}`, '30']).complete;
+    const res2 = await ExecUtil.spawn('docker', ['run', '--rm', `${imageName}:${tag}`, '30'], {
+      stdio: 'pipe'
+    });
 
-    assert(await res2.stderr === '');
-    assert(res2.code === 0);
+    const state2 = await res2.result;
+    assert(state2.stderr === '');
+    assert(state2.code === 0);
 
-    const res3 = await ExecUtil.spawn('docker', ['image', 'rm', '--force', `${imageName}:${tag}`]).complete;
+    await ExecUtil.spawn('docker', ['image', 'rm', '--force', `${imageName}:${tag}`]);
 
-    assert(res3.stdout?.includes('Result: 60'));
-    assert(/Result: 60/.test(res3.stdout ?? ''));
+    assert(state2.stdout.includes('Result: 60'));
+    assert(/Result: 60/.test(state2.stdout));
   }
 }
