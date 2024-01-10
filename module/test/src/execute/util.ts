@@ -59,16 +59,17 @@ export class RunnerUtil {
    * @returns
    */
   static async getTestCount(patterns: string[]): Promise<number> {
-    const countRes = await ExecUtil.spawn('npx', ['trv', 'test:count', ...patterns],
+    const proc = await ExecUtil.spawn('npx', ['trv', 'test:count', ...patterns],
       {
         stdio: 'pipe',
         env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
       }
-    ).complete;
+    );
+    const countRes = await proc.complete;
     if (!countRes.valid) {
       throw new Error(countRes.stderr);
     }
-    return countRes.valid ? +countRes.stdout! : 0;
+    return countRes.valid ? +countRes.stdout : 0;
   }
 
   /**
