@@ -16,7 +16,7 @@ export class OpenApiClientHelp {
     if (!await fs.stat(formatCache).catch(() => false)) {
       const stdout = ExecUtil.spawn('docker', ['run', '--rm', dockerImage, 'list']);
       const res = await stdout.result;
-      const lines = res.stdout!
+      const lines = res.stdout
         .split('DOCUMENTATION')[0]
         .trim()
         .split(/\n/g)

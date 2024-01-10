@@ -66,15 +66,15 @@ export class PackUtil {
    * Track result response
    */
   static async runCommand(cmd: string[], opts: ExecutionOptions = {}): Promise<string> {
-    const proc = await ExecUtil.spawn(cmd[0], cmd.slice(1), {
+    const { valid, code, stderr, message, stdout } = await ExecUtil.spawn(cmd[0], cmd.slice(1), {
       stdio: [0, 'pipe', 'pipe', 'ipc'],
       ...opts,
     }).complete;
-    if (!proc.valid) {
-      process.exitCode = proc.code;
-      throw new AppError(proc.stderr || proc.message || 'An unexpected error has occurred');
+    if (!valid) {
+      process.exitCode = code;
+      throw new AppError(stderr || message || 'An unexpected error has occurred');
     }
-    return proc.stdout!;
+    return stdout;
   }
 
   /**
