@@ -5,8 +5,8 @@ import os from 'node:os';
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { path as mPath } from '@travetto/manifest';
 
-import { StreamUtil } from '../src/stream';
 import { ExecUtil } from '../src/exec';
+import { StreamUtil } from '../src/stream';
 
 
 @Suite()
