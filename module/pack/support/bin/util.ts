@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { path, RuntimeIndex } from '@travetto/manifest';
-import { AppError, ExecUtil, ExecOptions } from '@travetto/base';
+import { AppError, ExecUtil, ExecutionOptions } from '@travetto/base';
 
 import { ActiveShellCommand } from './shell';
 
@@ -65,7 +65,7 @@ export class PackUtil {
   /**
    * Track result response
    */
-  static async runCommand(cmd: string[], opts: ExecOptions = {}): Promise<string> {
+  static async runCommand(cmd: string[], opts: ExecutionOptions = {}): Promise<string> {
     const proc = await ExecUtil.spawn(cmd[0], cmd.slice(1), {
       stdio: [0, 'pipe', 'pipe', 'ipc'],
       ...opts,

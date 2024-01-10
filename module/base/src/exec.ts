@@ -8,7 +8,7 @@ const MINUTE = (1000 * 60);
 
 type Complete = { valid: Boolean, code: number, message?: string };
 
-export type ExecOptions = SpawnOptions;
+export type ExecutionOptions = SpawnOptions;
 
 class OutputChannel {
   #src: Readable;
@@ -187,7 +187,7 @@ export class ExecUtil {
    * @param args The command line arguments to pass
    * @param options The enhancement options
    */
-  static spawn(cmd: string, args: string[] = [], options: ExecOptions = {}): ExecutionState {
+  static spawn(cmd: string, args: string[] = [], options: ExecutionOptions = {}): ExecutionState {
     return new ExecutionState(spawn(cmd, args, options));
   }
 
@@ -197,7 +197,7 @@ export class ExecUtil {
    * @param args The command line arguments to pass
    * @param options The enhancement options
    */
-  static async spawnWithRestart(cmd: string, args: string[], options: ExecOptions = {}, maxRetries: number = 5): Promise<ExecutionResult> {
+  static async spawnWithRestart(cmd: string, args: string[], options: ExecutionOptions = {}, maxRetries: number = 5): Promise<ExecutionResult> {
     const restarts: number[] = [];
 
     process.once('disconnect', () => process.kill(process.pid));

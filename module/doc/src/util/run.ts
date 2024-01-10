@@ -1,7 +1,7 @@
 import os from 'node:os';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env, ExecOptions, ExecUtil, ExecutionState } from '@travetto/base';
+import { Env, ExecutionOptions, ExecUtil, ExecutionState } from '@travetto/base';
 import { StyleUtil } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
@@ -18,7 +18,7 @@ export type RunConfig = {
 type RunState = {
   cmd: string;
   args: string[];
-  opts: ExecOptions;
+  opts: ExecutionOptions;
 };
 
 class DocState {

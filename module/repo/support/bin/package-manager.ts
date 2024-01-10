@@ -1,7 +1,7 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
-import { ExecUtil, ExecOptions, ExecutionState, ExecutionResult } from '@travetto/base';
+import { ExecUtil, ExecutionOptions, ExecutionState, ExecutionResult } from '@travetto/base';
 import { IndexedModule, ManifestContext, Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -15,7 +15,7 @@ export class PackageManager {
   /**
    * Is a module already published
    */
-  static isPublished(ctx: ManifestContext, mod: IndexedModule, opts: ExecOptions): ExecutionState {
+  static isPublished(ctx: ManifestContext, mod: IndexedModule, opts: ExecutionOptions): ExecutionState {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -66,7 +66,7 @@ export class PackageManager {
   /**
    * Dry-run packaging
    */
-  static dryRunPackaging(ctx: ManifestContext, opts: ExecOptions): ExecutionState {
+  static dryRunPackaging(ctx: ManifestContext, opts: ExecutionOptions): ExecutionState {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -80,7 +80,7 @@ export class PackageManager {
   /**
    * Publish a module
    */
-  static publish(ctx: ManifestContext, mod: IndexedModule, dryRun: boolean | undefined, opts: ExecOptions): ExecutionState {
+  static publish(ctx: ManifestContext, mod: IndexedModule, dryRun: boolean | undefined, opts: ExecutionOptions): ExecutionState {
     if (dryRun) {
       return this.dryRunPackaging(ctx, opts);
     }

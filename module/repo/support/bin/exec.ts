@@ -1,4 +1,4 @@
-import { ExecutionResult, ExecOptions, Env, Util, ExecutionState } from '@travetto/base';
+import { ExecutionResult, ExecutionOptions, Env, Util, ExecutionState } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
@@ -45,7 +45,7 @@ export class RepoExecUtil {
    */
   static async execOnModules<T = ExecutionResult>(
     mode: 'all' | 'changed',
-    operation: (mod: IndexedModule, options: ExecOptions) => ExecutionState,
+    operation: (mod: IndexedModule, options: ExecutionOptions) => ExecutionState,
     config: ModuleRunConfig<T> = {}
   ): Promise<Map<IndexedModule, T>> {
 
