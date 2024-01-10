@@ -23,8 +23,8 @@ export class CliScmUtil {
       await ExecUtil.spawn('git', ['config', 'user.email']).result,
     ]);
     return {
-      name: (name.valid ? name.stdout?.trim() : '') || process.env.USER,
-      email: email.stdout!.trim()
+      name: (name.valid ? name.stdout.trim() : '') || process.env.USER,
+      email: email.stdout.trim()
     };
   }
 
@@ -33,8 +33,8 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string | undefined> {
-    const { stdout } = await ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path }).result;
-    return stdout!
+    const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path });
+    return (await result).stdout
       .split(/\n/)
       .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
   }
