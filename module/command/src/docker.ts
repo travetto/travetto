@@ -2,8 +2,9 @@ import fs from 'node:fs/promises';
 import cp from 'node:child_process';
 import { rmSync, mkdirSync } from 'node:fs';
 
+
 import { path } from '@travetto/manifest';
-import { Env, ExecutionResult, DataUtil, ExecUtil, ExecutionState } from '@travetto/base';
+import { Env, ExecUtil, ExecutionState, ExecutionResult, DataUtil } from '@travetto/base';
 
 /**
  * Simple docker wrapper for launching and interacting with a container
