@@ -397,11 +397,15 @@ export class DockerContainer {
     console.debug('Destroying', { image: this.#image, container: this.#container });
     this.#runAway = this.#runAway || runAway;
 
-    await ExecUtil.spawn(this.#dockerCmd, ['kill', this.#container]).result;
+    try {
+      await ExecUtil.spawn(this.#dockerCmd, ['kill', this.#container]).result;
+    } catch { }
 
     console.debug('Removing', { image: this.#image, container: this.#container });
 
-    await ExecUtil.spawn(this.#dockerCmd, ['rm', '-fv', this.#container]).result;
+    try {
+      await ExecUtil.spawn(this.#dockerCmd, ['rm', '-fv', this.#container]).result;
+    } catch { }
 
     if (this.#pendingExecutions.size) {
       const results = [...this.#pendingExecutions.values()].map(x => x.result);
@@ -476,8 +480,8 @@ export class DockerContainer {
    */
   async removeDanglingVolumes(): Promise<void> {
     try {
-      const proc = ExecUtil.spawn(this.#dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
-      const ids = (await proc.result).stdout?.trim();
+      const { result } = ExecUtil.spawn(this.#dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
+      const ids = (await result).stdout.trim();
       if (ids) {
         await ExecUtil.spawn(this.#dockerCmd, ['volume', 'rm', ...ids.split('\n')]).result;
       }
