@@ -1,7 +1,7 @@
 import os from 'node:os';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env, ExecutionOptions, ExecUtil, ExecutionState } from '@travetto/base';
+import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
 import { StyleUtil } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
@@ -120,7 +120,7 @@ export class DocRunUtil {
       if (!res.valid) {
         throw new Error(res.stderr);
       }
-      final = StyleUtil.cleanText(res.stdout).trim() || StyleUtil.cleanText(res.stderr).trim();
+      final = StyleUtil.cleanText(res.stdout.toString()).trim() || StyleUtil.cleanText(res.stderr.toString()).trim();
     } catch (err) {
       if (err instanceof Error) {
         final = err.message;
