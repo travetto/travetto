@@ -91,8 +91,8 @@ export class CliRunUtil {
   }
 
   static async getModules(): Promise<ModuleGraphItem<Set<string>>[]> {
-    const res = RunUtil.spawnCli('repo:list', ['-f', 'json'], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
-    const data = await res.result;
+    const res = RunUtil.spawnCli('repo:list', ['-f', 'json'], { stdio: [0, 'pipe', 'pipe', 'ignore'] });
+    const data = await res.complete;
     if (!data.valid) {
       throw new Error(`Unable to collect module list: ${data.message}`);
     }
@@ -108,8 +108,8 @@ export class CliRunUtil {
    * Get list of run choices
    */
   static async getChoices(): Promise<RunChoice[]> {
-    const res = RunUtil.spawnCli('cli:schema', [], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
-    const data = await res.result;
+    const res = RunUtil.spawnCli('cli:schema', [], { stdio: [0, 'pipe', 'pipe', 'ignore'] });
+    const data = await res.complete;
     if (!data.valid) {
       throw new Error(`Unable to collect cli command list: ${data.message}`);
     }

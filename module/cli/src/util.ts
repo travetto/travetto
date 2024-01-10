@@ -40,6 +40,7 @@ export class CliUtil {
     }
     return ExecUtil.spawnWithRestart(process.argv0, process.argv.slice(1), {
       env: {
+        ...process.env,
         ...Env.TRV_DYNAMIC.export(true),
         ...Env.TRV_CAN_RESTART.export(false)
       },

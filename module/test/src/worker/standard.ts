@@ -45,6 +45,7 @@ export function buildStandardTestManager(consumer: TestConsumer): Worker<string>
           {
             cwd,
             env: {
+              ...process.env,
               ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(module)!.outputPath),
               ...Env.TRV_QUIET.export(true)
             },

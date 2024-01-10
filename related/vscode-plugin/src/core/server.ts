@@ -1,4 +1,4 @@
-import { Env, ExecUtil, ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
+import { Env, ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
 import type { } from '@travetto/log';
 
 import { Log } from './log';
@@ -51,6 +51,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
       ...opts,
       env: {
+        ...process.env,
         ...Env.TRV_DYNAMIC.export(true),
         ...Env.FORCE_COLOR.export(0),
         ...Env.NODE_DISABLE_COLORS.export(true),
@@ -59,10 +60,10 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
         ...Env.TRV_LOG_TIME.export(false),
         ...opts.env
       },
-      catchAsResult: true,
-      onStdOutLine: line => this.#log.info(prefix, line.trimEnd()),
-      onStdErrorLine: line => this.#log.error(prefix, line.trimEnd())
     });
+
+    state.stdout?.onLine(line => this.#log.info(prefix, line.trimEnd()));
+    state.stderr?.onLine(line => this.#log.error(prefix, line.trimEnd()));
 
     const ready = new Promise<void>((resolve, reject) => {
       setTimeout(reject, READY_WAIT_WINDOW);
@@ -75,7 +76,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       };
       state.process.on('message', readyHandler);
     }).catch(() => {
-      ExecUtil.kill(state.process);
+      state.kill();
       this.#log.info('Service Timed out');
       throw new Error('Timeout');
     });
@@ -84,7 +85,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
 
     this.#log.info('Started', state.process.pid);
 
-    state.result.then(result => {
+    state.complete.then(result => {
       this.#log.info('Exited', this.#state?.process.pid, { exitCode: result.code, valid: result.valid });
       this.stop();
       this.#trigger('exit');
@@ -119,7 +120,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       const proc = this.#state.process;
       this.#state = undefined;
       const waitForKill = new Promise<void>(res => proc.on('exit', res));
-      ExecUtil.kill(proc);
+      proc.kill();
       await waitForKill;
     }
   }

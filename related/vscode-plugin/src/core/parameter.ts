@@ -149,13 +149,11 @@ export class ParameterSelector {
             const items: { label: string, description: string }[] = [];
             const proc = ExecUtil.spawn(rgPath, args, {
               stdio: [0, 'pipe', 2],
-              outputMode: 'text-stream',
               shell: true,
               cwd,
-              catchAsResult: true,
-              onStdOutLine: item => items.push({ label: item, description: path.resolve(cwd, item) })
             });
-            await proc.result;
+            proc.stdout?.onLine(item => items.push({ label: item.trim(), description: path.resolve(cwd, item.trim()) }));
+            await proc.complete;
             input.items = items;
             input.busy = false;
           }),

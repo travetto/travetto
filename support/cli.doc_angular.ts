@@ -49,7 +49,7 @@ export class DocAngularCommand {
           progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
           filter: mod => mods.has(mod)
         });
-      await ExecUtil.spawn('trv', ['doc'], { env: { ...Env.TRV_MANIFEST.export('') }, cwd: RuntimeIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
+      await ExecUtil.spawn('trv', ['doc'], { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: RuntimeIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
       mods.add(RuntimeIndex.mainModule);
     } else {
       const opts = {
