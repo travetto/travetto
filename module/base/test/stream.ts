@@ -79,7 +79,9 @@ export class StreamUtilTest {
   async pipe() {
     const echo = await this.fixture.resolve('echo.js');
     const proc = ExecUtil.spawn(process.argv0, [echo], { stdio: ['pipe', 'pipe', 'pipe'] });
-    const returnedStream = await proc.execPipe(createReadStream(echo));
+    const returnedStream = await proc.execPipe(createReadStream(
+      echo
+    ));
     const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
     assert(result.includes('process.stdin'));
   }
