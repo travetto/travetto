@@ -377,7 +377,7 @@ export class DockerContainer {
 
     this.#watchForEviction(execState);
     if (this.#unref) {
-      execState.unref();
+      execState.process.unref();
     }
 
     return execState.result.finally(() => this.#pendingExecutions.delete(execState));

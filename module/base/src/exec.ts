@@ -1,4 +1,4 @@
-import { ChildProcess, Serializable, spawn, SpawnOptions } from 'node:child_process';
+import { ChildProcess, spawn, SpawnOptions } from 'node:child_process';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { createInterface } from 'node:readline/promises';
 
@@ -93,14 +93,14 @@ export class ExecutionResult implements Complete {
    * Stdout as a string
    */
   get stdout(): string {
-    const encoding = this.spawn.raw.stdout?.readableEncoding;
+    const encoding = this.spawn.process.stdout?.readableEncoding;
     return this.spawn.stdout?.rawOutput?.toString(encoding ?? 'utf8') ?? '';
   }
   /**
    * Stderr as a string
    */
   get stderr(): string {
-    const encoding = this.spawn.raw.stdout?.readableEncoding;
+    const encoding = this.spawn.process.stderr?.readableEncoding;
     return this.spawn.stderr?.rawOutput?.toString(encoding ?? 'utf8') ?? '';
   }
 }
@@ -111,10 +111,10 @@ export class ExecutionState {
   stdout?: OutputChannel;
   stderr?: OutputChannel;
   stdin?: Writable;
-  raw: ChildProcess;
+  process: ChildProcess;
 
   constructor(proc: ChildProcess) {
-    this.raw = proc;
+    this.process = proc;
     this.stdin = proc.stdin!;
     this.stderr = proc.stderr ? new OutputChannel(proc.stderr) : undefined;
     this.stdout = proc.stdout ? new OutputChannel(proc.stdout) : undefined;
@@ -122,8 +122,8 @@ export class ExecutionState {
 
   get done(): Promise<Complete> {
     return this.#complete ??= new Promise<Complete>((resolve) => {
-      this.raw.on('error', (e: Error) => resolve({ code: this.raw.exitCode ?? 0, valid: false, message: e.message }));
-      this.raw.on('close', (exitCode: number) => resolve({ code: exitCode, valid: !exitCode }));
+      this.process.on('error', (e: Error) => resolve({ code: this.process.exitCode ?? 0, valid: false, message: e.message }));
+      this.process.on('close', (exitCode: number) => resolve({ code: exitCode, valid: !exitCode }));
     });
   }
 
@@ -132,19 +132,7 @@ export class ExecutionState {
   }
 
   kill(): void {
-    process.kill(this.raw.pid!, ...(process.platform === 'win32' ? [] : ['SIGTERM']));
-  }
-
-  send(message: Serializable, cb?: (err: Error | null) => void): void {
-    this.raw.send?.(message, cb);
-  }
-
-  onMessage(cb: (val: Serializable) => void): void {
-    this.raw.on('message', cb);
-  }
-
-  unref(): void {
-    this.raw.unref();
+    process.kill(this.process.pid!, ...(process.platform === 'win32' ? [] : ['SIGTERM']));
   }
 
   get result(): Promise<ExecutionResult> {
@@ -160,16 +148,16 @@ export class ExecutionState {
    * @param input The data to input into the process
    */
   async execPipe<T extends Buffer | Readable>(input: T): Promise<T> {
-    (await StreamUtil.toStream(input)).pipe(this.raw.stdin!);
+    (await StreamUtil.toStream(input)).pipe(this.process.stdin!);
 
     if (input instanceof Buffer) { // If passing buffers
-      const buf = StreamUtil.toBuffer(this.raw.stdout!);
+      const buf = StreamUtil.toBuffer(this.process.stdout!);
       await this.complete;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return buf as Promise<T>;
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return StreamUtil.waitForCompletion(this.raw.stdout!, () => this.complete) as Promise<T>;
+      return StreamUtil.waitForCompletion(this.process.stdout!, () => this.complete) as Promise<T>;
     }
   }
 }
@@ -206,12 +194,12 @@ export class ExecUtil {
       const state = this.spawn(cmd, args, options);
 
       const toKill = (): void => { state.kill(); };
-      const toMessage = (v: unknown): void => { state.send(v!); };
+      const toMessage = (v: unknown): void => { state.process.send?.(v!); };
 
       // Proxy kill requests
       process.on('message', toMessage);
       process.on('SIGINT', toKill);
-      state.onMessage(v => process.send?.(v));
+      state.process.on('message', v => process.send?.(v));
 
       const result = await state.complete;
       if (result.code !== this.RESTART_EXIT_CODE) {
