@@ -2,7 +2,7 @@ import { createReadStream } from 'node:fs';
 import readline from 'node:readline';
 import timers from 'node:timers/promises';
 
-import { Env, ShutdownManager, ExecUtil } from '@travetto/base';
+import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
 import { IndexedFile, RuntimeIndex } from '@travetto/manifest';
 
 /**
