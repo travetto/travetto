@@ -1,4 +1,4 @@
-import { Env, ExecutionResult, ExecUtil, ExecutionState } from '@travetto/base';
+import { Env, ExecUtil, ExecutionResult, ExecutionState } from '@travetto/base';
 
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
