@@ -117,7 +117,7 @@ export class DocRunUtil {
     let final: string;
     try {
       const state = this.runState(cmd, args, config);
-      const res = await Spawn.exec(state.cmd, state.args, { stdio: 'pipe', ...state.opts }).result;
+      const res = await Spawn.exec(state.cmd, state.args, { stdio: 'pipe', ...state.opts }).complete;
       if (!res.valid) {
         throw new Error(res.stderr);
       }

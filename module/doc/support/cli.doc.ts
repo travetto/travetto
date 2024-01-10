@@ -57,7 +57,7 @@ export class DocCommand implements CliCommandShape {
           cwd: RuntimeIndex.mainModule.sourcePath,
           env: { ...process.env, ...Env.TRV_QUIET.export(true) },
           stdio: 'inherit'
-        }).result;
+        }).complete;
       }
     }, { restartOnExit: true });
   }

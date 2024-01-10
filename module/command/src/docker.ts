@@ -77,7 +77,7 @@ export class DockerContainer {
    * Watch execution for any failed state and evict as needed
    */
   #watchForEviction(state: Spawn, all = false): Spawn {
-    state.success.catch(err => {
+    state.result.catch(err => {
       if (all || err.killed) {
         this.#evict = true;
         this.#pendingExecutions.clear();
@@ -320,7 +320,7 @@ export class DockerContainer {
    */
   async create(args?: string[], flags?: string[]): Promise<ExecutionResult> {
     const allFlags = this.getLaunchFlags(flags);
-    return this.#runCmd('create', '--name', this.#container, ...allFlags, this.#image, ...(args ?? [])).result;
+    return this.#runCmd('create', '--name', this.#container, ...allFlags, this.#image, ...(args ?? [])).complete;
   }
 
   /**
@@ -328,17 +328,17 @@ export class DockerContainer {
    */
   async start(args?: string[], flags?: string[]): Promise<ExecutionResult> {
     await this.initTemp();
-    return this.#runCmd('start', ...(flags ?? []), this.#container, ...(args ?? [])).result;
+    return this.#runCmd('start', ...(flags ?? []), this.#container, ...(args ?? [])).complete;
   }
 
   /**
    * Stop a container
    */
   async stop(args?: string[], flags?: string[]): Promise<ExecutionResult> {
-    const toStop = this.#runCmd('stop', ...(flags ?? []), this.#container, ...(args ?? [])).result;
+    const toStop = this.#runCmd('stop', ...(flags ?? []), this.#container, ...(args ?? [])).complete;
     let prom = toStop;
     if (this.#pendingExecutions) {
-      const pendingResults = [...this.#pendingExecutions.values()].map(e => e.result);
+      const pendingResults = [...this.#pendingExecutions.values()].map(e => e.complete);
       this.#pendingExecutions.clear();
       prom = Promise.all([toStop, ...pendingResults]).then(([first]) => first);
     }
@@ -353,7 +353,7 @@ export class DockerContainer {
     const execState = this.#runCmd('exec', ...flags, this.#container, ...(args ?? []));
     this.#pendingExecutions.add(execState);
 
-    execState.result.finally(() => this.#pendingExecutions.delete(execState));
+    execState.complete.finally(() => this.#pendingExecutions.delete(execState));
 
     return execState;
   }
@@ -379,7 +379,7 @@ export class DockerContainer {
       execState.raw.unref();
     }
 
-    return execState.result.finally(() => this.#pendingExecutions.delete(execState));
+    return execState.complete.finally(() => this.#pendingExecutions.delete(execState));
   }
 
   /**
@@ -396,14 +396,14 @@ export class DockerContainer {
     console.debug('Destroying', { image: this.#image, container: this.#container });
     this.#runAway = this.#runAway || runAway;
 
-    await Spawn.exec(this.#dockerCmd, ['kill', this.#container]).result;
+    await Spawn.exec(this.#dockerCmd, ['kill', this.#container]).complete;
 
     console.debug('Removing', { image: this.#image, container: this.#container });
 
-    await Spawn.exec(this.#dockerCmd, ['rm', '-fv', this.#container]).result;
+    await Spawn.exec(this.#dockerCmd, ['rm', '-fv', this.#container]).complete;
 
     if (this.#pendingExecutions.size) {
-      const results = [...this.#pendingExecutions.values()].map(x => x.result);
+      const results = [...this.#pendingExecutions.values()].map(x => x.complete);
       this.#pendingExecutions.clear();
       await Promise.all(results);
     }
@@ -476,9 +476,9 @@ export class DockerContainer {
   async removeDanglingVolumes(): Promise<void> {
     try {
       const proc = Spawn.exec(this.#dockerCmd, ['volume', 'ls', '-qf', 'dangling=true']);
-      const ids = (await proc.success).stdout?.trim();
+      const ids = (await proc.result).stdout?.trim();
       if (ids) {
-        await Spawn.exec(this.#dockerCmd, ['volume', 'rm', ...ids.split('\n')]).success;
+        await Spawn.exec(this.#dockerCmd, ['volume', 'rm', ...ids.split('\n')]).result;
       }
     } catch {
       // ignore

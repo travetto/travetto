@@ -15,7 +15,7 @@ export class OpenApiClientHelp {
     const formatCache = ManifestFileUtil.toolPath(RuntimeIndex, 'openapi-formats.json');
     if (!await fs.stat(formatCache).catch(() => false)) {
       const stdout = Spawn.exec('docker', ['run', '--rm', dockerImage, 'list']);
-      const res = await stdout.success;
+      const res = await stdout.result;
       const lines = res.stdout!
         .split('DOCUMENTATION')[0]
         .trim()

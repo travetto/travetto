@@ -20,7 +20,7 @@ export class SpawnTest {
     const proc = Spawn.exec('ls', ['-ls'], {
       cwd: RuntimeIndex.mainModule.outputPath
     });
-    const result = await proc.success;
+    const result = await proc.result;
     assert(result.stdout?.includes('package.json'));
     assert(result.code === 0);
     assert(result.valid);
@@ -31,7 +31,7 @@ export class SpawnTest {
     const proc = Spawn.exec('ls', ['xxxx'], {
       cwd: RuntimeIndex.mainModule.outputPath,
     });
-    const result = await proc.result;
+    const result = await proc.complete;
     assert(result.stderr?.includes('xxxx'));
     assert(result.code > 0);
     assert(!result.valid);
@@ -42,7 +42,7 @@ export class SpawnTest {
     const proc = Spawn.exec(process.argv0, [await this.fixture.resolve('echo.js')]);
     proc.stdin?.write('Hello Worldy');
     proc.stdin?.end();
-    const result = await proc.result;
+    const result = await proc.complete;
     assert(result.stdout === 'Hello Worldy');
   }
 

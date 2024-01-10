@@ -16,6 +16,6 @@ export class ImageCompressor {
     // Feed from process to file system
     state.stdout!.pipe(createWriteStream(out));
 
-    await state.result;
+    await state.complete;
   }
 }

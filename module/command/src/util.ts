@@ -77,7 +77,7 @@ export class CommandUtil {
    * @param label
    */
   static async findContainerByLabel(label: string): Promise<string> {
-    return (await Spawn.exec('docker', ['ps', '-q', '--filter', `label=${label}`]).success).stdout!.trim();
+    return (await Spawn.exec('docker', ['ps', '-q', '--filter', `label=${label}`]).result).stdout!.trim();
   }
 
   /**
@@ -85,6 +85,6 @@ export class CommandUtil {
    * @param cid
    */
   static async killContainerById(cid: string): Promise<void> {
-    await Spawn.exec('docker', ['kill', cid]).result;
+    await Spawn.exec('docker', ['kill', cid]).complete;
   }
 }

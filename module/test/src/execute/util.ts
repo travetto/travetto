@@ -64,7 +64,7 @@ export class RunnerUtil {
         stdio: 'pipe',
         env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
       }
-    ).result;
+    ).complete;
     if (!countRes.valid) {
       throw new Error(countRes.stderr);
     }

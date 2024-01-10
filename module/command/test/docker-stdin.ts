@@ -24,6 +24,6 @@ export class DockerIOTest {
 
     assert(true);
 
-    await spawn.success;
+    await spawn.result;
   }
 }

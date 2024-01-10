@@ -61,7 +61,7 @@ export class PackageManager {
         args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...mods];
         break;
     }
-    await Spawn.exec(ctx.workspace.manager, args, { stdio: 'inherit' }).success;
+    await Spawn.exec(ctx.workspace.manager, args, { stdio: 'inherit' }).result;
   }
 
   /**

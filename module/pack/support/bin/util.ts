@@ -24,7 +24,7 @@ export class PackUtil {
    */
   static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
     const [cmd, ...args] = ActiveShellCommand.copyRecursive(src, dest);
-    const res = await Spawn.exec(cmd, args).result;
+    const res = await Spawn.exec(cmd, args).complete;
     if (res.code && !ignore) {
       throw new Error(`Failed to copy ${src} to ${dest}`);
     }
@@ -70,7 +70,7 @@ export class PackUtil {
     const proc = await Spawn.exec(cmd[0], cmd.slice(1), {
       stdio: [0, 'pipe', 'pipe', 'ipc'],
       ...opts,
-    }).result;
+    }).complete;
     if (!proc.valid) {
       process.exitCode = proc.code;
       throw new AppError(proc.stderr || proc.message || 'An unexpected error has occurred');

@@ -83,7 +83,7 @@ export class RepoExecUtil {
 
           processes.set(mod, proc);
 
-          const result = await proc.result;
+          const result = await proc.complete;
 
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
           const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;

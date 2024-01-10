@@ -14,16 +14,16 @@ export class PackAppSuite {
     const res = await Spawn.exec('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
       cwd: RuntimeIndex.mainModule.sourcePath,
       env: { PATH: process.env.PATH }
-    }).result;
+    }).complete;
     assert(res.code === 0);
     assert(res.valid);
 
-    const res2 = await Spawn.exec('docker', ['run', '--rm', `${imageName}:${tag}`, '30']).result;
+    const res2 = await Spawn.exec('docker', ['run', '--rm', `${imageName}:${tag}`, '30']).complete;
 
     assert(await res2.stderr === '');
     assert(res2.code === 0);
 
-    const res3 = await Spawn.exec('docker', ['image', 'rm', '--force', `${imageName}:${tag}`]).result;
+    const res3 = await Spawn.exec('docker', ['image', 'rm', '--force', `${imageName}:${tag}`]).complete;
 
     assert(res3.stdout?.includes('Result: 60'));
     assert(/Result: 60/.test(res3.stdout ?? ''));

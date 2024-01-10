@@ -37,7 +37,7 @@ export class DocAngularCommand {
               ...Env.TRV_BUILD.export('none')
             }
           });
-          req.result.then(v => {
+          req.complete.then(v => {
             if (!v.valid) {
               console.error(`${mod.name} - failed`);
             }

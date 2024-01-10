@@ -111,7 +111,7 @@ export class Spawn {
     });
   }
 
-  get result(): Promise<SpawnResult> {
+  get complete(): Promise<SpawnResult> {
     return this.#result ??= this.done.then(async v => new SpawnResult(this, v));
   }
 
@@ -119,8 +119,8 @@ export class Spawn {
     process.kill(this.raw.pid!, ...(process.platform === 'win32' ? [] : ['SIGTERM']));
   }
 
-  get success(): Promise<SpawnResult> {
-    return this.result.then(v => {
+  get result(): Promise<SpawnResult> {
+    return this.complete.then(v => {
       if (!v.valid) { throw new Error(v.message ?? `Execution failure - ${v.code}`); }
       else { return v; }
     });
@@ -136,12 +136,12 @@ export class Spawn {
 
     if (input instanceof Buffer) { // If passing buffers
       const buf = StreamUtil.toBuffer(this.raw.stdout!);
-      await this.result;
+      await this.complete;
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return buf as Promise<T>;
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return StreamUtil.waitForCompletion(this.raw.stdout!, () => this.result) as Promise<T>;
+      return StreamUtil.waitForCompletion(this.raw.stdout!, () => this.complete) as Promise<T>;
     }
   }
 }
