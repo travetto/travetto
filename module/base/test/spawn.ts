@@ -21,7 +21,7 @@ export class SpawnTest {
       cwd: RuntimeIndex.mainModule.outputPath
     });
     const result = await proc.result;
-    assert(result.stdout?.includes('package.json'));
+    assert(result.stdout.includes('package.json'));
     assert(result.code === 0);
     assert(result.valid);
   }
@@ -32,7 +32,7 @@ export class SpawnTest {
       cwd: RuntimeIndex.mainModule.outputPath,
     });
     const result = await proc.complete;
-    assert(result.stderr?.includes('xxxx'));
+    assert(result.stderr.includes('xxxx'));
     assert(result.code > 0);
     assert(!result.valid);
   }
