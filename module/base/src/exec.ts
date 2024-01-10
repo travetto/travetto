@@ -143,6 +143,10 @@ export class ExecutionState {
     this.raw.on('message', cb);
   }
 
+  unref(): void {
+    this.raw.unref();
+  }
+
   get result(): Promise<ExecutionResult> {
     return this.complete.then(v => {
       if (!v.valid) { throw new Error(v.message ?? `Execution failure - ${v.code}`); }
