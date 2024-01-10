@@ -48,7 +48,7 @@ export class CliScmUtil {
     const ws = RuntimeContext.workspace.path;
     const res = await ExecUtil.spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
     const out = new Set<string>();
-    for (const line of res.stdout!.split(/\n/g)) {
+    for (const line of res.stdout.split(/\n/g)) {
       const entry = RuntimeIndex.getEntry(path.resolve(ws, line));
       if (entry) {
         out.add(entry.sourceFile);
@@ -79,7 +79,7 @@ export class CliScmUtil {
    * Create a commit
    */
   static createCommit(message: string): Promise<string> {
-    return ExecUtil.spawn('git', ['commit', '.', '-m', message]).result.then(r => r.stdout!);
+    return ExecUtil.spawn('git', ['commit', '.', '-m', message]).result.then(r => r.stdout);
   }
 
   /**
