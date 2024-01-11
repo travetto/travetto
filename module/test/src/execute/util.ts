@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process';
 import { createReadStream } from 'node:fs';
 import readline from 'node:readline';
 import timers from 'node:timers/promises';
@@ -59,14 +60,12 @@ export class RunnerUtil {
    * @returns
    */
   static async getTestCount(patterns: string[]): Promise<number> {
-    const proc = ExecUtil.spawn('npx', ['trv', 'test:count', ...patterns],
-      {
-        stdio: 'pipe',
-        catchAsResult: true,
-        env: { ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
-      }
+    const countRes = await ExecUtil.getResult(
+      spawn('npx', ['trv', 'test:count', ...patterns], {
+        env: { ...process.env, ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
+      }),
+      { catch: true }
     );
-    const countRes = await proc.result;
     if (!countRes.valid) {
       throw new Error(countRes.stderr);
     }
