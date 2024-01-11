@@ -84,7 +84,6 @@ export class ExecUtil {
    */
   static #getOpts(opts: ExecutionOptions): ExecutionOptions {
     return {
-      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       cwd: path.cwd(),
       shell: false,
       outputMode: 'text',

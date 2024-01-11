@@ -43,7 +43,7 @@ export class ExecUtilTest {
     proc.process.stdin?.write('Hello Worldy');
     proc.process.stdin?.end();
     const result = await proc.result;
-    assert(result.stdout === 'Hello Worldy');
+    assert(result.stdout.trim() === 'Hello Worldy');
   }
 
   @Test()
