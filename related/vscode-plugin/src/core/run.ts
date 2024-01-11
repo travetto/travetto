@@ -90,7 +90,7 @@ export class RunUtil {
     this.#log.debug('Spawning', this.cliFile, command, { args, env });
     return ExecUtil.spawn(
       'node', [this.cliFile, command, ...args ?? []],
-      { cwd: Workspace.path, ...opts, env }
+      { cwd: Workspace.path, ...opts, env: { ...process.env, ...env } }
     );
   }
 }

@@ -55,7 +55,7 @@ export class Context {
     const res = ExecUtil.spawn(cmd, args, {
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
-      isolatedEnv: true,
+      env: { PATH: process.env.PATH },
       onStdErrorLine: line => term.writer.write(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`).commit()
     }).result;
 

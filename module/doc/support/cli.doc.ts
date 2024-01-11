@@ -55,7 +55,7 @@ export class DocCommand implements CliCommandShape {
       if (action === 'update' && file === this.input) {
         await ExecUtil.spawn('npx', ['trv', ...args], {
           cwd: RuntimeIndex.mainModule.sourcePath,
-          env: { ...Env.TRV_QUIET.export(true) },
+          env: { ...process.env, ...Env.TRV_QUIET.export(true) },
           stdio: 'inherit', catchAsResult: true
         });
       }

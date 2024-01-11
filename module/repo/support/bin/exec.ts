@@ -46,6 +46,7 @@ export class RepoExecUtil {
       catchAsResult: true,
       cwd: folder,
       env: {
+        ...process.env,
         ...Env.TRV_MANIFEST.export(''),
         ...Env.TRV_MODULE.export(mod.name)
       },

@@ -63,7 +63,11 @@ export class RunnerUtil {
       {
         stdio: 'pipe',
         catchAsResult: true,
-        env: { ...Env.FORCE_COLOR.export(0), ...Env.NO_COLOR.export(true) }
+        env: {
+          ...process.env,
+          ...Env.FORCE_COLOR.export(0),
+          ...Env.NO_COLOR.export(true)
+        }
       }
     );
     const countRes = await proc.result;

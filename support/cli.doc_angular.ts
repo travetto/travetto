@@ -32,6 +32,7 @@ export class DocAngularCommand {
             ...opts,
             timeout: 20000,
             env: {
+              ...process.env,
               ...opts.env ?? {},
               ...Env.TRV_BUILD.export('none')
             }
@@ -48,11 +49,20 @@ export class DocAngularCommand {
           progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
           filter: mod => mods.has(mod)
         });
-      await ExecUtil.spawn('trv', ['doc'], { env: { ...Env.TRV_MANIFEST.export('') }, cwd: RuntimeIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
+      await ExecUtil.spawn('trv', ['doc'], {
+        env: {
+          ...process.env,
+          ...Env.TRV_MANIFEST.export('')
+        }, cwd: RuntimeIndex.mainModule.sourcePath, stdio: 'pipe'
+      }).result;
       mods.add(RuntimeIndex.mainModule);
     } else {
       const opts = {
-        env: { ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },
+        env: {
+          ...process.env,
+          ...Env.TRV_MANIFEST.export(''),
+          ...Env.TRV_BUILD.export('none')
+        },
         cwd: [...mods][0].sourcePath, stdio: 'inherit'
       } as const;
       await ExecUtil.spawn('trv', ['doc'], opts).result;

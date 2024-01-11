@@ -15,7 +15,7 @@ export class PackAppSuite {
       cwd: RuntimeIndex.mainModule.sourcePath,
       stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
       catchAsResult: true,
-      isolatedEnv: true
+      env: { PATH: process.env.PATH }
     });
     const state = await res.result;
     assert(state.valid);

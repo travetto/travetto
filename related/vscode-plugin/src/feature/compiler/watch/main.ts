@@ -62,12 +62,14 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#log.debug('Running Compiler', this.#compilerCliFile, command);
     return ExecUtil.spawn('node', [this.#compilerCliFile, command], {
       cwd: Workspace.path,
-      isolatedEnv: true,
+      env: {
+        PATH: process.env.PATH,
+        ...Env.TRV_BUILD.export('debug')
+      },
       ...((command === 'start' || command === 'restart') ? {
         outputMode: 'text-stream',
         onStdErrorLine: line => this.#log.error(`> ${line}`),
       } : {}),
-      env: { ...Env.TRV_BUILD.export('debug') }
     });
   }
 
@@ -79,7 +81,7 @@ export class CompilerWatchFeature extends BaseFeature {
   #compilerEvents<T>(type: 'state' | 'log' | 'progress', signal?: AbortSignal): AsyncIterable<T> {
     const queue = new AsyncQueue<T>(signal);
     const { process: proc } = ExecUtil.spawn('node', [this.#compilerCliFile, 'event', type], {
-      cwd: Workspace.path, outputMode: 'text-stream', isolatedEnv: true,
+      cwd: Workspace.path, outputMode: 'text-stream', env: { PATH: process.env.PATH },
       onStdOutLine: line => queue.add(JSON.parse(line)),
     });
 

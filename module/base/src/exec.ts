@@ -4,8 +4,6 @@ import { Readable } from 'node:stream';
 
 import { path } from '@travetto/manifest';
 
-import { Env } from './env';
-
 const MINUTE = (1000 * 60);
 
 /**
@@ -32,10 +30,6 @@ export interface ExecutionResult {
    * Whether or not the execution completed successfully
    */
   valid: boolean;
-  /**
-   * Whether or not the execution was killed
-   */
-  killed?: boolean;
 }
 
 /**
@@ -55,15 +49,6 @@ export interface ExecutionOptions extends SpawnOptions {
    * an Error, or if it merely marks the process as completed, marking the result as invalid.
    */
   catchAsResult?: boolean;
-  /**
-   * Should the environment be isolated, or inherit from process.env
-   */
-  isolatedEnv?: boolean;
-  /**
-   * Built in timeout for any execution. The number of milliseconds the process can run before
-   * terminating and throwing an error
-   */
-  timeout?: number;
   /**
    * Determines how to treat the stdout/stderr data.
    *  - 'text' will assume the output streams are textual, and will convert to unicode data.
@@ -111,13 +96,7 @@ export class ExecUtil {
       cwd: path.cwd(),
       shell: false,
       outputMode: 'text',
-      ...opts,
-      env: {
-        // Preserve path when isolating
-        ...(opts.isolatedEnv ? { PATH: process.env.PATH } : process.env),
-        ...Env.TRV_DYNAMIC.export(false), // Force dynamic to not cascade
-        ...(opts.env ?? {})
-      }
+      ...opts
     };
   }
 
@@ -131,19 +110,13 @@ export class ExecUtil {
    * @param cmd The command being run
    */
   static #enhanceProcess(proc: ChildProcess, options: ExecutionOptions, cmd: string): Promise<ExecutionResult> {
-    const timeout = options.timeout;
-
     const res = new Promise<ExecutionResult>((resolve, reject) => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
-      let timer: NodeJS.Timeout;
       let done = false;
       const finish = function (result: Omit<ExecutionResult, 'stderr' | 'stdout'>): void {
         if (done) {
           return;
-        }
-        if (timer) {
-          clearTimeout(timer);
         }
         done = true;
 
@@ -195,13 +168,6 @@ export class ExecUtil {
 
       proc.on('close', (code: number) =>
         finish({ code, valid: code === null || code === 0 || code === 130 || code === 143 })); // Sigint/term
-
-      if (timeout) {
-        timer = setTimeout(async x => {
-          this.kill(proc);
-          finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
-        }, timeout);
-      }
     });
 
     return options.catchAsResult ? res.catch((err: ErrorWithMeta) => err.meta!) : res;
