@@ -50,15 +50,6 @@ export interface ExecutionOptions extends SpawnOptions {
    */
   catchAsResult?: boolean;
   /**
-   * Determines how to treat the stdout/stderr data.
-   *  - 'text' will assume the output streams are textual, and will convert to unicode data.
-   *  - 'text-stream' makes the same assumptions as 'text', but will only fire events, and will
-   *        not persist any data.  This is really useful for long running programs.
-   *  - 'binary' treats all stdout/stderr data as raw buffers, and will not perform any transformations.
-   *  - 'raw' avoids touching stdout/stderr altogether, and leaves it up to the caller to decide.
-   */
-  outputMode?: 'raw' | 'binary' | 'text';
-  /**
    * The stdin source for the execution
    */
   stdin?: string | Buffer | Readable;
@@ -85,7 +76,6 @@ export class ExecUtil {
   static #getOpts(opts: ExecutionOptions): ExecutionOptions {
     return {
       cwd: path.cwd(),
-      outputMode: 'text',
       ...opts
     };
   }
@@ -125,25 +115,16 @@ export class ExecUtil {
         }
       };
 
-      switch (options.outputMode ?? 'text') {
-        case 'binary': {
-          proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
-          proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
-          break;
-        }
-        case 'text': {
-          // If pipes exists
-          if (proc.stdout) {
-            rl.createInterface(proc.stdout).on('line', line => {
-              stdout.push(Buffer.from(line), Buffer.from('\n'));
-            });
-          }
-          if (proc.stderr) {
-            rl.createInterface(proc.stderr).on('line', line => {
-              stderr.push(Buffer.from(line), Buffer.from('\n'));
-            });
-          }
-        }
+      // If pipes exists
+      if (proc.stdout) {
+        rl.createInterface(proc.stdout).on('line', line => {
+          stdout.push(Buffer.from(line), Buffer.from('\n'));
+        });
+      }
+      if (proc.stderr) {
+        rl.createInterface(proc.stderr).on('line', line => {
+          stderr.push(Buffer.from(line), Buffer.from('\n'));
+        });
       }
 
       proc.on('error', (err: Error) =>
@@ -174,34 +155,33 @@ export class ExecUtil {
    * @param args The command line arguments to pass
    * @param options The enhancement options
    */
-  static async spawnWithRestart(cmd: string, args: string[], options: RestartExecutionOptions = {}): Promise<ExecutionResult> {
-    const maxRetries = options.maxRetriesPerMinute ?? 5;
+  static async spawnWithRestart(cmd: string, args: string[], options: SpawnOptions = {}, maxRetriesPerMinute = 5): Promise<ExecutionResult> {
     const restarts: number[] = [];
 
     process.once('disconnect', () => ExecUtil.kill(process));
 
     for (; ;) {
-      const state = this.spawn(cmd, args, { outputMode: 'raw', ...options, catchAsResult: true });
+      const proc = spawn(cmd, args, { ...options });
 
-      const toKill = (): void => { state.process.kill('SIGKILL'); };
-      const toMessage = (v: unknown): void => { state.process.send?.(v!); };
+      const toKill = (): void => { proc.kill('SIGKILL'); };
+      const toMessage = (v: unknown): void => { proc.send?.(v!); };
 
       // Proxy kill requests
       process.on('message', toMessage);
       process.on('SIGINT', toKill);
-      state.process.on('message', v => process.send?.(v));
+      proc.on('message', v => process.send?.(v));
 
-      const result = await state.result;
+      const result = await ExecUtil.getResult(proc);
       if (result.code !== this.RESTART_EXIT_CODE) {
         return result;
       } else {
         process.off('SIGINT', toKill);
         process.off('message', toMessage);
         restarts.unshift(Date.now());
-        if (restarts.length === maxRetries) {
-          if ((restarts[0] - restarts[maxRetries - 1]) <= MINUTE) {
-            console.error(`Bailing, due to ${maxRetries} restarts in under a minute`);
-            return state.result;
+        if (restarts.length === maxRetriesPerMinute) {
+          if ((restarts[0] - restarts[maxRetriesPerMinute - 1]) <= MINUTE) {
+            console.error(`Bailing, due to ${maxRetriesPerMinute} restarts in under a minute`);
+            return result;
           }
           restarts.pop(); // Keep list short
         }
@@ -231,7 +211,7 @@ export class ExecUtil {
    * @param options The options to use to enhance the process
    * @param cmd The command being run
    */
-  static getResult(proc: ChildProcess, options: { catch?: boolean, stdout?: boolean, stderr?: boolean }): Promise<ExecutionResult> {
+  static getResult(proc: ChildProcess, options: { catch?: boolean, stdout?: boolean, stderr?: boolean } = {}): Promise<ExecutionResult> {
     const res = new Promise<ExecutionResult>((resolve, reject) => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
