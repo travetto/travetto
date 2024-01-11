@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process';
 import fs from 'node:fs/promises';
 
 import { ExecUtil } from '@travetto/base';
@@ -19,8 +20,8 @@ export class CliScmUtil {
    */
   static async getAuthor(): Promise<{ name?: string, email: string }> {
     const [name, email] = await Promise.all([
-      await ExecUtil.spawn('git', ['config', 'user.name'], { catchAsResult: true }).result,
-      await ExecUtil.spawn('git', ['config', 'user.email']).result,
+      ExecUtil.getResult(spawn('git', ['config', 'user.name']), { catch: true }),
+      ExecUtil.getResult(spawn('git', ['config', 'user.email'])),
     ]);
     return {
       name: (name.valid ? name.stdout.trim() : '') || process.env.USER,
@@ -33,8 +34,8 @@ export class CliScmUtil {
    * @returns
    */
   static async findLastRelease(): Promise<string | undefined> {
-    const { result } = ExecUtil.spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path });
-    return (await result).stdout
+    const result = await ExecUtil.getResult(spawn('git', ['log', '--pretty=oneline'], { cwd: RuntimeContext.workspace.path }));
+    return result.stdout
       .split(/\n/)
       .find(x => /Publish /.test(x))?.split(/\s+/)?.[0];
   }
@@ -46,7 +47,7 @@ export class CliScmUtil {
    */
   static async findChangedFiles(fromHash: string, toHash: string = 'HEAD'): Promise<string[]> {
     const ws = RuntimeContext.workspace.path;
-    const res = await ExecUtil.spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }).result;
+    const res = await ExecUtil.getResult(spawn('git', ['diff', '--name-only', `${fromHash}..${toHash}`, ':!**/DOC.*', ':!**/README.*'], { cwd: ws }));
     const out = new Set<string>();
     for (const line of res.stdout.split(/\n/g)) {
       const entry = RuntimeIndex.getEntry(path.resolve(ws, line));
@@ -79,15 +80,15 @@ export class CliScmUtil {
    * Create a commit
    */
   static createCommit(message: string): Promise<string> {
-    return ExecUtil.spawn('git', ['commit', '.', '-m', message]).result.then(r => r.stdout);
+    return ExecUtil.getResult(spawn('git', ['commit', '.', '-m', message])).then(r => r.stdout);
   }
 
   /**
    * Verify if workspace is dirty
    */
   static async isWorkspaceDirty(): Promise<boolean> {
-    const res1 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code'], { catchAsResult: true }).result;
-    const res2 = await ExecUtil.spawn('git', ['diff', '--quiet', '--exit-code', '--cached'], { catchAsResult: true }).result;
+    const res1 = await ExecUtil.getResult(spawn('git', ['diff', '--quiet', '--exit-code']), { catch: true });
+    const res2 = await ExecUtil.getResult(spawn('git', ['diff', '--quiet', '--exit-code', '--cached']), { catch: true });
     return !res1.valid || !res2.valid;
   }
 }
