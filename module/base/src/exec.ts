@@ -1,6 +1,5 @@
 import rl from 'node:readline';
 import { ChildProcess, spawn, SpawnOptions } from 'node:child_process';
-import { Readable } from 'node:stream';
 
 import { path } from '@travetto/manifest';
 
@@ -32,10 +31,6 @@ export interface ExecutionResult {
    * Whether or not the execution completed successfully
    */
   valid: boolean;
-  /**
-   * Whether or not the execution was killed
-   */
-  killed?: boolean;
 }
 
 /**
@@ -60,11 +55,6 @@ export interface ExecutionOptions extends SpawnOptions {
    */
   isolatedEnv?: boolean;
   /**
-   * Built in timeout for any execution. The number of milliseconds the process can run before
-   * terminating and throwing an error
-   */
-  timeout?: number;
-  /**
    * Determines how to treat the stdout/stderr data.
    *  - 'text' will assume the output streams are textual, and will convert to unicode data.
    *  - 'text-stream' makes the same assumptions as 'text', but will only fire events, and will
@@ -81,10 +71,6 @@ export interface ExecutionOptions extends SpawnOptions {
    * On stdout line.  Requires 'outputMode' to be either 'text' or 'text-stream'
    */
   onStdOutLine?: (line: string) => void;
-  /**
-   * The stdin source for the execution
-   */
-  stdin?: string | Buffer | Readable;
 }
 
 /**
@@ -199,7 +185,7 @@ export class ExecUtil {
       if (timeout) {
         timer = setTimeout(async x => {
           this.kill(proc);
-          finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
+          finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false });
         }, timeout);
       }
     });
@@ -272,5 +258,59 @@ export class ExecUtil {
     } else if (procOrPid?.pid) {
       process.kill(procOrPid.pid, ...args);
     }
+  }
+
+  /**
+   * Take a child process, and some additional options, and produce a promise that
+   * represents the entire execution.  On successful completion the promise will resolve, and
+   * on failed completion the promise will reject.
+   *
+   * @param proc The process to enhance
+   * @param options The options to use to enhance the process
+   * @param cmd The command being run
+   */
+  static getResult(proc: ChildProcess, options: { catch?: boolean, stdout?: boolean, stderr?: boolean } = {}): Promise<ExecutionResult> {
+    const res = new Promise<ExecutionResult>((resolve, reject) => {
+      const stdout: Buffer[] = [];
+      const stderr: Buffer[] = [];
+      let done = false;
+      const finish = function (result: Omit<ExecutionResult, 'stderr' | 'stdout'>): void {
+        if (done) {
+          return;
+        }
+        done = true;
+
+        const final = {
+          stdout: Buffer.concat(stdout).toString('utf8'),
+          stderr: Buffer.concat(stderr).toString('utf8'),
+          ...result
+        };
+
+        resolve(!final.valid ?
+          { ...final, message: `${final.message || final.stderr || final.stdout || 'failed'}` } :
+          final
+        );
+      };
+      if (options.stdout !== false) {
+        proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
+      }
+      if (options.stderr !== false) {
+        proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
+      }
+
+      proc.on('error', (err: Error) =>
+        finish({ code: 1, message: err.message, valid: false }));
+
+      proc.on('close', (code: number) =>
+        finish({ code, valid: code === null || code === 0 }));
+    });
+
+    return options.catch ? res : res.then(v => {
+      if (v.valid) {
+        return v;
+      } else {
+        throw new Error(v.message);
+      }
+    });
   }
 }
