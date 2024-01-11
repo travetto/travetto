@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 
 import { ExecUtil } from '@travetto/base';
 import { ManifestFileUtil, path, RuntimeIndex } from '@travetto/manifest';
@@ -14,9 +15,8 @@ export class OpenApiClientHelp {
   static async getListOfFormats(dockerImage: string): Promise<string[]> {
     const formatCache = ManifestFileUtil.toolPath(RuntimeIndex, 'openapi-formats.json');
     if (!await fs.stat(formatCache).catch(() => false)) {
-      const stdout = ExecUtil.spawn('docker', ['run', '--rm', dockerImage, 'list']);
-      const res = await stdout.result;
-      const lines = res.stdout
+      const { stdout } = await ExecUtil.getResult(spawn('docker', ['run', '--rm', dockerImage, 'list'], { shell: false }));
+      const lines = stdout
         .split('DOCUMENTATION')[0]
         .trim()
         .split(/\n/g)

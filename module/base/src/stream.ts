@@ -145,7 +145,7 @@ export class StreamUtil {
   /**
    * Read all lines of a given readable
    */
-  static async onLine(stream: Readable | undefined, cb: (line: string) => unknown): Promise<void> {
+  static async onLine(stream: Readable | null | undefined, cb: (line: string) => unknown): Promise<void> {
     if (stream) {
       for await (const line of rl.createInterface({ input: stream })) {
         await cb(line.trimEnd());

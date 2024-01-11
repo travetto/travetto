@@ -1,7 +1,8 @@
 import vscode from 'vscode';
+import { spawn } from 'node:child_process';
 
 import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent } from '@travetto/compiler/support/types';
-import { Env, ExecUtil, ExecutionState } from '@travetto/base';
+import { Env, ExecUtil, ExecutionState, StreamUtil } from '@travetto/base';
 
 import { BaseFeature } from '../../base';
 import { Log } from '../../../core/log';
@@ -78,10 +79,11 @@ export class CompilerWatchFeature extends BaseFeature {
    */
   #compilerEvents<T>(type: 'state' | 'log' | 'progress', signal?: AbortSignal): AsyncIterable<T> {
     const queue = new AsyncQueue<T>(signal);
-    const { process: proc } = ExecUtil.spawn('node', [this.#compilerCliFile, 'event', type], {
-      cwd: Workspace.path, outputMode: 'text-stream', isolatedEnv: true,
-      onStdOutLine: line => queue.add(JSON.parse(line)),
+    const proc = spawn('node', [this.#compilerCliFile, 'event', type], {
+      cwd: Workspace.path, env: { PATH: process.env.PATH }, shell: false
     });
+
+    StreamUtil.onLine(proc.stdout, line => queue.add(JSON.parse(line)));
 
     signal?.addEventListener('abort', () => proc.kill());
     proc.on('exit', () => queue.close());
