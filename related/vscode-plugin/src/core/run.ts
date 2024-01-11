@@ -1,6 +1,7 @@
 import vscode from 'vscode';
+import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 
-import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
+import { Env } from '@travetto/base';
 
 import { EnvDict, LaunchConfig } from './types';
 import { Workspace } from './workspace';
@@ -85,10 +86,10 @@ export class RunUtil {
   }
 
   /** Spawn the CLI in the same form as ExecUtil.spawn */
-  static spawnCli(command: string, args?: string[], opts?: ExecutionOptions & { cliModule?: string }): ExecutionState {
+  static spawnCli(command: string, args?: string[], opts?: SpawnOptions & { cliModule?: string }): ChildProcess {
     const env = this.#buildEnv(false, opts?.env, opts?.cliModule);
     this.#log.debug('Spawning', this.cliFile, command, { args, env });
-    return ExecUtil.spawn(
+    return spawn(
       'node', [this.cliFile, command, ...args ?? []],
       { cwd: Workspace.path, ...opts, env: { ...process.env, ...env } }
     );

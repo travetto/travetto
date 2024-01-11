@@ -47,7 +47,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     this.#log.info('Starting', command, ...args);
 
     const prefix = String.fromCharCode(171);
-    const state = RunUtil.spawnCli(command, args, {
+    const proc = RunUtil.spawnCli(command, args, {
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
       ...opts,
       env: {
@@ -60,8 +60,9 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
         ...Env.TRV_LOG_TIME.export(false),
         ...opts.env
       },
-      catchAsResult: true
     });
+
+    const state = { process: proc, result: ExecUtil.getResult(proc, { catch: true }) };
 
     StreamUtil.onLine(state.process.stdout!, line => this.#log.info(prefix, line.trimEnd()));
     StreamUtil.onLine(state.process.stderr!, line => this.#log.error(prefix, line.trimEnd()));

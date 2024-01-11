@@ -222,4 +222,58 @@ export class ExecUtil {
       process.kill(procOrPid.pid, ...args);
     }
   }
+  /**
+   * Take a child process, and some additional options, and produce a promise that
+   * represents the entire execution.  On successful completion the promise will resolve, and
+   * on failed completion the promise will reject.
+   *
+   * @param proc The process to enhance
+   * @param options The options to use to enhance the process
+   * @param cmd The command being run
+   */
+  static getResult(proc: ChildProcess, options: { catch?: boolean, stdout?: boolean, stderr?: boolean }): Promise<ExecutionResult> {
+    const res = new Promise<ExecutionResult>((resolve, reject) => {
+      const stdout: Buffer[] = [];
+      const stderr: Buffer[] = [];
+      let done = false;
+      const finish = function (result: Omit<ExecutionResult, 'stderr' | 'stdout'>): void {
+        if (done) {
+          return;
+        }
+        done = true;
+
+        const final = {
+          stdout: Buffer.concat(stdout).toString('utf8'),
+          stderr: Buffer.concat(stderr).toString('utf8'),
+          ...result
+        };
+
+        resolve(!final.valid ?
+          { ...final, message: `${final.message || final.stderr || final.stdout || 'failed'}` } :
+          final
+        );
+      };
+      if (options.stdout !== false) {
+        proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
+      }
+      if (options.stderr !== false) {
+        proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
+      }
+
+      proc.on('error', (err: Error) =>
+        finish({ code: 1, message: err.message, valid: false }));
+
+      proc.on('close', (code: number) =>
+        finish({ code, valid: code === null || code === 0 }));
+    });
+
+    return options.catch ? res : res.then(v => {
+      if (v.valid) {
+        return v;
+      } else {
+        throw new Error(v.message);
+      }
+    });
+  }
+
 }

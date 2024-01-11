@@ -5,6 +5,7 @@ import { Workspace } from '../../../core/workspace';
 import { ParameterSelector } from '../../../core/parameter';
 import { LaunchConfig } from '../../../core/types';
 import { RunUtil } from '../../../core/run';
+import { ExecUtil } from '@travetto/base';
 
 type PickItem = vscode.QuickPickItem & { target: RunChoice };
 
@@ -91,8 +92,10 @@ export class CliRunUtil {
   }
 
   static async getModules(): Promise<ModuleGraphItem<Set<string>>[]> {
-    const res = RunUtil.spawnCli('repo:list', ['-f', 'json'], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
-    const data = await res.result;
+    const data = await ExecUtil.getResult(
+      RunUtil.spawnCli('repo:list', ['-f', 'json']),
+      { catch: true, stdout: true, stderr: true }
+    );
     if (!data.valid) {
       throw new Error(`Unable to collect module list: ${data.message}`);
     }
@@ -108,8 +111,10 @@ export class CliRunUtil {
    * Get list of run choices
    */
   static async getChoices(): Promise<RunChoice[]> {
-    const res = RunUtil.spawnCli('cli:schema', [], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
-    const data = await res.result;
+    const data = await ExecUtil.getResult(
+      RunUtil.spawnCli('cli:schema'),
+      { catch: true, stdout: true, stderr: true }
+    );
     if (!data.valid) {
       throw new Error(`Unable to collect cli command list: ${data.message}`);
     }
