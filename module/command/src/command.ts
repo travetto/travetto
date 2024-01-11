@@ -17,7 +17,7 @@ export class CommandOperation {
    */
   static async dockerAvailable(): Promise<boolean> {
     if (this.#hasDocker === undefined && !Env.TRV_DOCKER.isFalse) { // Check for docker existence
-      const { result: prom } = ExecUtil.spawn('docker', ['ps']);
+      const { result: prom } = ExecUtil.spawn('docker', ['ps'], { shell: false });
       this.#hasDocker = (await prom).valid;
     }
     return this.#hasDocker;
@@ -44,7 +44,7 @@ export class CommandOperation {
     const { localCheck } = this.config;
 
     const useLocal = await (Array.isArray(localCheck) ?
-      ExecUtil.spawn(...localCheck).result.then(x => x.valid, () => false) :
+      ExecUtil.spawn(...localCheck, { shell: false }).result.then(x => x.valid, () => false) :
       localCheck());
 
     const useContainer = this.config.allowDocker && !useLocal && (await CommandOperation.dockerAvailable());

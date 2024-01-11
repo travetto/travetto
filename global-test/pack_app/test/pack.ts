@@ -28,7 +28,7 @@ export class PackAppSuite {
     assert(state2.stderr === '');
     assert(state2.code === 0);
 
-    await ExecUtil.spawn('docker', ['image', 'rm', '--force', `${imageName}:${tag}`]);
+    await ExecUtil.spawn('docker', ['image', 'rm', '--force', `${imageName}:${tag}`], { shell: false });
 
     assert(state2.stdout.includes('Result: 60'));
     assert(/Result: 60/.test(state2.stdout));

@@ -85,7 +85,6 @@ export class ExecUtil {
   static #getOpts(opts: ExecutionOptions): ExecutionOptions {
     return {
       cwd: path.cwd(),
-      shell: false,
       outputMode: 'text',
       ...opts
     };

@@ -49,6 +49,7 @@ export function buildStandardTestManager(consumer: TestConsumer): Worker<string>
               ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(module)!.outputPath),
               ...Env.TRV_QUIET.export(true)
             },
+            shell: false,
             stdio: ['ignore', 'ignore', 2, 'ipc']
           }
         )
