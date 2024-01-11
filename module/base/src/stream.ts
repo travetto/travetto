@@ -1,4 +1,5 @@
 import { createWriteStream } from 'node:fs';
+import rl from 'node:readline/promises';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { ReadableStream as WebReadableStream } from 'node:stream/web';
 
@@ -138,6 +139,12 @@ export class StreamUtil {
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return this.waitForCompletion(proc.stdout!, () => prom) as Promise<T>;
+    }
+  }
+
+  static async onLine(stream: Readable, cb: (line: string) => unknown): Promise<void> {
+    for await (const line of rl.createInterface({ input: stream })) {
+      await cb(line.trimEnd());
     }
   }
 }

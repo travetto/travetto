@@ -1,4 +1,4 @@
-import { ExecutionResult, ExecutionOptions, ExecutionState, Env, Util, ExecUtil } from '@travetto/base';
+import { ExecutionResult, ExecutionOptions, ExecutionState, Env, Util, ExecUtil, StreamUtil } from '@travetto/base';
 import { CliModuleUtil } from '@travetto/cli';
 import { IndexedModule } from '@travetto/manifest';
 import { StyleUtil, Terminal, TerminalUtil } from '@travetto/terminal';
@@ -28,38 +28,6 @@ const colorize = (val: string, idx: number): string => COLORS[idx % COLORS.lengt
  * Tools for running commands across all modules of the monorepo
  */
 export class RepoExecUtil {
-
-  /**
-   * Generate execution options for running on modules
-   */
-  static #buildExecutionOptions <T = ExecutionState>(
-    mod: IndexedModule,
-    config: ModuleRunConfig<T>,
-    prefixes: Record<string, string>,
-    stdoutTerm: Terminal,
-    stderrTerm: Terminal
-  ): ExecutionOptions {
-    const folder = mod.sourceFolder;
-    const opts: ExecutionOptions = {
-      stdio: ['ignore', 'pipe', 'pipe', 'ignore'],
-      outputMode: 'text',
-      catchAsResult: true,
-      cwd: folder,
-      env: {
-        ...process.env,
-        ...Env.TRV_MANIFEST.export(''),
-        ...Env.TRV_MODULE.export(mod.name)
-      },
-    };
-
-    if (config.showStdout) {
-      opts.onStdOutLine = (line: string): unknown => stdoutTerm.writer.write(`${prefixes[folder] ?? ''}${line}`).commit();
-    }
-    if (config.showStderr) {
-      opts.onStdErrorLine = (line: string): unknown => stderrTerm.writer.write(`${prefixes[folder] ?? ''}${line}`).commit();
-    }
-    return opts;
-  }
 
   /**
    * Build equal sized prefix labels for outputting
@@ -97,12 +65,30 @@ export class RepoExecUtil {
     const work = WorkPool.runStreamProgress(async (mod) => {
       try {
         if (!(await config.filter?.(mod) === false)) {
-          const opts = RepoExecUtil.#buildExecutionOptions(mod, config, prefixes, stdoutTerm, stderrTerm);
+          const folder = mod.sourceFolder;
 
-          const result = await operation(mod, opts).result;
+          const { result, process: proc } = operation(mod, {
+            stdio: ['ignore', 'pipe', 'pipe', 'ignore'],
+            catchAsResult: true,
+            cwd: folder,
+            env: {
+              ...process.env,
+              ...Env.TRV_MANIFEST.export(''),
+              ...Env.TRV_MODULE.export(mod.name)
+            },
+          });
 
+          const prefix = prefixes[folder] ?? '';
+          if (config.showStdout) {
+            StreamUtil.onLine(proc.stdout!, line => stdoutTerm.writer.write(`${prefix}${line}`).commit());
+          }
+          if (config.showStderr) {
+            StreamUtil.onLine(proc.stderr!, line => stderrTerm.writer.write(`${prefix}${line}`).commit());
+          }
+
+          const out = await result;
           // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-          const output = (config.transformResult ? config.transformResult(mod, result) : result) as T;
+          const output = (config.transformResult ? config.transformResult(mod, out) : out) as T;
           results.set(mod, output);
         }
         return config.progressMessage?.(mod) ?? mod.name;

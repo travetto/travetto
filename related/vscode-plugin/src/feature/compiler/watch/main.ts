@@ -1,7 +1,8 @@
 import vscode from 'vscode';
+import { spawn } from 'node:child_process';
 
 import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent } from '@travetto/compiler/support/types';
-import { Env, ExecUtil, ExecutionState } from '@travetto/base';
+import { Env, StreamUtil } from '@travetto/base';
 
 import { BaseFeature } from '../../base';
 import { Log } from '../../../core/log';
@@ -58,19 +59,23 @@ export class CompilerWatchFeature extends BaseFeature {
    * Spawn the compiler cli in the same form as ExecUtil.spawn
    * @param command
    */
-  run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info'): ExecutionState {
+  async run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info'): Promise<string> {
     this.#log.debug('Running Compiler', this.#compilerCliFile, command);
-    return ExecUtil.spawn('node', [this.#compilerCliFile, command], {
+    const proc = spawn('node', [this.#compilerCliFile, command], {
+      shell: false,
       cwd: Workspace.path,
       env: {
         PATH: process.env.PATH,
         ...Env.TRV_BUILD.export('debug')
       },
-      ...((command === 'start' || command === 'restart') ? {
-        outputMode: 'text-stream',
-        onStdErrorLine: line => this.#log.error(`> ${line}`),
-      } : {}),
     });
+
+    if (command === 'start' || command === 'restart') {
+      StreamUtil.onLine(proc.stderr!, line => this.#log.error(`> ${line}`));
+    }
+
+    return (command === 'info') ?
+      StreamUtil.toBuffer(proc.stdout!).then(v => v.toString('utf8')) : '';
   }
 
   /**
@@ -80,10 +85,11 @@ export class CompilerWatchFeature extends BaseFeature {
    */
   #compilerEvents<T>(type: 'state' | 'log' | 'progress', signal?: AbortSignal): AsyncIterable<T> {
     const queue = new AsyncQueue<T>(signal);
-    const { process: proc } = ExecUtil.spawn('node', [this.#compilerCliFile, 'event', type], {
-      cwd: Workspace.path, outputMode: 'text-stream', env: { PATH: process.env.PATH },
-      onStdOutLine: line => queue.add(JSON.parse(line)),
+    const proc = spawn('node', [this.#compilerCliFile, 'event', type], {
+      cwd: Workspace.path, env: { PATH: process.env.PATH }
     });
+
+    StreamUtil.onLine(proc.stdout!, line => queue.add(JSON.parse(line)));
 
     signal?.addEventListener('abort', () => proc.kill());
     proc.on('exit', () => queue.close());
@@ -94,10 +100,10 @@ export class CompilerWatchFeature extends BaseFeature {
    * Get compiler state
    */
   async #compilerState(): Promise<CompilerState | undefined> {
-    const result = await this.run('info').result;
+    const result = await this.run('info');
     try {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return JSON.parse(result.stdout).state as CompilerState;
+      return JSON.parse(result).state as CompilerState;
     } catch { }
   }
 

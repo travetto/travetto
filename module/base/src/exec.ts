@@ -57,15 +57,7 @@ export interface ExecutionOptions extends SpawnOptions {
    *  - 'binary' treats all stdout/stderr data as raw buffers, and will not perform any transformations.
    *  - 'raw' avoids touching stdout/stderr altogether, and leaves it up to the caller to decide.
    */
-  outputMode?: 'raw' | 'binary' | 'text' | 'text-stream';
-  /**
-   * On stderr line.  Requires 'outputMode' to be either 'text' or 'text-stream'
-   */
-  onStdErrorLine?: (line: string) => void;
-  /**
-   * On stdout line.  Requires 'outputMode' to be either 'text' or 'text-stream'
-   */
-  onStdOutLine?: (line: string) => void;
+  outputMode?: 'raw' | 'binary' | 'text';
   /**
    * The stdin source for the execution
    */
@@ -141,23 +133,16 @@ export class ExecUtil {
           proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
           break;
         }
-        case 'text':
-        case 'text-stream': {
+        case 'text': {
           // If pipes exists
           if (proc.stdout) {
             rl.createInterface(proc.stdout).on('line', line => {
-              options.onStdOutLine?.(`${line}\n`);
-              if (options.outputMode !== 'text-stream') {
-                stdout.push(Buffer.from(line), Buffer.from('\n'));
-              }
+              stdout.push(Buffer.from(line), Buffer.from('\n'));
             });
           }
           if (proc.stderr) {
             rl.createInterface(proc.stderr).on('line', line => {
-              options.onStdErrorLine?.(`${line}\n`);
-              if (options.outputMode !== 'text-stream') {
-                stderr.push(Buffer.from(line), Buffer.from('\n'));
-              }
+              stderr.push(Buffer.from(line), Buffer.from('\n'));
             });
           }
         }

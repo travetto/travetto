@@ -1,4 +1,4 @@
-import { Env, ExecUtil, ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
+import { Env, ExecUtil, ExecutionOptions, ExecutionState, ShutdownManager, StreamUtil } from '@travetto/base';
 import type { } from '@travetto/log';
 
 import { Log } from './log';
@@ -60,10 +60,11 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
         ...Env.TRV_LOG_TIME.export(false),
         ...opts.env
       },
-      catchAsResult: true,
-      onStdOutLine: line => this.#log.info(prefix, line.trimEnd()),
-      onStdErrorLine: line => this.#log.error(prefix, line.trimEnd())
+      catchAsResult: true
     });
+
+    StreamUtil.onLine(state.process.stdout!, line => this.#log.info(prefix, line.trimEnd()));
+    StreamUtil.onLine(state.process.stderr!, line => this.#log.error(prefix, line.trimEnd()));
 
     const ready = new Promise<void>((resolve, reject) => {
       setTimeout(reject, READY_WAIT_WINDOW);

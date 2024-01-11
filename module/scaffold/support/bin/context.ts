@@ -3,7 +3,7 @@ import mustache from 'mustache';
 
 import { cliTpl } from '@travetto/cli';
 import { path, RuntimeIndex, NodePackageManager, PackageUtil } from '@travetto/manifest';
-import { ExecUtil, ExecutionResult } from '@travetto/base';
+import { ExecUtil, StreamUtil } from '@travetto/base';
 import { Terminal } from '@travetto/terminal';
 
 import { Feature } from './features';
@@ -50,16 +50,18 @@ export class Context {
     this.#targetDir = path.resolve(targetDir);
   }
 
-  #exec(cmd: string, args: string[]): Promise<ExecutionResult> {
+  async #exec(cmd: string, args: string[]): Promise<void> {
     const term = new Terminal();
     const res = ExecUtil.spawn(cmd, args, {
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
       env: { PATH: process.env.PATH },
-      onStdErrorLine: line => term.writer.write(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`).commit()
-    }).result;
+    });
 
-    return res;
+    StreamUtil.onLine(res.process.stderr!,
+      line => term.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`).commit());
+
+    await res.result;
   }
 
   get selfPath(): string {
