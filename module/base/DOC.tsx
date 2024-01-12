@@ -169,15 +169,11 @@ tpl\`{{age:20}} {{name: 'bob'}}\</>;
   </c.Section>
 
   <c.Section title='Process Execution'>
-    Just like {d.library('ChildProcess')}, the {ExecUtil} exposes {d.method('spawn')} and {d.method('fork')}.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a {d.input('Promise')} structure, that throws an error on an non-zero return status.<br />
+    {ExecUtil} exposes {d.method('getResult')} as a means to wrap {d.library('ChildProcess')}'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br />
 
     A simple example would be:
 
     <c.Code title='Running a directory listing via ls' src='doc/exec.ts' />
-
-    As you can see, the call returns not only the child process information, but the {d.input('Promise')} to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module allows for the following execution options:
-
-    <c.Code title='Execution Options' src='src/exec.ts' startRe={/ExecutionOptions/} endRe={/^[}]/} />
 
   </c.Section>
   <c.Section title='Shutdown Management'>

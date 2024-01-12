@@ -1,4 +1,5 @@
-import { Env, ExecUtil, ExecutionResult, ExecutionState } from '@travetto/base';
+import { spawn, ChildProcess } from 'node:child_process';
+import { Env, ExecUtil } from '@travetto/base';
 
 import { DockerContainer } from './docker';
 import { CommandConfig } from './types';
@@ -17,8 +18,8 @@ export class CommandOperation {
    */
   static async dockerAvailable(): Promise<boolean> {
     if (this.#hasDocker === undefined && !Env.TRV_DOCKER.isFalse) { // Check for docker existence
-      const { result: prom } = ExecUtil.spawn('docker', ['ps']);
-      this.#hasDocker = (await prom).valid;
+      const { valid } = await ExecUtil.getResult(spawn('docker', ['ps']), { catch: true });
+      this.#hasDocker = valid;
     }
     return this.#hasDocker;
   }
@@ -44,7 +45,7 @@ export class CommandOperation {
     const { localCheck } = this.config;
 
     const useLocal = await (Array.isArray(localCheck) ?
-      ExecUtil.spawn(...localCheck).result.then(x => x.valid, () => false) :
+      ExecUtil.getResult(spawn(...localCheck)).then(x => x.valid, () => false) :
       localCheck());
 
     const useContainer = this.config.allowDocker && !useLocal && (await CommandOperation.dockerAvailable());
@@ -81,21 +82,21 @@ export class CommandOperation {
   /**
    * Execute a command, either via a docker exec or the locally installed program
    */
-  async exec(...args: string[]): Promise<ExecutionState> {
+  async exec(...args: string[]): Promise<ChildProcess> {
     const container = await this.getExecContainer();
     args = (container ? this.config.containerCommand : this.config.localCommand)(args);
 
     if (container) {
       return container.exec(args);
     } else {
-      return ExecUtil.spawn(args[0], args.slice(1), { shell: true });
+      return spawn(args[0], args.slice(1), { shell: true });
     }
   }
 
   /**
    * Run a single command, if using docker, run once and terminate.
    */
-  async run(...args: string[]): Promise<ExecutionResult> {
+  async run(...args: string[]): Promise<ChildProcess> {
     const container = await this.getRunContainer();
     const [cmd, ...rest] = (container ? this.config.containerCommand : this.config.localCommand)(args);
     console.debug('Running command', { cmd, rest, container: !!container });
@@ -103,7 +104,7 @@ export class CommandOperation {
     if (container) {
       return container.setEntryPoint(cmd).run(rest);
     } else {
-      return await ExecUtil.spawn(cmd, rest, { shell: true }).result;
+      return spawn(cmd, rest, { shell: true });
     }
   }
 }

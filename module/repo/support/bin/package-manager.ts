@@ -1,7 +1,8 @@
 import path from 'node:path';
+import { spawn, ChildProcess } from 'node:child_process';
 import fs from 'node:fs/promises';
 
-import { ExecUtil, ExecutionOptions, ExecutionState, ExecutionResult } from '@travetto/base';
+import { ExecUtil, ExecutionResult } from '@travetto/base';
 import { IndexedModule, ManifestContext, Package, PackageUtil } from '@travetto/manifest';
 import { CliModuleUtil } from '@travetto/cli';
 
@@ -15,7 +16,7 @@ export class PackageManager {
   /**
    * Is a module already published
    */
-  static isPublished(ctx: ManifestContext, mod: IndexedModule, opts: ExecutionOptions): ExecutionState {
+  static isPublished(ctx: ManifestContext, mod: IndexedModule): ChildProcess {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -25,7 +26,7 @@ export class PackageManager {
         args = ['info', `${mod.name}@${mod.version}`, 'dist.integrity', '--json'];
         break;
     }
-    return ExecUtil.spawn(ctx.workspace.manager, args, opts);
+    return spawn(ctx.workspace.manager, args, { cwd: mod.sourceFolder });
   }
 
   /**
@@ -60,13 +61,13 @@ export class PackageManager {
         args = ['version', '--no-workspaces-update', level, ...(preid ? ['--preid', preid] : []), ...mods];
         break;
     }
-    await ExecUtil.spawn(ctx.workspace.manager, args, { stdio: 'inherit' }).result;
+    await ExecUtil.getResult(spawn(ctx.workspace.manager, args, { cwd: ctx.workspace.path, stdio: 'inherit' }));
   }
 
   /**
    * Dry-run packaging
    */
-  static dryRunPackaging(ctx: ManifestContext, opts: ExecutionOptions): ExecutionState {
+  static dryRunPackaging(ctx: ManifestContext): ChildProcess {
     let args: string[];
     switch (ctx.workspace.manager) {
       case 'npm':
@@ -74,15 +75,15 @@ export class PackageManager {
         args = ['pack', '--dry-run'];
         break;
     }
-    return ExecUtil.spawn(ctx.workspace.manager, args, opts);
+    return spawn(ctx.workspace.manager, args, { cwd: ctx.workspace.path });
   }
 
   /**
    * Publish a module
    */
-  static publish(ctx: ManifestContext, mod: IndexedModule, dryRun: boolean | undefined, opts: ExecutionOptions): ExecutionState {
+  static publish(ctx: ManifestContext, mod: IndexedModule, dryRun: boolean | undefined): ChildProcess {
     if (dryRun) {
-      return this.dryRunPackaging(ctx, opts);
+      return this.dryRunPackaging(ctx);
     }
 
     const versionTag = mod.version.match(/^.*-(rc|alpha|beta|next)[.]\d+/)?.[1] ?? 'latest';
@@ -93,7 +94,7 @@ export class PackageManager {
         args = ['publish', '--tag', versionTag, '--access', 'public'];
         break;
     }
-    return ExecUtil.spawn(ctx.workspace.manager, args, opts);
+    return spawn(ctx.workspace.manager, args, { cwd: ctx.workspace.path });
   }
 
   /**

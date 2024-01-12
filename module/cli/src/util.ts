@@ -1,3 +1,5 @@
+import { spawn } from 'node:child_process';
+
 import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
 import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 
@@ -38,13 +40,14 @@ export class CliUtil {
       Env.TRV_CAN_RESTART.clear();
       return;
     }
-    return ExecUtil.spawnWithRestart(process.argv0, process.argv.slice(1), {
+    return ExecUtil.withRestart(() => spawn(process.argv0, process.argv.slice(1), {
       env: {
+        ...process.env,
         ...Env.TRV_DYNAMIC.export(true),
         ...Env.TRV_CAN_RESTART.export(false)
       },
       stdio: [0, 1, 2, 'ipc']
-    });
+    }));
   }
 
   /**

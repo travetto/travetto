@@ -96,7 +96,7 @@ export class ImageConverter {
    * @param image
    */
   static async getDimensions(image: Readable | Buffer | string): Promise<{ width: number, height: number }> {
-    const state = await this.CONVERTER.exec(
+    const proc = await this.CONVERTER.exec(
       'gm', 'identify', '-format', '%wX%h', '-',
     );
 
@@ -104,9 +104,9 @@ export class ImageConverter {
       image = createReadStream(image);
     }
 
-    await StreamUtil.execPipe(state, await StreamUtil.toStream(image));
+    await StreamUtil.execPipe(proc, await StreamUtil.toStream(image));
 
-    const buf = await StreamUtil.toBuffer(state.process.stdout!);
+    const buf = await StreamUtil.toBuffer(proc.stdout!);
     const text = buf.toString('utf8');
     const [w, h] = text.split('X').map(x => parseFloat(x));
 

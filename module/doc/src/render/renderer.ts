@@ -19,8 +19,10 @@ export class DocRenderer {
 
   static async get(file: string, manifest: ManifestContext): Promise<DocRenderer> {
     const mod = RuntimeIndex.getFromSource(file)?.import;
-    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const res = await import(mod!) as DocumentShape;
+    if (!mod) {
+      throw new Error(`Unable to render ${file}, not in the manifest`);
+    }
+    const res: DocumentShape = await import(mod);
 
     const pkg = PackageUtil.readPackage(manifest.workspace.path);
     const repoBaseUrl = pkg.travetto?.doc?.baseUrl ?? manifest.workspace.path;

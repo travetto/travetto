@@ -1,5 +1,7 @@
+import { fork } from 'node:child_process';
+
 import { RuntimeIndex } from '@travetto/manifest';
-import { Env, ExecUtil } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { ParentCommChannel, Worker } from '@travetto/worker';
 
 import { Events, RunEvent } from './types';
@@ -39,12 +41,12 @@ export function buildStandardTestManager(consumer: TestConsumer): Worker<string>
       const cwd = RuntimeIndex.getModule(module)!.sourcePath;
 
       const channel = new ParentCommChannel<TestEvent & { error?: Error }>(
-        ExecUtil.spawn(
-          process.argv0,
-          [RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), 'test:child'],
+        fork(
+          RuntimeIndex.resolveFileImport('@travetto/cli/support/entry.trv'), ['test:child'],
           {
             cwd,
             env: {
+              ...process.env,
               ...Env.TRV_MANIFEST.export(RuntimeIndex.getModule(module)!.outputPath),
               ...Env.TRV_QUIET.export(true)
             },

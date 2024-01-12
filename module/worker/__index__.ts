@@ -7,4 +7,3 @@ export * from './src/support/timeout';
 export * from './src/support/error';
 export * from './src/queue';
 export * from './src/pool';
-export * from './src/util';

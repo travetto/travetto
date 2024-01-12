@@ -1,9 +1,10 @@
 import fs from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 import mustache from 'mustache';
 
+import { ExecUtil, StreamUtil } from '@travetto/base';
 import { cliTpl } from '@travetto/cli';
 import { path, RuntimeIndex, NodePackageManager, PackageUtil } from '@travetto/manifest';
-import { ExecUtil, ExecutionResult } from '@travetto/base';
 import { Terminal } from '@travetto/terminal';
 
 import { Feature } from './features';
@@ -50,16 +51,19 @@ export class Context {
     this.#targetDir = path.resolve(targetDir);
   }
 
-  #exec(cmd: string, args: string[]): Promise<ExecutionResult> {
+  #exec(cmd: string, args: string[]): Promise<void> {
     const term = new Terminal();
-    const res = ExecUtil.spawn(cmd, args, {
+    const proc = spawn(cmd, args, {
       cwd: this.destination(),
       stdio: [0, 'pipe', 'pipe'],
-      isolatedEnv: true,
-      onStdErrorLine: line => term.writer.write(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`).commit()
-    }).result;
+      shell: false,
+      env: { PATH: process.env.PATH },
+    });
 
-    return res;
+    StreamUtil.onLine(proc.stderr,
+      line => term.writer.writeLine(cliTpl`    ${{ identifier: [cmd, ...args].join(' ') }}: ${line}`).commit());
+
+    return ExecUtil.getResult(proc).then(() => { });
   }
 
   get selfPath(): string {

@@ -344,7 +344,7 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="process-execution">Process Execution</h2>
 
-Just like <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>, the <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L100">ExecUtil</a> exposes <code class="item method">spawn</code> and <code class="item method">fork</code>.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a <code class="item input">Promise</code> structure, that throws an error on an non-zero return status.<br><br>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L36">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
 A simple example would be:
 
   <figure class="code">
@@ -352,58 +352,12 @@ A simple example would be:
 <cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/doc/exec.ts">Source</a></cite>
 
 </figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExecUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
+    <pre><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> spawn <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'node:child_process'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> <span class="token punctuation">{{'{'}}</span> ExecUtil <span class="token punctuation">{{'}'}}</span> <span class="token keyword">from</span> <span class="token string">'@travetto/base'</span><span class="token punctuation">;</span>
 
 <span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">executeListing</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token keyword">const</span> <span class="token punctuation">{{'{'}}</span> result <span class="token punctuation">{{'}'}}</span> <span class="token operator">=</span> ExecUtil<span class="token punctuation">.</span><span class="token function">spawn</span><span class="token punctuation">(</span><span class="token string">'ls'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-  <span class="token keyword">const</span> final <span class="token operator">=</span> <span class="token keyword">await</span> result<span class="token punctuation">;</span>
+  <span class="token keyword">const</span> final <span class="token operator">=</span> <span class="token keyword">await</span> ExecUtil<span class="token punctuation">.</span><span class="token function">getResult</span><span class="token punctuation">(</span><span class="token function">spawn</span><span class="token punctuation">(</span><span class="token string">'ls'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
   <span class="token builtin">console</span><span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Listing'</span><span class="token punctuation">,</span> <span class="token punctuation">{{'{'}}</span> lines<span class="token operator">:</span> final<span class="token punctuation">.</span>stdout<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token string">'\n'</span><span class="token punctuation">)</span> <span class="token punctuation">{{'}'}}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">{{'}'}}</span></code></pre>
-  </figure>
-
-As you can see, the call returns not only the child process information, but the <code class="item input">Promise</code> to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module allows for the following execution options:
-
-  <figure class="code">
-    <figcaption class="code">Execution Options
-<cite><a target="_blank" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L52">Source</a></cite>
-
-</figcaption>
-    <pre><code class="language-typescript"><span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">ExecutionOptions</span> <span class="token keyword">extends</span> <span class="token class-name">SpawnOptions</span> <span class="token punctuation">{{'{'}}</span>
-  <span class="token comment">/**
-   * Should an error be caught and returned as a result. Determines whether an exit code > 0 throws
-   * an Error, or if it merely marks the process as completed, marking the result as invalid.
-   */</span>
-  catchAsResult<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Should the environment be isolated, or inherit from process.env
-   */</span>
-  isolatedEnv<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Built in timeout for any execution. The number of milliseconds the process can run before
-   * terminating and throwing an error
-   */</span>
-  timeout<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * Determines how to treat the stdout/stderr data.
-   *  - 'text' will assume the output streams are textual, and will convert to unicode data.
-   *  - 'text-stream' makes the same assumptions as 'text', but will only fire events, and will
-   *        not persist any data.  This is really useful for long running programs.
-   *  - 'binary' treats all stdout/stderr data as raw buffers, and will not perform any transformations.
-   *  - 'raw' avoids touching stdout/stderr altogether, and leaves it up to the caller to decide.
-   */</span>
-  outputMode<span class="token operator">?</span><span class="token operator">:</span> <span class="token string">'raw'</span> <span class="token operator">|</span> <span class="token string">'binary'</span> <span class="token operator">|</span> <span class="token string">'text'</span> <span class="token operator">|</span> <span class="token string">'text-stream'</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * On stderr line.  Requires 'outputMode' to be either 'text' or 'text-stream'
-   */</span>
-  onStdErrorLine<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span>line<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * On stdout line.  Requires 'outputMode' to be either 'text' or 'text-stream'
-   */</span>
-  onStdOutLine<span class="token operator">?</span><span class="token operator">:</span> <span class="token punctuation">(</span>line<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token keyword">void</span><span class="token punctuation">;</span>
-  <span class="token comment">/**
-   * The stdin source for the execution
-   */</span>
-  stdin<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span> <span class="token operator">|</span> Buffer <span class="token operator">|</span> Readable<span class="token punctuation">;</span>
 <span class="token punctuation">{{'}'}}</span></code></pre>
   </figure>
 

@@ -50,12 +50,14 @@ export class NginxServer {
 ```
 
 ## Command Service
-While docker containers provide a high level of flexibility, performance can be an issue.  [CommandOperation](https://github.com/travetto/travetto/tree/main/module/command/src/command.ts#L11) is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
+While docker containers provide a high level of flexibility, performance can be an issue.  [CommandOperation](https://github.com/travetto/travetto/tree/main/module/command/src/command.ts#L12) is a construct that wraps execution of a specific child program.  It allows for the application to decide between using docker to invoke the child program or calling the binary against the host operating system.  This is especially useful in environments where installation of programs (and specific versions) is challenging.
 
 **Code: Command Service example, using pngquant**
 ```typescript
 import { createWriteStream, createReadStream } from 'node:fs';
+
 import { CommandOperation } from '@travetto/command';
+import { ExecUtil } from '@travetto/base';
 
 export class ImageCompressor {
   converter = new CommandOperation({
@@ -64,15 +66,15 @@ export class ImageCompressor {
   });
 
   async compress(img: string) {
-    const state = await this.converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
+    const proc = await this.converter.exec('pngquant', '--quality', '40-80', '--speed 1', '--force', '-');
     const out = `${img}.compressed`;
 
     // Feed into process
-    createReadStream(img).pipe(state.process.stdin!);
+    createReadStream(img).pipe(proc.stdin!);
     // Feed from process to file system
-    state.process.stdout!.pipe(createWriteStream(out));
+    proc.stdout!.pipe(createWriteStream(out));
 
-    await state.result;
+    await ExecUtil.getResult(proc);
   }
 }
 ```

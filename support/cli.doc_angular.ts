@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 
 import { Env, ExecUtil } from '@travetto/base';
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
@@ -27,35 +28,36 @@ export class DocAngularCommand {
     if (mods.size > 1) {
       // Build out docs
       await RepoExecUtil.execOnModules('all',
-        (mod, opts) => {
-          const req = ExecUtil.spawn('trv', ['doc'], {
-            ...opts,
+        mod => {
+          const proc = spawn('trv', ['doc'], {
             timeout: 20000,
+            cwd: mod.sourceFolder,
+            shell: false,
             env: {
-              ...opts.env ?? {},
+              ...process.env,
+              ...Env.TRV_MODULE.export(mod.name),
+              ...Env.TRV_MANIFEST.export(undefined),
               ...Env.TRV_BUILD.export('none')
             }
           });
-          req.result.then(v => {
-            if (!v.valid) {
-              console.error(`${mod.name} - failed`);
-            }
-          });
-          return req;
+
+          ExecUtil.getResult(proc).catch(() => console.error(`${mod.name} - failed`));
+
+          return proc;
         },
         {
           showStdout: false,
           progressMessage: mod => `Running 'trv doc' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
           filter: mod => mods.has(mod)
         });
-      await ExecUtil.spawn('trv', ['doc'], { env: { ...Env.TRV_MANIFEST.export('') }, cwd: RuntimeIndex.mainModule.sourcePath, stdio: 'pipe' }).result;
+      await ExecUtil.getResult(spawn('trv', ['doc'], { env: { ...process.env, ...Env.TRV_MANIFEST.export('') }, cwd: RuntimeIndex.mainModule.sourcePath }));
       mods.add(RuntimeIndex.mainModule);
     } else {
-      const opts = {
-        env: { ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },
-        cwd: [...mods][0].sourcePath, stdio: 'inherit'
-      } as const;
-      await ExecUtil.spawn('trv', ['doc'], opts).result;
+      await ExecUtil.getResult(spawn('trv', ['doc'], {
+        env: { ...process.env, ...Env.TRV_MANIFEST.export(''), ...Env.TRV_BUILD.export('none') },
+        cwd: [...mods][0].sourcePath,
+        stdio: 'inherit'
+      }));
     }
 
     for (const mod of mods) {

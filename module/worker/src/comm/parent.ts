@@ -1,6 +1,6 @@
 import { ChildProcess } from 'node:child_process';
 
-import { ShutdownManager, ExecutionState } from '@travetto/base';
+import { ShutdownManager } from '@travetto/base';
 
 import { ProcessCommChannel } from './channel';
 
@@ -9,13 +9,12 @@ import { ProcessCommChannel } from './channel';
  */
 export class ParentCommChannel<U = unknown> extends ProcessCommChannel<ChildProcess, U> {
 
-  #complete: ExecutionState['result'];
+  #complete: Promise<void>;
 
-  constructor(state: ExecutionState) {
-    super(state.process);
+  constructor(proc: ChildProcess) {
+    super(proc);
     ShutdownManager.onGracefulShutdown(() => this.destroy(), this);
-    this.#complete = state.result
-      .finally(() => { this.proc = undefined; });
+    this.#complete = new Promise<void>(r => proc.on('close', r)).finally(() => { this.proc = undefined; });
   }
 
   /**

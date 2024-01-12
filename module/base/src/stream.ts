@@ -1,8 +1,8 @@
+import rl from 'node:readline/promises';
 import { createWriteStream } from 'node:fs';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { ReadableStream as WebReadableStream } from 'node:stream/web';
-
-import type { ExecutionState } from './exec';
+import { ChildProcess } from 'node:child_process';
 
 type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | WebReadableStream;
 
@@ -125,19 +125,28 @@ export class StreamUtil {
    * @param state The execution state to pipe
    * @param input The data to input into the process
    */
-  static async execPipe<T extends Buffer | Readable>(state: ExecutionState, input: T): Promise<T> {
-    const { process: proc, result: prom } = state;
-
+  static async execPipe<T extends Buffer | Readable>(proc: ChildProcess, input: T): Promise<T> {
     (await this.toStream(input)).pipe(proc.stdin!);
 
     if (input instanceof Buffer) { // If passing buffers
       const buf = this.toBuffer(proc.stdout!);
-      await prom;
+      await new Promise(r => proc.on('close', r));
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return buf as Promise<T>;
     } else {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return this.waitForCompletion(proc.stdout!, () => prom) as Promise<T>;
+      return this.waitForCompletion(proc.stdout!, () => new Promise(r => proc.on('close', r))) as Promise<T>;
+    }
+  }
+
+  /**
+   * Read all lines of a given readable
+   */
+  static async onLine(stream: Readable | null | undefined, cb: (line: string) => unknown): Promise<void> {
+    if (stream) {
+      for await (const line of rl.createInterface({ input: stream })) {
+        await cb(line.trimEnd());
+      }
     }
   }
 }

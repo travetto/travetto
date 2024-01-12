@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
+import { spawn, SpawnOptions } from 'node:child_process';
 
 import { path, RuntimeIndex } from '@travetto/manifest';
-import { AppError, ExecUtil, ExecutionOptions } from '@travetto/base';
+import { AppError, ExecUtil } from '@travetto/base';
 
 import { ActiveShellCommand } from './shell';
 
@@ -23,7 +24,7 @@ export class PackUtil {
    */
   static async copyRecursive(src: string, dest: string, ignore = false): Promise<void> {
     const [cmd, ...args] = ActiveShellCommand.copyRecursive(src, dest);
-    const res = await ExecUtil.spawn(cmd, args, { catchAsResult: true }).result;
+    const res = await ExecUtil.getResult(spawn(cmd, args, { shell: false }), { catch: true });
     if (res.code && !ignore) {
       throw new Error(`Failed to copy ${src} to ${dest}`);
     }
@@ -65,12 +66,13 @@ export class PackUtil {
   /**
    * Track result response
    */
-  static async runCommand(cmd: string[], opts: ExecutionOptions = {}): Promise<string> {
-    const { valid, code, stderr, message, stdout } = await ExecUtil.spawn(cmd[0], cmd.slice(1), {
-      stdio: [0, 'pipe', 'pipe', 'ipc'],
+  static async runCommand(cmd: string[], opts: SpawnOptions = {}): Promise<string> {
+    const { valid, code, stderr, message, stdout } = await ExecUtil.getResult(spawn(cmd[0], cmd.slice(1), {
+      stdio: [0, 'pipe', 'pipe'],
+      shell: false,
       ...opts,
-      catchAsResult: true
-    }).result;
+    }), { catch: true });
+
     if (!valid) {
       process.exitCode = code;
       throw new AppError(stderr || message || 'An unexpected error has occurred');
