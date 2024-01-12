@@ -15,7 +15,7 @@ export class PackAppSuite {
     const proc = spawn('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
       cwd: RuntimeIndex.mainModule.sourcePath,
       shell: false,
-      env: { PATH: process.env.path, ...Env.TRV_DYNAMIC.export(false) }
+      env: { PATH: process.env.PATH, ...Env.TRV_DYNAMIC.export(false) }
     });
 
     const state = await ExecUtil.getResult(proc, { catch: true });
