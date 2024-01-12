@@ -7,22 +7,6 @@ import { AuthUtil } from '../src/util';
 export class UtilTest {
 
   @Test()
-  async testPermissions() {
-    const checker = AuthUtil.permissionMatcher(['!c|d', 'a|b']);
-    assert(checker(new Set(['a', 'b'])) === true);
-    assert(checker(new Set(['a', 'b', 'c', 'd'])) === false);
-
-    const checker2 = AuthUtil.permissionMatcher(['!c', '!d', 'a', 'b']);
-    assert(checker2(new Set(['a'])) === true);
-    assert(checker2(new Set(['b'])) === true);
-    assert(checker2(new Set(['a', 'b', 'c'])) === false);
-
-    const checker3 = AuthUtil.permissionMatcher(['!c', '!d']);
-    assert(checker3(new Set(['a'])) === true);
-    assert(checker3(new Set([])) === true);
-  }
-
-  @Test()
   async testHash() {
     const hash = AuthUtil.generateHash('hello', 'test', 100, 20);
     assert((await hash).length === 20);

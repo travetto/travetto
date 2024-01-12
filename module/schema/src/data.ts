@@ -1,5 +1,4 @@
-import { ObjectUtil } from './object';
-import { Class, ClassInstance, TypedObject } from './types';
+import { Class, ClassInstance, TypedObject, ObjectUtil } from '@travetto/base';
 
 const REGEX_PAT = /[\/](.*)[\/](i|g|m|s)?/;
 

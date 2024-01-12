@@ -1,5 +1,6 @@
-import { Class, ConcreteClass, TypedObject, ObjectUtil, DataUtil } from '@travetto/base';
+import { Class, ConcreteClass, TypedObject, ObjectUtil } from '@travetto/base';
 
+import { DataUtil } from './data';
 import { AllViewⲐ } from './internal/types';
 import { SchemaRegistry } from './service/registry';
 import { FieldConfig } from './service/types';

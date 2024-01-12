@@ -10,27 +10,6 @@ const pbkdf2 = util.promisify(crypto.pbkdf2);
  */
 export class AuthUtil {
 
-  static #matchPermissionSet(rule: string[], perms: Set<string>): boolean {
-    for (const el of rule) {
-      if (!perms.has(el)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  /**
-   * Build matcher for permissions in allow/deny fashion
-   *
-   * @param permissions Permissions to build matcher for
-   */
-  static permissionMatcher(permissions: string[]): (perms: Set<string>) => boolean {
-    return Util.allowDenyMatcher<string[], [Set<string>]>(permissions,
-      x => x.split('|'),
-      this.#matchPermissionSet.bind(this),
-    );
-  }
-
   /**
    * Generate a hash for a given value
    *

@@ -1,47 +1,57 @@
 // @ts-check
-import fs from 'node:fs/promises';
+import { statSync, readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 
 import { getManifestContext } from '@travetto/manifest/bin/context.js';
 
 /** @typedef {import('@travetto/manifest').ManifestContext} Ctx */
-/** @typedef {(ctx: Ctx, content:string) => (string | Promise<string>)} Transform */
 
-const stat = (/** @type {string}*/ file) => fs.stat(file).then(s => Math.max(s.mtimeMs, s.ctimeMs)).catch(() => 0);
 const TS_EXT = /[.]tsx?$/;
 
-const /** @type {Transform} */ transpile = async (ctx, content, tsconfig = path.resolve(ctx.workspace.path, 'tsconfig.json')) => {
-  await fs.stat(tsconfig).catch(() => fs.writeFile(tsconfig, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8'));
+const getAge = (/** @type {{mtimeMs:number, ctimeMs:number}} */ st) => Math.max(st.mtimeMs, st.ctimeMs);
+
+const getTarget = (/** @type {Ctx} */ ctx, file = '') => ({
+  dest: path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler', file).replace(TS_EXT, '.js'),
+  src: path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, file),
+  writeIfStale(/** @type {(text:string)=>string}*/ transform) {
+    if (!existsSync(this.dest) || getAge(statSync(this.dest)) < getAge(statSync(this.src))) {
+      const text = readFileSync(this.src, 'utf8');
+      mkdirSync(path.dirname(this.dest), { recursive: true });
+      writeFileSync(this.dest, transform(text), 'utf8');
+    }
+  }
+});
+
+const getTranspiler = async (/** @type {Ctx} */ ctx) => {
   const ts = (await import('typescript')).default;
   const module = ctx.workspace.type === 'module' ? ts.ModuleKind.ESNext : ts.ModuleKind.CommonJS;
-  return ts.transpile(content, { target: ts.ScriptTarget.ES2022, module, esModuleInterop: true, allowSyntheticDefaultImports: true });
+  return (content = '') => ts.transpile(content, { target: ts.ScriptTarget.ES2022, module, esModuleInterop: true, allowSyntheticDefaultImports: true });
 };
 
-const /** @type {Transform} */ rewritePackage = (ctx, content) =>
-  JSON.stringify(Object.assign(JSON.parse(content), { type: ctx.workspace.type }), null, 2);
+/** @returns {Promise<import('@travetto/compiler/support/entry.trvc')>} */
+async function imp(f = '') { try { return require(f); } catch (err) { return import(f); } }
 
-async function outputIfChanged(/** @type {Ctx} */ ctx, /** @type {string} */ file, /** @type {Transform} */ transform) {
-  const target = path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler', file).replace(TS_EXT, '.js');
-  const src = path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, file);
+export async function getEntry() {
+  const ctx = getManifestContext();
+  const target = getTarget.bind(null, ctx);
 
-  if (await stat(src) > await stat(target)) {
-    await fs.mkdir(path.dirname(target), { recursive: true });
-    const content = await fs.readFile(src, 'utf8');
-    await fs.writeFile(target, await transform(ctx, content), 'utf8');
+  // Setup Tsconfig
+  const tsconfig = path.resolve(ctx.workspace.path, 'tsconfig.json');
+  existsSync(tsconfig) || writeFileSync(tsconfig, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
+
+  // Compile support folder
+  target('package.json').writeIfStale(text => JSON.stringify(Object.assign(JSON.parse(text), { type: ctx.workspace.type }), null, 2));
+
+  let transpile;
+  for (const file of readdirSync(target('support').src, { recursive: true, encoding: 'utf8' })) {
+    if (TS_EXT.test(file)) { target(`support/${file}`).writeIfStale(transpile ??= await getTranspiler(ctx)); }
   }
-  return target;
+
+  // Load
+  try {
+    return await imp(target('support/entry.trvc.ts').dest).then(v => v.main(ctx));
+  } catch (err) {
+    rmSync(target('.').dest, { recursive: true, force: true });
+    throw err;
+  }
 }
-
-export const getEntry = async () => {
-  const ctx = await getManifestContext();
-  const entry = await outputIfChanged(ctx, 'support/entry.trvc.ts', transpile);
-  const run = (/** @type {import('@travetto/compiler/support/entry.trvc')} */ mod) => mod.main(ctx);
-
-  await outputIfChanged(ctx, 'package.json', rewritePackage);
-
-  await fs.readdir(path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, 'support'), { recursive: true }).then(files =>
-    Promise.all(files.filter(x => TS_EXT.test(x)).map(f => outputIfChanged(ctx, `support/${f}`, transpile))));
-
-  try { return run(require(entry)); }
-  catch { return import(entry).then(run); }
-};

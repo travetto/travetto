@@ -1,9 +1,9 @@
 import * as mongo from 'mongodb';
 
-import { Class, DataUtil, ObjectUtil } from '@travetto/base';
+import { Class, ObjectUtil } from '@travetto/base';
 import { DistanceUnit, ModelQuery, Query, WhereClause } from '@travetto/model-query';
 import type { ModelType, IndexField } from '@travetto/model';
-import { SchemaRegistry } from '@travetto/schema';
+import { DataUtil, SchemaRegistry } from '@travetto/schema';
 import { ModelQueryUtil } from '@travetto/model-query/src/internal/service/query';
 import { AllViewⲐ } from '@travetto/schema/src/internal/types';
 

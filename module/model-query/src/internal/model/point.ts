@@ -1,4 +1,4 @@
-import { DataUtil } from '@travetto/base';
+import { DataUtil } from '@travetto/schema';
 
 export class PointImpl {
   static validateSchema(input: unknown): 'type' | undefined {

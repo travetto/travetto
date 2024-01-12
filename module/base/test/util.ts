@@ -25,45 +25,6 @@ export class UtilTest {
     assert(!allHashes.includes(hashForSpace));
   }
 
-
-  @Test()
-  orderDependents() {
-    const items = [
-      {
-        key: 'first'
-      },
-      {
-        after: ['first', 'fourth'],
-        key: 'fifth'
-      },
-      {
-        after: ['first'],
-        key: 'third'
-      },
-      {
-        after: ['first'],
-        key: 'second'
-      },
-      {
-        after: ['first', 'second'],
-        key: 'fourth'
-      },
-      {
-        after: ['fifth'],
-        key: 'sixth'
-      }
-    ] as const;
-
-    const ordered = Util.ordered(items);
-    assert.deepStrictEqual(ordered.map(x => x.key), ['first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
-
-    const ordered2 = Util.ordered([
-      { key: 'tenth', before: ['second'] },
-      ...items
-    ]);
-    assert.deepStrictEqual(ordered2.map(x => x.key), ['tenth', 'first', 'third', 'second', 'fourth', 'fifth', 'sixth']);
-  }
-
   @Test()
   staticUuidVerify() {
     const hash = crypto.createHash('sha512');
