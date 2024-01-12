@@ -1,6 +1,6 @@
-import { spawn } from 'node:child_process';
+import { ChildProcess, spawn } from 'node:child_process';
 
-import { Env, ExecUtil, ExecutionState, ShutdownManager, StreamUtil } from '@travetto/base';
+import { Env, ExecUtil, ExecutionResult, ShutdownManager, StreamUtil } from '@travetto/base';
 import type { } from '@travetto/log';
 
 import { Log } from './log';
@@ -15,13 +15,18 @@ type Handlers = {
   fail: Handler<[Error]>[];
 };
 
+type State = {
+  process: ChildProcess;
+  result: Promise<ExecutionResult>;
+};
+
 /**
  * Tracks the logic for running a process as an IPC-based server
  */
 export class ProcessServer<C extends { type: string }, E extends { type: string }> {
 
   #handlers: Handlers;
-  #state: ExecutionState | undefined;
+  #state: State | undefined;
   #command: string;
   #args: string[];
   #log: Log;
@@ -43,7 +48,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     }
   }
 
-  async #launchServer(command: string, args: string[]): Promise<[ExecutionState, Promise<void>]> {
+  async #launchServer(command: string, args: string[]): Promise<[State, Promise<void>]> {
     this.#log.info('Starting', command, ...args);
 
     const proc = spawn(command, args, {

@@ -45,7 +45,7 @@ export class CommandOperation {
     const { localCheck } = this.config;
 
     const useLocal = await (Array.isArray(localCheck) ?
-      ExecUtil.spawn(...localCheck).result.then(x => x.valid, () => false) :
+      ExecUtil.getResult(spawn(...localCheck)).then(x => x.valid, () => false) :
       localCheck());
 
     const useContainer = this.config.allowDocker && !useLocal && (await CommandOperation.dockerAvailable());
