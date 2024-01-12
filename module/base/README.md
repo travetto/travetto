@@ -306,61 +306,18 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-Just like [child_process](https://nodejs.org/api/child_process.html), the [ExecUtil](https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L100) exposes `spawn` and `fork`.  These are generally wrappers around the underlying functionality.  In addition to the base functionality, each of those functions is converted to a `Promise` structure, that throws an error on an non-zero return status.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L36) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 
 **Code: Running a directory listing via ls**
 ```typescript
+import { spawn } from 'node:child_process';
 import { ExecUtil } from '@travetto/base';
 
 export async function executeListing() {
-  const { result } = ExecUtil.spawn('ls');
-  const final = await result;
+  const final = await ExecUtil.getResult(spawn('ls'));
   console.log('Listing', { lines: final.stdout.split('\n') });
-}
-```
-
-As you can see, the call returns not only the child process information, but the `Promise` to wait for.  Additionally, some common patterns are provided for the default construction of the child process. In addition to the standard options for running child processes, the module allows for the following execution options:
-
-**Code: Execution Options**
-```typescript
-export interface ExecutionOptions extends SpawnOptions {
-  /**
-   * Should an error be caught and returned as a result. Determines whether an exit code > 0 throws
-   * an Error, or if it merely marks the process as completed, marking the result as invalid.
-   */
-  catchAsResult?: boolean;
-  /**
-   * Should the environment be isolated, or inherit from process.env
-   */
-  isolatedEnv?: boolean;
-  /**
-   * Built in timeout for any execution. The number of milliseconds the process can run before
-   * terminating and throwing an error
-   */
-  timeout?: number;
-  /**
-   * Determines how to treat the stdout/stderr data.
-   *  - 'text' will assume the output streams are textual, and will convert to unicode data.
-   *  - 'text-stream' makes the same assumptions as 'text', but will only fire events, and will
-   *        not persist any data.  This is really useful for long running programs.
-   *  - 'binary' treats all stdout/stderr data as raw buffers, and will not perform any transformations.
-   *  - 'raw' avoids touching stdout/stderr altogether, and leaves it up to the caller to decide.
-   */
-  outputMode?: 'raw' | 'binary' | 'text' | 'text-stream';
-  /**
-   * On stderr line.  Requires 'outputMode' to be either 'text' or 'text-stream'
-   */
-  onStdErrorLine?: (line: string) => void;
-  /**
-   * On stdout line.  Requires 'outputMode' to be either 'text' or 'text-stream'
-   */
-  onStdOutLine?: (line: string) => void;
-  /**
-   * The stdin source for the execution
-   */
-  stdin?: string | Buffer | Readable;
 }
 ```
 

@@ -134,7 +134,7 @@ Options:
   --env-file <string>                    Env Flag File Name (default: ".env")
   --manifest-file <string>               Manifest File Name (default: "manifest.json")
   -df, --docker-factory <string>         Docker Factory source  (default: "@travetto/pack/support/pack.dockerfile")
-  -di, --docker-image <string>           Docker Image to extend  (default: "node:21-alpine")
+  -di, --docker-image <string>           Docker Image to extend  (default: "node:20-alpine")
   -dn, --docker-name <string>            Docker Image Name  (default: "travetto_pack")
   -dt, --docker-tag <string>             Docker Image Tag  (default: ["latest"])
   -dp, --docker-port <number>            Docker Image Port  (default: [])
@@ -240,7 +240,7 @@ cd $ROOT
 
 echo "Generating Docker File $DIST/Dockerfile @travetto/pack/support/pack.dockerfile"
 
-echo "FROM node:21-alpine" > $DIST/Dockerfile
+echo "FROM node:20-alpine" > $DIST/Dockerfile
 echo "RUN which useradd && (groupadd --gid 2000 app && useradd -u 2000 -g app app) || (addgroup -g 2000 app && adduser -D -G app -u 2000 app)" >> $DIST/Dockerfile
 echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
 echo "COPY --chown=\"app:app\" . /app" >> $DIST/Dockerfile
@@ -249,11 +249,11 @@ echo "USER app" >> $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
 
-# Pulling Docker Base Image node:21-alpine 
+# Pulling Docker Base Image node:20-alpine 
 
-echo "Pulling Docker Base Image node:21-alpine"
+echo "Pulling Docker Base Image node:20-alpine"
 
-docker pull node:21-alpine
+docker pull node:20-alpine
 
 # Building Docker Container latest 
 

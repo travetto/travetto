@@ -72,10 +72,10 @@ export class RepoExecUtil {
           processes.set(mod, proc);
 
           if (config.showStdout) {
-            StreamUtil.onLine(proc.stdout, line => stdoutTerm.writer.write(`${prefix}${line}`).commit());
+            StreamUtil.onLine(proc.stdout, line => stdoutTerm.writer.writeLine(`${prefix}${line}`).commit());
           }
           if (config.showStderr) {
-            StreamUtil.onLine(proc.stderr, line => stderrTerm.writer.write(`${prefix}${line}`).commit());
+            StreamUtil.onLine(proc.stderr, line => stderrTerm.writer.writeLine(`${prefix}${line}`).commit());
           }
 
           const result = await ExecUtil.getResult(proc, { catch: true });

@@ -9,12 +9,6 @@ export const text = <>
 
   <c.Section title='Execution Pools'>
     With respect to managing multiple executions, {WorkPool} is provided to allow for concurrent operation, and processing of jobs concurrently.  To manage the flow of jobs, {WorkQueue} is provided to support a wide range of use cases. {WorkQueue} allows for manual control of iteration, which is useful for event driven work loads. <br />
-
-    Below is a pool that will convert images on demand, while queuing as needed.
-
-    <c.Code title='Image processing queue, with a fixed batch/pool size' src='doc/images.ts' />
-
-    Once a pool is constructed, it can be shutdown by calling the {d.method('.shutdown()')} method, and awaiting the result.
   </c.Section>
 
   <c.Section title='IPC Support' >

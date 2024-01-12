@@ -78,7 +78,7 @@ export class CommandUtil {
    * @param label
    */
   static async findContainerByLabel(label: string): Promise<string> {
-    return (await ExecUtil.getResult(spawn('docker', ['ps', '-q', '--filter', `label=${label}`], { shell: false }))).stdout;
+    return (await ExecUtil.getResult(spawn('docker', ['ps', '-q', '--filter', `label=${label}`], { shell: false }))).stdout.trim();
   }
 
   /**
