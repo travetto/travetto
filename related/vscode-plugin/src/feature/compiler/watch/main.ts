@@ -1,8 +1,8 @@
 import vscode from 'vscode';
-import { spawn } from 'node:child_process';
+import { ChildProcess, spawn } from 'node:child_process';
 
 import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent } from '@travetto/compiler/support/types';
-import { Env, ExecUtil, ExecutionState, StreamUtil } from '@travetto/base';
+import { Env, ExecUtil, StreamUtil } from '@travetto/base';
 
 import { BaseFeature } from '../../base';
 import { Log } from '../../../core/log';
@@ -56,20 +56,21 @@ export class CompilerWatchFeature extends BaseFeature {
   }
 
   /**
-   * Spawn the compiler cli in the same form as ExecUtil.spawn
+   * Spawn the compiler cli
    * @param command
    */
-  run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info'): ExecutionState {
+  run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info'): ChildProcess {
     this.#log.debug('Running Compiler', this.#compilerCliFile, command);
-    return ExecUtil.spawn('node', [this.#compilerCliFile, command], {
+    const proc = spawn('node', [this.#compilerCliFile, command], {
       cwd: Workspace.path,
-      isolatedEnv: true,
-      ...((command === 'start' || command === 'restart') ? {
-        outputMode: 'text-stream',
-        onStdErrorLine: line => this.#log.error(`> ${line}`),
-      } : {}),
-      env: { ...Env.TRV_BUILD.export('debug') }
+      env: { PATH: process.env.PATH, ...Env.TRV_BUILD.export('debug') }
     });
+
+    if (command === 'start' || command === 'restart') {
+      StreamUtil.onLine(proc.stderr, line => this.#log.error(`> ${line}`));
+    }
+
+    return proc;
   }
 
   /**
@@ -94,10 +95,10 @@ export class CompilerWatchFeature extends BaseFeature {
    * Get compiler state
    */
   async #compilerState(): Promise<CompilerState | undefined> {
-    const result = await this.run('info').result;
+    const { stdout } = await ExecUtil.getResult(this.run('info'));
     try {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return JSON.parse(result.stdout).state as CompilerState;
+      return JSON.parse(stdout).state as CompilerState;
     } catch { }
   }
 

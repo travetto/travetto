@@ -1,4 +1,6 @@
-import { Env, ExecUtil, ExecutionOptions, ExecutionState, ShutdownManager } from '@travetto/base';
+import { spawn } from 'node:child_process';
+
+import { Env, ExecUtil, ExecutionState, ShutdownManager, StreamUtil } from '@travetto/base';
 import type { } from '@travetto/log';
 
 import { Log } from './log';
@@ -22,13 +24,11 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
   #state: ExecutionState | undefined;
   #command: string;
   #args: string[];
-  #opts: ExecutionOptions;
   #log: Log;
 
-  constructor(log: Log, cliCommand: string, args: string[] = [], opts: ExecutionOptions = {}) {
+  constructor(log: Log, cliCommand: string, args: string[] = []) {
     this.#command = cliCommand;
     this.#args = args;
-    this.#opts = opts;
     this.#log = log;
     this.#handlers = { start: [], exit: [], fail: [] };
 
@@ -43,26 +43,32 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     }
   }
 
-  async #launchServer(command: string, args: string[], opts: ExecutionOptions = {}): Promise<[ExecutionState, Promise<void>]> {
+  async #launchServer(command: string, args: string[]): Promise<[ExecutionState, Promise<void>]> {
     this.#log.info('Starting', command, ...args);
 
-    const prefix = String.fromCharCode(171);
-    const state = RunUtil.spawnCli(command, args, {
+    const proc = spawn(command, args, {
       stdio: ['inherit', 'pipe', 'pipe', 'ipc'],
-      ...opts,
       env: {
+        ...process.env,
+        ...RunUtil.buildEnv(),
         ...Env.TRV_DYNAMIC.export(true),
         ...Env.FORCE_COLOR.export(0),
         ...Env.NODE_DISABLE_COLORS.export(true),
         ...Env.NO_COLOR.export(true),
         ...Env.TRV_QUIET.export(true),
         ...Env.TRV_LOG_TIME.export(false),
-        ...opts.env
       },
-      catchAsResult: true,
-      onStdOutLine: line => this.#log.info(prefix, line.trimEnd()),
-      onStdErrorLine: line => this.#log.error(prefix, line.trimEnd())
+      shell: false
     });
+
+    const prefix = String.fromCharCode(171);
+    StreamUtil.onLine(proc.stdout, line => this.#log.info(prefix, line.trimEnd()));
+    StreamUtil.onLine(proc.stderr, line => this.#log.error(prefix, line.trimEnd()));
+
+    const state = {
+      result: ExecUtil.getResult(proc, { catch: true }),
+      process: proc
+    };
 
     const ready = new Promise<void>((resolve, reject) => {
       setTimeout(reject, READY_WAIT_WINDOW);
@@ -105,7 +111,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
     if (this.#state) {
       return;
     }
-    const [state, ready] = await this.#launchServer(this.#command, this.#args, this.#opts);
+    const [state, ready] = await this.#launchServer(this.#command, this.#args);
     this.#state = state;
     return ready;
   }

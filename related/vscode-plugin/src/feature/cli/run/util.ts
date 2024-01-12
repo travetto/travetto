@@ -1,4 +1,7 @@
 import vscode from 'vscode';
+import { spawn } from 'child_process';
+
+import { ExecUtil, Env } from '@travetto/base';
 
 import { RunChoice, ResolvedRunChoice } from './types';
 import { Workspace } from '../../../core/workspace';
@@ -91,8 +94,12 @@ export class CliRunUtil {
   }
 
   static async getModules(): Promise<ModuleGraphItem<Set<string>>[]> {
-    const res = RunUtil.spawnCli('repo:list', ['-f', 'json'], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
-    const data = await res.result;
+    const proc = spawn('node', [RunUtil.cliFile, 'repo:list', '-f', 'json'], {
+      stdio: [0, 'pipe', 'pipe', 'ignore'],
+      shell: false,
+      env: { ...process.env, ...RunUtil.buildEnv(), ...Env.TRV_QUIET.export(true) }
+    });
+    const data = await ExecUtil.getResult(proc, { catch: true });
     if (!data.valid) {
       throw new Error(`Unable to collect module list: ${data.message}`);
     }
@@ -108,8 +115,12 @@ export class CliRunUtil {
    * Get list of run choices
    */
   static async getChoices(): Promise<RunChoice[]> {
-    const res = RunUtil.spawnCli('cli:schema', [], { stdio: [0, 'pipe', 'pipe', 'ignore'], catchAsResult: true });
-    const data = await res.result;
+    const proc = spawn('node', [RunUtil.cliFile, 'cli:schema'], {
+      stdio: [0, 'pipe', 'pipe', 'ignore'],
+      shell: false,
+      env: { ...process.env, ...RunUtil.buildEnv(), ...Env.TRV_QUIET.export(true) }
+    });
+    const data = await ExecUtil.getResult(proc, { catch: true });
     if (!data.valid) {
       throw new Error(`Unable to collect cli command list: ${data.message}`);
     }
