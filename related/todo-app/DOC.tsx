@@ -5,7 +5,7 @@ import { RuntimeIndex } from '@travetto/manifest';
 import { d, c, DocJSXElementByFn, DocJSXElement, isDocJSXElement } from '@travetto/doc';
 import { DocRunUtil } from '@travetto/doc/src/util/run';
 import { Model } from '@travetto/model';
-import { Env, ExecUtil, ShutdownManager, Util } from '@travetto/base';
+import { Env, ShutdownManager, Util } from '@travetto/base';
 
 const ModelType = d.codeLink('ModelType', '@travetto/model/src/types/model.ts', /./);
 const TodoRoot = d.ref('Todo App', RuntimeIndex.mainModule.outputPath);
@@ -17,13 +17,13 @@ async function init() {
 
   const startupBuffer: Buffer[] = [];
 
-  const cmd = DocRunUtil.runBackground('trv', ['run:rest'], {
-    env: { REST_LOG_PATHS: '!*', REST_PORT: `${port}`, REST_SSL: '0' }
+  const cmd = DocRunUtil.spawn('trv', ['run:rest'], {
+    env: { ...process.env, REST_LOG_PATHS: '!*', REST_PORT: `${port}`, REST_SSL: '0' }
   });
 
-  ShutdownManager.onGracefulShutdown(async () => ExecUtil.kill(cmd.process));
+  ShutdownManager.onGracefulShutdown(async () => { cmd.kill(); });
 
-  cmd.process.stdout?.on('data', v =>
+  cmd.stdout?.on('data', v =>
     startupBuffer.push(Buffer.from(v)));
 
   while (startupBuffer.length === 0) {

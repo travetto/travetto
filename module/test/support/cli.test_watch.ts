@@ -1,4 +1,4 @@
-import { Env, ExecUtil } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { CliCommand, CliUtil } from '@travetto/cli';
 
 import { TestFormat } from './bin/types';
@@ -22,7 +22,7 @@ export class TestWatcherCommand {
       return;
     }
 
-    process.once('disconnect', () => ExecUtil.kill(process));
+    process.once('disconnect', () => process.exit());
 
     try {
       const { TestWatcher } = await import('../src/execute/watcher.js');

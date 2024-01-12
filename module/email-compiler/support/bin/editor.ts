@@ -1,5 +1,3 @@
-import { ExecUtil } from '@travetto/base';
-
 import { EmailCompilationManager } from './manager';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
@@ -108,7 +106,7 @@ export class EditorState {
       }
     });
 
-    process.once('disconnect', () => ExecUtil.kill(process));
+    process.once('disconnect', () => process.exit());
     process.send?.('ready');
 
     for await (const f of EmailCompiler.watchCompile()) {

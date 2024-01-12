@@ -1,8 +1,6 @@
 import { ChildProcess } from 'node:child_process';
 import { EventEmitter } from 'node:events';
 
-import { ExecUtil } from '@travetto/base';
-
 /**
  * Channel that represents communication between parent/child
  */
@@ -92,7 +90,8 @@ export class ProcessCommChannel<T extends NodeJS.Process | ChildProcess, V = unk
     if (this.#proc) {
       console.debug('Killing', { pid: this.#parentId, id: this.id });
       if (this.#proc !== process) {
-        ExecUtil.kill(this.#proc);
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        (this.#proc as ChildProcess).kill();
       }
       this.#proc = undefined;
     }

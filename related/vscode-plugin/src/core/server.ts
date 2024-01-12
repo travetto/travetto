@@ -86,7 +86,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       };
       state.process.on('message', readyHandler);
     }).catch(() => {
-      ExecUtil.kill(state.process);
+      state.process.kill();
       this.#log.info('Service Timed out');
       throw new Error('Timeout');
     });
@@ -130,7 +130,7 @@ export class ProcessServer<C extends { type: string }, E extends { type: string 
       const proc = this.#state.process;
       this.#state = undefined;
       const waitForKill = new Promise<void>(res => proc.on('exit', res));
-      ExecUtil.kill(proc);
+      proc.kill();
       await waitForKill;
     }
   }

@@ -86,7 +86,7 @@ export class RepoExecUtil {
         }
         return config.progressMessage?.(mod) ?? mod.name;
       } finally {
-        ExecUtil.kill(processes.get(mod!));
+        processes.get(mod!)?.kill();
       }
     }, mods, mods.length, { max: workerCount, min: workerCount });
 

@@ -47,7 +47,7 @@ export class ExecUtil {
     const maxRetries = maxRetriesPerMinute ?? 5;
     const restarts: number[] = [];
 
-    process.once('disconnect', () => ExecUtil.kill(process));
+    process.once('disconnect', () => this.kill(process));
 
     for (; ;) {
       const proc = run();
@@ -60,7 +60,7 @@ export class ExecUtil {
       process.on('SIGINT', toKill);
       proc.on('message', v => process.send?.(v));
 
-      const result = await ExecUtil.getResult(proc, { catch: true });
+      const result = await this.getResult(proc, { catch: true });
       if (result.code !== this.RESTART_EXIT_CODE) {
         return result;
       } else {

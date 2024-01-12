@@ -1,5 +1,5 @@
 import os from 'node:os';
-import { spawn } from 'node:child_process';
+import { spawn, ChildProcess } from 'node:child_process';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
 import { Env, ExecUtil } from '@travetto/base';
@@ -71,6 +71,27 @@ export class DocRunUtil {
     return text;
   }
 
+  /**
+   * Spawn command with appropriate environment, and cwd
+   */
+  static spawn(cmd: string, args: string[], config: RunConfig = {}): ChildProcess {
+    return spawn(cmd, args, {
+      cwd: path.toPosix(config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : RuntimeIndex.mainModule).sourcePath),
+      shell: '/bin/bash',
+      env: {
+        ...process.env,
+        ...Env.DEBUG.export(false),
+        ...Env.TRV_CAN_RESTART.export(false),
+        ...Env.TRV_CLI_IPC.export(undefined),
+        ...Env.TRV_MANIFEST.export(''),
+        ...Env.TRV_BUILD.export('none'),
+        ...Env.TRV_ROLE.export(undefined),
+        ...Env.TRV_MODULE.export(config.module ?? ''),
+        ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
+        ...config.env
+      }
+    });
+  }
 
   /**
    * Run command synchronously and return output
@@ -78,22 +99,7 @@ export class DocRunUtil {
   static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
     let final: string;
     try {
-      const proc = spawn(cmd, args, {
-        cwd: path.toPosix(config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : RuntimeIndex.mainModule).sourcePath),
-        shell: '/bin/bash',
-        env: {
-          ...process.env,
-          ...Env.DEBUG.export(false),
-          ...Env.TRV_CAN_RESTART.export(false),
-          ...Env.TRV_CLI_IPC.export(undefined),
-          ...Env.TRV_MANIFEST.export(''),
-          ...Env.TRV_BUILD.export('none'),
-          ...Env.TRV_ROLE.export(undefined),
-          ...Env.TRV_MODULE.export(config.module ?? ''),
-          ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
-          ...config.env
-        }
-      });
+      const proc = this.spawn(cmd, args, config);
       const res = await ExecUtil.getResult(proc, { catch: true });
       if (!res.valid) {
         throw new Error(res.stderr);
