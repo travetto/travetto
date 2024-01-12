@@ -1,7 +1,7 @@
 /** @jsxImportSource @travetto/doc */
 import { d, c } from '@travetto/doc';
 
-import { WorkPool, WorkQueue, ChildCommChannel, ParentCommChannel, WorkUtil } from '@travetto/worker';
+import { WorkPool, WorkQueue, ChildCommChannel, ParentCommChannel } from '@travetto/worker';
 
 export const text = <>
   <c.StdHeader />
@@ -19,19 +19,5 @@ export const text = <>
 
   <c.Section title='IPC Support' >
     Within the {d.input('comm')} package, there is support for two primary communication elements: {ChildCommChannel} and {ParentCommChannel}.  Usually {ParentCommChannel} indicates it is the owner of the sub process. {ChildCommChannel} indicates that it has been created/spawned/forked by the parent and will communicate back to it's parent. This generally means that a {ParentCommChannel} can be destroyed (i.e. killing the subprocess) where a {ChildCommChannel} can only exit the process, but the channel cannot be destroyed.
-
-    <c.SubSection title='IPC as a Worker'>
-      A common pattern is to want to model a sub process as a worker, to be a valid candidate in a {WorkPool}.  The {WorkUtil} class provides a utility to facilitate this desire.
-
-      <c.Code title='Spawned Worker' src='src/util.ts' />
-
-      When creating your work, via process spawning, you will need to provide the script (and any other features you would like in {d.input('SpawnConfig')}).   Additionally you must, at a minimum, provide functionality to run whenever an input element is up for grabs in the input source.  This method will be provided the communication channel ({ParentCommChannel}) and the input value.  A simple example could look like:
-
-      <c.Code title='Spawning Pool' src='doc/spawner.ts' />
-
-      <c.Code title='Spawned Worker' src='doc/spawned.ts' />
-
-      <c.Execution title='Output' cmd='trv' args={['main', 'doc/spawner.ts']} />
-    </c.SubSection>
   </c.Section>
 </>;
