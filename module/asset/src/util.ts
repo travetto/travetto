@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
 import crypto from 'node:crypto';
 import mime from 'mime';
 
@@ -19,14 +20,8 @@ export class AssetUtil {
   static async hashFile(pth: string): Promise<string> {
     const hasher = crypto.createHash('sha256').setEncoding('hex');
     const str = createReadStream(pth);
-    const hashStream = str.pipe(hasher);
-    try {
-      return await new Promise<string>((res, rej) => {
-        hashStream.on('finish', (e?: Error) => e ? rej(e) : res(hasher.read().toString()));
-      });
-    } finally {
-      try { str.close(); } catch { }
-    }
+    await pipeline(str, hasher);
+    return hasher.read().toString();
   }
 
   /**

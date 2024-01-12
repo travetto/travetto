@@ -2,6 +2,7 @@ import { createWriteStream } from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import stream from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 import mime from 'mime';
 
 import { Renderable, Request, Response } from '@travetto/rest';
@@ -36,23 +37,21 @@ export class AssetRestUtil {
     }
 
     let read = 0;
-    await new Promise((res, rej) => {
-      inputStream
-        .pipe(new stream.Transform({
-          transform(chunk, encoding, callback): void {
-            read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : 0;
-            if (read >= maxSize) {
-              callback(new AppError('File size exceeded', 'data'));
-            } else {
-              callback(null, chunk);
-            }
-          },
-        }))
-        .on('error', rej)
-        .pipe(createWriteStream(outputFile))
-        .on('finish', res)
-        .on('error', rej);
-    });
+
+    await pipeline(
+      inputStream,
+      new stream.Transform({
+        transform(chunk, encoding, callback): void {
+          read += (Buffer.isBuffer(chunk) || typeof chunk === 'string') ? chunk.length : 0;
+          if (read >= maxSize) {
+            callback(new AppError('File size exceeded', 'data'));
+          } else {
+            callback(null, chunk);
+          }
+        },
+      }),
+      createWriteStream(outputFile)
+    );
   }
 
   /**

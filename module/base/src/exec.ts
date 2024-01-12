@@ -4,22 +4,11 @@ const MINUTE = (1000 * 60);
 
 const RESULT = Symbol.for('@travetto/base:exec-result');
 
-/**
- * Result of an execution
- */
-export interface ExecutionResult {
+interface ExecutionBaseResult {
   /**
    * Exit code
    */
   code: number;
-  /**
-   * Stdout as a string
-   */
-  stdout: string;
-  /**
-   * Stderr as a string
-   */
-  stderr: string;
   /**
    * Execution result message, should be inline with code
    */
@@ -31,6 +20,20 @@ export interface ExecutionResult {
 }
 
 /**
+ * Result of an execution
+ */
+export interface ExecutionResult extends ExecutionBaseResult {
+  /**
+   * Stdout as a string
+   */
+  stdout: string;
+  /**
+   * Stderr as a string
+   */
+  stderr: string;
+}
+
+/**
  * Standard utilities for managing executions
  */
 export class ExecUtil {
@@ -39,9 +42,8 @@ export class ExecUtil {
 
   /**
    * Run with automatic restart support
-   * @param cmd The command to run
-   * @param args The command line arguments to pass
-   * @param options The enhancement options
+   * @param run The factory to produce the next running process
+   * @param maxRetriesPerMinute The number of times to allow a retry within a minute
    */
   static async withRestart(run: () => ChildProcess, maxRetriesPerMinute?: number): Promise<ExecutionResult> {
     const maxRetries = maxRetriesPerMinute ?? 5;
@@ -88,14 +90,14 @@ export class ExecUtil {
    * @param options The options to use to enhance the process
    */
   static getResult(
-    proc: ChildProcess & { [RESULT]?: Record<string, Promise<ExecutionResult>> },
-    options: { catch?: boolean, stdout?: boolean, stderr?: boolean } = {}
+    proc: ChildProcess & { [RESULT]?: Promise<ExecutionResult> },
+    options: { catch?: boolean } = {}
   ): Promise<ExecutionResult> {
-    const res = (proc[RESULT] ??= {})[`${options.stdout}|${options.stderr}`] ??= new Promise<ExecutionResult>(resolve => {
+    const res = proc[RESULT] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let done = false;
-      const finish = function (result: Omit<ExecutionResult, 'stderr' | 'stdout'>): void {
+      const finish = (result: ExecutionBaseResult): void => {
         if (done) {
           return;
         }
@@ -112,12 +114,9 @@ export class ExecUtil {
           final
         );
       };
-      if (options.stdout !== false) {
-        proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
-      }
-      if (options.stderr !== false) {
-        proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
-      }
+
+      proc.stdout?.on('data', (d: string | Buffer) => stdout.push(Buffer.from(d)));
+      proc.stderr?.on('data', (d: string | Buffer) => stderr.push(Buffer.from(d)));
 
       proc.on('error', (err: Error) =>
         finish({ code: 1, message: err.message, valid: false }));

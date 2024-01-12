@@ -1,7 +1,8 @@
 import assert from 'node:assert';
+import { pipeline } from 'node:stream/promises';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
-import { ExecUtil } from '@travetto/base';
+import { ExecUtil, MemoryWritable } from '@travetto/base';
 
 import { DockerContainer } from '../src/docker';
 
@@ -21,10 +22,17 @@ export class DockerIOTest {
 
     const proc = await container.exec(['gm', 'convert', '-resize', '100x50', '-', '-']);
 
-    (await this.fixture.readStream('/download.jpeg')).pipe(proc.stdin!);
+    const output = new MemoryWritable();
+
+    await Promise.all([
+      pipeline(await this.fixture.readStream('/download.jpeg'), proc.stdin!),
+      pipeline(proc.stdout!, output)
+    ]);
 
     assert(true);
 
-    await ExecUtil.getResult(proc);
+    assert(output.toBuffer().length > 100);
+
+    assert((await ExecUtil.getResult(proc)).valid);
   }
 }

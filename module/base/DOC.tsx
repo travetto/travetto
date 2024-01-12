@@ -125,7 +125,6 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
       <li>{d.method('toBuffer(src: Readable | Buffer | string): Promise<Buffer>')} for converting a stream/buffer/filepath to a Buffer.</li>
       <li>{d.method('toReadable(src: Readable | Buffer | string):Promise<Readable>')} for converting a stream/buffer/filepath to a Readable</li>
       <li>{d.method('writeToFile(src: Readable, out: string):Promise<void>')} will stream a readable into a file path, and wait for completion.</li>
-      <li>{d.method('waitForCompletion(src: Readable, finish:()=>Promise<any>)')} will ensure the stream remains open until the promise finish produces is satisfied.</li>
     </ul>
   </c.Section>
 

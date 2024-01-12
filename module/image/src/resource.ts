@@ -1,8 +1,9 @@
 import fs from 'node:fs/promises';
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { ManifestFileUtil, RuntimeIndex, path } from '@travetto/manifest';
-import { Env, ResourceLoader, StreamUtil } from '@travetto/base';
+import { Env, ResourceLoader } from '@travetto/base';
 
 import { ImageConverter } from './convert';
 
@@ -40,7 +41,7 @@ export class ImageOptimizingResourceLoader extends ResourceLoader {
       } else if (/[.]jpe?g$/i.test(rel)) {
         stream = await ImageConverter.optimize('jpeg', stream);
       }
-      await StreamUtil.pipe(stream, handle.createWriteStream());
+      await pipeline(stream, handle.createWriteStream());
     }
 
     const buffer = await handle.readFile();

@@ -2,12 +2,13 @@ import assert from 'node:assert';
 import os from 'node:os';
 import fs from 'node:fs/promises';
 import { fork, spawn } from 'node:child_process';
+import { createWriteStream } from 'node:fs';
+import { pipeline } from 'node:stream/promises';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { RuntimeIndex, path } from '@travetto/manifest';
 
 import { ExecUtil } from '../src/exec';
-import { StreamUtil } from '../src/stream';
 
 
 @Suite()
@@ -50,16 +51,18 @@ export class ExecUtilTest {
   async pipe() {
     const src = await this.fixture.readStream('/logo.png');
 
-    const state = spawn('gm', [
+    const proc = spawn('gm', [
       'convert', '-resize', '100x',
       '-auto-orient', '-strip', '-quality', '86',
       '-', '-'
     ]);
 
-    StreamUtil.pipe(src, state.stdin!);
-
     const tempFile = path.resolve(os.tmpdir(), `${Math.random()}.png`);
-    await StreamUtil.writeToFile(state.stdout!, tempFile);
+
+    await Promise.all([
+      pipeline(src, proc.stdin!),
+      pipeline(proc.stdout!, createWriteStream(tempFile))
+    ]);
 
     const test = await fs.stat(tempFile);
     await fs.unlink(tempFile);

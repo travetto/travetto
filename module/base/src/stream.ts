@@ -2,9 +2,26 @@ import rl from 'node:readline/promises';
 import { createWriteStream } from 'node:fs';
 import { PassThrough, Readable, Writable } from 'node:stream';
 import { ReadableStream as WebReadableStream } from 'node:stream/web';
-import { ChildProcess } from 'node:child_process';
+import { pipeline } from 'node:stream/promises';
 
 type All = Buffer | string | Readable | Uint8Array | NodeJS.ReadableStream | WebReadableStream;
+
+export class MemoryWritable extends Writable {
+  data: Buffer[] = [];
+
+  toBuffer(encoding: BufferEncoding): string;
+  toBuffer(): Buffer;
+  toBuffer(encoding?: BufferEncoding): Buffer | string {
+    const buffer = Buffer.concat(this.data);
+    return encoding ? buffer.toString(encoding) : buffer;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  _write(chunk: any, encoding: string, callback: (err?: Error) => void): void {
+    this.data.push(chunk);
+    callback();
+  }
+}
 
 /**
  * Utilities for managing streams/buffers/etc
@@ -29,14 +46,9 @@ export class StreamUtil {
     if ('getReader' in src) {
       return this.streamToBuffer(Readable.fromWeb(src));
     }
-    return new Promise<Buffer>((res, rej) => {
-      const data: Buffer[] = [];
-      src.on('data', d => data.push(d));
-      src.on('error', rej);
-      src.on('end', (err: unknown) => {
-        err ? rej(err) : res(Buffer.concat(data));
-      });
-    });
+    const buffer = new MemoryWritable();
+    await pipeline(src, buffer);
+    return buffer.toBuffer();
   }
 
   /**
@@ -76,67 +88,7 @@ export class StreamUtil {
    * @param out The location to write to
    */
   static async writeToFile(src: All, out: string): Promise<void> {
-    const write = createWriteStream(out);
-    const finalStream = (await this.toStream(src)).pipe(write);
-    await new Promise((res, rej) => {
-      finalStream.on('finish', res).on('error', rej);
-    });
-    return;
-  }
-
-  /**
-   * Delay ending stream until 'waitUntil' is resolved
-   * @param stream The stream to wait for
-   * @param waitUntil The function to track completion before the stream is done
-   */
-  static async waitForCompletion(stream: Readable, waitUntil: () => Promise<unknown>): Promise<Readable> {
-    const ogListen = stream.addListener;
-
-    // Allow for process to end before calling end handler
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    stream.on = stream.addListener = function (this: Readable, type: string, handler: (...params: any[]) => void): Readable {
-      let outHandler = handler;
-      if (type === 'end') {
-        outHandler = async (...params: unknown[]): Promise<void> => {
-          await waitUntil();
-          handler(...params);
-        };
-      }
-      return ogListen.call(this, type, outHandler);
-    };
-    return stream;
-  }
-
-  /**
-   * Pipe a stream and wait for completion
-   */
-  static async pipe(src: Readable, dest: Writable, opts?: { end?: boolean }): Promise<void> {
-    await new Promise((res, rej) => {
-      src.on('end', res)
-        .on('drain', res)
-        .on('close', res)
-        .on('error', rej);
-      src.pipe(dest, opts);
-    });
-  }
-
-  /**
-   * Pipe a buffer into an execution state
-   * @param state The execution state to pipe
-   * @param input The data to input into the process
-   */
-  static async execPipe<T extends Buffer | Readable>(proc: ChildProcess, input: T): Promise<T> {
-    (await this.toStream(input)).pipe(proc.stdin!);
-
-    if (input instanceof Buffer) { // If passing buffers
-      const buf = this.toBuffer(proc.stdout!);
-      await new Promise(r => proc.on('close', r));
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return buf as Promise<T>;
-    } else {
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return this.waitForCompletion(proc.stdout!, () => new Promise(r => proc.on('close', r))) as Promise<T>;
-    }
+    await pipeline(await this.toStream(src), createWriteStream(out));
   }
 
   /**
@@ -144,7 +96,7 @@ export class StreamUtil {
    */
   static async onLine(stream: Readable | null | undefined, cb: (line: string) => unknown): Promise<void> {
     if (stream) {
-      for await (const line of rl.createInterface({ input: stream })) {
+      for await (const line of rl.createInterface(stream)) {
         await cb(line.trimEnd());
       }
     }

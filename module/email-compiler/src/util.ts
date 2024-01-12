@@ -1,7 +1,7 @@
 import util from 'node:util';
-import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
-import { ResourceLoader, StreamUtil } from '@travetto/base';
+import { MemoryWritable, ResourceLoader } from '@travetto/base';
 import {
   EmailTemplateImageConfig, EmailTemplateStyleConfig,
   EmailCompiled, EmailCompileContext
@@ -136,20 +136,26 @@ export class EmailCompileUtil {
    */
   static async inlineImages(html: string, opts: EmailTemplateImageConfig): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, this.#HTML_CSS_IMAGE_URLS);
-    const pendingImages: [token: string, ext: string, stream: Readable | Promise<Readable>][] = [];
+    const pendingImages: [token: string, ext: string, stream: Buffer | Promise<Buffer>][] = [];
     const resource = new ResourceLoader(opts.search);
 
     for (const [token, src] of tokens) {
       const ext = path.extname(src);
-      const stream = await resource.readStream(src);
-      pendingImages.push([token, ext, /^[.](jpe?g|png)$/.test(ext) ?
-        ImageConverter.optimize(ext === '.png' ? 'png' : 'jpeg', stream) : stream]);
+      if (/^[.](jpe?g|png)$/.test(ext)) {
+        const output = await ImageConverter.optimize(
+          ext === '.png' ? 'png' : 'jpeg', await resource.readStream(src)
+        );
+        const buffer = new MemoryWritable();
+        await pipeline(output, buffer);
+        pendingImages.push([token, ext, buffer.toBuffer()]);
+      } else {
+        pendingImages.push([token, ext, resource.read(src, true)]);
+      }
     }
 
-    const imageMap = new Map(await Promise.all(pendingImages.map(async ([token, ext, stream]) => {
-      const data = await StreamUtil.streamToBuffer(await stream);
-      return [token, `data:image/${ext.replace('.', '')};base64,${data.toString('base64')}`] as const;
-    })));
+    const imageMap = new Map(await Promise.all(pendingImages.map(async ([token, ext, data]) =>
+      [token, `data:image/${ext.replace('.', '')};base64,${data.toString('base64')}`] as const
+    )));
 
     return finalize(token => imageMap.get(token)!);
   }

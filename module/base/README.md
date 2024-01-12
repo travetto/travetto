@@ -234,11 +234,10 @@ $ DEBUG=express:*,@travetto/rest npx trv run rest
 ```
 
 ## Stream Utilities
-The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L12) class provides basic stream utilities for use within the framework:
+The [StreamUtil](https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L29) class provides basic stream utilities for use within the framework:
    *  `toBuffer(src: Readable | Buffer | string): Promise<Buffer>` for converting a stream/buffer/filepath to a Buffer.
    *  `toReadable(src: Readable | Buffer | string):Promise<Readable>` for converting a stream/buffer/filepath to a Readable
    *  `writeToFile(src: Readable, out: string):Promise<void>` will stream a readable into a file path, and wait for completion.
-   *  `waitForCompletion(src: Readable, finish:()=>Promise<any>)` will ensure the stream remains open until the promise finish produces is satisfied.
 
 ## Object Utilities
 Simple functions for providing a minimal facsimile to [lodash](https://lodash.com), but without all the weight. Currently [ObjectUtil](https://github.com/travetto/travetto/tree/main/module/base/src/object.ts#L10) includes:
@@ -306,7 +305,7 @@ export class TimeUtil {
 ```
 
 ## Process Execution
-[ExecUtil](https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L36) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
+[ExecUtil](https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L39) exposes `getResult` as a means to wrap [child_process](https://nodejs.org/api/child_process.html)'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.
 
 A simple example would be:
 

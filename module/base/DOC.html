@@ -260,11 +260,10 @@ $ <span class="token assign-left variable">DEBUG</span><span class="token operat
 
 <h2 id="stream-utilities">Stream Utilities</h2>
 
-The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L12">StreamUtil</a> class provides basic stream utilities for use within the framework:
+The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/stream.ts#L29">StreamUtil</a> class provides basic stream utilities for use within the framework:
 <ul> <li><code class="item method">toBuffer(src: Readable | Buffer | string): Promise&lt;Buffer&gt;</code> for converting a stream/buffer/filepath to a Buffer.</li>
 <li><code class="item method">toReadable(src: Readable | Buffer | string):Promise&lt;Readable&gt;</code> for converting a stream/buffer/filepath to a Readable</li>
 <li><code class="item method">writeToFile(src: Readable, out: string):Promise&lt;void&gt;</code> will stream a readable into a file path, and wait for completion.</li>
-<li><code class="item method">waitForCompletion(src: Readable, finish:()=&gt;Promise&lt;any&gt;)</code> will ensure the stream remains open until the promise finish produces is satisfied.</li>
 </ul>
 
 <h2 id="object-utilities">Object Utilities</h2>
@@ -344,7 +343,7 @@ tpl`<span class="token punctuation">{{'{'}}</span><span class="token punctuation
 
 <h2 id="process-execution">Process Execution</h2>
 
-<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L36">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
+<a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/base/src/exec.ts#L39">ExecUtil</a> exposes <code class="item method">getResult</code> as a means to wrap <a target="_blank" class="external-link" href="https://nodejs.org/api/child_process.html">child_process</a>'s process object.  This wrapper allows for a promise-based resolution of the subprocess with the ability to capture the stderr/stdout.<br><br>
 A simple example would be:
 
   <figure class="code">

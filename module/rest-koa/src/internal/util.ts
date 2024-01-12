@@ -1,10 +1,10 @@
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import koa from 'koa';
 
 import { RestServerUtil, Request, Response } from '@travetto/rest';
 import { NodeEntityⲐ, ProviderEntityⲐ, SendStreamⲐ } from '@travetto/rest/src/internal/symbol';
-import { StreamUtil } from '@travetto/base';
 
 /**
  * Provides translation between koa request/response objects and the framework
@@ -53,7 +53,7 @@ export class KoaServerUtil {
       [SendStreamⲐ]: async (stream: Readable): Promise<void> => {
         ctx.respond = false;
         ctx.response.status = 200;
-        await StreamUtil.pipe(stream, ctx.res);
+        await pipeline(stream, ctx.res);
       },
       on: ctx.res.on.bind(ctx.res),
       end: (val?: unknown): void => {

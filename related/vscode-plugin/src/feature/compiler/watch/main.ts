@@ -1,14 +1,14 @@
 import vscode from 'vscode';
+import { createInterface } from 'node:readline/promises';
 import { ChildProcess, spawn } from 'node:child_process';
 
 import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent } from '@travetto/compiler/support/types';
-import { Env, ExecUtil, StreamUtil } from '@travetto/base';
+import { Env, ExecUtil, StreamUtil, Util } from '@travetto/base';
 
 import { BaseFeature } from '../../base';
 import { Log } from '../../../core/log';
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
-import { AsyncQueue, resolvablePromise } from '../../../core/queue';
 
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
@@ -30,7 +30,7 @@ export class CompilerWatchFeature extends BaseFeature {
     this.#progress[type]?.cleanup();
 
     const ctrl = new AbortController();
-    const complete = resolvablePromise();
+    const complete = Util.resolvablePromise();
     const kill = (): void => ctrl.abort();
     signal.addEventListener('abort', kill);
 
@@ -59,11 +59,16 @@ export class CompilerWatchFeature extends BaseFeature {
    * Spawn the compiler cli
    * @param command
    */
-  run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info'): ChildProcess {
+  run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info' | 'event', args?: string[], signal?: AbortSignal): ChildProcess {
     this.#log.debug('Running Compiler', this.#compilerCliFile, command);
-    const proc = spawn('node', [this.#compilerCliFile, command], {
+    const proc = spawn('node', [this.#compilerCliFile, command, ...args ?? []], {
       cwd: Workspace.path,
-      env: { PATH: process.env.PATH, ...Env.TRV_BUILD.export('debug') }
+      signal,
+      shell: false,
+      env: {
+        PATH: process.env.PATH,
+        ...(command !== 'info' && command !== 'event') ? Env.TRV_BUILD.export('debug') : {}
+      }
     });
 
     if (command === 'start' || command === 'restart') {
@@ -78,17 +83,11 @@ export class CompilerWatchFeature extends BaseFeature {
    * @param type
    * @param signal
    */
-  #compilerEvents<T>(type: 'state' | 'log' | 'progress', signal?: AbortSignal): AsyncIterable<T> {
-    const queue = new AsyncQueue<T>(signal);
-    const proc = spawn('node', [this.#compilerCliFile, 'event', type], {
-      cwd: Workspace.path, env: { PATH: process.env.PATH }, shell: false
-    });
-
-    StreamUtil.onLine(proc.stdout, line => queue.add(JSON.parse(line)));
-
-    signal?.addEventListener('abort', () => proc.kill());
-    proc.on('exit', () => queue.close());
-    return queue;
+  async * #compilerEvents<T>(type: 'state' | 'log' | 'progress', signal?: AbortSignal): AsyncIterable<T> {
+    const proc = this.run('event', [type], signal);
+    for await (const line of createInterface(proc.stdout!)) {
+      yield JSON.parse(line);
+    }
   }
 
   /**

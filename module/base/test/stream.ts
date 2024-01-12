@@ -1,12 +1,10 @@
 import assert from 'node:assert';
 import { createReadStream } from 'node:fs';
 import os from 'node:os';
-import { fork } from 'node:child_process';
 
 import { Test, Suite, TestFixtures } from '@travetto/test';
 import { path as mPath } from '@travetto/manifest';
 
-import { ExecUtil } from '../src/exec';
 import { StreamUtil } from '../src/stream';
 
 
@@ -65,23 +63,5 @@ export class StreamUtilTest {
 
     const buff = await StreamUtil.toBuffer(createReadStream(temp));
     assert(buff.toString('utf8') === 'Hello World');
-  }
-
-  @Test()
-  async waitForCompletion() {
-    const path = await this.fixture.resolve('long.js');
-    const proc = fork(path, ['20'], { stdio: 'pipe' });
-    const stream = await StreamUtil.waitForCompletion(proc.stdout!, () => ExecUtil.getResult(proc));
-    const output = (await StreamUtil.toBuffer(stream)).toString('utf8').split(/\n/g);
-    assert(output.length >= 20);
-  }
-
-  @Test()
-  async pipe() {
-    const echo = await this.fixture.resolve('echo.js');
-    const proc = fork(echo, { stdio: 'pipe' });
-    const returnedStream = await StreamUtil.execPipe(proc, createReadStream(echo));
-    const result = (await StreamUtil.toBuffer(returnedStream)).toString('utf8');
-    assert(result.includes('process.stdin'));
   }
 }

@@ -1,6 +1,7 @@
 // Wildcard import needed here due to packaging issues
 import * as mongo from 'mongodb';
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import {
   ModelRegistry, ModelType, OptionalId,
@@ -292,9 +293,7 @@ export class MongoModelService implements
       metadata: meta
     });
 
-    await new Promise<unknown>((resolve, reject) => {
-      input.pipe(writeStream).on('finish', resolve).on('error', reject);
-    });
+    await pipeline(input, writeStream);
   }
 
   async getStream(location: string): Promise<Readable> {
@@ -553,7 +552,7 @@ export class MongoModelService implements
   // Facet
   async facet<T extends ModelType>(cls: Class<T>, field: ValidStringFields<T>, query?: ModelQuery<T>): Promise<{ key: string, count: number }[]> {
     const col = await this.getStore(cls);
-    const pipeline: object[] = [{
+    const aggs: object[] = [{
       $group: {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         _id: `$${field as string}`,
@@ -569,10 +568,10 @@ export class MongoModelService implements
       q = { $and: [q, MongoUtil.prepareQuery(cls, query).filter] };
     }
 
-    pipeline.unshift({ $match: q });
+    aggs.unshift({ $match: q });
 
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    const result = (await col.aggregate(pipeline).toArray()) as { _id: mongo.ObjectId, count: number }[];
+    const result = (await col.aggregate(aggs).toArray()) as { _id: mongo.ObjectId, count: number }[];
 
     return result.map(val => ({
       key: MongoUtil.idToString(val._id),

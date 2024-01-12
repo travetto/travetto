@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import assert from 'node:assert';
 import crypto from 'node:crypto';
 import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
 import { StreamUtil } from '@travetto/base';
@@ -15,14 +16,9 @@ export abstract class ModelStreamSuite extends BaseModelSuite<ModelStreamSupport
   fixture = new TestFixtures(['@travetto/model']);
 
   async getHash(stream: Readable): Promise<string> {
-    const hash = crypto.createHash('sha1');
-    hash.setEncoding('hex');
-    await new Promise((res, rej) => {
-      stream.on('end', res);
-      stream.on('error', rej);
-      stream.pipe(hash);
-    });
-    return hash.read() as string;
+    const hasher = crypto.createHash('sha1').setEncoding('hex');
+    await pipeline(stream, hasher);
+    return hasher.read().toString();
   }
 
   async getStream(resource: string): Promise<readonly [{ size: number, contentType: string, hash: string, filename: string }, Readable]> {
