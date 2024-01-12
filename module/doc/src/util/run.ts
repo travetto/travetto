@@ -1,7 +1,8 @@
 import os from 'node:os';
+import { spawn } from 'node:child_process';
 
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
-import { Env, ExecUtil, ExecutionOptions, ExecutionState } from '@travetto/base';
+import { Env, ExecUtil } from '@travetto/base';
 import { StyleUtil } from '@travetto/terminal';
 
 export const COMMON_DATE = new Date('2029-03-14T00:00:00.000').getTime();
@@ -13,12 +14,6 @@ export type RunConfig = {
   env?: Record<string, string>;
   envName?: string;
   cwd?: string;
-};
-
-type RunState = {
-  cmd: string;
-  args: string[];
-  opts: ExecutionOptions;
 };
 
 class DocState {
@@ -50,31 +45,6 @@ class DocState {
 export class DocRunUtil {
   static #docState = new DocState();
 
-  static runState(cmd: string, args: string[], config: RunConfig = {}): RunState {
-    const cwd = config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : RuntimeIndex.mainModule).sourcePath;
-    args = [...args];
-    return {
-      cmd,
-      args,
-      opts: {
-        cwd: path.toPosix(cwd),
-        shell: '/bin/bash',
-        env: {
-          ...process.env,
-          ...Env.DEBUG.export(false),
-          ...Env.TRV_CAN_RESTART.export(false),
-          ...Env.TRV_CLI_IPC.export(undefined),
-          ...Env.TRV_MANIFEST.export(''),
-          ...Env.TRV_BUILD.export('none'),
-          ...Env.TRV_ROLE.export(undefined),
-          ...Env.TRV_MODULE.export(config.module ?? ''),
-          ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
-          ...(config.env ?? {})
-        }
-      }
-    };
-  }
-
   /**
    * Clean run output
    */
@@ -101,13 +71,6 @@ export class DocRunUtil {
     return text;
   }
 
-  /**
-   * Run process in the background
-   */
-  static runBackground(cmd: string, args: string[], config: RunConfig = {}): ExecutionState {
-    const state = this.runState(cmd, args, config);
-    return ExecUtil.spawn(state.cmd, state.args, { ...state.opts, stdio: 'pipe' });
-  }
 
   /**
    * Run command synchronously and return output
@@ -115,12 +78,27 @@ export class DocRunUtil {
   static async run(cmd: string, args: string[], config: RunConfig = {}): Promise<string> {
     let final: string;
     try {
-      const state = this.runState(cmd, args, config);
-      const res = await ExecUtil.spawn(state.cmd, state.args, { stdio: 'pipe', ...state.opts, catchAsResult: true }).result;
+      const proc = spawn(cmd, args, {
+        cwd: path.toPosix(config.cwd ?? (config.module ? RuntimeIndex.getModule(config.module)! : RuntimeIndex.mainModule).sourcePath),
+        shell: '/bin/bash',
+        env: {
+          ...process.env,
+          ...Env.DEBUG.export(false),
+          ...Env.TRV_CAN_RESTART.export(false),
+          ...Env.TRV_CLI_IPC.export(undefined),
+          ...Env.TRV_MANIFEST.export(''),
+          ...Env.TRV_BUILD.export('none'),
+          ...Env.TRV_ROLE.export(undefined),
+          ...Env.TRV_MODULE.export(config.module ?? ''),
+          ...(config.envName ? Env.TRV_ENV.export(config.envName) : {}),
+          ...config.env
+        }
+      });
+      const res = await ExecUtil.getResult(proc, { catch: true });
       if (!res.valid) {
         throw new Error(res.stderr);
       }
-      final = StyleUtil.cleanText(res.stdout.toString()).trim() || StyleUtil.cleanText(res.stderr.toString()).trim();
+      final = StyleUtil.cleanText(res.stdout).trim() || StyleUtil.cleanText(res.stderr).trim();
     } catch (err) {
       if (err instanceof Error) {
         final = err.message;
