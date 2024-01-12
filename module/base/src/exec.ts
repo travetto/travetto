@@ -86,7 +86,6 @@ export class ExecUtil {
    *
    * @param proc The process to enhance
    * @param options The options to use to enhance the process
-   * @param cmd The command being run
    */
   static getResult(
     proc: ChildProcess & { [RESULT]?: Record<string, Promise<ExecutionResult>> },
