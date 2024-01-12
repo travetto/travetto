@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 
 import { Suite, Test, TestFixtures } from '@travetto/test';
+import { ExecUtil } from '@travetto/base';
 
 import { DockerContainer } from '../src/docker';
 
@@ -18,12 +19,12 @@ export class DockerIOTest {
     await container.create(['/bin/sh']);
     await container.start();
 
-    const { process: proc, result: prom } = await container.exec(['gm', 'convert', '-resize', '100x50', '-', '-']);
+    const proc = await container.exec(['gm', 'convert', '-resize', '100x50', '-', '-']);
 
     (await this.fixture.readStream('/download.jpeg')).pipe(proc.stdin!);
 
     assert(true);
 
-    await prom;
+    await ExecUtil.getResult(proc);
   }
 }

@@ -8,6 +8,8 @@ import { Env } from './env';
 
 const MINUTE = (1000 * 60);
 
+const RESULT = Symbol.for('@travetto/base:exec-result');
+
 /**
  * Result of an execution
  */
@@ -283,8 +285,11 @@ export class ExecUtil {
    * @param options The options to use to enhance the process
    * @param cmd The command being run
    */
-  static getResult(proc: ChildProcess, options: { catch?: boolean, stdout?: boolean, stderr?: boolean } = {}): Promise<ExecutionResult> {
-    const res = new Promise<ExecutionResult>((resolve, reject) => {
+  static getResult(
+    proc: ChildProcess & { [RESULT]?: Record<string, Promise<ExecutionResult>> },
+    options: { catch?: boolean, stdout?: boolean, stderr?: boolean } = {}
+  ): Promise<ExecutionResult> {
+    const res = (proc[RESULT] ??= {})[`${options.stdout}|${options.stderr}`] ??= new Promise<ExecutionResult>(resolve => {
       const stdout: Buffer[] = [];
       const stderr: Buffer[] = [];
       let done = false;

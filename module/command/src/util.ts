@@ -2,8 +2,9 @@ import https from 'node:https';
 import http from 'node:http';
 import net from 'node:net';
 import timers from 'node:timers/promises';
+import { spawn } from 'node:child_process';
 
-import { ExecUtil, ExecutionResult } from '@travetto/base';
+import { ExecUtil } from '@travetto/base';
 
 /**
  * Utilities to support command execution
@@ -77,14 +78,14 @@ export class CommandUtil {
    * @param label
    */
   static async findContainerByLabel(label: string): Promise<string> {
-    return (await ExecUtil.spawn('docker', ['ps', '-q', '--filter', `label=${label}`]).result).stdout.trim();
+    return (await ExecUtil.getResult(spawn('docker', ['ps', '-q', '--filter', `label=${label}`], { shell: false }))).stdout;
   }
 
   /**
    * Kill container by id
    * @param cid
    */
-  static async killContainerById(cid: string): Promise<ExecutionResult> {
-    return await ExecUtil.spawn('docker', ['kill', cid]).result;
+  static async killContainerById(cid: string): Promise<void> {
+    await ExecUtil.getResult(spawn('docker', ['kill', cid], { shell: false }));
   }
 }
