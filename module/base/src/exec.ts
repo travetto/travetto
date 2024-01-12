@@ -47,7 +47,7 @@ export class ExecUtil {
     const maxRetries = maxRetriesPerMinute ?? 5;
     const restarts: number[] = [];
 
-    process.once('disconnect', () => this.kill(process));
+    process.once('disconnect', () => process.exit());
 
     for (; ;) {
       const proc = run();
@@ -76,19 +76,6 @@ export class ExecUtil {
         }
         console.error('Restarting...', { pid: process.pid });
       }
-    }
-  }
-
-  /**
-   * Kill a spawned process
-   * @param proc The process to kill
-   */
-  static kill(procOrPid?: { pid?: number } | number): void {
-    const args = process.platform === 'win32' ? [] : ['SIGTERM'];
-    if (typeof procOrPid === 'number') {
-      process.kill(procOrPid, ...args);
-    } else if (procOrPid?.pid) {
-      process.kill(procOrPid.pid, ...args);
     }
   }
 
