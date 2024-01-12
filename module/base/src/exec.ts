@@ -1,5 +1,6 @@
 import rl from 'node:readline';
 import { ChildProcess, spawn, SpawnOptions } from 'node:child_process';
+import { Readable } from 'node:stream';
 
 import { path } from '@travetto/manifest';
 
@@ -31,6 +32,10 @@ export interface ExecutionResult {
    * Whether or not the execution completed successfully
    */
   valid: boolean;
+  /**
+   * Whether or not the execution was killed
+   */
+  killed?: boolean;
 }
 
 /**
@@ -55,6 +60,11 @@ export interface ExecutionOptions extends SpawnOptions {
    */
   isolatedEnv?: boolean;
   /**
+   * Built in timeout for any execution. The number of milliseconds the process can run before
+   * terminating and throwing an error
+   */
+  timeout?: number;
+  /**
    * Determines how to treat the stdout/stderr data.
    *  - 'text' will assume the output streams are textual, and will convert to unicode data.
    *  - 'text-stream' makes the same assumptions as 'text', but will only fire events, and will
@@ -71,6 +81,10 @@ export interface ExecutionOptions extends SpawnOptions {
    * On stdout line.  Requires 'outputMode' to be either 'text' or 'text-stream'
    */
   onStdOutLine?: (line: string) => void;
+  /**
+   * The stdin source for the execution
+   */
+  stdin?: string | Buffer | Readable;
 }
 
 /**
@@ -185,7 +199,7 @@ export class ExecUtil {
       if (timeout) {
         timer = setTimeout(async x => {
           this.kill(proc);
-          finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false });
+          finish({ code: 1, message: `Execution timed out after: ${timeout} ms`, valid: false, killed: true });
         }, timeout);
       }
     });
