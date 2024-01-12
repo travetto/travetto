@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 
 import { Env, ExecUtil } from '@travetto/base';
 import { path, RuntimeIndex, RuntimeContext } from '@travetto/manifest';
@@ -27,21 +28,20 @@ export class DocAngularCommand {
     if (mods.size > 1) {
       // Build out docs
       await RepoExecUtil.execOnModules('all',
-        (mod, opts) => {
-          const req = ExecUtil.spawn('trv', ['doc'], {
-            ...opts,
+        mod => {
+          const proc = spawn('trv', ['doc'], {
             timeout: 20000,
             env: {
-              ...opts.env ?? {},
+              ...process.env,
+              ...Env.TRV_MODULE.export(mod.name),
+              ...Env.TRV_MANIFEST.export(undefined),
               ...Env.TRV_BUILD.export('none')
             }
           });
-          req.result.then(v => {
-            if (!v.valid) {
-              console.error(`${mod.name} - failed`);
-            }
-          });
-          return req;
+
+          ExecUtil.getResult(proc).catch(() => console.error(`${mod.name} - failed`));
+
+          return proc;
         },
         {
           showStdout: false,

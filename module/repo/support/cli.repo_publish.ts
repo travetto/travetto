@@ -14,7 +14,7 @@ export class RepoPublishCommand implements CliCommandShape {
   dryRun = true;
 
   async main(): Promise<void> {
-    const published = await RepoExecUtil.execOnModules('all', (mod, opts) => PackageManager.isPublished(RuntimeContext, mod, opts), {
+    const published = await RepoExecUtil.execOnModules('all', mod => PackageManager.isPublished(RuntimeContext, mod), {
       filter: mod => !!mod.local && !mod.internal,
       progressMessage: (mod) => `Checking published [%idx/%total] -- ${mod?.name}`,
       showStderr: false,
@@ -26,7 +26,7 @@ export class RepoPublishCommand implements CliCommandShape {
     }
 
     await RepoExecUtil.execOnModules(
-      'all', (mod, opts) => PackageManager.publish(RuntimeContext, mod, this.dryRun, opts),
+      'all', mod => PackageManager.publish(RuntimeContext, mod, this.dryRun),
       {
         progressMessage: (mod) => `Published [%idx/%total] -- ${mod?.name}`,
         showStdout: false,

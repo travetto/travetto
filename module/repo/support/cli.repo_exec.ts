@@ -1,6 +1,8 @@
+import { spawn } from 'node:child_process';
+
 import { CliCommand, CliCommandShape, ParsedState } from '@travetto/cli';
 import { WorkPool } from '@travetto/worker';
-import { Env, ExecUtil } from '@travetto/base';
+import { Env } from '@travetto/base';
 import { Ignore, Max, Min } from '@travetto/schema';
 
 import { RepoExecUtil } from './bin/exec';
@@ -36,8 +38,14 @@ export class RepoExecCommand implements CliCommandShape {
 
     await RepoExecUtil.execOnModules(
       this.changed ? 'changed' : 'all',
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      (mod, opts) => ExecUtil.spawn(cmd, finalArgs, opts),
+      mod => spawn(cmd, finalArgs, {
+        cwd: mod.sourceFolder,
+        env: {
+          ...process.env,
+          ...Env.TRV_MODULE.export(mod.name),
+          ...Env.TRV_MANIFEST.export(undefined)
+        }
+      }),
       {
         progressMessage: mod => `Running '${cmd} ${finalArgs.join(' ')}' [%idx/%total] ${mod?.sourceFolder ?? ''}`,
         showStdout: this.showStdout,
