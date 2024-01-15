@@ -71,7 +71,7 @@ export class TestWatcher {
       }
     });
 
-    process.send?.('ready');
+    process.send?.({ type: 'ready' });
 
     if (runAllOnStart) {
       for (const test of await RunnerUtil.getTestFiles()) {

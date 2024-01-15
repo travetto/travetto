@@ -1,17 +1,19 @@
 import vscode from 'vscode';
+import { ChildProcess, spawn } from 'node:child_process';
 
-import { path } from '@travetto/manifest';
+import { RuntimeIndex, path } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
-import { ProcessServer } from '../../../core/server';
 import { RunUtil } from '../../../core/run';
 
 import { BaseFeature } from '../../base';
 
 import { WorkspaceResultsManager } from './workspace';
-import { RemoveEvent, TestCommand, TestEvent } from './types';
+import { RemoveEvent, TestEvent } from './types';
+
+type Event = TestEvent | RemoveEvent | { type: 'log', message: string };
 
 /**
  * Test Runner Feature
@@ -19,30 +21,43 @@ import { RemoveEvent, TestCommand, TestEvent } from './types';
 @Activatible('@travetto/test', 'test')
 class TestRunnerFeature extends BaseFeature {
 
-  #server: ProcessServer<TestCommand, TestEvent | RemoveEvent | { type: 'log', message: string }>;
+  #activeProcesses: Record<string, ChildProcess> = {};
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (e: void) => unknown;
+
+  #runFile(file: string, line?: number): void {
+    this.#activeProcesses[file]?.kill(); // Ensure only one at a time
+
+    const proc = spawn('node', [
+      RunUtil.cliEntryTargetFile,
+      this.commandName('direct'), '-f', 'event',
+      file, ...(line ? [`${line}`] : [])
+    ], {
+      cwd: Workspace.path,
+      env: {
+        ...process.env,
+        ...Env.TRV_MANIFEST.export(undefined),
+        ...Env.TRV_MODULE.export(RuntimeIndex.getFromSource(file)!.module),
+        ...Env.TRV_QUIET.export(true)
+      },
+      stdio: ['ignore', 'ignore', 2, 'ipc']
+    });
+
+    proc.on('message', (ev: Event) => {
+      switch (ev.type) {
+        case 'log': this.log.info('[Log  ]', ev.message); return;
+        case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
+      }
+      this.#consumer.onEvent(ev);
+      this.#codeLensUpdated?.();
+    });
+
+    this.#activeProcesses[file] = proc;
+  }
 
   constructor(module?: string, command?: string) {
     super(module, command);
     this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
-    this.#server = new ProcessServer(this.log, 'test:watch', ['-f', 'exec', '-m', 'change'])
-      .listen('start', () => {
-        this.#server.onMessage(['assertion', 'suite', 'test', 'log', 'removeTest'], ev => {
-          switch (ev.type) {
-            case 'log': this.log.info('[Log  ]', ev.message); return;
-            case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
-          }
-          this.#consumer.onEvent(ev);
-          this.#codeLensUpdated?.();
-        });
-
-        // Trigger all visible editors on start
-        for (const editor of vscode.window.visibleTextEditors) {
-          this.onChangedActiveEditor(editor);
-        }
-      })
-      .listen('fail', err => vscode.window.showErrorMessage(`Test Server: ${err.message}`));
   }
 
   /**
@@ -93,19 +108,30 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
-    if (editor?.document.fileName.includes('/test/')) {
+    if (editor?.document.fileName.includes('/test/') && Workspace.isCompilerWatching) {
       this.#consumer.trackEditor(editor);
       if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
-        await this.#server.start();
-        this.#server.sendMessage({ type: 'run-test', file: editor.document.fileName });
+        this.#runFile(editor.document.fileName);
       }
     }
   }
 
   async onOpenTextDocument(doc: vscode.TextDocument): Promise<void> {
-    if (doc.fileName.includes('/test/')) {
-      await this.#server.start();
+    if (doc.fileName.includes('/test/') && Workspace.isCompilerWatching) {
       this.#consumer.trackEditor(doc);
+    }
+  }
+
+  async onDidSaveTextDocument(doc: vscode.TextDocument): Promise<void> {
+    if (doc.fileName.includes('/test/') && Workspace.isCompilerWatching) {
+      let line = undefined;
+      if (vscode.window.activeTextEditor?.document === doc) {
+        const sels = vscode.window.activeTextEditor.selections;
+        if (sels.length === 1) {
+          line = sels[0].start.line;
+        }
+      }
+      this.#runFile(doc.fileName, line);
     }
   }
 
@@ -118,16 +144,21 @@ class TestRunnerFeature extends BaseFeature {
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', this.launchTestDebugger.bind(this));
-    this.register('start', () => this.#server.start());
-    this.register('restart', () => this.#server.restart());
-    this.register('stop', () => this.#server.stop().then(() => {
-      this.#consumer.resetAll();
-    }));
     this.register('rerun', () => {
       this.#consumer.reset(vscode.window.activeTextEditor);
-      this.#server.sendMessage({ type: 'run-test', file: vscode.window.activeTextEditor!.document.fileName });
+      this.#runFile(vscode.window.activeTextEditor!.document.fileName);
     });
 
+    Workspace.onCompilerState(state => {
+      if (Workspace.isCompilerWatching) {
+        // Trigger all visible editors on start
+        for (const editor of vscode.window.visibleTextEditors) {
+          this.onChangedActiveEditor(editor);
+        }
+      }
+    });
+
+    vscode.workspace.onDidSaveTextDocument(x => this.onDidSaveTextDocument(x), null, context.subscriptions);
     vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);

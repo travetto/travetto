@@ -1,5 +1,6 @@
 import vscode from 'vscode';
 
+import type { CompilerStateType } from '@travetto/compiler/support/types';
 import { ManifestContext, PackageUtil } from '@travetto/manifest';
 
 /**
@@ -9,7 +10,29 @@ export class Workspace {
 
   static #context: vscode.ExtensionContext;
   static #manifestContext: ManifestContext;
+  static #compilerState: CompilerStateType | undefined;
+  static #compilerStateListeners: ((ev: CompilerStateType | 'disconnected') => void)[] = [];
 
+  static onCompilerState(handler: (ev: CompilerStateType | 'disconnected') => void): void {
+    this.#compilerStateListeners.push(handler);
+    handler(this.compilerState);
+  }
+
+  static set compilerState(state: CompilerStateType | undefined) {
+    this.#compilerState = state;
+    for (const el of this.#compilerStateListeners) { el(this.compilerState); }
+  }
+
+  /** Get the current compiler state */
+  static get compilerState(): CompilerStateType | 'disconnected' {
+    return this.#compilerState ?? 'disconnected';
+  }
+
+  static get isCompilerWatching(): boolean {
+    return this.#compilerState === 'watch-start';
+  }
+
+  /** Resolve an import to a file path */
   static resolveImport(imp: string): string {
     return PackageUtil.resolveImport(imp, this.path);
   }

@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import { createInterface } from 'node:readline/promises';
 import { ChildProcess, spawn } from 'node:child_process';
 
-import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent } from '@travetto/compiler/support/types';
+import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
 import { Env, ExecUtil, StreamUtil, Util } from '@travetto/base';
 
 import { BaseFeature } from '../../base';
@@ -12,7 +12,6 @@ import { Activatible } from '../../../core/activation';
 
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
-type CompilerState = CompilerStateEvent['state'];
 
 const SCOPE_MAX = 15;
 
@@ -93,11 +92,11 @@ export class CompilerWatchFeature extends BaseFeature {
   /**
    * Get compiler state
    */
-  async #compilerState(): Promise<CompilerState | undefined> {
+  async #compilerState(): Promise<CompilerStateType | undefined> {
     const { stdout } = await ExecUtil.getResult(this.run('info'));
     try {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return JSON.parse(stdout).state as CompilerState;
+      return JSON.parse(stdout).state as CompilerStateType;
     } catch { }
   }
 
@@ -124,7 +123,7 @@ export class CompilerWatchFeature extends BaseFeature {
     }
   }
 
-  #onState(state: CompilerState): void {
+  #onState(state: CompilerStateType): void {
     let v: string;
     switch (state) {
       case 'reset': v = '$(flame) Restarting'; break;
@@ -138,6 +137,7 @@ export class CompilerWatchFeature extends BaseFeature {
       default: v = '$(debug-pause) Disconnected'; break;
     }
     this.#status.text = v;
+    Workspace.compilerState = state;
   }
 
   async #trackState(): Promise<void> {

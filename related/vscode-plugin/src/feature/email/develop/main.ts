@@ -1,11 +1,13 @@
 import { EventEmitter } from 'node:events';
+import { ChildProcess, spawn } from 'node:child_process';
 import vscode from 'vscode';
 
 import { Activatible } from '../../../core/activation';
-import { ProcessServer } from '../../../core/server';
+import { RunUtil } from '../../../core/run';
+import { Workspace } from '../../../core/workspace';
 
 import { BaseFeature } from '../../base';
-import { Content, EmailCompilerCommand, EmailCompilerEvent } from './types';
+import { Content, EmailCompilerEvent } from './types';
 
 /**
  * Email Template Feature
@@ -17,7 +19,7 @@ export class EmailCompilerFeature extends BaseFeature {
     return /[.]email[.]tsx$/.test(f ?? '');
   }
 
-  #server: ProcessServer<EmailCompilerCommand, EmailCompilerEvent>;
+  #server: ChildProcess;
   #format?: 'text' | 'html';
   #active = new Set<string>();
   #activeFile?: string;
@@ -25,26 +27,38 @@ export class EmailCompilerFeature extends BaseFeature {
   #panel?: vscode.WebviewPanel;
   #emitter = new EventEmitter();
 
-  constructor(
-    module?: string,
-    command?: string
-  ) {
-    super(module, command);
+  #startServer(): void {
+    if (this.#server && !this.#server.killed) {
+      return;
+    }
 
-    this.#server = new ProcessServer(this.log, 'email:editor', [])
-      .listen('start', () => {
-        this.#server.onMessage('changed', ev => this.#emitter.emit('render', ev));
-        this.#server.onMessage('changed-failed', ev => this.log.info('Email template', ev));
+    this.#server = spawn('node', [RunUtil.cliFile, 'email:editor'],
+      {
+        cwd: Workspace.path,
+        stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+      }
+    )
+      .on('message', async (ev: EmailCompilerEvent) => {
+        switch (ev.type) {
+          case 'changed': this.#emitter.emit('render', ev); break;
+          case 'changed-failed': this.log.info('Email template', ev); break;
+          case 'configured': {
+            const doc = await vscode.workspace.openTextDocument(ev.file);
+            await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
+            break;
+          }
+          case 'init': {
+            for (const el of vscode.window.visibleTextEditors) {
+              this.trackFile(el.document, true);
+            }
 
-        for (const el of vscode.window.visibleTextEditors) {
-          this.trackFile(el.document, true);
+            if (vscode.window.activeTextEditor) {
+              this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
+            }
+            break;
+          }
         }
-
-        if (vscode.window.activeTextEditor) {
-          this.setActiveFile(vscode.window.activeTextEditor.document.fileName);
-        }
-      })
-      .listen('fail', err => vscode.window.showErrorMessage(`Email Compilation: ${err.message}`));
+      });
   }
 
   getPanel(): vscode.WebviewPanel {
@@ -71,7 +85,7 @@ export class EmailCompilerFeature extends BaseFeature {
       this.#activeFile = file;
       this.setActiveContent(undefined);
       if (file) {
-        this.#server.sendMessage({ type: 'redraw', file: this.#activeFile! });
+        this.#server.send({ type: 'redraw', file: this.#activeFile! });
       }
     }
   }
@@ -90,13 +104,13 @@ export class EmailCompilerFeature extends BaseFeature {
     }
     if (open) {
       if (this.#active.size === 0) {
-        this.#server.start();
+        this.#startServer();
       }
       this.#active.add(file.fileName);
     } else {
       this.#active.delete(file.fileName);
       if (this.#active.size === 0) {
-        this.#server.stop();
+        this.#server.kill();
       }
     }
   }
@@ -109,7 +123,7 @@ export class EmailCompilerFeature extends BaseFeature {
     }
 
     await this.getPanel();
-    await this.#server.start();
+    await this.#startServer();
 
     this.#format = format;
 
@@ -122,24 +136,12 @@ export class EmailCompilerFeature extends BaseFeature {
   }
 
   async openPreviewContext(): Promise<void> {
-    const { file } = await this.#server.sendMessageAndWaitFor({ type: 'configure', file: this.#activeFile! }, 'configured');
-    const doc = await vscode.workspace.openTextDocument(file);
-    await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside);
+    this.#server?.send({ type: 'configure', file: this.#activeFile });
   }
 
   async sendEmail(): Promise<void> {
-    if (this.#server.running && this.#activeFile) {
-      await vscode.window.withProgress(
-        {
-          location: vscode.ProgressLocation.Notification,
-          cancellable: false,
-          title: 'Sending email'
-        },
-        () => this.#server.sendMessageAndWaitFor({ type: 'send', file: this.#activeFile! }, 'sent', 'sent-failed').then(console.log)
-          .catch(err => {
-            vscode.window.showErrorMessage(err.message);
-          })
-      );
+    if (this.#server?.killed === false && this.#activeFile) {
+      this.#server.send({ type: 'send', file: this.#activeFile! });
     }
   }
 

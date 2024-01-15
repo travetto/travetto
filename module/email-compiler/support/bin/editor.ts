@@ -107,7 +107,7 @@ export class EditorState {
     });
 
     process.once('disconnect', () => process.exit());
-    process.send?.('ready');
+    process.send?.({ type: 'init' });
 
     for await (const f of EmailCompiler.watchCompile()) {
       await this.renderFile(f);

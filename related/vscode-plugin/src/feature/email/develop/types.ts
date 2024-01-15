@@ -6,6 +6,7 @@ export type EmailCompilerCommand =
   { type: 'configure', file: string };
 
 export type EmailCompilerEvent =
+  { type: 'init' } |
   { type: 'changed', file: string, content?: Content } |
   { type: 'changed-failed' } |
   { type: 'configured', file: string } |
