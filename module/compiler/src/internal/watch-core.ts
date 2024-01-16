@@ -1,107 +1,41 @@
-import fs from 'node:fs/promises';
+import { statSync } from 'node:fs';
 
-import { IndexedModule, ManifestContext, ManifestModuleUtil, path } from '@travetto/manifest';
+import { path } from '@travetto/manifest';
 
 import { AsyncQueue } from '../../support/queue';
 
-export type WatchEvent<T = {}> =
-  ({ action: 'create' | 'update' | 'delete', file: string, folder: string } & T) |
-  { action: 'reset', file: string };
+export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
 
 const CREATE_THRESHOLD = 50;
-const VALID_TYPES = new Set(['ts', 'typings', 'js', 'package-json']);
-type ToWatch = { file: string, actions: string[] };
-
-/** Watch file for reset */
-function watchForReset(q: AsyncQueue<WatchEvent>, root: string, files: ToWatch[], signal: AbortSignal): void {
-  const watchers: Record<string, { folder: string, files: Map<string, (ToWatch & { name: string, actionSet: Set<string> })> }> = {};
-  // Group by base path
-  for (const el of files) {
-    const full = path.resolve(root, el.file);
-    const folder = path.dirname(full);
-    const tgt = { ...el, name: path.basename(el.file), actionSet: new Set(el.actions) };
-    const watcher = (watchers[folder] ??= { folder, files: new Map() });
-    watcher.files.set(tgt.name, tgt);
-  }
-
-  // Fire them all off
-  Object.values(watchers).map(async (watcher) => {
-    try {
-      for await (const ev of fs.watch(watcher.folder, { persistent: true, encoding: 'utf8', signal })) {
-        const toWatch = watcher.files.get(ev.filename!);
-        if (toWatch) {
-          const stat = await fs.stat(path.resolve(root, ev.filename!)).catch(() => undefined);
-          const action = !stat ? 'delete' : ((Date.now() - stat.ctimeMs) < CREATE_THRESHOLD) ? 'create' : 'update';
-          if (toWatch.actionSet.has(action)) {
-            q.add({ action: 'reset', file: ev.filename! });
-          }
-        }
-      }
-    } catch (err) {
-      // Ignore
-    }
-  });
-}
-
-/** Watch recursive files for a given folder */
-async function watchFolder(ctx: ManifestContext, q: AsyncQueue<WatchEvent>, src: string, target: string, signal: AbortSignal): Promise<void> {
-  const lib = await import('@parcel/watcher');
-  const ignore = [
-    'node_modules', '**/.trv',
-    ...((!ctx.workspace.mono || src === ctx.workspace.path) ? [ctx.build.compilerFolder, ctx.build.outputFolder] : []),
-    ...(await fs.readdir(src)).filter(x => x.startsWith('.'))
-  ];
-
-  const cleanup = await lib.subscribe(src, async (err, events) => {
-    if (err) {
-      console.error('Watch Error', err);
-    }
-    for (const ev of events) {
-      const finalEv = { action: ev.type, file: path.toPosix(ev.path), folder: target };
-      if (ev.type !== 'delete') {
-        const stats = await fs.stat(finalEv.file);
-        if ((Date.now() - stats.ctimeMs) < CREATE_THRESHOLD) {
-          ev.type = 'create'; // Force create on newly stated files
-        }
-      }
-
-      if (ev.type === 'delete' && finalEv.file === src) {
-        return q.close();
-      }
-
-      const matches = !finalEv.file.includes('/.') && VALID_TYPES.has(ManifestModuleUtil.getFileType(finalEv.file));
-      if (matches) {
-        q.add(finalEv);
-      }
-    }
-  }, { ignore });
-  signal.addEventListener('abort', () => cleanup.unsubscribe());
-}
 
 /** Watch files */
-export async function* fileWatchEvents(manifest: ManifestContext, modules: IndexedModule[], signal: AbortSignal): AsyncIterable<WatchEvent> {
-  const q = new AsyncQueue<WatchEvent>(signal);
+export async function* fileWatchEvents(rootPath: string, signal: AbortSignal): AsyncIterable<
+  WatchEvent | { action: 'error', error: Error }
+> {
+  const q = new AsyncQueue<WatchEvent | { action: 'error', error: Error }>(signal);
+  const lib = await import('@parcel/watcher');
 
-  for (const m of modules.filter(x => !manifest.workspace.mono || x.sourcePath !== manifest.workspace.path)) {
-    await watchFolder(manifest, q, m.sourcePath, m.sourcePath, signal);
-  }
-
-  // Add monorepo folders
-  if (manifest.workspace.mono) {
-    const mono = modules.find(x => x.sourcePath === manifest.workspace.path)!;
-    for (const folder of Object.keys(mono.files)) {
-      if (!folder.startsWith('$')) {
-        await watchFolder(manifest, q, path.resolve(mono.sourcePath, folder), mono.sourcePath, signal);
-      }
+  const cleanup = await lib.subscribe(rootPath, (err, events) => {
+    if (err) {
+      q.add({ action: 'error', error: err });
+      return;
     }
-  }
 
-  watchForReset(q, manifest.workspace.path, [
-    { file: manifest.build.outputFolder, actions: ['delete'] },
-    { file: manifest.build.compilerFolder, actions: ['delete'] },
-    { file: 'package-lock.json', actions: ['delete', 'update', 'create'] },
-    { file: 'package.json', actions: ['delete', 'update', 'create'] }
-  ], signal);
+    for (const ev of events) {
+      const finalEv = { action: ev.type, file: path.toPosix(ev.path) };
+      if (ev.type !== 'delete') {
+        const stats = statSync(finalEv.file);
+        if ((Date.now() - stats.ctimeMs) < CREATE_THRESHOLD) {
+          finalEv.action = 'create'; // Force create on newly stated files
+        }
+      }
+      q.add(finalEv);
+    }
+  }, {
+    ignore: ['node_modules']
+  });
+
+  signal.addEventListener('abort', () => cleanup.unsubscribe());
 
   yield* q;
 }

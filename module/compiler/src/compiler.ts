@@ -38,7 +38,7 @@ export class Compiler {
     this.#state = state;
     this.#dirtyFiles = dirtyFiles[0] === '*' ?
       this.#state.getAllFiles() :
-      dirtyFiles.map(f => this.#state.getBySource(f)!.input);
+      dirtyFiles.map(f => this.#state.getBySource(f)!.inputFile);
     this.#watch = watch;
 
     this.#ctrl = new AbortController();
@@ -157,16 +157,16 @@ export class Compiler {
         }
         const { action, entry } = ev;
         if (action !== 'delete') {
-          const err = await emitter(entry.input, true);
+          const err = await emitter(entry.inputFile, true);
           if (err) {
-            Log.info('Compilation Error', CompilerUtil.buildTranspileError(entry.input, err));
+            Log.info('Compilation Error', CompilerUtil.buildTranspileError(entry.inputFile, err));
           } else {
-            Log.info(`Compiled ${entry.source}`);
+            Log.info(`Compiled ${entry.sourceFile}`);
           }
         } else {
           // Remove output
-          Log.info(`Removed ${entry.source}, ${entry.output}`);
-          await fs.rm(entry.output!, { force: true }); // Ensure output is deleted
+          Log.info(`Removed ${entry.sourceFile}, ${entry.outputFile}`);
+          await fs.rm(entry.outputFile!, { force: true }); // Ensure output is deleted
         }
 
         // Send change events
@@ -175,7 +175,7 @@ export class Compiler {
           time: Date.now(),
           file: ev.file,
           folder: ev.folder,
-          output: ev.entry.output!,
+          output: ev.entry.outputFile!,
           module: ev.entry.module.name
         });
       }
