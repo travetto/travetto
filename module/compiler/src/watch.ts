@@ -9,14 +9,10 @@ import { CompilerState } from './state';
 import { CompilerUtil } from './util';
 
 import { WatchEvent, fileWatchEvents } from './internal/watch-core';
-import { Log } from './log';
 
 type CompilerWatchEvent = (WatchEvent & { entry: CompileStateEntry, folder: string }) | { action: 'reset', file: string };
 
-
 type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile: string, folderKey: ManifestModuleFolderType, type: ManifestModuleFileType };
-
-type TrieNode = { mod?: ManifestModule, subs: Record<string, TrieNode> };
 
 /**
  * Watch support, based on compiler state and manifest details
@@ -27,34 +23,6 @@ export class CompilerWatcher {
   #dirtyFiles: DirtyFile[] = [];
   #state: CompilerState;
   #signal: AbortSignal;
-
-  #trieLookup(): (file: string) => ManifestModule | undefined {
-    const trie: TrieNode = { subs: {} };
-    for (const mod of Object.values(this.#state.manifest.modules)) {
-      if (mod.sourceFolder) {
-        const pth = mod.sourceFolder.split('/');
-        let node = trie;
-        for (const sub of pth) {
-          node = node.subs[sub] ??= { subs: {} };
-        }
-        node.mod = mod;
-      } else {
-        trie.mod = mod;
-      }
-    }
-    return (file: string) => {
-      const parts = file.replace(`${this.#state.manifest.workspace.path}/`, '').split('/');
-      let node = trie;
-      for (const sub of parts) {
-        if (!node.subs[sub]) {
-          return;
-        } else {
-          node = node.subs[sub];
-        }
-      }
-      return node.mod;
-    };
-  }
 
   constructor(state: CompilerState, signal: AbortSignal) {
     this.#state = state;
@@ -123,8 +91,6 @@ export class CompilerWatcher {
     const OUTPUT_PATH = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
     const COMPILER_PATH = path.resolve(manifest.workspace.path, manifest.build.compilerFolder);
 
-    const getMod = this.#trieLookup();
-
     for await (const ev of fileWatchEvents(this.#state.manifest.workspace.path, this.#signal)) {
       if (ev instanceof Error) {
         throw ev;
@@ -148,7 +114,7 @@ export class CompilerWatcher {
 
       let entry = this.#state.getBySource(sourceFile);
 
-      const mod = entry?.module ?? getMod(sourceFile);
+      const mod = entry?.module ?? this.#state.findModuleForSourceFile(sourceFile);
       if (!mod) {
         continue;
       }
