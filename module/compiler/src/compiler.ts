@@ -45,8 +45,16 @@ export class Compiler {
     this.#signal = this.#ctrl.signal;
     setMaxListeners(1000, this.#signal);
     process
-      .once('disconnect', () => this.#ctrl.abort())
-      .on('message', ev => (ev === 'shutdown') && this.#ctrl.abort());
+      .once('disconnect', () => this.#shutdown(true))
+      .on('message', ev => (ev === 'shutdown') && this.#shutdown(true));
+  }
+
+  #shutdown(manual?: boolean): void {
+    if (manual) {
+      Log.error('Shutting down manually');
+      process.exitCode = 2;
+    }
+    this.#ctrl.abort();
   }
 
   /**
@@ -147,37 +155,44 @@ export class Compiler {
       Log.info('Watch is ready');
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
-
-      for await (const ev of new CompilerWatcher(this.#state, this.#signal).watchChanges()) {
-        if (ev.action === 'reset') {
-          Log.info(`Triggering reset due to change in ${ev.file}`);
-          EventUtil.sendEvent('state', { state: 'reset' });
-          this.#ctrl.abort();
-          return;
-        }
-        const { action, entry } = ev;
-        if (action !== 'delete') {
-          const err = await emitter(entry.inputFile, true);
-          if (err) {
-            Log.info('Compilation Error', CompilerUtil.buildTranspileError(entry.inputFile, err));
-          } else {
-            Log.info(`Compiled ${entry.sourceFile}`);
+      try {
+        for await (const ev of new CompilerWatcher(this.#state, this.#signal).watchChanges()) {
+          if (ev.action === 'reset') {
+            Log.info(`Triggering reset due to change in ${ev.file}`);
+            EventUtil.sendEvent('state', { state: 'reset' });
+            this.#ctrl.abort();
+            return;
           }
-        } else {
-          // Remove output
-          Log.info(`Removed ${entry.sourceFile}, ${entry.outputFile}`);
-          await fs.rm(entry.outputFile!, { force: true }); // Ensure output is deleted
-        }
+          const { action, entry } = ev;
+          if (action !== 'delete') {
+            const err = await emitter(entry.inputFile, true);
+            if (err) {
+              Log.info('Compilation Error', CompilerUtil.buildTranspileError(entry.inputFile, err));
+            } else {
+              Log.info(`Compiled ${entry.sourceFile}`);
+            }
+          } else {
+            // Remove output
+            Log.info(`Removed ${entry.sourceFile}, ${entry.outputFile}`);
+            await fs.rm(entry.outputFile!, { force: true }); // Ensure output is deleted
+          }
 
-        // Send change events
-        EventUtil.sendEvent('change', {
-          action: ev.action,
-          time: Date.now(),
-          file: ev.file,
-          folder: ev.folder,
-          output: ev.entry.outputFile!,
-          module: ev.entry.module.name
-        });
+          // Send change events
+          EventUtil.sendEvent('change', {
+            action: ev.action,
+            time: Date.now(),
+            file: ev.file,
+            folder: ev.folder,
+            output: ev.entry.outputFile!,
+            module: ev.entry.module.name
+          });
+        }
+      } catch (err) {
+        if (err instanceof Error) {
+          Log.error('Watch Failed', err.message);
+        }
+        process.exitCode = 1;
+        this.#shutdown(false);
       }
 
       EventUtil.sendEvent('state', { state: 'watch-end' });
@@ -186,10 +201,5 @@ export class Compiler {
     // No longer listen to disconnect
     process.removeAllListeners('disconnect');
     process.removeAllListeners('message');
-
-    if (this.#ctrl.signal.aborted) {
-      process.exitCode = 2;
-      Log.error('Shutting down manually');
-    }
   }
 }

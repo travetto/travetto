@@ -10,14 +10,15 @@ const CREATE_THRESHOLD = 50;
 
 /** Watch files */
 export async function* fileWatchEvents(rootPath: string, signal: AbortSignal): AsyncIterable<
-  WatchEvent | { action: 'error', error: Error }
+  WatchEvent | Error
 > {
-  const q = new AsyncQueue<WatchEvent | { action: 'error', error: Error }>(signal);
+  const q = new AsyncQueue<WatchEvent | Error>(signal);
   const lib = await import('@parcel/watcher');
 
   const cleanup = await lib.subscribe(rootPath, (err, events) => {
     if (err) {
-      q.add({ action: 'error', error: err });
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      q.add(err instanceof Error ? err : new Error((err as Error).message));
       return;
     }
 
@@ -32,7 +33,7 @@ export async function* fileWatchEvents(rootPath: string, signal: AbortSignal): A
       q.add(finalEv);
     }
   }, {
-    ignore: ['node_modules']
+    ignore: ['node_modules', '**/node_modules', '.git', '**/.git']
   });
 
   signal.addEventListener('abort', () => cleanup.unsubscribe());

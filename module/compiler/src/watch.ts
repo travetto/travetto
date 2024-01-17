@@ -126,9 +126,8 @@ export class CompilerWatcher {
     const getMod = this.#trieLookup();
 
     for await (const ev of fileWatchEvents(this.#state.manifest.workspace.path, this.#signal)) {
-      if (ev.action === 'error') {
-        Log.error(ev.error.message);
-        return;
+      if (ev instanceof Error) {
+        throw ev;
       }
 
       const { action, file: sourceFile } = ev;
