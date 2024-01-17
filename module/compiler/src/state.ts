@@ -134,7 +134,7 @@ export class CompilerState implements ts.CompilerHost {
       undefined :
       path.resolve(this.#outputPath, ManifestModuleUtil.sourceToOutputExt(relativeInput));
 
-    const entry = { sourceFile, inputFile, outputFile, module, relativeInput };
+    const entry = { sourceFile, inputFile, outputFile, module };
 
     this.#inputToEntry.set(inputFile, entry);
     this.#sourceToEntry.set(sourceFile, entry);
