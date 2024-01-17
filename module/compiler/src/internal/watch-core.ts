@@ -9,16 +9,14 @@ export type WatchEvent = { action: 'create' | 'update' | 'delete', file: string 
 const CREATE_THRESHOLD = 50;
 
 /** Watch files */
-export async function* fileWatchEvents(rootPath: string, signal: AbortSignal): AsyncIterable<
-  WatchEvent | Error
-> {
-  const q = new AsyncQueue<WatchEvent | Error>(signal);
+export async function* fileWatchEvents(rootPath: string, signal: AbortSignal): AsyncIterable<WatchEvent> {
+  const q = new AsyncQueue<WatchEvent>(signal);
   const lib = await import('@parcel/watcher');
 
   const cleanup = await lib.subscribe(rootPath, (err, events) => {
     if (err) {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      q.add(err instanceof Error ? err : new Error((err as Error).message));
+      q.throw(err instanceof Error ? err : new Error((err as Error).message));
       return;
     }
 

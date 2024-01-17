@@ -92,10 +92,6 @@ export class CompilerWatcher {
     const COMPILER_PATH = path.resolve(manifest.workspace.path, manifest.build.compilerFolder);
 
     for await (const ev of fileWatchEvents(this.#state.manifest.workspace.path, this.#signal)) {
-      if (ev instanceof Error) {
-        throw ev;
-      }
-
       const { action, file: sourceFile } = ev;
 
       if (
