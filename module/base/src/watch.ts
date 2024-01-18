@@ -3,7 +3,7 @@ import { RuntimeIndex } from '@travetto/manifest';
 import { ExecUtil } from './exec';
 import { ShutdownManager } from './shutdown';
 
-export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete', folder: string };
+export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete' };
 export type FullWatchEvent = WatchEvent & { output: string, module: string, time: number };
 
 export async function watchCompiler<T extends WatchEvent>(handler: (ev: T) => unknown, cfg?: { restartOnExit?: boolean, signal?: AbortSignal }): Promise<void> {

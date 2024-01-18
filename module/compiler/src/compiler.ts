@@ -200,7 +200,6 @@ export class Compiler {
             action: ev.action,
             time: Date.now(),
             file: ev.file,
-            folder: ev.folder,
             output: ev.entry.outputFile!,
             module: ev.entry.module.name
           });

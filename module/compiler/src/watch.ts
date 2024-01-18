@@ -10,7 +10,7 @@ import { CompilerUtil } from './util';
 
 import { WatchEvent, fileWatchEvents } from './internal/watch-core';
 
-type CompilerWatchEvent = WatchEvent & { entry: CompileStateEntry, folder: string };
+type CompilerWatchEvent = WatchEvent & { entry: CompileStateEntry };
 
 type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile: string, folderKey: ManifestModuleFolderType, type: ManifestModuleFileType };
 
@@ -153,7 +153,7 @@ export class CompilerWatcher {
 
       if (entry) {
         await this.#rebuildManifestsIfNeeded();
-        yield { action, file: entry.sourceFile, folder: entry.module.sourceFolder, entry };
+        yield { action, file: entry.sourceFile, entry };
       }
     }
   }
