@@ -12,7 +12,6 @@ export class RunUtil {
 
   static #baseEnv: EnvDict = { ...Env.DEBUG.export('') };
   static #cliFile: string;
-  static #cliEntryTargetFile: string;
 
   static get cliFile(): string {
     return this.#cliFile ??= Workspace.resolveImport('@travetto/cli/bin/trv.js');
