@@ -31,6 +31,7 @@ export async function* fileWatchEvents(rootPath: string, signal: AbortSignal): A
       q.add(finalEv);
     }
   }, {
+    // TODO: Read .gitignore?
     ignore: ['node_modules', '**/node_modules', '.git', '**/.git']
   });
 
