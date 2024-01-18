@@ -10,7 +10,7 @@ import { CompilerUtil } from './util';
 
 import { WatchEvent, fileWatchEvents } from './internal/watch-core';
 
-type CompilerWatchEvent = (WatchEvent & { entry: CompileStateEntry, folder: string }) | { action: 'reset', file: string };
+type CompilerWatchEvent = WatchEvent & { entry: CompileStateEntry, folder: string };
 
 type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile: string, folderKey: ManifestModuleFolderType, type: ManifestModuleFileType };
 
@@ -99,8 +99,7 @@ export class CompilerWatcher {
         sourceFile === ROOT_PKG ||
         (action === 'delete' && (sourceFile === OUTPUT_PATH || sourceFile === COMPILER_PATH))
       ) {
-        yield { action: 'reset', file: sourceFile };
-        return;
+        throw new Error('RESET');
       }
 
       const fileType = ManifestModuleUtil.getFileType(sourceFile);
