@@ -33,6 +33,7 @@ export class Compiler {
   #watch?: boolean;
   #ctrl: AbortController;
   #signal: AbortSignal;
+  #shuttingDown = false;
 
   constructor(state: CompilerState, dirtyFiles: string[], watch?: boolean) {
     this.#state = state;
@@ -50,6 +51,11 @@ export class Compiler {
   }
 
   #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', err?: Error): void {
+    if (this.#shuttingDown) {
+      return;
+    }
+
+    this.#shuttingDown = true;
     switch (mode) {
       case 'manual': {
         Log.error('Shutting down manually');
@@ -199,13 +205,13 @@ export class Compiler {
             module: ev.entry.module.name
           });
         }
+        EventUtil.sendEvent('state', { state: 'watch-end' });
+
       } catch (err) {
         if (err instanceof Error) {
-          return this.#shutdown(err.message === 'RESET' ? 'reset' : 'error', err);
+          this.#shutdown(err.message === 'RESET' ? 'reset' : 'error', err);
         }
       }
-
-      EventUtil.sendEvent('state', { state: 'watch-end' });
     }
 
     this.#shutdown('complete');
