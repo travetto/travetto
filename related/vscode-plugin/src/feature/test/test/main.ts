@@ -1,7 +1,7 @@
 import vscode from 'vscode';
-import { ChildProcess, spawn } from 'node:child_process';
+import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { path } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 
 import { Workspace } from '../../../core/workspace';
@@ -28,20 +28,26 @@ class TestRunnerFeature extends BaseFeature {
   #runFile(file: string, line?: number): void {
     this.#activeProcesses[file]?.kill(); // Ensure only one at a time
 
-    const proc = spawn('node', [
-      RunUtil.cliEntryTargetFile,
-      this.commandName('direct'), '-f', 'event',
-      file, ...(line ? [`${line}`] : [])
-    ], {
+    const args = [
+      RunUtil.cliFile,
+      'test:direct', '-f', 'exec',
+      file, `${line ?? '0'}`
+    ];
+
+    const mod = Workspace.workspaceIndex.getFromSource(file)!.module;
+
+    const config: SpawnOptions = {
       cwd: Workspace.path,
       env: {
         ...process.env,
         ...Env.TRV_MANIFEST.export(undefined),
-        ...Env.TRV_MODULE.export(RuntimeIndex.getFromSource(file)!.module),
+        ...Env.TRV_MODULE.export(mod),
         ...Env.TRV_QUIET.export(true)
       },
-      stdio: ['ignore', 'ignore', 2, 'ipc']
-    });
+      stdio: ['pipe', 'pipe', 2, 'ipc']
+    };
+
+    const proc = spawn('node', args, config);
 
     proc.on('message', (ev: Event) => {
       switch (ev.type) {

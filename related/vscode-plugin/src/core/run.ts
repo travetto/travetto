@@ -18,10 +18,6 @@ export class RunUtil {
     return this.#cliFile ??= Workspace.resolveImport('@travetto/cli/bin/trv.js');
   }
 
-  static get cliEntryTargetFile(): string {
-    return this.#cliEntryTargetFile ??= Workspace.resolveImport('@travetto/cli/support/entry.trv');
-  }
-
   static buildEnv(cliModule?: string): EnvDict {
     return {
       ...this.#baseEnv,

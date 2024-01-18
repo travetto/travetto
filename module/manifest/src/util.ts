@@ -22,6 +22,13 @@ export class ManifestUtil {
   }
 
   /**
+   * Produce a manifest location given a current context and a module name
+   */
+  static getManifestLocation(ctx: ManifestContext, module?: string): string {
+    return path.resolve(ctx.workspace.path, ctx.build.outputFolder, 'node_modules', module ?? ctx.workspace.name);
+  }
+
+  /**
    * Produce a production manifest from a given manifest
    */
   static createProductionManifest(manifest: ManifestRoot): ManifestRoot {
@@ -47,7 +54,7 @@ export class ManifestUtil {
    * @param file
    * @returns
    */
-  static readManifestSync(file: string): { manifest: ManifestRoot, file: string } {
+  static readManifestSync(file: string): ManifestRoot {
     file = path.resolve(file);
     if (!file.endsWith('.json')) {
       file = path.resolve(file, MANIFEST_FILE);
@@ -58,7 +65,7 @@ export class ManifestUtil {
       manifest.build.outputFolder = path.cwd();
       manifest.workspace.path = path.cwd();
     }
-    return { manifest, file };
+    return manifest;
   }
 
   /**

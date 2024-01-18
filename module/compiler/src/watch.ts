@@ -61,8 +61,9 @@ export class CompilerWatcher {
       }
       await ManifestUtil.writeManifest(newManifest);
     }
-    // Reindex
-    this.#state.manifestIndex.init(this.#state.manifestIndex.manifestFile);
+
+    // Reindex at workspace root
+    this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
   }
 
   #addDirtyFile(mod: ManifestModule, moduleFile: string, remove = false): void {

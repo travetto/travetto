@@ -43,7 +43,6 @@ const TypedObject: {
  */
 export class ManifestIndex {
 
-  #manifestFile: string;
   #manifest: ManifestRoot;
   #modules: IndexedModule[];
   #modulesByName: Record<string, IndexedModule> = {};
@@ -69,14 +68,8 @@ export class ManifestIndex {
     return this.#outputRoot;
   }
 
-  get manifestFile(): string {
-    return this.#manifestFile;
-  }
-
   init(manifestInput: string): void {
-    const { manifest, file } = ManifestUtil.readManifestSync(manifestInput);
-    this.#manifest = manifest;
-    this.#manifestFile = file;
+    this.#manifest = ManifestUtil.readManifestSync(manifestInput);
     this.#outputRoot = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#index();
   }

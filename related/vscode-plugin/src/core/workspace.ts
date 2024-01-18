@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 
 import type { CompilerStateType } from '@travetto/compiler/support/types';
-import { ManifestContext, PackageUtil } from '@travetto/manifest';
+import { ManifestContext, ManifestIndex, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
 
 /**
  * Standard set of workspace utilities
@@ -10,6 +10,7 @@ export class Workspace {
 
   static #context: vscode.ExtensionContext;
   static #manifestContext: ManifestContext;
+  static #workspaceIndex: ManifestIndex;
   static #compilerState: CompilerStateType | undefined;
   static #compilerStateListeners: ((ev: CompilerStateType | 'disconnected') => void)[] = [];
 
@@ -57,6 +58,11 @@ export class Workspace {
     return this.#manifestContext.workspace.name;
   }
 
+  /** Get workspace index */
+  static get workspaceIndex(): ManifestIndex {
+    return this.#workspaceIndex;
+  }
+
   /**
    * Initialize extension context
    * @param context
@@ -64,6 +70,7 @@ export class Workspace {
   static async init(context: vscode.ExtensionContext, manifestContext: ManifestContext): Promise<void> {
     this.#context = context;
     this.#manifestContext = manifestContext;
+    this.#workspaceIndex = new ManifestIndex(ManifestUtil.getManifestLocation(manifestContext));
   }
 
   /** Find full path for a resource */
