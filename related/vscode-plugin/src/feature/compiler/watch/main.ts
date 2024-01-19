@@ -73,6 +73,9 @@ export class CompilerWatchFeature extends BaseFeature {
     if (command === 'start' || command === 'restart') {
       StreamUtil.onLine(proc.stderr, line => this.#log.error(`> ${line}`));
     }
+    proc.on('exit', (code) => {
+      this.#log.debug('Finished command', command, 'with', code);
+    });
 
     return proc;
   }
@@ -124,6 +127,7 @@ export class CompilerWatchFeature extends BaseFeature {
   }
 
   #onState(state: CompilerStateType): void {
+    this.#log.debug('Compiler state changed', state);
     let v: string;
     switch (state) {
       case 'reset': v = '$(flame) Restarting'; break;
