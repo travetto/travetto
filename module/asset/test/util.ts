@@ -25,9 +25,21 @@ export class UtilTest {
   @Test()
   async detectFileType() {
     const png = await this.fixture.resolve('/logo.png');
-    const fileType = (await AssetUtil.detectFileType(png))!;
+    const fileType = await AssetUtil.detectFileType(png);
+    assert(fileType);
     assert(fileType.ext === 'png');
     assert(fileType.mime === 'image/png');
+
+    const gifStream = await this.fixture.readStream('/logo.gif');
+    const fileType2 = await AssetUtil.detectFileType(gifStream);
+    assert(fileType2);
+    assert(fileType2.ext === 'gif');
+    assert(fileType2.mime === 'image/gif');
+
+    const m4aBuff = await this.fixture.read('/logo', true);
+    const fileType3 = await AssetUtil.detectFileType(m4aBuff);
+    assert(fileType3!.ext === 'png');
+    assert(fileType3!.mime === 'image/png');
   }
 
   @Test()

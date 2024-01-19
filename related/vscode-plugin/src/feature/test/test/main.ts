@@ -90,13 +90,13 @@ class TestRunnerFeature extends BaseFeature {
   /**
    * Launch a test from the current location
    */
-  async launchTestDebugger(): Promise<void> {
+  async launchTestDebugger(line?: number): Promise<void> {
     const editor = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
     if (!editor || !this.#isTestDoc(editor)) {
       return;
     }
 
-    const line = editor.selection.start.line + 1;
+    line ??= (editor.selection.start.line + 1);
     const file = path.toPosix(editor.document.fileName ?? '');
     const prettyFile = file.replace(`${Workspace.path}/`, '');
     const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(file)!;
@@ -108,6 +108,8 @@ class TestRunnerFeature extends BaseFeature {
       args: [prettyFile, `${line}`],
       cliModule: mod.name,
       env: {
+        ...Env.TRV_TEST_PHASE_TIMEOUT.export('5m'),
+        ...Env.TRV_TEST_TIMEOUT.export('1h'),
         ...Env.TRV_TEST_BREAK_ENTRY.export(true)
       }
     });
@@ -125,7 +127,7 @@ class TestRunnerFeature extends BaseFeature {
         command: {
           command: this.commandName('line'),
           title: 'Debug Test',
-          arguments: [doc.fileName, test.code, true]
+          arguments: [test.code]
         }
       }));
   }
