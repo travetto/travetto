@@ -59,7 +59,7 @@ export class CompilerWatchFeature extends BaseFeature {
    * @param command
    */
   run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info' | 'event', args?: string[], signal?: AbortSignal): ChildProcess {
-    this.#log.debug('Running Compiler', this.#compilerCliFile, command);
+    this.#log.trace('Running Compiler', this.#compilerCliFile, command, args);
     const proc = spawn('node', [this.#compilerCliFile, command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
