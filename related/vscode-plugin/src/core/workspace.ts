@@ -60,7 +60,7 @@ export class Workspace {
 
   /** Get workspace index */
   static get workspaceIndex(): ManifestIndex {
-    return this.#workspaceIndex;
+    return this.#workspaceIndex ??= new ManifestIndex(ManifestUtil.getManifestLocation(this.#manifestContext));
   }
 
   /**
@@ -70,7 +70,6 @@ export class Workspace {
   static async init(context: vscode.ExtensionContext, manifestContext: ManifestContext): Promise<void> {
     this.#context = context;
     this.#manifestContext = manifestContext;
-    this.#workspaceIndex = new ManifestIndex(ManifestUtil.getManifestLocation(manifestContext));
   }
 
   /** Find full path for a resource */

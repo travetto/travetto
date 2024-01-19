@@ -8,10 +8,10 @@ import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
 import { CompilerUtil } from './util';
 
-import { WatchEvent, fileWatchEvents } from './internal/watch-core';
+import { AsyncQueue } from '../support/queue';
 
+type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
 type CompilerWatchEvent = WatchEvent & { entry: CompileStateEntry };
-
 type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile: string, folderKey: ManifestModuleFolderType, type: ManifestModuleFileType };
 
 /**
@@ -27,6 +27,30 @@ export class CompilerWatcher {
   constructor(state: CompilerState, signal: AbortSignal) {
     this.#state = state;
     this.#signal = signal;
+  }
+
+  /** Watch files */
+  async * #watchFolder(rootPath: string): AsyncIterable<WatchEvent> {
+    const q = new AsyncQueue<WatchEvent>(this.#signal);
+    const lib = await import('@parcel/watcher');
+
+    const cleanup = await lib.subscribe(rootPath, (err, events) => {
+      if (err) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        q.throw(err instanceof Error ? err : new Error((err as Error).message));
+        return;
+      }
+      for (const ev of events) {
+        q.add({ action: ev.type, file: path.toPosix(ev.path) });
+      }
+    }, {
+      // TODO: Read .gitignore?
+      ignore: ['node_modules', '**/node_modules', '.git', '**/.git']
+    });
+
+    this.#signal.addEventListener('abort', () => cleanup.unsubscribe());
+
+    yield* q;
   }
 
   async #rebuildManifestsIfNeeded(): Promise<void> {
@@ -92,7 +116,7 @@ export class CompilerWatcher {
     const OUTPUT_PATH = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
     const COMPILER_PATH = path.resolve(manifest.workspace.path, manifest.build.compilerFolder);
 
-    for await (const ev of fileWatchEvents(this.#state.manifest.workspace.path, this.#signal)) {
+    for await (const ev of this.#watchFolder(this.#state.manifest.workspace.path)) {
       const { action, file: sourceFile } = ev;
 
       if (
@@ -110,7 +134,7 @@ export class CompilerWatcher {
 
       let entry = this.#state.getBySource(sourceFile);
 
-      const mod = entry?.module ?? this.#state.findModuleForSourceFile(sourceFile);
+      const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(sourceFile);
       if (!mod) {
         continue;
       }

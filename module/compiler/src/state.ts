@@ -3,10 +3,10 @@ import ts from 'typescript';
 import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
+import { CommonUtil } from '../support/util';
+
 import { CompilerUtil } from './util';
 import { CompileStateEntry } from './types';
-import { CommonUtil } from '../support/util';
-import { existsSync } from 'node:fs';
 
 function folderMapper(root: string, prefix: string): { dir: string, translate: (val: string) => string } {
   let matched: string = '~~';
@@ -17,8 +17,6 @@ function folderMapper(root: string, prefix: string): { dir: string, translate: (
   });
   return { dir: final, translate: (file: string) => file.replace(prefix, matched) };
 }
-
-type TrieNode = { mod?: ManifestModule, subs: Record<string, TrieNode> };
 
 export class CompilerState implements ts.CompilerHost {
 
@@ -45,24 +43,6 @@ export class CompilerState implements ts.CompilerHost {
   #modules: ManifestModule[];
   #transformerManager: TransformerManager;
   #compilerOptions: ts.CompilerOptions;
-  #moduleTrie: TrieNode;
-
-  #buildModuleTrie(): TrieNode {
-    const trie: TrieNode = { subs: {} };
-    for (const mod of Object.values(this.#manifest.modules)) {
-      if (mod.sourceFolder) {
-        const pth = mod.sourceFolder.split('/');
-        let node = trie;
-        for (const sub of pth) {
-          node = node.subs[sub] ??= { subs: {} };
-        }
-        node.mod = mod;
-      } else {
-        trie.mod = mod;
-      }
-    }
-    return trie;
-  }
 
   async init(idx: ManifestIndex): Promise<this> {
     this.#manifestIndex = idx;
@@ -109,32 +89,6 @@ export class CompilerState implements ts.CompilerHost {
 
   get manifestIndex(): ManifestIndex {
     return this.#manifestIndex;
-  }
-
-  /** Find the module for a given source file, if it falls under a given workspace module */
-  findModuleForSourceFile(file: string): ManifestModule | undefined {
-    const trie = this.#moduleTrie ??= this.#buildModuleTrie();
-    const parts = file.replace(`${this.#manifest.workspace.path}/`, '').split('/');
-
-    let node = trie;
-    let mod: ManifestModule | undefined = undefined;
-    for (let i = 0; i < parts.length; i += 1) {
-      const base = path.resolve(this.#manifest.workspace.path, ...parts.slice(0, i));
-      if (
-        existsSync(path.resolve(base, 'package.json')) ||
-        existsSync(path.resolve(base, '.git'))
-      ) { // Clear out when entering a new module or a new repo
-        mod = undefined;
-      }
-      const sub = parts[i];
-      if (!node.subs[sub]) {
-        break;
-      } else {
-        node = node.subs[sub];
-        mod = node.mod ?? mod;
-      }
-    }
-    return mod;
   }
 
   resolveOutputFile(file: string): string {

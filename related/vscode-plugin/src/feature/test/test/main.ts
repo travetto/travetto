@@ -12,6 +12,7 @@ import { BaseFeature } from '../../base';
 
 import { WorkspaceResultsManager } from './workspace';
 import { RemoveEvent, TestEvent } from './types';
+import { Log } from '../../../core/log';
 
 type Event = TestEvent | RemoveEvent | { type: 'log', message: string };
 
@@ -26,6 +27,12 @@ class TestRunnerFeature extends BaseFeature {
   #codeLensUpdated: (e: void) => unknown;
 
   #runFile(file: string, line?: number): void {
+    const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(file);
+    if (!mod) {
+      this.log.error('Unknown file', file, 'skipping');
+      return;
+    }
+
     this.#activeProcesses[file]?.kill(); // Ensure only one at a time
 
     const args = [
@@ -34,14 +41,12 @@ class TestRunnerFeature extends BaseFeature {
       file, `${line ?? '0'}`
     ];
 
-    const mod = Workspace.workspaceIndex.getFromSource(file)!.module;
-
     const config: SpawnOptions = {
       cwd: Workspace.path,
       env: {
         ...process.env,
         ...Env.TRV_MANIFEST.export(undefined),
-        ...Env.TRV_MODULE.export(mod),
+        ...Env.TRV_MODULE.export(mod.name),
         ...Env.TRV_QUIET.export(true)
       },
       stdio: ['pipe', 'pipe', 2, 'ipc']
