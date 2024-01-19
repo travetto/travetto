@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 
-import { path } from '@travetto/manifest';
+import { IndexedModule, ManifestModule, path } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 
 import { Workspace } from '../../../core/workspace';
@@ -25,20 +25,24 @@ class TestRunnerFeature extends BaseFeature {
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (e: void) => unknown;
 
-  #isTestDoc(doc: vscode.TextDocument | undefined): boolean {
-    if (!doc || !doc.fileName || !Workspace.isCompilerWatching) {
-      return false;
+  #getTestModule(file?: string): IndexedModule | ManifestModule | undefined {
+    if (!file) {
+      return;
     }
-    const mod = Workspace.workspaceIndex.getModuleFromSource(doc.fileName) ??
-      Workspace.workspaceIndex.findModuleForArbitraryFile(doc.fileName);
-    if (mod) {
-      return doc.fileName.startsWith(path.resolve(Workspace.path, mod.sourceFolder, 'test'));
+    const mod = Workspace.workspaceIndex.getModuleFromSource(file) ??
+      Workspace.workspaceIndex.findModuleForArbitraryFile(file);
+    if (mod && file.startsWith(path.resolve(Workspace.path, mod.sourceFolder, 'test'))) {
+      return mod;
     }
-    return false;
+  }
+
+  #isTestDoc(doc: vscode.TextEditor | vscode.TextDocument | undefined): boolean {
+    const file = doc ? ('fileName' in doc ? doc.fileName : doc.document.fileName) : undefined;
+    return Workspace.isCompilerWatching && !!this.#getTestModule(file);
   }
 
   #runFile(file: string, line?: number): void {
-    const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(file);
+    const mod = this.#getTestModule(file);
 
     if (!mod) {
       this.log.error('Unknown file', file, 'skipping');
@@ -88,11 +92,7 @@ class TestRunnerFeature extends BaseFeature {
    */
   async launchTestDebugger(): Promise<void> {
     const editor = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
-    if (!editor) {
-      return;
-    }
-
-    if (!editor.document.fileName || !this.#isTestDoc(editor.document)) {
+    if (!editor || !this.#isTestDoc(editor)) {
       return;
     }
 
@@ -131,7 +131,7 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
-    if (editor && this.#isTestDoc(editor.document)) {
+    if (editor && this.#isTestDoc(editor)) {
       this.#consumer.trackEditor(editor);
       if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
         this.#runFile(editor.document.fileName);
@@ -169,9 +169,9 @@ class TestRunnerFeature extends BaseFeature {
     this.register('line', this.launchTestDebugger.bind(this));
     this.register('rerun', () => {
       const editor = vscode.window.activeTextEditor;
-      if (editor && this.#isTestDoc(editor.document)) {
+      if (this.#isTestDoc(editor)) {
         this.#consumer.reset(editor);
-        this.#runFile(editor.document.fileName);
+        this.#runFile(editor!.document.fileName);
       }
     });
 
