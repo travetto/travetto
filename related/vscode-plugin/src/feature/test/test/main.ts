@@ -25,8 +25,21 @@ class TestRunnerFeature extends BaseFeature {
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (e: void) => unknown;
 
+  #isTestDoc(doc: vscode.TextDocument | undefined): boolean {
+    if (!doc || !doc.fileName || !Workspace.isCompilerWatching) {
+      return false;
+    }
+    const mod = Workspace.workspaceIndex.getModuleFromSource(doc.fileName) ??
+      Workspace.workspaceIndex.findModuleForArbitraryFile(doc.fileName);
+    if (mod) {
+      return doc.fileName.startsWith(path.resolve(Workspace.path, mod.sourceFolder, 'test'));
+    }
+    return false;
+  }
+
   #runFile(file: string, line?: number): void {
     const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(file);
+
     if (!mod) {
       this.log.error('Unknown file', file, 'skipping');
       return;
@@ -73,29 +86,29 @@ class TestRunnerFeature extends BaseFeature {
   /**
    * Launch a test from the current location
    */
-  async launchTestDebugger(file?: string, line?: number, breakpoint: boolean = true): Promise<void> {
+  async launchTestDebugger(): Promise<void> {
     const editor = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
-    if (editor) {
-      line ??= editor.selection.start.line + 1;
-      file ??= editor.document.fileName;
-    }
-
-    if (!file || !line) {
+    if (!editor) {
       return;
     }
 
-    file = path.toPosix(file);
+    if (!editor.document.fileName || !this.#isTestDoc(editor.document)) {
+      return;
+    }
 
+    const line = editor.selection.start.line + 1;
+    const file = path.toPosix(editor.document.fileName ?? '');
     const prettyFile = file.replace(`${Workspace.path}/`, '');
+    const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(file)!;
 
     await RunUtil.debug({
       useCli: true,
       name: `Debug Travetto Test - ${prettyFile}`,
       main: 'test:direct',
       args: [prettyFile, `${line}`],
-      cliModule: file,
+      cliModule: mod.name,
       env: {
-        ...(breakpoint ? Env.TRV_TEST_BREAK_ENTRY.export(true) : {})
+        ...Env.TRV_TEST_BREAK_ENTRY.export(true)
       }
     });
   }
@@ -118,7 +131,7 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
-    if (editor?.document.fileName.includes('/test/') && Workspace.isCompilerWatching) {
+    if (editor && this.#isTestDoc(editor.document)) {
       this.#consumer.trackEditor(editor);
       if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
         this.#runFile(editor.document.fileName);
@@ -127,13 +140,13 @@ class TestRunnerFeature extends BaseFeature {
   }
 
   async onOpenTextDocument(doc: vscode.TextDocument): Promise<void> {
-    if (doc.fileName.includes('/test/') && Workspace.isCompilerWatching) {
+    if (this.#isTestDoc(doc)) {
       this.#consumer.trackEditor(doc);
     }
   }
 
   async onDidSaveTextDocument(doc: vscode.TextDocument): Promise<void> {
-    if (doc.fileName.includes('/test/') && Workspace.isCompilerWatching) {
+    if (this.#isTestDoc(doc)) {
       let line = undefined;
       if (vscode.window.activeTextEditor?.document === doc) {
         const sels = vscode.window.activeTextEditor.selections;
@@ -155,16 +168,17 @@ class TestRunnerFeature extends BaseFeature {
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', this.launchTestDebugger.bind(this));
     this.register('rerun', () => {
-      this.#consumer.reset(vscode.window.activeTextEditor);
-      this.#runFile(vscode.window.activeTextEditor!.document.fileName);
+      const editor = vscode.window.activeTextEditor;
+      if (editor && this.#isTestDoc(editor.document)) {
+        this.#consumer.reset(editor);
+        this.#runFile(editor.document.fileName);
+      }
     });
 
     Workspace.onCompilerState(state => {
-      if (Workspace.isCompilerWatching) {
-        // Trigger all visible editors on start
-        for (const editor of vscode.window.visibleTextEditors) {
-          this.onChangedActiveEditor(editor);
-        }
+      // Trigger all visible editors on start
+      for (const editor of vscode.window.visibleTextEditors) {
+        this.onChangedActiveEditor(editor);
       }
     });
 

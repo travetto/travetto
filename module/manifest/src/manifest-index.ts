@@ -273,8 +273,8 @@ export class ManifestIndex {
     return out;
   }
 
-  /** 
-   * Find the module for an arbitrary source file, if it falls under a given workspace module 
+  /**
+   * Find the module for an arbitrary source file, if it falls under a given workspace module
    */
   findModuleForArbitraryFile(file: string): ManifestModule | undefined {
     const root = this.#moduleTrie ??= new Trie(
