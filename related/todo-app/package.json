@@ -29,11 +29,11 @@
     "@travetto/openapi": "^4.0.0-rc.0",
     "@travetto/rest-express": "^4.0.0-rc.0",
     "@travetto/rest-session": "^4.0.0-rc.0",
-    "vue": "^3.3.10"
+    "vue": "^3.4.15"
   },
   "devDependencies": {
-    "@travetto/pack": "^4.0.0-rc.0",
     "@travetto/compiler": "^4.0.0-rc.0",
+    "@travetto/pack": "^4.0.0-rc.0",
     "@travetto/rest-client": "^4.0.0-rc.0"
   },
   "travetto": {

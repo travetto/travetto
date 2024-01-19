@@ -26,7 +26,7 @@
   "dependencies": {
     "@fastify/compress": "^6.5.0",
     "@travetto/rest": "^4.0.0-rc.0",
-    "fastify": "^4.24.3"
+    "fastify": "^4.25.2"
   },
   "travetto": {
     "displayName": "Fastify REST Source"

@@ -58,9 +58,9 @@
     }
   },
   "devDependencies": {
-    "@travetto/repo": "^3.4.10",
-    "@types/node-forge": "^1.3.10",
-    "@types/vscode": "^1.84.2",
+    "@travetto/repo": "^4.0.0-rc.0",
+    "@types/node-forge": "^1.3.11",
+    "@types/vscode": "^1.85.0",
     "node-forge": "^1.3.1"
   }
 }

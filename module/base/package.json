@@ -25,9 +25,9 @@
   },
   "dependencies": {
     "@travetto/manifest": "^4.0.0-rc.0",
-    "@types/node": "^20.10.3",
-    "debug": "^4.3.4",
-    "@types/debug": "^4.1.12"
+    "@types/debug": "^4.1.12",
+    "@types/node": "^20.11.5",
+    "debug": "^4.3.4"
   },
   "peerDependencies": {
     "@travetto/transformer": "^4.0.0-rc.0"

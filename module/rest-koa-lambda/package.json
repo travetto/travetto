@@ -28,7 +28,7 @@
     "@travetto/rest": "^4.0.0-rc.0",
     "@travetto/rest-aws-lambda": "^4.0.0-rc.0",
     "@travetto/rest-koa": "^4.0.0-rc.0",
-    "@vendia/serverless-express": "^4.10.4"
+    "@vendia/serverless-express": "^4.12.6"
   },
   "travetto": {
     "displayName": "Koa REST AWS Lambda Source"

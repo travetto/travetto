@@ -128,9 +128,9 @@ export class ManifestUtil {
    */
   static lookupTrie<T>(
     inputs: T[], getPath: (v: T) => string[], validateUnknown?: (pth: string[]) => boolean
-  ): (path: string[]) => T | undefined {
-    type TrieNode<T> = { value?: T, subs: Record<string, TrieNode<T>> };
-    const root: TrieNode<T> = { subs: {} };
+  ): (pth: string[]) => T | undefined {
+    type TrieNode = { value?: T, subs: Record<string, TrieNode> };
+    const root: TrieNode = { subs: {} };
     for (const item of inputs) {
       const pth = getPath(item);
       let node = root;
@@ -157,6 +157,6 @@ export class ManifestUtil {
       }
 
       return value;
-    }
+    };
   }
 }
