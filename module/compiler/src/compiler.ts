@@ -190,9 +190,11 @@ export class Compiler {
               Log.info(`Compiled ${ev.entry.sourceFile}`);
             }
           } else {
-            // Remove output
-            Log.info(`Removed ${ev.entry.sourceFile}, ${ev.entry.outputFile}`);
-            await fs.rm(ev.entry.outputFile!, { force: true }); // Ensure output is deleted
+            if (ev.entry.outputFile) {
+              // Remove output
+              Log.info(`Removed ${ev.entry.sourceFile}, ${ev.entry.outputFile}`);
+              await fs.rm(ev.entry.outputFile, { force: true }); // Ensure output is deleted
+            }
           }
 
           // Send change events
