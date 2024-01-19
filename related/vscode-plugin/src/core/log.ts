@@ -28,4 +28,8 @@ export class Log {
   warn(message: string, ...args: unknown[]): void {
     Log.#log.warn(this.#prefix, message, ...args);
   }
+
+  trace(message: string, ...args: unknown[]): void {
+    Log.#log.trace(this.#prefix, message, ...args);
+  }
 }

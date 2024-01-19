@@ -1,17 +1,19 @@
 import vscode from 'vscode';
+import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 
-import { path } from '@travetto/manifest';
+import { IndexedModule, ManifestModule, path } from '@travetto/manifest';
 import { Env } from '@travetto/base';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
-import { ProcessServer } from '../../../core/server';
 import { RunUtil } from '../../../core/run';
 
 import { BaseFeature } from '../../base';
 
 import { WorkspaceResultsManager } from './workspace';
-import { RemoveEvent, TestCommand, TestEvent } from './types';
+import { RemoveEvent, TestEvent } from './types';
+
+type Event = TestEvent | RemoveEvent | { type: 'log', message: string };
 
 /**
  * Test Runner Feature
@@ -19,58 +21,96 @@ import { RemoveEvent, TestCommand, TestEvent } from './types';
 @Activatible('@travetto/test', 'test')
 class TestRunnerFeature extends BaseFeature {
 
-  #server: ProcessServer<TestCommand, TestEvent | RemoveEvent | { type: 'log', message: string }>;
+  #activeProcesses: Record<string, ChildProcess> = {};
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (e: void) => unknown;
+
+  #getTestModule(file?: string): IndexedModule | ManifestModule | undefined {
+    if (!file) {
+      return;
+    }
+    const mod = Workspace.workspaceIndex.getModuleFromSource(file) ??
+      Workspace.workspaceIndex.findModuleForArbitraryFile(file);
+    if (mod && file.startsWith(path.resolve(Workspace.path, mod.sourceFolder, 'test'))) {
+      return mod;
+    }
+  }
+
+  #isTestDoc(doc: vscode.TextEditor | vscode.TextDocument | undefined): boolean {
+    const file = doc ? ('fileName' in doc ? doc.fileName : doc.document.fileName) : undefined;
+    return Workspace.isCompilerWatching && !!this.#getTestModule(file);
+  }
+
+  #runFile(file: string, line?: number): void {
+    const mod = this.#getTestModule(file);
+
+    if (!mod) {
+      this.log.error('Unknown file', file, 'skipping');
+      return;
+    }
+
+    this.#activeProcesses[file]?.kill(); // Ensure only one at a time
+
+    const args = [
+      RunUtil.cliFile,
+      'test:direct', '-f', 'exec',
+      file, `${line ?? '0'}`
+    ];
+
+    const config: SpawnOptions = {
+      cwd: Workspace.path,
+      env: {
+        ...process.env,
+        ...Env.TRV_MANIFEST.export(undefined),
+        ...Env.TRV_MODULE.export(mod.name),
+        ...Env.TRV_QUIET.export(true)
+      },
+      stdio: ['pipe', 'pipe', 2, 'ipc']
+    };
+
+    const proc = spawn('node', args, config);
+
+    proc.on('message', (ev: Event) => {
+      switch (ev.type) {
+        case 'log': this.log.info('[Log  ]', ev.message); return;
+        case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
+      }
+      this.#consumer.onEvent(ev);
+      this.#codeLensUpdated?.();
+    });
+
+    this.#activeProcesses[file] = proc;
+  }
 
   constructor(module?: string, command?: string) {
     super(module, command);
     this.#consumer = new WorkspaceResultsManager(this.log, vscode.window);
-    this.#server = new ProcessServer(this.log, 'test:watch', ['-f', 'exec', '-m', 'change'])
-      .listen('start', () => {
-        this.#server.onMessage(['assertion', 'suite', 'test', 'log', 'removeTest'], ev => {
-          switch (ev.type) {
-            case 'log': this.log.info('[Log  ]', ev.message); return;
-            case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
-          }
-          this.#consumer.onEvent(ev);
-          this.#codeLensUpdated?.();
-        });
-
-        // Trigger all visible editors on start
-        for (const editor of vscode.window.visibleTextEditors) {
-          this.onChangedActiveEditor(editor);
-        }
-      })
-      .listen('fail', err => vscode.window.showErrorMessage(`Test Server: ${err.message}`));
   }
 
   /**
    * Launch a test from the current location
    */
-  async launchTestDebugger(file?: string, line?: number, breakpoint: boolean = true): Promise<void> {
+  async launchTestDebugger(line?: number): Promise<void> {
     const editor = Workspace.getDocumentEditor(vscode.window.activeTextEditor);
-    if (editor) {
-      line ??= editor.selection.start.line + 1;
-      file ??= editor.document.fileName;
-    }
-
-    if (!file || !line) {
+    if (!editor || !this.#isTestDoc(editor)) {
       return;
     }
 
-    file = path.toPosix(file);
-
+    line ??= (editor.selection.start.line + 1);
+    const file = path.toPosix(editor.document.fileName ?? '');
     const prettyFile = file.replace(`${Workspace.path}/`, '');
+    const mod = Workspace.workspaceIndex.findModuleForArbitraryFile(file)!;
 
     await RunUtil.debug({
       useCli: true,
       name: `Debug Travetto Test - ${prettyFile}`,
       main: 'test:direct',
       args: [prettyFile, `${line}`],
-      cliModule: file,
+      cliModule: mod.name,
       env: {
-        ...(breakpoint ? Env.TRV_TEST_BREAK_ENTRY.export(true) : {})
+        ...Env.TRV_TEST_PHASE_TIMEOUT.export('5m'),
+        ...Env.TRV_TEST_TIMEOUT.export('1h'),
+        ...Env.TRV_TEST_BREAK_ENTRY.export(true)
       }
     });
   }
@@ -87,25 +127,36 @@ class TestRunnerFeature extends BaseFeature {
         command: {
           command: this.commandName('line'),
           title: 'Debug Test',
-          arguments: [doc.fileName, test.code, true]
+          arguments: [test.code]
         }
       }));
   }
 
   async onChangedActiveEditor(editor: vscode.TextEditor | undefined): Promise<void> {
-    if (editor?.document.fileName.includes('/test/')) {
+    if (editor && this.#isTestDoc(editor)) {
       this.#consumer.trackEditor(editor);
       if (!this.#consumer.getResults(editor.document)?.getListOfTests().length) {
-        await this.#server.start();
-        this.#server.sendMessage({ type: 'run-test', file: editor.document.fileName });
+        this.#runFile(editor.document.fileName);
       }
     }
   }
 
   async onOpenTextDocument(doc: vscode.TextDocument): Promise<void> {
-    if (doc.fileName.includes('/test/')) {
-      await this.#server.start();
+    if (this.#isTestDoc(doc)) {
       this.#consumer.trackEditor(doc);
+    }
+  }
+
+  async onDidSaveTextDocument(doc: vscode.TextDocument): Promise<void> {
+    if (this.#isTestDoc(doc)) {
+      let line = undefined;
+      if (vscode.window.activeTextEditor?.document === doc) {
+        const sels = vscode.window.activeTextEditor.selections;
+        if (sels.length === 1) {
+          line = sels[0].start.line;
+        }
+      }
+      this.#runFile(doc.fileName, line);
     }
   }
 
@@ -118,16 +169,22 @@ class TestRunnerFeature extends BaseFeature {
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', this.launchTestDebugger.bind(this));
-    this.register('start', () => this.#server.start());
-    this.register('restart', () => this.#server.restart());
-    this.register('stop', () => this.#server.stop().then(() => {
-      this.#consumer.resetAll();
-    }));
     this.register('rerun', () => {
-      this.#consumer.reset(vscode.window.activeTextEditor);
-      this.#server.sendMessage({ type: 'run-test', file: vscode.window.activeTextEditor!.document.fileName });
+      const editor = vscode.window.activeTextEditor;
+      if (this.#isTestDoc(editor)) {
+        this.#consumer.reset(editor);
+        this.#runFile(editor!.document.fileName);
+      }
     });
 
+    Workspace.onCompilerState(state => {
+      // Trigger all visible editors on start
+      for (const editor of vscode.window.visibleTextEditors) {
+        this.onChangedActiveEditor(editor);
+      }
+    });
+
+    vscode.workspace.onDidSaveTextDocument(x => this.onDidSaveTextDocument(x), null, context.subscriptions);
     vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);

@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import { createInterface } from 'node:readline/promises';
 import { ChildProcess, spawn } from 'node:child_process';
 
-import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent } from '@travetto/compiler/support/types';
+import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
 import { Env, ExecUtil, StreamUtil, Util } from '@travetto/base';
 
 import { BaseFeature } from '../../base';
@@ -12,7 +12,6 @@ import { Activatible } from '../../../core/activation';
 
 type ProgressBar = vscode.Progress<{ message: string, increment?: number }>;
 type ProgressState = { prev: number, bar: ProgressBar, cleanup: () => void };
-type CompilerState = CompilerStateEvent['state'];
 
 const SCOPE_MAX = 15;
 
@@ -60,7 +59,7 @@ export class CompilerWatchFeature extends BaseFeature {
    * @param command
    */
   run(command: 'start' | 'stop' | 'clean' | 'restart' | 'info' | 'event', args?: string[], signal?: AbortSignal): ChildProcess {
-    this.#log.debug('Running Compiler', this.#compilerCliFile, command);
+    this.#log.trace('Running Compiler', this.#compilerCliFile, command, args);
     const proc = spawn('node', [this.#compilerCliFile, command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
@@ -74,6 +73,9 @@ export class CompilerWatchFeature extends BaseFeature {
     if (command === 'start' || command === 'restart') {
       StreamUtil.onLine(proc.stderr, line => this.#log.error(`> ${line}`));
     }
+    proc.on('exit', (code) => {
+      this.#log.debug('Finished command', command, 'with', code);
+    });
 
     return proc;
   }
@@ -93,11 +95,11 @@ export class CompilerWatchFeature extends BaseFeature {
   /**
    * Get compiler state
    */
-  async #compilerState(): Promise<CompilerState | undefined> {
+  async #compilerState(): Promise<CompilerStateType | undefined> {
     const { stdout } = await ExecUtil.getResult(this.run('info'));
     try {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return JSON.parse(stdout).state as CompilerState;
+      return JSON.parse(stdout).state as CompilerStateType;
     } catch { }
   }
 
@@ -124,7 +126,8 @@ export class CompilerWatchFeature extends BaseFeature {
     }
   }
 
-  #onState(state: CompilerState): void {
+  #onState(state: CompilerStateType): void {
+    this.#log.debug('Compiler state changed', state);
     let v: string;
     switch (state) {
       case 'reset': v = '$(flame) Restarting'; break;
@@ -138,6 +141,7 @@ export class CompilerWatchFeature extends BaseFeature {
       default: v = '$(debug-pause) Disconnected'; break;
     }
     this.#status.text = v;
+    Workspace.compilerState = state;
   }
 
   async #trackState(): Promise<void> {

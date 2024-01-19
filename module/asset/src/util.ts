@@ -1,7 +1,9 @@
 import fs from 'node:fs/promises';
+import { Readable } from 'node:stream';
 import { createReadStream } from 'node:fs';
 import { pipeline } from 'node:stream/promises';
 import crypto from 'node:crypto';
+
 import mime from 'mime';
 
 import { path } from '@travetto/manifest';
@@ -27,25 +29,40 @@ export class AssetUtil {
   /**
    * Read a chunk from a file, primarily used for mime detection
    */
-  static async readChunk(filePath: string, bytes: number): Promise<Buffer> {
-    const fd = await fs.open(filePath, 'r');
-    try {
-      const buffer = Buffer.alloc(bytes);
-      await fd.read(buffer, 0, bytes, 0);
-      return buffer;
-    } finally {
-      try { fd.close(); } catch { }
+  static async readChunk(input: string | Readable | Buffer, bytes: number): Promise<Buffer> {
+    if (Buffer.isBuffer(input)) {
+      return input;
+    } else if (typeof input === 'string') {
+      const fd = await fs.open(input, 'r');
+      try {
+        const buffer = Buffer.alloc(bytes);
+        await fd.read(buffer, 0, bytes, 0);
+        return buffer;
+      } finally {
+        try { fd.close(); } catch { }
+      }
+    } else {
+      const chunks: Buffer[] = [];
+      let size = 0;
+      for await (const chunk of input) {
+        const bChunk = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+        chunks.push(bChunk);
+        if ((size += bChunk.length) >= bytes) {
+          break;
+        }
+      }
+      return Buffer.concat(chunks);
     }
   }
 
   /**
    * Detect file type from location on disk
    */
-  static async detectFileType(filePath: string): Promise<{ ext: string, mime: string } | undefined> {
+  static async detectFileType(input: string | Buffer | Readable): Promise<{ ext: string, mime: string } | undefined> {
     const { default: fileType } = await import('file-type');
-    const buffer = await this.readChunk(filePath, 4100);
+    const buffer = await this.readChunk(input, 4100);
     const matched = await fileType.fromBuffer(buffer);
-    if (matched?.mime === 'video/mp4' && filePath.endsWith('.m4a')) {
+    if (typeof input === 'string' && matched?.mime === 'video/mp4' && input.endsWith('.m4a')) {
       return { ext: '.m4a', mime: 'audio/mpeg' };
     }
     return matched;

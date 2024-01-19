@@ -33,20 +33,53 @@ export class Compiler {
   #watch?: boolean;
   #ctrl: AbortController;
   #signal: AbortSignal;
+  #shuttingDown = false;
 
   constructor(state: CompilerState, dirtyFiles: string[], watch?: boolean) {
     this.#state = state;
     this.#dirtyFiles = dirtyFiles[0] === '*' ?
       this.#state.getAllFiles() :
-      dirtyFiles.map(f => this.#state.getBySource(f)!.input);
+      dirtyFiles.map(f => this.#state.getBySource(f)!.inputFile);
     this.#watch = watch;
 
     this.#ctrl = new AbortController();
     this.#signal = this.#ctrl.signal;
     setMaxListeners(1000, this.#signal);
     process
-      .once('disconnect', () => this.#ctrl.abort())
-      .on('message', ev => (ev === 'shutdown') && this.#ctrl.abort());
+      .once('disconnect', () => this.#shutdown('manual'))
+      .on('message', ev => (ev === 'shutdown') && this.#shutdown('manual'));
+  }
+
+  #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', err?: Error): void {
+    if (this.#shuttingDown) {
+      return;
+    }
+
+    this.#shuttingDown = true;
+    switch (mode) {
+      case 'manual': {
+        Log.error('Shutting down manually');
+        process.exitCode = 2;
+        break;
+      }
+      case 'error': {
+        process.exitCode = 1;
+        if (err) {
+          Log.error('Shutting down due to failure', err.message);
+        }
+        break;
+      }
+      case 'reset': {
+        Log.info('Triggering reset due to change in core files');
+        EventUtil.sendEvent('state', { state: 'reset' });
+        process.exitCode = 0;
+        break;
+      }
+    }
+    // No longer listen to disconnect
+    process.removeAllListeners('disconnect');
+    process.removeAllListeners('message');
+    this.#ctrl.abort();
   }
 
   /**
@@ -147,49 +180,41 @@ export class Compiler {
       Log.info('Watch is ready');
 
       EventUtil.sendEvent('state', { state: 'watch-start' });
-
-      for await (const ev of new CompilerWatcher(this.#state, this.#signal).watchChanges()) {
-        if (ev.action === 'reset') {
-          Log.info(`Triggering reset due to change in ${ev.file}`);
-          EventUtil.sendEvent('state', { state: 'reset' });
-          this.#ctrl.abort();
-          return;
-        }
-        const { action, entry } = ev;
-        if (action !== 'delete') {
-          const err = await emitter(entry.input, true);
-          if (err) {
-            Log.info('Compilation Error', CompilerUtil.buildTranspileError(entry.input, err));
+      try {
+        for await (const ev of new CompilerWatcher(this.#state, this.#signal).watchChanges()) {
+          if (ev.action !== 'delete') {
+            const err = await emitter(ev.entry.inputFile, true);
+            if (err) {
+              Log.info('Compilation Error', CompilerUtil.buildTranspileError(ev.entry.inputFile, err));
+            } else {
+              Log.info(`Compiled ${ev.entry.sourceFile}`);
+            }
           } else {
-            Log.info(`Compiled ${entry.source}`);
+            if (ev.entry.outputFile) {
+              // Remove output
+              Log.info(`Removed ${ev.entry.sourceFile}, ${ev.entry.outputFile}`);
+              await fs.rm(ev.entry.outputFile, { force: true }); // Ensure output is deleted
+            }
           }
-        } else {
-          // Remove output
-          Log.info(`Removed ${entry.source}, ${entry.output}`);
-          await fs.rm(entry.output!, { force: true }); // Ensure output is deleted
+
+          // Send change events
+          EventUtil.sendEvent('change', {
+            action: ev.action,
+            time: Date.now(),
+            file: ev.file,
+            output: ev.entry.outputFile!,
+            module: ev.entry.module.name
+          });
         }
+        EventUtil.sendEvent('state', { state: 'watch-end' });
 
-        // Send change events
-        EventUtil.sendEvent('change', {
-          action: ev.action,
-          time: Date.now(),
-          file: ev.file,
-          folder: ev.folder,
-          output: ev.entry.output!,
-          module: ev.entry.module.name
-        });
+      } catch (err) {
+        if (err instanceof Error) {
+          this.#shutdown(err.message === 'RESET' ? 'reset' : 'error', err);
+        }
       }
-
-      EventUtil.sendEvent('state', { state: 'watch-end' });
     }
 
-    // No longer listen to disconnect
-    process.removeAllListeners('disconnect');
-    process.removeAllListeners('message');
-
-    if (this.#ctrl.signal.aborted) {
-      process.exitCode = 2;
-      Log.error('Shutting down manually');
-    }
+    this.#shutdown('complete');
   }
 }

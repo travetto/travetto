@@ -1,15 +1,17 @@
 import { readFileSync } from 'node:fs';
 
 import {
-  ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType, ManifestModuleFileType, path, ManifestModule,
+  ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType, ManifestModuleFileType, path, ManifestModule
 } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
 import { CompilerUtil } from './util';
 
-import { WatchEvent, fileWatchEvents } from './internal/watch-core';
+import { AsyncQueue } from '../support/queue';
 
+type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
+type CompilerWatchEvent = WatchEvent & { entry: CompileStateEntry };
 type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile: string, folderKey: ManifestModuleFolderType, type: ManifestModuleFileType };
 
 /**
@@ -25,6 +27,30 @@ export class CompilerWatcher {
   constructor(state: CompilerState, signal: AbortSignal) {
     this.#state = state;
     this.#signal = signal;
+  }
+
+  /** Watch files */
+  async * #watchFolder(rootPath: string): AsyncIterable<WatchEvent> {
+    const q = new AsyncQueue<WatchEvent>(this.#signal);
+    const lib = await import('@parcel/watcher');
+
+    const cleanup = await lib.subscribe(rootPath, (err, events) => {
+      if (err) {
+        // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+        q.throw(err instanceof Error ? err : new Error((err as Error).message));
+        return;
+      }
+      for (const ev of events) {
+        q.add({ action: ev.type, file: path.toPosix(ev.path) });
+      }
+    }, {
+      // TODO: Read .gitignore?
+      ignore: ['node_modules', '**/node_modules', '.git', '**/.git']
+    });
+
+    this.#signal.addEventListener('abort', () => cleanup.unsubscribe());
+
+    yield* q;
   }
 
   async #rebuildManifestsIfNeeded(): Promise<void> {
@@ -59,19 +85,14 @@ export class CompilerWatcher {
       }
       await ManifestUtil.writeManifest(newManifest);
     }
-    // Reindex
-    this.#state.manifestIndex.init(this.#state.manifestIndex.manifestFile);
+
+    // Reindex at workspace root
+    this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
   }
 
-  #getModuleMap(): Record<string, ManifestModule> {
-    return Object.fromEntries(
-      Object.values(this.#state.manifest.modules).map(x => [path.resolve(this.#state.manifest.workspace.path, x.sourceFolder), x])
-    );
-  }
-
-  #addDirtyFile(mod: ManifestModule, folder: string, moduleFile: string, remove = false): void {
+  #addDirtyFile(mod: ManifestModule, moduleFile: string, remove = false): void {
     this.#dirtyFiles.push({
-      mod: mod.name, modFolder: folder, remove, moduleFile,
+      mod: mod.name, modFolder: mod.sourceFolder, remove, moduleFile,
       folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
       type: ManifestModuleUtil.getFileType(moduleFile),
     });
@@ -83,36 +104,48 @@ export class CompilerWatcher {
    * @param handler
    * @returns
    */
-  async * watchChanges(): AsyncIterable<WatchEvent<{ entry: CompileStateEntry }>> {
+  async * watchChanges(): AsyncIterable<CompilerWatchEvent> {
     if (this.#signal.aborted) {
       yield* [];
       return;
     }
 
-    const mods = this.#getModuleMap();
+    const manifest = this.#state.manifest;
+    const ROOT_LOCK = path.resolve(manifest.workspace.path, 'package-lock.json');
+    const ROOT_PKG = path.resolve(manifest.workspace.path, 'package.json');
+    const OUTPUT_PATH = path.resolve(manifest.workspace.path, manifest.build.outputFolder);
+    const COMPILER_PATH = path.resolve(manifest.workspace.path, manifest.build.compilerFolder);
 
-    const modules = [...this.#state.manifestIndex.getModuleList('all')].map(x => this.#state.manifestIndex.getModule(x)!);
+    for await (const ev of this.#watchFolder(this.#state.manifest.workspace.path)) {
+      const { action, file: sourceFile } = ev;
 
-    const stream = fileWatchEvents(this.#state.manifest, modules, this.#signal);
-    for await (const ev of stream) {
-
-      if (ev.action === 'reset') {
-        yield ev;
-        return;
+      if (
+        sourceFile === ROOT_LOCK ||
+        sourceFile === ROOT_PKG ||
+        (action === 'delete' && (sourceFile === OUTPUT_PATH || sourceFile === COMPILER_PATH))
+      ) {
+        throw new Error('RESET');
       }
 
-      const { action, file: sourceFile, folder } = ev;
-      const mod = mods[folder];
+      const fileType = ManifestModuleUtil.getFileType(sourceFile);
+      if (!(fileType === 'ts' || fileType === 'typings' || fileType === 'js')) {
+        continue;
+      }
+
+      let entry = this.#state.getBySource(sourceFile);
+
+      const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(sourceFile);
+      if (!mod) {
+        continue;
+      }
+
       const moduleFile = mod.sourceFolder ?
         (sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile) :
         sourceFile.replace(`${this.#state.manifest.workspace.path}/`, '');
 
-      let entry = this.#state.getBySource(sourceFile);
-
       switch (action) {
         case 'create': {
-          const fileType = ManifestModuleUtil.getFileType(moduleFile);
-          this.#addDirtyFile(mod, folder, moduleFile);
+          this.#addDirtyFile(mod, moduleFile);
           if (CompilerUtil.validFile(fileType)) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             entry = this.#state.registerInput(mod, moduleFile);
@@ -124,7 +157,7 @@ export class CompilerWatcher {
           if (entry) {
             const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
             if (this.#sourceHashes.get(sourceFile) !== hash) {
-              this.#state.resetInputSource(entry.input);
+              this.#state.resetInputSource(entry.inputFile);
               this.#sourceHashes.set(sourceFile, hash);
             } else {
               entry = undefined;
@@ -134,9 +167,9 @@ export class CompilerWatcher {
         }
         case 'delete': {
           if (entry) {
-            this.#state.removeInput(entry.input);
-            if (entry.output) {
-              this.#addDirtyFile(mod, folder, moduleFile, true);
+            this.#state.removeInput(entry.inputFile);
+            if (entry.outputFile) {
+              this.#addDirtyFile(mod, moduleFile, true);
             }
           }
         }
@@ -144,7 +177,7 @@ export class CompilerWatcher {
 
       if (entry) {
         await this.#rebuildManifestsIfNeeded();
-        yield { action, file: entry.source, folder, entry };
+        yield { action, file: entry.sourceFile, entry };
       }
     }
   }

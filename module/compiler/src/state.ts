@@ -3,9 +3,10 @@ import ts from 'typescript';
 import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
 
+import { CommonUtil } from '../support/util';
+
 import { CompilerUtil } from './util';
 import { CompileStateEntry } from './types';
-import { CommonUtil } from '../support/util';
 
 function folderMapper(root: string, prefix: string): { dir: string, translate: (val: string) => string } {
   let matched: string = '~~';
@@ -26,7 +27,7 @@ export class CompilerState implements ts.CompilerHost {
   private constructor() { }
 
   #rootDir: string;
-  #inputPathToSource: (file: string) => string;
+  #inputPathToSourcePath: (file: string) => string;
   #outputPath: string;
   #inputFiles = new Set<string>();
   #inputDirectoryToSource = new Map<string, string>();
@@ -48,7 +49,7 @@ export class CompilerState implements ts.CompilerHost {
     this.#manifest = idx.manifest;
     const mapper = folderMapper(this.#manifest.workspace.path, '##');
     this.#rootDir = mapper.dir;
-    this.#inputPathToSource = mapper.translate;
+    this.#inputPathToSourcePath = mapper.translate;
 
     this.#outputPath = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#modules = Object.values(this.#manifest.modules);
@@ -95,7 +96,7 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   getArbitraryInputFile(): string {
-    return this.getBySource(this.#manifestIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile)!.input;
+    return this.getBySource(this.#manifestIndex.getModule('@travetto/manifest')!.files.src[0].sourceFile)!.inputFile;
   }
 
   createProgram(oldProgram?: ts.Program): ts.Program {
@@ -107,9 +108,9 @@ export class CompilerState implements ts.CompilerHost {
   writeInputFile(program: ts.Program, inputFile: string): ts.EmitResult | undefined | void {
     switch (ManifestModuleUtil.getFileType(inputFile)) {
       case 'package-json':
-        return this.writeFile(this.#inputToEntry.get(inputFile)!.output!, this.readFile(inputFile)!, false);
+        return this.writeFile(this.#inputToEntry.get(inputFile)!.outputFile!, this.readFile(inputFile)!, false);
       case 'js':
-        return this.writeFile(this.#inputToEntry.get(inputFile)!.output!, ts.transpile(this.readFile(inputFile)!, this.#compilerOptions), false);
+        return this.writeFile(this.#inputToEntry.get(inputFile)!.outputFile!, ts.transpile(this.readFile(inputFile)!, this.#compilerOptions), false);
       case 'ts':
         return program.emit(
           program.getSourceFile(inputFile)!,
@@ -134,7 +135,7 @@ export class CompilerState implements ts.CompilerHost {
       undefined :
       path.resolve(this.#outputPath, ManifestModuleUtil.sourceToOutputExt(relativeInput));
 
-    const entry = { source: sourceFile, input: inputFile, output: outputFile, module, relativeInput };
+    const entry = { sourceFile, inputFile, outputFile, module };
 
     this.#inputToEntry.set(inputFile, entry);
     this.#sourceToEntry.set(sourceFile, entry);
@@ -150,11 +151,11 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   removeInput(inputFile: string): void {
-    const { output, source } = this.#inputToEntry.get(inputFile)!;
-    if (output) {
-      this.#outputToEntry.delete(output);
+    const { outputFile, sourceFile } = this.#inputToEntry.get(inputFile)!;
+    if (outputFile) {
+      this.#outputToEntry.delete(outputFile);
     }
-    this.#sourceToEntry.delete(source);
+    this.#sourceToEntry.delete(sourceFile);
     this.#inputToEntry.delete(inputFile);
     this.#inputFiles.delete(inputFile);
   }
@@ -177,11 +178,11 @@ export class CompilerState implements ts.CompilerHost {
   getDefaultLibLocation(): string { return path.dirname(ts.getDefaultLibFilePath(this.#compilerOptions)); }
 
   fileExists(inputFile: string): boolean {
-    return this.#inputToEntry.has(inputFile) || ts.sys.fileExists(this.#inputPathToSource(inputFile));
+    return this.#inputToEntry.has(inputFile) || ts.sys.fileExists(this.#inputPathToSourcePath(inputFile));
   }
 
   directoryExists(inputDir: string): boolean {
-    return this.#inputDirectoryToSource.has(inputDir) || ts.sys.directoryExists(this.#inputPathToSource(inputDir));
+    return this.#inputDirectoryToSource.has(inputDir) || ts.sys.directoryExists(this.#inputPathToSourcePath(inputDir));
   }
 
   writeFile(
@@ -204,7 +205,7 @@ export class CompilerState implements ts.CompilerHost {
 
   readFile(inputFile: string): string | undefined {
     const res = this.#sourceContents.get(inputFile) ?? ts.sys.readFile(
-      this.#inputToEntry.get(inputFile)?.source ?? this.#inputPathToSource(inputFile)
+      this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile)
     );
     this.#sourceContents.set(inputFile, res);
     return res;

@@ -9,19 +9,12 @@ import { Log } from './log';
 
 export class IpcSupport {
 
-  static readJSONRequest<T>(req: http.IncomingMessage): Promise<T> {
-    return new Promise<T>((res, rej) => {
-      const body: Buffer[] = [];
-      req.on('data', (chunk) => body.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk));
-      req.on('end', () => {
-        try {
-          res(JSON.parse(Buffer.concat(body).toString('utf8')));
-        } catch (err) {
-          rej(err);
-        }
-      });
-      req.on('error', rej);
-    });
+  static async readJSONRequest<T>(req: http.IncomingMessage): Promise<T> {
+    const chunks: Buffer[] = [];
+    for await (const chunk of req) {
+      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+    }
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
   }
 
   #ctrl = new AbortController();
@@ -40,7 +33,6 @@ export class IpcSupport {
           const ev = await IpcSupport.readJSONRequest<TargetEvent>(req);
           this.#log.info('Received IPC event', ev);
           this.#handler(ev);
-
         }
         res.statusCode = 200;
         res.end(JSON.stringify({ ok: true }));

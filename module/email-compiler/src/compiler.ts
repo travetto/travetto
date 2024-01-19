@@ -26,7 +26,7 @@ export class EmailCompiler {
           persistent: false
         })) {
           const exists = ev.filename ? await fs.stat(ev.filename).catch(() => false) : false;
-          handler({ action: !!exists ? 'create' : 'delete', file: path.toPosix(ev.filename!), folder: src });
+          handler({ action: !!exists ? 'create' : 'delete', file: path.toPosix(ev.filename!) });
         }
       })();
     }

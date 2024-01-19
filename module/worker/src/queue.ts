@@ -68,6 +68,15 @@ export class WorkQueue<X> implements AsyncIterator<X>, AsyncIterable<X> {
   }
 
   /**
+   * Throw an error from the queue, rejecting and terminating immediately
+   */
+  async throw(e?: Error): Promise<IteratorResult<X>> {
+    this.#done = true;
+    this.#ready.reject(e);
+    return { value: undefined, done: this.#done };
+  }
+
+  /**
    * Get size, will change as items are added
    */
   get size(): number {

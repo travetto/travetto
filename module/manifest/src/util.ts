@@ -22,6 +22,13 @@ export class ManifestUtil {
   }
 
   /**
+   * Produce a manifest location given a current context and a module name
+   */
+  static getManifestLocation(ctx: ManifestContext, module?: string): string {
+    return path.resolve(ctx.workspace.path, ctx.build.outputFolder, 'node_modules', module ?? ctx.workspace.name);
+  }
+
+  /**
    * Produce a production manifest from a given manifest
    */
   static createProductionManifest(manifest: ManifestRoot): ManifestRoot {
@@ -47,7 +54,7 @@ export class ManifestUtil {
    * @param file
    * @returns
    */
-  static readManifestSync(file: string): { manifest: ManifestRoot, file: string } {
+  static readManifestSync(file: string): ManifestRoot {
     file = path.resolve(file);
     if (!file.endsWith('.json')) {
       file = path.resolve(file, MANIFEST_FILE);
@@ -58,7 +65,7 @@ export class ManifestUtil {
       manifest.build.outputFolder = path.cwd();
       manifest.workspace.path = path.cwd();
     }
-    return { manifest, file };
+    return manifest;
   }
 
   /**
@@ -114,5 +121,42 @@ export class ManifestUtil {
         description: pkg.description
       }
     };
+  }
+
+  /**
+   * Efficient lookup for path-based graphs
+   */
+  static lookupTrie<T>(
+    inputs: T[], getPath: (v: T) => string[], validateUnknown?: (pth: string[]) => boolean
+  ): (path: string[]) => T | undefined {
+    type TrieNode<T> = { value?: T, subs: Record<string, TrieNode<T>> };
+    const root: TrieNode<T> = { subs: {} };
+    for (const item of inputs) {
+      const pth = getPath(item);
+      let node = root;
+      for (const sub of pth) {
+        node = node.subs[sub] ??= { subs: {} };
+      }
+      node.value = item;
+    }
+
+    return pth => {
+      let node = root;
+      let value = node.value;
+      let i = 0;
+
+      for (const sub of pth) {
+        i += 1;
+        if (node) {
+          node = node.subs[sub];
+          value = node?.value ?? value;
+        } else if (validateUnknown && !node && !validateUnknown(pth.slice(0, i))) {
+          value = undefined;
+          break;
+        }
+      }
+
+      return value;
+    }
   }
 }

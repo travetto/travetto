@@ -2,7 +2,7 @@ import ts from 'typescript';
 
 import { ManifestContext, ManifestModuleFileType, ManifestModuleUtil, ManifestRoot, Package, path } from '@travetto/manifest';
 
-type OutputToSource = (outputFile: string) => ({ source: string } | undefined);
+type OutputToSource = (outputFile: string) => ({ sourceFile: string } | undefined);
 
 const nativeCwd = process.cwd();
 
@@ -32,11 +32,11 @@ export class CompilerUtil {
   static rewriteSourceMap(ctx: ManifestContext, text: string, outputToSource: OutputToSource): string {
     const data: { sourceRoot?: string, sources: string[] } = JSON.parse(text);
     const output = ManifestModuleUtil.sourceToOutputExt(path.resolve(ctx.workspace.path, ctx.build.outputFolder, data.sources[0]));
-    const { source: file } = outputToSource(output) ?? {};
+    const { sourceFile } = outputToSource(output) ?? {};
 
-    if (file) {
+    if (sourceFile) {
       delete data.sourceRoot;
-      data.sources = [file];
+      data.sources = [sourceFile];
       text = JSON.stringify(data);
     }
     return text;

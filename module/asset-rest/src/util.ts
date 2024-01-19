@@ -98,7 +98,9 @@ export class AssetRestUtil {
     return {
       render(res: Response): stream.Readable {
         res.setHeader('Content-Type', asset.contentType);
-        res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
+        if (asset.filename) {
+          res.setHeader('Content-Disposition', `attachment;filename=${path.basename(asset.filename)}`);
+        }
         if (asset.contentEncoding) {
           res.setHeader('Content-Encoding', asset.contentEncoding);
         }

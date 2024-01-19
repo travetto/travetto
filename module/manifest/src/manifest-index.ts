@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+
 import { ManifestModuleUtil } from './module';
 import { path } from './path';
 
@@ -43,7 +45,7 @@ const TypedObject: {
  */
 export class ManifestIndex {
 
-  #manifestFile: string;
+  #arbitraryLookup?: (parts: string[]) => ManifestModule | undefined;
   #manifest: ManifestRoot;
   #modules: IndexedModule[];
   #modulesByName: Record<string, IndexedModule> = {};
@@ -69,14 +71,8 @@ export class ManifestIndex {
     return this.#outputRoot;
   }
 
-  get manifestFile(): string {
-    return this.#manifestFile;
-  }
-
   init(manifestInput: string): void {
-    const { manifest, file } = ManifestUtil.readManifestSync(manifestInput);
-    this.#manifest = manifest;
-    this.#manifestFile = file;
+    this.#manifest = ManifestUtil.readManifestSync(manifestInput);
     this.#outputRoot = path.resolve(this.#manifest.workspace.path, this.#manifest.build.outputFolder);
     this.#index();
   }
@@ -104,6 +100,7 @@ export class ManifestIndex {
     this.#outputToEntry.clear();
     this.#importToEntry.clear();
     this.#sourceToEntry.clear();
+    this.#arbitraryLookup = undefined;
 
     this.#modules = Object.values(this.#manifest.modules)
       .map(m => ({
@@ -273,5 +270,20 @@ export class ManifestIndex {
       out.add(mod);
     }
     return out;
+  }
+
+  /**
+   * Find the module for an arbitrary source file, if it falls under a given workspace module
+   */
+  findModuleForArbitraryFile(file: string): ManifestModule | undefined {
+    const base = this.#manifest.workspace.path;
+    const lookup = this.#arbitraryLookup ??= ManifestUtil.lookupTrie(
+      Object.values(this.#manifest.modules),
+      x => x.sourceFolder.split('/'),
+      sub =>
+        !existsSync(path.resolve(base, ...sub, 'package.json')) &&
+        !existsSync(path.resolve(base, ...sub, '.git'))
+    );
+    return lookup(file.replace(`${base}/`, '').split('/'));
   }
 }
