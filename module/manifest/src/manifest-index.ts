@@ -9,7 +9,6 @@ import {
 } from './types';
 
 import { ManifestUtil } from './util';
-import { Trie } from './trie';
 
 export type FindConfig = {
   folder?: (folder: ManifestModuleFolderType) => boolean;
@@ -46,7 +45,7 @@ const TypedObject: {
  */
 export class ManifestIndex {
 
-  #moduleTrie?: Trie<ManifestModule>;
+  #arbitraryLookup?: (parts: string[]) => ManifestModule | undefined;
   #manifest: ManifestRoot;
   #modules: IndexedModule[];
   #modulesByName: Record<string, IndexedModule> = {};
@@ -101,7 +100,7 @@ export class ManifestIndex {
     this.#outputToEntry.clear();
     this.#importToEntry.clear();
     this.#sourceToEntry.clear();
-    this.#moduleTrie = undefined;
+    this.#arbitraryLookup = undefined;
 
     this.#modules = Object.values(this.#manifest.modules)
       .map(m => ({
@@ -277,18 +276,14 @@ export class ManifestIndex {
    * Find the module for an arbitrary source file, if it falls under a given workspace module
    */
   findModuleForArbitraryFile(file: string): ManifestModule | undefined {
-    const root = this.#moduleTrie ??= new Trie(
-      Object.values(this.#manifest.modules),
-      x => x.sourceFolder.split('/')
-    );
-
     const base = this.#manifest.workspace.path;
-    return root.lookup(
-      file.replace(`${base}/`, '').split('/'),
-      (node, sub) => !!node || (
+    const lookup = this.#arbitraryLookup ??= ManifestUtil.lookupTrie(
+      Object.values(this.#manifest.modules),
+      x => x.sourceFolder.split('/'),
+      sub =>
         !existsSync(path.resolve(base, ...sub, 'package.json')) &&
         !existsSync(path.resolve(base, ...sub, '.git'))
-      )
     );
+    return lookup(file.replace(`${base}/`, '').split('/'));
   }
 }
