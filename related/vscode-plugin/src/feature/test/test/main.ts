@@ -12,7 +12,6 @@ import { BaseFeature } from '../../base';
 
 import { WorkspaceResultsManager } from './workspace';
 import { RemoveEvent, TestEvent } from './types';
-import { Log } from '../../../core/log';
 
 type Event = TestEvent | RemoveEvent | { type: 'log', message: string };
 
