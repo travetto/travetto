@@ -3,7 +3,7 @@ import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerEventType, CompilerOp, CompilerServerInfo } from './types';
+import type { CompilerOp, CompilerServerInfo } from './types';
 import { LogUtil } from './log';
 import { CommonUtil } from './util';
 import { CompilerSetup } from './setup';
@@ -40,9 +40,17 @@ export const main = (ctx: ManifestContext) => {
     },
 
     /** Stream events */
-    events: async (type: CompilerEventType, handler: (ev: unknown) => unknown): Promise<void> => {
+    events: async (type: string, handler: (ev: unknown) => unknown): Promise<void> => {
       LogUtil.initLogs(ctx, 'error');
-      for await (const ev of client.fetchEvents(type)) { await handler(ev); }
+      switch (type) {
+        case 'change': case 'log': case 'progress': case 'state': {
+          for await (const ev of client.fetchEvents(type)) { await handler(ev); }
+          break;
+        }
+        default: {
+          throw new Error(`Unknown event type: ${type}`);
+        }
+      }
     },
 
     /** Main entry point for compilation */
