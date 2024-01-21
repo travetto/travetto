@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { AppError, Env, FileLoader, TypedObject, WatchEvent, watchCompiler } from '@travetto/base';
-import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
+import { EmailTemplatePrepared, EmailCompiled, MailUtil, EmailTemplateImport } from '@travetto/email';
 import { RuntimeIndex, path } from '@travetto/manifest';
 import { WorkQueue } from '@travetto/worker';
 
@@ -13,6 +13,15 @@ const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)
  * Email compilation support
  */
 export class EmailCompiler {
+
+
+  static #getLoader(moduleResources: string[], globalResources: string[]): FileLoader {
+    return new FileLoader([
+      ...Env.TRV_RESOURCES.list ?? [], '@#resources',
+      ...moduleResources, '@@#resources',
+      ...globalResources
+    ]);
+  }
 
   /**
    * Watch folders as needed
@@ -30,19 +39,19 @@ export class EmailCompiler {
   }
 
   /** Load Template */
-  static async loadTemplate(file: string): Promise<EmailCompileContext> {
+  static async loadTemplate(file: string): Promise<EmailTemplatePrepared> {
     const entry = RuntimeIndex.getEntry(file);
-    if (!entry) {
+    const mod = entry ? RuntimeIndex.getModule(entry.module) : undefined;
+    if (!entry || !mod) {
       throw new Error(`Unable to find template for ${file}`);
     }
-    const root = (await import(entry.outputFile)).default;
-    const og: EmailCompileSource = await root.wrap();
-    const res: EmailCompileContext = {
-      file: entry.sourceFile,
-      module: entry.module,
-      images: {},
-      styles: {},
-      ...og
+    const root: EmailTemplateImport<unknown> = (await import(entry.outputFile)).default;
+    const og = await root.prepare({ file, module: mod.name });
+    const moduleResources = RuntimeIndex.getDependentModules(mod, 'children').map(x => `${x.name}#resources`);
+    const res: EmailTemplatePrepared = {
+      ...og,
+      images: { ...og.images ?? {}, loader: this.#getLoader(moduleResources, og.images?.resources ?? []) },
+      styles: { ...og.styles ?? {}, loader: this.#getLoader(moduleResources, og.styles?.resources ?? []) },
     };
     return res;
   }
@@ -102,19 +111,7 @@ export class EmailCompiler {
       throw new AppError('Unknown file attempting to be compiled', 'data', { file });
     }
 
-    // Define search for images/styles based on file module and its dependents
-    const children = RuntimeIndex.getDependentModules(mod, 'children');
-    const search = new FileLoader([
-      ...(Env.TRV_RESOURCES.list ?? []),
-      '@#resources',
-      ...children.map(x => `${x.name}/resources`),
-      '@@#resources'
-    ]);
-
-    (src.images ??= {}).search = search;
-    (src.styles ??= {}).search = search;
-
-    const compiled = await EmailCompileUtil.compile(src);
+    const compiled = await EmailCompileUtil.compile(src, { file, module: mod.name });
     await this.writeTemplate(file, compiled);
     return compiled;
   }

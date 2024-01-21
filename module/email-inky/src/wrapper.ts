@@ -1,22 +1,24 @@
-import { EmailCompileSource } from '@travetto/email';
-import { JSXElement } from '@travetto/email-inky/jsx-runtime';
+import { EmailTemplateCore, EmailTemplateLocation } from '@travetto/email';
 import { PackageUtil, path } from '@travetto/manifest';
 
 import { InkyRenderer } from './render/renderer';
 import { Html } from './render/html';
 import { Markdown } from './render/markdown';
 import { Subject } from './render/subject';
+import { JSXElement } from '@travetto/doc/jsx-runtime';
 
-export const wrap = (content: JSXElement): EmailCompileSource => ({
-  styles: {
-    search: [path.dirname(PackageUtil.resolveImport('foundation-emails/scss/_global.scss'))],
-    global: `
+export async function prepare(node: JSXElement, loc: EmailTemplateLocation): Promise<EmailTemplateCore> {
+  return {
+    styles: {
+      resources: [path.dirname(PackageUtil.resolveImport('foundation-emails/scss/_global.scss'))],
+      global: `
   @import 'email/inky.variables';
   @import '_global';
   @import 'foundation-emails';
   `
-  },
-  html: InkyRenderer.render.bind(InkyRenderer, content, Html),
-  text: InkyRenderer.render.bind(InkyRenderer, content, Markdown),
-  subject: InkyRenderer.render.bind(InkyRenderer, content, Subject),
-});
+    },
+    html: () => InkyRenderer.render(node, Html, loc),
+    text: () => InkyRenderer.render(node, Markdown, loc),
+    subject: () => InkyRenderer.render(node, Subject, loc),
+  };
+}
