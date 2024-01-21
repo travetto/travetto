@@ -14,7 +14,7 @@ const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)
  */
 export class EmailCompiler {
 
-
+  /** Get a file loader for a given set of module and global resource paths */
   static #getLoader(moduleResources: string[], globalResources: string[]): FileLoader {
     return new FileLoader([
       ...Env.TRV_RESOURCES.list ?? [], '@#resources',
