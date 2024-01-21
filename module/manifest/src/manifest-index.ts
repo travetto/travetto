@@ -32,6 +32,7 @@ export type IndexedModule = ManifestModuleCore & {
   sourcePath: string;
   outputPath: string;
   files: Record<ManifestModuleFolderType, IndexedFile[]>;
+  children: Set<string>;
 };
 
 const TypedObject: {
@@ -107,6 +108,7 @@ export class ManifestIndex {
         ...m,
         outputPath: this.#resolveOutput(m.outputFolder),
         sourcePath: path.resolve(this.#manifest.workspace.path, m.sourceFolder),
+        children: new Set(),
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
         files: Object.fromEntries(
           Object.entries(m.files).map(([folder, files]) => [folder, this.#moduleFiles(m, files ?? [])])
@@ -125,6 +127,13 @@ export class ManifestIndex {
     }
     this.#modulesByName = Object.fromEntries(this.#modules.map(x => [x.name, x]));
     this.#modulesByFolder = Object.fromEntries(this.#modules.map(x => [x.sourceFolder, x]));
+
+    // Store child information
+    for (const mod of this.#modules) {
+      for (const p of mod.parents) {
+        this.#modulesByName[p].children.add(mod.name);
+      }
+    }
   }
 
   /**
@@ -254,11 +263,11 @@ export class ManifestIndex {
   }
 
   /**
-   * Get all modules (transitively) that depend on this module
+   * Get all modules, parents or children, (transitively) of the provided root, in a DFS fashion
    */
-  getDependentModules(root: IndexedModule): Set<IndexedModule> {
+  getDependentModules(root: IndexedModule, field: 'parents' | 'children'): IndexedModule[] {
     const seen = new Set<string>();
-    const out = new Set<IndexedModule>();
+    const out: IndexedModule[] = [];
     const toProcess = [root.name];
     while (toProcess.length) {
       const next = toProcess.shift()!;
@@ -266,8 +275,8 @@ export class ManifestIndex {
         continue;
       }
       const mod = this.getModule(next)!;
-      toProcess.push(...mod.parents);
-      out.add(mod);
+      toProcess.push(...mod[field]);
+      out.push(mod);
     }
     return out;
   }

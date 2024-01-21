@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { FileLoader, TypedObject, WatchEvent, watchCompiler } from '@travetto/base';
+import { AppError, Env, FileLoader, TypedObject, WatchEvent, watchCompiler } from '@travetto/base';
 import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
 import { RuntimeIndex, path } from '@travetto/manifest';
 import { WorkQueue } from '@travetto/worker';
@@ -20,13 +20,10 @@ export class EmailCompiler {
   static async #watchFolders(folders: string[], handler: (ev: WatchEvent) => void, signal: AbortSignal): Promise<void> {
     for (const src of folders) {
       (async (): Promise<void> => {
-        for await (const ev of fs.watch(src, {
-          recursive: true,
-          signal,
-          persistent: false
-        })) {
-          const exists = ev.filename ? await fs.stat(ev.filename).catch(() => false) : false;
-          handler({ action: !!exists ? 'create' : 'delete', file: path.toPosix(ev.filename!) });
+        for await (const ev of fs.watch(src, { recursive: true, signal, persistent: false })) {
+          if (ev.filename && VALID_FILE(ev.filename) && await fs.stat(ev.filename).catch(() => { })) {
+            await handler({ file: path.toPosix(ev.filename!), action: 'update' });
+          }
         }
       })();
     }
@@ -99,6 +96,24 @@ export class EmailCompiler {
    */
   static async compile(file: string, persist: boolean = false): Promise<EmailCompiled> {
     const src = await this.loadTemplate(file);
+
+    const mod = RuntimeIndex.getModuleFromSource(file);
+    if (!mod) {
+      throw new AppError('Unknown file attempting to be compiled', 'data', { file });
+    }
+
+    // Define search for images/styles based on file module and its dependents
+    const children = RuntimeIndex.getDependentModules(mod, 'children');
+    const search = new FileLoader([
+      ...(Env.TRV_RESOURCES.list ?? []),
+      '@#resources',
+      ...children.map(x => `${x.name}/resources`),
+      '@@#resources'
+    ]);
+
+    (src.images ??= {}).search = search;
+    (src.styles ??= {}).search = search;
+
     const compiled = await EmailCompileUtil.compile(src);
     if (persist) {
       await this.writeTemplate(file, compiled);
@@ -124,39 +139,35 @@ export class EmailCompiler {
     );
 
     const ctrl = new AbortController();
-    const stream = new WorkQueue<WatchEvent>([], ctrl.signal);
+    const stream = new WorkQueue<string>([], ctrl.signal);
+    process.on('SIGINT', () => ctrl.abort());
 
     // watch resources
-    this.#watchFolders(all, ev => stream.add(ev), ctrl.signal);
+    this.#watchFolders(all, async ({ file }) => {
+      try {
+        const changed = await this.compileAll();
+        console.log('Successfully compiled templates', { changed, source: file });
+        stream.addAll(changed);
+      } catch (err) {
+        console.error('Error in compiling all templates', err && err instanceof Error ? err.message : `${err}`);
+      }
+    }, ctrl.signal);
 
     // Watch template files
-    watchCompiler(ev => {
-      const src = RuntimeIndex.getEntry(ev.file);
-      if (src && EmailCompileUtil.isTemplateFile(src.sourceFile)) {
-        setTimeout(() => stream.add({ ...ev, file: src.sourceFile }), 100); // Wait for it to be loaded
+    watchCompiler(async ({ file, action }) => {
+      const src = RuntimeIndex.getEntry(file);
+      if (!src || !EmailCompileUtil.isTemplateFile(src.sourceFile) || action === 'delete') {
+        return;
       }
-    }, { signal: ctrl.signal });
-
-    for await (const { file, action } of stream) {
-      if (action === 'delete') {
-        continue;
-      }
-
       try {
-        if (EmailCompileUtil.isTemplateFile(file)) {
-          await this.compile(file, true);
-          console.log(`Successfully compiled ${1} templates`, { changed: [file] });
-          yield file;
-        } else if (VALID_FILE(file)) {
-          const rootFile = file.replace(/\/resources.*/, '/package.json');
-          const mod = RuntimeIndex.getFromSource(rootFile)!.module;
-          const changed = await this.compileAll(mod);
-          console.log(`Successfully compiled ${changed.length} templates`, { changed, file });
-          yield* changed;
-        }
+        await this.compile(file, true);
+        console.log('Successfully compiled template', { changed: [file] });
+        stream.add(file);
       } catch (err) {
         console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
       }
-    }
+    }, { signal: ctrl.signal });
+
+    yield* stream;
   }
 }

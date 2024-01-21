@@ -1,11 +1,8 @@
 import util from 'node:util';
 import { pipeline } from 'node:stream/promises';
 
-import { MemoryWritable, ResourceLoader } from '@travetto/base';
-import {
-  EmailTemplateImageConfig, EmailTemplateStyleConfig,
-  EmailCompiled, EmailCompileContext
-} from '@travetto/email';
+import { MemoryWritable, RuntimeResources } from '@travetto/base';
+import { EmailTemplateImageConfig, EmailTemplateStyleConfig, EmailCompiled, EmailCompileContext } from '@travetto/email';
 import { ImageConverter } from '@travetto/image';
 import { path } from '@travetto/manifest';
 
@@ -137,7 +134,7 @@ export class EmailCompileUtil {
   static async inlineImages(html: string, opts: EmailTemplateImageConfig): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, this.#HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Buffer | Promise<Buffer>][] = [];
-    const resource = new ResourceLoader(opts.search);
+    const resource = opts.search ?? RuntimeResources;
 
     for (const [token, src] of tokens) {
       const ext = path.extname(src);
@@ -189,7 +186,7 @@ export class EmailCompileUtil {
       styles.push(opts.global);
     }
 
-    const resource = new ResourceLoader(opts.search);
+    const resource = opts.search ?? RuntimeResources;
     const main = await resource.read('/email/main.scss').then(d => d, () => '');
 
     if (main) {

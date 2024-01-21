@@ -36,11 +36,7 @@ export class EditorState {
         const content = await this.#template.resolveCompiledTemplate(
           file, await EditorConfig.getContext(file)
         );
-        this.response({
-          type: 'changed',
-          file,
-          content
-        });
+        this.response({ type: 'changed', file, content });
       } catch (err) {
         if (err && err instanceof Error) {
           this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file });

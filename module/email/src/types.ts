@@ -1,3 +1,4 @@
+import { FileLoader } from '@travetto/base';
 import { Readable } from 'node:stream';
 import { Url } from 'node:url';
 
@@ -44,7 +45,7 @@ export interface EmailOptions {
 
   from?: string | EmailAddress;
   sender?: string | EmailAddress;
-  to?: string | EmailAddress | (string | EmailAddress)[];
+  to?: string | EsmailAddress | (string | EmailAddress)[];
   cc?: string | EmailAddress | (string | EmailAddress)[];
   bcc?: string | EmailAddress | (string | EmailAddress)[];
   replyTo?: string | EmailAddress;
@@ -66,7 +67,7 @@ export type EmailCompiled = Record<EmailContentType, string>;
 
 // Compilation support, defined here to allow for templates to not have a direct dependency on the compiler
 type BaseTemplateConfig = {
-  search?: string[] | readonly string[];
+  search?: FileLoader;
   inline?: boolean;
 };
 

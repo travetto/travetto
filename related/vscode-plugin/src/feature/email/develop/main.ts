@@ -1,4 +1,3 @@
-import { EventEmitter } from 'node:events';
 import { ChildProcess, spawn } from 'node:child_process';
 import vscode from 'vscode';
 
@@ -25,22 +24,24 @@ export class EmailCompilerFeature extends BaseFeature {
   #activeFile?: string;
   #activeContent?: Content;
   #panel?: vscode.WebviewPanel;
-  #emitter = new EventEmitter();
 
   #startServer(): void {
     if (this.#server && !this.#server.killed) {
       return;
     }
 
-    this.#server = spawn('node', [RunUtil.cliFile, 'email:editor'],
-      {
-        cwd: Workspace.path,
-        stdio: ['pipe', 'pipe', 'pipe', 'ipc']
-      }
-    )
+    this.#server = spawn('node', [RunUtil.cliFile, 'email:editor'], {
+      cwd: Workspace.path,
+      stdio: ['pipe', 'pipe', 'pipe', 'ipc']
+    })
       .on('message', async (ev: EmailCompilerEvent) => {
         switch (ev.type) {
-          case 'changed': this.#emitter.emit('render', ev); break;
+          case 'changed': {
+            if (ev.file === this.#activeFile) {
+              this.setActiveContent(ev.content);
+            }
+            break;
+          }
           case 'changed-failed': this.log.info('Email template', ev); break;
           case 'configured': {
             const doc = await vscode.workspace.openTextDocument(ev.file);
@@ -67,9 +68,7 @@ export class EmailCompilerFeature extends BaseFeature {
         viewColumn: vscode.ViewColumn.Beside,
         preserveFocus: true
       });
-      this.#panel.onDidDispose(d => {
-        this.#panel = undefined;
-      });
+      this.#panel.onDidDispose(d => { this.#panel = undefined; });
     }
     if (!this.#panel.visible) {
       this.#panel.reveal(vscode.ViewColumn.Beside, true);
@@ -103,9 +102,7 @@ export class EmailCompilerFeature extends BaseFeature {
       return;
     }
     if (open) {
-      if (this.#active.size === 0) {
-        this.#startServer();
-      }
+      this.#startServer();
       this.#active.add(file.fileName);
     } else {
       this.#active.delete(file.fileName);
@@ -123,7 +120,7 @@ export class EmailCompilerFeature extends BaseFeature {
     }
 
     await this.getPanel();
-    await this.#startServer();
+    this.#startServer();
 
     this.#format = format;
 
@@ -152,12 +149,6 @@ export class EmailCompilerFeature extends BaseFeature {
     vscode.workspace.onDidOpenTextDocument(x => this.trackFile(x, true), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(x => this.trackFile(x, false), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.setActiveFile(vscode.window.activeTextEditor?.document.fileName), null, context.subscriptions);
-
-    this.#emitter.on('render', ({ file, content }: EmailCompilerEvent & { type: 'changed' }) => {
-      if (file === this.#activeFile) {
-        this.setActiveContent(content);
-      }
-    });
 
     this.register('preview-html', () => this.openPreview('html'));
     this.register('preview-text', () => this.openPreview('text'));
