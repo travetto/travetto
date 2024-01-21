@@ -45,7 +45,7 @@ export interface EmailOptions {
 
   from?: string | EmailAddress;
   sender?: string | EmailAddress;
-  to?: string | EsmailAddress | (string | EmailAddress)[];
+  to?: string | EmailAddress | (string | EmailAddress)[];
   cc?: string | EmailAddress | (string | EmailAddress)[];
   bcc?: string | EmailAddress | (string | EmailAddress)[];
   replyTo?: string | EmailAddress;
