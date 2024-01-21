@@ -3,18 +3,20 @@ import fs from 'node:fs/promises';
 import { ManifestFileUtil, RuntimeContext } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
 
+export type Sender = {
+  port?: number;
+  host?: string;
+  auth?: {
+    user?: string;
+    pass?: string;
+  };
+};
+
 interface ConfigType {
   to: string;
   from: string;
   context?: Record<string, unknown>;
-  sender?: {
-    port?: number;
-    host?: string;
-    auth?: {
-      user?: string;
-      pass?: string;
-    };
-  };
+  sender?: Sender;
 }
 
 const CONFIG_FILE = 'resources/email-context.yml';

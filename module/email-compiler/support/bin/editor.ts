@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@travetto/di';
+import { MailUtil, EmailCompiled, MailInterpolator } from '@travetto/email';
+import { TypedObject } from '@travetto/base';
 
-import { EmailCompilationManager } from './manager';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
 
@@ -28,79 +29,72 @@ export class EditorService {
   #lastFile = '';
 
   @Inject()
-  template: EmailCompilationManager;
-
-  @Inject()
   sender: EditorSendService;
 
-  async renderFile(file: string): Promise<void> {
-    file = EmailCompileUtil.isTemplateFile(file) ? file : this.#lastFile;
-    if (file) {
-      try {
-        const content = await this.template.resolveCompiledTemplate(
-          file, await EditorConfig.get('context')
-        );
-        this.response({ type: 'changed', file, content });
-      } catch (err) {
-        if (err && err instanceof Error) {
-          this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file });
-        } else {
-          console.error(err);
-        }
-      }
-    }
+  @Inject()
+  engine: MailInterpolator;
+
+  async #interpolate(text: string, context: Record<string, unknown>): Promise<string> {
+    return Promise.resolve(this.engine.render(text, context)).then(MailUtil.purgeBrand);
   }
 
-  response(response: OutboundMessage): void {
-    if (process.connected) {
-      process.send?.(response);
-    }
+  async #renderTemplate(rel: string, context: Record<string, unknown>): Promise<EmailCompiled> {
+    const p = await EmailCompiler.readTemplateParts(rel);
+    return TypedObject.fromEntries(
+      await Promise.all(TypedObject.entries(p).map(([k, v]) => this.#interpolate(v, context).then((t) => [k, t])))
+    );
   }
 
-  async onConfigure(msg: InboundMessage & { type: 'configure' }): Promise<void> {
-    this.response({ type: 'configured', file: await EditorConfig.ensureConfig() });
+  async #renderFile(file: string): Promise<{ content: EmailCompiled, file: string }> {
+    const content = await this.#renderTemplate(file, await EditorConfig.get('context'));
+    return { content, file };
   }
 
-  async #onRedraw(msg: InboundMessage & { type: 'redraw' }): Promise<void> {
+  async  #response<T>(op: Promise<T>, succ: (v: T) => OutboundMessage, fail?: (err: Error) => OutboundMessage): Promise<void> {
     try {
-      await EmailCompiler.compile(msg.file, true);
-      await this.renderFile(msg.file);
+      const res = await op;
+      if (process.connected) { process.send?.(succ(res)); }
     } catch (err) {
-      if (err && err instanceof Error) {
-        this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
+      if (fail && process.connected && err && err instanceof Error) {
+        process.send?.(fail(err));
       } else {
         console.error(err);
       }
     }
   }
 
-  async onSend(msg: InboundMessage & { type: 'send' }): Promise<void> {
+  async sendFile(file: string, to?: string): Promise<{ to: string, file: string, url?: string | false | undefined }> {
     const cfg = await EditorConfig.get();
-    const to = msg.to || cfg.to;
-    const from = msg.from || cfg.from;
-    const content = await this.template.resolveCompiledTemplate(msg.file, cfg.context ?? {});
-
-    try {
-      const url = await this.sender.send({ from, to, ...content, });
-      this.response({ type: 'sent', to, file: msg.file, ...url });
-    } catch (err) {
-      if (err && err instanceof Error) {
-        this.response({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
-      } else {
-        console.error(err);
-      }
-    }
+    to ||= cfg.to;
+    const content = await this.#renderTemplate(file, cfg.context ?? {});
+    return { to, file, ...await this.sender.send({ from: cfg.from, to, ...content, }) };
   }
 
   /**
    * Initialize context, and listeners
    */
-  async init(): Promise<void> {
-    process.on('message', (msg: InboundMessage) => {
+  async listen(): Promise<void> {
+    process.on('message', async (msg: InboundMessage) => {
       switch (msg.type) {
-        case 'configure': this.onConfigure(msg); break;
-        case 'redraw': this.#onRedraw(msg); break;
-        case 'send': this.onSend(msg); break;
+        case 'configure': {
+          await this.#response(EditorConfig.ensureConfig(), file => ({ type: 'configured', file }));
+          break;
+        }
+        case 'redraw': {
+          await this.#response(this.#renderFile(msg.file),
+            res => ({ type: 'changed', ...res }),
+            err => ({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file })
+          );
+          break;
+        }
+        case 'send': {
+          await this.#response(
+            this.sendFile(msg.file, msg.to),
+            res => ({ type: 'sent', ...res }),
+            err => ({ type: 'sent-failed', message: err.message, stack: err.stack, to: msg.to!, file: msg.file })
+          );
+          break;
+        }
       }
     });
 
@@ -111,7 +105,13 @@ export class EditorService {
     process.on('SIGINT', () => ctrl.abort());
 
     for await (const f of EmailCompiler.watchCompile(ctrl.signal)) {
-      await this.renderFile(f);
+      const file = EmailCompileUtil.isTemplateFile(f) ? f : this.#lastFile;
+      if (file) {
+        await this.#response(this.#renderFile(f),
+          res => ({ type: 'changed', ...res }),
+          err => ({ type: 'changed-failed', message: err.message, stack: err.stack, file })
+        );
+      }
     }
   }
 }

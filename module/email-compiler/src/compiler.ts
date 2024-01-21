@@ -94,7 +94,7 @@ export class EmailCompiler {
   /**
    * Compile a file given a resource provider
    */
-  static async compile(file: string, persist: boolean = false): Promise<EmailCompiled> {
+  static async compile(file: string): Promise<EmailCompiled> {
     const src = await this.loadTemplate(file);
 
     const mod = RuntimeIndex.getModuleFromSource(file);
@@ -115,9 +115,7 @@ export class EmailCompiler {
     (src.styles ??= {}).search = search;
 
     const compiled = await EmailCompileUtil.compile(src);
-    if (persist) {
-      await this.writeTemplate(file, compiled);
-    }
+    await this.writeTemplate(file, compiled);
     return compiled;
   }
 
@@ -126,7 +124,7 @@ export class EmailCompiler {
    */
   static async compileAll(mod?: string): Promise<string[]> {
     const keys = this.findAllTemplates(mod);
-    await Promise.all(keys.map(src => this.compile(src, true)));
+    await Promise.all(keys.map(src => this.compile(src)));
     return keys;
   }
 
@@ -158,7 +156,7 @@ export class EmailCompiler {
         return;
       }
       try {
-        await this.compile(file, true);
+        await this.compile(file);
         console.log('Successfully compiled template', { changed: [file] });
         stream.add(file);
       } catch (err) {
@@ -167,5 +165,25 @@ export class EmailCompiler {
     }, { signal });
 
     yield* stream;
+  }
+
+  /**
+   * Read template parts, compiling if necessary
+   */
+  static async readTemplateParts(file: string): Promise<EmailCompiled> {
+    const files = this.getOutputFiles(file);
+    const missing = await Promise.all(Object.values(files).map(x => fs.stat(file).catch(() => { })));
+
+    if (missing.some(x => x === undefined)) {
+      await this.compile(file);
+    }
+
+    const parts = await Promise.all(
+      TypedObject.entries(files).map(
+        ([key, partFile]) => fs.readFile(partFile, 'utf8')
+          .then(content => [key, content] as const)
+      )
+    );
+    return TypedObject.fromEntries<keyof EmailCompiled, string>(parts);
   }
 }
