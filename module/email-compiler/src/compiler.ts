@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 
 import { AppError, Env, FileLoader, TypedObject, WatchEvent, watchCompiler } from '@travetto/base';
-import { EmailTemplatePrepared, EmailCompiled, MailUtil, EmailTemplateImport } from '@travetto/email';
+import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
 import { RuntimeIndex, path } from '@travetto/manifest';
 import { WorkQueue } from '@travetto/worker';
 
@@ -39,7 +39,7 @@ export class EmailCompiler {
   }
 
   /** Load Template */
-  static async loadTemplate(file: string): Promise<EmailTemplatePrepared> {
+  static async loadTemplate(file: string): Promise<EmailTemplateModule> {
     const entry = RuntimeIndex.getEntry(file);
     const mod = entry ? RuntimeIndex.getModule(entry.module) : undefined;
     if (!entry || !mod) {
@@ -48,7 +48,7 @@ export class EmailCompiler {
     const root: EmailTemplateImport<unknown> = (await import(entry.outputFile)).default;
     const og = await root.prepare({ file, module: mod.name });
     const moduleResources = RuntimeIndex.getDependentModules(mod, 'children').map(x => `${x.name}#resources`);
-    const res: EmailTemplatePrepared = {
+    const res: EmailTemplateModule = {
       ...og,
       images: { ...og.images ?? {}, loader: this.#getLoader(moduleResources, og.images?.resources ?? []) },
       styles: { ...og.styles ?? {}, loader: this.#getLoader(moduleResources, og.styles?.resources ?? []) },
@@ -111,7 +111,7 @@ export class EmailCompiler {
       throw new AppError('Unknown file attempting to be compiled', 'data', { file });
     }
 
-    const compiled = await EmailCompileUtil.compile(src, { file, module: mod.name });
+    const compiled = await EmailCompileUtil.compile(src);
     await this.writeTemplate(file, compiled);
     return compiled;
   }

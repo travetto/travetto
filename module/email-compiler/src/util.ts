@@ -2,7 +2,7 @@ import util from 'node:util';
 import { pipeline } from 'node:stream/promises';
 
 import { MemoryWritable } from '@travetto/base';
-import { EmailCompiled, EmailTemplateLocation, EmailTemplatePrepared, EmailTemplateResource } from '@travetto/email';
+import { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageConverter } from '@travetto/image';
 import { path } from '@travetto/manifest';
 
@@ -139,13 +139,13 @@ export class EmailCompileUtil {
       const ext = path.extname(src);
       if (/^[.](jpe?g|png)$/.test(ext)) {
         const output = await ImageConverter.optimize(
-          ext === '.png' ? 'png' : 'jpeg', await opts.loader.readStream(src)
+          ext === '.png' ? 'png' : 'jpeg', await opts.loader!.readStream(src)
         );
         const buffer = new MemoryWritable();
         await pipeline(output, buffer);
         pendingImages.push([token, ext, buffer.toBuffer()]);
       } else {
-        pendingImages.push([token, ext, opts.loader.read(src, true)]);
+        pendingImages.push([token, ext, opts.loader!.read(src, true)]);
       }
     }
 
@@ -185,14 +185,14 @@ export class EmailCompileUtil {
       styles.push(opts.global);
     }
 
-    const main = await opts.loader.read('/email/main.scss').then(d => d, () => '');
+    const main = await opts.loader!.read('/email/main.scss').then(d => d, () => '');
 
     if (main) {
       styles.push(main);
     }
 
     if (styles.length) {
-      const compiled = await this.compileSass({ data: styles.join('\n') }, opts.loader.searchPaths);
+      const compiled = await this.compileSass({ data: styles.join('\n') }, opts.loader!.searchPaths);
 
       // Remove all unused styles
       const finalStyles = await this.pruneCss(html, compiled);
@@ -204,11 +204,11 @@ export class EmailCompileUtil {
     return html;
   }
 
-  static async compile(src: EmailTemplatePrepared, loc: EmailTemplateLocation): Promise<EmailCompiled> {
-    const subject = await this.simplifiedText(await src.subject(loc));
-    const text = await this.simplifiedText(await src.text(loc));
+  static async compile(src: EmailTemplateModule): Promise<EmailCompiled> {
+    const subject = await this.simplifiedText(await src.subject());
+    const text = await this.simplifiedText(await src.text());
 
-    let html = await src.html(loc);
+    let html = await src.html();
 
     if (src.styles?.inline !== false) {
       html = await this.applyStyles(html, src.styles!);
