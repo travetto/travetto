@@ -29,8 +29,9 @@ export class EmailCompileCommand implements CliCommandShape {
     }
 
     if (this.watch) {
-
-      for await (const _ of EmailCompiler.watchCompile()) {
+      const ctrl = new AbortController();
+      process.on('SIGINT', () => ctrl.abort());
+      for await (const _ of EmailCompiler.watchCompile(ctrl.signal)) {
         // Iterate until done
       }
     }

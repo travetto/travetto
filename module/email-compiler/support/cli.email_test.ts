@@ -1,6 +1,7 @@
 import { path } from '@travetto/manifest';
 import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand } from '@travetto/cli';
+import { DependencyRegistry } from '@travetto/di';
 
 import { EmailCompilationManager } from './bin/manager';
 import { EditorConfig } from './bin/config';
@@ -19,9 +20,9 @@ export class EmailTestCommand implements CliCommandShape {
     await RootRegistry.init();
     await EmailCompiler.compile(file, true);
 
-    const mgr = await EmailCompilationManager.createInstance();
-    const cfg = await EditorConfig.get(file);
-    const content = await mgr.resolveCompiledTemplate(file, await EditorConfig.getContext(file));
+    const mgr = await DependencyRegistry.getInstance(EmailCompilationManager);
+    const cfg = await EditorConfig.get();
+    const content = await mgr.resolveCompiledTemplate(file, cfg.context ?? {});
 
     await EditorSendService.sendEmail(file, { from: cfg.from, to, ...content, });
   }

@@ -1,28 +1,19 @@
 import fs from 'node:fs/promises';
 
 import { type MailInterpolator, type EmailCompiled } from '@travetto/email';
-import { DependencyRegistry } from '@travetto/di';
+import { Inject, Injectable } from '@travetto/di';
 import { TypedObject } from '@travetto/base';
-import { MailInterpolatorTarget } from '@travetto/email/src/internal/types';
 
 import { EmailCompiler } from '../../src/compiler';
 
 /**
  *
  */
+@Injectable()
 export class EmailCompilationManager {
 
-  static async createInstance(): Promise<EmailCompilationManager> {
-    return new EmailCompilationManager(
-      await DependencyRegistry.getInstance<MailInterpolator>(MailInterpolatorTarget),
-    );
-  }
-
+  @Inject()
   engine: MailInterpolator;
-
-  constructor(engine: MailInterpolator) {
-    this.engine = engine;
-  }
 
   /**
    * Resolve template

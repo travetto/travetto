@@ -1,3 +1,5 @@
+import { Inject, Injectable } from '@travetto/di';
+
 import { EmailCompilationManager } from './manager';
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
@@ -20,21 +22,20 @@ type OutboundMessage =
 /**
  * Utils for interacting with editors
  */
+@Injectable()
 export class EditorState {
 
   #lastFile = '';
-  #template: EmailCompilationManager;
 
-  constructor(template: EmailCompilationManager) {
-    this.#template = template;
-  }
+  @Inject()
+  template: EmailCompilationManager;
 
   async renderFile(file: string): Promise<void> {
     file = EmailCompileUtil.isTemplateFile(file) ? file : this.#lastFile;
     if (file) {
       try {
-        const content = await this.#template.resolveCompiledTemplate(
-          file, await EditorConfig.getContext(file)
+        const content = await this.template.resolveCompiledTemplate(
+          file, await EditorConfig.get('context')
         );
         this.response({ type: 'changed', file, content });
       } catch (err) {
@@ -54,7 +55,7 @@ export class EditorState {
   }
 
   async onConfigure(msg: InboundMessage & { type: 'configure' }): Promise<void> {
-    this.response({ type: 'configured', file: await EditorConfig.ensureConfig(msg.file) });
+    this.response({ type: 'configured', file: await EditorConfig.ensureConfig() });
   }
 
   async #onRedraw(msg: InboundMessage & { type: 'redraw' }): Promise<void> {
@@ -71,12 +72,10 @@ export class EditorState {
   }
 
   async onSend(msg: InboundMessage & { type: 'send' }): Promise<void> {
-    const cfg = await EditorConfig.get(msg.file);
+    const cfg = await EditorConfig.get();
     const to = msg.to || cfg.to;
     const from = msg.from || cfg.from;
-    const content = await this.#template.resolveCompiledTemplate(
-      msg.file, await EditorConfig.getContext(msg.file)
-    );
+    const content = await this.template.resolveCompiledTemplate(msg.file, cfg.context ?? {});
 
     try {
       const url = await EditorSendService.sendEmail(msg.file, { from, to, ...content, });
@@ -105,7 +104,10 @@ export class EditorState {
     process.once('disconnect', () => process.exit());
     process.send?.({ type: 'init' });
 
-    for await (const f of EmailCompiler.watchCompile()) {
+    const ctrl = new AbortController();
+    process.on('SIGINT', () => ctrl.abort());
+
+    for await (const f of EmailCompiler.watchCompile(ctrl.signal)) {
       await this.renderFile(f);
     }
   }

@@ -133,14 +133,12 @@ export class EmailCompiler {
   /**
    * Watch compilation
    */
-  static async * watchCompile(): AsyncIterable<string> {
+  static async * watchCompile(signal: AbortSignal): AsyncIterable<string> {
     const all = FileLoader.resolvePaths(
       this.findAllTemplates().map(x => `${RuntimeIndex.getEntry(x)!.module}#resources`)
     );
 
-    const ctrl = new AbortController();
-    const stream = new WorkQueue<string>([], ctrl.signal);
-    process.on('SIGINT', () => ctrl.abort());
+    const stream = new WorkQueue<string>([], signal);
 
     // watch resources
     this.#watchFolders(all, async ({ file }) => {
@@ -151,7 +149,7 @@ export class EmailCompiler {
       } catch (err) {
         console.error('Error in compiling all templates', err && err instanceof Error ? err.message : `${err}`);
       }
-    }, ctrl.signal);
+    }, signal);
 
     // Watch template files
     watchCompiler(async ({ file, action }) => {
@@ -166,7 +164,7 @@ export class EmailCompiler {
       } catch (err) {
         console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
       }
-    }, { signal: ctrl.signal });
+    }, { signal });
 
     yield* stream;
   }

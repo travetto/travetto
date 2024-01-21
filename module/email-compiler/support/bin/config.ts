@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { IndexedModule, RuntimeIndex, path } from '@travetto/manifest';
+import { ManifestFileUtil, RuntimeContext } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
 
 interface ConfigType {
@@ -17,13 +17,14 @@ interface ConfigType {
   };
 }
 
+const CONFIG_FILE = 'resources/email-context.yml';
+
 /**
  * Configuration utils
  */
-export class $EditorConfig {
+export class EditorConfig {
 
-  #configFile: Record<string, string> = {};
-  #defaultConfig = {
+  static DEFAULT_CONFIG = {
     to: 'my-email@gmail.com',
     from: 'from-email@gmail.com',
     context: {
@@ -39,49 +40,32 @@ export class $EditorConfig {
     },
   };
 
-  #getEmailConfig(mod: IndexedModule): string {
-    return this.#configFile[mod.name] ??= path.resolve(mod.sourcePath, 'resources/email/local.yml');
-  }
-
   /**
    *
    */
-  async get(file: string): Promise<ConfigType> {
+  static async get<K extends keyof ConfigType>(key: K): Promise<Exclude<ConfigType[K], undefined>>;
+  static async get(): Promise<ConfigType>;
+  static async get<K extends keyof ConfigType>(key?: K): Promise<ConfigType | ConfigType[K]> {
     try {
-      const mod = RuntimeIndex.getModuleFromSource(file)!;
-      const resolved = this.#getEmailConfig(mod);
+      const resolved = RuntimeContext.workspaceRelative(CONFIG_FILE);
       const content = await fs.readFile(resolved, 'utf8');
-      return YamlUtil.parse<ConfigType>(content);
+      const data = YamlUtil.parse<ConfigType>(content);
+      return key ? data[key] : data;
     } catch {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
       return {} as ConfigType;
     }
   }
 
-  async getContext(file: string): Promise<Exclude<ConfigType['context'], undefined>> {
-    const conf = await this.get(file);
-    return conf.context ?? {};
+  static getDefaultConfig(): string {
+    return YamlUtil.serialize(this.DEFAULT_CONFIG);
   }
 
-  async getSenderConfig(file: string): Promise<Exclude<ConfigType['sender'], undefined>> {
-    const conf = await this.get(file);
-    return conf.sender ?? {};
-  }
-
-  getDefaultConfig(): string {
-    return YamlUtil.serialize(this.#defaultConfig);
-  }
-
-  async ensureConfig(file: string): Promise<string> {
-    console.log('Ensuring config', file);
-    const mod = RuntimeIndex.getModuleFromSource(file)!;
-    const resolved = this.#getEmailConfig(mod);
+  static async ensureConfig(): Promise<string> {
+    const resolved = RuntimeContext.workspaceRelative(CONFIG_FILE);
     if (!(await fs.stat(resolved).catch(() => { }))) {
-      await fs.mkdir(path.dirname(resolved), { recursive: true });
-      await fs.writeFile(resolved, this.getDefaultConfig(), { encoding: 'utf8' });
+      await ManifestFileUtil.bufferedFileWrite(resolved, this.getDefaultConfig());
     }
     return resolved;
   }
 }
-
-export const EditorConfig = new $EditorConfig();

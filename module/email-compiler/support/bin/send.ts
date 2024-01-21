@@ -19,9 +19,9 @@ export class EditorSendService {
     const mod = RuntimeIndex.getModuleFromSource(file)!.name;
 
     if (!this.#svc[mod]) {
-      const senderConfig = await EditorConfig.getSenderConfig(file);
+      const senderConfig = await EditorConfig.get('sender');
 
-      if (senderConfig?.host?.includes('ethereal.email')) {
+      if (senderConfig.host?.includes('ethereal.email')) {
         const cls = class { };
         const { NodemailerTransport } = await import('@travetto/email-nodemailer');
         DependencyRegistry.registerFactory({
@@ -65,7 +65,7 @@ ${EditorConfig.getDefaultConfig()}`.trim();
       const info = await svc.send<{ host?: string } & SentEmail>(message);
       console.log('Sent email', { to });
 
-      const senderConfig = await EditorConfig.getSenderConfig(file);
+      const senderConfig = await EditorConfig.get('sender');
       return senderConfig.host?.includes('ethereal.email') ? {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any
         url: (await import('nodemailer')).getTestMessageUrl(info as any)
