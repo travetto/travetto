@@ -3,7 +3,7 @@ import { CliCommand, CliUtil } from '@travetto/cli';
 import { RootRegistry } from '@travetto/registry';
 import { DependencyRegistry } from '@travetto/di';
 
-import { EditorState } from './bin/editor';
+import { EditorService } from './bin/editor';
 
 /** The email editor compilation service and output serving */
 @CliCommand({ addEnv: true })
@@ -19,6 +19,6 @@ export class EmailEditorCommand {
     }
 
     await RootRegistry.init();
-    (await DependencyRegistry.getInstance(EditorState)).init();
+    (await DependencyRegistry.getInstance(EditorService)).init();
   }
 }

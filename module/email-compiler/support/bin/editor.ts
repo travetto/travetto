@@ -23,12 +23,15 @@ type OutboundMessage =
  * Utils for interacting with editors
  */
 @Injectable()
-export class EditorState {
+export class EditorService {
 
   #lastFile = '';
 
   @Inject()
   template: EmailCompilationManager;
+
+  @Inject()
+  sender: EditorSendService;
 
   async renderFile(file: string): Promise<void> {
     file = EmailCompileUtil.isTemplateFile(file) ? file : this.#lastFile;
@@ -78,7 +81,7 @@ export class EditorState {
     const content = await this.template.resolveCompiledTemplate(msg.file, cfg.context ?? {});
 
     try {
-      const url = await EditorSendService.sendEmail(msg.file, { from, to, ...content, });
+      const url = await this.sender.send({ from, to, ...content, });
       this.response({ type: 'sent', to, file: msg.file, ...url });
     } catch (err) {
       if (err && err instanceof Error) {
