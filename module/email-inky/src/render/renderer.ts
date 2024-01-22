@@ -1,9 +1,8 @@
 import { isJSXElement, JSXElement, createFragment, JSXFragmentType, JSXChild } from '@travetto/email-inky/jsx-runtime';
-import { EmailTemplateLocation } from '@travetto/email';
 
 import { EMPTY_ELEMENT, getComponentName, JSXElementByFn, c } from '../components';
 import { RenderProvider, RenderState } from '../types';
-import { RenderContext } from './context';
+import { RenderContext, RenderContextInit } from './context';
 
 /**
  * Inky Renderer
@@ -83,10 +82,10 @@ export class InkyRenderer {
   static async render(
     root: JSXElement,
     provider: RenderProvider<RenderContext>,
-    sourceLoc: EmailTemplateLocation,
+    context: RenderContextInit,
     isRoot = true
   ): Promise<string> {
-    const ctx = new RenderContext(sourceLoc.file, sourceLoc.module);
+    const ctx = new RenderContext(context);
     const par: JSXElement = root.type === JSXFragmentType ? root : createFragment({ children: [root] });
     const text = await this.#render(ctx, provider, par, []);
     return provider.finalize(text, ctx, isRoot);

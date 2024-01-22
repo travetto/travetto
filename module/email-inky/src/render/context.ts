@@ -1,19 +1,24 @@
 import { createElement } from '@travetto/email-inky/jsx-runtime';
+import { FileLoader, ModuleResourceLoader } from '@travetto/base';
+import { EmailTemplateLocation } from '@travetto/email';
 
 import { JSXElementByFn, c } from '../components';
+
+export type RenderContextInit = EmailTemplateLocation & { loader?: FileLoader, columnCount?: number };
 
 /**
  * Render Context
  */
-export class RenderContext {
+export class RenderContext implements RenderContextInit {
 
   columnCount: number = 12;
   file: string;
   module: string;
+  loader: FileLoader;
 
-  constructor(srcFile: string, module: string) {
-    this.file = srcFile;
-    this.module = module;
+  constructor(ctx: RenderContextInit) {
+    Object.assign(this, ctx);
+    this.loader ??= new ModuleResourceLoader(ctx.module);
   }
 
   /**

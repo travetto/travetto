@@ -1,6 +1,7 @@
 import { RootRegistry } from '@travetto/registry';
 import { CliCommandShape, CliCommand, cliTpl } from '@travetto/cli';
 import { Env } from '@travetto/base';
+import { RuntimeContext } from '@travetto/manifest';
 
 import { EmailCompiler } from '../src/compiler';
 
@@ -25,7 +26,7 @@ export class EmailCompileCommand implements CliCommandShape {
     const all = await EmailCompiler.compileAll();
     console!.log(cliTpl`Successfully compiled ${{ param: `${all.length}` }} templates`);
     for (const el of all) {
-      console!.log(cliTpl`  * ${{ param: el }}`);
+      console!.log(cliTpl`  * ${{ param: el.replace(`${RuntimeContext.workspace.path}/`, '') }}`);
     }
 
     if (this.watch) {

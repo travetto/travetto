@@ -6,8 +6,9 @@ export default <InkyTemplate>
   <Title>Todo Completed</Title>
   <Summary>Todo Complete</Summary>
   <Container>
-    <p>
-      <Value attr='name' />, your todo is successfully completed
+    <h1 className="text-center">Hello World</h1>
+    <p className="text-center">
+      <Value attr='name' />, your todos is successfully completed
     </p>
   </Container>
 </InkyTemplate>;

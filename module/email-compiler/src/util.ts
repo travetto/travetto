@@ -181,8 +181,8 @@ export class EmailCompileUtil {
   static async applyStyles(html: string, opts: EmailTemplateResource): Promise<string> {
     const styles: string[] = [];
 
-    if (opts.global) {
-      styles.push(opts.global);
+    if (opts.globalStyles) {
+      styles.push(opts.globalStyles);
     }
 
     const main = await opts.loader!.read('/email/main.scss').then(d => d, () => '');
@@ -210,15 +210,15 @@ export class EmailCompileUtil {
 
     let html = await src.html();
 
-    if (src.styles?.inline !== false) {
-      html = await this.applyStyles(html, src.styles!);
+    if (src.inlineStyle !== false) {
+      html = await this.applyStyles(html, src);
     }
 
     // Fix up html edge cases
     html = this.handleHtmlEdgeCases(html);
 
-    if (src.images?.inline !== false) {
-      html = await this.inlineImages(html, src.images!);
+    if (src.inlineImages !== false) {
+      html = await this.inlineImages(html, src);
     }
 
     return { html, subject, text };

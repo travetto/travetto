@@ -67,16 +67,14 @@ export type EmailCompiled = Record<EmailContentType, string>;
 
 // Compilation support, defined here to allow for templates to not have a direct dependency on the compiler
 export type EmailTemplateResource = {
-  loader?: FileLoader;
-  resources?: string[];
-  inline?: boolean;
-  global?: string;
+  loader: FileLoader;
+  inlineStyle?: boolean;
+  inlineImages?: boolean;
+  globalStyles?: string;
 };
 
 type EmailTemplateContent = Record<EmailContentType, () => (Promise<string> | string)>;
 
 export type EmailTemplateLocation = { file: string, module: string };
-export type EmailTemplateModule = Record<'styles' | 'images', EmailTemplateResource> & EmailTemplateContent;
-export type EmailTemplateImport<T = unknown> = {
-  prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule>;
-} & T;
+export type EmailTemplateModule = EmailTemplateResource & EmailTemplateContent;
+export type EmailTemplateImport = { prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule> };

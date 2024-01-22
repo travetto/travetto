@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 
-import { AppError, Env, FileLoader, TypedObject, WatchEvent, watchCompiler } from '@travetto/base';
+import { AppError, FileLoader, TypedObject, WatchEvent, watchCompiler } from '@travetto/base';
 import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
 import { RuntimeIndex, path } from '@travetto/manifest';
 import { WorkQueue } from '@travetto/worker';
@@ -13,15 +13,6 @@ const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)
  * Email compilation support
  */
 export class EmailCompiler {
-
-  /** Get a file loader for a given set of module and global resource paths */
-  static #getLoader(moduleResources: string[], globalResources: string[]): FileLoader {
-    return new FileLoader([
-      ...Env.TRV_RESOURCES.list ?? [], '@#resources',
-      ...moduleResources, '@@#resources',
-      ...globalResources
-    ]);
-  }
 
   /**
    * Watch folders as needed
@@ -38,22 +29,17 @@ export class EmailCompiler {
     }
   }
 
-  /** Load Template */
+  /**
+   * Load Template
+   */
   static async loadTemplate(file: string): Promise<EmailTemplateModule> {
     const entry = RuntimeIndex.getEntry(file);
     const mod = entry ? RuntimeIndex.getModule(entry.module) : undefined;
     if (!entry || !mod) {
       throw new Error(`Unable to find template for ${file}`);
     }
-    const root: EmailTemplateImport<unknown> = (await import(entry.outputFile)).default;
-    const og = await root.prepare({ file, module: mod.name });
-    const moduleResources = RuntimeIndex.getDependentModules(mod, 'children').map(x => `${x.name}#resources`);
-    const res: EmailTemplateModule = {
-      ...og,
-      images: { ...og.images ?? {}, loader: this.#getLoader(moduleResources, og.images?.resources ?? []) },
-      styles: { ...og.styles ?? {}, loader: this.#getLoader(moduleResources, og.styles?.resources ?? []) },
-    };
-    return res;
+    const root: EmailTemplateImport = (await import(entry.outputFile)).default;
+    return await root.prepare({ file, module: mod.name });
   }
 
   /**
