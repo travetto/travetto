@@ -112,24 +112,4 @@ export class EmailCompiler {
       }
     }
   }
-
-  /**
-   * Read template parts, compiling if necessary
-   */
-  static async readTemplateParts(file: string): Promise<EmailCompiled> {
-    const files = this.getOutputFiles(file);
-    const missing = await Promise.all(Object.values(files).map(x => fs.stat(file).catch(() => { })));
-
-    if (missing.some(x => x === undefined)) {
-      await this.compile(file);
-    }
-
-    const parts = await Promise.all(
-      TypedObject.entries(files).map(
-        ([key, partFile]) => fs.readFile(partFile, 'utf8')
-          .then(content => [key, content] as const)
-      )
-    );
-    return TypedObject.fromEntries<keyof EmailCompiled, string>(parts);
-  }
 }

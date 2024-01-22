@@ -10,6 +10,8 @@ import { Workspace } from '../../../core/workspace';
 import { BaseFeature } from '../../base';
 import { Content, EmailCompilerEvent } from './types';
 
+const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
+
 /**
  * Email Template Feature
  */
@@ -120,6 +122,12 @@ export class EmailCompilerFeature extends BaseFeature {
     }
   }
 
+  savedFile(file: vscode.TextDocument): void {
+    if (VALID_FILE(file.fileName) && this.#activeFile) {
+      this.#server.send({ type: 'redraw', file: this.#activeFile });
+    }
+  }
+
   async openPreview(format: 'html' | 'text'): Promise<void> {
     const active = vscode.window.activeTextEditor;
     const file = active?.document.fileName;
@@ -156,6 +164,7 @@ export class EmailCompilerFeature extends BaseFeature {
   activate(context: vscode.ExtensionContext): void {
     vscode.workspace.onDidOpenTextDocument(x => this.trackFile(x, true), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(x => this.trackFile(x, false), null, context.subscriptions);
+    vscode.workspace.onDidSaveTextDocument(x => this.savedFile(x), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.setActiveFile(vscode.window.activeTextEditor?.document.fileName), null, context.subscriptions);
 
     this.register('preview-html', () => this.openPreview('html'));

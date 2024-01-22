@@ -36,7 +36,7 @@ export class EditorService {
   }
 
   async #renderTemplate(rel: string, context: Record<string, unknown>): Promise<EmailCompiled> {
-    const p = await EmailCompiler.readTemplateParts(rel);
+    const p = await EmailCompiler.compile(rel);
     return TypedObject.fromEntries(
       await Promise.all(TypedObject.entries(p).map(([k, v]) => this.#interpolate(v, context).then((t) => [k, t])))
     );
