@@ -42,14 +42,10 @@ export const main = (ctx: ManifestContext) => {
     /** Stream events */
     events: async (type: string, handler: (ev: unknown) => unknown): Promise<void> => {
       LogUtil.initLogs(ctx, 'error');
-      switch (type) {
-        case 'change': case 'log': case 'progress': case 'state': {
-          for await (const ev of client.fetchEvents(type)) { await handler(ev); }
-          break;
-        }
-        default: {
-          throw new Error(`Unknown event type: ${type}`);
-        }
+      if (type === 'change' || type === 'log' || type === 'progress' || type === 'state') {
+        for await (const ev of client.fetchEvents(type)) { await handler(ev); }
+      } else {
+        throw new Error(`Unknown event type: ${type}`);
       }
     },
 
