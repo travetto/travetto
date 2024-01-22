@@ -77,12 +77,12 @@ export class EmailCompileUtil {
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
-  static async compileSass(src: { data: string } | { file: string }, roots: string[] | readonly string[]): Promise<string> {
+  static async compileSass(src: { data: string } | { file: string }, opts: EmailTemplateResource): Promise<string> {
     const sass = await import('sass');
     const result = await util.promisify(sass.render)({
       ...src,
       sourceMap: false,
-      includePaths: roots.slice(0)
+      includePaths: opts.loader.searchPaths.slice(0)
     });
     return result!.css.toString();
   }
@@ -179,20 +179,13 @@ export class EmailCompileUtil {
    * Apply styles into a given html document
    */
   static async applyStyles(html: string, opts: EmailTemplateResource): Promise<string> {
-    const styles: string[] = [];
-
-    if (opts.globalStyles) {
-      styles.push(opts.globalStyles);
-    }
-
-    const main = await opts.loader.read('/email/main.scss').then(d => d, () => '');
-
-    if (main) {
-      styles.push(main);
-    }
+    const styles = [
+      opts.globalStyles ?? '',
+      await opts.loader.read('/email/main.scss').catch(() => '')
+    ].filter(x => !!x).join('\n');
 
     if (styles.length) {
-      const compiled = await this.compileSass({ data: styles.join('\n') }, opts.loader.searchPaths);
+      const compiled = await this.compileSass({ data: styles }, opts);
 
       // Remove all unused styles
       const finalStyles = await this.pruneCss(html, compiled);
