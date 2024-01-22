@@ -151,7 +151,6 @@ export class CompilerState implements ts.CompilerHost {
     if (addHash) {
       const hash = CompilerUtil.naiveHash(readFileSync(inputFile, 'utf8'));
       this.#sourceHashes.set(inputFile, hash);
-
     } else {
       this.#sourceHashes.set(inputFile, -1); // Unknown
     }
