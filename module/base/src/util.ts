@@ -1,5 +1,7 @@
 import crypto from 'node:crypto';
 
+import { ManifestFileUtil } from '@travetto/manifest';
+
 type PromiseResolver<T> = { resolve: (v: T) => void, reject: (err?: unknown) => void };
 type MapFn<T, U> = (val: T, i: number) => U | Promise<U>;
 
@@ -83,5 +85,12 @@ export class Util {
         yield m;
       }
     }
+  }
+
+  /**
+   * Write file and copy over when ready
+   */
+  static async bufferedFileWrite(file: string, content: string | object): Promise<string> {
+    return ManifestFileUtil.bufferedFileWrite(file, content);
   }
 }

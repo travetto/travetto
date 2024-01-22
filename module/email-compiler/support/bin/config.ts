@@ -1,7 +1,8 @@
 import fs from 'node:fs/promises';
 
-import { ManifestFileUtil, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
+import { Util } from '@travetto/base';
 
 export type Sender = {
   port?: number;
@@ -66,7 +67,7 @@ export class EditorConfig {
   static async ensureConfig(): Promise<string> {
     const resolved = RuntimeContext.workspaceRelative(CONFIG_FILE);
     if (!(await fs.stat(resolved).catch(() => { }))) {
-      await ManifestFileUtil.bufferedFileWrite(resolved, this.getDefaultConfig());
+      await Util.bufferedFileWrite(resolved, this.getDefaultConfig());
     }
     return resolved;
   }

@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises';
 
-import { AppError, TypedObject, watchCompiler } from '@travetto/base';
+import { TypedObject, watchCompiler } from '@travetto/base';
 import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
-import { RuntimeIndex, path } from '@travetto/manifest';
+import { ManifestFileUtil, RuntimeIndex, path } from '@travetto/manifest';
 
 import { EmailCompileUtil } from './util';
 
@@ -60,10 +60,10 @@ export class EmailCompiler {
     const outs = this.getOutputFiles(file);
     await Promise.all(TypedObject.keys(outs).map(async k => {
       if (msg[k]) {
-        await fs.mkdir(path.dirname(outs[k]), { recursive: true });
-        await fs.writeFile(outs[k], MailUtil.buildBrand(file, msg[k], 'trv email:compile'), { encoding: 'utf8' });
+        const content = MailUtil.buildBrand(file, msg[k], 'trv email:compile');
+        await ManifestFileUtil.bufferedFileWrite(outs[k], content);
       } else {
-        await fs.unlink(outs[k]).catch(() => { }); // Remove file if data not provided
+        await fs.rm(outs[k], { force: true }); // Remove file if data not provided
       }
     }));
   }
@@ -72,14 +72,8 @@ export class EmailCompiler {
    * Compile a file given a resource provider
    */
   static async compile(file: string): Promise<EmailCompiled> {
-    const src = await this.loadTemplate(file);
-
-    const mod = RuntimeIndex.getModuleFromSource(file);
-    if (!mod) {
-      throw new AppError('Unknown file attempting to be compiled', 'data', { file });
-    }
-
-    const compiled = await EmailCompileUtil.compile(src);
+    const tpl = await this.loadTemplate(file);
+    const compiled = await EmailCompileUtil.compile(tpl);
     await this.writeTemplate(file, compiled);
     return compiled;
   }
