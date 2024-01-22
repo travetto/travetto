@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-
 import {
   ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType, ManifestModuleFileType, path, ManifestModule
 } from '@travetto/manifest';
@@ -19,7 +17,6 @@ type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile:
  */
 export class CompilerWatcher {
 
-  #sourceHashes = new Map<string, number>();
   #dirtyFiles: DirtyFile[] = [];
   #state: CompilerState;
   #signal: AbortSignal;
@@ -45,7 +42,12 @@ export class CompilerWatcher {
       }
     }, {
       // TODO: Read .gitignore?
-      ignore: ['node_modules', '**/node_modules', '.git', '**/.git']
+      ignore: [
+        'node_modules', '**/node_modules', '.git', '**/.git',
+        `${this.#state.manifest.build.outputFolder}/**`,
+        `${this.#state.manifest.build.compilerFolder}/**`,
+        `${this.#state.manifest.build.toolFolder}/**`
+      ]
     });
 
     this.#signal.addEventListener('abort', () => cleanup.unsubscribe());
@@ -58,9 +60,7 @@ export class CompilerWatcher {
       return;
     }
     const mods = [...new Set(this.#dirtyFiles.map(x => x.modFolder))];
-    const contexts = await Promise.all(mods.map(folder =>
-      ManifestUtil.getModuleContext(this.#state.manifest, folder)
-    ));
+    const contexts = mods.map(folder => ManifestUtil.getModuleContext(this.#state.manifest, folder));
 
     const files = this.#dirtyFiles.slice(0);
     this.#dirtyFiles = [];
@@ -128,7 +128,7 @@ export class CompilerWatcher {
       }
 
       const fileType = ManifestModuleUtil.getFileType(sourceFile);
-      if (!(fileType === 'ts' || fileType === 'typings' || fileType === 'js')) {
+      if (!CompilerUtil.validFile(fileType)) {
         continue;
       }
 
@@ -139,26 +139,24 @@ export class CompilerWatcher {
         continue;
       }
 
+      const resolveAction = !entry && action === 'update' ? 'create' : action;
+
       const moduleFile = mod.sourceFolder ?
         (sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile) :
         sourceFile.replace(`${this.#state.manifest.workspace.path}/`, '');
 
-      switch (action) {
+      switch (resolveAction) {
         case 'create': {
-          this.#addDirtyFile(mod, moduleFile);
-          if (CompilerUtil.validFile(fileType)) {
-            const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
-            entry = this.#state.registerInput(mod, moduleFile);
-            this.#sourceHashes.set(sourceFile, hash);
+          entry = this.#state.registerInput(mod, moduleFile);
+          if (entry.outputFile) {
+            this.#addDirtyFile(mod, moduleFile);
           }
           break;
         }
         case 'update': {
           if (entry) {
-            const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
-            if (this.#sourceHashes.get(sourceFile) !== hash) {
+            if (this.#state.isFileContentsChanged(entry.inputFile)) {
               this.#state.resetInputSource(entry.inputFile);
-              this.#sourceHashes.set(sourceFile, hash);
             } else {
               entry = undefined;
             }
@@ -172,12 +170,13 @@ export class CompilerWatcher {
               this.#addDirtyFile(mod, moduleFile, true);
             }
           }
+          break;
         }
       }
 
       if (entry) {
         await this.#rebuildManifestsIfNeeded();
-        yield { action, file: entry.sourceFile, entry };
+        yield { action: resolveAction, file: entry.sourceFile, entry };
       }
     }
   }

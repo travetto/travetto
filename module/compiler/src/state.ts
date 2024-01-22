@@ -1,4 +1,5 @@
 import ts from 'typescript';
+import { readFileSync } from 'node:fs';
 
 import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
@@ -37,6 +38,7 @@ export class CompilerState implements ts.CompilerHost {
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, ts.SourceFile>();
+  #sourceHashes = new Map<string, number>();
 
   #manifestIndex: ManifestIndex;
   #manifest: ManifestRoot;
@@ -124,7 +126,7 @@ export class CompilerState implements ts.CompilerHost {
     return this.#sourceToEntry.get(sourceFile);
   }
 
-  registerInput(module: ManifestModule, moduleFile: string): CompileStateEntry {
+  registerInput(module: ManifestModule, moduleFile: string, addHash = false): CompileStateEntry {
     const relativeInput = `${module.outputFolder}/${moduleFile}`;
     const sourceFile = path.resolve(this.#manifest.workspace.path, module.sourceFolder, moduleFile);
     const sourceFolder = path.dirname(sourceFile);
@@ -146,8 +148,23 @@ export class CompilerState implements ts.CompilerHost {
     }
 
     this.#inputFiles.add(inputFile);
+    if (addHash) {
+      const hash = CompilerUtil.naiveHash(readFileSync(inputFile, 'utf8'));
+      this.#sourceHashes.set(inputFile, hash);
+
+    } else {
+      this.#sourceHashes.set(inputFile, -1); // Unknown
+    }
 
     return entry;
+  }
+
+  isFileContentsChanged(inputFile: string): boolean {
+    const { sourceFile } = this.#inputToEntry.get(inputFile)!;
+    const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
+    const result = this.#sourceHashes.get(inputFile) !== hash;
+    this.#sourceHashes.set(inputFile, hash);
+    return result;
   }
 
   removeInput(inputFile: string): void {
@@ -155,14 +172,19 @@ export class CompilerState implements ts.CompilerHost {
     if (outputFile) {
       this.#outputToEntry.delete(outputFile);
     }
+    // Remove self
+    this.resetInputSource(inputFile);
+
     this.#sourceToEntry.delete(sourceFile);
     this.#inputToEntry.delete(inputFile);
     this.#inputFiles.delete(inputFile);
   }
 
   resetInputSource(inputFile: string): void {
-    this.#sourceFileObjects.delete(inputFile);
-    this.#sourceContents.delete(inputFile);
+    const { sourceFile } = this.#inputToEntry.get(inputFile)!;
+    this.#sourceFileObjects.delete(sourceFile);
+    this.#sourceContents.delete(sourceFile);
+    this.#sourceHashes.delete(sourceFile);
   }
 
   getAllFiles(): string[] {

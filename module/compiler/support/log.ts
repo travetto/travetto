@@ -1,3 +1,5 @@
+import { appendFileSync } from 'node:fs';
+import util from 'node:util';
 import type { ManifestContext } from '@travetto/manifest';
 import type { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent } from './types';
 
@@ -18,6 +20,8 @@ export class LogUtil {
 
   static logProgress?: ProgressWriter;
 
+  static outFile: string;
+
   /**
    * Set level for operation
    */
@@ -28,6 +32,7 @@ export class LogUtil {
       this.logLevel = build || defaultLevel;
     }
     this.root = ctx.workspace.path;
+    this.outFile = `${ctx.workspace.path}/${ctx.build.toolFolder}/compiler.log`;
 
     if (this.isLevelActive('info') && process.stdout.isTTY) {
       this.logProgress = this.#logProgressEvent;
@@ -68,6 +73,8 @@ export class LogUtil {
       params.unshift(new Date().toISOString(), `${ev.level.padEnd(5)}`);
       // eslint-disable-next-line no-console
       console[ev.level]!(...params);
+      // Log to file
+      appendFileSync(this.outFile, `${params.map(x => typeof x === 'string' ? x : util.inspect(x)).join(' ')}\n`, 'utf8');
     }
   }
 
