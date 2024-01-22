@@ -122,5 +122,13 @@ export const RuntimeContext = build({
    */
   workspaceRelative(...rel: string[]): string {
     return path.resolve(RuntimeIndex.manifest.workspace.path, ...rel);
+  },
+  /**
+   * Produce a workspace path for tooling, with '@' being replaced by node_module/name folder
+   * @param rel The relative path
+   */
+  toolPath(...rel: string[]): string {
+    rel = rel.flatMap(x => x === '@' ? ['node_modules', RuntimeIndex.manifest.main.name] : [x]);
+    return path.resolve(RuntimeIndex.manifest.workspace.path, RuntimeIndex.manifest.build.toolFolder, ...rel);
   }
 }, ['main', 'workspace']);

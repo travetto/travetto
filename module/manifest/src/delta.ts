@@ -1,10 +1,11 @@
+import fs from 'node:fs/promises';
+
 import {
   ManifestContext, ManifestModule, ManifestModuleCore, ManifestModuleFile,
   ManifestModuleFileType, ManifestModuleFolderType, ManifestRoot
 } from './types';
 
 import { ManifestModuleUtil } from './module';
-import { ManifestFileUtil } from './file';
 import { path } from './path';
 
 type DeltaEventType = 'added' | 'changed' | 'removed' | 'missing' | 'dirty';
@@ -45,7 +46,7 @@ export class ManifestDeltaUtil {
     for (const el of Object.keys(left.files)) {
       const output = ManifestModuleUtil.sourceToOutputExt(`${outputFolder}/${left.outputFolder}/${el}`);
       const [, , leftTs] = left.files[el];
-      const stat = await ManifestFileUtil.statFile(output);
+      const stat = await fs.stat(output).catch(() => undefined);
       right.delete(ManifestModuleUtil.sourceToBlankExt(el));
 
       if (!stat) {

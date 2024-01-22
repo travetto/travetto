@@ -1,11 +1,8 @@
 import util from 'node:util';
 import { pipeline } from 'node:stream/promises';
 
-import { MemoryWritable, ResourceLoader } from '@travetto/base';
-import {
-  EmailTemplateImageConfig, EmailTemplateStyleConfig,
-  EmailCompiled, EmailCompileContext
-} from '@travetto/email';
+import { MemoryWritable } from '@travetto/base';
+import { EmailCompiled, EmailTemplateModule, EmailTemplateResource } from '@travetto/email';
 import { ImageConverter } from '@travetto/image';
 import { path } from '@travetto/manifest';
 
@@ -80,12 +77,12 @@ export class EmailCompileUtil {
   /**
    * Compile SCSS content with roots as search paths for additional assets
    */
-  static async compileSass(src: { data: string } | { file: string }, roots: string[] | readonly string[]): Promise<string> {
+  static async compileSass(src: { data: string } | { file: string }, opts: EmailTemplateResource): Promise<string> {
     const sass = await import('sass');
     const result = await util.promisify(sass.render)({
       ...src,
       sourceMap: false,
-      includePaths: roots.slice(0)
+      includePaths: opts.loader.searchPaths.slice(0)
     });
     return result!.css.toString();
   }
@@ -134,22 +131,21 @@ export class EmailCompileUtil {
   /**
    * Inline image sources
    */
-  static async inlineImages(html: string, opts: EmailTemplateImageConfig): Promise<string> {
+  static async inlineImages(html: string, opts: EmailTemplateResource): Promise<string> {
     const { tokens, finalize } = await this.tokenizeResources(html, this.#HTML_CSS_IMAGE_URLS);
     const pendingImages: [token: string, ext: string, stream: Buffer | Promise<Buffer>][] = [];
-    const resource = new ResourceLoader(opts.search);
 
     for (const [token, src] of tokens) {
       const ext = path.extname(src);
       if (/^[.](jpe?g|png)$/.test(ext)) {
         const output = await ImageConverter.optimize(
-          ext === '.png' ? 'png' : 'jpeg', await resource.readStream(src)
+          ext === '.png' ? 'png' : 'jpeg', await opts.loader.readStream(src)
         );
         const buffer = new MemoryWritable();
         await pipeline(output, buffer);
         pendingImages.push([token, ext, buffer.toBuffer()]);
       } else {
-        pendingImages.push([token, ext, resource.read(src, true)]);
+        pendingImages.push([token, ext, opts.loader.read(src, true)]);
       }
     }
 
@@ -182,22 +178,14 @@ export class EmailCompileUtil {
   /**
    * Apply styles into a given html document
    */
-  static async applyStyles(html: string, opts: EmailTemplateStyleConfig): Promise<string> {
-    const styles: string[] = [];
-
-    if (opts.global) {
-      styles.push(opts.global);
-    }
-
-    const resource = new ResourceLoader(opts.search);
-    const main = await resource.read('/email/main.scss').then(d => d, () => '');
-
-    if (main) {
-      styles.push(main);
-    }
+  static async applyStyles(html: string, opts: EmailTemplateResource): Promise<string> {
+    const styles = [
+      opts.globalStyles ?? '',
+      await opts.loader.read('/email/main.scss').catch(() => '')
+    ].filter(x => !!x).join('\n');
 
     if (styles.length) {
-      const compiled = await this.compileSass({ data: styles.join('\n') }, resource.searchPaths);
+      const compiled = await this.compileSass({ data: styles }, opts);
 
       // Remove all unused styles
       const finalStyles = await this.pruneCss(html, compiled);
@@ -209,21 +197,21 @@ export class EmailCompileUtil {
     return html;
   }
 
-  static async compile(src: EmailCompileContext): Promise<EmailCompiled> {
-    const subject = await this.simplifiedText(await src.subject(src));
-    const text = await this.simplifiedText(await src.text(src));
+  static async compile(src: EmailTemplateModule): Promise<EmailCompiled> {
+    const subject = await this.simplifiedText(await src.subject());
+    const text = await this.simplifiedText(await src.text());
 
-    let html = await src.html(src);
+    let html = await src.html();
 
-    if (src.styles?.inline !== false) {
-      html = await this.applyStyles(html, src.styles!);
+    if (src.inlineStyle !== false) {
+      html = await this.applyStyles(html, src);
     }
 
     // Fix up html edge cases
     html = this.handleHtmlEdgeCases(html);
 
-    if (src.images?.inline !== false) {
-      html = await this.inlineImages(html, src.images!);
+    if (src.inlineImages !== false) {
+      html = await this.inlineImages(html, src);
     }
 
     return { html, subject, text };

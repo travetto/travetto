@@ -3,7 +3,6 @@ import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 
 import { path } from './path';
-import type { ManifestContext } from './types';
 
 export class ManifestFileUtil {
   /**
@@ -16,7 +15,7 @@ export class ManifestFileUtil {
     const temp = path.resolve(os.tmpdir(), tempName);
     await fs.writeFile(temp, typeof content === 'string' ? content : JSON.stringify(content), 'utf8');
     await fs.copyFile(temp, file);
-    fs.unlink(temp);
+    fs.unlink(temp); // Don't wait for completion
     return file;
   }
 
@@ -32,24 +31,5 @@ export class ManifestFileUtil {
    */
   static readAsJsonSync<T = unknown>(file: string): T {
     return JSON.parse(readFileSync(file, 'utf8'));
-  }
-
-  /**
-   * Stat file
-   */
-  static statFile(file: string): Promise<{ mtimeMs: number, ctimeMs: number } | undefined> {
-    return fs.stat(file).catch(() => undefined);
-  }
-
-  /**
-   * Resolve tool path for usage
-   */
-  static toolPath(ctx: ManifestContext | { manifest: ManifestContext }, rel: string, moduleSpecific = false): string {
-    ctx = 'manifest' in ctx ? ctx.manifest : ctx;
-    const parts = [rel];
-    if (moduleSpecific) {
-      parts.unshift('node_modules', ctx.main.name);
-    }
-    return path.resolve(ctx.workspace.path, '.trv/tool', ...parts);
   }
 }

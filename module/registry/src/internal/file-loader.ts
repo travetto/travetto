@@ -65,11 +65,13 @@ class $DynamicFileLoader {
       .on('uncaughtException', handle);
 
     // Fire off, and let it run in the bg. Restart on exit
-    watchCompiler<FullWatchEvent>(ev => {
-      if (ev.file && RuntimeIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
-        return this.dispatch(ev);
+    (async (): Promise<void> => {
+      for await (const ev of watchCompiler<FullWatchEvent>({ restartOnExit: true })) {
+        if (ev.file && RuntimeIndex.hasModule(ev.module) && VALID_FILE_TYPES.has(ManifestModuleUtil.getFileType(ev.file))) {
+          await this.dispatch(ev);
+        }
       }
-    }, { restartOnExit: true });
+    })();
   }
 }
 

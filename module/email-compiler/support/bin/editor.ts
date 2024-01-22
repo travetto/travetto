@@ -1,9 +1,11 @@
-import { EmailCompilationManager } from './manager';
+import { Inject, Injectable } from '@travetto/di';
+import { MailUtil, EmailCompiled, MailInterpolator } from '@travetto/email';
+import { AppError, TypedObject } from '@travetto/base';
+
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
 
 import { EmailCompiler } from '../../src/compiler';
-import { EmailCompileUtil } from '../../src/util';
 
 type InboundMessage =
   { type: 'configure', file: string } |
@@ -20,97 +22,87 @@ type OutboundMessage =
 /**
  * Utils for interacting with editors
  */
-export class EditorState {
+@Injectable()
+export class EditorService {
 
-  #lastFile = '';
-  #template: EmailCompilationManager;
+  @Inject()
+  sender: EditorSendService;
 
-  constructor(template: EmailCompilationManager) {
-    this.#template = template;
+  @Inject()
+  engine: MailInterpolator;
+
+  async #interpolate(text: string, context: Record<string, unknown>): Promise<string> {
+    return Promise.resolve(this.engine.render(text, context)).then(MailUtil.purgeBrand);
   }
 
-  async renderFile(file: string): Promise<void> {
-    file = EmailCompileUtil.isTemplateFile(file) ? file : this.#lastFile;
-    if (file) {
-      try {
-        const content = await this.#template.resolveCompiledTemplate(
-          file, await EditorConfig.getContext(file)
-        );
-        this.response({
-          type: 'changed',
-          file,
-          content
-        });
-      } catch (err) {
-        if (err && err instanceof Error) {
-          this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file });
-        } else {
-          console.error(err);
-        }
-      }
-    }
-  }
-
-  response(response: OutboundMessage): void {
-    if (process.connected) {
-      process.send?.(response);
-    }
-  }
-
-  async onConfigure(msg: InboundMessage & { type: 'configure' }): Promise<void> {
-    this.response({ type: 'configured', file: await EditorConfig.ensureConfig(msg.file) });
-  }
-
-  async #onRedraw(msg: InboundMessage & { type: 'redraw' }): Promise<void> {
-    try {
-      await EmailCompiler.compile(msg.file, true);
-      await this.renderFile(msg.file);
-    } catch (err) {
-      if (err && err instanceof Error) {
-        this.response({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file });
-      } else {
-        console.error(err);
-      }
-    }
-  }
-
-  async onSend(msg: InboundMessage & { type: 'send' }): Promise<void> {
-    const cfg = await EditorConfig.get(msg.file);
-    const to = msg.to || cfg.to;
-    const from = msg.from || cfg.from;
-    const content = await this.#template.resolveCompiledTemplate(
-      msg.file, await EditorConfig.getContext(msg.file)
+  async #renderTemplate(rel: string, context: Record<string, unknown>): Promise<EmailCompiled> {
+    const p = await EmailCompiler.compile(rel);
+    return TypedObject.fromEntries(
+      await Promise.all(TypedObject.entries(p).map(([k, v]) => this.#interpolate(v, context).then((t) => [k, t])))
     );
+  }
 
+  async #renderFile(file: string): Promise<{ content: EmailCompiled, file: string }> {
+    const content = await this.#renderTemplate(file, await EditorConfig.get('context'));
+    return { content, file };
+  }
+
+  async #response<T>(op: Promise<T>, success: (v: T) => OutboundMessage, fail?: (err: Error) => OutboundMessage): Promise<void> {
     try {
-      const url = await EditorSendService.sendEmail(msg.file, { from, to, ...content, });
-      this.response({ type: 'sent', to, file: msg.file, ...url });
+      const res = await op;
+      if (process.connected) { process.send?.(success(res)); }
     } catch (err) {
-      if (err && err instanceof Error) {
-        this.response({ type: 'sent-failed', message: err.message, stack: err.stack, to, file: msg.file });
+      if (fail && process.connected && err && err instanceof Error) {
+        process.send?.(fail(err));
       } else {
         console.error(err);
       }
     }
+  }
+
+  async sendFile(file: string, to?: string): Promise<{ to: string, file: string, url?: string | false | undefined }> {
+    const cfg = await EditorConfig.get();
+    to ||= cfg.to;
+    const content = await this.#renderTemplate(file, cfg.context ?? {});
+    return { to, file, ...await this.sender.send({ from: cfg.from, to, ...content, }) };
   }
 
   /**
    * Initialize context, and listeners
    */
-  async init(): Promise<void> {
-    process.on('message', (msg: InboundMessage) => {
+  async listen(): Promise<void> {
+    if (!process.connected || !process.send) {
+      throw new AppError('Unable to run email editor, missing ipc channel', 'permissions');
+    }
+    process.on('message', async (msg: InboundMessage) => {
       switch (msg.type) {
-        case 'configure': this.onConfigure(msg); break;
-        case 'redraw': this.#onRedraw(msg); break;
-        case 'send': this.onSend(msg); break;
+        case 'configure': {
+          return await this.#response(EditorConfig.ensureConfig(), file => ({ type: 'configured', file }));
+        }
+        case 'redraw': {
+          return await this.#response(this.#renderFile(msg.file),
+            res => ({ type: 'changed', ...res }),
+            err => ({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file })
+          );
+        }
+        case 'send': {
+          return await this.#response(
+            this.sendFile(msg.file, msg.to),
+            res => ({ type: 'sent', ...res }),
+            err => ({ type: 'sent-failed', message: err.message, stack: err.stack, to: msg.to!, file: msg.file })
+          );
+        }
       }
     });
 
     process.once('disconnect', () => process.exit());
-    process.send?.({ type: 'init' });
+    process.send({ type: 'init' });
 
-    for await (const f of EmailCompiler.watchCompile()) {
-      await this.renderFile(f);
+    for await (const file of EmailCompiler.watchCompile()) {
+      await this.#response(this.#renderFile(file),
+        res => ({ type: 'changed', ...res }),
+        err => ({ type: 'changed-failed', message: err.message, stack: err.stack, file })
+      );
     }
   }
 }

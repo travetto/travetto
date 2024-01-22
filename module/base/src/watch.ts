@@ -6,7 +6,7 @@ import { ShutdownManager } from './shutdown';
 export type WatchEvent = { file: string, action: 'create' | 'update' | 'delete' };
 export type FullWatchEvent = WatchEvent & { output: string, module: string, time: number };
 
-export async function watchCompiler<T extends WatchEvent>(handler: (ev: T) => unknown, cfg?: { restartOnExit?: boolean, signal?: AbortSignal }): Promise<void> {
+export async function* watchCompiler<T extends WatchEvent>(cfg?: { restartOnExit?: boolean, signal?: AbortSignal }): AsyncIterable<T> {
   // Load at runtime
   const { CompilerClient } = await import('@travetto/compiler/support/server/client.js');
 
@@ -21,7 +21,7 @@ export async function watchCompiler<T extends WatchEvent>(handler: (ev: T) => un
 
   for await (const ev of client.fetchEvents('change', { signal: ctrl.signal, enforceIteration: true })) {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    await handler(ev as unknown as T);
+    yield ev as unknown as T;
   }
 
   remove();

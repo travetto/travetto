@@ -1,4 +1,5 @@
 import { ConcreteClass } from '@travetto/base';
+import { EmailTemplateModule, EmailTemplateLocation } from '@travetto/email';
 
 export type JSXChild = JSXElement | number | bigint | boolean | object | string;
 type JSXProps = { children?: JSXChild | JSXChild[] | null, className?: string, id?: string, name?: string, dir?: string };
@@ -66,9 +67,15 @@ export function createElement<T extends string | ConcreteClass | JSXComponentFun
 export function createRootElement<T extends string | ConcreteClass | JSXComponentFunction<P>, P extends {}>(
   type: T, props: P & JSXProps
 ): JSXElement<T, P> {
-  const res: JSXElement<T, P> & { wrap?: Function } = createElement(type, props);
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-  res.wrap = (): Promise<unknown> => import('@travetto/email-inky/src/wrapper.js').then(v => v.wrap(res as JSXElement));
+  const res = createElement(type, props);
+
+  Object.assign(res, {
+    prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule> {
+      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
+      return import('@travetto/email-inky/src/wrapper.js').then(v => v.prepare(res as JSXElement, loc));
+    }
+  });
+
   return res;
 }
 

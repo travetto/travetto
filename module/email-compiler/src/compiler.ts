@@ -1,13 +1,10 @@
 import fs from 'node:fs/promises';
 
-import { FileLoader, TypedObject, WatchEvent, watchCompiler } from '@travetto/base';
-import { EmailCompileSource, EmailCompiled, EmailCompileContext, MailUtil } from '@travetto/email';
+import { TypedObject, Util, watchCompiler } from '@travetto/base';
+import { EmailCompiled, MailUtil, EmailTemplateImport, EmailTemplateModule } from '@travetto/email';
 import { RuntimeIndex, path } from '@travetto/manifest';
-import { WorkQueue } from '@travetto/worker';
 
 import { EmailCompileUtil } from './util';
-
-const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)$/.test(file) && !/[.]compiled[.]/.test(file);
 
 /**
  * Email compilation support
@@ -15,39 +12,16 @@ const VALID_FILE = (file: string): boolean => /[.](scss|css|png|jpe?g|gif|ya?ml)
 export class EmailCompiler {
 
   /**
-   * Watch folders as needed
+   * Load Template
    */
-  static async #watchFolders(folders: string[], handler: (ev: WatchEvent) => void, signal: AbortSignal): Promise<void> {
-    for (const src of folders) {
-      (async (): Promise<void> => {
-        for await (const ev of fs.watch(src, {
-          recursive: true,
-          signal,
-          persistent: false
-        })) {
-          const exists = ev.filename ? await fs.stat(ev.filename).catch(() => false) : false;
-          handler({ action: !!exists ? 'create' : 'delete', file: path.toPosix(ev.filename!) });
-        }
-      })();
-    }
-  }
-
-  /** Load Template */
-  static async loadTemplate(file: string): Promise<EmailCompileContext> {
+  static async loadTemplate(file: string): Promise<EmailTemplateModule> {
     const entry = RuntimeIndex.getEntry(file);
-    if (!entry) {
+    const mod = entry ? RuntimeIndex.getModule(entry.module) : undefined;
+    if (!entry || !mod) {
       throw new Error(`Unable to find template for ${file}`);
     }
-    const root = (await import(entry.outputFile)).default;
-    const og: EmailCompileSource = await root.wrap();
-    const res: EmailCompileContext = {
-      file: entry.sourceFile,
-      module: entry.module,
-      images: {},
-      styles: {},
-      ...og
-    };
-    return res;
+    const root: EmailTemplateImport = (await import(entry.outputFile)).default;
+    return await root.prepare({ file, module: mod.name });
   }
 
   /**
@@ -86,10 +60,10 @@ export class EmailCompiler {
     const outs = this.getOutputFiles(file);
     await Promise.all(TypedObject.keys(outs).map(async k => {
       if (msg[k]) {
-        await fs.mkdir(path.dirname(outs[k]), { recursive: true });
-        await fs.writeFile(outs[k], MailUtil.buildBrand(file, msg[k], 'trv email:compile'), { encoding: 'utf8' });
+        const content = MailUtil.buildBrand(file, msg[k], 'trv email:compile');
+        await Util.bufferedFileWrite(outs[k], content);
       } else {
-        await fs.unlink(outs[k]).catch(() => { }); // Remove file if data not provided
+        await fs.rm(outs[k], { force: true }); // Remove file if data not provided
       }
     }));
   }
@@ -97,12 +71,10 @@ export class EmailCompiler {
   /**
    * Compile a file given a resource provider
    */
-  static async compile(file: string, persist: boolean = false): Promise<EmailCompiled> {
-    const src = await this.loadTemplate(file);
-    const compiled = await EmailCompileUtil.compile(src);
-    if (persist) {
-      await this.writeTemplate(file, compiled);
-    }
+  static async compile(file: string): Promise<EmailCompiled> {
+    const tpl = await this.loadTemplate(file);
+    const compiled = await EmailCompileUtil.compile(tpl);
+    await this.writeTemplate(file, compiled);
     return compiled;
   }
 
@@ -111,49 +83,24 @@ export class EmailCompiler {
    */
   static async compileAll(mod?: string): Promise<string[]> {
     const keys = this.findAllTemplates(mod);
-    await Promise.all(keys.map(src => this.compile(src, true)));
+    await Promise.all(keys.map(src => this.compile(src)));
     return keys;
   }
 
   /**
    * Watch compilation
    */
-  static async * watchCompile(): AsyncIterable<string> {
-    const all = FileLoader.resolvePaths(
-      this.findAllTemplates().map(x => `${RuntimeIndex.getEntry(x)!.module}#resources`)
-    );
-
-    const ctrl = new AbortController();
-    const stream = new WorkQueue<WatchEvent>([], ctrl.signal);
-
-    // watch resources
-    this.#watchFolders(all, ev => stream.add(ev), ctrl.signal);
-
+  static async * watchCompile(signal?: AbortSignal): AsyncIterable<string> {
     // Watch template files
-    watchCompiler(ev => {
-      const src = RuntimeIndex.getEntry(ev.file);
-      if (src && EmailCompileUtil.isTemplateFile(src.sourceFile)) {
-        setTimeout(() => stream.add({ ...ev, file: src.sourceFile }), 100); // Wait for it to be loaded
-      }
-    }, { signal: ctrl.signal });
-
-    for await (const { file, action } of stream) {
-      if (action === 'delete') {
+    for await (const { file, action } of watchCompiler({ signal })) {
+      const src = RuntimeIndex.getEntry(file);
+      if (!src || !EmailCompileUtil.isTemplateFile(src.sourceFile) || action === 'delete') {
         continue;
       }
-
       try {
-        if (EmailCompileUtil.isTemplateFile(file)) {
-          await this.compile(file, true);
-          console.log(`Successfully compiled ${1} templates`, { changed: [file] });
-          yield file;
-        } else if (VALID_FILE(file)) {
-          const rootFile = file.replace(/\/resources.*/, '/package.json');
-          const mod = RuntimeIndex.getFromSource(rootFile)!.module;
-          const changed = await this.compileAll(mod);
-          console.log(`Successfully compiled ${changed.length} templates`, { changed, file });
-          yield* changed;
-        }
+        await this.compile(file);
+        console.log('Successfully compiled template', { changed: [file] });
+        yield file;
       } catch (err) {
         console.error(`Error in compiling ${file}`, err && err instanceof Error ? err.message : `${err}`);
       }

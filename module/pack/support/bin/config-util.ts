@@ -39,10 +39,7 @@ export class PackConfigUtil {
    */
   static dockerEnvVars(cfg: DockerPackConfig): string {
     return [
-      `ENV NODE_OPTIONS="${[
-        '--disable-proto=delete',  // Security enforcement
-        ...(cfg.sourcemap ? ['--enable-source-maps'] : []),
-      ].join(' ')}"`,
+      `ENV NODE_OPTIONS="${[...(cfg.sourcemap ? ['--enable-source-maps'] : [])].join(' ')}"`,
     ].join('\n');
   }
 

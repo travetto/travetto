@@ -1,8 +1,4 @@
-#!/usr/bin/env -S node --disable-proto=delete --enable-source-maps
-process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps --disable-proto=delete`;
-
-// Make sure we turn it on
-process.setSourceMapsEnabled(true);
+#!/usr/bin/env node
 
 // @ts-check
 import { getEntry } from '@travetto/compiler/bin/common.js';

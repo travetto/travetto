@@ -32,6 +32,8 @@ const getTranspiler = async (/** @type {Ctx} */ ctx) => {
 async function imp(f = '') { try { return require(f); } catch (err) { return import(f); } }
 
 export async function getEntry() {
+  process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
+
   const ctx = getManifestContext();
   const target = getTarget.bind(null, ctx);
 

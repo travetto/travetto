@@ -1,72 +1,54 @@
 import { MailService, EmailOptions, SentEmail } from '@travetto/email';
 import { MailTransportTarget } from '@travetto/email/src/internal/types';
-import { DependencyRegistry } from '@travetto/di';
+import { DependencyRegistry, Injectable } from '@travetto/di';
 
 import { EditorConfig } from './config';
-import { RuntimeIndex } from '@travetto/manifest';
 
 /**
- * Util for sending emails
+ * Editor mail sender
  */
+@Injectable()
 export class EditorSendService {
 
-  static #svc: Record<string, MailService> = {};
+  ethereal = false;
 
-  /**
-   * Get mail service
-   */
-  static async getMailService(file: string): Promise<MailService> {
-    const mod = RuntimeIndex.getModuleFromSource(file)!.name;
+  async service(): Promise<MailService> {
+    const transports = DependencyRegistry.getCandidateTypes(MailTransportTarget);
 
-    if (!this.#svc[mod]) {
-      const senderConfig = await EditorConfig.getSenderConfig(file);
-
-      if (senderConfig?.host?.includes('ethereal.email')) {
-        const cls = class { };
+    if (!transports.length) {
+      try {
         const { NodemailerTransport } = await import('@travetto/email-nodemailer');
+        const senderConfig = await EditorConfig.get('sender');
+        const cls = class { };
         DependencyRegistry.registerFactory({
           fn: () => new NodemailerTransport(senderConfig),
           target: MailTransportTarget,
           src: cls,
           id: 'nodemailer',
         });
-
         DependencyRegistry.install(cls, { curr: cls, type: 'added' });
-      } else if (!DependencyRegistry.getCandidateTypes(MailTransportTarget).length) {
-        const errorMessage = `
-Please configure your email setup and/or credentials for testing. In the file \`email/local.yml\`, you can specify \`sender\` configuration.
-Email sending will not work until the above is fixed. A sample configuration would look like:     
 
-${EditorConfig.getDefaultConfig()}`.trim();
-        console.error(errorMessage);
-        throw new Error(errorMessage);
+        this.ethereal = !!senderConfig.host?.includes('ethereal.email');
+      } catch (err) {
+        console.error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
+        throw new Error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
       }
-
-      this.#svc[mod] = await DependencyRegistry.getInstance(MailService);
     }
-    return this.#svc[mod];
+    return await DependencyRegistry.getInstance(MailService);
   }
 
   /**
-   * Resolve template
+   * Send email
    */
-  static async sendEmail(file: string, message: EmailOptions): Promise<{
-    url?: string | false;
-  }> {
+  async send(message: EmailOptions): Promise<{ url?: string | false }> {
     const to = message.to!;
     try {
       console.log('Sending email', { to });
-      // Let the engine template
-      const svc = await this.getMailService(file);
-      if (!svc) {
-        throw new Error('Node mailer support is missing');
-      }
-
+      const svc = await this.service();
       const info = await svc.send<{ host?: string } & SentEmail>(message);
       console.log('Sent email', { to });
 
-      const senderConfig = await EditorConfig.getSenderConfig(file);
-      return senderConfig.host?.includes('ethereal.email') ? {
+      return this.ethereal ? {
         // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, @typescript-eslint/no-explicit-any
         url: (await import('nodemailer')).getTestMessageUrl(info as any)
       } : {};

@@ -52,6 +52,8 @@ export type ManifestContext = {
     compilerUrl: string;
     /** Code output folder, relative to workspace */
     outputFolder: string;
+    /** Location of development-time tool output */
+    toolFolder: string;
   };
   main: {
     /** Main module for manifest */

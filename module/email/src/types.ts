@@ -1,3 +1,4 @@
+import { FileLoader } from '@travetto/base';
 import { Readable } from 'node:stream';
 import { Url } from 'node:url';
 
@@ -65,20 +66,15 @@ export type SentEmail = {
 export type EmailCompiled = Record<EmailContentType, string>;
 
 // Compilation support, defined here to allow for templates to not have a direct dependency on the compiler
-type BaseTemplateConfig = {
-  search?: string[] | readonly string[];
-  inline?: boolean;
+export type EmailTemplateResource = {
+  loader: FileLoader;
+  inlineStyle?: boolean;
+  inlineImages?: boolean;
+  globalStyles?: string;
 };
 
-export type EmailTemplateStyleConfig = BaseTemplateConfig & { global?: string };
-export type EmailTemplateImageConfig = BaseTemplateConfig & {};
-
-export type EmailTemplateConfig = {
-  styles?: EmailTemplateStyleConfig;
-  images?: EmailTemplateImageConfig;
-};
+type EmailTemplateContent = Record<EmailContentType, () => (Promise<string> | string)>;
 
 export type EmailTemplateLocation = { file: string, module: string };
-export type EmailRenderer = (ctx: EmailTemplateLocation & EmailTemplateConfig) => Promise<string> | string;
-export type EmailCompileSource = EmailTemplateConfig & Record<EmailContentType, EmailRenderer>;
-export type EmailCompileContext = EmailTemplateLocation & EmailCompileSource;
+export type EmailTemplateModule = EmailTemplateResource & EmailTemplateContent;
+export type EmailTemplateImport = { prepare(loc: EmailTemplateLocation): Promise<EmailTemplateModule> };

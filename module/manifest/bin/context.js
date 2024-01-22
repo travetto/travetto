@@ -86,9 +86,10 @@ function $resolveWorkspace(base = process.cwd()) {
 /**
  * Get Compiler url
  * @param {Workspace} ws
+ * @param {string} toolFolder
  */
-function $getCompilerUrl(ws) {
-  const file = path.resolve(ws.path, TOOL_FOLDER, 'build.compilerUrl');
+function $getCompilerUrl(ws, toolFolder) {
+  const file = path.resolve(ws.path, toolFolder, 'build.compilerUrl');
   // eslint-disable-next-line no-bitwise
   const port = (Math.abs([...file].reduce((a, b) => (a * 33) ^ b.charCodeAt(0), 5381)) % 29000) + 20000;
   const out = `http://localhost:${port}`;
@@ -142,6 +143,7 @@ export function getManifestContext(folder) {
   const workspace = $resolveWorkspace(folder);
   const mod = $resolveModule(workspace, folder);
   const build = workspace.travetto?.build ?? {};
+  const toolFolder = build.toolFolder ?? TOOL_FOLDER;
 
   return {
     workspace: {
@@ -153,9 +155,10 @@ export function getManifestContext(folder) {
     },
     build: {
       compilerFolder: build.compilerFolder ?? COMPILER_FOLDER,
-      compilerUrl: build.compilerUrl ?? $getCompilerUrl(workspace),
+      compilerUrl: build.compilerUrl ?? $getCompilerUrl(workspace, toolFolder),
       compilerModuleFolder: path.dirname(workspace.resolve('@travetto/compiler/package.json')).replace(`${workspace.path}/`, ''),
       outputFolder: build.outputFolder ?? OUTPUT_FOLDER,
+      toolFolder
     },
     main: {
       name: mod.name ?? 'untitled',
