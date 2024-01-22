@@ -98,10 +98,8 @@ export class EditorService {
     process.once('disconnect', () => process.exit());
     process.send?.({ type: 'init' });
 
-    const ctrl = new AbortController();
-    process.on('SIGINT', () => ctrl.abort());
 
-    for await (const f of EmailCompiler.watchCompile(ctrl.signal)) {
+    for await (const f of EmailCompiler.watchCompile()) {
       const file = EmailCompileUtil.isTemplateFile(f) ? f : this.#lastFile;
       if (file) {
         await this.#response(this.#renderFile(f),
