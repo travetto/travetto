@@ -19,7 +19,7 @@ interface ConfigType {
   sender?: Sender;
 }
 
-const CONFIG_FILE = 'resources/email-context.yml';
+export const CONFIG_FILE = 'resources/email/local.yml';
 
 /**
  * Configuration utils

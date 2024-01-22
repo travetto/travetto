@@ -131,7 +131,7 @@ export class ManifestIndex {
     // Store child information
     for (const mod of this.#modules) {
       for (const p of mod.parents) {
-        this.#modulesByName[p].children.add(mod.name);
+        this.#modulesByName[p]?.children.add(mod.name);
       }
     }
   }

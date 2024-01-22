@@ -1,6 +1,8 @@
 import { ChildProcess, spawn } from 'node:child_process';
 import vscode from 'vscode';
 
+import { StreamUtil } from '@travetto/base';
+
 import { Activatible } from '../../../core/activation';
 import { RunUtil } from '../../../core/run';
 import { Workspace } from '../../../core/workspace';
@@ -26,12 +28,15 @@ export class EmailCompilerFeature extends BaseFeature {
   #panel?: vscode.WebviewPanel;
 
   #startServer(): void {
-    if (this.#server && !this.#server.killed) {
+    if (this.#server && this.#server.connected) {
       return;
     }
 
     this.#server = spawn('node', [RunUtil.cliFile, 'email:editor'], {
       cwd: Workspace.path,
+      env: {
+        TRV_CAN_RESTART: 'false'
+      },
       stdio: ['pipe', 'pipe', 'pipe', 'ipc']
     })
       .on('message', async (ev: EmailCompilerEvent) => {
@@ -60,6 +65,9 @@ export class EmailCompilerFeature extends BaseFeature {
           }
         }
       });
+
+    StreamUtil.onLine(this.#server.stderr, (line) => this.log.error(`> ${line}`));
+    StreamUtil.onLine(this.#server.stdout, (line) => this.log.debug(`> ${line}`));
   }
 
   getPanel(): vscode.WebviewPanel {
@@ -137,7 +145,7 @@ export class EmailCompilerFeature extends BaseFeature {
   }
 
   async sendEmail(): Promise<void> {
-    if (this.#server?.killed === false && this.#activeFile) {
+    if (this.#server?.connected && this.#activeFile) {
       this.#server.send({ type: 'send', file: this.#activeFile! });
     }
   }

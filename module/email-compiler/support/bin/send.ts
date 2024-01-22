@@ -10,36 +10,31 @@ import { EditorConfig } from './config';
 @Injectable()
 export class EditorSendService {
 
-  service: MailService;
-
   ethereal = false;
 
-  async postConstruct(): Promise<void> {
-    const senderConfig = await EditorConfig.get('sender');
+  async service(): Promise<MailService> {
+    const transports = DependencyRegistry.getCandidateTypes(MailTransportTarget);
 
-    if (senderConfig.host?.includes('ethereal.email')) {
-      this.ethereal = true;
-      const cls = class { };
-      const { NodemailerTransport } = await import('@travetto/email-nodemailer');
-      DependencyRegistry.registerFactory({
-        fn: () => new NodemailerTransport(senderConfig),
-        target: MailTransportTarget,
-        src: cls,
-        id: 'nodemailer',
-      });
+    if (!transports.length) {
+      try {
+        const { NodemailerTransport } = await import('@travetto/email-nodemailer');
+        const senderConfig = await EditorConfig.get('sender');
+        const cls = class { };
+        DependencyRegistry.registerFactory({
+          fn: () => new NodemailerTransport(senderConfig),
+          target: MailTransportTarget,
+          src: cls,
+          id: 'nodemailer',
+        });
+        DependencyRegistry.install(cls, { curr: cls, type: 'added' });
 
-      DependencyRegistry.install(cls, { curr: cls, type: 'added' });
-    } else if (!DependencyRegistry.getCandidateTypes(MailTransportTarget).length) {
-      const errorMessage = `
-Please configure your email setup and/or credentials for testing. In the file \`email/local.yml\`, you can specify \`sender\` configuration.
-Email sending will not work until the above is fixed. A sample configuration would look like:     
-
-${EditorConfig.getDefaultConfig()}`.trim();
-      console.error(errorMessage);
-      throw new Error(errorMessage);
+        this.ethereal = !!senderConfig.host?.includes('ethereal.email');
+      } catch (err) {
+        console.error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
+        throw new Error('A mail transport is currently needed to support sending emails.  Please install @travetto/email-nodemailer or any other compatible transport');
+      }
     }
-
-    this.service = await DependencyRegistry.getInstance(MailService);
+    return await DependencyRegistry.getInstance(MailService);
   }
 
   /**
@@ -49,7 +44,8 @@ ${EditorConfig.getDefaultConfig()}`.trim();
     const to = message.to!;
     try {
       console.log('Sending email', { to });
-      const info = await this.service.send<{ host?: string } & SentEmail>(message);
+      const svc = await this.service();
+      const info = await svc.send<{ host?: string } & SentEmail>(message);
       console.log('Sent email', { to });
 
       return this.ethereal ? {
