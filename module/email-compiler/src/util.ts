@@ -139,13 +139,13 @@ export class EmailCompileUtil {
       const ext = path.extname(src);
       if (/^[.](jpe?g|png)$/.test(ext)) {
         const output = await ImageConverter.optimize(
-          ext === '.png' ? 'png' : 'jpeg', await opts.loader!.readStream(src)
+          ext === '.png' ? 'png' : 'jpeg', await opts.loader.readStream(src)
         );
         const buffer = new MemoryWritable();
         await pipeline(output, buffer);
         pendingImages.push([token, ext, buffer.toBuffer()]);
       } else {
-        pendingImages.push([token, ext, opts.loader!.read(src, true)]);
+        pendingImages.push([token, ext, opts.loader.read(src, true)]);
       }
     }
 
@@ -185,14 +185,14 @@ export class EmailCompileUtil {
       styles.push(opts.globalStyles);
     }
 
-    const main = await opts.loader!.read('/email/main.scss').then(d => d, () => '');
+    const main = await opts.loader.read('/email/main.scss').then(d => d, () => '');
 
     if (main) {
       styles.push(main);
     }
 
     if (styles.length) {
-      const compiled = await this.compileSass({ data: styles.join('\n') }, opts.loader!.searchPaths);
+      const compiled = await this.compileSass({ data: styles.join('\n') }, opts.loader.searchPaths);
 
       // Remove all unused styles
       const finalStyles = await this.pruneCss(html, compiled);
