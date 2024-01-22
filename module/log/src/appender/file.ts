@@ -3,7 +3,7 @@ import { createWriteStream, WriteStream, mkdirSync, openSync, appendFileSync } f
 import { Env } from '@travetto/base';
 import { Injectable } from '@travetto/di';
 import { Config, EnvVar } from '@travetto/config';
-import { ManifestFileUtil, path, RuntimeIndex } from '@travetto/manifest';
+import { path, RuntimeContext } from '@travetto/manifest';
 
 import { LogAppender, LogEvent } from '../types';
 
@@ -16,7 +16,7 @@ export class FileLogAppenderConfig {
 
   postConstruct(): void {
     if (!this.output || this.output === 'file' || this.output === 'console') {
-      this.output = ManifestFileUtil.toolPath(RuntimeIndex, 'output.log', true);
+      this.output = RuntimeContext.toolPath('@', 'output.log');
     }
   }
 }

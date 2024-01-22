@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 
 import { ExecUtil, Util } from '@travetto/base';
-import { ManifestFileUtil, RuntimeIndex, RuntimeContext, path } from '@travetto/manifest';
+import { RuntimeContext, path } from '@travetto/manifest';
 import { TestFixtures } from '@travetto/test';
 
 import { RestClientGeneratorService } from '../../src/service';
@@ -13,7 +13,7 @@ const fixtures = new TestFixtures(['@travetto/rest-client']);
 export class RestClientTestUtil {
 
   static get rootFolder(): string {
-    return ManifestFileUtil.toolPath(RuntimeIndex, 'rest-client-puppeteer', false);
+    return RuntimeContext.toolPath('rest-client-puppeteer');
   }
 
   static get clientFile(): string {
