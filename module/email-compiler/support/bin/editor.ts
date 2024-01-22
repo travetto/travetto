@@ -98,7 +98,6 @@ export class EditorService {
     process.once('disconnect', () => process.exit());
     process.send?.({ type: 'init' });
 
-
     for await (const f of EmailCompiler.watchCompile()) {
       const file = EmailCompileUtil.isTemplateFile(f) ? f : this.#lastFile;
       if (file) {
