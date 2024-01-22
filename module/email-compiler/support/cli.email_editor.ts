@@ -19,6 +19,7 @@ export class EmailEditorCommand {
     }
 
     await RootRegistry.init();
-    (await DependencyRegistry.getInstance(EditorService)).listen();
+    const service = await DependencyRegistry.getInstance(EditorService);
+    await service.listen();
   }
 }
