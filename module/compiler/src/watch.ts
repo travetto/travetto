@@ -139,13 +139,13 @@ export class CompilerWatcher {
         continue;
       }
 
-      const resolveAction = !entry && action === 'update' ? 'create' : action;
+      const resolvedAction = !entry && action === 'update' ? 'create' : action;
 
       const moduleFile = mod.sourceFolder ?
         (sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile) :
         sourceFile.replace(`${this.#state.manifest.workspace.path}/`, '');
 
-      switch (resolveAction) {
+      switch (resolvedAction) {
         case 'create': {
           entry = this.#state.registerInput(mod, moduleFile);
           if (entry.outputFile) {
@@ -176,7 +176,7 @@ export class CompilerWatcher {
 
       if (entry) {
         await this.#rebuildManifestsIfNeeded();
-        yield { action: resolveAction, file: entry.sourceFile, entry };
+        yield { action: resolvedAction, file: entry.sourceFile, entry };
       }
     }
   }
