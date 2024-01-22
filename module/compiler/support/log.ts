@@ -20,7 +20,7 @@ export class LogUtil {
 
   static logProgress?: ProgressWriter;
 
-  static outFile: string;
+  static outFile?: string;
 
   /**
    * Set level for operation
@@ -73,8 +73,10 @@ export class LogUtil {
       params.unshift(new Date().toISOString(), `${ev.level.padEnd(5)}`);
       // eslint-disable-next-line no-console
       console[ev.level]!(...params);
-      // Log to file
-      appendFileSync(this.outFile, `${params.map(x => typeof x === 'string' ? x : util.inspect(x)).join(' ')}\n`, 'utf8');
+      if (this.outFile && this.isLevelActive('debug')) {
+        // Log to file
+        appendFileSync(this.outFile, `${params.map(x => typeof x === 'string' ? x : util.inspect(x)).join(' ')}\n`, 'utf8');
+      }
     }
   }
 
