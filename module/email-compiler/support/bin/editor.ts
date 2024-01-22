@@ -77,23 +77,20 @@ export class EditorService {
     process.on('message', async (msg: InboundMessage) => {
       switch (msg.type) {
         case 'configure': {
-          await this.#response(EditorConfig.ensureConfig(), file => ({ type: 'configured', file }));
-          break;
+          return await this.#response(EditorConfig.ensureConfig(), file => ({ type: 'configured', file }));
         }
         case 'redraw': {
-          await this.#response(this.#renderFile(msg.file),
+          return await this.#response(this.#renderFile(msg.file),
             res => ({ type: 'changed', ...res }),
             err => ({ type: 'changed-failed', message: err.message, stack: err.stack, file: msg.file })
           );
-          break;
         }
         case 'send': {
-          await this.#response(
+          return await this.#response(
             this.sendFile(msg.file, msg.to),
             res => ({ type: 'sent', ...res }),
             err => ({ type: 'sent-failed', message: err.message, stack: err.stack, to: msg.to!, file: msg.file })
           );
-          break;
         }
       }
     });
