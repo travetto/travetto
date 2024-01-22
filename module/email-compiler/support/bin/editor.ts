@@ -1,12 +1,11 @@
 import { Inject, Injectable } from '@travetto/di';
 import { MailUtil, EmailCompiled, MailInterpolator } from '@travetto/email';
-import { TypedObject } from '@travetto/base';
+import { AppError, TypedObject } from '@travetto/base';
 
 import { EditorSendService } from './send';
 import { EditorConfig } from './config';
 
 import { EmailCompiler } from '../../src/compiler';
-import { EmailCompileUtil } from '../../src/util';
 
 type InboundMessage =
   { type: 'configure', file: string } |
@@ -25,8 +24,6 @@ type OutboundMessage =
  */
 @Injectable()
 export class EditorService {
-
-  #lastFile = '';
 
   @Inject()
   sender: EditorSendService;
@@ -50,10 +47,10 @@ export class EditorService {
     return { content, file };
   }
 
-  async  #response<T>(op: Promise<T>, succ: (v: T) => OutboundMessage, fail?: (err: Error) => OutboundMessage): Promise<void> {
+  async #response<T>(op: Promise<T>, success: (v: T) => OutboundMessage, fail?: (err: Error) => OutboundMessage): Promise<void> {
     try {
       const res = await op;
-      if (process.connected) { process.send?.(succ(res)); }
+      if (process.connected) { process.send?.(success(res)); }
     } catch (err) {
       if (fail && process.connected && err && err instanceof Error) {
         process.send?.(fail(err));
@@ -74,6 +71,9 @@ export class EditorService {
    * Initialize context, and listeners
    */
   async listen(): Promise<void> {
+    if (!process.connected || !process.send) {
+      throw new AppError('Unable to run email editor, missing ipc channel', 'permissions');
+    }
     process.on('message', async (msg: InboundMessage) => {
       switch (msg.type) {
         case 'configure': {
@@ -96,16 +96,13 @@ export class EditorService {
     });
 
     process.once('disconnect', () => process.exit());
-    process.send?.({ type: 'init' });
+    process.send({ type: 'init' });
 
-    for await (const f of EmailCompiler.watchCompile()) {
-      const file = EmailCompileUtil.isTemplateFile(f) ? f : this.#lastFile;
-      if (file) {
-        await this.#response(this.#renderFile(f),
-          res => ({ type: 'changed', ...res }),
-          err => ({ type: 'changed-failed', message: err.message, stack: err.stack, file })
-        );
-      }
+    for await (const file of EmailCompiler.watchCompile()) {
+      await this.#response(this.#renderFile(file),
+        res => ({ type: 'changed', ...res }),
+        err => ({ type: 'changed-failed', message: err.message, stack: err.stack, file })
+      );
     }
   }
 }
