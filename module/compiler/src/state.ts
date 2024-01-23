@@ -45,6 +45,12 @@ export class CompilerState implements ts.CompilerHost {
   #transformerManager: TransformerManager;
   #compilerOptions: ts.CompilerOptions;
 
+  #readFile(inputFile: string): string | undefined {
+    return ts.sys.readFile(
+      this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile)
+    );
+  }
+
   async init(idx: ManifestIndex): Promise<this> {
     this.#manifestIndex = idx;
     this.#manifest = idx.manifest;
@@ -152,15 +158,16 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   checkIfSourceChanged(inputFile: string): boolean {
-    const contents = this.readFile(inputFile, true);
+    const contents = this.#readFile(inputFile);
     const prevHash = this.#sourceHashes.get(inputFile);
     if (!contents || (contents.length === 0 && prevHash)) {
       return false; // Ignore empty file
     }
     const currentHash = CompilerUtil.naiveHash(contents);
-    this.#sourceHashes.set(inputFile, currentHash);
     const changed = prevHash !== currentHash;
     if (changed) {
+      this.#sourceHashes.set(inputFile, currentHash);
+      this.#sourceContents.set(inputFile, contents);
       this.#sourceFileObjects.delete(inputFile);
     }
     return changed;
@@ -217,10 +224,8 @@ export class CompilerState implements ts.CompilerHost {
     ts.sys.writeFile(outputFile, text, bom);
   }
 
-  readFile(inputFile: string, force = false): string | undefined {
-    const res = (force ? undefined : this.#sourceContents.get(inputFile)) ?? ts.sys.readFile(
-      this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile)
-    );
+  readFile(inputFile: string): string | undefined {
+    const res = this.#sourceContents.get(inputFile) ?? this.#readFile(inputFile);
     this.#sourceContents.set(inputFile, res);
     return res;
   }
