@@ -155,12 +155,12 @@ export class CompilerState implements ts.CompilerHost {
   isInputSourceChanged(inputFile: string): boolean {
     const { sourceFile } = this.#inputToEntry.get(inputFile)!;
     const contents = readFileSync(sourceFile, 'utf8');
-    const prevHash = this.#sourceHashes.get(sourceFile);
+    const prevHash = this.#sourceHashes.get(inputFile);
     if (!contents.length && prevHash) {
       return false; // Ignore empty file
     }
     const currentHash = CompilerUtil.naiveHash(contents);
-    this.#sourceHashes.set(sourceFile, currentHash);
+    this.#sourceHashes.set(inputFile, currentHash);
     return prevHash !== currentHash;
   }
 
@@ -172,16 +172,15 @@ export class CompilerState implements ts.CompilerHost {
     // Remove self
     this.resetInputSource(inputFile);
 
-    this.#sourceHashes.delete(sourceFile);
+    this.#sourceHashes.delete(inputFile);
     this.#sourceToEntry.delete(sourceFile);
     this.#inputToEntry.delete(inputFile);
     this.#inputFiles.delete(inputFile);
   }
 
   resetInputSource(inputFile: string): void {
-    const { sourceFile } = this.#inputToEntry.get(inputFile)!;
-    this.#sourceFileObjects.delete(sourceFile);
-    this.#sourceContents.delete(sourceFile);
+    this.#sourceFileObjects.delete(inputFile);
+    this.#sourceContents.delete(inputFile);
   }
 
   getAllFiles(): string[] {
