@@ -56,7 +56,7 @@ export class LogUtil {
   }
 
   /**
-   * Log event
+   * Log event with filtering by level
    */
   static logEvent(ev: CompilerLogEvent): void {
     if (this.isLevelActive(ev.level)) {
