@@ -147,7 +147,7 @@ export class CompilerWatcher {
 
       switch (resolvedAction) {
         case 'create': {
-          entry = this.#state.registerInput(mod, moduleFile);
+          entry = this.#state.registerInput(mod, moduleFile, true);
           if (entry.outputFile) {
             this.#addDirtyFile(mod, moduleFile);
           }
@@ -155,7 +155,7 @@ export class CompilerWatcher {
         }
         case 'update': {
           if (entry) {
-            if (this.#state.isFileContentsChanged(entry.inputFile)) {
+            if (this.#state.isInputSourceChanged(entry.inputFile)) {
               this.#state.resetInputSource(entry.inputFile);
             } else {
               entry = undefined;
