@@ -96,7 +96,6 @@ export class CompilerWatcher {
    */
   async * watchChanges(): AsyncIterable<CompilerWatchEvent> {
     if (this.#signal.aborted) {
-      yield* [];
       return;
     }
 
@@ -125,7 +124,7 @@ export class CompilerWatcher {
       let entry = this.#state.getBySource(sourceFile);
 
       const mod = entry?.module ?? this.#state.manifestIndex.findModuleForArbitraryFile(sourceFile);
-      if (!mod) {
+      if (!mod) { // Unknown module
         continue;
       }
 
