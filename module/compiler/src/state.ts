@@ -149,10 +149,10 @@ export class CompilerState implements ts.CompilerHost {
 
     this.#inputFiles.add(inputFile);
     if (computeHash) {
-      const hash = CompilerUtil.naiveHash(readFileSync(inputFile, 'utf8'));
-      this.#sourceHashes.set(inputFile, hash);
+      const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
+      this.#sourceHashes.set(sourceFile, hash);
     } else {
-      this.#sourceHashes.set(inputFile, -1); // Unknown
+      this.#sourceHashes.set(sourceFile, -1); // Unknown
     }
 
     return entry;
