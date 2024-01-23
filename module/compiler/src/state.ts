@@ -1,5 +1,4 @@
 import ts from 'typescript';
-import { readFileSync } from 'node:fs';
 
 import { path, ManifestModuleUtil, ManifestModule, ManifestRoot, ManifestIndex } from '@travetto/manifest';
 import { TransformerManager } from '@travetto/transformer';
@@ -152,16 +151,19 @@ export class CompilerState implements ts.CompilerHost {
     return entry;
   }
 
-  isInputSourceChanged(inputFile: string): boolean {
-    const { sourceFile } = this.#inputToEntry.get(inputFile)!;
-    const contents = readFileSync(sourceFile, 'utf8');
+  checkIfSourceChanged(inputFile: string): boolean {
+    const contents = this.readFile(inputFile, true);
     const prevHash = this.#sourceHashes.get(inputFile);
-    if (!contents.length && prevHash) {
+    if (!contents || (contents.length === 0 && prevHash)) {
       return false; // Ignore empty file
     }
     const currentHash = CompilerUtil.naiveHash(contents);
     this.#sourceHashes.set(inputFile, currentHash);
-    return prevHash !== currentHash;
+    const changed = prevHash !== currentHash;
+    if (changed) {
+      this.#sourceFileObjects.delete(inputFile);
+    }
+    return changed;
   }
 
   removeInput(inputFile: string): void {
@@ -169,18 +171,12 @@ export class CompilerState implements ts.CompilerHost {
     if (outputFile) {
       this.#outputToEntry.delete(outputFile);
     }
-    // Remove self
-    this.resetInputSource(inputFile);
-
+    this.#sourceFileObjects.delete(inputFile);
+    this.#sourceContents.delete(inputFile);
     this.#sourceHashes.delete(inputFile);
     this.#sourceToEntry.delete(sourceFile);
     this.#inputToEntry.delete(inputFile);
     this.#inputFiles.delete(inputFile);
-  }
-
-  resetInputSource(inputFile: string): void {
-    this.#sourceFileObjects.delete(inputFile);
-    this.#sourceContents.delete(inputFile);
   }
 
   getAllFiles(): string[] {
@@ -221,8 +217,8 @@ export class CompilerState implements ts.CompilerHost {
     ts.sys.writeFile(outputFile, text, bom);
   }
 
-  readFile(inputFile: string): string | undefined {
-    const res = this.#sourceContents.get(inputFile) ?? ts.sys.readFile(
+  readFile(inputFile: string, force = false): string | undefined {
+    const res = (force ? undefined : this.#sourceContents.get(inputFile)) ?? ts.sys.readFile(
       this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile)
     );
     this.#sourceContents.set(inputFile, res);

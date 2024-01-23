@@ -8,9 +8,10 @@ import { CompilerUtil } from './util';
 
 import { AsyncQueue } from '../support/queue';
 
-type WatchEvent = { action: 'create' | 'update' | 'delete', file: string };
+type WatchAction = 'create' | 'update' | 'delete';
+type WatchEvent = { action: WatchAction, file: string };
 type CompilerWatchEvent = WatchEvent & { entry: CompileStateEntry };
-type DirtyFile = { modFolder: string, mod: string, remove?: boolean, moduleFile: string, folderKey: ManifestModuleFolderType, type: ManifestModuleFileType };
+type DirtyFile = { mod: ManifestModule, action: WatchAction, moduleFile: string, folderKey: ManifestModuleFolderType, type: ManifestModuleFileType };
 
 /**
  * Watch support, based on compiler state and manifest details
@@ -59,7 +60,7 @@ export class CompilerWatcher {
     if (!this.#dirtyFiles.length) {
       return;
     }
-    const mods = [...new Set(this.#dirtyFiles.map(x => x.modFolder))];
+    const mods = [...new Set(this.#dirtyFiles.map(x => x.mod.sourceFolder))];
     const contexts = mods.map(folder => ManifestUtil.getModuleContext(this.#state.manifest, folder));
 
     const files = this.#dirtyFiles.slice(0);
@@ -68,16 +69,16 @@ export class CompilerWatcher {
     for (const ctx of [...contexts, this.#state.manifest]) {
       const newManifest = await ManifestUtil.buildManifest(ctx);
       for (const file of files) {
-        if (file.mod in newManifest.modules) {
-          const modFiles = newManifest.modules[file.mod].files[file.folderKey] ??= [];
+        if (file.mod.name in newManifest.modules) {
+          const modFiles = newManifest.modules[file.mod.name].files[file.folderKey] ??= [];
           const idx = modFiles.findIndex(x => x[0] === file.moduleFile);
 
-          if (!file.remove && idx < 0) {
+          if (file.action === 'create' && idx < 0) {
             modFiles.push([file.moduleFile, file.type, Date.now()]);
           } else if (idx >= 0) {
-            if (file.remove) {
+            if (file.action === 'delete') {
               modFiles.splice(idx, 1);
-            } else {
+            } else if (file.action === 'create') {
               modFiles[idx] = [file.moduleFile, file.type, Date.now()];
             }
           }
@@ -90,12 +91,14 @@ export class CompilerWatcher {
     this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
   }
 
-  #addDirtyFile(mod: ManifestModule, moduleFile: string, remove = false): void {
-    this.#dirtyFiles.push({
-      mod: mod.name, modFolder: mod.sourceFolder, remove, moduleFile,
-      folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
-      type: ManifestModuleUtil.getFileType(moduleFile),
-    });
+  #addDirtyFile(mod: ManifestModule, moduleFile: string, action: WatchAction): void {
+    if (action !== 'update') {
+      this.#dirtyFiles.push({
+        mod, action, moduleFile,
+        folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
+        type: ManifestModuleUtil.getFileType(moduleFile),
+      });
+    }
   }
 
   /**
@@ -139,45 +142,27 @@ export class CompilerWatcher {
         continue;
       }
 
-      const resolvedAction = !entry && action === 'update' ? 'create' : action;
-
       const moduleFile = mod.sourceFolder ?
         (sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile) :
         sourceFile.replace(`${this.#state.manifest.workspace.path}/`, '');
 
-      switch (resolvedAction) {
-        case 'create': {
-          entry = this.#state.registerInput(mod, moduleFile);
-          if (entry.outputFile) {
-            this.#addDirtyFile(mod, moduleFile);
-          }
-          break;
+      if (action === 'create') {
+        entry = this.#state.registerInput(mod, moduleFile);
+      } else if (!entry) {
+        continue;
+      } else if (action === 'update') {
+        if (!this.#state.checkIfSourceChanged(entry.inputFile)) {
+          continue;
         }
-        case 'update': {
-          if (entry) {
-            if (this.#state.isInputSourceChanged(entry.inputFile)) {
-              this.#state.resetInputSource(entry.inputFile);
-            } else {
-              entry = undefined;
-            }
-          }
-          break;
-        }
-        case 'delete': {
-          if (entry) {
-            this.#state.removeInput(entry.inputFile);
-            if (entry.outputFile) {
-              this.#addDirtyFile(mod, moduleFile, true);
-            }
-          }
-          break;
-        }
+      } else if (action === 'delete') {
+        this.#state.removeInput(entry.inputFile);
       }
 
-      if (entry) {
-        await this.#rebuildManifestsIfNeeded();
-        yield { action: resolvedAction, file: entry.sourceFile, entry };
+      if (entry.outputFile) {
+        this.#addDirtyFile(mod, moduleFile, action);
       }
+      await this.#rebuildManifestsIfNeeded();
+      yield { action, file: entry.sourceFile, entry };
     }
   }
 }
