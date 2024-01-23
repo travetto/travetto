@@ -10,7 +10,7 @@ import { LogUtil } from '../log';
 import { CompilerClient } from './client';
 import { CommonUtil } from '../util';
 
-const log = LogUtil.scoped('compiler-server');
+const log = LogUtil.logger('compiler-server');
 
 /**
  * Compiler Server Class
@@ -43,7 +43,7 @@ export class CompilerServer {
 
   constructor(ctx: ManifestContext, op: CompilerOp) {
     this.#ctx = ctx;
-    this.#client = new CompilerClient(ctx, LogUtil.scoped('client.server'));
+    this.#client = new CompilerClient(ctx, LogUtil.logger('client.server'));
     this.#url = this.#client.url;
     this.info = {
       state: 'startup',
@@ -162,7 +162,7 @@ export class CompilerServer {
    */
   async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
 
-    LogUtil.log('compiler', 'debug', 'Started, streaming logs');
+    log('debug', 'Started, streaming logs');
     LogUtil.consumeLogEvents(this.#client.fetchEvents('log', { signal: this.signal }));
 
     for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {

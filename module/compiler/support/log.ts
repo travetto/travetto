@@ -1,5 +1,7 @@
 import { appendFileSync } from 'node:fs';
 import util from 'node:util';
+import path from 'node:path';
+
 import type { ManifestContext } from '@travetto/manifest';
 import type { CompilerLogEvent, CompilerLogLevel, CompilerProgressEvent } from './types';
 
@@ -32,13 +34,8 @@ export class LogUtil {
       this.logLevel = build || defaultLevel;
     }
     this.root = ctx.workspace.path;
-    this.outFile = `${ctx.workspace.path}/${ctx.build.toolFolder}/compiler.log`;
-
-    if (this.isLevelActive('info') && process.stdout.isTTY) {
-      this.logProgress = this.#logProgressEvent;
-    } else {
-      this.logProgress = undefined;
-    }
+    this.outFile = this.isLevelActive('debug') ? path.resolve(ctx.workspace.path, ctx.build.toolFolder, 'compiler.log') : undefined;
+    this.logProgress = (this.isLevelActive('info') && process.stdout.isTTY) ? this.#logProgressEvent : undefined;
   }
 
   static #logProgressEvent(ev: CompilerProgressEvent): Promise<void> | void {
@@ -59,12 +56,9 @@ export class LogUtil {
   }
 
   /**
-   * Log message with filtering by level
+   * Log event
    */
-  static log(event: CompilerLogEvent): void;
-  static log(scope: string, ...args: Parameters<CompilerLogger>): void;
-  static log(scopeOrEvent: string | CompilerLogEvent, level?: CompilerLogLevel, message?: string, ...args: unknown[]): void {
-    const ev = typeof scopeOrEvent === 'string' ? { scope: scopeOrEvent, level: level!, message, args } : scopeOrEvent;
+  static logEvent(ev: CompilerLogEvent): void {
     if (this.isLevelActive(ev.level)) {
       const params = [ev.message, ...ev.args ?? []].map(x => typeof x === 'string' ? x.replaceAll(this.root, '.') : x);
       if (ev.scope) {
@@ -73,7 +67,7 @@ export class LogUtil {
       params.unshift(new Date().toISOString(), `${ev.level.padEnd(5)}`);
       // eslint-disable-next-line no-console
       console[ev.level]!(...params);
-      if (this.outFile && this.isLevelActive('debug')) {
+      if (this.outFile) {
         // Log to file
         appendFileSync(this.outFile, `${params.map(x => typeof x === 'string' ? x : util.inspect(x)).join(' ')}\n`, 'utf8');
       }
@@ -84,7 +78,7 @@ export class LogUtil {
    * With logger
    */
   static withLogger<T>(scope: string, op: WithLogger<T>, basic = true): Promise<T> {
-    const log = this.scoped(scope);
+    const log = this.logger(scope);
     basic && log('debug', 'Started');
     return op(log).finally(() => basic && log('debug', 'Completed'));
   }
@@ -92,15 +86,15 @@ export class LogUtil {
   /**
    * With scope
    */
-  static scoped(scope: string): CompilerLogger {
-    return this.log.bind(this, scope);
+  static logger(scope: string): CompilerLogger {
+    return (level, message, ...args) => this.logEvent({ scope, message, level, args, time: Date.now() });
   }
 
   /**
    * Stream Compiler log events to console
    */
   static async consumeLogEvents(src: AsyncIterable<CompilerLogEvent>): Promise<void> {
-    for await (const ev of src) { this.log(ev); }
+    for await (const ev of src) { this.logEvent(ev); }
   }
 
   /**

@@ -58,6 +58,7 @@ export class CommonUtil {
    * Restartable Event Stream
    */
   static async * restartableEvents<T>(src: (signal: AbortSignal) => AsyncIterable<T>, parent: AbortSignal, shouldRestart: (item: T) => boolean): AsyncIterable<T> {
+    const log = LogUtil.logger('event-stream');
     outer: while (!parent.aborted) {
       const controller = new AbortController();
       setMaxListeners(1000, controller.signal);
@@ -66,7 +67,7 @@ export class CommonUtil {
 
       const comp = src(controller.signal);
 
-      LogUtil.log('event-stream', 'debug', 'Started event stream');
+      log('debug', 'Started event stream');
 
       // Wait for all events, close at the end
       for await (const ev of comp) {
@@ -77,7 +78,7 @@ export class CommonUtil {
         }
       }
 
-      LogUtil.log('event-stream', 'debug', 'Finished event stream');
+      log('debug', 'Finished event stream');
 
       // Natural exit, we done
       if (!controller.signal.aborted) { // Shutdown source if still running
