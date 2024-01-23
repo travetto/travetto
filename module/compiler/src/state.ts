@@ -174,6 +174,7 @@ export class CompilerState implements ts.CompilerHost {
     // Remove self
     this.resetInputSource(inputFile);
 
+    this.#sourceHashes.delete(sourceFile);
     this.#sourceToEntry.delete(sourceFile);
     this.#inputToEntry.delete(inputFile);
     this.#inputFiles.delete(inputFile);
@@ -183,7 +184,6 @@ export class CompilerState implements ts.CompilerHost {
     const { sourceFile } = this.#inputToEntry.get(inputFile)!;
     this.#sourceFileObjects.delete(sourceFile);
     this.#sourceContents.delete(sourceFile);
-    this.#sourceHashes.delete(sourceFile);
   }
 
   getAllFiles(): string[] {
