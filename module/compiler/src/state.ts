@@ -161,8 +161,8 @@ export class CompilerState implements ts.CompilerHost {
   isInputSourceChanged(inputFile: string): boolean {
     const { sourceFile } = this.#inputToEntry.get(inputFile)!;
     const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
-    const result = this.#sourceHashes.get(inputFile) !== hash;
-    this.#sourceHashes.set(inputFile, hash);
+    const result = this.#sourceHashes.get(sourceFile) !== hash;
+    this.#sourceHashes.set(sourceFile, hash);
     return result;
   }
 
