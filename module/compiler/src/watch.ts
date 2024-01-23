@@ -1,6 +1,4 @@
-import {
-  ManifestModuleUtil, ManifestUtil, ManifestModuleFolderType, ManifestModuleFileType, path, ManifestModule
-} from '@travetto/manifest';
+import { ManifestContext, ManifestModuleUtil, ManifestUtil, RuntimeIndex, path } from '@travetto/manifest';
 
 import type { CompileStateEntry } from './types';
 import { CompilerState } from './state';
@@ -11,14 +9,11 @@ import { AsyncQueue } from '../support/queue';
 type WatchAction = 'create' | 'update' | 'delete';
 type WatchEvent = { action: WatchAction, file: string };
 type CompilerWatchEvent = WatchEvent & { entry: CompileStateEntry };
-type DirtyFile = { mod: ManifestModule, action: WatchAction, moduleFile: string, folderKey: ManifestModuleFolderType, type: ManifestModuleFileType };
 
 /**
  * Watch support, based on compiler state and manifest details
  */
 export class CompilerWatcher {
-
-  #dirtyFiles: DirtyFile[] = [];
   #state: CompilerState;
   #signal: AbortSignal;
 
@@ -56,31 +51,35 @@ export class CompilerWatcher {
     yield* q;
   }
 
-  async #rebuildManifestsIfNeeded(): Promise<void> {
-    if (!this.#dirtyFiles.length) {
+  async #rebuildManifestsIfNeeded(event: CompilerWatchEvent, moduleFile: string): Promise<void> {
+    if (!event.entry.outputFile || event.action === 'update') {
       return;
     }
-    const mods = [...new Set(this.#dirtyFiles.map(x => x.mod.sourceFolder))];
-    const contexts = mods.map(folder => ManifestUtil.getModuleContext(this.#state.manifest, folder));
 
-    const files = this.#dirtyFiles.slice(0);
-    this.#dirtyFiles = [];
+    const toUpdate: ManifestContext[] = RuntimeIndex.getDependentModules(event.entry.module.name, 'parents')
+      .map(el => ManifestUtil.getModuleContext(this.#state.manifest, el.sourceFolder));
 
-    for (const ctx of [...contexts, this.#state.manifest]) {
+    if (this.#state.manifest.workspace.mono) {
+      toUpdate.push(this.#state.manifest);
+    }
+
+    const mod = event.entry.module;
+    const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);
+    const fileType = ManifestModuleUtil.getFileType(moduleFile);
+
+    for (const ctx of toUpdate) {
       const newManifest = await ManifestUtil.buildManifest(ctx);
-      for (const file of files) {
-        if (file.mod.name in newManifest.modules) {
-          const modFiles = newManifest.modules[file.mod.name].files[file.folderKey] ??= [];
-          const idx = modFiles.findIndex(x => x[0] === file.moduleFile);
+      if (mod.name in newManifest.modules) {
+        const modFiles = newManifest.modules[mod.name].files[folderKey] ??= [];
+        const idx = modFiles.findIndex(x => x[0] === moduleFile);
 
-          if (file.action === 'create' && idx < 0) {
-            modFiles.push([file.moduleFile, file.type, Date.now()]);
-          } else if (idx >= 0) {
-            if (file.action === 'delete') {
-              modFiles.splice(idx, 1);
-            } else {
-              modFiles[idx] = [file.moduleFile, file.type, Date.now()];
-            }
+        if (event.action === 'create' && idx < 0) {
+          modFiles.push([moduleFile, fileType, Date.now()]);
+        } else if (idx >= 0) {
+          if (event.action === 'delete') {
+            modFiles.splice(idx, 1);
+          } else {
+            modFiles[idx] = [moduleFile, fileType, Date.now()];
           }
         }
       }
@@ -89,16 +88,6 @@ export class CompilerWatcher {
 
     // Reindex at workspace root
     this.#state.manifestIndex.init(ManifestUtil.getManifestLocation(this.#state.manifest));
-  }
-
-  #addDirtyFile(mod: ManifestModule, moduleFile: string, action: WatchAction): void {
-    if (action !== 'update') {
-      this.#dirtyFiles.push({
-        mod, action, moduleFile,
-        folderKey: ManifestModuleUtil.getFolderKey(moduleFile),
-        type: ManifestModuleUtil.getFileType(moduleFile),
-      });
-    }
   }
 
   /**
@@ -158,11 +147,9 @@ export class CompilerWatcher {
         this.#state.removeInput(entry.inputFile);
       }
 
-      if (entry.outputFile) {
-        this.#addDirtyFile(mod, moduleFile, action);
-      }
-      await this.#rebuildManifestsIfNeeded();
-      yield { action, file: entry.sourceFile, entry };
+      const result: CompilerWatchEvent = { action, file: entry.sourceFile, entry };
+      await this.#rebuildManifestsIfNeeded(result, moduleFile);
+      yield result;
     }
   }
 }
