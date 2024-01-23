@@ -131,7 +131,8 @@ export class CompilerWatcher {
         continue;
       }
 
-      const moduleFile = sourceFile.includes(mod.sourceFolder) ? sourceFile.split(`${mod.sourceFolder}/`)[1] : sourceFile;
+      const modRoot = mod.sourceFolder || this.#state.manifest.workspace.path;
+      const moduleFile = sourceFile.includes(modRoot) ? sourceFile.split(`${modRoot}/`)[1] : sourceFile;
 
       if (action === 'create') {
         entry = this.#state.registerInput(mod, moduleFile);
