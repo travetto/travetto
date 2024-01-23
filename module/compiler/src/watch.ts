@@ -78,7 +78,7 @@ export class CompilerWatcher {
           } else if (idx >= 0) {
             if (file.action === 'delete') {
               modFiles.splice(idx, 1);
-            } else if (file.action === 'create') {
+            } else {
               modFiles[idx] = [file.moduleFile, file.type, Date.now()];
             }
           }
