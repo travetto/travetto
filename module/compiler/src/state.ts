@@ -46,9 +46,7 @@ export class CompilerState implements ts.CompilerHost {
   #compilerOptions: ts.CompilerOptions;
 
   #readFile(inputFile: string): string | undefined {
-    return ts.sys.readFile(
-      this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile)
-    );
+    return ts.sys.readFile(this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile));
   }
 
   async init(idx: ManifestIndex): Promise<this> {
