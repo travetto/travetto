@@ -10,7 +10,7 @@ export class EmailResourceLoader extends FileLoader {
     }
     super([
       ...Env.TRV_RESOURCES.list ?? [],
-      '@#resources',
+      `${module}#resources`,
       ...RuntimeIndex.getDependentModules(mod, 'children').map(x => `${x.name}#resources`),
       '@@#resources',
       ...globalResources ?? []

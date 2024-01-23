@@ -40,8 +40,8 @@ export class CompilerWatcher {
       // TODO: Read .gitignore?
       ignore: [
         'node_modules', '**/node_modules', '.git', '**/.git',
-        `${this.#state.manifest.build.outputFolder}/**`,
-        `${this.#state.manifest.build.compilerFolder}/**`,
+        `${this.#state.manifest.build.outputFolder}/node_modules/**`,
+        `${this.#state.manifest.build.compilerFolder}/node_modules/**`,
         `${this.#state.manifest.build.toolFolder}/**`
       ]
     });
@@ -59,9 +59,7 @@ export class CompilerWatcher {
     const toUpdate: ManifestContext[] = RuntimeIndex.getDependentModules(event.entry.module.name, 'parents')
       .map(el => ManifestUtil.getModuleContext(this.#state.manifest, el.sourceFolder));
 
-    if (this.#state.manifest.workspace.mono) {
-      toUpdate.push(this.#state.manifest);
-    }
+    toUpdate.push(this.#state.manifest);
 
     const mod = event.entry.module;
     const folderKey = ManifestModuleUtil.getFolderKey(moduleFile);

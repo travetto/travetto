@@ -275,7 +275,9 @@ export class ManifestIndex {
         seen.add(next);
         const mod = this.getModule(next)!;
         toProcess.push(...mod[field]);
-        out.push(mod);
+        if (next !== this.#manifest.main.name) { // Do not include self
+          out.push(mod);
+        }
       }
     }
     return out;
