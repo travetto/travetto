@@ -187,7 +187,7 @@ export class Compiler {
             if (err) {
               Log.info('Compilation Error', CompilerUtil.buildTranspileError(ev.entry.inputFile, err));
             } else {
-              Log.info(`Compiled ${ev.entry.sourceFile}`);
+              Log.info(`Compiled ${ev.entry.sourceFile} on ${ev.action}`);
             }
           } else {
             if (ev.entry.outputFile) {

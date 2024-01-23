@@ -126,7 +126,7 @@ export class CompilerState implements ts.CompilerHost {
     return this.#sourceToEntry.get(sourceFile);
   }
 
-  registerInput(module: ManifestModule, moduleFile: string, computeHash = false): CompileStateEntry {
+  registerInput(module: ManifestModule, moduleFile: string): CompileStateEntry {
     const relativeInput = `${module.outputFolder}/${moduleFile}`;
     const sourceFile = path.resolve(this.#manifest.workspace.path, module.sourceFolder, moduleFile);
     const sourceFolder = path.dirname(sourceFile);
@@ -148,22 +148,20 @@ export class CompilerState implements ts.CompilerHost {
     }
 
     this.#inputFiles.add(inputFile);
-    if (computeHash) {
-      const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
-      this.#sourceHashes.set(sourceFile, hash);
-    } else {
-      this.#sourceHashes.set(sourceFile, -1); // Unknown
-    }
-
+    this.#sourceHashes.set(sourceFile, -1); // Unknown
     return entry;
   }
 
   isInputSourceChanged(inputFile: string): boolean {
     const { sourceFile } = this.#inputToEntry.get(inputFile)!;
-    const hash = CompilerUtil.naiveHash(readFileSync(sourceFile, 'utf8'));
-    const result = this.#sourceHashes.get(sourceFile) !== hash;
-    this.#sourceHashes.set(sourceFile, hash);
-    return result;
+    const contents = readFileSync(sourceFile, 'utf8');
+    const prevHash = this.#sourceHashes.get(sourceFile);
+    if (!contents.length && prevHash) {
+      return false; // Ignore empty file
+    }
+    const currentHash = CompilerUtil.naiveHash(contents);
+    this.#sourceHashes.set(sourceFile, currentHash);
+    return prevHash !== currentHash;
   }
 
   removeInput(inputFile: string): void {

@@ -147,7 +147,7 @@ export class CompilerWatcher {
 
       switch (resolvedAction) {
         case 'create': {
-          entry = this.#state.registerInput(mod, moduleFile, true);
+          entry = this.#state.registerInput(mod, moduleFile);
           if (entry.outputFile) {
             this.#addDirtyFile(mod, moduleFile);
           }
