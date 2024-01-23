@@ -135,7 +135,9 @@ export class ManifestUtil {
       const pth = getPath(item);
       let node = root;
       for (const sub of pth) {
-        node = node.subs[sub] ??= { subs: {} };
+        if (sub) {
+          node = node.subs[sub] ??= { subs: {} };
+        }
       }
       node.value = item;
     }

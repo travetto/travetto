@@ -9,7 +9,7 @@ import { AsyncQueue } from '../queue';
 import { LogUtil } from '../log';
 import { CommonUtil } from '../util';
 
-const log = LogUtil.scoped('compiler-exec');
+const log = LogUtil.logger('compiler-exec');
 const isEvent = (msg: unknown): msg is CompilerEvent => !!msg && typeof msg === 'object' && 'type' in msg;
 
 /**

@@ -13,7 +13,8 @@ import { CompilerClient } from './server/client';
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {
-  const client = new CompilerClient(ctx, LogUtil.scoped('client.main'));
+  const log = LogUtil.logger('client.main');
+  const client = new CompilerClient(ctx, log);
   const buildFolders = [ctx.build.outputFolder, ctx.build.compilerFolder];
 
   const ops = {
@@ -69,7 +70,7 @@ export const main = (ctx: ManifestContext) => {
           }
         });
       } else {
-        LogUtil.log({ level: 'info', message: 'Server already running, waiting for watch to complete', time: Date.now() });
+        log('info', 'Server already running, waiting for watch to complete');
         const ctrl = new AbortController();
         LogUtil.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete, signal: ctrl.signal }));
         await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');

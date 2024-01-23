@@ -1,4 +1,5 @@
 import http from 'node:http';
+import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
@@ -9,7 +10,7 @@ import { LogUtil } from '../log';
 import { CompilerClient } from './client';
 import { CommonUtil } from '../util';
 
-const log = LogUtil.scoped('compiler-server');
+const log = LogUtil.logger('compiler-server');
 
 /**
  * Compiler Server Class
@@ -42,7 +43,7 @@ export class CompilerServer {
 
   constructor(ctx: ManifestContext, op: CompilerOp) {
     this.#ctx = ctx;
-    this.#client = new CompilerClient(ctx, LogUtil.scoped('client.server'));
+    this.#client = new CompilerClient(ctx, LogUtil.logger('client.server'));
     this.#url = this.#client.url;
     this.info = {
       state: 'startup',
@@ -80,9 +81,11 @@ export class CompilerServer {
             const info = await this.#client.info();
             resolve((info && info.mode === 'build' && this.mode === 'watch') ? 'retry' : 'running');
           } else {
+            log('warn', 'Failed in running server', err);
             reject(err);
           }
-        });
+        })
+        .on('close', () => log('debug', 'Server close event'));
 
       const url = new URL(this.#url);
       setTimeout(() => this.#server.listen(+url.port, url.hostname), 1); // Run async
@@ -159,7 +162,7 @@ export class CompilerServer {
    */
   async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
 
-    LogUtil.log('compiler', 'debug', 'Started, streaming logs');
+    log('debug', 'Started, streaming logs');
     LogUtil.consumeLogEvents(this.#client.fetchEvents('log', { signal: this.signal }));
 
     for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
@@ -190,7 +193,7 @@ export class CompilerServer {
    */
   async close(force: boolean): Promise<unknown> {
     log('info', 'Closing down server');
-    await new Promise(r => {
+    const shutdown = new Promise(r => {
 
       if (force) {
         const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
@@ -206,6 +209,9 @@ export class CompilerServer {
         this.#shutdown.abort();
       });
     });
+
+    await Promise.race([shutdown, timers.setTimeout(1000)]);
+
     return { closing: true };
   }
 

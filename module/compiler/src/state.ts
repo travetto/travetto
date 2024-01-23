@@ -37,12 +37,17 @@ export class CompilerState implements ts.CompilerHost {
 
   #sourceContents = new Map<string, string | undefined>();
   #sourceFileObjects = new Map<string, ts.SourceFile>();
+  #sourceHashes = new Map<string, number>();
 
   #manifestIndex: ManifestIndex;
   #manifest: ManifestRoot;
   #modules: ManifestModule[];
   #transformerManager: TransformerManager;
   #compilerOptions: ts.CompilerOptions;
+
+  #readFile(inputFile: string): string | undefined {
+    return ts.sys.readFile(this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile));
+  }
 
   async init(idx: ManifestIndex): Promise<this> {
     this.#manifestIndex = idx;
@@ -146,8 +151,24 @@ export class CompilerState implements ts.CompilerHost {
     }
 
     this.#inputFiles.add(inputFile);
-
+    this.#sourceHashes.set(sourceFile, -1); // Unknown
     return entry;
+  }
+
+  checkIfSourceChanged(inputFile: string): boolean {
+    const contents = this.#readFile(inputFile);
+    const prevHash = this.#sourceHashes.get(inputFile);
+    if (!contents || (contents.length === 0 && prevHash)) {
+      return false; // Ignore empty file
+    }
+    const currentHash = CompilerUtil.naiveHash(contents);
+    const changed = prevHash !== currentHash;
+    if (changed) {
+      this.#sourceHashes.set(inputFile, currentHash);
+      this.#sourceContents.set(inputFile, contents);
+      this.#sourceFileObjects.delete(inputFile);
+    }
+    return changed;
   }
 
   removeInput(inputFile: string): void {
@@ -155,14 +176,12 @@ export class CompilerState implements ts.CompilerHost {
     if (outputFile) {
       this.#outputToEntry.delete(outputFile);
     }
+    this.#sourceFileObjects.delete(inputFile);
+    this.#sourceContents.delete(inputFile);
+    this.#sourceHashes.delete(inputFile);
     this.#sourceToEntry.delete(sourceFile);
     this.#inputToEntry.delete(inputFile);
     this.#inputFiles.delete(inputFile);
-  }
-
-  resetInputSource(inputFile: string): void {
-    this.#sourceFileObjects.delete(inputFile);
-    this.#sourceContents.delete(inputFile);
   }
 
   getAllFiles(): string[] {
@@ -204,9 +223,7 @@ export class CompilerState implements ts.CompilerHost {
   }
 
   readFile(inputFile: string): string | undefined {
-    const res = this.#sourceContents.get(inputFile) ?? ts.sys.readFile(
-      this.#inputToEntry.get(inputFile)?.sourceFile ?? this.#inputPathToSourcePath(inputFile)
-    );
+    const res = this.#sourceContents.get(inputFile) ?? this.#readFile(inputFile);
     this.#sourceContents.set(inputFile, res);
     return res;
   }

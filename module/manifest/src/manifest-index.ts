@@ -265,18 +265,20 @@ export class ManifestIndex {
   /**
    * Get all modules, parents or children, (transitively) of the provided root, in a DFS fashion
    */
-  getDependentModules(root: IndexedModule, field: 'parents' | 'children'): IndexedModule[] {
+  getDependentModules(root: IndexedModule | string, field: 'parents' | 'children'): IndexedModule[] {
     const seen = new Set<string>();
     const out: IndexedModule[] = [];
-    const toProcess = [root.name];
+    const toProcess = [typeof root === 'string' ? root : root.name];
     while (toProcess.length) {
       const next = toProcess.shift()!;
-      if (seen.has(next)) {
-        continue;
+      if (!seen.has(next)) {
+        seen.add(next);
+        const mod = this.getModule(next)!;
+        toProcess.push(...mod[field]);
+        if (next !== this.#manifest.main.name) { // Do not include self
+          out.push(mod);
+        }
       }
-      const mod = this.getModule(next)!;
-      toProcess.push(...mod[field]);
-      out.push(mod);
     }
     return out;
   }
