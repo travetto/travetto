@@ -194,12 +194,6 @@ export class CompilerServer {
     log('debug', 'Finished processing events');
   }
 
-  #terminateProgress(): void {
-    const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
-    LogUtil.logProgress?.(cancel);
-    this.#emitEvent({ type: 'progress', payload: cancel });
-  }
-
   /**
    * Close server
    */
@@ -208,7 +202,9 @@ export class CompilerServer {
 
     // If we are in a place where progress exists
     if (this.info.state === 'compile-start') {
-      this.#terminateProgress();
+      const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
+      LogUtil.logProgress?.(cancel);
+      this.#emitEvent({ type: 'progress', payload: cancel });
     }
 
     await new Promise(r => {
