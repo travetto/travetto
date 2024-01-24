@@ -12,6 +12,8 @@ import { CompilerServer } from './server/server';
 import { CompilerRunner } from './server/runner';
 import { CompilerClient } from './server/client';
 
+const SHUTDOWN_TIMEOUT = 3000;
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {
   const log = LogUtil.logger('client.main');
@@ -29,7 +31,7 @@ export const main = (ctx: ManifestContext) => {
           try {
             process.kill(info.compilerPid, 0);
             await timers.setTimeout(100);
-            if ((Date.now() - start) > 3000) { // If we exceed to the max timeout
+            if ((Date.now() - start) > SHUTDOWN_TIMEOUT) { // If we exceed to the max timeout
               process.kill(info.compilerPid); // Force kill
             }
           } catch {
