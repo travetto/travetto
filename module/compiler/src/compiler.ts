@@ -76,6 +76,9 @@ export class Compiler {
         break;
       }
     }
+    // No longer listen to disconnect
+    process.removeAllListeners('disconnect');
+    process.removeAllListeners('message');
     this.#ctrl.abort();
   }
 
@@ -215,9 +218,5 @@ export class Compiler {
     Log.debug('Compiler process shutdown');
 
     this.#shutdown('complete');
-
-    // No longer listen to disconnect
-    process.removeAllListeners('disconnect');
-    process.removeAllListeners('message');
   }
 }
