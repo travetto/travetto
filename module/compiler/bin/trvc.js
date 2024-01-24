@@ -25,7 +25,7 @@ getEntry().then(async (ops) => {
   switch (op) {
     case undefined:
     case 'help': return console.log(`\n${help()}\n`);
-    case 'restart': return ops.stop().then(() => ops.compile('watch'));
+    case 'restart': return ops.restart();
     case 'stop': return ops.stop();
     case 'info': return ops.info().then(v => console.log(JSON.stringify(v, null, 2)));
     case 'event': return ops.events(args[0], v => {
@@ -35,9 +35,9 @@ getEntry().then(async (ops) => {
     });
     case 'clean': return ops.clean();
     case 'manifest': return ops.manifest(args[0], flags.some(x => x === '--prod'));
-    case 'start': return ops.compile('watch');
-    case 'watch':
-    case 'build': return ops.compile(op);
+    case 'start':
+    case 'watch': return ops.start();
+    case 'build': return ops.build();
     default: console.error(`Unknown trvc operation: ${op}\n`); return console.error(help());
   }
 });

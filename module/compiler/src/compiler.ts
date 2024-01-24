@@ -45,9 +45,8 @@ export class Compiler {
     this.#ctrl = new AbortController();
     this.#signal = this.#ctrl.signal;
     setMaxListeners(1000, this.#signal);
-    process
-      .once('disconnect', () => this.#shutdown('manual'))
-      .on('message', ev => (ev === 'shutdown') && this.#shutdown('manual'));
+    process.once('disconnect', () => this.#shutdown('manual'));
+    process.on('message', ev => (ev === 'shutdown') && this.#shutdown('manual'));
   }
 
   #shutdown(mode: 'error' | 'manual' | 'complete' | 'reset', err?: Error): void {
@@ -76,9 +75,6 @@ export class Compiler {
         break;
       }
     }
-    // No longer listen to disconnect
-    process.removeAllListeners('disconnect');
-    process.removeAllListeners('message');
     this.#ctrl.abort();
   }
 
@@ -215,6 +211,12 @@ export class Compiler {
       }
     }
 
+    Log.debug('Compiler process shutdown');
+
     this.#shutdown('complete');
+
+    // No longer listen to disconnect
+    process.removeAllListeners('disconnect');
+    process.removeAllListeners('message');
   }
 }

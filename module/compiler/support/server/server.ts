@@ -1,7 +1,7 @@
 import http from 'node:http';
-import timers from 'node:timers/promises';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
 
@@ -61,7 +61,7 @@ export class CompilerServer {
       keepAliveTimeout: 1000 * 60 * 60,
     }, (req, res) => this.#onRequest(req, res));
 
-    process.once('exit', () => this.#shutdown.abort());
+    setMaxListeners(1000, this.signal);
   }
 
   get mode(): CompilerMode {
@@ -149,8 +149,13 @@ export class CompilerServer {
     switch (action) {
       case 'send-event': await this.#emitEvent(await CompilerServer.readJSONRequest(req)); out = { received: true }; break;
       case 'event': return await this.#addListener(subAction, res);
-      case 'stop': out = await this.close(true); break;
       case 'clean': out = await this.#clean(); break;
+      case 'stop': {
+        // Must send immediately
+        res.end(JSON.stringify({ closing: true }));
+        this.#shutdown.abort();
+        break;
+      }
       case 'info':
       default: out = this.info ?? {}; break;
     }
@@ -161,9 +166,6 @@ export class CompilerServer {
    * Process events
    */
   async processEvents(src: (signal: AbortSignal) => AsyncIterable<CompilerEvent>): Promise<void> {
-
-    log('debug', 'Started, streaming logs');
-    LogUtil.consumeLogEvents(this.#client.fetchEvents('log', { signal: this.signal }));
 
     for await (const ev of CommonUtil.restartableEvents(src, this.signal, this.isResetEvent)) {
       if (ev.type === 'progress') {
@@ -178,6 +180,8 @@ export class CompilerServer {
           this.info.compilerPid = ev.payload.extra.pid;
         }
         log('info', `State changed: ${this.info.state}`);
+      } else if (ev.type === 'log') {
+        LogUtil.logEvent(ev.payload);
       }
       if (this.isResetEvent(ev)) {
         await this.#disconnectActive();
@@ -185,34 +189,34 @@ export class CompilerServer {
     }
 
     // Terminate, after letting all remaining events emit
-    await this.close(this.signal.aborted);
+    await this.close();
+
+    log('debug', 'Finished processing events');
+  }
+
+  #terminateProgress(): void {
+    const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
+    LogUtil.logProgress?.(cancel);
+    this.#emitEvent({ type: 'progress', payload: cancel });
   }
 
   /**
    * Close server
    */
-  async close(force: boolean): Promise<unknown> {
+  async close(): Promise<void> {
     log('info', 'Closing down server');
-    const shutdown = new Promise(r => {
 
-      if (force) {
-        const cancel: CompilerProgressEvent = { complete: true, idx: 0, total: 0, message: 'Complete', operation: 'compile' };
-        LogUtil.logProgress?.(cancel);
-        this.#emitEvent({ type: 'progress', payload: cancel });
-      }
+    // If we are in a place where progress exists
+    if (this.info.state === 'compile-start') {
+      this.#terminateProgress();
+    }
 
+    await new Promise(r => {
       this.#server.close(r);
-      this.#emitEvent({ type: 'state', payload: { state: 'close' } });
-      this.#server.unref();
-      setImmediate(() => {
-        this.#server.closeAllConnections();
-        this.#shutdown.abort();
-      });
+      this.#server.closeAllConnections();
     });
 
-    await Promise.race([shutdown, timers.setTimeout(1000)]);
-
-    return { closing: true };
+    log('info', 'Closed down server');
   }
 
   /**

@@ -91,13 +91,6 @@ export class LogUtil {
   }
 
   /**
-   * Stream Compiler log events to console
-   */
-  static async consumeLogEvents(src: AsyncIterable<CompilerLogEvent>): Promise<void> {
-    for await (const ev of src) { this.logEvent(ev); }
-  }
-
-  /**
    * Write all progress events if active
    */
   static async consumeProgressEvents(src: () => AsyncIterable<CompilerProgressEvent>): Promise<void> {

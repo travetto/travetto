@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import timers from 'node:timers/promises';
 import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
@@ -25,6 +26,19 @@ export const main = (ctx: ManifestContext) => {
       } else {
         console.log(`Server not running ${ctx.workspace.path}: ${client}`);
       }
+    },
+
+    /** Start */
+    async start(): Promise<void> { await ops.compile('watch'); },
+
+    /** Start */
+    async build(): Promise<void> { await ops.compile('build'); },
+
+    /** Restart */
+    async restart(): Promise<void> {
+      await client.stop();
+      await timers.setTimeout(100);
+      await ops.start();
     },
 
     /** Get server info */
@@ -63,12 +77,14 @@ export const main = (ctx: ManifestContext) => {
 
       // Wait for build to be ready
       if (server) {
+        log('debug', 'Start Server');
         await server.processEvents(async function* (signal) {
           const changed = await CompilerSetup.setup(ctx);
           if (!setupOnly) {
             yield* CompilerRunner.runProcess(ctx, changed, op, signal);
           }
         });
+        log('debug', 'End Server');
       } else {
         log('info', 'Server already running, waiting for watch to complete');
         const ctrl = new AbortController();
