@@ -25,7 +25,7 @@ getEntry().then(async (ops) => {
   switch (op) {
     case undefined:
     case 'help': return console.log(`\n${help()}\n`);
-    case 'restart': return ops.stop().then(v => ops.compile('watch'));
+    case 'restart': return ops.stop().then(() => ops.compile('watch'));
     case 'stop': return ops.stop();
     case 'info': return ops.info().then(v => console.log(JSON.stringify(v, null, 2)));
     case 'event': return ops.events(args[0], v => {
