@@ -4,7 +4,7 @@ import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerOp, CompilerServerInfo } from './types';
+import type { CompilerLogLevel, CompilerMode, CompilerServerInfo } from './types';
 import { LogUtil } from './log';
 import { CommonUtil } from './util';
 import { CompilerSetup } from './setup';
@@ -19,6 +19,32 @@ export const main = (ctx: ManifestContext) => {
   const log = LogUtil.logger('client.main');
   const client = new CompilerClient(ctx, log);
   const buildFolders = [ctx.build.outputFolder, ctx.build.compilerFolder];
+
+
+  /** Main entry point for compilation */
+  const compile = async (op: CompilerMode, logLevel: CompilerLogLevel, setupOnly = false): Promise<void> => {
+    LogUtil.initLogs(ctx, logLevel ?? 'info');
+
+    const server = await new CompilerServer(ctx, op).listen();
+
+    // Wait for build to be ready
+    if (server) {
+      log('debug', 'Start Server');
+      await server.processEvents(async function* (signal) {
+        const changed = await CompilerSetup.setup(ctx);
+        if (!setupOnly) {
+          yield* CompilerRunner.runProcess(ctx, changed, op, signal);
+        }
+      });
+      log('debug', 'End Server');
+    } else {
+      log('info', 'Server already running, waiting for initial compile to complete');
+      const ctrl = new AbortController();
+      LogUtil.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete, signal: ctrl.signal }));
+      await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
+      ctrl.abort();
+    }
+  };
 
   const ops = {
     /** Stop the server */
@@ -48,6 +74,9 @@ export const main = (ctx: ManifestContext) => {
       }
     },
 
+    /** Restart the server */
+    async restart(): Promise<void> { await ops.stop(true).then(() => ops.watch()); },
+
     /** Get server info */
     info: (): Promise<CompilerServerInfo | undefined> => client.info(),
 
@@ -71,40 +100,24 @@ export const main = (ctx: ManifestContext) => {
       }
     },
 
-    /** Main entry point for compilation */
-    async compile(op: CompilerOp, setupOnly = false): Promise<(mod: string) => Promise<unknown>> {
+    /** Build the project */
+    async build(): Promise<void> { await compile('build', 'info'); },
+
+    /** Build and watch the project */
+    async watch(): Promise<void> { await compile('watch', 'info'); },
+
+    /** Build and run */
+    async run(): Promise<(mod: string) => Promise<unknown>> {
       // Short circuit if we can
-      if (op === 'run' && await client.isWatching()) {
-        return CommonUtil.moduleLoader(ctx);
-      }
-
-      LogUtil.initLogs(ctx, op === 'run' ? 'error' : 'info');
-
-      const server = await new CompilerServer(ctx, op).listen();
-
-      // Wait for build to be ready
-      if (server) {
-        log('debug', 'Start Server');
-        await server.processEvents(async function* (signal) {
-          const changed = await CompilerSetup.setup(ctx);
-          if (!setupOnly) {
-            yield* CompilerRunner.runProcess(ctx, changed, op, signal);
-          }
-        });
-        log('debug', 'End Server');
-      } else {
-        log('info', 'Server already running, waiting for initial compile to complete');
-        const ctrl = new AbortController();
-        LogUtil.consumeProgressEvents(() => client.fetchEvents('progress', { until: ev => !!ev.complete, signal: ctrl.signal }));
-        await client.waitForState(['compile-end', 'watch-start'], 'Successfully built');
-        ctrl.abort();
+      if (!(await client.isWatching())) {
+        await compile('build', 'error');
       }
       return CommonUtil.moduleLoader(ctx);
     },
 
     /** Manifest entry point */
     async manifest(output?: string, prod?: boolean): Promise<void> {
-      await ops.compile('run', true);
+      await compile('build', 'error', true);
       await CompilerSetup.exportManifest(ctx, output, prod); return;
     }
   };

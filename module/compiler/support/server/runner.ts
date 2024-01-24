@@ -4,7 +4,7 @@ import { rmSync } from 'node:fs';
 
 import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
-import type { CompilerOp, CompilerEvent } from '../types';
+import type { CompilerEvent, CompilerMode } from '../types';
 import { AsyncQueue } from '../queue';
 import { LogUtil } from '../log';
 import { CommonUtil } from '../util';
@@ -20,13 +20,13 @@ export class CompilerRunner {
   /**
    * Run compile process
    */
-  static async * runProcess(ctx: ManifestContext, changed: DeltaEvent[], op: CompilerOp, signal: AbortSignal): AsyncIterable<CompilerEvent> {
+  static async * runProcess(ctx: ManifestContext, changed: DeltaEvent[], mode: CompilerMode, signal: AbortSignal): AsyncIterable<CompilerEvent> {
     if (signal.aborted) {
       log('debug', 'Skipping, shutting down');
       return;
     }
 
-    const watch = op === 'watch';
+    const watch = mode === 'watch';
     if (!changed.length && !watch) {
       yield { type: 'state', payload: { state: 'compile-end' } };
       log('debug', 'Skipped');

@@ -5,7 +5,7 @@ import { setMaxListeners } from 'node:events';
 
 import type { ManifestContext } from '@travetto/manifest';
 
-import type { CompilerMode, CompilerOp, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types';
+import type { CompilerMode, CompilerProgressEvent, CompilerEvent, CompilerEventType, CompilerServerInfo } from '../types';
 import { LogUtil } from '../log';
 import { CompilerClient } from './client';
 import { CommonUtil } from '../util';
@@ -41,14 +41,14 @@ export class CompilerServer {
   #client: CompilerClient;
   #url: string;
 
-  constructor(ctx: ManifestContext, op: CompilerOp) {
+  constructor(ctx: ManifestContext, mode: CompilerMode) {
     this.#ctx = ctx;
     this.#client = new CompilerClient(ctx, LogUtil.logger('client.server'));
     this.#url = this.#client.url;
     this.info = {
       state: 'startup',
       iteration: Date.now(),
-      mode: op === 'run' ? 'build' : op,
+      mode,
       serverPid: process.pid,
       compilerPid: -1,
       path: ctx.workspace.path,
