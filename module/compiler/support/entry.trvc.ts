@@ -36,8 +36,19 @@ export const main = (ctx: ManifestContext) => {
 
     /** Restart */
     async restart(): Promise<void> {
-      await client.stop();
-      await timers.setTimeout(100);
+      const info = await client.info();
+      if (info) {
+        await client.stop();
+        for (; ;) {
+          try {
+            process.kill(info.compilerPid, 0);
+            await timers.setTimeout(100);
+            continue;
+          } catch {
+            break;
+          }
+        }
+      }
       await ops.start();
     },
 
