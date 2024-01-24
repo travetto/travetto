@@ -209,7 +209,11 @@ export class CompilerServer {
 
     await new Promise(r => {
       this.#server.close(r);
-      this.#server.closeAllConnections();
+      this.#emitEvent({ type: 'state', payload: { state: 'close' } });
+      setImmediate(() => {
+        this.#server.closeAllConnections();
+        this.#shutdown.abort();
+      });
     });
 
     log('info', 'Closed down server');
