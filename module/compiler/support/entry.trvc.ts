@@ -20,36 +20,30 @@ export const main = (ctx: ManifestContext) => {
 
   const ops = {
     /** Stop the server */
-    async stop(): Promise<void> {
-      if (await client.stop()) {
-        console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
-      } else {
-        console.log(`Server not running ${ctx.workspace.path}: ${client}`);
-      }
-    },
-
-    /** Start */
-    async start(): Promise<void> { await ops.compile('watch'); },
-
-    /** Start */
-    async build(): Promise<void> { await ops.compile('build'); },
-
-    /** Restart */
-    async restart(): Promise<void> {
+    async stop(quiet = false): Promise<void> {
       const info = await client.info();
       if (info) {
         await client.stop();
-        for (; ;) {
+        const start = Date.now();
+        for (; ;) { // Ensure its done
           try {
             process.kill(info.compilerPid, 0);
             await timers.setTimeout(100);
-            continue;
+            if ((Date.now() - start) > 3000) { // If we exceed to the max timeout
+              process.kill(info.compilerPid); // Force kill
+            }
           } catch {
             break;
           }
         }
+        if (!quiet) {
+          console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
+        }
+      } else {
+        if (quiet) {
+          console.log(`Server not running ${ctx.workspace.path}: ${client}`);
+        }
       }
-      await ops.start();
     },
 
     /** Get server info */
