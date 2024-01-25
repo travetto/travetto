@@ -4,7 +4,7 @@ import { rmSync } from 'node:fs';
 
 import type { ManifestContext, DeltaEvent } from '@travetto/manifest';
 
-import type { CompilerOp, CompilerEvent } from '../types';
+import type { CompilerEvent, CompilerMode } from '../types';
 import { AsyncQueue } from '../queue';
 import { LogUtil } from '../log';
 import { CommonUtil } from '../util';
@@ -20,8 +20,13 @@ export class CompilerRunner {
   /**
    * Run compile process
    */
-  static async * runProcess(ctx: ManifestContext, changed: DeltaEvent[], op: CompilerOp, signal: AbortSignal): AsyncIterable<CompilerEvent> {
-    const watch = op === 'watch';
+  static async * runProcess(ctx: ManifestContext, changed: DeltaEvent[], mode: CompilerMode, signal: AbortSignal): AsyncIterable<CompilerEvent> {
+    if (signal.aborted) {
+      log('debug', 'Skipping, shutting down');
+      return;
+    }
+
+    const watch = mode === 'watch';
     if (!changed.length && !watch) {
       yield { type: 'state', payload: { state: 'compile-end' } };
       log('debug', 'Skipped');
@@ -53,15 +58,18 @@ export class CompilerRunner {
         .on('message', msg => isEvent(msg) && queue.add(msg))
         .on('exit', () => queue.close());
 
-      kill = (): unknown => (proc.connected ? proc.send('shutdown') : proc.kill());
+      kill = (): unknown => {
+        log('debug', 'Shutting down process');
+        return (proc.connected ? proc.send('shutdown') : proc.kill());
+      };
 
       process.once('SIGINT', kill);
       signal.addEventListener('abort', kill);
 
       yield* queue;
 
-      if (!proc.killed && proc.exitCode !== 0) {
-        log('error', `Failed during compilation, code=${proc.exitCode}, killed=${proc.killed}`);
+      if (proc.exitCode !== 0) {
+        log('error', `Terminated during compilation, code=${proc.exitCode}, killed=${proc.killed}`);
       }
 
       log('debug', 'Finished');

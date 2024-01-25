@@ -17,6 +17,8 @@ type FetchEventsConfig<T> = {
   enforceIteration?: boolean;
 };
 
+const SHUTDOWN_TIMEOUT = 3000;
+
 /**
  * Compiler Client Operations
  */
@@ -53,9 +55,25 @@ export class CompilerClient {
     return fetch(`${this.#url}/clean`).then(v => v.ok, () => false);
   }
 
-  /** Stop server */
-  stop(): Promise<boolean> {
-    return fetch(`${this.#url}/stop`).then(v => v.ok, () => false);
+  /** Stop server and wait for shutdown */
+  async stop(): Promise<boolean> {
+    const info = await this.info();
+    if (!info) {
+      return false;
+    }
+    await fetch(`${this.#url}/stop`).then(v => v.ok, () => false); // Trigger
+    const start = Date.now();
+    for (; ;) { // Ensure its done
+      try {
+        process.kill(info.compilerPid, 0); // See if process is still running
+      } catch {
+        return true; // If not, its done
+      }
+      await timers.setTimeout(100);
+      if ((Date.now() - start) > SHUTDOWN_TIMEOUT) { // If we exceed the max timeout
+        process.kill(info.compilerPid); // Force kill
+      }
+    }
   }
 
   /** Fetch compiler events */

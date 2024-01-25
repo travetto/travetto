@@ -215,6 +215,8 @@ export class Compiler {
       }
     }
 
+    Log.debug('Compiler process shutdown');
+
     this.#shutdown('complete');
   }
 }

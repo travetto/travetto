@@ -46,6 +46,11 @@ export class CompilerWatcher {
       ]
     });
 
+    if (this.#signal.aborted) { // If already aborted, can happen async
+      cleanup.unsubscribe();
+      return;
+    }
+
     this.#signal.addEventListener('abort', () => cleanup.unsubscribe());
 
     yield* q;

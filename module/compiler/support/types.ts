@@ -1,5 +1,4 @@
 export type CompilerMode = 'build' | 'watch';
-export type CompilerOp = CompilerMode | 'run';
 
 export type CompilerStateType = 'startup' | 'init' | 'compile-start' | 'compile-end' | 'watch-start' | 'watch-end' | 'reset' | 'close';
 export type CompilerChangeEvent = { file: string, action: 'create' | 'update' | 'delete', output: string, module: string, time: number };
