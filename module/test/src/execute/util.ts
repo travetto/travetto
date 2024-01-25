@@ -44,7 +44,7 @@ export class RunnerUtil {
       folder: f => f === 'test',
       file: f => f.role === 'test'
     })
-      .filter(f => globs?.some(g => g.test(f.import)) ?? true);
+      .filter(f => globs?.some(g => g.test(f.sourceFile)) ?? true);
 
     const validFiles = files
       .map(f => this.isTestFile(f.sourceFile).then(valid => ({ file: f, valid })));
