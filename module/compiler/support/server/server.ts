@@ -153,7 +153,7 @@ export class CompilerServer {
       case 'stop': {
         // Must send immediately
         res.end(JSON.stringify({ closing: true }));
-        this.#shutdown.abort();
+        await this.close();
         break;
       }
       case 'info':
