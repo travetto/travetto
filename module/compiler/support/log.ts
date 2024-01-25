@@ -18,6 +18,18 @@ export class LogUtil {
 
   static logProgress?: ProgressWriter;
 
+  static linePartial = false;
+
+  static #rewriteLine(text: string): Promise<void> | void {
+    // Move to 1st position, and clear after text
+    const done = process.stdout.write(`\x1b[1G${text}\x1b[0K`);
+    this.linePartial = !text;
+    if (!done) {
+      return new Promise<void>(r => process.stdout.once('drain', r));
+    }
+  }
+
+
   /**
    * Set level for operation
    */
@@ -34,11 +46,7 @@ export class LogUtil {
   static #logProgressEvent(ev: CompilerProgressEvent): Promise<void> | void {
     const pct = Math.trunc(ev.idx * 100 / ev.total);
     const text = ev.complete ? '' : `Compiling [${'#'.repeat(Math.trunc(pct / 10)).padEnd(10, ' ')}] [${ev.idx}/${ev.total}] ${ev.message}`;
-    // Move to 1st position, and clear after text
-    const done = process.stdout.write(`\x1b[1G${text}\x1b[0K`);
-    if (!done) {
-      return new Promise<void>(r => process.stdout.once('drain', r));
-    }
+    return this.#rewriteLine(text);
   }
 
   /**
@@ -58,6 +66,9 @@ export class LogUtil {
         params.unshift(`[${ev.scope.padEnd(SCOPE_MAX, ' ')}]`);
       }
       params.unshift(new Date().toISOString(), `${ev.level.padEnd(5)}`);
+      if (this.linePartial) {
+        this.#rewriteLine(''); // Clear out progress line
+      }
       // eslint-disable-next-line no-console
       console[ev.level]!(...params);
     }
