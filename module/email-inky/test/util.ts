@@ -1,3 +1,4 @@
+import { RuntimeContext } from '@travetto/manifest';
 import { JSXElement } from '@travetto/email-inky/jsx-runtime';
 
 import { InkyRenderer } from '../src/render/renderer';
@@ -19,6 +20,6 @@ export async function renderJSX(element: JSXElement): Promise<string> {
   return cleanseOutput(await InkyRenderer.render(
     element,
     Html,
-    { file: '', module: '' }, false)
+    { file: '', module: RuntimeContext.main.name }, false)
   );
 }

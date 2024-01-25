@@ -33,6 +33,7 @@ async function imp(f = '') { try { return require(f); } catch (err) { return imp
 
 export async function getEntry() {
   process.setSourceMapsEnabled(true); // Ensure source map during compilation/development
+  process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS ?? ''} --enable-source-maps`; // Ensure it passes to children
 
   const ctx = getManifestContext();
   const target = getTarget.bind(null, ctx);

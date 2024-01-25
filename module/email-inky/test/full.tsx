@@ -4,7 +4,7 @@ import assert from 'node:assert';
 
 import { Suite, Test } from '@travetto/test';
 import { RuntimeContext } from '@travetto/manifest';
-import { Container, If, Unless, Summary, Title, Value, InkyTemplate, wrap } from '../__index__';
+import { Container, If, Unless, Summary, Title, Value, InkyTemplate, prepare } from '../__index__';
 
 @Suite('InkyTemplate')
 class ContainerTest {
@@ -19,22 +19,20 @@ class ContainerTest {
       </Container>
     </InkyTemplate>;
 
-    const wrapper = wrap(input);
-
-    const state = {
+    const module = await prepare(input, {
       file: 'test',
       module: RuntimeContext.main.name,
-    };
+    });
 
     assert(input);
 
 
-    assert((await wrapper.subject(state)).trim() === 'My Title');
+    assert((await module.subject()).trim() === 'My Title');
 
-    assert((await wrapper.html(state)).includes('My Summary'));
+    assert((await module.html()).includes('My Summary'));
 
-    assert(/<head>.*<title>My Title<\/title>.*?<\/head>/gsm.test(((await wrapper.html(state)))));
-    assert(/<body>\s*<span id="summary".*?My Summary<\/span>/gsm.test(((await wrapper.html(state)))));
+    assert(/<head>.*<title>My Title<\/title>.*?<\/head>/gsm.test(((await module.html()))));
+    assert(/<body>\s*<span id="summary".*?My Summary<\/span>/gsm.test(((await module.html()))));
   }
 
   @Test('works when rendering an inky template with conditionals')
@@ -55,16 +53,12 @@ class ContainerTest {
       </Container>
     </InkyTemplate>;
 
-    const wrapper = wrap(input);
-
-    const state = {
+    const wrapper = await prepare(input, {
       file: 'test',
       module: RuntimeContext.main.name,
-    };
+    });
 
-    assert(state);
-
-    const output = await wrapper.html(state);
+    const output = await wrapper.html();
     assert(/[{]{2}#paid[}]{2}\s*Payment!\s*[{]{2}\/paid[}]{2}/gsm.test(output));
     assert(/[{]{2}[^]unpaid[}]{2}\s*No Payment!\s*[{]{2}\/unpaid[}]{2}/gsm.test(output));
     assert(/[{]{2}amount[}]{2}/gsm.test(output));
@@ -79,14 +73,12 @@ class ContainerTest {
       <Container style={'background-image: url(/green.gif)'}>      </Container>
     </InkyTemplate>;
 
-    const wrapper = wrap(input);
-
-    const state = {
+    const wrapper = await prepare(input, {
       file: 'test',
-      module: RuntimeContext.main.name,
-    };
+      module: RuntimeContext.main.name
+    });
 
-    const output = await wrapper.html(state);
+    const output = await wrapper.html();
     assert(/background-image: url[(][/]green.gif[)]/gsm.test(output));
   }
 }

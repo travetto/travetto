@@ -1,6 +1,6 @@
 import { createElement } from '@travetto/email-inky/jsx-runtime';
-import { FileLoader, ModuleResourceLoader } from '@travetto/base';
-import { EmailTemplateLocation } from '@travetto/email';
+import { FileLoader } from '@travetto/base';
+import { EmailTemplateLocation, EmailResourceLoader } from '@travetto/email';
 
 import { JSXElementByFn, c } from '../components';
 
@@ -18,7 +18,7 @@ export class RenderContext implements RenderContextInit {
 
   constructor(ctx: RenderContextInit) {
     Object.assign(this, ctx);
-    this.loader ??= new ModuleResourceLoader(ctx.module);
+    this.loader ??= new EmailResourceLoader(ctx.module);
   }
 
   /**
