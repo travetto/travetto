@@ -1,5 +1,4 @@
 import fs from 'node:fs/promises';
-import timers from 'node:timers/promises';
 import path from 'node:path';
 
 import type { ManifestContext } from '@travetto/manifest';
@@ -11,8 +10,6 @@ import { CompilerSetup } from './setup';
 import { CompilerServer } from './server/server';
 import { CompilerRunner } from './server/runner';
 import { CompilerClient } from './server/client';
-
-const SHUTDOWN_TIMEOUT = 3000;
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export const main = (ctx: ManifestContext) => {
@@ -49,26 +46,11 @@ export const main = (ctx: ManifestContext) => {
   const ops = {
     /** Stop the server */
     async stop(quiet = false): Promise<void> {
-      const info = await client.info();
-      if (info) {
-        await client.stop();
-        const start = Date.now();
-        for (; ;) { // Ensure its done
-          try {
-            process.kill(info.compilerPid, 0);
-            await timers.setTimeout(100);
-            if ((Date.now() - start) > SHUTDOWN_TIMEOUT) { // If we exceed the max timeout
-              process.kill(info.compilerPid); // Force kill
-            }
-          } catch {
-            break;
-          }
-        }
-        if (!quiet) {
+      const justStopped = await client.stopAndWait();
+      if (!quiet) {
+        if (!justStopped) {
           console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
-        }
-      } else {
-        if (quiet) {
+        } else {
           console.log(`Server not running ${ctx.workspace.path}: ${client}`);
         }
       }
