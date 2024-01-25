@@ -46,13 +46,10 @@ export const main = (ctx: ManifestContext) => {
   const ops = {
     /** Stop the server */
     async stop(quiet = false): Promise<void> {
-      const justStopped = await client.stopAndWait();
-      if (!quiet) {
-        if (!justStopped) {
-          console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
-        } else {
-          console.log(`Server not running ${ctx.workspace.path}: ${client}`);
-        }
+      if (await client.stopAndWait()) {
+        !quiet && console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
+      } else {
+        !quiet && console.log(`Server not running ${ctx.workspace.path}: ${client}`);
       }
     },
 
