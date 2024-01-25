@@ -55,18 +55,13 @@ export class CompilerClient {
     return fetch(`${this.#url}/clean`).then(v => v.ok, () => false);
   }
 
-  /** Stop server */
-  stop(): Promise<boolean> {
-    return fetch(`${this.#url}/stop`).then(v => v.ok, () => false);
-  }
-
   /** Stop server and wait for shutdown */
-  async stopAndWait(): Promise<boolean> {
+  async stop(): Promise<boolean> {
     const info = await this.info();
     if (!info) {
       return false;
     }
-    await this.stop(); // Start request
+    await fetch(`${this.#url}/stop`).then(v => v.ok, () => false); // Trigger
     const start = Date.now();
     for (; ;) { // Ensure its done
       try {

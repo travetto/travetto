@@ -46,7 +46,7 @@ export const main = (ctx: ManifestContext) => {
   const ops = {
     /** Stop the server */
     async stop(): Promise<void> {
-      if (await client.stopAndWait()) {
+      if (await client.stop()) {
         console.log(`Stopped server ${ctx.workspace.path}: ${client}`);
       } else {
         console.log(`Server not running ${ctx.workspace.path}: ${client}`);
@@ -54,7 +54,7 @@ export const main = (ctx: ManifestContext) => {
     },
 
     /** Restart the server */
-    async restart(): Promise<void> { await client.stopAndWait().then(() => ops.watch()); },
+    async restart(): Promise<void> { await client.stop().then(() => ops.watch()); },
 
     /** Get server info */
     info: (): Promise<CompilerServerInfo | undefined> => client.info(),
