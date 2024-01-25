@@ -56,7 +56,7 @@ export class CompilerClient {
   }
 
   /** Stop server */
-  async stop(): Promise<boolean> {
+  stop(): Promise<boolean> {
     return fetch(`${this.#url}/stop`).then(v => v.ok, () => false);
   }
 
