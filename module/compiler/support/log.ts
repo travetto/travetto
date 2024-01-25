@@ -23,7 +23,7 @@ export class LogUtil {
   static #rewriteLine(text: string): Promise<void> | void {
     // Move to 1st position, and clear after text
     const done = process.stdout.write(`\x1b[1G${text}\x1b[0K`);
-    this.linePartial = !text;
+    this.linePartial = !!text;
     if (!done) {
       return new Promise<void>(r => process.stdout.once('drain', r));
     }
