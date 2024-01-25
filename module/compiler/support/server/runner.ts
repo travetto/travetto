@@ -41,7 +41,6 @@ export class CompilerRunner {
     const changedFiles = changed[0]?.file === '*' ? ['*'] : changed.map(ev => ev.sourceFile);
 
     const queue = new AsyncQueue<CompilerEvent>();
-    let kill: (() => void) | undefined;
 
     try {
       await CommonUtil.writeTextFile(deltaFile, changedFiles.join('\n'));
@@ -58,7 +57,7 @@ export class CompilerRunner {
         .on('message', msg => isEvent(msg) && queue.add(msg))
         .on('exit', () => queue.close());
 
-      kill = (): unknown => {
+      const kill = (): unknown => {
         log('debug', 'Shutting down process');
         return (proc.connected ? proc.send('shutdown') : proc.kill());
       };
@@ -71,12 +70,10 @@ export class CompilerRunner {
       if (proc.exitCode !== 0) {
         log('error', `Terminated during compilation, code=${proc.exitCode}, killed=${proc.killed}`);
       }
+      process.off('SIGINT', kill);
 
       log('debug', 'Finished');
     } finally {
-      if (kill) {
-        process.off('SIGINT', kill);
-      }
       rmSync(deltaFile, { force: true });
     }
   }

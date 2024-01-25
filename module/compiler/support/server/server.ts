@@ -207,14 +207,25 @@ export class CompilerServer {
       this.#emitEvent({ type: 'progress', payload: cancel });
     }
 
-    await new Promise(r => {
-      this.#server.close(r);
-      this.#emitEvent({ type: 'state', payload: { state: 'close' } });
-      setImmediate(() => {
-        this.#server.closeAllConnections();
-        this.#shutdown.abort();
+    try {
+      await new Promise((resolve, reject) => {
+        this.#server.close(resolve);
+        this.#emitEvent({ type: 'state', payload: { state: 'close' } });
+        setImmediate(() => {
+          this.#server.closeAllConnections();
+          this.#shutdown.abort();
+        });
+        setTimeout(reject, 2000); // 2s max wait
       });
-    });
+    } catch { // Timeout or other error
+      // Force shutdown
+      this.#server.closeAllConnections();
+      if (this.info.compilerPid) { // Ensure its killed
+        try {
+          process.kill(this.info.compilerPid);
+        } catch { }
+      }
+    }
 
     log('info', 'Closed down server');
   }

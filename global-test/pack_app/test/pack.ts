@@ -12,6 +12,7 @@ export class PackAppSuite {
   async testPack() {
     const tag = `tag-${Math.random()}`.replace(/[0][.]/, '');
     const imageName = 'travetto-test_pack_app';
+    assert(RuntimeIndex.mainModule.sourcePath.endsWith('pack_app'));
     const proc = spawn('npx', ['trv', 'pack:docker', '-dt', tag, 'run:double'], {
       cwd: RuntimeIndex.mainModule.sourcePath,
       shell: false,
