@@ -106,8 +106,8 @@ export const main = (ctx: ManifestContext) => {
     /** Build and watch the project */
     async watch(): Promise<void> { await compile('watch', 'info'); },
 
-    /** Build and run */
-    async run(): Promise<(mod: string) => Promise<unknown>> {
+    /** Build and return a loader */
+    async getLoader(): Promise<(mod: string) => Promise<unknown>> {
       // Short circuit if we can
       if (!(await client.isWatching())) {
         await compile('build', 'error');
