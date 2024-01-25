@@ -46,11 +46,12 @@ export class CompilerWatcher {
       ]
     });
 
-    this.#signal.addEventListener('abort', () => cleanup.unsubscribe());
-
-    if (this.#signal.aborted) { // Somehow?
+    if (this.#signal.aborted) { // If already aborted, can happen async
       cleanup.unsubscribe();
+      return;
     }
+
+    this.#signal.addEventListener('abort', () => cleanup.unsubscribe());
 
     yield* q;
   }
@@ -99,6 +100,10 @@ export class CompilerWatcher {
    * @returns
    */
   async * watchChanges(): AsyncIterable<CompilerWatchEvent> {
+    if (this.#signal.aborted) {
+      return;
+    }
+
     const manifest = this.#state.manifest;
     const ROOT_LOCK = path.resolve(manifest.workspace.path, 'package-lock.json');
     const ROOT_PKG = path.resolve(manifest.workspace.path, 'package.json');
