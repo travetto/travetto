@@ -45,8 +45,6 @@ export class TestCommand implements CliCommandShape {
 
     if (mode === 'single' && !await this.isFirstFile(first)) {
       return { message: 'You must specify a proper test file to run in single mode', source: 'arg' };
-    } else if (!/test\//.test(first)) {
-      return { message: 'Only files in the test/ folder are permitted to be run', source: 'arg' };
     }
   }
 
