@@ -209,13 +209,13 @@ export class CompilerServer {
 
     try {
       await new Promise((resolve, reject) => {
+        setTimeout(reject, 2000).unref(); // 2s max wait
         this.#server.close(resolve);
         this.#emitEvent({ type: 'state', payload: { state: 'close' } });
         setImmediate(() => {
           this.#server.closeAllConnections();
           this.#shutdown.abort();
         });
-        setTimeout(reject, 2000); // 2s max wait
       });
     } catch { // Timeout or other error
       // Force shutdown

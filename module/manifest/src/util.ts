@@ -17,7 +17,9 @@ export class ManifestUtil {
     return {
       modules: await ManifestModuleUtil.produceModules(ctx),
       generated: Date.now(),
-      ...ctx
+      main: ctx.main,
+      workspace: ctx.workspace,
+      build: ctx.build
     };
   }
 
@@ -33,7 +35,9 @@ export class ManifestUtil {
    */
   static createProductionManifest(manifest: ManifestRoot): ManifestRoot {
     return {
-      ...manifest,
+      generated: manifest.generated,
+      main: manifest.main,
+      workspace: manifest.workspace,
       // If in prod mode, only include std modules
       modules: Object.fromEntries(
         Object.values(manifest.modules)
@@ -96,7 +100,8 @@ export class ManifestUtil {
    */
   static getWorkspaceContext(ctx: ManifestContext): ManifestContext {
     return ctx.workspace.mono ? {
-      ...ctx,
+      workspace: ctx.workspace,
+      build: ctx.build,
       main: {
         name: ctx.workspace.name,
         folder: '',
@@ -113,7 +118,8 @@ export class ManifestUtil {
     const pkg = PackageUtil.readPackage(modPath);
 
     return {
-      ...ctx,
+      workspace: ctx.workspace,
+      build: ctx.build,
       main: {
         name: pkg.name,
         folder,
