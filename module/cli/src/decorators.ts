@@ -5,7 +5,6 @@ import { SchemaRegistry } from '@travetto/schema';
 import { CliCommandShape, CliCommandShapeFields } from './types';
 import { CliCommandRegistry, CliCommandConfigOptions } from './registry';
 import { CliModuleUtil } from './module';
-import { CliUtil } from './util';
 import { CliParseUtil } from './parse';
 
 /**
@@ -48,7 +47,7 @@ export function CliCommand(cfg: CliCommandConfigOptions = {}) {
         aliases: ['m', CliParseUtil.toEnvField(Env.TRV_MODULE.key)],
         description: 'Module to run for',
         specifiers: ['module'],
-        required: { active: CliUtil.monoRoot }
+        required: { active: RuntimeContext.monoRoot }
       });
     }
 

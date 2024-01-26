@@ -37,22 +37,25 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
   async init(req: PackageVisitReq<ModuleDep>): Promise<PackageVisitReq<ModuleDep>[]> {
     const pkg = PackageUtil.readPackage(req.sourcePath);
     const workspacePkg = PackageUtil.readPackage(this.ctx.workspace.path);
-    const workspaceModules = pkg.workspaces?.length ? (await PackageUtil.resolveWorkspaces(this.ctx, req.sourcePath)) : [];
 
     this.#mainLikeModules = new Set([
       pkg.name,
       ...Object.entries(pkg.travetto?.build?.withModules ?? []).filter(x => x[1] === 'main').map(x => x[0]),
-      // Add workspace folders, for tests and docs
-      ...workspaceModules.map(x => x.name)
     ]);
 
     const globals = Object.keys(workspacePkg.travetto?.build?.withModules ?? [])
       .map(name => PackageUtil.packageReq<ModuleDep>(PackageUtil.resolvePackagePath(name), name in (workspacePkg.dependencies ?? {}), true));
 
-    const workspaceModuleDeps = workspaceModules
-      .map(entry => PackageUtil.packageReq<ModuleDep>(path.resolve(req.sourcePath, entry.sourcePath), false, true));
+    // Capture workspace modules as dependencies
+    if (this.ctx.workspace.mono && !this.ctx.main.folder) { // We are at the root of the workspace
+      for (const mod of await PackageUtil.resolveWorkspaces(this.ctx)) {
+        // Add workspace folders, for tests and docs
+        this.#mainLikeModules.add(mod.name);
+        globals.push(PackageUtil.packageReq<ModuleDep>(path.resolve(this.ctx.workspace.path, mod.sourcePath), false, true));
+      }
+    }
 
-    return [...globals, ...workspaceModuleDeps];
+    return globals;
   }
 
   /**

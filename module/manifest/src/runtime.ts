@@ -130,5 +130,11 @@ export const RuntimeContext = build({
   toolPath(...rel: string[]): string {
     rel = rel.flatMap(x => x === '@' ? ['node_modules', RuntimeIndex.manifest.main.name] : [x]);
     return path.resolve(RuntimeIndex.manifest.workspace.path, RuntimeIndex.manifest.build.toolFolder, ...rel);
+  },
+  /**
+   * Are we running from a mono-root?
+   */
+  get monoRoot(): boolean {
+    return !!RuntimeIndex.manifest.workspace.mono && !RuntimeIndex.manifest.main.folder;
   }
 }, ['main', 'workspace']);

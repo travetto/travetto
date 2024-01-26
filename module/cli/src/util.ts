@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 
 import { Env, ExecUtil, ShutdownManager } from '@travetto/base';
-import { RuntimeIndex, RuntimeContext } from '@travetto/manifest';
+import { RuntimeContext } from '@travetto/manifest';
 
 import { CliCommandShape, CliCommandShapeFields, RunResponse } from './types';
 
@@ -11,13 +11,6 @@ const validEnv = (k: string): boolean => IPC_ALLOWED_ENV.has(k) || (!IPC_INVALID
 
 export class CliUtil {
   /**
-   * Are we running from a mono-root?
-   */
-  static get monoRoot(): boolean {
-    return !!RuntimeContext.workspace.mono && RuntimeIndex.mainModule.sourcePath === RuntimeContext.workspace.path;
-  }
-
-  /**
    * Get a simplified version of a module name
    * @returns
    */
@@ -25,7 +18,7 @@ export class CliUtil {
     const simple = (module ?? RuntimeContext.main.name).replace(/[\/]/, '_').replace(/@/, '');
     if (!simple) {
       return placeholder;
-    } else if (!module && this.monoRoot) {
+    } else if (!module && RuntimeContext.monoRoot) {
       return placeholder;
     } else {
       return placeholder.replace('<module>', simple);

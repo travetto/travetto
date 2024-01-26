@@ -96,13 +96,6 @@ export class PackageUtil {
   }
 
   /**
-   * import a package.json from a given module name
-   */
-  static importPackage(moduleName: string): Package {
-    return this.readPackage(this.resolvePackagePath(moduleName));
-  }
-
-  /**
    * Visit packages with ability to track duplicates
    */
   static async visitPackages<T>(visitor: PackageVisitor<T>): Promise<Set<T>> {
@@ -133,8 +126,7 @@ export class PackageUtil {
           // We consider a module local if its not in the node_modules
           !req.sourcePath.includes('node_modules') && (
             // And its the root or we are in a monorepo
-            root.sourcePath === req.sourcePath ||
-            !!root.pkg.workspaces
+            root.sourcePath === req.sourcePath || !!root.pkg.workspaces
           )
         );
         queue.push(...children.map(x => ({ ...x, parent: dep })));
@@ -146,32 +138,23 @@ export class PackageUtil {
   /**
    * Find workspace values from rootPath
    */
-  static async resolveWorkspaces(ctx: ManifestContext, rootPath: string): Promise<PackageWorkspaceEntry[]> {
-    if (!this.#workspaces[rootPath]) {
-      const cache = path.resolve(ctx.workspace.path, ctx.build.outputFolder, 'workspaces.json');
-      try {
-        return await ManifestFileUtil.readAsJson(cache);
-      } catch (err) {
+  static async resolveWorkspaces(ctx: ManifestContext): Promise<PackageWorkspaceEntry[]> {
+    const rootPath = ctx.workspace.path;
+    const cache = path.resolve(rootPath, ctx.build.outputFolder, 'workspaces.json');
+    return this.#workspaces[rootPath] ??= await ManifestFileUtil.readAsJson<PackageWorkspaceEntry[]>(cache)
+      .catch(async () => {
         let out: PackageWorkspaceEntry[];
         switch (ctx.workspace.manager) {
+          case 'yarn':
           case 'npm': {
             const res = await this.#exec<{ location: string, name: string }[]>(rootPath, 'npm query .workspace');
             out = res.map(d => ({ sourcePath: d.location, name: d.name }));
             break;
           }
-          case 'yarn': {
-            const res = await this.#exec<Record<string, { location: string }>>(rootPath, 'npm query .workspace');
-            out = Object.entries(res).map(([name, { location }]) => ({ sourcePath: location, name }));
-            break;
-          }
         }
-
-        this.#workspaces[rootPath] = out;
-
         await ManifestFileUtil.bufferedFileWrite(cache, out);
-      }
-    }
-    return this.#workspaces[rootPath];
+        return out;
+      });
   }
 
   /**
