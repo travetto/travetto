@@ -36,7 +36,7 @@ Additionally, once the code has been compiled (or even bundled after that), the 
 
 <h2 id="manifest-delta">Manifest Delta</h2>
 
-During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L20">ManifestDeltaUtil</a> provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s incremental behavior to know when a file has changed and needs to be recompiled.
+During the compilation process, it is helpful to know how the output content differs from the manifest, which is produced from the source input. The <a target="_blank" class="source-link" href="https://github.com/travetto/travetto/tree/main/module/manifest/src/delta.ts#L21">ManifestDeltaUtil</a> provides the functionality for a given manifest, and will produce a stream of changes grouped by module.  This is the primary input into the <a class="module-link" href="https://github.com/travetto/travetto/tree/main/module/compiler" title="The compiler infrastructure for the Travetto framework">Compiler</a>'s incremental behavior to know when a file has changed and needs to be recompiled.
 
 <h2 id="class-and-function-metadata">Class and Function Metadata</h2>
 
@@ -122,7 +122,8 @@ By default, all paths within the framework are assumed to be in a POSIX style, a
     <span class="token string-property property">"compilerFolder"</span><span class="token operator">:</span> <span class="token string">".trv/compiler"</span><span class="token punctuation">,</span>
     <span class="token string-property property">"compilerUrl"</span><span class="token operator">:</span> <span class="token string">"http://127.0.0.1:26803"</span><span class="token punctuation">,</span>
     <span class="token string-property property">"compilerModuleFolder"</span><span class="token operator">:</span> <span class="token string">"module/compiler"</span><span class="token punctuation">,</span>
-    <span class="token string-property property">"outputFolder"</span><span class="token operator">:</span> <span class="token string">".trv/output"</span>
+    <span class="token string-property property">"outputFolder"</span><span class="token operator">:</span> <span class="token string">".trv/output"</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"toolFolder"</span><span class="token operator">:</span> <span class="token string">".trv/tool"</span>
   <span class="token punctuation">{{'}'}}</span><span class="token punctuation">,</span>
   <span class="token string-property property">"main"</span><span class="token operator">:</span> <span class="token punctuation">{{'{'}}</span>
     <span class="token string-property property">"name"</span><span class="token operator">:</span> <span class="token string">"@travetto/manifest"</span><span class="token punctuation">,</span>

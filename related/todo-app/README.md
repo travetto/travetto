@@ -376,6 +376,14 @@ npx trv run:rest
         level: true,
         location: true
       },
+      MailConfig: {
+        transport: {},
+        defaults: {
+          title: 'Email Title',
+          from: 'Travetto Mailer <mailer@travetto.dev>',
+          replyTo: 'Travetto Mailer <mailer@travetto.dev>'
+        }
+      },
       MemoryModelConfig: {},
       MongoModelConfig: {
         hosts: { '0': 'localhost' },

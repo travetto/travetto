@@ -21,7 +21,7 @@ This module expands upon the [Typescript](https://typescriptlang.org) compiler, 
 Beyond the [Typescript](https://typescriptlang.org) compiler functionality, the module provides the primary entry point into the development process.
 
 ## CLI
-The compiler cli, [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L5) is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. 
+The compiler cli, [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L4) is the entry point for compilation-related operations. It has the ability to check for active builds, and ongoing watch operations to ensure only one process is building at a time.  Within the framework, regardless of mono-repo or not, the compilation always targets the entire project.  With the efficient caching behavior, this leads to generally a minimal overhead but allows for centralization of all operations. 
 
 The compiler cli supports the following operations:
    *  `start|watch` - Run the compiler in watch mode
@@ -39,35 +39,35 @@ In addition to the normal output, the compiler supports an environment variable 
 $ TRV_BUILD=debug trvc build
 
 2029-03-14T04:00:00.618Z info  [compiler-server] Starting server http://127.0.0.1:25539
-2029-03-14T04:00:00.837Z debug [compiler       ] Started, streaming logs
+2029-03-14T04:00:00.837Z debug [client.main    ] Start Server
 2029-03-14T04:00:01.510Z debug [event-stream   ] Started event stream
 2029-03-14T04:00:02.450Z debug [precompile     ] Started
-2029-03-14T04:00:02.762Z debug [compiler-server] Receive request { action: 'info', subAction: undefined }
-2029-03-14T04:00:02.947Z debug [client.server  ] Starting watch for events of type "log"
-2029-03-14T04:00:03.093Z debug [compiler-server] Receive request { action: 'event', subAction: 'log' }
-2029-03-14T04:00:04.003Z debug [precompile     ] Skipped @travetto/manifest
-2029-03-14T04:00:04.495Z debug [precompile     ] Skipped @travetto/transformer
-2029-03-14T04:00:05.066Z debug [precompile     ] Skipped @travetto/compiler
-2029-03-14T04:00:05.307Z debug [precompile     ] Completed
-2029-03-14T04:00:05.952Z debug [manifest       ] Started
-2029-03-14T04:00:06.859Z debug [manifest       ] Completed
-2029-03-14T04:00:07.720Z debug [transformers   ] Started
-2029-03-14T04:00:08.179Z debug [transformers   ] Skipped @travetto/base
-2029-03-14T04:00:08.588Z debug [transformers   ] Skipped @travetto/cli
-2029-03-14T04:00:09.493Z debug [transformers   ] Skipped @travetto/manifest
-2029-03-14T04:00:10.395Z debug [transformers   ] Skipped @travetto/registry
-2029-03-14T04:00:10.407Z debug [transformers   ] Skipped @travetto/schema
-2029-03-14T04:00:10.799Z debug [transformers   ] Completed
-2029-03-14T04:00:11.013Z debug [delta          ] Started
-2029-03-14T04:00:11.827Z debug [delta          ] Completed
-2029-03-14T04:00:11.894Z debug [manifest       ] Started
-2029-03-14T04:00:12.133Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
-2029-03-14T04:00:13.123Z debug [manifest       ] Completed
-2029-03-14T04:00:14.014Z info  [compiler-server] State changed: compile-end
-2029-03-14T04:00:14.924Z debug [compiler-exec  ] Skipped
-2029-03-14T04:00:15.690Z debug [event-stream   ] Finished event stream
-2029-03-14T04:00:15.865Z info  [compiler-server] Closing down server
-2029-03-14T04:00:16.757Z debug [client.server  ] Stopping watch for events of type "log"
+2029-03-14T04:00:02.762Z debug [precompile     ] Skipped @travetto/manifest
+2029-03-14T04:00:02.947Z debug [precompile     ] Skipped @travetto/transformer
+2029-03-14T04:00:03.093Z debug [precompile     ] Skipped @travetto/compiler
+2029-03-14T04:00:04.003Z debug [precompile     ] Completed
+2029-03-14T04:00:04.495Z debug [manifest       ] Started
+2029-03-14T04:00:05.066Z debug [manifest       ] Completed
+2029-03-14T04:00:05.307Z debug [transformers   ] Started
+2029-03-14T04:00:05.952Z debug [transformers   ] Skipped @travetto/base
+2029-03-14T04:00:06.859Z debug [transformers   ] Skipped @travetto/cli
+2029-03-14T04:00:07.720Z debug [transformers   ] Skipped @travetto/manifest
+2029-03-14T04:00:08.179Z debug [transformers   ] Skipped @travetto/registry
+2029-03-14T04:00:08.588Z debug [transformers   ] Skipped @travetto/schema
+2029-03-14T04:00:09.493Z debug [transformers   ] Completed
+2029-03-14T04:00:10.395Z debug [delta          ] Started
+2029-03-14T04:00:10.407Z debug [delta          ] Completed
+2029-03-14T04:00:10.799Z debug [manifest       ] Started
+2029-03-14T04:00:11.013Z debug [manifest       ] Wrote manifest @travetto-doc/compiler
+2029-03-14T04:00:11.827Z debug [manifest       ] Completed
+2029-03-14T04:00:11.894Z info  [compiler-server] State changed: compile-end
+2029-03-14T04:00:12.133Z debug [compiler-exec  ] Skipped
+2029-03-14T04:00:13.123Z debug [event-stream   ] Finished event stream
+2029-03-14T04:00:14.014Z info  [compiler-server] Closing down server
+2029-03-14T04:00:14.924Z debug [compiler-server] Server close event
+2029-03-14T04:00:15.690Z info  [compiler-server] Closed down server
+2029-03-14T04:00:15.865Z debug [compiler-server] Finished processing events
+2029-03-14T04:00:16.757Z debug [client.main    ] End Server
 ```
 
 **Terminal: Sample trv output with default log level**
@@ -88,4 +88,4 @@ The compiler will move through the following phases on a given compilation execu
    *  `Invoke Compiler` - Run [Typescript](https://typescriptlang.org) compiler with the aforementioned enhancements
 
 ### Bootstrapping
-Given that the framework is distributed as [Typescript](https://typescriptlang.org) only files, there is a bootstrapping problem that needs to be mitigated.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L5) entrypoint, along with a small context utility in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching") are the only [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) files needed to run the project.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L5) entry point will compile `@travetto/compiler/support/*` files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.
+Given that the framework is distributed as [Typescript](https://typescriptlang.org) only files, there is a bootstrapping problem that needs to be mitigated.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L4) entrypoint, along with a small context utility in [Manifest](https://github.com/travetto/travetto/tree/main/module/manifest#readme "Support for project indexing, manifesting, along with file watching") are the only [Javascript](https://developer.mozilla.org/en-US/docs/Web/JavaScript) files needed to run the project.  The [trvc](https://github.com/travetto/travetto/tree/main/module/compiler/bin/trvc.js#L4) entry point will compile `@travetto/compiler/support/*` files as the set that is used at startup.  These files are also accessible to the compiler as they get re-compiled after the fact.

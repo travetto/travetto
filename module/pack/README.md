@@ -244,7 +244,7 @@ echo "FROM node:20-alpine" > $DIST/Dockerfile
 echo "RUN which useradd && (groupadd --gid 2000 app && useradd -u 2000 -g app app) || (addgroup -g 2000 app && adduser -D -G app -u 2000 app)" >> $DIST/Dockerfile
 echo "RUN mkdir /app && chown app:app /app" >> $DIST/Dockerfile
 echo "COPY --chown=\"app:app\" . /app" >> $DIST/Dockerfile
-echo "ENV NODE_OPTIONS=\"--disable-proto=delete\"" >> $DIST/Dockerfile
+echo "ENV NODE_OPTIONS=\"\"" >> $DIST/Dockerfile
 echo "USER app" >> $DIST/Dockerfile
 echo "WORKDIR /app" >> $DIST/Dockerfile
 echo "ENTRYPOINT [\"/app/todo-app.sh\"]" >> $DIST/Dockerfile
