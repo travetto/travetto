@@ -404,6 +404,14 @@ First we must start the application:
         level: true,
         location: <span class="token boolean">true</span>
       <span class="token punctuation">{{'}'}}</span>,
+      MailConfig: <span class="token punctuation">{{'{'}}</span>
+        transport: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
+        defaults: <span class="token punctuation">{{'{'}}</span>
+          title: <span class="token string">'Email Title'</span>,
+          from: <span class="token string">'Travetto Mailer &lt;mailer@travetto.dev>'</span>,
+          replyTo: <span class="token string">'Travetto Mailer &lt;mailer@travetto.dev>'</span>
+        <span class="token punctuation">{{'}'}}</span>
+      <span class="token punctuation">{{'}'}}</span>,
       MemoryModelConfig: <span class="token punctuation">{{'{'}}</span><span class="token punctuation">{{'}'}}</span>,
       MongoModelConfig: <span class="token punctuation">{{'{'}}</span>
         hosts: <span class="token punctuation">{{'{'}}</span> <span class="token string">'0'</span><span class="token builtin class-name">:</span> <span class="token string">'localhost'</span> <span class="token punctuation">{{'}'}}</span>,

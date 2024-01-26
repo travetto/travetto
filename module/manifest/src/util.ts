@@ -15,11 +15,11 @@ export class ManifestUtil {
    */
   static async buildManifest(ctx: ManifestContext): Promise<ManifestRoot> {
     return {
-      modules: await ManifestModuleUtil.produceModules(ctx),
       generated: Date.now(),
-      main: ctx.main,
       workspace: ctx.workspace,
-      build: ctx.build
+      build: ctx.build,
+      main: ctx.main,
+      modules: await ManifestModuleUtil.produceModules(ctx),
     };
   }
 
@@ -36,19 +36,18 @@ export class ManifestUtil {
   static createProductionManifest(manifest: ManifestRoot): ManifestRoot {
     return {
       generated: manifest.generated,
-      main: manifest.main,
       workspace: manifest.workspace,
-      // If in prod mode, only include std modules
+      build: {
+        ...manifest.build,
+        // Mark output folder/workspace path as portable
+        outputFolder: '$$PRODUCTION$$',
+      },
+      main: manifest.main,
       modules: Object.fromEntries(
         Object.values(manifest.modules)
           .filter(x => x.prod)
           .map(m => [m.name, m])
       ),
-      build: {
-        ...manifest.build,
-        // Mark output folder/workspace path as portable
-        outputFolder: '$$PRODUCTION$$',
-      }
     };
   }
 
