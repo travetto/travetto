@@ -9,6 +9,7 @@ export type ModuleDep = ManifestDepCore & {
   childSet: Set<string>;
   parentSet: Set<string>;
   roleSet: Set<ManifestModuleRole>;
+  /** Dependency is direct to the main module or its part of the workspace global set */
   topLevel?: boolean;
 };
 
@@ -80,7 +81,8 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
 
     const dep: ModuleDep = {
       name, version, sourcePath, main, mainLike, local, internal, pkg: req.pkg,
-      parentSet: new Set([]), childSet: new Set([]), roleSet: new Set([]), prod: req.prod, topLevel: req.topLevel
+      parentSet: new Set([]), childSet: new Set([]), roleSet: new Set(req.pkg.travetto?.roles), prod: req.prod,
+      topLevel: req.topLevel || this.#mainLikeModules.has(name)
     };
 
     return dep;
@@ -110,31 +112,39 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
 
     // Visit all direct dependencies and mark
     for (const { el } of mapping.values()) {
-      if (!main.child.has(el.name)) { // Not a direct descendent
-        el.prod = false;
-      }
-      if (main.child.has(el.name) || (el.topLevel && el !== main.el)) { // Direct descendant
-        el.roleSet = new Set(el.pkg.travetto?.roles ?? []);
+      if (el === main.el) { continue; }
+      if (el.topLevel || main.child.has(el.name)) {
         if (!el.roleSet.size) {
           el.roleSet.add('std');
         }
+        main.child.add(el.name); // Ensure top level is a child of main for propagation
+        mapping.get(el.name)!.parent.add(main.el.name);
+      } else if (!main.child.has(el.name)) { // Not a direct descendent or top-level
+        el.prod = false;
+        el.roleSet.clear(); // Only allow roles via propagation
       }
     }
+
+    // Color parent
+    main.el.roleSet.add('std');
+    main.el.prod = true;
 
     while (mapping.size > 0) {
       const toProcess = [...mapping.values()].filter(x => x.parent.size === 0);
       if (!toProcess.length) {
         throw new Error(`We have reached a cycle for ${[...mapping.keys()]}`);
       }
-      // Propagate
+      // Propagate to children
       for (const { el, child } of toProcess) {
         for (const c of child.keys()) {
           const { el: cDep, parent } = mapping.get(c)!;
           parent.delete(el.name); // Remove from child
-          for (const role of el.roleSet) {
-            cDep.roleSet.add(role);
+          if (cDep.name in (el.pkg.dependencies ?? {})) { // If an owned prod-dependency
+            for (const role of el.roleSet) {
+              cDep.roleSet.add(role); // Transfer roles
+            }
+            cDep.prod ||= el.prod; // Allow prod to trickle down as needed
           }
-          cDep.prod ||= el.prod; // Allow prod to trickle down as needed
         }
       }
       // Remove from mapping
@@ -142,10 +152,6 @@ export class ModuleDependencyVisitor implements PackageVisitor<ModuleDep> {
         mapping.delete(el.name);
       }
     }
-
-    // Color parent as final step
-    main.el.prod = true;
-    main.el.roleSet.add('std');
 
     return deps;
   }

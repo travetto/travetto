@@ -19,7 +19,7 @@ class ImageUtilTest {
 <div style="background: url('/red.gif')"></div>
 `;
 
-    const output = await EmailCompileUtil.inlineImages(text, { search: this.fixture });
+    const output = await EmailCompileUtil.inlineImages(text, { loader: this.fixture });
 
     assert(!output.includes('red.gif'));
     assert(!output.includes('blue.gif'));

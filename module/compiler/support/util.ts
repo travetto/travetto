@@ -73,6 +73,7 @@ export class CommonUtil {
       for await (const ev of comp) {
         yield ev;
         if (shouldRestart(ev)) {
+          log('debug', 'Restarting stream');
           controller.abort(); // Ensure terminated of process
           continue outer;
         }

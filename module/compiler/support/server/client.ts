@@ -43,7 +43,7 @@ export class CompilerClient {
   /** Get server information, if server is running */
   info(): Promise<CompilerServerInfo | undefined> {
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-    return fetch(`${this.#url}/info`).then(v => v.json(), () => undefined) as Promise<CompilerServerInfo>;
+    return fetch(`${this.#url}/info`, { signal: AbortSignal.timeout(250) }).then(v => v.json(), () => undefined) as Promise<CompilerServerInfo>;
   }
 
   async isWatching(): Promise<boolean> {
@@ -61,7 +61,8 @@ export class CompilerClient {
     if (!info) {
       return false;
     }
-    await fetch(`${this.#url}/stop`).then(v => v.ok, () => false); // Trigger
+
+    await fetch(`${this.#url}/stop`, { signal: AbortSignal.timeout(250) }).then(v => v.ok, () => false); // Trigger
     const start = Date.now();
     for (; ;) { // Ensure its done
       try {

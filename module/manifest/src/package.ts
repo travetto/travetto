@@ -107,7 +107,7 @@ export class PackageUtil {
     const out = new Set<T>();
 
     while (queue.length) {
-      const req = queue.pop();
+      const req = queue.shift(); // Visit initial set first
 
       if (!req || (visitor.valid && !visitor.valid(req))) {
         continue;

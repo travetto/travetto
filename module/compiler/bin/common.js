@@ -13,11 +13,11 @@ const getAge = (/** @type {{mtimeMs:number, ctimeMs:number}} */ st) => Math.max(
 const getTarget = (/** @type {Ctx} */ ctx, file = '') => ({
   dest: path.resolve(ctx.workspace.path, ctx.build.compilerFolder, 'node_modules', '@travetto/compiler', file).replace(TS_EXT, '.js'),
   src: path.resolve(ctx.workspace.path, ctx.build.compilerModuleFolder, file),
-  writeIfStale(/** @type {(text:string)=>string}*/ transform) {
+  async writeIfStale(/** @type {(text:string)=>(string|Promise<string>)}*/ transform) {
     if (!existsSync(this.dest) || getAge(statSync(this.dest)) < getAge(statSync(this.src))) {
       const text = readFileSync(this.src, 'utf8');
       mkdirSync(path.dirname(this.dest), { recursive: true });
-      writeFileSync(this.dest, transform(text), 'utf8');
+      writeFileSync(this.dest, await transform(text), 'utf8');
     }
   }
 });
@@ -43,11 +43,11 @@ export async function getEntry() {
   existsSync(tsconfig) || writeFileSync(tsconfig, JSON.stringify({ extends: '@travetto/compiler/tsconfig.trv.json' }), 'utf8');
 
   // Compile support folder
-  target('package.json').writeIfStale(text => JSON.stringify(Object.assign(JSON.parse(text), { type: ctx.workspace.type }), null, 2));
+  await target('package.json').writeIfStale(text => JSON.stringify(Object.assign(JSON.parse(text), { type: ctx.workspace.type }), null, 2));
 
   let transpile;
   for (const file of readdirSync(target('support').src, { recursive: true, encoding: 'utf8' })) {
-    if (TS_EXT.test(file)) { target(`support/${file}`).writeIfStale(transpile ??= await getTranspiler(ctx)); }
+    if (TS_EXT.test(file)) { await target(`support/${file}`).writeIfStale(async (text) => (transpile ??= await getTranspiler(ctx))(text)); }
   }
 
   // Load
