@@ -1,7 +1,8 @@
 import vscode from 'vscode';
+import timers from 'node:timers/promises';
 
 import type { CompilerStateType } from '@travetto/compiler/support/types';
-import { ManifestContext, ManifestIndex, ManifestUtil, PackageUtil, path } from '@travetto/manifest';
+import { ManifestContext, ManifestIndex, ManifestUtil, PackageUtil } from '@travetto/manifest';
 
 /**
  * Standard set of workspace utilities
@@ -97,5 +98,16 @@ export class Workspace {
     if (editor && editor.document) {
       return editor;
     }
+  }
+
+  /** Show a message for a limited time, with the ability to dismiss */
+  static async showEphemeralMessage(text: string, duration = 3000): Promise<void> {
+    await vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification, title: text, cancellable: true,
+    }, async (_, token) => {
+      const ctrl = new AbortController();
+      token.onCancellationRequested(() => ctrl.abort());
+      await timers.setTimeout(duration, undefined, { signal: ctrl.signal });
+    });
   }
 }

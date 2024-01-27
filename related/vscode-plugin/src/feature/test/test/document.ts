@@ -3,16 +3,15 @@ import vscode from 'vscode';
 
 import { TypedObject } from '@travetto/base';
 
+import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
+import type { Assertion, TestResult, SuiteResult, SuiteConfig, TestConfig } from '@travetto/test';
+
 import { Decorations } from './decoration';
-import {
-  AllState, TestState, ResultState,
-  TestEvent, SuiteResult, TestResult, Assertion,
-  SuiteConfig, SuiteState, Level,
-  StatusUnknown,
-  RemoveEvent
-} from './types';
+import { AllState, TestState, ResultState, SuiteState, TestLevel, StatusUnknown } from './types';
 
 const diagColl = vscode.languages.createDiagnosticCollection('Travetto');
+
+type TestItem = Assertion | TestResult | TestConfig | SuiteResult | SuiteConfig;
 
 function isTestState(level: string, state: ResultState<unknown>): state is TestState {
   return level === 'test';
@@ -22,15 +21,15 @@ function isSuiteState(level: string, state: ResultState<unknown>): state is Suit
   return level === 'suite';
 }
 
-function isAssertion(level: string, state?: Assertion | TestResult | SuiteResult | TestEvent | SuiteConfig): state is Assertion {
+function isAssertion(level: string, state?: TestItem): state is Assertion {
   return level === 'assertion';
 }
 
-function isTestResult(level: string, state?: Assertion | TestResult | SuiteResult | TestEvent | SuiteConfig): state is TestResult {
+function isTestResult(level: string, state?: TestItem): state is TestResult {
   return level === 'test';
 }
 
-function isSuiteResult(level: string, state?: Assertion | TestResult | SuiteResult | TestEvent | SuiteConfig): state is SuiteResult {
+function isSuiteResult(level: string, state?: TestItem): state is SuiteResult {
   return level === 'suite';
 }
 
@@ -41,11 +40,7 @@ type LineAtDoc = Pick<vscode.TextDocument, 'lineAt'>;
  */
 export class DocumentResultsManager {
 
-  #results: AllState = {
-    suite: {},
-    test: {}
-  };
-
+  #results: AllState = { suite: {}, test: {} };
   #failedAssertions: Record<number, Assertion> = {};
   #diagnostics: vscode.Diagnostic[] = [];
   #editors = new Set<vscode.TextEditor>();
@@ -230,11 +225,11 @@ export class DocumentResultsManager {
    * @param src
    */
   store(
-    level: Level,
+    level: TestLevel,
     key: string,
     status: StatusUnknown,
     decoration: vscode.DecorationOptions,
-    src?: Assertion | SuiteResult | SuiteConfig | TestResult | TestEvent
+    src?: TestItem
   ): void {
     if (isAssertion(level, src)) {
       const el = this.#results.test[key];
@@ -270,7 +265,7 @@ export class DocumentResultsManager {
    * Create all level styles
    * @param level
    */
-  genStyles(level: Level): Record<'failed' | 'passed' | 'unknown', vscode.TextEditorDecorationType> {
+  genStyles(level: TestLevel): Record<'failed' | 'passed' | 'unknown', vscode.TextEditorDecorationType> {
     return {
       failed: Decorations.buildStyle(level, 'failed'),
       passed: Decorations.buildStyle(level, 'passed'),
@@ -283,7 +278,7 @@ export class DocumentResultsManager {
    * @param level Level to reset
    * @param key The file to reset
    */
-  reset(level: Exclude<Level, 'assertion'>, key: string): void {
+  reset(level: Exclude<TestLevel, 'assertion'>, key: string): void {
     const existing = this.#results[level][key];
     const base: ResultState<unknown> = {
       status: 'unknown',
@@ -311,7 +306,7 @@ export class DocumentResultsManager {
    * @param suite
    */
   onSuite(suite: SuiteResult): void {
-    const status = suite.skipped ? 'unknown' : (suite.failed ? 'failed' : 'passed');
+    const status = (suite.failed ? 'failed' : suite.passed ? 'passed' : 'skipped');
     this.reset('suite', suite.classId);
     this.store('suite', suite.classId, status, Decorations.buildSuite(suite), suite);
   }
@@ -346,8 +341,10 @@ export class DocumentResultsManager {
   /**
    * On a test event, update internal state
    */
-  onEvent(e: TestEvent | RemoveEvent): void {
-    if (e.type === 'removeTest') {
+  onEvent(e: TestWatchEvent): void {
+    if (e.type === 'ready' || e.type === 'log') {
+      // Ignore
+    } else if (e.type === 'removeTest') {
       this.reset('test', `${e.classId}:${e.method}`);
     } else if (e.phase === 'before') {
       switch (e.type) {

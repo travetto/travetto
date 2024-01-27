@@ -2,7 +2,8 @@ import vscode from 'vscode';
 import { ChildProcess, SpawnOptions, spawn } from 'node:child_process';
 
 import { IndexedModule, ManifestModule, path } from '@travetto/manifest';
-import { Env } from '@travetto/base';
+import { Env, StreamUtil } from '@travetto/base';
+import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
 
 import { Workspace } from '../../../core/workspace';
 import { Activatible } from '../../../core/activation';
@@ -11,9 +12,6 @@ import { RunUtil } from '../../../core/run';
 import { BaseFeature } from '../../base';
 
 import { WorkspaceResultsManager } from './workspace';
-import { RemoveEvent, TestEvent } from './types';
-
-type Event = TestEvent | RemoveEvent | { type: 'log', message: string };
 
 /**
  * Test Runner Feature
@@ -25,44 +23,47 @@ class TestRunnerFeature extends BaseFeature {
   #consumer: WorkspaceResultsManager;
   #codeLensUpdated: (e: void) => unknown;
 
-  #start(): void {
-    if (!this.#server) {
-      this.log.info('Starting server');
-      const config: SpawnOptions = {
-        cwd: Workspace.path,
-        env: {
-          ...process.env,
-          ...Env.TRV_MANIFEST.export(undefined),
-          ...Env.TRV_QUIET.export(true)
-        },
-        stdio: ['pipe', 'pipe', 2, 'ipc']
-      };
+  #stopServer(): void {
+    if (!this.#server) { return; }
 
-      this.#server = spawn('node', [RunUtil.cliFile, 'test:watch', '--format', 'exec', '--mode', 'change'], config)
-        .on('message', (ev: Event | { type: 'ready' }) => {
-          switch (ev.type) {
-            case 'ready': {
-              // Trigger all visible editors on start
-              for (const editor of vscode.window.visibleTextEditors) {
-                this.onChangedActiveEditor(editor);
-              }
-              return;
-            }
-            case 'log': this.log.info('[Log  ]', ev.message); return;
-            case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
-          }
-          this.#consumer.onEvent(ev);
-          this.#codeLensUpdated?.();
-        });
-    }
+    this.log.info('Stopping server');
+    this.#server.kill();
+    this.#server = undefined;
   }
 
-  #stop(): void {
-    if (this.#server) {
-      this.log.info('Stopping server');
-      this.#server.kill();
-      this.#server = undefined;
-    }
+  #startServer(): void {
+    if (this.#server) { return; }
+
+    this.log.info('Starting server');
+    const config: SpawnOptions = {
+      cwd: Workspace.path,
+      env: {
+        ...process.env,
+        ...Env.TRV_MANIFEST.export(undefined),
+        ...Env.TRV_QUIET.export(true)
+      },
+      stdio: ['pipe', 'pipe', 2, 'ipc']
+    };
+
+    this.#server = spawn('node', [RunUtil.cliFile, 'test:watch', '--format', 'exec', '--mode', 'change'], config)
+      .on('message', (ev: TestWatchEvent) => {
+        switch (ev.type) {
+          case 'ready': {
+            // Trigger all visible editors on start
+            for (const editor of vscode.window.visibleTextEditors) {
+              this.onChangedActiveEditor(editor);
+            }
+            return;
+          }
+          case 'log': this.log.info('[Log  ]', ev.message); return;
+          case 'test': this.log.info('[Event]', ev.type, ev.phase, ev.test.classId, ev.test.methodName); break;
+        }
+        this.#consumer.onEvent(ev);
+        this.#codeLensUpdated?.();
+      });
+
+    StreamUtil.onLine(this.#server.stderr, (line) => this.log.debug(`> stderr > ${line}`));
+    StreamUtil.onLine(this.#server.stdout, (line) => this.log.debug(`> stdout > ${line}`));
   }
 
   #getTestModule(file?: string): IndexedModule | ManifestModule | undefined {
@@ -180,11 +181,11 @@ class TestRunnerFeature extends BaseFeature {
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
     this.register('line', () => this.#launchTestDebugger());
-    this.register('stop', () => this.#stop());
-    this.register('start', () => this.#start());
+    this.register('stop', () => this.#stopServer());
+    this.register('start', () => this.#startServer());
     this.register('rerun', () => this.#rerunActive());
 
-    Workspace.onCompilerState(state => (state === 'watch-start') ? this.#start() : this.#stop());
+    Workspace.onCompilerState(state => (state === 'watch-start') ? this.#startServer() : this.#stopServer());
     vscode.workspace.onDidOpenTextDocument(x => this.onOpenTextDocument(x), null, context.subscriptions);
     vscode.workspace.onDidCloseTextDocument(x => this.onCloseTextDocument(x), null, context.subscriptions);
     vscode.window.onDidChangeActiveTextEditor(x => this.onChangedActiveEditor(x), null, context.subscriptions);

@@ -1,5 +1,6 @@
 import vscode from 'vscode';
 import { createInterface } from 'node:readline/promises';
+import timers from 'node:timers/promises';
 import { ChildProcess, spawn } from 'node:child_process';
 
 import type { CompilerLogEvent, CompilerProgressEvent, CompilerStateEvent, CompilerStateType } from '@travetto/compiler/support/types';
@@ -63,20 +64,18 @@ export class CompilerWatchFeature extends BaseFeature {
     const proc = spawn('node', [this.#compilerCliFile, command, ...args ?? []], {
       cwd: Workspace.path,
       signal,
-      shell: false,
+      stdio: 'pipe',
       env: {
         PATH: process.env.PATH,
         ...(command !== 'info' && command !== 'event') ? Env.TRV_BUILD.export('debug') : {}
       }
+    }).on('exit', (code) => {
+      this.#log.debug('Finished command', command, 'with', code);
     });
 
     if (command === 'start' || command === 'restart') {
       StreamUtil.onLine(proc.stderr, line => this.#log.error(`> ${line}`));
     }
-    proc.on('exit', (code) => {
-      this.#log.debug('Finished command', command, 'with', code);
-    });
-
     return proc;
   }
 
@@ -107,10 +106,12 @@ export class CompilerWatchFeature extends BaseFeature {
     for (; ;) {
       const ctrl = new AbortController();
       let connected = false;
+      let state: string | undefined;
       try {
-        if (await this.#compilerState()) {
+        state = await this.#compilerState();
+        if (state) {
           connected = true;
-
+          this.#log.info('Connected', state);
           await Promise.race([this.#trackLog(), this.#trackState(), this.#trackProgress(ctrl.signal)]);
         }
       } catch (err) {
@@ -118,7 +119,7 @@ export class CompilerWatchFeature extends BaseFeature {
       }
 
       if (connected) {
-        this.#log.info('Disconnecting', !!ctrl.signal.aborted);
+        this.#log.info('Disconnecting', !!ctrl.signal.aborted, state);
       }
       ctrl.abort();
       // Check every second
@@ -127,7 +128,7 @@ export class CompilerWatchFeature extends BaseFeature {
   }
 
   #onState(state: CompilerStateType): void {
-    this.#log.debug('Compiler state changed', state);
+    this.#log.info('Compiler state changed', state);
     let v: string;
     switch (state) {
       case 'reset': v = '$(flame) Restarting'; break;
@@ -174,9 +175,9 @@ export class CompilerWatchFeature extends BaseFeature {
       let pState = this.#progress[ev.operation];
 
       const value = 100 * (ev.idx / ev.total);
-      const delta = (value - pState?.prev ?? 0);
+      const delta = value - (pState?.prev ?? 0);
 
-      if (ev.complete || delta < 0) {
+      if (ev.complete || delta < 0 || ev.total < 5) {
         pState?.cleanup();
         continue;
       }
@@ -191,22 +192,19 @@ export class CompilerWatchFeature extends BaseFeature {
    * On initial activation
    */
   async activate(context: vscode.ExtensionContext): Promise<void> {
-    this.#status.command = { command: this.commandName('show-log'), title: 'Show Logs' };
-    this.#onState('close');
-
     this.#compilerCliFile = Workspace.resolveImport('@travetto/compiler/bin/trvc.js');
 
-    // Start the listener
-    this.#trackConnected();
+    this.#status.command = { command: this.commandName('show-log'), title: 'Show Logs' };
+    this.register('show-log', () => this.#log.show());
+    this.#onState('close');
+    this.#status.show();
 
+    this.#trackConnected();
+    await timers.setTimeout(1000); // Add buffer
     this.run('start');
 
     for (const op of ['start', 'stop', 'restart', 'clean'] as const) {
       this.register(op, () => this.run(op));
     }
-
-    this.register('show-log', () => this.#log.show());
-
-    this.#status.show();
   }
 }

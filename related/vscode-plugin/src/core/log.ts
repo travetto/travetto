@@ -1,7 +1,9 @@
+import { Util } from '@travetto/base';
 import vscode from 'vscode';
 
 export class Log {
   static #log: vscode.LogOutputChannel = vscode.window.createOutputChannel('Travetto Plugin', { log: true });
+  static #id = `<${Util.fullHash(`${process.pid}`).substring(0, 4)}>`;
 
   #prefix: string;
 
@@ -14,22 +16,22 @@ export class Log {
   }
 
   info(message: string, ...args: unknown[]): void {
-    Log.#log.info(this.#prefix, message, ...args);
+    Log.#log.info(Log.#id, this.#prefix, message, ...args);
   }
 
   error(message: string, ...args: unknown[]): void {
-    Log.#log.error(this.#prefix, message, ...args);
+    Log.#log.error(Log.#id, this.#prefix, message, ...args);
   }
 
   debug(message: string, ...args: unknown[]): void {
-    Log.#log.debug(this.#prefix, message, ...args);
+    Log.#log.debug(Log.#id, this.#prefix, message, ...args);
   }
 
   warn(message: string, ...args: unknown[]): void {
-    Log.#log.warn(this.#prefix, message, ...args);
+    Log.#log.warn(Log.#id, this.#prefix, message, ...args);
   }
 
   trace(message: string, ...args: unknown[]): void {
-    Log.#log.trace(this.#prefix, message, ...args);
+    Log.#log.trace(Log.#id, this.#prefix, message, ...args);
   }
 }

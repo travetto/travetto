@@ -1,10 +1,12 @@
 import vscode from 'vscode';
 
+import type { TestWatchEvent } from '@travetto/test/src/execute/watcher';
+
 import { Log } from '../../../core/log';
 import { Workspace } from '../../../core/workspace';
 
 import { DocumentResultsManager } from './document';
-import { TestEvent, StatusUnknown, RemoveEvent, CompleteEvent } from './types';
+import { StatusUnknown } from './types';
 
 /**
  * Manages results for the entire workspace, including the statusbar
@@ -61,7 +63,7 @@ export class WorkspaceResultsManager {
    * Get test results
    * @param target
    */
-  getLocation(target: vscode.TextDocument | RemoveEvent | TestEvent): string | undefined {
+  getLocation(target: vscode.TextDocument | TestWatchEvent): string | undefined {
     let file: string | undefined;
     if ('fileName' in target) {
       file = target.fileName;
@@ -84,7 +86,7 @@ export class WorkspaceResultsManager {
    * Get test results
    * @param target
    */
-  getResults(target: vscode.TextDocument | RemoveEvent | TestEvent): DocumentResultsManager | undefined {
+  getResults(target: vscode.TextDocument | TestWatchEvent): DocumentResultsManager | undefined {
     const file = this.getLocation(target);
     if (file) {
       if (!this.#results.has(file)) {
@@ -110,15 +112,9 @@ export class WorkspaceResultsManager {
    * On test event
    * @param ev
    */
-  onEvent(ev: TestEvent | RemoveEvent | CompleteEvent): void {
-    if (ev.type === 'runComplete') {
-      if (ev.error) {
-        this.#log.error(ev.error.name, ev.error.stack);
-      }
-    } else {
-      this.getResults(ev)?.onEvent(ev);
-      this.updateTotals();
-    }
+  onEvent(ev: TestWatchEvent): void {
+    this.getResults(ev)?.onEvent(ev);
+    this.updateTotals();
   }
 
   /**

@@ -28,8 +28,8 @@ export class ErrorUtil {
       if (ObjectUtil.hasToJSON(e)) {
         Object.assign(error, e.toJSON());
       }
-      error.message ??= e.message;
-      error.stack ??= e.stack;
+      error.message ||= e.message;
+      error.stack ??= e.stack?.replace(/.*\[ERR_ASSERTION\]:\s*/, '');
     }
 
     return error;

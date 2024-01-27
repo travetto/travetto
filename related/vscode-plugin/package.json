@@ -35,6 +35,7 @@
   "devDependencies": {
     "@travetto/cli": "^4.0.0-rc.0",
     "@travetto/compiler": "^4.0.0-rc.0",
+    "@travetto/email-compiler": "^4.0.0-rc.0",
     "@travetto/doc": "^4.0.0-rc.0",
     "@travetto/pack": "^4.0.0-rc.0",
     "@travetto/log": "^4.0.0-rc.0",
@@ -115,6 +116,16 @@
         "category": "Travetto"
       },
       {
+        "command": "travetto.test.test:start",
+        "title": "Start Test Server",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.test.test:stop",
+        "title": "Stop Test Server",
+        "category": "Travetto"
+      },
+      {
         "command": "travetto.test.test:line",
         "title": "Debug Test",
         "category": "Travetto"
@@ -140,11 +151,21 @@
         "category": "Travetto"
       },
       {
+        "command": "travetto.email-compiler.editor:start",
+        "title": "Start Email Editor Server",
+        "category": "Travetto"
+      },
+      {
+        "command": "travetto.email-compiler.editor:stop",
+        "title": "Stop Email Editor Server",
+        "category": "Travetto"
+      },
+      {
         "icon": {
           "light": "images/icons/baseline_vertical_split_black_24dp.png",
           "dark": "images/icons/baseline_vertical_split_white_24dp.png"
         },
-        "command": "travetto.email-compiler.develop:preview-html",
+        "command": "travetto.email-compiler.editor:preview-html",
         "title": "Preview Email HTML",
         "category": "Travetto"
       },
@@ -153,7 +174,7 @@
           "light": "images/icons/baseline_text_snippet_black_24dp.png",
           "dark": "images/icons/baseline_text_snippet_white_24dp.png"
         },
-        "command": "travetto.email-compiler.develop:preview-text",
+        "command": "travetto.email-compiler.editor:preview-text",
         "title": "Preview Email Text",
         "category": "Travetto"
       },
@@ -162,7 +183,7 @@
           "light": "images/icons/baseline_email_black_24dp.png",
           "dark": "images/icons/baseline_email_white_24dp.png"
         },
-        "command": "travetto.email-compiler.develop:send",
+        "command": "travetto.email-compiler.editor:send",
         "title": "Send Email Template",
         "category": "Travetto"
       },
@@ -171,7 +192,7 @@
           "light": "images/icons/baseline_settings_black_24dp.png",
           "dark": "images/icons/baseline_settings_white_24dp.png"
         },
-        "command": "travetto.email-compiler.develop:preview-context",
+        "command": "travetto.email-compiler.editor:preview-context",
         "title": "Email Template Context",
         "category": "Travetto"
       }
@@ -179,22 +200,22 @@
     "menus": {
       "editor/title": [
         {
-          "command": "travetto.email-compiler.develop:send",
+          "command": "travetto.email-compiler.editor:send",
           "group": "navigation",
           "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
-          "command": "travetto.email-compiler.develop:preview-text",
+          "command": "travetto.email-compiler.editor:preview-text",
           "group": "navigation",
           "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
-          "command": "travetto.email-compiler.develop:preview-html",
+          "command": "travetto.email-compiler.editor:preview-html",
           "group": "navigation",
           "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
-          "command": "travetto.email-compiler.develop:preview-context",
+          "command": "travetto.email-compiler.editor:preview-context",
           "group": "navigation",
           "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         }
@@ -211,6 +232,12 @@
         },
         {
           "command": "travetto.compiler:clean"
+        },
+        {
+          "command": "travetto.test.test:start"
+        },
+        {
+          "command": "travetto.test.test:stop"
         },
         {
           "command": "travetto.test.test:line",
@@ -237,19 +264,27 @@
           "when": "travetto.cli"
         },
         {
-          "command": "travetto.email-compiler.develop:preview-html",
+          "command": "travetto.email-compiler.editor:start",
+          "when": "travetto.email-compiler"
+        },
+        {
+          "command": "travetto.email-compiler.editor:stop",
+          "when": "travetto.email-compiler"
+        },
+        {
+          "command": "travetto.email-compiler.editor:preview-html",
           "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
-          "command": "travetto.email-compiler.develop:preview-text",
+          "command": "travetto.email-compiler.editor:preview-text",
           "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
-          "command": "travetto.email-compiler.develop:preview-context",
+          "command": "travetto.email-compiler.editor:preview-context",
           "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         },
         {
-          "command": "travetto.email-compiler.develop:send",
+          "command": "travetto.email-compiler.editor:send",
           "when": "travetto.email-compiler && resourceFilename =~ /[.]email[.]tsx$/"
         }
       ]

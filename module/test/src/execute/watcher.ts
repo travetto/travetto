@@ -9,10 +9,17 @@ import { TestConsumerRegistry } from '../consumer/registry';
 import { CumulativeSummaryConsumer } from '../consumer/types/cumulative';
 import { RunEvent } from '../worker/types';
 import { RunnerUtil } from './util';
+import { TestEvent } from '../model/event';
 
 function isRunEvent(ev: unknown): ev is RunEvent {
   return ObjectUtil.isPlainObject(ev) && 'type' in ev && typeof ev.type === 'string' && ev.type === 'run-test';
 }
+
+export type TestWatchEvent =
+  TestEvent |
+  { type: 'removeTest', method: string, file: string, classId: string } |
+  { type: 'ready' } |
+  { type: 'log', message: string };
 
 /**
  * Test Watcher.

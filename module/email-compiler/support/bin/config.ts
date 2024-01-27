@@ -4,21 +4,7 @@ import { RuntimeContext } from '@travetto/manifest';
 import { YamlUtil } from '@travetto/yaml';
 import { Util } from '@travetto/base';
 
-export type Sender = {
-  port?: number;
-  host?: string;
-  auth?: {
-    user?: string;
-    pass?: string;
-  };
-};
-
-interface ConfigType {
-  to: string;
-  from: string;
-  context?: Record<string, unknown>;
-  sender?: Sender;
-}
+import { EditorConfigType } from './types';
 
 export const CONFIG_FILE = 'resources/email/local.yml';
 
@@ -46,17 +32,17 @@ export class EditorConfig {
   /**
    *
    */
-  static async get<K extends keyof ConfigType>(key: K): Promise<Exclude<ConfigType[K], undefined>>;
-  static async get(): Promise<ConfigType>;
-  static async get<K extends keyof ConfigType>(key?: K): Promise<ConfigType | ConfigType[K]> {
+  static async get<K extends keyof EditorConfigType>(key: K): Promise<Exclude<EditorConfigType[K], undefined>>;
+  static async get(): Promise<EditorConfigType>;
+  static async get<K extends keyof EditorConfigType>(key?: K): Promise<EditorConfigType | EditorConfigType[K]> {
     try {
       const resolved = RuntimeContext.workspaceRelative(CONFIG_FILE);
       const content = await fs.readFile(resolved, 'utf8');
-      const data = YamlUtil.parse<ConfigType>(content);
+      const data = YamlUtil.parse<EditorConfigType>(content);
       return key ? data[key] : data;
     } catch {
       // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      return {} as ConfigType;
+      return {} as EditorConfigType;
     }
   }
 
