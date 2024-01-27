@@ -90,6 +90,17 @@ export class MailService {
       final.attachments = [...attachments, ...(final.attachments ?? [])];
     }
 
+    // Disable threading if desired, provide a unique message id and a unique reply-to
+    if ('disableThreading' in message && message.disableThreading) {
+      const id = MailUtil.buildUniqueMessageId(message);
+      final.headers = {
+        'In-Reply-To': id,
+        References: id,
+        'X-Message-Id': id,
+        ...final.headers
+      };
+    }
+
     return this.#transport.send<S>(final);
   }
 
