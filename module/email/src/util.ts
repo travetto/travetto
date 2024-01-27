@@ -1,6 +1,7 @@
 import { RuntimeContext } from '@travetto/manifest';
 
-import { EmailAttachment } from './types';
+import { EmailAttachment, EmailIdentity, EmailIdentityList, EmailOptions } from './types';
+import { Util } from '@travetto/base';
 
 /**
  * Utilities for email
@@ -56,5 +57,28 @@ export class MailUtil {
     return {
       html, attachments
     };
+  }
+
+  /**
+   * Get the primary email, if set from an email identity or identity list
+   */
+  static getPrimaryEmail(src?: EmailIdentity | EmailIdentityList): string | undefined {
+    if (!src) {
+      return;
+    }
+    if (Array.isArray(src)) {
+      src = src[0];
+    }
+    return (typeof src === 'string') ? src : src.address;
+  }
+
+  /**
+   * Build a unique message id
+   */
+  static buildUniqueMessageId(message: EmailOptions): string {
+    const from = this.getPrimaryEmail(message.from)!;
+    const to = this.getPrimaryEmail(message.to)!;
+    const uid = Util.shortHash(`${to}${from}${message.subject}${Date.now()}`).substring(0, 12);
+    return `<${uid}@${from.split('@')[1]}>`;
   }
 }

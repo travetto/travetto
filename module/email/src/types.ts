@@ -34,6 +34,9 @@ export interface EmailAttachment extends AttachmentLike {
 
 type EmailContentType = 'html' | 'text' | 'subject';
 
+export type EmailIdentity = string | EmailAddress;
+export type EmailIdentityList = EmailIdentity | EmailIdentity[];
+
 /**
  * Full message options
  */
@@ -43,13 +46,15 @@ export interface EmailOptions {
   subject: string;
   context?: Record<string, unknown>; // For templating
 
-  from?: string | EmailAddress;
-  sender?: string | EmailAddress;
-  to?: string | EmailAddress | (string | EmailAddress)[];
-  cc?: string | EmailAddress | (string | EmailAddress)[];
-  bcc?: string | EmailAddress | (string | EmailAddress)[];
-  replyTo?: string | EmailAddress;
-  inReplyTo?: string | EmailAddress;
+  disableThreading?: boolean;
+
+  from?: EmailIdentity;
+  sender?: EmailIdentity;
+  to?: EmailIdentityList;
+  cc?: EmailIdentityList;
+  bcc?: EmailIdentityList;
+  replyTo?: EmailIdentity;
+  inReplyTo?: EmailIdentity;
   references?: string | string[];
   headers?: Record<string, string | string[]>;
   attachments?: EmailAttachment[];
