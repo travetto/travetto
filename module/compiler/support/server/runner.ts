@@ -59,7 +59,7 @@ export class CompilerRunner {
 
       const kill = (): unknown => {
         log('debug', 'Shutting down process');
-        return (proc.connected ? proc.send('shutdown') : proc.kill());
+        return (proc.connected ? proc.send('shutdown', (err) => proc.kill()) : proc.kill());
       };
 
       process.once('SIGINT', kill);
